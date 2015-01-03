@@ -57,7 +57,7 @@
             var graphics = output.getContext("2d");
             var CHAR_HEIGHT = 20;
             var LINE_HEIGHT = CHAR_HEIGHT * 1.25;
-            var cursor = {x: 0, y: 0, len: 0};
+            var cursor = {x: 0, y: 0, x2: 0, y2: 0, len: 0};
             graphics.font = CHAR_HEIGHT + "px monospace";
             var CHAR_WIDTH = graphics.measureText("M").width;
             var testStyleSheet = null;
@@ -141,7 +141,7 @@
 
             // flatten DOM tree and prepare nodes for cascade calc
             function computeStyles(doc, styleSheet) {
-                var rules = styleSheet.rules;
+                var rules = styleSheet.cssRules;
                 var parent = doc.parentNode;
                 if (!parent) {
                     parent = document.createElement("div");
@@ -296,9 +296,20 @@
                 }
                 else if (key === Keys.DELETE) {
                     if(cursor.len > 0){
-                        
-                        lines[cursor.y] = lines[cursor.y].substring(0, cursor.x);
-                        cursor.len = 0;
+                        while(cursor.len > 0){
+                            var toDelete = lines[cursor.y].length - cursor.x;
+                            var concat = true;
+                            if(toDelete > cursor.len){
+                                toDelete = cursor.len;
+                                concat = false;
+                            }
+                            lines[cursor.y] = lines[cursor.y].substring(0, cursor.x) + lines[cursor.y].substring(cursor.x + toDelete);
+                            if(concat && cursor.y < lines.length - 2){
+                                lines[cursor.y] += lines[cursor.y + 1];
+                                lines.splice(cursor.y + 1, 1);
+                            }
+                            cursor.len -= toDelete + (concat ? 1 : 0);
+                        }
                     }
                     else if (cursor.x === lines[cursor.y].length) {
                         if (cursor.y < lines.length - 1) {
@@ -390,7 +401,6 @@
             }
 
             function fixCursor(cursor, lines) {
-
                 if (cursor.y < 0) {
                     cursor.y = 0;
                 }
