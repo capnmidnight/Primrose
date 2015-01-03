@@ -452,12 +452,10 @@
                     var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY / CHAR_HEIGHT)));
                     var x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX / CHAR_WIDTH)));
                     var t = 0;
-                    if (y < cursor.y) {
+                    if (y < cursor.y || y === cursor.y && x < cursor.x) {
                         t = cursor.y;
                         cursor.y = y;
                         y = t;
-                    }
-                    if (x < cursor.x) {
                         t = cursor.x;
                         cursor.x = x;
                         x = t;
