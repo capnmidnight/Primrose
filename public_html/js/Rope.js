@@ -117,6 +117,15 @@ Rope.tests.fourLeafLength = function(){
             + d.length, rp.length());
 };
 
+Rope.tests.fourLeafWeight = function(){
+    var a = "hello, ";
+    var b = "my friend.";
+    var c = " it's been a long time.";
+    var d = " did you receive my package?";
+    var rp = new Rope(new Rope(a, b), new Rope(c, d));
+    Assert.areEqual(a.length + b.length, rp.weight, "unexpected weight");
+};
+
 Rope.tests.leftLoadedLength = function(){
     var a = "hello, ";
     var b = "my friend.";
@@ -247,6 +256,14 @@ Rope.prototype.append = function(str_or_rope){
     this.rebalance();
 };
 
+Rope.tests.basicStringAppendLength = function(){
+    var a = "asdf";
+    var b = "qwer";
+    var rp = new Rope(a);
+    rp.append(b);
+    Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
+};
+
 Rope.tests.basicStringAppendLeft = function(){
     var a = "asdf";
     var b = "qwer";
@@ -281,11 +298,13 @@ Rope.prototype.split = function(i){
             cur = cur.left;
         }
         else{
-            stack.push(new Rope(cur.value.substring(i)));
+            var sub = cur.value.substring(i);
+            stack.push(new Rope(sub));
+            cur.weight -= sub.length;
             cur.value[i] = cur.value.substring(0, i);
+            cur = null;
         }
     }
-    cur = null;
     while(stack.length > 0){
         if(cur !== null){
             cur = new Rope(cur, stack.pop());
@@ -297,6 +316,33 @@ Rope.prototype.split = function(i){
     this.rebalance();
     cur.rebalance();
     return cur;
+};
+
+Rope.tests.basicSplit1Length = function(){
+    var str = "0123456789";
+    var a = str.substring(0, 5);
+    var b = str.substring(5);
+    var rp1 = new Rope(str);
+    var rp2 = rp1.split(5);
+    Assert.areEqual(a.length, rp1.length());
+};
+
+Rope.tests.basicSplit1Value = function(){
+    var str = "0123456789";
+    var a = str.substring(0, 5);
+    var b = str.substring(5);
+    var rp1 = new Rope(str);
+    var rp2 = rp1.split(5);
+    Assert.areEqual(a, rp1.substring(0, 5));
+};
+
+Rope.tests.basicSplit2 = function(){
+    var str = "0123456789";
+    var a = str.substring(0, 5);
+    var b = str.substring(5);
+    var rp1 = new Rope(str);
+    var rp2 = rp1.split(5);
+    Assert.areEqual(b.length, rp2.length());
 };
 
 Rope.prototype.delete = function(i, j){
