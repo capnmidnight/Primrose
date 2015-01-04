@@ -240,7 +240,7 @@ Rope.tests.fourLeafCharAt4 = function(){
 /*
  * This is supposed to be faster than an array of characters
  */
-Rope.prototype.append = function(str_or_rope){
+Rope.prototype.concat = function(str_or_rope){
     if(!(str_or_rope instanceof Rope)){
         str_or_rope = new Rope(str_or_rope);
     }
@@ -260,7 +260,7 @@ Rope.tests.basicStringAppendLength = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
-    rp.append(b);
+    rp.concat(b);
     Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
 };
 
@@ -268,7 +268,7 @@ Rope.tests.basicStringAppendLeft = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
-    rp.append(b);
+    rp.concat(b);
     Assert.areEqual(a, rp.left.value, "left doesn't match");
 };
 
@@ -276,7 +276,7 @@ Rope.tests.basicStringAppendRight = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
-    rp.append(b);
+    rp.concat(b);
     Assert.areEqual(b, rp.right.value, "right doesn't match");
 };
 
@@ -378,7 +378,7 @@ Rope.tests.complexSplit2 = function(){
 Rope.prototype.delete = function(i, j){
     var right = this.split(j);
     this.split(i); // discard the middle
-    this.append(right);
+    this.concat(right);
     this.weight = this.left.length();
 };
 
@@ -394,6 +394,15 @@ Rope.tests.basicDelete2 = function(){
     var rp = new Rope(str);
     rp.delete(3, 5);
     Assert.areEqual("01256789", rp.toString());
+};
+
+Rope.prototype.insert = function(i, str_or_rope){
+    if(!(str_or_rope instanceof Rope)){
+        str_or_rope = new Rope(str_or_rope);
+    }
+    var right = this.split(i);
+    this.concat(str_or_rope);
+    this.concat(right);
 };
 
 Rope.prototype.toString = function(){
@@ -446,10 +455,63 @@ Rope.prototype.substring = function(i, j){
     return str;
 };
 
+Rope.BALANCE_SIZE = 100;
+
 /*
  * Ropes are binary trees, and binary trees are more efficient when they
  * are balanced.
  */
 Rope.prototype.rebalance = function(){
-    // still to be written
+    // get the whole string
+    var str = this.toString();
+    
+    // delete all of the links between the old Rope nodes
+    var stack = [this];
+    while(stack.length > 0){
+        var cur = stack.pop();
+        if(cur.left !== null){
+            stack.push(cur.right);
+            stack.push(cur.left);
+            cur.left = null;
+            cur.right = null;
+        }
+    }
+    
+    // figure out the dimensions of the new leaves
+    var leafCount = Math.ceil(str.length / Rope.BALANCE_SIZE);
+    var leafLen = str.length / leafCount;
+    
+    // split the whole string into roughtly equally sized leaves
+    var leaves = [];
+    for(var i = 0; i < leafCount; ++i){
+        leaves.push(str.substring(
+                Math.floor(i * leafLen), 
+                Math.floor((i + 1) * leafLen)));
+    }
+    
+    // rebuild each layer from the bottom up
+    var nextLeaves = [];
+    while(leaves.length >= 2){
+        for(var i = 0; i < leaves.length; i += 2){
+            nextLeaves.push(new Rope(leaves[i], leaves[i + 1]));
+        }
+        // an odd number of nodes will leave a straggler behind. Just append
+        // it to the list of nodes for the next level, and it will get picked
+        // back up in the right order.
+        if((leaves.length % 2) === 1){
+            nextLeaves.push(leaves[leaves.length - 1]);
+        }
+        leaves = nextLeaves;
+    }
+    
+    // overwrite this Rope with the last rope that was left
+    var rp = leaves[0];
+    this.value = rp.value;
+    this.weight = rp.weight;
+    this.left = rp.left;
+    this.right = rp.right;
+    
+    // and remove the links so we don't hurt the reference-counting GC.
+    rp.left = null;
+    rp.right = null;
 };
