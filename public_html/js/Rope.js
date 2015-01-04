@@ -377,10 +377,41 @@ Rope.tests.complexSplit2 = function(){
 
 Rope.prototype.delete = function(i, j){
     var right = this.split(j);
-    // discard the middle
-    this.split(i);
-    this.concat(right);
+    this.split(i); // discard the middle
+    this.append(right);
     this.weight = this.left.length();
+};
+
+Rope.tests.basicDelete = function(){
+    var str = "0123456789";
+    var rp = new Rope(str);
+    rp.delete(3, 5);
+    Assert.areEqual(str.length - 2, rp.length());
+};
+
+Rope.tests.basicDelete2 = function(){
+    var str = "0123456789";
+    var rp = new Rope(str);
+    rp.delete(3, 5);
+    Assert.areEqual("01256789", rp.toString());
+};
+
+Rope.prototype.toString = function(){
+    var str = "";
+    var cur = this;
+    var stack = [];
+    // true recursion is defective in JavaScript
+    while(cur !== null && cur !== undefined){
+        if(cur.left !== null){
+            stack.push(cur.right);
+            cur = cur.left;
+        }
+        else{
+            str += cur.value;
+            cur = stack.pop();
+        }
+    }
+    return str;
 };
 
 Rope.prototype.substring = function(i, j){
