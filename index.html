@@ -429,6 +429,10 @@
                 else {
                     console.log(event.keyCode);
                 }
+                
+                if(evt.keyCode === Keys.SPACE){
+                    evt.preventDefault();
+                }
 
                 return lines;
             }
