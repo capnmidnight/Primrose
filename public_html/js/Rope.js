@@ -295,13 +295,19 @@ Rope.prototype.split = function(i){
         }
         else if(cur.left !== null){
             stack.push(cur.right);
-            cur = cur.left;
+            cur.value = cur.left.value;
+            cur.weight = cur.left.weight;
+            cur.right = cur.left.right;
+            cur.left.right = null;
+            var n = cur.left.left;
+            cur.left.left = null;
+            cur.left = n;
         }
         else{
             var sub = cur.value.substring(i);
             stack.push(new Rope(sub));
-            cur.weight -= sub.length;
-            cur.value[i] = cur.value.substring(0, i);
+            cur.value = cur.value.substring(0, i);
+            cur.weight = i;
             cur = null;
         }
     }
@@ -336,13 +342,37 @@ Rope.tests.basicSplit1Value = function(){
     Assert.areEqual(a, rp1.substring(0, 5));
 };
 
-Rope.tests.basicSplit2 = function(){
+Rope.tests.basicSplit2Length = function(){
     var str = "0123456789";
     var a = str.substring(0, 5);
     var b = str.substring(5);
     var rp1 = new Rope(str);
     var rp2 = rp1.split(5);
     Assert.areEqual(b.length, rp2.length());
+};
+
+Rope.tests.complexSplit1 = function(){
+    var a = "asdfqer";
+    var b = "1234";
+    var c = "what the heck";
+    var d = "ok, I think I get it";
+    var e = "no time for teletubbies";
+    var l = a.length + b.length + c.length + d.length + e.length;
+    var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
+    var rp2 = rp1.split(5);
+    Assert.areEqual(l - 5, rp2.length());
+};
+
+Rope.tests.complexSplit2 = function(){
+    var a = "asdfqer";
+    var b = "1234";
+    var c = "what the heck";
+    var d = "ok, I think I get it";
+    var e = "no time for teletubbies";
+    var l1 = a.length + b.length + c.length + d.length + e.length;
+    var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
+    var rp2 = rp1.split(Math.floor(l1/2));
+    Assert.areEqual(l1, rp1.length() + rp2.length());
 };
 
 Rope.prototype.delete = function(i, j){
