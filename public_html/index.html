@@ -62,6 +62,12 @@
             var output = document.getElementById("output");
             var graphics = output.getContext("2d");
             var CHAR_HEIGHT = 20;
+            var pixelRatio = window.devicePixelRatio || 1;
+            CHAR_HEIGHT *= pixelRatio;
+            output.style.width = output.width + "px";
+            output.style.height = output.height + "px";
+            output.width = output.width * pixelRatio;
+            output.height = output.height * pixelRatio;
             var LINE_HEIGHT = CHAR_HEIGHT * 1.25;
             var cursor = {x: 0, y: 0, x2: 0, y2: 0, len: 0};
             graphics.font = CHAR_HEIGHT + "px monospace";
@@ -452,8 +458,8 @@
             var dragging = false;
             output.addEventListener("mousedown", function (evt) {
                 var lines = testText.split("\n");
-                cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY / CHAR_HEIGHT) - 0.25)));
-                cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX / CHAR_WIDTH)));
+                cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
+                cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
                 cursor.len = 0;
                 refresh();
                 dragging = true;
@@ -465,8 +471,8 @@
             output.addEventListener("mousemove", function (evt) {
                 if (dragging) {
                     var lines = testText.split("\n");
-                    var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY / CHAR_HEIGHT)));
-                    var x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX / CHAR_WIDTH)));
+                    var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY * pixelRatio / CHAR_HEIGHT)));
+                    var x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
                     var t = 0;
                     if (y < cursor.y || y === cursor.y && x < cursor.x) {
                         t = cursor.y;
