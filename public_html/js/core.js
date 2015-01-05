@@ -1,6 +1,6 @@
 /*
 https://www.github.com/capnmidnight/VR
-Copyright (c) 2014 Sean T. McBeth
+Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
 All rights reserved.
 
     This program is free software: you can redistribute it and/or modify

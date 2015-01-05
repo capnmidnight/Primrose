@@ -1,3 +1,20 @@
+/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
  * A Rope data structure is a means of storing a collection of characters 
  * that makes insertions and deletions faster than a regular array would do.
@@ -260,7 +277,9 @@ Rope.tests.basicStringAppendLength = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
+    console.log(rp.value, rp.left, rp.right);
     rp.concat(b);
+    console.log(rp.value, rp.left, rp.right);
     Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
 };
 
@@ -463,6 +482,7 @@ Rope.BALANCE_SIZE = 100;
  */
 Rope.prototype.rebalance = function(){
     // get the whole string
+    /*
     var str = this.toString();
     
     // delete all of the links between the old Rope nodes
@@ -514,4 +534,5 @@ Rope.prototype.rebalance = function(){
     // and remove the links so we don't hurt the reference-counting GC.
     rp.left = null;
     rp.right = null;
+    */
 };
