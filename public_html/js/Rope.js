@@ -277,26 +277,16 @@ Rope.tests.basicStringAppendLength = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
-    console.log(rp.value, rp.left, rp.right);
     rp.concat(b);
-    console.log(rp.value, rp.left, rp.right);
     Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
 };
 
-Rope.tests.basicStringAppendLeft = function(){
+Rope.tests.basicStringAppend = function(){
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
     rp.concat(b);
-    Assert.areEqual(a, rp.left.value, "left doesn't match");
-};
-
-Rope.tests.basicStringAppendRight = function(){
-    var a = "asdf";
-    var b = "qwer";
-    var rp = new Rope(a);
-    rp.concat(b);
-    Assert.areEqual(b, rp.right.value, "right doesn't match");
+    Assert.areEqual(a + b, rp.toString());
 };
 
 /*
@@ -398,7 +388,6 @@ Rope.prototype.delete = function(i, j){
     var right = this.split(j);
     this.split(i); // discard the middle
     this.concat(right);
-    this.weight = this.left.length();
 };
 
 Rope.tests.basicDelete = function(){
@@ -480,11 +469,10 @@ Rope.BALANCE_SIZE = 100;
  * Ropes are binary trees, and binary trees are more efficient when they
  * are balanced.
  */
-Rope.prototype.rebalance = function(){
+Rope.prototype.rebalance = function(opt_size){
+    opt_size = opt_size || Rope.BALANCE_SIZE;
     // get the whole string
-    /*
     var str = this.toString();
-    
     // delete all of the links between the old Rope nodes
     var stack = [this];
     while(stack.length > 0){
@@ -498,21 +486,20 @@ Rope.prototype.rebalance = function(){
     }
     
     // figure out the dimensions of the new leaves
-    var leafCount = Math.ceil(str.length / Rope.BALANCE_SIZE);
+    var leafCount = Math.ceil(str.length / opt_size);
     var leafLen = str.length / leafCount;
-    
     // split the whole string into roughtly equally sized leaves
     var leaves = [];
     for(var i = 0; i < leafCount; ++i){
-        leaves.push(str.substring(
+        var sub = str.substring(
                 Math.floor(i * leafLen), 
-                Math.floor((i + 1) * leafLen)));
+                Math.floor((i + 1) * leafLen));
+        leaves.push(new Rope(sub));
     }
-    
     // rebuild each layer from the bottom up
-    var nextLeaves = [];
     while(leaves.length >= 2){
-        for(var i = 0; i < leaves.length; i += 2){
+        var nextLeaves = [];
+        for(var i = 0; i < leaves.length - 1; i += 2){
             nextLeaves.push(new Rope(leaves[i], leaves[i + 1]));
         }
         // an odd number of nodes will leave a straggler behind. Just append
@@ -534,5 +521,11 @@ Rope.prototype.rebalance = function(){
     // and remove the links so we don't hurt the reference-counting GC.
     rp.left = null;
     rp.right = null;
-    */
+};
+
+Rope.tests.basicRebalance = function(){
+    var str = "0123456789";
+    var rp = new Rope(str);
+    rp.rebalance(1);
+    Assert.areEqual(str.length, rp.length());
 };
