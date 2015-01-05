@@ -20,87 +20,107 @@
  */
 var grammars = {
     // used for all languages
-    preprocessing: {
+    preprocessing: [
         // prevent user-code from injecting its own control sequences.
-        ampersands: [/&/g, "&amp;"],
+        ["ampersands", /&/g, "&amp;"],
         
         // prevent spaces from collapsing (this will eventually go away
         // when DOM-based processing goes away).
-        spaces: [/ /g, "&nbsp;"]
-    },
+        ["spaces", / /g, "&nbsp;"]
+    ],
     
-    postprocessing: {
+    postprocessing: [
         // return the user-coded ampersands
-        amerpsands: [/&amp;/g, "&"],
+        ["amerpsands", /&amp;/g, "&"],
         
         // prevent newlinse from collapsing (this will eventually go away
         // when DOM-based processing goes away).
-        newlines: [/\r?\n/g, "<br>"]
-    },
+        ["newlines", /\r?\n/g, "<br>"]
+    ],
     
-    JavaScript: {
+    JavaScript: [
         // remove escaped quotation marks, so they don't mess with the
         // string remover
-        escapedQuotationMarks: [/\\"/g, "&quot;"],
+        [
+            "escapedQuotationMarks", 
+            /\\"/g, 
+            "&quot;"
+        ],
 
-        strings: [
+        [
+            "strings", 
             /"[^"]+"/g, 
             function (txt, state, match, groups, i) {
                 var i = state.strings.length;
                 // return the escaped quotation marks
                 state.strings[i] = match.replace(/&quot;/g, "\\\"");
                 return "&string" + i + ";";
-            }],
+            }
+        ],
 
-        inlineComments: [
+        [
+            "inlineComments", 
             /\/\/[^\n]+\n/g, 
             function (txt, state, match, groups, i) {
                 var i = state.comments.length;
                 state.comments[i] = match;
                 return "&comment" + i + ";";
-            }],
+            }
+        ],
 
-        blockComments: [
+        [
+            "blockComments", 
             /\/\*(\/(?!\*)|[^\/])+\*\//g, 
             function (txt, state, match, groups, i) {
                 var i = state.comments.length;
                 state.comments[i] = match;
                 return "&comment" + i + ";";
-            }],
+            }
+        ],
 
-        keywords: [
+        [
+            "keywords", 
             /\b(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/g, 
             function (txt, state, match, groups, i) {
                 return "&" + match + ";";
-            }],
+            }
+        ],
 
-        identifiers: [
+        [
+            "identifiers", 
             /(\w+)/g, 
             function (txt, state, match, groups, i) {
                 if (txt[i - 1] === "&") {
                     return match;
                 }
                 return "<span class=\"identifier\">" + match + "</span>";
-            }],
+            }
+        ],
         
         // These will go away when the DOM based processing is replaced with 
         // a proper tokenizer.
-        replaceKeywords: [
+        [
+            "replaceKeywords", 
             /&(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with);/g,
             function (txt, state, match, groups, i) {
                 return "<span class=\"keyword\">" + groups + "</span>";
-            }],
+            }
+        ],
         
-        replaceStrings: [
+        [
+            "replaceStrings", 
             /&string(\d+);/g, 
             function (txt, state, match, groups, i) {
                 return "<span class=\"stringLiteral\">" + state.strings[groups] + "</span>";
-            }],
+            }
+        ],
         
-        replaceComments: [
+        [
+            "replaceComments",
             /&comment(\d+);/g, 
             function (txt, state, match, groups, i) {
                 return "<span class=\"comment\">" + state.comments[groups] + "</span>";
-            }]
-    }
+            }
+        ]
+    ]
 };

@@ -84,7 +84,7 @@ function test(func, printer){
 }
 
 function consoleTest(func){
-    if(func){
+    if(func && func.tests){
         var result = test(func, console.log.bind(console)),
             nameMatch = /function (\w+)\(/,
             matches = func.toString().match(nameMatch),
