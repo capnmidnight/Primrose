@@ -97,12 +97,10 @@ Grammar.tests = {
         var tokens = Grammar.JavaScript.tokenize(src);
         var res = tokens.map(function(t){ return t.value; }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(5, tokens.length, "number of tokens does not match");
+        Assert.areEqual(3, tokens.length, "number of tokens does not match");
         Assert.areEqual("strings", tokens[0].rule.name, "0: token incorrect type");
         Assert.areEqual("default", tokens[1].rule.name, "1: token incorrect type");
-        Assert.areEqual("identifiers", tokens[2].rule.name, "2: token incorrect type");
-        Assert.areEqual("default", tokens[3].rule.name, "3: token incorrect type");
-        Assert.areEqual("strings", tokens[4].rule.name, "4: token incorrect type");
+        Assert.areEqual("strings", tokens[2].rule.name, "2: token incorrect type");
     },
     singleLineBlockComment: function(){
         var src = "/* asdf one 2 three 4 */";

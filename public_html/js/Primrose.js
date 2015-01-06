@@ -22,11 +22,14 @@ function load() {
 
     function editText(evt) {
         evt = evt || event;
-        var key = evt.keyCode || evt.which;
+        var type = ((evt.ctrlKey && "CTRL" || "")
+                + (evt.altKey && "ALT" || "")
+                + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+        var key = evt.keyCode;
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
             var text = data.toString();
             var lines = text.split(/\n/g);
-            var cur = evt.shiftKey ? cursor.end : cursor.both;
+            var cur = (type === "SHIFT") ? cursor.end : cursor.both;
             if (key === Keys.LEFTARROW) {
                 cur.left(lines);
                 evt.preventDefault();
@@ -43,25 +46,25 @@ function load() {
                 cur.down(lines);
                 evt.preventDefault();
             }
-            else if(key === Keys.HOME){
-                if(evt.ctrlKey){
+            else if (key === Keys.HOME) {
+                if (type === "CTRL") {
                     cur.fullHome(lines);
                 }
-                else{
+                else {
                     cur.home(lines);
                 }
                 evt.preventDefault();
             }
-            else if(key === Keys.END){
-                if(evt.ctrlKey){
+            else if (key === Keys.END) {
+                if (type === "CTRL") {
                     cur.fullEnd(lines);
                 }
-                else{
+                else {
                     cur.end(lines);
                 }
                 evt.preventDefault();
             }
-            else if(evt.ctrlKey && codePage.UPPERCASE[key] === "A"){
+            else if (type === "CTRL" && codePage.NORMAL[key] === "a") {
                 cursor.start.fullHome(lines);
                 cursor.end.fullEnd(lines);
             }
@@ -69,7 +72,6 @@ function load() {
                 if (cursor.start.i !== cursor.end.i) {
                     var a = Math.min(cursor.start.i, cursor.end.i);
                     var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i));
-                    console.log(a, b);
                     data.delete(a, b);
                     if (cursor.start.i > cursor.end.i) {
                         cursor.start.copy(cursor.end);
@@ -79,7 +81,7 @@ function load() {
                     evt.preventDefault();
                     if (cursor.start.i === cursor.end.i && cursor.start.i > 0) {
                         data.delete(cursor.start.i - 1, cursor.start.i);
-                        cursor.start.left(lines);
+                        cursor.both.left(lines);
                     }
                 }
                 else if (key === Keys.DELETE) {
@@ -98,25 +100,27 @@ function load() {
                     lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
                     data.insert(cursor.start.i, "\n" + indent);
                     for (var i = 0; i <= indent.length; ++i) {
-                        cursor.start.right(lines);
+                        cursor.both.right(lines);
                     }
                     evt.preventDefault();
                 }
-                else if (!evt.ctrlKey && !evt.altKey && (codePage.UPPERCASE[key] || codePage.LOWERCASE[key])) {
-                    var char = (evt.shiftKey ? codePage.UPPERCASE : codePage.LOWERCASE)[key];
-                    data.insert(
-                            cursor.start.i,
-                            char);
-                    // do these edits concurrently so we don't have to rebuild
-                    // the string and resplit it.
-                    var left = lines[cursor.start.y].substring(0, cursor.start.x);
-                    var right = lines[cursor.start.y].substring(cursor.start.x);
-                    lines[cursor.start.y] = left + char + right;
-                    cursor.start.right(lines);
-                    evt.preventDefault();
+                else if ((type === "SHIFT" || type === "NORMAL")) {
+                    var char = codePage[type][key];
+                    if (char) {
+                        data.insert(
+                                cursor.start.i,
+                                char);
+                        // do these edits concurrently so we don't have to rebuild
+                        // the string and resplit it.
+                        var left = lines[cursor.start.y].substring(0, cursor.start.x);
+                        var right = lines[cursor.start.y].substring(cursor.start.x);
+                        lines[cursor.start.y] = left + char + right;
+                        cursor.both.right(lines);
+                        evt.preventDefault();
+                    }
                 }
                 else {
-                    console.log(evt.keyCode);
+                    console.log(type, key);
                 }
             }
         }
@@ -144,7 +148,7 @@ function load() {
         drawText();
         dragging = true;
     });
-    
+
     output.addEventListener("mouseup", function (evt) {
         dragging = false;
     });
@@ -172,7 +176,7 @@ function load() {
                 if (part.length > 0) {
                     var a = cursor.start;
                     var b = cursor.end;
-                    if(cursor.end.i < cursor.start.i){
+                    if (cursor.end.i < cursor.start.i) {
                         a = cursor.end;
                         b = cursor.start;
                     }
