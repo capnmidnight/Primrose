@@ -36,7 +36,7 @@ function load() {
                     }
                     if (a.i <= c + part.length && c <= b.i) {
                         var cx = Math.max(a.x, x);
-                        var cw = Math.min(b.x, x + part.length) - cx + 1;
+                        var cw = Math.min(b.x, x + part.length) - cx;
                         graphics.fillStyle = "#c0c0c0";
                         graphics.fillRect(
                                 cx * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
@@ -111,8 +111,8 @@ function load() {
             }
             else {
                 if (cursor.start.i !== cursor.end.i) {
-                    var a = Math.min(cursor.start.i, cursor.end.i + 1);
-                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i + 1));
+                    var a = Math.min(cursor.start.i, cursor.end.i);
+                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i));
                     var delta = b - a;
                     data.delete(a, b);
                     if (cursor.start.i > text.length - delta) {
