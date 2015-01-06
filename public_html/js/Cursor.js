@@ -42,6 +42,11 @@ Cursor.prototype.left = function (lines) {
     }
 };
 
+Cursor.prototype.home = function(lines){
+    this.i -= this.x;
+    this.x = 0;
+};
+
 Cursor.prototype.right = function (lines) {
     if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
         ++this.i;

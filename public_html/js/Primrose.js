@@ -25,14 +25,6 @@ function load() {
     var DEFAULT_STYLE = new Rule("default", null, {color: DEFAULT_COLOR});
     graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
-    var testStyleSheet = null;
-    for (var i = 0; i < document.styleSheets.length; ++i) {
-        var s = document.styleSheets[i];
-        if (s.ownerNode.id === "testStyle") {
-            testStyleSheet = s;
-            break;
-        }
-    }
 
     function drawText() {
         var text = data.toString();
@@ -82,102 +74,88 @@ function load() {
     function editText(evt) {
         evt = evt || event;
         var key = evt.keyCode || evt.which;
-        var text = data.toString();
-        var lines = text.split(/\n/g);
-        if (key === Keys.LEFTARROW) {
-            if (evt.shiftKey) {
-                cursor.end.left(lines);
+        if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
+            var text = data.toString();
+            var lines = text.split(/\n/g);
+            var cur = evt.shiftKey ? cursor.end : cursor.start;
+            if (key === Keys.LEFTARROW) {
+                cur.left(lines);
+                evt.preventDefault();
+            }
+            else if (key === Keys.RIGHTARROW) {
+                cur.right(lines);
+                evt.preventDefault();
+            }
+            else if (key === Keys.UPARROW) {
+                cur.up(lines);
+                evt.preventDefault();
+            }
+            else if (key === Keys.DOWNARROW) {
+                cur.down(lines);
+                evt.preventDefault();
+            }
+            else if(key === Keys.HOME){
+                cur.home(lines);
+                evt.preventDefault();
             }
             else {
-                cursor.start.left(lines);
-                cursor.end.copy(cursor.start);
-            }
-            evt.preventDefault();
-        }
-        else if (key === Keys.RIGHTARROW) {
-            if (evt.shiftKey) {
-                cursor.end.right(lines);
-            }
-            else if (!evt.shiftKey) {
-                cursor.start.right(lines);
-                cursor.end.copy(cursor.start);
-            }
-            evt.preventDefault();
-        }
-        else if (key === Keys.UPARROW) {
-            if (evt.shiftKey) {
-                cursor.end.up(lines);
-            }
-            else if (!evt.shiftKey) {
-                cursor.start.up(lines);
-                cursor.end.copy(cursor.start);
-            }
-            evt.preventDefault();
-        }
-        else if (key === Keys.DOWNARROW) {
-            if (evt.shiftKey) {
-                cursor.end.down(lines);
-            }
-            else if (!evt.shiftKey) {
-                cursor.start.down(lines);
-                cursor.end.copy(cursor.start);
-            }
-            evt.preventDefault();
-        }
-        else if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            if (cursor.start.i !== cursor.end.i) {
-                var a = Math.min(cursor.start.i, cursor.end.i + 1);
-                var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i + 1));
-                var delta = b - a;
-                data.delete(a, b);
-                if (cursor.start.i > text.length - delta) {
-                    cursor.start.copy(cursor.end);
+                if (cursor.start.i !== cursor.end.i) {
+                    var a = Math.min(cursor.start.i, cursor.end.i + 1);
+                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i + 1));
+                    var delta = b - a;
+                    data.delete(a, b);
+                    if (cursor.start.i > text.length - delta) {
+                        cursor.start.copy(cursor.end);
+                    }
                 }
-            }
-            if (key === Keys.BACKSPACE) {
-                evt.preventDefault();
-                if (cursor.start.i === cursor.end.i && cursor.start.i > 0) {
-                    data.delete(cursor.start.i - 1, cursor.start.i);
-                    cursor.start.left(lines);
+                if (key === Keys.BACKSPACE) {
+                    evt.preventDefault();
+                    if (cursor.start.i === cursor.end.i && cursor.start.i > 0) {
+                        data.delete(cursor.start.i - 1, cursor.start.i);
+                        cursor.start.left(lines);
+                    }
                 }
-            }
-            else if (key === Keys.DELETE) {
-                if (cursor.start.i === cursor.end.i && cursor.start.i < text.length) {
-                    data.delete(cursor.start.i, cursor.start.i + 1);
+                else if (key === Keys.DELETE) {
+                    if (cursor.start.i === cursor.end.i && cursor.start.i < text.length) {
+                        data.delete(cursor.start.i, cursor.start.i + 1);
+                    }
                 }
-            }
-            else if (key === Keys.ENTER) {
-                var indent = "";
-                for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
-                    indent += " ";
+                else if (key === Keys.ENTER) {
+                    var indent = "";
+                    for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
+                        indent += " ";
+                    }
+                    // do these edits concurrently so we don't have to rebuild
+                    // the string and resplit it.
+                    lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
+                    lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
+                    data.insert(cursor.start.i, "\n" + indent);
+                    for (var i = 0; i <= indent.length; ++i) {
+                        cursor.start.right(lines);
+                    }
+                    evt.preventDefault();
                 }
-                // do these edits concurrently so we don't have to rebuild
-                // the string and resplit it.
-                lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
-                lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
-                data.insert(cursor.start.i, "\n" + indent);
-                for (var i = 0; i <= indent.length; ++i) {
+                else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
+                    var char = (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key];
+                    data.insert(
+                            cursor.start.i,
+                            char);
+                    // do these edits concurrently so we don't have to rebuild
+                    // the string and resplit it.
+                    var left = lines[cursor.start.y].substring(0, cursor.start.x);
+                    var right = lines[cursor.start.y].substring(cursor.start.x);
+                    lines[cursor.start.y] = left + char + right;
                     cursor.start.right(lines);
+                    evt.preventDefault();
                 }
-                evt.preventDefault();
+                else {
+                    console.log(evt.keyCode);
+                }
             }
-            else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
-                var char = (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key];
-                data.insert(
-                        cursor.start.i,
-                        char);
-                // do these edits concurrently so we don't have to rebuild
-                // the string and resplit it.
-                var left = lines[cursor.start.y].substring(0, cursor.start.x);
-                var right = lines[cursor.start.y].substring(cursor.start.x);
-                lines[cursor.start.y] = left + char + right;
-                cursor.start.right(lines);
-                evt.preventDefault();
+            
+            if(!evt.shiftKey || Keys.LOWERCASE[key]){
+                cursor.end.copy(cursor.start);
             }
-            else {
-                console.log(evt.keyCode);
-            }
-            cursor.end.copy(cursor.start);
         }
     }
 
@@ -205,6 +183,7 @@ function load() {
         drawText();
         dragging = true;
     });
+    
     output.addEventListener("mouseup", function (evt) {
         dragging = false;
     });
