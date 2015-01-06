@@ -63,7 +63,7 @@ Cursor.prototype.fullEnd = function(lines){
     this.i += lines[this.y].length - this.x;
     while(this.y < lines.length - 1){
         ++this.y;
-        this.i += lines[this.y].length;
+        this.i += lines[this.y].length + 1;
     }
     this.x = lines[this.y].length;
 };
