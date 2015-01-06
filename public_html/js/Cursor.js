@@ -66,3 +66,12 @@ Cursor.prototype.down = function (lines) {
         this.i += lines[this.y - 1].length + 1 + dx;
     }
 };
+
+Cursor.prototype.setXY = function(x, y, lines){
+    this.y = Math.max(0, Math.min(lines.length - 1, y));
+    this.x = Math.max(0, Math.min(lines[this.y].length, x));
+    this.i = this.x;
+    for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length + 1;
+    }
+};

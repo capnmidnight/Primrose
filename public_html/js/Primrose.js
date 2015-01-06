@@ -131,7 +131,7 @@ function load() {
             }
             if (key === Keys.BACKSPACE && cursor.start.i === cursor.end.i) {
                 data.delete(cursor.start.i - 1, cursor.start.i);
-                --cursor.start.i;
+                cursor.start.left(lines);
                 evt.preventDefault();
             }
             else if (key === Keys.DELETE && cursor.start.i === cursor.end.i) {
@@ -142,18 +142,25 @@ function load() {
                 while (lines[cursor.start.y][cursor.start.x] === " ") {
                     indent += " ";
                 }
+                // do these edits concurrently so we don't have to rebuild
+                // the string and resplit it.
+                lines.splice(cursor.start.y + 1, 0, lines[cursor.start.y].substring(cursor.start.x));
+                lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
                 data.insert(cursor.start.i, "\n" + indent);
-                cursor.start.i += indent.length + 1;
-                ++cursor.start.y;
-                cursor.start.x = indent.length;
+                cursor.start.right(lines);
                 evt.preventDefault();
             }
             else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
+                var char = (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key];
                 data.insert(
                         cursor.start.i,
-                        (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key]);
-                ++cursor.start.i;
-                ++cursor.start.x;
+                        char);
+                // do these edits concurrently so we don't have to rebuild
+                // the string and resplit it.
+                var left = lines[cursor.start.y].substring(0, cursor.start.x);
+                var right = lines[cursor.start.y].substring(cursor.start.x);
+                lines[cursor.start.y] = left + char + right;
+                cursor.start.right(lines);
                 evt.preventDefault();
             }
             else {
@@ -171,15 +178,18 @@ function load() {
     drawText();
 
     var dragging = false;
+    
+    function getCell(x, y){
+        x = Math.floor(x * pixelRatio / CHAR_WIDTH);
+        y = Math.floor((y * pixelRatio / CHAR_HEIGHT) - 0.25);
+        return {x: x, y: y};
+    }
+    
     output.addEventListener("mousedown", function (evt) {
         var text = data.toString();
         var lines = text.split("\n");
-        cursor.start.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
-        cursor.start.x = Math.max(0, Math.min(lines[cursor.start.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
-        cursor.start.i = cursor.start.x;
-        for (var i = 0; i < cursor.start.y; ++i) {
-            cursor.start.i += lines[i].length + 1;
-        }
+        var cell = getCell(evt.layerX, evt.layerY);
+        cursor.start.setXY(cell.x, cell.y, lines);
         cursor.end.copy(cursor.start);
         drawText();
         dragging = true;
@@ -192,11 +202,8 @@ function load() {
         if (dragging) {
             var text = data.toString();
             var lines = text.split("\n");
-            var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY * pixelRatio / CHAR_HEIGHT)));
-            cursor.end.i = Math.max(0, Math.min(lines[cursor.start.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
-            for (var i = 0; i < y; ++i) {
-                cursor.end.i += lines[i].length + 1;
-            }
+            var cell = getCell(evt.layerX, evt.layerY);
+            cursor.end.setXY(cell.x, cell.y, lines);
             drawText();
         }
     });
