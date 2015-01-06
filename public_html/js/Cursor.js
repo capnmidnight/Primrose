@@ -106,19 +106,46 @@ Cursor.prototype.setXY = function(x, y, lines){
     }
 };
 
-function CombinedCursor(start, end){
+Cursor.prototype.incY = function(dy, lines){
+    this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+    this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
+    this.i = this.x;
+    for (var i = 0; i < this.y; ++i) {
+        this.i += lines[i].length + 1;
+    }
+};
+
+function CombinedCursor(start, finish){
     this.start = start;
-    this.end = end;
+    this.finish = finish;
 }
 
 CombinedCursor.prototype.toString = function(){
-    return this.start.toString() + this.end.toString();
+    return this.start.toString() + this.finish.toString();
 };
 
 for(var key in Cursor.prototype){
-    if(key !== "toString"
-        && Cursor.prototype.hasOwnProperty(key)
-        && Cursor.prototype[key] instanceof Function){
-        CombinedCursor.prototype[key] = new Function("cursor", fmt("this.start.$1(cursor); this.end.copy(this.start);", key));
+    if(Cursor.prototype.hasOwnProperty(key)
+        && !CombinedCursor.prototype.hasOwnProperty(key)){
+        var func = Cursor.prototype[key];
+        if(func instanceof Function){
+            switch(func.length){
+                case 0:
+                    CombinedCursor.prototype[key] = new Function(fmt("this.start.$1(); this.finish.copy(this.start);", key));
+                    break;
+                case 1:
+                    CombinedCursor.prototype[key] = new Function("lines", fmt("this.start.$1(lines); this.finish.copy(this.start);", key));
+                    break;
+                case 2:
+                    CombinedCursor.prototype[key] = new Function("i", "lines", fmt("this.start.$1(i, lines); this.finish.copy(this.start);", key));
+                    break;
+                case 3:
+                    CombinedCursor.prototype[key] = new Function("x", "y", "lines", fmt("this.start.$1(x, y, lines); this.finish.copy(this.start);", key));
+                    break;
+                default:
+                    console.error("function %s is too long: %s.", key, func.length);
+                    break;
+            }
+        }
     }
 }

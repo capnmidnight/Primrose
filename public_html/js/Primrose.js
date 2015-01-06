@@ -11,11 +11,12 @@ function load() {
     output.width = output.width * pixelRatio;
     output.height = output.height * pixelRatio;
     var start = new Cursor();
-    var end = new Cursor();
-    var cursor = {start: start, end: end, both: new CombinedCursor(start, end)};
+    var finish = new Cursor();
+    var cursor = {start: start, finish: finish, both: new CombinedCursor(start, finish)};
     var DEFAULT_FONT = "monospace";
     var DEFAULT_COLOR = "black";
     var DEFAULT_STYLE = new Rule("default", null, {color: DEFAULT_COLOR});
+    var PAGE_SIZE = 5;
     graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
     var codePage = CodePages.EN_US;
@@ -29,7 +30,7 @@ function load() {
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
             var text = data.toString();
             var lines = text.split(/\n/g);
-            var cur = (type === "SHIFT") ? cursor.end : cursor.both;
+            var cur = /SHIFT/.test(type) ? cursor.finish : cursor.both;
             if (key === Keys.LEFTARROW) {
                 cur.left(lines);
                 evt.preventDefault();
@@ -46,8 +47,16 @@ function load() {
                 cur.down(lines);
                 evt.preventDefault();
             }
+            else if (key === Keys.PAGEUP) {
+                cur.incY(-PAGE_SIZE, lines);
+                evt.preventDefault();
+            }
+            else if (key === Keys.PAGEDOWN) {
+                cur.incY(PAGE_SIZE, lines);
+                evt.preventDefault();
+            }
             else if (key === Keys.HOME) {
-                if (type === "CTRL") {
+                if (/CTRL/.test(type)) {
                     cur.fullHome(lines);
                 }
                 else {
@@ -56,7 +65,7 @@ function load() {
                 evt.preventDefault();
             }
             else if (key === Keys.END) {
-                if (type === "CTRL") {
+                if (/CTRL/.test(type)) {
                     cur.fullEnd(lines);
                 }
                 else {
@@ -64,28 +73,28 @@ function load() {
                 }
                 evt.preventDefault();
             }
-            else if (type === "CTRL" && codePage.NORMAL[key] === "a") {
+            else if (/CTRL/.test(type) && codePage.NORMAL[key] === "a") {
                 cursor.start.fullHome(lines);
-                cursor.end.fullEnd(lines);
+                cursor.finish.fullEnd(lines);
             }
             else {
-                if (cursor.start.i !== cursor.end.i) {
-                    var a = Math.min(cursor.start.i, cursor.end.i);
-                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i));
+                if (cursor.start.i !== cursor.finish.i) {
+                    var a = Math.min(cursor.start.i, cursor.finish.i);
+                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.finish.i));
                     data.delete(a, b);
-                    if (cursor.start.i > cursor.end.i) {
-                        cursor.start.copy(cursor.end);
+                    if (cursor.start.i > cursor.finish.i) {
+                        cursor.start.copy(cursor.finish);
                     }
                 }
                 if (key === Keys.BACKSPACE) {
                     evt.preventDefault();
-                    if (cursor.start.i === cursor.end.i && cursor.start.i > 0) {
+                    if (cursor.start.i === cursor.finish.i && cursor.start.i > 0) {
                         data.delete(cursor.start.i - 1, cursor.start.i);
                         cursor.both.left(lines);
                     }
                 }
                 else if (key === Keys.DELETE) {
-                    if (cursor.start.i === cursor.end.i && cursor.start.i < text.length) {
+                    if (cursor.start.i === cursor.finish.i && cursor.start.i < text.length) {
                         data.delete(cursor.start.i, cursor.start.i + 1);
                     }
                 }
@@ -143,8 +152,7 @@ function load() {
         var text = data.toString();
         var lines = text.split("\n");
         var cell = getCell(evt.layerX, evt.layerY);
-        cursor.start.setXY(cell.x, cell.y, lines);
-        cursor.end.copy(cursor.start);
+        cursor.both.setXY(cell.x, cell.y, lines);
         drawText();
         dragging = true;
     });
@@ -158,7 +166,7 @@ function load() {
             var text = data.toString();
             var lines = text.split("\n");
             var cell = getCell(evt.layerX, evt.layerY);
-            cursor.end.setXY(cell.x, cell.y, lines);
+            cursor.finish.setXY(cell.x, cell.y, lines);
             drawText();
         }
     });
@@ -175,9 +183,9 @@ function load() {
                 var part = parts[j];
                 if (part.length > 0) {
                     var a = cursor.start;
-                    var b = cursor.end;
-                    if (cursor.end.i < cursor.start.i) {
-                        a = cursor.end;
+                    var b = cursor.finish;
+                    if (cursor.finish.i < cursor.start.i) {
+                        a = cursor.finish;
                         b = cursor.start;
                     }
                     if (a.i <= c + part.length && c <= b.i) {
