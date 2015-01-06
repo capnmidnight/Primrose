@@ -143,15 +143,17 @@ function load() {
             }
             else if (key === Keys.ENTER) {
                 var indent = "";
-                while (lines[cursor.start.y][cursor.start.x] === " ") {
+                for(var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
                     indent += " ";
                 }
                 // do these edits concurrently so we don't have to rebuild
                 // the string and resplit it.
-                lines.splice(cursor.start.y + 1, 0, lines[cursor.start.y].substring(cursor.start.x));
+                lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
                 lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
                 data.insert(cursor.start.i, "\n" + indent);
-                cursor.start.right(lines);
+                for(var i = 0; i <= indent.length; ++i){
+                    cursor.start.right(lines);
+                }
                 evt.preventDefault();
             }
             else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
