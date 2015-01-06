@@ -96,9 +96,11 @@ function load() {
         else if (key === Keys.RIGHTARROW) {
             if (evt.shiftKey) {
                 cursor.end.right(lines);
+                console.log(cursor.end.toString());
             }
             else if (!evt.shiftKey) {
                 cursor.start.right(lines);
+                console.log(cursor.start.toString());
                 cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
@@ -125,9 +127,13 @@ function load() {
         }
         else if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
             if (cursor.start.i !== cursor.end.i) {
-                data.delete(
-                        Math.min(cursor.start.i, cursor.end.i + 1),
-                        Math.max(cursor.start.i, cursor.end.i + 1));
+                var a = Math.min(cursor.start.i, cursor.end.i + 1);
+                var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i + 1));
+                var delta = b - a;
+                data.delete(a, b);
+                if(cursor.start.i > text.length - delta){
+                    cursor.start.copy(cursor.end);
+                }
             }
             if (key === Keys.BACKSPACE) {
                 evt.preventDefault();
