@@ -4,53 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
         <title>Primrose: Canvas-based text editor</title>
-        <style type="text/css">
-            body{
-                background-color: #eee;
-            }
-            #output{
-                border:dashed 3px red;
-            }
-            #clipboard-container {
-                position: fixed;
-                left: 0px;
-                top: 0px;
-                width: 0px;
-                height: 0px;
-                z-index: 100;
-                display: none;
-                opacity: 0;
-            }
-            #clipboard {
-                width: 1px;
-                height: 1px;       
-                padding: 0px;
-            }
-        </style>
-        <style type="text/css" id="testStyle">
-            #testDoc{
-                font-family: monospace;
-                color:black;
-            }
-            #testDoc .keyword{
-                color: blue;
-            }
-            #testDoc .identifier{
-                color: #aa0000;
-                font-weight: bold;
-            }
-            #testDoc .stringLiteral{
-                color: #aa9900;
-                font-style: italic;
-            }
-            #testDoc .comment{
-                color: green;
-                font-style: italic;
-            }
-            #testDoc .openParen, .closeParen, .openBrace, .closeBrace{
-                color: black;
-            }
-        </style>
+        <link type="text/css" href="css/main.css" rel="stylesheet">
         <script type="text/javascript" src="js/core.js"></script>
         <script type="text/javascript" src="js/testing.js"></script>
         <script type="text/javascript" src="js/Rope.js"></script>
