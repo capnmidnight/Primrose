@@ -94,7 +94,7 @@ function load() {
             evt.preventDefault();
         }
         else if (key === Keys.RIGHTARROW) {
-            if (evt.shiftKey){
+            if (evt.shiftKey) {
                 cursor.end.right(lines);
             }
             else if (!evt.shiftKey) {
@@ -104,7 +104,7 @@ function load() {
             evt.preventDefault();
         }
         else if (key === Keys.UPARROW) {
-            if (evt.shiftKey){
+            if (evt.shiftKey) {
                 cursor.end.up(lines);
             }
             else if (!evt.shiftKey) {
@@ -114,7 +114,7 @@ function load() {
             evt.preventDefault();
         }
         else if (key === Keys.DOWNARROW) {
-            if (evt.shiftKey){
+            if (evt.shiftKey) {
                 cursor.end.down(lines);
             }
             else if (!evt.shiftKey) {
@@ -129,13 +129,17 @@ function load() {
                         Math.min(cursor.start.i, cursor.end.i + 1),
                         Math.max(cursor.start.i, cursor.end.i + 1));
             }
-            if (key === Keys.BACKSPACE && cursor.start.i === cursor.end.i) {
-                data.delete(cursor.start.i - 1, cursor.start.i);
-                cursor.start.left(lines);
+            if (key === Keys.BACKSPACE) {
                 evt.preventDefault();
+                if (cursor.start.i === cursor.end.i && cursor.start.i > 0) {
+                    data.delete(cursor.start.i - 1, cursor.start.i);
+                    cursor.start.left(lines);
+                }
             }
-            else if (key === Keys.DELETE && cursor.start.i === cursor.end.i) {
-                data.delete(cursor.start.i, cursor.start.i + 1);
+            else if (key === Keys.DELETE) {
+                if (cursor.start.i === cursor.end.i && cursor.start.i < text.length) {
+                    data.delete(cursor.start.i, cursor.start.i + 1);
+                }
             }
             else if (key === Keys.ENTER) {
                 var indent = "";
@@ -178,13 +182,13 @@ function load() {
     drawText();
 
     var dragging = false;
-    
-    function getCell(x, y){
+
+    function getCell(x, y) {
         x = Math.floor(x * pixelRatio / CHAR_WIDTH);
         y = Math.floor((y * pixelRatio / CHAR_HEIGHT) - 0.25);
         return {x: x, y: y};
     }
-    
+
     output.addEventListener("mousedown", function (evt) {
         var text = data.toString();
         var lines = text.split("\n");
