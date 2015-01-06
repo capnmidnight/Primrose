@@ -20,7 +20,9 @@ function load() {
     output.width = output.width * pixelRatio;
     output.height = output.height * pixelRatio;
     var cursor = {start: new Cursor(), end: new Cursor()};
-    graphics.font = CHAR_HEIGHT + "px monospace";
+    var DEFAULT_FONT = "monospace";
+    var DEFAULT_COLOR = "black";
+    graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
     var testStyleSheet = null;
     for (var i = 0; i < document.styleSheets.length; ++i) {
@@ -51,19 +53,10 @@ function load() {
                             CHAR_WIDTH, CHAR_HEIGHT
                             );
                 }
-
-                /*
-                 var font = ((cur.totalStyle["font-weight"] || "")
-                 + " "
-                 + (cur.totalStyle["font-style"] || "")
-                 + " "
-                 + CHAR_HEIGHT
-                 + "px monospace").trim();
-                 */
-                var font = CHAR_HEIGHT + "px monospace";
+                
+                var font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
                 graphics.font = font;
-                //graphics.fillStyle = cur.totalStyle.color;
-                graphics.fillStyle = "black";
+                graphics.fillStyle = DEFAULT_COLOR;
                 graphics.fillText(char, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
                 ++x;
             }

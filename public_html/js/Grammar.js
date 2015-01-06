@@ -15,112 +15,95 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * 
- */
-var grammars = {
-    // used for all languages
-    preprocessing: [
-        // prevent user-code from injecting its own control sequences.
-        ["ampersands", /&/g, "&amp;"],
-        
-        // prevent spaces from collapsing (this will eventually go away
-        // when DOM-based processing goes away).
-        ["spaces", / /g, "&nbsp;"]
-    ],
-    
-    postprocessing: [
-        // return the user-coded ampersands
-        ["amerpsands", /&amp;/g, "&"],
-        
-        // prevent newlinse from collapsing (this will eventually go away
-        // when DOM-based processing goes away).
-        ["newlines", /\r?\n/g, "<br>"]
-    ],
-    
-    JavaScript: [
-        // remove escaped quotation marks, so they don't mess with the
-        // string remover
-        [
-            "escapedQuotationMarks", 
-            /\\"/g, 
-            "&quot;"
-        ],
 
-        [
-            "strings", 
-            /"[^"]+"/g, 
-            function (txt, state, match, groups, i) {
-                var i = state.strings.length;
-                // return the escaped quotation marks
-                state.strings[i] = match.replace(/&quot;/g, "\\\"");
-                return "&string" + i + ";";
-            }
-        ],
+function Grammar(grammar) {
+    // clone the preprocessing grammar to start a new grammar
+    this.grammar = grammar.map(function(rule){
+        return new Rule(rule[0], rule[1], rule[2]);
+    });
+}
 
-        [
-            "inlineComments", 
-            /\/\/[^\n]+\n/g, 
-            function (txt, state, match, groups, i) {
-                var i = state.comments.length;
-                state.comments[i] = match;
-                return "&comment" + i + ";";
-            }
-        ],
+function Rule(name, test, style){
+    this.name = name;
+    this.test = test;
+    this.style = style || {};
+}
 
-        [
-            "blockComments", 
-            /\/\*(\/(?!\*)|[^\/])+\*\//g, 
-            function (txt, state, match, groups, i) {
-                var i = state.comments.length;
-                state.comments[i] = match;
-                return "&comment" + i + ";";
+Grammar.prototype.tokenize = function (text) {
+    var tokens = [text];
+    for(var i = 0; i < this.grammar.length; ++i){
+        var rule = this.grammar[i];
+        console.log("processing rule: ", rule.name);
+        for(var j = 0; j < tokens.length && j < 1000; ++j){
+            console.log("\tsubstring", j);
+            if(!tokens[j].style){
+                tokens[j].replace(rule.test, function(match){
+                    match.name = rule.name;
+                    match.style = rule.style;
+                    var start = arguments[arguments.length - 2];
+                    var left = tokens[j].substring(0, start);
+                    var right = tokens[j].substring(start + match.length);
+                    //tokens.splice(j + 1, 0, match, right);
+                    console.log("\t\t", match, start, left, right);
+                    return left;
+                });
             }
-        ],
-
-        [
-            "keywords", 
-            /\b(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/g, 
-            function (txt, state, match, groups, i) {
-                return "&" + match + ";";
-            }
-        ],
-
-        [
-            "identifiers", 
-            /(\w+)/g, 
-            function (txt, state, match, groups, i) {
-                if (txt[i - 1] === "&") {
-                    return match;
-                }
-                return "<span class=\"identifier\">" + match + "</span>";
-            }
-        ],
-        
-        // These will go away when the DOM based processing is replaced with 
-        // a proper tokenizer.
-        [
-            "replaceKeywords", 
-            /&(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with);/g,
-            function (txt, state, match, groups, i) {
-                return "<span class=\"keyword\">" + groups + "</span>";
-            }
-        ],
-        
-        [
-            "replaceStrings", 
-            /&string(\d+);/g, 
-            function (txt, state, match, groups, i) {
-                return "<span class=\"stringLiteral\">" + state.strings[groups] + "</span>";
-            }
-        ],
-        
-        [
-            "replaceComments",
-            /&comment(\d+);/g, 
-            function (txt, state, match, groups, i) {
-                return "<span class=\"comment\">" + state.comments[groups] + "</span>";
-            }
-        ]
-    ]
+        }
+    }
+    return tokens.filter(function(t){
+        return t.length > 0;
+    });
 };
+
+Grammar.tests = {
+    aSimpleString: function(){
+        var txt = "\"a\"";
+        var tokens = Grammar.JavaScript.tokenize(txt);
+        Assert.areEqual(1, tokens.length);
+        Assert.areEqual("string", tokens[0].name);
+        Assert.isNotNull(tokens[0].style);
+        Assert.areEqual(txt, tokens[0]);
+    }
+};
+
+Grammar.JavaScript = new Grammar([
+    [
+        "strings",
+        /"(\\"|[^"])+"/,
+        {
+            color: "#aa9900",
+            fontStyle: "italic"
+        }
+    ],
+    [
+        "inlineComments",
+        /\/\/[^\n]+\n/,
+        {
+            color: "green",
+            fontStyle: "italic"
+        }
+    ],
+    [
+        "blockComments",
+        /\/\*(\/(?!\*)|[^\/])+\*\//g,
+        {
+            color: "green",
+            fontStyle: "italic"
+        }
+    ],
+    [
+        "keywords",
+        /\b(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/,
+        {
+            color: "blue"
+        }
+    ],
+    [
+        "identifiers",
+        /(\w+)/,
+        {
+            color: "#aa0000",
+            fontWeight: "bold"
+        }
+    ]
+]);

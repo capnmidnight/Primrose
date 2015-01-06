@@ -17,5 +17,5 @@
 
 consoleTest(Cursor);
 consoleTest(Rope);
-consoleTest(Tokenizer);
+consoleTest(Grammar);
 consoleTest(TextBuffer);
