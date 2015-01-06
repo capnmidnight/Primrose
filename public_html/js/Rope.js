@@ -41,48 +41,42 @@ function Rope(str_or_left, opt_right) {
         this.value = null;
         this.left = str_or_left;
         this.right = opt_right;
+        this.length = opt_right.length;
     }
     else {
         this.value = str_or_left;
         this.left = null;
         this.right = null;
+        this.length = 0;
     }
     if (str_or_left instanceof Rope) {
-        this.weight = str_or_left.length();
+        this.weight = str_or_left.getLength();
     }
     else {
         this.weight = str_or_left.length;
     }
+    this.length += this.weight;
 }
 
 Rope.tests = {
-    leafWeightMatchesLength: function () {
+    leaf: function () {
         var str = "hello, world";
         var rp = new Rope(str);
         Assert.areEqual(str.length, rp.weight, "length doesn't match weight");
-    },
-    leafWeightMatchesValue: function () {
-        var str = "hello, world";
-        var rp = new Rope(str);
         Assert.areEqual(str, rp.value, "values don't match");
+        Assert.areEqual(str.length, rp.length, "lengths don't match");
+        Assert.areEqual(str, rp.toString(), "values don't match");
     },
-    basicRootMatchesLength: function () {
+    root: function () {
         var l = "hello,";
         var r = " world";
+        var str = l + r;
         var rp = new Rope(l, r);
         Assert.areEqual(l.length, rp.weight, "left length doesn't match weight");
-    },
-    basicRootMatchesLeft: function () {
-        var l = "hello,";
-        var r = " world";
-        var rp = new Rope(l, r);
         Assert.areEqual(l, rp.left.value, "left doesn't match");
-    },
-    basicRootMatchesRight: function () {
-        var l = "hello,";
-        var r = " world";
-        var rp = new Rope(l, r);
         Assert.areEqual(r, rp.right.value, "right doesn't match");
+        Assert.areEqual(str.length, rp.length, "lengths don't match");
+        Assert.areEqual(str, rp.toString(), "values don't match");
     }
 };
 
@@ -91,7 +85,7 @@ Rope.tests = {
  * string contained. This requires walking down the right-side of the tree,
  * because we already know the length of the left-side of the tree (the 'weight')
  */
-Rope.prototype.length = function () {
+Rope.prototype.getLength = function () {
     var cur = this;
     var len = 0;
     while (cur !== null && cur !== undefined) {
@@ -104,14 +98,14 @@ Rope.prototype.length = function () {
 Rope.tests.basicLength = function () {
     var str = "hello, my friend";
     var rp = new Rope(str);
-    Assert.areEqual(str.length, rp.length());
+    Assert.areEqual(str.length, rp.getLength());
 };
 
 Rope.tests.twoLeafLength = function () {
     var l = "hello, ";
     var r = "my friend";
     var rp = new Rope(l, r);
-    Assert.areEqual(l.length + r.length, rp.length());
+    Assert.areEqual(l.length + r.length, rp.getLength());
 };
 
 Rope.tests.threeLeafLength = function () {
@@ -119,7 +113,7 @@ Rope.tests.threeLeafLength = function () {
     var b = "my friend";
     var c = " it's been a long time";
     var rp = new Rope(new Rope(a, b), c);
-    Assert.areEqual(a.length + b.length + c.length, rp.length());
+    Assert.areEqual(a.length + b.length + c.length, rp.getLength());
 };
 
 Rope.tests.fourLeafLength = function () {
@@ -131,7 +125,7 @@ Rope.tests.fourLeafLength = function () {
     Assert.areEqual(a.length
             + b.length
             + c.length
-            + d.length, rp.length());
+            + d.length, rp.getLength());
 };
 
 Rope.tests.fourLeafWeight = function () {
@@ -154,7 +148,7 @@ Rope.tests.leftLoadedLength = function () {
             + b.length
             + c.length
             + d.length
-            + e.length, rp.length());
+            + e.length, rp.getLength());
 };
 
 Rope.tests.rightLoadedLength = function () {
@@ -168,7 +162,7 @@ Rope.tests.rightLoadedLength = function () {
             + b.length
             + c.length
             + d.length
-            + e.length, rp.length());
+            + e.length, rp.getLength());
 };
 
 /*
@@ -263,7 +257,7 @@ Rope.prototype.concat = function (str_or_rope) {
     }
     if (this.value === null) {
         this.left = new Rope(this.left, this.right);
-        this.weight += this.right.length();
+        this.weight += this.right.getLength();
     }
     else {
         this.left = new Rope(this.value);
@@ -278,7 +272,7 @@ Rope.tests.basicStringAppendLength = function () {
     var b = "qwer";
     var rp = new Rope(a);
     rp.concat(b);
-    Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
+    Assert.areEqual(a.length + b.length, rp.getLength(), "lengths doesn't match");
 };
 
 Rope.tests.basicStringAppend = function () {
@@ -339,7 +333,7 @@ Rope.tests.basicSplit1Length = function () {
     var b = str.substring(5);
     var rp1 = new Rope(str);
     var rp2 = rp1.split(5);
-    Assert.areEqual(a.length, rp1.length());
+    Assert.areEqual(a.length, rp1.getLength());
 };
 
 Rope.tests.basicSplit1Value = function () {
@@ -357,7 +351,7 @@ Rope.tests.basicSplit2Length = function () {
     var b = str.substring(5);
     var rp1 = new Rope(str);
     var rp2 = rp1.split(5);
-    Assert.areEqual(b.length, rp2.length());
+    Assert.areEqual(b.length, rp2.getLength());
 };
 
 Rope.tests.complexSplit1 = function () {
@@ -369,7 +363,7 @@ Rope.tests.complexSplit1 = function () {
     var l = a.length + b.length + c.length + d.length + e.length;
     var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
     var rp2 = rp1.split(5);
-    Assert.areEqual(l - 5, rp2.length());
+    Assert.areEqual(l - 5, rp2.getLength());
 };
 
 Rope.tests.complexSplit2 = function () {
@@ -381,7 +375,7 @@ Rope.tests.complexSplit2 = function () {
     var l1 = a.length + b.length + c.length + d.length + e.length;
     var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
     var rp2 = rp1.split(Math.floor(l1 / 2));
-    Assert.areEqual(l1, rp1.length() + rp2.length());
+    Assert.areEqual(l1, rp1.getLength() + rp2.getLength());
 };
 
 Rope.prototype.delete = function (i, j) {
@@ -394,7 +388,7 @@ Rope.tests.basicDelete = function () {
     var str = "0123456789";
     var rp = new Rope(str);
     rp.delete(3, 5);
-    Assert.areEqual(str.length - 2, rp.length());
+    Assert.areEqual(str.length - 2, rp.getLength());
 };
 
 Rope.tests.basicDelete2 = function () {
@@ -532,11 +526,11 @@ Rope.tests.basicRebalance = function () {
     var str = "0123456789";
     var rp = new Rope(str);
     rp.rebalance(1);
-    Assert.areEqual(str.length, rp.length());
+    Assert.areEqual(str.length, rp.getLength());
 };
 
 Rope.tests.rebalanceZero = function () {
     var rp = new Rope("");
     rp.rebalance();
-    Assert.areEqual(0, rp.length());
-}
+    Assert.areEqual(0, rp.getLength());
+};

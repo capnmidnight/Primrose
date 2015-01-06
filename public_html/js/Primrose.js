@@ -20,17 +20,19 @@ function load() {
     graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
     var codePage = CodePages.EN_US;
+    var dragging = false;
 
     function editText(evt) {
         evt = evt || event;
-        var type = ((evt.ctrlKey && "CTRL" || "")
-                + (evt.altKey && "ALT" || "")
-                + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
         var key = evt.keyCode;
+        // don't do anything about the actual press of SHIFT, CTRL, or ALT
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
+            var type = ((evt.ctrlKey && "CTRL" || "")
+                    + (evt.altKey && "ALT" || "")
+                    + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
             var text = data.toString();
             var lines = text.split(/\n/g);
-            var cur = /SHIFT/.test(type) ? cursor.finish : cursor.both;
+            var cur = evt.shiftKey ? cursor.finish : cursor.both;
             if (key === Keys.LEFTARROW) {
                 cur.left(lines);
                 evt.preventDefault();
@@ -56,7 +58,7 @@ function load() {
                 evt.preventDefault();
             }
             else if (key === Keys.HOME) {
-                if (/CTRL/.test(type)) {
+                if (evt.ctrlKey) {
                     cur.fullHome(lines);
                 }
                 else {
@@ -65,7 +67,7 @@ function load() {
                 evt.preventDefault();
             }
             else if (key === Keys.END) {
-                if (/CTRL/.test(type)) {
+                if (evt.ctrlKey) {
                     cur.fullEnd(lines);
                 }
                 else {
@@ -73,64 +75,71 @@ function load() {
                 }
                 evt.preventDefault();
             }
-            else if (/CTRL/.test(type) && codePage.NORMAL[key] === "a") {
+            else if (evt.ctrlKey && codePage.NORMAL[key] === "a") {
                 cursor.start.fullHome(lines);
                 cursor.finish.fullEnd(lines);
             }
-            else {
-                if (cursor.start.i !== cursor.finish.i) {
-                    var a = Math.min(cursor.start.i, cursor.finish.i);
-                    var b = Math.min(text.length, Math.max(cursor.start.i, cursor.finish.i));
-                    data.delete(a, b);
-                    if (cursor.start.i > cursor.finish.i) {
-                        cursor.start.copy(cursor.finish);
-                    }
+            else if (key === Keys.BACKSPACE) {
+                if (cursor.start.i === cursor.finish.i) {
+                    cursor.start.left(lines);
                 }
-                if (key === Keys.BACKSPACE) {
-                    evt.preventDefault();
-                    if (cursor.start.i === cursor.finish.i && cursor.start.i > 0) {
-                        data.delete(cursor.start.i - 1, cursor.start.i);
-                        cursor.both.left(lines);
-                    }
+                deleteSelection();
+                evt.preventDefault();
+            }
+            else if (key === Keys.DELETE) {
+                if (cursor.start.i === cursor.finish.i) {
+                    cursor.finish.right(lines);
                 }
-                else if (key === Keys.DELETE) {
-                    if (cursor.start.i === cursor.finish.i && cursor.start.i < text.length) {
-                        data.delete(cursor.start.i, cursor.start.i + 1);
-                    }
+                deleteSelection();
+            }
+            else if (key === Keys.ENTER) {
+                deleteSelection();
+                var indent = "";
+                for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
+                    indent += " ";
                 }
-                else if (key === Keys.ENTER) {
-                    var indent = "";
-                    for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
-                        indent += " ";
-                    }
+                data.insert(cursor.start.i, "\n" + indent);
+                // do these edits concurrently so we don't have to rebuild
+                // the string and resplit it.
+                lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
+                lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
+                for (var i = 0; i <= indent.length; ++i) {
+                    cursor.both.right(lines);
+                }
+            }
+            else if (codePage[type]) {
+                var char = codePage[type][key];
+                if (char) {
+                    deleteSelection();
+                    data.insert(cursor.start.i, char);
                     // do these edits concurrently so we don't have to rebuild
                     // the string and resplit it.
-                    lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
-                    lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
-                    data.insert(cursor.start.i, "\n" + indent);
-                    for (var i = 0; i <= indent.length; ++i) {
-                        cursor.both.right(lines);
-                    }
-                    evt.preventDefault();
-                }
-                else if ((type === "SHIFT" || type === "NORMAL")) {
-                    var char = codePage[type][key];
-                    if (char) {
-                        data.insert(
-                                cursor.start.i,
-                                char);
-                        // do these edits concurrently so we don't have to rebuild
-                        // the string and resplit it.
-                        var left = lines[cursor.start.y].substring(0, cursor.start.x);
-                        var right = lines[cursor.start.y].substring(cursor.start.x);
-                        lines[cursor.start.y] = left + char + right;
-                        cursor.both.right(lines);
+                    var left = lines[cursor.start.y].substring(0, cursor.start.x);
+                    var right = lines[cursor.start.y].substring(cursor.start.x);
+                    lines[cursor.start.y] = left + char + right;
+                    cursor.both.right(lines);
+                    if (key === Keys.SPACEBAR) {
                         evt.preventDefault();
                     }
                 }
-                else {
-                    console.log(type, key);
-                }
+            }
+            else {
+                // what just happened?
+                console.log(type, key);
+            }
+        }
+    }
+
+    function deleteSelection() {
+        if (cursor.start.i !== cursor.finish.i) {
+            var a = Math.min(cursor.start.i, cursor.finish.i);
+            var b = Math.max(cursor.start.i, cursor.finish.i);
+            data.delete(a, b);
+            if (cursor.start.i > cursor.finish.i) {
+                cursor.start.copy(cursor.finish);
+            }
+            else {
+                cursor.finish.copy(cursor.start);
             }
         }
     }
@@ -139,8 +148,6 @@ function load() {
         editText(evt);
         drawText();
     });
-
-    var dragging = false;
 
     function getCell(x, y) {
         x = Math.floor(x * pixelRatio / CHAR_WIDTH);
