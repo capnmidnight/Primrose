@@ -24,7 +24,7 @@ var Assert = {
                 || Math.abs(actual - expected)
             || (Number.isNaN(expected)
                 ^ Number.isNaN(actual))) > Assert.ALPHA){
-            throw new Error(fmt("$3(expected value) $1 != $2 (actual value)", expected, actual, msg ? "[" + msg + "]" : ""));
+            throw new Error(fmt("$3(expected value) $1 != $2 (actual value)", expected, actual, msg ? "[" + msg + "] " : ""));
         }
     },
 
@@ -42,9 +42,9 @@ var Assert = {
         }
     },
 
-    isNotNull: function(obj){
+    isNotNull: function(obj, msg){
         if(obj === null || obj === undefined){
-            throw new Error("object was null");
+            throw new Error((msg ? "[" + msg + "] " : "") + "object was null");
         }
     }
 };

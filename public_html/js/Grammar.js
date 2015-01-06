@@ -18,58 +18,144 @@
 
 function Grammar(grammar) {
     // clone the preprocessing grammar to start a new grammar
-    this.grammar = grammar.map(function(rule){
+    this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1], rule[2]);
     });
 }
 
-function Rule(name, test, style){
+function Rule(name, test, style) {
     this.name = name;
     this.test = test;
     this.style = style || {};
 }
 
-Grammar.prototype.tokenize = function (text) {
+function Token(value, rule) {
+    this.value = value;
+    this.rule = rule;
+}
+
+Grammar.prototype.tokenize = function (text, defaultRule) {
+    defaultRule = defaultRule || new Rule("default", null, {});
     var tokens = [text];
-    for(var i = 0; i < this.grammar.length; ++i){
+    for (var i = 0; i < this.grammar.length; ++i) {
         var rule = this.grammar[i];
-        console.log("processing rule: ", rule.name);
-        for(var j = 0; j < tokens.length && j < 1000; ++j){
-            console.log("\tsubstring", j);
-            if(!tokens[j].style){
-                tokens[j].replace(rule.test, function(match){
-                    match.name = rule.name;
-                    match.style = rule.style;
-                    var start = arguments[arguments.length - 2];
-                    var left = tokens[j].substring(0, start);
-                    var right = tokens[j].substring(start + match.length);
-                    //tokens.splice(j + 1, 0, match, right);
-                    console.log("\t\t", match, start, left, right);
-                    return left;
-                });
+        for (var j = 0; j < tokens.length; ++j) {
+            var str = tokens[j];
+            if (!(str instanceof Token)) {
+                var res = rule.test.exec(tokens[j]);
+                if (res) {
+                    // insert the new token into the token list
+                    var mid = res[0];
+                    var token = new Token(mid, rule);
+                    tokens.splice(j + 1, 0, token);
+                    
+                    // reinsert the rest of the string for further processing
+                    var start = res.index;
+                    var end = start + mid.length;
+                    if (end < str.length) {
+                        var right = str.substring(end);
+                        tokens.splice(j + 2, 0, right);
+                    }
+                    
+                    // cut the newly created token out of the string
+                    if(start > 0){
+                        tokens[j] = str.substring(0, start);
+                        // skip the token we just created
+                        ++j;
+                    }
+                    else{
+                        tokens.splice(j, 1);
+                        // no need to backup, because the next array element
+                        // will be a Token and we don't need to recheck it
+                    }
+                }
             }
         }
     }
-    return tokens.filter(function(t){
-        return t.length > 0;
-    });
+    for (var i = 0; i < tokens.length; ++i) {
+        if (!(tokens[i] instanceof Token)) {
+            tokens[i] = new Token(tokens[i], defaultRule);
+        }
+    }
+    return tokens;
 };
 
 Grammar.tests = {
-    aSimpleString: function(){
-        var txt = "\"a\"";
-        var tokens = Grammar.JavaScript.tokenize(txt);
-        Assert.areEqual(1, tokens.length);
-        Assert.areEqual("string", tokens[0].name);
-        Assert.isNotNull(tokens[0].style);
-        Assert.areEqual(txt, tokens[0]);
+    aSimpleString: function () {
+        var src = "\"a\"";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(1, tokens.length, "number of tokens does not match");
+        Assert.areEqual(src, tokens[0].value, "token isn't right value");
+        Assert.isNotNull(tokens[0].rule, "token does not have a rule");
+        Assert.isNotNull(tokens[0].rule.style, "token does not have a style");
+        Assert.areEqual("strings", tokens[0].rule.name, "token types do not match");
+    },
+    twoStrings: function () {
+        var src = "\"a\" b \"c\"";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(5, tokens.length, "number of tokens does not match");
+        Assert.areEqual("strings", tokens[0].rule.name, "0: token incorrect type");
+        Assert.areEqual("default", tokens[1].rule.name, "1: token incorrect type");
+        Assert.areEqual("identifiers", tokens[2].rule.name, "2: token incorrect type");
+        Assert.areEqual("default", tokens[3].rule.name, "3: token incorrect type");
+        Assert.areEqual("strings", tokens[4].rule.name, "4: token incorrect type");
+    },
+    singleLineBlockComment: function(){
+        var src = "/* asdf one 2 three 4 */";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(1, tokens.length, "number of tokens does not match");
+        Assert.areEqual(src, tokens[0].value, "token isn't right value");
+        Assert.isNotNull(tokens[0].rule, "token does not have a rule");
+        Assert.isNotNull(tokens[0].rule.style, "token does not have a style");
+        Assert.areEqual("blockComments", tokens[0].rule.name, "token types do not match");
+    },
+    multiLineBlockComment: function(){
+        var src = "/*\n asdf one\n2 three 4\n*/";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(1, tokens.length, "number of tokens does not match");
+        Assert.areEqual(src, tokens[0].value, "token isn't right value");
+        Assert.isNotNull(tokens[0].rule, "token does not have a rule");
+        Assert.isNotNull(tokens[0].rule.style, "token does not have a style");
+        Assert.areEqual("blockComments", tokens[0].rule.name, "token types do not match");
+    },
+    multipleMultiLineBlockComment: function(){
+        var src = "/*\n asdf one\n2 three 4\n*/\nfunction(){\n/*\n asdf one\n2 three 4\n*/\n}";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(6, tokens.length, "number of tokens does not match");
+        Assert.areEqual("blockComments", tokens[0].rule.name, "0: token types do not match");
+        Assert.areEqual("blockComments", tokens[4].rule.name, "4: token types do not match." + tokens[5].value);
+    },
+    bigTest: function(){
+        var src = "function Hello (){\n"
+            + "    // a comment\n"
+            + "    function MyFunc ( ) {\n"
+            + "        var x = \"Whatever\";\n"
+            + "        console.log(x + \" World\");\n"
+            + "        /*\n"
+            + "          a longer comment\n"
+            + "        */\n"
+            + "    }\n"
+            + "}";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
     }
 };
 
 Grammar.JavaScript = new Grammar([
     [
         "strings",
-        /"(\\"|[^"])+"/,
+        /"(?:\\"|[^"]+)"/,
         {
             color: "#aa9900",
             fontStyle: "italic"
@@ -85,7 +171,7 @@ Grammar.JavaScript = new Grammar([
     ],
     [
         "blockComments",
-        /\/\*(\/(?!\*)|[^\/])+\*\//g,
+        /\/\*(?:\/(?!\*)|[^\/])+\*\//,
         {
             color: "green",
             fontStyle: "italic"
@@ -93,14 +179,14 @@ Grammar.JavaScript = new Grammar([
     ],
     [
         "keywords",
-        /\b(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/,
+        /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/,
         {
             color: "blue"
         }
     ],
     [
         "identifiers",
-        /(\w+)/,
+        /(?:\w+)/,
         {
             color: "#aa0000",
             fontWeight: "bold"

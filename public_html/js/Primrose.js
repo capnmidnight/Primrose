@@ -22,6 +22,7 @@ function load() {
     var cursor = {start: new Cursor(), end: new Cursor()};
     var DEFAULT_FONT = "monospace";
     var DEFAULT_COLOR = "black";
+    var DEFAULT_STYLE = new Rule("default", null, {color: DEFAULT_COLOR});
     graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
     var testStyleSheet = null;
@@ -35,30 +36,37 @@ function load() {
 
     function drawText() {
         var text = data.toString();
+        var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
         graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-        var x = 0, y = 0;
-        for (var i = 0; i < text.length; ++i) {
-            var char = text[i];
-            if (char === "\n") {
-                ++y;
-                x = 0;
-            }
-            else {
-                var a = Math.min(cursor.start.i, cursor.end.i);
-                var b = Math.max(cursor.start.i, cursor.end.i);
-                if (a <= i && i <= b) {
-                    graphics.fillStyle = "#c0c0c0";
-                    graphics.fillRect(
-                            x * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
-                            CHAR_WIDTH, CHAR_HEIGHT
-                            );
+        var x = 0, y = 0, c = 0;
+        for (var i = 0; i < tokens.length; ++i) {
+            var t = tokens[i];
+            var parts = t.value.split("\n");
+            for (var j = 0; j < parts.length; ++j) {
+                var part = parts[j];
+                if (part.length > 0) {
+                    var a = Math.min(cursor.start.i, cursor.end.i);
+                    var b = Math.max(cursor.start.i, cursor.end.i);
+                    if (a <= c && c <= b) {
+                        graphics.fillStyle = "#c0c0c0";
+                        graphics.fillRect(
+                                x * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
+                                Math.min(b - c, part.length) * CHAR_WIDTH, CHAR_HEIGHT
+                                );
+                    }
+
+                    var font = (t.rule.style.fontWeight || "") + " " + (t.rule.style.fontStyle || "") + " " + CHAR_HEIGHT + "px " + DEFAULT_FONT;
+                    graphics.font = font.trim();
+                    graphics.fillStyle = t.rule.style.color;
+                    graphics.fillText(part, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
+                    x += part.length;
+                    c += part.length;
                 }
-                
-                var font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
-                graphics.font = font;
-                graphics.fillStyle = DEFAULT_COLOR;
-                graphics.fillText(char, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
-                ++x;
+                if (j < parts.length - 1) {
+                    ++y;
+                    x = 0;
+                    ++c;
+                }
             }
         }
 
@@ -89,11 +97,9 @@ function load() {
         else if (key === Keys.RIGHTARROW) {
             if (evt.shiftKey) {
                 cursor.end.right(lines);
-                console.log(cursor.end.toString());
             }
             else if (!evt.shiftKey) {
                 cursor.start.right(lines);
-                console.log(cursor.start.toString());
                 cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
@@ -124,7 +130,7 @@ function load() {
                 var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i + 1));
                 var delta = b - a;
                 data.delete(a, b);
-                if(cursor.start.i > text.length - delta){
+                if (cursor.start.i > text.length - delta) {
                     cursor.start.copy(cursor.end);
                 }
             }
@@ -142,7 +148,7 @@ function load() {
             }
             else if (key === Keys.ENTER) {
                 var indent = "";
-                for(var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
+                for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
                     indent += " ";
                 }
                 // do these edits concurrently so we don't have to rebuild
@@ -150,7 +156,7 @@ function load() {
                 lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
                 lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
                 data.insert(cursor.start.i, "\n" + indent);
-                for(var i = 0; i <= indent.length; ++i){
+                for (var i = 0; i <= indent.length; ++i) {
                     cursor.start.right(lines);
                 }
                 evt.preventDefault();
