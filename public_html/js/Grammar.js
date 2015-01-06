@@ -183,13 +183,5 @@ Grammar.JavaScript = new Grammar([
         {
             color: "blue"
         }
-    ],
-    [
-        "identifiers",
-        /(?:\w+)/,
-        {
-            color: "#aa0000",
-            fontWeight: "bold"
-        }
     ]
 ]);

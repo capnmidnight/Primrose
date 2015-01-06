@@ -10,63 +10,15 @@ function load() {
     output.style.height = output.height + "px";
     output.width = output.width * pixelRatio;
     output.height = output.height * pixelRatio;
-    var cursor = {start: new Cursor(), end: new Cursor()};
+    var start = new Cursor();
+    var end = new Cursor();
+    var cursor = {start: start, end: end, both: new CombinedCursor(start, end)};
     var DEFAULT_FONT = "monospace";
     var DEFAULT_COLOR = "black";
     var DEFAULT_STYLE = new Rule("default", null, {color: DEFAULT_COLOR});
     graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
     var CHAR_WIDTH = graphics.measureText("M").width;
-
-    function drawText() {
-        var text = data.toString();
-        var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
-        graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-        var x = 0, y = 0, c = 0;
-        for (var i = 0; i < tokens.length; ++i) {
-            var t = tokens[i];
-            var parts = t.value.split("\n");
-            for (var j = 0; j < parts.length; ++j) {
-                var part = parts[j];
-                if (part.length > 0) {
-                    var a = cursor.start;
-                    var b = cursor.end;
-                    if(cursor.end.i < cursor.start.i){
-                        a = cursor.end;
-                        b = cursor.start;
-                    }
-                    if (a.i <= c + part.length && c <= b.i) {
-                        var cx = Math.max(a.x, x);
-                        var cw = Math.min(b.x, x + part.length) - cx;
-                        graphics.fillStyle = "#c0c0c0";
-                        graphics.fillRect(
-                                cx * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
-                                cw * CHAR_WIDTH, CHAR_HEIGHT
-                                );
-                    }
-
-                    var font = (t.rule.style.fontWeight || "") + " " + (t.rule.style.fontStyle || "") + " " + CHAR_HEIGHT + "px " + DEFAULT_FONT;
-                    graphics.font = font.trim();
-                    graphics.fillStyle = t.rule.style.color;
-                    graphics.fillText(part, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
-                    x += part.length;
-                    c += part.length;
-                }
-                if (j < parts.length - 1) {
-                    ++y;
-                    x = 0;
-                    ++c;
-                }
-            }
-        }
-
-        graphics.beginPath();
-        graphics.strokeStyle = "black";
-        graphics.moveTo(cursor.start.x * CHAR_WIDTH, cursor.start.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.start.x * CHAR_WIDTH, (cursor.start.y + 1.25) * CHAR_HEIGHT);
-        graphics.moveTo(cursor.start.x * CHAR_WIDTH + 1, cursor.start.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.start.x * CHAR_WIDTH + 1, (cursor.start.y + 1.25) * CHAR_HEIGHT);
-        graphics.stroke();
-    }
+    var codePage = CodePages.EN_US;
 
     function editText(evt) {
         evt = evt || event;
@@ -74,7 +26,7 @@ function load() {
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
             var text = data.toString();
             var lines = text.split(/\n/g);
-            var cur = evt.shiftKey ? cursor.end : cursor.start;
+            var cur = evt.shiftKey ? cursor.end : cursor.both;
             if (key === Keys.LEFTARROW) {
                 cur.left(lines);
                 evt.preventDefault();
@@ -109,13 +61,17 @@ function load() {
                 }
                 evt.preventDefault();
             }
+            else if(evt.ctrlKey && codePage.UPPERCASE[key] === "A"){
+                cursor.start.fullHome(lines);
+                cursor.end.fullEnd(lines);
+            }
             else {
                 if (cursor.start.i !== cursor.end.i) {
                     var a = Math.min(cursor.start.i, cursor.end.i);
                     var b = Math.min(text.length, Math.max(cursor.start.i, cursor.end.i));
-                    var delta = b - a;
+                    console.log(a, b);
                     data.delete(a, b);
-                    if (cursor.start.i > text.length - delta) {
+                    if (cursor.start.i > cursor.end.i) {
                         cursor.start.copy(cursor.end);
                     }
                 }
@@ -146,8 +102,8 @@ function load() {
                     }
                     evt.preventDefault();
                 }
-                else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
-                    var char = (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key];
+                else if (!evt.ctrlKey && !evt.altKey && (codePage.UPPERCASE[key] || codePage.LOWERCASE[key])) {
+                    var char = (evt.shiftKey ? codePage.UPPERCASE : codePage.LOWERCASE)[key];
                     data.insert(
                             cursor.start.i,
                             char);
@@ -163,10 +119,6 @@ function load() {
                     console.log(evt.keyCode);
                 }
             }
-            
-            if(!evt.shiftKey || Keys.LOWERCASE[key]){
-                cursor.end.copy(cursor.start);
-            }
         }
     }
 
@@ -174,8 +126,6 @@ function load() {
         editText(evt);
         drawText();
     });
-
-    drawText();
 
     var dragging = false;
 
@@ -208,4 +158,57 @@ function load() {
             drawText();
         }
     });
+
+    function drawText() {
+        var text = data.toString();
+        var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
+        graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+        var x = 0, y = 0, c = 0;
+        for (var i = 0; i < tokens.length; ++i) {
+            var t = tokens[i];
+            var parts = t.value.split("\n");
+            for (var j = 0; j < parts.length; ++j) {
+                var part = parts[j];
+                if (part.length > 0) {
+                    var a = cursor.start;
+                    var b = cursor.end;
+                    if(cursor.end.i < cursor.start.i){
+                        a = cursor.end;
+                        b = cursor.start;
+                    }
+                    if (a.i <= c + part.length && c <= b.i) {
+                        var cx = Math.max(a.x, x);
+                        var cw = Math.min(b.x, x + part.length) - cx;
+                        graphics.fillStyle = "#c0c0c0";
+                        graphics.fillRect(
+                                cx * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
+                                cw * CHAR_WIDTH, CHAR_HEIGHT
+                                );
+                    }
+
+                    var font = (t.rule.style.fontWeight || "") + " " + (t.rule.style.fontStyle || "") + " " + CHAR_HEIGHT + "px " + DEFAULT_FONT;
+                    graphics.font = font.trim();
+                    graphics.fillStyle = t.rule.style.color || DEFAULT_COLOR;
+                    graphics.fillText(part, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
+                    x += part.length;
+                    c += part.length;
+                }
+                if (j < parts.length - 1) {
+                    ++y;
+                    x = 0;
+                    ++c;
+                }
+            }
+        }
+
+        graphics.beginPath();
+        graphics.strokeStyle = "black";
+        graphics.moveTo(cursor.start.x * CHAR_WIDTH, cursor.start.y * CHAR_HEIGHT);
+        graphics.lineTo(cursor.start.x * CHAR_WIDTH, (cursor.start.y + 1.25) * CHAR_HEIGHT);
+        graphics.moveTo(cursor.start.x * CHAR_WIDTH + 1, cursor.start.y * CHAR_HEIGHT);
+        graphics.lineTo(cursor.start.x * CHAR_WIDTH + 1, (cursor.start.y + 1.25) * CHAR_HEIGHT);
+        graphics.stroke();
+    }
+
+    drawText();
 }

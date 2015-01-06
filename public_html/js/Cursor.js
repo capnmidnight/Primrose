@@ -105,3 +105,20 @@ Cursor.prototype.setXY = function(x, y, lines){
         this.i += lines[i].length + 1;
     }
 };
+
+function CombinedCursor(start, end){
+    this.start = start;
+    this.end = end;
+}
+
+CombinedCursor.prototype.toString = function(){
+    return this.start.toString() + this.end.toString();
+};
+
+for(var key in Cursor.prototype){
+    if(key !== "toString"
+        && Cursor.prototype.hasOwnProperty(key)
+        && Cursor.prototype[key] instanceof Function){
+        CombinedCursor.prototype[key] = new Function("cursor", fmt("this.start.$1(cursor); this.end.copy(this.start);", key));
+    }
+}
