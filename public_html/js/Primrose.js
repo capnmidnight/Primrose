@@ -1,14 +1,5 @@
 function load() {
-    var data = new Rope("function Hello (){\n"
-            + "    // a comment\n"
-            + "    function MyFunc ( ) {\n"
-            + "        var x = \"Whatever\";\n"
-            + "        console.log(x + \" World\");\n"
-            + "        /*\n"
-            + "          a longer comment\n"
-            + "        */\n"
-            + "    }\n"
-            + "}");
+    var data = new Rope(drawText.toString());
     var clipboard = document.getElementById("clipboard");
     var output = document.getElementById("output");
     var graphics = output.getContext("2d");
