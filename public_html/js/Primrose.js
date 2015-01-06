@@ -98,6 +98,10 @@ function load() {
                 cur.home(lines);
                 evt.preventDefault();
             }
+            else if(key === Keys.END){
+                cur.end(lines);
+                evt.preventDefault();
+            }
             else {
                 if (cursor.start.i !== cursor.end.i) {
                     var a = Math.min(cursor.start.i, cursor.end.i + 1);

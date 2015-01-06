@@ -47,6 +47,12 @@ Cursor.prototype.home = function(lines){
     this.x = 0;
 };
 
+Cursor.prototype.end = function(lines){
+    var dx = lines[this.y].length - this.x;
+    this.i += dx;
+    this.x += dx;
+};
+
 Cursor.prototype.right = function (lines) {
     if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
         ++this.i;
