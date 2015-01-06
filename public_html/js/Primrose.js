@@ -37,13 +37,19 @@ function load() {
             for (var j = 0; j < parts.length; ++j) {
                 var part = parts[j];
                 if (part.length > 0) {
-                    var a = Math.min(cursor.start.i, cursor.end.i);
-                    var b = Math.max(cursor.start.i, cursor.end.i);
-                    if (a <= c && c <= b) {
+                    var a = cursor.start;
+                    var b = cursor.end;
+                    if(cursor.end.i < cursor.start.i){
+                        a = cursor.end;
+                        b = cursor.start;
+                    }
+                    if (a.i <= c + part.length && c <= b.i) {
+                        var cx = Math.max(a.x, x);
+                        var cw = Math.min(b.x, x + part.length) - cx + 1;
                         graphics.fillStyle = "#c0c0c0";
                         graphics.fillRect(
-                                x * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
-                                Math.min(b - c, part.length) * CHAR_WIDTH, CHAR_HEIGHT
+                                cx * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
+                                cw * CHAR_WIDTH, CHAR_HEIGHT
                                 );
                     }
 
@@ -95,11 +101,21 @@ function load() {
                 evt.preventDefault();
             }
             else if(key === Keys.HOME){
-                cur.home(lines);
+                if(evt.ctrlKey){
+                    cur.fullHome(lines);
+                }
+                else{
+                    cur.home(lines);
+                }
                 evt.preventDefault();
             }
             else if(key === Keys.END){
-                cur.end(lines);
+                if(evt.ctrlKey){
+                    cur.fullEnd(lines);
+                }
+                else{
+                    cur.end(lines);
+                }
                 evt.preventDefault();
             }
             else {

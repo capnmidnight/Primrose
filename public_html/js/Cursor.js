@@ -47,10 +47,25 @@ Cursor.prototype.home = function(lines){
     this.x = 0;
 };
 
+Cursor.prototype.fullHome = function(lines){
+    this.i = 0;
+    this.x = 0;
+    this.y = 0;
+};
+
 Cursor.prototype.end = function(lines){
     var dx = lines[this.y].length - this.x;
     this.i += dx;
     this.x += dx;
+};
+
+Cursor.prototype.fullEnd = function(lines){
+    this.i += lines[this.y].length - this.x;
+    while(this.y < lines.length - 1){
+        ++this.y;
+        this.i += lines[this.y].length;
+    }
+    this.x = lines[this.y].length;
 };
 
 Cursor.prototype.right = function (lines) {
