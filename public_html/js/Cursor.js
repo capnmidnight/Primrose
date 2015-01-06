@@ -42,6 +42,38 @@ Cursor.prototype.left = function (lines) {
     }
 };
 
+Cursor.prototype.skipLeft = function (lines) {
+    
+};
+
+Cursor.prototype.right = function (lines) {
+    if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
+        ++this.i;
+        ++this.x;
+        if (this.x > lines[this.y].length) {
+            this.x = 0;
+            ++this.y;
+        }
+    }
+};
+
+Cursor.prototype.skipRight = function (lines) {
+    var x = this.x + 1;
+    var line = lines[this.y].substring(x);
+    var m = line.match(/(\s|\W)+/);
+    var i = m ? (m.index + m[0].length + 1) : line.length;
+    if(i < 0){
+        i = line.length;
+    }
+    if(i === line.length){
+        this.right(lines);
+    }
+    else{
+        this.i += i;
+        this.x += i;
+    }
+};
+
 Cursor.prototype.home = function(lines){
     this.i -= this.x;
     this.x = 0;
@@ -66,17 +98,6 @@ Cursor.prototype.fullEnd = function(lines){
         this.i += lines[this.y].length + 1;
     }
     this.x = lines[this.y].length;
-};
-
-Cursor.prototype.right = function (lines) {
-    if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
-        ++this.i;
-        ++this.x;
-        if (this.x > lines[this.y].length) {
-            this.x = 0;
-            ++this.y;
-        }
-    }
 };
 
 Cursor.prototype.up = function (lines) {

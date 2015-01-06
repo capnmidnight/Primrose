@@ -34,11 +34,21 @@ function load() {
             var lines = text.split(/\n/g);
             var cur = evt.shiftKey ? cursor.finish : cursor.both;
             if (key === Keys.LEFTARROW) {
-                cur.left(lines);
+                if (evt.ctrlKey) {
+                    cur.skipLeft(lines);
+                }
+                else {
+                    cur.left(lines);
+                }
                 evt.preventDefault();
             }
             else if (key === Keys.RIGHTARROW) {
-                cur.right(lines);
+                if (evt.ctrlKey) {
+                    cur.skipRight(lines);
+                }
+                else {
+                    cur.right(lines);
+                }
                 evt.preventDefault();
             }
             else if (key === Keys.UPARROW) {
