@@ -9,6 +9,7 @@ function load() {
             + "        */\n"
             + "    }\n"
             + "}");
+    var clipboard = document.getElementById("clipboard");
     var output = document.getElementById("output");
     var graphics = output.getContext("2d");
     var CHAR_HEIGHT = 20;
@@ -80,12 +81,11 @@ function load() {
         var key = evt.keyCode || evt.which;
         var text = data.toString();
         var lines = text.split(/\n/g);
-        evt.preventDefault();
         if (key === Keys.LEFTARROW) {
             if (evt.shiftKey) {
                 --cursor.end;
             }
-            else {
+            else if (cursor.start > 0) {
                 --cursor.start;
                 cursor.end = cursor.start;
                 --cursor.x;
@@ -94,12 +94,13 @@ function load() {
                     cursor.x = lines[cursor.y].length;
                 }
             }
+            evt.preventDefault();
         }
-        else if (key === Keys.RIGHTARROW && cursor.start < text.length) {
+        else if (key === Keys.RIGHTARROW) {
             if (evt.shiftKey) {
                 ++cursor.end;
             }
-            else {
+            else if (cursor.start < text.length) {
                 ++cursor.start;
                 cursor.end = cursor.start;
                 ++cursor.x;
@@ -108,29 +109,34 @@ function load() {
                     ++cursor.y;
                 }
             }
+            evt.preventDefault();
         }
-        else if (key === Keys.UPARROW && cursor.y > 0) {
+        else if (key === Keys.UPARROW) {
             if (evt.shiftKey) {
                 // this is not right
                 cursor.end -= lines[cursor.y - 1].length - cursor.x;
             }
-            else {
+            else if(cursor.y > 0){
                 --cursor.y;
-                cursor.x = Math.min(lines[cursor.y].length, cursor.x);
-                cursor.start -= lines[cursor.y].length + 1;
+                var dx = Math.min(0, lines[cursor.y].length - cursor.x);
+                cursor.x += dx;
+                cursor.start -= lines[cursor.y].length + 1 - dx;
                 cursor.end = cursor.start;
             }
+            evt.preventDefault();
         }
-        else if (key === Keys.DOWNARROW && cursor.y < lines.length) {
+        else if (key === Keys.DOWNARROW) {
             if (evt.shiftKey) {
                 cursor.end += lines[cursor.y].length;
             }
-            else {
-                cursor.start += lines[cursor.y].length + 1;
-                cursor.end = cursor.start;
+            else if(cursor.y < lines.length - 1){
                 ++cursor.y;
-                cursor.x = Math.min(lines[cursor.y].length, cursor.x);
+                var dx = Math.min(0, lines[cursor.y].length - cursor.x);
+                cursor.x += dx;
+                cursor.start += lines[cursor.y - 1].length + 1 + dx;
+                cursor.end = cursor.start;
             }
+            evt.preventDefault();
         }
         else if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
             if (cursor.start !== cursor.end) {
@@ -141,6 +147,7 @@ function load() {
             if (key === Keys.BACKSPACE && cursor.start === cursor.end) {
                 data.delete(cursor.start - 1, cursor.start);
                 --cursor.start;
+                evt.preventDefault();
             }
             else if (key === Keys.DELETE && cursor.start === cursor.end) {
                 data.delete(cursor.start, cursor.start + 1);
@@ -154,13 +161,15 @@ function load() {
                 cursor.start += indent.length + 1;
                 ++cursor.y;
                 cursor.x = indent.length;
+                evt.preventDefault();
             }
-            else if (Keys.UPPERCASE[key] || Keys.LOWERCASE[key]) {
+            else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
                 data.insert(
                         cursor.start,
                         (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key]);
                 ++cursor.start;
                 ++cursor.x;
+                evt.preventDefault();
             }
             else {
                 console.log(evt.keyCode);
@@ -183,7 +192,7 @@ function load() {
         cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
         cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
         cursor.start = cursor.x;
-        for(var i = 0; i < cursor.y; ++i){
+        for (var i = 0; i < cursor.y; ++i) {
             cursor.start += lines[i].length + 1;
         }
         cursor.end = cursor.start;
@@ -200,7 +209,7 @@ function load() {
             var lines = text.split("\n");
             var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY * pixelRatio / CHAR_HEIGHT)));
             cursor.end = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
-            for(var i = 0; i < y; ++i){
+            for (var i = 0; i < y; ++i) {
                 cursor.end += lines[i].length + 1;
             }
             drawText();
