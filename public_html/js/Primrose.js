@@ -19,7 +19,7 @@ function load() {
     output.style.height = output.height + "px";
     output.width = output.width * pixelRatio;
     output.height = output.height * pixelRatio;
-    var cursor = {x: 0, y: 0, start: 0, end: 0};
+    var cursor = {x: 0, y: 0, i: 0, x2: 0, y2: 0, i2: 0};
     graphics.font = CHAR_HEIGHT + "px monospace";
     var CHAR_WIDTH = graphics.measureText("M").width;
     var testStyleSheet = null;
@@ -42,7 +42,7 @@ function load() {
                 x = 0;
             }
             else {
-                if (cursor.start <= i && i <= cursor.end) {
+                if (cursor.i <= i && i <= cursor.i2) {
                     graphics.fillStyle = "#c0c0c0";
                     graphics.fillRect(
                             x * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
@@ -83,98 +83,123 @@ function load() {
         var lines = text.split(/\n/g);
         if (key === Keys.LEFTARROW) {
             if (evt.shiftKey) {
-                --cursor.end;
+                --cursor.i2;
+                --cursor.x2;
+                if (cursor.x2 < 0) {
+                    --cursor.y2;
+                    cursor.x2 = lines[cursor.y2].length;
+                }
             }
-            else if (cursor.start > 0) {
-                --cursor.start;
-                cursor.end = cursor.start;
+            else if (cursor.i > 0) {
+                --cursor.i;
                 --cursor.x;
                 if (cursor.x < 0) {
                     --cursor.y;
                     cursor.x = lines[cursor.y].length;
                 }
+                cursor.i2 = cursor.i;
+                cursor.x2 = cursor.x;
+                cursor.y2 = cursor.y;
             }
             evt.preventDefault();
         }
         else if (key === Keys.RIGHTARROW) {
             if (evt.shiftKey) {
-                ++cursor.end;
+                ++cursor.i2;
+                ++cursor.x2;
+                if (cursor.x2 > lines[cursor.y2].length) {
+                    cursor.x2 = 0;
+                    ++cursor.y2;
+                }
             }
-            else if (cursor.start < text.length) {
-                ++cursor.start;
-                cursor.end = cursor.start;
+            else if (cursor.i < text.length) {
+                ++cursor.i;
                 ++cursor.x;
                 if (cursor.x > lines[cursor.y].length) {
                     cursor.x = 0;
                     ++cursor.y;
                 }
+                cursor.i2 = cursor.i;
+                cursor.x2 = cursor.x;
+                cursor.y2 = cursor.y;
             }
             evt.preventDefault();
         }
         else if (key === Keys.UPARROW) {
             if (evt.shiftKey) {
-                // this is not right
-                cursor.end -= lines[cursor.y - 1].length - cursor.x;
+                --cursor.y2;
+                var dx = Math.min(0, lines[cursor.y2].length - cursor.x2);
+                cursor.x2 += dx;
+                cursor.i2 -= lines[cursor.y2].length + 1 - dx;
             }
-            else if(cursor.y > 0){
+            else if (cursor.y > 0) {
                 --cursor.y;
                 var dx = Math.min(0, lines[cursor.y].length - cursor.x);
                 cursor.x += dx;
-                cursor.start -= lines[cursor.y].length + 1 - dx;
-                cursor.end = cursor.start;
+                cursor.i -= lines[cursor.y].length + 1 - dx;
+                cursor.i2 = cursor.i;
+                cursor.x2 = cursor.x;
+                cursor.y2 = cursor.y;
             }
             evt.preventDefault();
         }
         else if (key === Keys.DOWNARROW) {
             if (evt.shiftKey) {
-                cursor.end += lines[cursor.y].length;
+                ++cursor.y2;
+                var dx = Math.min(0, lines[cursor.y2].length - cursor.x2);
+                cursor.x2 += dx;
+                cursor.i2 += lines[cursor.y2 - 1].length + 1 + dx;
             }
-            else if(cursor.y < lines.length - 1){
+            else if (cursor.y < lines.length - 1) {
                 ++cursor.y;
                 var dx = Math.min(0, lines[cursor.y].length - cursor.x);
                 cursor.x += dx;
-                cursor.start += lines[cursor.y - 1].length + 1 + dx;
-                cursor.end = cursor.start;
+                cursor.i += lines[cursor.y - 1].length + 1 + dx;
+                cursor.i2 = cursor.i;
+                cursor.x2 = cursor.x;
+                cursor.y2 = cursor.y;
             }
             evt.preventDefault();
         }
         else if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            if (cursor.start !== cursor.end) {
+            if (cursor.i !== cursor.i2) {
                 data.delete(
-                        Math.min(cursor.start, cursor.end + 1),
-                        Math.max(cursor.start, cursor.end + 1));
+                        Math.min(cursor.i, cursor.i2 + 1),
+                        Math.max(cursor.i, cursor.i2 + 1));
             }
-            if (key === Keys.BACKSPACE && cursor.start === cursor.end) {
-                data.delete(cursor.start - 1, cursor.start);
-                --cursor.start;
+            if (key === Keys.BACKSPACE && cursor.i === cursor.i2) {
+                data.delete(cursor.i - 1, cursor.i);
+                --cursor.i;
                 evt.preventDefault();
             }
-            else if (key === Keys.DELETE && cursor.start === cursor.end) {
-                data.delete(cursor.start, cursor.start + 1);
+            else if (key === Keys.DELETE && cursor.i === cursor.i2) {
+                data.delete(cursor.i, cursor.i + 1);
             }
             else if (key === Keys.ENTER) {
                 var indent = "";
                 while (lines[cursor.y][cursor.x] === " ") {
                     indent += " ";
                 }
-                data.insert(cursor.start, "\n" + indent);
-                cursor.start += indent.length + 1;
+                data.insert(cursor.i, "\n" + indent);
+                cursor.i += indent.length + 1;
                 ++cursor.y;
                 cursor.x = indent.length;
                 evt.preventDefault();
             }
             else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
                 data.insert(
-                        cursor.start,
+                        cursor.i,
                         (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key]);
-                ++cursor.start;
+                ++cursor.i;
                 ++cursor.x;
                 evt.preventDefault();
             }
             else {
                 console.log(evt.keyCode);
             }
-            cursor.end = cursor.start;
+            cursor.i2 = cursor.i;
+            cursor.x2 = cursor.x;
+            cursor.y2 = cursor.y;
         }
     }
 
@@ -191,11 +216,13 @@ function load() {
         var lines = text.split("\n");
         cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
         cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
-        cursor.start = cursor.x;
+        cursor.i = cursor.x;
         for (var i = 0; i < cursor.y; ++i) {
-            cursor.start += lines[i].length + 1;
+            cursor.i += lines[i].length + 1;
         }
-        cursor.end = cursor.start;
+        cursor.i2 = cursor.i;
+        cursor.x2 = cursor.x;
+        cursor.y2 = cursor.y;
         drawText();
         dragging = true;
     });
@@ -208,9 +235,9 @@ function load() {
             var text = data.toString();
             var lines = text.split("\n");
             var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY * pixelRatio / CHAR_HEIGHT)));
-            cursor.end = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
+            cursor.i2 = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
             for (var i = 0; i < y; ++i) {
-                cursor.end += lines[i].length + 1;
+                cursor.i2 += lines[i].length + 1;
             }
             drawText();
         }
