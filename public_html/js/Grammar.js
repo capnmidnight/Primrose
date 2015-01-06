@@ -45,12 +45,15 @@ Grammar.prototype.tokenize = function (text, defaultRule) {
                 var res = rule.test.exec(tokens[j]);
                 if (res) {
                     // insert the new token into the token list
-                    var mid = res[0];
+                    var mid = res[res.length - 1];
+                    var start = res.index;
+                    if(res.length === 2){
+                        start += res[0].indexOf(mid);
+                    }
                     var token = new Token(mid, rule);
                     tokens.splice(j + 1, 0, token);
                     
                     // reinsert the rest of the string for further processing
-                    var start = res.index;
                     var end = start + mid.length;
                     if (end < str.length) {
                         var right = str.substring(end);
@@ -81,6 +84,15 @@ Grammar.prototype.tokenize = function (text, defaultRule) {
 };
 
 Grammar.tests = {
+    captureOnlyAGroup: function() {
+        var src = "function(){ a.b.c = \"asdf\"; }";
+        var tokens = Grammar.JavaScript.tokenize(src);
+        var res = tokens.map(function(t){ return t.value; }).join("");
+        Assert.areEqual(src, res);
+        Assert.areEqual(6, tokens.length, "number of tokens does not match");
+        Assert.areEqual("c", tokens[2].value, "token isn't right value");
+        Assert.areEqual("members", tokens[2].rule.name, "token types do not match");        
+    },
     aSimpleString: function () {
         var src = "\"a\"";
         var tokens = Grammar.JavaScript.tokenize(src);
@@ -180,6 +192,20 @@ Grammar.JavaScript = new Grammar([
         /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/,
         {
             color: "blue"
+        }
+    ],
+    [
+        "functions",
+        /(\w+)(?:\s*\()/,
+        {
+            color: "red"
+        }
+    ],
+    [
+        "members",
+        /(?:(?:\w+\.)+)(\w+)/,
+        {
+            color: "green"
         }
     ]
 ]);
