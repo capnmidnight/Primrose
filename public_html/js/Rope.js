@@ -29,56 +29,56 @@
  *      A Rope when used with opt_right, the left node of the Rope.
  *  (optional) opt_right:
  *      when not null and not undefined, a Rope to use as the right node.
-*/
-function Rope(str_or_left, opt_right){
-    if(opt_right !== null && opt_right !== undefined){
-        if(!(str_or_left instanceof Rope)){
+ */
+function Rope(str_or_left, opt_right) {
+    if (opt_right !== null && opt_right !== undefined) {
+        if (!(str_or_left instanceof Rope)) {
             str_or_left = new Rope(str_or_left);
         }
-        if(!(opt_right instanceof Rope)){
+        if (!(opt_right instanceof Rope)) {
             opt_right = new Rope(opt_right);
         }
         this.value = null;
         this.left = str_or_left;
         this.right = opt_right;
     }
-    else{
+    else {
         this.value = str_or_left;
         this.left = null;
         this.right = null;
     }
-    if(str_or_left instanceof Rope){
+    if (str_or_left instanceof Rope) {
         this.weight = str_or_left.length();
     }
-    else{
+    else {
         this.weight = str_or_left.length;
     }
 }
 
 Rope.tests = {
-    leafWeightMatchesLength: function(){
+    leafWeightMatchesLength: function () {
         var str = "hello, world";
         var rp = new Rope(str);
         Assert.areEqual(str.length, rp.weight, "length doesn't match weight");
     },
-    leafWeightMatchesValue: function(){
+    leafWeightMatchesValue: function () {
         var str = "hello, world";
         var rp = new Rope(str);
         Assert.areEqual(str, rp.value, "values don't match");
     },
-    basicRootMatchesLength: function(){
+    basicRootMatchesLength: function () {
         var l = "hello,";
         var r = " world";
         var rp = new Rope(l, r);
         Assert.areEqual(l.length, rp.weight, "left length doesn't match weight");
     },
-    basicRootMatchesLeft: function(){
+    basicRootMatchesLeft: function () {
         var l = "hello,";
         var r = " world";
         var rp = new Rope(l, r);
         Assert.areEqual(l, rp.left.value, "left doesn't match");
     },
-    basicRootMatchesRight: function(){
+    basicRootMatchesRight: function () {
         var l = "hello,";
         var r = " world";
         var rp = new Rope(l, r);
@@ -91,30 +91,30 @@ Rope.tests = {
  * string contained. This requires walking down the right-side of the tree,
  * because we already know the length of the left-side of the tree (the 'weight')
  */
-Rope.prototype.length = function(){
+Rope.prototype.length = function () {
     var cur = this;
     var len = 0;
-    while(cur !== null && cur !== undefined){
+    while (cur !== null && cur !== undefined) {
         len += cur.weight;
         cur = cur.right;
     }
     return len;
 };
 
-Rope.tests.basicLength = function(){
+Rope.tests.basicLength = function () {
     var str = "hello, my friend";
     var rp = new Rope(str);
     Assert.areEqual(str.length, rp.length());
 };
 
-Rope.tests.twoLeafLength = function(){
+Rope.tests.twoLeafLength = function () {
     var l = "hello, ";
     var r = "my friend";
     var rp = new Rope(l, r);
     Assert.areEqual(l.length + r.length, rp.length());
 };
 
-Rope.tests.threeLeafLength = function(){
+Rope.tests.threeLeafLength = function () {
     var a = "hello, ";
     var b = "my friend";
     var c = " it's been a long time";
@@ -122,19 +122,19 @@ Rope.tests.threeLeafLength = function(){
     Assert.areEqual(a.length + b.length + c.length, rp.length());
 };
 
-Rope.tests.fourLeafLength = function(){
+Rope.tests.fourLeafLength = function () {
     var a = "hello, ";
     var b = "my friend.";
     var c = " it's been a long time.";
     var d = " did you receive my package?";
     var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    Assert.areEqual(a.length 
-            + b.length 
+    Assert.areEqual(a.length
+            + b.length
             + c.length
             + d.length, rp.length());
 };
 
-Rope.tests.fourLeafWeight = function(){
+Rope.tests.fourLeafWeight = function () {
     var a = "hello, ";
     var b = "my friend.";
     var c = " it's been a long time.";
@@ -143,29 +143,29 @@ Rope.tests.fourLeafWeight = function(){
     Assert.areEqual(a.length + b.length, rp.weight, "unexpected weight");
 };
 
-Rope.tests.leftLoadedLength = function(){
+Rope.tests.leftLoadedLength = function () {
     var a = "hello, ";
     var b = "my friend.";
     var c = " it's been a long time.";
     var d = " did you receive my package?";
     var e = " i sent it last week.";
     var rp = new Rope(new Rope(new Rope(new Rope(a, b), c), d), e);
-    Assert.areEqual(a.length 
-            + b.length 
+    Assert.areEqual(a.length
+            + b.length
             + c.length
             + d.length
             + e.length, rp.length());
 };
 
-Rope.tests.rightLoadedLength = function(){
+Rope.tests.rightLoadedLength = function () {
     var a = "hello, ";
     var b = "my friend.";
     var c = " it's been a long time.";
     var d = " did you receive my package?";
     var e = " i sent it last week.";
     var rp = new Rope(a, new Rope(b, new Rope(c, new Rope(d, e))));
-    Assert.areEqual(a.length 
-            + b.length 
+    Assert.areEqual(a.length
+            + b.length
             + c.length
             + d.length
             + e.length, rp.length());
@@ -174,31 +174,31 @@ Rope.tests.rightLoadedLength = function(){
 /*
  * Find a character by index in the Rope
  */
-Rope.prototype.charAt = function(i){
+Rope.prototype.charAt = function (i) {
     var cur = this;
     // true recursion is defective in JavaScript
-    while(cur !== null && cur !== undefined){
-        if(i > cur.weight){
+    while (cur !== null && cur !== undefined) {
+        if (i > cur.weight) {
             i -= cur.weight;
             cur = cur.right;
         }
-        else if(cur.left !== null){
+        else if (cur.left !== null) {
             cur = cur.left;
         }
-        else{
+        else {
             return cur.value[i];
         }
     }
 };
 
-Rope.tests.basicCharAt = function(){
+Rope.tests.basicCharAt = function () {
     var str = "test string 1234";
     var rp = new Rope(str);
     var idx = Math.floor(str.length / 2);
     Assert.areEqual(str[idx], rp.charAt(idx), "characters don't match");
 };
 
-Rope.tests.twoLeafCharAt1 = function(){
+Rope.tests.twoLeafCharAt1 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var rp = new Rope(a, b);
@@ -206,7 +206,7 @@ Rope.tests.twoLeafCharAt1 = function(){
     Assert.areEqual(a[idx], rp.charAt(idx), "characters don't match");
 };
 
-Rope.tests.twoLeafCharAt2 = function(){
+Rope.tests.twoLeafCharAt2 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var rp = new Rope(a, b);
@@ -214,7 +214,7 @@ Rope.tests.twoLeafCharAt2 = function(){
     Assert.areEqual(b[idx], rp.charAt(a.length + idx), "characters don't match");
 };
 
-Rope.tests.fourLeafCharAt1 = function(){
+Rope.tests.fourLeafCharAt1 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var c = "not really";
@@ -224,7 +224,7 @@ Rope.tests.fourLeafCharAt1 = function(){
     Assert.areEqual(a[idx], rp.charAt(idx), "characters don't match");
 };
 
-Rope.tests.fourLeafCharAt2 = function(){
+Rope.tests.fourLeafCharAt2 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var c = "not really";
@@ -234,7 +234,7 @@ Rope.tests.fourLeafCharAt2 = function(){
     Assert.areEqual(b[idx], rp.charAt(a.length + idx), "characters don't match");
 };
 
-Rope.tests.fourLeafCharAt3 = function(){
+Rope.tests.fourLeafCharAt3 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var c = "not really";
@@ -244,7 +244,7 @@ Rope.tests.fourLeafCharAt3 = function(){
     Assert.areEqual(c[idx], rp.charAt(a.length + b.length + idx), "characters don't match");
 };
 
-Rope.tests.fourLeafCharAt4 = function(){
+Rope.tests.fourLeafCharAt4 = function () {
     var a = "test string 1234";
     var b = "qwerty asplode";
     var c = "not really";
@@ -257,15 +257,15 @@ Rope.tests.fourLeafCharAt4 = function(){
 /*
  * This is supposed to be faster than an array of characters
  */
-Rope.prototype.concat = function(str_or_rope){
-    if(!(str_or_rope instanceof Rope)){
+Rope.prototype.concat = function (str_or_rope) {
+    if (!(str_or_rope instanceof Rope)) {
         str_or_rope = new Rope(str_or_rope);
     }
-    if(this.value === null){
+    if (this.value === null) {
         this.left = new Rope(this.left, this.right);
         this.weight += this.right.length();
     }
-    else{
+    else {
         this.left = new Rope(this.value);
         this.value = null;
     }
@@ -273,7 +273,7 @@ Rope.prototype.concat = function(str_or_rope){
     this.rebalance();
 };
 
-Rope.tests.basicStringAppendLength = function(){
+Rope.tests.basicStringAppendLength = function () {
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
@@ -281,7 +281,7 @@ Rope.tests.basicStringAppendLength = function(){
     Assert.areEqual(a.length + b.length, rp.length(), "lengths doesn't match");
 };
 
-Rope.tests.basicStringAppend = function(){
+Rope.tests.basicStringAppend = function () {
     var a = "asdf";
     var b = "qwer";
     var rp = new Rope(a);
@@ -293,16 +293,16 @@ Rope.tests.basicStringAppend = function(){
  * Cuts the Rope. Leaves this Rope as everything to the left of i, returns
  * a Rope that is everything to the right of i.
  */
-Rope.prototype.split = function(i){
+Rope.prototype.split = function (i) {
     var cur = this;
     var stack = [];
     // true recursion is defective in JavaScript
-    while(cur !== null && cur !== undefined){
-        if(i > cur.weight){
+    while (cur !== null && cur !== undefined) {
+        if (i > cur.weight) {
             i -= cur.weight;
             cur = cur.right;
         }
-        else if(cur.left !== null){
+        else if (cur.left !== null) {
             stack.push(cur.right);
             cur.value = cur.left.value;
             cur.weight = cur.left.weight;
@@ -312,7 +312,7 @@ Rope.prototype.split = function(i){
             cur.left.left = null;
             cur.left = n;
         }
-        else{
+        else {
             var sub = cur.value.substring(i);
             stack.push(new Rope(sub));
             cur.value = cur.value.substring(0, i);
@@ -320,11 +320,11 @@ Rope.prototype.split = function(i){
             cur = null;
         }
     }
-    while(stack.length > 0){
-        if(cur !== null){
+    while (stack.length > 0) {
+        if (cur !== null) {
             cur = new Rope(cur, stack.pop());
         }
-        else{
+        else {
             cur = stack.pop();
         }
     }
@@ -333,7 +333,7 @@ Rope.prototype.split = function(i){
     return cur;
 };
 
-Rope.tests.basicSplit1Length = function(){
+Rope.tests.basicSplit1Length = function () {
     var str = "0123456789";
     var a = str.substring(0, 5);
     var b = str.substring(5);
@@ -342,7 +342,7 @@ Rope.tests.basicSplit1Length = function(){
     Assert.areEqual(a.length, rp1.length());
 };
 
-Rope.tests.basicSplit1Value = function(){
+Rope.tests.basicSplit1Value = function () {
     var str = "0123456789";
     var a = str.substring(0, 5);
     var b = str.substring(5);
@@ -351,7 +351,7 @@ Rope.tests.basicSplit1Value = function(){
     Assert.areEqual(a, rp1.substring(0, 5));
 };
 
-Rope.tests.basicSplit2Length = function(){
+Rope.tests.basicSplit2Length = function () {
     var str = "0123456789";
     var a = str.substring(0, 5);
     var b = str.substring(5);
@@ -360,7 +360,7 @@ Rope.tests.basicSplit2Length = function(){
     Assert.areEqual(b.length, rp2.length());
 };
 
-Rope.tests.complexSplit1 = function(){
+Rope.tests.complexSplit1 = function () {
     var a = "asdfqer";
     var b = "1234";
     var c = "what the heck";
@@ -372,7 +372,7 @@ Rope.tests.complexSplit1 = function(){
     Assert.areEqual(l - 5, rp2.length());
 };
 
-Rope.tests.complexSplit2 = function(){
+Rope.tests.complexSplit2 = function () {
     var a = "asdfqer";
     var b = "1234";
     var c = "what the heck";
@@ -380,32 +380,32 @@ Rope.tests.complexSplit2 = function(){
     var e = "no time for teletubbies";
     var l1 = a.length + b.length + c.length + d.length + e.length;
     var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
-    var rp2 = rp1.split(Math.floor(l1/2));
+    var rp2 = rp1.split(Math.floor(l1 / 2));
     Assert.areEqual(l1, rp1.length() + rp2.length());
 };
 
-Rope.prototype.delete = function(i, j){
+Rope.prototype.delete = function (i, j) {
     var right = this.split(j);
     this.split(i); // discard the middle
     this.concat(right);
 };
 
-Rope.tests.basicDelete = function(){
+Rope.tests.basicDelete = function () {
     var str = "0123456789";
     var rp = new Rope(str);
     rp.delete(3, 5);
     Assert.areEqual(str.length - 2, rp.length());
 };
 
-Rope.tests.basicDelete2 = function(){
+Rope.tests.basicDelete2 = function () {
     var str = "0123456789";
     var rp = new Rope(str);
     rp.delete(3, 5);
     Assert.areEqual("01256789", rp.toString());
 };
 
-Rope.prototype.insert = function(i, str_or_rope){
-    if(!(str_or_rope instanceof Rope)){
+Rope.prototype.insert = function (i, str_or_rope) {
+    if (!(str_or_rope instanceof Rope)) {
         str_or_rope = new Rope(str_or_rope);
     }
     var right = this.split(i);
@@ -413,17 +413,17 @@ Rope.prototype.insert = function(i, str_or_rope){
     this.concat(right);
 };
 
-Rope.prototype.toString = function(){
+Rope.prototype.toString = function () {
     var str = "";
     var cur = this;
     var stack = [];
     // true recursion is defective in JavaScript
-    while(cur !== null && cur !== undefined){
-        if(cur.left !== null){
+    while (cur !== null && cur !== undefined) {
+        if (cur.left !== null) {
             stack.push(cur.right);
             cur = cur.left;
         }
-        else{
+        else {
             str += cur.value;
             cur = stack.pop();
         }
@@ -431,14 +431,14 @@ Rope.prototype.toString = function(){
     return str;
 };
 
-Rope.prototype.substring = function(i, j){
+Rope.prototype.substring = function (i, j) {
     var str = "";
     var cur = this;
     var stack = [];
     // true recursion is defective in JavaScript
-    while(cur !== null && cur !== undefined){
-        if(i > cur.weight){
-            if(j > 0){
+    while (cur !== null && cur !== undefined) {
+        if (i > cur.weight) {
+            if (j > 0) {
                 // this simplified logic works because javascript doesn't care 
                 // about negative values for substring operations.
                 i -= cur.weight;
@@ -446,11 +446,11 @@ Rope.prototype.substring = function(i, j){
                 cur = cur.right;
             }
         }
-        else if(cur.left !== null){
+        else if (cur.left !== null) {
             stack.push(cur.right);
             cur = cur.left;
         }
-        else{
+        else {
             // this simplified logic works because javascript doesn't care 
             // about values longer than the string length for substring operations.
             var sub = cur.value.substring(i, j);
@@ -469,63 +469,74 @@ Rope.BALANCE_SIZE = 100;
  * Ropes are binary trees, and binary trees are more efficient when they
  * are balanced.
  */
-Rope.prototype.rebalance = function(opt_size){
-    opt_size = opt_size || Rope.BALANCE_SIZE;
+Rope.prototype.rebalance = function (opt_size) {
     // get the whole string
     var str = this.toString();
+    opt_size = opt_size || Rope.BALANCE_SIZE;
     // delete all of the links between the old Rope nodes
     var stack = [this];
-    while(stack.length > 0){
+    while (stack.length > 0) {
         var cur = stack.pop();
-        if(cur.left !== null){
+        if (cur.left !== null) {
             stack.push(cur.right);
             stack.push(cur.left);
             cur.left = null;
             cur.right = null;
         }
     }
-    
-    // figure out the dimensions of the new leaves
-    var leafCount = Math.ceil(str.length / opt_size);
-    var leafLen = str.length / leafCount;
-    // split the whole string into roughtly equally sized leaves
-    var leaves = [];
-    for(var i = 0; i < leafCount; ++i){
-        var sub = str.substring(
-                Math.floor(i * leafLen), 
-                Math.floor((i + 1) * leafLen));
-        leaves.push(new Rope(sub));
+
+    if (str.length === 0) {
+        this.value = "";
     }
-    // rebuild each layer from the bottom up
-    while(leaves.length >= 2){
-        var nextLeaves = [];
-        for(var i = 0; i < leaves.length - 1; i += 2){
-            nextLeaves.push(new Rope(leaves[i], leaves[i + 1]));
+    else {
+        // figure out the dimensions of the new leaves
+        var leafCount = Math.ceil(str.length / opt_size);
+        var leafLen = str.length / leafCount;
+        // split the whole string into roughtly equally sized leaves
+        var leaves = [];
+        for (var i = 0; i < leafCount; ++i) {
+            var sub = str.substring(
+                    Math.floor(i * leafLen),
+                    Math.floor((i + 1) * leafLen));
+            leaves.push(new Rope(sub));
         }
-        // an odd number of nodes will leave a straggler behind. Just append
-        // it to the list of nodes for the next level, and it will get picked
-        // back up in the right order.
-        if((leaves.length % 2) === 1){
-            nextLeaves.push(leaves[leaves.length - 1]);
+        // rebuild each layer from the bottom up
+        while (leaves.length >= 2) {
+            var nextLeaves = [];
+            for (var i = 0; i < leaves.length - 1; i += 2) {
+                nextLeaves.push(new Rope(leaves[i], leaves[i + 1]));
+            }
+            // an odd number of nodes will leave a straggler behind. Just append
+            // it to the list of nodes for the next level, and it will get picked
+            // back up in the right order.
+            if ((leaves.length % 2) === 1) {
+                nextLeaves.push(leaves[leaves.length - 1]);
+            }
+            leaves = nextLeaves;
         }
-        leaves = nextLeaves;
+
+        // overwrite this Rope with the last rope that was left
+        var rp = leaves[0];
+        this.value = rp.value;
+        this.weight = rp.weight;
+        this.left = rp.left;
+        this.right = rp.right;
+
+        // and remove the links so we don't hurt the reference-counting GC.
+        rp.left = null;
+        rp.right = null;
     }
-    
-    // overwrite this Rope with the last rope that was left
-    var rp = leaves[0];
-    this.value = rp.value;
-    this.weight = rp.weight;
-    this.left = rp.left;
-    this.right = rp.right;
-    
-    // and remove the links so we don't hurt the reference-counting GC.
-    rp.left = null;
-    rp.right = null;
 };
 
-Rope.tests.basicRebalance = function(){
+Rope.tests.basicRebalance = function () {
     var str = "0123456789";
     var rp = new Rope(str);
     rp.rebalance(1);
     Assert.areEqual(str.length, rp.length());
 };
+
+Rope.tests.rebalanceZero = function () {
+    var rp = new Rope("");
+    rp.rebalance();
+    Assert.areEqual(0, rp.length());
+}

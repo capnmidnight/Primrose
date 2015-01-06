@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+consoleTest(Cursor);
 consoleTest(Rope);
 consoleTest(Tokenizer);
 consoleTest(TextBuffer);

@@ -19,7 +19,7 @@ function load() {
     output.style.height = output.height + "px";
     output.width = output.width * pixelRatio;
     output.height = output.height * pixelRatio;
-    var cursor = {x: 0, y: 0, i: 0, x2: 0, y2: 0, i2: 0};
+    var cursor = {start: new Cursor(), end: new Cursor()};
     graphics.font = CHAR_HEIGHT + "px monospace";
     var CHAR_WIDTH = graphics.measureText("M").width;
     var testStyleSheet = null;
@@ -42,7 +42,9 @@ function load() {
                 x = 0;
             }
             else {
-                if (cursor.i <= i && i <= cursor.i2) {
+                var a = Math.min(cursor.start.i, cursor.end.i);
+                var b = Math.max(cursor.start.i, cursor.end.i);
+                if (a <= i && i <= b) {
                     graphics.fillStyle = "#c0c0c0";
                     graphics.fillRect(
                             x * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
@@ -69,10 +71,10 @@ function load() {
 
         graphics.beginPath();
         graphics.strokeStyle = "black";
-        graphics.moveTo(cursor.x * CHAR_WIDTH, cursor.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.x * CHAR_WIDTH, (cursor.y + 1.25) * CHAR_HEIGHT);
-        graphics.moveTo(cursor.x * CHAR_WIDTH + 1, cursor.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.x * CHAR_WIDTH + 1, (cursor.y + 1.25) * CHAR_HEIGHT);
+        graphics.moveTo(cursor.start.x * CHAR_WIDTH, cursor.start.y * CHAR_HEIGHT);
+        graphics.lineTo(cursor.start.x * CHAR_WIDTH, (cursor.start.y + 1.25) * CHAR_HEIGHT);
+        graphics.moveTo(cursor.start.x * CHAR_WIDTH + 1, cursor.start.y * CHAR_HEIGHT);
+        graphics.lineTo(cursor.start.x * CHAR_WIDTH + 1, (cursor.start.y + 1.25) * CHAR_HEIGHT);
         graphics.stroke();
     }
 
@@ -83,123 +85,81 @@ function load() {
         var lines = text.split(/\n/g);
         if (key === Keys.LEFTARROW) {
             if (evt.shiftKey) {
-                --cursor.i2;
-                --cursor.x2;
-                if (cursor.x2 < 0) {
-                    --cursor.y2;
-                    cursor.x2 = lines[cursor.y2].length;
-                }
+                cursor.end.left(lines);
             }
-            else if (cursor.i > 0) {
-                --cursor.i;
-                --cursor.x;
-                if (cursor.x < 0) {
-                    --cursor.y;
-                    cursor.x = lines[cursor.y].length;
-                }
-                cursor.i2 = cursor.i;
-                cursor.x2 = cursor.x;
-                cursor.y2 = cursor.y;
+            else {
+                cursor.start.left(lines);
+                cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
         }
         else if (key === Keys.RIGHTARROW) {
-            if (evt.shiftKey) {
-                ++cursor.i2;
-                ++cursor.x2;
-                if (cursor.x2 > lines[cursor.y2].length) {
-                    cursor.x2 = 0;
-                    ++cursor.y2;
-                }
+            if (evt.shiftKey){
+                cursor.end.right(lines);
             }
-            else if (cursor.i < text.length) {
-                ++cursor.i;
-                ++cursor.x;
-                if (cursor.x > lines[cursor.y].length) {
-                    cursor.x = 0;
-                    ++cursor.y;
-                }
-                cursor.i2 = cursor.i;
-                cursor.x2 = cursor.x;
-                cursor.y2 = cursor.y;
+            else if (!evt.shiftKey) {
+                cursor.start.right(lines);
+                cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
         }
         else if (key === Keys.UPARROW) {
-            if (evt.shiftKey) {
-                --cursor.y2;
-                var dx = Math.min(0, lines[cursor.y2].length - cursor.x2);
-                cursor.x2 += dx;
-                cursor.i2 -= lines[cursor.y2].length + 1 - dx;
+            if (evt.shiftKey){
+                cursor.end.up(lines);
             }
-            else if (cursor.y > 0) {
-                --cursor.y;
-                var dx = Math.min(0, lines[cursor.y].length - cursor.x);
-                cursor.x += dx;
-                cursor.i -= lines[cursor.y].length + 1 - dx;
-                cursor.i2 = cursor.i;
-                cursor.x2 = cursor.x;
-                cursor.y2 = cursor.y;
+            else if (!evt.shiftKey) {
+                cursor.start.up(lines);
+                cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
         }
         else if (key === Keys.DOWNARROW) {
-            if (evt.shiftKey) {
-                ++cursor.y2;
-                var dx = Math.min(0, lines[cursor.y2].length - cursor.x2);
-                cursor.x2 += dx;
-                cursor.i2 += lines[cursor.y2 - 1].length + 1 + dx;
+            if (evt.shiftKey){
+                cursor.end.down(lines);
             }
-            else if (cursor.y < lines.length - 1) {
-                ++cursor.y;
-                var dx = Math.min(0, lines[cursor.y].length - cursor.x);
-                cursor.x += dx;
-                cursor.i += lines[cursor.y - 1].length + 1 + dx;
-                cursor.i2 = cursor.i;
-                cursor.x2 = cursor.x;
-                cursor.y2 = cursor.y;
+            else if (!evt.shiftKey) {
+                cursor.start.down(lines);
+                cursor.end.copy(cursor.start);
             }
             evt.preventDefault();
         }
         else if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            if (cursor.i !== cursor.i2) {
+            if (cursor.start.i !== cursor.end.i) {
                 data.delete(
-                        Math.min(cursor.i, cursor.i2 + 1),
-                        Math.max(cursor.i, cursor.i2 + 1));
+                        Math.min(cursor.start.i, cursor.end.i + 1),
+                        Math.max(cursor.start.i, cursor.end.i + 1));
             }
-            if (key === Keys.BACKSPACE && cursor.i === cursor.i2) {
-                data.delete(cursor.i - 1, cursor.i);
-                --cursor.i;
+            if (key === Keys.BACKSPACE && cursor.start.i === cursor.end.i) {
+                data.delete(cursor.start.i - 1, cursor.start.i);
+                --cursor.start.i;
                 evt.preventDefault();
             }
-            else if (key === Keys.DELETE && cursor.i === cursor.i2) {
-                data.delete(cursor.i, cursor.i + 1);
+            else if (key === Keys.DELETE && cursor.start.i === cursor.end.i) {
+                data.delete(cursor.start.i, cursor.start.i + 1);
             }
             else if (key === Keys.ENTER) {
                 var indent = "";
-                while (lines[cursor.y][cursor.x] === " ") {
+                while (lines[cursor.start.y][cursor.start.x] === " ") {
                     indent += " ";
                 }
-                data.insert(cursor.i, "\n" + indent);
-                cursor.i += indent.length + 1;
-                ++cursor.y;
-                cursor.x = indent.length;
+                data.insert(cursor.start.i, "\n" + indent);
+                cursor.start.i += indent.length + 1;
+                ++cursor.start.y;
+                cursor.start.x = indent.length;
                 evt.preventDefault();
             }
             else if (!evt.ctrlKey && !evt.altKey && (Keys.UPPERCASE[key] || Keys.LOWERCASE[key])) {
                 data.insert(
-                        cursor.i,
+                        cursor.start.i,
                         (evt.shiftKey ? Keys.UPPERCASE : Keys.LOWERCASE)[key]);
-                ++cursor.i;
-                ++cursor.x;
+                ++cursor.start.i;
+                ++cursor.start.x;
                 evt.preventDefault();
             }
             else {
                 console.log(evt.keyCode);
             }
-            cursor.i2 = cursor.i;
-            cursor.x2 = cursor.x;
-            cursor.y2 = cursor.y;
+            cursor.end.copy(cursor.start);
         }
     }
 
@@ -214,15 +174,13 @@ function load() {
     output.addEventListener("mousedown", function (evt) {
         var text = data.toString();
         var lines = text.split("\n");
-        cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
-        cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
-        cursor.i = cursor.x;
-        for (var i = 0; i < cursor.y; ++i) {
-            cursor.i += lines[i].length + 1;
+        cursor.start.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY * pixelRatio / CHAR_HEIGHT) - 0.25)));
+        cursor.start.x = Math.max(0, Math.min(lines[cursor.start.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
+        cursor.start.i = cursor.start.x;
+        for (var i = 0; i < cursor.start.y; ++i) {
+            cursor.start.i += lines[i].length + 1;
         }
-        cursor.i2 = cursor.i;
-        cursor.x2 = cursor.x;
-        cursor.y2 = cursor.y;
+        cursor.end.copy(cursor.start);
         drawText();
         dragging = true;
     });
@@ -235,9 +193,9 @@ function load() {
             var text = data.toString();
             var lines = text.split("\n");
             var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY * pixelRatio / CHAR_HEIGHT)));
-            cursor.i2 = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
+            cursor.end.i = Math.max(0, Math.min(lines[cursor.start.y].length, Math.floor(evt.layerX * pixelRatio / CHAR_WIDTH)));
             for (var i = 0; i < y; ++i) {
-                cursor.i2 += lines[i].length + 1;
+                cursor.end.i += lines[i].length + 1;
             }
             drawText();
         }
