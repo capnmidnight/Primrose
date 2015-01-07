@@ -1,21 +1,21 @@
 /*
-https://www.github.com/capnmidnight/VR
-Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
-All rights reserved.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ https://www.github.com/capnmidnight/VR
+ Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ All rights reserved.
+ 
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 // so named because it keeps me from going crazy
 function GET(url, type, progress, error, success) {
@@ -37,25 +37,6 @@ function GET(url, type, progress, error, success) {
     xhr.send();
 }
 
-function XXX(msg, v){
-    return new Error(fmt("$1. Was given $2$3$2", msg, v ? '"' : "", v));
-}
-
-function E(elem, evt, thunk){
-    if(!elem || !elem.addEventListener){
-        throw XXX("must supply an element with an addEventListener method", elem);
-    }
-    if(!evt || typeof(evt) !== "string"){
-        throw XXX("must provide the name of an event", evt);
-    }
-    
-    if(!thunk){
-        thunk = console.log.bind(console, fmt("$1.$2", elem.tagName, evt));
-    }
-    
-    elem.addEventListener(evt, thunk);
-}
-
 function getObject(url, progress, error, success) {
     GET(url, "json",
             success && error && progress,
@@ -71,6 +52,27 @@ function makeURL(url, queryMap) {
     return url + "?" + output.join("&");
 }
 
+// Utility functions for testing out event handlers. Meant only for learning
+// about new APIs.
+function XXX(msg, v) {
+    return new Error(fmt("$1. Was given $2$3$2", msg, v ? '"' : "", v));
+}
+
+function E(elem, evt, thunk) {
+    if (!elem || !elem.addEventListener) {
+        throw XXX("must supply an element with an addEventListener method", elem);
+    }
+    if (!evt || typeof (evt) !== "string") {
+        throw XXX("must provide the name of an event", evt);
+    }
+
+    if (!thunk) {
+        thunk = console.log.bind(console, fmt("$1.$2", elem.tagName, evt));
+    }
+
+    elem.addEventListener(evt, thunk);
+}
+
 // Applying Array's slice method to array-like objects. Called with
 // no parameters, this function converts array-like objects into
 // JavaScript Arrays.
@@ -82,11 +84,11 @@ function map(arr, fun) {
     return Array.prototype.map.call(arr, fun);
 }
 
-function reduce(arr, fun, base){
+function reduce(arr, fun, base) {
     return Array.prototype.reduce.call(arr, fun, base);
 }
 
-function filter(arr, fun){
+function filter(arr, fun) {
     return Array.prototype.filter.call(arr, fun);
 }
 
@@ -153,58 +155,58 @@ function group(arr, getKey, getValue) {
 }
 
 // An object inspection function.
-function help(obj){
+function help(obj) {
     var funcs = {};
     var props = {};
     var evnts = [];
-    if(obj){
-        for(var field in obj){
-            if(field.indexOf("on") === 0 
-                // this is a known element that is not an event, but looks like
-                // an event to the most basic assumption.
-                && (obj !== navigator || field !== "onLine")){
+    if (obj) {
+        for (var field in obj) {
+            if (field.indexOf("on") === 0
+                    // this is a known element that is not an event, but looks like
+                    // an event to the most basic assumption.
+                    && (obj !== navigator || field !== "onLine")) {
                 evnts.push(field.substring(2));
             }
-            else if(typeof(obj[field]) === "function"){
+            else if (typeof (obj[field]) === "function") {
                 funcs[field] = obj[field];
             }
-            else{
+            else {
                 props[field] = obj[field];
             }
         }
 
-        var type = typeof(obj);
-        if(type === "function"){
+        var type = typeof (obj);
+        if (type === "function") {
             type = obj.toString().match(/(function [^(]*)/)[1];
         }
-        else if(type === "object"){
+        else if (type === "object") {
             type = null;
-            if(obj.constructor && obj.constructor.name){
+            if (obj.constructor && obj.constructor.name) {
                 type = obj.constructor.name;
             }
             else {
                 var q = [{prefix: "", obj: window}];
                 var traversed = [];
-                while(q.length > 0 && type === null){
+                while (q.length > 0 && type === null) {
                     var parentObject = q.shift();
                     parentObject.___traversed___ = true;
                     traversed.push(parentObject);
-                    for(var field in parentObject.obj){
+                    for (var field in parentObject.obj) {
                         var testObject = parentObject.obj[field];
-                        if(testObject){
-                            if(typeof(testObject) === "function"){
-                                if(testObject.prototype && obj instanceof testObject){
+                        if (testObject) {
+                            if (typeof (testObject) === "function") {
+                                if (testObject.prototype && obj instanceof testObject) {
                                     type = parentObject.prefix + field;
                                     break;
                                 }
                             }
-                            else if(!testObject.___tried___){
+                            else if (!testObject.___tried___) {
                                 q.push({prefix: parentObject.prefix + field + ".", obj: testObject});
                             }
                         }
                     }
                 }
-                traversed.forEach(function(o){
+                traversed.forEach(function (o) {
                     delete o.___traversed___;
                 });
             }
@@ -220,7 +222,7 @@ function help(obj){
 
         return obj;
     }
-    else{
+    else {
         console.warn("Object was falsey.");
     }
 }
@@ -380,7 +382,7 @@ function findEverything(elem, obj) {
         var elem = arr[i];
         if (elem.id && elem.id.length > 0) {
             obj[elem.id] = elem;
-            if(elem.parentElement){
+            if (elem.parentElement) {
                 elem.parentElement[elem.id] = elem;
             }
         }
@@ -394,7 +396,7 @@ function inherit(classType, parentType) {
 }
 
 function getSetting(name, defValue) {
-    if(window.localStorage){
+    if (window.localStorage) {
         var val = window.localStorage.getItem(name);
         if (val) {
             try {
@@ -410,11 +412,11 @@ function getSetting(name, defValue) {
 
 function setSetting(name, val) {
     if (window.localStorage && val) {
-        try{
+        try {
             window.localStorage.setItem(name, JSON.stringify(val));
         }
-        catch(exp){
-            console.error("setSetting", name, val, typeof(val), exp);
+        catch (exp) {
+            console.error("setSetting", name, val, typeof (val), exp);
         }
     }
 }
@@ -431,7 +433,7 @@ function readForm(ctrls) {
         for (var name in ctrls) {
             var c = ctrls[name];
             if ((c.tagName === "INPUT" || c.tagName === "SELECT")
-                && (!c.dataset || !c.dataset.skipcache)) {
+                    && (!c.dataset || !c.dataset.skipcache)) {
                 if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     state[name] = c.value;
                 }
@@ -449,9 +451,9 @@ function writeForm(ctrls, state) {
         for (var name in ctrls) {
             var c = ctrls[name];
             if (state[name] !== null
-                && state[name] !== undefined
-                && (c.tagName === "INPUT" || c.tagName === "SELECT")
-                && (!c.dataset || !c.dataset.skipcache)) {
+                    && state[name] !== undefined
+                    && (c.tagName === "INPUT" || c.tagName === "SELECT")
+                    && (!c.dataset || !c.dataset.skipcache)) {
                 if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     c.value = state[name];
                 }
@@ -463,43 +465,28 @@ function writeForm(ctrls, state) {
     }
 }
 
-function reloadPage(){
-    document.location = document.location.href;
-}
+function reloadPage() { document.location = document.location.href; }
 
 // snagged and adapted from http://detectmobilebrowsers.com/
 var isMobile = (function (a) {
     return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4));
 })(navigator.userAgent || navigator.vendor || window.opera),
-    isiOS = /Apple-iP(hone|od|ad)/.test(navigator.userAgent || ""),
-    isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
-    isFirefox = typeof InstallTrigger !== 'undefined',
-    isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0,
-    isChrome = !!window.chrome && !isOpera,
-    isIE = /*@cc_on!@*/false || !!document.documentMode;
-    
-    
+        isiOS = /Apple-iP(hone|od|ad)/.test(navigator.userAgent || ""),
+        isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
+        isFirefox = typeof InstallTrigger !== 'undefined',
+        isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0,
+        isChrome = !!window.chrome && !isOpera,
+        isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+
 navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.RTCIceCandidate;
 window.RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.RTCSessionDescription;
 
-window.MediaStreamTrack = window.MediaStreamTrack || {};
-MediaStreamTrack.getVideoTracks =
-        (window.MediaStream && MediaStream.getVideoTracks && (function (getter, success) {
-            success(getter());
-        }).bind(MediaStream, MediaStream.getVideoTracks))
-        || (MediaStreamTrack.getSources && function (success) {
-            return MediaStreamTrack.getSources(function (sources) {
-                success(sources.filter(function (source) {
-                    return source.kind === "video";
-                }));
-            });
-        })
-        || function (success) {
-            return success([]);
-        };
+// this doesn't seem to actually work
+screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {};
 
 // full-screen-ism polyfill
 if (!document.documentElement.requestFullscreen) {
@@ -519,9 +506,6 @@ if (!document.documentElement.requestFullscreen) {
     }
 }
 
-screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {
-};
-
 function isFullScreenMode() {
     return (document.fullscreenElement
             || document.mozFullScreenElement
@@ -536,13 +520,13 @@ function requestFullScreen(success) {
             if (isFullScreenMode()) {
                 clearInterval(interval);
                 screen.lockOrientation("landscape-primary");
-                if(success){
+                if (success) {
                     success();
                 }
             }
         }, 1000);
     }
-    else if(success){
+    else if (success) {
         success();
     }
 }
@@ -564,30 +548,30 @@ function toggleFullScreen() {
     }
 }
 
-function addFullScreenShim(){
+function addFullScreenShim() {
     var elems = arr(arguments);
-    elems = elems.map(function(e){
+    elems = elems.map(function (e) {
         return {
             elem: e,
             events: help(e).events
         };
     });
-    
-    function removeFullScreenShim(){
-        elems.forEach(function(elem){
-            elem.events.forEach(function(e){            
+
+    function removeFullScreenShim() {
+        elems.forEach(function (elem) {
+            elem.events.forEach(function (e) {
                 elem.elem.removeEventListener(e, fullScreenShim);
             });
         });
     }
-    
-    function fullScreenShim(evt){
+
+    function fullScreenShim(evt) {
         requestFullScreen(removeFullScreenShim);
     }
-    
-    elems.forEach(function(elem){
-        elem.events.forEach(function(e){
-            if(e.indexOf("fullscreenerror") < 0){
+
+    elems.forEach(function (elem) {
+        elem.events.forEach(function (e) {
+            if (e.indexOf("fullscreenerror") < 0) {
                 elem.elem.addEventListener(e, fullScreenShim, false);
             }
         });
@@ -595,22 +579,7 @@ function addFullScreenShim(){
 }
 
 document.exitPointerLock = document.exitPointerLock
-    || document.webkitExitPointerLock
-    || document.mozExitPointerLock
-    || function(){};
-    
-if(window.Notification && Notification.permission !== "denied") {
-    Notification.requestPermission(function (permission) {
-        if (!Notification.permission) {
-            Notification.permission = permission;
-        }
-    });
-}
-
-function combineDefaults(options, classFunc){
-    var combined = options || {};
-    for(var key in classFunc.DEFAULTS){
-        combined[key] = combined[key] || classFunc.DEFAULTS[key];
-    }
-    return combined;
-}
+        || document.webkitExitPointerLock
+        || document.mozExitPointerLock
+        || function () {
+        };

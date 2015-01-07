@@ -176,8 +176,8 @@ Primrose.prototype.insertAtCursor = function (str) {
         var parts = str.split("\n");
         parts[0] = lines[this.start.y].substring(0, this.start.x) + parts[0];
         parts[parts.length - 1] += lines[this.start.y].substring(this.start.x);
-        lines.splice.bind(lines, this.start.y, parts.length).apply(lines, parts);
-        for (var i = 0; i <= str.length; ++i) {
+        lines.splice.bind(lines, this.start.y, 1).apply(lines, parts);
+        for (var i = 0; i < str.length; ++i) {
             this.start.right(lines);
         }
         this.finish.copy(this.start);
