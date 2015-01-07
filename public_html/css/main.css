@@ -1,0 +1,6 @@
+body{
+    background-color: #eee;
+}
+#output{
+    border:dashed 3px red;
+}

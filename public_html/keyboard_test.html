@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+    <head>
+        <title>Test keyCodes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <button id="b" type="button">sort</button><br>
+        <input id="v" type="text"><br>
+        <textarea id="t" cols="80" rows="50"></textarea>
+        <script type="text/javascript">
+            var t = document.getElementById("t");
+            var b = document.getElementById("b");
+            var v = document.getElementById("v");
+            t.addEventListener("keydown", function (evt) {
+                if (evt.keyCode !== 8 
+                        && evt.keyCode !== 16 
+                        && evt.keyCode !== 17 
+                        && evt.keyCode !== 18 
+                        && evt.keyCode !== 91) {
+                    if(t.value.length === 0){
+                        t.value = "CodePages." + v.value + " = {NORMAL: {}, SHIFT: {}};\n";
+                    }
+                    var type = ((evt.ctrlKey && "CTRL" || "")
+                            + (evt.altKey && "ALT" || "")
+                            + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+                    t.value += "CodePages." + v.value + "." + type + "[" + evt.keyCode + "] = \"";
+                }
+            });
+            
+            t.addEventListener("keyup", function (evt) {
+                if (evt.keyCode !== 8 
+                        && evt.keyCode !== 16 
+                        && evt.keyCode !== 17 
+                        && evt.keyCode !== 18 
+                        && evt.keyCode !== 85 
+                        && evt.keyCode !== 91) {
+                    t.value += "\";\n";
+                }
+                console.log(evt.keyCode);
+            });
+            
+            b.addEventListener("click", function(){
+                var lines = t.value.split("\n");
+                lines.sort();
+                t.value = lines.join("\n");
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+        <title>Primrose: Canvas-based text editor</title>
+        <link type="text/css" href="css/main.css" rel="stylesheet">
+        <script type="text/javascript" src="js/core.js"></script>
+        <script type="text/javascript" src="js/testing.js"></script>
+        <script type="text/javascript" src="js/Rope.js"></script>
+        <script type="text/javascript" src="js/Grammar.js"></script>
+        <script type="text/javascript" src="js/TextBuffer.js"></script>
+        <script type="text/javascript" src="js/Keys.js"></script>
+        <script type="text/javascript" src="js/code_pages/EN_US.js"></script>
+        <script type="text/javascript" src="js/code_pages/EN_UK.js"></script>
+        <script type="text/javascript" src="js/code_pages/EN_IN.js"></script>
+        <script type="text/javascript" src="js/code_pages/EN_CMS.js"></script>
+        <script type="text/javascript" src="js/code_pages/DEU.js"></script>
+        <script type="text/javascript" src="js/code_pages/FRA.js"></script>
+        <script type="text/javascript" src="js/Cursor.js"></script>
+        <script type="text/javascript" src="js/Themes.js"></script>
+        <script type="text/javascript" src="js/Primrose.js"></script>
+        <script type="text/javascript" src="js/Commands.js"></script>
+        <script type="text/javascript" src="js/tests.js"></script>
+        <script type="text/javascript">
+            var prim;
+            window.addEventListener("load", function(){
+                var canvas = document.getElementById("output");
+                prim = new Primrose(canvas);
+                prim.drawText();
+            });
+        </script>
+    </head>
+    <body>
+        <canvas id="output" width="690" height="300"></canvas>
+        <!-- these breaks are meant to force the page longer than the screen
+        to be able to test that key commands don't cause the page to scroll -->
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+    </body>
+</html>
