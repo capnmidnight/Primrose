@@ -59,13 +59,15 @@
                     <canvas id="output" width="690" height="300"></canvas>
                     <script type="text/javascript">
                         var prim = new Primrose(document.getElementById("output"), {
-                            file: "var i, output;\n"
-                                    + "for (i = 1; i < 101; i++) {\n"
-                                    + "  output = '';\n"
-                                    + "  if (!(i % 3)) output += 'Fizz';\n"
-                                    + "  if (!(i % 5)) output += 'Buzz';\n"
-                                    + "  console.log(output || i);\n"
-                                    + "}"
+                            file: "(function (){\n" +
+                                    "    var i, output;\n" +
+                                    "    for (i = 1; i < 101; i++) {\n" +
+                                    "        output = \"\";\n" +
+                                    "        if (!(i % 3)) output += \"Fizz\";\n" +
+                                    "        if (!(i % 5)) output += \"Buzz\";\n" +
+                                    "        console.log(output || i);\n" +
+                                    "    }    \n" +
+                                    "});\n"
                         });
                         prim.drawText();
                     </script>
