@@ -1,796 +1,159 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+        <link type="text/css" href="public_html/css/main.css" rel="stylesheet">
 
-    <title>Primrose by capnmidnight</title>
-  </head>
+        <!--[if lt IE 9]>
+        <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 
-  <body>
-    <header>
-      <div class="inner">
-        <h1>Primrose</h1>
-        <h2>A text editor that draws to Canvas</h2>
-        <a href="https://github.com/capnmidnight/Primrose" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
+        <script type="text/javascript" src="public_html/js/core.js"></script>
+        <script type="text/javascript" src="public_html/js/testing.js"></script>
+        <script type="text/javascript" src="public_html/js/Rope.js"></script>
+        <script type="text/javascript" src="public_html/js/Grammar.js"></script>
+        <script type="text/javascript" src="public_html/js/TextBuffer.js"></script>
+        <script type="text/javascript" src="public_html/js/Keys.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/EN_US.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/EN_UK.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/EN_IN.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/EN_CMS.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/DEU.js"></script>
+        <script type="text/javascript" src="public_html/js/code_pages/FRA.js"></script>
+        <script type="text/javascript" src="public_html/js/Cursor.js"></script>
+        <script type="text/javascript" src="public_html/js/Themes.js"></script>
+        <script type="text/javascript" src="public_html/js/Primrose.js"></script>
+        <script type="text/javascript" src="public_html/js/Commands.js"></script>
+        <script type="text/javascript" src="public_html/js/tests.js"></script>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
-<a id="primrose-a-text-editor-that-draws-to-canvas" class="anchor" href="#primrose-a-text-editor-that-draws-to-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primrose: A text editor that draws to Canvas</h1>
+        <title>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</title>
+    </head>
 
-<p>Primrose[0] is a lightweight[1] text editor control for Web browsers[2]. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.</p>
+    <body>
+        <header>
+            <div class="inner">
+                <h1>Primrose</h1>
+                <h2>A cross-browser, syntax-highlighting code editor control for WebGL and other uses</h2>
+                <a href="https://github.com/capnmidnight/Primrose" class="button"><small>View project on</small> GitHub</a>
+            </div>
+        </header>
 
-<h2>
-<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+        <div id="content-wrapper">
+            <div class="inner clearfix">
+                <section id="main-content">
+                    <h1>
+                        <a id="primrose-a-text-editor-that-draws-to-canvas" class="anchor" href="#primrose-a-text-editor-that-draws-to-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</h1>
 
-<p>
-<p>Go ahead, try some tippity-typing in the box below.</p>
+                    <p>Primrose[0] is a lightweight[1] text editor control for Web browsers[2]. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.</p>
 
-  
-        <style type="text/css">
-            #output{
-                border:dashed 3px red;
-            }
-            body{
-                background-color: #eee;
-            }
-        </style>
-        <style type="text/css" id="testStyle">
-            #testDoc{
-                font-family: monospace;
-                color:black;
-            }
-            #testDoc .keyword{
-                color: blue;
-            }
-            #testDoc .identifier{
-                color: #aa0000;
-                font-weight: bold;
-            }
-            #testDoc .stringLiteral{
-                color: #aa9900;
-                font-style: italic;
-            }
-            #testDoc .comment{
-                color: green;
-                font-style: italic;
-            }
-            #testDoc .openParen, .closeParen, .openBrace, .closeBrace{
-                color: black;
-            }
-        </style>
-        <canvas id="output" width="690" height="300"></canvas>
-          <script type="text/javascript">
-            // scrounge setup
-            var testText = "function Hello (){\n"
-                    + "    // a comment\n"
-                    + "    function MyFunc ( ) {\n"
-                    + "        var x = \"Whatever\";\n"
-                    + "        console.log(x + \" World\");\n"
-                    + "        /*\n"
-                    + "          a longer comment\n"
-                    + "        */\n"
-                    + "    }\n"
-                    + "}";
-            var testDoc = document.getElementById("testDoc");
-            var output = document.getElementById("output");
-            var graphics = output.getContext("2d");
-            var CHAR_HEIGHT = 20;
-            var LINE_HEIGHT = CHAR_HEIGHT * 1.25;
-            var cursor = {x: 0, y: 0, x2: 0, y2: 0, len: 0};
-            graphics.font = CHAR_HEIGHT + "px monospace";
-            var CHAR_WIDTH = graphics.measureText("M").width;
-            var testStyleSheet = null;
-            for (var i = 0; i < document.styleSheets.length; ++i) {
-                var s = document.styleSheets[i];
-                if (s.ownerNode.id === "testStyle") {
-                    testStyleSheet = s;
-                    break;
-                }
-            }
+                    <h2><a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
 
-            var javascriptGrammar = {
-                escapeAmpersands: function (txt) {
-                    return txt.replace(/&/g, "&amp;");
-                },
-                escapeEscapedQuote: function (txt) {
-                    return txt.replace(/\\"/g, "&quot;");
-                },
-                replaceSpaces: function (txt) {
-                    return txt.replace(/ /g, "&nbsp;");
-                },
-                escapeStrings: function (txt, state) {
-                    return txt.replace(/"[^"]+"/g, function (match) {
-                        var i = state.strings.length;
-                        state.strings[i] = match;
-                        return "&string" + i + ";";
-                    });
-                },
-                escapeComments1: function (txt, state) {
-                    return txt.replace(/\/\/[^\n]+\n/g, function (match) {
-                        var i = state.comments.length;
-                        state.comments[i] = match;
-                        return "&comment" + i + ";";
-                    });
-                },
-                escapeComments2: function (txt, state) {
-                    return txt.replace(/\/\*(\/(?!\*)|[^\/])+\*\//g, function (match) {
-                        var i = state.comments.length;
-                        state.comments[i] = match;
-                        return "&comment" + i + ";";
-                    });
-                },
-                escapeKeywords: function (txt) {
-                    return txt.replace(/\b(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/g, function (match, groups) {
-                        return "&" + match + ";";
-                    });
-                },
-                replaceIdentifiers: function (txt) {
-                    return txt.replace(/(\w+)/g, function (match, groups, i) {
-                        if (txt[i - 1] === "&") {
-                            return match;
-                        }
-                        return "<span class=\"identifier\">" + match + "</span>";
-                    });
-                },
-                replaceKeywords: function (txt) {
-                    return txt.replace(/&(break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with);/g, function (match, groups) {
-                        return "<span class=\"keyword\">" + groups + "</span>";
-                    });
-                },
-                replaceStrings: function (txt, state) {
-                    return txt.replace(/&string(\d+);/g, function (match, groups) {
-                        return "<span class=\"stringLiteral\">" + state.strings[groups] + "</span>";
-                    });
-                },
-                replaceComments: function (txt, state) {
-                    return txt.replace(/&comment(\d+);/g, function (match, groups) {
-                        return "<span class=\"comment\">" + state.comments[groups] + "</span>";
-                    });
-                },
-                replaceNewlines: function (txt) {
-                    return txt.replace(/\r?\n/g, "<br>");
-                },
-                replaceEscapedQuote: function (txt) {
-                    return txt.replace(/&quot;/g, "\\\"");
-                },
-                replaceAmerpsands: function (txt) {
-                    return txt.replace(/&amp;/g, "&");
-                }
-            };
+                    <p>Go ahead, try some tippity-typing in the box below.</p>
+                    <canvas id="output" width="690" height="300"></canvas>
+                    <script type="text/javascript">
+                        var prim = new Primrose(document.getElementById("output"), {
+                            file: "var i, output;\n"
+                                    + "for (i = 1; i < 101; i++) {\n"
+                                    + "  output = '';\n"
+                                    + "  if (!(i % 3)) output += 'Fizz';\n"
+                                    + "  if (!(i % 5)) output += 'Buzz';\n"
+                                    + "  console.log(output || i);\n"
+                                    + "}"
+                        });
+                        prim.drawText();
+                    </script>
 
-            // flatten DOM tree and prepare nodes for cascade calc
-            function computeStyles(doc, styleSheet) {
-                var rules = styleSheet.cssRules;
-                var parent = doc.parentNode;
-                if (!parent) {
-                    parent = document.createElement("div");
-                    if (typeof (doc) === "string") {
-                        var temp = doc;
-                        doc = document.createElement("div");
-                        doc.innerHTML = temp;
-                        doc.id = "testDoc";
-                    }
-                    else {
-                        parent.id = "testDoc";
-                    }
-                    parent.appendChild(doc);
-                }
-                var allNodes = [doc];
-                var textNodes = [];
-                for (var i = 0; i < allNodes.length; ++i) {
-                    var cur = allNodes[i];
-                    cur.totalStyle = {};
-                    if (cur.nodeType === Element.TEXT_NODE) {
-                        textNodes.push(cur);
-                        cur.text = cur.nodeValue
-                                .replace(/( |\n|\r)/g, "")
-                                .replace(/&nbsp;/g, " ");
-                    }
-                    else if (cur.tagName === "BR") {
-                        textNodes.push("\n");
-                    }
-                    allNodes.splice.bind(allNodes, i + 1, 0).apply(allNodes, cur.childNodes);
-                }
+                    <p>[NOTE: this is an extremely early proof-of-concept. There are still some bugs of the known and unknown variety. In particular, I have no way of testing whether or not the international keyboard support is correct. Consider contributing!]</p>
 
-                // start with stylesheet rules first, later rules
-                // will be able to replace early rules
-                for (var i = 0; i < rules.length; ++i) {
-                    var rule = rules[i];
+                    <h2><a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>
 
-                    // find the nodes this applies to and apply the rule
-                    var tags = parent.querySelectorAll(rule.selectorText);
-                    for (var j = 0; j < rule.style.length; ++j) {
-                        var style = rule.style[j];
-                        var def = rule.style[style];
-                        if (rule.style.hasOwnProperty(style) && def) {
-                            for (var k = 0; k < tags.length; ++k) {
-                                var cur = tags[k];
-                                cur.totalStyle[style] = def;
-                            }
-                        }
-                    }
-                }
+                    <p>You and I have a problem. We are writing HTML5 Single-Page Applications, primarily based around the Canvas tag (in my case, WebVR demos) and 
+                        we want to provide an editable text control <em>within</em> the Canvas context. We also want that text control to provide the basic features 
+                        we've come to expect from most modern text editors, e.g. the standard range of keyboard shortcuts and basic syntax highlighting.</p>
 
-                // cascade down the rules of the parent nodes and overwrite the
-                // stylesheet rules with the inline rules
-                for (var i = 0; i < allNodes.length; ++i) {
-                    var cur = allNodes[i];
-                    for (var j = 0; j < cur.childNodes.length; ++j) {
-                        var child = cur.childNodes[j];
-                        if (child.style) {
-                            for (var k = 0; k < child.style.length; ++k) {
-                                child.totalStyle[child.style[k]] = child.style[child.style[k]];
-                            }
-                        }
-                        for (var key in child.parentNode.totalStyle) {
-                            if (!child.totalStyle[key]) {
-                                child.totalStyle[key] = child.parentNode.totalStyle[key];
-                            }
-                        }
-                    }
-                }
-                return textNodes;
-            }
+                    <p>At first, I was tempted to implement syntax highlighting with a Content-Editable Div or IFrame element, layered on top of the Canvas element.
+                        At face value it seems like a good idea: leverage the awesome text formatting power of the browser. Unfortunately, I quickly learned that 
+                        Content-Editable is built with WYSIWYG editing of emails in mind, where the formatting is directly controlled by the user, not by heuristics 
+                        defined by the programmer.</p>
 
-            function drawText(g, textNodes, cursor) {
-                var lines = testText.split("\n");
-                g.clearRect(0, 0, g.canvas.width, g.canvas.height);
-                var x = 0, y = 0, sx = cursor.x, sy = cursor.y;
+                    <p>But it is possible, and a number of third party controls do it [3]. However, I personally haven't yet found such a third party control that was 
+                        the right mix of features and ease-of-use for my needs. They usually involve project configurations that don't mesh well with my own projects, 
+                        or they are tightly integrated into a larger framework of a full WYSIWYG editor.</p>
 
+                    <p>I had also considered skipping the syntax highlighting altogether, going with a regular, ol' TextArea element instead. Or even if I were to 
+                        acquire a working Content-Editable solution[4], there was a second problem. All solutions involving overlaying an HTML element do not 
+                        composite well with the graphics context. This works fine in 2D, where elements are built in layers, but in 3D with WebGL, the HTML Element 
+                        is not be a part the scene and does not work with the depth buffering. The text will always be a 2D element masquerading in a 3D world, 
+                        never overlapping properly with other objects in the scene.</p>
 
-                g.fillStyle = "#c0c0c0";
-                for (var i = 0; i < cursor.len; ++i) {
-                    if (sx >= lines[sy].length) {
-                        sx = 0;
-                        ++sy;
-                    }
-                    else {
-                        g.fillRect(sx * CHAR_WIDTH, (sy + 0.25) * CHAR_HEIGHT, CHAR_WIDTH, CHAR_HEIGHT);
-                        ++sx;
-                    }
-                }
+                    <p>There is also an annoying procedural problem of having to duplicate all of the world and camera transformations from the WebGL context to 
+                        CSS3 3D transforms[5]. With the stereo rendering I'm doing for WebVR demos, keeping a secondary HTML element in sync with the edits made 
+                        in a primary element turns into a lot of work.</p>
 
-                for (var i = 0; i < textNodes.length; ++i) {
-                    var cur = textNodes[i];
-                    if (cur === "\n") {
-                        x = 0;
-                        ++y;
-                    }
-                    else {
-                        var txt = cur.nodeValue
-                                .replace(/( |\n|\r)/g, "")
-                                .replace(/&nbsp;/g, " ");
+                    <h2><a id="a-solution" class="anchor" href="#a-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Solution</h2>
 
-                        var font = ((cur.totalStyle["font-weight"] || "")
-                                + " "
-                                + (cur.totalStyle["font-style"] || "")
-                                + " "
-                                + CHAR_HEIGHT
-                                + "px monospace").trim();
-                        g.font = font;
-                        g.fillStyle = cur.totalStyle.color;
-                        g.fillText(txt, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
-                        x += txt.length;
-                    }
-                }
-                g.beginPath();
-                g.strokeStyle = "black";
-                g.moveTo(cursor.x * CHAR_WIDTH, cursor.y * CHAR_HEIGHT);
-                g.lineTo(cursor.x * CHAR_WIDTH, (cursor.y + 1.25) * CHAR_HEIGHT);
-                g.moveTo(cursor.x * CHAR_WIDTH + 1, cursor.y * CHAR_HEIGHT);
-                g.lineTo(cursor.x * CHAR_WIDTH + 1, (cursor.y + 1.25) * CHAR_HEIGHT);
-                g.stroke();
-            }
+                    <p>Primrose emulates common features found in text editor controls, drawing directly to a Canvas element. It can be configured to source events 
+                        from other elements--useful when Canvas is being used as a texture and thus is not a part of the DOM to be able to receive input events. And
+                        it is fully programmable, allowing the implementer to customize its operation quickly and easily. It is designed to be a simple, 
+                        syntax-highlighting source code editor, not an everything-to-everyone WYSIWYG editor.</p>
 
-            function parseTextToHTML(text, grammar) {
-                var state = {
-                    strings: [],
-                    comments: []
-                };
-                for (var key in grammar) {
-                    text = grammar[key](text, state);
-                }
-                return text;
-            }
+                    <h2><a id="licensing" class="anchor" href="#licensing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licensing</h2>
 
-            function editText(text, cursor, evt) {
-                var lines = text.split("\n");
+                    <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may be readily used with other FOSS.</p>
 
-                var key = event.keyCode;
-                if (key === Keys.BACKSPACE) {
-                    evt.preventDefault();
-                    if (cursor.x === 0) {
-                        if (cursor.y > 0) {
-                            cursor.x = lines[cursor.y - 1].length;
-                            lines[cursor.y - 1] += lines[cursor.y];
-                            lines.splice(cursor.y, 1);
-                            --cursor.y;
-                        }
-                    }
-                    else {
-                        lines[cursor.y] = lines[cursor.y].substring(0, cursor.x - 1)
-                                + lines[cursor.y].substring(cursor.x);
-                        --cursor.x;
-                    }
-                }
-                else if (key === Keys.DELETE) {
-                    if(cursor.len > 0){
-                        while(cursor.len > 0){
-                            var toDelete = lines[cursor.y].length - cursor.x;
-                            var concat = true;
-                            if(toDelete > cursor.len){
-                                toDelete = cursor.len;
-                                concat = false;
-                            }
-                            lines[cursor.y] = lines[cursor.y].substring(0, cursor.x) + lines[cursor.y].substring(cursor.x + toDelete);
-                            if(concat && cursor.y < lines.length - 2){
-                                lines[cursor.y] += lines[cursor.y + 1];
-                                lines.splice(cursor.y + 1, 1);
-                            }
-                            cursor.len -= toDelete + (concat ? 1 : 0);
-                        }
-                    }
-                    else if (cursor.x === lines[cursor.y].length) {
-                        if (cursor.y < lines.length - 1) {
-                            lines[cursor.y] += lines[cursor.y + 1];
-                            lines.splice(cursor.y + 1, 1);
-                        }
-                    }
-                    else {
-                        lines[cursor.y] = lines[cursor.y].substring(0, cursor.x)
-                                + lines[cursor.y].substring(cursor.x + 1);
-                    }
-                }
-                else if (key === Keys.LEFTARROW) {
-                    --cursor.x;                    
-                    cursor.len = 0;
-                }
-                else if (key === Keys.RIGHTARROW) {
-                    ++cursor.x;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.UPARROW) {
-                    --cursor.y;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.DOWNARROW) {
-                    ++cursor.y;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.HOME) {
-                    if (evt.ctrlKey) {
-                        cursor.y = 0;
-                    }
-                    cursor.x = 0;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.END) {
-                    if (evt.ctrlKey) {
-                        cursor.y = lines.length - 1;
-                    }
-                    cursor.x = lines[cursor.y].length;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.PAGEUP) {
-                    cursor.y -= 10;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.PAGEDOWN) {
-                    cursor.y += 10;
-                    cursor.len = 0;
-                }
-                else if (key === Keys.ENTER) {
-                    lines.splice(cursor.y + 1, 0, lines[cursor.y].substring(cursor.x));
-                    lines[cursor.y] = lines[cursor.y].substring(0, cursor.x);
-                    ++cursor.y;
-                    cursor.x = 0;
-                    while (lines[cursor.y - 1][cursor.x] === " ") {
-                        lines[cursor.y] += " ";
-                        ++cursor.x;
-                    }
-                    cursor.len = 0;
-                }
-                else if (key === Keys.TAB) {
-                    evt.preventDefault();
-                    lines[cursor.y] = lines[cursor.y].substring(0, cursor.x)
-                            + "    "
-                            + lines[cursor.y].substring(cursor.x);
-                    cursor.x += 4;
-                    cursor.len = 0;
-                }
-                else if (event.shiftKey && Keys.UPPERCASE[key]) {
-                    lines[cursor.y] = lines[cursor.y].substring(0, cursor.x)
-                            + Keys.UPPERCASE[key]
-                            + lines[cursor.y].substring(cursor.x);
-                    ++cursor.x;
-                    cursor.len = 0;
-                }
-                else if (!event.shiftKey && Keys.LOWERCASE[key]) {
-                    lines[cursor.y] = lines[cursor.y].substring(0, cursor.x)
-                            + Keys.LOWERCASE[key]
-                            + lines[cursor.y].substring(cursor.x);
-                    ++cursor.x;
-                    cursor.len = 0;
-                }
-                else {
-                    console.log(event.keyCode);
-                }
-                
-                evt.preventDefault();
+                    <p>If you would like to use Primrose in proprietary projects, please contact me directly for licensing options.</p>
 
-                return lines;
-            }
+                    <h2>
+                        <a id="contributions" class="anchor" href="#contributions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributions</h2>
 
-            function fixCursor(cursor, lines) {
-                if (cursor.y < 0) {
-                    cursor.y = 0;
-                }
-                else if (cursor.y > lines.length - 1) {
-                    cursor.y = lines.length - 1;
-                }
+                    <p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email
+                        address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request. This will serve as your copyright assignment.</p>
 
-                if (cursor.x > lines[cursor.y].length) {
-                    if (cursor.y < lines.length - 1) {
-                        cursor.x = 0;
-                        ++cursor.y;
-                    }
-                    else {
-                        --cursor.x;
-                    }
-                }
-                else if (cursor.x < 0) {
-                    if (cursor.y > 0) {
-                        --cursor.y;
-                        cursor.x = lines[cursor.y].length;
-                    }
-                    else {
-                        ++cursor.x;
-                    }
-                }
-            }
+                    <h2>
+                        <a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>
 
-            function refresh() {
-                var doc = parseTextToHTML(testText, javascriptGrammar);
-                var parts = computeStyles(doc, testStyleSheet);
-                drawText(graphics, parts, cursor);
-            }
+                    <ol>
+                        <li>The name is arbitrary.</li>
 
-            window.addEventListener("keydown", function (evt) {
-                var lines = editText(testText, cursor, evt);
-                fixCursor(cursor, lines);
-                testText = lines.join("\n");
-                refresh();
-            });
+                        <li>"Lightweight" in the context of GUI controls means "rendered in software", as opposed to "using the native GUI controls provided by 
+                            the operating system". In this context, we're considering the browser to be a part of the "operating system", as from the perspective of 
+                            a SPA, it is.</li>
 
-            refresh();
+                        <li>It requires only that your browser implement Canvas and the Graphics2D context in their most common, basic forms. I am not aware of
+                            any commonly-used browsers that have not had this feature for several years now.</li>
 
-            var dragging = false;
-            output.addEventListener("mousedown", function (evt) {
-                var lines = testText.split("\n");
-                cursor.y = Math.max(0, Math.min(lines.length - 1, Math.floor((evt.layerY / CHAR_HEIGHT) - 0.25)));
-                cursor.x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX / CHAR_WIDTH)));
-                cursor.len = 0;
-                refresh();
-                dragging = true;
-            });
-            output.addEventListener("mouseup", function (evt) {
-                dragging = false;
-            });
+                        <li>And thankfully have solved a plethora of browser compatability issues along the way. Luckily, rendering from scratch side-steps a 
+                            lot of those problems.</li>
 
-            output.addEventListener("mousemove", function (evt) {
-                if (dragging) {
-                    var lines = testText.split("\n");
-                    var y = Math.max(0, Math.min(lines.length - 1, Math.floor(evt.layerY / CHAR_HEIGHT)));
-                    var x = Math.max(0, Math.min(lines[cursor.y].length, Math.floor(evt.layerX / CHAR_WIDTH)));
-                    var t = 0;
-                    if (y < cursor.y || y === cursor.y && x < cursor.x) {
-                        t = cursor.y;
-                        cursor.y = y;
-                        y = t;
-                        t = cursor.x;
-                        cursor.x = x;
-                        x = t;
-                    }
-                    cursor.len = x - cursor.x;
-                    for (var i = cursor.y; i < y; ++i) {
-                        cursor.len += lines[i].length + 1;
-                    }
-                    refresh();
-                }
-            });
+                        <li>Or another, obscure solution involving rendering HTML elements in SVG that has a bevy of its own issues involving cross-browser 
+                            compatibility and security issues.</li>
 
-            var Keys = {};
-            Keys.BACKSPACE = 8;
-            Keys.TAB = 9;
-            Keys.ENTER = 13;
-            Keys.SHIFT = 16;
-            Keys.CTRL = 17;
-            Keys.ALT = 18;
-            Keys.PAUSEBREAK = 19;
-            Keys.CAPSLOCK = 20;
-            Keys.ESCAPE = 27;
-            Keys.SPACEBAR = 32;
-            Keys.PAGEUP = 33;
-            Keys.PAGEDOWN = 34;
-            Keys.END = 35;
-            Keys.HOME = 36;
-            Keys.LEFTARROW = 37;
-            Keys.UPARROW = 38;
-            Keys.RIGHTARROW = 39;
-            Keys.DOWNARROW = 40;
-            Keys.INSERT = 45;
-            Keys.DELETE = 46;
-            Keys.NUMBER0 = 48;
-            Keys.NUMBER1 = 49;
-            Keys.NUMBER2 = 50;
-            Keys.NUMBER3 = 51;
-            Keys.NUMBER4 = 52;
-            Keys.NUMBER5 = 53;
-            Keys.NUMBER6 = 54;
-            Keys.NUMBER7 = 55;
-            Keys.NUMBER8 = 56;
-            Keys.NUMBER9 = 57;
-            Keys.A = 65;
-            Keys.B = 66;
-            Keys.C = 67;
-            Keys.D = 68;
-            Keys.E = 69;
-            Keys.F = 70;
-            Keys.G = 71;
-            Keys.H = 72;
-            Keys.I = 73;
-            Keys.J = 74;
-            Keys.K = 75;
-            Keys.L = 76;
-            Keys.M = 77;
-            Keys.N = 78;
-            Keys.O = 79;
-            Keys.P = 80;
-            Keys.Q = 81;
-            Keys.R = 82;
-            Keys.S = 83;
-            Keys.T = 84;
-            Keys.U = 85;
-            Keys.V = 86;
-            Keys.W = 87;
-            Keys.X = 88;
-            Keys.Y = 89;
-            Keys.Z = 90;
-            Keys.LEFTWINDOWKEY = 91;
-            Keys.RIGHTWINDOWKEY = 92;
-            Keys.SELECTKEY = 93;
-            Keys.NUMPAD0 = 96;
-            Keys.NUMPAD1 = 97;
-            Keys.NUMPAD2 = 98;
-            Keys.NUMPAD3 = 99;
-            Keys.NUMPAD4 = 100;
-            Keys.NUMPAD5 = 101;
-            Keys.NUMPAD6 = 102;
-            Keys.NUMPAD7 = 103;
-            Keys.NUMPAD8 = 104;
-            Keys.NUMPAD9 = 105;
-            Keys.MULTIPLY = 106;
-            Keys.ADD = 107;
-            Keys.SUBTRACT = 109;
-            Keys.DECIMALPOINT = 110;
-            Keys.DIVIDE = 111;
-            Keys.F1 = 112;
-            Keys.F2 = 113;
-            Keys.F3 = 114;
-            Keys.F4 = 115;
-            Keys.F5 = 116;
-            Keys.F6 = 117;
-            Keys.F7 = 118;
-            Keys.F8 = 119;
-            Keys.F9 = 120;
-            Keys.F10 = 121;
-            Keys.F11 = 122;
-            Keys.F12 = 123;
-            Keys.NUMLOCK = 144;
-            Keys.SCROLLLOCK = 145;
-            Keys.SEMICOLON = 186;
-            Keys.EQUALSIGN = 187;
-            Keys.COMMA = 188;
-            Keys.DASH = 189;
-            Keys.PERIOD = 190;
-            Keys.FORWARDSLASH = 191;
-            Keys.GRAVEACCENT = 192;
-            Keys.OPENBRACKET = 219;
-            Keys.BACKSLASH = 220;
-            Keys.CLOSEBRACKET = 221;
-            Keys.SINGLEQUOTE = 222;
+                        <li>Violating the DRY principle, and fraught with cross-browser peril.</li>
+                    </ol>
+                </section>
 
-            Keys.LOWERCASE = {};
-            Keys.LOWERCASE[Keys.A] = "a";
-            Keys.LOWERCASE[Keys.B] = "b";
-            Keys.LOWERCASE[Keys.C] = "c";
-            Keys.LOWERCASE[Keys.D] = "d";
-            Keys.LOWERCASE[Keys.E] = "e";
-            Keys.LOWERCASE[Keys.F] = "f";
-            Keys.LOWERCASE[Keys.G] = "g";
-            Keys.LOWERCASE[Keys.H] = "h";
-            Keys.LOWERCASE[Keys.I] = "i";
-            Keys.LOWERCASE[Keys.J] = "j";
-            Keys.LOWERCASE[Keys.K] = "k";
-            Keys.LOWERCASE[Keys.L] = "l";
-            Keys.LOWERCASE[Keys.M] = "m";
-            Keys.LOWERCASE[Keys.N] = "n";
-            Keys.LOWERCASE[Keys.O] = "o";
-            Keys.LOWERCASE[Keys.P] = "p";
-            Keys.LOWERCASE[Keys.Q] = "q";
-            Keys.LOWERCASE[Keys.R] = "r";
-            Keys.LOWERCASE[Keys.S] = "s";
-            Keys.LOWERCASE[Keys.T] = "t";
-            Keys.LOWERCASE[Keys.U] = "u";
-            Keys.LOWERCASE[Keys.V] = "v";
-            Keys.LOWERCASE[Keys.W] = "w";
-            Keys.LOWERCASE[Keys.X] = "x";
-            Keys.LOWERCASE[Keys.Y] = "y";
-            Keys.LOWERCASE[Keys.Z] = "z";
-            Keys.LOWERCASE[Keys.SPACEBAR] = " ";
-            Keys.LOWERCASE[Keys.NUMBER0] = "0";
-            Keys.LOWERCASE[Keys.NUMBER1] = "1";
-            Keys.LOWERCASE[Keys.NUMBER2] = "2";
-            Keys.LOWERCASE[Keys.NUMBER3] = "3";
-            Keys.LOWERCASE[Keys.NUMBER4] = "4";
-            Keys.LOWERCASE[Keys.NUMBER5] = "5";
-            Keys.LOWERCASE[Keys.NUMBER6] = "6";
-            Keys.LOWERCASE[Keys.NUMBER7] = "7";
-            Keys.LOWERCASE[Keys.NUMBER8] = "8";
-            Keys.LOWERCASE[Keys.NUMBER9] = "9";
-            Keys.LOWERCASE[Keys.MULTIPLY] = "*";
-            Keys.LOWERCASE[Keys.ADD] = "+";
-            Keys.LOWERCASE[Keys.SUBTRACT] = "-";
-            Keys.LOWERCASE[Keys.DECIMALPOINT] = ".";
-            Keys.LOWERCASE[Keys.DIVIDE] = "/";
-            Keys.LOWERCASE[Keys.SEMICOLON] = ";";
-            Keys.LOWERCASE[Keys.EQUALSIGN] = "=";
-            Keys.LOWERCASE[Keys.COMMA] = ",";
-            Keys.LOWERCASE[Keys.DASH] = "-";
-            Keys.LOWERCASE[Keys.PERIOD] = ".";
-            Keys.LOWERCASE[Keys.FORWARDSLASH] = "/";
-            Keys.LOWERCASE[Keys.GRAVEACCENT] = "`";
-            Keys.LOWERCASE[Keys.OPENBRACKET] = "[";
-            Keys.LOWERCASE[Keys.BACKSLASH] = "\\";
-            Keys.LOWERCASE[Keys.CLOSEBRACKET] = "]";
-            Keys.LOWERCASE[Keys.SINGLEQUOTE] = "'";
+                <aside id="sidebar">
+                    <a href="https://github.com/capnmidnight/Primrose/zipball/master" class="button">
+                        <small>Download</small>
+                        .zip file
+                    </a>
+                    <a href="https://github.com/capnmidnight/Primrose/tarball/master" class="button">
+                        <small>Download</small>
+                        .tar.gz file
+                    </a>
 
-            Keys.UPPERCASE = {};
-            Keys.UPPERCASE[Keys.A] = "A";
-            Keys.UPPERCASE[Keys.B] = "B";
-            Keys.UPPERCASE[Keys.C] = "C";
-            Keys.UPPERCASE[Keys.D] = "D";
-            Keys.UPPERCASE[Keys.E] = "E";
-            Keys.UPPERCASE[Keys.F] = "F";
-            Keys.UPPERCASE[Keys.G] = "G";
-            Keys.UPPERCASE[Keys.H] = "H";
-            Keys.UPPERCASE[Keys.I] = "I";
-            Keys.UPPERCASE[Keys.J] = "J";
-            Keys.UPPERCASE[Keys.K] = "K";
-            Keys.UPPERCASE[Keys.L] = "L";
-            Keys.UPPERCASE[Keys.M] = "M";
-            Keys.UPPERCASE[Keys.N] = "N";
-            Keys.UPPERCASE[Keys.O] = "O";
-            Keys.UPPERCASE[Keys.P] = "P";
-            Keys.UPPERCASE[Keys.Q] = "Q";
-            Keys.UPPERCASE[Keys.R] = "R";
-            Keys.UPPERCASE[Keys.S] = "S";
-            Keys.UPPERCASE[Keys.T] = "T";
-            Keys.UPPERCASE[Keys.U] = "U";
-            Keys.UPPERCASE[Keys.V] = "V";
-            Keys.UPPERCASE[Keys.W] = "W";
-            Keys.UPPERCASE[Keys.X] = "X";
-            Keys.UPPERCASE[Keys.Y] = "Y";
-            Keys.UPPERCASE[Keys.Z] = "Z";
-            Keys.UPPERCASE[Keys.SPACEBAR] = " ";
-            Keys.UPPERCASE[Keys.NUMBER0] = ")";
-            Keys.UPPERCASE[Keys.NUMBER1] = "!";
-            Keys.UPPERCASE[Keys.NUMBER2] = "@";
-            Keys.UPPERCASE[Keys.NUMBER3] = "#";
-            Keys.UPPERCASE[Keys.NUMBER4] = "$";
-            Keys.UPPERCASE[Keys.NUMBER5] = "%";
-            Keys.UPPERCASE[Keys.NUMBER6] = "^";
-            Keys.UPPERCASE[Keys.NUMBER7] = "&";
-            Keys.UPPERCASE[Keys.NUMBER8] = "*";
-            Keys.UPPERCASE[Keys.NUMBER9] = "(";
-            Keys.UPPERCASE[Keys.MULTIPLY] = "*";
-            Keys.UPPERCASE[Keys.ADD] = "+";
-            Keys.UPPERCASE[Keys.SUBTRACT] = "-";
-            Keys.UPPERCASE[Keys.DECIMALPOINT] = ".";
-            Keys.UPPERCASE[Keys.DIVIDE] = "/";
-            Keys.UPPERCASE[Keys.SEMICOLON] = ":";
-            Keys.UPPERCASE[Keys.EQUALSIGN] = "+";
-            Keys.UPPERCASE[Keys.COMMA] = "<";
-            Keys.UPPERCASE[Keys.DASH] = "_";
-            Keys.UPPERCASE[Keys.PERIOD] = ">";
-            Keys.UPPERCASE[Keys.FORWARDSLASH] = "?";
-            Keys.UPPERCASE[Keys.GRAVEACCENT] = "~";
-            Keys.UPPERCASE[Keys.OPENBRACKET] = "{";
-            Keys.UPPERCASE[Keys.BACKSLASH] = "|";
-            Keys.UPPERCASE[Keys.CLOSEBRACKET] = "}";
-            Keys.UPPERCASE[Keys.SINGLEQUOTE] = "\"";
-        </script>
-</p>
+                    <p class="repo-owner"><a href="https://github.com/capnmidnight/Primrose"></a> is maintained by <a href="https://github.com/capnmidnight">capnmidnight</a>.</p>
 
-<p>[NOTE: this is an extremely early proof-of-concept. It works only in Google Chrome and maps only to US English keyboards. But these should be addressable issues in the long run.]</p>
-
-<h2>
-<a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>
-
-<p>Say you are writing an HTML5 Single-Page Application, it is primarily based around the Canvas tag--e.g. a game, either 2D or 3D--and you would like to provide an editable text control <em>within</em> the Canvas context. You might also like that text control to provide the basic features you've come to expect from most modern text editors, e.g. keyboard shortcuts and syntax highlighting.</p>
-
-<p>You might be tempted to implement your syntax highlighting with a Content-Editable Div or IFrame element, layered on top of the Canvas element. At face value it seems like a good idea: leverage the awesome text formatting power of the browser. Unfortunately, you quickly learn that Content-Editable is built with WYSIWYG editing of emails in mind, where the formatting is directly controlled by the user, not by heuristics defined by the programmer.</p>
-
-<p>But it is possible, and a number of third party controls do it. However, I personally haven't yet found such a third party control that was the right mix of features and ease-of-use for my needs. They usually involve project configurations that don't mesh well with my own projects, or they are tightly integrated into a larger framework of a full WYSIWYG editor.</p>
-
-<p>You might even consider giving up on your dreams and skipping the syntax highlighting altogether, going with a regular, ol' TextArea element instead. Or even if you acquire a working Content-Editable solution[3], you will still have a problem. All solutions that involve overlaying an HTML element do not composite well with your own graphics drawing operations.</p>
-
-<p>In the Graphics2D context, the text will not be an actual part of your image. You won't be able to save the Canvas with the text to an image file. Though this is likely not that big of a concern, it's still a case that Primrose covers.</p>
-
-<p>Much more importantly, in the WegGL context, the HTML Element will not be a part the scene and will not work with any depth buffering. Your text will always be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene. You will have to duplicate all of your world and camera transformations from the WebGL context to CSS3 3D transforms[4]. And any form of stereo rendering will require you to keep a secondary HTML element in sync with the edits made in the primary element.</p>
-
-<h2>
-<a id="a-solution" class="anchor" href="#a-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Solution</h2>
-
-<p>Primrose emulates common features found in text editor controls, drawing directly to a Canvas element. It can be configured to source events from other elements--useful when Canvas is being used as a texture and thus is not a part of the DOM to be able to receive input events. And it is fully programmable, allowing the implementer to customize its operation quickly and easily. It is designed to be a simple, syntax-highlighting source code editor, not an everything-to-everyone WYSIWYG editor.</p>
-
-<h2>
-<a id="licensing" class="anchor" href="#licensing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licensing</h2>
-
-<p>Primrose is free, open source software (GPLv3) and may be readily used with other FOSS.</p>
-
-<p>If you would like to use Primrose in proprietary projects, please contact me directly for licensing options.</p>
-
-<h2>
-<a id="contributions" class="anchor" href="#contributions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributions</h2>
-
-<p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.</p>
-
-<h2>
-<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>
-
-<p>[0] The name is arbitrary.</p>
-
-<p>[1] "Lightweight" in the context of GUI controls means "rendered in software", as opposed to "using the native GUI controls provided by the operating system". In this context, we're considering the browser to be a part of the "operating system", as from the perspective of a SPA, it is.</p>
-
-<p>[2] It requires only that your browser implement Canvas and the Graphics2D context in their most common, basic forms. I am not aware of any commonly-used browsers that have not had this feature for several years now.</p>
-
-<p>[3] Or another, obscure solution involving rendering HTML elements in SVG that has a bevy of its own issues involving cross-browser compatibility and security issues.</p>
-
-<p>[4] Violating the DRY principle, and fraught with cross-browser peril.</p>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/capnmidnight/Primrose/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/capnmidnight/Primrose/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/capnmidnight/Primrose"></a> is maintained by <a href="https://github.com/capnmidnight">capnmidnight</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
-
-  
-  </body>
+                    <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+                </aside>
+            </div>
+        </div>
+    </body>
 </html>
