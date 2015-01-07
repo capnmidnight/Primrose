@@ -49,5 +49,39 @@ var Themes = {
             foreColor: "red",
             fontStyle: "underline italic"
         }
+    },
+    Dark: {
+        fontFamily: "monospace",
+        regular: { 
+            backColor: "black",
+            foreColor: "#c0c0c0",
+            selectedBackColor: "#c0c0c0",
+            selectedForeColor: "#ffffff"
+        },
+        strings: {
+            foreColor: "#aa9900",
+            fontStyle: "italic"
+        },
+        numbers: {
+            foreColor: "green"
+        },
+        comments: {
+            foreColor: "yellow",
+            fontStyle: "italic"
+        },
+        keywords: {
+            foreColor: "cyan"
+        },
+        functions: {
+            foreColor: "brown",
+            fontWeight: "bold"
+        },
+        members: {
+            foreColor: "green"
+        },
+        error: {
+            foreColor: "red",
+            fontStyle: "underline italic"
+        }
     }
 };

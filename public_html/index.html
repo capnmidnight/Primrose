@@ -44,29 +44,36 @@
                             + "    object.member.method('mooooo');\n"
                             + "});\n"
                 });
-                prim.drawText();
-
-                for (var key in CodePages) {
-                    if (CodePages.hasOwnProperty(key)) {
-                        var opt = document.createElement("option");
-                        opt.innerHTML = key;
-                        if (key === "EN_US") {
-                            opt.selected = "selected";
+                
+                prim.drawText();                
+                
+                function makeSelector(elem, obj, def, prop){
+                    for(var key in obj){
+                        if(obj.hasOwnProperty(key)){
+                            var opt = document.createElement("option");
+                            opt.innerHTML = key;
+                            if(key === def){
+                                opt.selected = "selected";
+                            }
+                            elem.appendChild(opt);
                         }
-                        ctrls.keyboards.appendChild(opt);
                     }
-                }
 
-                E(ctrls.keyboards, "change", function (evt) {
-                    if (this.selectedIndex > 0) {
-                        prim.codePage = CodePages[this.value];
-                    }
-                });
+                    E(elem, "change", function (evt) {
+                        if (this.selectedIndex > 0) {
+                            prim[prop] = obj[this.value];
+                        }
+                    });
+                }
+                
+                makeSelector(ctrls.keyboards, CodePages, "EN_US", "codePage");
+                makeSelector(ctrls.themes, Themes, "DEFAULT", "theme");
             });
         </script>
     </head>
     <body>
         <select id="keyboards"></select>
+        <select id="themes"></select>
         <br>
         <canvas id="output" width="690" height="600"></canvas>
         <!-- these breaks are meant to force the page longer than the screen

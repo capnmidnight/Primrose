@@ -115,7 +115,8 @@ function Primrose(canvas, options) {
                         f = d;
                     }
                     var cw = f.i - e.i;
-                    graphics.fillStyle = this.theme.regular.selectedBackColor;
+                    graphics.fillStyle = this.theme.regular.selectedBackColor
+                            || Themes.DEFAULT.regular.selectedBackColor;
                     graphics.fillRect(
                             e.x * CHAR_WIDTH, (e.y + 0.25) * CHAR_HEIGHT,
                             cw * CHAR_WIDTH, CHAR_HEIGHT
