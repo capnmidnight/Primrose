@@ -88,6 +88,7 @@ function load() {
             else if (evt.ctrlKey && codePage.NORMAL[key] === "a") {
                 cursor.start.fullHome(lines);
                 cursor.finish.fullEnd(lines);
+                evt.preventDefault();
             }
             else if (key === Keys.BACKSPACE) {
                 if (cursor.start.i === cursor.finish.i) {
@@ -159,7 +160,7 @@ function load() {
         drawText();
     });
 
-    function getCell(x, y) {
+    function pixel2cell(x, y) {
         x = Math.floor(x * pixelRatio / CHAR_WIDTH);
         y = Math.floor((y * pixelRatio / CHAR_HEIGHT) - 0.25);
         return {x: x, y: y};
@@ -168,7 +169,7 @@ function load() {
     output.addEventListener("mousedown", function (evt) {
         var text = data.toString();
         var lines = text.split("\n");
-        var cell = getCell(evt.layerX, evt.layerY);
+        var cell = pixel2cell(evt.layerX, evt.layerY);
         cursor.both.setXY(cell.x, cell.y, lines);
         drawText();
         dragging = true;
@@ -182,7 +183,7 @@ function load() {
         if (dragging) {
             var text = data.toString();
             var lines = text.split("\n");
-            var cell = getCell(evt.layerX, evt.layerY);
+            var cell = pixel2cell(evt.layerX, evt.layerY);
             cursor.finish.setXY(cell.x, cell.y, lines);
             drawText();
         }
@@ -192,7 +193,7 @@ function load() {
         var text = data.toString();
         var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
         graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-        var x = 0, y = 0, c = 0;
+        var c = new Cursor(), d = new Cursor();
         for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
             var parts = t.value.split("\n");
@@ -201,16 +202,25 @@ function load() {
                 if (part.length > 0) {
                     var a = cursor.start;
                     var b = cursor.finish;
+                    d.copy(c);
+                    d.x += part.length;
+                    d.i += part.length;
                     if (cursor.finish.i < cursor.start.i) {
                         a = cursor.finish;
                         b = cursor.start;
                     }
-                    if (a.i <= c + part.length && c <= b.i) {
-                        var cx = Math.max(a.x, x);
-                        var cw = Math.min(b.x, x + part.length) - cx;
+                    if (a.i <= d.i && c.i < b.i) {
+                        var e = a, f = b;
+                        if(c.i > a.i){
+                            e = c;
+                        }
+                        if(d.i < b.i){
+                            f = d;
+                        }
+                        var cw = f.i - e.i;
                         graphics.fillStyle = "#c0c0c0";
                         graphics.fillRect(
-                                cx * CHAR_WIDTH, (y + 0.25) * CHAR_HEIGHT,
+                                e.x * CHAR_WIDTH, (e.y + 0.25) * CHAR_HEIGHT,
                                 cw * CHAR_WIDTH, CHAR_HEIGHT
                                 );
                     }
@@ -218,14 +228,14 @@ function load() {
                     var font = (t.rule.style.fontWeight || "") + " " + (t.rule.style.fontStyle || "") + " " + CHAR_HEIGHT + "px " + DEFAULT_FONT;
                     graphics.font = font.trim();
                     graphics.fillStyle = t.rule.style.color || DEFAULT_COLOR;
-                    graphics.fillText(part, x * CHAR_WIDTH, (y + 1) * CHAR_HEIGHT);
-                    x += part.length;
-                    c += part.length;
+                    graphics.fillText(part, c.x * CHAR_WIDTH, (c.y + 1) * CHAR_HEIGHT);
+                    c.x += part.length;
+                    c.i += part.length;
                 }
                 if (j < parts.length - 1) {
-                    ++y;
-                    x = 0;
-                    ++c;
+                    ++c.y;
+                    ++c.i;
+                    c.x = 0;
                 }
             }
         }
