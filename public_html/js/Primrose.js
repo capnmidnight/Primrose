@@ -197,6 +197,12 @@ Primrose.prototype.getLines = function () {
     return this.history[this.history.length - 1].slice();
 };
 
+Primrose.prototype.export = function(){
+    return this.getLines().map(function(m) {
+        return "\"" + m.replace(/"/g, "\\\"") + "\\n\"";
+    }).join("\n+ ");
+};
+
 Primrose.prototype.pushUndo = function (lines) {
     this.history.push(lines);
 };

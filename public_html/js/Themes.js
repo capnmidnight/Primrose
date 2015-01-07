@@ -28,12 +28,11 @@ var Themes = {
             foreColor: "#aa9900",
             fontStyle: "italic"
         },
-        inlineComments: {
-            foreColor: "green",
-            fontStyle: "italic"
+        numbers: {
+            foreColor: "green"
         },
-        blockComments: {
-            foreColor: "green",
+        comments: {
+            foreColor: "grey",
             fontStyle: "italic"
         },
         keywords: {

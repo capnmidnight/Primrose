@@ -27,15 +27,22 @@
             window.addEventListener("load", function () {
                 var ctrls = findEverything();
                 prim = new Primrose(ctrls.output, {
-                    file: "(function (){\n" +
-                            "    var i, output;\n" +
-                            "    for (i = 1; i < 101; i++) {\n" +
-                            "        output = \"\";\n" +
-                            "        if (!(i % 3)) output += \"Fizz\";\n" +
-                            "        if (!(i % 5)) output += \"Buzz\";\n" +
-                            "        console.log(output || i);\n" +
-                            "    }    \n" +
-                            "});\n"
+                    file: "(function (){\n"
+                            + "    var i, output;\n"
+                            + "    // a line comment\n"
+                            + "    var long1 = 3.14159, asdf_ok = .5;\n"
+                            + "    for (i = 1; i < 101; i++) {\n"
+                            + "        output = \"\";\n"
+                            + "        if ((i % 3) === 0) output += \"Fizz\";\n"
+                            + "        if ((i % 5) === 0) output += \"Buzz\";\n"
+                            + "        console.log(output || i);\n"
+                            + "    }\n"
+                            + "    /*\n"
+                            + "        a block comment\n"
+                            + "    */\n"
+                            + "    \n"
+                            + "    object.member.method('mooooo');\n"
+                            + "});\n"
                 });
                 prim.drawText();
 
@@ -43,15 +50,15 @@
                     if (CodePages.hasOwnProperty(key)) {
                         var opt = document.createElement("option");
                         opt.innerHTML = key;
-                        if(key === "EN_US"){
+                        if (key === "EN_US") {
                             opt.selected = "selected";
                         }
                         ctrls.keyboards.appendChild(opt);
                     }
                 }
-                
-                E(ctrls.keyboards, "change", function(evt){
-                    if(this.selectedIndex > 0){
+
+                E(ctrls.keyboards, "change", function (evt) {
+                    if (this.selectedIndex > 0) {
                         prim.codePage = CodePages[this.value];
                     }
                 });
@@ -61,7 +68,7 @@
     <body>
         <select id="keyboards"></select>
         <br>
-        <canvas id="output" width="690" height="300"></canvas>
+        <canvas id="output" width="690" height="600"></canvas>
         <!-- these breaks are meant to force the page longer than the screen
         to be able to test that key commands don't cause the page to scroll -->
         <br>

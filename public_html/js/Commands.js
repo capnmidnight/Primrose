@@ -132,7 +132,7 @@ Commands["NORMAL" + Keys.ENTER] = function (lines) {
     for (var i = 0; i < lines[this.start.y].length && lines[this.start.y][i] === " "; ++i) {
         indent += " ";
     }
-    this.insertAtCursor(indent + "\n");
+    this.insertAtCursor("\n" + indent);
 };
 
 Commands["NORMAL" + Keys.TAB] = function (lines) {
