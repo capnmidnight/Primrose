@@ -25,8 +25,8 @@
         <script type="text/javascript">
             var prim;
             window.addEventListener("load", function () {
-                var canvas = document.getElementById("output");
-                prim = new Primrose(canvas, {
+                var ctrls = findEverything();
+                prim = new Primrose(ctrls.output, {
                     file: "(function (){\n" +
                             "    var i, output;\n" +
                             "    for (i = 1; i < 101; i++) {\n" +
@@ -38,10 +38,29 @@
                             "});\n"
                 });
                 prim.drawText();
+
+                for (var key in CodePages) {
+                    if (CodePages.hasOwnProperty(key)) {
+                        var opt = document.createElement("option");
+                        opt.innerHTML = key;
+                        if(key === "EN_US"){
+                            opt.selected = "selected";
+                        }
+                        ctrls.keyboards.appendChild(opt);
+                    }
+                }
+                
+                E(ctrls.keyboards, "change", function(evt){
+                    if(this.selectedIndex > 0){
+                        prim.codePage = CodePages[this.value];
+                    }
+                });
             });
         </script>
     </head>
     <body>
+        <select id="keyboards"></select>
+        <br>
         <canvas id="output" width="690" height="300"></canvas>
         <!-- these breaks are meant to force the page longer than the screen
         to be able to test that key commands don't cause the page to scroll -->

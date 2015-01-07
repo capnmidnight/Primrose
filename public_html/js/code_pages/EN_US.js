@@ -17,6 +17,11 @@
 
 CodePages.EN_US = {NORMAL: {}, SHIFT: {}};
 
+CodePages.EN_US.NORMAL[106] = "*";
+CodePages.EN_US.NORMAL[107] = "+";
+CodePages.EN_US.NORMAL[109] = "-";
+CodePages.EN_US.NORMAL[110] = ".";
+CodePages.EN_US.NORMAL[111] = "/";
 CodePages.EN_US.NORMAL[186] = ";";
 CodePages.EN_US.NORMAL[187] = "=";
 CodePages.EN_US.NORMAL[188] = ",";
@@ -42,7 +47,7 @@ CodePages.EN_US.NORMAL[57] = "9";
 CodePages.EN_US.NORMAL[65] = "a";
 CodePages.EN_US.NORMAL[66] = "b";
 CodePages.EN_US.NORMAL[67] = "c";
-CodePages.EN_US.NORMAL[68] = "d";
+CodePages.EN_US.NORMAL[68] = "d"; 
 CodePages.EN_US.NORMAL[69] = "e";
 CodePages.EN_US.NORMAL[70] = "f";
 CodePages.EN_US.NORMAL[71] = "g";
@@ -65,6 +70,11 @@ CodePages.EN_US.NORMAL[87] = "w";
 CodePages.EN_US.NORMAL[88] = "x";
 CodePages.EN_US.NORMAL[89] = "y";
 CodePages.EN_US.NORMAL[90] = "z";
+CodePages.EN_US.SHIFT[106] = "*";
+CodePages.EN_US.SHIFT[107] = "+";
+CodePages.EN_US.SHIFT[109] = "-";
+CodePages.EN_US.SHIFT[110] = ".";
+CodePages.EN_US.SHIFT[111] = "/";
 CodePages.EN_US.SHIFT[186] = ":";
 CodePages.EN_US.SHIFT[187] = "+";
 CodePages.EN_US.SHIFT[188] = "<";
