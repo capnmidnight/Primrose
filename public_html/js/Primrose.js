@@ -1,185 +1,55 @@
-function load() {
-    var history = [drawText.toString().split("\n")];
-    var output = document.getElementById("output");
-    var graphics = output.getContext("2d");
-    var CHAR_HEIGHT = 20;
-    var pixelRatio = window.devicePixelRatio || 1;
-    CHAR_HEIGHT *= pixelRatio;
-    output.style.width = output.width + "px";
-    output.style.height = output.height + "px";
-    output.width = output.width * pixelRatio;
-    output.height = output.height * pixelRatio;
-    var start = new Cursor();
-    var finish = new Cursor();
-    var cursor = {start: start, finish: finish, both: new CombinedCursor(start, finish)};
-    var DEFAULT_FONT = "monospace";
-    var DEFAULT_COLOR = "black";
-    var DEFAULT_STYLE = new Rule("default", null, {color: DEFAULT_COLOR});
-    var PAGE_SIZE = 5;
-    graphics.font = CHAR_HEIGHT + "px " + DEFAULT_FONT;
+function Primrose(canvas, options) {
+    options = options || {};
+
+    this.syntaxRules = options.syntaxRules || Grammar.JavaScript;
+
+    this.theme = options.theme || Themes.DEFAULT;
+    this.codePage = options.codePage || CodePages.EN_US;
+    this.history = [(options.file || "").split("\n")];
+    this.start = new Cursor();
+    this.finish = new Cursor();
+    this.both = new CombinedCursor(this.start, this.finish);
+
+    var graphics = canvas.getContext("2d");
+    var PIX_RATIO = window.devicePixelRatio || 1;
+    var CHAR_HEIGHT = 20 * PIX_RATIO;
+    canvas.style.width = canvas.width + "px";
+    canvas.style.height = canvas.height + "px";
+    canvas.width = canvas.width * PIX_RATIO;
+    canvas.height = canvas.height * PIX_RATIO;
+    graphics.font = CHAR_HEIGHT + "px " + this.theme.fontFamily;
     var CHAR_WIDTH = graphics.measureText("M").width;
-    var codePage = CodePages.EN_US;
     var dragging = false;
-    var TAB_SIZE = 4;
-    var TAB = "";
-    for (var i = 0; i < TAB_SIZE; ++i) {
-        TAB += " ";
+    this.pageSize = options.pageSize || 5;
+    this.tabWidth = options.tabWidth || 4;
+    this.tabString = "";
+    for (var i = 0; i < this.tabWidth; ++i) {
+        this.tabString += " ";
     }
 
+    var keyEventSource = options.keyEventSource || window;
+    var clipboardEventSource = options.clipboardEventSource || window;
+    var mouseEventSource = options.mouseEventSource || canvas;
 
-    function editText(evt) {
+    this.editText = function (evt) {
         evt = evt || event;
         var key = evt.keyCode;
         // don't do anything about the actual press of SHIFT, CTRL, or ALT
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            var prefix = ((evt.ctrlKey && "CTRL" || "")
+            var type = ((evt.ctrlKey && "CTRL" || "")
                     + (evt.altKey && "ALT" || "")
-                    + (evt.shiftKey && "SHIFT" || ""));
-            var type = prefix || "NORMAL";
-            var lines = history[history.length - 1];
-            var cur = evt.shiftKey ? cursor.finish : cursor.both;
-            if (key === Keys.LEFTARROW) {
-                if (evt.ctrlKey) {
-                    cur.skipLeft(lines);
-                }
-                else {
-                    cur.left(lines);
-                }
+                    + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+            var codeCommand = type + key;
+            var charCommand = type + "+" + this.codePage.SHIFT[key];
+            var func = Commands[codeCommand] || Commands[charCommand];
+            if (func) {
+                func.call(this, this.getLines());
                 evt.preventDefault();
             }
-            else if (key === Keys.RIGHTARROW) {
-                if (evt.ctrlKey) {
-                    cur.skipRight(lines);
-                }
-                else {
-                    cur.right(lines);
-                }
-                evt.preventDefault();
-            }
-            else if (key === Keys.UPARROW) {
-                cur.up(lines);
-                evt.preventDefault();
-            }
-            else if (key === Keys.DOWNARROW) {
-                cur.down(lines);
-                evt.preventDefault();
-            }
-            else if (key === Keys.PAGEUP) {
-                cur.incY(-PAGE_SIZE, lines);
-                evt.preventDefault();
-            }
-            else if (key === Keys.PAGEDOWN) {
-                cur.incY(PAGE_SIZE, lines);
-                evt.preventDefault();
-            }
-            else if (key === Keys.HOME) {
-                if (evt.ctrlKey) {
-                    cur.fullHome(lines);
-                }
-                else {
-                    cur.home(lines);
-                }
-                evt.preventDefault();
-            }
-            else if (key === Keys.END) {
-                if (evt.ctrlKey) {
-                    cur.fullEnd(lines);
-                }
-                else {
-                    cur.end(lines);
-                }
-                evt.preventDefault();
-            }
-            else if (key === Keys.BACKSPACE) {
-                if (cursor.start.i === cursor.finish.i) {
-                    cursor.start.left(lines);
-                }
-                deleteSelection();
-                evt.preventDefault();
-            }
-            else if (key === Keys.DELETE) {
-                if (cursor.start.i === cursor.finish.i) {
-                    cursor.finish.right(lines);
-                }
-                deleteSelection();
-            }
-            else if (key === Keys.ENTER) {
-                deleteSelection();
-                var indent = "";
-                for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
-                    indent += " ";
-                }
-                lines = lines.slice();
-                history.push(lines);
-                lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
-                lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
-                for (var i = 0; i <= indent.length; ++i) {
-                    cursor.both.right(lines);
-                }
-            }
-            else if (key === Keys.TAB) {
-                if (!evt.altKey && !evt.ctrlKey) {
-                    if (cursor.start.y !== cursor.finish.y) {
-                        var a = cursor.start;
-                        var b = cursor.finish;
-                        if (a.i > b.i) {
-                            a = cursor.finish;
-                            b = cursor.start;
-                        }
-                        a.home(lines);
-                        b.end(lines);
-                        lines = lines.slice();
-                        history.push(lines);
-                        if (evt.shiftKey) {
-                            for (var y = a.y; y <= b.y; ++y) {
-                                if (lines[y].substring(0, TAB_SIZE) === TAB) {
-                                    lines[y] = lines[y].substring(TAB_SIZE);
-                                }
-                            }
-                        }
-                        else {
-                            for (var y = a.y; y <= b.y; ++y) {
-                                lines[y] = TAB + lines[y];
-                            }
-                        }
-                        a.setXY(0, a.y, lines);
-                        b.setXY(0, b.y, lines);
-                        b.end(lines);
-                    }
-                    else if (!evt.shiftKey) {
-                        deleteSelection();
-                        var left = lines[cursor.start.y].substring(0, cursor.start.x);
-                        var right = lines[cursor.start.y].substring(cursor.start.x);
-                        lines = lines.slice();
-                        history.push(lines);
-                        lines[cursor.start.y] = left + TAB + right;
-                        for (var i = 0; i < TAB_SIZE; ++i) {
-                            cursor.both.right(lines);
-                        }
-                    }
-                    evt.preventDefault();
-                }
-            }
-            else if (evt.ctrlKey && codePage.NORMAL[key] === "a") {
-                cursor.start.fullHome(lines);
-                cursor.finish.fullEnd(lines);
-                evt.preventDefault();
-            }
-            else if (evt.ctrlKey && codePage.NORMAL[key] === "z") {
-                if(history.length > 1){
-                    history.pop();
-                }
-            }
-            else if (codePage[type]) {
-                var char = codePage[type][key];
+            else if (this.codePage[type]) {
+                var char = this.codePage[type][key];
                 if (char) {
-                    deleteSelection();
-                    var left = lines[cursor.start.y].substring(0, cursor.start.x);
-                    var right = lines[cursor.start.y].substring(cursor.start.x);
-                    lines = lines.slice();
-                    history.push(lines);
-                    lines[cursor.start.y] = left + char + right;
-                    cursor.both.right(lines);
+                    this.insertAtCursor(char);
                     if (key === Keys.SPACEBAR) {
                         evt.preventDefault();
                     }
@@ -190,57 +60,10 @@ function load() {
                 console.log(type, key);
             }
         }
-    }
+        this.drawText();
+    };
 
-    function deleteSelection() {
-        if (cursor.start.i !== cursor.finish.i) {
-            var a = cursor.start;
-            var b = cursor.finish;
-            if (a.i > b.i) {
-                a = cursor.finish;
-                b = cursor.start;
-            }
-            var lines = history[history.length - 1];
-            var text = lines.join("\n");
-            var left = text.substring(0, a.i);
-            var right = text.substring(b.i);
-            text = left + right;
-            lines = text.split("\n");
-            history.push(lines);
-            b.copy(a);
-        }
-    }
-
-    window.addEventListener("keydown", function (evt) {
-        editText(evt);
-        drawText();
-    });
-
-    function copySelectedText(evt) {
-        if (cursor.start.i !== cursor.finish.i) {
-            var a = cursor.start;
-            var b = cursor.finish;
-            if (a.i > b.i) {
-                a = cursor.finish;
-                b = cursor.start;
-            }
-            var lines = history[history.length - 1];
-            var text = lines.join("\n");
-            var str = text.substring(a.i, b.i);
-            evt.clipboardData.setData("text/plain", str);
-        }
-        evt.preventDefault();
-    }
-
-    window.addEventListener("copy", copySelectedText);
-
-    window.addEventListener("cut", function (evt) {
-        copySelectedText(evt)
-        deleteSelection();
-        drawText();
-    });
-
-    window.addEventListener("paste", function (evt) {
+    function readClipboard(evt) {
         var i = evt.clipboardData.types.indexOf("text/plain");
         if (i < 0) {
             for (i = 0; i < evt.clipboardData.types.length; ++i) {
@@ -250,119 +73,187 @@ function load() {
             }
         }
         if (i >= 0) {
-            var a = cursor.start;
-            var b = cursor.finish;
-            if (a.i > b.i) {
-                a = cursor.finish;
-                b = cursor.start;
-            }
             var type = evt.clipboardData.types[i];
             var str = evt.clipboardData.getData(type);
-            console.log("paste", str);
-            deleteSelection();
-            var lines = history[history.length - 1];
-            var text = lines.join("\n");
-            var left = text.substring(0, a.i);
-            var right = text.substring(a.i);
-            text = left + str + right;
-            lines = text.split("\n");
-            history.push(lines);
-            for (var i = 0; i < str.length; ++i) {
-                cursor.start.right(lines);
-            }
-            cursor.finish.copy(cursor.start);
             evt.preventDefault();
-            drawText();
+            this.pasteAtCursor(str);
         }
-    });
+    }
 
     function pixel2cell(x, y) {
-        x = Math.floor(x * pixelRatio / CHAR_WIDTH);
-        y = Math.floor((y * pixelRatio / CHAR_HEIGHT) - 0.25);
+        x = Math.floor(x * PIX_RATIO / CHAR_WIDTH);
+        y = Math.floor((y * PIX_RATIO / CHAR_HEIGHT) - 0.25);
         return {x: x, y: y};
     }
 
-    output.addEventListener("mousedown", function (evt) {
-        var lines = history[history.length - 1];
-        var cell = pixel2cell(evt.layerX, evt.layerY);
-        cursor.both.setXY(cell.x, cell.y, lines);
-        drawText();
-        dragging = true;
-    });
-
-    output.addEventListener("mouseup", function (evt) {
-        dragging = false;
-    });
-
-    output.addEventListener("mousemove", function (evt) {
-        if (dragging) {
-            var lines = history[history.length - 1];
-            var cell = pixel2cell(evt.layerX, evt.layerY);
-            cursor.finish.setXY(cell.x, cell.y, lines);
-            drawText();
-        }
-    });
-
-    function drawText() {
-        var lines = history[history.length - 1];
+    this.drawText = function () {
+        var lines = this.getLines();
         var text = lines.join("\n");
-        var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
-        graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+        var tokens = this.syntaxRules.tokenize(text);
+        var clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect";
+        graphics[clearFunc](0, 0, graphics.canvas.width, graphics.canvas.height);
         var c = new Cursor(), d = new Cursor();
         for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
-            var parts = t.value.split("\n");
-            for (var j = 0; j < parts.length; ++j) {
-                var part = parts[j];
-                if (part.length > 0) {
-                    var a = cursor.start;
-                    var b = cursor.finish;
-                    d.copy(c);
-                    d.x += part.length;
-                    d.i += part.length;
-                    if (cursor.finish.i < cursor.start.i) {
-                        a = cursor.finish;
-                        b = cursor.start;
+            if (t.type === "newlines") {
+                c.x = 0;
+                ++c.y;
+                ++c.i;
+            }
+            else if (t.value.length > 0) {
+                var a = this.getMinCursor();
+                var b = this.getMaxCursor();
+                d.copy(c);
+                d.x += t.value.length;
+                d.i += t.value.length;
+                if (a.i <= d.i && c.i < b.i) {
+                    var e = a, f = b;
+                    if (c.i > a.i) {
+                        e = c;
                     }
-                    if (a.i <= d.i && c.i < b.i) {
-                        var e = a, f = b;
-                        if (c.i > a.i) {
-                            e = c;
-                        }
-                        if (d.i < b.i) {
-                            f = d;
-                        }
-                        var cw = f.i - e.i;
-                        graphics.fillStyle = "#c0c0c0";
-                        graphics.fillRect(
-                                e.x * CHAR_WIDTH, (e.y + 0.25) * CHAR_HEIGHT,
-                                cw * CHAR_WIDTH, CHAR_HEIGHT
-                                );
+                    if (d.i < b.i) {
+                        f = d;
                     }
-
-                    var font = (t.rule.style.fontWeight || "") + " " + (t.rule.style.fontStyle || "") + " " + CHAR_HEIGHT + "px " + DEFAULT_FONT;
-                    graphics.font = font.trim();
-                    graphics.fillStyle = t.rule.style.color || DEFAULT_COLOR;
-                    graphics.fillText(part, c.x * CHAR_WIDTH, (c.y + 1) * CHAR_HEIGHT);
-                    c.x += part.length;
-                    c.i += part.length;
+                    var cw = f.i - e.i;
+                    graphics.fillStyle = this.theme.regular.selectedBackColor;
+                    graphics.fillRect(
+                            e.x * CHAR_WIDTH, (e.y + 0.25) * CHAR_HEIGHT,
+                            cw * CHAR_WIDTH, CHAR_HEIGHT
+                            );
                 }
-                if (j < parts.length - 1) {
-                    ++c.y;
-                    ++c.i;
-                    c.x = 0;
-                }
+                var style = this.theme[t.type] || {};
+                var font = (style.fontWeight || this.theme.regular.fontWeight || "")
+                        + " " + (style.fontStyle || this.theme.regular.fontStyle || "")
+                        + " " + CHAR_HEIGHT + "px " + this.theme.fontFamily;
+                graphics.font = font.trim();
+                graphics.fillStyle = style.foreColor || this.theme.regular.foreColor;
+                graphics.fillText(t.value, c.x * CHAR_WIDTH, (c.y + 1) * CHAR_HEIGHT);
+                c.copy(d);
             }
         }
 
         graphics.beginPath();
         graphics.strokeStyle = "black";
-        graphics.moveTo(cursor.start.x * CHAR_WIDTH, cursor.start.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.start.x * CHAR_WIDTH, (cursor.start.y + 1.25) * CHAR_HEIGHT);
-        graphics.moveTo(cursor.start.x * CHAR_WIDTH + 1, cursor.start.y * CHAR_HEIGHT);
-        graphics.lineTo(cursor.start.x * CHAR_WIDTH + 1, (cursor.start.y + 1.25) * CHAR_HEIGHT);
+        graphics.moveTo(this.start.x * CHAR_WIDTH, this.start.y * CHAR_HEIGHT);
+        graphics.lineTo(this.start.x * CHAR_WIDTH, (this.start.y + 1.25) * CHAR_HEIGHT);
+        graphics.moveTo(this.finish.x * CHAR_WIDTH + 1, this.finish.y * CHAR_HEIGHT);
+        graphics.lineTo(this.finish.x * CHAR_WIDTH + 1, (this.finish.y + 1.25) * CHAR_HEIGHT);
         graphics.stroke();
-    }
+    };
 
-    drawText();
+    keyEventSource.addEventListener("keydown", this.editText.bind(this));
+
+    clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
+    clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
+    clipboardEventSource.addEventListener("paste", readClipboard.bind(this));
+
+    mouseEventSource.addEventListener("mousedown", function (evt) {
+        var lines = this.history[this.history.length - 1];
+        var cell = pixel2cell(evt.layerX, evt.layerY);
+        this.both.setXY(cell.x, cell.y, lines);
+        this.drawText();
+        dragging = true;
+    }.bind(this));
+
+    mouseEventSource.addEventListener("mouseup", function (evt) {
+        dragging = false;
+    });
+
+    mouseEventSource.addEventListener("mousemove", function (evt) {
+        if (dragging) {
+            var lines = this.history[this.history.length - 1];
+            var cell = pixel2cell(evt.layerX, evt.layerY);
+            this.finish.setXY(cell.x, cell.y, lines);
+            this.drawText();
+        }
+    }.bind(this));
 }
+
+Primrose.prototype.insertAtCursor = function (str) {
+    if (str.length > 0) {
+        this.deleteSelection();
+        var lines = this.getLines();
+        var parts = str.split("\n");
+        parts[0] = lines[this.start.y].substring(0, this.start.x) + parts[0];
+        parts[parts.length - 1] += lines[this.start.y].substring(this.start.x);
+        lines.splice.bind(lines, this.start.y, parts.length).apply(lines, parts);
+        for (var i = 0; i <= str.length; ++i) {
+            this.start.right(lines);
+        }
+        this.finish.copy(this.start);
+        this.pushUndo(lines);
+    }
+};
+
+Primrose.prototype.getMinCursor = function () {
+    return this.start.i <= this.finish.i ? this.start : this.finish;
+};
+
+Primrose.prototype.getMaxCursor = function () {
+    return this.start.i > this.finish.i ? this.start : this.finish;
+};
+
+Primrose.prototype.getLines = function () {
+    return this.history[this.history.length - 1].slice();
+};
+
+Primrose.prototype.pushUndo = function (lines) {
+    this.history.push(lines);
+};
+
+Primrose.prototype.popUndo = function () {
+    if (this.history.length > 1) {
+        return this.history.pop();
+    }
+};
+
+Primrose.prototype.copySelectedText = function (evt) {
+    if (this.start.i !== this.finish.i) {
+        var a = this.getMinCursor();
+        var b = this.getMaxCursor();
+        var lines = this.getLines();
+        var text = lines.join("\n");
+        var str = text.substring(a.i, b.i);
+        evt.clipboardData.setData("text/plain", str);
+    }
+    evt.preventDefault();
+};
+
+Primrose.prototype.cutSelectedText = function (evt) {
+    this.copySelectedText(evt);
+    this.deleteSelection();
+    this.drawText();
+};
+
+Primrose.prototype.pasteAtCursor = function (str) {
+    this.deleteSelection();
+    var lines = this.getLines();
+    var text = lines.join("\n");
+    var a = this.getMinCursor();
+    var left = text.substring(0, a.i);
+    var right = text.substring(a.i);
+    text = left + str + right;
+    lines = text.split("\n");
+    this.pushUndo(lines);
+    for (var i = 0; i < str.length; ++i) {
+        this.start.right(lines);
+    }
+    this.finish.copy(this.start);
+    this.drawText();
+};
+
+Primrose.prototype.deleteSelection = function () {
+    if (this.start.i !== this.finish.i) {
+        var a = this.getMinCursor();
+        var b = this.getMaxCursor();
+        var lines = this.getLines();
+        // TODO: don't rejoin the string first.
+        var text = lines.join("\n");
+        var left = text.substring(0, a.i);
+        var right = text.substring(b.i);
+        text = left + right;
+        lines = text.split("\n");
+        this.pushUndo(lines);
+        b.copy(a);
+    }
+};

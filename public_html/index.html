@@ -18,10 +18,17 @@
         <script type="text/javascript" src="js/code_pages/DEU.js"></script>
         <script type="text/javascript" src="js/code_pages/FRA.js"></script>
         <script type="text/javascript" src="js/Cursor.js"></script>
+        <script type="text/javascript" src="js/Themes.js"></script>
         <script type="text/javascript" src="js/Primrose.js"></script>
+        <script type="text/javascript" src="js/Commands.js"></script>
         <script type="text/javascript" src="js/tests.js"></script>
         <script type="text/javascript">
-            window.addEventListener("load", load);
+            var prim;
+            window.addEventListener("load", function(){
+                var canvas = document.getElementById("output");
+                prim = new Primrose(canvas);
+                prim.drawText();
+            });
         </script>
     </head>
     <body>
