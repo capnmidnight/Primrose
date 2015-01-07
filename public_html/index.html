@@ -24,9 +24,19 @@
         <script type="text/javascript" src="js/tests.js"></script>
         <script type="text/javascript">
             var prim;
-            window.addEventListener("load", function(){
+            window.addEventListener("load", function () {
                 var canvas = document.getElementById("output");
-                prim = new Primrose(canvas);
+                prim = new Primrose(canvas, {
+                    file: "(function (){\n" +
+                            "    var i, output;\n" +
+                            "    for (i = 1; i < 101; i++) {\n" +
+                            "        output = \"\";\n" +
+                            "        if (!(i % 3)) output += \"Fizz\";\n" +
+                            "        if (!(i % 5)) output += \"Buzz\";\n" +
+                            "        console.log(output || i);\n" +
+                            "    }    \n" +
+                            "});\n"
+                });
                 prim.drawText();
             });
         </script>
