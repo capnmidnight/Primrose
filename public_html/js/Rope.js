@@ -463,9 +463,9 @@ Rope.BALANCE_SIZE = 100;
  * Ropes are binary trees, and binary trees are more efficient when they
  * are balanced.
  */
-Rope.prototype.rebalance = function (opt_size) {
+Rope.prototype.rebalance = function (str, opt_size) {
     // get the whole string
-    var str = this.toString();
+    var str = str || this.toString();
     opt_size = opt_size || Rope.BALANCE_SIZE;
     // delete all of the links between the old Rope nodes
     var stack = [this];
@@ -525,7 +525,7 @@ Rope.prototype.rebalance = function (opt_size) {
 Rope.tests.basicRebalance = function () {
     var str = "0123456789";
     var rp = new Rope(str);
-    rp.rebalance(1);
+    rp.rebalance(null, 1);
     Assert.areEqual(str.length, rp.getLength());
 };
 

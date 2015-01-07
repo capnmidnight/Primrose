@@ -21,6 +21,12 @@ function load() {
     var CHAR_WIDTH = graphics.measureText("M").width;
     var codePage = CodePages.EN_US;
     var dragging = false;
+    var TAB_SIZE = 4;
+    var TAB = "";
+    for (var i = 0; i < TAB_SIZE; ++i) {
+        TAB += " ";
+    }
+
 
     function editText(evt) {
         evt = evt || event;
@@ -118,6 +124,47 @@ function load() {
                     cursor.both.right(lines);
                 }
             }
+            else if (key === Keys.TAB) {
+                if (!evt.altKey && !evt.ctrlKey) {
+                    if (cursor.start.y !== cursor.finish.y) {
+                        var a = cursor.start;
+                        var b = cursor.finish;
+                        if (a.i > b.i) {
+                            a = cursor.finish;
+                            b = cursor.start;
+                        }
+                        a.home(lines);
+                        b.end(lines);
+                        if (evt.shiftKey) {
+                            for (var y = a.y; y <= b.y; ++y) {
+                                if (lines[y].substring(0, TAB_SIZE) === TAB) {
+                                    lines[y] = lines[y].substring(TAB_SIZE);
+                                }
+                            }
+                        }
+                        else {
+                            for (var y = a.y; y <= b.y; ++y) {
+                                lines[y] = TAB + lines[y];
+                            }
+                        }
+                        data.rebalance(lines.join("\n"));
+                        a.setXY(0, a.y, lines);
+                        b.setXY(0, b.y, lines);
+                        b.end(lines);
+                    }
+                    else if(!evt.shiftKey){
+                        deleteSelection();
+                        var left = lines[cursor.start.y].substring(0, cursor.start.x);
+                        var right = lines[cursor.start.y].substring(cursor.start.x);
+                        data.insert(cursor.start.i, TAB);
+                        lines[cursor.start.y] = left + TAB + right;
+                        for (var i = 0; i < TAB_SIZE; ++i) {
+                            cursor.both.right(lines);
+                        }
+                    }
+                    evt.preventDefault();
+                }
+            }
             else if (codePage[type]) {
                 var char = codePage[type][key];
                 if (char) {
@@ -211,10 +258,10 @@ function load() {
                     }
                     if (a.i <= d.i && c.i < b.i) {
                         var e = a, f = b;
-                        if(c.i > a.i){
+                        if (c.i > a.i) {
                             e = c;
                         }
-                        if(d.i < b.i){
+                        if (d.i < b.i) {
                             f = d;
                         }
                         var cw = f.i - e.i;
