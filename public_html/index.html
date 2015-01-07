@@ -44,30 +44,26 @@
                             + "    object.member.method('mooooo');\n"
                             + "});\n"
                 });
-                
-                prim.drawText();                
-                
-                function makeSelector(elem, obj, def, prop){
-                    for(var key in obj){
-                        if(obj.hasOwnProperty(key)){
+
+                function makeSelector(elem, obj, def, prop) {
+                    for (var key in obj) {
+                        if (obj.hasOwnProperty(key)) {
                             var opt = document.createElement("option");
                             opt.innerHTML = key;
-                            if(key === def){
+                            if (key === def) {
                                 opt.selected = "selected";
                             }
                             elem.appendChild(opt);
                         }
                     }
 
-                    E(elem, "change", function (evt) {
-                        if (this.selectedIndex > 0) {
-                            prim[prop] = obj[this.value];
-                        }
+                    E(elem, "change", function () {
+                        prim[prop](obj[this.value]);
                     });
                 }
-                
-                makeSelector(ctrls.keyboards, CodePages, "EN_US", "codePage");
-                makeSelector(ctrls.themes, Themes, "DEFAULT", "theme");
+
+                makeSelector(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
+                makeSelector(ctrls.themes, Themes, "DEFAULT", "setTheme");
             });
         </script>
     </head>

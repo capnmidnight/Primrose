@@ -3,22 +3,19 @@ function Primrose(canvas, options) {
 
     this.syntaxRules = options.syntaxRules || Grammar.JavaScript;
 
-    this.theme = options.theme || Themes.DEFAULT;
     this.codePage = options.codePage || CodePages.EN_US;
     this.history = [(options.file || "").split("\n")];
     this.start = new Cursor();
     this.finish = new Cursor();
     this.both = new CombinedCursor(this.start, this.finish);
 
-    var graphics = canvas.getContext("2d");
-    var PIX_RATIO = window.devicePixelRatio || 1;
-    var CHAR_HEIGHT = 20 * PIX_RATIO;
-    canvas.style.width = canvas.width + "px";
-    canvas.style.height = canvas.height + "px";
-    canvas.width = canvas.width * PIX_RATIO;
-    canvas.height = canvas.height * PIX_RATIO;
-    graphics.font = CHAR_HEIGHT + "px " + this.theme.fontFamily;
-    var CHAR_WIDTH = graphics.measureText("M").width;
+    this.canvas = canvas;
+    this.graphics = this.canvas.getContext("2d");
+    this.canvas.style.width = this.canvas.width + "px";
+    this.canvas.style.height = this.canvas.height + "px";
+    
+    this.fontSize = options.fontSize || 20;
+    
     var dragging = false;
     this.pageSize = options.pageSize || 5;
     this.tabWidth = options.tabWidth || 4;
@@ -29,7 +26,7 @@ function Primrose(canvas, options) {
 
     var keyEventSource = options.keyEventSource || window;
     var clipboardEventSource = options.clipboardEventSource || window;
-    var mouseEventSource = options.mouseEventSource || canvas;
+    var mouseEventSource = options.mouseEventSource || this.canvas;
 
     this.editText = function (evt) {
         evt = evt || event;
@@ -80,18 +77,15 @@ function Primrose(canvas, options) {
         }
     }
 
-    function pixel2cell(x, y) {
-        x = Math.floor(x * PIX_RATIO / CHAR_WIDTH);
-        y = Math.floor((y * PIX_RATIO / CHAR_HEIGHT) - 0.25);
-        return {x: x, y: y};
-    }
-
     this.drawText = function () {
         var lines = this.getLines();
         var text = lines.join("\n");
         var tokens = this.syntaxRules.tokenize(text);
         var clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect";
-        graphics[clearFunc](0, 0, graphics.canvas.width, graphics.canvas.height);
+        if(this.theme.regular.backColor){
+            this.graphics.fillStyle = this.theme.regular.backColor;
+        }
+        this.graphics[clearFunc](0, 0, this.graphics.canvas.width, this.graphics.canvas.height);
         var c = new Cursor(), d = new Cursor();
         for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
@@ -115,31 +109,31 @@ function Primrose(canvas, options) {
                         f = d;
                     }
                     var cw = f.i - e.i;
-                    graphics.fillStyle = this.theme.regular.selectedBackColor
+                    this.graphics.fillStyle = this.theme.regular.selectedBackColor
                             || Themes.DEFAULT.regular.selectedBackColor;
-                    graphics.fillRect(
-                            e.x * CHAR_WIDTH, (e.y + 0.25) * CHAR_HEIGHT,
-                            cw * CHAR_WIDTH, CHAR_HEIGHT
+                    this.graphics.fillRect(
+                            e.x * this.characterWidth, (e.y + 0.25) * this.characterHeight,
+                            cw * this.characterWidth, this.characterHeight
                             );
                 }
                 var style = this.theme[t.type] || {};
                 var font = (style.fontWeight || this.theme.regular.fontWeight || "")
                         + " " + (style.fontStyle || this.theme.regular.fontStyle || "")
-                        + " " + CHAR_HEIGHT + "px " + this.theme.fontFamily;
-                graphics.font = font.trim();
-                graphics.fillStyle = style.foreColor || this.theme.regular.foreColor;
-                graphics.fillText(t.value, c.x * CHAR_WIDTH, (c.y + 1) * CHAR_HEIGHT);
+                        + " " + this.characterHeight + "px " + this.theme.fontFamily;
+                this.graphics.font = font.trim();
+                this.graphics.fillStyle = style.foreColor || this.theme.regular.foreColor;
+                this.graphics.fillText(t.value, c.x * this.characterWidth, (c.y + 1) * this.characterHeight);
                 c.copy(d);
             }
         }
 
-        graphics.beginPath();
-        graphics.strokeStyle = "black";
-        graphics.moveTo(this.start.x * CHAR_WIDTH, this.start.y * CHAR_HEIGHT);
-        graphics.lineTo(this.start.x * CHAR_WIDTH, (this.start.y + 1.25) * CHAR_HEIGHT);
-        graphics.moveTo(this.finish.x * CHAR_WIDTH + 1, this.finish.y * CHAR_HEIGHT);
-        graphics.lineTo(this.finish.x * CHAR_WIDTH + 1, (this.finish.y + 1.25) * CHAR_HEIGHT);
-        graphics.stroke();
+        this.graphics.beginPath();
+        this.graphics.strokeStyle = "black";
+        this.graphics.moveTo(this.start.x * this.characterWidth, this.start.y * this.characterHeight);
+        this.graphics.lineTo(this.start.x * this.characterWidth, (this.start.y + 1.25) * this.characterHeight);
+        this.graphics.moveTo(this.finish.x * this.characterWidth + 1, this.finish.y * this.characterHeight);
+        this.graphics.lineTo(this.finish.x * this.characterWidth + 1, (this.finish.y + 1.25) * this.characterHeight);
+        this.graphics.stroke();
     };
 
     keyEventSource.addEventListener("keydown", this.editText.bind(this));
@@ -150,25 +144,53 @@ function Primrose(canvas, options) {
 
     mouseEventSource.addEventListener("mousedown", function (evt) {
         var lines = this.history[this.history.length - 1];
-        var cell = pixel2cell(evt.layerX, evt.layerY);
+        var cell = this.pixel2cell(evt.layerX, evt.layerY);
         this.both.setXY(cell.x, cell.y, lines);
         this.drawText();
         dragging = true;
     }.bind(this));
 
-    mouseEventSource.addEventListener("mouseup", function (evt) {
+    mouseEventSource.addEventListener("mouseup", function () {
         dragging = false;
     });
 
     mouseEventSource.addEventListener("mousemove", function (evt) {
         if (dragging) {
             var lines = this.history[this.history.length - 1];
-            var cell = pixel2cell(evt.layerX, evt.layerY);
+            var cell = this.pixel2cell(evt.layerX, evt.layerY);
             this.finish.setXY(cell.x, cell.y, lines);
             this.drawText();
         }
     }.bind(this));
+    
+    this.setTheme(options.theme || Themes.DEFAULT);    
 }
+
+Primrose.prototype.pixel2cell = function(x, y) {
+    var r = this.getPixelRatio();
+    x = Math.floor(x * r / this.characterWidth);
+    y = Math.floor((y * r / this.characterHeight) - 0.25);
+    return {x: x, y: y};
+};
+
+Primrose.prototype.getPixelRatio = function(){
+    return window.devicePixelRatio || 1;
+};
+
+Primrose.prototype.setTheme = function(theme){
+    this.theme = theme;
+    var r = this.getPixelRatio();
+    this.characterHeight = this.fontSize * r;
+    this.canvas.width = this.canvas.width * r;
+    this.canvas.height = this.canvas.height * r;
+    this.graphics.font = this.characterHeight + "px " + this.theme.fontFamily;
+    this.characterWidth = this.graphics.measureText("M").width;
+    this.drawText();
+};
+
+Primrose.prototype.setCodePage = function(codePage){
+    this.codePage = codePage;
+};
 
 Primrose.prototype.insertAtCursor = function (str) {
     if (str.length > 0) {
