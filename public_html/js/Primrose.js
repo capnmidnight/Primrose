@@ -32,9 +32,10 @@ function load() {
         var key = evt.keyCode;
         // don't do anything about the actual press of SHIFT, CTRL, or ALT
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            var type = ((evt.ctrlKey && "CTRL" || "")
+            var prefix = ((evt.ctrlKey && "CTRL" || "")
                     + (evt.altKey && "ALT" || "")
-                    + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+                    + (evt.shiftKey && "SHIFT" || ""));
+            var type = prefix || "NORMAL";
             var lines = history[history.length - 1];
             var cur = evt.shiftKey ? cursor.finish : cursor.both;
             if (key === Keys.LEFTARROW) {
@@ -173,8 +174,6 @@ function load() {
                 var char = codePage[type][key];
                 if (char) {
                     deleteSelection();
-                    // do these edits concurrently so we don't have to rebuild
-                    // the string and resplit it.
                     var left = lines[cursor.start.y].substring(0, cursor.start.x);
                     var right = lines[cursor.start.y].substring(cursor.start.x);
                     lines = lines.slice();
