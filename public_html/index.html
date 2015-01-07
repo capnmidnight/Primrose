@@ -45,25 +45,8 @@
                             + "});\n"
                 });
 
-                function makeSelector(elem, obj, def, prop) {
-                    for (var key in obj) {
-                        if (obj.hasOwnProperty(key)) {
-                            var opt = document.createElement("option");
-                            opt.innerHTML = key;
-                            if (key === def) {
-                                opt.selected = "selected";
-                            }
-                            elem.appendChild(opt);
-                        }
-                    }
-
-                    E(elem, "change", function () {
-                        prim[prop](obj[this.value]);
-                    });
-                }
-
-                makeSelector(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
-                makeSelector(ctrls.themes, Themes, "DEFAULT", "setTheme");
+                makeSelectorFromObj(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
+                makeSelectorFromObj(ctrls.themes, Themes, "DEFAULT", "setTheme");
             });
         </script>
     </head>
