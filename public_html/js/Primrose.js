@@ -1,6 +1,5 @@
 function load() {
-    var data = new Rope(drawText.toString());
-    var clipboard = document.getElementById("clipboard");
+    var history = [drawText.toString().split("\n")];
     var output = document.getElementById("output");
     var graphics = output.getContext("2d");
     var CHAR_HEIGHT = 20;
@@ -36,8 +35,7 @@ function load() {
             var type = ((evt.ctrlKey && "CTRL" || "")
                     + (evt.altKey && "ALT" || "")
                     + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-            var text = data.toString();
-            var lines = text.split(/\n/g);
+            var lines = history[history.length - 1];
             var cur = evt.shiftKey ? cursor.finish : cursor.both;
             if (key === Keys.LEFTARROW) {
                 if (evt.ctrlKey) {
@@ -91,11 +89,6 @@ function load() {
                 }
                 evt.preventDefault();
             }
-            else if (evt.ctrlKey && codePage.NORMAL[key] === "a") {
-                cursor.start.fullHome(lines);
-                cursor.finish.fullEnd(lines);
-                evt.preventDefault();
-            }
             else if (key === Keys.BACKSPACE) {
                 if (cursor.start.i === cursor.finish.i) {
                     cursor.start.left(lines);
@@ -115,9 +108,8 @@ function load() {
                 for (var i = 0; i < lines[cursor.start.y].length && lines[cursor.start.y][i] === " "; ++i) {
                     indent += " ";
                 }
-                data.insert(cursor.start.i, "\n" + indent);
-                // do these edits concurrently so we don't have to rebuild
-                // the string and resplit it.
+                lines = lines.slice();
+                history.push(lines);
                 lines.splice(cursor.start.y + 1, 0, indent + lines[cursor.start.y].substring(cursor.start.x));
                 lines[cursor.start.y] = lines[cursor.start.y].substring(0, cursor.start.x);
                 for (var i = 0; i <= indent.length; ++i) {
@@ -135,6 +127,8 @@ function load() {
                         }
                         a.home(lines);
                         b.end(lines);
+                        lines = lines.slice();
+                        history.push(lines);
                         if (evt.shiftKey) {
                             for (var y = a.y; y <= b.y; ++y) {
                                 if (lines[y].substring(0, TAB_SIZE) === TAB) {
@@ -147,16 +141,16 @@ function load() {
                                 lines[y] = TAB + lines[y];
                             }
                         }
-                        data.rebalance(lines.join("\n"));
                         a.setXY(0, a.y, lines);
                         b.setXY(0, b.y, lines);
                         b.end(lines);
                     }
-                    else if(!evt.shiftKey){
+                    else if (!evt.shiftKey) {
                         deleteSelection();
                         var left = lines[cursor.start.y].substring(0, cursor.start.x);
                         var right = lines[cursor.start.y].substring(cursor.start.x);
-                        data.insert(cursor.start.i, TAB);
+                        lines = lines.slice();
+                        history.push(lines);
                         lines[cursor.start.y] = left + TAB + right;
                         for (var i = 0; i < TAB_SIZE; ++i) {
                             cursor.both.right(lines);
@@ -165,15 +159,26 @@ function load() {
                     evt.preventDefault();
                 }
             }
+            else if (evt.ctrlKey && codePage.NORMAL[key] === "a") {
+                cursor.start.fullHome(lines);
+                cursor.finish.fullEnd(lines);
+                evt.preventDefault();
+            }
+            else if (evt.ctrlKey && codePage.NORMAL[key] === "z") {
+                if(history.length > 1){
+                    history.pop();
+                }
+            }
             else if (codePage[type]) {
                 var char = codePage[type][key];
                 if (char) {
                     deleteSelection();
-                    data.insert(cursor.start.i, char);
                     // do these edits concurrently so we don't have to rebuild
                     // the string and resplit it.
                     var left = lines[cursor.start.y].substring(0, cursor.start.x);
                     var right = lines[cursor.start.y].substring(cursor.start.x);
+                    lines = lines.slice();
+                    history.push(lines);
                     lines[cursor.start.y] = left + char + right;
                     cursor.both.right(lines);
                     if (key === Keys.SPACEBAR) {
@@ -190,21 +195,86 @@ function load() {
 
     function deleteSelection() {
         if (cursor.start.i !== cursor.finish.i) {
-            var a = Math.min(cursor.start.i, cursor.finish.i);
-            var b = Math.max(cursor.start.i, cursor.finish.i);
-            data.delete(a, b);
-            if (cursor.start.i > cursor.finish.i) {
-                cursor.start.copy(cursor.finish);
+            var a = cursor.start;
+            var b = cursor.finish;
+            if (a.i > b.i) {
+                a = cursor.finish;
+                b = cursor.start;
             }
-            else {
-                cursor.finish.copy(cursor.start);
-            }
+            var lines = history[history.length - 1];
+            var text = lines.join("\n");
+            var left = text.substring(0, a.i);
+            var right = text.substring(b.i);
+            text = left + right;
+            lines = text.split("\n");
+            history.push(lines);
+            b.copy(a);
         }
     }
 
     window.addEventListener("keydown", function (evt) {
         editText(evt);
         drawText();
+    });
+
+    function copySelectedText(evt) {
+        if (cursor.start.i !== cursor.finish.i) {
+            var a = cursor.start;
+            var b = cursor.finish;
+            if (a.i > b.i) {
+                a = cursor.finish;
+                b = cursor.start;
+            }
+            var lines = history[history.length - 1];
+            var text = lines.join("\n");
+            var str = text.substring(a.i, b.i);
+            evt.clipboardData.setData("text/plain", str);
+        }
+        evt.preventDefault();
+    }
+
+    window.addEventListener("copy", copySelectedText);
+
+    window.addEventListener("cut", function (evt) {
+        copySelectedText(evt)
+        deleteSelection();
+        drawText();
+    });
+
+    window.addEventListener("paste", function (evt) {
+        var i = evt.clipboardData.types.indexOf("text/plain");
+        if (i < 0) {
+            for (i = 0; i < evt.clipboardData.types.length; ++i) {
+                if (/^text/.test(evt.clipboardData.types[i])) {
+                    break;
+                }
+            }
+        }
+        if (i >= 0) {
+            var a = cursor.start;
+            var b = cursor.finish;
+            if (a.i > b.i) {
+                a = cursor.finish;
+                b = cursor.start;
+            }
+            var type = evt.clipboardData.types[i];
+            var str = evt.clipboardData.getData(type);
+            console.log("paste", str);
+            deleteSelection();
+            var lines = history[history.length - 1];
+            var text = lines.join("\n");
+            var left = text.substring(0, a.i);
+            var right = text.substring(a.i);
+            text = left + str + right;
+            lines = text.split("\n");
+            history.push(lines);
+            for (var i = 0; i < str.length; ++i) {
+                cursor.start.right(lines);
+            }
+            cursor.finish.copy(cursor.start);
+            evt.preventDefault();
+            drawText();
+        }
     });
 
     function pixel2cell(x, y) {
@@ -214,8 +284,7 @@ function load() {
     }
 
     output.addEventListener("mousedown", function (evt) {
-        var text = data.toString();
-        var lines = text.split("\n");
+        var lines = history[history.length - 1];
         var cell = pixel2cell(evt.layerX, evt.layerY);
         cursor.both.setXY(cell.x, cell.y, lines);
         drawText();
@@ -228,8 +297,7 @@ function load() {
 
     output.addEventListener("mousemove", function (evt) {
         if (dragging) {
-            var text = data.toString();
-            var lines = text.split("\n");
+            var lines = history[history.length - 1];
             var cell = pixel2cell(evt.layerX, evt.layerY);
             cursor.finish.setXY(cell.x, cell.y, lines);
             drawText();
@@ -237,7 +305,8 @@ function load() {
     });
 
     function drawText() {
-        var text = data.toString();
+        var lines = history[history.length - 1];
+        var text = lines.join("\n");
         var tokens = Grammar.JavaScript.tokenize(text, DEFAULT_STYLE);
         graphics.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
         var c = new Cursor(), d = new Cursor();
