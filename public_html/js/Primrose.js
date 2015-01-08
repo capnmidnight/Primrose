@@ -155,17 +155,24 @@ function Primrose(canvasID, options) {
         gfx.stroke();
     };
 
+    var gridWidth, gridHeight;
     function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = fontSize * r;
-        canvas.width = canvas.width * r;
-        canvas.height = canvas.height * r;
+        var w = canvas.style.width;
+        var h = canvas.style.height;
+        w = parseFloat(w.substring(0, w.length - 2));
+        h = parseFloat(h.substring(0, h.length - 2));
+        canvas.width = w * r;
+        canvas.height = h * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
         this.characterWidth = gfx.measureText("M").width;
+        gridWidth = Math.floor(canvas.width / this.characterWidth);
+        gridHeight = Math.floor(canvas.height / this.characterHeight);
         this.drawText();
     }
 
-    var fontSize = options.fontSize || 12;
+    var fontSize = options.fontSize || 14;
     this.setFontSize = function (sz) {
         fontSize = sz;
         measureText.call(this);
