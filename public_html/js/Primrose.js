@@ -11,7 +11,7 @@ function Primrose(canvasID, options) {
         codePage = cp;
     };
 
-    var history = [(options.file || "").split("\n")];
+    var history = [(options.file.replace(/\r\n/g, "\n") || "").split("\n")];
     this.getLines = function () {
         return history[history.length - 1].slice();
     };
@@ -65,7 +65,7 @@ function Primrose(canvasID, options) {
     surrogate.style.top = canvas.offsetTop + "px";
     surrogate.style.width = canvas.offsetWidth + "px";
     surrogate.style.height = canvas.offsetHeigth + "px";
-    surrogate.value = this.getLines().join("\n");
+    surrogate.value = this.getText();
     this.DOMElement.appendChild(surrogate);
 
     var keyEventSource = options.keyEventSource || surrogate;
@@ -162,16 +162,8 @@ function Primrose(canvasID, options) {
         }
         gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
 
-        var lines = this.getLines();
-        var lineCountWidth = Math.ceil(Math.log(lines.length) / Math.LN10);
-        this.gridLeft = lineCountWidth + leftGutterWidth;
-        gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
-        var scrollRight = this.scrollLeft + gridWidth;
-        gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
-        this.pageSize = Math.floor(gridHeight);
-        var text = lines.join("\n");
-        var tokens = languageGrammar.tokenize(text);
-
+        var tokens = languageGrammar.tokenize(this.getText());
+        
         // group the tokens into rows
         var rows = [[]];
         for (var i = 0; i < tokens.length; ++i) {
@@ -184,6 +176,13 @@ function Primrose(canvasID, options) {
             }
         }
 
+        var lineCountWidth = Math.ceil(Math.log(rows.length) / Math.LN10);
+        this.gridLeft = lineCountWidth + leftGutterWidth;
+        gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
+        var scrollRight = this.scrollLeft + gridWidth;
+        gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
+        this.pageSize = Math.floor(gridHeight);
+
         var minCursor = Cursor.min(this.frontCursor, this.backCursor);
         var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
         var tokenFront = new Cursor();
@@ -192,26 +191,8 @@ function Primrose(canvasID, options) {
 
         for (var y = 0; y < rows.length; ++y) {
             // skip drawing rows that aren't in view
-            if (this.scrollTop <= y && y < this.scrollTop + gridHeight) {
-
-                // draw the left gutter
-                var lineNumber = y.toString();
-                while (lineNumber.length < lineCountWidth) {
-                    lineNumber = " " + lineNumber;
-                }
-                gfx.fillStyle = theme.regular.selectedBackColor
-                        || Themes.DEFAULT.regular.selectedBackColor;
-                gfx.fillRect(
-                        0,
-                        (y - this.scrollTop + 0.2) * this.characterHeight,
-                        (lineNumber.length + leftGutterWidth) * this.characterWidth,
-                        this.characterHeight);
-                gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
-                gfx.fillStyle = theme.regular.foreColor;
-                gfx.fillText(
-                        lineNumber,
-                        0,
-                        (y - this.scrollTop + 1) * this.characterHeight);
+            if (this.scrollTop <= y && y < this.scrollTop + gridHeight)
+            {
 
                 // draw the tokens on this row
                 var row = rows[y];
@@ -223,13 +204,6 @@ function Primrose(canvasID, options) {
 
                     // skip drawing tokens that aren't in view
                     if (this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-                        if (tokenFront.x < this.scrollLeft) {
-                            var dx = this.scrollLeft - tokenFront.x;
-                            tokenFront.x += dx;
-                            tokenFront.i += dx;
-                            toPrint = toPrint.substring(dx);
-                        }
-
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
                             var selectionFront = Cursor.max(minCursor, tokenFront);
@@ -259,6 +233,26 @@ function Primrose(canvasID, options) {
 
                     tokenFront.copy(tokenBack);
                 }
+
+
+                // draw the left gutter
+                var lineNumber = y.toString();
+                while (lineNumber.length < lineCountWidth) {
+                    lineNumber = " " + lineNumber;
+                }
+                gfx.fillStyle = theme.regular.selectedBackColor
+                        || Themes.DEFAULT.regular.selectedBackColor;
+                gfx.fillRect(
+                        0,
+                        (y - this.scrollTop + 0.2) * this.characterHeight,
+                        (lineNumber.length + leftGutterWidth) * this.characterWidth,
+                        this.characterHeight);
+                gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
+                gfx.fillStyle = theme.regular.foreColor;
+                gfx.fillText(
+                        lineNumber,
+                        0,
+                        (y - this.scrollTop + 1) * this.characterHeight);
             }
             maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
             tokenFront.x = 0;
@@ -287,8 +281,8 @@ function Primrose(canvasID, options) {
         // draw the scrollbars
 
         //vertical
-        var scrollY = (this.scrollTop * canvas.height) / lines.length + this.characterHeight;
-        var scrollBarHeight = gridHeight * canvas.height / lines.length - bottomGutterHeight * this.characterHeight;
+        var scrollY = (this.scrollTop * canvas.height) / rows.length + this.characterHeight;
+        var scrollBarHeight = gridHeight * canvas.height / rows.length - bottomGutterHeight * this.characterHeight;
         gfx.fillStyle = theme.regular.selectedBackColor
                 || Themes.DEFAULT.regular.selectedBackColor;
         gfx.fillRect(
@@ -346,10 +340,10 @@ function Primrose(canvasID, options) {
 
     keyEventSource.addEventListener("keydown", this.editText.bind(this));
     keyEventSource.addEventListener("keyup", function () {
-        surrogate.value = this.getLines().join("\n");
+        surrogate.value = this.getText();
         surrogate.selectionStart = this.frontCursor.i;
         surrogate.selectionLength = this.backCursor.i - this.frontCursor.i;
-    });
+    }.bind(this));
 
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
@@ -370,7 +364,7 @@ function Primrose(canvasID, options) {
     mouseEventSource.addEventListener("mouseup", function () {
         dragging = false;
         surrogate.focus();
-    });
+    }.bind(this));
 
     mouseEventSource.addEventListener("mousemove", function (evt) {
         if (dragging) {
@@ -426,6 +420,10 @@ Primrose.prototype.insertAtCursor = function (str) {
         this.backCursor.copy(this.frontCursor);
         this.pushUndo(lines);
     }
+};
+
+Primrose.prototype.getText = function () {
+    return this.getLines().join("\n");
 };
 
 Primrose.prototype.export = function () {
