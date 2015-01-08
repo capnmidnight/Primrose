@@ -154,6 +154,21 @@ function group(arr, getKey, getValue) {
     return groups;
 }
 
+// unicode-aware string reverse
+var reverse = function (str) {
+    str = str.replace(reverse.combiningMarks, function (match, capture1, capture2) {
+        return reverse(capture2) + capture1;
+    })
+            .replace(reverse.surrogatePair, "$2$1");
+    var res = "";
+    for (var i = str.length - 1; i >= 0; --i) {
+        res += str[i];
+    }
+    return res;
+};
+reverse.combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
+reverse.surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+
 // An object inspection function.
 function help(obj) {
     var funcs = {};

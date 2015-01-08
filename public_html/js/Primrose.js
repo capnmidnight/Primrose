@@ -11,10 +11,18 @@ function Primrose(canvasID, options) {
         languageGrammar = lang;
     };
 
-    var codePage = options.codePage || CodePages.EN_US;
+    var codePage;
     this.setCodePage = function (cp) {
         codePage = cp;
+        for (var type in codePage) {
+            var codes = codePage[type];
+            for (var code in codes) {
+                var combo = type + "_" + codes[code];
+                Commands[combo.toUpperCase()] = this.insertAtCursor.bind(this, codes[code]);
+            }
+        }
     };
+    this.setCodePage(options.codePage || CodePages.EN_US);
 
     var history = [];
     this.getLines = function () {
@@ -80,38 +88,27 @@ function Primrose(canvasID, options) {
     this.editText = function (evt) {
         evt = evt || event;
         var key = evt.keyCode;
-        // don't do anything about the actual press of SHIFT, CTRL, or ALT
-        if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            var typeA = (evt.ctrlKey && "CTRL" || "")
-                    + (evt.altKey && "ALT" || "");
-            var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-            typeA = typeA || "NORMAL";
-            var codeCommandA = typeA + key;
-            var codeCommandB = typeB + key;
-            var charCommand = typeB + "_" + codePage.SHIFT[key];
-            var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
-            if (func) {
-                var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
-                func.call(this, this.getLines(), currentCursor);
-                if (!evt.shiftKey) {
-                    this.backCursor.copy(this.frontCursor);
-                }
-                evt.preventDefault();
+        var typeA = (evt.ctrlKey && "CTRL" || "")
+                + (evt.altKey && "ALT" || "");
+        var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+        typeA = typeA || "NORMAL";
+        var codeCommandA = typeA + key;
+        var codeCommandB = typeB + key;
+        var charCommand = typeB + "_" + codePage.SHIFT[key];
+        var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
+        if (func) {
+            this.frontCursor.moved = false;
+            this.backCursor.moved = false;
+            var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
+            func.call(this, this.getLines(), currentCursor);
+            if (this.frontCursor.moved && !this.backCursor.moved) {
+                this.backCursor.copy(this.frontCursor);
             }
-            else if (codePage[typeB]) {
-                var char = codePage[typeB][key];
-                if (char) {
-                    this.insertAtCursor(char);
-                    this.scrollIntoView(this.frontCursor);
-                    if (key === Keys.SPACEBAR) {
-                        evt.preventDefault();
-                    }
-                }
-            }
-            else {
-                // what just happened?
-                console.log(typeB, key);
-            }
+            evt.preventDefault();
+        }
+        else {
+            // what just happened?
+            console.log(typeB, key);
         }
         this.drawText();
     };
@@ -169,11 +166,9 @@ function Primrose(canvasID, options) {
         var rows = [[]];
         for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
+            rows[rows.length - 1].push(t);
             if (t.type === "newlines") {
                 rows.push([]);
-            }
-            else {
-                rows[rows.length - 1].push(t);
             }
         }
 
@@ -257,7 +252,6 @@ function Primrose(canvasID, options) {
             maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
             tokenFront.x = 0;
             ++tokenFront.y;
-            ++tokenFront.i;
             tokenBack.copy(tokenFront);
         }
 
@@ -353,7 +347,6 @@ function Primrose(canvasID, options) {
         var lines = this.getLines();
         var cell = this.pixel2cell(evt.layerX, evt.layerY);
         cursor.setXY(cell.x, cell.y, lines);
-        this.drawText();
     }
 
     mouseEventSource.addEventListener("mousedown", function (evt) {
@@ -361,6 +354,7 @@ function Primrose(canvasID, options) {
             setCursorXY.call(this, this.frontCursor, evt);
             this.backCursor.copy(this.frontCursor);
             dragging = true;
+            this.drawText();
         }
     }.bind(this));
 
@@ -374,6 +368,7 @@ function Primrose(canvasID, options) {
     mouseEventSource.addEventListener("mousemove", function (evt) {
         if (dragging) {
             setCursorXY.call(this, this.backCursor, evt);
+            this.drawText();
         }
     }.bind(this));
 }

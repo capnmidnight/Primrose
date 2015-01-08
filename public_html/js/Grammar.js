@@ -81,6 +81,7 @@ Grammar.prototype.tokenize = function (text) {
         if (!(t instanceof Token)) {
             tokens[i] = t = new Token(t, "regular");
         }
+               
         if (blockOn) {
             if (t.type === "endBlockComments") {
                 blockOn = false;

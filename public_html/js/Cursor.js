@@ -19,17 +19,18 @@ function Cursor(i, x, y) {
     this.i = i || 0;
     this.x = x || 0;
     this.y = y || 0;
+    this.moved = false;
 }
 
-Cursor.min = function(a, b){
-    if(a.i <= b.i){
+Cursor.min = function (a, b) {
+    if (a.i <= b.i) {
         return a;
     }
     return b;
 };
 
-Cursor.max = function(a, b){
-    if(a.i > b.i){
+Cursor.max = function (a, b) {
+    if (a.i > b.i) {
         return a;
     }
     return b;
@@ -43,6 +44,7 @@ Cursor.prototype.copy = function (cursor) {
     this.i = cursor.i;
     this.x = cursor.x;
     this.y = cursor.y;
+    this.moved = false;
 };
 
 Cursor.prototype.left = function (lines) {
@@ -54,23 +56,8 @@ Cursor.prototype.left = function (lines) {
             this.x = lines[this.y].length;
         }
     }
+    this.moved = true;
 };
-
-
-
-var reverse = function (str) {
-    str = str.replace(reverse.combiningMarks, function (match, capture1, capture2) {
-        return reverse(capture2) + capture1;
-    })
-            .replace(reverse.surrogatePair, "$2$1");
-    var res = "";
-    for (var i = str.length - 1; i >= 0; --i) {
-        res += str[i];
-    }
-    return res;
-};
-reverse.combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
-reverse.surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
 Cursor.prototype.skipLeft = function (lines) {
     if (this.x === 0) {
@@ -84,6 +71,7 @@ Cursor.prototype.skipLeft = function (lines) {
         this.i -= dx;
         this.x -= dx;
     }
+    this.moved = true;
 };
 
 Cursor.prototype.right = function (lines) {
@@ -95,6 +83,7 @@ Cursor.prototype.right = function (lines) {
             ++this.y;
         }
     }
+    this.moved = true;
 };
 
 Cursor.prototype.skipRight = function (lines) {
@@ -105,27 +94,31 @@ Cursor.prototype.skipRight = function (lines) {
         var x = this.x + 1;
         var line = lines[this.y].substring(x);
         var m = line.match(/(\s|\W)+/);
-        var dx = m ? ( m.index + m[0].length + 1) : (line.length - this.x);
+        var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
         this.i += dx;
         this.x += dx;
     }
+    this.moved = true;
 };
 
 Cursor.prototype.home = function (lines) {
     this.i -= this.x;
     this.x = 0;
+    this.moved = true;
 };
 
 Cursor.prototype.fullHome = function (lines) {
     this.i = 0;
     this.x = 0;
     this.y = 0;
+    this.moved = true;
 };
 
 Cursor.prototype.end = function (lines) {
     var dx = lines[this.y].length - this.x;
     this.i += dx;
     this.x += dx;
+    this.moved = true;
 };
 
 Cursor.prototype.fullEnd = function (lines) {
@@ -135,6 +128,7 @@ Cursor.prototype.fullEnd = function (lines) {
         this.i += lines[this.y].length + 1;
     }
     this.x = lines[this.y].length;
+    this.moved = true;
 };
 
 Cursor.prototype.up = function (lines) {
@@ -144,6 +138,7 @@ Cursor.prototype.up = function (lines) {
         this.x += dx;
         this.i -= lines[this.y].length + 1 - dx;
     }
+    this.moved = true;
 };
 
 Cursor.prototype.down = function (lines) {
@@ -153,6 +148,7 @@ Cursor.prototype.down = function (lines) {
         this.x += dx;
         this.i += lines[this.y - 1].length + 1 + dx;
     }
+    this.moved = true;
 };
 
 Cursor.prototype.setXY = function (x, y, lines) {
@@ -162,6 +158,7 @@ Cursor.prototype.setXY = function (x, y, lines) {
     for (var i = 0; i < this.y; ++i) {
         this.i += lines[i].length + 1;
     }
+    this.moved = true;
 };
 
 Cursor.prototype.incY = function (dy, lines) {
@@ -171,39 +168,5 @@ Cursor.prototype.incY = function (dy, lines) {
     for (var i = 0; i < this.y; ++i) {
         this.i += lines[i].length + 1;
     }
+    this.moved = true;
 };
-
-function CombinedCursor(start, finish) {
-    this.start = start;
-    this.finish = finish;
-}
-
-CombinedCursor.prototype.toString = function () {
-    return this.start.toString() + this.finish.toString();
-};
-
-for (var key in Cursor.prototype) {
-    if (Cursor.prototype.hasOwnProperty(key)
-            && !CombinedCursor.prototype.hasOwnProperty(key)) {
-        var func = Cursor.prototype[key];
-        if (func instanceof Function) {
-            switch (func.length) {
-                case 0:
-                    CombinedCursor.prototype[key] = new Function(fmt("this.start.$1(); this.finish.copy(this.start);", key));
-                    break;
-                case 1:
-                    CombinedCursor.prototype[key] = new Function("lines", fmt("this.start.$1(lines); this.finish.copy(this.start);", key));
-                    break;
-                case 2:
-                    CombinedCursor.prototype[key] = new Function("i", "lines", fmt("this.start.$1(i, lines); this.finish.copy(this.start);", key));
-                    break;
-                case 3:
-                    CombinedCursor.prototype[key] = new Function("x", "y", "lines", fmt("this.start.$1(x, y, lines); this.finish.copy(this.start);", key));
-                    break;
-                default:
-                    console.error("function %s is too long: %s.", key, func.length);
-                    break;
-            }
-        }
-    }
-}
