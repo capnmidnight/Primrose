@@ -55,7 +55,7 @@ var Themes = {
         regular: { 
             backColor: "black",
             foreColor: "#c0c0c0",
-            selectedBackColor: "#c0c0c0",
+            selectedBackColor: "#404040",
             selectedForeColor: "#ffffff"
         },
         strings: {
