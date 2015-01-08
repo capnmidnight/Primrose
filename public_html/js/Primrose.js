@@ -38,6 +38,7 @@ function Primrose(canvasID, options) {
     var dragging = false;
     this.scrollTop = 0;
     this.scrollLeft = 0;
+    this.gridLeft = 0;
     var leftGutterWidth = 1;
     var rightGutterWidth = 1;
     var bottomGutterHeight = 1;
@@ -83,6 +84,7 @@ function Primrose(canvasID, options) {
                 var char = codePage[typeB][key];
                 if (char) {
                     this.insertAtCursor(char);
+                    this.scrollIntoView(this.frontCursor);
                     if (key === Keys.SPACEBAR) {
                         evt.preventDefault();
                     }
@@ -145,8 +147,9 @@ function Primrose(canvasID, options) {
 
         var lines = this.getLines();
         var lineCountWidth = Math.ceil(Math.log(lines.length) / Math.LN10);
-        var gridLeft = lineCountWidth + leftGutterWidth;
-        gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft - rightGutterWidth;
+        this.gridLeft = lineCountWidth + leftGutterWidth;
+        gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
+        var scrollRight = this.scrollLeft + gridWidth;
         gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
         this.pageSize = Math.floor(gridHeight);
         var text = lines.join("\n");
@@ -168,6 +171,7 @@ function Primrose(canvasID, options) {
         var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
         var tokenFront = new Cursor();
         var tokenBack = new Cursor();
+        var maxLineWidth = 0;
 
         for (var y = 0; y < rows.length; ++y) {
             // skip drawing rows that aren't in view
@@ -196,12 +200,19 @@ function Primrose(canvasID, options) {
                 var row = rows[y];
                 for (var n = 0; n < row.length; ++n) {
                     var t = row[n];
-                    tokenBack.x += t.value.length;
-                    tokenBack.i += t.value.length;
+                    var toPrint = t.value;
+                    tokenBack.x += toPrint.length;
+                    tokenBack.i += toPrint.length;
 
                     // skip drawing tokens that aren't in view
-                    if (this.scrollLeft <= tokenBack.x && tokenFront.x < this.scrollLeft + gridWidth) {
-
+                    if (this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                        if(tokenFront.x < this.scrollLeft){
+                            var dx = this.scrollLeft - tokenFront.x;
+                            tokenFront.x += dx;
+                            tokenFront.i += dx;
+                            toPrint = toPrint.substring(dx);
+                        }
+                        
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
                             var selectionFront = Cursor.max(minCursor, tokenFront);
@@ -210,7 +221,7 @@ function Primrose(canvasID, options) {
                             gfx.fillStyle = theme.regular.selectedBackColor
                                     || Themes.DEFAULT.regular.selectedBackColor;
                             gfx.fillRect(
-                                    (selectionFront.x - this.scrollLeft + gridLeft) * this.characterWidth,
+                                    (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                     (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
                                     cw * this.characterWidth,
                                     this.characterHeight);
@@ -224,14 +235,15 @@ function Primrose(canvasID, options) {
                         gfx.font = font.trim();
                         gfx.fillStyle = style.foreColor || theme.regular.foreColor;
                         gfx.fillText(
-                                t.value,
-                                (tokenFront.x - this.scrollLeft + gridLeft) * this.characterWidth,
+                                toPrint,
+                                (tokenFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                 (tokenFront.y - this.scrollTop + 1) * this.characterHeight);
                     }
 
                     tokenFront.copy(tokenBack);
                 }
             }
+            maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
             tokenFront.x = 0;
             ++tokenFront.y;
             ++tokenFront.i;
@@ -242,22 +254,24 @@ function Primrose(canvasID, options) {
         gfx.beginPath();
         gfx.strokeStyle = "black";
         gfx.moveTo(
-                (this.frontCursor.x - this.scrollLeft + gridLeft) * this.characterWidth,
+                (this.frontCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                 (this.frontCursor.y - this.scrollTop) * this.characterHeight);
         gfx.lineTo(
-                (this.frontCursor.x - this.scrollLeft + gridLeft) * this.characterWidth,
+                (this.frontCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                 (this.frontCursor.y - this.scrollTop + 1.25) * this.characterHeight);
         gfx.moveTo(
-                (this.backCursor.x - this.scrollLeft + gridLeft) * this.characterWidth + 1,
+                (this.backCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth + 1,
                 (this.backCursor.y - this.scrollTop) * this.characterHeight);
         gfx.lineTo(
-                (this.backCursor.x - this.scrollLeft + gridLeft) * this.characterWidth + 1,
+                (this.backCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth + 1,
                 (this.backCursor.y - this.scrollTop + 1.25) * this.characterHeight);
         gfx.stroke();
 
         // draw the scrollbars
-        var scrollY = (this.scrollTop * canvas.height) / lines.length;
-        var scrollBarHeight = (gridHeight + bottomGutterHeight) * canvas.height / lines.length;
+        
+        //vertical
+        var scrollY = (this.scrollTop * canvas.height) / lines.length + this.characterHeight;
+        var scrollBarHeight = gridHeight * canvas.height / lines.length - bottomGutterHeight * this.characterHeight;
         gfx.fillStyle = theme.regular.selectedBackColor
                 || Themes.DEFAULT.regular.selectedBackColor;
         gfx.fillRect(
@@ -265,17 +279,24 @@ function Primrose(canvasID, options) {
                 scrollY,
                 this.characterWidth,
                 scrollBarHeight);
+                
+        // horizontal
+        var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + this.characterWidth;
+        var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
+        gfx.fillStyle = theme.regular.selectedBackColor
+                || Themes.DEFAULT.regular.selectedBackColor;
+        gfx.fillRect(
+                scrollX,
+                gridHeight * this.characterHeight,
+                scrollBarWidth,
+                this.characterHeight);
     };
 
     function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = fontSize * r;
-        var w = canvas.style.width;
-        var h = canvas.style.height;
-        w = parseFloat(w.substring(0, w.length - 2));
-        h = parseFloat(h.substring(0, h.length - 2));
-        canvas.width = w * r;
-        canvas.height = h * r;
+        canvas.width = canvas.clientWidth * r;
+        canvas.height = canvas.clientHeight * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
         this.characterWidth = gfx.measureText("M").width;
         this.drawText();
@@ -311,12 +332,16 @@ function Primrose(canvasID, options) {
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
     clipboardEventSource.addEventListener("paste", readClipboard.bind(this));
-
-    mouseEventSource.addEventListener("mousedown", function (evt) {
+    
+    function setCursorXY(cursor, evt){
         var lines = this.getLines();
         var cell = this.pixel2cell(evt.layerX, evt.layerY);
-        this.bothCursors.setXY(cell.x, cell.y, lines);
+        cursor.setXY(cell.x, cell.y, lines);
         this.drawText();
+    }
+
+    mouseEventSource.addEventListener("mousedown", function (evt) {
+        setCursorXY.call(this, this.bothCursors, evt);
         dragging = true;
     }.bind(this));
 
@@ -326,17 +351,14 @@ function Primrose(canvasID, options) {
 
     mouseEventSource.addEventListener("mousemove", function (evt) {
         if (dragging) {
-            var lines = this.getLines();
-            var cell = this.pixel2cell(evt.layerX, evt.layerY);
-            this.backCursor.setXY(cell.x, cell.y, lines);
-            this.drawText();
+            setCursorXY.call(this, this.backCursor, evt);
         }
     }.bind(this));
 }
 
 Primrose.prototype.pixel2cell = function (x, y) {
     var r = this.getPixelRatio();
-    x = Math.floor(x * r / this.characterWidth) + this.scrollLeft;
+    x = Math.floor(x * r / this.characterWidth) + this.scrollLeft - this.gridLeft;
     y = Math.floor((y * r / this.characterHeight) - 0.25) + this.scrollTop;
     return {x: x, y: y};
 };
