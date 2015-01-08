@@ -16,10 +16,7 @@
         <![endif]-->
 
         <script type="text/javascript" src="public_html/js/core.js"></script>
-        <script type="text/javascript" src="public_html/js/testing.js"></script>
-        <script type="text/javascript" src="public_html/js/Rope.js"></script>
         <script type="text/javascript" src="public_html/js/Grammar.js"></script>
-        <script type="text/javascript" src="public_html/js/TextBuffer.js"></script>
         <script type="text/javascript" src="public_html/js/Keys.js"></script>
         <script type="text/javascript" src="public_html/js/code_pages/EN_US.js"></script>
         <script type="text/javascript" src="public_html/js/code_pages/EN_UK.js"></script>
@@ -31,7 +28,6 @@
         <script type="text/javascript" src="public_html/js/Themes.js"></script>
         <script type="text/javascript" src="public_html/js/Primrose.js"></script>
         <script type="text/javascript" src="public_html/js/Commands.js"></script>
-        <script type="text/javascript" src="public_html/js/tests.js"></script>
 
         <title>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</title>
     </head>
@@ -58,23 +54,19 @@
                     <p>Go ahead, try some tippity-typing in the box below.</p>
                     <canvas id="output" width="690" height="300"></canvas>
                     <script type="text/javascript">
-                        var prim = new Primrose(document.getElementById("output"), {
-                            file: "(function (){\n" +
-                                    "    var i, output;\n" +
-                                    "    for (i = 1; i < 101; i++) {\n" +
-                                    "        output = \"\";\n" +
-                                    "        if (!(i % 3)) output += \"Fizz\";\n" +
-                                    "        if (!(i % 5)) output += \"Buzz\";\n" +
-                                    "        console.log(output || i);\n" +
-                                    "    }    \n" +
-                                    "});\n"
+                        var ctrls = findEverything();
+                        prim = new Primrose(ctrls.output, {
+                            file: Primrose.toString()
                         });
-                        prim.drawText();
+
+                        ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
+                        ctrls.controls.appendChild(prim.keyboardSelect);
+                        ctrls.controls.appendChild(prim.themeSelect);
                     </script>
 
                     <p>[NOTE: this is an extremely early proof-of-concept. There is no scrolling yet. There are missing features. There are still some bugs of the
-                    known and unknown variety. In particular, I have no way of testing whether or not the international keyboard support is correct. But the results
-                    so far are promising. Consider contributing!]</p>
+                        known and unknown variety. In particular, I have no way of testing whether or not the international keyboard support is correct. But the results
+                        so far are promising. Consider contributing!]</p>
 
                     <h2><a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>
 
