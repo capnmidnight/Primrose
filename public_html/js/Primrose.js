@@ -188,7 +188,7 @@ function Primrose(canvasID, options) {
             }
         }
 
-        var lineCountWidth = Math.ceil(Math.log(rows.length) / Math.LN10);
+        var lineCountWidth = Math.max(1, Math.ceil(Math.log(rows.length) / Math.LN10));
         this.gridLeft = lineCountWidth + leftGutterWidth;
         gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
         var scrollRight = this.scrollLeft + gridWidth;
