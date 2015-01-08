@@ -11,7 +11,7 @@ function Primrose(canvasID, options) {
         codePage = cp;
     };
 
-    var history = [(options.file.replace(/\r\n/g, "\n") || "").split("\n")];
+    var history = [];
     this.getLines = function () {
         return history[history.length - 1].slice();
     };
@@ -25,6 +25,7 @@ function Primrose(canvasID, options) {
             return history.pop();
         }
     };
+    this.setText(options.file || "");
 
     this.frontCursor = new Cursor();
     this.backCursor = new Cursor();
@@ -163,7 +164,7 @@ function Primrose(canvasID, options) {
         gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
 
         var tokens = languageGrammar.tokenize(this.getText());
-        
+
         // group the tokens into rows
         var rows = [[]];
         for (var i = 0; i < tokens.length; ++i) {
@@ -190,74 +191,71 @@ function Primrose(canvasID, options) {
         var maxLineWidth = 0;
 
         for (var y = 0; y < rows.length; ++y) {
-            // skip drawing rows that aren't in view
-            if (this.scrollTop <= y && y < this.scrollTop + gridHeight)
-            {
+            // draw the tokens on this row
+            var row = rows[y];
+            for (var n = 0; n < row.length; ++n) {
+                var t = row[n];
+                var toPrint = t.value;
+                tokenBack.x += toPrint.length;
+                tokenBack.i += toPrint.length;
 
-                // draw the tokens on this row
-                var row = rows[y];
-                for (var n = 0; n < row.length; ++n) {
-                    var t = row[n];
-                    var toPrint = t.value;
-                    tokenBack.x += toPrint.length;
-                    tokenBack.i += toPrint.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-                        // draw the selection box
-                        if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                            var selectionFront = Cursor.max(minCursor, tokenFront);
-                            var selectionBack = Cursor.min(maxCursor, tokenBack);
-                            var cw = selectionBack.i - selectionFront.i;
-                            gfx.fillStyle = theme.regular.selectedBackColor
-                                    || Themes.DEFAULT.regular.selectedBackColor;
-                            gfx.fillRect(
-                                    (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
-                                    (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
-                                    cw * this.characterWidth,
-                                    this.characterHeight);
-                        }
-
-                        // draw the text
-                        var style = theme[t.type] || {};
-                        var font = (style.fontWeight || theme.regular.fontWeight || "")
-                                + " " + (style.fontStyle || theme.regular.fontStyle || "")
-                                + " " + this.characterHeight + "px " + theme.fontFamily;
-                        gfx.font = font.trim();
-                        gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                        gfx.fillText(
-                                toPrint,
-                                (tokenFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
-                                (tokenFront.y - this.scrollTop + 1) * this.characterHeight);
+                // skip drawing tokens that aren't in view
+                if (this.scrollTop <= y && y < this.scrollTop + gridHeight
+                        && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                    // draw the selection box
+                    if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                        var selectionFront = Cursor.max(minCursor, tokenFront);
+                        var selectionBack = Cursor.min(maxCursor, tokenBack);
+                        var cw = selectionBack.i - selectionFront.i;
+                        gfx.fillStyle = theme.regular.selectedBackColor
+                                || Themes.DEFAULT.regular.selectedBackColor;
+                        gfx.fillRect(
+                                (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
+                                (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
+                                cw * this.characterWidth,
+                                this.characterHeight);
                     }
 
-                    tokenFront.copy(tokenBack);
+                    // draw the text
+                    var style = theme[t.type] || {};
+                    var font = (style.fontWeight || theme.regular.fontWeight || "")
+                            + " " + (style.fontStyle || theme.regular.fontStyle || "")
+                            + " " + this.characterHeight + "px " + theme.fontFamily;
+                    gfx.font = font.trim();
+                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                    gfx.fillText(
+                            toPrint,
+                            (tokenFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
+                            (tokenFront.y - this.scrollTop + 1) * this.characterHeight);
                 }
 
-
-                // draw the left gutter
-                var lineNumber = y.toString();
-                while (lineNumber.length < lineCountWidth) {
-                    lineNumber = " " + lineNumber;
-                }
-                gfx.fillStyle = theme.regular.selectedBackColor
-                        || Themes.DEFAULT.regular.selectedBackColor;
-                gfx.fillRect(
-                        0,
-                        (y - this.scrollTop + 0.2) * this.characterHeight,
-                        (lineNumber.length + leftGutterWidth) * this.characterWidth,
-                        this.characterHeight);
-                gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
-                gfx.fillStyle = theme.regular.foreColor;
-                gfx.fillText(
-                        lineNumber,
-                        0,
-                        (y - this.scrollTop + 1) * this.characterHeight);
+                tokenFront.copy(tokenBack);
             }
+
+
+            // draw the left gutter
+            var lineNumber = y.toString();
+            while (lineNumber.length < lineCountWidth) {
+                lineNumber = " " + lineNumber;
+            }
+            gfx.fillStyle = theme.regular.selectedBackColor
+                    || Themes.DEFAULT.regular.selectedBackColor;
+            gfx.fillRect(
+                    0,
+                    (y - this.scrollTop + 0.2) * this.characterHeight,
+                    (lineNumber.length + leftGutterWidth) * this.characterWidth,
+                    this.characterHeight);
+            gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
+            gfx.fillStyle = theme.regular.foreColor;
+            gfx.fillText(
+                    lineNumber,
+                    0,
+                    (y - this.scrollTop + 1) * this.characterHeight);
+                    
             maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
             tokenFront.x = 0;
             ++tokenFront.y;
-            ++tokenFront.i;
+            tokenFront.i += 2;
             tokenBack.copy(tokenFront);
         }
 
@@ -424,6 +422,15 @@ Primrose.prototype.insertAtCursor = function (str) {
 
 Primrose.prototype.getText = function () {
     return this.getLines().join("\n");
+};
+
+Primrose.prototype.setText = function (txt) {
+    txt = txt.replace(/\r\n/, "\n");
+    var lines = txt.split("\n")
+    this.pushUndo(lines);
+    if (this.drawText) {
+        this.drawText();
+    }
 };
 
 Primrose.prototype.export = function () {
