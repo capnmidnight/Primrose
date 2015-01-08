@@ -378,6 +378,19 @@ function Primrose(canvasID, options) {
     }.bind(this));
 }
 
+Primrose.prototype.getText = function () {
+    return this.getLines().join("\n");
+};
+
+Primrose.prototype.setText = function (txt) {
+    txt = txt.replace(/\r\n/g, "\n");
+    var lines = txt.split("\n");
+    this.pushUndo(lines);
+    if (this.drawText) {
+        this.drawText();
+    }
+};
+
 Primrose.prototype.pixel2cell = function (x, y) {
     var r = this.getPixelRatio();
     x = Math.floor(x * r / this.characterWidth) + this.scrollLeft - this.gridLeft;
@@ -411,8 +424,24 @@ Primrose.prototype.getPixelRatio = function () {
     return window.devicePixelRatio || 1;
 };
 
+Primrose.prototype.deleteSelection = function () {
+    if (this.frontCursor.i !== this.backCursor.i) {
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+        var lines = this.getLines();
+        // TODO: don't rejoin the string first.
+        var text = lines.join("\n");
+        var left = text.substring(0, minCursor.i);
+        var right = text.substring(maxCursor.i);
+        text = left + right;
+        this.setText(text);
+        maxCursor.copy(minCursor);
+    }
+};
+
 Primrose.prototype.insertAtCursor = function (str) {
     if (str.length > 0) {
+        str = str.replace(/\r\n/g, "\n");
         this.deleteSelection();
         var lines = this.getLines();
         var parts = str.split("\n");
@@ -423,21 +452,14 @@ Primrose.prototype.insertAtCursor = function (str) {
             this.frontCursor.right(lines);
         }
         this.backCursor.copy(this.frontCursor);
+        this.scrollIntoView(this.frontCursor);
         this.pushUndo(lines);
     }
 };
 
-Primrose.prototype.getText = function () {
-    return this.getLines().join("\n");
-};
-
-Primrose.prototype.setText = function (txt) {
-    txt = txt.replace(/\r\n/g, "\n");
-    var lines = txt.split("\n")
-    this.pushUndo(lines);
-    if (this.drawText) {
-        this.drawText();
-    }
+Primrose.prototype.pasteAtCursor = function (str) {
+    this.insertAtCursor(str);
+    this.drawText();
 };
 
 Primrose.prototype.export = function () {
@@ -462,37 +484,4 @@ Primrose.prototype.cutSelectedText = function (evt) {
     this.copySelectedText(evt);
     this.deleteSelection();
     this.drawText();
-};
-
-Primrose.prototype.pasteAtCursor = function (str) {
-    this.deleteSelection();
-    var lines = this.getLines();
-    var text = lines.join("\n");
-    var minCursor = Cursor.min(this.frontCursor, this.backCursor);
-    var left = text.substring(0, minCursor.i);
-    var right = text.substring(minCursor.i);
-    text = left + str + right;
-    lines = text.split("\n");
-    this.pushUndo(lines);
-    for (var i = 0; i < str.length; ++i) {
-        this.frontCursor.right(lines);
-    }
-    this.backCursor.copy(this.frontCursor);
-    this.drawText();
-};
-
-Primrose.prototype.deleteSelection = function () {
-    if (this.frontCursor.i !== this.backCursor.i) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor);
-        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-        var lines = this.getLines();
-        // TODO: don't rejoin the string first.
-        var text = lines.join("\n");
-        var left = text.substring(0, minCursor.i);
-        var right = text.substring(maxCursor.i);
-        text = left + right;
-        lines = text.split("\n");
-        this.pushUndo(lines);
-        maxCursor.copy(minCursor);
-    }
 };
