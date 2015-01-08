@@ -40,6 +40,7 @@ function Primrose(canvasID, options) {
     var scrollLeft = 0;
     var leftGutterWidth = 1;
     var rightGutterWidth = 1;
+    var bottomGutterHeight = 1;
     var gridWidth = 0;
     var gridHeight = 0;
     this.pageSize = options.pageSize || 5;
@@ -138,9 +139,9 @@ function Primrose(canvasID, options) {
     this.drawText = function () {
         var lines = this.getLines();
         var lineCountWidth = Math.ceil(Math.log(lines.length) / Math.LN10);
-        var gridLeft = lineCountWidth + leftGutterWidth + rightGutterWidth;
-        gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft;
-        gridHeight = Math.floor(canvas.height / this.characterHeight);
+        var gridLeft = lineCountWidth + leftGutterWidth;
+        gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft - rightGutterWidth;
+        gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
         var text = lines.join("\n");
         var tokens = languageGrammar.tokenize(text);
         var rows = [[]];
@@ -176,7 +177,7 @@ function Primrose(canvasID, options) {
                 gfx.fillRect(
                         0,
                         (y - scrollTop + 0.2) * this.characterHeight,
-                        cw * this.characterWidth,
+                        (lineNumber.length + leftGutterWidth)* this.characterWidth,
                         this.characterHeight);
                 gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
                 gfx.fillStyle = theme.regular.foreColor;
