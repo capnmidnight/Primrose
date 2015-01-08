@@ -40,6 +40,8 @@ function Primrose(canvasID, options) {
     var scrollLeft = 0;
     var leftGutterWidth = 1;
     var rightGutterWidth = 1;
+    var gridWidth = 0;
+    var gridHeight = 0;
     this.pageSize = options.pageSize || 5;
     this.tabWidth = options.tabWidth || 4;
     this.tabString = "";
@@ -135,6 +137,10 @@ function Primrose(canvasID, options) {
 
     this.drawText = function () {
         var lines = this.getLines();
+        var lineCountWidth = Math.ceil(Math.log(lines.length) / Math.LN10);
+        var gridLeft = lineCountWidth + leftGutterWidth + rightGutterWidth;
+        gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft;
+        gridHeight = Math.floor(canvas.height / this.characterHeight);
         var text = lines.join("\n");
         var tokens = languageGrammar.tokenize(text);
         var rows = [[]];
@@ -160,37 +166,57 @@ function Primrose(canvasID, options) {
 
         for (var y = 0; y < rows.length; ++y) {
             var row = rows[y];
-            for (var n = 0; n < row.length; ++n) {
-                var t = row[n];
-                tokenBack.x += t.value.length;
-                tokenBack.i += t.value.length;
-
-                if (scrollTop <= y && y < scrollTop + gridHeight) {
-                    if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                        var selectionFront = Cursor.max(minCursor, tokenFront);
-                        var selectionBack = Cursor.min(maxCursor, tokenBack);
-                        var cw = selectionBack.i - selectionFront.i;
-                        gfx.fillStyle = theme.regular.selectedBackColor
-                                || Themes.DEFAULT.regular.selectedBackColor;
-                        gfx.fillRect(
-                                (selectionFront.x - scrollLeft) * this.characterWidth,
-                                (selectionFront.y - scrollTop + 0.2) * this.characterHeight,
-                                cw * this.characterWidth,
-                                this.characterHeight);
-                    }
-                    var style = theme[t.type] || {};
-                    var font = (style.fontWeight || theme.regular.fontWeight || "")
-                            + " " + (style.fontStyle || theme.regular.fontStyle || "")
-                            + " " + this.characterHeight + "px " + theme.fontFamily;
-                    gfx.font = font.trim();
-                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                    gfx.fillText(
-                            t.value,
-                            (tokenFront.x - scrollLeft) * this.characterWidth,
-                            (tokenFront.y - scrollTop + 1) * this.characterHeight);
+            if (scrollTop <= y && y < scrollTop + gridHeight) {
+                var lineNumber = y.toString();
+                while(lineNumber.length < lineCountWidth){
+                    lineNumber = " " + lineNumber;
                 }
+                gfx.fillStyle = theme.regular.selectedBackColor
+                        || Themes.DEFAULT.regular.selectedBackColor;
+                gfx.fillRect(
+                        0,
+                        (y - scrollTop + 0.2) * this.characterHeight,
+                        cw * this.characterWidth,
+                        this.characterHeight);
+                gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
+                gfx.fillStyle = theme.regular.foreColor;
+                gfx.fillText(
+                        lineNumber,
+                        0,
+                        (y - scrollTop + 1) * this.characterHeight);
 
-                tokenFront.copy(tokenBack);
+                for (var n = 0; n < row.length; ++n) {
+                    var t = row[n];
+                    tokenBack.x += t.value.length;
+                    tokenBack.i += t.value.length;
+
+                    if (scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
+                        if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                            var selectionFront = Cursor.max(minCursor, tokenFront);
+                            var selectionBack = Cursor.min(maxCursor, tokenBack);
+                            var cw = selectionBack.i - selectionFront.i;
+                            gfx.fillStyle = theme.regular.selectedBackColor
+                                    || Themes.DEFAULT.regular.selectedBackColor;
+                            gfx.fillRect(
+                                    (selectionFront.x - scrollLeft + gridLeft) * this.characterWidth,
+                                    (selectionFront.y - scrollTop + 0.2) * this.characterHeight,
+                                    cw * this.characterWidth,
+                                    this.characterHeight);
+                        }
+                        var style = theme[t.type] || {};
+                        var font = (style.fontWeight || theme.regular.fontWeight || "")
+                                + " " + (style.fontStyle || theme.regular.fontStyle || "")
+                                + " " + this.characterHeight + "px " + theme.fontFamily;
+                        gfx.font = font.trim();
+                        gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                        gfx.fillText(
+                                t.value,
+                                (tokenFront.x - scrollLeft + gridLeft) * this.characterWidth,
+                                (tokenFront.y - scrollTop + 1) * this.characterHeight);
+                    }
+
+                    tokenFront.copy(tokenBack);
+                }
             }
             tokenFront.x = 0;
             ++tokenFront.y;
@@ -201,21 +227,20 @@ function Primrose(canvasID, options) {
         gfx.beginPath();
         gfx.strokeStyle = "black";
         gfx.moveTo(
-                (this.frontCursor.x - scrollLeft) * this.characterWidth,
+                (this.frontCursor.x - scrollLeft + gridLeft) * this.characterWidth,
                 (this.frontCursor.y - scrollTop) * this.characterHeight);
         gfx.lineTo(
-                (this.frontCursor.x - scrollLeft) * this.characterWidth,
+                (this.frontCursor.x - scrollLeft + gridLeft) * this.characterWidth,
                 (this.frontCursor.y - scrollTop + 1.25) * this.characterHeight);
         gfx.moveTo(
-                (this.backCursor.x - scrollLeft) * this.characterWidth + 1,
+                (this.backCursor.x - scrollLeft + gridLeft) * this.characterWidth + 1,
                 (this.backCursor.y - scrollTop) * this.characterHeight);
         gfx.lineTo(
-                (this.backCursor.x - scrollLeft) * this.characterWidth + 1,
+                (this.backCursor.x - scrollLeft + gridLeft) * this.characterWidth + 1,
                 (this.backCursor.y - scrollTop + 1.25) * this.characterHeight);
         gfx.stroke();
     };
-
-    var gridWidth, gridHeight;
+    
     function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = fontSize * r;
@@ -227,9 +252,6 @@ function Primrose(canvasID, options) {
         canvas.height = h * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
         this.characterWidth = gfx.measureText("M").width;
-        var lineCountWidth = Math.ceil(Math.log(this.getLines().length) / Math.LN10);
-        gridWidth = Math.floor(canvas.width / this.characterWidth) - (lineCountWidth + leftGutterWidth + rightGutterWidth);
-        gridHeight = Math.floor(canvas.height / this.characterHeight);
         this.drawText();
     }
 

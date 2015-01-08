@@ -27,22 +27,7 @@
             window.addEventListener("load", function () {
                 var ctrls = findEverything();
                 prim = new Primrose(ctrls.output, {
-                    file: "(function (){\n"
-                            + "    var i, output;\n"
-                            + "    // a line comment\n"
-                            + "    var long1 = 3.14159, asdf_ok = .5;\n"
-                            + "    for (i = 1; i < 101; i++) {\n"
-                            + "        output = \"\";\n"
-                            + "        if ((i % 3) === 0) output += \"Fizz\";\n"
-                            + "        if ((i % 5) === 0) output += \"Buzz\";\n"
-                            + "        console.log(output || i);\n"
-                            + "    }\n"
-                            + "    /*\n"
-                            + "        a block comment\n"
-                            + "    */\n"
-                            + "    \n"
-                            + "    object.member.method('mooooo');\n"
-                            + "});\n"
+                    file: Primrose.toString()
                 });
 
                 makeSelectorFromObj(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
