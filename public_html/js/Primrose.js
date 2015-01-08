@@ -92,12 +92,7 @@ function Primrose(canvasID, options) {
             var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
             if (func) {
                 var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
-                if (func instanceof Function) {
-                    func.call(this, this.getLines(), currentCursor);
-                }
-                else {
-                    currentCursor[func](this.getLines(), currentCursor);
-                }
+                func.call(this, this.getLines(), currentCursor);
                 if (!evt.shiftKey) {
                     this.backCursor.copy(this.frontCursor);
                 }
