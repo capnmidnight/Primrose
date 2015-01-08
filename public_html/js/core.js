@@ -469,7 +469,7 @@ function reloadPage() {
     document.location = document.location.href;
 }
 
-function makeSelectorFromObj(elem, obj, def, prop) {
+function makeSelectorFromObj(elem, obj, def, target, prop) {
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
             var opt = document.createElement("option");
@@ -482,7 +482,7 @@ function makeSelectorFromObj(elem, obj, def, prop) {
     }
 
     E(elem, "change", function () {
-        prim[prop](obj[this.value]);
+        target[prop](obj[this.value]);
     });
 }
 

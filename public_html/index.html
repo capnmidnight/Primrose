@@ -30,17 +30,16 @@
                     file: Primrose.toString()
                 });
                 
-                document.body.appendChild(prim.DOMElement);
-
-                makeSelectorFromObj(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
-                makeSelectorFromObj(ctrls.themes, Themes, "DEFAULT", "setTheme");
+                ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
+                ctrls.controls.appendChild(prim.keyboardSelect);
+                ctrls.controls.appendChild(prim.themeSelect);
             });
         </script>
     </head>
     <body>
-        <select id="keyboards"></select>
-        <select id="themes"></select>
-        <br>
+        <div id="controls">
+            
+        </div>
         <canvas id="output" width="690" height="600"></canvas>
         <!-- these breaks are meant to force the page longer than the screen
         to be able to test that key commands don't cause the page to scroll -->

@@ -1,5 +1,10 @@
 function Primrose(canvasID, options) {
     options = options || {};
+    
+    this.keyboardSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
+    this.themeSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
+    makeSelectorFromObj(this.keyboardSelect, CodePages, "EN_US", this, "setCodePage");
+    makeSelectorFromObj(this.themeSelect, Themes, "DEFAULT", this, "setTheme");
 
     var languageGrammar = options.languageGrammar || Grammar.JavaScript;
     this.setLanguageGrammar = function (lang) {
@@ -257,7 +262,7 @@ function Primrose(canvasID, options) {
             maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
             tokenFront.x = 0;
             ++tokenFront.y;
-            tokenFront.i += 2;
+            ++tokenFront.i;
             tokenBack.copy(tokenFront);
         }
 
