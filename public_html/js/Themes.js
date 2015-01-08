@@ -28,16 +28,49 @@ var Themes = {
             foreColor: "#aa9900",
             fontStyle: "italic"
         },
-        inlineComments: {
-            foreColor: "green",
-            fontStyle: "italic"
+        numbers: {
+            foreColor: "green"
         },
-        blockComments: {
-            foreColor: "green",
+        comments: {
+            foreColor: "grey",
             fontStyle: "italic"
         },
         keywords: {
             foreColor: "blue"
+        },
+        functions: {
+            foreColor: "brown",
+            fontWeight: "bold"
+        },
+        members: {
+            foreColor: "green"
+        },
+        error: {
+            foreColor: "red",
+            fontStyle: "underline italic"
+        }
+    },
+    Dark: {
+        fontFamily: "monospace",
+        regular: { 
+            backColor: "black",
+            foreColor: "#c0c0c0",
+            selectedBackColor: "#404040",
+            selectedForeColor: "#ffffff"
+        },
+        strings: {
+            foreColor: "#aa9900",
+            fontStyle: "italic"
+        },
+        numbers: {
+            foreColor: "green"
+        },
+        comments: {
+            foreColor: "yellow",
+            fontStyle: "italic"
+        },
+        keywords: {
+            foreColor: "cyan"
         },
         functions: {
             foreColor: "brown",

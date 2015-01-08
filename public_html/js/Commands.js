@@ -17,126 +17,65 @@
 
 var Commands = {};
 
-Commands["NORMAL" + Keys.LEFTARROW] = function (lines) {
-    this.both.left(lines);
+Commands["NORMAL" + Keys.LEFTARROW] = "left";
+Commands["CTRL" + Keys.LEFTARROW] = "skipLeft";
+Commands["NORMAL" + Keys.RIGHTARROW] = "right";
+Commands["CTRL" + Keys.RIGHTARROW] = "skipRight";
+Commands["NORMAL" + Keys.UPARROW] = "up";
+Commands["NORMAL" + Keys.DOWNARROW] = "down";
+Commands["NORMAL" + Keys.HOME] = "home";
+Commands["CTRL" + Keys.HOME] = "fullHome";
+Commands["NORMAL" + Keys.END] = "end";
+Commands["CTRL" + Keys.END] = "fullEnd";
+
+Commands["NORMAL" + Keys.PAGEUP] = function (lines, cursor) {
+    cursor.incY(-this.pageSize, lines);
 };
 
-Commands["SHIFT" + Keys.LEFTARROW] = function (lines) {
-    this.finish.left(lines);
+Commands["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
+    cursor.incY(this.pageSize, lines);
 };
 
-Commands["CTRL" + Keys.LEFTARROW] = function (lines) {
-    this.both.skipLeft(lines);
+Commands["CTRL" + Keys.DASH] = function () {
+    this.decreaseFontSize();
 };
 
-Commands["CTRLSHIFT" + Keys.LEFTARROW] = function (lines) {
-    this.finish.skipLeft(lines);
-};
-
-Commands["NORMAL" + Keys.RIGHTARROW] = function (lines) {
-    this.both.right(lines);
-};
-
-Commands["SHIFT" + Keys.RIGHTARROW] = function (lines) {
-    this.finish.right(lines);
-};
-
-Commands["CTRL" + Keys.RIGHTARROW] = function (lines) {
-    this.both.skipRight(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.RIGHTARROW] = function (lines) {
-    this.finish.skipRight(lines);
-};
-
-Commands["NORMAL" + Keys.UPARROW] = function (lines) {
-    this.both.up(lines);
-};
-
-Commands["SHIFT" + Keys.UPARROW] = function (lines) {
-    this.finish.up(lines);
-};
-
-Commands["NORMAL" + Keys.DOWNARROW] = function (lines) {
-    this.both.down(lines);
-};
-
-Commands["SHIFT" + Keys.DOWNARROW] = function (lines) {
-    this.finish.down(lines);
-};
-
-Commands["NORMAL" + Keys.PAGEUP] = function (lines) {
-    this.both.incY(-this.pageSize, lines);
-};
-
-Commands["SHIFT" + Keys.PAGEUP] = function (lines) {
-    this.finish.incY(-this.pageSize, lines);
-};
-
-Commands["NORMAL" + Keys.PAGEDOWN] = function (lines) {
-    this.both.incY(this.pageSize, lines);
-};
-
-Commands["SHIFT" + Keys.PAGEDOWN] = function (lines) {
-    this.finish.incY(this.pageSize, lines);
-};
-
-Commands["NORMAL" + Keys.HOME] = function (lines) {
-    this.both.home(lines);
-};
-
-Commands["SHIFT" + Keys.HOME] = function (lines) {
-    this.finish.home(lines);
-};
-
-Commands["CTRL" + Keys.HOME] = function (lines) {
-    this.both.fullHome(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.HOME] = function (lines) {
-    this.finish.fullHome(lines);
-};
-
-Commands["NORMAL" + Keys.END] = function (lines) {
-    this.both.end(lines);
-};
-
-Commands["SHIFT" + Keys.END] = function (lines) {
-    this.finish.end(lines);
-};
-
-Commands["CTRL" + Keys.END] = function (lines) {
-    this.both.fullEnd(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.END] = function (lines) {
-    this.finish.fullEnd(lines);
+Commands["CTRL" + Keys.EQUALSIGN] = function () {
+    this.increaseFontSize();
 };
 
 Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
-    if (this.start.i === this.finish.i) {
-        this.start.left(lines);
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.frontCursor.left(lines);
+    }
+    this.deleteSelection();
+};
+
+Commands["SHIFT" + Keys.DELETE] = function (lines) {
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.frontCursor.home(lines);
+        this.backCursor.end(lines);
     }
     this.deleteSelection();
 };
 
 Commands["NORMAL" + Keys.DELETE] = function (lines) {
-    if (this.start.i === this.finish.i) {
-        this.finish.right(lines);
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.backCursor.right(lines);
     }
     this.deleteSelection();
 };
 
 Commands["NORMAL" + Keys.ENTER] = function (lines) {
     var indent = "";
-    for (var i = 0; i < lines[this.start.y].length && lines[this.start.y][i] === " "; ++i) {
+    for (var i = 0; i < lines[this.frontCursor.y].length && lines[this.frontCursor.y][i] === " "; ++i) {
         indent += " ";
     }
-    this.insertAtCursor(indent + "\n");
+    this.insertAtCursor("\n" + indent);
 };
 
 Commands["NORMAL" + Keys.TAB] = function (lines) {
-    if (this.start.y === this.finish.y) {
+    if (this.frontCursor.y === this.backCursor.y) {
         this.insertAtCursor(this.tabString);
     }
     else {
@@ -155,7 +94,7 @@ Commands["NORMAL" + Keys.TAB] = function (lines) {
 };
 
 Commands["SHIFT" + Keys.TAB] = function (lines) {
-    if (this.start.y !== this.finish.y) {
+    if (this.frontCursor.y !== this.backCursor.y) {
         var a = this.getMinCursor();
         var b = this.getMaxCursor();
         a.home(lines);
@@ -172,12 +111,12 @@ Commands["SHIFT" + Keys.TAB] = function (lines) {
     }
 };
 
-Commands["CTRL+A"] = function (lines) {
-    this.start.fullHome(lines);
-    this.finish.fullEnd(lines);
+Commands.CTRL_A = function (lines) {
+    this.frontCursor.fullHome(lines);
+    this.backCursor.fullEnd(lines);
 };
 
-Commands["CTRL+Z"] = function (lines) {
+Commands.CTRL_Z = function (lines) {
     this.popUndo();
 };
 

@@ -1,5 +1,6 @@
 body{
     background-color: #eee;
+    background-image: url(../img/bg.jpg);
 }
 #output{
     border:dashed 3px red;

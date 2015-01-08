@@ -24,15 +24,23 @@
         <script type="text/javascript" src="js/tests.js"></script>
         <script type="text/javascript">
             var prim;
-            window.addEventListener("load", function(){
-                var canvas = document.getElementById("output");
-                prim = new Primrose(canvas);
-                prim.drawText();
+            window.addEventListener("load", function () {
+                var ctrls = findEverything();
+                prim = new Primrose(ctrls.output, {
+                    file: Primrose.toString()
+                });
+                
+                ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
+                ctrls.controls.appendChild(prim.keyboardSelect);
+                ctrls.controls.appendChild(prim.themeSelect);
             });
         </script>
     </head>
     <body>
-        <canvas id="output" width="690" height="300"></canvas>
+        <div id="controls">
+            
+        </div>
+        <canvas id="output" width="690" height="600"></canvas>
         <!-- these breaks are meant to force the page longer than the screen
         to be able to test that key commands don't cause the page to scroll -->
         <br>

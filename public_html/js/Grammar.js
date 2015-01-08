@@ -50,28 +50,6 @@ Grammar.prototype.tokenize = function (text) {
                     }
                     var token = new Token(mid, rule.name);
                     tokens.splice(j + 1, 0, token);
-                    if(rule.name === "endBlockComments"){
-                        var blockStart = -1;
-                        for(var k = j + 1; k >= 0; --k){
-                            if(tokens[k].type === "startBlockComments"){
-                                blockStart = k;
-                                break;
-                            }
-                        }
-                        if(blockStart === -1){
-                            token.type = "error";
-                        }
-                        else{
-                            for(var k = j + 1; k >= blockStart; --k){
-                                if(!(tokens[k] instanceof Token)){
-                                    tokens[k] = new Token(tokens[k], "blockComments");
-                                }
-                                else if(tokens[k].type !== "newlines"){
-                                    tokens[k].type = "blockComments";
-                                }
-                            }
-                        }
-                    }
 
                     // reinsert the rest of the string for further processing
                     var end = start + mid.length;
@@ -95,9 +73,31 @@ Grammar.prototype.tokenize = function (text) {
             }
         }
     }
+
+    // normalize tokens
+    var blockOn = false;
     for (var i = 0; i < tokens.length; ++i) {
-        if (!(tokens[i] instanceof Token)) {
-            tokens[i] = new Token(tokens[i], "regular");
+        var t = tokens[i];
+        if (!(t instanceof Token)) {
+            tokens[i] = t = new Token(t, "regular");
+        }
+        if (blockOn) {
+            if (t.type === "endBlockComments") {
+                blockOn = false;
+            }
+            if (t.type !== "newlines") {
+                t.type = "comments";
+            }
+        }
+        else if (t.type === "startBlockComments") {
+            blockOn = true;
+            t.type = "comments";
+        }
+        else if (t.type === "inlineComments") {
+            t.type = "comments";
+        }
+        else if (/^strings\d+/.test(t.type)) {
+            t.type = "strings";
         }
     }
     return tokens;
@@ -105,10 +105,12 @@ Grammar.prototype.tokenize = function (text) {
 
 Grammar.JavaScript = new Grammar([
     ["newlines", /(?:\r\n|\r|\n)/],
-    ["strings", /"(?:\\"|[^"]*)"/],
-    ["inlineComments", /\/\/[^\n]+\n/],
+    ["inlineComments", /\/\/.+$/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
+    ["strings1", /"(?:\\"|[^"]*)"/],
+    ["strings2", /'(?:\\'|[^']*)'/],
+    ["numbers", /\b(?:\d*\.)?\d+\b/],
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
@@ -122,7 +124,6 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(6, tokens.length, "number of tokens does not match");
         Assert.areEqual("c", tokens[2].value, "token isn't right value");
         Assert.areEqual("members", tokens[2].type, "token types do not match");
     },
@@ -133,8 +134,6 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(1, tokens.length, "number of tokens does not match");
-        Assert.areEqual(src, tokens[0].value, "token isn't right value");
         Assert.areEqual("strings", tokens[0].type, "token types do not match");
     },
     twoStrings: function () {
@@ -144,7 +143,6 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(3, tokens.length, "number of tokens does not match");
         Assert.areEqual("strings", tokens[0].type, "0: token incorrect type");
         Assert.areEqual("regular", tokens[1].type, "1: token incorrect type");
         Assert.areEqual("strings", tokens[2].type, "2: token incorrect type");
@@ -156,8 +154,7 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(3, tokens.length, "number of tokens does not match");
-        Assert.areEqual("blockComments", tokens[0].type, "token types do not match");
+        Assert.areEqual("comments", tokens[0].type, "token types do not match");
     },
     multiLineBlockComment: function () {
         var src = "/*\n asdf one\n2 three 4\n*/";
@@ -166,8 +163,7 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(7, tokens.length, "number of tokens does not match");
-        Assert.areEqual("blockComments", tokens[0].type, "token types do not match");
+        Assert.areEqual("comments", tokens[0].type, "token types do not match");
     },
     multipleMultiLineBlockComment: function () {
         var src = "/*\n asdf one\n2 three 4\n*/\nfunction(){\n/*\n asdf one\n2 three 4\n*/\n}";
@@ -176,9 +172,8 @@ Grammar.tests = {
             return t.value;
         }).join("");
         Assert.areEqual(src, res);
-        Assert.areEqual(20, tokens.length, "number of tokens does not match");
-        Assert.areEqual("blockComments", tokens[0].type, "0: token types do not match");
-        Assert.areEqual("blockComments", tokens[4].type, "4: token types do not match." + tokens[5].value);
+        Assert.areEqual("comments", tokens[0].type, "0: token types do not match");
+        Assert.areEqual("comments", tokens[4].type, "4: token types do not match." + tokens[5].value);
     },
     bigTest: function () {
         var src = "function Hello (){\n"

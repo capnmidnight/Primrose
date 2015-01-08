@@ -465,7 +465,26 @@ function writeForm(ctrls, state) {
     }
 }
 
-function reloadPage() { document.location = document.location.href; }
+function reloadPage() {
+    document.location = document.location.href;
+}
+
+function makeSelectorFromObj(elem, obj, def, target, prop) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            var opt = document.createElement("option");
+            opt.innerHTML = key;
+            if (key === def) {
+                opt.selected = "selected";
+            }
+            elem.appendChild(opt);
+        }
+    }
+
+    E(elem, "change", function () {
+        target[prop](obj[this.value]);
+    });
+}
 
 // snagged and adapted from http://detectmobilebrowsers.com/
 var isMobile = (function (a) {
@@ -486,7 +505,8 @@ window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || 
 window.RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.RTCSessionDescription;
 
 // this doesn't seem to actually work
-screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {};
+screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {
+};
 
 // full-screen-ism polyfill
 if (!document.documentElement.requestFullscreen) {

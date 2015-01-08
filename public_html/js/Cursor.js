@@ -21,6 +21,20 @@ function Cursor(i, x, y) {
     this.y = y || 0;
 }
 
+Cursor.min = function(a, b){
+    if(a.i <= b.i){
+        return a;
+    }
+    return b;
+};
+
+Cursor.max = function(a, b){
+    if(a.i > b.i){
+        return a;
+    }
+    return b;
+};
+
 Cursor.prototype.toString = function () {
     return fmt("[i:$1 x:$2 y:$3]", this.i, this.x, this.y);
 };
