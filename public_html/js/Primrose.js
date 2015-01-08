@@ -1,6 +1,6 @@
 function Primrose(canvasID, options) {
     options = options || {};
-    
+
     this.keyboardSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
     this.themeSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
     makeSelectorFromObj(this.keyboardSelect, CodePages, "EN_US", this, "setCodePage");
@@ -34,7 +34,6 @@ function Primrose(canvasID, options) {
 
     this.frontCursor = new Cursor();
     this.backCursor = new Cursor();
-    this.bothCursors = new CombinedCursor(this.frontCursor, this.backCursor);
 
     var canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement);
     var gfx = canvas.getContext("2d");
@@ -92,15 +91,16 @@ function Primrose(canvasID, options) {
             var charCommand = typeB + "_" + codePage.SHIFT[key];
             var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
             if (func) {
-                var currentCursor = evt.shiftKey ? this.backCursor : this.bothCursors;
+                var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
                 if (func instanceof Function) {
                     func.call(this, this.getLines(), currentCursor);
                 }
                 else {
                     currentCursor[func](this.getLines(), currentCursor);
                 }
-                currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
-                this.scrollIntoView(currentCursor);
+                if (!evt.shiftKey) {
+                    this.backCursor.copy(this.frontCursor);
+                }
                 evt.preventDefault();
             }
             else if (codePage[typeB]) {
@@ -362,12 +362,17 @@ function Primrose(canvasID, options) {
     }
 
     mouseEventSource.addEventListener("mousedown", function (evt) {
-        setCursorXY.call(this, this.bothCursors, evt);
-        dragging = true;
+        if (evt.button === 0) {
+            setCursorXY.call(this, this.frontCursor, evt);
+            this.backCursor.copy(this.frontCursor);
+            dragging = true;
+        }
     }.bind(this));
 
-    mouseEventSource.addEventListener("mouseup", function () {
-        dragging = false;
+    mouseEventSource.addEventListener("mouseup", function (evt) {
+        if (evt.button === 0) {
+            dragging = false;
+        }
         surrogate.focus();
     }.bind(this));
 

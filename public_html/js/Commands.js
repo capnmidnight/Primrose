@@ -17,31 +17,89 @@
 
 var Commands = {};
 
-Commands["NORMAL" + Keys.LEFTARROW] = "left";
-Commands["CTRL" + Keys.LEFTARROW] = "skipLeft";
-Commands["NORMAL" + Keys.RIGHTARROW] = "right";
-Commands["CTRL" + Keys.RIGHTARROW] = "skipRight";
-Commands["NORMAL" + Keys.UPARROW] = "up";
-Commands["NORMAL" + Keys.DOWNARROW] = "down";
-Commands["NORMAL" + Keys.HOME] = "home";
-Commands["CTRL" + Keys.HOME] = "fullHome";
-Commands["NORMAL" + Keys.END] = "end";
-Commands["CTRL" + Keys.END] = "fullEnd";
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front.
+// If SHIFT is held, then "back"
+Commands["NORMAL" + Keys.LEFTARROW] = function (lines, cursor) {
+    cursor.left(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["CTRL" + Keys.LEFTARROW] = function (lines, cursor) {
+    cursor.skipLeft(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["NORMAL" + Keys.RIGHTARROW] = function (lines, cursor) {
+    cursor.right(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["CTRL" + Keys.RIGHTARROW] = function (lines, cursor) {
+    cursor.skipRight(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["NORMAL" + Keys.UPARROW] = function (lines, cursor) {
+    cursor.up(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["NORMAL" + Keys.DOWNARROW] = function (lines, cursor) {
+    cursor.down(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["NORMAL" + Keys.HOME] = function (lines, cursor) {
+    cursor.home(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["CTRL" + Keys.HOME] = function (lines, cursor) {
+    cursor.fullHome(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["NORMAL" + Keys.END] = function (lines, cursor) {
+    cursor.end(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["CTRL" + Keys.END] = function (lines, cursor) {
+    cursor.fullEnd(lines);
+    this.scrollIntoView(cursor);
+};
+
+Commands["CTRL" + Keys.DOWNARROW] = function (lines, cursor) {
+    if (this.scrollTop < lines.length) {
+        ++this.scrollTop;
+    }
+};
+
+Commands["CTRL" + Keys.UPARROW] = function (lines, cursor) {
+    if (this.scrollTop > 0) {
+        --this.scrollTop;
+    }
+};
 
 Commands["NORMAL" + Keys.PAGEUP] = function (lines, cursor) {
     cursor.incY(-this.pageSize, lines);
+    this.scrollIntoView(cursor);
 };
 
 Commands["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
     cursor.incY(this.pageSize, lines);
+    this.scrollIntoView(cursor);
 };
 
 Commands["CTRL" + Keys.DASH] = function () {
     this.decreaseFontSize();
+    this.scrollIntoView(cursor);
 };
 
 Commands["CTRL" + Keys.EQUALSIGN] = function () {
     this.increaseFontSize();
+    this.scrollIntoView(cursor);
 };
 
 Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
@@ -49,6 +107,7 @@ Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
         this.frontCursor.left(lines);
     }
     this.deleteSelection();
+    this.scrollIntoView(cursor);
 };
 
 Commands["SHIFT" + Keys.DELETE] = function (lines) {
@@ -57,6 +116,7 @@ Commands["SHIFT" + Keys.DELETE] = function (lines) {
         this.backCursor.end(lines);
     }
     this.deleteSelection();
+    this.scrollIntoView(cursor);
 };
 
 Commands["NORMAL" + Keys.DELETE] = function (lines) {
@@ -64,6 +124,7 @@ Commands["NORMAL" + Keys.DELETE] = function (lines) {
         this.backCursor.right(lines);
     }
     this.deleteSelection();
+    this.scrollIntoView(cursor);
 };
 
 Commands["NORMAL" + Keys.ENTER] = function (lines) {
@@ -72,6 +133,7 @@ Commands["NORMAL" + Keys.ENTER] = function (lines) {
         indent += " ";
     }
     this.insertAtCursor("\n" + indent);
+    this.scrollIntoView(cursor);
 };
 
 Commands["NORMAL" + Keys.TAB] = function (lines) {
@@ -91,6 +153,7 @@ Commands["NORMAL" + Keys.TAB] = function (lines) {
         b.end(lines);
         this.pushUndo(lines);
     }
+    this.scrollIntoView(cursor);
 };
 
 Commands["SHIFT" + Keys.TAB] = function (lines) {
@@ -109,6 +172,7 @@ Commands["SHIFT" + Keys.TAB] = function (lines) {
         b.end(lines);
         this.pushUndo(lines);
     }
+    this.scrollIntoView(cursor);
 };
 
 Commands.CTRL_A = function (lines) {
@@ -118,5 +182,6 @@ Commands.CTRL_A = function (lines) {
 
 Commands.CTRL_Z = function (lines) {
     this.popUndo();
+    this.scrollIntoView(cursor);
 };
 
