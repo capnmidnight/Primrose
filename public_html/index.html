@@ -29,6 +29,8 @@
                 prim = new Primrose(ctrls.output, {
                     file: Primrose.toString()
                 });
+                
+                document.body.appendChild(prim.DOMElement);
 
                 makeSelectorFromObj(ctrls.keyboards, CodePages, "EN_US", "setCodePage");
                 makeSelectorFromObj(ctrls.themes, Themes, "DEFAULT", "setTheme");

@@ -51,8 +51,25 @@ function Primrose(canvasID, options) {
         this.tabString += " ";
     }
 
-    var keyEventSource = options.keyEventSource || window;
-    var clipboardEventSource = options.clipboardEventSource || window;
+    this.DOMElement = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement);
+    this.DOMElement.style.position = "absolute";
+    this.DOMElement.style.left = 0;
+    this.DOMElement.style.top = 0;
+    this.DOMElement.style.width = 0;
+    this.DOMElement.style.height = 0;
+    this.DOMElement.style.overflow = "hidden";
+
+    var surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
+    surrogate.style.position = "absolute";
+    surrogate.style.left = canvas.offsetLeft + "px";
+    surrogate.style.top = canvas.offsetTop + "px";
+    surrogate.style.width = canvas.offsetWidth + "px";
+    surrogate.style.height = canvas.offsetHeigth + "px";
+    surrogate.value = this.getLines().join("\n");
+    this.DOMElement.appendChild(surrogate);
+
+    var keyEventSource = options.keyEventSource || surrogate;
+    var clipboardEventSource = options.clipboardEventSource || surrogate;
     var mouseEventSource = options.mouseEventSource || canvas;
 
     this.editText = function (evt) {
@@ -206,13 +223,13 @@ function Primrose(canvasID, options) {
 
                     // skip drawing tokens that aren't in view
                     if (this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-                        if(tokenFront.x < this.scrollLeft){
+                        if (tokenFront.x < this.scrollLeft) {
                             var dx = this.scrollLeft - tokenFront.x;
                             tokenFront.x += dx;
                             tokenFront.i += dx;
                             toPrint = toPrint.substring(dx);
                         }
-                        
+
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
                             var selectionFront = Cursor.max(minCursor, tokenFront);
@@ -268,7 +285,7 @@ function Primrose(canvasID, options) {
         gfx.stroke();
 
         // draw the scrollbars
-        
+
         //vertical
         var scrollY = (this.scrollTop * canvas.height) / lines.length + this.characterHeight;
         var scrollBarHeight = gridHeight * canvas.height / lines.length - bottomGutterHeight * this.characterHeight;
@@ -279,7 +296,7 @@ function Primrose(canvasID, options) {
                 scrollY,
                 this.characterWidth,
                 scrollBarHeight);
-                
+
         // horizontal
         var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + this.characterWidth;
         var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
@@ -328,12 +345,17 @@ function Primrose(canvasID, options) {
     this.setTheme(options.theme || Themes.DEFAULT);
 
     keyEventSource.addEventListener("keydown", this.editText.bind(this));
+    keyEventSource.addEventListener("keyup", function () {
+        surrogate.value = this.getLines().join("\n");
+        surrogate.selectionStart = this.frontCursor.i;
+        surrogate.selectionLength = this.backCursor.i - this.frontCursor.i;
+    });
 
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
     clipboardEventSource.addEventListener("paste", readClipboard.bind(this));
-    
-    function setCursorXY(cursor, evt){
+
+    function setCursorXY(cursor, evt) {
         var lines = this.getLines();
         var cell = this.pixel2cell(evt.layerX, evt.layerY);
         cursor.setXY(cell.x, cell.y, lines);
@@ -347,6 +369,7 @@ function Primrose(canvasID, options) {
 
     mouseEventSource.addEventListener("mouseup", function () {
         dragging = false;
+        surrogate.focus();
     });
 
     mouseEventSource.addEventListener("mousemove", function (evt) {
