@@ -89,9 +89,9 @@ function Primrose(canvasID, options) {
         }
         this.drawText();
     };
-    
-    this.scrollIntoView = function(currentCursor){
-        
+
+    this.scrollIntoView = function (currentCursor) {
+
     };
 
     function readClipboard(evt) {
@@ -131,33 +131,26 @@ function Primrose(canvasID, options) {
             gfx.fillStyle = theme.regular.backColor;
         }
         gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
-        var c = new Cursor(), d = new Cursor();
-        for (var i = 0; i < tokens.length; ++i) {
-            var t = tokens[i];
-            if (t.type === "newlines") {
-                c.x = 0;
-                ++c.y;
-                ++c.i;
-            }
-            else if (t.value.length > 0) {
-                var a = this.getMinCursor();
-                var b = this.getMaxCursor();
-                d.copy(c);
-                d.x += t.value.length;
-                d.i += t.value.length;
-                if (a.i <= d.i && c.i < b.i) {
-                    var e = a, f = b;
-                    if (c.i > a.i) {
-                        e = c;
-                    }
-                    if (d.i < b.i) {
-                        f = d;
-                    }
-                    var cw = f.i - e.i;
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
+        var tokenFront = new Cursor()
+        var tokenBack = new Cursor();
+
+        for (var y = 0; y < rows.length; ++y) {
+            var row = rows[y];
+            for (var n = 0; n < row.length; ++n) {
+                var t = row[n];
+                tokenBack.x += t.value.length;
+                tokenBack.i += t.value.length;
+                
+                if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                    var selectionFront = Cursor.max(minCursor, tokenFront);
+                    var selectionBack = Cursor.min(maxCursor, tokenBack);
+                    var cw = selectionBack.i - selectionFront.i;
                     gfx.fillStyle = theme.regular.selectedBackColor
                             || Themes.DEFAULT.regular.selectedBackColor;
                     gfx.fillRect(
-                            e.x * this.characterWidth, (e.y + 0.25) * this.characterHeight,
+                            selectionFront.x * this.characterWidth, (selectionFront.y + 0.25) * this.characterHeight,
                             cw * this.characterWidth, this.characterHeight
                             );
                 }
@@ -167,9 +160,14 @@ function Primrose(canvasID, options) {
                         + " " + this.characterHeight + "px " + theme.fontFamily;
                 gfx.font = font.trim();
                 gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                gfx.fillText(t.value, c.x * this.characterWidth, (c.y + 1) * this.characterHeight);
-                c.copy(d);
+                gfx.fillText(t.value, tokenFront.x * this.characterWidth, (tokenFront.y + 1) * this.characterHeight);
+                
+                tokenFront.copy(tokenBack);
             }
+            tokenFront.x = 0;
+            ++tokenFront.y;
+            ++tokenFront.i;
+            tokenBack.copy(tokenFront);
         }
 
         gfx.beginPath();
@@ -300,14 +298,6 @@ Primrose.prototype.insertAtCursor = function (str) {
     }
 };
 
-Primrose.prototype.getMinCursor = function () {
-    return this.frontCursor.i <= this.backCursor.i ? this.frontCursor : this.backCursor;
-};
-
-Primrose.prototype.getMaxCursor = function () {
-    return this.frontCursor.i > this.backCursor.i ? this.frontCursor : this.backCursor;
-};
-
 Primrose.prototype.export = function () {
     return this.getLines().map(function (m) {
         return "\"" + m.replace(/"/g, "\\\"") + "\\n\"";
@@ -316,11 +306,11 @@ Primrose.prototype.export = function () {
 
 Primrose.prototype.copySelectedText = function (evt) {
     if (this.frontCursor.i !== this.backCursor.i) {
-        var a = this.getMinCursor();
-        var b = this.getMaxCursor();
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
         var lines = this.getLines();
         var text = lines.join("\n");
-        var str = text.substring(a.i, b.i);
+        var str = text.substring(minCursor.i, maxCursor.i);
         evt.clipboardData.setData("text/plain", str);
     }
     evt.preventDefault();
@@ -336,9 +326,9 @@ Primrose.prototype.pasteAtCursor = function (str) {
     this.deleteSelection();
     var lines = this.getLines();
     var text = lines.join("\n");
-    var a = this.getMinCursor();
-    var left = text.substring(0, a.i);
-    var right = text.substring(a.i);
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
+    var left = text.substring(0, minCursor.i);
+    var right = text.substring(minCursor.i);
     text = left + str + right;
     lines = text.split("\n");
     this.pushUndo(lines);
@@ -351,16 +341,16 @@ Primrose.prototype.pasteAtCursor = function (str) {
 
 Primrose.prototype.deleteSelection = function () {
     if (this.frontCursor.i !== this.backCursor.i) {
-        var a = this.getMinCursor();
-        var b = this.getMaxCursor();
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
         var lines = this.getLines();
         // TODO: don't rejoin the string first.
         var text = lines.join("\n");
-        var left = text.substring(0, a.i);
-        var right = text.substring(b.i);
+        var left = text.substring(0, minCursor.i);
+        var right = text.substring(maxCursor.i);
         text = left + right;
         lines = text.split("\n");
         this.pushUndo(lines);
-        b.copy(a);
+        maxCursor.copy(minCursor);
     }
 };
