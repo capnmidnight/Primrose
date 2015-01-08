@@ -175,12 +175,12 @@ Commands["SHIFT" + Keys.TAB] = function (lines, cursor) {
     this.scrollIntoView(cursor);
 };
 
-Commands.CTRL_A = function (lines, cursor) {
+Commands.CTRL_a = function (lines, cursor) {
     this.frontCursor.fullHome(lines);
     this.backCursor.fullEnd(lines);
 };
 
-Commands.CTRL_Z = function (lines, cursor) {
+Commands.CTRL_z = function (lines, cursor) {
     this.popUndo();
     this.scrollIntoView(cursor);
 };

@@ -17,8 +17,8 @@ function Primrose(canvasID, options) {
         for (var type in codePage) {
             var codes = codePage[type];
             for (var code in codes) {
-                var combo = type + "_" + codes[code];
-                Commands[combo.toUpperCase()] = this.insertAtCursor.bind(this, codes[code]);
+                var name = type + "_" + codePage.NORMAL[code];
+                Commands[name] = this.insertAtCursor.bind(this, codes[code]);
             }
         }
     };
@@ -94,7 +94,7 @@ function Primrose(canvasID, options) {
         typeA = typeA || "NORMAL";
         var codeCommandA = typeA + key;
         var codeCommandB = typeB + key;
-        var charCommand = typeB + "_" + codePage.SHIFT[key];
+        var charCommand = typeB + "_" + codePage.NORMAL[key];
         var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
         if (func) {
             this.frontCursor.moved = false;
@@ -348,6 +348,15 @@ function Primrose(canvasID, options) {
         var cell = this.pixel2cell(evt.layerX, evt.layerY);
         cursor.setXY(cell.x, cell.y, lines);
     }
+    
+    mouseEventSource.addEventListener("wheel", function(evt){
+        this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
+        if(this.scrollTop < 0){
+            this.scrollTop = 0;
+        }
+        evt.preventDefault();
+        this.drawText();
+    }.bind(this));
 
     mouseEventSource.addEventListener("mousedown", function (evt) {
         if (evt.button === 0) {
