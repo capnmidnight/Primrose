@@ -92,17 +92,17 @@ Commands["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
     this.scrollIntoView(cursor);
 };
 
-Commands["CTRL" + Keys.DASH] = function () {
+Commands["CTRL" + Keys.DASH] = function (lines, cursor) {
     this.decreaseFontSize();
     this.scrollIntoView(cursor);
 };
 
-Commands["CTRL" + Keys.EQUALSIGN] = function () {
+Commands["CTRL" + Keys.EQUALSIGN] = function (lines, cursor) {
     this.increaseFontSize();
     this.scrollIntoView(cursor);
 };
 
-Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
+Commands["NORMAL" + Keys.BACKSPACE] = function (lines, cursor) {
     if (this.frontCursor.i === this.backCursor.i) {
         this.frontCursor.left(lines);
     }
@@ -110,7 +110,7 @@ Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands["SHIFT" + Keys.DELETE] = function (lines) {
+Commands["SHIFT" + Keys.DELETE] = function (lines, cursor) {
     if (this.frontCursor.i === this.backCursor.i) {
         this.frontCursor.home(lines);
         this.backCursor.end(lines);
@@ -119,7 +119,7 @@ Commands["SHIFT" + Keys.DELETE] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands["NORMAL" + Keys.DELETE] = function (lines) {
+Commands["NORMAL" + Keys.DELETE] = function (lines, cursor) {
     if (this.frontCursor.i === this.backCursor.i) {
         this.backCursor.right(lines);
     }
@@ -127,7 +127,7 @@ Commands["NORMAL" + Keys.DELETE] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands["NORMAL" + Keys.ENTER] = function (lines) {
+Commands["NORMAL" + Keys.ENTER] = function (lines, cursor) {
     var indent = "";
     for (var i = 0; i < lines[this.frontCursor.y].length && lines[this.frontCursor.y][i] === " "; ++i) {
         indent += " ";
@@ -136,7 +136,7 @@ Commands["NORMAL" + Keys.ENTER] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands["NORMAL" + Keys.TAB] = function (lines) {
+Commands["NORMAL" + Keys.TAB] = function (lines, cursor) {
     if (this.frontCursor.y === this.backCursor.y) {
         this.insertAtCursor(this.tabString);
     }
@@ -156,7 +156,7 @@ Commands["NORMAL" + Keys.TAB] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands["SHIFT" + Keys.TAB] = function (lines) {
+Commands["SHIFT" + Keys.TAB] = function (lines, cursor) {
     if (this.frontCursor.y !== this.backCursor.y) {
         var a = this.getMinCursor();
         var b = this.getMaxCursor();
@@ -175,12 +175,12 @@ Commands["SHIFT" + Keys.TAB] = function (lines) {
     this.scrollIntoView(cursor);
 };
 
-Commands.CTRL_A = function (lines) {
+Commands.CTRL_A = function (lines, cursor) {
     this.frontCursor.fullHome(lines);
     this.backCursor.fullEnd(lines);
 };
 
-Commands.CTRL_Z = function (lines) {
+Commands.CTRL_Z = function (lines, cursor) {
     this.popUndo();
     this.scrollIntoView(cursor);
 };
