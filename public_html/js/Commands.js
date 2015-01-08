@@ -17,113 +17,44 @@
 
 var Commands = {};
 
-Commands["NORMAL" + Keys.LEFTARROW] = function (lines) {
-    this.bothCursors.left(lines);
+Commands["NORMAL" + Keys.LEFTARROW] = "left";
+Commands["CTRL" + Keys.LEFTARROW] = "skipLeft";
+Commands["NORMAL" + Keys.RIGHTARROW] = "right";
+Commands["CTRL" + Keys.RIGHTARROW] = "skipRight";
+Commands["NORMAL" + Keys.UPARROW] = "up";
+Commands["NORMAL" + Keys.DOWNARROW] = "down";
+Commands["NORMAL" + Keys.HOME] = "home";
+Commands["CTRL" + Keys.HOME] = "fullHome";
+Commands["NORMAL" + Keys.END] = "end";
+Commands["CTRL" + Keys.END] = "fullEnd";
+
+Commands["NORMAL" + Keys.PAGEUP] = function (lines, cursor) {
+    cursor.incY(-this.pageSize, lines);
 };
 
-Commands["SHIFT" + Keys.LEFTARROW] = function (lines) {
-    this.backCursor.left(lines);
+Commands["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
+    cursor.incY(this.pageSize, lines);
 };
 
-Commands["CTRL" + Keys.LEFTARROW] = function (lines) {
-    this.bothCursors.skipLeft(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.LEFTARROW] = function (lines) {
-    this.backCursor.skipLeft(lines);
-};
-
-Commands["NORMAL" + Keys.RIGHTARROW] = function (lines) {
-    this.bothCursors.right(lines);
-};
-
-Commands["SHIFT" + Keys.RIGHTARROW] = function (lines) {
-    this.backCursor.right(lines);
-};
-
-Commands["CTRL" + Keys.RIGHTARROW] = function (lines) {
-    this.bothCursors.skipRight(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.RIGHTARROW] = function (lines) {
-    this.backCursor.skipRight(lines);
-};
-
-Commands["NORMAL" + Keys.UPARROW] = function (lines) {
-    this.bothCursors.up(lines);
-};
-
-Commands["SHIFT" + Keys.UPARROW] = function (lines) {
-    this.backCursor.up(lines);
-};
-
-Commands["NORMAL" + Keys.DOWNARROW] = function (lines) {
-    this.bothCursors.down(lines);
-};
-
-Commands["SHIFT" + Keys.DOWNARROW] = function (lines) {
-    this.backCursor.down(lines);
-};
-
-Commands["NORMAL" + Keys.PAGEUP] = function (lines) {
-    this.bothCursors.incY(-this.pageSize, lines);
-};
-
-Commands["SHIFT" + Keys.PAGEUP] = function (lines) {
-    this.backCursor.incY(-this.pageSize, lines);
-};
-
-Commands["NORMAL" + Keys.PAGEDOWN] = function (lines) {
-    this.bothCursors.incY(this.pageSize, lines);
-};
-
-Commands["SHIFT" + Keys.PAGEDOWN] = function (lines) {
-    this.backCursor.incY(this.pageSize, lines);
-};
-
-Commands["NORMAL" + Keys.HOME] = function (lines) {
-    this.bothCursors.home(lines);
-};
-
-Commands["SHIFT" + Keys.HOME] = function (lines) {
-    this.backCursor.home(lines);
-};
-
-Commands["CTRL" + Keys.HOME] = function (lines) {
-    this.bothCursors.fullHome(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.HOME] = function (lines) {
-    this.backCursor.fullHome(lines);
-};
-
-Commands["NORMAL" + Keys.END] = function (lines) {
-    this.bothCursors.end(lines);
-};
-
-Commands["SHIFT" + Keys.END] = function (lines) {
-    this.backCursor.end(lines);
-};
-
-Commands["CTRL" + Keys.END] = function (lines) {
-    this.bothCursors.fullEnd(lines);
-};
-
-Commands["CTRLSHIFT" + Keys.END] = function (lines) {
-    this.backCursor.fullEnd(lines);
-};
-
-Commands["CTRL" + Keys.DASH] = function (lines) {
+Commands["CTRL" + Keys.DASH] = function () {
     this.decreaseFontSize();
 };
 
-Commands["CTRL" + Keys.EQUALSIGN] = function (lines) {
+Commands["CTRL" + Keys.EQUALSIGN] = function () {
     this.increaseFontSize();
 };
 
 Commands["NORMAL" + Keys.BACKSPACE] = function (lines) {
     if (this.frontCursor.i === this.backCursor.i) {
         this.frontCursor.left(lines);
+    }
+    this.deleteSelection();
+};
+
+Commands["SHIFT" + Keys.DELETE] = function (lines) {
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.frontCursor.home(lines);
+        this.backCursor.end(lines);
     }
     this.deleteSelection();
 };
@@ -180,12 +111,12 @@ Commands["SHIFT" + Keys.TAB] = function (lines) {
     }
 };
 
-Commands["CTRL+A"] = function (lines) {
+Commands.CTRL_A = function (lines) {
     this.frontCursor.fullHome(lines);
     this.backCursor.fullEnd(lines);
 };
 
-Commands["CTRL+Z"] = function (lines) {
+Commands.CTRL_Z = function (lines) {
     this.popUndo();
 };
 

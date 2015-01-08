@@ -36,6 +36,7 @@ function Primrose(canvasID, options) {
     canvas.style.height = canvas.height + "px";
 
     var dragging = false;
+    var scrollTop = 0
     this.pageSize = options.pageSize || 5;
     this.tabWidth = options.tabWidth || 4;
     this.tabString = "";
@@ -52,18 +53,28 @@ function Primrose(canvasID, options) {
         var key = evt.keyCode;
         // don't do anything about the actual press of SHIFT, CTRL, or ALT
         if (key !== Keys.SHIFT && key !== Keys.CTRL && key !== Keys.ALT) {
-            var type = ((evt.ctrlKey && "CTRL" || "")
-                    + (evt.altKey && "ALT" || "")
-                    + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-            var codeCommand = type + key;
-            var charCommand = type + "+" + codePage.SHIFT[key];
-            var func = Commands[codeCommand] || Commands[charCommand];
+            var typeA = (evt.ctrlKey && "CTRL" || "")
+                    + (evt.altKey && "ALT" || "");
+            var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+            typeA = typeA || "NORMAL";
+            var codeCommandA = typeA + key;
+            var codeCommandB = typeB + key;
+            var charCommand = typeB + "_" + codePage.SHIFT[key];
+            var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
             if (func) {
-                func.call(this, this.getLines());
+                var currentCursor = evt.shiftKey ? this.backCursor : this.bothCursors;
+                if (func instanceof Function) {
+                    func.call(this, this.getLines(), currentCursor);
+                }
+                else {
+                    currentCursor[func](this.getLines(), currentCursor);
+                }
+                currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
+                this.scrollIntoView(currentCursor);
                 evt.preventDefault();
             }
-            else if (codePage[type]) {
-                var char = codePage[type][key];
+            else if (codePage[typeB]) {
+                var char = codePage[typeB][key];
                 if (char) {
                     this.insertAtCursor(char);
                     if (key === Keys.SPACEBAR) {
@@ -73,10 +84,14 @@ function Primrose(canvasID, options) {
             }
             else {
                 // what just happened?
-                console.log(type, key);
+                console.log(typeB, key);
             }
         }
         this.drawText();
+    };
+    
+    this.scrollIntoView = function(currentCursor){
+        
     };
 
     function readClipboard(evt) {
@@ -100,6 +115,17 @@ function Primrose(canvasID, options) {
         var lines = this.getLines();
         var text = lines.join("\n");
         var tokens = languageGrammar.tokenize(text);
+        var rows = [[]];
+        for (var i = 0; i < tokens.length; ++i) {
+            var t = tokens[i];
+            if (t.type === "newlines") {
+                rows.push([]);
+            }
+            else {
+                rows[rows.length - 1].push(t);
+            }
+        }
+
         var clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
         if (theme.regular.backColor) {
             gfx.fillStyle = theme.regular.backColor;
