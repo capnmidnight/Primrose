@@ -91,7 +91,20 @@ function Primrose(canvasID, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-
+        var dyTop = currentCursor.y - scrollTop;
+        var dyBottom = dyTop - gridHeight;
+        if (!(dyTop >= 0 && dyBottom < 0)) {
+            var dy = 0;
+            // compare the absolute values, so we get the smallest change regardless
+            // of direction
+            if (Math.abs(dyTop) < Math.abs(dyBottom)) {
+                dy = dyTop;
+            }
+            else {
+                dy = dyBottom;
+            }
+            scrollTop += dy;
+        }
     };
 
     function readClipboard(evt) {
@@ -131,9 +144,9 @@ function Primrose(canvasID, options) {
             gfx.fillStyle = theme.regular.backColor;
         }
         gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
-        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
-        var tokenFront = new Cursor()
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
+        var tokenFront = new Cursor();
         var tokenBack = new Cursor();
 
         for (var y = 0; y < rows.length; ++y) {
@@ -142,26 +155,28 @@ function Primrose(canvasID, options) {
                 var t = row[n];
                 tokenBack.x += t.value.length;
                 tokenBack.i += t.value.length;
-                
-                if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                    var selectionFront = Cursor.max(minCursor, tokenFront);
-                    var selectionBack = Cursor.min(maxCursor, tokenBack);
-                    var cw = selectionBack.i - selectionFront.i;
-                    gfx.fillStyle = theme.regular.selectedBackColor
-                            || Themes.DEFAULT.regular.selectedBackColor;
-                    gfx.fillRect(
-                            selectionFront.x * this.characterWidth, (selectionFront.y + 0.25) * this.characterHeight,
-                            cw * this.characterWidth, this.characterHeight
-                            );
+
+                if (scrollTop <= y && y < scrollTop + gridHeight) {
+                    if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                        var selectionFront = Cursor.max(minCursor, tokenFront);
+                        var selectionBack = Cursor.min(maxCursor, tokenBack);
+                        var cw = selectionBack.i - selectionFront.i;
+                        gfx.fillStyle = theme.regular.selectedBackColor
+                                || Themes.DEFAULT.regular.selectedBackColor;
+                        gfx.fillRect(
+                                selectionFront.x * this.characterWidth, (selectionFront.y + 0.2 - scrollTop) * this.characterHeight,
+                                cw * this.characterWidth, this.characterHeight
+                                );
+                    }
+                    var style = theme[t.type] || {};
+                    var font = (style.fontWeight || theme.regular.fontWeight || "")
+                            + " " + (style.fontStyle || theme.regular.fontStyle || "")
+                            + " " + this.characterHeight + "px " + theme.fontFamily;
+                    gfx.font = font.trim();
+                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                    gfx.fillText(t.value, tokenFront.x * this.characterWidth, (tokenFront.y + 1 - scrollTop) * this.characterHeight);
                 }
-                var style = theme[t.type] || {};
-                var font = (style.fontWeight || theme.regular.fontWeight || "")
-                        + " " + (style.fontStyle || theme.regular.fontStyle || "")
-                        + " " + this.characterHeight + "px " + theme.fontFamily;
-                gfx.font = font.trim();
-                gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                gfx.fillText(t.value, tokenFront.x * this.characterWidth, (tokenFront.y + 1) * this.characterHeight);
-                
+
                 tokenFront.copy(tokenBack);
             }
             tokenFront.x = 0;
@@ -172,10 +187,10 @@ function Primrose(canvasID, options) {
 
         gfx.beginPath();
         gfx.strokeStyle = "black";
-        gfx.moveTo(this.frontCursor.x * this.characterWidth, this.frontCursor.y * this.characterHeight);
-        gfx.lineTo(this.frontCursor.x * this.characterWidth, (this.frontCursor.y + 1.25) * this.characterHeight);
-        gfx.moveTo(this.backCursor.x * this.characterWidth + 1, this.backCursor.y * this.characterHeight);
-        gfx.lineTo(this.backCursor.x * this.characterWidth + 1, (this.backCursor.y + 1.25) * this.characterHeight);
+        gfx.moveTo(this.frontCursor.x * this.characterWidth, (this.frontCursor.y - scrollTop) * this.characterHeight);
+        gfx.lineTo(this.frontCursor.x * this.characterWidth, (this.frontCursor.y - scrollTop + 1.25) * this.characterHeight);
+        gfx.moveTo(this.backCursor.x * this.characterWidth + 1, (this.backCursor.y - scrollTop) * this.characterHeight);
+        gfx.lineTo(this.backCursor.x * this.characterWidth + 1, (this.backCursor.y - scrollTop + 1.25) * this.characterHeight);
         gfx.stroke();
     };
 
@@ -306,8 +321,8 @@ Primrose.prototype.export = function () {
 
 Primrose.prototype.copySelectedText = function (evt) {
     if (this.frontCursor.i !== this.backCursor.i) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
-        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
         var lines = this.getLines();
         var text = lines.join("\n");
         var str = text.substring(minCursor.i, maxCursor.i);
@@ -326,7 +341,7 @@ Primrose.prototype.pasteAtCursor = function (str) {
     this.deleteSelection();
     var lines = this.getLines();
     var text = lines.join("\n");
-    var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
+    var minCursor = Cursor.min(this.frontCursor, this.backCursor);
     var left = text.substring(0, minCursor.i);
     var right = text.substring(minCursor.i);
     text = left + str + right;
@@ -341,8 +356,8 @@ Primrose.prototype.pasteAtCursor = function (str) {
 
 Primrose.prototype.deleteSelection = function () {
     if (this.frontCursor.i !== this.backCursor.i) {
-        var minCursor = Cursor.min(this.frontCursor, this.backCursor);;
-        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);;
+        var minCursor = Cursor.min(this.frontCursor, this.backCursor);
+        var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
         var lines = this.getLines();
         // TODO: don't rejoin the string first.
         var text = lines.join("\n");
