@@ -47,6 +47,15 @@ Cursor.prototype.copy = function (cursor) {
     this.moved = false;
 };
 
+Cursor.prototype.rectify = function (lines) {
+    if (this.y >= lines.length) {
+        this.y = lines.length - 1;
+    }
+    if (this.x > lines[this.y].length) {
+        this.x = lines[this.y].length;
+    }
+};
+
 Cursor.prototype.left = function (lines) {
     if (this.i > 0) {
         --this.i;

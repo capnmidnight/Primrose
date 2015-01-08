@@ -180,8 +180,12 @@ Commands.CTRL_a = function (lines, cursor) {
     this.backCursor.fullEnd(lines);
 };
 
-Commands.CTRL_z = function (lines, cursor) {
-    this.popUndo();
+Commands.CTRL_y = function (lines, cursor) {
+    this.redo();
     this.scrollIntoView(cursor);
 };
 
+Commands.CTRL_z = function (lines, cursor) {
+    this.undo();
+    this.scrollIntoView(cursor);
+};

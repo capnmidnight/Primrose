@@ -26,9 +26,9 @@
             var prim;
             window.addEventListener("load", function () {
                 var ctrls = findEverything();
-                prim = new Primrose(ctrls.output, {
-                    file: Primrose.toString()
-                });
+                prim = new Primrose(ctrls.output);
+                prim.setText("a\nb");
+                //prim.setText(Primrose.toString());
                 
                 ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
                 ctrls.controls.appendChild(prim.keyboardSelect);

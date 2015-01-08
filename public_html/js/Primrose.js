@@ -25,19 +25,31 @@ function Primrose(canvasID, options) {
     this.setCodePage(options.codePage || CodePages.EN_US);
 
     var history = [];
+    var historyFrame = -1;
     this.getLines = function () {
-        return history[history.length - 1].slice();
+        return history[historyFrame].slice();
     };
 
     this.pushUndo = function (lines) {
+        if(historyFrame < history.length - 1){
+            history.splice(historyFrame + 1);
+        }
         history.push(lines);
+        historyFrame = history.length - 1;
     };
 
-    this.popUndo = function () {
-        if (history.length > 1) {
-            return history.pop();
+    this.redo = function () {
+        if (historyFrame < history.length - 1) {
+            ++historyFrame;
         }
     };
+
+    this.undo = function () {
+        if (historyFrame > 1) {
+            --historyFrame;
+        }
+    };
+
     this.setText(options.file || "");
 
     this.frontCursor = new Cursor();
@@ -100,10 +112,14 @@ function Primrose(canvasID, options) {
             this.frontCursor.moved = false;
             this.backCursor.moved = false;
             var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
-            func.call(this, this.getLines(), currentCursor);
+            var lines = this.getLines();
+            func.call(this, lines, currentCursor);
+            lines = this.getLines();
             if (this.frontCursor.moved && !this.backCursor.moved) {
                 this.backCursor.copy(this.frontCursor);
             }
+            this.frontCursor.rectify(lines);
+            this.backCursor.rectify(lines);
             evt.preventDefault();
         }
         else {
@@ -348,10 +364,10 @@ function Primrose(canvasID, options) {
         var cell = this.pixel2cell(evt.layerX, evt.layerY);
         cursor.setXY(cell.x, cell.y, lines);
     }
-    
-    mouseEventSource.addEventListener("wheel", function(evt){
+
+    mouseEventSource.addEventListener("wheel", function (evt) {
         this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
-        if(this.scrollTop < 0){
+        if (this.scrollTop < 0) {
             this.scrollTop = 0;
         }
         evt.preventDefault();
