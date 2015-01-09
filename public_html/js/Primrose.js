@@ -45,7 +45,7 @@ function Primrose(canvasID, options) {
     };
 
     this.undo = function () {
-        if (historyFrame > 1) {
+        if (historyFrame > 0) {
             --historyFrame;
         }
     };
