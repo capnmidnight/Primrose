@@ -31,7 +31,7 @@ function Primrose(canvasID, options) {
     };
 
     this.pushUndo = function (lines) {
-        if(historyFrame < history.length - 1){
+        if (historyFrame < history.length - 1) {
             history.splice(historyFrame + 1);
         }
         history.push(lines);
@@ -97,37 +97,75 @@ function Primrose(canvasID, options) {
     var clipboardEventSource = options.clipboardEventSource || surrogate;
     var mouseEventSource = options.mouseEventSource || canvas;
 
+    var modifierKeyState = {};
+    for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+        Keys.MODIFIER_KEYS[i] = {
+            name: Keys.MODIFIER_KEYS[i],
+            flag: Keys.MODIFIER_KEYS[i].toLowerCase() + "Key",
+            index: Keys[Keys.MODIFIER_KEYS[i]]
+        };
+        modifierKeyState[Keys.MODIFIER_KEYS[i].index] = 0;
+    }
+
     this.editText = function (evt) {
         evt = evt || event;
         var key = evt.keyCode;
-        var typeA = (evt.ctrlKey && "CTRL" || "")
-                + (evt.altKey && "ALT" || "");
-        var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-        typeA = typeA || "NORMAL";
-        var codeCommandA = typeA + key;
-        var codeCommandB = typeB + key;
-        var charCommand = typeB + "_" + codePage.NORMAL[key];
-        var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
-        if (func) {
-            this.frontCursor.moved = false;
-            this.backCursor.moved = false;
-            var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
-            var lines = this.getLines();
-            func.call(this, lines, currentCursor);
-            lines = this.getLines();
-            if (this.frontCursor.moved && !this.backCursor.moved) {
-                this.backCursor.copy(this.frontCursor);
-            }
-            this.frontCursor.rectify(lines);
-            this.backCursor.rectify(lines);
-            evt.preventDefault();
+        if (modifierKeyState[key] !== undefined) {
+            modifierKeyState[key] |= (evt.location || evt.keyLocation || 1);
         }
         else {
-            // what just happened?
-            console.log(typeB, key);
+            var type = "";
+            for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+                var m = Keys.MODIFIER_KEYS[i];
+                if (!evt[m.flag]) {
+                    modifierKeyState[m.index] = 0;
+                }
+                type += m.name + modifierKeyState[m.index];
+            }
+            console.log(type);
+            var typeA = (evt.ctrlKey && "CTRL" || "")
+                    + (evt.altKey && "ALT" || "");
+            var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
+            typeA = typeA || "NORMAL";
+            var codeCommandA = typeA + key;
+            var codeCommandB = typeB + key;
+            var charCommand = typeB + "_" + codePage.NORMAL[key];
+            var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
+            if (func) {
+                this.frontCursor.moved = false;
+                this.backCursor.moved = false;
+                var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
+                var lines = this.getLines();
+                func.call(this, lines, currentCursor);
+                lines = this.getLines();
+                if (this.frontCursor.moved && !this.backCursor.moved) {
+                    this.backCursor.copy(this.frontCursor);
+                }
+                this.frontCursor.rectify(lines);
+                this.backCursor.rectify(lines);
+                evt.preventDefault();
+            }
+            else {
+                // what just happened?
+                console.log(typeB, key);
+            }
         }
         this.drawText();
     };
+
+    keyEventSource.addEventListener("keydown", this.editText.bind(this));
+    keyEventSource.addEventListener("keyup", function (evt) {
+        surrogate.value = this.getText();
+        surrogate.selectionStart = this.frontCursor.i;
+        surrogate.selectionLength = this.backCursor.i - this.frontCursor.i;
+
+        var key = evt.keyCode;
+        var m = modifierKeyState[key];
+        var l = (evt.location || evt.keyLocation || 1);
+        if (m !== undefined && (m & l) !== 0) {
+            modifierKeyState[key] -= l;
+        }
+    }.bind(this));
 
     function minDelta(v, minV, maxV) {
         var dvMinV = v - minV;
@@ -348,13 +386,6 @@ function Primrose(canvasID, options) {
     };
     this.setTheme(options.theme || Themes.DEFAULT);
 
-    keyEventSource.addEventListener("keydown", this.editText.bind(this));
-    keyEventSource.addEventListener("keyup", function () {
-        surrogate.value = this.getText();
-        surrogate.selectionStart = this.frontCursor.i;
-        surrogate.selectionLength = this.backCursor.i - this.frontCursor.i;
-    }.bind(this));
-
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
     clipboardEventSource.addEventListener("paste", readClipboard.bind(this));
@@ -504,4 +535,5 @@ Primrose.prototype.cutSelectedText = function (evt) {
     this.copySelectedText(evt);
     this.deleteSelection();
     this.drawText();
-};
+}
+;
