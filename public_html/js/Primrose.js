@@ -90,9 +90,6 @@ function Primrose(canvasID, options) {
     surrogate.style.top = canvas.offsetTop + "px";
     surrogate.style.width = canvas.offsetWidth + "px";
     surrogate.style.height = canvas.offsetHeigth + "px";
-    surrogate.value = this.getText();
-    surrogate.selectionStart = 0;
-    surrogate.selectionLength = 0;
 
     var surrogateContainer = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement);
     surrogateContainer.style.position = "absolute";
@@ -167,10 +164,6 @@ function Primrose(canvasID, options) {
 
     keyEventSource.addEventListener("keydown", this.editText.bind(this));
     keyEventSource.addEventListener("keyup", function (evt) {
-        surrogate.value = this.getText();
-        surrogate.selectionStart = this.frontCursor.i;
-        surrogate.selectionLength = this.backCursor.i - this.frontCursor.i;
-
         var key = evt.keyCode;
         var m = modifierKeyState[key];
         var l = (evt.location || evt.keyLocation || 1);
