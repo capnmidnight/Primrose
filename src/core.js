@@ -176,10 +176,9 @@ function help(obj) {
     var evnts = [];
     if (obj) {
         for (var field in obj) {
-            if (field.indexOf("on") === 0
-                    // this is a known element that is not an event, but looks like
-                    // an event to the most basic assumption.
-                    && (obj !== navigator || field !== "onLine")) {
+            if (field.indexOf("on") === 0 && (obj !== navigator || field !== "onLine")) { 
+                // `online` is a known element that is not an event, but looks like
+                // an event to the most basic assumption.
                 evnts.push(field.substring(2));
             }
             else if (typeof (obj[field]) === "function") {
@@ -206,7 +205,7 @@ function help(obj) {
                     var parentObject = q.shift();
                     parentObject.___traversed___ = true;
                     traversed.push(parentObject);
-                    for (var field in parentObject.obj) {
+                    for (field in parentObject.obj) {
                         var testObject = parentObject.obj[field];
                         if (testObject) {
                             if (typeof (testObject) === "function") {
@@ -226,7 +225,7 @@ function help(obj) {
                 });
             }
         }
-        var obj = {
+        obj = {
             type: type,
             events: evnts,
             functions: funcs,
@@ -394,11 +393,11 @@ function findEverything(elem, obj) {
     obj = obj || {};
     var arr = elem.querySelectorAll("*");
     for (var i = 0; i < arr.length; ++i) {
-        var elem = arr[i];
-        if (elem.id && elem.id.length > 0) {
-            obj[elem.id] = elem;
-            if (elem.parentElement) {
-                elem.parentElement[elem.id] = elem;
+        var e = arr[i];
+        if (e.id && e.id.length > 0) {
+            obj[e.id] = e;
+            if (e.parentElement) {
+                e.parentElement[e.id] = e;
             }
         }
     }
@@ -447,8 +446,7 @@ function readForm(ctrls) {
     if (ctrls) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if ((c.tagName === "INPUT" || c.tagName === "SELECT")
-                    && (!c.dataset || !c.dataset.skipcache)) {
+            if ((c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
                 if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     state[name] = c.value;
                 }
@@ -465,10 +463,7 @@ function writeForm(ctrls, state) {
     if (state) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if (state[name] !== null
-                    && state[name] !== undefined
-                    && (c.tagName === "INPUT" || c.tagName === "SELECT")
-                    && (!c.dataset || !c.dataset.skipcache)) {
+            if (state[name] !== null && state[name] !== undefined && (c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
                 if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     c.value = state[name];
                 }
@@ -542,10 +537,7 @@ if (!document.documentElement.requestFullscreen) {
 }
 
 function isFullScreenMode() {
-    return (document.fullscreenElement
-            || document.mozFullScreenElement
-            || document.webkitFullscreenElement
-            || document.msFullscreenElement);
+    return (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 }
 
 function requestFullScreen(success) {
@@ -613,8 +605,4 @@ function addFullScreenShim() {
     });
 }
 
-document.exitPointerLock = document.exitPointerLock
-        || document.webkitExitPointerLock
-        || document.mozExitPointerLock
-        || function () {
-        };
+document.exitPointerLock = document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () { };

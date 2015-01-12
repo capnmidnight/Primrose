@@ -76,12 +76,12 @@ Grammar.prototype.tokenize = function (text) {
 
     // normalize tokens
     var blockOn = false;
-    for (var i = 0; i < tokens.length; ++i) {
+    for (i = 0; i < tokens.length; ++i) {
         var t = tokens[i];
         if (!(t instanceof Token)) {
             tokens[i] = t = new Token(t, "regular");
         }
-               
+
         if (blockOn) {
             if (t.type === "endBlockComments") {
                 blockOn = false;
@@ -177,16 +177,16 @@ Grammar.tests = {
         Assert.areEqual("comments", tokens[4].type, "4: token types do not match." + tokens[5].value);
     },
     bigTest: function () {
-        var src = "function Hello (){\n"
-                + "    // a comment\n"
-                + "    function MyFunc ( ) {\n"
-                + "        var x = \"Whatever\";\n"
-                + "        console.log(x + \" World\");\n"
-                + "        /*\n"
-                + "          a longer comment\n"
-                + "        */\n"
-                + "    }\n"
-                + "}";
+        var src = "function Hello (){\n" +
+                "    // a comment\n" +
+                "    function MyFunc ( ) {\n" +
+                "        var x = \"Whatever\";\n" +
+                "        console.log(x + \" World\");\n" +
+                "        /*\n" +
+                "          a longer comment\n" +
+                "        */\n" +
+                "    }\n" +
+                "}";
         var tokens = Grammar.JavaScript.tokenize(src);
         var res = tokens.map(function (t) {
             return t.value;

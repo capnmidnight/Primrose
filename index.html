@@ -45,14 +45,39 @@
                     <script type="text/javascript">
                         var ctrls = findEverything();
                         prim = new Primrose(ctrls.output, {
-                            file: Primrose.toString()
+                            file: "function fib(arity, len) {\n" +
+"    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
+"}\n" +
+" \n" +
+"function lucas(arity, len) {\n" +
+"    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
+"}\n" +
+" \n" +
+"function nacci(a, arity, len) {\n" +
+"    while (a.length < len) {\n" +
+"        var sum = 0;\n" +
+"        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
+"            sum += a[i];\n" +
+"        a.push(sum);\n" +
+"    }\n" +
+"    return a;\n" +
+"}\n" +
+" \n" +
+"function main() {\n" +
+"    for (var arity = 2; arity <= 10; arity++)\n" +
+"        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
+"    for (var arity = 2; arity <= 10; arity++)\n" +
+"        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
+"}\n" +
+" \n" +
+"main();"
                         });
 
                         ctrls.controls.appendChild(prim.keyboardSelect);
                         ctrls.controls.appendChild(prim.themeSelect);
                     </script>
 
-                    <p>[NOTE: this is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
+                    <p>[NOTE: <a href="http://rosettacode.org/wiki/Fibonacci_n-step_number_sequences#JavaScript">Code sample from RosettaCode.org</a>. This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
                         or not the international keyboard support is correct. But the results so far are promising. Consider contributing!]</p>
 
                     <h2><a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>

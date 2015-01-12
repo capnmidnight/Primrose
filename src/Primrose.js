@@ -107,7 +107,7 @@ function Primrose(canvasID, options) {
     var mouseEventSource = options.mouseEventSource || canvas;
 
     var modifierKeyState = {};
-    for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
+    for (i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
         Keys.MODIFIER_KEYS[i] = {
             name: Keys.MODIFIER_KEYS[i],
             flag: Keys.MODIFIER_KEYS[i].toLowerCase() + "Key",
@@ -120,7 +120,7 @@ function Primrose(canvasID, options) {
         evt = evt || event;
         var key = evt.keyCode;
         if (modifierKeyState[key] !== undefined) {
-            modifierKeyState[key] |= (evt.location || evt.keyLocation || 1);
+            modifierKeyState[key] |= (evt.location || 1);
         }
         else {
             var type = "";
@@ -132,8 +132,7 @@ function Primrose(canvasID, options) {
                 type += m.name + modifierKeyState[m.index];
             }
             console.log(type);
-            var typeA = (evt.ctrlKey && "CTRL" || "")
-                    + (evt.altKey && "ALT" || "");
+            var typeA = (evt.ctrlKey && "CTRL" || "") + (evt.altKey && "ALT" || "");
             var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
             typeA = typeA || "NORMAL";
             var codeCommandA = typeA + key;
@@ -166,7 +165,7 @@ function Primrose(canvasID, options) {
     keyEventSource.addEventListener("keyup", function (evt) {
         var key = evt.keyCode;
         var m = modifierKeyState[key];
-        var l = (evt.location || evt.keyLocation || 1);
+        var l = (evt.location || 1);
         if (m !== undefined && (m & l) !== 0) {
             modifierKeyState[key] -= l;
         }
@@ -213,6 +212,7 @@ function Primrose(canvasID, options) {
     }
 
     this.drawText = function () {
+        var t;
         var clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
         if (theme.regular.backColor) {
             gfx.fillStyle = theme.regular.backColor;
@@ -224,7 +224,7 @@ function Primrose(canvasID, options) {
         // group the tokens into rows
         var rows = [[]];
         for (var i = 0; i < tokens.length; ++i) {
-            var t = tokens[i];
+            t = tokens[i];
             rows[rows.length - 1].push(t);
             if (t.type === "newlines") {
                 rows.push([]);
@@ -248,22 +248,20 @@ function Primrose(canvasID, options) {
             // draw the tokens on this row
             var row = rows[y];
             for (var n = 0; n < row.length; ++n) {
-                var t = row[n];
+                t = row[n];
                 var toPrint = t.value;
                 tokenBack.x += toPrint.length;
                 tokenBack.i += toPrint.length;
 
                 // skip drawing tokens that aren't in view
-                if (this.scrollTop <= y && y < this.scrollTop + gridHeight
-                        && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                if (this.scrollTop <= y && y < this.scrollTop + gridHeight && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
 
                     // draw the selection box
                     if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
                         var selectionFront = Cursor.max(minCursor, tokenFront);
                         var selectionBack = Cursor.min(maxCursor, tokenBack);
                         var cw = selectionBack.i - selectionFront.i;
-                        gfx.fillStyle = theme.regular.selectedBackColor
-                                || Themes.DEFAULT.regular.selectedBackColor;
+                        gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                         gfx.fillRect(
                                 (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                 (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
@@ -273,9 +271,9 @@ function Primrose(canvasID, options) {
 
                     // draw the text
                     var style = theme[t.type] || {};
-                    var font = (style.fontWeight || theme.regular.fontWeight || "")
-                            + " " + (style.fontStyle || theme.regular.fontStyle || "")
-                            + " " + this.characterHeight + "px " + theme.fontFamily;
+                    var font = (style.fontWeight || theme.regular.fontWeight || "") + 
+                            " " + (style.fontStyle || theme.regular.fontStyle || "") + 
+                            " " + this.characterHeight + "px " + theme.fontFamily;
                     gfx.font = font.trim();
                     gfx.fillStyle = style.foreColor || theme.regular.foreColor;
                     gfx.fillText(
@@ -293,8 +291,7 @@ function Primrose(canvasID, options) {
                 while (lineNumber.length < lineCountWidth) {
                     lineNumber = " " + lineNumber;
                 }
-                gfx.fillStyle = theme.regular.selectedBackColor
-                        || Themes.DEFAULT.regular.selectedBackColor;
+                gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 gfx.fillRect(
                         0,
                         (y - this.scrollTop + 0.2) * this.characterHeight,
@@ -336,8 +333,7 @@ function Primrose(canvasID, options) {
         //vertical
         var scrollY = (this.scrollTop * canvas.height) / rows.length;
         var scrollBarHeight = gridHeight * canvas.height / rows.length - bottomGutterHeight * this.characterHeight;
-        gfx.fillStyle = theme.regular.selectedBackColor
-                || Themes.DEFAULT.regular.selectedBackColor;
+        gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
         gfx.fillRect(
                 canvas.width - this.characterWidth,
                 scrollY,
@@ -347,8 +343,7 @@ function Primrose(canvasID, options) {
         // horizontal
         var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + (this.gridLeft * this.characterWidth);
         var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
-        gfx.fillStyle = theme.regular.selectedBackColor
-                || Themes.DEFAULT.regular.selectedBackColor;
+        gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
         gfx.fillRect(
                 scrollX,
                 gridHeight * this.characterHeight,
