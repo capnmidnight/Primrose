@@ -50,13 +50,13 @@
 
                     <p>Go ahead, try some tippity-typing in the box below.</p>
                     <canvas id="output" width="690" height="300"></canvas>
+                    <div id="controls"></div>
                     <script type="text/javascript">
                         var ctrls = findEverything();
                         prim = new Primrose(ctrls.output, {
                             file: Primrose.toString()
                         });
 
-                        ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
                         ctrls.controls.appendChild(prim.keyboardSelect);
                         ctrls.controls.appendChild(prim.themeSelect);
                     </script>

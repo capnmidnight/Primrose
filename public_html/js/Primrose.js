@@ -82,14 +82,7 @@ function Primrose(canvasID, options) {
         this.tabString += " ";
     }
 
-    this.DOMElement = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement);
-    this.DOMElement.style.position = "absolute";
-    this.DOMElement.style.left = 0;
-    this.DOMElement.style.top = 0;
-    this.DOMElement.style.width = 0;
-    this.DOMElement.style.height = 0;
-    this.DOMElement.style.overflow = "hidden";
-
+    // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     var surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
     surrogate.style.position = "absolute";
     surrogate.style.left = canvas.offsetLeft + "px";
@@ -97,7 +90,19 @@ function Primrose(canvasID, options) {
     surrogate.style.width = canvas.offsetWidth + "px";
     surrogate.style.height = canvas.offsetHeigth + "px";
     surrogate.value = this.getText();
-    this.DOMElement.appendChild(surrogate);
+    surrogate.selectionStart = 0;
+    surrogate.selectionLength = 0;
+
+    var surrogateContainer = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement);
+    surrogateContainer.style.position = "absolute";
+    surrogateContainer.style.left = 0;
+    surrogateContainer.style.top = 0;
+    surrogateContainer.style.width = 0;
+    surrogateContainer.style.height = 0;
+    surrogateContainer.style.overflow = "hidden";
+    
+    canvas.parentElement.insertBefore(surrogateContainer, canvas);
+    surrogateContainer.appendChild(surrogate);
 
     var keyEventSource = options.keyEventSource || surrogate;
     var clipboardEventSource = options.clipboardEventSource || surrogate;
