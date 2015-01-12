@@ -1,7 +1,7 @@
 System.config({
   "paths": {
     "*": "*.js",
-    "Primrose/*": "src/*.js"
+    "Primrose/*": "dist/*.js"
   }
 });
 
