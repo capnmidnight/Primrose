@@ -99,8 +99,10 @@ function Primrose(canvasID, options) {
     surrogateContainer.style.height = 0;
     surrogateContainer.style.overflow = "hidden";
     
-    canvas.parentElement.insertBefore(surrogateContainer, canvas);
-    surrogateContainer.appendChild(surrogate);
+    if(canvas.parentElement){
+        canvas.parentElement.insertBefore(surrogateContainer, canvas);
+        surrogateContainer.appendChild(surrogate);
+    }
 
     var keyEventSource = options.keyEventSource || surrogate;
     var clipboardEventSource = options.clipboardEventSource || surrogate;
