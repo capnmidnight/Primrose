@@ -11,11 +11,12 @@ function Primrose(canvasID, options) {
 
     var codePage;
     this.setCodePage = function (cp) {
+        var lang = navigator.userLanguage || navigator.languages[0];
         codePage = cp;
         if(codePage === undefined){
             for(var key in CodePages){
                 cp = CodePages[key];
-                if(cp.language === navigator.languages[0]){
+                if(cp.language === lang){
                     codePage = cp;
                     break;
                 }
@@ -369,7 +370,10 @@ function Primrose(canvasID, options) {
         canvas.width = canvas.clientWidth * r;
         canvas.height = canvas.clientHeight * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
-        this.characterWidth = gfx.measureText("M").width;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.characterWidth = gfx.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
         this.drawText();
     }
     window.addEventListener("resize", measureText.bind(this));
