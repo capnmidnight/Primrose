@@ -34,11 +34,15 @@ function Token(value, type) {
 }
 
 Grammar.prototype.tokenize = function (text) {
-    var tokens = [new Token(text, "regular")], t = null;
+    // all text starts off as regular text, then gets cut up into tokens of
+    // more specific type
+    var tokens = [new Token(text, "regular")],
+        t = null;
     for (var i = 0; i < this.grammar.length; ++i) {
         var rule = this.grammar[i];
         for (var j = 0; j < tokens.length; ++j) {
             t = tokens[j];
+
             if (t.type === "regular") {
                 var res = rule.test.exec(tokens[j].value);
                 if (res) {
@@ -51,14 +55,15 @@ Grammar.prototype.tokenize = function (text) {
                     var token = new Token(mid, rule.name);
                     tokens.splice(j + 1, 0, token);
 
-                    // reinsert the rest of the string for further processing
+                    // if there is any string after the found token,
+                    // reinsert it so it can be processed further.
                     var end = start + mid.length;
                     if (end < t.value.length) {
                         var right = new Token(t.value.substring(end), "regular");
                         tokens.splice(j + 2, 0, right);
                     }
 
-                    // cut the newly created token out of the string
+                    // cut the newly created token out of the current string
                     if (start > 0) {
                         t.value = t.value.substring(0, start);
                         // skip the token we just created
@@ -90,12 +95,6 @@ Grammar.prototype.tokenize = function (text) {
         else if (t.type === "startBlockComments") {
             blockOn = true;
             t.type = "comments";
-        }
-        else if (t.type === "inlineComments") {
-            t.type = "comments";
-        }
-        else if (/^strings\d+/.test(t.type)) {
-            t.type = "strings";
         }
     }
     return tokens;
