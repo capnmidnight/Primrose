@@ -18,7 +18,9 @@
 
 var Themes = {
     DEFAULT: {
+        name: "DEFAULT",
         fontFamily: "monospace",
+        cursorColor: "black",
         regular: { 
             foreColor: "black",
             selectedBackColor: "#c0c0c0",
@@ -51,7 +53,9 @@ var Themes = {
         }
     },
     Dark: {
+        name: "Dark",
         fontFamily: "monospace",
+        cursorColor: "white",
         regular: { 
             backColor: "black",
             foreColor: "#c0c0c0",

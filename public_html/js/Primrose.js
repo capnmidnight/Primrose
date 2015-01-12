@@ -3,8 +3,6 @@ function Primrose(canvasID, options) {
 
     this.keyboardSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
     this.themeSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
-    makeSelectorFromObj(this.keyboardSelect, CodePages, "EN_US", this, "setCodePage");
-    makeSelectorFromObj(this.themeSelect, Themes, "DEFAULT", this, "setTheme");
 
     var languageGrammar = options.languageGrammar || Grammar.JavaScript;
     this.setLanguageGrammar = function (lang) {
@@ -14,6 +12,15 @@ function Primrose(canvasID, options) {
     var codePage;
     this.setCodePage = function (cp) {
         codePage = cp;
+        if(codePage === undefined){
+            for(var key in CodePages){
+                cp = CodePages[key];
+                if(cp.language === navigator.languages[0]){
+                    codePage = cp;
+                    break;
+                }
+            }
+        }
         for (var type in codePage) {
             var codes = codePage[type];
             for (var code in codes) {
@@ -22,7 +29,8 @@ function Primrose(canvasID, options) {
             }
         }
     };
-    this.setCodePage(options.codePage || CodePages.EN_US);
+    this.setCodePage(options.codePage);
+    makeSelectorFromObj(this.keyboardSelect, CodePages, codePage.name, this, "setCodePage");
 
     var history = [];
     var historyFrame = -1;
@@ -57,8 +65,6 @@ function Primrose(canvasID, options) {
 
     var canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement);
     var gfx = canvas.getContext("2d");
-    canvas.style.width = canvas.width + "px";
-    canvas.style.height = canvas.height + "px";
 
     var dragging = false;
     this.scrollTop = 0;
@@ -311,7 +317,7 @@ function Primrose(canvasID, options) {
 
         // draw the cursor caret
         gfx.beginPath();
-        gfx.strokeStyle = "black";
+        gfx.strokeStyle = theme.cursorColor || "black";
         gfx.moveTo(
                 (this.frontCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                 (this.frontCursor.y - this.scrollTop) * this.characterHeight);
@@ -348,18 +354,20 @@ function Primrose(canvasID, options) {
                 scrollX,
                 gridHeight * this.characterHeight,
                 scrollBarWidth,
-                this.characterHeight);
+                this.characterWidth);
     };
 
     function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = fontSize * r;
+        console.log(canvas.clientWidth, canvas.clientHeight);
         canvas.width = canvas.clientWidth * r;
         canvas.height = canvas.clientHeight * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
         this.characterWidth = gfx.measureText("M").width;
         this.drawText();
     }
+    window.addEventListener("resize", measureText.bind(this));
 
     var fontSize = options.fontSize || 14;
     this.setFontSize = function (sz) {
@@ -381,10 +389,11 @@ function Primrose(canvasID, options) {
 
     var theme = null;
     this.setTheme = function (t) {
-        theme = t;
+        theme = t || Themes.DEFAULT;
         measureText.call(this);
     };
-    this.setTheme(options.theme || Themes.DEFAULT);
+    this.setTheme(options.theme);
+    makeSelectorFromObj(this.themeSelect, Themes, theme.name, this, "setTheme");
 
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));

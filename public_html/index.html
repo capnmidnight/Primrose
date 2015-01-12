@@ -12,11 +12,7 @@
         <script type="text/javascript" src="js/TextBuffer.js"></script>
         <script type="text/javascript" src="js/Keys.js"></script>
         <script type="text/javascript" src="js/code_pages/EN_US.js"></script>
-        <script type="text/javascript" src="js/code_pages/EN_UK.js"></script>
-        <script type="text/javascript" src="js/code_pages/EN_IN.js"></script>
-        <script type="text/javascript" src="js/code_pages/EN_CMS.js"></script>
-        <script type="text/javascript" src="js/code_pages/DEU.js"></script>
-        <script type="text/javascript" src="js/code_pages/FRA.js"></script>
+        <script type="text/javascript" src="js/code_pages/EN_UKX.js"></script>
         <script type="text/javascript" src="js/Cursor.js"></script>
         <script type="text/javascript" src="js/Themes.js"></script>
         <script type="text/javascript" src="js/Primrose.js"></script>
@@ -29,7 +25,7 @@
                 prim = new Primrose(ctrls.output, {
                     file: Primrose.toString()
                 });
-                
+
                 ctrls.output.parentElement.insertBefore(prim.DOMElement, ctrls.output);
                 ctrls.controls.appendChild(prim.keyboardSelect);
                 ctrls.controls.appendChild(prim.themeSelect);
@@ -37,55 +33,9 @@
         </script>
     </head>
     <body>
+        <canvas id="output"></canvas>
         <div id="controls">
-            
+
         </div>
-        <canvas id="output" width="690" height="600"></canvas>
-        <!-- these breaks are meant to force the page longer than the screen
-        to be able to test that key commands don't cause the page to scroll -->
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
     </body>
 </html>
