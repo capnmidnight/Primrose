@@ -17,11 +17,11 @@
 
 Grammar.JavaScript = new Grammar([
     ["newlines", /(?:\r\n|\r|\n)/],
-    ["inlineComments", /\/\/.+$/],
+    ["comments", /\/\/.*$/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
-    ["strings1", /"(?:\\"|[^"]*)"/],
-    ["strings2", /'(?:\\'|[^']*)'/],
+    ["strings", /"(?:\\"|[^"]*)"/],
+    ["strings", /'(?:\\'|[^']*)'/],
     ["numbers", /\b(?:\d*\.)?\d+\b/],
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
