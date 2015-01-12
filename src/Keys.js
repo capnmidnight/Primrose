@@ -93,5 +93,3 @@ var Keys = {
     CLOSEBRACKET: 221,
     SINGLEQUOTE: 222
 };
-
-CodePages = {};

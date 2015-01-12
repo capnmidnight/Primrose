@@ -58,28 +58,6 @@ function Rope(str_or_left, opt_right) {
     this.length += this.weight;
 }
 
-Rope.tests = {
-    leaf: function () {
-        var str = "hello, world";
-        var rp = new Rope(str);
-        Assert.areEqual(str.length, rp.weight, "length doesn't match weight");
-        Assert.areEqual(str, rp.value, "values don't match");
-        Assert.areEqual(str.length, rp.length, "lengths don't match");
-        Assert.areEqual(str, rp.toString(), "values don't match");
-    },
-    root: function () {
-        var l = "hello,";
-        var r = " world";
-        var str = l + r;
-        var rp = new Rope(l, r);
-        Assert.areEqual(l.length, rp.weight, "left length doesn't match weight");
-        Assert.areEqual(l, rp.left.value, "left doesn't match");
-        Assert.areEqual(r, rp.right.value, "right doesn't match");
-        Assert.areEqual(str.length, rp.length, "lengths don't match");
-        Assert.areEqual(str, rp.toString(), "values don't match");
-    }
-};
-
 /*
  * Recurses through the Rope to figure out the length of the full
  * string contained. This requires walking down the right-side of the tree,
@@ -94,77 +72,6 @@ Rope.prototype.getLength = function () {
     }
     return len;
 };
-
-Rope.tests.basicLength = function () {
-    var str = "hello, my friend";
-    var rp = new Rope(str);
-    Assert.areEqual(str.length, rp.getLength());
-};
-
-Rope.tests.twoLeafLength = function () {
-    var l = "hello, ";
-    var r = "my friend";
-    var rp = new Rope(l, r);
-    Assert.areEqual(l.length + r.length, rp.getLength());
-};
-
-Rope.tests.threeLeafLength = function () {
-    var a = "hello, ";
-    var b = "my friend";
-    var c = " it's been a long time";
-    var rp = new Rope(new Rope(a, b), c);
-    Assert.areEqual(a.length + b.length + c.length, rp.getLength());
-};
-
-Rope.tests.fourLeafLength = function () {
-    var a = "hello, ";
-    var b = "my friend.";
-    var c = " it's been a long time.";
-    var d = " did you receive my package?";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    Assert.areEqual(a.length
-            + b.length
-            + c.length
-            + d.length, rp.getLength());
-};
-
-Rope.tests.fourLeafWeight = function () {
-    var a = "hello, ";
-    var b = "my friend.";
-    var c = " it's been a long time.";
-    var d = " did you receive my package?";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    Assert.areEqual(a.length + b.length, rp.weight, "unexpected weight");
-};
-
-Rope.tests.leftLoadedLength = function () {
-    var a = "hello, ";
-    var b = "my friend.";
-    var c = " it's been a long time.";
-    var d = " did you receive my package?";
-    var e = " i sent it last week.";
-    var rp = new Rope(new Rope(new Rope(new Rope(a, b), c), d), e);
-    Assert.areEqual(a.length
-            + b.length
-            + c.length
-            + d.length
-            + e.length, rp.getLength());
-};
-
-Rope.tests.rightLoadedLength = function () {
-    var a = "hello, ";
-    var b = "my friend.";
-    var c = " it's been a long time.";
-    var d = " did you receive my package?";
-    var e = " i sent it last week.";
-    var rp = new Rope(a, new Rope(b, new Rope(c, new Rope(d, e))));
-    Assert.areEqual(a.length
-            + b.length
-            + c.length
-            + d.length
-            + e.length, rp.getLength());
-};
-
 /*
  * Find a character by index in the Rope
  */
@@ -185,69 +92,6 @@ Rope.prototype.charAt = function (i) {
     }
 };
 
-Rope.tests.basicCharAt = function () {
-    var str = "test string 1234";
-    var rp = new Rope(str);
-    var idx = Math.floor(str.length / 2);
-    Assert.areEqual(str[idx], rp.charAt(idx), "characters don't match");
-};
-
-Rope.tests.twoLeafCharAt1 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var rp = new Rope(a, b);
-    var idx = Math.floor(a.length / 2);
-    Assert.areEqual(a[idx], rp.charAt(idx), "characters don't match");
-};
-
-Rope.tests.twoLeafCharAt2 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var rp = new Rope(a, b);
-    var idx = Math.floor(b.length / 2);
-    Assert.areEqual(b[idx], rp.charAt(a.length + idx), "characters don't match");
-};
-
-Rope.tests.fourLeafCharAt1 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var c = "not really";
-    var d = "okay, whatever";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    var idx = Math.floor(a.length / 2);
-    Assert.areEqual(a[idx], rp.charAt(idx), "characters don't match");
-};
-
-Rope.tests.fourLeafCharAt2 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var c = "not really";
-    var d = "okay, whatever";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    var idx = Math.floor(b.length / 2);
-    Assert.areEqual(b[idx], rp.charAt(a.length + idx), "characters don't match");
-};
-
-Rope.tests.fourLeafCharAt3 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var c = "not really";
-    var d = "okay, whatever";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    var idx = Math.floor(c.length / 2);
-    Assert.areEqual(c[idx], rp.charAt(a.length + b.length + idx), "characters don't match");
-};
-
-Rope.tests.fourLeafCharAt4 = function () {
-    var a = "test string 1234";
-    var b = "qwerty asplode";
-    var c = "not really";
-    var d = "okay, whatever";
-    var rp = new Rope(new Rope(a, b), new Rope(c, d));
-    var idx = Math.floor(d.length / 2);
-    Assert.areEqual(d[idx], rp.charAt(a.length + b.length + c.length + idx), "characters don't match");
-};
-
 /*
  * This is supposed to be faster than an array of characters
  */
@@ -266,23 +110,6 @@ Rope.prototype.concat = function (str_or_rope) {
     this.right = str_or_rope;
     this.rebalance();
 };
-
-Rope.tests.basicStringAppendLength = function () {
-    var a = "asdf";
-    var b = "qwer";
-    var rp = new Rope(a);
-    rp.concat(b);
-    Assert.areEqual(a.length + b.length, rp.getLength(), "lengths doesn't match");
-};
-
-Rope.tests.basicStringAppend = function () {
-    var a = "asdf";
-    var b = "qwer";
-    var rp = new Rope(a);
-    rp.concat(b);
-    Assert.areEqual(a + b, rp.toString());
-};
-
 /*
  * Cuts the Rope. Leaves this Rope as everything to the left of i, returns
  * a Rope that is everything to the right of i.
@@ -327,75 +154,10 @@ Rope.prototype.split = function (i) {
     return cur;
 };
 
-Rope.tests.basicSplit1Length = function () {
-    var str = "0123456789";
-    var a = str.substring(0, 5);
-    var b = str.substring(5);
-    var rp1 = new Rope(str);
-    var rp2 = rp1.split(5);
-    Assert.areEqual(a.length, rp1.getLength());
-};
-
-Rope.tests.basicSplit1Value = function () {
-    var str = "0123456789";
-    var a = str.substring(0, 5);
-    var b = str.substring(5);
-    var rp1 = new Rope(str);
-    var rp2 = rp1.split(5);
-    Assert.areEqual(a, rp1.substring(0, 5));
-};
-
-Rope.tests.basicSplit2Length = function () {
-    var str = "0123456789";
-    var a = str.substring(0, 5);
-    var b = str.substring(5);
-    var rp1 = new Rope(str);
-    var rp2 = rp1.split(5);
-    Assert.areEqual(b.length, rp2.getLength());
-};
-
-Rope.tests.complexSplit1 = function () {
-    var a = "asdfqer";
-    var b = "1234";
-    var c = "what the heck";
-    var d = "ok, I think I get it";
-    var e = "no time for teletubbies";
-    var l = a.length + b.length + c.length + d.length + e.length;
-    var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
-    var rp2 = rp1.split(5);
-    Assert.areEqual(l - 5, rp2.getLength());
-};
-
-Rope.tests.complexSplit2 = function () {
-    var a = "asdfqer";
-    var b = "1234";
-    var c = "what the heck";
-    var d = "ok, I think I get it";
-    var e = "no time for teletubbies";
-    var l1 = a.length + b.length + c.length + d.length + e.length;
-    var rp1 = new Rope(new Rope(a, new Rope(b, c)), new Rope(d, e));
-    var rp2 = rp1.split(Math.floor(l1 / 2));
-    Assert.areEqual(l1, rp1.getLength() + rp2.getLength());
-};
-
 Rope.prototype.delete = function (i, j) {
     var right = this.split(j);
     this.split(i); // discard the middle
     this.concat(right);
-};
-
-Rope.tests.basicDelete = function () {
-    var str = "0123456789";
-    var rp = new Rope(str);
-    rp.delete(3, 5);
-    Assert.areEqual(str.length - 2, rp.getLength());
-};
-
-Rope.tests.basicDelete2 = function () {
-    var str = "0123456789";
-    var rp = new Rope(str);
-    rp.delete(3, 5);
-    Assert.areEqual("01256789", rp.toString());
 };
 
 Rope.prototype.insert = function (i, str_or_rope) {
@@ -406,7 +168,6 @@ Rope.prototype.insert = function (i, str_or_rope) {
     this.concat(str_or_rope);
     this.concat(right);
 };
-
 Rope.prototype.toString = function () {
     var str = "";
     var cur = this;
@@ -458,7 +219,6 @@ Rope.prototype.substring = function (i, j) {
 };
 
 Rope.BALANCE_SIZE = 100;
-
 /*
  * Ropes are binary trees, and binary trees are more efficient when they
  * are balanced.
@@ -515,22 +275,8 @@ Rope.prototype.rebalance = function (str, opt_size) {
         this.weight = rp.weight;
         this.left = rp.left;
         this.right = rp.right;
-
         // and remove the links so we don't hurt the reference-counting GC.
         rp.left = null;
         rp.right = null;
     }
-};
-
-Rope.tests.basicRebalance = function () {
-    var str = "0123456789";
-    var rp = new Rope(str);
-    rp.rebalance(null, 1);
-    Assert.areEqual(str.length, rp.getLength());
-};
-
-Rope.tests.rebalanceZero = function () {
-    var rp = new Rope("");
-    rp.rebalance();
-    Assert.areEqual(0, rp.getLength());
 };
