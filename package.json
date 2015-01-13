@@ -3,6 +3,9 @@
   "description": "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
   "version": "0.6.0",
   "main": "config.js",
+  "author": "Sean T. McBeth",
+  "license": "GPLv3",
+  "homepage": "https://github.com/capnmidnight/Primrose",
   "directories": {
     "test": "test",
     "baseURL": "",
@@ -13,6 +16,9 @@
     "type": "git",
     "url": "https://github.com/capnmidnight/Primrose.git"
   },
+  "bugs": {
+    "url": "https://github.com/capnmidnight/Primrose/issues"
+  },
   "keywords": [
     "text",
     "editor",
@@ -21,12 +27,6 @@
     "syntax",
     "highlighting"
   ],
-  "author": "Sean T. McBeth",
-  "license": "GPLv3",
-  "bugs": {
-    "url": "https://github.com/capnmidnight/Primrose/issues"
-  },
-  "homepage": "https://github.com/capnmidnight/Primrose",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-clean": "^0.6.0",
