@@ -1,38 +1,36 @@
 {
-  "name": "Primrose",
-  "description": "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
-  "version": "0.6.0",
-  "main": "config.js",
-  "author": "Sean T. McBeth",
-  "license": "GPLv3",
-  "homepage": "https://github.com/capnmidnight/Primrose",
-  "directories": {
-    "test": "test",
-    "baseURL": "",
-    "lib": "dist",
-    "packages": "jspm_packages"
+  "name" : "Primrose",
+  "description" : "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
+  "version" : "0.6.0",
+  "main" : "./config.js",
+  "author" : {
+    "name" : "Sean T. McBeth",
+    "email" : "sean@seanmcbeth.com",
+    "url" : "https://www.seanmcbeth.com"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/capnmidnight/Primrose.git"
+  "license" : {
+    "type" : "gplv3"
   },
-  "bugs": {
-    "url": "https://github.com/capnmidnight/Primrose/issues"
+  "homepage" : "https://github.com/capnmidnight/Primrose",
+  "directories" : {
+    "test" : "test",
+    "lib" : "dist",
+    "packages" : "jspm_packages"
   },
-  "keywords": [
-    "text",
-    "editor",
-    "HTML5",
-    "canvas",
-    "syntax",
-    "highlighting"
-  ],
-  "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-copy": "^0.7.0",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.7.0"
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/capnmidnight/Primrose.git"
+  },
+  "bugs" : {
+    "url" : "https://github.com/capnmidnight/Primrose/issues"
+  },
+  "keywords" : [ "text", "editor", "HTML5", "canvas", "syntax", "highlighting" ],
+  "devDependencies" : {
+    "grunt" : "^0.4.5",
+    "grunt-contrib-clean" : "^0.6.0",
+    "grunt-contrib-concat" : "^0.5.0",
+    "grunt-contrib-copy" : "^0.7.0",
+    "grunt-contrib-jshint" : "^0.10.0",
+    "grunt-contrib-uglify" : "^0.7.0"
   }
 }

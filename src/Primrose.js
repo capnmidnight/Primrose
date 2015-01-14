@@ -15,9 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var CodePages = {};
-var Themes = {};
-
 function Primrose(canvasID, options) {
     options = options || {};
 
@@ -33,23 +30,26 @@ function Primrose(canvasID, options) {
     this.setCodePage = function (cp) {
         var lang = navigator.userLanguage || navigator.languages[0];
         codePage = cp;
-        if(codePage === undefined){
-            for(var key in CodePages){
+
+        if (codePage === undefined) {
+            for (var key in CodePages) {
                 cp = CodePages[key];
-                if(cp.language === lang){
+                if (cp.language === lang) {
                     codePage = cp;
                     break;
                 }
             }
         }
+
         for (var type in codePage) {
             var codes = codePage[type];
             for (var code in codes) {
                 var name = type + "_" + codePage.NORMAL[code];
-                Commands[name] = this.insertAtCursor.bind(this, codes[code]);
+                this[name] = this.insertAtCursor.bind(this, codes[code]);
             }
         }
     };
+
     this.setCodePage(options.codePage);
     makeSelectorFromObj(this.keyboardSelect, CodePages, codePage.name, this, "setCodePage");
 
@@ -106,10 +106,6 @@ function Primrose(canvasID, options) {
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     var surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
     surrogate.style.position = "absolute";
-    surrogate.style.left = canvas.offsetLeft + "px";
-    surrogate.style.top = canvas.offsetTop + "px";
-    surrogate.style.width = canvas.offsetWidth + "px";
-    surrogate.style.height = canvas.offsetHeigth + "px";
 
     var surrogateContainer = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement);
     surrogateContainer.style.position = "absolute";
@@ -118,8 +114,8 @@ function Primrose(canvasID, options) {
     surrogateContainer.style.width = 0;
     surrogateContainer.style.height = 0;
     surrogateContainer.style.overflow = "hidden";
-    
-    if(canvas.parentElement){
+
+    if (canvas.parentElement) {
         canvas.parentElement.insertBefore(surrogateContainer, canvas);
         surrogateContainer.appendChild(surrogate);
     }
@@ -160,7 +156,7 @@ function Primrose(canvasID, options) {
             var codeCommandA = typeA + key;
             var codeCommandB = typeB + key;
             var charCommand = typeB + "_" + codePage.NORMAL[key];
-            var func = Commands[codeCommandB] || Commands[codeCommandA] || Commands[charCommand];
+            var func = this[codeCommandB] || this[codeCommandA] || this[charCommand];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
@@ -260,6 +256,11 @@ function Primrose(canvasID, options) {
         gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
         this.pageSize = Math.floor(gridHeight);
 
+        surrogate.style.left = (canvas.offsetLeft + (this.gridLeft * this.characterWidth)) + "px";
+        surrogate.style.top = canvas.offsetTop + "px";
+        surrogate.style.width = (gridWidth * this.characterWidth) + "px";
+        surrogate.style.height = (gridHeight * canvas.offsetHeigth) + "px";
+
         var minCursor = Cursor.min(this.frontCursor, this.backCursor);
         var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
         var tokenFront = new Cursor();
@@ -293,8 +294,8 @@ function Primrose(canvasID, options) {
 
                     // draw the text
                     var style = theme[t.type] || {};
-                    var font = (style.fontWeight || theme.regular.fontWeight || "") + 
-                            " " + (style.fontStyle || theme.regular.fontStyle || "") + 
+                    var font = (style.fontWeight || theme.regular.fontWeight || "") +
+                            " " + (style.fontStyle || theme.regular.fontStyle || "") +
                             " " + this.characterHeight + "px " + theme.fontFamily;
                     gfx.font = font.trim();
                     gfx.fillStyle = style.foreColor || theme.regular.foreColor;
@@ -376,7 +377,6 @@ function Primrose(canvasID, options) {
     function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = fontSize * r;
-        console.log(canvas.clientWidth, canvas.clientHeight);
         canvas.width = canvas.clientWidth * r;
         canvas.height = canvas.clientHeight * r;
         gfx.font = this.characterHeight + "px " + theme.fontFamily;
@@ -563,5 +563,181 @@ Primrose.prototype.cutSelectedText = function (evt) {
     this.copySelectedText(evt);
     this.deleteSelection();
     this.drawText();
-}
-;
+};
+
+// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front.
+// If SHIFT is held, then "back"
+Primrose.prototype["NORMAL" + Keys.LEFTARROW] = function (lines, cursor) {
+    cursor.left(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.LEFTARROW] = function (lines, cursor) {
+    cursor.skipLeft(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.RIGHTARROW] = function (lines, cursor) {
+    cursor.right(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.RIGHTARROW] = function (lines, cursor) {
+    cursor.skipRight(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.UPARROW] = function (lines, cursor) {
+    cursor.up(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.DOWNARROW] = function (lines, cursor) {
+    cursor.down(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.HOME] = function (lines, cursor) {
+    cursor.home(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.HOME] = function (lines, cursor) {
+    cursor.fullHome(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.END] = function (lines, cursor) {
+    cursor.end(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.END] = function (lines, cursor) {
+    cursor.fullEnd(lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.DOWNARROW] = function (lines, cursor) {
+    if (this.scrollTop < lines.length) {
+        ++this.scrollTop;
+    }
+};
+
+Primrose.prototype["CTRL" + Keys.UPARROW] = function (lines, cursor) {
+    if (this.scrollTop > 0) {
+        --this.scrollTop;
+    }
+};
+
+Primrose.prototype["NORMAL" + Keys.PAGEUP] = function (lines, cursor) {
+    cursor.incY(-this.pageSize, lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
+    cursor.incY(this.pageSize, lines);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.DASH] = function (lines, cursor) {
+    this.decreaseFontSize();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["CTRL" + Keys.EQUALSIGN] = function (lines, cursor) {
+    this.increaseFontSize();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.BACKSPACE] = function (lines, cursor) {
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.frontCursor.left(lines);
+    }
+    this.deleteSelection();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["SHIFT" + Keys.DELETE] = function (lines, cursor) {
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.frontCursor.home(lines);
+        this.backCursor.end(lines);
+    }
+    this.deleteSelection();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.DELETE] = function (lines, cursor) {
+    if (this.frontCursor.i === this.backCursor.i) {
+        this.backCursor.right(lines);
+    }
+    this.deleteSelection();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.ENTER] = function (lines, cursor) {
+    var indent = "";
+    for (var i = 0; i < lines[this.frontCursor.y].length && lines[this.frontCursor.y][i] === " "; ++i) {
+        indent += " ";
+    }
+    this.insertAtCursor("\n" + indent);
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["NORMAL" + Keys.TAB] = function (lines, cursor) {
+    if (this.frontCursor.y === this.backCursor.y) {
+        this.insertAtCursor(this.tabString);
+    }
+    else {
+        var a = this.getMinCursor();
+        var b = this.getMaxCursor();
+        a.home(lines);
+        b.end(lines);
+        for (var y = a.y; y <= b.y; ++y) {
+            lines[y] = this.tabString + lines[y];
+        }
+        a.setXY(0, a.y, lines);
+        b.setXY(0, b.y, lines);
+        b.end(lines);
+        this.pushUndo(lines);
+    }
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype["SHIFT" + Keys.TAB] = function (lines, cursor) {
+    if (this.frontCursor.y !== this.backCursor.y) {
+        var a = this.getMinCursor();
+        var b = this.getMaxCursor();
+        a.home(lines);
+        b.end(lines);
+        for (var y = a.y; y <= b.y; ++y) {
+            if (lines[y].substring(0, this.tabWidth) === this.tabString) {
+                lines[y] = lines[y].substring(this.tabWidth);
+            }
+        }
+        a.setXY(0, a.y, lines);
+        b.setXY(0, b.y, lines);
+        b.end(lines);
+        this.pushUndo(lines);
+    }
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype.CTRLSHIFT_e = function (lines, cursor) {
+    eval(this.getText());
+};
+
+Primrose.prototype.CTRL_a = function (lines, cursor) {
+    this.frontCursor.fullHome(lines);
+    this.backCursor.fullEnd(lines);
+};
+
+Primrose.prototype.CTRL_y = function (lines, cursor) {
+    this.redo();
+    this.scrollIntoView(cursor);
+};
+
+Primrose.prototype.CTRL_z = function (lines, cursor) {
+    this.undo();
+    this.scrollIntoView(cursor);
+};

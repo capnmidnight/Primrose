@@ -17,6 +17,9 @@
 
 // eventually, this will have configurable values for different locales.
 
+
+var CodePages = {};
+var Themes = {};
 var Keys = {
     MODIFIER_KEYS: ["CTRL", "ALT", "SHIFT"],
     BACKSPACE: 8,
