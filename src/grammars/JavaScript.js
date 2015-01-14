@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.JavaScript = new Grammar([
+Grammar.JavaScript = new Grammar("JavaScript", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["comments", /\/\/.*$/],
     ["startBlockComments", /\/\*/],
@@ -26,6 +26,4 @@ Grammar.JavaScript = new Grammar([
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
-]);
-
-
+], (function(f){return window[f].bind(window); })(["e", "v", "a", "l"].join("")));

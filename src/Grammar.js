@@ -16,11 +16,14 @@
  */
 
 
-function Grammar(grammar) {
+function Grammar(name, grammar, exec) {
+    this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1]);
     });
+    
+    this.exec = exec;
 }
 
 function Rule(name, test) {

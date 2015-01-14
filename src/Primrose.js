@@ -18,13 +18,20 @@
 function Primrose(canvasID, options) {
     options = options || {};
 
-    this.keyboardSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
-    this.themeSelect = cascadeElement("primrose-keyboard-language-selector", "select", HTMLSelectElement);
-
-    var languageGrammar = options.languageGrammar || Grammar.JavaScript;
+    var languageGrammar;
     this.setLanguageGrammar = function (lang) {
-        languageGrammar = lang;
+        languageGrammar = lang || Grammar.JavaScript;
+        if(this.drawText){
+            this.drawText();
+        }
     };
+    
+    this.exec = function(script){
+        languageGrammar.exec(script);
+    };
+    
+    this.setLanguageGrammar(options.languageGrammar);
+    this.languageSelect = makeSelectorFromObj("primrose-language-selector", Grammar, languageGrammar.name, this, "setLanguageGrammar");
 
     var codePage;
     this.setCodePage = function (cp) {
@@ -51,7 +58,7 @@ function Primrose(canvasID, options) {
     };
 
     this.setCodePage(options.codePage);
-    makeSelectorFromObj(this.keyboardSelect, CodePages, codePage.name, this, "setCodePage");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-language-selector", CodePages, codePage.name, this, "setCodePage");
 
     var history = [];
     var historyFrame = -1;
@@ -412,7 +419,7 @@ function Primrose(canvasID, options) {
         measureText.call(this);
     };
     this.setTheme(options.theme);
-    makeSelectorFromObj(this.themeSelect, Themes, theme.name, this, "setTheme");
+    this.themeSelect = makeSelectorFromObj("primrose-keyboard-language-selector", Themes, theme.name, this, "setTheme");
 
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
@@ -724,7 +731,7 @@ Primrose.prototype["SHIFT" + Keys.TAB] = function (lines, cursor) {
 };
 
 Primrose.prototype.CTRLSHIFT_e = function (lines, cursor) {
-    eval(this.getText());
+    this.exec(this.getText());
 };
 
 Primrose.prototype.CTRL_a = function (lines, cursor) {

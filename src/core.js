@@ -479,7 +479,8 @@ function reloadPage() {
     document.location = document.location.href;
 }
 
-function makeSelectorFromObj(elem, obj, def, target, prop) {
+function makeSelectorFromObj(id, obj, def, target, prop) {
+    var elem = cascadeElement(id, "select", HTMLSelectElement);
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
             var opt = document.createElement("option");
@@ -494,6 +495,8 @@ function makeSelectorFromObj(elem, obj, def, target, prop) {
     E(elem, "change", function () {
         target[prop](obj[this.value]);
     });
+    
+    return elem;
 }
 
 // snagged and adapted from http://detectmobilebrowsers.com/
