@@ -22,17 +22,35 @@ var CodePages = {};
 var Themes = {};
 var Commands = {};
 var Keys = {
-    MODIFIER_KEYS: ["CTRL", "ALT", "SHIFT"],
-    BACKSPACE: 8,
-    TAB: 9,
-    ENTER: 13,
+    ///////////////////////////////////////////////////////////////////////////
+    // modifiers
+    ///////////////////////////////////////////////////////////////////////////
+    MODIFIER_KEYS: ["CTRL", "ALT", "SHIFT", "META"],
     SHIFT: 16,
     CTRL: 17,
     ALT: 18,
+    META_L: 91,
+    META_R: 92,
+    ///////////////////////////////////////////////////////////////////////////
+    // whitespace
+    ///////////////////////////////////////////////////////////////////////////
+    BACKSPACE: 8,
+    TAB: 9,
+    ENTER: 13,
+    SPACEBAR: 32,
+    DELETE: 46,
+    ///////////////////////////////////////////////////////////////////////////
+    // lock keys
+    ///////////////////////////////////////////////////////////////////////////
     PAUSEBREAK: 19,
     CAPSLOCK: 20,
+    NUMLOCK: 144,
+    SCROLLLOCK: 145,
+    INSERT: 45,
+    ///////////////////////////////////////////////////////////////////////////
+    // navigation keys
+    ///////////////////////////////////////////////////////////////////////////
     ESCAPE: 27,
-    SPACEBAR: 32,
     PAGEUP: 33,
     PAGEDOWN: 34,
     END: 35,
@@ -41,21 +59,10 @@ var Keys = {
     UPARROW: 38,
     RIGHTARROW: 39,
     DOWNARROW: 40,
-    INSERT: 45,
-    DELETE: 46,
-    NUMBER0: 48,
-    NUMBER1: 49,
-    NUMBER2: 50,
-    NUMBER3: 51,
-    NUMBER4: 52,
-    NUMBER5: 53,
-    NUMBER6: 54,
-    NUMBER7: 55,
-    NUMBER8: 56,
-    NUMBER9: 57,
-    LEFTWINDOWKEY: 91,
-    RIGHTWINDOWKEY: 92,
     SELECTKEY: 93,
+    ///////////////////////////////////////////////////////////////////////////
+    // numpad
+    ///////////////////////////////////////////////////////////////////////////
     NUMPAD0: 96,
     NUMPAD1: 97,
     NUMPAD2: 98,
@@ -71,6 +78,9 @@ var Keys = {
     SUBTRACT: 109,
     DECIMALPOINT: 110,
     DIVIDE: 111,
+    ///////////////////////////////////////////////////////////////////////////
+    // function keys
+    ///////////////////////////////////////////////////////////////////////////
     F1: 112,
     F2: 113,
     F3: 114,
@@ -82,18 +92,5 @@ var Keys = {
     F9: 120,
     F10: 121,
     F11: 122,
-    F12: 123,
-    NUMLOCK: 144,
-    SCROLLLOCK: 145,
-    SEMICOLON: 186,
-    EQUALSIGN: 187,
-    COMMA: 188,
-    DASH: 189,
-    PERIOD: 190,
-    FORWARDSLASH: 191,
-    GRAVEACCENT: 192,
-    OPENBRACKET: 219,
-    BACKSLASH: 220,
-    CLOSEBRACKET: 221,
-    SINGLEQUOTE: 222
+    F12: 123
 };
