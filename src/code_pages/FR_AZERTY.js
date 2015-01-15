@@ -57,6 +57,19 @@ CodePages.FR_AZERTY = {
         "69": "Ë",
         "65": "Ä"
     },
+    DEAD3NORMAL: {
+        "65": "ã",
+        "79": "õ",
+        "78": "ñ"
+    },
+    DEAD4NORMAL: {
+        "55": "è",
+        "65": "à",
+        "69": "è",
+        "85": "ù",
+        "73": "ì",
+        "79": "ò"
+    },
     NORMAL: {
         "221": function (prim, lines, cursor) {
             prim.setState("DEAD1");
