@@ -696,8 +696,8 @@ Primrose.prototype["NORMAL" + Keys.TAB] = function (lines, cursor) {
         this.insertAtCursor(this.tabString);
     }
     else {
-        var a = this.getMinCursor();
-        var b = this.getMaxCursor();
+        var a = Cursor.min(this.frontCursor, this.backCursor);
+        var b = Cursor.max(this.frontCursor, this.backCursor);
         a.home(lines);
         b.end(lines);
         for (var y = a.y; y <= b.y; ++y) {
@@ -713,8 +713,8 @@ Primrose.prototype["NORMAL" + Keys.TAB] = function (lines, cursor) {
 
 Primrose.prototype["SHIFT" + Keys.TAB] = function (lines, cursor) {
     if (this.frontCursor.y !== this.backCursor.y) {
-        var a = this.getMinCursor();
-        var b = this.getMaxCursor();
+        var a = Cursor.min(this.frontCursor, this.backCursor);
+        var b = Cursor.max(this.frontCursor, this.backCursor);
         a.home(lines);
         b.end(lines);
         for (var y = a.y; y <= b.y; ++y) {
