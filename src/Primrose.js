@@ -220,7 +220,11 @@ function Primrose(canvasID, options) {
             var codes = codePage[type];
             for (var code in codes) {
                 var name = type + "_" + codePage.NORMAL[code];
-                commandPack[name] = this.insertAtCursor.bind(this, codes[code]);
+                var func = codes[code];
+                if(!(func instanceof Function)){
+                    func = this.insertAtCursor.bind(this, codes[code]);
+                }
+                commandPack[name] = func;
             }
         }
     };
