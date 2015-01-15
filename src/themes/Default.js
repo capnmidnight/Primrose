@@ -16,7 +16,7 @@
  */
 
 Themes.DEFAULT = {
-    name: "DEFAULT",
+    name: "Light",
     fontFamily: "monospace",
     cursorColor: "black",
     fontSize: 14,

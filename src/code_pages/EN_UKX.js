@@ -16,7 +16,7 @@
  */
 
 CodePages.EN_UKX = {
-    name: "EN_UKX",
+    name: "English: UK Extended",
     language: "en-GB",
     CTRLALT: {
         "52": "€",

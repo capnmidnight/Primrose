@@ -28,15 +28,20 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
 
     var codePage,
+            operatingSystem,
+            commandSystem,
+            keyboardSystem,
+            commandPack = {},
             tokenizer,
             theme,
+            pageSize,
             gridWidth,
             gridHeight,
             tabWidth,
             tabString,
-            state = "",
-            commandPack = {},
-            modifierKeyState = {},
+            deadKeyState = "",
+            commandState = "",
+            keyNames = [],
             history = [],
             historyFrame = -1,
             dragging = false,
@@ -46,9 +51,8 @@ function Primrose(canvasID, options) {
             bottomGutterHeight = 1,
             canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
-            // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
             surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
-            surrogateContainer = cascadeElement("primrose-surrogate-textarea-container", "div", HTMLDivElement),
+            surrogateContainer,
             keyEventSource = options.keyEventSource || surrogate,
             clipboardEventSource = options.clipboardEventSource || surrogate,
             mouseEventSource = options.mouseEventSource || canvas;
@@ -63,18 +67,17 @@ function Primrose(canvasID, options) {
     this.scrollTop = 0;
     this.scrollLeft = 0;
     this.gridLeft = 0;
-    this.pageSize = 0;
 
 
     //////////////////////////////////////////////////////////////////////////
     // private methods
     //////////////////////////////////////////////////////////////////////////
-    
+
     function onFocus() {
         focused = true;
         this.drawText();
     }
-    
+
     function onBlur() {
         focused = false;
         this.drawText();
@@ -143,15 +146,6 @@ function Primrose(canvasID, options) {
         this.drawText();
     }
 
-    function releaseKey(evt) {
-        var key = evt.keyCode;
-        var m = modifierKeyState[key];
-        var l = (evt.location || 1);
-        if (m !== undefined && (m & l) !== 0) {
-            modifierKeyState[key] -= l;
-        }
-    }
-
     function mouseButtonDown(evt) {
         if (evt.button === 0) {
             setCursorXY.call(this, this.frontCursor, evt);
@@ -175,12 +169,69 @@ function Primrose(canvasID, options) {
         }
     }
 
+    function releaseKey(evt) {
+    }
+
+    function addCommandPack(cmd) {
+        if (cmd) {
+            for (var key in cmd) {
+                if (cmd.hasOwnProperty(key)) {
+                    commandPack[key] = cmd[key];
+                }
+            }
+        }
+    }
+
+    function refreshCommandPack() {
+        if (keyboardSystem && operatingSystem && commandSystem) {
+            commandPack = {};
+        }
+        addCommandPack.call(this, keyboardSystem);
+        addCommandPack.call(this, operatingSystem);
+        addCommandPack.call(this, commandSystem);
+    }
+
+    function makeHidingContainer(id, obj) {
+        var elem = cascadeElement(id, "div", HTMLDivElement);
+        elem.style.position = "absolute";
+        elem.style.left = 0;
+        elem.style.top = 0;
+        elem.style.width = 0;
+        elem.style.height = 0;
+        elem.style.overflow = "hidden";
+        elem.appendChild(obj);
+        return elem;
+    }
+
+    function makeCursorCommand(name) {
+        var method = name.toLowerCase();
+        this["cursor" + name] = function (lines, cursor) {
+            cursor[method](lines);
+            this.scrollIntoView(cursor);
+        };
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
     // public methods
     //////////////////////////////////////////////////////////////////////////
-    
-    this.focus = function(){
+    ["Left", "Right",
+        "SkipLeft", "SkipRight",
+        "Up", "Down",
+        "Home", "End",
+        "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
+
+    this.cursorPageUp = function (lines, cursor) {
+        cursor.incY(-pageSize, lines);
+        this.scrollIntoView(cursor);
+    };
+
+    this.cursorPageDown = function (lines, cursor) {
+        cursor.incY(pageSize, lines);
+        this.scrollIntoView(cursor);
+    };
+
+    this.focus = function () {
         surrogate.focus();
     };
 
@@ -189,17 +240,22 @@ function Primrose(canvasID, options) {
         measureText.call(this);
     };
 
-    this.setState = function (st) {
-        state = st || "";
+    this.setDeadKeyState = function (st) {
+        deadKeyState = st || "";
     };
 
-    this.setCommandPack = function (cmd) {
-        cmd = cmd || Commands.DEFAULT;
-        for (var key in cmd) {
-            if (cmd.hasOwnProperty(key)) {
-                commandPack[key] = cmd[key];
-            }
-        }
+    this.setCommandState = function (st) {
+        commandState = st || "";
+    };
+
+    this.setOperatingSystem = function (os) {
+        operatingSystem = os || (isOSX ? OSCommands.OSX : OSCommands.WINDOWS);
+        refreshCommandPack.call(this);
+    };
+
+    this.setCommandSystem = function (cmd) {
+        commandSystem = cmd || Commands.DEFAULT;
+        refreshCommandPack.call(this);
     };
 
     this.setCodePage = function (cp) {
@@ -216,17 +272,33 @@ function Primrose(canvasID, options) {
             }
         }
 
-        for (var type in codePage) {
-            var codes = codePage[type];
-            for (var code in codes) {
-                var name = type + "_" + codePage.NORMAL[code];
-                var func = codes[code];
-                if(!(func instanceof Function)){
-                    func = this.insertAtCursor.bind(this, codes[code]);
-                }
-                commandPack[name] = func;
+        keyNames = [];
+        for (var key in Keys) {
+            var code = Keys[key];
+            if (!isNaN(code)) {
+                keyNames[code] = key;
             }
         }
+
+        keyboardSystem = {};
+        for (var type in codePage) {
+            var codes = codePage[type];
+            if (typeof (codes) === "object") {
+                for (var code in codes) {
+                    var char = codePage.NORMAL[code];
+                    keyNames[code] = char;
+                    var name = type + "_" + char;
+
+                    var func = codes[code];
+                    if (!(func instanceof Function)) {
+                        func = this.insertAtCursor.bind(this, codes[code]);
+                    }
+                    keyboardSystem[name] = func;
+                }
+            }
+        }
+
+        refreshCommandPack.call(this);
     };
 
     this.setTokenizer = function (tk) {
@@ -402,34 +474,37 @@ function Primrose(canvasID, options) {
 
     this.editText = function (evt) {
         evt = evt || event;
+
         var key = evt.keyCode;
-        var oldState = state;
-        if (modifierKeyState[key] !== undefined) {
-            modifierKeyState[key] |= (evt.location || 1);
-        }
-        else {
-            var type = "";
-            for (var i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
-                var m = Keys.MODIFIER_KEYS[i];
-                if (!evt[m.flag]) {
-                    modifierKeyState[m.index] = 0;
-                }
-                type += m.name + modifierKeyState[m.index];
+        if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L && key !== Keys.META_R && key !== Keys.SHIFT) {
+            var oldDeadKeyState = deadKeyState;
+
+            var commandName = deadKeyState;
+
+            if (evt.ctrlKey) {
+                commandName += "CTRL";
             }
-            
-            var typeA = (evt.ctrlKey && "CTRL" || "") + (evt.altKey && "ALT" || "");
-            var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-            typeA = typeA || "NORMAL";
-            var codeCommandA = state + typeA + key;
-            var codeCommandB = state + typeB + key;
-            var charCommand = state + typeB + "_" + codePage.NORMAL[key];
-            var func = commandPack[codeCommandB] || commandPack[codeCommandA] || commandPack[charCommand];
+            if (evt.altKey) {
+                commandName += "ALT";
+            }
+            if (evt.metaKey) {
+                commandName += "META";
+            }
+            if (evt.shiftKey) {
+                commandName += "SHIFT";
+            }
+            if (commandName === deadKeyState) {
+                commandName += "NORMAL";
+            }
+
+            commandName += "_" + keyNames[key];
+
+            var func = commandPack[commandName];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
-                var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
                 var lines = this.getLines();
-                func.call(null, this, lines, currentCursor);
+                func.call(null, this, lines);
                 lines = this.getLines();
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
@@ -438,16 +513,10 @@ function Primrose(canvasID, options) {
                 this.backCursor.rectify(lines);
                 evt.preventDefault();
             }
-            else {
-                // what just happened?
-                console.log(type, key, 
-                    "A", codeCommandA, !!commandPack[codeCommandA], 
-                    "B", codeCommandB, !!commandPack[codeCommandB], 
-                    "C", charCommand, !!commandPack[charCommand]);
+
+            if (deadKeyState === oldDeadKeyState) {
+                deadKeyState = "";
             }
-        }
-        if(state === oldState){
-            state = "";
         }
         this.drawText();
     };
@@ -478,12 +547,14 @@ function Primrose(canvasID, options) {
             gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
             var scrollRight = this.scrollLeft + gridWidth;
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
-            this.pageSize = Math.floor(gridHeight);
+            pageSize = Math.floor(gridHeight);
 
-            surrogate.style.left = (canvas.offsetLeft + (this.gridLeft * this.characterWidth)) + "px";
-            surrogate.style.top = canvas.offsetTop + "px";
-            surrogate.style.width = (gridWidth * this.characterWidth) + "px";
-            surrogate.style.height = (gridHeight * canvas.offsetHeigth) + "px";
+            if (surrogate) {
+                surrogate.style.left = (canvas.offsetLeft + (this.gridLeft * this.characterWidth)) + "px";
+                surrogate.style.top = canvas.offsetTop + "px";
+                surrogate.style.width = (gridWidth * this.characterWidth) + "px";
+                surrogate.style.height = (gridHeight * canvas.offsetHeigth) + "px";
+            }
 
             var minCursor = Cursor.min(this.frontCursor, this.backCursor);
             var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
@@ -606,39 +677,29 @@ function Primrose(canvasID, options) {
     // initialization
     /////////////////////////////////////////////////////////////////////////
 
+    // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer.style.position = "absolute";
-    surrogateContainer.style.left = 0;
-    surrogateContainer.style.top = 0;
-    surrogateContainer.style.width = 0;
-    surrogateContainer.style.height = 0;
-    surrogateContainer.style.overflow = "hidden";
+    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
 
-    if (canvas.parentElement) {
-        canvas.parentElement.insertBefore(surrogateContainer, canvas);
-        surrogateContainer.appendChild(surrogate);
+    if (!canvas.parentElement) {
+        document.body.appendChild(makeHidingContainer("primrose-container", canvas));
     }
 
-    for (i = 0; i < Keys.MODIFIER_KEYS.length; ++i) {
-        Keys.MODIFIER_KEYS[i] = {
-            name: Keys.MODIFIER_KEYS[i],
-            flag: Keys.MODIFIER_KEYS[i].toLowerCase() + "Key",
-            index: Keys[Keys.MODIFIER_KEYS[i]]
-        };
-        modifierKeyState[Keys.MODIFIER_KEYS[i].index] = 0;
-    }
+    canvas.parentElement.insertBefore(surrogateContainer, canvas);
 
     this.setTabWidth(options.tabWidth);
     this.setTheme(options.theme);
     this.setTokenizer(options.tokenizer);
-    this.setCommandPack(options.commands);
     this.setCodePage(options.codePage);
+    this.setOperatingSystem(options.os);
+    this.setCommandSystem(options.commands);
     this.setText(options.file);
 
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector", CodePages, codePage.name, this, "setCodePage");
     this.themeSelect = makeSelectorFromObj("primrose-theme-selector", Themes, theme.name, this, "setTheme");
     this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector", Grammar, tokenizer.name, this, "setTokenizer");
-    this.commandPackSelect = makeSelectorFromObj("primrose-command-pack-selector", Commands, commandPack.name, this, "setCommandPack");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector", CodePages, codePage.name, this, "setCodePage");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector", Commands, commandSystem.name, this, "setCommandSystem");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector", OSCommands, operatingSystem.name, this, "setOperatingSystem");
 
 
     //////////////////////////////////////////////////////////////////////////

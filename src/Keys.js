@@ -21,11 +21,12 @@
 var CodePages = {};
 var Themes = {};
 var Commands = {};
+var OSCommands = {};
 var Keys = {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
-    MODIFIER_KEYS: ["CTRL", "ALT", "SHIFT", "META"],
+    MODIFIER_KEYS: ["CTRL", "ALT", "META", "SHIFT"],
     SHIFT: 16,
     CTRL: 17,
     ALT: 18,
@@ -92,5 +93,15 @@ var Keys = {
     F9: 120,
     F10: 121,
     F11: 122,
-    F12: 123
+    F12: 123,
+    setCursorCommand: function (obj, mod, key, func, cur) {
+        var name = mod + "_" + key;
+        obj[name] = function (prim, lines) {
+            prim["cursor" + func](lines, prim[cur + "Cursor"]);
+        };
+    },
+    makeCursorCommand: function (obj, baseMod, key, func) {
+        Keys.setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
+        Keys.setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+    }
 };

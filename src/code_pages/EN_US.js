@@ -16,7 +16,7 @@
  */
 
 CodePages.EN_US = {
-    name: "EN_US",
+    name: "English: USA",
     language: "en-US",
     NORMAL: {
         "32": " ",

@@ -17,6 +17,8 @@
         <script type="text/javascript" src="src/themes/Default.js"></script>
         <script type="text/javascript" src="src/themes/Dark.js"></script>
         <script type="text/javascript" src="src/command_packs/Default.js"></script>
+        <script type="text/javascript" src="src/operating_systems/Windows.js"></script>
+        <script type="text/javascript" src="src/operating_systems/OSX.js"></script>
         <script type="text/javascript">
             var prim;
             window.addEventListener("load", function () {
@@ -26,10 +28,11 @@
                 });
                 prim.focus();
 
+                ctrls.controls.appendChild(prim.operatingSystemSelect);
                 ctrls.controls.appendChild(prim.keyboardSelect);
-                ctrls.controls.appendChild(prim.themeSelect);
+                ctrls.controls.appendChild(prim.commandSystemSelect);
                 ctrls.controls.appendChild(prim.tokenizerSelect);
-                ctrls.controls.appendChild(prim.commandPackSelect);
+                ctrls.controls.appendChild(prim.themeSelect);
             });
         </script>
     </head>

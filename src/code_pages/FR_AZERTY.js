@@ -15,17 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 CodePages.FR_AZERTY = {
-    name: "FR_AZERTY",
+    name: "Français: AZERTY",
     language: "fr",
     CTRLALT: {
         "50": function (prim, lines, cursor) {
-            prim.setState("DEAD3");
+            prim.setDeadKeyState("DEAD3");
         },
         "55": function (prim, lines, cursor) {
-            prim.setState("DEAD4");
+            prim.setDeadKeyState("DEAD4");
         },
         "51": "#",
         "52": "{",
@@ -79,7 +77,7 @@ CodePages.FR_AZERTY = {
     },
     NORMAL: {
         "221": function (prim, lines, cursor) {
-            prim.setState("DEAD1");
+            prim.setDeadKeyState("DEAD1");
         },
         "222": "²",
         "49": "&",
@@ -131,7 +129,7 @@ CodePages.FR_AZERTY = {
     },
     SHIFT: {
         "221": function (prim, lines, cursor) {
-            prim.setState("DEAD2");
+            prim.setDeadKeyState("DEAD2");
         },
         "222": "",
         "49": "1",

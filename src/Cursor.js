@@ -68,7 +68,7 @@ Cursor.prototype.left = function (lines) {
     this.moved = true;
 };
 
-Cursor.prototype.skipLeft = function (lines) {
+Cursor.prototype.skipleft = function (lines) {
     if (this.x === 0) {
         this.left(lines);
     }
@@ -95,7 +95,7 @@ Cursor.prototype.right = function (lines) {
     this.moved = true;
 };
 
-Cursor.prototype.skipRight = function (lines) {
+Cursor.prototype.skipright = function (lines) {
     if (this.x === lines[this.y].length) {
         this.right(lines);
     }
@@ -116,7 +116,7 @@ Cursor.prototype.home = function (lines) {
     this.moved = true;
 };
 
-Cursor.prototype.fullHome = function (lines) {
+Cursor.prototype.fullhome = function (lines) {
     this.i = 0;
     this.x = 0;
     this.y = 0;
@@ -130,7 +130,7 @@ Cursor.prototype.end = function (lines) {
     this.moved = true;
 };
 
-Cursor.prototype.fullEnd = function (lines) {
+Cursor.prototype.fullend = function (lines) {
     this.i += lines[this.y].length - this.x;
     while (this.y < lines.length - 1) {
         ++this.y;
