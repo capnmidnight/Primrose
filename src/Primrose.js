@@ -18,20 +18,17 @@
 function Primrose(canvasID, options) {
     options = options || {};
 
-    var languageGrammar;
-    this.setLanguageGrammar = function (lang) {
-        languageGrammar = lang || Grammar.JavaScript;
-        if(this.drawText){
-            this.drawText();
+    var commandPack = {};
+    this.setCommandPack = function (cmd) {
+        cmd = cmd || Commands.DEFAULT;
+        for (var key in cmd) {
+            if (cmd.hasOwnProperty(key)) {
+                commandPack[key] = cmd[key];
+            }
         }
     };
-    
-    this.exec = function(script){
-        languageGrammar.exec(script);
-    };
-    
-    this.setLanguageGrammar(options.languageGrammar);
-    this.languageSelect = makeSelectorFromObj("primrose-language-selector", Grammar, languageGrammar.name, this, "setLanguageGrammar");
+    this.setCommandPack(options.commands);
+    this.commandPackSelect = makeSelectorFromObj("primrose-command-pack-selector", Commands, commandPack.name, this, "setCommandPack");
 
     var codePage;
     this.setCodePage = function (cp) {
@@ -52,13 +49,28 @@ function Primrose(canvasID, options) {
             var codes = codePage[type];
             for (var code in codes) {
                 var name = type + "_" + codePage.NORMAL[code];
-                this[name] = this.insertAtCursor.bind(this, codes[code]);
+                commandPack[name] = this.insertAtCursor.bind(this, codes[code]);
             }
         }
     };
 
     this.setCodePage(options.codePage);
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-language-selector", CodePages, codePage.name, this, "setCodePage");
+
+    var languageGrammar;
+    this.setLanguageGrammar = function (lang) {
+        languageGrammar = lang || Grammar.JavaScript;
+        if (this.drawText) {
+            this.drawText();
+        }
+    };
+
+    this.exec = function (script) {
+        languageGrammar.exec(script);
+    };
+
+    this.setLanguageGrammar(options.languageGrammar);
+    this.languageSelect = makeSelectorFromObj("primrose-language-selector", Grammar, languageGrammar.name, this, "setLanguageGrammar");
 
     var history = [];
     var historyFrame = -1;
@@ -163,13 +175,13 @@ function Primrose(canvasID, options) {
             var codeCommandA = typeA + key;
             var codeCommandB = typeB + key;
             var charCommand = typeB + "_" + codePage.NORMAL[key];
-            var func = this[codeCommandB] || this[codeCommandA] || this[charCommand];
+            var func = commandPack[codeCommandB] || commandPack[codeCommandA] || commandPack[charCommand];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
                 var currentCursor = evt.shiftKey ? this.backCursor : this.frontCursor;
                 var lines = this.getLines();
-                func.call(this, lines, currentCursor);
+                func.call(null, this, lines, currentCursor);
                 lines = this.getLines();
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
@@ -575,176 +587,181 @@ Primrose.prototype.cutSelectedText = function (evt) {
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-Primrose.prototype["NORMAL" + Keys.LEFTARROW] = function (lines, cursor) {
+var Commands = {
+    DEFAULT: {
+        name: "DEFAULT"
+    }
+};
+Commands.DEFAULT["NORMAL" + Keys.LEFTARROW] = function (prim, lines, cursor) {
     cursor.left(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.LEFTARROW] = function (lines, cursor) {
+Commands.DEFAULT["CTRL" + Keys.LEFTARROW] = function (prim, lines, cursor) {
     cursor.skipLeft(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.RIGHTARROW] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.RIGHTARROW] = function (prim, lines, cursor) {
     cursor.right(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.RIGHTARROW] = function (lines, cursor) {
+Commands.DEFAULT["CTRL" + Keys.RIGHTARROW] = function (prim, lines, cursor) {
     cursor.skipRight(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.UPARROW] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.UPARROW] = function (prim, lines, cursor) {
     cursor.up(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.DOWNARROW] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.DOWNARROW] = function (prim, lines, cursor) {
     cursor.down(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.HOME] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.HOME] = function (prim, lines, cursor) {
     cursor.home(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.HOME] = function (lines, cursor) {
+Commands.DEFAULT["CTRL" + Keys.HOME] = function (prim, lines, cursor) {
     cursor.fullHome(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.END] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.END] = function (prim, lines, cursor) {
     cursor.end(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.END] = function (lines, cursor) {
+Commands.DEFAULT["CTRL" + Keys.END] = function (prim, lines, cursor) {
     cursor.fullEnd(lines);
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.DOWNARROW] = function (lines, cursor) {
-    if (this.scrollTop < lines.length) {
-        ++this.scrollTop;
+Commands.DEFAULT["CTRL" + Keys.DOWNARROW] = function (prim, lines, cursor) {
+    if (prim.scrollTop < lines.length) {
+        ++prim.scrollTop;
     }
 };
 
-Primrose.prototype["CTRL" + Keys.UPARROW] = function (lines, cursor) {
-    if (this.scrollTop > 0) {
-        --this.scrollTop;
+Commands.DEFAULT["CTRL" + Keys.UPARROW] = function (prim, lines, cursor) {
+    if (prim.scrollTop > 0) {
+        --prim.scrollTop;
     }
 };
 
-Primrose.prototype["NORMAL" + Keys.PAGEUP] = function (lines, cursor) {
-    cursor.incY(-this.pageSize, lines);
-    this.scrollIntoView(cursor);
+Commands.DEFAULT["NORMAL" + Keys.PAGEUP] = function (prim, lines, cursor) {
+    cursor.incY(-prim.pageSize, lines);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.PAGEDOWN] = function (lines, cursor) {
-    cursor.incY(this.pageSize, lines);
-    this.scrollIntoView(cursor);
+Commands.DEFAULT["NORMAL" + Keys.PAGEDOWN] = function (prim, lines, cursor) {
+    cursor.incY(prim.pageSize, lines);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.DASH] = function (lines, cursor) {
-    this.decreaseFontSize();
-    this.scrollIntoView(cursor);
+Commands.DEFAULT["CTRL" + Keys.DASH] = function (prim, lines, cursor) {
+    prim.decreaseFontSize();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["CTRL" + Keys.EQUALSIGN] = function (lines, cursor) {
-    this.increaseFontSize();
-    this.scrollIntoView(cursor);
+Commands.DEFAULT["CTRL" + Keys.EQUALSIGN] = function (prim, lines, cursor) {
+    prim.increaseFontSize();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.BACKSPACE] = function (lines, cursor) {
-    if (this.frontCursor.i === this.backCursor.i) {
-        this.frontCursor.left(lines);
+Commands.DEFAULT["NORMAL" + Keys.BACKSPACE] = function (prim, lines, cursor) {
+    if (prim.frontCursor.i === prim.backCursor.i) {
+        prim.frontCursor.left(lines);
     }
-    this.deleteSelection();
-    this.scrollIntoView(cursor);
+    prim.deleteSelection();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["SHIFT" + Keys.DELETE] = function (lines, cursor) {
-    if (this.frontCursor.i === this.backCursor.i) {
-        this.frontCursor.home(lines);
-        this.backCursor.end(lines);
+Commands.DEFAULT["SHIFT" + Keys.DELETE] = function (prim, lines, cursor) {
+    if (prim.frontCursor.i === prim.backCursor.i) {
+        prim.frontCursor.home(lines);
+        prim.backCursor.end(lines);
     }
-    this.deleteSelection();
-    this.scrollIntoView(cursor);
+    prim.deleteSelection();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.DELETE] = function (lines, cursor) {
-    if (this.frontCursor.i === this.backCursor.i) {
-        this.backCursor.right(lines);
+Commands.DEFAULT["NORMAL" + Keys.DELETE] = function (prim, lines, cursor) {
+    if (prim.frontCursor.i === prim.backCursor.i) {
+        prim.backCursor.right(lines);
     }
-    this.deleteSelection();
-    this.scrollIntoView(cursor);
+    prim.deleteSelection();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.ENTER] = function (lines, cursor) {
+Commands.DEFAULT["NORMAL" + Keys.ENTER] = function (prim, lines, cursor) {
     var indent = "";
-    for (var i = 0; i < lines[this.frontCursor.y].length && lines[this.frontCursor.y][i] === " "; ++i) {
+    for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
         indent += " ";
     }
-    this.insertAtCursor("\n" + indent);
-    this.scrollIntoView(cursor);
+    prim.insertAtCursor("\n" + indent);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["NORMAL" + Keys.TAB] = function (lines, cursor) {
-    if (this.frontCursor.y === this.backCursor.y) {
-        this.insertAtCursor(this.tabString);
+Commands.DEFAULT["NORMAL" + Keys.TAB] = function (prim, lines, cursor) {
+    if (prim.frontCursor.y === prim.backCursor.y) {
+        prim.insertAtCursor(prim.tabString);
     }
     else {
-        var a = Cursor.min(this.frontCursor, this.backCursor);
-        var b = Cursor.max(this.frontCursor, this.backCursor);
+        var a = Cursor.min(prim.frontCursor, prim.backCursor);
+        var b = Cursor.max(prim.frontCursor, prim.backCursor);
         a.home(lines);
         b.end(lines);
         for (var y = a.y; y <= b.y; ++y) {
-            lines[y] = this.tabString + lines[y];
+            lines[y] = prim.tabString + lines[y];
         }
         a.setXY(0, a.y, lines);
         b.setXY(0, b.y, lines);
         b.end(lines);
-        this.pushUndo(lines);
+        prim.pushUndo(lines);
     }
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype["SHIFT" + Keys.TAB] = function (lines, cursor) {
-    if (this.frontCursor.y !== this.backCursor.y) {
-        var a = Cursor.min(this.frontCursor, this.backCursor);
-        var b = Cursor.max(this.frontCursor, this.backCursor);
+Commands.DEFAULT["SHIFT" + Keys.TAB] = function (prim, lines, cursor) {
+    if (prim.frontCursor.y !== prim.backCursor.y) {
+        var a = Cursor.min(prim.frontCursor, prim.backCursor);
+        var b = Cursor.max(prim.frontCursor, prim.backCursor);
         a.home(lines);
         b.end(lines);
         for (var y = a.y; y <= b.y; ++y) {
-            if (lines[y].substring(0, this.tabWidth) === this.tabString) {
-                lines[y] = lines[y].substring(this.tabWidth);
+            if (lines[y].substring(0, prim.tabWidth) === prim.tabString) {
+                lines[y] = lines[y].substring(prim.tabWidth);
             }
         }
         a.setXY(0, a.y, lines);
         b.setXY(0, b.y, lines);
         b.end(lines);
-        this.pushUndo(lines);
+        prim.pushUndo(lines);
     }
-    this.scrollIntoView(cursor);
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype.CTRLSHIFT_e = function (lines, cursor) {
-    this.exec(this.getText());
+Commands.DEFAULT.CTRLSHIFT_e = function (prim, lines, cursor) {
+    prim.exec(prim.getText());
 };
 
-Primrose.prototype.CTRL_a = function (lines, cursor) {
-    this.frontCursor.fullHome(lines);
-    this.backCursor.fullEnd(lines);
+Commands.DEFAULT.CTRL_a = function (prim, lines, cursor) {
+    prim.frontCursor.fullHome(lines);
+    prim.backCursor.fullEnd(lines);
 };
 
-Primrose.prototype.CTRL_y = function (lines, cursor) {
-    this.redo();
-    this.scrollIntoView(cursor);
+Commands.DEFAULT.CTRL_y = function (prim, lines, cursor) {
+    prim.redo();
+    prim.scrollIntoView(cursor);
 };
 
-Primrose.prototype.CTRL_z = function (lines, cursor) {
-    this.undo();
-    this.scrollIntoView(cursor);
+Commands.DEFAULT.CTRL_z = function (prim, lines, cursor) {
+    prim.undo();
+    prim.scrollIntoView(cursor);
 };
