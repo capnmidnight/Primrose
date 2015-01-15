@@ -19,6 +19,7 @@ Themes.Dark = {
     name: "Dark",
     fontFamily: "monospace",
     cursorColor: "white",
+    fontSize: 14,
     regular: {
         backColor: "black",
         foreColor: "#c0c0c0",

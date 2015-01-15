@@ -19,6 +19,7 @@ Themes.DEFAULT = {
     name: "DEFAULT",
     fontFamily: "monospace",
     cursorColor: "black",
+    fontSize: 14,
     regular: {
         foreColor: "black",
         selectedBackColor: "#c0c0c0",

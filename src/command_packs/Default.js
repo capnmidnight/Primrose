@@ -140,8 +140,9 @@ Commands.DEFAULT["NORMAL" + Keys.ENTER] = function (prim, lines, cursor) {
 };
 
 Commands.DEFAULT["NORMAL" + Keys.TAB] = function (prim, lines, cursor) {
-    if (prim.frontCursor.y === prim.backCursor.y) {
-        prim.insertAtCursor(prim.tabString);
+    var ts = prim.getTabString();
+    if (prim.frontCursor.y === prim.backCursor.y && prim.frontCursor.x !== 0) {
+        prim.insertAtCursor(ts);
     }
     else {
         var a = Cursor.min(prim.frontCursor, prim.backCursor);
@@ -149,7 +150,7 @@ Commands.DEFAULT["NORMAL" + Keys.TAB] = function (prim, lines, cursor) {
         a.home(lines);
         b.end(lines);
         for (var y = a.y; y <= b.y; ++y) {
-            lines[y] = prim.tabString + lines[y];
+            lines[y] = ts + lines[y];
         }
         a.setXY(0, a.y, lines);
         b.setXY(0, b.y, lines);
@@ -160,26 +161,30 @@ Commands.DEFAULT["NORMAL" + Keys.TAB] = function (prim, lines, cursor) {
 };
 
 Commands.DEFAULT["SHIFT" + Keys.TAB] = function (prim, lines, cursor) {
-    if (prim.frontCursor.y !== prim.backCursor.y) {
-        var a = Cursor.min(prim.frontCursor, prim.backCursor);
-        var b = Cursor.max(prim.frontCursor, prim.backCursor);
-        a.home(lines);
-        b.end(lines);
-        for (var y = a.y; y <= b.y; ++y) {
-            if (lines[y].substring(0, prim.tabWidth) === prim.tabString) {
-                lines[y] = lines[y].substring(prim.tabWidth);
-            }
+    var a = Cursor.min(prim.frontCursor, prim.backCursor);
+    var b = Cursor.max(prim.frontCursor, prim.backCursor);
+    a.home(lines);
+    b.home(lines);
+    var tw = prim.getTabWidth();
+    var ts = prim.getTabString();
+    var edited = false;
+    for (var y = a.y; y <= b.y; ++y) {
+        if (lines[y].substring(0, tw) === ts) {
+            lines[y] = lines[y].substring(tw);
+            edited = true;
         }
+    }
+    if (edited) {
         a.setXY(0, a.y, lines);
         b.setXY(0, b.y, lines);
         b.end(lines);
         prim.pushUndo(lines);
+        prim.scrollIntoView(cursor);
     }
-    prim.scrollIntoView(cursor);
 };
 
 Commands.DEFAULT.CTRLSHIFT_e = function (prim, lines, cursor) {
-    prim.exec(prim.getText());
+    prim.getTokenizer().exec(prim.getText());
 };
 
 Commands.DEFAULT.CTRL_a = function (prim, lines, cursor) {

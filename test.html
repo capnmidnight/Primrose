@@ -23,10 +23,12 @@
                 prim = new Primrose(ctrls.output, {
                     file: Primrose.toString()
                 });
+                prim.focus();
 
                 ctrls.controls.appendChild(prim.keyboardSelect);
                 ctrls.controls.appendChild(prim.themeSelect);
-                ctrls.controls.appendChild(prim.languageSelect);
+                ctrls.controls.appendChild(prim.tokenizerSelect);
+                ctrls.controls.appendChild(prim.commandPackSelect);
             });
         </script>
     </head>
