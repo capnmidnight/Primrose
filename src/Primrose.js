@@ -403,6 +403,7 @@ function Primrose(canvasID, options) {
     this.editText = function (evt) {
         evt = evt || event;
         var key = evt.keyCode;
+        var oldState = state;
         if (modifierKeyState[key] !== undefined) {
             modifierKeyState[key] |= (evt.location || 1);
         }
@@ -415,7 +416,7 @@ function Primrose(canvasID, options) {
                 }
                 type += m.name + modifierKeyState[m.index];
             }
-            console.log(type);
+            
             var typeA = (evt.ctrlKey && "CTRL" || "") + (evt.altKey && "ALT" || "");
             var typeB = (typeA + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
             typeA = typeA || "NORMAL";
@@ -439,8 +440,14 @@ function Primrose(canvasID, options) {
             }
             else {
                 // what just happened?
-                console.log(typeB, key);
+                console.log(type, key, 
+                    "A", codeCommandA, !!commandPack[codeCommandA], 
+                    "B", codeCommandB, !!commandPack[codeCommandB], 
+                    "C", charCommand, !!commandPack[charCommand]);
             }
+        }
+        if(state === oldState){
+            state = "";
         }
         this.drawText();
     };
