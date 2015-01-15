@@ -259,11 +259,12 @@ function Primrose(canvasID, options) {
     };
 
     this.setCodePage = function (cp) {
+        var key, code;
         var lang = navigator.userLanguage || navigator.languages[0];
         codePage = cp;
 
         if (codePage === undefined) {
-            for (var key in CodePages) {
+            for (key in CodePages) {
                 cp = CodePages[key];
                 if (cp.language === lang) {
                     codePage = cp;
@@ -273,8 +274,8 @@ function Primrose(canvasID, options) {
         }
 
         keyNames = [];
-        for (var key in Keys) {
-            var code = Keys[key];
+        for (key in Keys) {
+            code = Keys[key];
             if (!isNaN(code)) {
                 keyNames[code] = key;
             }
@@ -284,7 +285,7 @@ function Primrose(canvasID, options) {
         for (var type in codePage) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
-                for (var code in codes) {
+                for (code in codes) {
                     var char = codePage.NORMAL[code];
                     keyNames[code] = char;
                     var name = type + "_" + char;

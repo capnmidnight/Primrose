@@ -46,37 +46,38 @@
                         var ctrls = findEverything();
                         prim = new Primrose(ctrls.output, {
                             file: "function fib(arity, len) {\n" +
-"    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
-"}\n" +
-" \n" +
-"function lucas(arity, len) {\n" +
-"    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
-"}\n" +
-" \n" +
-"function nacci(a, arity, len) {\n" +
-"    while (a.length < len) {\n" +
-"        var sum = 0;\n" +
-"        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
-"            sum += a[i];\n" +
-"        a.push(sum);\n" +
-"    }\n" +
-"    return a;\n" +
-"}\n" +
-" \n" +
-"function main() {\n" +
-"    for (var arity = 2; arity <= 10; arity++)\n" +
-"        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
-"    for (var arity = 2; arity <= 10; arity++)\n" +
-"        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
-"}\n" +
-" \n" +
-"main();"
+                                    "    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
+                                    "}\n" +
+                                    " \n" +
+                                    "function lucas(arity, len) {\n" +
+                                    "    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
+                                    "}\n" +
+                                    " \n" +
+                                    "function nacci(a, arity, len) {\n" +
+                                    "    while (a.length < len) {\n" +
+                                    "        var sum = 0;\n" +
+                                    "        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
+                                    "            sum += a[i];\n" +
+                                    "        a.push(sum);\n" +
+                                    "    }\n" +
+                                    "    return a;\n" +
+                                    "}\n" +
+                                    " \n" +
+                                    "function main() {\n" +
+                                    "    for (var arity = 2; arity <= 10; arity++)\n" +
+                                    "        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
+                                    "    for (var arity = 2; arity <= 10; arity++)\n" +
+                                    "        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
+                                    "}\n" +
+                                    " \n" +
+                                    "main();"
                         });
 
+                        ctrls.controls.appendChild(prim.operatingSystemSelect);
                         ctrls.controls.appendChild(prim.keyboardSelect);
-                        ctrls.controls.appendChild(prim.themeSelect);
+                        ctrls.controls.appendChild(prim.commandSystemSelect);
                         ctrls.controls.appendChild(prim.tokenizerSelect);
-                        ctrls.controls.appendChild(prim.commandPackSelect);
+                        ctrls.controls.appendChild(prim.themeSelect);
                     </script>
 
                     <p>[NOTE: <a href="http://rosettacode.org/wiki/Fibonacci_n-step_number_sequences#JavaScript">Code sample from RosettaCode.org</a>. This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
@@ -113,9 +114,9 @@
                         from other elements--useful when Canvas is being used as a texture and thus is not a part of the DOM to be able to receive input events. And
                         it is fully programmable, allowing the implementer to customize its operation quickly and easily. It is designed to be a simple, 
                         syntax-highlighting source code editor, not an everything-to-everyone WYSIWYG editor.</p>
-                    
+
                     <h2>Screenshot</h2>
-                    
+
                     <p><a href="images/screenshot1.jpg" target="_blank"><img alt="screenshot" src="images/screenshot1.jpg"></a></p>
 
                     <h2><a id="licensing" class="anchor" href="#licensing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licensing</h2>
