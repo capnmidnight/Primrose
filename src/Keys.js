@@ -20,6 +20,7 @@
 
 var CodePages = {};
 var Themes = {};
+var Commands = {};
 var Keys = {
     MODIFIER_KEYS: ["CTRL", "ALT", "SHIFT"],
     BACKSPACE: 8,
