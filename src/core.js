@@ -479,7 +479,7 @@ function reloadPage() {
     document.location = document.location.href;
 }
 
-function makeSelectorFromObj(id, obj, def, target, prop) {
+function makeSelectorFromObj(id, obj, def, target, prop, lbl) {
     var elem = cascadeElement(id, "select", HTMLSelectElement);
     var items = [];
     for (var key in obj) {
@@ -507,7 +507,15 @@ function makeSelectorFromObj(id, obj, def, target, prop) {
         });
     }
 
-    return elem;
+    var container = cascadeElement("container -" + id, "div", HTMLDivElement);
+    var label = cascadeElement("label-" + id, "span", HTMLSpanElement);
+    label.innerHTML = " - " + lbl;
+    label.for = elem;
+    elem.title = lbl;
+    elem.alt = lbl;
+    container.appendChild(elem);
+    container.appendChild(label);
+    return container;
 }
 
 function makeHidingContainer(id, obj) {

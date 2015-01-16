@@ -695,12 +695,12 @@ function Primrose(canvasID, options) {
     this.setCommandSystem(options.commands);
     this.setText(options.file);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvasID, Themes, theme.name, this, "setTheme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, this, "setTokenizer");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OSCommands, operatingSystem.name, this, "setOperatingSystem");
-
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvasID, Themes, theme.name, this, "setTheme", "theme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, this, "setTokenizer", "language syntax");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage", "localization");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem", "sommand system");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OSCommands, operatingSystem.name, this, "setOperatingSystem", "shortcut style");
+    
 
     //////////////////////////////////////////////////////////////////////////
     // wire up event handlers

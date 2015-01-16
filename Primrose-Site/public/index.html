@@ -1,25 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset='utf-8'>
-        <meta http-equiv="X-UA-Compatible" content="chrome=1">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-        <link type="text/css" href="css/main.css" rel="stylesheet">
-
-        <!--[if lt IE 9]>
-        <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+        <title>Primrose: code editor control in WebGL</title>
+        <link type="text/css" rel="stylesheet" href="/stylesheets/style.css" />
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
         <script type="text/javascript" src="dist/Primrose.latest.min.js"></script>
-        <script type="text/javascript" src="test/demo.js"></script>
-
-        <title>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</title>
     </head>
 
     <body>
@@ -46,7 +33,57 @@
                     <div id="controls"></div>
                     <canvas id="output" style="width:100%;height:500px;border:dashed 2px red"></canvas>
                     <script type="text/javascript">
-                        PrimroseDemo(750, 375);
+                        var prim, cube;
+                        function setup() {
+                            var ctrls = findEverything();
+                            prim = new Primrose("editor", {
+                                width: "750px",
+                                height: "375px",
+                                mouseEventSource: ctrls.output,
+                                file: setup.toString()
+                            });
+                            var scene = new THREE.Scene(),
+                                    camera = new THREE.PerspectiveCamera(75, ctrls.output.width / ctrls.output.height, 0.1, 1000),
+                                    renderer = new THREE.WebGLRenderer({
+                                        canvas: ctrls.output,
+                                        alpha: true,
+                                        antialias: true
+                                    }),
+                                    geometry = new THREE.BoxGeometry(3, 1.5, 3),
+                                    texture = new THREE.Texture(prim.getCanvas()),
+                                    material = new THREE.MeshBasicMaterial({
+                                        map: texture,
+                                        transparent: false,
+                                        useScreenCoordinates: false,
+                                        color: 0xffffff,
+                                        shading: THREE.FlatShading}),
+                                    rotAxis = new THREE.Vector3(0.25, 1, 0.125);
+
+                            cube = new THREE.Mesh(geometry, material);
+
+                            renderer.setSize(ctrls.output.clientWidth, ctrls.output.clientHeight);
+                            texture.anisotropy = renderer.getMaxAnisotropy();
+
+                            ctrls.controls.appendChild(prim.operatingSystemSelect);
+                            ctrls.controls.appendChild(prim.keyboardSelect);
+                            ctrls.controls.appendChild(prim.themeSelect);
+
+
+                            // the following will be necessary for Three.js r70
+                            //renderer.setPixelRatio(window.devicePixelRatio);
+
+                            scene.add(cube);
+                            camera.position.z = 3;
+                            prim.focus();
+                            function render(t) {
+                                requestAnimationFrame(render);
+                                texture.needsUpdate = true;
+                                cube.quaternion.setFromAxisAngle(rotAxis, t / 10000);
+                                renderer.render(scene, camera);
+                            }
+                            requestAnimationFrame(render);
+                        }
+                        setup();
                     </script>  
 
                     <p>[NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 

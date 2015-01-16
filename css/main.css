@@ -9,12 +9,104 @@ html, body{
 body{
     background-color: #eee;
     background-image: url(../img/bg.jpg);
+    font-family: sans-serif;
 }
 
 #output{ 
     box-sizing: border-box;
     top:0;
-    height: 95%;
+    height: 100%;
     bottom:0;
+    width:100%;
+}
+
+#description{
+    position:absolute;
+    margin:3em;
+    padding:3em;
+    top:0;
+    right:0;
+    background-color: white;
+    border:dashed 2px red;
+    width:20em;
+}
+
+#description > h1{
+    font-size:32pt;
+}
+
+a.button
+{
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    border-width: 10px;
+    border-style: solid;
+}
+
+a.primary.button{
+    background-color: #99ff99;
+    border-color: #99ff99;
+    color: #005500;
+    font-weight: bold;
+    width:100%;
+}
+
+a.primary.button > small{
+    color: #007700;
+    font-weight: normal;
+}
+
+a.primary.button:hover{
+    box-shadow: 0px 0px 15px #bbb;
+}
+
+a.primary.button:active
+{
+    background-color: #7f4040;
+    border-color: #7f4040;
+}
+
+
+a.secondary.button{
+    font-size:smaller;
+    background-color: #7f0000;
+    border-color: #7f0000;
+    color: #fff;
+}
+
+a.secondary.button:hover{
+    box-shadow: 0px 0px 15px #bbb;
+    background-color: #7f2020;
+    border-color: #7f2020;
+}
+
+a.secondary.button:active
+{
+    background-color: #7f4040;
+    border-color: #7f4040;
+}
+
+a.disabled.button{
+    background-color: #ddd;
+    border-color: #ddd;
+    color: #fff;
+    cursor: no-drop;
+}
+
+.menu{
+    padding:0;
+    margin:0;
+    margin-top:1em;
+    width:100%;
+}
+
+.menu td{
+    padding:0;
+    margin:0;
+}
+
+.menu a.button{
     width:100%;
 }
