@@ -15,6 +15,7 @@
         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
 
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
         <script type="text/javascript" src="dist/Primrose.latest.min.js"></script>
 
         <title>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</title>
@@ -33,52 +34,90 @@
             <div class="inner clearfix">
                 <section id="main-content">
                     <h1>
-                        <a id="primrose-a-text-editor-that-draws-to-canvas" class="anchor" href="#primrose-a-text-editor-that-draws-to-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</h1>
+                        <a id="primrose-a-text-editor-that-draws-to-canvas" class="anchor" href="#primrose-a-text-editor-that-draws-to-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primrose: text editing in a texture</h1>
 
-                    <p>Primrose[0] is a lightweight[1] text editor control for Web browsers[2]. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.</p>
+                    <p>Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.</p>
 
-                    <h2><a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+                    <h1>Demonstration</h1>
+                    <p>Click on the cube below and try editing the text with keyboard controls.</p>
+                    <p>Alternately, you may try <a href="editor.html">Primrose in a 2D environment.</a></p>
 
-                    <p>Go ahead, try some tippity-typing in the box below.</p>
-                    <canvas id="output" style="width:100%;height:300px;"></canvas>
                     <div id="controls"></div>
+                    <canvas id="output" style="width:100%;height:500px;border:dashed 2px red"></canvas>
                     <script type="text/javascript">
-                        var ctrls = findEverything();
-                        prim = new Primrose(ctrls.output, {
-                            file: "function fib(arity, len) {\n" +
-                                    "    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
-                                    "}\n" +
-                                    " \n" +
-                                    "function lucas(arity, len) {\n" +
-                                    "    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
-                                    "}\n" +
-                                    " \n" +
-                                    "function nacci(a, arity, len) {\n" +
-                                    "    while (a.length < len) {\n" +
-                                    "        var sum = 0;\n" +
-                                    "        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
-                                    "            sum += a[i];\n" +
-                                    "        a.push(sum);\n" +
-                                    "    }\n" +
-                                    "    return a;\n" +
-                                    "}\n" +
-                                    " \n" +
-                                    "function main() {\n" +
-                                    "    for (var arity = 2; arity <= 10; arity++)\n" +
-                                    "        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
-                                    "    for (var arity = 2; arity <= 10; arity++)\n" +
-                                    "        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
-                                    "}\n" +
-                                    " \n" +
-                                    "main();"
-                        });
+                        var ctrls = findEverything(),
+                                prim = new Primrose("editor", {
+                                    width: "500px",
+                                    height: "250px",
+                                    mouseEventSource: ctrls.output,
+                                    file: "function fib(arity, len) {\n" +
+                                            "    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
+                                            "}\n" +
+                                            " \n" +
+                                            "function lucas(arity, len) {\n" +
+                                            "    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
+                                            "}\n" +
+                                            " \n" +
+                                            "function nacci(a, arity, len) {\n" +
+                                            "    while (a.length < len) {\n" +
+                                            "        var sum = 0;\n" +
+                                            "        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
+                                            "            sum += a[i];\n" +
+                                            "        a.push(sum);\n" +
+                                            "    }\n" +
+                                            "    return a;\n" +
+                                            "}\n" +
+                                            " \n" +
+                                            "function main() {\n" +
+                                            "    for (var arity = 2; arity <= 10; arity++)\n" +
+                                            "        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
+                                            "    for (var arity = 2; arity <= 10; arity++)\n" +
+                                            "        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
+                                            "}\n" +
+                                            " \n" +
+                                            "main();"
+                                }),
+                                gl = ctrls.output.getContext("webgl"),
+                                scene = new THREE.Scene(),
+                                camera = new THREE.PerspectiveCamera(75, ctrls.output.width / ctrls.output.height, 0.1, 1000),
+                                renderer = new THREE.WebGLRenderer({
+                                    canvas: ctrls.output,
+                                    alpha: true,
+                                    antialias: true
+                                }),
+                                geometry = new THREE.BoxGeometry(3, 1.5, 3),
+                                texture = new THREE.Texture(prim.getCanvas()),
+                                material = new THREE.MeshBasicMaterial({
+                                    map: texture,
+                                    transparent: false,
+                                    useScreenCoordinates: false,
+                                    color: 0xffffff,
+                                    shading: THREE.FlatShading}),
+                                cube = new THREE.Mesh(geometry, material),
+                                rotAxis = new THREE.Vector3(0.25, 1, 0.125);
+
+                        renderer.setSize(ctrls.output.clientWidth, ctrls.output.clientHeight);
+                        texture.anisotropy = renderer.getMaxAnisotropy();
 
                         ctrls.controls.appendChild(prim.operatingSystemSelect);
                         ctrls.controls.appendChild(prim.keyboardSelect);
-                        ctrls.controls.appendChild(prim.commandSystemSelect);
-                        ctrls.controls.appendChild(prim.tokenizerSelect);
                         ctrls.controls.appendChild(prim.themeSelect);
-                    </script>
+
+
+                        // the following will be necessary for Three.js r70
+                        //renderer.setPixelRatio(window.devicePixelRatio);
+
+                        scene.add(cube);
+                        camera.position.z = 3;
+                        prim.focus();
+                        function render(t) {
+                            requestAnimationFrame(render);
+                            texture.needsUpdate = true;
+                            cube.quaternion.setFromAxisAngle(rotAxis, t / 10000);
+                            renderer.render(scene, camera);
+                        }
+                        requestAnimationFrame(render);
+                    </script>  
 
                     <p>[NOTE: <a href="http://rosettacode.org/wiki/Fibonacci_n-step_number_sequences#JavaScript">Code sample from RosettaCode.org</a>. This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
                         or not the international keyboard support is correct. But the results so far are promising. Consider contributing!]</p>

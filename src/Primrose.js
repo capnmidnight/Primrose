@@ -51,7 +51,7 @@ function Primrose(canvasID, options) {
             bottomGutterHeight = 1,
             canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
-            surrogate = cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement),
+            surrogate = cascadeElement("primrose-surrogate-textarea-" + canvasID, "textarea", HTMLTextAreaElement),
             surrogateContainer,
             keyEventSource = options.keyEventSource || surrogate,
             clipboardEventSource = options.clipboardEventSource || surrogate,
@@ -191,18 +191,6 @@ function Primrose(canvasID, options) {
         addCommandPack.call(this, commandSystem);
     }
 
-    function makeHidingContainer(id, obj) {
-        var elem = cascadeElement(id, "div", HTMLDivElement);
-        elem.style.position = "absolute";
-        elem.style.left = 0;
-        elem.style.top = 0;
-        elem.style.width = 0;
-        elem.style.height = 0;
-        elem.style.overflow = "hidden";
-        elem.appendChild(obj);
-        return elem;
-    }
-
     function makeCursorCommand(name) {
         var method = name.toLowerCase();
         this["cursor" + name] = function (lines, cursor) {
@@ -233,6 +221,10 @@ function Primrose(canvasID, options) {
 
     this.focus = function () {
         surrogate.focus();
+    };
+    
+    this.getCanvas = function(){
+        return canvas;
     };
 
     this.setTheme = function (t) {
@@ -472,6 +464,15 @@ function Primrose(canvasID, options) {
         this.deleteSelection();
         this.drawText();
     };
+    
+    this.setSurrogateRectangle = function(x, y, w, h){
+        if (surrogate) {
+            surrogate.style.left = x + "px";
+            surrogate.style.top = y + "px";
+            surrogate.style.width = w + "px";
+            surrogate.style.height = h + "px";
+        }
+    };
 
     this.editText = function (evt) {
         evt = evt || event;
@@ -549,13 +550,6 @@ function Primrose(canvasID, options) {
             var scrollRight = this.scrollLeft + gridWidth;
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
             pageSize = Math.floor(gridHeight);
-
-            if (surrogate) {
-                surrogate.style.left = (canvas.offsetLeft + (this.gridLeft * this.characterWidth)) + "px";
-                surrogate.style.top = canvas.offsetTop + "px";
-                surrogate.style.width = (gridWidth * this.characterWidth) + "px";
-                surrogate.style.height = (gridHeight * canvas.offsetHeigth) + "px";
-            }
 
             var minCursor = Cursor.min(this.frontCursor, this.backCursor);
             var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
@@ -677,13 +671,18 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
+    if(!(canvasID instanceof HTMLCanvasElement) && options.width && options.height){
+        canvas.style.position = "absolute";
+        canvas.style.width = options.width;
+        canvas.style.height = options.height;
+    }
 
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container", surrogate);
+    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + canvasID, surrogate);
 
     if (!canvas.parentElement) {
-        document.body.appendChild(makeHidingContainer("primrose-container", canvas));
+        document.body.appendChild(makeHidingContainer("primrose-container-" + canvasID, canvas));
     }
 
     canvas.parentElement.insertBefore(surrogateContainer, canvas);
@@ -696,11 +695,11 @@ function Primrose(canvasID, options) {
     this.setCommandSystem(options.commands);
     this.setText(options.file);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector", Themes, theme.name, this, "setTheme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector", Grammar, tokenizer.name, this, "setTokenizer");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector", CodePages, codePage.name, this, "setCodePage");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector", Commands, commandSystem.name, this, "setCommandSystem");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector", OSCommands, operatingSystem.name, this, "setOperatingSystem");
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvasID, Themes, theme.name, this, "setTheme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, this, "setTokenizer");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OSCommands, operatingSystem.name, this, "setOperatingSystem");
 
 
     //////////////////////////////////////////////////////////////////////////
