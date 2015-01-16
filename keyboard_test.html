@@ -22,45 +22,135 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <button id="b" type="button">sort</button><br>
-        <input id="v" type="text"><br>
-        <textarea id="t" cols="80" rows="50"></textarea>
+        <select id="c"></select>
+        <input id="v" type="text" placeholder="code page name">
+        <input id="n" type="text" placeholder="friendly name">
+        <input id="l" type="text" placeholder="language code"><br>
+        <input id="x" type="text" placeholder="type codes here"><br>
+        <div id="t" style="font-family:monospace; font-size:10pt;white-space: pre; column-count: 3;-webkit-column-count: 3;-moz-column-count: 3;"></div>
+        <script type="text/javascript" src="src/core.js"></script>
+        <script type="text/javascript" src="src/Keys.js"></script>
+        <script type="text/javascript" src="src/code_pages/EN_US.js"></script>
+        <script type="text/javascript" src="src/code_pages/EN_UKX.js"></script>
+        <script type="text/javascript" src="src/code_pages/FR_AZERTY.js"></script>
         <script type="text/javascript">
             var t = document.getElementById("t");
-            var b = document.getElementById("b");
             var v = document.getElementById("v");
-            t.addEventListener("keydown", function (evt) {
-                if (evt.keyCode !== 8 
-                        && evt.keyCode !== 16 
-                        && evt.keyCode !== 17 
-                        && evt.keyCode !== 18 
-                        && evt.keyCode !== 91) {
-                    if(t.value.length === 0){
-                        t.value = "CodePages." + v.value + " = {NORMAL: {}, SHIFT: {}};\n";
+            var n = document.getElementById("n");
+            var l = document.getElementById("l");
+            var x = document.getElementById("x");
+
+            var codePage;
+            function setCodePage(cp) {
+                codePage = cp;
+                if (codePage) {
+                    for (var key in CodePages) {
+                        if (CodePages[key].name === codePage.name) {
+                            v.value = key;
+                            n.value = CodePages[key].name;
+                            l.value = CodePages[key].language;
+                            break;
+                        }
                     }
-                    var type = ((evt.ctrlKey && "CTRL" || "")
-                            + (evt.altKey && "ALT" || "")
-                            + (evt.shiftKey && "SHIFT" || "")) || "NORMAL";
-                    t.value += "CodePages." + v.value + "." + type + "[" + evt.keyCode + "] = \"";
                 }
+                else {
+                    codePage = {};
+                    n.value = "";
+                    l.value = "";
+                }
+                drawPage();
+            }
+            setCodePage(CodePages.EN_US);
+            var c = makeSelectorFromObj("c", CodePages, codePage.name, window, "setCodePage");
+
+            v.addEventListener("change", function () {
+                setCodePage(CodePages[v.value]);
             });
             
-            t.addEventListener("keyup", function (evt) {
-                if (evt.keyCode !== 8 
-                        && evt.keyCode !== 16 
-                        && evt.keyCode !== 17 
-                        && evt.keyCode !== 18 
-                        && evt.keyCode !== 85 
+            n.addEventListener("change", function(){
+                codePage = codePage || {};
+                codePage.name = n.value;
+                drawPage();
+            });
+            
+            l.addEventListener("change", function(){
+                codePage = codePage || {};
+                codePage.language = l.value;
+                drawPage();
+            });
+
+            function drawPage() {
+                t.value = "CodePages." + v.value + " = {\n";
+                for (var key in codePage) {
+                    t.value += "    " + key + ": ";
+                    var val = codePage[key];
+                    var typ = typeof (val);
+                    if (typ === "string" || typ === "number") {
+                        t.value += "\"" + val + "\",\n";
+                    }
+                    else {
+                        t.value += "{\n";
+                        for (var name in val) {
+                            console.log(name, val[name]);
+                            var val2 = val[name];
+                            if(val2 instanceof Function){
+                                val2 = val2.toString();
+                            }
+                            else{
+                                val2 = "\"" + val2.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"";
+                            }
+                            t.value += "        \"" + name + "\": " + val2 + ",\n";
+                        }
+                        t.value += "    },\n";
+                    }
+                }
+                t.value += "};";
+                t.textContent = t.value;
+                t.innerText = t.value;
+            }
+            var commandName, code;
+            x.addEventListener("keydown", function (evt) {
+                if (evt.location === 0) {
+                    commandName = "";
+                    if (evt.ctrlKey) {
+                        commandName += "CTRL";
+                    }
+                    if (evt.altKey) {
+                        commandName += "ALT";
+                    }
+                    if (evt.metaKey) {
+                        commandName += "META";
+                    }
+                    if (evt.shiftKey) {
+                        commandName += "SHIFT";
+                    }
+                    if (commandName === "") {
+                        commandName += "NORMAL";
+                    }
+                    code = evt.keyCode;
+                    x.value = "";
+                }
+            });
+
+            x.addEventListener("keyup", function (evt) {
+                if (evt.keyCode !== 8
+                        && evt.keyCode !== 16
+                        && evt.keyCode !== 17
+                        && evt.keyCode !== 18
                         && evt.keyCode !== 91) {
-                    t.value += "\";\n";
+                    if(!codePage[commandName]){
+                        codePage[commandName] = {};
+                    }
+                    codePage[commandName][code] = x.value;
+                    x.value = code;
+                    drawPage();
                 }
-                console.log(evt.keyCode);
             });
             
-            b.addEventListener("click", function(){
-                var lines = t.value.split("\n");
-                lines.sort();
-                t.value = lines.join("\n");
+            window.addEventListener("copy", function(evt){
+                var str = t.textContent || t.innerText;
+                evt.clipboardData.setData("text/plain", str);
+                evt.preventDefault();
             });
         </script>
     </body>

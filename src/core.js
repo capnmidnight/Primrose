@@ -481,10 +481,12 @@ function reloadPage() {
 
 function makeSelectorFromObj(id, obj, def, target, prop) {
     var elem = cascadeElement(id, "select", HTMLSelectElement);
+    var items = [];
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
             var opt = document.createElement("option");
             opt.innerHTML = obj[key].name || key;
+            items.push(obj[key]);
             if (key === def) {
                 opt.selected = "selected";
             }
@@ -493,7 +495,13 @@ function makeSelectorFromObj(id, obj, def, target, prop) {
     }
 
     E(elem, "change", function () {
-        target[prop](obj[this.value]);
+        var item = items[elem.selectedIndex];
+        if(target[prop] instanceof Function){
+            target[prop](item);
+        }
+        else{
+            target[prop] = item;
+        }
     });
     
     return elem;
