@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 CodePages.DE_QWERTZ = {
     name: "Deutsch: QWERTZ",
     language: "de",
-    deadKeys: [220, 221],
+    deadKeys: [220, 221, 160, 192],
     NORMAL: {
+        "0": "ä",
         "32": " ",
         "48": "0",
         "49": "1",
@@ -32,6 +32,8 @@ CodePages.DE_QWERTZ = {
         "55": "7",
         "56": "8",
         "57": "9",
+        "60": "<",
+        "63": "ß",
         "65": "a",
         "66": "b",
         "67": "c",
@@ -58,20 +60,28 @@ CodePages.DE_QWERTZ = {
         "88": "x",
         "89": "y",
         "90": "z",
+        "160": function (prim) {
+            prim.setDeadKeyState("DEAD3");
+        },
+        "163": "#",
+        "171": "+",
+        "173": "-",
         "186": "ü",
         "187": "+",
         "188": ",",
         "189": "-",
         "190": ".",
         "191": "#",
-        "192": "ö",
+        "192": function (prim) {
+            prim.setDeadKeyState("DEAD4");
+        },
         "219": "ß",
         "220": function (prim) {
-prim.setDeadKeyState("DEAD1");
-},
+            prim.setDeadKeyState("DEAD1");
+        },
         "221": function (prim) {
-prim.setDeadKeyState("DEAD2");
-},
+            prim.setDeadKeyState("DEAD2");
+        },
         "222": "ä",
         "226": "<"
     },
@@ -93,6 +103,7 @@ prim.setDeadKeyState("DEAD2");
         "89": "ý"
     },
     SHIFT: {
+        "0": "Ü",
         "32": " ",
         "48": "=",
         "49": "!",
@@ -104,6 +115,8 @@ prim.setDeadKeyState("DEAD2");
         "55": "/",
         "56": "(",
         "57": ")",
+        "60": ">",
+        "63": "?",
         "65": "A",
         "66": "B",
         "67": "C",
@@ -130,6 +143,9 @@ prim.setDeadKeyState("DEAD2");
         "88": "X",
         "89": "Y",
         "90": "Z",
+        "163": "'",
+        "171": "*",
+        "173": "_",
         "186": "Ü",
         "187": "*",
         "188": ";",
@@ -148,14 +164,35 @@ prim.setDeadKeyState("DEAD2");
         "55": "{",
         "56": "[",
         "57": "]",
+        "60": "|",
+        "63": "\\",
         "69": "€",
         "77": "µ",
         "81": "@",
+        "171": "~",
         "187": "~",
         "219": "\\",
         "226": "|"
     },
     CTRLALTSHIFT: {
+        "63": "ẞ",
         "219": "ẞ"
+    },
+    DEAD3NORMAL: {
+        "65": "a",
+        "69": "e",
+        "73": "i",
+        "79": "o",
+        "85": "u",
+        "190": "."
+    },
+    DEAD4NORMAL: {
+        "65": "a",
+        "69": "e",
+        "73": "i",
+        "79": "o",
+        "83": "s",
+        "85": "u",
+        "89": "y"
     }
 };
