@@ -176,7 +176,7 @@ function help(obj) {
     var evnts = [];
     if (obj) {
         for (var field in obj) {
-            if (field.indexOf("on") === 0 && (obj !== navigator || field !== "onLine")) { 
+            if (field.indexOf("on") === 0 && (obj !== navigator || field !== "onLine")) {
                 // `online` is a known element that is not an event, but looks like
                 // an event to the most basic assumption.
                 evnts.push(field.substring(2));
@@ -485,25 +485,28 @@ function makeSelectorFromObj(id, obj, def, target, prop) {
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
             var opt = document.createElement("option");
-            opt.innerHTML = obj[key].name || key;
+            var val = obj[key].name || key;
+            opt.innerHTML = val;
             items.push(obj[key]);
-            if (key === def) {
+            if (val === def) {
                 opt.selected = "selected";
             }
             elem.appendChild(opt);
         }
     }
 
-    E(elem, "change", function () {
-        var item = items[elem.selectedIndex];
-        if(target[prop] instanceof Function){
-            target[prop](item);
-        }
-        else{
-            target[prop] = item;
-        }
-    });
-    
+    if (target[prop] instanceof Function) {
+        E(elem, "change", function () {
+            target[prop](items[elem.selectedIndex]);
+        });
+    }
+    else {
+
+        E(elem, "change", function () {
+            target[prop] = items[elem.selectedIndex];
+        });
+    }
+
     return elem;
 }
 
@@ -618,4 +621,5 @@ function addFullScreenShim() {
     });
 }
 
-document.exitPointerLock = document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () { };
+document.exitPointerLock = document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () {
+};
