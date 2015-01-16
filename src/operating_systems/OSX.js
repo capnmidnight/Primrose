@@ -39,7 +39,7 @@ OSCommands.OSX = {
 
 Keys.makeCursorCommand(OSCommands.OSX, "META", "LEFTARROW", "Home");
 Keys.makeCursorCommand(OSCommands.OSX, "META", "RIGHTARROW", "End");
-Keys.makeCursorCommand(OSCommands.OSX, "META", "LEFTARROW", "FullHome");
-Keys.makeCursorCommand(OSCommands.OSX, "META", "RIGHTARROW", "FullEnd");
+Keys.makeCursorCommand(OSCommands.OSX, "META", "UPARROW", "FullHome");
+Keys.makeCursorCommand(OSCommands.OSX, "META", "DOWNARROW", "FullEnd");
 Keys.makeCursorCommand(OSCommands.OSX, "ALT", "RIGHTARROW", "SkipRight");
 Keys.makeCursorCommand(OSCommands.OSX, "ALT", "LEFTARROW", "SkipLeft");
