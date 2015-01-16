@@ -45,107 +45,77 @@
                     <div id="controls"></div>
                     <canvas id="output" style="width:100%;height:500px;border:dashed 2px red"></canvas>
                     <script type="text/javascript">
-                        var ctrls = findEverything(),
-                                prim = new Primrose("editor", {
-                                    width: "500px",
-                                    height: "250px",
-                                    mouseEventSource: ctrls.output,
-                                    file: "function fib(arity, len) {\n" +
-                                            "    return nacci(nacci([1,1], arity, arity), arity, len);\n" +
-                                            "}\n" +
-                                            " \n" +
-                                            "function lucas(arity, len) {\n" +
-                                            "    return nacci(nacci([2,1], arity, arity), arity, len);\n" +
-                                            "}\n" +
-                                            " \n" +
-                                            "function nacci(a, arity, len) {\n" +
-                                            "    while (a.length < len) {\n" +
-                                            "        var sum = 0;\n" +
-                                            "        for (var i = Math.max(0, a.length - arity); i < a.length; i++)\n" +
-                                            "            sum += a[i];\n" +
-                                            "        a.push(sum);\n" +
-                                            "    }\n" +
-                                            "    return a;\n" +
-                                            "}\n" +
-                                            " \n" +
-                                            "function main() {\n" +
-                                            "    for (var arity = 2; arity <= 10; arity++)\n" +
-                                            "        console.log(\"fib(\" + arity + \"): \" + fib(arity, 15));\n" +
-                                            "    for (var arity = 2; arity <= 10; arity++)\n" +
-                                            "        console.log(\"lucas(\" + arity + \"): \" + lucas(arity, 15));\n" +
-                                            "}\n" +
-                                            " \n" +
-                                            "main();"
-                                }),
-                                gl = ctrls.output.getContext("webgl"),
-                                scene = new THREE.Scene(),
-                                camera = new THREE.PerspectiveCamera(75, ctrls.output.width / ctrls.output.height, 0.1, 1000),
-                                renderer = new THREE.WebGLRenderer({
-                                    canvas: ctrls.output,
-                                    alpha: true,
-                                    antialias: true
-                                }),
-                                geometry = new THREE.BoxGeometry(3, 1.5, 3),
-                                texture = new THREE.Texture(prim.getCanvas()),
-                                material = new THREE.MeshBasicMaterial({
-                                    map: texture,
-                                    transparent: false,
-                                    useScreenCoordinates: false,
-                                    color: 0xffffff,
-                                    shading: THREE.FlatShading}),
-                                cube = new THREE.Mesh(geometry, material),
-                                rotAxis = new THREE.Vector3(0.25, 1, 0.125);
+                        var prim, cube;
+function setup() {
+    var ctrls = findEverything();
+    prim = new Primrose("editor", {
+        width: "750px",
+        height: "375px",
+        mouseEventSource: ctrls.output,
+        file: setup.toString()
+    });
+    var scene = new THREE.Scene(),
+            camera = new THREE.PerspectiveCamera(75, ctrls.output.width / ctrls.output.height, 0.1, 1000),
+            renderer = new THREE.WebGLRenderer({
+                canvas: ctrls.output,
+                alpha: true,
+                antialias: true
+            }),
+            geometry = new THREE.BoxGeometry(3, 1.5, 3),
+            texture = new THREE.Texture(prim.getCanvas()),
+            material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: false,
+                useScreenCoordinates: false,
+                color: 0xffffff,
+                shading: THREE.FlatShading}),
+            rotAxis = new THREE.Vector3(0.25, 1, 0.125);
 
-                        renderer.setSize(ctrls.output.clientWidth, ctrls.output.clientHeight);
-                        texture.anisotropy = renderer.getMaxAnisotropy();
+    cube = new THREE.Mesh(geometry, material);
 
-                        ctrls.controls.appendChild(prim.operatingSystemSelect);
-                        ctrls.controls.appendChild(prim.keyboardSelect);
-                        ctrls.controls.appendChild(prim.themeSelect);
+    renderer.setSize(ctrls.output.clientWidth, ctrls.output.clientHeight);
+    texture.anisotropy = renderer.getMaxAnisotropy();
+
+    ctrls.controls.appendChild(prim.operatingSystemSelect);
+    ctrls.controls.appendChild(prim.keyboardSelect);
+    ctrls.controls.appendChild(prim.themeSelect);
 
 
-                        // the following will be necessary for Three.js r70
-                        //renderer.setPixelRatio(window.devicePixelRatio);
+    // the following will be necessary for Three.js r70
+    //renderer.setPixelRatio(window.devicePixelRatio);
 
-                        scene.add(cube);
-                        camera.position.z = 3;
-                        prim.focus();
-                        function render(t) {
-                            requestAnimationFrame(render);
-                            texture.needsUpdate = true;
-                            cube.quaternion.setFromAxisAngle(rotAxis, t / 10000);
-                            renderer.render(scene, camera);
-                        }
-                        requestAnimationFrame(render);
+    scene.add(cube);
+    camera.position.z = 3;
+    prim.focus();
+    function render(t) {
+        requestAnimationFrame(render);
+        texture.needsUpdate = true;
+        cube.quaternion.setFromAxisAngle(rotAxis, t / 10000);
+        renderer.render(scene, camera);
+    }
+    requestAnimationFrame(render);
+}
+                        setup();
                     </script>  
 
-                    <p>[NOTE: <a href="http://rosettacode.org/wiki/Fibonacci_n-step_number_sequences#JavaScript">Code sample from RosettaCode.org</a>. This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
+                    <p>[NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
                         or not the international keyboard support is correct. But the results so far are promising. Consider contributing!]</p>
 
                     <h2><a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>
 
-                    <p>You and I have a problem. We are writing HTML5 Single-Page Applications, primarily based around the Canvas tag (in my case, WebVR demos) and 
-                        we want to provide an editable text control <em>within</em> the Canvas context. We also want that text control to provide the basic features 
-                        we've come to expect from most modern text editors, e.g. the standard range of keyboard shortcuts and basic syntax highlighting.</p>
+                    <p>I want a syntax highlighting text editor control for use in the Web browser, specifically one that I can easily use in a WebGL context
+                        as a texture on a mesh. Blah blah blah WebVR blah blah blah the virtual desktop blah blah blah. Whatever. I want one.</p>
 
-                    <p>At first, I was tempted to implement syntax highlighting with a Content-Editable Div or IFrame element, layered on top of the Canvas element.
-                        At face value it seems like a good idea: leverage the awesome text formatting power of the browser. Unfortunately, I quickly learned that 
-                        Content-Editable is built with WYSIWYG editing of emails in mind, where the formatting is directly controlled by the user, not by heuristics 
-                        defined by the programmer.</p>
+                    <p>From past experience with Content-Editable elements, I knew there were a lot of cross-browser compatability issues to work out. For those
+                        past projects, I had often opted to use a plain TextArea element, just to avoid the problem. And while a number of third party controls do 
+                        the Content-Editable thing, I hadn't found one that was the right mix of features and ease-of-use for my needs. They usually involve project
+                        configurations that don't mesh well with my own projects, or they are tightly integrated into a larger framework of a full WYSIWYG editor.</p>
 
-                    <p>But it is possible, and a number of third party controls do it [3]. However, I personally haven't yet found such a third party control that was 
-                        the right mix of features and ease-of-use for my needs. They usually involve project configurations that don't mesh well with my own projects, 
-                        or they are tightly integrated into a larger framework of a full WYSIWYG editor.</p>
+                    <p>Additionally, all solutions involving overlaying an HTML element do not composite well with the graphics context. This works fine in 2D, where 
+                        elements are built in layers, but in 3D with WebGL, the HTML Element is not a part the scene and does not work with the depth buffering. 
+                        The text will always be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene.</p>
 
-                    <p>I had also considered skipping the syntax highlighting altogether, going with a regular, ol' TextArea element instead. Or even if I were to 
-                        acquire a working Content-Editable solution[4], there was a second problem. All solutions involving overlaying an HTML element do not 
-                        composite well with the graphics context. This works fine in 2D, where elements are built in layers, but in 3D with WebGL, the HTML Element 
-                        is not be a part the scene and does not work with the depth buffering. The text will always be a 2D element masquerading in a 3D world, 
-                        never overlapping properly with other objects in the scene.</p>
-
-                    <p>There is also an annoying procedural problem of having to duplicate all of the world and camera transformations from the WebGL context to 
-                        CSS3 3D transforms[5]. With the stereo rendering I'm doing for WebVR demos, keeping a secondary HTML element in sync with the edits made 
-                        in a primary element turns into a lot of work.</p>
+                    <p>So, I started 2015 with the goal of fixing it.</p>
 
                     <h2><a id="a-solution" class="anchor" href="#a-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Solution</h2>
 
@@ -170,27 +140,6 @@
                     <p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email
                         address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request. This will serve as your copyright assignment.</p>
 
-                    <h2>
-                        <a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>
-
-                    <ol>
-                        <li>The name is arbitrary.</li>
-
-                        <li>"Lightweight" in the context of GUI controls means "rendered in software", as opposed to "using the native GUI controls provided by 
-                            the operating system". In this context, we're considering the browser to be a part of the "operating system", as from the perspective of 
-                            a SPA, it is.</li>
-
-                        <li>It requires only that your browser implement Canvas and the Graphics2D context in their most common, basic forms. I am not aware of
-                            any commonly-used browsers that have not had this feature for several years now.</li>
-
-                        <li>And thankfully have solved a plethora of browser compatability issues along the way. Luckily, rendering from scratch side-steps a 
-                            lot of those problems.</li>
-
-                        <li>Or another, obscure solution involving rendering HTML elements in SVG that has a bevy of its own issues involving cross-browser 
-                            compatibility and security issues.</li>
-
-                        <li>Violating the DRY principle, and fraught with cross-browser peril.</li>
-                    </ol>
                 </section>
 
                 <aside id="sidebar">
