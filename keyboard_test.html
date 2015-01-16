@@ -27,12 +27,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <input id="n" type="text" placeholder="friendly name">
         <input id="l" type="text" placeholder="language code"><br>
         <input id="x" type="text" placeholder="type codes here"><br>
-        <div id="t" style="font-family:monospace; font-size:10pt;white-space: pre; column-count: 3;-webkit-column-count: 3;-moz-column-count: 3;"></div>
+        <div id="t" style="font-family:monospace; font-size:10pt;white-space: pre; column-count: 7;-webkit-column-count: 7;-moz-column-count: 7;"></div>
         <script type="text/javascript" src="src/core.js"></script>
         <script type="text/javascript" src="src/Keys.js"></script>
         <script type="text/javascript" src="src/code_pages/EN_US.js"></script>
         <script type="text/javascript" src="src/code_pages/EN_UKX.js"></script>
         <script type="text/javascript" src="src/code_pages/FR_AZERTY.js"></script>
+        <script type="text/javascript" src="src/code_pages/DE_QWERTZ.js"></script>
         <script type="text/javascript">
             var t = document.getElementById("t");
             var v = document.getElementById("v");
@@ -88,18 +89,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     if (typ === "string" || typ === "number") {
                         t.value += "\"" + val + "\",\n";
                     }
+                    else if(val instanceof Array){
+                        t.value +=  "[" + val.join(", ") + "],\n";
+                    }
                     else {
                         t.value += "{\n";
                         for (var name in val) {
-                            console.log(name, val[name]);
+                            t.value += "        \"" + name + "\": ";
                             var val2 = val[name];
                             if(val2 instanceof Function){
-                                val2 = val2.toString();
+                                val2 = val2.toString().replace("anonymous", "").replace(/\n\/\*\*\//, "");
                             }
-                            else{
+                            else if(typeof(val2) === "string"){
                                 val2 = "\"" + val2.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"";
                             }
-                            t.value += "        \"" + name + "\": " + val2 + ",\n";
+                            else{
+                                val2 = val2.toString();
+                            }
+                            t.value += val2 + ",\n";
                         }
                         t.value += "    },\n";
                     }
@@ -108,7 +115,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 t.textContent = t.value;
                 t.innerText = t.value;
             }
-            var commandName, code;
+            var commandName, code, deadKey = "";
             x.addEventListener("keydown", function (evt) {
                 if (evt.location === 0) {
                     commandName = "";
@@ -127,6 +134,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     if (commandName === "") {
                         commandName += "NORMAL";
                     }
+                    if(codePage.deadKeys){
+                        var dk = codePage.deadKeys.indexOf(code);
+                        if(dk > -1){
+                            deadKey = "DEAD" + (dk + 1);
+                        }
+                    }
                     code = evt.keyCode;
                     x.value = "";
                 }
@@ -138,11 +151,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         && evt.keyCode !== 17
                         && evt.keyCode !== 18
                         && evt.keyCode !== 91) {
+                    commandName = deadKey + commandName;
                     if(!codePage[commandName]){
                         codePage[commandName] = {};
                     }
-                    codePage[commandName][code] = x.value;
-                    x.value = code;
+                    if(x.value.length > 0){
+                        codePage[commandName][code] = x.value;
+                        deadKey = "";
+                    }
+                    else{
+                        if(!codePage.deadKeys){
+                            codePage.deadKeys = [];
+                        }
+                        var dk = codePage.deadKeys.indexOf(code);
+                        if(dk === -1){
+                            dk = codePage.deadKeys.length;
+                            codePage.deadKeys.push(code);
+                        }
+                        ++dk;
+                        codePage[commandName][code] = new Function("prim", "prim.setDeadKeyState(\"DEAD" + dk + "\");");
+                    }
+                    x.value = commandName + " " + code + " " + x.value;
                     drawPage();
                 }
             });
