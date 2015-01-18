@@ -105,3 +105,10 @@ var Keys = {
         Keys.setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
     }
 };
+
+for(var key in Keys){
+    var val = Keys[key];
+    if(Keys.hasOwnProperty(key) && typeof(val) === "number"){
+        Keys[val] = key;
+    }
+}

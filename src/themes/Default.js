@@ -21,6 +21,7 @@ Themes.DEFAULT = {
     cursorColor: "black",
     fontSize: 14,
     regular: {
+        backColor: "white",
         foreColor: "black",
         selectedBackColor: "#c0c0c0",
         selectedForeColor: "#000000"

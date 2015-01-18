@@ -2,13 +2,204 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
         <title>Primrose: Canvas-based text editor</title>
         <link type="text/css" href="css/main.css" rel="stylesheet">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
         <script type="text/javascript" src="dist/Primrose.min.js"></script>
-        <script type="text/javascript" src="test/demo.js"></script>
+        <script type="text/javascript">
+function PrimroseDemo(w, h) {
+    var ctrls = findEverything(),
+            lt = 0,
+            lastMouseX,
+            lastTouchX,
+            lastTouchY,
+            touchSpeed = 0,
+            SPEED = 0.002,
+            heading = 0,
+            keyState = {},
+            prim = new Primrose("editor", {
+                width: w + "px",
+                height: h + "px",
+                pointerEventSource: ctrls.output,
+                file: PrimroseDemo.toString()
+            }),
+            scene = new THREE.Scene(),
+            camera = new THREE.PerspectiveCamera(75, ctrls.output.width / ctrls.output.height, 0.1, 1000),
+            renderer = new THREE.WebGLRenderer({
+                canvas: ctrls.output,
+                alpha: true
+            }),
+            floor = texturedBox(25, 1, 25, 25, 25, "test/deck.png"),
+            editor = texturedBox(5, 5, 5, 1, 1, prim);
+
+    ctrls.controls.appendChild(prim.operatingSystemSelect);
+    ctrls.controls.appendChild(prim.keyboardSelect);
+    ctrls.controls.appendChild(prim.themeSelect);
+    
+    ctrls.forwardKey.value = "W";
+    ctrls.forwardKey.dataset.keycode = 87;
+    ctrls.leftKey.value = "A";
+    ctrls.leftKey.dataset.keycode = 65;
+    ctrls.backKey.value = "S";
+    ctrls.backKey.dataset.keycode = 83;
+    ctrls.rightKey.value = "D";
+    ctrls.rightKey.dataset.keycode = 68;
+    
+    setupKeyOption(ctrls.leftKey);
+    setupKeyOption(ctrls.rightKey);
+    setupKeyOption(ctrls.forwardKey);
+    setupKeyOption(ctrls.backKey);
+
+    prim.placeSurrogateUnder(ctrls.output);
+
+    window.addEventListener("resize", refreshSize);
+    window.addEventListener("keydown", keyDown);
+    window.addEventListener("keyup", keyUp);
+    window.addEventListener("mousemove", mouseMove);
+    window.addEventListener("touchstart", touchStart);
+    window.addEventListener("touchmove", touchMove);
+    window.addEventListener("touchend", touchEnd);
+    refreshSize();
+
+    editor.position.y = 0;
+    floor.position.y = -3;
+    camera.position.z = 5;
+    scene.add(floor);
+    scene.add(editor);
+    requestAnimationFrame(render);
+
+    function refreshSize() {
+        var w = ctrls.outputContainer.clientWidth,
+                h = ctrls.outputContainer.clientHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    }
+
+    function keyDown(evt) {
+        if (!prim.isFocused()) {
+            keyState[evt.keyCode] = true;
+        }
+    }
+
+    function keyUp(evt) {
+        keyState[evt.keyCode] = false;
+    }
+
+    function mouseMove(evt) {
+        if (!prim.isFocused()) {
+            var x = evt.clientX;
+            if(lastMouseX){
+                heading -= (x - lastMouseX) * 0.001;
+            }
+            lastMouseX = x;
+        }
+    }
+
+    function touchStart(evt) {
+        if (!prim.isFocused()) {
+            lastTouchX = evt.touches[0].clientX;
+            lastTouchY = evt.touches[0].clientY;
+        }
+    }
+
+    function touchMove(evt) {
+        if (!prim.isFocused()) {
+            var x = evt.touches[0].clientX, y = evt.touches[0].clientY;
+            heading += (x - lastTouchX) * 0.005;
+            touchSpeed = y - lastTouchY;
+            lastTouchX = x;
+            lastTouchY = y;
+        }
+    }
+    
+    function touchEnd(evt){
+        if(!prim.isFocused()){
+            touchSpeed = 0;
+        }
+    }
+
+    function update(dt) {
+        if (keyState[ctrls.forwardKey.dataset.keycode]) {
+            camera.position.z -= SPEED * dt;
+            camera.position.x -= SPEED * Math.sin(heading) * dt;
+        }
+        else if (keyState[ctrls.backKey.dataset.keycode]) {
+            camera.position.z += SPEED * Math.cos(heading) * dt;
+            camera.position.x += SPEED * Math.sin(heading) * dt;
+        }
+        if (keyState[ctrls.leftKey.dataset.keycode]) {
+            camera.position.x -= SPEED * Math.cos(heading) * dt;
+            camera.position.z += SPEED * Math.sin(heading) * dt;
+        }
+        else if (keyState[ctrls.rightKey.dataset.keycode]) {
+            camera.position.x += SPEED * Math.cos(heading) * dt;
+            camera.position.z -= SPEED * Math.sin(heading) * dt;
+        }
+        camera.position.z -= SPEED * touchSpeed * dt;
+        camera.position.x -= SPEED * touchSpeed * Math.sin(heading) * dt;
+        camera.quaternion.setFromAxisAngle(camera.up, heading);
+    }
+
+    function render(t) {
+        requestAnimationFrame(render);
+        if (lt) {
+            update(t - lt);
+        }
+        renderer.render(scene, camera);
+        lt = t;
+    }
+
+    function texturedBox(w, h, l, s, t, txt) {
+        var geometry = new THREE.BoxGeometry(w, h, l),
+                texture;
+
+        if (typeof (txt) === "string") {
+            texture = THREE.ImageUtils.loadTexture(txt);
+            texture.anisotropy = renderer.getMaxAnisotropy();
+        }
+        else if (txt instanceof Primrose) {
+            texture = txt.getTexture(renderer.getMaxAnisotropy());
+        }
+
+        if (s * t > 1) {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(s, t);
+        }
+
+        var material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            useScreenCoordinates: false,
+            color: 0xffffff,
+            shading: THREE.FlatShading
+        });
+
+        var obj = new THREE.Mesh(geometry, material);
+        return obj;
+    }
+
+    function clearKeyOption(evt) {
+        this.value = "";
+        this.dataset.keycode = "";
+    }
+
+    function setKeyOption(evt) {
+        this.dataset.keycode = evt.keyCode;
+        this.value = this.value || Keys[evt.keyCode];
+        this.value = this.value.toUpperCase();
+        this.blur();
+    }
+
+    function setupKeyOption(elem) {
+        elem.addEventListener("keydown", clearKeyOption);
+        elem.addEventListener("keyup", setKeyOption);
+    }
+}
+        </script>
     </head>
-    <body onload="PrimroseDemo(1000, 500)">
+    <body onload="PrimroseDemo(1024, 1024)">
         <div id="outputContainer">
             <canvas id="output"></canvas>
         </div>
@@ -16,7 +207,7 @@
             <div id="haderp">
                 <div>
                     <h1><img src="favicon.png" alt="logo" title="Primrose logo">&nbsp;Primrose</h1>
-                    <a id="github" href="https://github.com/capnmidnight/VR" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+                    <a id="github" href="https://github.com/capnmidnight/Primrose" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
                     <p>Primrose is a cross-browser, syntax-highlighting code editor control for use in WebGL applications.</p>
                     <p><a href="" class="primary button">Buy License<br><small>Use Primrose in closed-source projects.</small></a></p>
                     <p><a href="" class="primary button">Buy Support<br><small>Get help with your projects.</small></a></p>
@@ -36,8 +227,16 @@
             <div id="instructions">
                 <div>
                     <h2>Try Primrose now!</h2>
-                    <p>A live-demo of Primrose is running on the left. Use keyboard controls to edit the text. Use the following controls to change its behavior.</p>
-                    <div id="controls"></div>
+                    <p>A live-demo of Primrose is running on the left. Click on the scene and use keyboard controls to edit the text. Hit ESC and use the mouse and keyboard to navigate.Use the following controls to change its behavior.</p>
+                    <div id="controls">
+                        <h3>Controls:</h3>
+                        <em>(To change setting, select a text box and tap the desired key)</em><br>
+                        <input type="text" id="forwardKey" size="10"><label for="forwardKey"> - forward key </label><br>
+                        <input type="text" id="leftKey" size="10"><label for="leftKey"> - left key</label><br>
+                        <input type="text" id="backKey" size="10"><label for="backKey"> - back key</label><br>
+                        <input type="text" id="rightKey" size="10"><label for="rightKey"> - right key</label><br>
+                        <h3>Other:</h3>
+                    </div>
                 </div>
                 <a class="minify-button">collapse</a>
             </div>

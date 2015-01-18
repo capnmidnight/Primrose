@@ -40,6 +40,7 @@ function Primrose(canvasID, options) {
             tabWidth,
             tabString,
             currentTouchID,
+            texture,
             deadKeyState = "",
             commandState = "",
             keyNames = [],
@@ -86,7 +87,7 @@ function Primrose(canvasID, options) {
 
     function minDelta(v, minV, maxV) {
         var dvMinV = v - minV;
-        var dvMaxV = v - maxV + 1;
+        var dvMaxV = v - maxV + 5;
         var dv = 0;
         if (!(dvMinV >= 0 && dvMaxV < 0)) {
             // compare the absolute values, so we get the smallest change regardless
@@ -139,12 +140,14 @@ function Primrose(canvasID, options) {
     }
 
     function readWheel(evt) {
-        this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
-        if (this.scrollTop < 0) {
-            this.scrollTop = 0;
+        if (focused) {
+            this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
+            if (this.scrollTop < 0) {
+                this.scrollTop = 0;
+            }
+            evt.preventDefault();
+            this.drawText();
         }
-        evt.preventDefault();
-        this.drawText();
     }
 
     function startPointer(x, y) {
@@ -271,6 +274,15 @@ function Primrose(canvasID, options) {
 
     this.getCanvas = function () {
         return canvas;
+    };
+
+    this.getTexture = function (anisotropy) {
+        if (!texture) {
+            texture = new THREE.Texture(canvas);
+            texture.anisotropy = anisotropy || 8;
+            texture.needsUpdate = true;
+        }
+        return texture;
     };
 
     this.setTheme = function (t) {
@@ -629,7 +641,7 @@ function Primrose(canvasID, options) {
                             gfx.fillRect(
                                     (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                     (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
-                                    cw * this.characterWidth,
+                                    cw * this.characterWidth + 1,
                                     this.characterHeight + 1);
                         }
 
@@ -715,6 +727,10 @@ function Primrose(canvasID, options) {
                     gridHeight * this.characterHeight,
                     scrollBarWidth,
                     this.characterWidth);
+
+            if (texture) {
+                texture.needsUpdate = true;
+            }
         }
     };
 

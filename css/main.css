@@ -8,7 +8,7 @@ html, body{
 
 body{
     background-color: #eee;
-    background-image: url(../img/bg.jpg);
+    background-image: url(../img/bg2.jpg);
     font-family: sans-serif;
 }
 
@@ -48,7 +48,7 @@ body{
 }
 
 #outputContainer, #output{ 
-    position: absolute;
+    position: fixed;
     box-sizing: border-box;
     top:0;
     height: 100%;
