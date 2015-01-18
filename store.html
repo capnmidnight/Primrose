@@ -57,9 +57,9 @@ function PrimroseDemo(w, h) {
     window.addEventListener("keydown", keyDown);
     window.addEventListener("keyup", keyUp);
     window.addEventListener("mousemove", mouseMove);
-    window.addEventListener("touchstart", touchStart);
-    window.addEventListener("touchmove", touchMove);
-    window.addEventListener("touchend", touchEnd);
+    ctrls.output.addEventListener("touchstart", touchStart);
+    ctrls.output.addEventListener("touchmove", touchMove);
+    ctrls.output.addEventListener("touchend", touchEnd);
     refreshSize();
 
     editor.position.y = 0;
