@@ -15,23 +15,31 @@
         <section id="description">
             <div id="haderp">
                 <div>
-                    <h1><img src="favicon.png" alt="logo">&nbsp;Primrose</h1>
-                    <a id="github" href="https://github.com/capnmidnight/VR"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+                    <h1><img src="favicon.png" alt="logo" title="Primrose logo">&nbsp;Primrose</h1>
+                    <a id="github" href="https://github.com/capnmidnight/VR" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
                     <p>Primrose is a cross-browser, syntax-highlighting code editor control for use in WebGL applications.</p>
-                    <p><a href="" class="primary enabled button">Buy License<br><small>Use Primrose in closed-source projects.</small></a></p>
-                    <p><a href="" class="primary enabled button">Buy Support<br><small>Get help with your projects.</small></a></p>
-                    <p><a href="dist/Primrose.min.js" class="secondary enabled button">Use for Free<br><small>34.8KB minified, free for open-source projects.</small></a></p>
+                    <p><a href="" class="primary button">Buy License<br><small>Use Primrose in closed-source projects.</small></a></p>
+                    <p><a href="" class="primary button">Buy Support<br><small>Get help with your projects.</small></a></p>
+                    <p><a href="dist/Primrose.min.js" class="secondary button">Use for Free<br><small>34.8KB minified, free for open-source projects.</small></a></p>
+                    <div style="text-align: center">
+                        <a href="https://www.seanmcbeth.com" target="_blank"><img src="stm.png" alt="logo" title="Sean T. McBeth" style="height:32px"></a>
+                        <a href="https://github.com/capnmidnight" target="_blank"><img src="github.png" alt="logo" title="GitHub profile" style="height:32px"></a>
+                        <a href="https://github.com/voodootikigod/logo.js" target="_blank"><img src="js.png" alt="logo" title="JavaScript" style="height:32px"></a>
+                        <a href="http://www.w3.org/html/" target="_blank"><img src="html5.png" alt="logo" title="HTML5"></a>
+                        <a href="http://www.gnu.org/licenses/gpl.html" target="_blank"><img src="gplv3.png" alt="logo" title="GPLv3"></a><br>
+                        <small>Copyright <a href="https://www.seanmcbeth.com">Sean T. McBeth</a>, 2015.</small>
+                    </div>
                 </div>
-                <a class="minify-button"></a>
+                <a class="minify-button">collapse</a>
             </div>
 
             <div id="instructions">
                 <div>
                     <h2>Try Primrose now!</h2>
-                    <p>The rotating cube on the left is a live-demo of Primrose. Use keyboard controls to edit the text. Use the following controls to change its behavior.</p>
+                    <p>A live-demo of Primrose is running on the left. Use keyboard controls to edit the text. Use the following controls to change its behavior.</p>
                     <div id="controls"></div>
                 </div>
-                <a class="minify-button"></a>
+                <a class="minify-button">collapse</a>
             </div>
         </section>
         <script>
@@ -40,6 +48,7 @@
                 mins[i].addEventListener("click", function () {
                     this.parentElement.children[0].style.display = this.collapsed ? "" : "none";
                     this.parentElement.style.padding = this.collapsed ? "3em" : "1em";
+                    this.innerHTML = this.collapsed ? "collapse" : "expand";
                     this.collapsed = !this.collapsed;
                 });
             }

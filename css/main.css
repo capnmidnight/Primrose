@@ -37,10 +37,12 @@ body{
     display:block;
     right: 0;
     bottom: 0;
-    width: 25px;
-    height: 25px;
-    border-top-left-radius: 12px;
-    background-color: #c0c0c0;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 75%;
+    color: white;
+    border-top-left-radius: 10px;
+    background-color: #bbb;
     text-align: center;
     vertical-align: middle;
 }
