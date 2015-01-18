@@ -21,6 +21,9 @@
 // If SHIFT is held, then "back"
 Commands.DEFAULT = {
     name: "Basic commands",
+    NORMAL_ESCAPE: function (prim, lines) {
+        prim.blur();
+    },
     CTRL_DOWNARROW: function (prim, lines) {
         if (prim.scrollTop < lines.length) {
             ++prim.scrollTop;

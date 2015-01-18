@@ -13,14 +13,16 @@ function PrimroseDemo(w, h) {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
     }
-    
+
     function render(t) {
         requestAnimationFrame(render);
+        if (lt && !prim.isFocused()) {
+        }
         texture.needsUpdate = true;
-        cube.quaternion.setFromAxisAngle(rotAxis, t / 10000);
         renderer.render(scene, camera);
+        lt = t;
     }
-    
+
     var ctrls = findEverything(),
             prim = new Primrose("editor", {
                 width: w + "px",
@@ -43,25 +45,25 @@ function PrimroseDemo(w, h) {
                 useScreenCoordinates: false,
                 color: 0xffffff,
                 shading: THREE.FlatShading}),
-            rotAxis = new THREE.Vector3(0.25, 1, 0.125);
+            cube = new THREE.Mesh(geometry, material),
+            lt = 0;
 
     texture.anisotropy = renderer.getMaxAnisotropy();
-    cube = new THREE.Mesh(geometry, material);
-    
+
     ctrls.controls.appendChild(prim.operatingSystemSelect);
     ctrls.controls.appendChild(prim.keyboardSelect);
     ctrls.controls.appendChild(prim.themeSelect);
 
     prim.placeSurrogateUnder(ctrls.output);
-    
+
     window.addEventListener("resize", refreshSize);
     refreshSize();
 
     // the following will be necessary for Three.js r70
     //renderer.setPixelRatio(window.devicePixelRatio);
 
-    scene.add(cube);
     camera.position.z = 3;
+    scene.add(cube);
     prim.focus();
     requestAnimationFrame(render);
 }

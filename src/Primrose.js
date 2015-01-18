@@ -154,45 +154,47 @@ function Primrose(canvasID, options) {
         dragging = true;
         this.drawText();
     }
-    
-    function movePointer(x, y){
+
+    function movePointer(x, y) {
         if (dragging) {
             var bounds = pointerEventSource.getBoundingClientRect();
             setCursorXY.call(this, this.backCursor, x - bounds.left, y - bounds.top);
             this.drawText();
-        }        
+        }
     }
 
     function mouseButtonDown(evt) {
-        if (evt.button === 0) {
+        if (focused && evt.button === 0) {
             startPointer.call(this, evt.clientX, evt.clientY);
             evt.preventDefault();
         }
     }
 
     function mouseMove(evt) {
-        movePointer.call(this, evt.clientX, evt.clientY);
+        if (focused) {
+            movePointer.call(this, evt.clientX, evt.clientY);
+        }
     }
 
     function mouseButtonUp(evt) {
-        if (evt.button === 0) {
+        if (focused && evt.button === 0) {
             dragging = false;
         }
+        surrogate.focus();
     }
 
     function touchStart(evt) {
-        if (evt.touches.length > 0 && !dragging) {
+        if (focused && evt.touches.length > 0 && !dragging) {
             var t = evt.touches[0];
             startPointer.call(this, t.clientX, t.clientY);
             currentTouchID = t.identifier;
-            evt.preventDefault();
         }
     }
-    
-    function touchMove(evt){
-        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
+
+    function touchMove(evt) {
+        for (var i = 0; i < evt.changedTouches.length && dragging; ++i) {
             var t = evt.changedTouches[i];
-            if(t.identifier === currentTouchID){
+            if (t.identifier === currentTouchID) {
                 movePointer.call(this, t.clientX, t.clientY);
                 break;
             }
@@ -200,9 +202,9 @@ function Primrose(canvasID, options) {
     }
 
     function touchEnd(evt) {
-        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
+        for (var i = 0; i < evt.changedTouches.length && dragging; ++i) {
             var t = evt.changedTouches[i];
-            if(t.identifier === currentTouchID){
+            if (t.identifier === currentTouchID) {
                 dragging = false;
             }
         }
@@ -257,6 +259,14 @@ function Primrose(canvasID, options) {
 
     this.focus = function () {
         surrogate.focus();
+    };
+
+    this.blur = function () {
+        surrogate.blur();
+    };
+
+    this.isFocused = function () {
+        return focused;
     };
 
     this.getCanvas = function () {
@@ -620,7 +630,7 @@ function Primrose(canvasID, options) {
                                     (selectionFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                     (selectionFront.y - this.scrollTop + 0.2) * this.characterHeight,
                                     cw * this.characterWidth,
-                                    this.characterHeight);
+                                    this.characterHeight + 1);
                         }
 
                         // draw the text
