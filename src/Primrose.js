@@ -222,8 +222,8 @@ function Primrose(canvasID, options) {
     this.focus = function () {
         surrogate.focus();
     };
-    
-    this.getCanvas = function(){
+
+    this.getCanvas = function () {
         return canvas;
     };
 
@@ -464,14 +464,18 @@ function Primrose(canvasID, options) {
         this.deleteSelection();
         this.drawText();
     };
-    
-    this.placeSurrogateUnder = function(elem){
+
+    this.placeSurrogateUnder = function (elem) {
         if (surrogate && elem) {
-            var bounds = elem.getBoundingClientRect();
-            surrogate.style.left = bounds.left + "px";
-            surrogate.style.top = window.scrollY + bounds.top + "px";
-            surrogate.style.width = (bounds.right - bounds.left) + "px";
-            surrogate.style.height = (bounds.bottom - bounds.top) + "px";
+            // wait a brief amount of time to make sure the browser rendering 
+            // engine had time to catch up
+            setTimeout(function () {
+                var bounds = elem.getBoundingClientRect();
+                surrogate.style.left = bounds.left + "px";
+                surrogate.style.top = window.scrollY + bounds.top + "px";
+                surrogate.style.width = (bounds.right - bounds.left) + "px";
+                surrogate.style.height = (bounds.bottom - bounds.top) + "px";
+            }, 250);
         }
     };
 
@@ -672,7 +676,7 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
-    if(!(canvasID instanceof HTMLCanvasElement) && options.width && options.height){
+    if (!(canvasID instanceof HTMLCanvasElement) && options.width && options.height) {
         canvas.style.position = "absolute";
         canvas.style.width = options.width;
         canvas.style.height = options.height;
@@ -701,7 +705,7 @@ function Primrose(canvasID, options) {
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage", "localization");
     this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem", "sommand system");
     this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OSCommands, operatingSystem.name, this, "setOperatingSystem", "shortcut style");
-    
+
 
     //////////////////////////////////////////////////////////////////////////
     // wire up event handlers
