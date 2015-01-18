@@ -39,6 +39,7 @@ function Primrose(canvasID, options) {
             gridHeight,
             tabWidth,
             tabString,
+            currentTouchID,
             deadKeyState = "",
             commandState = "",
             keyNames = [],
@@ -55,7 +56,7 @@ function Primrose(canvasID, options) {
             surrogateContainer,
             keyEventSource = options.keyEventSource || surrogate,
             clipboardEventSource = options.clipboardEventSource || surrogate,
-            mouseEventSource = options.mouseEventSource || canvas;
+            pointerEventSource = options.pointerEventSource || canvas;
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -118,7 +119,7 @@ function Primrose(canvasID, options) {
         }
     }
 
-    function measureText() {
+    function measureText(evt) {
         var r = this.getPixelRatio();
         this.characterHeight = theme.fontSize * r;
         canvas.width = canvas.clientWidth * r;
@@ -131,9 +132,9 @@ function Primrose(canvasID, options) {
         this.drawText();
     }
 
-    function setCursorXY(cursor, evt) {
+    function setCursorXY(cursor, x, y) {
         var lines = this.getLines();
-        var cell = this.pixel2cell(evt.layerX, evt.layerY);
+        var cell = this.pixel2cell(x, y);
         cursor.setXY(cell.x, cell.y, lines);
     }
 
@@ -146,12 +147,28 @@ function Primrose(canvasID, options) {
         this.drawText();
     }
 
+    function startPointer(x, y) {
+        var bounds = pointerEventSource.getBoundingClientRect();
+        setCursorXY.call(this, this.frontCursor, x - bounds.left, y - bounds.top);
+        this.backCursor.copy(this.frontCursor);
+        dragging = true;
+        this.drawText();
+    }
+
     function mouseButtonDown(evt) {
+        console.log(evt);
         if (evt.button === 0) {
-            setCursorXY.call(this, this.frontCursor, evt);
-            this.backCursor.copy(this.frontCursor);
-            dragging = true;
-            this.drawText();
+            startPointer.call(this, evt.clientX, evt.clientY);
+            evt.preventDefault();
+        }
+    }
+
+    function touchStart(evt) {
+        if (evt.touches.length > 0 && !dragging) {
+            var t = evt.touches[0];
+            startPointer.call(this, t.clientX, t.clientY);
+            currentTouchID = t.identifier;
+            evt.preventDefault();
         }
     }
 
@@ -159,17 +176,37 @@ function Primrose(canvasID, options) {
         if (evt.button === 0) {
             dragging = false;
         }
-        surrogate.focus();
+    }
+
+    function touchEnd(evt) {
+        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
+            var t = evt.changedTouches[i];
+            if(t.identifier === currentTouchID){
+                dragging = false;
+            }
+        }
+    }
+    
+    function movePointer(x, y){
+        if (dragging) {
+            var bounds = pointerEventSource.getBoundingClientRect();
+            setCursorXY.call(this, this.backCursor, x - bounds.left, y - bounds.top);
+            this.drawText();
+        }        
     }
 
     function mouseMove(evt) {
-        if (dragging) {
-            setCursorXY.call(this, this.backCursor, evt);
-            this.drawText();
-        }
+        movePointer.call(this, evt.clientX, evt.clientY);
     }
-
-    function releaseKey(evt) {
+    
+    function touchMove(evt){
+        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
+            var t = evt.changedTouches[i];
+            if(t.identifier === currentTouchID){
+                movePointer.call(this, t.clientX, t.clientY);
+                break;
+            }
+        }
     }
 
     function addCommandPack(cmd) {
@@ -717,14 +754,16 @@ function Primrose(canvasID, options) {
     surrogate.addEventListener("blur", onBlur.bind(this));
 
     keyEventSource.addEventListener("keydown", this.editText.bind(this));
-    keyEventSource.addEventListener("keyup", releaseKey.bind(this));
 
     clipboardEventSource.addEventListener("copy", this.copySelectedText.bind(this));
     clipboardEventSource.addEventListener("cut", this.cutSelectedText.bind(this));
     clipboardEventSource.addEventListener("paste", readClipboard.bind(this));
 
-    mouseEventSource.addEventListener("wheel", readWheel.bind(this));
-    mouseEventSource.addEventListener("mousedown", mouseButtonDown.bind(this));
-    mouseEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
-    mouseEventSource.addEventListener("mousemove", mouseMove.bind(this));
+    pointerEventSource.addEventListener("wheel", readWheel.bind(this));
+    pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this));
+    pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
+    pointerEventSource.addEventListener("mousemove", mouseMove.bind(this));
+    pointerEventSource.addEventListener("touchstart", touchStart.bind(this));
+    pointerEventSource.addEventListener("touchend", touchEnd.bind(this));
+    pointerEventSource.addEventListener("touchmove", touchMove.bind(this));
 }

@@ -25,7 +25,7 @@ function PrimroseDemo(w, h) {
             prim = new Primrose("editor", {
                 width: w + "px",
                 height: h + "px",
-                mouseEventSource: ctrls.output,
+                pointerEventSource: ctrls.output,
                 file: PrimroseDemo.toString()
             }),
             scene = new THREE.Scene(),
