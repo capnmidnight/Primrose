@@ -37,6 +37,8 @@ function PrimroseDemo(w, h) {
     ctrls.controls.appendChild(prim.operatingSystemSelect);
     ctrls.controls.appendChild(prim.keyboardSelect);
     ctrls.controls.appendChild(prim.themeSelect);
+    
+    prim.placeSurrogateUnder(ctrls.output);
 
 
     // the following will be necessary for Three.js r70

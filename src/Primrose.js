@@ -465,12 +465,13 @@ function Primrose(canvasID, options) {
         this.drawText();
     };
     
-    this.setSurrogateRectangle = function(x, y, w, h){
-        if (surrogate) {
-            surrogate.style.left = x + "px";
-            surrogate.style.top = y + "px";
-            surrogate.style.width = w + "px";
-            surrogate.style.height = h + "px";
+    this.placeSurrogateUnder = function(elem){
+        if (surrogate && elem) {
+            var bounds = elem.getBoundingClientRect();
+            surrogate.style.left = bounds.left + "px";
+            surrogate.style.top = window.scrollY + bounds.top + "px";
+            surrogate.style.width = (bounds.right - bounds.left) + "px";
+            surrogate.style.height = (bounds.bottom - bounds.top) + "px";
         }
     };
 
@@ -685,7 +686,7 @@ function Primrose(canvasID, options) {
         document.body.appendChild(makeHidingContainer("primrose-container-" + canvasID, canvas));
     }
 
-    canvas.parentElement.insertBefore(surrogateContainer, canvas);
+    document.body.appendChild(surrogateContainer);
 
     this.setTabWidth(options.tabWidth);
     this.setTheme(options.theme);
