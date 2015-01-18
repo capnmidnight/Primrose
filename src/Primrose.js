@@ -119,7 +119,7 @@ function Primrose(canvasID, options) {
         }
     }
 
-    function measureText(evt) {
+    function measureText() {
         var r = this.getPixelRatio();
         this.characterHeight = theme.fontSize * r;
         canvas.width = canvas.clientWidth * r;
@@ -154,12 +154,29 @@ function Primrose(canvasID, options) {
         dragging = true;
         this.drawText();
     }
+    
+    function movePointer(x, y){
+        if (dragging) {
+            var bounds = pointerEventSource.getBoundingClientRect();
+            setCursorXY.call(this, this.backCursor, x - bounds.left, y - bounds.top);
+            this.drawText();
+        }        
+    }
 
     function mouseButtonDown(evt) {
-        console.log(evt);
         if (evt.button === 0) {
             startPointer.call(this, evt.clientX, evt.clientY);
             evt.preventDefault();
+        }
+    }
+
+    function mouseMove(evt) {
+        movePointer.call(this, evt.clientX, evt.clientY);
+    }
+
+    function mouseButtonUp(evt) {
+        if (evt.button === 0) {
+            dragging = false;
         }
     }
 
@@ -171,10 +188,14 @@ function Primrose(canvasID, options) {
             evt.preventDefault();
         }
     }
-
-    function mouseButtonUp(evt) {
-        if (evt.button === 0) {
-            dragging = false;
+    
+    function touchMove(evt){
+        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
+            var t = evt.changedTouches[i];
+            if(t.identifier === currentTouchID){
+                movePointer.call(this, t.clientX, t.clientY);
+                break;
+            }
         }
     }
 
@@ -183,28 +204,6 @@ function Primrose(canvasID, options) {
             var t = evt.changedTouches[i];
             if(t.identifier === currentTouchID){
                 dragging = false;
-            }
-        }
-    }
-    
-    function movePointer(x, y){
-        if (dragging) {
-            var bounds = pointerEventSource.getBoundingClientRect();
-            setCursorXY.call(this, this.backCursor, x - bounds.left, y - bounds.top);
-            this.drawText();
-        }        
-    }
-
-    function mouseMove(evt) {
-        movePointer.call(this, evt.clientX, evt.clientY);
-    }
-    
-    function touchMove(evt){
-        for(var i = 0; i < evt.changedTouches.length && dragging; ++i){
-            var t = evt.changedTouches[i];
-            if(t.identifier === currentTouchID){
-                movePointer.call(this, t.clientX, t.clientY);
-                break;
             }
         }
     }
