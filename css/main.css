@@ -12,7 +12,41 @@ body{
     font-family: sans-serif;
 }
 
-#output{ 
+#description{
+    position:absolute;
+    margin:3em;
+    top:0;
+    right:0;
+    max-width:25em;
+}
+
+#haderp, #instructions{
+    position: relative;
+    background-color: white;
+    border:dashed 2px red;
+    padding:3em;    
+}
+
+#instructions{
+    margin-top:1em;
+}
+
+.minify-button{
+    cursor: pointer;
+    position: absolute;
+    display:block;
+    right: 0;
+    bottom: 0;
+    width: 25px;
+    height: 25px;
+    border-top-left-radius: 12px;
+    background-color: #c0c0c0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#outputContainer, #output{ 
+    position: absolute;
     box-sizing: border-box;
     top:0;
     height: 100%;
@@ -20,18 +54,7 @@ body{
     width:100%;
 }
 
-#description{
-    position:absolute;
-    margin:3em;
-    padding:3em;
-    top:0;
-    right:0;
-    background-color: white;
-    border:dashed 2px red;
-    width:20em;
-}
-
-#description > h1{
+h1{
     font-size:32pt;
 }
 
@@ -43,49 +66,48 @@ a.button
     text-decoration: none;
     border-width: 10px;
     border-style: solid;
+    font-weight: bold;
+    width:100%;
+}
+
+a.button > small{
+    font-weight: normal;
+}
+
+a.button:hover{
+    box-shadow: 0px 0px 15px #bbb;
 }
 
 a.primary.button{
     background-color: #99ff99;
     border-color: #99ff99;
     color: #005500;
-    font-weight: bold;
-    width:100%;
 }
 
 a.primary.button > small{
     color: #007700;
-    font-weight: normal;
-}
-
-a.primary.button:hover{
-    box-shadow: 0px 0px 15px #bbb;
 }
 
 a.primary.button:active
 {
-    background-color: #7f4040;
-    border-color: #7f4040;
+    background-color: #407f40;
+    border-color: #407f40;
 }
-
 
 a.secondary.button{
-    font-size:smaller;
-    background-color: #7f0000;
-    border-color: #7f0000;
-    color: #fff;
+    background-color: #9999ff;
+    border-color: #9999ff;
+    color: #000055;
 }
 
-a.secondary.button:hover{
-    box-shadow: 0px 0px 15px #bbb;
-    background-color: #7f2020;
-    border-color: #7f2020;
+a.secondary.button > small{
+    color: #000077;
 }
 
 a.secondary.button:active
 {
-    background-color: #7f4040;
-    border-color: #7f4040;
+    background-color: #40407f;
+    border-color: #40407f;
 }
 
 a.disabled.button{
