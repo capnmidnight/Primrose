@@ -26,7 +26,7 @@ module.exports = function (grunt) {
             },
             build: {
                 files:{
-                    "dist/Primrose.latest.min.js": ["build/**/*.js"],
+                    "dist/Primrose.min.js": ["build/**/*.js"],
                     "dist/Primrose.<%= pkg.version %>.min.js": ["build/**/*.js"]
                 }
             }
