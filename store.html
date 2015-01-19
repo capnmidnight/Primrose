@@ -10,6 +10,8 @@
         <script type="text/javascript" src="dist/Primrose.min.js"></script>
         <script type="text/javascript" src="store.js"></script>
         <script type="text/javascript">
+// this is done as an in-page script so that Github doesn't automatically
+// minify the newline characters away.
 function PrimroseDemo(w, h) {
     var ctrls = findEverything(),
         lt = 0,
@@ -163,6 +165,7 @@ function PrimroseDemo(w, h) {
             touchDrive = y - lastTouchY;
             lastTouchX = x;
             lastTouchY = y;
+            evt.preventDefault();
         }
     }
 
@@ -333,7 +336,7 @@ function PrimroseDemo(w, h) {
                         <div id="fullScreenMsg">Go full-screen</div>
                         <small>hit ESC to exit.</small>
                     </a>
-                    <h3>Controls:</h3>
+                    <h3>Navigation:</h3>
                     <em>(To change setting, select a text box and tap the desired key)</em><br>
                     <input type="text" id="forwardKey" size="10"><label for="forwardKey"> - forward key </label><br>
                     <input type="text" id="leftKey" size="10"><label for="leftKey"> - left key</label><br>

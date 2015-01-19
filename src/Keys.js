@@ -21,7 +21,7 @@
 var CodePages = {};
 var Themes = {};
 var Commands = {};
-var OSCommands = {};
+var OperatingSystems = {};
 var Keys = {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
