@@ -342,9 +342,19 @@ function Primrose(canvasID, options) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
                 for (code in codes) {
-                    var char = codePage.NORMAL[code];
+                    var char, name;
+                    if (code.indexOf("_") > -1) {
+                        var parts = code.split(' ');
+                        var browser = parts[0];
+                        code = parts[1];
+                        char = codePage.NORMAL[code];
+                        name = browser + "_" + type + " " + char;
+                    }
+                    else {
+                        char = codePage.NORMAL[code];
+                        name = type + "_" + char;
+                    }
                     keyNames[code] = char;
-                    var name = type + "_" + char;
                     keyboardSystem[name] = codes[code];
                 }
             }
