@@ -29,6 +29,7 @@ function Primrose(canvasID, options) {
 
     var codePage,
             operatingSystem,
+            browser,
             commandSystem,
             keyboardSystem,
             commandPack = {},
@@ -217,7 +218,11 @@ function Primrose(canvasID, options) {
         if (cmd) {
             for (var key in cmd) {
                 if (cmd.hasOwnProperty(key)) {
-                    commandPack[key] = cmd[key];
+                    var func = cmd[key];
+                    if (!(func instanceof Function)) {
+                        func = this.insertAtCursor.bind(this, func);
+                    }
+                    commandPack[key] = func;
                 }
             }
         }
@@ -229,6 +234,7 @@ function Primrose(canvasID, options) {
         }
         addCommandPack.call(this, keyboardSystem);
         addCommandPack.call(this, operatingSystem);
+        addCommandPack.call(this, browser);
         addCommandPack.call(this, commandSystem);
     }
 
@@ -299,7 +305,7 @@ function Primrose(canvasID, options) {
     };
 
     this.setOperatingSystem = function (os) {
-        operatingSystem = os || (isOSX ? OSCommands.OSX : OSCommands.WINDOWS);
+        operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
         refreshCommandPack.call(this);
     };
 
@@ -339,12 +345,7 @@ function Primrose(canvasID, options) {
                     var char = codePage.NORMAL[code];
                     keyNames[code] = char;
                     var name = type + "_" + char;
-
-                    var func = codes[code];
-                    if (!(func instanceof Function)) {
-                        func = this.insertAtCursor.bind(this, codes[code]);
-                    }
-                    keyboardSystem[name] = func;
+                    keyboardSystem[name] = codes[code];
                 }
             }
         }
@@ -564,7 +565,7 @@ function Primrose(canvasID, options) {
 
             commandName += "_" + keyNames[key];
 
-            var func = commandPack[commandName];
+            var func = commandPack[browser + "_" + commandName] || commandPack[commandName];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
@@ -738,6 +739,7 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
+    browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
     if (!(canvasID instanceof HTMLCanvasElement) && options.width && options.height) {
         canvas.style.position = "absolute";
         canvas.style.width = options.width;
@@ -766,7 +768,7 @@ function Primrose(canvasID, options) {
     this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, this, "setTokenizer", "language syntax");
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage", "localization");
     this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem", "sommand system");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OSCommands, operatingSystem.name, this, "setOperatingSystem", "shortcut style");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OperatingSystems, operatingSystem.name, this, "setOperatingSystem", "shortcut style");
 
 
     //////////////////////////////////////////////////////////////////////////

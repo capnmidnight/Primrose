@@ -8,6 +8,8 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
         <script type="text/javascript" src="dist/Primrose.min.js"></script>
         <script type="text/javascript">
+// this is done as an in-page script so that Github doesn't automatically
+// minify the newline characters away.
 function PrimroseDemo(w, h) {
     var ctrls = findEverything(),
             lt = 0,
@@ -111,6 +113,7 @@ function PrimroseDemo(w, h) {
             touchSpeed = y - lastTouchY;
             lastTouchX = x;
             lastTouchY = y;
+            evt.preventDefault();
         }
     }
     
@@ -229,13 +232,13 @@ function PrimroseDemo(w, h) {
                     <h2>Try Primrose now!</h2>
                     <p>A live-demo of Primrose is running on the left. Click on the scene and use keyboard controls to edit the text. Hit ESC and use the mouse and keyboard to navigate.Use the following controls to change its behavior.</p>
                     <div id="controls">
-                        <h3>Controls:</h3>
+                        <h3>Navigation:</h3>
                         <em>(To change setting, select a text box and tap the desired key)</em><br>
                         <input type="text" id="forwardKey" size="10"><label for="forwardKey"> - forward key </label><br>
                         <input type="text" id="leftKey" size="10"><label for="leftKey"> - left key</label><br>
                         <input type="text" id="backKey" size="10"><label for="backKey"> - back key</label><br>
                         <input type="text" id="rightKey" size="10"><label for="rightKey"> - right key</label><br>
-                        <h3>Other:</h3>
+                        <h3>Editor:</h3>
                     </div>
                 </div>
                 <a class="minify-button">collapse</a>

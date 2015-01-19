@@ -19,7 +19,6 @@ CodePages.EN_US = {
     name: "English: USA",
     language: "en-US",
     NORMAL: {
-        "32": " ",
         "48": "0",
         "49": "1",
         "50": "2",
@@ -87,7 +86,6 @@ CodePages.EN_US = {
         "222": "'"
     },
     SHIFT: {
-        "32": " ",
         "48": ")",
         "49": "!",
         "50": "@",

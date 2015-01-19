@@ -17,7 +17,7 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OSCommands.WINDOWS = {
+OperatingSystems.WINDOWS = {
     name: "Windows",
     CTRLSHIFT_e: function (prim, lines) {
         prim.getTokenizer().exec(prim.getText());
@@ -36,9 +36,9 @@ OSCommands.WINDOWS = {
     }
 };
 
-Keys.makeCursorCommand(OSCommands.WINDOWS, "", "HOME", "Home");
-Keys.makeCursorCommand(OSCommands.WINDOWS, "", "END", "End");
-Keys.makeCursorCommand(OSCommands.WINDOWS, "CTRL", "HOME", "FullHome");
-Keys.makeCursorCommand(OSCommands.WINDOWS, "CTRL", "END", "FullEnd");
-Keys.makeCursorCommand(OSCommands.WINDOWS, "CTRL", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OSCommands.WINDOWS, "CTRL", "LEFTARROW", "SkipLeft");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "HOME", "Home");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "END", "End");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "HOME", "FullHome");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "END", "FullEnd");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "RIGHTARROW", "SkipRight");
+Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "LEFTARROW", "SkipLeft");
