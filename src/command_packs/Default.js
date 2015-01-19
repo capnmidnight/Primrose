@@ -21,7 +21,9 @@
 // If SHIFT is held, then "back"
 Commands.DEFAULT = {
     name: "Basic commands",
-    NORMAL_ESCAPE: function (prim, lines) {
+    NORMAL_SPACEBAR: " ",
+    SHIFT_SPACEBAR: " ",
+    CTRLSHIFT_x: function (prim, lines) {
         prim.blur();
     },
     CTRL_DOWNARROW: function (prim, lines) {

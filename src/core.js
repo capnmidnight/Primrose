@@ -565,9 +565,7 @@ if (!document.documentElement.requestFullscreen) {
         document.exitFullscreen = document.mozCancelFullScreen;
     }
     else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.requestFullscreen = function () {
-            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        };
+        document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
         document.exitFullscreen = document.webkitExitFullscreen;
     }
 }
@@ -576,9 +574,18 @@ function isFullScreenMode() {
     return (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 }
 
-function requestFullScreen(success) {
+function requestFullScreen(vrDisplay, success) {
+    if(vrDisplay instanceof Function){
+        success = vrDisplay;
+        vrDisplay = null;
+    }
     if (!isFullScreenMode()) {
-        document.documentElement.requestFullscreen();
+        if(vrDisplay){
+            document.documentElement.requestFullscreen({vrDisplay: vrDisplay});
+        }
+        else{
+            document.documentElement.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
         var interval = setInterval(function () {
             if (isFullScreenMode()) {
                 clearInterval(interval);
@@ -641,5 +648,10 @@ function addFullScreenShim() {
     });
 }
 
-document.exitPointerLock = document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () {
-};
+var exitPointerLock = (document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () {
+}).bind(document);
+function isPointerLocked() {
+    return !!(document.pointerLockElement || document.webkitPointerLockElement || document.mozPointerLockElement);
+}
+var requestPointerLock = (document.documentElement.requestPointerLock || document.documentElement.webkitRequestPointerLock || document.documentElement.mozRequestPointerLock || function () {
+}).bind(document.documentElement);

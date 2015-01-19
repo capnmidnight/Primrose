@@ -1,63 +1,76 @@
+*{
+    box-sizing: border-box;
+}
+
 html, body{
-    position:absolute;
-    width:100%;
-    height:100%;
-    padding:0;
-    margin:0;    
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;    
 }
 
 body{
     background-color: #eee;
-    background-image: url(../img/bg2.JPG);
+    background-image: url(../img/bg2.jpg);
+    background-size: 100%;
+    background-attachment: fixed;
     font-family: sans-serif;
 }
 
 #description{
-    position:absolute;
-    margin:3em;
-    top:0;
-    right:0;
-    max-width:25em;
-}
-
-#haderp, #instructions{
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     background-color: white;
-    border:dashed 2px red;
-    padding:3em;    
+    border: dashed 2px red;
 }
 
-#instructions{
-    margin-top:1em;
+#description > *{
+    margin-top: 3em;
 }
 
-.minify-button{
+#store, #instructions{
+    max-width: 25em;
+}
+
+@media(min-width:640px){
+    #description{
+        margin: 3em;
+    }
+    #description > *{
+        margin: 3em;
+    }
+}
+
+#minifyButton{
     cursor: pointer;
     position: absolute;
-    display:block;
-    right: 0;
-    bottom: 0;
+    display: block;
+    left: 0;
+    top: 0;
     padding: 10px;
     font-weight: bold;
     font-size: 75%;
     color: white;
-    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     background-color: #bbb;
     text-align: center;
     vertical-align: middle;
+    margin: 0;
 }
 
 #outputContainer, #output{ 
     position: fixed;
     box-sizing: border-box;
-    top:0;
+    top: 0;
     height: 100%;
-    bottom:0;
-    width:100%;
+    bottom: 0;
+    width: 100%;
 }
 
 h1{
-    font-size:32pt;
+    font-size: 32pt;
 }
 
 a.button
@@ -69,14 +82,14 @@ a.button
     border-width: 10px;
     border-style: solid;
     font-weight: bold;
-    width:100%;
+    width: 100%;
 }
 
 a.button > small{
     font-weight: normal;
 }
 
-a.button:hover{
+#description, a.button:hover{
     box-shadow: 0px 0px 15px #bbb;
 }
 
@@ -116,21 +129,27 @@ a.disabled.button{
     background-color: #ddd;
     border-color: #ddd;
     color: #fff;
-    cursor: no-drop;
+    cursor: default;
+}
+a.disabled.button:hover{
+    box-shadow: none;
 }
 
 .menu{
-    padding:0;
-    margin:0;
-    margin-top:1em;
-    width:100%;
+    padding: 0;
+    margin: 0;
+    margin-top: 1em;
+    width: 100%;
 }
 
 .menu td{
-    padding:0;
-    margin:0;
+    padding: 0;
+    text-align: center;
+    margin: 0;
+    width: 20%;
 }
 
 .menu a.button{
-    width:100%;
+    width: 100%;
+    font-size: 75%;
 }

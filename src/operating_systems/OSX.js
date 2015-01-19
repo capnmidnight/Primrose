@@ -18,11 +18,8 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OSCommands.OSX = {
+OperatingSystems.OSX = {
     name: "OSX",
-    METASHIFT_e: function (prim, lines) {
-        prim.getTokenizer().exec(prim.getText());
-    },
     META_a: function (prim, lines) {
         prim.frontCursor.fullhome(lines);
         prim.backCursor.fullend(lines);
@@ -37,9 +34,9 @@ OSCommands.OSX = {
     }
 };
 
-Keys.makeCursorCommand(OSCommands.OSX, "META", "LEFTARROW", "Home");
-Keys.makeCursorCommand(OSCommands.OSX, "META", "RIGHTARROW", "End");
-Keys.makeCursorCommand(OSCommands.OSX, "META", "UPARROW", "FullHome");
-Keys.makeCursorCommand(OSCommands.OSX, "META", "DOWNARROW", "FullEnd");
-Keys.makeCursorCommand(OSCommands.OSX, "ALT", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OSCommands.OSX, "ALT", "LEFTARROW", "SkipLeft");
+Keys.makeCursorCommand(OperatingSystems.OSX, "META", "LEFTARROW", "Home");
+Keys.makeCursorCommand(OperatingSystems.OSX, "META", "RIGHTARROW", "End");
+Keys.makeCursorCommand(OperatingSystems.OSX, "META", "UPARROW", "FullHome");
+Keys.makeCursorCommand(OperatingSystems.OSX, "META", "DOWNARROW", "FullEnd");
+Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "RIGHTARROW", "SkipRight");
+Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "LEFTARROW", "SkipLeft");
