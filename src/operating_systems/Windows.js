@@ -19,9 +19,6 @@
 // so we don't have to include handlers for them here.
 OSCommands.WINDOWS = {
     name: "Windows",
-    CTRLSHIFT_e: function (prim, lines) {
-        prim.getTokenizer().exec(prim.getText());
-    },
     CTRL_a: function (prim, lines) {
         prim.frontCursor.fullhome(lines);
         prim.backCursor.fullend(lines);

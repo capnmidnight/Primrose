@@ -20,9 +20,6 @@
 // so we don't have to include handlers for them here.
 OSCommands.OSX = {
     name: "OSX",
-    METASHIFT_e: function (prim, lines) {
-        prim.getTokenizer().exec(prim.getText());
-    },
     META_a: function (prim, lines) {
         prim.frontCursor.fullhome(lines);
         prim.backCursor.fullend(lines);
