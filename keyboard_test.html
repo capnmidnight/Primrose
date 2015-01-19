@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <script type="text/javascript" src="src/code_pages/FR_AZERTY.js"></script>
         <script type="text/javascript" src="src/code_pages/DE_QWERTZ.js"></script>
         <script type="text/javascript">
+            var browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
             var t = document.getElementById("t");
             var v = document.getElementById("v");
             var n = document.getElementById("n");
@@ -156,6 +157,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         codePage[commandName] = {};
                     }
                     if(x.value.length > 0){
+                        if(codePage[commandName][code] !== undefined && codePage[commandName][code] !== x.value){
+                            code = browser + "_" + code;
+                        }
                         codePage[commandName][code] = x.value;
                         deadKey = "";
                     }
