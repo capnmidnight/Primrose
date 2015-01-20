@@ -20,33 +20,46 @@
 // so named because it keeps me from going crazy
 
 
-function makeURL(url, queryMap) {
+
+function joinMap(map, sep){    
     var output = [];
-    for (var key in queryMap) {
-        output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
+    for (var key in map) {
+        if(map.hasOwnProperty(key) && !(map[key] instanceof Function)){
+            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(map[key]));
+        }
     }
-    return url + "?" + output.join("&");
+    return output.join(sep);
+}
+function makeURL(url, queryMap) {
+    return url + "?" + joinMap(queryMap, "&");
 }
 
 function XHR(url, method, type, progress, error, success, setup){
     var xhr = new XMLHttpRequest(), data;
-    xhr.open(method, url);
-    xhr.responseType = type;
+    if(type){
+        xhr.responseType = type;
+    }
     xhr.onerror = error;
     xhr.onabort = error;
     xhr.onprogress = progress;
     xhr.onload = function () {
         if (xhr.status < 400) {
-            success(xhr.response);
+            if(success){
+                success(xhr.response);
+            }
         }
-        else {
+        else if(error) {
             error();
         }
     };
     if(setup){
         data = setup(xhr);
     }
+    
+    xhr.open(method, url);
     if(data){
+        xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("content-length", data.length);
         xhr.send(data);
     }
     else{
@@ -69,26 +82,12 @@ function getObject(url, progress, error, success) {
 
 function POST(url, data, type, progress, error, success) {
     var startLen;
-    type = type || "text";
     if(!window.FormData){
         startLen = url.length + 1;
         url = makeURL(url, data);        
     }
     XHR(url, "POST", type, progress, error, success, function(xhr){
-        if(window.FormData){
-            var form = new FormData();
-            for(var key in data){
-                if(data.hasOwnProperty(key)){
-                    form.append(key, data[key]);
-                }
-            }
-            return form;
-        }
-        else{
-            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhr.setRequestHeader("Content-length", url.length - startLen);
-            xhr.setRequestHeader("Connection", "close");
-        }
+        return joinMap(data, "&");
     });
 }
 
