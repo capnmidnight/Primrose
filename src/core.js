@@ -55,8 +55,8 @@ function XHR(url, method, type, progress, error, success, data){
     
     xhr.open(method, url);
     if(data){
-        xhr.setRequestHeader("content-type", "application/json");
-        xhr.send(data);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(JSON.stringify(data));
     }
     else{
         xhr.send();
