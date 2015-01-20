@@ -18,10 +18,19 @@
  */
 
 // so named because it keeps me from going crazy
-function GET(url, type, progress, error, success) {
-    type = type || "text";
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
+
+
+function makeURL(url, queryMap) {
+    var output = [];
+    for (var key in queryMap) {
+        output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
+    }
+    return url + "?" + output.join("&");
+}
+
+function XHR(url, method, type, progress, error, success, setup){
+    var xhr = new XMLHttpRequest(), data;
+    xhr.open(method, url);
     xhr.responseType = type;
     xhr.onerror = error;
     xhr.onabort = error;
@@ -34,7 +43,20 @@ function GET(url, type, progress, error, success) {
             error();
         }
     };
-    xhr.send();
+    if(setup){
+        data = setup(xhr);
+    }
+    if(data){
+        xhr.send(data);
+    }
+    else{
+        xhr.send();
+    }
+}
+
+function GET(url, type, progress, error, success) {
+    type = type || "text";
+    XHR(url, "GET", progress, error, success);
 }
 
 function getObject(url, progress, error, success) {
@@ -44,12 +66,30 @@ function getObject(url, progress, error, success) {
             success || error || progress);
 }
 
-function makeURL(url, queryMap) {
-    var output = [];
-    for (var key in queryMap) {
-        output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
+
+function POST(url, data, type, progress, error, success) {
+    var startLen;
+    type = type || "text";
+    if(!window.FormData){
+        startLen = url.length + 1;
+        url = makeURL(url, data);        
     }
-    return url + "?" + output.join("&");
+    XHR(url, type, progress, error, success, function(xhr){
+        if(window.FormData){
+            var form = new FormData();
+            for(var key in data){
+                if(data.hasOwnProperty(key)){
+                    form.append(key, data[key]);
+                }
+            }
+            return form;
+        }
+        else{
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.setRequestHeader("Content-length", url.length - startLen);
+            xhr.setRequestHeader("Connection", "close");
+        }
+    });
 }
 
 // Utility functions for testing out event handlers. Meant only for learning
@@ -575,15 +615,15 @@ function isFullScreenMode() {
 }
 
 function requestFullScreen(vrDisplay, success) {
-    if(vrDisplay instanceof Function){
+    if (vrDisplay instanceof Function) {
         success = vrDisplay;
         vrDisplay = null;
     }
     if (!isFullScreenMode()) {
-        if(vrDisplay){
+        if (vrDisplay) {
             document.documentElement.requestFullscreen({vrDisplay: vrDisplay});
         }
-        else{
+        else {
             document.documentElement.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         }
         var interval = setInterval(function () {
