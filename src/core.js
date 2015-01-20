@@ -92,6 +92,13 @@ function POST(url, data, type, progress, error, success) {
     });
 }
 
+function sendObject(url, data, progress, error, success) {
+    POST(url, data, null,
+            success && error && progress,
+            (success && error) || (error && progress),
+            success || error || progress);
+}
+
 // Utility functions for testing out event handlers. Meant only for learning
 // about new APIs.
 function XXX(msg, v) {
