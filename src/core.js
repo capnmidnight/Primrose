@@ -34,8 +34,8 @@ function makeURL(url, queryMap) {
     return url + "?" + joinMap(queryMap, "&");
 }
 
-function XHR(url, method, type, progress, error, success, setup){
-    var xhr = new XMLHttpRequest(), data;
+function XHR(url, method, type, progress, error, success, data){
+    var xhr = new XMLHttpRequest();
     if(type){
         xhr.responseType = type;
     }
@@ -52,14 +52,10 @@ function XHR(url, method, type, progress, error, success, setup){
             error();
         }
     };
-    if(setup){
-        data = setup(xhr);
-    }
     
     xhr.open(method, url);
     if(data){
-        xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("content-length", data.length);
+        xhr.setRequestHeader("content-type", "application/json");
         xhr.send(data);
     }
     else{
@@ -86,9 +82,7 @@ function POST(url, data, type, progress, error, success) {
         startLen = url.length + 1;
         url = makeURL(url, data);        
     }
-    XHR(url, "POST", type, progress, error, success, function(xhr){
-        return joinMap(data, "&");
-    });
+    XHR(url, "POST", type, progress, error, success, data);
 }
 
 function sendObject(url, data, progress, error, success) {
