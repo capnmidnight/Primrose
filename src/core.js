@@ -17,26 +17,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// so named because it keeps me from going crazy
+// Pyschologist.js: so named because it keeps me from going crazy
 
 
-
-function joinMap(map, sep){    
+function makeURL(url, queryMap) {
     var output = [];
-    for (var key in map) {
-        if(map.hasOwnProperty(key) && !(map[key] instanceof Function)){
-            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(map[key]));
+    for (var key in queryMap) {
+        if (queryMap.hasOwnProperty(key) && !(queryMap[key] instanceof Function)) {
+            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
         }
     }
-    return output.join(sep);
-}
-function makeURL(url, queryMap) {
-    return url + "?" + joinMap(queryMap, "&");
+    return url + "?" + output.join("&");
 }
 
-function XHR(url, method, type, progress, error, success, data){
+function XHR(url, method, type, progress, error, success, data) {
     var xhr = new XMLHttpRequest();
-    if(type){
+    if (type) {
         xhr.responseType = type;
     }
     xhr.onerror = error;
@@ -44,21 +40,21 @@ function XHR(url, method, type, progress, error, success, data){
     xhr.onprogress = progress;
     xhr.onload = function () {
         if (xhr.status < 400) {
-            if(success){
+            if (success) {
                 success(xhr.response);
             }
         }
-        else if(error) {
+        else if (error) {
             error();
         }
     };
-    
+
     xhr.open(method, url);
-    if(data){
+    if (data) {
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.send(JSON.stringify(data));
     }
-    else{
+    else {
         xhr.send();
     }
 }
@@ -68,25 +64,20 @@ function GET(url, type, progress, error, success) {
     XHR(url, "GET", type, progress, error, success);
 }
 
-function getObject(url, progress, error, success) {
-    GET(url, "json",
-            success && error && progress,
-            (success && error) || (error && progress),
-            success || error || progress);
-}
-
 
 function POST(url, data, type, progress, error, success) {
-    var startLen;
-    if(!window.FormData){
-        startLen = url.length + 1;
-        url = makeURL(url, data);        
-    }
     XHR(url, "POST", type, progress, error, success, data);
 }
 
+function getObject(url, progress, error, success) {
+    var progressThunk = success && error && progress,
+            errorThunk = (success && error) || (error && progress),
+            successThunk = success || error || progress;
+    GET(url, "json", progressThunk, errorThunk, successThunk);
+}
+
 function sendObject(url, data, progress, error, success) {
-    POST(url, data, null,
+    POST(url, data, "json",
             success && error && progress,
             (success && error) || (error && progress),
             success || error || progress);
