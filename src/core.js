@@ -56,7 +56,7 @@ function XHR(url, method, type, progress, error, success, setup){
 
 function GET(url, type, progress, error, success) {
     type = type || "text";
-    XHR(url, "GET", progress, error, success);
+    XHR(url, "GET", type, progress, error, success);
 }
 
 function getObject(url, progress, error, success) {
@@ -74,7 +74,7 @@ function POST(url, data, type, progress, error, success) {
         startLen = url.length + 1;
         url = makeURL(url, data);        
     }
-    XHR(url, type, progress, error, success, function(xhr){
+    XHR(url, "POST", type, progress, error, success, function(xhr){
         if(window.FormData){
             var form = new FormData();
             for(var key in data){
