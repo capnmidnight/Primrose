@@ -4,17 +4,12 @@
     "main": "dist/Primrose.min.js",
     "keywords": ["text", "editor", "HTML5", "canvas", "syntax", "highlighting"],
     "license": "gplv3",
-    "version": "0.9.2",
-    "authors": [
-        "Sean T. McBeth <sean.mcbeth+gh@gmail.com>"
-    ],
-    "moduleType": [
-        "node"
-    ],
+    "version": "0.10.0",
     "homepage": "http://www.primroseeditor.com",
     "private": false,
     "ignore": [
         "**/.*",
+        "*.md",
         "node_modules",
         "bower_components",
         "src",
