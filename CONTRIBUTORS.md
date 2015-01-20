@@ -1,3 +1,3 @@
 # Contributors
 
-[N/A]
+Sean T. McBeth <sean@primroseeditor.com>
