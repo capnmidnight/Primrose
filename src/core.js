@@ -32,9 +32,6 @@ function makeURL(url, queryMap) {
 
 function XHR(url, method, type, progress, error, success, data) {
     var xhr = new XMLHttpRequest();
-    if (type) {
-        xhr.responseType = type;
-    }
     xhr.onerror = error;
     xhr.onabort = error;
     xhr.onprogress = progress;
@@ -50,6 +47,9 @@ function XHR(url, method, type, progress, error, success, data) {
     };
 
     xhr.open(method, url);
+    if (type) {
+        xhr.responseType = type;
+    }
     if (data) {
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.send(JSON.stringify(data));
