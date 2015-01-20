@@ -1,58 +1,369 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
     <head>
-        <meta charset='utf-8'>
-        <meta http-equiv="X-UA-Compatible" content="chrome=1">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-        <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+        <title>Primrose: Canvas-based text editor</title>
         <link type="text/css" href="css/main.css" rel="stylesheet">
-
-        <!--[if lt IE 9]>
-        <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
-
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/three.js/r69/three.min.js"></script>
+        <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script>
         <script type="text/javascript" src="dist/Primrose.min.js"></script>
-        <script type="text/javascript" src="test/demo.js"></script>
+        <script type="text/javascript" src="store.js"></script>
+        <script type="text/javascript">
+// this is done as an in-page script so that Github doesn't automatically
+// minify the newline characters away.
+function PrimroseDemo(w, h) {
+    var ctrls = findEverything(),
+        lt = 0,
+        lastMouseX = 0,
+        lastTouchX = 0,
+        lastTouchY = 0,
+        touchDrive = 0,
+        touchStrafe = 0,
+        SPEED = 0.002,
+        heading = 0,
+        keyState = {},
+        prim = new Primrose("editor", {
+            width: w + "px",
+            height: h + "px",
+            pointerEventSource: ctrls.output,
+            file: PrimroseDemo.toString()
+        }),
+        scene = new THREE.Scene(),
+        body = new THREE.Object3D(),
+        camera = new THREE.PerspectiveCamera(50, ctrls.output.width / ctrls.output.height, 0.1, 50);
+    
+    renderer = new THREE.WebGLRenderer({
+        canvas: ctrls.output,
+        alpha: true
+    });
+    
+    var floor = box(25, 1, 25, "test/deck.png", 25, 25),
+        editor = box(1, 0.5, 1, prim);
 
-        <title>Primrose: a cross-browser, syntax-highlighting code editor control for WebGL and other uses</title>
+    window.addEventListener("resize", refreshSize);
+    window.addEventListener("keydown", keyDown);
+    window.addEventListener("keyup", keyUp);
+    window.addEventListener("mousedown", mouseDown);
+    window.addEventListener("mousemove", mouseMove);
+    ctrls.output.addEventListener("touchstart", touchStart);
+    ctrls.output.addEventListener("touchmove", touchMove);
+    ctrls.output.addEventListener("touchend", touchEnd);
+
+    ctrls.controls.appendChild(prim.operatingSystemSelect);
+    ctrls.controls.appendChild(prim.keyboardSelect);
+    ctrls.controls.appendChild(prim.themeSelect);
+    prim.placeSurrogateUnder(ctrls.output);
+    
+    if (navigator.getVRDevices || navigator.mozGetVRDevices) {
+        ctrls.fullScreenMsg.innerHTML = "Go VR!";
+    }
+
+    ctrls.minifyButton.innerHTML = "hide " + cmdPre + "+M)";
+
+    setupKeyOption(ctrls.leftKey, "A", 65);
+    setupKeyOption(ctrls.rightKey, "D", 68);
+    setupKeyOption(ctrls.forwardKey, "W", 87);
+    setupKeyOption(ctrls.backKey, "S", 83);
+
+    refreshSize();
+
+    editor.position.y = -0.125;
+    floor.position.y = -3;
+    body.position.set(-0.2, 0, 1.5);
+
+    body.add(camera);
+    scene.add(floor);
+    scene.add(editor);
+    scene.add(body);
+
+    requestAnimationFrame(render);
+
+    function refreshSize() {
+        var w = ctrls.outputContainer.clientWidth,
+            h = ctrls.outputContainer.clientHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    }
+    
+    function logToEditor(msg){
+        prim.insertAtCursor(msg);
+        prim.drawText();
+    }
+
+    function keyDown(evt) {
+        if (!prim.isFocused()) {
+            keyState[evt.keyCode] = true;
+        }
+        if (evt[modA] && evt[modB]) {
+            if (evt.keyCode === 69) {
+                var func = new Function("scene", "camera", "body", "box", "log", prim.getText());
+                try {
+                    func.call(prim, scene, camera, body, box, logToEditor);
+                }
+                catch (exp) {
+                    logToEditor(exp.message);
+                }
+            }
+            else if (evt.keyCode === 70) {
+                goFullscreen();
+            }
+            else if (evt.keyCode === 77) {
+                showHide("windowInterior");
+                evt.preventDefault();
+            }
+            else if(evt.keyCode === 38){
+                prim.increaseFontSize();
+            }
+            else if(evt.keyCode === 40){
+                prim.decreaseFontSize();
+            }
+        }
+    }
+
+    function keyUp(evt) {
+        keyState[evt.keyCode] = false;
+    }
+
+    function mouseDown(evt) {
+        if (isPointerLocked() && !prim.isFocused()) {
+            prim.focus();
+        }
+    }
+
+    function mouseMove(evt) {
+        if (!prim.isFocused()) {
+            var dx = evt.movementX || evt.mozMovementX;
+            if (isPointerLocked() && dx !== undefined) {
+                heading -= dx * 0.001;
+                lastMouseX += dx;
+            }
+            else {
+                var x = evt.clientX;
+                if (lastMouseX) {
+                    heading -= (x - lastMouseX) * 0.001;
+                }
+                lastMouseX = x;
+            }
+        }
+    }
+
+    function touchStart(evt) {
+        lastTouchX = evt.touches[0].clientX;
+        lastTouchY = evt.touches[0].clientY;
+    }
+
+    function touchMove(evt) {
+        if (!prim.isFocused() && evt.touches.length === 1 || evt.touches.length === 2) {
+            var x = evt.touches[0].clientX, y = evt.touches[0].clientY;
+            if (evt.touches.length === 1) {
+                heading += (x - lastTouchX) * 0.005;
+            }
+            else {
+                touchStrafe = x - lastTouchX;
+            }
+            touchDrive = y - lastTouchY;
+            lastTouchX = x;
+            lastTouchY = y;
+            evt.preventDefault();
+        }
+    }
+
+    function touchEnd(evt) {
+        if (evt.touches.length < 2) {
+            touchStrafe = 0;
+        }
+
+        if (evt.touches.length === 0) {
+            touchDrive = 0;
+        }
+    }
+
+    function update(dt) {
+        var cos = Math.cos(heading),
+                sin = Math.sin(heading);
+        if (keyState[ctrls.forwardKey.dataset.keycode]) {
+            body.position.z -= dt * SPEED * cos;
+            body.position.x -= dt * SPEED * sin;
+        }
+        else if (keyState[ctrls.backKey.dataset.keycode]) {
+            body.position.z += dt * SPEED * cos;
+            body.position.x += dt * SPEED * sin;
+        }
+        if (keyState[ctrls.leftKey.dataset.keycode]) {
+            body.position.x -= dt * SPEED * cos;
+            body.position.z += dt * SPEED * sin;
+        }
+        else if (keyState[ctrls.rightKey.dataset.keycode]) {
+            body.position.x += dt * SPEED * cos;
+            body.position.z -= dt * SPEED * sin;
+        }
+
+        body.position.z += dt * SPEED * (touchStrafe * sin - touchDrive * cos);
+        body.position.x -= dt * SPEED * (touchStrafe * cos + touchDrive * sin);
+        body.position.x = Math.min(12.5, Math.max(-12.5, body.position.x));
+        body.position.z = Math.min(12.5, Math.max(-12.5, body.position.z));
+        body.quaternion.setFromAxisAngle(body.up, heading);
+        
+        if(vrSensor){
+            var state = vrSensor.getState();
+            camera.position.copy(state.position);
+            camera.quaternion.copy(state.orientation);
+        }
+
+        ctrls.loc.innerHTML = fmt("<$1.00, $2.00>", body.position.x, body.position.z);
+    }
+
+    function render(t) {
+        if (lt) {
+            update(t - lt);
+        }
+        if(vrEffect){
+            vrEffect.render(scene, camera);
+        }
+        else{
+            renderer.render(scene, camera);
+        }
+        lt = t;
+        requestAnimationFrame(render);
+    }
+
+    function clearKeyOption(evt) {
+        this.value = "";
+        this.dataset.keycode = "";
+    }
+
+    function setKeyOption(evt) {
+        this.dataset.keycode = evt.keyCode;
+        this.value = this.value || Keys[evt.keyCode];
+        this.value = this.value.toUpperCase();
+        this.blur();
+    }
+
+    function setupKeyOption(elem, char, code) {
+        elem.value = char;
+        elem.dataset.keycode = code;
+        elem.addEventListener("keydown", clearKeyOption);
+        elem.addEventListener("keyup", setKeyOption);
+    }
+
+    function box(w, h, l, txt, s, t) {
+        var geometry = new THREE.BoxGeometry(w, h, l),
+            material;
+
+        if(typeof(txt) === "number") {
+            material = new THREE.MeshBasicMaterial({
+                transparent: true,
+                color: txt,
+                useScreenCoordinates: false,
+                shading: THREE.FlatShading
+            });
+        }
+        else{
+            var texture;
+            if (typeof (txt) === "string") {
+                texture = THREE.ImageUtils.loadTexture(txt);
+                texture.anisotropy = renderer.getMaxAnisotropy();
+            }
+            else if (txt instanceof Primrose) {
+                texture = txt.getTexture(renderer.getMaxAnisotropy());
+            }
+            else{
+                texture = txt;
+            }
+            
+            material = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                map: texture,
+                transparent: true,
+                useScreenCoordinates: false,
+                shading: THREE.FlatShading
+            });
+            
+            if (s * t > 1) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(s, t);
+            }
+        }
+
+        var obj = new THREE.Mesh(geometry, material);
+        return obj;
+    }
+}
+        </script>
     </head>
+    <body onload="PrimroseDemo(1024, 512);showSection('store');">
+        <div id="outputContainer">
+            <canvas id="output"></canvas>
+        </div>
+        <div id="description">
+            <a id="minifyButton" onclick="showHide('windowInterior')">hide</a>
+            <div id="windowInterior">
+                <table class="menu">
+                    <tbody>
+                        <tr>
+                            <td><a href="javascript:showSection('store');" class="secondary button">Home</a></td>
+                            <td><a href="javascript:showSection('instructions');" class="secondary button">Demo</a></td>
+                            <td><a href="javascript:showSection('about');" class="secondary button">About</a></td>
+                            <td><a href="javascript:showSection('mail');" class="secondary button">List</a></td>
+                            <td><a href="https://github.com/capnmidnight/Primrose" target="_blank" class="secondary button">GitHub</a></td>
+                        </tr>
+                    </tbody>
+                </table>
 
-    <body>
-        <header>
-            <div class="inner">
-                <h1>Primrose</h1>
-                <h2>A cross-browser, syntax-highlighting code editor control for WebGL and other uses</h2>
-                <a href="https://github.com/capnmidnight/Primrose" class="button"><small>View project on</small> GitHub</a>
-            </div>
-        </header>
+                <h1><img src="favicon.png" alt="logo" title="Primrose logo">&nbsp;Primrose</h1>
 
-        <div id="content-wrapper">
-            <div class="inner clearfix">
-                <section id="main-content">
-                    <h1>
-                        <a id="primrose-a-text-editor-that-draws-to-canvas" class="anchor" href="#primrose-a-text-editor-that-draws-to-canvas" aria-hidden="true"><span class="octicon octicon-link"></span></a>Primrose: text editing in a texture</h1>
+                <div id="store" class="tab">
+                    <p>Primrose is a cross-browser, syntax-highlighting code editor control for use in WebGL applications.</p>
+                    <p><a href="" class="primary button">Buy a license<br><small>Use Primrose in closed-source projects.</small></a></p>
+                    <p><a href="" class="primary button">Buy support<br><small>Get help with your projects.</small></a></p>
+                    <p><a href="dist/Primrose.min.js" class="secondary button">Use for free<br><small>34.8 KB minified, free for open-source projects.</small></a></p>
+                    <p><a href="javascript:showSection('mail');" class="secondary button">Join the mailing list<br><small>With weekly news on VR projects.</small></a></p>
+                    <div style="text-align: center">
+                        <a href="https://www.seanmcbeth.com" target="_blank"><img src="img/stm.png" alt="logo" title="Sean T. McBeth" style="height:32px"></a>
+                        <a href="https://github.com/capnmidnight" target="_blank"><img src="img/github.png" alt="logo" title="GitHub profile" style="height:32px"></a>
+                        <a href="https://github.com/voodootikigod/logo.js" target="_blank"><img src="img/js.png" alt="logo" title="JavaScript" style="height:32px"></a>
+                        <a href="http://www.w3.org/html/" target="_blank"><img src="img/html5.png" alt="logo" title="HTML5"></a>
+                        <a href="http://www.gnu.org/licenses/gpl.html" target="_blank"><img src="img/gplv3.png" alt="logo" title="GPLv3"></a><br>
+                        <small>Copyright <a href="https://www.seanmcbeth.com">Sean T. McBeth</a>, 2015. <span id="loc" style="display: none;"></span></small>
+                    </div>
+                </div>
 
+                <div id="instructions" class="tab">
+                    <h2>Try Primrose now!</h2>
+                    <p>A live-demo of Primrose is running on this page. Click on the scene to start editing. Use keyboard controls to edit the text. Hit CTRL+SHIFT+X to exit editing. Use the mouse and keyboard to navigate. Use the following controls to change its behavior.</p>
+                    <a class="primary button" onclick="goFullscreen()">
+                        <div id="fullScreenMsg">Go full-screen</div>
+                        <small>hit ESC to exit.</small>
+                    </a>
+                    <h3>Navigation:</h3>
+                    <em>(To change setting, select a text box and tap the desired key)</em><br>
+                    <input type="text" id="forwardKey" size="10"><label for="forwardKey"> - forward key </label><br>
+                    <input type="text" id="leftKey" size="10"><label for="leftKey"> - left key</label><br>
+                    <input type="text" id="backKey" size="10"><label for="backKey"> - back key</label><br>
+                    <input type="text" id="rightKey" size="10"><label for="rightKey"> - right key</label><br>
+                    <h3>Other:</h3>
+                    <div id="controls">
+                    </div>
+                </div>
+
+                <div id="mail" class="tab">
+                    <h2>Primrose mailing list</h2>
+                    <form id="listSignup">
+                        <p>[sign-up form goes here]</p>
+                    </form>
+                </div>
+
+                <div id="about" class="tab">
+                    <h2>About Primrose</h2>
                     <p>Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.</p>
 
-                    <h1>Demonstration</h1>
-                    <p>Click on the cube below and try editing the text with keyboard controls.</p>
-                    <p>Alternately, you may try <a href="editor.html">Primrose in a 2D environment.</a></p>
+                    <p><em>NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
+                            or not the international keyboard support is correct. But the results so far are promising. <a href="keyboard_test.html" target="_blank">Consider contributing information
+                                about your keyboard in your locale</a>!</em></p>
 
-                    <div id="controls"></div>
-                    <canvas id="output" style="width:100%;height:500px;border:dashed 2px red"></canvas>
-                    <script type="text/javascript">
-                        PrimroseDemo(750, 375);
-                    </script>  
-
-                    <p>[NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether 
-                        or not the international keyboard support is correct. But the results so far are promising. Consider contributing!]</p>
-
-                    <h2><a id="a-problem" class="anchor" href="#a-problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Problem</h2>
+                    <h2>A Problem</h2>
 
                     <p>I want a syntax highlighting text editor control for use in the Web browser, specifically one that I can easily use in a WebGL context
                         as a texture on a mesh. Blah blah blah WebVR blah blah blah the virtual desktop blah blah blah. Whatever. I want one.</p>
@@ -68,45 +379,25 @@
 
                     <p>So, I started 2015 with the goal of fixing it.</p>
 
-                    <h2><a id="a-solution" class="anchor" href="#a-solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Solution</h2>
+                    <h2>A Solution</h2>
 
                     <p>Primrose emulates common features found in text editor controls, drawing directly to a Canvas element. It can be configured to source events 
                         from other elements--useful when Canvas is being used as a texture and thus is not a part of the DOM to be able to receive input events. And
                         it is fully programmable, allowing the implementer to customize its operation quickly and easily. It is designed to be a simple, 
                         syntax-highlighting source code editor, not an everything-to-everyone WYSIWYG editor.</p>
 
-                    <h2>Screenshot</h2>
+                    <h2>Licensing</h2>
 
-                    <p><a href="images/screenshot1.jpg" target="_blank"><img alt="screenshot" src="images/screenshot1.jpg"></a></p>
+                    <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may be readily used with other FOSS projects.</p>
 
-                    <h2><a id="licensing" class="anchor" href="#licensing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licensing</h2>
+                    <p>If you would like to use Primrose in proprietary projects, please buy a license.</p>
 
-                    <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may be readily used with other FOSS.</p>
-
-                    <p>If you would like to use Primrose in proprietary projects, please contact me directly for licensing options.</p>
-
-                    <h2>
-                        <a id="contributions" class="anchor" href="#contributions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributions</h2>
+                    <h2>Contributions</h2>
 
                     <p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email
                         address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request. This will serve as your copyright assignment.</p>
 
-                </section>
-
-                <aside id="sidebar">
-                    <a href="https://github.com/capnmidnight/Primrose/zipball/master" class="button">
-                        <small>Download</small>
-                        .zip file
-                    </a>
-                    <a href="https://github.com/capnmidnight/Primrose/tarball/master" class="button">
-                        <small>Download</small>
-                        .tar.gz file
-                    </a>
-
-                    <p class="repo-owner"><a href="https://github.com/capnmidnight/Primrose"></a> is maintained by <a href="https://github.com/capnmidnight">capnmidnight</a>.</p>
-
-                    <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-                </aside>
+                </div>
             </div>
         </div>
     </body>
