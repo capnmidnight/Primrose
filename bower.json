@@ -10,6 +10,9 @@
     "ignore": [
         "**/.*",
         "*.md",
+        "Gruntfile.js",
+        "package.json",
+        "nbproject",
         "node_modules",
         "bower_components",
         "src",
