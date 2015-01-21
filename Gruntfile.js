@@ -6,17 +6,6 @@ module.exports = function (grunt) {
         jshint: {
             all: ["src/**/*.js"]
         },
-        clean: ["build"],
-        uglify: {
-            build: {
-                files: [{
-                        expand: true,
-                        cwd: "src",
-                        src: "**/*.js",
-                        dest: "build"
-                    }]
-            }
-        },
         concat: {
             options: {
                 banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n"
@@ -26,18 +15,24 @@ module.exports = function (grunt) {
             },
             build: {
                 files:{
-                    "dist/Primrose.min.js": ["build/**/*.js"],
-                    "dist/Primrose.<%= pkg.version %>.min.js": ["build/**/*.js"]
+                    "dist/Primrose.js": ["src/**/*.js"],
                 }
             }
-        }
+        },
+        uglify: {
+            build: {
+                files: [{
+                        src: "dist/Primrose.js",
+                        dest: "dist/Primrose.min.js"
+                    }]
+            }
+        },
     });
 
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-contrib-uglify");
 
-    grunt.registerTask("default", ["jshint", "clean", "uglify", "concat"]);
+    grunt.registerTask("default", ["jshint", "concat", "uglify"]);
 
 };
