@@ -316,7 +316,7 @@ function Primrose(canvasID, options) {
 
     this.setCodePage = function (cp) {
         var key, code;
-        var lang = navigator.userLanguage || navigator.languages[0];
+        var lang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || navigator.broserLanguage || "en-US";
         codePage = cp;
 
         if (codePage === undefined) {
