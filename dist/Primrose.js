@@ -472,16 +472,6 @@ function Primrose(canvasID, options) {
     // private methods
     //////////////////////////////////////////////////////////////////////////
 
-    function onFocus() {
-        focused = true;
-        this.drawText();
-    }
-
-    function onBlur() {
-        focused = false;
-        this.drawText();
-    }
-
     function minDelta(v, minV, maxV) {
         var dvMinV = v - minV;
         var dvMaxV = v - maxV + 5;
@@ -639,11 +629,11 @@ function Primrose(canvasID, options) {
     };
 
     this.focus = function () {
-        surrogate.focus();
+        focused = true;
     };
 
     this.blur = function () {
-        surrogate.blur();
+        focused = false;
     };
 
     this.isFocused = function () {
@@ -690,6 +680,14 @@ function Primrose(canvasID, options) {
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
         measureText.call(this);
+    };
+    
+    this.getWidth = function(){
+        return canvas.width;
+    };
+    
+    this.getHeight = function(){
+        return canvas.height;
     };
 
     this.setCodePage = function (cp) {
@@ -1211,9 +1209,6 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
 
     window.addEventListener("resize", measureText.bind(this));
-
-    surrogate.addEventListener("focus", onFocus.bind(this));
-    surrogate.addEventListener("blur", onBlur.bind(this));
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));

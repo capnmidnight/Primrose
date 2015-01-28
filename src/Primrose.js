@@ -36,10 +36,9 @@ function Primrose(canvasID, options) {
             tokenizer,
             theme,
             pageSize,
-            gridWidth,
-            gridHeight,
-            tabWidth,
-            tabString,
+            gridWidth, gridHeight,
+            pointerX, pointerY,
+            tabWidth, tabString,
             currentTouchID,
             texture,
             deadKeyState = "",
@@ -72,16 +71,6 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
     // private methods
     //////////////////////////////////////////////////////////////////////////
-
-    function onFocus() {
-        focused = true;
-        this.drawText();
-    }
-
-    function onBlur() {
-        focused = false;
-        this.drawText();
-    }
 
     function minDelta(v, minV, maxV) {
         var dvMinV = v - minV;
@@ -132,6 +121,8 @@ function Primrose(canvasID, options) {
     }
 
     function setCursorXY(cursor, x, y) {
+        pointerX = x;
+        pointerY = y;
         var lines = this.getLines();
         var cell = this.pixel2cell(x, y);
         cursor.setXY(cell.x, cell.y, lines);
@@ -160,7 +151,7 @@ function Primrose(canvasID, options) {
 
     function touchStart(pointerEventSource, evt) {
         if (focused && evt.touches.length > 0 && !dragging) {
-            var t = evt.touches[0];            
+            var t = evt.touches[0];
             var bounds = pointerEventSource.getBoundingClientRect();
             this.startPointer(t.clientX - bounds.left, t.clientY - bounds.top);
             currentTouchID = t.identifier;
@@ -240,11 +231,11 @@ function Primrose(canvasID, options) {
     };
 
     this.focus = function () {
-        surrogate.focus();
+        focused = true;
     };
 
     this.blur = function () {
-        surrogate.blur();
+        focused = false;
     };
 
     this.isFocused = function () {
@@ -291,6 +282,14 @@ function Primrose(canvasID, options) {
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
         measureText.call(this);
+    };
+
+    this.getWidth = function () {
+        return canvas.width;
+    };
+
+    this.getHeight = function () {
+        return canvas.height;
     };
 
     this.setCodePage = function (cp) {
@@ -718,6 +717,16 @@ function Primrose(canvasID, options) {
                     scrollBarWidth,
                     this.characterWidth);
 
+            if (pointerX) {
+                gfx.beginPath();
+                gfx.strokeStyle = "#ff0000";
+                gfx.moveTo(pointerX - 5, pointerY);
+                gfx.lineTo(pointerX + 5, pointerY);
+                gfx.moveTo(pointerX, pointerY - 5);
+                gfx.lineTo(pointerX, pointerY + 5);
+                gfx.stroke();
+            }
+
             if (texture) {
                 texture.needsUpdate = true;
             }
@@ -742,24 +751,24 @@ function Primrose(canvasID, options) {
         this.drawText();
     };
 
-    this.movePointer = function(x, y) {
+    this.movePointer = function (x, y) {
         if (dragging) {
             setCursorXY.call(this, this.backCursor, x, y);
             this.drawText();
         }
     };
-    
-    this.endPointer = function(){
+
+    this.endPointer = function () {
         dragging = false;
         surrogate.focus();
     };
 
     this.bindEvents = function (keyEventSource, pointerEventSource) {
-        if(keyEventSource){
+        if (keyEventSource) {
             keyEventSource.addEventListener("keydown", this.editText.bind(this));
         }
 
-        if(pointerEventSource){
+        if (pointerEventSource) {
             pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
             pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
             pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
@@ -812,9 +821,6 @@ function Primrose(canvasID, options) {
     //////////////////////////////////////////////////////////////////////////
 
     window.addEventListener("resize", measureText.bind(this));
-
-    surrogate.addEventListener("focus", onFocus.bind(this));
-    surrogate.addEventListener("blur", onBlur.bind(this));
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
