@@ -1,4 +1,4 @@
-/*! Primrose 2015-01-28
+/*! Primrose 2015-01-29
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -431,6 +431,7 @@ function Primrose(canvasID, options) {
             keyboardSystem,
             commandPack = {},
             tokenizer,
+            tokens,
             theme,
             pageSize,
             gridWidth, gridHeight,
@@ -445,6 +446,7 @@ function Primrose(canvasID, options) {
             historyFrame = -1,
             dragging = false,
             focused = false,
+            changed = false,
             leftGutterWidth = 1,
             rightGutterWidth = 1,
             bottomGutterHeight = 1,
@@ -506,7 +508,13 @@ function Primrose(canvasID, options) {
     }
 
     function measureText() {
-        var r = this.getPixelRatio();
+        var r = this.getPixelRatio(),
+                oldCharacterWidth = this.characterWidth,
+                oldCharacterHeight = this.characterHeight,
+                oldWidth = canvas.width,
+                oldHeight = canvas.height,
+                oldFont = gfx.font;
+        
         this.characterHeight = theme.fontSize * r;
         canvas.width = canvas.clientWidth * r;
         canvas.height = canvas.clientHeight * r;
@@ -515,10 +523,16 @@ function Primrose(canvasID, options) {
         // to two decimal places on systems that return integer values from
         // measureText.
         this.characterWidth = gfx.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+        changed = oldCharacterWidth !== this.characterWidth ||
+                oldCharacterHeight !== this.characterHeight ||
+                oldWidth !== canvas.width ||
+                oldHeight !== canvas.height ||
+                oldFont !== gfx.font;
         this.drawText();
     }
 
     function setCursorXY(cursor, x, y) {
+        changed = true;
         pointerX = x;
         pointerY = y;
         var lines = this.getLines();
@@ -619,20 +633,24 @@ function Primrose(canvasID, options) {
         "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
     this.cursorPageUp = function (lines, cursor) {
+        changed = true;
         cursor.incY(-pageSize, lines);
         this.scrollIntoView(cursor);
     };
 
     this.cursorPageDown = function (lines, cursor) {
+        changed = true;
         cursor.incY(pageSize, lines);
         this.scrollIntoView(cursor);
     };
 
     this.focus = function () {
+        changed = true;
         focused = true;
     };
 
     this.blur = function () {
+        changed = true;
         focused = false;
     };
 
@@ -659,19 +677,23 @@ function Primrose(canvasID, options) {
     };
 
     this.setDeadKeyState = function (st) {
+        changed = true;
         deadKeyState = st || "";
     };
 
     this.setCommandState = function (st) {
+        changed = true;
         commandState = st || "";
     };
 
     this.setOperatingSystem = function (os) {
+        changed = true;
         operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
         refreshCommandPack.call(this);
     };
 
     this.setCommandSystem = function (cmd) {
+        changed = true;
         commandSystem = cmd || Commands.DEFAULT;
         refreshCommandPack.call(this);
     };
@@ -680,6 +702,11 @@ function Primrose(canvasID, options) {
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
         measureText.call(this);
+    };
+    
+    this.forceUpdate = function(){
+        changed = true;
+        this.drawText();
     };
 
     this.getWidth = function () {
@@ -691,6 +718,7 @@ function Primrose(canvasID, options) {
     };
 
     this.setCodePage = function (cp) {
+        changed = true;
         var key, code;
         var lang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || navigator.broserLanguage || "en-US";
         codePage = cp;
@@ -740,9 +768,13 @@ function Primrose(canvasID, options) {
     };
 
     this.setTokenizer = function (tk) {
+        changed = true;
         tokenizer = tk || Grammar.JavaScript;
-        if (this.drawText) {
-            this.drawText();
+        if(history && history.length > 0){
+            tokens = tokenizer.tokenize(this.getText());
+            if (this.drawText) {
+                this.drawText();
+            }
         }
     };
 
@@ -755,6 +787,7 @@ function Primrose(canvasID, options) {
     };
 
     this.pushUndo = function (lines) {
+        changed = true;
         if (historyFrame < history.length - 1) {
             history.splice(historyFrame + 1);
         }
@@ -763,12 +796,14 @@ function Primrose(canvasID, options) {
     };
 
     this.redo = function () {
+        changed = true;
         if (historyFrame < history.length - 1) {
             ++historyFrame;
         }
     };
 
     this.undo = function () {
+        changed = true;
         if (historyFrame > 0) {
             --historyFrame;
         }
@@ -816,6 +851,7 @@ function Primrose(canvasID, options) {
         txt = txt.replace(/\r\n/g, "\n");
         var lines = txt.split("\n");
         this.pushUndo(lines);
+        tokens = tokenizer.tokenize(txt);
         if (this.drawText) {
             this.drawText();
         }
@@ -1001,15 +1037,13 @@ function Primrose(canvasID, options) {
     };
 
     this.drawText = function () {
-        if (theme && tokenizer && history.length > 0) {
+        if (changed && theme && tokens && history.length > 0) {
             var t;
             var clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
             if (theme.regular.backColor) {
                 gfx.fillStyle = theme.regular.backColor;
             }
             gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
-
-            var tokens = tokenizer.tokenize(this.getText());
 
             // group the tokens into rows
             var rows = [[]];
@@ -1159,6 +1193,7 @@ function Primrose(canvasID, options) {
             if (texture) {
                 texture.needsUpdate = true;
             }
+            changed = false;
         }
     };
 
