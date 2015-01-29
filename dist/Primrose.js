@@ -1,4 +1,4 @@
-/*! Primrose 2015-01-27
+/*! Primrose 2015-01-28
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -199,14 +199,12 @@ Cursor.prototype.incY = function (dy, lines) {
  */
 
 
-function Grammar(name, grammar, exec) {
+function Grammar(name, grammar) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1]);
     });
-    
-    this.exec = exec;
 }
 
 function Rule(name, test) {
@@ -214,44 +212,44 @@ function Rule(name, test) {
     this.test = test;
 }
 
-function Token(value, type) {
+function Token(value, type, index) {
     this.value = value;
     this.type = type;
+    this.index = index;
 }
 
 Grammar.prototype.tokenize = function (text) {
     // all text starts off as regular text, then gets cut up into tokens of
     // more specific type
-    var tokens = [new Token(text, "regular")],
-        t = null;
+    var tokens = [new Token(text, "regular", 0)];
     for (var i = 0; i < this.grammar.length; ++i) {
         var rule = this.grammar[i];
         for (var j = 0; j < tokens.length; ++j) {
-            t = tokens[j];
+            var left = tokens[j];
 
-            if (t.type === "regular") {
+            if (left.type === "regular") {
                 var res = rule.test.exec(tokens[j].value);
                 if (res) {
                     // insert the new token into the token list
-                    var mid = res[res.length - 1];
+                    var midx = res[res.length - 1];
                     var start = res.index;
                     if (res.length === 2) {
-                        start += res[0].indexOf(mid);
+                        start += res[0].indexOf(midx);
                     }
-                    var token = new Token(mid, rule.name);
-                    tokens.splice(j + 1, 0, token);
+                    var mid = new Token(midx, rule.name, left.index + start);
+                    tokens.splice(j + 1, 0, mid);
 
                     // if there is any string after the found token,
                     // reinsert it so it can be processed further.
-                    var end = start + mid.length;
-                    if (end < t.value.length) {
-                        var right = new Token(t.value.substring(end), "regular");
+                    var end = start + midx.length;
+                    if (end < left.value.length) {
+                        var right = new Token(left.value.substring(end), "regular", left.index + end);
                         tokens.splice(j + 2, 0, right);
                     }
 
                     // cut the newly created token out of the current string
                     if (start > 0) {
-                        t.value = t.value.substring(0, start);
+                        left.value = left.value.substring(0, start);
                         // skip the token we just created
                         ++j;
                     }
@@ -268,7 +266,7 @@ Grammar.prototype.tokenize = function (text) {
     // normalize tokens
     var blockOn = false;
     for (i = 0; i < tokens.length; ++i) {
-        t = tokens[i];
+        var t = tokens[i];
 
         if (blockOn) {
             if (t.type === "endBlockComments") {
@@ -435,10 +433,9 @@ function Primrose(canvasID, options) {
             tokenizer,
             theme,
             pageSize,
-            gridWidth,
-            gridHeight,
-            tabWidth,
-            tabString,
+            gridWidth, gridHeight,
+            pointerX, pointerY,
+            tabWidth, tabString,
             currentTouchID,
             texture,
             deadKeyState = "",
@@ -466,6 +463,7 @@ function Primrose(canvasID, options) {
     this.scrollTop = 0;
     this.scrollLeft = 0;
     this.gridLeft = 0;
+    this.currentToken = null;
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -521,6 +519,8 @@ function Primrose(canvasID, options) {
     }
 
     function setCursorXY(cursor, x, y) {
+        pointerX = x;
+        pointerY = y;
         var lines = this.getLines();
         var cell = this.pixel2cell(x, y);
         cursor.setXY(cell.x, cell.y, lines);
@@ -549,7 +549,7 @@ function Primrose(canvasID, options) {
 
     function touchStart(pointerEventSource, evt) {
         if (focused && evt.touches.length > 0 && !dragging) {
-            var t = evt.touches[0];            
+            var t = evt.touches[0];
             var bounds = pointerEventSource.getBoundingClientRect();
             this.startPointer(t.clientX - bounds.left, t.clientY - bounds.top);
             currentTouchID = t.identifier;
@@ -681,12 +681,12 @@ function Primrose(canvasID, options) {
         canvas.style.height = h + "px";
         measureText.call(this);
     };
-    
-    this.getWidth = function(){
+
+    this.getWidth = function () {
         return canvas.width;
     };
-    
-    this.getHeight = function(){
+
+    this.getHeight = function () {
         return canvas.height;
     };
 
@@ -923,6 +923,33 @@ function Primrose(canvasID, options) {
             }, 250);
         }
     };
+    
+    this.incCurrentToken = function(dir){        
+        if(this.currentToken && this.currentToken.type === "numbers"){
+            var num = parseFloat(this.currentToken.value);
+            var increment = Math.pow(10, Math.floor(Math.log10(Math.abs(num))));
+            if(increment >= 1){
+                increment /= 10;
+            }
+            else if(!increment){
+                increment = 0.1;
+            }
+            num += dir * increment;
+            var text = this.getText();
+            var left = text.substring(0, this.currentToken.index);
+            var right = text.substring(this.currentToken.index + this.currentToken.value.length);
+            if(increment < 1){
+                var d = Math.ceil(-Math.log10(1.1 * increment));
+                console.log(num, increment, d);
+                console.log(num.toFixed(d));
+                text = left + num.toFixed(d) + right;
+            }
+            else{
+                text = left + num.toString() + right;
+            }
+            this.setText(text);
+        }
+    };
 
     this.editText = function (evt) {
         evt = evt || event;
@@ -1006,6 +1033,8 @@ function Primrose(canvasID, options) {
             var tokenFront = new Cursor();
             var tokenBack = new Cursor();
             var maxLineWidth = 0;
+            
+            this.currentToken = null;
 
             for (var y = 0; y < rows.length; ++y) {
                 // draw the tokens on this row
@@ -1018,9 +1047,11 @@ function Primrose(canvasID, options) {
 
                     // skip drawing tokens that aren't in view
                     if (this.scrollTop <= y && y < this.scrollTop + gridHeight && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                            if(minCursor.i === maxCursor.i){
+                                this.currentToken = t;
+                            }
                             var selectionFront = Cursor.max(minCursor, tokenFront);
                             var selectionBack = Cursor.min(maxCursor, tokenBack);
                             var cw = selectionBack.i - selectionFront.i;
@@ -1115,6 +1146,16 @@ function Primrose(canvasID, options) {
                     scrollBarWidth,
                     this.characterWidth);
 
+            if (pointerX) {
+                gfx.beginPath();
+                gfx.strokeStyle = "#ff0000";
+                gfx.moveTo(pointerX - 5, pointerY);
+                gfx.lineTo(pointerX + 5, pointerY);
+                gfx.moveTo(pointerX, pointerY - 5);
+                gfx.lineTo(pointerX, pointerY + 5);
+                gfx.stroke();
+            }
+
             if (texture) {
                 texture.needsUpdate = true;
             }
@@ -1139,24 +1180,24 @@ function Primrose(canvasID, options) {
         this.drawText();
     };
 
-    this.movePointer = function(x, y) {
+    this.movePointer = function (x, y) {
         if (dragging) {
             setCursorXY.call(this, this.backCursor, x, y);
             this.drawText();
         }
     };
-    
-    this.endPointer = function(){
+
+    this.endPointer = function () {
         dragging = false;
         surrogate.focus();
     };
 
     this.bindEvents = function (keyEventSource, pointerEventSource) {
-        if(keyEventSource){
+        if (keyEventSource) {
             keyEventSource.addEventListener("keydown", this.editText.bind(this));
         }
 
-        if(pointerEventSource){
+        if (pointerEventSource) {
             pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
             pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
             pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
@@ -1876,19 +1917,6 @@ Commands.DEFAULT = {
     name: "Basic commands",
     NORMAL_SPACEBAR: " ",
     SHIFT_SPACEBAR: " ",
-    CTRLSHIFT_x: function (prim, lines) {
-        prim.blur();
-    },
-    CTRL_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
-        }
-    },
-    CTRL_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-    },
     NORMAL_BACKSPACE: function (prim, lines) {
         if (prim.frontCursor.i === prim.backCursor.i) {
             prim.frontCursor.left(lines);
@@ -2679,11 +2707,11 @@ Grammar.JavaScript = new Grammar("JavaScript", [
     ["endBlockComments", /\*\//],
     ["strings", /"(?:\\"|[^"]*)"/],
     ["strings", /'(?:\\'|[^']*)'/],
-    ["numbers", /\b(?:\d*\.)?\d+\b/],
+    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
-], (function(f){return window[f].bind(window); })(["e", "v", "a", "l"].join("")));;/* 
+]);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2716,6 +2744,16 @@ OperatingSystems.OSX = {
     META_z: function (prim, lines) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
+    },
+    META_DOWNARROW: function (prim, lines) {
+        if (prim.scrollTop < lines.length) {
+            ++prim.scrollTop;
+        }
+    },
+    META_UPARROW: function (prim, lines) {
+        if (prim.scrollTop > 0) {
+            --prim.scrollTop;
+        }
     }
 };
 
@@ -2757,6 +2795,22 @@ OperatingSystems.WINDOWS = {
     CTRL_z: function (prim, lines) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
+    },
+    CTRL_DOWNARROW: function (prim, lines) {
+        if (prim.scrollTop < lines.length) {
+            ++prim.scrollTop;
+        }
+    },
+    CTRL_UPARROW: function (prim, lines) {
+        if (prim.scrollTop > 0) {
+            --prim.scrollTop;
+        }
+    },
+    ALTSHIFT_LEFTARROW: function (prim, lines) {
+        prim.incCurrentToken(-1);
+    },
+    ALTSHIFT_RIGHTARROW: function (prim, lines) {
+        prim.incCurrentToken(1);
     }
 };
 
