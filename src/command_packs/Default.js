@@ -55,7 +55,7 @@ Commands.DEFAULT = {
     },
     NORMAL_TAB: function (prim, lines) {
         var ts = prim.getTabString();
-        if (prim.frontCursor.y === prim.backCursor.y && prim.frontCursor.x !== 0) {
+        if (prim.frontCursor.y === prim.backCursor.y) {
             prim.insertAtCursor(ts);
         }
         else {

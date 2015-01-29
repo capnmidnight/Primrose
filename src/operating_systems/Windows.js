@@ -22,6 +22,7 @@ OperatingSystems.WINDOWS = {
     CTRL_a: function (prim, lines) {
         prim.frontCursor.fullhome(lines);
         prim.backCursor.fullend(lines);
+        prim.forceUpdate();
     },
     CTRL_y: function (prim, lines) {
         prim.redo();
@@ -35,11 +36,13 @@ OperatingSystems.WINDOWS = {
         if (prim.scrollTop < lines.length) {
             ++prim.scrollTop;
         }
+        prim.forceUpdate();
     },
     CTRL_UPARROW: function (prim, lines) {
         if (prim.scrollTop > 0) {
             --prim.scrollTop;
         }
+        prim.forceUpdate();
     },
     ALTSHIFT_LEFTARROW: function (prim, lines) {
         prim.incCurrentToken(-1);

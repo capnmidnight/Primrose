@@ -617,6 +617,7 @@ function Primrose(canvasID, options) {
     function makeCursorCommand(name) {
         var method = name.toLowerCase();
         this["cursor" + name] = function (lines, cursor) {
+            changed = true;
             cursor[method](lines);
             this.scrollIntoView(cursor);
         };
@@ -675,6 +676,10 @@ function Primrose(canvasID, options) {
         theme = t || Themes.DEFAULT;
         measureText.call(this);
     };
+    
+    this.getTheme = function(){
+        return theme;
+    };
 
     this.setDeadKeyState = function (st) {
         changed = true;
@@ -690,6 +695,10 @@ function Primrose(canvasID, options) {
         changed = true;
         operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
         refreshCommandPack.call(this);
+    };
+    
+    this.getOperatingSystem = function(){
+        return operatingSystem;
     };
 
     this.setCommandSystem = function (cmd) {
@@ -766,6 +775,10 @@ function Primrose(canvasID, options) {
 
         refreshCommandPack.call(this);
     };
+    
+    this.getCodePage = function(){
+        return codePage;
+    };
 
     this.setTokenizer = function (tk) {
         changed = true;
@@ -793,6 +806,8 @@ function Primrose(canvasID, options) {
         }
         history.push(lines);
         historyFrame = history.length - 1;
+        tokens = tokenizer.tokenize(this.getText());
+        this.drawText();
     };
 
     this.redo = function () {
@@ -800,6 +815,7 @@ function Primrose(canvasID, options) {
         if (historyFrame < history.length - 1) {
             ++historyFrame;
         }
+        tokens = tokenizer.tokenize(this.getText());
     };
 
     this.undo = function () {
@@ -807,6 +823,7 @@ function Primrose(canvasID, options) {
         if (historyFrame > 0) {
             --historyFrame;
         }
+        tokens = tokenizer.tokenize(this.getText());
     };
 
     this.setTabWidth = function (tw) {
@@ -851,7 +868,6 @@ function Primrose(canvasID, options) {
         txt = txt.replace(/\r\n/g, "\n");
         var lines = txt.split("\n");
         this.pushUndo(lines);
-        tokens = tokenizer.tokenize(txt);
         if (this.drawText) {
             this.drawText();
         }
@@ -900,8 +916,8 @@ function Primrose(canvasID, options) {
             var left = text.substring(0, minCursor.i);
             var right = text.substring(maxCursor.i);
             text = left + right;
-            this.setText(text);
             maxCursor.copy(minCursor);
+            this.setText(text);
         }
     };
 
@@ -1037,7 +1053,7 @@ function Primrose(canvasID, options) {
     };
 
     this.drawText = function () {
-        if (changed && theme && tokens && history.length > 0) {
+        if (changed && theme && tokens) {
             var t;
             var clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
             if (theme.regular.backColor) {
@@ -1984,7 +2000,7 @@ Commands.DEFAULT = {
     },
     NORMAL_TAB: function (prim, lines) {
         var ts = prim.getTabString();
-        if (prim.frontCursor.y === prim.backCursor.y && prim.frontCursor.x !== 0) {
+        if (prim.frontCursor.y === prim.backCursor.y) {
             prim.insertAtCursor(ts);
         }
         else {
@@ -2822,6 +2838,7 @@ OperatingSystems.WINDOWS = {
     CTRL_a: function (prim, lines) {
         prim.frontCursor.fullhome(lines);
         prim.backCursor.fullend(lines);
+        prim.forceUpdate();
     },
     CTRL_y: function (prim, lines) {
         prim.redo();
@@ -2835,11 +2852,13 @@ OperatingSystems.WINDOWS = {
         if (prim.scrollTop < lines.length) {
             ++prim.scrollTop;
         }
+        prim.forceUpdate();
     },
     CTRL_UPARROW: function (prim, lines) {
         if (prim.scrollTop > 0) {
             --prim.scrollTop;
         }
+        prim.forceUpdate();
     },
     ALTSHIFT_LEFTARROW: function (prim, lines) {
         prim.incCurrentToken(-1);
