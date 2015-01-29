@@ -66,6 +66,7 @@ function Primrose(canvasID, options) {
     this.scrollTop = 0;
     this.scrollLeft = 0;
     this.gridLeft = 0;
+    this.currentToken = null;
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -525,6 +526,33 @@ function Primrose(canvasID, options) {
             }, 250);
         }
     };
+    
+    this.incCurrentToken = function(dir){        
+        if(this.currentToken && this.currentToken.type === "numbers"){
+            var num = parseFloat(this.currentToken.value);
+            var increment = Math.pow(10, Math.floor(Math.log10(Math.abs(num))));
+            if(increment >= 1){
+                increment /= 10;
+            }
+            else if(!increment){
+                increment = 0.1;
+            }
+            num += dir * increment;
+            var text = this.getText();
+            var left = text.substring(0, this.currentToken.index);
+            var right = text.substring(this.currentToken.index + this.currentToken.value.length);
+            if(increment < 1){
+                var d = Math.ceil(-Math.log10(1.1 * increment));
+                console.log(num, increment, d);
+                console.log(num.toFixed(d));
+                text = left + num.toFixed(d) + right;
+            }
+            else{
+                text = left + num.toString() + right;
+            }
+            this.setText(text);
+        }
+    };
 
     this.editText = function (evt) {
         evt = evt || event;
@@ -608,6 +636,8 @@ function Primrose(canvasID, options) {
             var tokenFront = new Cursor();
             var tokenBack = new Cursor();
             var maxLineWidth = 0;
+            
+            this.currentToken = null;
 
             for (var y = 0; y < rows.length; ++y) {
                 // draw the tokens on this row
@@ -620,9 +650,11 @@ function Primrose(canvasID, options) {
 
                     // skip drawing tokens that aren't in view
                     if (this.scrollTop <= y && y < this.scrollTop + gridHeight && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                            if(minCursor.i === maxCursor.i){
+                                this.currentToken = t;
+                            }
                             var selectionFront = Cursor.max(minCursor, tokenFront);
                             var selectionBack = Cursor.min(maxCursor, tokenBack);
                             var cw = selectionBack.i - selectionFront.i;
