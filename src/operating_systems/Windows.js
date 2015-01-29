@@ -30,6 +30,22 @@ OperatingSystems.WINDOWS = {
     CTRL_z: function (prim, lines) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
+    },
+    CTRL_DOWNARROW: function (prim, lines) {
+        if (prim.scrollTop < lines.length) {
+            ++prim.scrollTop;
+        }
+    },
+    CTRL_UPARROW: function (prim, lines) {
+        if (prim.scrollTop > 0) {
+            --prim.scrollTop;
+        }
+    },
+    ALTSHIFT_LEFTARROW: function (prim, lines) {
+        prim.incCurrentToken(-1);
+    },
+    ALTSHIFT_RIGHTARROW: function (prim, lines) {
+        prim.incCurrentToken(1);
     }
 };
 

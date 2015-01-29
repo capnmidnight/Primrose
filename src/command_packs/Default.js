@@ -23,19 +23,6 @@ Commands.DEFAULT = {
     name: "Basic commands",
     NORMAL_SPACEBAR: " ",
     SHIFT_SPACEBAR: " ",
-    CTRLSHIFT_x: function (prim, lines) {
-        prim.blur();
-    },
-    CTRL_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
-        }
-    },
-    CTRL_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-    },
     NORMAL_BACKSPACE: function (prim, lines) {
         if (prim.frontCursor.i === prim.backCursor.i) {
             prim.frontCursor.left(lines);

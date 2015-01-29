@@ -31,6 +31,16 @@ OperatingSystems.OSX = {
     META_z: function (prim, lines) {
         prim.undo();
         prim.scrollIntoView(prim.frontCursor);
+    },
+    META_DOWNARROW: function (prim, lines) {
+        if (prim.scrollTop < lines.length) {
+            ++prim.scrollTop;
+        }
+    },
+    META_UPARROW: function (prim, lines) {
+        if (prim.scrollTop > 0) {
+            --prim.scrollTop;
+        }
     }
 };
 
