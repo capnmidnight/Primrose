@@ -22,8 +22,8 @@ Grammar.JavaScript = new Grammar("JavaScript", [
     ["endBlockComments", /\*\//],
     ["strings", /"(?:\\"|[^"]*)"/],
     ["strings", /'(?:\\'|[^']*)'/],
-    ["numbers", /\b(?:\d*\.)?\d+\b/],
+    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
-], (function(f){return window[f].bind(window); })(["e", "v", "a", "l"].join("")));
+]);
