@@ -799,16 +799,6 @@ function Primrose(canvasID, options) {
                     scrollBarWidth,
                     this.characterWidth);
 
-            if (pointerX) {
-                gfx.beginPath();
-                gfx.strokeStyle = "#ff0000";
-                gfx.moveTo(pointerX - 5, pointerY);
-                gfx.lineTo(pointerX + 5, pointerY);
-                gfx.moveTo(pointerX, pointerY - 5);
-                gfx.lineTo(pointerX, pointerY + 5);
-                gfx.stroke();
-            }
-
             if (texture) {
                 texture.needsUpdate = true;
             }
@@ -818,6 +808,7 @@ function Primrose(canvasID, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
+            changed = true;
             this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
             if (this.scrollTop < 0) {
                 this.scrollTop = 0;
@@ -895,7 +886,7 @@ function Primrose(canvasID, options) {
     this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvasID, Themes, theme.name, this, "setTheme", "theme");
     this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, this, "setTokenizer", "language syntax");
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, this, "setCodePage", "localization");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem", "sommand system");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, this, "setCommandSystem", "command system");
     this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OperatingSystems, operatingSystem.name, this, "setOperatingSystem", "shortcut style");
 
 
