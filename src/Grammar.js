@@ -16,14 +16,12 @@
  */
 
 
-function Grammar(name, grammar, exec) {
+function Grammar(name, grammar) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1]);
     });
-    
-    this.exec = exec;
 }
 
 function Rule(name, test) {
@@ -31,44 +29,44 @@ function Rule(name, test) {
     this.test = test;
 }
 
-function Token(value, type) {
+function Token(value, type, index) {
     this.value = value;
     this.type = type;
+    this.index = index;
 }
 
 Grammar.prototype.tokenize = function (text) {
     // all text starts off as regular text, then gets cut up into tokens of
     // more specific type
-    var tokens = [new Token(text, "regular")],
-        t = null;
+    var tokens = [new Token(text, "regular", 0)];
     for (var i = 0; i < this.grammar.length; ++i) {
         var rule = this.grammar[i];
         for (var j = 0; j < tokens.length; ++j) {
-            t = tokens[j];
+            var left = tokens[j];
 
-            if (t.type === "regular") {
+            if (left.type === "regular") {
                 var res = rule.test.exec(tokens[j].value);
                 if (res) {
                     // insert the new token into the token list
-                    var mid = res[res.length - 1];
+                    var midx = res[res.length - 1];
                     var start = res.index;
                     if (res.length === 2) {
-                        start += res[0].indexOf(mid);
+                        start += res[0].indexOf(midx);
                     }
-                    var token = new Token(mid, rule.name);
-                    tokens.splice(j + 1, 0, token);
+                    var mid = new Token(midx, rule.name, left.index + start);
+                    tokens.splice(j + 1, 0, mid);
 
                     // if there is any string after the found token,
                     // reinsert it so it can be processed further.
-                    var end = start + mid.length;
-                    if (end < t.value.length) {
-                        var right = new Token(t.value.substring(end), "regular");
+                    var end = start + midx.length;
+                    if (end < left.value.length) {
+                        var right = new Token(left.value.substring(end), "regular", left.index + end);
                         tokens.splice(j + 2, 0, right);
                     }
 
                     // cut the newly created token out of the current string
                     if (start > 0) {
-                        t.value = t.value.substring(0, start);
+                        left.value = left.value.substring(0, start);
                         // skip the token we just created
                         ++j;
                     }
@@ -85,7 +83,7 @@ Grammar.prototype.tokenize = function (text) {
     // normalize tokens
     var blockOn = false;
     for (i = 0; i < tokens.length; ++i) {
-        t = tokens[i];
+        var t = tokens[i];
 
         if (blockOn) {
             if (t.type === "endBlockComments") {
