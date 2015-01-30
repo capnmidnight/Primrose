@@ -332,16 +332,25 @@ function Primrose(canvasID, options) {
     this.setCodePage = function (cp) {
         changed = true;
         var key, code;
-        var lang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || navigator.broserLanguage || "en-US";
+        var lang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || navigator.browserLanguage;
+        
+        if(!lang || lang === "en"){
+            lang = "en-US";
+        }
+        
         codePage = cp;
 
-        if (codePage === undefined) {
+        if (!codePage) {
             for (key in CodePages) {
                 cp = CodePages[key];
                 if (cp.language === lang) {
                     codePage = cp;
                     break;
                 }
+            }
+        
+            if(!codePage){
+                codePage = CodePages.EN_US;
             }
         }
 
