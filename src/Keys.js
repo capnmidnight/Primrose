@@ -103,6 +103,12 @@ var Keys = {
     makeCursorCommand: function (obj, baseMod, key, func) {
         Keys.setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
         Keys.setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+    },
+    addNumPad: function(obj){
+        for(var i = 0; i <= 9; ++i){
+            var code = Keys["NUMPAD" + i];
+            obj.NORMAL[code] = i.toString();
+        }
     }
 };
 

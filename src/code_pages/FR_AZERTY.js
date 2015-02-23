@@ -174,3 +174,5 @@ CodePages.FR_AZERTY = {
         "85": "ù"
     }
 };
+
+Keys.addNumPad(CodePages.FR_AZERTY);

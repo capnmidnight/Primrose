@@ -1,4 +1,4 @@
-/*! Primrose 2015-01-30
+/*! Primrose 2015-02-22
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -387,6 +387,12 @@ var Keys = {
     makeCursorCommand: function (obj, baseMod, key, func) {
         Keys.setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
         Keys.setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+    },
+    addNumPad: function(obj){
+        for(var i = 0; i <= 9; ++i){
+            var code = Keys["NUMPAD" + i];
+            obj.NORMAL[code] = i.toString();
+        }
     }
 };
 
@@ -1498,7 +1504,9 @@ CodePages.DE_QWERTZ = {
         "85": "u",
         "89": "y"
     }
-};;/* 
+};
+
+Keys.addNumPad(CodePages.DE_QWERTZ);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1646,7 +1654,9 @@ CodePages.EN_UKX = {
         "222": "~",
         "223": "¬"
     }
-};;/* 
+};
+
+Keys.addNumPad(CodePages.EN_UKX);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1768,7 +1778,9 @@ CodePages.EN_US = {
         "221": "}",
         "222": "\""
     }
-};;/* 
+};
+
+Keys.addNumPad(CodePages.EN_US);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1943,7 +1955,9 @@ CodePages.FR_AZERTY = {
         "79": "ò",
         "85": "ù"
     }
-};;/* 
+};
+
+Keys.addNumPad(CodePages.FR_AZERTY);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify

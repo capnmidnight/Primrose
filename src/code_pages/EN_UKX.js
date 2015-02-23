@@ -147,3 +147,5 @@ CodePages.EN_UKX = {
         "223": "¬"
     }
 };
+
+Keys.addNumPad(CodePages.EN_UKX);

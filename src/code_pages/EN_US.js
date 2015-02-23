@@ -121,3 +121,5 @@ CodePages.EN_US = {
         "222": "\""
     }
 };
+
+Keys.addNumPad(CodePages.EN_US);

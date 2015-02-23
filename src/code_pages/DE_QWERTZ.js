@@ -192,3 +192,5 @@ CodePages.DE_QWERTZ = {
         "89": "y"
     }
 };
+
+Keys.addNumPad(CodePages.DE_QWERTZ);
