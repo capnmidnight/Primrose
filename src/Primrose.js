@@ -41,7 +41,7 @@ function Primrose(canvasID, options) {
             pointerX, pointerY,
             tabWidth, tabString,
             currentTouchID,
-            texture,
+            texture, pickingTexture,
             deadKeyState = "",
             commandState = "",
             keyNames = [],
@@ -273,6 +273,30 @@ function Primrose(canvasID, options) {
             texture.needsUpdate = true;
         }
         return texture;
+    };
+    
+    this.getPickingTexture = function(){
+        if(!pickingTexture){
+            var canvas = document.createElement("canvas"),
+                    w = this.getWidth(),
+                    h = this.getHeight();
+            canvas.width = w;
+            canvas.height = h;
+
+            var gfx = canvas.getContext("2d"),
+                pixels = gfx.createImageData(w, h);
+
+            for (var i = 0, p = 0, l = w * h; i < l; ++i, p += 4) {
+                pixels.data[p] = (0xff0000 & i) >> 16;
+                pixels.data[p + 1] = (0x00ff00 & i) >> 8;
+                pixels.data[p + 2] = (0x0000ff & i) >> 0;
+                pixels.data[p + 3] = 0xff;
+            }
+            gfx.putImageData(pixels, 0, 0);
+            pickingTexture = new THREE.Texture(canvas, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.RGBAFormat, THREE.UnsignedByteType, 0);            
+            pickingTexture.needsUpdate = true;
+        }
+        return pickingTexture;
     };
 
     this.setTheme = function (t) {
