@@ -44,7 +44,7 @@ function Primrose(canvasID, options) {
             pointerX, pointerY,
             tabWidth, tabString,
             currentTouchID,
-            texture, pickingTexture,
+            texture, pickingTexture, pickingPixelBuffer,
             deadKeyState = "",
             commandState = "",
             keyNames = [],
@@ -272,7 +272,7 @@ function Primrose(canvasID, options) {
 
     self.getTexture = function (anisotropy) {
         if (window.THREE && !texture) {
-            texture = new THREE.Texture(canvas);
+            texture = new THREE.Texture(self.getCanvas());
             texture.anisotropy = anisotropy || 8;
             texture.needsUpdate = true;
         }
@@ -301,6 +301,23 @@ function Primrose(canvasID, options) {
             pickingTexture.needsUpdate = true;
         }
         return pickingTexture;
+    };
+    
+    self.doPicking = function(op, gl, x, y){
+        if(!pickingPixelBuffer){
+            pickingPixelBuffer = new Uint8Array(4);            
+        }
+
+        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
+        
+        var i = (pickingPixelBuffer[0] << 16) |
+                (pickingPixelBuffer[1] << 8) |
+                (pickingPixelBuffer[2] << 0);
+        
+        x = i % canvas.width;
+        y = i / canvas.width;
+        
+        self[op + "Pointer"](x, y);
     };
     
     self.setShowLineNumbers = function (v) {
