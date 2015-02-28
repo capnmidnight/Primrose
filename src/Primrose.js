@@ -229,6 +229,19 @@ function Primrose(canvasID, options) {
             self.scrollIntoView(cursor);
         };
     }
+    
+    function getPixelIndex(gl, x, y){
+        if(!pickingPixelBuffer){
+            pickingPixelBuffer = new Uint8Array(4);            
+        }
+
+        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
+        
+        var i = (pickingPixelBuffer[0] << 16) |
+                (pickingPixelBuffer[1] << 8) |
+                (pickingPixelBuffer[2] << 0);
+        return i;        
+    }
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -303,21 +316,20 @@ function Primrose(canvasID, options) {
         return pickingTexture;
     };
     
-    self.doPicking = function(op, gl, x, y){
-        if(!pickingPixelBuffer){
-            pickingPixelBuffer = new Uint8Array(4);            
-        }
-
-        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
-        
-        var i = (pickingPixelBuffer[0] << 16) |
-                (pickingPixelBuffer[1] << 8) |
-                (pickingPixelBuffer[2] << 0);
-        
+    self.startPicking = function(gl, x, y){
+        var i = getPixelIndex(gl, x, y);
         x = i % canvas.width;
         y = i / canvas.width;
         
-        self[op + "Pointer"](x, y);
+        self.startPointer(x, y);
+    };
+    
+    self.movePicking = function(gl, x, y){
+        var i = getPixelIndex(gl, x, y);
+        x = i % canvas.width;
+        y = i / canvas.width;
+        
+        self.movePointer(x, y);
     };
     
     self.setShowLineNumbers = function (v) {
