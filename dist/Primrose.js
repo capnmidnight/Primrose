@@ -1173,47 +1173,6 @@ function Primrose(canvasID, options) {
             self.currentToken = null;
 
             for (var y = 0; y < rows.length; ++y) {
-                // draw the tokens on self row
-                var row = rows[y];
-                for (var n = 0; n < row.length; ++n) {
-                    t = row[n];
-                    var toPrint = t.value;
-                    tokenBack.x += toPrint.length;
-                    tokenBack.i += toPrint.length;
-
-                    // skip drawing tokens that aren't in view
-                    if (self.scrollTop <= y && y < self.scrollTop + gridHeight && self.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-                        // draw the selection box
-                        if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                            if(minCursor.i === maxCursor.i){
-                                self.currentToken = t;
-                            }
-                            var selectionFront = Cursor.max(minCursor, tokenFront);
-                            var selectionBack = Cursor.min(maxCursor, tokenBack);
-                            var cw = selectionBack.i - selectionFront.i;
-                            gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
-                            gfx.fillRect(
-                                    (selectionFront.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
-                                    (selectionFront.y - self.scrollTop + 0.2) * self.characterHeight,
-                                    cw * self.characterWidth + 1,
-                                    self.characterHeight + 1);
-                        }
-
-                        // draw the text
-                        var style = theme[t.type] || {};
-                        var font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + self.characterHeight + "px " + theme.fontFamily;
-                        gfx.font = font.trim();
-                        gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                        gfx.fillText(
-                                toPrint,
-                                (tokenFront.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
-                                (tokenFront.y - self.scrollTop + 1) * self.characterHeight);
-                    }
-
-                    tokenFront.copy(tokenBack);
-                }
 
                 if (showLineNumbers && self.scrollTop <= y && y < self.scrollTop + gridHeight) {
                     // draw the left gutter
@@ -1233,6 +1192,58 @@ function Primrose(canvasID, options) {
                             lineNumber,
                             0,
                             (y - self.scrollTop + 1) * self.characterHeight);
+                }
+                
+                // draw the current row highlighter
+                if(y === self.backCursor.y){
+                    gfx.fillStyle = theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor;
+                    gfx.fillRect(
+                            (self.gridLeft - self.scrollLeft) * self.characterWidth,
+                            (y + 0.2 - self.scrollTop) * self.characterHeight,
+                            gridWidth * self.characterWidth,
+                            self.characterHeight + 1);
+                }                       
+                
+                // draw the tokens on this row
+                var row = rows[y]; 
+                for (var n = 0; n < row.length; ++n) {
+                    t = row[n];
+                    var toPrint = t.value;
+                    tokenBack.x += toPrint.length;
+                    tokenBack.i += toPrint.length;
+
+                    // skip drawing tokens that aren't in view
+                    if (self.scrollTop <= y && y < self.scrollTop + gridHeight && self.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {                        
+                        // draw the selection box
+                        if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                            if(minCursor.i === maxCursor.i){
+                                self.currentToken = t;
+                            }
+                            var selectionFront = Cursor.max(minCursor, tokenFront);
+                            var selectionBack = Cursor.min(maxCursor, tokenBack);
+                            var cw = selectionBack.i - selectionFront.i;
+                            gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
+                            gfx.fillRect(
+                                    (selectionFront.x + self.gridLeft - self.scrollLeft) * self.characterWidth,
+                                    (selectionFront.y + 0.2 - self.scrollTop) * self.characterHeight,
+                                    cw * self.characterWidth + 1,
+                                    self.characterHeight + 1);
+                        }
+
+                        // draw the text
+                        var style = theme[t.type] || {};
+                        var font = (style.fontWeight || theme.regular.fontWeight || "") +
+                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                                " " + self.characterHeight + "px " + theme.fontFamily;
+                        gfx.font = font.trim();
+                        gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                        gfx.fillText(
+                                toPrint,
+                                (tokenFront.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
+                                (tokenFront.y - self.scrollTop + 1) * self.characterHeight);
+                    }
+
+                    tokenFront.copy(tokenBack);
                 }
 
                 maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
@@ -3004,8 +3015,8 @@ Themes.Dark = {
     regular: {
         backColor: "black",
         foreColor: "#c0c0c0",
-        selectedBackColor: "#404040",
-        selectedForeColor: "#ffffff"
+        currentRowBackColor: "#202020",
+        selectedBackColor: "#404040"
     },
     strings: {
         foreColor: "#aa9900",
@@ -3057,8 +3068,8 @@ Themes.DEFAULT = {
     regular: {
         backColor: "white",
         foreColor: "black",
-        selectedBackColor: "#c0c0c0",
-        selectedForeColor: "#000000"
+        currentRowBackColor: "#d7d7d7",
+        selectedBackColor: "#c0c0c0"
     },
     strings: {
         foreColor: "#aa9900",

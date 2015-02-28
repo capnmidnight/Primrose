@@ -23,8 +23,8 @@ Themes.DEFAULT = {
     regular: {
         backColor: "white",
         foreColor: "black",
-        selectedBackColor: "#c0c0c0",
-        selectedForeColor: "#000000"
+        currentRowBackColor: "#d7d7d7",
+        selectedBackColor: "#c0c0c0"
     },
     strings: {
         foreColor: "#aa9900",

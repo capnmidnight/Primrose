@@ -23,8 +23,8 @@ Themes.Dark = {
     regular: {
         backColor: "black",
         foreColor: "#c0c0c0",
-        selectedBackColor: "#404040",
-        selectedForeColor: "#ffffff"
+        currentRowBackColor: "#202020",
+        selectedBackColor: "#404040"
     },
     strings: {
         foreColor: "#aa9900",
