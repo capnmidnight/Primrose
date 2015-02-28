@@ -453,6 +453,7 @@ function Primrose(canvasID, options) {
             dragging = false,
             focused = false,
             changed = false,
+            showLineNumbers = false,
             leftGutterWidth = 1,
             rightGutterWidth = 1,
             bottomGutterHeight = 1,
@@ -676,6 +677,16 @@ function Primrose(canvasID, options) {
             texture.needsUpdate = true;
         }
         return texture;
+    };
+    
+    this.setShowLineNumbers = function (v) {
+        showLineNumbers = v;
+        changed = true;
+        this.drawText();
+    };
+    
+    this.getShowLineNumbers = function() {
+        return showLineNumbers;
     };
 
     this.setTheme = function (t) {
@@ -1086,8 +1097,12 @@ function Primrose(canvasID, options) {
                 }
             }
 
-            var lineCountWidth = Math.max(1, Math.ceil(Math.log(rows.length) / Math.LN10));
-            this.gridLeft = lineCountWidth + leftGutterWidth;
+            var lineCountWidth = 0;
+            this.gridLeft = leftGutterWidth;
+            if(showLineNumbers) {
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(rows.length) / Math.LN10));
+                this.gridLeft += lineCountWidth;
+            }
             gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
             var scrollRight = this.scrollLeft + gridWidth;
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
@@ -1144,7 +1159,7 @@ function Primrose(canvasID, options) {
                     tokenFront.copy(tokenBack);
                 }
 
-                if (this.scrollTop <= y && y < this.scrollTop + gridHeight) {
+                if (showLineNumbers && this.scrollTop <= y && y < this.scrollTop + gridHeight) {
                     // draw the left gutter
                     var lineNumber = y.toString();
                     while (lineNumber.length < lineCountWidth) {
@@ -1286,6 +1301,7 @@ function Primrose(canvasID, options) {
 
     document.body.appendChild(surrogateContainer);
 
+    this.setShowLineNumbers(!options.hideLineNumbers);
     this.setTabWidth(options.tabWidth);
     this.setTheme(options.theme);
     this.setTokenizer(options.tokenizer);
@@ -2765,8 +2781,17 @@ var requestPointerLock = (document.documentElement.requestPointerLock || documen
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.PlainText = new Grammar("PlainText", [
-    ["newlines", /(?:\r\n|\r|\n)/]
+Grammar.JavaScript = new Grammar("JavaScript", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["comments", /\/\/.*$/],
+    ["startBlockComments", /\/\*/],
+    ["endBlockComments", /\*\//],
+    ["strings", /"(?:\\"|[^"]*)"/],
+    ["strings", /'(?:\\'|[^']*)'/],
+    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+    ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
+    ["functions", /(\w+)(?:\s*\()/],
+    ["members", /(?:(?:\w+\.)+)(\w+)/]
 ]);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -2784,17 +2809,8 @@ Grammar.PlainText = new Grammar("PlainText", [
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.JavaScript = new Grammar("JavaScript", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["comments", /\/\/.*$/],
-    ["startBlockComments", /\/\*/],
-    ["endBlockComments", /\*\//],
-    ["strings", /"(?:\\"|[^"]*)"/],
-    ["strings", /'(?:\\'|[^']*)'/],
-    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-    ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
-    ["functions", /(\w+)(?:\s*\()/],
-    ["members", /(?:(?:\w+\.)+)(\w+)/]
+Grammar.PlainText = new Grammar("PlainText", [
+    ["newlines", /(?:\r\n|\r|\n)/]
 ]);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
