@@ -3123,4 +3123,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};
+};Primrose.VERSION = "v0.12.5.0";

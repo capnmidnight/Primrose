@@ -1,5 +1,5 @@
+var pkgConfig = require("./package.json");
 module.exports = function (grunt) {
-
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
@@ -11,7 +11,8 @@ module.exports = function (grunt) {
                 banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n"
                         + "Copyright (C) 2015 <%= pkg.author %>\n"
                         + "<%= pkg.homepage %>*/\n",
-                separator: ";"
+                separator: ";",
+                footer: "Primrose.VERSION = \"v" + pkgConfig.version + "\";"
             },
             build: {
                 files:{
