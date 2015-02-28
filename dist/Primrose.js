@@ -18,170 +18,174 @@ https://github.com/capnmidnight/Primrose*/
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Cursor(i, x, y) {
-    this.i = i || 0;
-    this.x = x || 0;
-    this.y = y || 0;
-    this.moved = false;
-}
-
-Cursor.min = function (a, b) {
-    if (a.i <= b.i) {
-        return a;
+var Cursor = (function () {
+    "use strict";
+    function Cursor(i, x, y) {
+        this.i = i || 0;
+        this.x = x || 0;
+        this.y = y || 0;
+        this.moved = false;
     }
-    return b;
-};
 
-Cursor.max = function (a, b) {
-    if (a.i > b.i) {
-        return a;
-    }
-    return b;
-};
+    Cursor.min = function (a, b) {
+        if (a.i <= b.i) {
+            return a;
+        }
+        return b;
+    };
 
-Cursor.prototype.toString = function () {
-    return fmt("[i:$1 x:$2 y:$3]", this.i, this.x, this.y);
-};
+    Cursor.max = function (a, b) {
+        if (a.i > b.i) {
+            return a;
+        }
+        return b;
+    };
 
-Cursor.prototype.copy = function (cursor) {
-    this.i = cursor.i;
-    this.x = cursor.x;
-    this.y = cursor.y;
-    this.moved = false;
-};
+    Cursor.prototype.toString = function () {
+        return fmt("[i:$1 x:$2 y:$3]", this.i, this.x, this.y);
+    };
 
-Cursor.prototype.rectify = function (lines) {
-    if (this.y >= lines.length) {
-        this.y = lines.length - 1;
-    }
-    if (this.x > lines[this.y].length) {
-        this.x = lines[this.y].length;
-    }
-};
+    Cursor.prototype.copy = function (cursor) {
+        this.i = cursor.i;
+        this.x = cursor.x;
+        this.y = cursor.y;
+        this.moved = false;
+    };
 
-Cursor.prototype.left = function (lines) {
-    if (this.i > 0) {
-        --this.i;
-        --this.x;
-        if (this.x < 0) {
-            --this.y;
+    Cursor.prototype.rectify = function (lines) {
+        if (this.y >= lines.length) {
+            this.y = lines.length - 1;
+        }
+        if (this.x > lines[this.y].length) {
             this.x = lines[this.y].length;
         }
-    }
-    this.moved = true;
-};
+    };
 
-Cursor.prototype.skipleft = function (lines) {
-    if (this.x === 0) {
-        this.left(lines);
-    }
-    else {
-        var x = this.x - 1;
-        var line = reverse(lines[this.y].substring(0, x));
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? (m.index + m[0].length + 1) : line.length + 1;
-        this.i -= dx;
-        this.x -= dx;
-    }
-    this.moved = true;
-};
-
-Cursor.prototype.right = function (lines) {
-    if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
-        ++this.i;
-        ++this.x;
-        if (this.x > lines[this.y].length) {
-            this.x = 0;
-            ++this.y;
+    Cursor.prototype.left = function (lines) {
+        if (this.i > 0) {
+            --this.i;
+            --this.x;
+            if (this.x < 0) {
+                --this.y;
+                this.x = lines[this.y].length;
+            }
         }
-    }
-    this.moved = true;
-};
+        this.moved = true;
+    };
 
-Cursor.prototype.skipright = function (lines) {
-    if (this.x === lines[this.y].length) {
-        this.right(lines);
-    }
-    else {
-        var x = this.x + 1;
-        var line = lines[this.y].substring(x);
-        var m = line.match(/(\s|\W)+/);
-        var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
+    Cursor.prototype.skipleft = function (lines) {
+        if (this.x === 0) {
+            this.left(lines);
+        }
+        else {
+            var x = this.x - 1;
+            var line = reverse(lines[this.y].substring(0, x));
+            var m = line.match(/(\s|\W)+/);
+            var dx = m ? (m.index + m[0].length + 1) : line.length + 1;
+            this.i -= dx;
+            this.x -= dx;
+        }
+        this.moved = true;
+    };
+
+    Cursor.prototype.right = function (lines) {
+        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
+            ++this.i;
+            ++this.x;
+            if (this.x > lines[this.y].length) {
+                this.x = 0;
+                ++this.y;
+            }
+        }
+        this.moved = true;
+    };
+
+    Cursor.prototype.skipright = function (lines) {
+        if (this.x === lines[this.y].length) {
+            this.right(lines);
+        }
+        else {
+            var x = this.x + 1;
+            var line = lines[this.y].substring(x);
+            var m = line.match(/(\s|\W)+/);
+            var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
+            this.i += dx;
+            this.x += dx;
+        }
+        this.moved = true;
+    };
+
+    Cursor.prototype.home = function (lines) {
+        this.i -= this.x;
+        this.x = 0;
+        this.moved = true;
+    };
+
+    Cursor.prototype.fullhome = function (lines) {
+        this.i = 0;
+        this.x = 0;
+        this.y = 0;
+        this.moved = true;
+    };
+
+    Cursor.prototype.end = function (lines) {
+        var dx = lines[this.y].length - this.x;
         this.i += dx;
         this.x += dx;
-    }
-    this.moved = true;
-};
+        this.moved = true;
+    };
 
-Cursor.prototype.home = function (lines) {
-    this.i -= this.x;
-    this.x = 0;
-    this.moved = true;
-};
+    Cursor.prototype.fullend = function (lines) {
+        this.i += lines[this.y].length - this.x;
+        while (this.y < lines.length - 1) {
+            ++this.y;
+            this.i += lines[this.y].length + 1;
+        }
+        this.x = lines[this.y].length;
+        this.moved = true;
+    };
 
-Cursor.prototype.fullhome = function (lines) {
-    this.i = 0;
-    this.x = 0;
-    this.y = 0;
-    this.moved = true;
-};
+    Cursor.prototype.up = function (lines) {
+        if (this.y > 0) {
+            --this.y;
+            var dx = Math.min(0, lines[this.y].length - this.x);
+            this.x += dx;
+            this.i -= lines[this.y].length + 1 - dx;
+        }
+        this.moved = true;
+    };
 
-Cursor.prototype.end = function (lines) {
-    var dx = lines[this.y].length - this.x;
-    this.i += dx;
-    this.x += dx;
-    this.moved = true;
-};
+    Cursor.prototype.down = function (lines) {
+        if (this.y < lines.length - 1) {
+            ++this.y;
+            var dx = Math.min(0, lines[this.y].length - this.x);
+            this.x += dx;
+            this.i += lines[this.y - 1].length + 1 + dx;
+        }
+        this.moved = true;
+    };
 
-Cursor.prototype.fullend = function (lines) {
-    this.i += lines[this.y].length - this.x;
-    while (this.y < lines.length - 1) {
-        ++this.y;
-        this.i += lines[this.y].length + 1;
-    }
-    this.x = lines[this.y].length;
-    this.moved = true;
-};
+    Cursor.prototype.setXY = function (x, y, lines) {
+        this.y = Math.max(0, Math.min(lines.length - 1, y));
+        this.x = Math.max(0, Math.min(lines[this.y].length, x));
+        this.i = this.x;
+        for (var i = 0; i < this.y; ++i) {
+            this.i += lines[i].length + 1;
+        }
+        this.moved = true;
+    };
 
-Cursor.prototype.up = function (lines) {
-    if (this.y > 0) {
-        --this.y;
-        var dx = Math.min(0, lines[this.y].length - this.x);
-        this.x += dx;
-        this.i -= lines[this.y].length + 1 - dx;
-    }
-    this.moved = true;
-};
-
-Cursor.prototype.down = function (lines) {
-    if (this.y < lines.length - 1) {
-        ++this.y;
-        var dx = Math.min(0, lines[this.y].length - this.x);
-        this.x += dx;
-        this.i += lines[this.y - 1].length + 1 + dx;
-    }
-    this.moved = true;
-};
-
-Cursor.prototype.setXY = function (x, y, lines) {
-    this.y = Math.max(0, Math.min(lines.length - 1, y));
-    this.x = Math.max(0, Math.min(lines[this.y].length, x));
-    this.i = this.x;
-    for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length + 1;
-    }
-    this.moved = true;
-};
-
-Cursor.prototype.incY = function (dy, lines) {
-    this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-    this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
-    this.i = this.x;
-    for (var i = 0; i < this.y; ++i) {
-        this.i += lines[i].length + 1;
-    }
-    this.moved = true;
-};;/* 
+    Cursor.prototype.incY = function (dy, lines) {
+        this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
+        this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
+        this.i = this.x;
+        for (var i = 0; i < this.y; ++i) {
+            this.i += lines[i].length + 1;
+        }
+        this.moved = true;
+    };
+    return Cursor;
+})();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -198,91 +202,93 @@ Cursor.prototype.incY = function (dy, lines) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-function Grammar(name, grammar) {
-    this.name = name;
-    // clone the preprocessing grammar to start a new grammar
-    this.grammar = grammar.map(function (rule) {
-        return new Rule(rule[0], rule[1]);
-    });
-}
-
 function Rule(name, test) {
+    "use strict";
     this.name = name;
     this.test = test;
 }
 
 function Token(value, type, index) {
+    "use strict";
     this.value = value;
     this.type = type;
     this.index = index;
 }
 
-Grammar.prototype.tokenize = function (text) {
-    // all text starts off as regular text, then gets cut up into tokens of
-    // more specific type
-    var tokens = [new Token(text, "regular", 0)];
-    for (var i = 0; i < this.grammar.length; ++i) {
-        var rule = this.grammar[i];
-        for (var j = 0; j < tokens.length; ++j) {
-            var left = tokens[j];
+function Grammar(name, grammar) {
+    "use strict";
+    this.name = name;
+    // clone the preprocessing grammar to start a new grammar
+    this.grammar = grammar.map(function (rule) {
+        return new Rule(rule[0], rule[1]);
+    });
+            
+    this.tokenize = function (text) {
+        // all text starts off as regular text, then gets cut up into tokens of
+        // more specific type
+        var tokens = [new Token(text, "regular", 0)];
+        for (var i = 0; i < this.grammar.length; ++i) {
+            var rule = this.grammar[i];
+            for (var j = 0; j < tokens.length; ++j) {
+                var left = tokens[j];
 
-            if (left.type === "regular") {
-                var res = rule.test.exec(tokens[j].value);
-                if (res) {
-                    // insert the new token into the token list
-                    var midx = res[res.length - 1];
-                    var start = res.index;
-                    if (res.length === 2) {
-                        start += res[0].indexOf(midx);
-                    }
-                    var mid = new Token(midx, rule.name, left.index + start);
-                    tokens.splice(j + 1, 0, mid);
+                if (left.type === "regular") {
+                    var res = rule.test.exec(tokens[j].value);
+                    if (res) {
+                        // insert the new token into the token list
+                        var midx = res[res.length - 1];
+                        var start = res.index;
+                        if (res.length === 2) {
+                            start += res[0].indexOf(midx);
+                        }
+                        var mid = new Token(midx, rule.name, left.index + start);
+                        tokens.splice(j + 1, 0, mid);
 
-                    // if there is any string after the found token,
-                    // reinsert it so it can be processed further.
-                    var end = start + midx.length;
-                    if (end < left.value.length) {
-                        var right = new Token(left.value.substring(end), "regular", left.index + end);
-                        tokens.splice(j + 2, 0, right);
-                    }
+                        // if there is any string after the found token,
+                        // reinsert it so it can be processed further.
+                        var end = start + midx.length;
+                        if (end < left.value.length) {
+                            var right = new Token(left.value.substring(end), "regular", left.index + end);
+                            tokens.splice(j + 2, 0, right);
+                        }
 
-                    // cut the newly created token out of the current string
-                    if (start > 0) {
-                        left.value = left.value.substring(0, start);
-                        // skip the token we just created
-                        ++j;
-                    }
-                    else {
-                        tokens.splice(j, 1);
-                        // no need to backup, because the next array element
-                        // will be a Token and we don't need to recheck it
+                        // cut the newly created token out of the current string
+                        if (start > 0) {
+                            left.value = left.value.substring(0, start);
+                            // skip the token we just created
+                            ++j;
+                        }
+                        else {
+                            tokens.splice(j, 1);
+                            // no need to backup, because the next array element
+                            // will be a Token and we don't need to recheck it
+                        }
                     }
                 }
             }
         }
-    }
 
-    // normalize tokens
-    var blockOn = false;
-    for (i = 0; i < tokens.length; ++i) {
-        var t = tokens[i];
+        // normalize tokens
+        var blockOn = false;
+        for (i = 0; i < tokens.length; ++i) {
+            var t = tokens[i];
 
-        if (blockOn) {
-            if (t.type === "endBlockComments") {
-                blockOn = false;
+            if (blockOn) {
+                if (t.type === "endBlockComments") {
+                    blockOn = false;
+                }
+                if (t.type !== "newlines") {
+                    t.type = "comments";
+                }
             }
-            if (t.type !== "newlines") {
+            else if (t.type === "startBlockComments") {
+                blockOn = true;
                 t.type = "comments";
             }
         }
-        else if (t.type === "startBlockComments") {
-            blockOn = true;
-            t.type = "comments";
-        }
-    }
-    return tokens;
-};;/* 
+        return tokens;
+    };
+};/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -306,7 +312,9 @@ var CodePages = {};
 var Themes = {};
 var Commands = {};
 var OperatingSystems = {};
-var Keys = {
+var Keys = (function(){
+    "use strict";
+    return {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
@@ -395,6 +403,7 @@ var Keys = {
         }
     }
 };
+})();
 
 for(var key in Keys){
     var val = Keys[key];
@@ -1411,184 +1420,186 @@ function Primrose(canvasID, options) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.DE_QWERTZ = {
-    name: "Deutsch: QWERTZ",
-    language: "de",
-    deadKeys: [220, 221, 160, 192],
-    NORMAL: {
-        "48": "0",
-        "49": "1",
-        "50": "2",
-        "51": "3",
-        "52": "4",
-        "53": "5",
-        "54": "6",
-        "55": "7",
-        "56": "8",
-        "57": "9",
-        "60": "<",
-        "63": "ß",
-        "65": "a",
-        "66": "b",
-        "67": "c",
-        "68": "d",
-        "69": "e",
-        "70": "f",
-        "71": "g",
-        "72": "h",
-        "73": "i",
-        "74": "j",
-        "75": "k",
-        "76": "l",
-        "77": "m",
-        "78": "n",
-        "79": "o",
-        "80": "p",
-        "81": "q",
-        "82": "r",
-        "83": "s",
-        "84": "t",
-        "85": "u",
-        "86": "v",
-        "87": "w",
-        "88": "x",
-        "89": "y",
-        "90": "z",
-        "160": function (prim) {
-            prim.setDeadKeyState("DEAD3");
+CodePages.DE_QWERTZ = (function () {
+    "use strict";
+    return {
+        name: "Deutsch: QWERTZ",
+        language: "de",
+        deadKeys: [220, 221, 160, 192],
+        NORMAL: {
+            "48": "0",
+            "49": "1",
+            "50": "2",
+            "51": "3",
+            "52": "4",
+            "53": "5",
+            "54": "6",
+            "55": "7",
+            "56": "8",
+            "57": "9",
+            "60": "<",
+            "63": "ß",
+            "65": "a",
+            "66": "b",
+            "67": "c",
+            "68": "d",
+            "69": "e",
+            "70": "f",
+            "71": "g",
+            "72": "h",
+            "73": "i",
+            "74": "j",
+            "75": "k",
+            "76": "l",
+            "77": "m",
+            "78": "n",
+            "79": "o",
+            "80": "p",
+            "81": "q",
+            "82": "r",
+            "83": "s",
+            "84": "t",
+            "85": "u",
+            "86": "v",
+            "87": "w",
+            "88": "x",
+            "89": "y",
+            "90": "z",
+            "160": function (prim) {
+                prim.setDeadKeyState("DEAD3");
+            },
+            "163": "#",
+            "171": "+",
+            "173": "-",
+            "186": "ü",
+            "187": "+",
+            "188": ",",
+            "189": "-",
+            "190": ".",
+            "191": "#",
+            "192": function (prim) {
+                prim.setDeadKeyState("DEAD4");
+            },
+            "219": "ß",
+            "220": function (prim) {
+                prim.setDeadKeyState("DEAD1");
+            },
+            "221": function (prim) {
+                prim.setDeadKeyState("DEAD2");
+            },
+            "222": "ä",
+            "226": "<"
         },
-        "163": "#",
-        "171": "+",
-        "173": "-",
-        "186": "ü",
-        "187": "+",
-        "188": ",",
-        "189": "-",
-        "190": ".",
-        "191": "#",
-        "192": function (prim) {
-            prim.setDeadKeyState("DEAD4");
+        DEAD1NORMAL: {
+            "65": "â",
+            "69": "ê",
+            "73": "î",
+            "79": "ô",
+            "85": "û",
+            "190": "."
         },
-        "219": "ß",
-        "220": function (prim) {
-            prim.setDeadKeyState("DEAD1");
+        DEAD2NORMAL: {
+            "65": "á",
+            "69": "é",
+            "73": "í",
+            "79": "ó",
+            "83": "s",
+            "85": "ú",
+            "89": "ý"
         },
-        "221": function (prim) {
-            prim.setDeadKeyState("DEAD2");
+        SHIFT: {
+            "48": "=",
+            "49": "!",
+            "50": "\"",
+            "51": "§",
+            "52": "$",
+            "53": "%",
+            "54": "&",
+            "55": "/",
+            "56": "(",
+            "57": ")",
+            "60": ">",
+            "63": "?",
+            "65": "A",
+            "66": "B",
+            "67": "C",
+            "68": "D",
+            "69": "E",
+            "70": "F",
+            "71": "G",
+            "72": "H",
+            "73": "I",
+            "74": "J",
+            "75": "K",
+            "76": "L",
+            "77": "M",
+            "78": "N",
+            "79": "O",
+            "80": "P",
+            "81": "Q",
+            "82": "R",
+            "83": "S",
+            "84": "T",
+            "85": "U",
+            "86": "V",
+            "87": "W",
+            "88": "X",
+            "89": "Y",
+            "90": "Z",
+            "163": "'",
+            "171": "*",
+            "173": "_",
+            "186": "Ü",
+            "187": "*",
+            "188": ";",
+            "189": "_",
+            "190": ":",
+            "191": "'",
+            "192": "Ö",
+            "219": "?",
+            "222": "Ä",
+            "226": ">"
         },
-        "222": "ä",
-        "226": "<"
-    },
-    DEAD1NORMAL: {
-        "65": "â",
-        "69": "ê",
-        "73": "î",
-        "79": "ô",
-        "85": "û",
-        "190": "."
-    },
-    DEAD2NORMAL: {
-        "65": "á",
-        "69": "é",
-        "73": "í",
-        "79": "ó",
-        "83": "s",
-        "85": "ú",
-        "89": "ý"
-    },
-    SHIFT: {
-        "48": "=",
-        "49": "!",
-        "50": "\"",
-        "51": "§",
-        "52": "$",
-        "53": "%",
-        "54": "&",
-        "55": "/",
-        "56": "(",
-        "57": ")",
-        "60": ">",
-        "63": "?",
-        "65": "A",
-        "66": "B",
-        "67": "C",
-        "68": "D",
-        "69": "E",
-        "70": "F",
-        "71": "G",
-        "72": "H",
-        "73": "I",
-        "74": "J",
-        "75": "K",
-        "76": "L",
-        "77": "M",
-        "78": "N",
-        "79": "O",
-        "80": "P",
-        "81": "Q",
-        "82": "R",
-        "83": "S",
-        "84": "T",
-        "85": "U",
-        "86": "V",
-        "87": "W",
-        "88": "X",
-        "89": "Y",
-        "90": "Z",
-        "163": "'",
-        "171": "*",
-        "173": "_",
-        "186": "Ü",
-        "187": "*",
-        "188": ";",
-        "189": "_",
-        "190": ":",
-        "191": "'",
-        "192": "Ö",
-        "219": "?",
-        "222": "Ä",
-        "226": ">"
-    },
-    CTRLALT: {
-        "48": "}",
-        "50": "²",
-        "51": "³",
-        "55": "{",
-        "56": "[",
-        "57": "]",
-        "60": "|",
-        "63": "\\",
-        "69": "€",
-        "77": "µ",
-        "81": "@",
-        "171": "~",
-        "187": "~",
-        "219": "\\",
-        "226": "|"
-    },
-    CTRLALTSHIFT: {
-        "63": "ẞ",
-        "219": "ẞ"
-    },
-    DEAD3NORMAL: {
-        "65": "a",
-        "69": "e",
-        "73": "i",
-        "79": "o",
-        "85": "u",
-        "190": "."
-    },
-    DEAD4NORMAL: {
-        "65": "a",
-        "69": "e",
-        "73": "i",
-        "79": "o",
-        "83": "s",
-        "85": "u",
-        "89": "y"
-    }
-};
-
+        CTRLALT: {
+            "48": "}",
+            "50": "²",
+            "51": "³",
+            "55": "{",
+            "56": "[",
+            "57": "]",
+            "60": "|",
+            "63": "\\",
+            "69": "€",
+            "77": "µ",
+            "81": "@",
+            "171": "~",
+            "187": "~",
+            "219": "\\",
+            "226": "|"
+        },
+        CTRLALTSHIFT: {
+            "63": "ẞ",
+            "219": "ẞ"
+        },
+        DEAD3NORMAL: {
+            "65": "a",
+            "69": "e",
+            "73": "i",
+            "79": "o",
+            "85": "u",
+            "190": "."
+        },
+        DEAD4NORMAL: {
+            "65": "a",
+            "69": "e",
+            "73": "i",
+            "79": "o",
+            "83": "s",
+            "85": "u",
+            "89": "y"
+        }
+    };
+})();
 Keys.addNumPad(CodePages.DE_QWERTZ);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -1606,139 +1617,141 @@ Keys.addNumPad(CodePages.DE_QWERTZ);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.EN_UKX = {
-    name: "English: UK Extended",
-    language: "en-GB",
-    CTRLALT: {
-        "52": "€",
-        "65": "á",
-        "69": "é",
-        "73": "í",
-        "79": "ó",
-        "85": "ú",
-        "163": "\\",
-        "192": "¦",
-        "222": "\\",
-        "223": "¦"
-    },
-    CTRLALTSHIFT: {
-        "65": "Á",
-        "69": "É",
-        "73": "Í",
-        "79": "Ó",
-        "85": "Ú",
-        "222": "|"
-    },
-    NORMAL: {
-        "48": "0",
-        "49": "1",
-        "50": "2",
-        "51": "3",
-        "52": "4",
-        "53": "5",
-        "54": "6",
-        "55": "7",
-        "56": "8",
-        "57": "9",
-        "59": ";",
-        "61": "=",
-        "65": "a",
-        "66": "b",
-        "67": "c",
-        "68": "d",
-        "69": "e",
-        "70": "f",
-        "71": "g",
-        "72": "h",
-        "73": "i",
-        "74": "j",
-        "75": "k",
-        "76": "l",
-        "77": "m",
-        "78": "n",
-        "79": "o",
-        "80": "p",
-        "81": "q",
-        "82": "r",
-        "83": "s",
-        "84": "t",
-        "85": "u",
-        "86": "v",
-        "87": "w",
-        "88": "x",
-        "89": "y",
-        "90": "z",
-        "163": "#",
-        "173": "-",
-        "186": ";",
-        "187": "=",
-        "188": ",",
-        "189": "-",
-        "190": ".",
-        "191": "/",
-        "192": "'",
-        "219": "[",
-        "220": "\\",
-        "221": "]",
-        "222": "#",
-        "223": "`"
-    },
-    SHIFT: {
-        "48": ")",
-        "49": "!",
-        "50": "\"",
-        "51": "£",
-        "52": "$",
-        "53": "%",
-        "54": "^",
-        "55": "&",
-        "56": "*",
-        "57": "(",
-        "59": ":",
-        "61": "+",
-        "65": "A",
-        "66": "B",
-        "67": "C",
-        "68": "D",
-        "69": "E",
-        "70": "F",
-        "71": "G",
-        "72": "H",
-        "73": "I",
-        "74": "J",
-        "75": "K",
-        "76": "L",
-        "77": "M",
-        "78": "N",
-        "79": "O",
-        "80": "P",
-        "81": "Q",
-        "82": "R",
-        "83": "S",
-        "84": "T",
-        "85": "U",
-        "86": "V",
-        "87": "W",
-        "88": "X",
-        "89": "Y",
-        "90": "Z",
-        "163": "~",
-        "173": "_",
-        "186": ":",
-        "187": "+",
-        "188": "<",
-        "189": "_",
-        "190": ">",
-        "191": "?",
-        "192": "@",
-        "219": "{",
-        "220": "|",
-        "221": "}",
-        "222": "~",
-        "223": "¬"
-    }
-};
-
+CodePages.EN_UKX = (function () {
+    "use strict";
+    return {
+        name: "English: UK Extended",
+        language: "en-GB",
+        CTRLALT: {
+            "52": "€",
+            "65": "á",
+            "69": "é",
+            "73": "í",
+            "79": "ó",
+            "85": "ú",
+            "163": "\\",
+            "192": "¦",
+            "222": "\\",
+            "223": "¦"
+        },
+        CTRLALTSHIFT: {
+            "65": "Á",
+            "69": "É",
+            "73": "Í",
+            "79": "Ó",
+            "85": "Ú",
+            "222": "|"
+        },
+        NORMAL: {
+            "48": "0",
+            "49": "1",
+            "50": "2",
+            "51": "3",
+            "52": "4",
+            "53": "5",
+            "54": "6",
+            "55": "7",
+            "56": "8",
+            "57": "9",
+            "59": ";",
+            "61": "=",
+            "65": "a",
+            "66": "b",
+            "67": "c",
+            "68": "d",
+            "69": "e",
+            "70": "f",
+            "71": "g",
+            "72": "h",
+            "73": "i",
+            "74": "j",
+            "75": "k",
+            "76": "l",
+            "77": "m",
+            "78": "n",
+            "79": "o",
+            "80": "p",
+            "81": "q",
+            "82": "r",
+            "83": "s",
+            "84": "t",
+            "85": "u",
+            "86": "v",
+            "87": "w",
+            "88": "x",
+            "89": "y",
+            "90": "z",
+            "163": "#",
+            "173": "-",
+            "186": ";",
+            "187": "=",
+            "188": ",",
+            "189": "-",
+            "190": ".",
+            "191": "/",
+            "192": "'",
+            "219": "[",
+            "220": "\\",
+            "221": "]",
+            "222": "#",
+            "223": "`"
+        },
+        SHIFT: {
+            "48": ")",
+            "49": "!",
+            "50": "\"",
+            "51": "£",
+            "52": "$",
+            "53": "%",
+            "54": "^",
+            "55": "&",
+            "56": "*",
+            "57": "(",
+            "59": ":",
+            "61": "+",
+            "65": "A",
+            "66": "B",
+            "67": "C",
+            "68": "D",
+            "69": "E",
+            "70": "F",
+            "71": "G",
+            "72": "H",
+            "73": "I",
+            "74": "J",
+            "75": "K",
+            "76": "L",
+            "77": "M",
+            "78": "N",
+            "79": "O",
+            "80": "P",
+            "81": "Q",
+            "82": "R",
+            "83": "S",
+            "84": "T",
+            "85": "U",
+            "86": "V",
+            "87": "W",
+            "88": "X",
+            "89": "Y",
+            "90": "Z",
+            "163": "~",
+            "173": "_",
+            "186": ":",
+            "187": "+",
+            "188": "<",
+            "189": "_",
+            "190": ">",
+            "191": "?",
+            "192": "@",
+            "219": "{",
+            "220": "|",
+            "221": "}",
+            "222": "~",
+            "223": "¬"
+        }
+    };
+})();
 Keys.addNumPad(CodePages.EN_UKX);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -1756,112 +1769,115 @@ Keys.addNumPad(CodePages.EN_UKX);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.EN_US = {
-    name: "English: USA",
-    language: "en-US",
-    NORMAL: {
-        "48": "0",
-        "49": "1",
-        "50": "2",
-        "51": "3",
-        "52": "4",
-        "53": "5",
-        "54": "6",
-        "55": "7",
-        "56": "8",
-        "57": "9",
-        "59": ";",
-        "61": "=",
-        "65": "a",
-        "66": "b",
-        "67": "c",
-        "68": "d",
-        "69": "e",
-        "70": "f",
-        "71": "g",
-        "72": "h",
-        "73": "i",
-        "74": "j",
-        "75": "k",
-        "76": "l",
-        "77": "m",
-        "78": "n",
-        "79": "o",
-        "80": "p",
-        "81": "q",
-        "82": "r",
-        "83": "s",
-        "84": "t",
-        "85": "u",
-        "86": "v",
-        "87": "w",
-        "88": "x",
-        "89": "y",
-        "90": "z",
-        "173": "-",
-        "186": ";",
-        "187": "=",
-        "188": ",",
-        "189": "-",
-        "190": ".",
-        "191": "/",
-        "219": "[",
-        "220": "\\",
-        "221": "]",
-        "222": "'"
-    },
-    SHIFT: {
-        "48": ")",
-        "49": "!",
-        "50": "@",
-        "51": "#",
-        "52": "$",
-        "53": "%",
-        "54": "^",
-        "55": "&",
-        "56": "*",
-        "57": "(",
-        "59": ":",
-        "61": "+",
-        "65": "A",
-        "66": "B",
-        "67": "C",
-        "68": "D",
-        "69": "E",
-        "70": "F",
-        "71": "G",
-        "72": "H",
-        "73": "I",
-        "74": "J",
-        "75": "K",
-        "76": "L",
-        "77": "M",
-        "78": "N",
-        "79": "O",
-        "80": "P",
-        "81": "Q",
-        "82": "R",
-        "83": "S",
-        "84": "T",
-        "85": "U",
-        "86": "V",
-        "87": "W",
-        "88": "X",
-        "89": "Y",
-        "90": "Z",
-        "173": "_",
-        "186": ":",
-        "187": "+",
-        "188": "<",
-        "189": "_",
-        "190": ">",
-        "191": "?",
-        "219": "{",
-        "220": "|",
-        "221": "}",
-        "222": "\""
-    }
-};
+CodePages.EN_US = (function () {
+    "use strict";
+    return {
+        name: "English: USA",
+        language: "en-US",
+        NORMAL: {
+            "48": "0",
+            "49": "1",
+            "50": "2",
+            "51": "3",
+            "52": "4",
+            "53": "5",
+            "54": "6",
+            "55": "7",
+            "56": "8",
+            "57": "9",
+            "59": ";",
+            "61": "=",
+            "65": "a",
+            "66": "b",
+            "67": "c",
+            "68": "d",
+            "69": "e",
+            "70": "f",
+            "71": "g",
+            "72": "h",
+            "73": "i",
+            "74": "j",
+            "75": "k",
+            "76": "l",
+            "77": "m",
+            "78": "n",
+            "79": "o",
+            "80": "p",
+            "81": "q",
+            "82": "r",
+            "83": "s",
+            "84": "t",
+            "85": "u",
+            "86": "v",
+            "87": "w",
+            "88": "x",
+            "89": "y",
+            "90": "z",
+            "173": "-",
+            "186": ";",
+            "187": "=",
+            "188": ",",
+            "189": "-",
+            "190": ".",
+            "191": "/",
+            "219": "[",
+            "220": "\\",
+            "221": "]",
+            "222": "'"
+        },
+        SHIFT: {
+            "48": ")",
+            "49": "!",
+            "50": "@",
+            "51": "#",
+            "52": "$",
+            "53": "%",
+            "54": "^",
+            "55": "&",
+            "56": "*",
+            "57": "(",
+            "59": ":",
+            "61": "+",
+            "65": "A",
+            "66": "B",
+            "67": "C",
+            "68": "D",
+            "69": "E",
+            "70": "F",
+            "71": "G",
+            "72": "H",
+            "73": "I",
+            "74": "J",
+            "75": "K",
+            "76": "L",
+            "77": "M",
+            "78": "N",
+            "79": "O",
+            "80": "P",
+            "81": "Q",
+            "82": "R",
+            "83": "S",
+            "84": "T",
+            "85": "U",
+            "86": "V",
+            "87": "W",
+            "88": "X",
+            "89": "Y",
+            "90": "Z",
+            "173": "_",
+            "186": ":",
+            "187": "+",
+            "188": "<",
+            "189": "_",
+            "190": ">",
+            "191": "?",
+            "219": "{",
+            "220": "|",
+            "221": "}",
+            "222": "\""
+        }
+    };
+})();
 
 Keys.addNumPad(CodePages.EN_US);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
@@ -1880,166 +1896,168 @@ Keys.addNumPad(CodePages.EN_US);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.FR_AZERTY = {
-    name: "Français: AZERTY",
-    language: "fr",
-    deadKeys: [221, 50, 55],
-    NORMAL: {
-        "48": "à",
-        "49": "&",
-        "50": "é",
-        "51": "\"",
-        "52": "'",
-        "53": "(",
-        "54": "-",
-        "55": "è",
-        "56": "_",
-        "57": "ç",
-        "65": "a",
-        "66": "b",
-        "67": "c",
-        "68": "d",
-        "69": "e",
-        "70": "f",
-        "71": "g",
-        "72": "h",
-        "73": "i",
-        "74": "j",
-        "75": "k",
-        "76": "l",
-        "77": "m",
-        "78": "n",
-        "79": "o",
-        "80": "p",
-        "81": "q",
-        "82": "r",
-        "83": "s",
-        "84": "t",
-        "85": "u",
-        "86": "v",
-        "87": "w",
-        "88": "x",
-        "89": "y",
-        "90": "z",
-        "186": "$",
-        "187": "=",
-        "188": ",",
-        "190": ";",
-        "191": ":",
-        "192": "ù",
-        "219": ")",
-        "220": "*",
-        "221": function (prim) {
-            prim.setDeadKeyState("DEAD1");
+CodePages.FR_AZERTY = (function () {
+    "use strict";
+    return {
+        name: "Français: AZERTY",
+        language: "fr",
+        deadKeys: [221, 50, 55],
+        NORMAL: {
+            "48": "à",
+            "49": "&",
+            "50": "é",
+            "51": "\"",
+            "52": "'",
+            "53": "(",
+            "54": "-",
+            "55": "è",
+            "56": "_",
+            "57": "ç",
+            "65": "a",
+            "66": "b",
+            "67": "c",
+            "68": "d",
+            "69": "e",
+            "70": "f",
+            "71": "g",
+            "72": "h",
+            "73": "i",
+            "74": "j",
+            "75": "k",
+            "76": "l",
+            "77": "m",
+            "78": "n",
+            "79": "o",
+            "80": "p",
+            "81": "q",
+            "82": "r",
+            "83": "s",
+            "84": "t",
+            "85": "u",
+            "86": "v",
+            "87": "w",
+            "88": "x",
+            "89": "y",
+            "90": "z",
+            "186": "$",
+            "187": "=",
+            "188": ",",
+            "190": ";",
+            "191": ":",
+            "192": "ù",
+            "219": ")",
+            "220": "*",
+            "221": function (prim) {
+                prim.setDeadKeyState("DEAD1");
+            },
+            "222": "²",
+            "223": "!",
+            "226": "<"
         },
-        "222": "²",
-        "223": "!",
-        "226": "<"
-    },
-    SHIFT: {
-        "48": "0",
-        "49": "1",
-        "50": "2",
-        "51": "3",
-        "52": "4",
-        "53": "5",
-        "54": "6",
-        "55": "7",
-        "56": "8",
-        "57": "9",
-        "65": "A",
-        "66": "B",
-        "67": "C",
-        "68": "D",
-        "69": "E",
-        "70": "F",
-        "71": "G",
-        "72": "H",
-        "73": "I",
-        "74": "J",
-        "75": "K",
-        "76": "L",
-        "77": "M",
-        "78": "N",
-        "79": "O",
-        "80": "P",
-        "81": "Q",
-        "82": "R",
-        "83": "S",
-        "84": "T",
-        "85": "U",
-        "86": "V",
-        "87": "W",
-        "88": "X",
-        "89": "Y",
-        "90": "Z",
-        "186": "£",
-        "187": "+",
-        "188": "?",
-        "190": ".",
-        "191": "/",
-        "192": "%",
-        "219": "°",
-        "220": "µ",
-        "223": "§",
-        "226": ">"
-    },
-    CTRLALT: {
-        "48": "@",
-        "50": function (prim) {
-            prim.setDeadKeyState("DEAD2");
+        SHIFT: {
+            "48": "0",
+            "49": "1",
+            "50": "2",
+            "51": "3",
+            "52": "4",
+            "53": "5",
+            "54": "6",
+            "55": "7",
+            "56": "8",
+            "57": "9",
+            "65": "A",
+            "66": "B",
+            "67": "C",
+            "68": "D",
+            "69": "E",
+            "70": "F",
+            "71": "G",
+            "72": "H",
+            "73": "I",
+            "74": "J",
+            "75": "K",
+            "76": "L",
+            "77": "M",
+            "78": "N",
+            "79": "O",
+            "80": "P",
+            "81": "Q",
+            "82": "R",
+            "83": "S",
+            "84": "T",
+            "85": "U",
+            "86": "V",
+            "87": "W",
+            "88": "X",
+            "89": "Y",
+            "90": "Z",
+            "186": "£",
+            "187": "+",
+            "188": "?",
+            "190": ".",
+            "191": "/",
+            "192": "%",
+            "219": "°",
+            "220": "µ",
+            "223": "§",
+            "226": ">"
         },
-        "51": "#",
-        "52": "{",
-        "53": "[",
-        "54": "|",
-        "55": function (prim) {
-            prim.setDeadKeyState("DEAD3");
+        CTRLALT: {
+            "48": "@",
+            "50": function (prim) {
+                prim.setDeadKeyState("DEAD2");
+            },
+            "51": "#",
+            "52": "{",
+            "53": "[",
+            "54": "|",
+            "55": function (prim) {
+                prim.setDeadKeyState("DEAD3");
+            },
+            "56": "\\",
+            "57": "^",
+            "69": "€",
+            "186": "¤",
+            "187": "}",
+            "219": "]"
         },
-        "56": "\\",
-        "57": "^",
-        "69": "€",
-        "186": "¤",
-        "187": "}",
-        "219": "]"
-    },
-    DEAD1NORMAL: {
-        "65": "â",
-        "69": "ê",
-        "73": "î",
-        "79": "ô",
-        "85": "û"
-    },
-    DEAD2NORMAL: {
-        "65": "ã",
-        "78": "ñ",
-        "79": "õ"
-    },
-    DEAD2CTRLALT: {
-        "50": function (prim) {
-            prim.setDeadKeyState("DEAD2");
+        DEAD1NORMAL: {
+            "65": "â",
+            "69": "ê",
+            "73": "î",
+            "79": "ô",
+            "85": "û"
         },
-        "55": function (prim) {
-            prim.setDeadKeyState("DEAD3");
+        DEAD2NORMAL: {
+            "65": "ã",
+            "78": "ñ",
+            "79": "õ"
+        },
+        DEAD2CTRLALT: {
+            "50": function (prim) {
+                prim.setDeadKeyState("DEAD2");
+            },
+            "55": function (prim) {
+                prim.setDeadKeyState("DEAD3");
+            }
+        },
+        DEAD1CTRLALT: {
+            "50": function (prim) {
+                prim.setDeadKeyState("DEAD2");
+            }
+        },
+        DEAD3NORMAL: {
+            "48": "à",
+            "50": "é",
+            "55": "è",
+            "65": "à",
+            "69": "è",
+            "73": "ì",
+            "79": "ò",
+            "85": "ù"
         }
-    },
-    DEAD1CTRLALT: {
-        "50": function (prim) {
-            prim.setDeadKeyState("DEAD2");
-        }
-    },
-    DEAD3NORMAL: {
-        "48": "à",
-        "50": "é",
-        "55": "è",
-        "65": "à",
-        "69": "è",
-        "73": "ì",
-        "79": "ò",
-        "85": "ù"
-    }
-};
-
+    };
+})();
 Keys.addNumPad(CodePages.FR_AZERTY);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -2061,83 +2079,86 @@ Keys.addNumPad(CodePages.FR_AZERTY);;/*
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-Commands.DEFAULT = {
-    name: "Basic commands",
-    NORMAL_SPACEBAR: " ",
-    SHIFT_SPACEBAR: " ",
-    NORMAL_BACKSPACE: function (prim, lines) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-            prim.frontCursor.left(lines);
-        }
-        prim.deleteSelection();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    NORMAL_ENTER: function (prim, lines) {
-        var indent = "";
-        for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
-            indent += " ";
-        }
-        prim.insertAtCursor("\n" + indent);
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    NORMAL_DELETE: function (prim, lines) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-            prim.backCursor.right(lines);
-        }
-        prim.deleteSelection();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    SHIFT_DELETE: function (prim, lines) {
-        if (prim.frontCursor.i === prim.backCursor.i) {
-            prim.frontCursor.home(lines);
-            prim.backCursor.end(lines);
-        }
-        prim.deleteSelection();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    NORMAL_TAB: function (prim, lines) {
-        var ts = prim.getTabString();
-        if (prim.frontCursor.y === prim.backCursor.y) {
-            prim.insertAtCursor(ts);
-        }
-        else {
+Commands.DEFAULT = (function () {
+    "use strict";
+    return {
+        name: "Basic commands",
+        NORMAL_SPACEBAR: " ",
+        SHIFT_SPACEBAR: " ",
+        NORMAL_BACKSPACE: function (prim, lines) {
+            if (prim.frontCursor.i === prim.backCursor.i) {
+                prim.frontCursor.left(lines);
+            }
+            prim.deleteSelection();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        NORMAL_ENTER: function (prim, lines) {
+            var indent = "";
+            for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
+                indent += " ";
+            }
+            prim.insertAtCursor("\n" + indent);
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        NORMAL_DELETE: function (prim, lines) {
+            if (prim.frontCursor.i === prim.backCursor.i) {
+                prim.backCursor.right(lines);
+            }
+            prim.deleteSelection();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        SHIFT_DELETE: function (prim, lines) {
+            if (prim.frontCursor.i === prim.backCursor.i) {
+                prim.frontCursor.home(lines);
+                prim.backCursor.end(lines);
+            }
+            prim.deleteSelection();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        NORMAL_TAB: function (prim, lines) {
+            var ts = prim.getTabString();
+            if (prim.frontCursor.y === prim.backCursor.y) {
+                prim.insertAtCursor(ts);
+            }
+            else {
+                var a = Cursor.min(prim.frontCursor, prim.backCursor);
+                var b = Cursor.max(prim.frontCursor, prim.backCursor);
+                a.home(lines);
+                b.end(lines);
+                for (var y = a.y; y <= b.y; ++y) {
+                    lines[y] = ts + lines[y];
+                }
+                a.setXY(0, a.y, lines);
+                b.setXY(0, b.y, lines);
+                b.end(lines);
+                prim.pushUndo(lines);
+            }
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        SHIFT_TAB: function (prim, lines) {
             var a = Cursor.min(prim.frontCursor, prim.backCursor);
             var b = Cursor.max(prim.frontCursor, prim.backCursor);
             a.home(lines);
-            b.end(lines);
+            b.home(lines);
+            var tw = prim.getTabWidth();
+            var ts = prim.getTabString();
+            var edited = false;
             for (var y = a.y; y <= b.y; ++y) {
-                lines[y] = ts + lines[y];
+                if (lines[y].substring(0, tw) === ts) {
+                    lines[y] = lines[y].substring(tw);
+                    edited = true;
+                }
             }
-            a.setXY(0, a.y, lines);
-            b.setXY(0, b.y, lines);
-            b.end(lines);
-            prim.pushUndo(lines);
-        }
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    SHIFT_TAB: function (prim, lines) {
-        var a = Cursor.min(prim.frontCursor, prim.backCursor);
-        var b = Cursor.max(prim.frontCursor, prim.backCursor);
-        a.home(lines);
-        b.home(lines);
-        var tw = prim.getTabWidth();
-        var ts = prim.getTabString();
-        var edited = false;
-        for (var y = a.y; y <= b.y; ++y) {
-            if (lines[y].substring(0, tw) === ts) {
-                lines[y] = lines[y].substring(tw);
-                edited = true;
+            if (edited) {
+                a.setXY(0, a.y, lines);
+                b.setXY(0, b.y, lines);
+                b.end(lines);
+                prim.pushUndo(lines);
+                prim.scrollIntoView(prim.frontCursor);
             }
         }
-        if (edited) {
-            a.setXY(0, a.y, lines);
-            b.setXY(0, b.y, lines);
-            b.end(lines);
-            prim.pushUndo(lines);
-            prim.scrollIntoView(prim.frontCursor);
-        }
-    }
-};
+    };
+})();
 
 Keys.makeCursorCommand(Commands.DEFAULT, "", "LEFTARROW", "Left");
 Keys.makeCursorCommand(Commands.DEFAULT, "", "RIGHTARROW", "Right");
@@ -2898,31 +2919,34 @@ Grammar.PlainText = new Grammar("PlainText", [
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.OSX = {
-    name: "OSX",
-    META_a: function (prim, lines) {
-        prim.frontCursor.fullhome(lines);
-        prim.backCursor.fullend(lines);
-    },
-    METASHIFT_z: function (prim, lines) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    META_z: function (prim, lines) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    META_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
+OperatingSystems.OSX = (function () {
+    "use strict";
+    return {
+        name: "OSX",
+        META_a: function (prim, lines) {
+            prim.frontCursor.fullhome(lines);
+            prim.backCursor.fullend(lines);
+        },
+        METASHIFT_z: function (prim, lines) {
+            prim.redo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        META_z: function (prim, lines) {
+            prim.undo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        META_DOWNARROW: function (prim, lines) {
+            if (prim.scrollTop < lines.length) {
+                ++prim.scrollTop;
+            }
+        },
+        META_UPARROW: function (prim, lines) {
+            if (prim.scrollTop > 0) {
+                --prim.scrollTop;
+            }
         }
-    },
-    META_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-    }
-};
+    };
+})();
 
 Keys.makeCursorCommand(OperatingSystems.OSX, "META", "LEFTARROW", "Home");
 Keys.makeCursorCommand(OperatingSystems.OSX, "META", "RIGHTARROW", "End");
@@ -2949,40 +2973,43 @@ Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "LEFTARROW", "SkipLeft");
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.WINDOWS = {
-    name: "Windows",
-    CTRL_a: function (prim, lines) {
-        prim.frontCursor.fullhome(lines);
-        prim.backCursor.fullend(lines);
-        prim.forceUpdate();
-    },
-    CTRL_y: function (prim, lines) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    CTRL_z: function (prim, lines) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    CTRL_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
+OperatingSystems.WINDOWS = (function () {
+    "use strict";
+    return {
+        name: "Windows",
+        CTRL_a: function (prim, lines) {
+            prim.frontCursor.fullhome(lines);
+            prim.backCursor.fullend(lines);
+            prim.forceUpdate();
+        },
+        CTRL_y: function (prim, lines) {
+            prim.redo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        CTRL_z: function (prim, lines) {
+            prim.undo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        CTRL_DOWNARROW: function (prim, lines) {
+            if (prim.scrollTop < lines.length) {
+                ++prim.scrollTop;
+            }
+            prim.forceUpdate();
+        },
+        CTRL_UPARROW: function (prim, lines) {
+            if (prim.scrollTop > 0) {
+                --prim.scrollTop;
+            }
+            prim.forceUpdate();
+        },
+        ALTSHIFT_LEFTARROW: function (prim, lines) {
+            prim.incCurrentToken(-1);
+        },
+        ALTSHIFT_RIGHTARROW: function (prim, lines) {
+            prim.incCurrentToken(1);
         }
-        prim.forceUpdate();
-    },
-    CTRL_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-        prim.forceUpdate();
-    },
-    ALTSHIFT_LEFTARROW: function (prim, lines) {
-        prim.incCurrentToken(-1);
-    },
-    ALTSHIFT_RIGHTARROW: function (prim, lines) {
-        prim.incCurrentToken(1);
-    }
-};
+    };
+})();
 
 Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "HOME", "Home");
 Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "END", "End");

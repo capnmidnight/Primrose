@@ -22,7 +22,9 @@ var CodePages = {};
 var Themes = {};
 var Commands = {};
 var OperatingSystems = {};
-var Keys = {
+var Keys = (function(){
+    "use strict";
+    return {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
@@ -111,6 +113,7 @@ var Keys = {
         }
     }
 };
+})();
 
 for(var key in Keys){
     var val = Keys[key];

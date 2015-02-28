@@ -17,40 +17,43 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.WINDOWS = {
-    name: "Windows",
-    CTRL_a: function (prim, lines) {
-        prim.frontCursor.fullhome(lines);
-        prim.backCursor.fullend(lines);
-        prim.forceUpdate();
-    },
-    CTRL_y: function (prim, lines) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    CTRL_z: function (prim, lines) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    CTRL_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
+OperatingSystems.WINDOWS = (function () {
+    "use strict";
+    return {
+        name: "Windows",
+        CTRL_a: function (prim, lines) {
+            prim.frontCursor.fullhome(lines);
+            prim.backCursor.fullend(lines);
+            prim.forceUpdate();
+        },
+        CTRL_y: function (prim, lines) {
+            prim.redo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        CTRL_z: function (prim, lines) {
+            prim.undo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        CTRL_DOWNARROW: function (prim, lines) {
+            if (prim.scrollTop < lines.length) {
+                ++prim.scrollTop;
+            }
+            prim.forceUpdate();
+        },
+        CTRL_UPARROW: function (prim, lines) {
+            if (prim.scrollTop > 0) {
+                --prim.scrollTop;
+            }
+            prim.forceUpdate();
+        },
+        ALTSHIFT_LEFTARROW: function (prim, lines) {
+            prim.incCurrentToken(-1);
+        },
+        ALTSHIFT_RIGHTARROW: function (prim, lines) {
+            prim.incCurrentToken(1);
         }
-        prim.forceUpdate();
-    },
-    CTRL_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-        prim.forceUpdate();
-    },
-    ALTSHIFT_LEFTARROW: function (prim, lines) {
-        prim.incCurrentToken(-1);
-    },
-    ALTSHIFT_RIGHTARROW: function (prim, lines) {
-        prim.incCurrentToken(1);
-    }
-};
+    };
+})();
 
 Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "HOME", "Home");
 Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "END", "End");

@@ -15,7 +15,7 @@ module.exports = function (grunt) {
             },
             build: {
                 files:{
-                    "dist/Primrose.js": ["src/**/*.js"],
+                    "dist/Primrose.js": ["src/**/*.js"]
                 }
             }
         },
@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                         dest: "dist/Primrose.min.js"
                     }]
             }
-        },
+        }
     });
 
     grunt.loadNpmTasks("grunt-contrib-jshint");

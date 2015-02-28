@@ -18,31 +18,34 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.OSX = {
-    name: "OSX",
-    META_a: function (prim, lines) {
-        prim.frontCursor.fullhome(lines);
-        prim.backCursor.fullend(lines);
-    },
-    METASHIFT_z: function (prim, lines) {
-        prim.redo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    META_z: function (prim, lines) {
-        prim.undo();
-        prim.scrollIntoView(prim.frontCursor);
-    },
-    META_DOWNARROW: function (prim, lines) {
-        if (prim.scrollTop < lines.length) {
-            ++prim.scrollTop;
+OperatingSystems.OSX = (function () {
+    "use strict";
+    return {
+        name: "OSX",
+        META_a: function (prim, lines) {
+            prim.frontCursor.fullhome(lines);
+            prim.backCursor.fullend(lines);
+        },
+        METASHIFT_z: function (prim, lines) {
+            prim.redo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        META_z: function (prim, lines) {
+            prim.undo();
+            prim.scrollIntoView(prim.frontCursor);
+        },
+        META_DOWNARROW: function (prim, lines) {
+            if (prim.scrollTop < lines.length) {
+                ++prim.scrollTop;
+            }
+        },
+        META_UPARROW: function (prim, lines) {
+            if (prim.scrollTop > 0) {
+                --prim.scrollTop;
+            }
         }
-    },
-    META_UPARROW: function (prim, lines) {
-        if (prim.scrollTop > 0) {
-            --prim.scrollTop;
-        }
-    }
-};
+    };
+})();
 
 Keys.makeCursorCommand(OperatingSystems.OSX, "META", "LEFTARROW", "Home");
 Keys.makeCursorCommand(OperatingSystems.OSX, "META", "RIGHTARROW", "End");
