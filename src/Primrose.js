@@ -266,13 +266,15 @@ function Primrose(canvasID, options) {
     };
 
     self.focus = function () {
-        changed = true;
         focused = true;
+        changed = true;
+        self.drawText();
     };
 
     self.blur = function () {
-        changed = true;
         focused = false;
+        changed = true;
+        self.drawText();
     };
 
     self.isFocused = function () {
@@ -792,7 +794,7 @@ function Primrose(canvasID, options) {
                 }
                 
                 // draw the current row highlighter
-                if(y === self.backCursor.y){
+                if(focused && y === self.backCursor.y){
                     gfx.fillStyle = theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor;
                     gfx.fillRect(
                             (self.gridLeft - self.scrollLeft) * self.characterWidth,
