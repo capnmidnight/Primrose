@@ -21,12 +21,27 @@ function Rule(name, test) {
     this.test = test;
 }
 
-function Token(value, type, index) {
+var Token = (function () {
     "use strict";
-    this.value = value;
-    this.type = type;
-    this.index = index;
-}
+    function Token(value, type, index, line) {
+        this.value = value;
+        this.type = type;
+        this.index = index;
+        this.line = line;
+    }
+
+    Token.prototype.clone = function () {
+        return new Token(this.value, this.type, this.index, this.line);
+    };
+
+    Token.prototype.splitAt = function (i) {
+        var next = this.value.substring(i);
+        this.value = this.value.substring(0, i);
+        return new Token(next, this.type, this.index + i, this.line);
+    };
+
+    return Token;
+})();
 
 function Grammar(name, grammar) {
     "use strict";
@@ -35,7 +50,7 @@ function Grammar(name, grammar) {
     this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1]);
     });
-            
+
     this.tokenize = function (text) {
         // all text starts off as regular text, then gets cut up into tokens of
         // more specific type
@@ -46,35 +61,32 @@ function Grammar(name, grammar) {
                 var left = tokens[j];
 
                 if (left.type === "regular") {
-                    var res = rule.test.exec(tokens[j].value);
+                    var res = rule.test.exec(left.value);
                     if (res) {
                         // insert the new token into the token list
                         var midx = res[res.length - 1];
                         var start = res.index;
-                        if (res.length === 2) {
-                            start += res[0].indexOf(midx);
-                        }
-                        var mid = new Token(midx, rule.name, left.index + start);
-                        tokens.splice(j + 1, 0, mid);
-
-                        // if there is any string after the found token,
-                        // reinsert it so it can be processed further.
                         var end = start + midx.length;
-                        if (end < left.value.length) {
-                            var right = new Token(left.value.substring(end), "regular", left.index + end);
-                            tokens.splice(j + 2, 0, right);
+                        if(start === 0){
+                            // the rule matches the start of the token
+                            left.type = rule.name;
+                            if(end < left.value.length){
+                                // but not the end
+                                var next = left.splitAt(end);
+                                next.type = "regular";
+                                tokens.splice(j + 1, 0, next);
+                            }
                         }
-
-                        // cut the newly created token out of the current string
-                        if (start > 0) {
-                            left.value = left.value.substring(0, start);
-                            // skip the token we just created
-                            ++j;
-                        }
-                        else {
-                            tokens.splice(j, 1);
-                            // no need to backup, because the next array element
-                            // will be a Token and we don't need to recheck it
+                        else{
+                            // the rule matches from the middle of the token
+                            var mid = left.splitAt(start);
+                            if(midx.length < mid.value.length) {
+                                // but not the end
+                                var right = mid.splitAt(midx.length);
+                                tokens.splice(j + 1, 0, right);
+                            }
+                            mid.type = rule.name;
+                            tokens.splice(j + 1, 0, mid);
                         }
                     }
                 }
@@ -82,9 +94,13 @@ function Grammar(name, grammar) {
         }
 
         // normalize tokens
-        var blockOn = false;
+        var blockOn = false, line = 0;
         for (i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
+            t.line = line;
+            if (t.type === "newlines") {
+                ++line;
+            }
 
             if (blockOn) {
                 if (t.type === "endBlockComments") {
