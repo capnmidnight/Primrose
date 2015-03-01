@@ -770,17 +770,25 @@ function Primrose(canvasID, options) {
             }
 
             var lineCountWidth = 0;
-            var leftGutterWidth = showScrollBars ? 1 : 0;
-            this.gridLeft = leftGutterWidth;
+            var leftGutterWidth = 0;
+            var rightGutterWidth = 0;
+            var bottomGutterHeight = 0;
+            
             if (showLineNumbers) {
                 lineCountWidth = Math.max(1, Math.ceil(Math.log(rows.length) / Math.LN10));
-                this.gridLeft += lineCountWidth;
+                leftGutterWidth = 1;
             }
-            var rightGutterWidth = showScrollBars ? 1 : 0;
+            
+            if(showScrollBars){
+                rightGutterWidth = 1;
+                bottomGutterHeight = 1;
+            }
+            
+            this.gridLeft = leftGutterWidth + lineCountWidth;
+            
             gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
             var scrollRight = this.scrollLeft + gridWidth;
             
-            var bottomGutterHeight = showScrollBars ? 1 : 0;
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
             pageSize = Math.floor(gridHeight);
 
