@@ -1,4 +1,4 @@
-/*! Primrose 2015-02-28
+/*! Primrose 2015-03-01
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -208,12 +208,27 @@ function Rule(name, test) {
     this.test = test;
 }
 
-function Token(value, type, index) {
+var Token = (function () {
     "use strict";
-    this.value = value;
-    this.type = type;
-    this.index = index;
-}
+    function Token(value, type, index, line) {
+        this.value = value;
+        this.type = type;
+        this.index = index;
+        this.line = line;
+    }
+
+    Token.prototype.clone = function () {
+        return new Token(this.value, this.type, this.index, this.line);
+    };
+
+    Token.prototype.splitAt = function (i) {
+        var next = this.value.substring(i);
+        this.value = this.value.substring(0, i);
+        return new Token(next, this.type, this.index + i, this.line);
+    };
+
+    return Token;
+})();
 
 function Grammar(name, grammar) {
     "use strict";
@@ -222,7 +237,7 @@ function Grammar(name, grammar) {
     this.grammar = grammar.map(function (rule) {
         return new Rule(rule[0], rule[1]);
     });
-            
+
     this.tokenize = function (text) {
         // all text starts off as regular text, then gets cut up into tokens of
         // more specific type
@@ -233,35 +248,32 @@ function Grammar(name, grammar) {
                 var left = tokens[j];
 
                 if (left.type === "regular") {
-                    var res = rule.test.exec(tokens[j].value);
+                    var res = rule.test.exec(left.value);
                     if (res) {
                         // insert the new token into the token list
                         var midx = res[res.length - 1];
                         var start = res.index;
-                        if (res.length === 2) {
-                            start += res[0].indexOf(midx);
-                        }
-                        var mid = new Token(midx, rule.name, left.index + start);
-                        tokens.splice(j + 1, 0, mid);
-
-                        // if there is any string after the found token,
-                        // reinsert it so it can be processed further.
                         var end = start + midx.length;
-                        if (end < left.value.length) {
-                            var right = new Token(left.value.substring(end), "regular", left.index + end);
-                            tokens.splice(j + 2, 0, right);
+                        if(start === 0){
+                            // the rule matches the start of the token
+                            left.type = rule.name;
+                            if(end < left.value.length){
+                                // but not the end
+                                var next = left.splitAt(end);
+                                next.type = "regular";
+                                tokens.splice(j + 1, 0, next);
+                            }
                         }
-
-                        // cut the newly created token out of the current string
-                        if (start > 0) {
-                            left.value = left.value.substring(0, start);
-                            // skip the token we just created
-                            ++j;
-                        }
-                        else {
-                            tokens.splice(j, 1);
-                            // no need to backup, because the next array element
-                            // will be a Token and we don't need to recheck it
+                        else{
+                            // the rule matches from the middle of the token
+                            var mid = left.splitAt(start);
+                            if(midx.length < mid.value.length) {
+                                // but not the end
+                                var right = mid.splitAt(midx.length);
+                                tokens.splice(j + 1, 0, right);
+                            }
+                            mid.type = rule.name;
+                            tokens.splice(j + 1, 0, mid);
                         }
                     }
                 }
@@ -269,9 +281,13 @@ function Grammar(name, grammar) {
         }
 
         // normalize tokens
-        var blockOn = false;
+        var blockOn = false, line = 0;
         for (i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
+            t.line = line;
+            if (t.type === "newlines") {
+                ++line;
+            }
 
             if (blockOn) {
                 if (t.type === "endBlockComments") {
@@ -458,7 +474,6 @@ function Primrose(canvasID, options) {
             currentTouchID,
             texture, pickingTexture, pickingPixelBuffer,
             deadKeyState = "",
-            commandState = "",
             keyNames = [],
             history = [],
             historyFrame = -1,
@@ -467,9 +482,10 @@ function Primrose(canvasID, options) {
             changed = false,
             showLineNumbers = true,
             showScrollBars = true,
+            wordWrap = false,
             canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
-            surrogate = cascadeElement("primrose-surrogate-textarea-" + canvasID, "textarea", HTMLTextAreaElement),
+            surrogate = cascadeElement("primrose-surrogate-textarea-" + canvas.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
 
 
@@ -677,14 +693,12 @@ function Primrose(canvasID, options) {
 
     this.focus = function () {
         focused = true;
-        changed = true;
-        this.drawText();
+        this.forceUpdate();
     };
 
     this.blur = function () {
         focused = false;
-        changed = true;
-        this.drawText();
+        this.forceUpdate();
     };
 
     this.isFocused = function () {
@@ -744,10 +758,18 @@ function Primrose(canvasID, options) {
         this.movePointer(x, y);
     };
 
+    this.setWordWrap = function (v) {
+        wordWrap = v;
+        this.forceUpdate();
+    };
+
+    this.getWordWrap = function () {
+        return wordWrap;
+    };
+
     this.setShowLineNumbers = function (v) {
         showLineNumbers = v;
-        changed = true;
-        this.drawText();
+        this.forceUpdate();
     };
 
     this.getShowLineNumbers = function () {
@@ -756,8 +778,7 @@ function Primrose(canvasID, options) {
 
     this.setShowScrollBars = function (v) {
         showScrollBars = v;
-        changed = true;
-        this.drawText();
+        this.forceUpdate();
     };
 
     this.getShowScrollBars = function () {
@@ -776,11 +797,6 @@ function Primrose(canvasID, options) {
     this.setDeadKeyState = function (st) {
         changed = true;
         deadKeyState = st || "";
-    };
-
-    this.setCommandState = function (st) {
-        changed = true;
-        commandState = st || "";
     };
 
     this.setOperatingSystem = function (os) {
@@ -805,11 +821,6 @@ function Primrose(canvasID, options) {
         measureText.call(self);
     };
 
-    this.forceUpdate = function () {
-        changed = true;
-        this.drawText();
-    };
-
     this.getWidth = function () {
         return canvas.width;
     };
@@ -818,10 +829,18 @@ function Primrose(canvasID, options) {
         return canvas.height;
     };
 
+    this.forceUpdate = function () {
+        changed = true;
+        this.drawText();
+    };
+
     this.setCodePage = function (cp) {
         changed = true;
         var key, code;
-        var lang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || navigator.browserLanguage;
+        var lang = (navigator.languages && navigator.languages[0]) ||
+                navigator.language ||
+                navigator.userLanguage ||
+                navigator.browserLanguage;
 
         if (!lang || lang === "en") {
             lang = "en-US";
@@ -901,14 +920,13 @@ function Primrose(canvasID, options) {
     };
 
     this.pushUndo = function (lines) {
-        changed = true;
         if (historyFrame < history.length - 1) {
             history.splice(historyFrame + 1);
         }
         history.push(lines);
         historyFrame = history.length - 1;
         tokens = tokenizer.tokenize(this.getText());
-        this.drawText();
+        this.forceUpdate();
     };
 
     this.redo = function () {
@@ -1152,8 +1170,8 @@ function Primrose(canvasID, options) {
         }
         this.drawText();
     };
-    
-    function fillRect(gfx, fill, x, y, w, h){
+
+    function fillRect(gfx, fill, x, y, w, h) {
         gfx.fillStyle = fill;
         gfx.fillRect(
                 x * self.characterWidth,
@@ -1171,13 +1189,11 @@ function Primrose(canvasID, options) {
             }
             gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
 
-            // group the tokens into rows
-            var rows = [[]];
+            var lineCount = 1;
+
             for (var i = 0; i < tokens.length; ++i) {
-                t = tokens[i];
-                rows[rows.length - 1].push(t);
-                if (t.type === "newlines") {
-                    rows.push([]);
+                if (tokens[i].type === "newlines") {
+                    ++lineCount;
                 }
             }
 
@@ -1185,51 +1201,77 @@ function Primrose(canvasID, options) {
             var leftGutterWidth = 0;
             var rightGutterWidth = 0;
             var bottomGutterHeight = 0;
-            
+
             if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(rows.length) / Math.LN10));
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
-            
-            if(showScrollBars){
+
+            if (showScrollBars) {
                 rightGutterWidth = 1;
                 bottomGutterHeight = 1;
             }
-            
+
             this.gridLeft = leftGutterWidth + lineCountWidth;
-            
+
             gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
             var scrollRight = this.scrollLeft + gridWidth;
-            
+
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
             pageSize = Math.floor(gridHeight);
+
+            // group the tokens into rows
+            var currentRow = [];
+            var rows = [currentRow];
+            var rowX = 0;
+            for (i = 0; i < tokens.length; ++i) {
+                t = tokens[i].clone();
+                currentRow.push(t);
+                rowX += t.value.length;
+                if (wordWrap && rowX >= gridWidth || t.type === "newlines") {
+                    currentRow = [];
+                    rows.push(currentRow);
+                    if (wordWrap && rowX >= gridWidth && t.type !== "newlines") {
+                        currentRow.push(t.splitAt(gridWidth - (rowX - t.value.length)));
+                    }
+                    rowX = 0;
+                }
+            }
 
             var minCursor = Cursor.min(this.frontCursor, this.backCursor);
             var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
             var tokenFront = new Cursor();
             var tokenBack = new Cursor();
             var maxLineWidth = 0;
+            var lastLine = -1;
 
             this.currentToken = null;
 
             for (var y = 0; y < rows.length; ++y) {
-
+                // draw the tokens on this row
+                var row = rows[y];
+                // be able to draw brand-new rows that don't have any tokens yet
+                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+                // draw the left gutter
                 if (showLineNumbers && this.scrollTop <= y && y < this.scrollTop + gridHeight) {
-                    // draw the left gutter
-                    var lineNumber = y.toString();
+                    var lineNumber = currentLine.toString();
                     while (lineNumber.length < lineCountWidth) {
                         lineNumber = " " + lineNumber;
                     }
                     fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                        0, (y - this.scrollTop + 0.2),
-                        (lineNumber.length + leftGutterWidth), 1);
+                            0, (y - this.scrollTop + 0.2),
+                            (lineNumber.length + leftGutterWidth), 1);
                     gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
-                    gfx.fillStyle = theme.regular.foreColor;
-                    gfx.fillText(
-                            lineNumber,
-                            0,
-                            (y - this.scrollTop + 1) * this.characterHeight);
+
+                    if (currentLine > lastLine) {
+                        gfx.fillStyle = theme.regular.foreColor;
+                        gfx.fillText(
+                                lineNumber,
+                                0,
+                                (y - this.scrollTop + 1) * this.characterHeight);
+                    }
                 }
+                lastLine = currentLine;
 
                 // draw the current row highlighter
                 if (focused && y === this.backCursor.y) {
@@ -1238,16 +1280,21 @@ function Primrose(canvasID, options) {
                             gridWidth, 1);
                 }
 
-                // draw the tokens on this row
-                var row = rows[y];
                 for (var n = 0; n < row.length; ++n) {
                     t = row[n];
                     var toPrint = t.value;
                     tokenBack.x += toPrint.length;
                     tokenBack.i += toPrint.length;
 
+                    if (t.type === "newlines") {
+                        lastLine = currentLine;
+                    }
+
                     // skip drawing tokens that aren't in view
-                    if (this.scrollTop <= y && y < this.scrollTop + gridHeight && this.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                    if (this.scrollTop <= y &&
+                            y < this.scrollTop + gridHeight &&
+                            this.scrollLeft <= tokenBack.x &&
+                            tokenFront.x < scrollRight) {
                         // draw the selection box
                         if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
                             if (minCursor.i === maxCursor.i) {
@@ -1257,8 +1304,8 @@ function Primrose(canvasID, options) {
                             var selectionBack = Cursor.min(maxCursor, tokenBack);
                             var cw = selectionBack.i - selectionFront.i;
                             fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                                (selectionFront.x + this.gridLeft - this.scrollLeft), (selectionFront.y + 0.2 - this.scrollTop),
-                                cw, 1);
+                                    (selectionFront.x + this.gridLeft - this.scrollLeft), (selectionFront.y + 0.2 - this.scrollTop),
+                                    cw, 1);
                         }
 
                         // draw the text
@@ -1301,7 +1348,7 @@ function Primrose(canvasID, options) {
                         (this.backCursor.y - this.scrollTop + 1.25) * this.characterHeight);
                 gfx.stroke();
             }
-            console.log(showScrollBars);
+
             // draw the scrollbars
             if (showScrollBars) {
                 //vertical
@@ -1314,7 +1361,7 @@ function Primrose(canvasID, options) {
                         scrollY,
                         this.characterWidth,
                         Math.max(this.characterHeight, scrollBarHeight));
-                        
+
                 // horizontal
                 var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + (this.gridLeft * this.characterWidth);
                 var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
@@ -1335,13 +1382,13 @@ function Primrose(canvasID, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            changed = true;
-            this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);
+            var delta = Math.floor(evt.deltaY / this.characterHeight);
+            this.scrollTop += delta;
             if (this.scrollTop < 0) {
                 this.scrollTop = 0;
             }
             evt.preventDefault();
-            this.drawText();
+            this.forceUpdate()();
         }
     };
 
@@ -1393,14 +1440,15 @@ function Primrose(canvasID, options) {
 
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + canvasID, surrogate);
+    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + canvas.id, surrogate);
 
     if (!canvas.parentElement) {
-        document.body.appendChild(makeHidingContainer("primrose-container-" + canvasID, canvas));
+        document.body.appendChild(makeHidingContainer("primrose-container-" + canvas.id, canvas));
     }
 
     document.body.appendChild(surrogateContainer);
 
+    this.setWordWrap(!!options.wordWrap);
     this.setShowLineNumbers(!options.hideLineNumbers);
     this.setShowScrollBars(!options.hideScrollBars);
     this.setTabWidth(options.tabWidth);
@@ -1412,11 +1460,11 @@ function Primrose(canvasID, options) {
     this.setText(options.file);
     this.bindEvents(options.keyEventSource, options.pointerEventSource);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvasID, Themes, theme.name, self, "setTheme", "theme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvasID, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvasID, CodePages, codePage.name, self, "setCodePage", "localization");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvasID, Commands, commandSystem.name, self, "setCommandSystem", "command system");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvasID, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvas.id, Themes, theme.name, self, "setTheme", "theme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvas.id, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvas.id, CodePages, codePage.name, self, "setCodePage", "localization");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvas.id, Commands, commandSystem.name, self, "setCommandSystem", "command system");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvas.id, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -2484,6 +2532,7 @@ function cascadeElement(id, tag, DOMClass) {
     var elem = null;
     if (id === null) {
         elem = document.createElement(tag);
+        elem.id = id = "auto_" + tag + Date.now();
     }
     else if (DOMClass === undefined || id instanceof DOMClass) {
         elem = id;

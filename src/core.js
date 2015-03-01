@@ -292,6 +292,7 @@ function cascadeElement(id, tag, DOMClass) {
     var elem = null;
     if (id === null) {
         elem = document.createElement(tag);
+        elem.id = id = "auto_" + tag + Date.now();
     }
     else if (DOMClass === undefined || id instanceof DOMClass) {
         elem = id;
