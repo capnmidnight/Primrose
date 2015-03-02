@@ -20,6 +20,15 @@
 
 var CodePages = {};
 var Themes = {};
+
+function Tile(i, bg, fg, style, weight){
+    this.index = i;
+    this.backColor = bg;
+    this.foreColor = fg;
+    this.fontStyle = style;
+    this.fontWeight = weight;
+}
+
 var Commands = {};
 var OperatingSystems = {};
 var Keys = (function(){
