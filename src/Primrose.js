@@ -93,9 +93,9 @@ function Primrose(canvasElementOrID, options) {
     }
 
     function minDelta(v, minV, maxV) {
-        var dvMinV = v - minV
-        dvMaxV = v - maxV + 5
-        dv = 0;
+        var dvMinV = v - minV,
+                dvMaxV = v - maxV + 5,
+                dv = 0;
         if (dvMinV < 0 || dvMaxV >= 0) {
             // compare the absolute values, so we get the smallest change
             // regardless of direction.
@@ -624,15 +624,14 @@ function Primrose(canvasElementOrID, options) {
     this.deleteSelection = function () {
         if (this.frontCursor.i !== this.backCursor.i) {
             // TODO: don't rejoin the string first.
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor)
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor)
-            lines = this.getLines()
-            text = lines.join("\n")
-            left = text.substring(0, minCursor.i)
-            right = text.substring(maxCursor.i);
-            text = left + right;
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    lines = this.getLines(),
+                    text = lines.join("\n"),
+                    left = text.substring(0, minCursor.i),
+                    right = text.substring(maxCursor.i);
             maxCursor.copy(minCursor);
-            this.setText(text);
+            this.setText(left + right);
         }
     };
 
