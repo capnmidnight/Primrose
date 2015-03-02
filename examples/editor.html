@@ -37,9 +37,9 @@
     <body>
         <div style="position:absolute;height:100%;width:100%">
             <div id="controls" style="position:absolute;height:7em;width:100%">
-                <div><input type="checkbox" id="toggleWordWrap" checked><label for="toggleWordWrap">Word wrap</label></div>
-                <div><input type="checkbox" id="toggleLineNumbers" checked><label for="toggleLineNumbers">Line numbers</label></div>
-                <div><input type="checkbox" id="toggleScrollBars" checked><label for="toggleScrollBars">Scroll bars</label></div>
+                <div><input type="checkbox" id="toggleWordWrap"><label for="toggleWordWrap">Word wrap</label></div>
+                <div><input type="checkbox" id="toggleLineNumbers"><label for="toggleLineNumbers">Line numbers</label></div>
+                <div><input type="checkbox" id="toggleScrollBars"><label for="toggleScrollBars">Scroll bars</label></div>
             </div>
             <div style="position:absolute;top:2em;bottom:0;width:100%;">
                 <canvas id="output" style="position:absolute;height:100%;width:100%;"></canvas>
@@ -121,15 +121,16 @@ function demo() {
                     
             function onToggle(e, f){
                 e.addEventListener("change", function(){
-                    f(e.checked);
+                    prim["set" + f](e.checked);
                 });
+                e.checked = prim["get" + f]();
             }
                     
             window.addEventListener("load", function () {
                 ctrls = findEverything();
                 prim = new Primrose(ctrls.output, {
                     file: demo.toString(),
-                    wordWrap: true
+                    wordWrap: false
                 });
                 prim.focus();
 
@@ -145,9 +146,9 @@ function demo() {
                     prim.bindEvents(window, output);
                     window.addEventListener("wheel", prim.readWheel.bind(prim));
 
-                    onToggle(toggleLineNumbers, prim.setShowLineNumbers.bind(prim));
-                    onToggle(toggleScrollBars, prim.setShowScrollBars.bind(prim));
-                    onToggle(toggleWordWrap, prim.setWordWrap.bind(prim));
+                    onToggle(toggleLineNumbers, "ShowLineNumbers");
+                    onToggle(toggleScrollBars, "ShowScrollBars");
+                    onToggle(toggleWordWrap, "WordWrap");
                 }
             });
         </script>
