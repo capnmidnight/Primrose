@@ -39,7 +39,6 @@ function Primrose(canvasElementOrID, options) {
             tokens,
             theme,
             pageSize,
-            gridWidth, gridHeight,
             pointerX, pointerY,
             tabWidth, tabString,
             currentTouchID,
@@ -51,7 +50,9 @@ function Primrose(canvasElementOrID, options) {
             scrollLeft = 0,
             gridTop = 0,
             gridLeft = 0,
-            grid = [],
+            gridWidth = 0,
+            gridHeight = 0,
+            tileGrid = [],
             lineCount = 0,
             dragging = false,
             focused = false,
@@ -836,10 +837,9 @@ function Primrose(canvasElementOrID, options) {
         }
     };
 
-    function renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight) {
-        var i, t, y, row, currentLine, lineNumber, selectionFront,
-                selectionBack, cw, font, style, drawWidth, drawHeight, scrollX,
-                scrollY, scrollBarWidth, scrollBarHeight,
+    function makeGrid(rows, lineCountWidth, leftGutterWidth) {
+        var i, t, x, y, row, currentLine, lineNumber, selectionFront,
+                selectionBack, cw, font, style,
                 scrollRight = scrollLeft + gridWidth,
                 minCursor = Cursor.min(self.frontCursor, self.backCursor),
                 maxCursor = Cursor.max(self.frontCursor, self.backCursor),
@@ -848,6 +848,34 @@ function Primrose(canvasElementOrID, options) {
                 maxLineWidth = 0,
                 lastLine = -1,
                 clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+
+        if (tileGrid.length > gridHeight) {
+            tileGrid.splice(gridHeight);
+        }
+        else
+            while (tileGrid.length < gridHeight) {
+                tileGrid.push([]);
+            }
+
+        for (y = 0; y < gridHeight; ++y) {
+            var row = tileGrid[y];
+            if (row.length > gridWidth) {
+                row.splice(gridWidth);
+            }
+            for (x = 0; x < gridWidth; ++x) {
+                if (!row[x]) {
+                    row[x] = new Tile();
+                }
+                else {
+                    row[x].index = null;
+                    row[x].char = null;
+                    row[x].foreColor = null;
+                    row[x].backColor = null;
+                    row[x].fontStyle = null;
+                    row[x].fontWeight = null;
+                }
+            }
+        }
 
         if (theme.regular.backColor) {
             gfx.fillStyle = theme.regular.backColor;
@@ -930,25 +958,134 @@ function Primrose(canvasElementOrID, options) {
             ++tokenFront.y;
             tokenBack.copy(tokenFront);
         }
+    }
 
-        // draw the cursor caret
-        if (focused) {
-            gfx.beginPath();
-            gfx.strokeStyle = theme.cursorColor || "black";
-            gfx.moveTo(
-                    (self.frontCursor.x - scrollLeft + gridLeft) * self.characterWidth,
-                    (self.frontCursor.y - self.scrollTop) * self.characterHeight);
-            gfx.lineTo(
-                    (self.frontCursor.x - scrollLeft + gridLeft) * self.characterWidth,
-                    (self.frontCursor.y - self.scrollTop + 1.25) * self.characterHeight);
-            gfx.moveTo(
-                    (self.backCursor.x - scrollLeft + gridLeft) * self.characterWidth + 1,
-                    (self.backCursor.y - self.scrollTop) * self.characterHeight);
-            gfx.lineTo(
-                    (self.backCursor.x - scrollLeft + gridLeft) * self.characterWidth + 1,
-                    (self.backCursor.y - self.scrollTop + 1.25) * self.characterHeight);
-            gfx.stroke();
+    function renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight) {
+        var i, t, y, row, currentLine, lineNumber, selectionFront,
+                selectionBack, cw, font, style, drawWidth, drawHeight, scrollX,
+                scrollY, scrollBarWidth, scrollBarHeight,
+                scrollRight = scrollLeft + gridWidth,
+                minCursor = Cursor.min(self.frontCursor, self.backCursor),
+                maxCursor = Cursor.max(self.frontCursor, self.backCursor),
+                tokenFront = new Cursor(),
+                tokenBack = new Cursor(),
+                maxLineWidth = 0,
+                lastLine = -1,
+                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+
+        if (theme.regular.backColor) {
+            gfx.fillStyle = theme.regular.backColor;
         }
+        gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
+        gfx.save();
+        gfx.translate(0, -self.scrollTop * self.characterHeight);
+        gfx.save();
+        gfx.translate((gridLeft - scrollLeft) * self.characterWidth, 0);
+        for (y = 0, lastLine = -1; y < rows.length; ++y) {
+            // draw the tokens on this row
+            row = rows[y];
+            // be able to draw brand-new rows that don't have any tokens yet
+            currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+
+            // draw the current row highlighter
+            if (focused && currentLine === self.backCursor.y) {
+                fillRect(gfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                        0, (y + 0.2),
+                        gridWidth, 1);
+            }
+
+            for (i = 0; i < row.length; ++i) {
+                t = row[i];
+                tokenBack.x += t.value.length;
+                tokenBack.i += t.value.length;
+
+                if (t.type === "newlines") {
+                    lastLine = currentLine;
+                }
+
+                // skip drawing tokens that aren't in view
+                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
+                        scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                    // draw the selection box
+                    var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+                    if (inSelection) {
+                        selectionFront = Cursor.max(minCursor, tokenFront);
+                        selectionBack = Cursor.min(maxCursor, tokenBack);
+                        cw = selectionBack.i - selectionFront.i;
+                        fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                                selectionFront.x, selectionFront.y + 0.2,
+                                cw, 1);
+                    }
+
+                    // draw the text
+                    style = theme[t.type] || {};
+                    font = (style.fontWeight || theme.regular.fontWeight || "") +
+                            " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                            " " + self.characterHeight + "px " + theme.fontFamily;
+                    gfx.font = font.trim();
+                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                    gfx.fillText(
+                            t.value,
+                            tokenFront.x * self.characterWidth,
+                            (tokenFront.y + 1) * self.characterHeight);
+
+                    // draw the cursor caret
+                    if (focused && inSelection && minCursor.i === maxCursor.i) {
+                        gfx.beginPath();
+                        gfx.strokeStyle = theme.cursorColor || "black";
+                        gfx.moveTo(
+                                self.frontCursor.x * self.characterWidth,
+                                self.frontCursor.y * self.characterHeight);
+                        gfx.lineTo(
+                                self.frontCursor.x * self.characterWidth,
+                                (self.frontCursor.y + 1.25) * self.characterHeight);
+                        gfx.moveTo(
+                                self.backCursor.x * self.characterWidth + 1,
+                                self.backCursor.y * self.characterHeight);
+                        gfx.lineTo(
+                                self.backCursor.x * self.characterWidth + 1,
+                                (self.backCursor.y + 1.25) * self.characterHeight);
+                        gfx.stroke();
+                    }
+                }
+
+                tokenFront.copy(tokenBack);
+            }
+
+            maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+            tokenFront.x = 0;
+            ++tokenFront.y;
+            tokenBack.copy(tokenFront);
+        }
+        gfx.restore();
+        
+        if (showLineNumbers) {
+            for (y = self.scrollTop; y < self.scrollTop + gridHeight; ++y) {
+                // draw the tokens on this row
+                row = rows[y];
+                // be able to draw brand-new rows that don't have any tokens yet
+                currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+                // draw the left gutter
+                lineNumber = currentLine.toString();
+                while (lineNumber.length < lineCountWidth) {
+                    lineNumber = " " + lineNumber;
+                }
+                fillRect(gfx,
+                        theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                        0, y + 0.2,
+                        (lineNumber.length + leftGutterWidth), 1);
+                gfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
+
+                if (currentLine > lastLine) {
+                    gfx.fillStyle = theme.regular.foreColor;
+                    gfx.fillText(
+                            lineNumber,
+                            0, (y + 1) * self.characterHeight);
+                }
+                lastLine = currentLine;
+            }
+        }
+        gfx.restore();
 
         // draw the scrollbars
         if (showScrollBars) {
@@ -974,7 +1111,6 @@ function Primrose(canvasElementOrID, options) {
                     self.characterWidth,
                     Math.max(self.characterHeight, scrollBarHeight));
         }
-
         if (texture) {
             texture.needsUpdate = true;
         }

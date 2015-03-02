@@ -21,8 +21,9 @@
 var CodePages = {};
 var Themes = {};
 
-function Tile(i, bg, fg, style, weight){
+function Tile(i, c, bg, fg, style, weight){
     this.index = i;
+    this.char = c;
     this.backColor = bg;
     this.foreColor = fg;
     this.fontStyle = style;
