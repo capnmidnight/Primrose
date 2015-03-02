@@ -45,12 +45,6 @@ OperatingSystems.WINDOWS = (function () {
                 --prim.scrollTop;
             }
             prim.forceUpdate();
-        },
-        ALTSHIFT_LEFTARROW: function (prim, lines) {
-            prim.incCurrentToken(-1);
-        },
-        ALTSHIFT_RIGHTARROW: function (prim, lines) {
-            prim.incCurrentToken(1);
         }
     };
 })();

@@ -441,10 +441,9 @@ for(var key in Keys){
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * along with self program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Primrose(canvasID, options) {
+function Primrose(canvasElementOrID, options) {
     "use strict";
     var self = this;
     //////////////////////////////////////////////////////////////////////////
@@ -483,7 +482,7 @@ function Primrose(canvasID, options) {
             showLineNumbers = true,
             showScrollBars = true,
             wordWrap = false,
-            canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement),
+            canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
             surrogate = cascadeElement("primrose-surrogate-textarea-" + canvas.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
@@ -498,6 +497,8 @@ function Primrose(canvasID, options) {
     this.scrollTop = 0;
     this.scrollLeft = 0;
     this.gridLeft = 0;
+    this.gridTop = 0;
+    this.lineCount = 0;
     this.currentToken = null;
 
 
@@ -505,13 +506,27 @@ function Primrose(canvasID, options) {
     // private methods
     //////////////////////////////////////////////////////////////////////////
 
+    function refreshTokens() {
+        tokens = tokenizer.tokenize(self.getText());
+    }
+
+    function clampScroll() {
+        if (self.scrollTop < 0) {
+            self.scrollTop = 0;
+        }
+        else
+            while (self.scrollTop > self.lineCount - gridHeight) {
+                --self.scrollTop;
+            }
+    }
+
     function minDelta(v, minV, maxV) {
-        var dvMinV = v - minV;
-        var dvMaxV = v - maxV + 5;
-        var dv = 0;
-        if (!(dvMinV >= 0 && dvMaxV < 0)) {
-            // compare the absolute values, so we get the smallest change regardless
-            // of direction
+        var dvMinV = v - minV,
+                dvMaxV = v - maxV + 5,
+                dv = 0;
+        if (dvMinV < 0 || dvMaxV >= 0) {
+            // compare the absolute values, so we get the smallest change
+            // regardless of direction.
             if (Math.abs(dvMinV) < Math.abs(dvMaxV)) {
                 dv = dvMinV;
             }
@@ -533,8 +548,8 @@ function Primrose(canvasID, options) {
             }
         }
         if (i >= 0) {
-            var type = evt.clipboardData.types[i];
-            var str = evt.clipboardData.getData(type);
+            var type = evt.clipboardData.types[i],
+                    str = evt.clipboardData.getData(type);
             evt.preventDefault();
             self.pasteAtCursor(str);
         }
@@ -562,6 +577,15 @@ function Primrose(canvasID, options) {
                 oldHeight !== canvas.height ||
                 oldFont !== gfx.font;
         self.drawText();
+    }
+
+    function fillRect(gfx, fill, x, y, w, h) {
+        gfx.fillStyle = fill;
+        gfx.fillRect(
+                x * self.characterWidth,
+                y * self.characterHeight,
+                w * self.characterWidth + 1,
+                h * self.characterHeight + 1);
     }
 
     function setCursorXY(cursor, x, y) {
@@ -641,10 +665,10 @@ function Primrose(canvasID, options) {
         if (keyboardSystem && operatingSystem && commandSystem) {
             commandPack = {};
         }
-        addCommandPack.call(self, keyboardSystem);
-        addCommandPack.call(self, operatingSystem);
-        addCommandPack.call(self, browser);
-        addCommandPack.call(self, commandSystem);
+        addCommandPack(keyboardSystem);
+        addCommandPack(operatingSystem);
+        addCommandPack(browser);
+        addCommandPack(commandSystem);
     }
 
     function makeCursorCommand(name) {
@@ -663,10 +687,9 @@ function Primrose(canvasID, options) {
 
         gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
 
-        var i = (pickingPixelBuffer[0] << 16) |
+        return (pickingPixelBuffer[0] << 16) |
                 (pickingPixelBuffer[1] << 8) |
                 (pickingPixelBuffer[2] << 0);
-        return i;
     }
 
 
@@ -677,7 +700,7 @@ function Primrose(canvasID, options) {
         "SkipLeft", "SkipRight",
         "Up", "Down",
         "Home", "End",
-        "FullHome", "FullEnd"].map(makeCursorCommand.bind(self));
+        "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
     this.cursorPageUp = function (lines, cursor) {
         changed = true;
@@ -787,7 +810,7 @@ function Primrose(canvasID, options) {
 
     this.setTheme = function (t) {
         theme = t || Themes.DEFAULT;
-        measureText.call(self);
+        measureText();
     };
 
     this.getTheme = function () {
@@ -802,7 +825,7 @@ function Primrose(canvasID, options) {
     this.setOperatingSystem = function (os) {
         changed = true;
         operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.getOperatingSystem = function () {
@@ -812,13 +835,13 @@ function Primrose(canvasID, options) {
     this.setCommandSystem = function (cmd) {
         changed = true;
         commandSystem = cmd || Commands.DEFAULT;
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.setSize = function (w, h) {
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
-        measureText.call(self);
+        measureText();
     };
 
     this.getWidth = function () {
@@ -836,8 +859,8 @@ function Primrose(canvasID, options) {
 
     this.setCodePage = function (cp) {
         changed = true;
-        var key, code;
-        var lang = (navigator.languages && navigator.languages[0]) ||
+        var key, code,
+                lang = (navigator.languages && navigator.languages[0]) ||
                 navigator.language ||
                 navigator.userLanguage ||
                 navigator.browserLanguage;
@@ -877,8 +900,8 @@ function Primrose(canvasID, options) {
                 for (code in codes) {
                     var char, name;
                     if (code.indexOf("_") > -1) {
-                        var parts = code.split(' ');
-                        var browser = parts[0];
+                        var parts = code.split(' '),
+                                browser = parts[0];
                         code = parts[1];
                         char = codePage.NORMAL[code];
                         name = browser + "_" + type + " " + char;
@@ -893,7 +916,7 @@ function Primrose(canvasID, options) {
             }
         }
 
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.getCodePage = function () {
@@ -904,7 +927,7 @@ function Primrose(canvasID, options) {
         changed = true;
         tokenizer = tk || Grammar.JavaScript;
         if (history && history.length > 0) {
-            tokens = tokenizer.tokenize(this.getText());
+            refreshTokens();
             if (this.drawText) {
                 this.drawText();
             }
@@ -925,7 +948,7 @@ function Primrose(canvasID, options) {
         }
         history.push(lines);
         historyFrame = history.length - 1;
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
         this.forceUpdate();
     };
 
@@ -934,7 +957,7 @@ function Primrose(canvasID, options) {
         if (historyFrame < history.length - 1) {
             ++historyFrame;
         }
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
     };
 
     this.undo = function () {
@@ -942,7 +965,7 @@ function Primrose(canvasID, options) {
         if (historyFrame > 0) {
             --historyFrame;
         }
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
     };
 
     this.setTabWidth = function (tw) {
@@ -964,17 +987,18 @@ function Primrose(canvasID, options) {
     this.scrollIntoView = function (currentCursor) {
         this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridHeight);
         this.scrollLeft += minDelta(currentCursor.x, this.scrollLeft, this.scrollLeft + gridWidth);
+        clampScroll();
     };
 
     this.increaseFontSize = function () {
         ++theme.fontSize;
-        measureText.call(self);
+        measureText();
     };
 
     this.decreaseFontSize = function () {
         if (theme.fontSize > 1) {
             --theme.fontSize;
-            measureText.call(self);
+            measureText();
         }
     };
 
@@ -1000,9 +1024,9 @@ function Primrose(canvasID, options) {
     };
 
     this.cell2i = function (x, y) {
-        var lines = this.getLines();
-        var i = 0;
-        for (var dy = 0; dy < y; ++dy) {
+        var dy, lines = this.getLines(),
+                i = 0;
+        for (dy = 0; dy < y; ++dy) {
             i += lines[dy].length + 1;
         }
         i += x;
@@ -1027,16 +1051,60 @@ function Primrose(canvasID, options) {
 
     this.deleteSelection = function () {
         if (this.frontCursor.i !== this.backCursor.i) {
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor);
-            var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-            var lines = this.getLines();
             // TODO: don't rejoin the string first.
-            var text = lines.join("\n");
-            var left = text.substring(0, minCursor.i);
-            var right = text.substring(maxCursor.i);
-            text = left + right;
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    lines = this.getLines(),
+                    text = lines.join("\n"),
+                    left = text.substring(0, minCursor.i),
+                    right = text.substring(maxCursor.i);
             maxCursor.copy(minCursor);
-            this.setText(text);
+            this.setText(left + right);
+        }
+    };
+
+    this.readWheel = function (evt) {
+        if (focused) {
+            var delta = Math.floor(evt.deltaY / this.characterHeight);
+            this.scrollTop += delta;
+            clampScroll();
+            evt.preventDefault();
+            this.forceUpdate();
+        }
+    };
+
+    this.startPointer = function (x, y) {
+        setCursorXY(this.frontCursor, x, y);
+        this.backCursor.copy(this.frontCursor);
+        dragging = true;
+        this.drawText();
+    };
+
+    this.movePointer = function (x, y) {
+        if (dragging) {
+            setCursorXY(this.backCursor, x, y);
+            this.drawText();
+        }
+    };
+
+    this.endPointer = function () {
+        dragging = false;
+        surrogate.focus();
+    };
+
+    this.bindEvents = function (keyEventSource, pointerEventSource) {
+        if (keyEventSource) {
+            keyEventSource.addEventListener("keydown", this.editText.bind(this));
+        }
+
+        if (pointerEventSource) {
+            pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
+            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
+            pointerEventSource.addEventListener("touchstart", touchStart.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("touchmove", touchMove.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("touchend", touchEnd.bind(this));
         }
     };
 
@@ -1065,11 +1133,11 @@ function Primrose(canvasID, options) {
 
     this.copySelectedText = function (evt) {
         if (this.frontCursor.i !== this.backCursor.i) {
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor);
-            var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-            var lines = this.getLines();
-            var text = lines.join("\n");
-            var str = text.substring(minCursor.i, maxCursor.i);
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    lines = this.getLines(),
+                    text = lines.join("\n"),
+                    str = text.substring(minCursor.i, maxCursor.i);
             evt.clipboardData.setData("text/plain", str);
         }
         evt.preventDefault();
@@ -1092,33 +1160,6 @@ function Primrose(canvasID, options) {
                 surrogate.style.width = (bounds.right - bounds.left) + "px";
                 surrogate.style.height = (bounds.bottom - bounds.top) + "px";
             }, 250);
-        }
-    };
-
-    this.incCurrentToken = function (dir) {
-        if (this.currentToken && this.currentToken.type === "numbers") {
-            var num = parseFloat(this.currentToken.value);
-            var increment = Math.pow(10, Math.floor(Math.log10(Math.abs(num))));
-            if (increment >= 1) {
-                increment /= 10;
-            }
-            else if (!increment) {
-                increment = 0.1;
-            }
-            num += dir * increment;
-            var text = this.getText();
-            var left = text.substring(0, this.currentToken.index);
-            var right = text.substring(this.currentToken.index + this.currentToken.value.length);
-            if (increment < 1) {
-                var d = Math.ceil(-Math.log10(1.1 * increment));
-                console.log(num, increment, d);
-                console.log(num.toFixed(d));
-                text = left + num.toFixed(d) + right;
-            }
-            else {
-                text = left + num.toString() + right;
-            }
-            this.setText(text);
         }
     };
 
@@ -1154,7 +1195,7 @@ function Primrose(canvasID, options) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
                 var lines = this.getLines();
-                func.call(null, self, lines);
+                func(self, lines);
                 lines = this.getLines();
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
@@ -1171,39 +1212,24 @@ function Primrose(canvasID, options) {
         this.drawText();
     };
 
-    function fillRect(gfx, fill, x, y, w, h) {
-        gfx.fillStyle = fill;
-        gfx.fillRect(
-                x * self.characterWidth,
-                y * self.characterHeight,
-                w * self.characterWidth + 1,
-                h * self.characterHeight + 1);
-    }
-
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t;
-            var clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
-            if (theme.regular.backColor) {
-                gfx.fillStyle = theme.regular.backColor;
-            }
-            gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
+            var t, i,
+                    lineCountWidth = 0,
+                    leftGutterWidth = 0,
+                    rightGutterWidth = 0,
+                    bottomGutterHeight = 0;
 
-            var lineCount = 1;
+            this.lineCount = 1;
 
-            for (var i = 0; i < tokens.length; ++i) {
+            for (i = 0; i < tokens.length; ++i) {
                 if (tokens[i].type === "newlines") {
-                    ++lineCount;
+                    ++this.lineCount;
                 }
             }
 
-            var lineCountWidth = 0;
-            var leftGutterWidth = 0;
-            var rightGutterWidth = 0;
-            var bottomGutterHeight = 0;
-
             if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(lineCount) / Math.LN10));
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(this.lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
 
@@ -1215,15 +1241,14 @@ function Primrose(canvasID, options) {
             this.gridLeft = leftGutterWidth + lineCountWidth;
 
             gridWidth = Math.floor(canvas.width / this.characterWidth) - this.gridLeft - rightGutterWidth;
-            var scrollRight = this.scrollLeft + gridWidth;
 
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
             pageSize = Math.floor(gridHeight);
 
             // group the tokens into rows
-            var currentRow = [];
-            var rows = [currentRow];
-            var rowX = 0;
+            var currentRow = [],
+                    rows = [currentRow],
+                    rowX = 0;
             for (i = 0; i < tokens.length; ++i) {
                 t = tokens[i].clone();
                 currentRow.push(t);
@@ -1238,201 +1263,167 @@ function Primrose(canvasID, options) {
                 }
             }
 
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor);
-            var maxCursor = Cursor.max(this.frontCursor, this.backCursor);
-            var tokenFront = new Cursor();
-            var tokenBack = new Cursor();
-            var maxLineWidth = 0;
-            var lastLine = -1;
-
             this.currentToken = null;
 
-            for (var y = 0; y < rows.length; ++y) {
-                // draw the tokens on this row
-                var row = rows[y];
-                // be able to draw brand-new rows that don't have any tokens yet
-                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-                // draw the left gutter
-                if (showLineNumbers && this.scrollTop <= y && y < this.scrollTop + gridHeight) {
-                    var lineNumber = currentLine.toString();
-                    while (lineNumber.length < lineCountWidth) {
-                        lineNumber = " " + lineNumber;
-                    }
-                    fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                            0, (y - this.scrollTop + 0.2),
-                            (lineNumber.length + leftGutterWidth), 1);
-                    gfx.font = "bold " + this.characterHeight + "px " + theme.fontFamily;
+            renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight);
 
-                    if (currentLine > lastLine) {
-                        gfx.fillStyle = theme.regular.foreColor;
-                        gfx.fillText(
-                                lineNumber,
-                                0,
-                                (y - this.scrollTop + 1) * this.characterHeight);
-                    }
-                }
-                lastLine = currentLine;
-
-                // draw the current row highlighter
-                if (focused && y === this.backCursor.y) {
-                    fillRect(gfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
-                            (this.gridLeft - this.scrollLeft), (y + 0.2 - this.scrollTop),
-                            gridWidth, 1);
-                }
-
-                for (var n = 0; n < row.length; ++n) {
-                    t = row[n];
-                    var toPrint = t.value;
-                    tokenBack.x += toPrint.length;
-                    tokenBack.i += toPrint.length;
-
-                    if (t.type === "newlines") {
-                        lastLine = currentLine;
-                    }
-
-                    // skip drawing tokens that aren't in view
-                    if (this.scrollTop <= y &&
-                            y < this.scrollTop + gridHeight &&
-                            this.scrollLeft <= tokenBack.x &&
-                            tokenFront.x < scrollRight) {
-                        // draw the selection box
-                        if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                            if (minCursor.i === maxCursor.i) {
-                                this.currentToken = t;
-                            }
-                            var selectionFront = Cursor.max(minCursor, tokenFront);
-                            var selectionBack = Cursor.min(maxCursor, tokenBack);
-                            var cw = selectionBack.i - selectionFront.i;
-                            fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                                    (selectionFront.x + this.gridLeft - this.scrollLeft), (selectionFront.y + 0.2 - this.scrollTop),
-                                    cw, 1);
-                        }
-
-                        // draw the text
-                        var style = theme[t.type] || {};
-                        var font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + this.characterHeight + "px " + theme.fontFamily;
-                        gfx.font = font.trim();
-                        gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                        gfx.fillText(
-                                toPrint,
-                                (tokenFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
-                                (tokenFront.y - this.scrollTop + 1) * this.characterHeight);
-                    }
-
-                    tokenFront.copy(tokenBack);
-                }
-
-                maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-                tokenFront.x = 0;
-                ++tokenFront.y;
-                tokenBack.copy(tokenFront);
-            }
-
-            // draw the cursor caret
-            if (focused) {
-                gfx.beginPath();
-                gfx.strokeStyle = theme.cursorColor || "black";
-                gfx.moveTo(
-                        (this.frontCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
-                        (this.frontCursor.y - this.scrollTop) * this.characterHeight);
-                gfx.lineTo(
-                        (this.frontCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
-                        (this.frontCursor.y - this.scrollTop + 1.25) * this.characterHeight);
-                gfx.moveTo(
-                        (this.backCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth + 1,
-                        (this.backCursor.y - this.scrollTop) * this.characterHeight);
-                gfx.lineTo(
-                        (this.backCursor.x - this.scrollLeft + this.gridLeft) * this.characterWidth + 1,
-                        (this.backCursor.y - this.scrollTop + 1.25) * this.characterHeight);
-                gfx.stroke();
-            }
-
-            // draw the scrollbars
-            if (showScrollBars) {
-                //vertical
-                var drawHeight = gridHeight * this.characterHeight;
-                var scrollY = (this.scrollTop * drawHeight) / rows.length;
-                var scrollBarHeight = gridHeight * drawHeight / rows.length - bottomGutterHeight * this.characterHeight;
-                gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
-                gfx.fillRect(
-                        canvas.width - this.characterWidth,
-                        scrollY,
-                        this.characterWidth,
-                        Math.max(this.characterHeight, scrollBarHeight));
-
-                // horizontal
-                var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + (this.gridLeft * this.characterWidth);
-                var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
-                gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
-                gfx.fillRect(
-                        scrollX,
-                        gridHeight * this.characterHeight,
-                        Math.max(this.characterWidth, scrollBarWidth),
-                        this.characterHeight);
-            }
-
-            if (texture) {
-                texture.needsUpdate = true;
-            }
             changed = false;
         }
     };
 
-    this.readWheel = function (evt) {
-        if (focused) {
-            var delta = Math.floor(evt.deltaY / this.characterHeight);
-            this.scrollTop += delta;
-            if (this.scrollTop < 0) {
-                this.scrollTop = 0;
+    function renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight) {
+        var i, t, y, row, currentLine, lineNumber, selectionFront,
+                selectionBack, cw, font, style, drawWidth, drawHeight, scrollX,
+                scrollY, scrollBarWidth, scrollBarHeight,
+                scrollRight = self.scrollLeft + gridWidth,
+                minCursor = Cursor.min(self.frontCursor, self.backCursor),
+                maxCursor = Cursor.max(self.frontCursor, self.backCursor),
+                tokenFront = new Cursor(),
+                tokenBack = new Cursor(),
+                maxLineWidth = 0,
+                lastLine = -1,
+                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+
+        if (theme.regular.backColor) {
+            gfx.fillStyle = theme.regular.backColor;
+        }
+        gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
+
+        for (y = 0; y < rows.length; ++y) {
+            // draw the tokens on this row
+            row = rows[y];
+            // be able to draw brand-new rows that don't have any tokens yet
+            currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+            // draw the left gutter
+            if (showLineNumbers && self.scrollTop <= y && y < self.scrollTop + gridHeight) {
+                lineNumber = currentLine.toString();
+                while (lineNumber.length < lineCountWidth) {
+                    lineNumber = " " + lineNumber;
+                }
+                fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                        0, (y - self.scrollTop + 0.2),
+                        (lineNumber.length + leftGutterWidth), 1);
+                gfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
+
+                if (currentLine > lastLine) {
+                    gfx.fillStyle = theme.regular.foreColor;
+                    gfx.fillText(
+                            lineNumber,
+                            0,
+                            (y - self.scrollTop + 1) * self.characterHeight);
+                }
             }
-            evt.preventDefault();
-            this.forceUpdate()();
+            lastLine = currentLine;
+
+            // draw the current row highlighter
+            if (focused && y === self.backCursor.y) {
+                fillRect(gfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                        (self.gridLeft - self.scrollLeft), (y + 0.2 - self.scrollTop),
+                        gridWidth, 1);
+            }
+
+            for (i = 0; i < row.length; ++i) {
+                t = row[i];
+                tokenBack.x += t.value.length;
+                tokenBack.i += t.value.length;
+
+                if (t.type === "newlines") {
+                    lastLine = currentLine;
+                }
+
+                // skip drawing tokens that aren't in view
+                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
+                        self.scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                    // draw the selection box
+                    if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
+                        if (minCursor.i === maxCursor.i) {
+                            self.currentToken = t;
+                        }
+                        selectionFront = Cursor.max(minCursor, tokenFront);
+                        selectionBack = Cursor.min(maxCursor, tokenBack);
+                        cw = selectionBack.i - selectionFront.i;
+                        fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                                (selectionFront.x + self.gridLeft - self.scrollLeft), (selectionFront.y + 0.2 - self.scrollTop),
+                                cw, 1);
+                    }
+
+                    // draw the text
+                    style = theme[t.type] || {};
+                    font = (style.fontWeight || theme.regular.fontWeight || "") +
+                            " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                            " " + self.characterHeight + "px " + theme.fontFamily;
+                    gfx.font = font.trim();
+                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                    gfx.fillText(
+                            t.value,
+                            (tokenFront.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
+                            (tokenFront.y - self.scrollTop + 1) * self.characterHeight);
+                }
+
+                tokenFront.copy(tokenBack);
+            }
+
+            maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
+            tokenFront.x = 0;
+            ++tokenFront.y;
+            tokenBack.copy(tokenFront);
         }
-    };
 
-    this.startPointer = function (x, y) {
-        setCursorXY.call(self, this.frontCursor, x, y);
-        this.backCursor.copy(this.frontCursor);
-        dragging = true;
-        this.drawText();
-    };
-
-    this.movePointer = function (x, y) {
-        if (dragging) {
-            setCursorXY.call(self, this.backCursor, x, y);
-            this.drawText();
-        }
-    };
-
-    this.endPointer = function () {
-        dragging = false;
-        surrogate.focus();
-    };
-
-    this.bindEvents = function (keyEventSource, pointerEventSource) {
-        if (keyEventSource) {
-            keyEventSource.addEventListener("keydown", this.editText.bind(self));
+        // draw the cursor caret
+        if (focused) {
+            gfx.beginPath();
+            gfx.strokeStyle = theme.cursorColor || "black";
+            gfx.moveTo(
+                    (self.frontCursor.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
+                    (self.frontCursor.y - self.scrollTop) * self.characterHeight);
+            gfx.lineTo(
+                    (self.frontCursor.x - self.scrollLeft + self.gridLeft) * self.characterWidth,
+                    (self.frontCursor.y - self.scrollTop + 1.25) * self.characterHeight);
+            gfx.moveTo(
+                    (self.backCursor.x - self.scrollLeft + self.gridLeft) * self.characterWidth + 1,
+                    (self.backCursor.y - self.scrollTop) * self.characterHeight);
+            gfx.lineTo(
+                    (self.backCursor.x - self.scrollLeft + self.gridLeft) * self.characterWidth + 1,
+                    (self.backCursor.y - self.scrollTop + 1.25) * self.characterHeight);
+            gfx.stroke();
         }
 
-        if (pointerEventSource) {
-            pointerEventSource.addEventListener("wheel", this.readWheel.bind(self));
-            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("mousemove", mouseMove.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(self));
-            pointerEventSource.addEventListener("touchstart", touchStart.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("touchmove", touchMove.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("touchend", touchEnd.bind(self));
+        // draw the scrollbars
+        if (showScrollBars) {
+            drawWidth = gridWidth * self.characterWidth;
+            drawHeight = gridHeight * self.characterHeight;
+            scrollX = (self.scrollLeft * drawWidth) / maxLineWidth + self.gridLeft * self.characterWidth;
+            scrollY = (self.scrollTop * drawHeight) / rows.length + self.gridTop * self.characterHeight;
+            scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (self.gridLeft + rightGutterWidth) * self.characterWidth;
+            scrollBarHeight = gridHeight * drawHeight / rows.length - (self.gridTop + bottomGutterHeight) * self.characterHeight;
+
+            gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
+            // horizontal
+            gfx.fillRect(
+                    scrollX,
+                    (gridHeight + 0.25) * self.characterHeight,
+                    Math.max(self.characterWidth, scrollBarWidth),
+                    self.characterHeight);
+
+            //vertical
+            gfx.fillRect(
+                    canvas.width - self.characterWidth,
+                    scrollY,
+                    self.characterWidth,
+                    Math.max(self.characterHeight, scrollBarHeight));
         }
-    };
+
+        if (texture) {
+            texture.needsUpdate = true;
+        }
+    }
 
 
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
     browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    if (!(canvasID instanceof HTMLCanvasElement) && options.width && options.height) {
+    if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {
         canvas.style.position = "absolute";
         canvas.style.width = options.width;
         canvas.style.height = options.height;
@@ -1471,11 +1462,11 @@ function Primrose(canvasID, options) {
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", measureText.bind(self));
+    window.addEventListener("resize", measureText.bind(this));
 
-    surrogate.addEventListener("copy", this.copySelectedText.bind(self));
-    surrogate.addEventListener("cut", this.cutSelectedText.bind(self));
-    surrogate.addEventListener("paste", readClipboard.bind(self));
+    surrogate.addEventListener("copy", this.copySelectedText.bind(this));
+    surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
+    surrogate.addEventListener("paste", readClipboard.bind(this));
 };/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3075,12 +3066,6 @@ OperatingSystems.WINDOWS = (function () {
                 --prim.scrollTop;
             }
             prim.forceUpdate();
-        },
-        ALTSHIFT_LEFTARROW: function (prim, lines) {
-            prim.incCurrentToken(-1);
-        },
-        ALTSHIFT_RIGHTARROW: function (prim, lines) {
-            prim.incCurrentToken(1);
         }
     };
 })();

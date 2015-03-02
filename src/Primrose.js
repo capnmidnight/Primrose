@@ -120,8 +120,8 @@ function Primrose(canvasElementOrID, options) {
             }
         }
         if (i >= 0) {
-            var type = evt.clipboardData.types[i]
-            str = evt.clipboardData.getData(type);
+            var type = evt.clipboardData.types[i],
+                    str = evt.clipboardData.getData(type);
             evt.preventDefault();
             self.pasteAtCursor(str);
         }
@@ -472,8 +472,8 @@ function Primrose(canvasElementOrID, options) {
                 for (code in codes) {
                     var char, name;
                     if (code.indexOf("_") > -1) {
-                        var parts = code.split(' ')
-                        browser = parts[0];
+                        var parts = code.split(' '),
+                                browser = parts[0];
                         code = parts[1];
                         char = codePage.NORMAL[code];
                         name = browser + "_" + type + " " + char;
@@ -596,9 +596,9 @@ function Primrose(canvasElementOrID, options) {
     };
 
     this.cell2i = function (x, y) {
-        var lines = this.getLines()
-        i = 0;
-        for (var dy = 0; dy < y; ++dy) {
+        var dy, lines = this.getLines(),
+                i = 0;
+        for (dy = 0; dy < y; ++dy) {
             i += lines[dy].length + 1;
         }
         i += x;
@@ -705,11 +705,11 @@ function Primrose(canvasElementOrID, options) {
 
     this.copySelectedText = function (evt) {
         if (this.frontCursor.i !== this.backCursor.i) {
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor)
-            maxCursor = Cursor.max(this.frontCursor, this.backCursor)
-            lines = this.getLines()
-            text = lines.join("\n")
-            str = text.substring(minCursor.i, maxCursor.i);
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    lines = this.getLines(),
+                    text = lines.join("\n"),
+                    str = text.substring(minCursor.i, maxCursor.i);
             evt.clipboardData.setData("text/plain", str);
         }
         evt.preventDefault();
@@ -732,33 +732,6 @@ function Primrose(canvasElementOrID, options) {
                 surrogate.style.width = (bounds.right - bounds.left) + "px";
                 surrogate.style.height = (bounds.bottom - bounds.top) + "px";
             }, 250);
-        }
-    };
-
-    this.incCurrentToken = function (dir) {
-        if (this.currentToken && this.currentToken.type === "numbers") {
-            var num = parseFloat(this.currentToken.value);
-            var increment = Math.pow(10, Math.floor(Math.log10(Math.abs(num))));
-            if (increment >= 1) {
-                increment /= 10;
-            }
-            else if (!increment) {
-                increment = 0.1;
-            }
-            num += dir * increment;
-            var text = this.getText()
-            left = text.substring(0, this.currentToken.index)
-            right = text.substring(this.currentToken.index + this.currentToken.value.length);
-            if (increment < 1) {
-                var d = Math.ceil(-Math.log10(1.1 * increment));
-                console.log(num, increment, d);
-                console.log(num.toFixed(d));
-                text = left + num.toFixed(d) + right;
-            }
-            else {
-                text = left + num.toString() + right;
-            }
-            this.setText(text);
         }
     };
 
