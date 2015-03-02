@@ -70,12 +70,23 @@ function Primrose(canvasID, options) {
     this.scrollTop = 0;
     this.scrollLeft = 0;
     this.gridLeft = 0;
+    this.gridTop = 0;
+    this.lineCount = 0;
     this.currentToken = null;
 
 
     //////////////////////////////////////////////////////////////////////////
     // private methods
     //////////////////////////////////////////////////////////////////////////
+    
+    function clampScroll(){
+        if (self.scrollTop < 0) {
+            self.scrollTop = 0;
+        }
+        else while(self.scrollTop > self.lineCount - gridHeight){
+            --self.scrollTop;
+        }        
+    }
 
     function minDelta(v, minV, maxV) {
         var dvMinV = v - minV;
@@ -359,7 +370,7 @@ function Primrose(canvasID, options) {
 
     this.setTheme = function (t) {
         theme = t || Themes.DEFAULT;
-        measureText.call(self);
+        measureText();
     };
 
     this.getTheme = function () {
@@ -374,7 +385,7 @@ function Primrose(canvasID, options) {
     this.setOperatingSystem = function (os) {
         changed = true;
         operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.getOperatingSystem = function () {
@@ -384,13 +395,13 @@ function Primrose(canvasID, options) {
     this.setCommandSystem = function (cmd) {
         changed = true;
         commandSystem = cmd || Commands.DEFAULT;
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.setSize = function (w, h) {
         canvas.style.width = w + "px";
         canvas.style.height = h + "px";
-        measureText.call(self);
+        measureText();
     };
 
     this.getWidth = function () {
@@ -465,7 +476,7 @@ function Primrose(canvasID, options) {
             }
         }
 
-        refreshCommandPack.call(self);
+        refreshCommandPack();
     };
 
     this.getCodePage = function () {
@@ -536,17 +547,18 @@ function Primrose(canvasID, options) {
     this.scrollIntoView = function (currentCursor) {
         this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridHeight);
         this.scrollLeft += minDelta(currentCursor.x, this.scrollLeft, this.scrollLeft + gridWidth);
+        clampScroll();
     };
 
     this.increaseFontSize = function () {
         ++theme.fontSize;
-        measureText.call(self);
+        measureText();
     };
 
     this.decreaseFontSize = function () {
         if (theme.fontSize > 1) {
             --theme.fontSize;
-            measureText.call(self);
+            measureText();
         }
     };
 
@@ -761,11 +773,11 @@ function Primrose(canvasID, options) {
             }
             gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
 
-            var lineCount = 1;
+            this.lineCount = 1;
 
             for (i = 0; i < tokens.length; ++i) {
                 if (tokens[i].type === "newlines") {
-                    ++lineCount;
+                    ++this.lineCount;
                 }
             }
 
@@ -775,7 +787,7 @@ function Primrose(canvasID, options) {
             var bottomGutterHeight = 0;
 
             if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(lineCount) / Math.LN10));
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(this.lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
 
@@ -854,9 +866,8 @@ function Primrose(canvasID, options) {
 
                 for (i = 0; i < row.length; ++i) {
                     t = row[i];
-                    var toPrint = t.value;
-                    tokenBack.x += toPrint.length;
-                    tokenBack.i += toPrint.length;
+                    tokenBack.x += t.value.length;
+                    tokenBack.i += t.value.length;
 
                     if (t.type === "newlines") {
                         lastLine = currentLine;
@@ -886,7 +897,7 @@ function Primrose(canvasID, options) {
                         gfx.font = font.trim();
                         gfx.fillStyle = style.foreColor || theme.regular.foreColor;
                         gfx.fillText(
-                                toPrint,
+                                t.value,
                                 (tokenFront.x - this.scrollLeft + this.gridLeft) * this.characterWidth,
                                 (tokenFront.y - this.scrollTop + 1) * this.characterHeight);
                     }
@@ -921,26 +932,27 @@ function Primrose(canvasID, options) {
 
             // draw the scrollbars
             if (showScrollBars) {
-                //vertical
+                var drawWidth = gridWidth * this.characterWidth;
                 var drawHeight = gridHeight * this.characterHeight;
-                var scrollY = (this.scrollTop * drawHeight) / rows.length;
-                var scrollBarHeight = gridHeight * drawHeight / rows.length - bottomGutterHeight * this.characterHeight;
+                var scrollX = (this.scrollLeft * drawWidth) / maxLineWidth + this.gridLeft * this.characterWidth;
+                var scrollY = (this.scrollTop * drawHeight) / rows.length + this.gridTop * this.characterHeight;
+                var scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
+                var scrollBarHeight = gridHeight * drawHeight / rows.length - (this.gridTop + bottomGutterHeight) * this.characterHeight;
+                
                 gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
+                // horizontal
+                gfx.fillRect(
+                        scrollX,
+                        (gridHeight + 0.25) * this.characterHeight,
+                        Math.max(this.characterWidth, scrollBarWidth),
+                        this.characterHeight);
+                        
+                //vertical
                 gfx.fillRect(
                         canvas.width - this.characterWidth,
                         scrollY,
                         this.characterWidth,
                         Math.max(this.characterHeight, scrollBarHeight));
-
-                // horizontal
-                var scrollX = (this.scrollLeft * canvas.width) / maxLineWidth + (this.gridLeft * this.characterWidth);
-                var scrollBarWidth = gridWidth * canvas.width / maxLineWidth - (this.gridLeft + rightGutterWidth) * this.characterWidth;
-                gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
-                gfx.fillRect(
-                        scrollX,
-                        gridHeight * this.characterHeight,
-                        Math.max(this.characterWidth, scrollBarWidth),
-                        this.characterHeight);
             }
 
             if (texture) {
@@ -954,11 +966,9 @@ function Primrose(canvasID, options) {
         if (focused) {
             var delta = Math.floor(evt.deltaY / this.characterHeight);
             this.scrollTop += delta;
-            if (this.scrollTop < 0) {
-                this.scrollTop = 0;
-            }
+            clampScroll();
             evt.preventDefault();
-            this.forceUpdate()();
+            this.forceUpdate();
         }
     };
 
