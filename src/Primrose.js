@@ -16,7 +16,7 @@
  * along with self program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Primrose(canvasID, options) {
+function Primrose(canvasElementOrID, options) {
     "use strict";
     var self = this;
     //////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ function Primrose(canvasID, options) {
             showLineNumbers = true,
             showScrollBars = true,
             wordWrap = false,
-            canvas = cascadeElement(canvasID, "canvas", HTMLCanvasElement),
+            canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
             surrogate = cascadeElement("primrose-surrogate-textarea-" + canvas.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
@@ -228,10 +228,10 @@ function Primrose(canvasID, options) {
         if (keyboardSystem && operatingSystem && commandSystem) {
             commandPack = {};
         }
-        addCommandPack.call(self, keyboardSystem);
-        addCommandPack.call(self, operatingSystem);
-        addCommandPack.call(self, browser);
-        addCommandPack.call(self, commandSystem);
+        addCommandPack(keyboardSystem);
+        addCommandPack(operatingSystem);
+        addCommandPack(browser);
+        addCommandPack(commandSystem);
     }
 
     function makeCursorCommand(name) {
@@ -264,7 +264,7 @@ function Primrose(canvasID, options) {
         "SkipLeft", "SkipRight",
         "Up", "Down",
         "Home", "End",
-        "FullHome", "FullEnd"].map(makeCursorCommand.bind(self));
+        "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
     this.cursorPageUp = function (lines, cursor) {
         changed = true;
@@ -742,7 +742,7 @@ function Primrose(canvasID, options) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
                 var lines = this.getLines();
-                func.call(null, self, lines);
+                func(self, lines);
                 lines = this.getLines();
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
@@ -977,7 +977,7 @@ function Primrose(canvasID, options) {
     };
 
     this.startPointer = function (x, y) {
-        setCursorXY.call(self, this.frontCursor, x, y);
+        setCursorXY(this.frontCursor, x, y);
         this.backCursor.copy(this.frontCursor);
         dragging = true;
         this.drawText();
@@ -985,7 +985,7 @@ function Primrose(canvasID, options) {
 
     this.movePointer = function (x, y) {
         if (dragging) {
-            setCursorXY.call(self, this.backCursor, x, y);
+            setCursorXY(this.backCursor, x, y);
             this.drawText();
         }
     };
@@ -997,17 +997,17 @@ function Primrose(canvasID, options) {
 
     this.bindEvents = function (keyEventSource, pointerEventSource) {
         if (keyEventSource) {
-            keyEventSource.addEventListener("keydown", this.editText.bind(self));
+            keyEventSource.addEventListener("keydown", this.editText.bind(this));
         }
 
         if (pointerEventSource) {
-            pointerEventSource.addEventListener("wheel", this.readWheel.bind(self));
-            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("mousemove", mouseMove.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(self));
-            pointerEventSource.addEventListener("touchstart", touchStart.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("touchmove", touchMove.bind(self, pointerEventSource));
-            pointerEventSource.addEventListener("touchend", touchEnd.bind(self));
+            pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
+            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
+            pointerEventSource.addEventListener("touchstart", touchStart.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("touchmove", touchMove.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("touchend", touchEnd.bind(this));
         }
     };
 
@@ -1016,7 +1016,7 @@ function Primrose(canvasID, options) {
     // initialization
     /////////////////////////////////////////////////////////////////////////
     browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    if (!(canvasID instanceof HTMLCanvasElement) && options.width && options.height) {
+    if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {
         canvas.style.position = "absolute";
         canvas.style.width = options.width;
         canvas.style.height = options.height;
@@ -1055,9 +1055,9 @@ function Primrose(canvasID, options) {
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", measureText.bind(self));
+    window.addEventListener("resize", measureText.bind(this));
 
-    surrogate.addEventListener("copy", this.copySelectedText.bind(self));
-    surrogate.addEventListener("cut", this.cutSelectedText.bind(self));
-    surrogate.addEventListener("paste", readClipboard.bind(self));
+    surrogate.addEventListener("copy", this.copySelectedText.bind(this));
+    surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
+    surrogate.addEventListener("paste", readClipboard.bind(this));
 }
