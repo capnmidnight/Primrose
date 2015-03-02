@@ -99,12 +99,7 @@ function Primrose(canvasElementOrID, options) {
         if (dvMinV < 0 || dvMaxV >= 0) {
             // compare the absolute values, so we get the smallest change
             // regardless of direction.
-            if (Math.abs(dvMinV) < Math.abs(dvMaxV)) {
-                dv = dvMinV;
-            }
-            else {
-                dv = dvMaxV;
-            }
+            dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
         }
 
         return dv;
