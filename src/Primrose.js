@@ -79,6 +79,10 @@ function Primrose(canvasID, options) {
     // private methods
     //////////////////////////////////////////////////////////////////////////
     
+    function refreshTokens(){
+        tokens = tokenizer.tokenize(self.getText());
+    }
+    
     function clampScroll(){
         if (self.scrollTop < 0) {
             self.scrollTop = 0;
@@ -487,7 +491,7 @@ function Primrose(canvasID, options) {
         changed = true;
         tokenizer = tk || Grammar.JavaScript;
         if (history && history.length > 0) {
-            tokens = tokenizer.tokenize(this.getText());
+            refreshTokens();
             if (this.drawText) {
                 this.drawText();
             }
@@ -508,7 +512,7 @@ function Primrose(canvasID, options) {
         }
         history.push(lines);
         historyFrame = history.length - 1;
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
         this.forceUpdate();
     };
 
@@ -517,7 +521,7 @@ function Primrose(canvasID, options) {
         if (historyFrame < history.length - 1) {
             ++historyFrame;
         }
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
     };
 
     this.undo = function () {
@@ -525,7 +529,7 @@ function Primrose(canvasID, options) {
         if (historyFrame > 0) {
             --historyFrame;
         }
-        tokens = tokenizer.tokenize(this.getText());
+        refreshTokens();
     };
 
     this.setTabWidth = function (tw) {
