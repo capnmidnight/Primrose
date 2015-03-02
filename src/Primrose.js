@@ -38,7 +38,6 @@ function Primrose(canvasElementOrID, options) {
             tokenizer,
             tokens,
             theme,
-            pageSize,
             pointerX, pointerY,
             tabWidth, tabString,
             currentTouchID,
@@ -52,6 +51,11 @@ function Primrose(canvasElementOrID, options) {
             gridLeft = 0,
             gridWidth = 0,
             gridHeight = 0,
+            lineCountWidth = 0,
+            leftGutterWidth = 0,
+            rightGutterWidth = 0,
+            bottomGutterHeight = 0,
+            tokenRows = null,
             tileGrid = [],
             lineCount = 0,
             dragging = false,
@@ -272,13 +276,13 @@ function Primrose(canvasElementOrID, options) {
 
     this.cursorPageUp = function (lines, cursor) {
         changed = true;
-        cursor.incY(-pageSize, lines);
+        cursor.incY(-gridHeight, lines);
         this.scrollIntoView(cursor);
     };
 
     this.cursorPageDown = function (lines, cursor) {
         changed = true;
-        cursor.incY(pageSize, lines);
+        cursor.incY(gridHeight, lines);
         this.scrollIntoView(cursor);
     };
 
@@ -782,11 +786,7 @@ function Primrose(canvasElementOrID, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t, i,
-                    lineCountWidth = 0,
-                    leftGutterWidth = 0,
-                    rightGutterWidth = 0,
-                    bottomGutterHeight = 0;
+            var t, i;
 
             this.lineCount = 1;
 
@@ -800,10 +800,18 @@ function Primrose(canvasElementOrID, options) {
                 lineCountWidth = Math.max(1, Math.ceil(Math.log(this.lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
+            else {
+                lineCountWidth = 0;
+                leftGutterWidth = 0;
+            }
 
             if (showScrollBars) {
                 rightGutterWidth = 1;
                 bottomGutterHeight = 1;
+            }
+            else {
+                rightGutterWidth = 0;
+                bottomGutterHeight = 0;
             }
 
             gridLeft = leftGutterWidth + lineCountWidth;
@@ -811,19 +819,18 @@ function Primrose(canvasElementOrID, options) {
             gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft - rightGutterWidth;
 
             gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
-            pageSize = Math.floor(gridHeight);
 
             // group the tokens into rows
             var currentRow = [],
-                    rows = [currentRow],
                     rowX = 0;
+            tokenRows = [currentRow];
             for (i = 0; i < tokens.length; ++i) {
                 t = tokens[i].clone();
                 currentRow.push(t);
                 rowX += t.value.length;
                 if (wordWrap && rowX >= gridWidth || t.type === "newlines") {
                     currentRow = [];
-                    rows.push(currentRow);
+                    tokenRows.push(currentRow);
                     if (wordWrap && rowX >= gridWidth && t.type !== "newlines") {
                         currentRow.push(t.splitAt(gridWidth - (rowX - t.value.length)));
                     }
@@ -831,136 +838,13 @@ function Primrose(canvasElementOrID, options) {
                 }
             }
 
-            renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight);
+            renderCanvas();
 
             changed = false;
         }
     };
 
-    function makeGrid(rows, lineCountWidth, leftGutterWidth) {
-        var i, t, x, y, row, currentLine, lineNumber, selectionFront,
-                selectionBack, cw, font, style,
-                scrollRight = scrollLeft + gridWidth,
-                minCursor = Cursor.min(self.frontCursor, self.backCursor),
-                maxCursor = Cursor.max(self.frontCursor, self.backCursor),
-                tokenFront = new Cursor(),
-                tokenBack = new Cursor(),
-                maxLineWidth = 0,
-                lastLine = -1,
-                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
-
-        if (tileGrid.length > gridHeight) {
-            tileGrid.splice(gridHeight);
-        }
-        else
-            while (tileGrid.length < gridHeight) {
-                tileGrid.push([]);
-            }
-
-        for (y = 0; y < gridHeight; ++y) {
-            var row = tileGrid[y];
-            if (row.length > gridWidth) {
-                row.splice(gridWidth);
-            }
-            for (x = 0; x < gridWidth; ++x) {
-                if (!row[x]) {
-                    row[x] = new Tile();
-                }
-                else {
-                    row[x].index = null;
-                    row[x].char = null;
-                    row[x].foreColor = null;
-                    row[x].backColor = null;
-                    row[x].fontStyle = null;
-                    row[x].fontWeight = null;
-                }
-            }
-        }
-
-        if (theme.regular.backColor) {
-            gfx.fillStyle = theme.regular.backColor;
-        }
-        gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
-
-        for (y = 0; y < rows.length; ++y) {
-            // draw the tokens on this row
-            row = rows[y];
-            // be able to draw brand-new rows that don't have any tokens yet
-            currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-            // draw the left gutter
-            if (showLineNumbers && self.scrollTop <= y && y < self.scrollTop + gridHeight) {
-                lineNumber = currentLine.toString();
-                while (lineNumber.length < lineCountWidth) {
-                    lineNumber = " " + lineNumber;
-                }
-                fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                        0, (y - self.scrollTop + 0.2),
-                        (lineNumber.length + leftGutterWidth), 1);
-                gfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
-
-                if (currentLine > lastLine) {
-                    gfx.fillStyle = theme.regular.foreColor;
-                    gfx.fillText(
-                            lineNumber,
-                            0,
-                            (y - self.scrollTop + 1) * self.characterHeight);
-                }
-            }
-            lastLine = currentLine;
-
-            // draw the current row highlighter
-            if (focused && y === self.backCursor.y) {
-                fillRect(gfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
-                        (gridLeft - scrollLeft), (y + 0.2 - self.scrollTop),
-                        gridWidth, 1);
-            }
-
-            for (i = 0; i < row.length; ++i) {
-                t = row[i];
-                tokenBack.x += t.value.length;
-                tokenBack.i += t.value.length;
-
-                if (t.type === "newlines") {
-                    lastLine = currentLine;
-                }
-
-                // skip drawing tokens that aren't in view
-                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
-                        scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
-                    // draw the selection box
-                    if (minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i) {
-                        selectionFront = Cursor.max(minCursor, tokenFront);
-                        selectionBack = Cursor.min(maxCursor, tokenBack);
-                        cw = selectionBack.i - selectionFront.i;
-                        fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                                (selectionFront.x + gridLeft - scrollLeft), (selectionFront.y + 0.2 - self.scrollTop),
-                                cw, 1);
-                    }
-
-                    // draw the text
-                    style = theme[t.type] || {};
-                    font = (style.fontWeight || theme.regular.fontWeight || "") +
-                            " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                            " " + self.characterHeight + "px " + theme.fontFamily;
-                    gfx.font = font.trim();
-                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                    gfx.fillText(
-                            t.value,
-                            (tokenFront.x - scrollLeft + gridLeft) * self.characterWidth,
-                            (tokenFront.y - self.scrollTop + 1) * self.characterHeight);
-                }
-
-                tokenFront.copy(tokenBack);
-            }
-
-            maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-            tokenFront.x = 0;
-            ++tokenFront.y;
-            tokenBack.copy(tokenFront);
-        }
-    }
-
-    function renderCanvas(rows, lineCountWidth, leftGutterWidth, rightGutterWidth, bottomGutterHeight) {
+    function renderCanvas() {
         var i, t, y, row, currentLine, lineNumber, selectionFront,
                 selectionBack, cw, font, style, drawWidth, drawHeight, scrollX,
                 scrollY, scrollBarWidth, scrollBarHeight,
@@ -981,9 +865,9 @@ function Primrose(canvasElementOrID, options) {
         gfx.translate(0, -self.scrollTop * self.characterHeight);
         gfx.save();
         gfx.translate((gridLeft - scrollLeft) * self.characterWidth, 0);
-        for (y = 0, lastLine = -1; y < rows.length; ++y) {
+        for (y = 0, lastLine = -1; y < tokenRows.length; ++y) {
             // draw the tokens on this row
-            row = rows[y];
+            row = tokenRows[y];
             // be able to draw brand-new rows that don't have any tokens yet
             currentLine = row.length > 0 ? row[0].line : lastLine + 1;
 
@@ -998,10 +882,6 @@ function Primrose(canvasElementOrID, options) {
                 t = row[i];
                 tokenBack.x += t.value.length;
                 tokenBack.i += t.value.length;
-
-                if (t.type === "newlines") {
-                    lastLine = currentLine;
-                }
 
                 // skip drawing tokens that aren't in view
                 if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
@@ -1027,24 +907,19 @@ function Primrose(canvasElementOrID, options) {
                     gfx.fillText(
                             t.value,
                             tokenFront.x * self.characterWidth,
-                            (tokenFront.y + 1) * self.characterHeight);
+                            (y + 1) * self.characterHeight);
 
                     // draw the cursor caret
                     if (focused && inSelection && minCursor.i === maxCursor.i) {
                         gfx.beginPath();
                         gfx.strokeStyle = theme.cursorColor || "black";
+                        gfx.lineWidth = 2;
                         gfx.moveTo(
                                 self.frontCursor.x * self.characterWidth,
-                                self.frontCursor.y * self.characterHeight);
+                                y * self.characterHeight);
                         gfx.lineTo(
                                 self.frontCursor.x * self.characterWidth,
-                                (self.frontCursor.y + 1.25) * self.characterHeight);
-                        gfx.moveTo(
-                                self.backCursor.x * self.characterWidth + 1,
-                                self.backCursor.y * self.characterHeight);
-                        gfx.lineTo(
-                                self.backCursor.x * self.characterWidth + 1,
-                                (self.backCursor.y + 1.25) * self.characterHeight);
+                                (y + 1.25) * self.characterHeight);
                         gfx.stroke();
                     }
                 }
@@ -1058,11 +933,11 @@ function Primrose(canvasElementOrID, options) {
             tokenBack.copy(tokenFront);
         }
         gfx.restore();
-        
+
         if (showLineNumbers) {
-            for (y = self.scrollTop; y < self.scrollTop + gridHeight; ++y) {
+            for (y = self.scrollTop, lastLine = -1; y < self.scrollTop + gridHeight; ++y) {
                 // draw the tokens on this row
-                row = rows[y];
+                row = tokenRows[y];
                 // be able to draw brand-new rows that don't have any tokens yet
                 currentLine = row.length > 0 ? row[0].line : lastLine + 1;
                 // draw the left gutter
@@ -1092,9 +967,9 @@ function Primrose(canvasElementOrID, options) {
             drawWidth = gridWidth * self.characterWidth;
             drawHeight = gridHeight * self.characterHeight;
             scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridLeft * self.characterWidth;
-            scrollY = (self.scrollTop * drawHeight) / rows.length + gridTop * self.characterHeight;
+            scrollY = (self.scrollTop * drawHeight) / tokenRows.length + gridTop * self.characterHeight;
             scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (gridLeft + rightGutterWidth) * self.characterWidth;
-            scrollBarHeight = gridHeight * drawHeight / rows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
+            scrollBarHeight = gridHeight * drawHeight / tokenRows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
 
             gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
             // horizontal
@@ -1111,6 +986,7 @@ function Primrose(canvasElementOrID, options) {
                     self.characterWidth,
                     Math.max(self.characterHeight, scrollBarHeight));
         }
+
         if (texture) {
             texture.needsUpdate = true;
         }
