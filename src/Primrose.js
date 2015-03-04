@@ -908,20 +908,6 @@ function Primrose(canvasElementOrID, options) {
                             t.value,
                             tokenFront.x * self.characterWidth,
                             (y + 1) * self.characterHeight);
-
-                    // draw the cursor caret
-                    if (focused && inSelection && minCursor.i === maxCursor.i) {
-                        gfx.beginPath();
-                        gfx.strokeStyle = theme.cursorColor || "black";
-                        gfx.lineWidth = 2;
-                        gfx.moveTo(
-                                self.frontCursor.x * self.characterWidth,
-                                y * self.characterHeight);
-                        gfx.lineTo(
-                                self.frontCursor.x * self.characterWidth,
-                                (y + 1.25) * self.characterHeight);
-                        gfx.stroke();
-                    }
                 }
 
                 tokenFront.copy(tokenBack);
@@ -932,6 +918,26 @@ function Primrose(canvasElementOrID, options) {
             ++tokenFront.y;
             tokenBack.copy(tokenFront);
         }
+
+        // draw the cursor caret
+        if (focused) {
+            gfx.beginPath();
+            gfx.strokeStyle = theme.cursorColor || "black";
+            gfx.moveTo(
+                    minCursor.x * self.characterWidth,
+                    minCursor.y * self.characterHeight);
+            gfx.lineTo(
+                    minCursor.x * self.characterWidth,
+                    (minCursor.y + 1.25) * self.characterHeight);
+            gfx.moveTo(
+                    maxCursor.x * self.characterWidth + 1,
+                    maxCursor.y * self.characterHeight);
+            gfx.lineTo(
+                    maxCursor.x * self.characterWidth + 1,
+                    (maxCursor.y + 1.25) * self.characterHeight);
+            gfx.stroke();
+        }
+
         gfx.restore();
 
         if (showLineNumbers) {
