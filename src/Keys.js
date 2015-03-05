@@ -20,6 +20,7 @@
 
 var CodePages = {};
 var Themes = {};
+var Renderers = {};
 
 function Tile(i, c, bg, fg, style, weight){
     this.index = i;

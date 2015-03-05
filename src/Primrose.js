@@ -65,7 +65,13 @@ function Primrose(canvasElementOrID, options) {
             showScrollBars = true,
             wordWrap = false,
             canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
+            bgCanvas = cascadeElement(canvas.id + "-back", "canvas", HTMLCanvasElement),
+            fgCanvas = cascadeElement(canvas.id + "-front", "canvas", HTMLCanvasElement),
+            trimCanvas = cascadeElement(canvas.id + "-trim", "canvas", HTMLCanvasElement),
             gfx = canvas.getContext("2d"),
+            fgfx = fgCanvas.getContext("2d"),
+            bgfx = bgCanvas.getContext("2d"),
+            tgfx = trimCanvas.getContext("2d"),
             surrogate = cascadeElement("primrose-surrogate-textarea-" + canvas.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
 
@@ -136,8 +142,15 @@ function Primrose(canvasElementOrID, options) {
                 oldFont = gfx.font;
 
         self.characterHeight = theme.fontSize * r;
-        canvas.width = canvas.clientWidth * r;
-        canvas.height = canvas.clientHeight * r;
+        bgCanvas.width =
+                fgCanvas.width =
+                trimCanvas.width =
+                canvas.width = canvas.clientWidth * r;
+        bgCanvas.height =
+                fgCanvas.height =
+                trimCanvas.height =
+                canvas.height =
+                canvas.clientHeight * r;
         gfx.font = self.characterHeight + "px " + theme.fontFamily;
         // measure 100 letter M's, then divide by 100, to get the width of an M
         // to two decimal places on systems that return integer values from
@@ -637,8 +650,7 @@ function Primrose(canvasElementOrID, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            var delta = Math.floor(evt.deltaY / this.characterHeight);
-            this.scrollTop += delta;
+            this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);;            
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -844,67 +856,110 @@ function Primrose(canvasElementOrID, options) {
         }
     };
 
-    function renderCanvas() {
-        var i, t, y, row, currentLine, lineNumber, selectionFront,
-                selectionBack, cw, font, style, drawWidth, drawHeight, scrollX,
-                scrollY, scrollBarWidth, scrollBarHeight,
-                scrollRight = scrollLeft + gridWidth,
-                minCursor = Cursor.min(self.frontCursor, self.backCursor),
+    function renderCanvasBackground() {
+        var minCursor = Cursor.min(self.frontCursor, self.backCursor),
                 maxCursor = Cursor.max(self.frontCursor, self.backCursor),
                 tokenFront = new Cursor(),
                 tokenBack = new Cursor(),
-                maxLineWidth = 0,
-                lastLine = -1,
                 clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
         if (theme.regular.backColor) {
-            gfx.fillStyle = theme.regular.backColor;
+            bgfx.fillStyle = theme.regular.backColor;
         }
-        gfx[clearFunc](0, 0, gfx.canvas.width, gfx.canvas.height);
-        gfx.save();
-        gfx.translate(0, -self.scrollTop * self.characterHeight);
-        gfx.save();
-        gfx.translate((gridLeft - scrollLeft) * self.characterWidth, 0);
-        for (y = 0, lastLine = -1; y < tokenRows.length; ++y) {
+
+        bgfx[clearFunc](0, 0, canvas.width, canvas.height);
+        bgfx.save();
+        bgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -self.scrollTop * self.characterHeight);
+        for (var y = 0, lastLine = -1; y < tokenRows.length; ++y) {
             // draw the tokens on this row
-            row = tokenRows[y];
+            var row = tokenRows[y];
             // be able to draw brand-new rows that don't have any tokens yet
-            currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+            var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
 
             // draw the current row highlighter
             if (focused && currentLine === self.backCursor.y) {
-                fillRect(gfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
                         0, (y + 0.2),
                         gridWidth, 1);
             }
 
-            for (i = 0; i < row.length; ++i) {
-                t = row[i];
+            for (var i = 0; i < row.length; ++i) {
+                var t = row[i];
                 tokenBack.x += t.value.length;
                 tokenBack.i += t.value.length;
 
                 // skip drawing tokens that aren't in view
                 if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
-                        scrollLeft <= tokenBack.x && tokenFront.x < scrollRight) {
+                        scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
                     // draw the selection box
                     var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
                     if (inSelection) {
-                        selectionFront = Cursor.max(minCursor, tokenFront);
-                        selectionBack = Cursor.min(maxCursor, tokenBack);
-                        cw = selectionBack.i - selectionFront.i;
-                        fillRect(gfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                        var selectionFront = Cursor.max(minCursor, tokenFront);
+                        var selectionBack = Cursor.min(maxCursor, tokenBack);
+                        var cw = selectionBack.i - selectionFront.i;
+                        fillRect(bgfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
                                 selectionFront.x, selectionFront.y + 0.2,
                                 cw, 1);
                     }
+                }
+
+                tokenFront.copy(tokenBack);
+            }
+
+            tokenFront.x = 0;
+            ++tokenFront.y;
+            tokenBack.copy(tokenFront);
+        }
+
+        // draw the cursor caret
+        if (focused) {
+            bgfx.beginPath();
+            bgfx.strokeStyle = theme.cursorColor || "black";
+            bgfx.moveTo(
+                    minCursor.x * self.characterWidth,
+                    minCursor.y * self.characterHeight);
+            bgfx.lineTo(
+                    minCursor.x * self.characterWidth,
+                    (minCursor.y + 1.25) * self.characterHeight);
+            bgfx.moveTo(
+                    maxCursor.x * self.characterWidth + 1,
+                    maxCursor.y * self.characterHeight);
+            bgfx.lineTo(
+                    maxCursor.x * self.characterWidth + 1,
+                    (maxCursor.y + 1.25) * self.characterHeight);
+            bgfx.stroke();
+        }
+        bgfx.restore();
+    }
+
+    function renderCanvasForeground() {
+        var tokenFront = new Cursor(),
+                tokenBack = new Cursor(),
+                maxLineWidth = 0;
+
+        fgfx.clearRect(0, 0, canvas.width, canvas.height);
+        fgfx.save();
+        fgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -self.scrollTop * self.characterHeight);
+        for (var y = 0; y < tokenRows.length; ++y) {
+            // draw the tokens on this row
+            var row = tokenRows[y];
+            for (var i = 0; i < row.length; ++i) {
+                var t = row[i];
+                tokenBack.x += t.value.length;
+                tokenBack.i += t.value.length;
+
+                // skip drawing tokens that aren't in view
+                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
+                        scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
 
                     // draw the text
-                    style = theme[t.type] || {};
-                    font = (style.fontWeight || theme.regular.fontWeight || "") +
+                    var style = theme[t.type] || {};
+                    var font = (style.fontWeight || theme.regular.fontWeight || "") +
                             " " + (style.fontStyle || theme.regular.fontStyle || "") +
                             " " + self.characterHeight + "px " + theme.fontFamily;
-                    gfx.font = font.trim();
-                    gfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                    gfx.fillText(
+                    fgfx.font = font.trim();
+                    fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                    fgfx.fillText(
                             t.value,
                             tokenFront.x * self.characterWidth,
                             (y + 1) * self.characterHeight);
@@ -918,80 +973,83 @@ function Primrose(canvasElementOrID, options) {
             ++tokenFront.y;
             tokenBack.copy(tokenFront);
         }
+        fgfx.restore();
+        return maxLineWidth;
+    }
 
-        // draw the cursor caret
-        if (focused) {
-            gfx.beginPath();
-            gfx.strokeStyle = theme.cursorColor || "black";
-            gfx.moveTo(
-                    minCursor.x * self.characterWidth,
-                    minCursor.y * self.characterHeight);
-            gfx.lineTo(
-                    minCursor.x * self.characterWidth,
-                    (minCursor.y + 1.25) * self.characterHeight);
-            gfx.moveTo(
-                    maxCursor.x * self.characterWidth + 1,
-                    maxCursor.y * self.characterHeight);
-            gfx.lineTo(
-                    maxCursor.x * self.characterWidth + 1,
-                    (maxCursor.y + 1.25) * self.characterHeight);
-            gfx.stroke();
-        }
-
-        gfx.restore();
-
+    function renderCanvasTrim(maxLineWidth) {
+        tgfx.clearRect(0, 0, canvas.width, canvas.height);
+        tgfx.save();
+        tgfx.translate(0, -self.scrollTop * self.characterHeight);
         if (showLineNumbers) {
-            for (y = self.scrollTop, lastLine = -1; y < self.scrollTop + gridHeight; ++y) {
+            for (var y = self.scrollTop, lastLine = -1; y < self.scrollTop + gridHeight; ++y) {
                 // draw the tokens on this row
-                row = tokenRows[y];
+                var row = tokenRows[y];
                 // be able to draw brand-new rows that don't have any tokens yet
-                currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
                 // draw the left gutter
-                lineNumber = currentLine.toString();
+                var lineNumber = currentLine.toString();
                 while (lineNumber.length < lineCountWidth) {
                     lineNumber = " " + lineNumber;
                 }
-                fillRect(gfx,
+                fillRect(tgfx,
                         theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
                         0, y + 0.2,
                         (lineNumber.length + leftGutterWidth), 1);
-                gfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
+                tgfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
 
                 if (currentLine > lastLine) {
-                    gfx.fillStyle = theme.regular.foreColor;
-                    gfx.fillText(
+                    tgfx.fillStyle = theme.regular.foreColor;
+                    tgfx.fillText(
                             lineNumber,
                             0, (y + 1) * self.characterHeight);
                 }
                 lastLine = currentLine;
             }
         }
-        gfx.restore();
+
+        tgfx.restore();
 
         // draw the scrollbars
         if (showScrollBars) {
-            drawWidth = gridWidth * self.characterWidth;
-            drawHeight = gridHeight * self.characterHeight;
-            scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridLeft * self.characterWidth;
-            scrollY = (self.scrollTop * drawHeight) / tokenRows.length + gridTop * self.characterHeight;
-            scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (gridLeft + rightGutterWidth) * self.characterWidth;
-            scrollBarHeight = gridHeight * drawHeight / tokenRows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
+            var drawWidth = gridWidth * self.characterWidth;
+            var drawHeight = gridHeight * self.characterHeight;
+            var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridLeft * self.characterWidth;
+            var scrollY = (self.scrollTop * drawHeight) / tokenRows.length + gridTop * self.characterHeight;
+            var scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (gridLeft + rightGutterWidth) * self.characterWidth;
+            var scrollBarHeight = gridHeight * drawHeight / tokenRows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
 
-            gfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
+            tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
             // horizontal
-            gfx.fillRect(
+            tgfx.fillRect(
                     scrollX,
                     (gridHeight + 0.25) * self.characterHeight,
                     Math.max(self.characterWidth, scrollBarWidth),
                     self.characterHeight);
 
             //vertical
-            gfx.fillRect(
+            tgfx.fillRect(
                     canvas.width - self.characterWidth,
                     scrollY,
                     self.characterWidth,
                     Math.max(self.characterHeight, scrollBarHeight));
         }
+    }
+
+    function renderCanvas() {
+        var maxLineWidth = 0;
+
+        if(self.frontCursor.moved || self.backCursor.moved){
+            renderCanvasBackground();
+        }
+        
+        maxLineWidth = renderCanvasForeground();
+        renderCanvasTrim(maxLineWidth);
+
+        gfx.clearRect(0, 0, canvas.width, canvas.height);
+        gfx.drawImage(bgCanvas, 0, 0);
+        gfx.drawImage(fgCanvas, 0, 0);
+        gfx.drawImage(trimCanvas, 0, 0);
 
         if (texture) {
             texture.needsUpdate = true;

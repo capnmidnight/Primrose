@@ -21,7 +21,7 @@ var Cursor = (function () {
         this.i = i || 0;
         this.x = x || 0;
         this.y = y || 0;
-        this.moved = false;
+        this.moved = true;
     }
 
     Cursor.min = function (a, b) {
