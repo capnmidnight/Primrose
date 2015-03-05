@@ -78,7 +78,7 @@ var Cursor = (function () {
             var x = this.x - 1;
             var line = reverse(lines[this.y].substring(0, x));
             var m = line.match(/(\s|\W)+/);
-            var dx = m ? (m.index + m[0].length + 1) : line.length + 1;
+            var dx = m ? (m.index + m[0].length + 1) : line.length;
             this.i -= dx;
             this.x -= dx;
         }
@@ -136,7 +136,7 @@ var Cursor = (function () {
         this.i += lines[this.y].length - this.x;
         while (this.y < lines.length - 1) {
             ++this.y;
-            this.i += lines[this.y].length + 1;
+            this.i += lines[this.y].length;
         }
         this.x = lines[this.y].length;
         this.moved = true;
@@ -147,7 +147,7 @@ var Cursor = (function () {
             --this.y;
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
-            this.i -= lines[this.y].length + 1 - dx;
+            this.i -= lines[this.y].length - dx;
         }
         this.moved = true;
     };
@@ -157,7 +157,7 @@ var Cursor = (function () {
             ++this.y;
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
-            this.i += lines[this.y - 1].length + 1 + dx;
+            this.i += lines[this.y - 1].length + dx;
         }
         this.moved = true;
     };
@@ -167,7 +167,7 @@ var Cursor = (function () {
         this.x = Math.max(0, Math.min(lines[this.y].length, x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length + 1;
+            this.i += lines[i].length;
         }
         this.moved = true;
     };
@@ -177,7 +177,7 @@ var Cursor = (function () {
         this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length + 1;
+            this.i += lines[i].length;
         }
         this.moved = true;
     };

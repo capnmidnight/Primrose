@@ -31,7 +31,6 @@ Renderers.Canvas = (function () {
                 texture = null, pickingTexture = null, pickingPixelBuffer = null;
 
         this.character = new Size();
-
         this.id = canvas.id;
 
         this.setTheme = function (t) {
@@ -113,18 +112,18 @@ Renderers.Canvas = (function () {
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
             bgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
-            for (var y = 0, lastLine = -1; y < tokenRows.length; ++y) {
+            
+
+            // draw the current row highlighter
+            if (focused) {
+                fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                        0, minCursor.y + 0.2,
+                        gridBounds.width, maxCursor.y - minCursor.y + 1);
+            }
+                
+            for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
-                // be able to draw brand-new rows that don't have any tokens yet
-                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-
-                // draw the current row highlighter
-                if (focused && currentLine === backCursor.y) {
-                    fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
-                            0, (y + 0.2),
-                            gridBounds.width, 1);
-                }
 
                 for (var i = 0; i < row.length; ++i) {
                     var t = row[i];

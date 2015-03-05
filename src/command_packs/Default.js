@@ -29,7 +29,7 @@ Commands.DEFAULT = (function () {
             if (prim.frontCursor.i === prim.backCursor.i) {
                 prim.frontCursor.left(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_ENTER: function (prim, lines) {
@@ -37,14 +37,14 @@ Commands.DEFAULT = (function () {
             for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
                 indent += " ";
             }
-            prim.insertAtCursor("\n" + indent);
+            prim.overwriteText("\n" + indent);
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_DELETE: function (prim, lines) {
             if (prim.frontCursor.i === prim.backCursor.i) {
                 prim.backCursor.right(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         SHIFT_DELETE: function (prim, lines) {
@@ -52,13 +52,13 @@ Commands.DEFAULT = (function () {
                 prim.frontCursor.home(lines);
                 prim.backCursor.end(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_TAB: function (prim, lines) {
             var ts = prim.getTabString();
             if (prim.frontCursor.y === prim.backCursor.y) {
-                prim.insertAtCursor(ts);
+                prim.overwriteText(ts);
             }
             else {
                 var a = Cursor.min(prim.frontCursor, prim.backCursor);

@@ -37,6 +37,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             commandPack = {},
             tokenizer,
             tokens,
+            tokenRows,
+            scrollLines,
             theme,
             pointer = new Point(),
             tabWidth,
@@ -49,13 +51,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
             gridBounds = new Rectangle(),
             topLeftGutter = new Size(),
             bottomRightGutter = new Size(),
-            tokenRows = null,
             dragging = false,
             focused = false,
             changed = false,
             showLineNumbers = true,
             showScrollBars = true,
             wordWrap = false,
+            wheelScrollSpeed = 0,
             renderer = new Renderer(renderToElementOrID, options),
             surrogate = cascadeElement("primrose-surrogate-textarea-" +
                     renderer.id, "textarea", HTMLTextAreaElement),
@@ -83,8 +85,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scroll.y = 0;
         }
         else
-            while (0 < self.scroll.y && self.scroll.y > self.getLineCount() -
-                    gridBounds.height) {
+            while (0 < self.scroll.y
+                    && self.scroll.y > scrollLines.length - gridBounds.height) {
                 --self.scroll.y;
             }
     }
@@ -122,9 +124,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
     function setCursorXY(cursor, x, y) {
         changed = true;
         pointer.set(x, y);
-        var lines = self.getLines();
         renderer.pixel2cell(pointer, self.scroll, gridBounds);
-        cursor.setXY(pointer.x, pointer.y, lines);
+        cursor.setXY(pointer.x, pointer.y, scrollLines);
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
@@ -186,7 +187,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 if (cmd.hasOwnProperty(key)) {
                     var func = cmd[key];
                     if (!(func instanceof Function)) {
-                        func = self.insertAtCursor.bind(self, func);
+                        func = self.overwriteText.bind(self, func);
                     }
                     commandPack[key] = func;
                 }
@@ -200,7 +201,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
         addCommandPack(keyboardSystem);
         addCommandPack(operatingSystem);
-        addCommandPack(browser);
         addCommandPack(commandSystem);
     }
 
@@ -211,6 +211,56 @@ function Primrose(renderToElementOrID, Renderer, options) {
             cursor[method](lines);
             self.scrollIntoView(cursor);
         };
+    }
+
+    function performLayout() {
+        var lineCountWidth;
+        if (showLineNumbers) {
+            lineCountWidth = Math.max(1, Math.ceil(Math.log(
+                    self.getLineCount()) / Math.LN10));
+            topLeftGutter.width = 1;
+        }
+        else {
+            lineCountWidth = 0;
+            topLeftGutter.width = 0;
+        }
+
+        if (showScrollBars) {
+            bottomRightGutter.set(1, 1);
+        }
+        else {
+            bottomRightGutter.set(0, 0);
+        }
+
+        gridBounds.set(
+                topLeftGutter.width + lineCountWidth,
+                0,
+                Math.floor(self.getWidth() /
+                        renderer.character.width) - gridBounds.x - bottomRightGutter.width,
+                Math.floor(self.getHeight() /
+                        renderer.character.height) - bottomRightGutter.height);
+
+        // group the tokens into rows
+        scrollLines = [""];
+        tokenRows = [[]];
+        var tokenQueue = tokens.slice();
+        for (var i = 0; i < tokenQueue.length; ++i) {
+            var t = tokenQueue[i].clone();
+            var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
+            var lb = t.type === "newlines" || wrap;
+            if(wrap) {
+                tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
+            }
+            
+            tokenRows[tokenRows.length - 1].push(t);
+            scrollLines[scrollLines.length - 1] += t.value;
+
+            if (lb) {
+                tokenRows.push([]);
+                scrollLines.push("");
+            }
+        }
+        return lineCountWidth;
     }
 
 
@@ -251,6 +301,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.getRenderer = function () {
         return renderer;
+    };
+
+    this.setWheelScrollSpeed = function (v) {
+        wheelScrollSpeed = v || 25;
+    };
+
+    this.getWheelScrollSpeed = function () {
+        return wheelScrollSpeed;
     };
 
     this.setWordWrap = function (v) {
@@ -415,9 +473,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.getLines = function () {
         return history[historyFrame].slice();
     };
-    
-    this.getLineCount = function() {
+
+    this.getLineCount = function () {
         return history[historyFrame].length;
+    };
+
+    this.getText = function () {
+        return history[historyFrame].join("\n");
     };
 
     this.pushUndo = function (lines) {
@@ -472,20 +534,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.increaseFontSize = function () {
         ++theme.fontSize;
-        renderer.resize();
+        changed = renderer.resize();
     };
 
     this.decreaseFontSize = function () {
         if (theme.fontSize > 1) {
             --theme.fontSize;
-            renderer.resize();
+            changed = renderer.resize();
         }
-    };
-
-    this.getText = function () {
-        return this.getLines()
-                .join(
-                        "\n");
     };
 
     this.setText = function (txt) {
@@ -493,9 +549,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         txt = txt.replace(/\r\n/g, "\n");
         var lines = txt.split("\n");
         this.pushUndo(lines);
-        if (this.drawText) {
-            this.drawText();
-        }
+        this.drawText();
     };
 
     this.getPixelRatio = function () {
@@ -503,48 +557,28 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.cell2i = function (x, y) {
-        var dy,
-                lines =
-                this.getLines(),
-                i = 0;
-        for (dy = 0; dy < y; ++dy) {
-            i += lines[dy].length + 1;
+        var i = 0;
+        for (var dy = 0; dy < y; ++dy) {
+            i += scrollLines[dy].length + 1;
         }
         i += x;
         return i;
     };
 
     this.i2cell = function (i) {
-        var lines = this.getLines();
-        for (var y = 0; y < lines.length; ++y) {
-            if (i <= lines.length) {
+        for (var y = 0; y < scrollLines.length; ++y) {
+            if (i <= scrollLines.length) {
                 return {x: i, y: y};
             }
             else {
-                i -= lines.length - 1;
+                i -= scrollLines.length - 1;
             }
-        }
-    };
-
-    this.deleteSelection = function () {
-        if (this.frontCursor.i !== this.backCursor.i) {
-            // TODO: don't rejoin the string first.
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-                    lines = this.getLines(),
-                    text = lines.join("\n"),
-                    left = text.substring(0, minCursor.i),
-                    right = text.substring(maxCursor.i);
-            maxCursor.copy(minCursor);
-            this.setText(left + right);
-            clampScroll();
         }
     };
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scroll.y += Math.floor(evt.deltaY /
-                    renderer.character.height);
+            this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -604,31 +638,29 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
     };
 
-    this.insertAtCursor = function (str) {
-        if (str.length > 0) {
-            str = str.replace(/\r\n/g, "\n");
-            this.deleteSelection();
-            var lines = this.getLines();
-            var parts = str.split("\n");
-            parts[0] = lines[this.frontCursor.y].substring(0,
-                    this.frontCursor.x) + parts[0];
-            parts[parts.length - 1] += lines[this.frontCursor.y].substring(
-                    this.frontCursor.x);
-            lines.splice.bind(lines, this.frontCursor.y, 1)
-                    .apply(
-                            lines,
-                            parts);
+    this.overwriteText = function (str) {
+        str = str || "";        
+        str = str.replace(/\r\n/g, "\n");
+        
+        if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+            // TODO: don't rejoin the string first.
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    text = this.getText(),
+                    left = text.substring(0, minCursor.i),
+                    right = text.substring(maxCursor.i);
             for (var i = 0; i < str.length; ++i) {
-                this.frontCursor.right(lines);
+                minCursor.right(scrollLines);
             }
-            this.backCursor.copy(this.frontCursor);
-            this.scrollIntoView(this.frontCursor);
-            this.pushUndo(lines);
+            maxCursor.copy(minCursor);
+            this.setText(left + str + right);
+            this.scrollIntoView(maxCursor);
+            clampScroll();
         }
     };
 
     this.pasteAtCursor = function (str) {
-        this.insertAtCursor(str);
+        this.overwriteText(str);
         this.drawText();
     };
 
@@ -636,8 +668,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         if (this.frontCursor.i !== this.backCursor.i) {
             var minCursor = Cursor.min(this.frontCursor, this.backCursor),
                     maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-                    lines = this.getLines(),
-                    text = lines.join("\n"),
+                    text = this.getText(),
                     str = text.substring(minCursor.i, maxCursor.i);
             evt.clipboardData.setData("text/plain", str);
         }
@@ -646,7 +677,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.cutSelectedText = function (evt) {
         this.copySelectedText(evt);
-        this.deleteSelection();
+        this.overwriteText();
         this.drawText();
     };
 
@@ -697,14 +728,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
-                var lines = this.getLines();
-                func(self, lines);
-                lines = this.getLines();
+                func(self, scrollLines);
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
                 }
-                this.frontCursor.rectify(lines);
-                this.backCursor.rectify(lines);
+                this.frontCursor.rectify(scrollLines);
+                this.backCursor.rectify(scrollLines);
+                clampScroll();
                 evt.preventDefault();
             }
 
@@ -717,52 +747,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var lineCountWidth;
-            if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(
-                        this.getLineCount()) / Math.LN10));
-                topLeftGutter.width = 1;
-            }
-            else {
-                lineCountWidth = 0;
-                topLeftGutter.width = 0;
-            }
-
-            if (showScrollBars) {
-                bottomRightGutter.set(1, 1);
-            }
-            else {
-                bottomRightGutter.set(0, 0);
-            }
-
-            gridBounds.set(
-                    topLeftGutter.width + lineCountWidth,
-                    0,
-                    Math.floor(this.getWidth() /
-                            renderer.character.width) - gridBounds.x - bottomRightGutter.width,
-                    Math.floor(this.getHeight() /
-                            renderer.character.height) - bottomRightGutter.height);
-
-            // group the tokens into rows
-            var currentRow = [],
-                    rowX = 0;
-            tokenRows = [currentRow];
-            for (var i = 0; i < tokens.length; ++i) {
-                var t = tokens[i].clone();
-                currentRow.push(t);
-                rowX += t.value.length;
-                if (wordWrap && rowX >= gridBounds.width || t.type ===
-                        "newlines") {
-                    currentRow = [];
-                    tokenRows.push(currentRow);
-                    if (wordWrap && rowX >= gridBounds.width && t.type !==
-                            "newlines") {
-                        currentRow.push(t.splitAt(gridBounds.width - (rowX -
-                                t.value.length)));
-                    }
-                    rowX = 0;
-                }
-            }
+            var lineCountWidth = performLayout();
 
             renderer.render(
                     tokenRows,
@@ -779,9 +764,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
+
+    //
+    // different browsers have different sets of keycodes for less-frequently
+    // used keys like.
     browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" :
             (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
 
+    //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
     surrogateContainer = makeHidingContainer(
@@ -790,6 +780,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     document.body.appendChild(surrogateContainer);
 
     this.setWordWrap(options.wordWrap);
+    this.setWheelScrollSpeed(options.wheelScrollSpeed);
     this.setShowLineNumbers(!options.hideLineNumbers);
     this.setShowScrollBars(!options.hideScrollBars);
     this.setTabWidth(options.tabWidth);
@@ -822,7 +813,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", renderer.resize.bind(renderer));
+    window.addEventListener("resize", function(){
+        changed = renderer.resize();
+        self.drawText();
+    });
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
