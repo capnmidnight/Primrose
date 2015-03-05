@@ -186,6 +186,152 @@ var Cursor = (function () {
     };
     return Cursor;
 })();;/* 
+ * Copyright (C) 2015 Sean
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+var Point = (function () {
+    "use strict";
+    function Point(x, y) {
+        this.set(x || 0, y || 0);
+
+        Object.defineProperties(this, {
+            left: {
+                get: function () {
+                    return this.x;
+                },
+                set: function (v) {
+                    this.x = v;
+                }
+            },
+            top: {
+                get: function () {
+                    return this.y;
+                },
+                set: function (v) {
+                    this.y = v;
+                }
+            }
+        });
+    }
+
+    Point.prototype.set = function (x, y) {
+        this.width = x;
+        this.height = y;
+    };
+
+    return Point;
+})();
+
+var Size = (function () {
+    "use strict";
+    function Size(width, height) {
+        this.set(width || 0, height || 0);
+    }
+
+    Size.prototype.set = function (width, height) {
+        this.width = width;
+        this.height = height;
+    };
+
+    return Size;
+})();
+
+var Rectangle = (function () {
+    "use strict";
+    function Rectangle(x, y, width, height) {
+        if (x instanceof Point) {
+            if (y instanceof Size) {
+                this.set(x.x, x.y, y.width, y.height);
+            }
+            else {
+                this.set(x.x, x.y, y || 0, width || 0);
+            }
+        }
+        else {
+            if (y instanceof Size) {
+                this.set(x || 0, y || 0, width.width,
+                        width.height);
+            }
+            else {
+                this.set(x || 0, y || 0, width || 0, height ||
+                        0);
+            }
+        }
+
+        Object.defineProperties(this, {
+            x: {
+                get: function () {
+                    return this.point.x;
+                },
+                set: function (v) {
+                    this.point.x = v;
+                }
+            },
+            left: {
+                get: function () {
+                    return this.point.x;
+                },
+                set: function (v) {
+                    this.point.x = v;
+                }
+            },
+            right: {
+                get: function () {
+                    return this.point.x + this.size.width;
+                },
+                set: function (v) {
+                    this.point.x = v - this.size.width;
+                }
+            },
+            y: {
+                get: function () {
+                    return this.point.y;
+                },
+                set: function (v) {
+                    this.point.y = v;
+                }
+            },
+            top: {
+                get: function () {
+                    return this.point.y;
+                },
+                set: function (v) {
+                    this.point.y = v;
+                }
+            },
+            bottom: {
+                get: function () {
+                    return this.point.y + this.size.height;
+                },
+                set: function (v) {
+                    this.point.y = v - this.size.height;
+                }
+            }
+        });
+    }
+
+    Rectangle.prototype.set = function (x, y, width,
+            height) {
+        this.point = new Point(x, y);
+        this.size = new Size(width, height);
+    };
+
+    return Rectangle;
+})();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -477,18 +623,17 @@ function Primrose(renderToElementOrID, Renderer, options) {
             tokenizer,
             tokens,
             theme,
-            pointerX, pointerY,
-            tabWidth, tabString,
+            pointerX,
+            pointerY,
+            tabWidth,
+            tabString,
             currentTouchID,
             deadKeyState = "",
             keyNames = [],
             history = [],
             historyFrame = -1,
             scrollLeft = 0,
-            gridTop = 0,
-            gridLeft = 0,
-            gridWidth = 0,
-            gridHeight = 0,
+            gridBounds = new Rectangle(),
             lineCountWidth = 0,
             leftGutterWidth = 0,
             topGutterHeight = 0,
@@ -503,7 +648,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             showScrollBars = true,
             wordWrap = false,
             renderer = new Renderer(renderToElementOrID, options),
-            surrogate = cascadeElement("primrose-surrogate-textarea-" + renderer.id, "textarea", HTMLTextAreaElement),
+            surrogate = cascadeElement("primrose-surrogate-textarea-" +
+                    renderer.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
 
 
@@ -529,7 +675,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scrollTop = 0;
         }
         else
-            while (0 < self.scrollTop && self.scrollTop > self.lineCount - gridHeight) {
+            while (0 < self.scrollTop && self.scrollTop > self.lineCount -
+                    gridBounds.height) {
                 --self.scrollTop;
             }
     }
@@ -569,14 +716,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
         pointerX = x;
         pointerY = y;
         var lines = self.getLines();
-        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop, gridLeft);
+        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop,
+                gridBounds);
         cursor.setXY(cell.x, cell.y, lines);
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
         if (focused && evt.button === 0) {
             var bounds = pointerEventSource.getBoundingClientRect();
-            self.startPointer(evt.clientX - bounds.left, evt.clientY - bounds.top);
+            self.startPointer(evt.clientX - bounds.left, evt.clientY -
+                    bounds.top);
             evt.preventDefault();
         }
     }
@@ -584,7 +733,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
     function mouseMove(pointerEventSource, evt) {
         if (focused) {
             var bounds = pointerEventSource.getBoundingClientRect();
-            self.movePointer(evt.clientX - bounds.left, evt.clientY - bounds.top);
+            self.movePointer(evt.clientX - bounds.left, evt.clientY -
+                    bounds.top);
         }
     }
 
@@ -608,7 +758,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var t = evt.changedTouches[i];
             if (t.identifier === currentTouchID) {
                 var bounds = pointerEventSource.getBoundingClientRect();
-                self.movePointer(t.clientX - bounds.left, t.clientY - bounds.top);
+                self.movePointer(t.clientX - bounds.left, t.clientY -
+                        bounds.top);
                 break;
             }
         }
@@ -668,13 +819,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.cursorPageUp = function (lines, cursor) {
         changed = true;
-        cursor.incY(-gridHeight, lines);
+        cursor.incY(-gridBounds.height, lines);
         this.scrollIntoView(cursor);
     };
 
     this.cursorPageDown = function (lines, cursor) {
         changed = true;
-        cursor.incY(gridHeight, lines);
+        cursor.incY(gridBounds.height, lines);
         this.scrollIntoView(cursor);
     };
 
@@ -740,7 +891,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setOperatingSystem = function (os) {
         changed = true;
-        operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
+        operatingSystem = os || (isOSX ? OperatingSystems.OSX :
+                OperatingSystems.WINDOWS);
         refreshCommandPack();
     };
 
@@ -773,7 +925,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setCodePage = function (cp) {
         changed = true;
-        var key, code,
+        var key,
+                code,
                 lang = (navigator.languages && navigator.languages[0]) ||
                 navigator.language ||
                 navigator.userLanguage ||
@@ -812,7 +965,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
                 for (code in codes) {
-                    var char, name;
+                    var char,
+                            name;
                     if (code.indexOf("_") > -1) {
                         var parts = code.split(' '),
                                 browser = parts[0];
@@ -899,8 +1053,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-        this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridHeight);
-        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft + gridWidth);
+        this.scrollTop += minDelta(currentCursor.y, this.scrollTop,
+                this.scrollTop + gridBounds.height);
+        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft +
+                gridBounds.width);
         clampScroll();
     };
 
@@ -917,7 +1073,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.getText = function () {
-        return this.getLines().join("\n");
+        return this.getLines()
+                .join(
+                        "\n");
     };
 
     this.setText = function (txt) {
@@ -935,7 +1093,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.cell2i = function (x, y) {
-        var dy, lines = this.getLines(),
+        var dy,
+                lines =
+                this.getLines(),
                 i = 0;
         for (dy = 0; dy < y; ++dy) {
             i += lines[dy].length + 1;
@@ -973,7 +1133,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scrollTop += Math.floor(evt.deltaY / renderer.characterHeight);
+            this.scrollTop += Math.floor(evt.deltaY /
+                    renderer.characterHeight);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -1011,17 +1172,25 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.bindEvents = function (keyEventSource, pointerEventSource) {
         if (keyEventSource) {
-            keyEventSource.addEventListener("keydown", this.editText.bind(this));
+            keyEventSource.addEventListener("keydown", this.editText.bind(
+                    this));
         }
 
         if (pointerEventSource) {
-            pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
-            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
-            pointerEventSource.addEventListener("touchstart", touchStart.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("touchmove", touchMove.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("touchend", touchEnd.bind(this));
+            pointerEventSource.addEventListener("wheel", this.readWheel.bind(
+                    this));
+            pointerEventSource.addEventListener("mousedown",
+                    mouseButtonDown.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mousemove", mouseMove.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(
+                    this));
+            pointerEventSource.addEventListener("touchstart", touchStart.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("touchmove", touchMove.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("touchend", touchEnd.bind(
+                    this));
         }
     };
 
@@ -1031,9 +1200,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
             this.deleteSelection();
             var lines = this.getLines();
             var parts = str.split("\n");
-            parts[0] = lines[this.frontCursor.y].substring(0, this.frontCursor.x) + parts[0];
-            parts[parts.length - 1] += lines[this.frontCursor.y].substring(this.frontCursor.x);
-            lines.splice.bind(lines, this.frontCursor.y, 1).apply(lines, parts);
+            parts[0] = lines[this.frontCursor.y].substring(0,
+                    this.frontCursor.x) + parts[0];
+            parts[parts.length - 1] += lines[this.frontCursor.y].substring(
+                    this.frontCursor.x);
+            lines.splice.bind(lines, this.frontCursor.y, 1)
+                    .apply(
+                            lines,
+                            parts);
             for (var i = 0; i < str.length; ++i) {
                 this.frontCursor.right(lines);
             }
@@ -1084,7 +1258,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L && key !== Keys.META_R && key !== Keys.SHIFT) {
+        if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L &&
+                key !== Keys.META_R && key !== Keys.SHIFT) {
             var oldDeadKeyState = deadKeyState;
 
             var commandName = deadKeyState;
@@ -1107,7 +1282,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
             commandName += "_" + keyNames[key];
 
-            var func = commandPack[browser + "_" + commandName] || commandPack[commandName];
+            var func = commandPack[browser + "_" + commandName] ||
+                    commandPack[commandName];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
@@ -1131,7 +1307,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t, i;
+            var t,
+                    i;
 
             this.lineCount = 1;
 
@@ -1142,7 +1319,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             }
 
             if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(this.lineCount) / Math.LN10));
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(
+                        this.lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
             else {
@@ -1159,11 +1337,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 bottomGutterHeight = 0;
             }
 
-            gridLeft = leftGutterWidth + lineCountWidth;
-
-            gridWidth = Math.floor(this.getWidth() / renderer.characterWidth) - gridLeft - rightGutterWidth;
-
-            gridHeight = Math.floor(this.getHeight() / renderer.characterHeight) - bottomGutterHeight;
+            gridBounds.set(
+                    leftGutterWidth + lineCountWidth,
+                    0,
+                    Math.floor(this.getWidth() / renderer.characterWidth) -
+                    gridBounds.x - rightGutterWidth,
+                    Math.floor(this.getHeight() / renderer.characterHeight) -
+                    bottomGutterHeight);
 
             // group the tokens into rows
             var currentRow = [],
@@ -1173,11 +1353,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 t = tokens[i].clone();
                 currentRow.push(t);
                 rowX += t.value.length;
-                if (wordWrap && rowX >= gridWidth || t.type === "newlines") {
+                if (wordWrap && rowX >= gridBounds.width || t.type ===
+                        "newlines") {
                     currentRow = [];
                     tokenRows.push(currentRow);
-                    if (wordWrap && rowX >= gridWidth && t.type !== "newlines") {
-                        currentRow.push(t.splitAt(gridWidth - (rowX - t.value.length)));
+                    if (wordWrap && rowX >= gridBounds.width && t.type !==
+                            "newlines") {
+                        currentRow.push(t.splitAt(gridBounds.width - rowX +
+                                t.value.length));
                     }
                     rowX = 0;
                 }
@@ -1186,11 +1369,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.render(
                     tokenRows,
                     this.frontCursor, this.backCursor,
-                    gridLeft, gridTop, gridWidth, gridHeight,
+                    gridBounds,
                     scrollLeft, this.scrollTop,
                     focused, showLineNumbers, showScrollBars,
                     lineCountWidth,
-                    leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight);
+                    leftGutterWidth, topGutterHeight, rightGutterWidth,
+                    bottomGutterHeight);
 
             changed = false;
         }
@@ -1199,11 +1383,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
-    browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+    browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" :
+            (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
 
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + renderer.id, surrogate);
+    surrogateContainer = makeHidingContainer(
+            "primrose-surrogate-textarea-container-" + renderer.id, surrogate);
 
     document.body.appendChild(surrogateContainer);
 
@@ -1219,11 +1405,21 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setText(options.file);
     this.bindEvents(options.keyEventSource, options.pointerEventSource);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + renderer.id, Themes, theme.name, self, "setTheme", "theme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + renderer.id, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + renderer.id, CodePages, codePage.name, self, "setCodePage", "localization");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + renderer.id, Commands, commandSystem.name, self, "setCommandSystem", "command system");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + renderer.id, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
+            renderer.id, Themes, theme.name, self, "setTheme", "theme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
+            renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
+            "language syntax");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
+            renderer.id, CodePages, codePage.name, self, "setCodePage",
+            "localization");
+    this.commandSystemSelect = makeSelectorFromObj(
+            "primrose-command-system-selector-" + renderer.id, Commands,
+            commandSystem.name, self, "setCommandSystem", "command system");
+    this.operatingSystemSelect = makeSelectorFromObj(
+            "primrose-operating-system-selector-" + renderer.id,
+            OperatingSystems, operatingSystem.name, self, "setOperatingSystem",
+            "shortcut style");
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -2022,8 +2218,10 @@ Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEDOWN", "PageDown");;/*
 function makeURL(url, queryMap) {
     var output = [];
     for (var key in queryMap) {
-        if (queryMap.hasOwnProperty(key) && !(queryMap[key] instanceof Function)) {
-            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
+        if (queryMap.hasOwnProperty(key) &&
+                !(queryMap[key] instanceof Function)) {
+            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(
+                    queryMap[key]));
         }
     }
     return url + "?" + output.join("&");
@@ -2090,7 +2288,8 @@ function XXX(msg, v) {
 
 function E(elem, evt, thunk) {
     if (!elem || !elem.addEventListener) {
-        throw XXX("must supply an element with an addEventListener method", elem);
+        throw XXX("must supply an element with an addEventListener method",
+                elem);
     }
     if (!evt || typeof (evt) !== "string") {
         throw XXX("must provide the name of an event", evt);
@@ -2141,7 +2340,8 @@ function agg(arr, get, red) {
             return obj[key];
         }).bind(window, get);
     }
-    return arr.map(get).reduce(red);
+    return arr.map(get)
+            .reduce(red);
 }
 
 function add(a, b) {
@@ -2186,7 +2386,8 @@ function group(arr, getKey, getValue) {
 
 // unicode-aware string reverse
 var reverse = function (str) {
-    str = str.replace(reverse.combiningMarks, function (match, capture1, capture2) {
+    str = str.replace(reverse.combiningMarks, function (match, capture1,
+            capture2) {
         return reverse(capture2) + capture1;
     })
             .replace(reverse.surrogatePair, "$2$1");
@@ -2196,7 +2397,8 @@ var reverse = function (str) {
     }
     return res;
 };
-reverse.combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
+reverse.combiningMarks =
+        /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
 reverse.surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
 // An object inspection function.
@@ -2206,7 +2408,8 @@ function help(obj) {
     var evnts = [];
     if (obj) {
         for (var field in obj) {
-            if (field.indexOf("on") === 0 && (obj !== navigator || field !== "onLine")) {
+            if (field.indexOf("on") === 0 && (obj !== navigator || field !==
+                    "onLine")) {
                 // `online` is a known element that is not an event, but looks like
                 // an event to the most basic assumption.
                 evnts.push(field.substring(2));
@@ -2221,7 +2424,9 @@ function help(obj) {
 
         var type = typeof (obj);
         if (type === "function") {
-            type = obj.toString().match(/(function [^(]*)/)[1];
+            type = obj.toString()
+                    .match(
+                            /(function [^(]*)/)[1];
         }
         else if (type === "object") {
             type = null;
@@ -2239,13 +2444,15 @@ function help(obj) {
                         var testObject = parentObject.obj[field];
                         if (testObject) {
                             if (typeof (testObject) === "function") {
-                                if (testObject.prototype && obj instanceof testObject) {
+                                if (testObject.prototype &&
+                                        obj instanceof testObject) {
                                     type = parentObject.prefix + field;
                                     break;
                                 }
                             }
                             else if (!testObject.___tried___) {
-                                q.push({prefix: parentObject.prefix + field + ".", obj: testObject});
+                                q.push({prefix: parentObject.prefix + field +
+                                            ".", obj: testObject});
                             }
                         }
                     }
@@ -2308,7 +2515,8 @@ function cascadeElement(id, tag, DOMClass) {
     }
 
     if (elem === null) {
-        throw new Error(id + " does not refer to a valid " + tag + " element.");
+        throw new Error(id + " does not refer to a valid " + tag +
+                " element.");
     }
     else {
         elem.innerHTML = "";
@@ -2381,7 +2589,8 @@ function fmt(template) {
                         val = val.toString();
                     }
                     if (pad && pad.length > 0) {
-                        var paddingRegex = new RegExp("^\\d{" + (pad.length + 1) + "}(\\.\\d+)?");
+                        var paddingRegex = new RegExp("^\\d{" + (pad.length +
+                                1) + "}(\\.\\d+)?");
                         while (!paddingRegex.test(val)) {
                             val = "0" + val;
                         }
@@ -2396,7 +2605,10 @@ function fmt(template) {
 
 fmt.addMillis = function (val, txt) {
     return txt.replace(/( AM| PM|$)/, function (match, g1) {
-        return (val.getMilliseconds() / 1000).toString().substring(1) + g1;
+        return (val.getMilliseconds() / 1000).toString()
+                .substring(
+                        1) +
+                g1;
     });
 };
 
@@ -2477,8 +2689,10 @@ function readForm(ctrls) {
     if (ctrls) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if ((c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
-                if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
+            if ((c.tagName === "INPUT" || c.tagName === "SELECT") &&
+                    (!c.dataset || !c.dataset.skipcache)) {
+                if (c.type === "text" || c.type === "password" || c.tagName ===
+                        "SELECT") {
                     state[name] = c.value;
                 }
                 else if (c.type === "checkbox" || c.type === "radio") {
@@ -2494,8 +2708,11 @@ function writeForm(ctrls, state) {
     if (state) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if (state[name] !== null && state[name] !== undefined && (c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
-                if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
+            if (state[name] !== null && state[name] !== undefined &&
+                    (c.tagName === "INPUT" || c.tagName === "SELECT") &&
+                    (!c.dataset || !c.dataset.skipcache)) {
+                if (c.type === "text" || c.type === "password" || c.tagName ===
+                        "SELECT") {
                     c.value = state[name];
                 }
                 else if (c.type === "checkbox" || c.type === "radio") {
@@ -2563,46 +2780,65 @@ function makeHidingContainer(id, obj) {
 
 // snagged and adapted from http://detectmobilebrowsers.com/
 var isMobile = (function (a) {
-    return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4));
+    return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
+            a) ||
+            /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+                    a.substring(
+                            0,
+                            4));
 })(navigator.userAgent || navigator.vendor || window.opera),
         isiOS = /Apple-iP(hone|od|ad)/.test(navigator.userAgent || ""),
         isOSX = /Macintosh/.test(navigator.userAgent || ""),
         isWindows = /Windows/.test(navigator.userAgent || ""),
         isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
         isFirefox = typeof InstallTrigger !== 'undefined',
-        isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0,
+        isSafari = Object.prototype.toString.call(window.HTMLElement)
+        .indexOf(
+                'Constructor') >
+        0,
         isChrome = !!window.chrome && !isOpera,
         isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 
-navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
-navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.RTCIceCandidate;
-window.RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.RTCSessionDescription;
+navigator.vibrate = navigator.vibrate || navigator.webkitVibrate ||
+        navigator.mozVibrate;
+navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia || navigator.oGetUserMedia;
+window.RTCPeerConnection = window.RTCPeerConnection ||
+        window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate ||
+        window.RTCIceCandidate;
+window.RTCSessionDescription = window.RTCSessionDescription ||
+        window.mozRTCSessionDescription || window.RTCSessionDescription;
 
 // this doesn't seem to actually work
-screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {
-};
+screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation ||
+        screen.msLockOrientation || function () {
+        };
 
 // full-screen-ism polyfill
 if (!document.documentElement.requestFullscreen) {
     if (document.documentElement.msRequestFullscreen) {
-        document.documentElement.requestFullscreen = document.documentElement.msRequestFullscreen;
+        document.documentElement.requestFullscreen =
+                document.documentElement.msRequestFullscreen;
         document.exitFullscreen = document.msExitFullscreen;
     }
     else if (document.documentElement.mozRequestFullScreen) {
-        document.documentElement.requestFullscreen = document.documentElement.mozRequestFullScreen;
+        document.documentElement.requestFullscreen =
+                document.documentElement.mozRequestFullScreen;
         document.exitFullscreen = document.mozCancelFullScreen;
     }
     else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
+        document.documentElement.requestFullscreen =
+                document.documentElement.webkitRequestFullscreen;
         document.exitFullscreen = document.webkitExitFullscreen;
     }
 }
 
 function isFullScreenMode() {
-    return (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    return (document.fullscreenElement || document.mozFullScreenElement ||
+            document.webkitFullscreenElement || document.msFullscreenElement);
 }
 
 function requestFullScreen(vrDisplay, success) {
@@ -2615,7 +2851,8 @@ function requestFullScreen(vrDisplay, success) {
             document.documentElement.requestFullscreen({vrDisplay: vrDisplay});
         }
         else {
-            document.documentElement.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            document.documentElement.requestFullscreen(
+                    Element.ALLOW_KEYBOARD_INPUT);
         }
         var interval = setInterval(function () {
             if (isFullScreenMode()) {
@@ -2679,13 +2916,21 @@ function addFullScreenShim() {
     });
 }
 
-var exitPointerLock = (document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () {
-}).bind(document);
+var exitPointerLock = (document.exitPointerLock ||
+        document.webkitExitPointerLock || document.mozExitPointerLock ||
+        function () {
+        }).bind(document);
 function isPointerLocked() {
-    return !!(document.pointerLockElement || document.webkitPointerLockElement || document.mozPointerLockElement);
+    return !!(document.pointerLockElement ||
+            document.webkitPointerLockElement ||
+            document.mozPointerLockElement);
 }
-var requestPointerLock = (document.documentElement.requestPointerLock || document.documentElement.webkitRequestPointerLock || document.documentElement.mozRequestPointerLock || function () {
-}).bind(document.documentElement);;/* 
+var requestPointerLock =
+        (document.documentElement.requestPointerLock ||
+                document.documentElement.webkitRequestPointerLock ||
+                document.documentElement.mozRequestPointerLock ||
+                function () {
+                }).bind(document.documentElement);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2865,16 +3110,24 @@ Renderers.Canvas = (function () {
     "use strict";
     function CanvasRenderer(canvasElementOrID, options) {
         var self = this,
-                canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
-                bgCanvas = cascadeElement(canvas.id + "-back", "canvas", HTMLCanvasElement),
-                fgCanvas = cascadeElement(canvas.id + "-front", "canvas", HTMLCanvasElement),
-                trimCanvas = cascadeElement(canvas.id + "-trim", "canvas", HTMLCanvasElement),
+                canvas = cascadeElement(canvasElementOrID, "canvas",
+                HTMLCanvasElement),
+                bgCanvas = cascadeElement(canvas.id + "-back", "canvas",
+                HTMLCanvasElement),
+                fgCanvas = cascadeElement(canvas.id + "-front", "canvas",
+                HTMLCanvasElement),
+                trimCanvas = cascadeElement(canvas.id + "-trim", "canvas",
+                HTMLCanvasElement),
                 gfx = canvas.getContext("2d"),
                 fgfx = fgCanvas.getContext("2d"),
                 bgfx = bgCanvas.getContext("2d"),
                 tgfx = trimCanvas.getContext("2d"),
                 theme = null,
-                texture = null, pickingTexture = null, pickingPixelBuffer = null;
+                texture = null,
+                pickingTexture =
+                null,
+                pickingPixelBuffer =
+                null;
 
         this.characterWidth = 0;
         this.characterHeight = 0;
@@ -2885,9 +3138,10 @@ Renderers.Canvas = (function () {
             theme = t;
         };
 
-        this.pixel2cell = function (x, y, scrollLeft, scrollTop, gridLeft) {
+        this.pixel2cell = function (x, y, scrollLeft, scrollTop, gridBounds) {
             var r = this.getPixelRatio();
-            x = Math.floor(x * r / this.characterWidth) + scrollLeft - gridLeft;
+            x = Math.floor(x * r / this.characterWidth) + scrollLeft -
+                    gridBounds.x;
             y = Math.floor((y * r / this.characterHeight) - 0.25) + scrollTop;
             return {x: x, y: y};
         };
@@ -2914,7 +3168,9 @@ Renderers.Canvas = (function () {
             // measure 100 letter M's, then divide by 100, to get the width of an M
             // to two decimal places on systems that return integer values from
             // measureText.
-            this.characterWidth = gfx.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+            this.characterWidth = gfx.measureText(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width /
+                    100;
             var changed = oldCharacterWidth !== this.characterWidth ||
                     oldCharacterHeight !== this.characterHeight ||
                     oldWidth !== canvas.width ||
@@ -2946,12 +3202,14 @@ Renderers.Canvas = (function () {
                     h * self.characterHeight + 1);
         }
 
-        function renderCanvasBackground(tokenRows, frontCursor, backCursor, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop, focused) {
+        function renderCanvasBackground(tokenRows, frontCursor, backCursor,
+                gridBounds, scrollLeft, scrollTop, focused) {
             var minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor),
                     tokenFront = new Cursor(),
                     tokenBack = new Cursor(),
-                    clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
+                    clearFunc = theme.regular.backColor ? "fillRect" :
+                    "clearRect";
 
             if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
@@ -2959,8 +3217,14 @@ Renderers.Canvas = (function () {
 
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
-            bgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -scrollTop * self.characterHeight);
-            for (var y = 0, lastLine = -1; y < tokenRows.length; ++y) {
+            bgfx.translate((gridBounds.x - scrollLeft) * self.characterWidth,
+                    -scrollTop * self.characterHeight);
+            for (var y = 0,
+                    lastLine =
+                    -1;
+                    y <
+                    tokenRows.length;
+                    ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
                 // be able to draw brand-new rows that don't have any tokens yet
@@ -2968,9 +3232,10 @@ Renderers.Canvas = (function () {
 
                 // draw the current row highlighter
                 if (focused && currentLine === backCursor.y) {
-                    fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                    fillRect(bgfx, theme.regular.currentRowBackColor ||
+                            Themes.DEFAULT.regular.currentRowBackColor,
                             0, (y + 0.2),
-                            gridWidth, 1);
+                            gridBounds.width, 1);
                 }
 
                 for (var i = 0; i < row.length; ++i) {
@@ -2979,15 +3244,20 @@ Renderers.Canvas = (function () {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scrollTop <= y && y < scrollTop + gridHeight &&
-                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
+                    if (scrollTop <= y && y < scrollTop + gridBounds.height &&
+                            scrollLeft <= tokenBack.x && tokenFront.x <
+                            scrollLeft + gridBounds.width) {
                         // draw the selection box
-                        var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
+                        var inSelection = minCursor.i <= tokenBack.i &&
+                                tokenFront.i < maxCursor.i;
                         if (inSelection) {
-                            var selectionFront = Cursor.max(minCursor, tokenFront);
-                            var selectionBack = Cursor.min(maxCursor, tokenBack);
+                            var selectionFront = Cursor.max(minCursor,
+                                    tokenFront);
+                            var selectionBack = Cursor.min(maxCursor,
+                                    tokenBack);
                             var cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                            fillRect(bgfx, theme.regular.selectedBackColor ||
+                                    Themes.DEFAULT.regular.selectedBackColor,
                                     selectionFront.x, selectionFront.y + 0.2,
                                     cw, 1);
                         }
@@ -3022,14 +3292,16 @@ Renderers.Canvas = (function () {
             bgfx.restore();
         }
 
-        function renderCanvasForeground(tokenRows, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop) {
+        function renderCanvasForeground(tokenRows, gridBounds, scrollLeft,
+                scrollTop) {
             var tokenFront = new Cursor(),
                     tokenBack = new Cursor(),
                     maxLineWidth = 0;
 
             fgfx.clearRect(0, 0, canvas.width, canvas.height);
             fgfx.save();
-            fgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -scrollTop * self.characterHeight);
+            fgfx.translate((gridBounds.x - scrollLeft) * self.characterWidth,
+                    -scrollTop * self.characterHeight);
             for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
@@ -3039,16 +3311,21 @@ Renderers.Canvas = (function () {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scrollTop <= y && y < scrollTop + gridHeight &&
-                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
+                    if (scrollTop <= y && y < scrollTop + gridBounds.height &&
+                            scrollLeft <= tokenBack.x && tokenFront.x <
+                            scrollLeft + gridBounds.width) {
 
                         // draw the text
                         var style = theme[t.type] || {};
-                        var font = (style.fontWeight || theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                                " " + self.characterHeight + "px " + theme.fontFamily;
+                        var font = (style.fontWeight ||
+                                theme.regular.fontWeight || "") +
+                                " " + (style.fontStyle ||
+                                        theme.regular.fontStyle || "") +
+                                " " + self.characterHeight + "px " +
+                                theme.fontFamily;
                         fgfx.font = font.trim();
-                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                        fgfx.fillStyle = style.foreColor ||
+                                theme.regular.foreColor;
                         fgfx.fillText(
                                 t.value,
                                 tokenFront.x * self.characterWidth,
@@ -3067,26 +3344,40 @@ Renderers.Canvas = (function () {
             return maxLineWidth;
         }
 
-        function renderCanvasTrim(tokenRows, gridLeft, gridTop, gridWidth, gridHeight, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight, maxLineWidth) {
+        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop,
+                showLineNumbers, showScrollBars, lineCountWidth,
+                leftGutterWidth, topGutterHeight, rightGutterWidth,
+                bottomGutterHeight, maxLineWidth) {
             tgfx.clearRect(0, 0, canvas.width, canvas.height);
             tgfx.save();
             tgfx.translate(0, -scrollTop * self.characterHeight);
             if (showLineNumbers) {
-                for (var y = scrollTop, lastLine = -1; y < scrollTop + gridHeight && y < tokenRows.length; ++y) {
+                for (var y = scrollTop,
+                        lastLine =
+                        -1;
+                        y <
+                        scrollTop +
+                        gridBounds.height &&
+                        y <
+                        tokenRows.length;
+                        ++y) {
                     // draw the tokens on this row
                     var row = tokenRows[y];
                     // be able to draw brand-new rows that don't have any tokens yet
-                    var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+                    var currentLine = row.length > 0 ? row[0].line : lastLine +
+                            1;
                     // draw the left gutter
                     var lineNumber = currentLine.toString();
                     while (lineNumber.length < lineCountWidth) {
                         lineNumber = " " + lineNumber;
                     }
                     fillRect(tgfx,
-                            theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
+                            theme.regular.selectedBackColor ||
+                            Themes.DEFAULT.regular.selectedBackColor,
                             0, y + 0.2,
                             (lineNumber.length + leftGutterWidth), 1);
-                    tgfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
+                    tgfx.font = "bold " + self.characterHeight + "px " +
+                            theme.fontFamily;
 
                     if (currentLine > lastLine) {
                         tgfx.fillStyle = theme.regular.foreColor;
@@ -3102,18 +3393,25 @@ Renderers.Canvas = (function () {
 
             // draw the scrollbars
             if (showScrollBars) {
-                var drawWidth = gridWidth * self.characterWidth;
-                var drawHeight = gridHeight * self.characterHeight;
-                var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridLeft * self.characterWidth;
-                var scrollY = (scrollTop * drawHeight) / tokenRows.length + gridTop * self.characterHeight;
-                var scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (gridLeft + rightGutterWidth) * self.characterWidth;
-                var scrollBarHeight = gridHeight * drawHeight / tokenRows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
+                var drawWidth = gridBounds.width * self.characterWidth;
+                var drawHeight = gridBounds.height * self.characterHeight;
+                var scrollX = (scrollLeft * drawWidth) / maxLineWidth +
+                        gridBounds.x * self.characterWidth;
+                var scrollY = (scrollTop * drawHeight) / tokenRows.length +
+                        gridBounds.y * self.characterHeight;
+                var scrollBarWidth = gridBounds.width * drawWidth /
+                        maxLineWidth - (gridBounds.x + rightGutterWidth) *
+                        self.characterWidth;
+                var scrollBarHeight = gridBounds.height * drawHeight /
+                        tokenRows.length - (gridBounds.y +
+                        bottomGutterHeight) * self.characterHeight;
 
-                tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
+                tgfx.fillStyle = theme.regular.selectedBackColor ||
+                        Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
                 tgfx.fillRect(
                         scrollX,
-                        (gridHeight + 0.25) * self.characterHeight,
+                        (gridBounds.height + 0.25) * self.characterHeight,
                         Math.max(self.characterWidth, scrollBarWidth),
                         self.characterHeight);
 
@@ -3128,16 +3426,22 @@ Renderers.Canvas = (function () {
 
         this.render = function (tokenRows,
                 frontCursor, backCursor,
-                gridLeft, gridTop, gridWidth, gridHeight,
+                gridBounds,
                 scrollLeft, scrollTop,
                 focused, showLineNumbers, showScrollBars,
                 lineCountWidth,
-                leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight) {
+                leftGutterWidth, topGutterHeight, rightGutterWidth,
+                bottomGutterHeight) {
             var maxLineWidth = 0;
 
-            renderCanvasBackground(tokenRows, frontCursor, backCursor, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop, focused);
-            maxLineWidth = renderCanvasForeground(tokenRows, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop);
-            renderCanvasTrim(tokenRows, gridLeft, gridTop, gridWidth, gridHeight, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight, maxLineWidth);
+            renderCanvasBackground(tokenRows, frontCursor, backCursor,
+                    gridBounds, scrollLeft, scrollTop, focused);
+            maxLineWidth = renderCanvasForeground(tokenRows, gridBounds,
+                    scrollLeft, scrollTop);
+            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop,
+                    showLineNumbers, showScrollBars, lineCountWidth,
+                    leftGutterWidth, topGutterHeight, rightGutterWidth,
+                    bottomGutterHeight, maxLineWidth);
 
             gfx.clearRect(0, 0, canvas.width, canvas.height);
             gfx.drawImage(bgCanvas, 0, 0);
@@ -3175,14 +3479,26 @@ Renderers.Canvas = (function () {
                 var gfx = c.getContext("2d"),
                         pixels = gfx.createImageData(w, h);
 
-                for (var i = 0, p = 0, l = w * h; i < l; ++i, p += 4) {
+                for (var i = 0,
+                        p =
+                        0,
+                        l =
+                        w *
+                        h;
+                        i <
+                        l;
+                        ++i, p +=
+                        4) {
                     pixels.data[p] = (0xff0000 & i) >> 16;
                     pixels.data[p + 1] = (0x00ff00 & i) >> 8;
                     pixels.data[p + 2] = (0x0000ff & i) >> 0;
                     pixels.data[p + 3] = 0xff;
                 }
                 gfx.putImageData(pixels, 0, 0);
-                pickingTexture = new THREE.Texture(c, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.RGBAFormat, THREE.UnsignedByteType, 0);
+                pickingTexture = new THREE.Texture(c, THREE.UVMapping,
+                        THREE.RepeatWrapping, THREE.RepeatWrapping,
+                        THREE.NearestFilter, THREE.NearestMipMapNearestFilter,
+                        THREE.RGBAFormat, THREE.UnsignedByteType, 0);
                 pickingTexture.needsUpdate = true;
             }
             return pickingTexture;
@@ -3197,7 +3513,8 @@ Renderers.Canvas = (function () {
                 pickingPixelBuffer = new Uint8Array(4);
             }
 
-            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
+            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE,
+                    pickingPixelBuffer);
 
             var i = (pickingPixelBuffer[0] << 16) |
                     (pickingPixelBuffer[1] << 8) |
@@ -3206,14 +3523,16 @@ Renderers.Canvas = (function () {
         };
 
 
-        if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {
+        if (!(canvasElementOrID instanceof HTMLCanvasElement) &&
+                options.width && options.height) {
             canvas.style.position = "absolute";
             canvas.style.width = options.width;
             canvas.style.height = options.height;
         }
 
         if (!canvas.parentElement) {
-            document.body.appendChild(makeHidingContainer("primrose-container-" + canvas.id, canvas));
+            document.body.appendChild(makeHidingContainer(
+                    "primrose-container-" + canvas.id, canvas));
         }
     }
 

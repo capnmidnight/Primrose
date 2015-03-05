@@ -46,10 +46,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             history = [],
             historyFrame = -1,
             scrollLeft = 0,
-            gridTop = 0,
-            gridLeft = 0,
-            gridWidth = 0,
-            gridHeight = 0,
+            gridBounds = new Rectangle(),
             lineCountWidth = 0,
             leftGutterWidth = 0,
             topGutterHeight = 0,
@@ -66,7 +63,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer = new Renderer(renderToElementOrID, options),
             surrogate = cascadeElement("primrose-surrogate-textarea-" + renderer.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
-
 
     //////////////////////////////////////////////////////////////////////////
     // public fields
@@ -90,7 +86,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scrollTop = 0;
         }
         else
-            while (0 < self.scrollTop && self.scrollTop > self.lineCount - gridHeight) {
+            while (0 < self.scrollTop && self.scrollTop > self.lineCount - gridBounds.height) {
                 --self.scrollTop;
             }
     }
@@ -130,7 +126,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         pointerX = x;
         pointerY = y;
         var lines = self.getLines();
-        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop, gridLeft);
+        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop, gridBounds.x);
         cursor.setXY(cell.x, cell.y, lines);
     }
 
@@ -229,13 +225,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.cursorPageUp = function (lines, cursor) {
         changed = true;
-        cursor.incY(-gridHeight, lines);
+        cursor.incY(-gridBounds.height, lines);
         this.scrollIntoView(cursor);
     };
 
     this.cursorPageDown = function (lines, cursor) {
         changed = true;
-        cursor.incY(gridHeight, lines);
+        cursor.incY(gridBounds.height, lines);
         this.scrollIntoView(cursor);
     };
 
@@ -460,8 +456,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-        this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridHeight);
-        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft + gridWidth);
+        this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridBounds.height);
+        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft + gridBounds.width);
         clampScroll();
     };
 
@@ -720,11 +716,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 bottomGutterHeight = 0;
             }
 
-            gridLeft = leftGutterWidth + lineCountWidth;
+            gridBounds.x = leftGutterWidth + lineCountWidth;
 
-            gridWidth = Math.floor(this.getWidth() / renderer.characterWidth) - gridLeft - rightGutterWidth;
+            gridBounds.width = Math.floor(this.getWidth() / renderer.characterWidth) - gridBounds.x - rightGutterWidth;
 
-            gridHeight = Math.floor(this.getHeight() / renderer.characterHeight) - bottomGutterHeight;
+            gridBounds.height = Math.floor(this.getHeight() / renderer.characterHeight) - bottomGutterHeight;
 
             // group the tokens into rows
             var currentRow = [],
@@ -734,11 +730,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 t = tokens[i].clone();
                 currentRow.push(t);
                 rowX += t.value.length;
-                if (wordWrap && rowX >= gridWidth || t.type === "newlines") {
+                if (wordWrap && rowX >= gridBounds.width || t.type === "newlines") {
                     currentRow = [];
                     tokenRows.push(currentRow);
-                    if (wordWrap && rowX >= gridWidth && t.type !== "newlines") {
-                        currentRow.push(t.splitAt(gridWidth - (rowX - t.value.length)));
+                    if (wordWrap && rowX >= gridBounds.width && t.type !== "newlines") {
+                        currentRow.push(t.splitAt(gridBounds.width - (rowX - t.value.length)));
                     }
                     rowX = 0;
                 }
@@ -747,7 +743,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.render(
                     tokenRows,
                     this.frontCursor, this.backCursor,
-                    gridLeft, gridTop, gridWidth, gridHeight,
+                    gridBounds.x, gridBounds.y, gridBounds.width, gridBounds.height,
                     scrollLeft, this.scrollTop,
                     focused, showLineNumbers, showScrollBars,
                     lineCountWidth,
