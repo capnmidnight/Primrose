@@ -23,15 +23,21 @@ var Point = (function () {
     }
 
     Point.prototype.set = function (x, y) {
-        this.x = x;
-        this.y = y;
+        if (x instanceof Point) {
+            this.x = x.x;
+            this.y = x.y;
+        }
+        else {
+            this.x = x;
+            this.y = y;
+        }
     };
 
     Point.prototype.clone = function () {
         return new Point(this.x, this.y);
     };
-    
-    Point.prototype.toString = function(){
+
+    Point.prototype.toString = function () {
         return fmt("(x:$1, y:$2)", this.x, this.y);
     };
 
@@ -45,16 +51,22 @@ var Size = (function () {
     }
 
     Size.prototype.set = function (width, height) {
-        this.width = width;
-        this.height = height;
+        if (width instanceof Size) {
+            this.width = width.width;
+            this.height = width.height;
+        }
+        else {
+            this.width = width;
+            this.height = height;
+        }
     };
 
     Size.prototype.clone = function () {
         return new Size(this.width, this.height);
     };
-    
-    Size.prototype.toString = function(){
-        return fmt("<w:$1, h:$2>", this.width, this.height);        
+
+    Size.prototype.toString = function () {
+        return fmt("<w:$1, h:$2>", this.width, this.height);
     };
 
     return Size;
@@ -62,78 +74,61 @@ var Size = (function () {
 
 var Rectangle = (function () {
     "use strict";
-    function Rectangle(x, y, width, height) {
-        this.set(x, y, width, height);
-
+    function Rectangle() {
+        this.point = new Point();
+        this.size = new Size();
+        
         Object.defineProperties(this, {
             x: {
                 get: function () {
                     return this.point.x;
                 },
-                set: function (v) {
-                    this.point.x = v;
+                set: function (x) {
+                    this.point.x = x;
                 }
             },
             left: {
                 get: function () {
                     return this.point.x;
                 },
-                set: function (v) {
-                    this.point.x = v;
+                set: function (left) {
+                    this.point.x = left;
                 }
             },
             right: {
                 get: function () {
                     return this.point.x + this.size.width;
                 },
-                set: function (v) {
-                    this.point.x = v - this.size.width;
+                set: function (right) {
+                    this.point.x = right - this.size.width;
                 }
             },
             y: {
                 get: function () {
                     return this.point.y;
                 },
-                set: function (v) {
-                    this.point.y = v;
+                set: function (y) {
+                    this.point.y = y;
                 }
             },
             top: {
                 get: function () {
                     return this.point.y;
                 },
-                set: function (v) {
-                    this.point.y = v;
+                set: function (top) {
+                    this.point.y = top;
                 }
             },
             bottom: {
                 get: function () {
                     return this.point.y + this.size.height;
                 },
-                set: function (v) {
-                    this.point.y = v - this.size.height;
+                set: function (bottom) {
+                    this.point.y = bottom - this.size.height;
                 }
             }
         });
     }
-
-    Rectangle.prototype.set = function (x, y, width, height) {
-        if (x instanceof Point) {
-            this.point = x;
-            height = width;
-            width = y;
-        }
-        else {
-            this.point = new Point(x || 0, y || 0);
-        }
-        
-        if (width instanceof Size) {
-            this.size = width;
-        }
-        else {
-            this.size = new Size(width || 0, height || 0);
-        }
-    };
 
     Rectangle.prototype.clone = function () {
         return new Rectangle(this.point.clone(), this.size.clone());

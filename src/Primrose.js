@@ -38,8 +38,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             tokenizer,
             tokens,
             theme,
-            pointerX, pointerY,
-            tabWidth, tabString,
+            pointerX,
+            pointerY,
+            tabWidth,
+            tabString,
             currentTouchID,
             deadKeyState = "",
             keyNames = [],
@@ -61,7 +63,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             showScrollBars = true,
             wordWrap = false,
             renderer = new Renderer(renderToElementOrID, options),
-            surrogate = cascadeElement("primrose-surrogate-textarea-" + renderer.id, "textarea", HTMLTextAreaElement),
+            surrogate = cascadeElement("primrose-surrogate-textarea-" +
+                    renderer.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
 
     //////////////////////////////////////////////////////////////////////////
@@ -86,7 +89,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scrollTop = 0;
         }
         else
-            while (0 < self.scrollTop && self.scrollTop > self.lineCount - gridBounds.height) {
+            while (0 < self.scrollTop && self.scrollTop > self.lineCount -
+                    gridBounds.height) {
                 --self.scrollTop;
             }
     }
@@ -126,14 +130,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
         pointerX = x;
         pointerY = y;
         var lines = self.getLines();
-        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop, gridBounds.x);
+        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop,
+                gridBounds.x);
         cursor.setXY(cell.x, cell.y, lines);
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
         if (focused && evt.button === 0) {
             var bounds = pointerEventSource.getBoundingClientRect();
-            self.startPointer(evt.clientX - bounds.left, evt.clientY - bounds.top);
+            self.startPointer(evt.clientX - bounds.left, evt.clientY -
+                    bounds.top);
             evt.preventDefault();
         }
     }
@@ -141,7 +147,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
     function mouseMove(pointerEventSource, evt) {
         if (focused) {
             var bounds = pointerEventSource.getBoundingClientRect();
-            self.movePointer(evt.clientX - bounds.left, evt.clientY - bounds.top);
+            self.movePointer(evt.clientX - bounds.left, evt.clientY -
+                    bounds.top);
         }
     }
 
@@ -165,7 +172,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var t = evt.changedTouches[i];
             if (t.identifier === currentTouchID) {
                 var bounds = pointerEventSource.getBoundingClientRect();
-                self.movePointer(t.clientX - bounds.left, t.clientY - bounds.top);
+                self.movePointer(t.clientX - bounds.left, t.clientY -
+                        bounds.top);
                 break;
             }
         }
@@ -297,7 +305,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setOperatingSystem = function (os) {
         changed = true;
-        operatingSystem = os || (isOSX ? OperatingSystems.OSX : OperatingSystems.WINDOWS);
+        operatingSystem = os || (isOSX ? OperatingSystems.OSX :
+                OperatingSystems.WINDOWS);
         refreshCommandPack();
     };
 
@@ -330,7 +339,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setCodePage = function (cp) {
         changed = true;
-        var key, code,
+        var key,
+                code,
                 lang = (navigator.languages && navigator.languages[0]) ||
                 navigator.language ||
                 navigator.userLanguage ||
@@ -369,7 +379,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
                 for (code in codes) {
-                    var char, name;
+                    var char,
+                            name;
                     if (code.indexOf("_") > -1) {
                         var parts = code.split(' '),
                                 browser = parts[0];
@@ -456,8 +467,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-        this.scrollTop += minDelta(currentCursor.y, this.scrollTop, this.scrollTop + gridBounds.height);
-        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft + gridBounds.width);
+        this.scrollTop += minDelta(currentCursor.y, this.scrollTop,
+                this.scrollTop + gridBounds.height);
+        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft +
+                gridBounds.width);
         clampScroll();
     };
 
@@ -474,7 +487,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.getText = function () {
-        return this.getLines().join("\n");
+        return this.getLines()
+                .join(
+                        "\n");
     };
 
     this.setText = function (txt) {
@@ -492,7 +507,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.cell2i = function (x, y) {
-        var dy, lines = this.getLines(),
+        var dy,
+                lines =
+                this.getLines(),
                 i = 0;
         for (dy = 0; dy < y; ++dy) {
             i += lines[dy].length + 1;
@@ -530,7 +547,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scrollTop += Math.floor(evt.deltaY / renderer.characterHeight);
+            this.scrollTop += Math.floor(evt.deltaY /
+                    renderer.characterHeight);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -568,17 +586,25 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.bindEvents = function (keyEventSource, pointerEventSource) {
         if (keyEventSource) {
-            keyEventSource.addEventListener("keydown", this.editText.bind(this));
+            keyEventSource.addEventListener("keydown", this.editText.bind(
+                    this));
         }
 
         if (pointerEventSource) {
-            pointerEventSource.addEventListener("wheel", this.readWheel.bind(this));
-            pointerEventSource.addEventListener("mousedown", mouseButtonDown.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("mousemove", mouseMove.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(this));
-            pointerEventSource.addEventListener("touchstart", touchStart.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("touchmove", touchMove.bind(this, pointerEventSource));
-            pointerEventSource.addEventListener("touchend", touchEnd.bind(this));
+            pointerEventSource.addEventListener("wheel", this.readWheel.bind(
+                    this));
+            pointerEventSource.addEventListener("mousedown",
+                    mouseButtonDown.bind(this, pointerEventSource));
+            pointerEventSource.addEventListener("mousemove", mouseMove.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("mouseup", mouseButtonUp.bind(
+                    this));
+            pointerEventSource.addEventListener("touchstart", touchStart.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("touchmove", touchMove.bind(
+                    this, pointerEventSource));
+            pointerEventSource.addEventListener("touchend", touchEnd.bind(
+                    this));
         }
     };
 
@@ -588,9 +614,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
             this.deleteSelection();
             var lines = this.getLines();
             var parts = str.split("\n");
-            parts[0] = lines[this.frontCursor.y].substring(0, this.frontCursor.x) + parts[0];
-            parts[parts.length - 1] += lines[this.frontCursor.y].substring(this.frontCursor.x);
-            lines.splice.bind(lines, this.frontCursor.y, 1).apply(lines, parts);
+            parts[0] = lines[this.frontCursor.y].substring(0,
+                    this.frontCursor.x) + parts[0];
+            parts[parts.length - 1] += lines[this.frontCursor.y].substring(
+                    this.frontCursor.x);
+            lines.splice.bind(lines, this.frontCursor.y, 1)
+                    .apply(
+                            lines,
+                            parts);
             for (var i = 0; i < str.length; ++i) {
                 this.frontCursor.right(lines);
             }
@@ -641,7 +672,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L && key !== Keys.META_R && key !== Keys.SHIFT) {
+        if (key !== Keys.CTRL && key !== Keys.ALT && key !== Keys.META_L &&
+                key !== Keys.META_R && key !== Keys.SHIFT) {
             var oldDeadKeyState = deadKeyState;
 
             var commandName = deadKeyState;
@@ -664,7 +696,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
             commandName += "_" + keyNames[key];
 
-            var func = commandPack[browser + "_" + commandName] || commandPack[commandName];
+            var func = commandPack[browser + "_" + commandName] ||
+                    commandPack[commandName];
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
@@ -688,7 +721,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t, i;
+            var t,
+                    i;
 
             this.lineCount = 1;
 
@@ -699,7 +733,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             }
 
             if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(this.lineCount) / Math.LN10));
+                lineCountWidth = Math.max(1, Math.ceil(Math.log(
+                        this.lineCount) / Math.LN10));
                 leftGutterWidth = 1;
             }
             else {
@@ -718,9 +753,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
             gridBounds.x = leftGutterWidth + lineCountWidth;
 
-            gridBounds.width = Math.floor(this.getWidth() / renderer.characterWidth) - gridBounds.x - rightGutterWidth;
+            gridBounds.width = Math.floor(this.getWidth() /
+                    renderer.characterWidth) - gridBounds.x - rightGutterWidth;
 
-            gridBounds.height = Math.floor(this.getHeight() / renderer.characterHeight) - bottomGutterHeight;
+            gridBounds.height = Math.floor(this.getHeight() /
+                    renderer.characterHeight) - bottomGutterHeight;
 
             // group the tokens into rows
             var currentRow = [],
@@ -730,11 +767,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 t = tokens[i].clone();
                 currentRow.push(t);
                 rowX += t.value.length;
-                if (wordWrap && rowX >= gridBounds.width || t.type === "newlines") {
+                if (wordWrap && rowX >= gridBounds.width || t.type ===
+                        "newlines") {
                     currentRow = [];
                     tokenRows.push(currentRow);
-                    if (wordWrap && rowX >= gridBounds.width && t.type !== "newlines") {
-                        currentRow.push(t.splitAt(gridBounds.width - (rowX - t.value.length)));
+                    if (wordWrap && rowX >= gridBounds.width && t.type !==
+                            "newlines") {
+                        currentRow.push(t.splitAt(gridBounds.width - (rowX -
+                                t.value.length)));
                     }
                     rowX = 0;
                 }
@@ -743,11 +783,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.render(
                     tokenRows,
                     this.frontCursor, this.backCursor,
-                    gridBounds.x, gridBounds.y, gridBounds.width, gridBounds.height,
+                    gridBounds.x, gridBounds.y, gridBounds.width,
+                    gridBounds.height,
                     scrollLeft, this.scrollTop,
                     focused, showLineNumbers, showScrollBars,
                     lineCountWidth,
-                    leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight);
+                    leftGutterWidth, topGutterHeight, rightGutterWidth,
+                    bottomGutterHeight);
 
             changed = false;
         }
@@ -756,11 +798,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
-    browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+    browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" :
+            (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
 
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + renderer.id, surrogate);
+    surrogateContainer = makeHidingContainer(
+            "primrose-surrogate-textarea-container-" + renderer.id, surrogate);
 
     document.body.appendChild(surrogateContainer);
 
@@ -776,11 +820,21 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setText(options.file);
     this.bindEvents(options.keyEventSource, options.pointerEventSource);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + renderer.id, Themes, theme.name, self, "setTheme", "theme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + renderer.id, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + renderer.id, CodePages, codePage.name, self, "setCodePage", "localization");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + renderer.id, Commands, commandSystem.name, self, "setCommandSystem", "command system");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + renderer.id, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
+            renderer.id, Themes, theme.name, self, "setTheme", "theme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
+            renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
+            "language syntax");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
+            renderer.id, CodePages, codePage.name, self, "setCodePage",
+            "localization");
+    this.commandSystemSelect = makeSelectorFromObj(
+            "primrose-command-system-selector-" + renderer.id, Commands,
+            commandSystem.name, self, "setCommandSystem", "command system");
+    this.operatingSystemSelect = makeSelectorFromObj(
+            "primrose-operating-system-selector-" + renderer.id,
+            OperatingSystems, operatingSystem.name, self, "setOperatingSystem",
+            "shortcut style");
 
 
     //////////////////////////////////////////////////////////////////////////
