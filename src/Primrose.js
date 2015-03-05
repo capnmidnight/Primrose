@@ -47,11 +47,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
             history = [],
             historyFrame = -1,
             gridBounds = new Rectangle(),
-            lineCountWidth = 0,
             topLeftGutter = new Size(),
             bottomRightGutter = new Size(),
             tokenRows = null,
-            lineCount = 0,
             dragging = false,
             focused = false,
             changed = false,
@@ -85,7 +83,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scroll.y = 0;
         }
         else
-            while (0 < self.scroll.y && self.scroll.y > self.lineCount -
+            while (0 < self.scroll.y && self.scroll.y > self.getLineCount() -
                     gridBounds.height) {
                 --self.scroll.y;
             }
@@ -256,7 +254,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.setWordWrap = function (v) {
-        wordWrap = v;
+        wordWrap = v || false;
         this.forceUpdate();
     };
 
@@ -416,6 +414,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.getLines = function () {
         return history[historyFrame].slice();
+    };
+    
+    this.getLineCount = function() {
+        return history[historyFrame].length;
     };
 
     this.pushUndo = function (lines) {
@@ -715,20 +717,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t,
-                    i;
-
-            this.lineCount = 1;
-
-            for (i = 0; i < tokens.length; ++i) {
-                if (tokens[i].type === "newlines") {
-                    ++this.lineCount;
-                }
-            }
-
+            var lineCountWidth;
             if (showLineNumbers) {
                 lineCountWidth = Math.max(1, Math.ceil(Math.log(
-                        this.lineCount) / Math.LN10));
+                        this.getLineCount()) / Math.LN10));
                 topLeftGutter.width = 1;
             }
             else {
@@ -755,8 +747,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var currentRow = [],
                     rowX = 0;
             tokenRows = [currentRow];
-            for (i = 0; i < tokens.length; ++i) {
-                t = tokens[i].clone();
+            for (var i = 0; i < tokens.length; ++i) {
+                var t = tokens[i].clone();
                 currentRow.push(t);
                 rowX += t.value.length;
                 if (wordWrap && rowX >= gridBounds.width || t.type ===
@@ -797,7 +789,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     document.body.appendChild(surrogateContainer);
 
-    this.setWordWrap(!!options.wordWrap);
+    this.setWordWrap(options.wordWrap);
     this.setShowLineNumbers(!options.hideLineNumbers);
     this.setShowScrollBars(!options.hideScrollBars);
     this.setTabWidth(options.tabWidth);
