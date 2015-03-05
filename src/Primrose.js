@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Primrose(canvasElementOrID, options) {
+function Primrose(renderToElementOrID, Renderer, options) {
     "use strict";
     var self = this;
     //////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,6 @@ function Primrose(canvasElementOrID, options) {
             pointerX, pointerY,
             tabWidth, tabString,
             currentTouchID,
-            texture, pickingTexture, pickingPixelBuffer,
             deadKeyState = "",
             keyNames = [],
             history = [],
@@ -53,10 +52,10 @@ function Primrose(canvasElementOrID, options) {
             gridHeight = 0,
             lineCountWidth = 0,
             leftGutterWidth = 0,
+            topGutterHeight = 0,
             rightGutterWidth = 0,
             bottomGutterHeight = 0,
             tokenRows = null,
-            tileGrid = [],
             lineCount = 0,
             dragging = false,
             focused = false,
@@ -64,15 +63,8 @@ function Primrose(canvasElementOrID, options) {
             showLineNumbers = true,
             showScrollBars = true,
             wordWrap = false,
-            canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
-            bgCanvas = cascadeElement(canvas.id + "-back", "canvas", HTMLCanvasElement),
-            fgCanvas = cascadeElement(canvas.id + "-front", "canvas", HTMLCanvasElement),
-            trimCanvas = cascadeElement(canvas.id + "-trim", "canvas", HTMLCanvasElement),
-            gfx = canvas.getContext("2d"),
-            fgfx = fgCanvas.getContext("2d"),
-            bgfx = bgCanvas.getContext("2d"),
-            tgfx = trimCanvas.getContext("2d"),
-            surrogate = cascadeElement("primrose-surrogate-textarea-" + canvas.id, "textarea", HTMLTextAreaElement),
+            renderer = new Renderer(renderToElementOrID, options),
+            surrogate = cascadeElement("primrose-surrogate-textarea-" + renderer.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
 
 
@@ -133,52 +125,12 @@ function Primrose(canvasElementOrID, options) {
         }
     }
 
-    function measureText() {
-        var r = self.getPixelRatio(),
-                oldCharacterWidth = self.characterWidth,
-                oldCharacterHeight = self.characterHeight,
-                oldWidth = canvas.width,
-                oldHeight = canvas.height,
-                oldFont = gfx.font;
-
-        self.characterHeight = theme.fontSize * r;
-        bgCanvas.width =
-                fgCanvas.width =
-                trimCanvas.width =
-                canvas.width = canvas.clientWidth * r;
-        bgCanvas.height =
-                fgCanvas.height =
-                trimCanvas.height =
-                canvas.height =
-                canvas.clientHeight * r;
-        gfx.font = self.characterHeight + "px " + theme.fontFamily;
-        // measure 100 letter M's, then divide by 100, to get the width of an M
-        // to two decimal places on systems that return integer values from
-        // measureText.
-        self.characterWidth = gfx.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
-        changed = oldCharacterWidth !== self.characterWidth ||
-                oldCharacterHeight !== self.characterHeight ||
-                oldWidth !== canvas.width ||
-                oldHeight !== canvas.height ||
-                oldFont !== gfx.font;
-        self.drawText();
-    }
-
-    function fillRect(gfx, fill, x, y, w, h) {
-        gfx.fillStyle = fill;
-        gfx.fillRect(
-                x * self.characterWidth,
-                y * self.characterHeight,
-                w * self.characterWidth + 1,
-                h * self.characterHeight + 1);
-    }
-
     function setCursorXY(cursor, x, y) {
         changed = true;
         pointerX = x;
         pointerY = y;
         var lines = self.getLines();
-        var cell = self.pixel2cell(x, y);
+        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop, gridLeft);
         cursor.setXY(cell.x, cell.y, lines);
     }
 
@@ -265,18 +217,6 @@ function Primrose(canvasElementOrID, options) {
         };
     }
 
-    function getPixelIndex(gl, x, y) {
-        if (!pickingPixelBuffer) {
-            pickingPixelBuffer = new Uint8Array(4);
-        }
-
-        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
-
-        return (pickingPixelBuffer[0] << 16) |
-                (pickingPixelBuffer[1] << 8) |
-                (pickingPixelBuffer[2] << 0);
-    }
-
 
     //////////////////////////////////////////////////////////////////////////
     // public methods
@@ -312,58 +252,9 @@ function Primrose(canvasElementOrID, options) {
     this.isFocused = function () {
         return focused;
     };
-
-    this.getCanvas = function () {
-        return canvas;
-    };
-
-    this.getTexture = function (anisotropy) {
-        if (window.THREE && !texture) {
-            texture = new THREE.Texture(canvas);
-            texture.anisotropy = anisotropy || 8;
-            texture.needsUpdate = true;
-        }
-        return texture;
-    };
-
-    this.getPickingTexture = function () {
-        if (!pickingTexture) {
-            var c = document.createElement("canvas"),
-                    w = this.getWidth(),
-                    h = this.getHeight();
-            c.width = w;
-            c.height = h;
-
-            var gfx = c.getContext("2d"),
-                    pixels = gfx.createImageData(w, h);
-
-            for (var i = 0, p = 0, l = w * h; i < l; ++i, p += 4) {
-                pixels.data[p] = (0xff0000 & i) >> 16;
-                pixels.data[p + 1] = (0x00ff00 & i) >> 8;
-                pixels.data[p + 2] = (0x0000ff & i) >> 0;
-                pixels.data[p + 3] = 0xff;
-            }
-            gfx.putImageData(pixels, 0, 0);
-            pickingTexture = new THREE.Texture(c, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.RGBAFormat, THREE.UnsignedByteType, 0);
-            pickingTexture.needsUpdate = true;
-        }
-        return pickingTexture;
-    };
-
-    this.startPicking = function (gl, x, y) {
-        var i = getPixelIndex(gl, x, y);
-        x = i % canvas.width;
-        y = i / canvas.width;
-
-        this.startPointer(x, y);
-    };
-
-    this.movePicking = function (gl, x, y) {
-        var i = getPixelIndex(gl, x, y);
-        x = i % canvas.width;
-        y = i / canvas.width;
-
-        this.movePointer(x, y);
+    
+    this.getRenderer = function(){
+        return renderer;
     };
 
     this.setWordWrap = function (v) {
@@ -395,7 +286,8 @@ function Primrose(canvasElementOrID, options) {
 
     this.setTheme = function (t) {
         theme = t || Themes.DEFAULT;
-        measureText();
+        renderer.setTheme(theme);
+        changed = renderer.resize();
     };
 
     this.getTheme = function () {
@@ -424,17 +316,15 @@ function Primrose(canvasElementOrID, options) {
     };
 
     this.setSize = function (w, h) {
-        canvas.style.width = w + "px";
-        canvas.style.height = h + "px";
-        measureText();
+        changed = renderer.setSize(w, h);
     };
 
     this.getWidth = function () {
-        return canvas.width;
+        return renderer.getWidth();
     };
 
     this.getHeight = function () {
-        return canvas.height;
+        return renderer.getHeight();
     };
 
     this.forceUpdate = function () {
@@ -577,13 +467,13 @@ function Primrose(canvasElementOrID, options) {
 
     this.increaseFontSize = function () {
         ++theme.fontSize;
-        measureText();
+        renderer.resize();
     };
 
     this.decreaseFontSize = function () {
         if (theme.fontSize > 1) {
             --theme.fontSize;
-            measureText();
+            renderer.resize();
         }
     };
 
@@ -601,11 +491,8 @@ function Primrose(canvasElementOrID, options) {
         }
     };
 
-    this.pixel2cell = function (x, y) {
-        var r = this.getPixelRatio();
-        x = Math.floor(x * r / this.characterWidth) + scrollLeft - gridLeft;
-        y = Math.floor((y * r / this.characterHeight) - 0.25) + this.scrollTop;
-        return {x: x, y: y};
+    this.getPixelRatio = function () {
+        return window.devicePixelRatio || 1;
     };
 
     this.cell2i = function (x, y) {
@@ -630,10 +517,6 @@ function Primrose(canvasElementOrID, options) {
         }
     };
 
-    this.getPixelRatio = function () {
-        return window.devicePixelRatio || 1;
-    };
-
     this.deleteSelection = function () {
         if (this.frontCursor.i !== this.backCursor.i) {
             // TODO: don't rejoin the string first.
@@ -650,7 +533,7 @@ function Primrose(canvasElementOrID, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scrollTop += Math.floor(evt.deltaY / this.characterHeight);;            
+            this.scrollTop += Math.floor(evt.deltaY / renderer.characterHeight);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -828,9 +711,9 @@ function Primrose(canvasElementOrID, options) {
 
             gridLeft = leftGutterWidth + lineCountWidth;
 
-            gridWidth = Math.floor(canvas.width / this.characterWidth) - gridLeft - rightGutterWidth;
+            gridWidth = Math.floor(this.getWidth() / renderer.characterWidth) - gridLeft - rightGutterWidth;
 
-            gridHeight = Math.floor(canvas.height / this.characterHeight) - bottomGutterHeight;
+            gridHeight = Math.floor(this.getHeight() / renderer.characterHeight) - bottomGutterHeight;
 
             // group the tokens into rows
             var currentRow = [],
@@ -850,230 +733,27 @@ function Primrose(canvasElementOrID, options) {
                 }
             }
 
-            renderCanvas();
+            renderer.render(
+                    tokenRows, 
+                    this.frontCursor, this.backCursor,
+                    gridLeft, gridTop, gridWidth, gridHeight, 
+                    scrollLeft, this.scrollTop, 
+                    focused, showLineNumbers, showScrollBars, 
+                    lineCountWidth, 
+                    leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight);
 
             changed = false;
         }
     };
 
-    function renderCanvasBackground() {
-        var minCursor = Cursor.min(self.frontCursor, self.backCursor),
-                maxCursor = Cursor.max(self.frontCursor, self.backCursor),
-                tokenFront = new Cursor(),
-                tokenBack = new Cursor(),
-                clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
-
-        if (theme.regular.backColor) {
-            bgfx.fillStyle = theme.regular.backColor;
-        }
-
-        bgfx[clearFunc](0, 0, canvas.width, canvas.height);
-        bgfx.save();
-        bgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -self.scrollTop * self.characterHeight);
-        for (var y = 0, lastLine = -1; y < tokenRows.length; ++y) {
-            // draw the tokens on this row
-            var row = tokenRows[y];
-            // be able to draw brand-new rows that don't have any tokens yet
-            var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-
-            // draw the current row highlighter
-            if (focused && currentLine === self.backCursor.y) {
-                fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
-                        0, (y + 0.2),
-                        gridWidth, 1);
-            }
-
-            for (var i = 0; i < row.length; ++i) {
-                var t = row[i];
-                tokenBack.x += t.value.length;
-                tokenBack.i += t.value.length;
-
-                // skip drawing tokens that aren't in view
-                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
-                        scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
-                    // draw the selection box
-                    var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
-                    if (inSelection) {
-                        var selectionFront = Cursor.max(minCursor, tokenFront);
-                        var selectionBack = Cursor.min(maxCursor, tokenBack);
-                        var cw = selectionBack.i - selectionFront.i;
-                        fillRect(bgfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                                selectionFront.x, selectionFront.y + 0.2,
-                                cw, 1);
-                    }
-                }
-
-                tokenFront.copy(tokenBack);
-            }
-
-            tokenFront.x = 0;
-            ++tokenFront.y;
-            tokenBack.copy(tokenFront);
-        }
-
-        // draw the cursor caret
-        if (focused) {
-            bgfx.beginPath();
-            bgfx.strokeStyle = theme.cursorColor || "black";
-            bgfx.moveTo(
-                    minCursor.x * self.characterWidth,
-                    minCursor.y * self.characterHeight);
-            bgfx.lineTo(
-                    minCursor.x * self.characterWidth,
-                    (minCursor.y + 1.25) * self.characterHeight);
-            bgfx.moveTo(
-                    maxCursor.x * self.characterWidth + 1,
-                    maxCursor.y * self.characterHeight);
-            bgfx.lineTo(
-                    maxCursor.x * self.characterWidth + 1,
-                    (maxCursor.y + 1.25) * self.characterHeight);
-            bgfx.stroke();
-        }
-        bgfx.restore();
-    }
-
-    function renderCanvasForeground() {
-        var tokenFront = new Cursor(),
-                tokenBack = new Cursor(),
-                maxLineWidth = 0;
-
-        fgfx.clearRect(0, 0, canvas.width, canvas.height);
-        fgfx.save();
-        fgfx.translate((gridLeft - scrollLeft) * self.characterWidth, -self.scrollTop * self.characterHeight);
-        for (var y = 0; y < tokenRows.length; ++y) {
-            // draw the tokens on this row
-            var row = tokenRows[y];
-            for (var i = 0; i < row.length; ++i) {
-                var t = row[i];
-                tokenBack.x += t.value.length;
-                tokenBack.i += t.value.length;
-
-                // skip drawing tokens that aren't in view
-                if (self.scrollTop <= y && y < self.scrollTop + gridHeight &&
-                        scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridWidth) {
-
-                    // draw the text
-                    var style = theme[t.type] || {};
-                    var font = (style.fontWeight || theme.regular.fontWeight || "") +
-                            " " + (style.fontStyle || theme.regular.fontStyle || "") +
-                            " " + self.characterHeight + "px " + theme.fontFamily;
-                    fgfx.font = font.trim();
-                    fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                    fgfx.fillText(
-                            t.value,
-                            tokenFront.x * self.characterWidth,
-                            (y + 1) * self.characterHeight);
-                }
-
-                tokenFront.copy(tokenBack);
-            }
-
-            maxLineWidth = Math.max(maxLineWidth, tokenBack.x);
-            tokenFront.x = 0;
-            ++tokenFront.y;
-            tokenBack.copy(tokenFront);
-        }
-        fgfx.restore();
-        return maxLineWidth;
-    }
-
-    function renderCanvasTrim(maxLineWidth) {
-        tgfx.clearRect(0, 0, canvas.width, canvas.height);
-        tgfx.save();
-        tgfx.translate(0, -self.scrollTop * self.characterHeight);
-        if (showLineNumbers) {
-            for (var y = self.scrollTop, lastLine = -1; y < self.scrollTop + gridHeight; ++y) {
-                // draw the tokens on this row
-                var row = tokenRows[y];
-                // be able to draw brand-new rows that don't have any tokens yet
-                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-                // draw the left gutter
-                var lineNumber = currentLine.toString();
-                while (lineNumber.length < lineCountWidth) {
-                    lineNumber = " " + lineNumber;
-                }
-                fillRect(tgfx,
-                        theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
-                        0, y + 0.2,
-                        (lineNumber.length + leftGutterWidth), 1);
-                tgfx.font = "bold " + self.characterHeight + "px " + theme.fontFamily;
-
-                if (currentLine > lastLine) {
-                    tgfx.fillStyle = theme.regular.foreColor;
-                    tgfx.fillText(
-                            lineNumber,
-                            0, (y + 1) * self.characterHeight);
-                }
-                lastLine = currentLine;
-            }
-        }
-
-        tgfx.restore();
-
-        // draw the scrollbars
-        if (showScrollBars) {
-            var drawWidth = gridWidth * self.characterWidth;
-            var drawHeight = gridHeight * self.characterHeight;
-            var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridLeft * self.characterWidth;
-            var scrollY = (self.scrollTop * drawHeight) / tokenRows.length + gridTop * self.characterHeight;
-            var scrollBarWidth = gridWidth * drawWidth / maxLineWidth - (gridLeft + rightGutterWidth) * self.characterWidth;
-            var scrollBarHeight = gridHeight * drawHeight / tokenRows.length - (gridTop + bottomGutterHeight) * self.characterHeight;
-
-            tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
-            // horizontal
-            tgfx.fillRect(
-                    scrollX,
-                    (gridHeight + 0.25) * self.characterHeight,
-                    Math.max(self.characterWidth, scrollBarWidth),
-                    self.characterHeight);
-
-            //vertical
-            tgfx.fillRect(
-                    canvas.width - self.characterWidth,
-                    scrollY,
-                    self.characterWidth,
-                    Math.max(self.characterHeight, scrollBarHeight));
-        }
-    }
-
-    function renderCanvas() {
-        var maxLineWidth = 0;
-
-        if(self.frontCursor.moved || self.backCursor.moved){
-            renderCanvasBackground();
-        }
-        
-        maxLineWidth = renderCanvasForeground();
-        renderCanvasTrim(maxLineWidth);
-
-        gfx.clearRect(0, 0, canvas.width, canvas.height);
-        gfx.drawImage(bgCanvas, 0, 0);
-        gfx.drawImage(fgCanvas, 0, 0);
-        gfx.drawImage(trimCanvas, 0, 0);
-
-        if (texture) {
-            texture.needsUpdate = true;
-        }
-    }
-
-
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
     browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-    if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {
-        canvas.style.position = "absolute";
-        canvas.style.width = options.width;
-        canvas.style.height = options.height;
-    }
 
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + canvas.id, surrogate);
-
-    if (!canvas.parentElement) {
-        document.body.appendChild(makeHidingContainer("primrose-container-" + canvas.id, canvas));
-    }
+    surrogateContainer = makeHidingContainer("primrose-surrogate-textarea-container-" + renderer.id, surrogate);
 
     document.body.appendChild(surrogateContainer);
 
@@ -1089,18 +769,18 @@ function Primrose(canvasElementOrID, options) {
     this.setText(options.file);
     this.bindEvents(options.keyEventSource, options.pointerEventSource);
 
-    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + canvas.id, Themes, theme.name, self, "setTheme", "theme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + canvas.id, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + canvas.id, CodePages, codePage.name, self, "setCodePage", "localization");
-    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + canvas.id, Commands, commandSystem.name, self, "setCommandSystem", "command system");
-    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + canvas.id, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
+    this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" + renderer.id, Themes, theme.name, self, "setTheme", "theme");
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" + renderer.id, Grammar, tokenizer.name, self, "setTokenizer", "language syntax");
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" + renderer.id, CodePages, codePage.name, self, "setCodePage", "localization");
+    this.commandSystemSelect = makeSelectorFromObj("primrose-command-system-selector-" + renderer.id, Commands, commandSystem.name, self, "setCommandSystem", "command system");
+    this.operatingSystemSelect = makeSelectorFromObj("primrose-operating-system-selector-" + renderer.id, OperatingSystems, operatingSystem.name, self, "setOperatingSystem", "shortcut style");
 
 
     //////////////////////////////////////////////////////////////////////////
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", measureText.bind(this));
+    window.addEventListener("resize", renderer.resize.bind(renderer));
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));

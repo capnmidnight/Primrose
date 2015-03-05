@@ -18,6 +18,7 @@
         <script type="text/javascript" src="../src/grammars/PlainText.js"></script>
         <script type="text/javascript" src="../src/operating_systems/OSX.js"></script>
         <script type="text/javascript" src="../src/operating_systems/Windows.js"></script>
+        <script type="text/javascript" src="../src/renderers/Canvas.js"></script>
         <script type="text/javascript" src="../src/themes/Dark.js"></script>
         <script type="text/javascript" src="../src/themes/Default.js"></script>
         <style type="text/css">
@@ -128,7 +129,7 @@ function demo() {
                     
             window.addEventListener("load", function () {
                 ctrls = findEverything();
-                prim = new Primrose(ctrls.output, {
+                prim = new Primrose(ctrls.output, Renderers.Canvas, {
                     file: demo.toString(),
                     wordWrap: false
                 });
@@ -141,7 +142,7 @@ function demo() {
                     controls.appendChild(prim.tokenizerSelect);
                     controls.appendChild(prim.themeSelect);
 
-                    prim.placeSurrogateUnder(prim.getCanvas());
+                    prim.placeSurrogateUnder(prim.getRenderer().getCanvas());
 
                     prim.bindEvents(window, output);
                     window.addEventListener("wheel", prim.readWheel.bind(prim));
