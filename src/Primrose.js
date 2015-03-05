@@ -38,8 +38,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             tokenizer,
             tokens,
             theme,
-            pointerX,
-            pointerY,
+            pointer = new Point(),
             tabWidth,
             tabString,
             currentTouchID,
@@ -47,13 +46,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             keyNames = [],
             history = [],
             historyFrame = -1,
-            scrollLeft = 0,
             gridBounds = new Rectangle(),
             lineCountWidth = 0,
-            leftGutterWidth = 0,
-            topGutterHeight = 0,
-            rightGutterWidth = 0,
-            bottomGutterHeight = 0,
+            topLeftGutter = new Size(),
+            bottomRightGutter = new Size(),
             tokenRows = null,
             lineCount = 0,
             dragging = false,
@@ -73,7 +69,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.frontCursor = new Cursor();
     this.backCursor = new Cursor();
-    this.scrollTop = 0;
+    this.scroll = new Point();
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -85,13 +81,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
     }
 
     function clampScroll() {
-        if (self.scrollTop < 0) {
-            self.scrollTop = 0;
+        if (self.scroll.y < 0) {
+            self.scroll.y = 0;
         }
         else
-            while (0 < self.scrollTop && self.scrollTop > self.lineCount -
+            while (0 < self.scroll.y && self.scroll.y > self.lineCount -
                     gridBounds.height) {
-                --self.scrollTop;
+                --self.scroll.y;
             }
     }
 
@@ -127,12 +123,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     function setCursorXY(cursor, x, y) {
         changed = true;
-        pointerX = x;
-        pointerY = y;
+        pointer.set(x, y);
         var lines = self.getLines();
-        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop,
-                gridBounds.x);
-        cursor.setXY(cell.x, cell.y, lines);
+        renderer.pixel2cell(pointer, self.scroll, gridBounds);
+        cursor.setXY(pointer.x, pointer.y, lines);
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
@@ -467,9 +461,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-        this.scrollTop += minDelta(currentCursor.y, this.scrollTop,
-                this.scrollTop + gridBounds.height);
-        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft +
+        this.scroll.y += minDelta(currentCursor.y, this.scroll.y,
+                this.scroll.y + gridBounds.height);
+        this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x +
                 gridBounds.width);
         clampScroll();
     };
@@ -547,8 +541,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scrollTop += Math.floor(evt.deltaY /
-                    renderer.characterHeight);
+            this.scroll.y += Math.floor(evt.deltaY /
+                    renderer.character.height);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -735,29 +729,27 @@ function Primrose(renderToElementOrID, Renderer, options) {
             if (showLineNumbers) {
                 lineCountWidth = Math.max(1, Math.ceil(Math.log(
                         this.lineCount) / Math.LN10));
-                leftGutterWidth = 1;
+                topLeftGutter.width = 1;
             }
             else {
                 lineCountWidth = 0;
-                leftGutterWidth = 0;
+                topLeftGutter.width = 0;
             }
 
             if (showScrollBars) {
-                rightGutterWidth = 1;
-                bottomGutterHeight = 1;
+                bottomRightGutter.set(1, 1);
             }
             else {
-                rightGutterWidth = 0;
-                bottomGutterHeight = 0;
+                bottomRightGutter.set(0, 0);
             }
 
-            gridBounds.x = leftGutterWidth + lineCountWidth;
-
-            gridBounds.width = Math.floor(this.getWidth() /
-                    renderer.characterWidth) - gridBounds.x - rightGutterWidth;
-
-            gridBounds.height = Math.floor(this.getHeight() /
-                    renderer.characterHeight) - bottomGutterHeight;
+            gridBounds.set(
+                    topLeftGutter.width + lineCountWidth,
+                    0,
+                    Math.floor(this.getWidth() /
+                            renderer.character.width) - gridBounds.x - bottomRightGutter.width,
+                    Math.floor(this.getHeight() /
+                            renderer.character.height) - bottomRightGutter.height);
 
             // group the tokens into rows
             var currentRow = [],
@@ -783,13 +775,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.render(
                     tokenRows,
                     this.frontCursor, this.backCursor,
-                    gridBounds.x, gridBounds.y, gridBounds.width,
-                    gridBounds.height,
-                    scrollLeft, this.scrollTop,
+                    gridBounds,
+                    this.scroll.x, this.scroll.y,
                     focused, showLineNumbers, showScrollBars,
-                    lineCountWidth,
-                    leftGutterWidth, topGutterHeight, rightGutterWidth,
-                    bottomGutterHeight);
+                    lineCountWidth);
 
             changed = false;
         }

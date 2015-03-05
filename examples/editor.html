@@ -130,23 +130,24 @@ function demo() {
                     
             window.addEventListener("load", function () {
                 ctrls = findEverything();
-                prim = new Primrose(ctrls.output, Renderers.Canvas, {
-                    file: demo.toString(),
-                    wordWrap: false
-                });
-                prim.focus();
 
                 with(ctrls){
+                    prim = new Primrose(output, Renderers.Canvas, {
+                        file: demo.toString(),
+                        wordWrap: false,
+                        keyEventSource: window,
+                        pointerEventSource: output
+                    });
+               
+                    window.addEventListener("wheel", prim.readWheel.bind(prim));  
+                    prim.placeSurrogateUnder(prim.getRenderer().getCanvas());                       
+                    prim.focus();                    
+                    
                     controls.appendChild(prim.operatingSystemSelect);
                     controls.appendChild(prim.keyboardSelect);
                     controls.appendChild(prim.commandSystemSelect);
                     controls.appendChild(prim.tokenizerSelect);
                     controls.appendChild(prim.themeSelect);
-
-                    prim.placeSurrogateUnder(prim.getRenderer().getCanvas());
-
-                    prim.bindEvents(window, output);
-                    window.addEventListener("wheel", prim.readWheel.bind(prim));
 
                     onToggle(toggleLineNumbers, "ShowLineNumbers");
                     onToggle(toggleScrollBars, "ShowScrollBars");

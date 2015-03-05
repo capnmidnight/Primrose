@@ -206,31 +206,13 @@ var Cursor = (function () {
 var Point = (function () {
     "use strict";
     function Point(x, y) {
-        this.set(x || 0, y || 0);
-
-        Object.defineProperties(this, {
-            left: {
-                get: function () {
-                    return this.x;
-                },
-                set: function (v) {
-                    this.x = v;
-                }
-            },
-            top: {
-                get: function () {
-                    return this.y;
-                },
-                set: function (v) {
-                    this.y = v;
-                }
-            }
-        });
+        this.x = x || 0;
+        this.y = y || 0;
     }
 
     Point.prototype.set = function (x, y) {
-        this.width = x;
-        this.height = y;
+        this.x = x;
+        this.y = y;
     };
 
     return Point;
@@ -239,7 +221,8 @@ var Point = (function () {
 var Size = (function () {
     "use strict";
     function Size(width, height) {
-        this.set(width || 0, height || 0);
+        this.width = width || 0;
+        this.height = height || 0;
     }
 
     Size.prototype.set = function (width, height) {
