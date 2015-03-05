@@ -90,7 +90,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scrollTop = 0;
         }
         else
-            while (self.scrollTop > self.lineCount - gridHeight) {
+            while (0 < self.scrollTop && self.scrollTop > self.lineCount - gridHeight) {
                 --self.scrollTop;
             }
     }
@@ -252,8 +252,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.isFocused = function () {
         return focused;
     };
-    
-    this.getRenderer = function(){
+
+    this.getRenderer = function () {
         return renderer;
     };
 
@@ -528,6 +528,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
                     right = text.substring(maxCursor.i);
             maxCursor.copy(minCursor);
             this.setText(left + right);
+            clampScroll();
         }
     };
 
@@ -734,12 +735,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
             }
 
             renderer.render(
-                    tokenRows, 
+                    tokenRows,
                     this.frontCursor, this.backCursor,
-                    gridLeft, gridTop, gridWidth, gridHeight, 
-                    scrollLeft, this.scrollTop, 
-                    focused, showLineNumbers, showScrollBars, 
-                    lineCountWidth, 
+                    gridLeft, gridTop, gridWidth, gridHeight,
+                    scrollLeft, this.scrollTop,
+                    focused, showLineNumbers, showScrollBars,
+                    lineCountWidth,
                     leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight);
 
             changed = false;

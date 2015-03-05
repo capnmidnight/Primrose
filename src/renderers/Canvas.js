@@ -29,7 +29,7 @@ Renderers.Canvas = (function () {
                 tgfx = trimCanvas.getContext("2d"),
                 theme = null,
                 texture = null, pickingTexture = null, pickingPixelBuffer = null;
-        
+
         this.characterWidth = 0;
         this.characterHeight = 0;
 
@@ -226,7 +226,7 @@ Renderers.Canvas = (function () {
             tgfx.save();
             tgfx.translate(0, -scrollTop * self.characterHeight);
             if (showLineNumbers) {
-                for (var y = scrollTop, lastLine = -1; y < scrollTop + gridHeight; ++y) {
+                for (var y = scrollTop, lastLine = -1; y < scrollTop + gridHeight && y < tokenRows.length; ++y) {
                     // draw the tokens on this row
                     var row = tokenRows[y];
                     // be able to draw brand-new rows that don't have any tokens yet
@@ -280,19 +280,16 @@ Renderers.Canvas = (function () {
             }
         }
 
-        this.render = function (tokenRows, 
-                frontCursor, backCursor, 
-                gridLeft, gridTop, gridWidth, gridHeight, 
-                scrollLeft, scrollTop, 
-                focused, showLineNumbers, showScrollBars, 
-                lineCountWidth, 
+        this.render = function (tokenRows,
+                frontCursor, backCursor,
+                gridLeft, gridTop, gridWidth, gridHeight,
+                scrollLeft, scrollTop,
+                focused, showLineNumbers, showScrollBars,
+                lineCountWidth,
                 leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight) {
             var maxLineWidth = 0;
 
-            if (frontCursor.moved || backCursor.moved) {
-                renderCanvasBackground(tokenRows, frontCursor, backCursor, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop, focused);
-            }
-
+            renderCanvasBackground(tokenRows, frontCursor, backCursor, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop, focused);
             maxLineWidth = renderCanvasForeground(tokenRows, gridLeft, gridWidth, gridHeight, scrollLeft, scrollTop);
             renderCanvasTrim(tokenRows, gridLeft, gridTop, gridWidth, gridHeight, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, leftGutterWidth, topGutterHeight, rightGutterWidth, bottomGutterHeight, maxLineWidth);
 
