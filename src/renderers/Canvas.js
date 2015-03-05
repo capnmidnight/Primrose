@@ -346,34 +346,18 @@ Renderers.Canvas = (function () {
             return window.devicePixelRatio || 1;
         };
 
-        this.startPicking = function (gl, x, y) {
-            var i = getPixelIndex(gl, x, y);
-            x = i % canvas.width;
-            y = i / canvas.width;
-
-            this.startPointer(x, y);
-        };
-
-        this.movePicking = function (gl, x, y) {
-            var i = getPixelIndex(gl, x, y);
-            x = i % canvas.width;
-            y = i / canvas.width;
-
-            this.movePointer(x, y);
-        };
-
-
-        function getPixelIndex(gl, x, y) {
+        this.getPixelIndex = function (gl, x, y) {
             if (!pickingPixelBuffer) {
                 pickingPixelBuffer = new Uint8Array(4);
             }
 
             gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
 
-            return (pickingPixelBuffer[0] << 16) |
+            var i = (pickingPixelBuffer[0] << 16) |
                     (pickingPixelBuffer[1] << 8) |
                     (pickingPixelBuffer[2] << 0);
-        }
+            return {x: i % canvas.width, y: i / canvas.width};
+        };
 
 
         if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {

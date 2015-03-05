@@ -541,6 +541,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
     };
 
+    this.startPicking = function (gl, x, y) {
+        var p = renderer.getPixelIndex(gl, x, y);
+        this.startPointer(p.x, p.y);
+    };
+
+    this.movePicking = function (gl, x, y) {
+        var p = renderer.getPixelIndex(gl, x, y);
+        this.movePointer(p.x, p.y);
+    };
+
     this.startPointer = function (x, y) {
         setCursorXY(this.frontCursor, x, y);
         this.backCursor.copy(this.frontCursor);
