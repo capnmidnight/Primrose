@@ -779,8 +779,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     document.body.appendChild(surrogateContainer);
 
-    this.setWordWrap(options.wordWrap);
     this.setWheelScrollSpeed(options.wheelScrollSpeed);
+    this.setWordWrap(!options.disableWordWrap);
     this.setShowLineNumbers(!options.hideLineNumbers);
     this.setShowScrollBars(!options.hideScrollBars);
     this.setTabWidth(options.tabWidth);
