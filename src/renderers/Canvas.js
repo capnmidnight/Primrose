@@ -112,7 +112,7 @@ Renderers.Canvas = (function () {
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
             bgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
-            
+
 
             // draw the current row highlighter
             if (focused) {
@@ -120,7 +120,7 @@ Renderers.Canvas = (function () {
                         0, minCursor.y + 0.2,
                         gridBounds.width, maxCursor.y - minCursor.y + 1);
             }
-                
+
             for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];

@@ -78,6 +78,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     function refreshTokens() {
         tokens = tokenizer.tokenize(self.getText());
+        self.drawText();
     }
 
     function clampScroll() {
@@ -85,23 +86,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scroll.y = 0;
         }
         else
-            while (0 < self.scroll.y
-                    && self.scroll.y > scrollLines.length - gridBounds.height) {
+            while (0 < self.scroll.y && 
+                self.scroll.y > scrollLines.length - gridBounds.height) {
                 --self.scroll.y;
             }
-    }
-
-    function minDelta(v, minV, maxV) {
-        var dvMinV = v - minV,
-                dvMaxV = v - maxV + 5,
-                dv = 0;
-        if (dvMinV < 0 || dvMaxV >= 0) {
-            // compare the absolute values, so we get the smallest change
-            // regardless of direction.
-            dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
-        }
-
-        return dv;
     }
 
     function readClipboard(evt) {
@@ -524,11 +512,24 @@ function Primrose(renderToElementOrID, Renderer, options) {
         return tabString;
     };
 
+    function minDelta(v, minV, maxV) {
+        var dvMinV = v - minV,
+                dvMaxV = v - maxV + 5,
+                dv = 0;
+        if (dvMinV < 0 || dvMaxV >= 0) {
+            // compare the absolute values, so we get the smallest change
+            // regardless of direction.
+            dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+        }
+
+        return dv;
+    }
+
     this.scrollIntoView = function (currentCursor) {
-        this.scroll.y += minDelta(currentCursor.y, this.scroll.y,
-                this.scroll.y + gridBounds.height);
-        this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x +
-                gridBounds.width);
+        this.scroll.y += minDelta(currentCursor.y, this.scroll.y, this.scroll.y + gridBounds.height);
+        if(!wordWrap){
+            this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x + gridBounds.width);
+        }
         clampScroll();
     };
 

@@ -1,4 +1,4 @@
-/*! Primrose 2015-03-04
+/*! Primrose 2015-03-05
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -81,7 +81,7 @@ var Cursor = (function () {
             var x = this.x - 1;
             var line = reverse(lines[this.y].substring(0, x));
             var m = line.match(/(\s|\W)+/);
-            var dx = m ? (m.index + m[0].length + 1) : line.length + 1;
+            var dx = m ? (m.index + m[0].length + 1) : line.length;
             this.i -= dx;
             this.x -= dx;
         }
@@ -139,7 +139,7 @@ var Cursor = (function () {
         this.i += lines[this.y].length - this.x;
         while (this.y < lines.length - 1) {
             ++this.y;
-            this.i += lines[this.y].length + 1;
+            this.i += lines[this.y].length;
         }
         this.x = lines[this.y].length;
         this.moved = true;
@@ -150,7 +150,7 @@ var Cursor = (function () {
             --this.y;
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
-            this.i -= lines[this.y].length + 1 - dx;
+            this.i -= lines[this.y].length - dx;
         }
         this.moved = true;
     };
@@ -160,7 +160,7 @@ var Cursor = (function () {
             ++this.y;
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
-            this.i += lines[this.y - 1].length + 1 + dx;
+            this.i += lines[this.y - 1].length + dx;
         }
         this.moved = true;
     };
@@ -170,7 +170,7 @@ var Cursor = (function () {
         this.x = Math.max(0, Math.min(lines[this.y].length, x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length + 1;
+            this.i += lines[i].length;
         }
         this.moved = true;
     };
@@ -180,7 +180,7 @@ var Cursor = (function () {
         this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length + 1;
+            this.i += lines[i].length;
         }
         this.moved = true;
     };
@@ -206,13 +206,20 @@ var Cursor = (function () {
 var Point = (function () {
     "use strict";
     function Point(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
+        this.set(x || 0, y || 0);
     }
 
     Point.prototype.set = function (x, y) {
         this.x = x;
         this.y = y;
+    };
+
+    Point.prototype.clone = function () {
+        return new Point(this.x, this.y);
+    };
+
+    Point.prototype.toString = function () {
+        return fmt("(x:$1, y:$2)", this.x, this.y);
     };
 
     return Point;
@@ -221,13 +228,20 @@ var Point = (function () {
 var Size = (function () {
     "use strict";
     function Size(width, height) {
-        this.width = width || 0;
-        this.height = height || 0;
+        this.set(width || 0, height || 0);
     }
 
     Size.prototype.set = function (width, height) {
         this.width = width;
         this.height = height;
+    };
+
+    Size.prototype.clone = function () {
+        return new Size(this.width, this.height);
+    };
+
+    Size.prototype.toString = function () {
+        return fmt("<w:$1, h:$2>", this.width, this.height);
     };
 
     return Size;
@@ -236,81 +250,72 @@ var Size = (function () {
 var Rectangle = (function () {
     "use strict";
     function Rectangle(x, y, width, height) {
-        if (x instanceof Point) {
-            if (y instanceof Size) {
-                this.set(x.x, x.y, y.width, y.height);
-            }
-            else {
-                this.set(x.x, x.y, y || 0, width || 0);
-            }
-        }
-        else {
-            if (y instanceof Size) {
-                this.set(x || 0, y || 0, width.width,
-                        width.height);
-            }
-            else {
-                this.set(x || 0, y || 0, width || 0, height ||
-                        0);
-            }
-        }
+        this.point = new Point(x, y);
+        this.size = new Size(width, height);
 
         Object.defineProperties(this, {
             x: {
                 get: function () {
                     return this.point.x;
                 },
-                set: function (v) {
-                    this.point.x = v;
+                set: function (x) {
+                    this.point.x = x;
                 }
             },
-            left: {
+            width: {
                 get: function () {
-                    return this.point.x;
+                    return this.size.width;
                 },
-                set: function (v) {
-                    this.point.x = v;
+                set: function (width) {
+                    this.size.width = width;
                 }
             },
             right: {
                 get: function () {
                     return this.point.x + this.size.width;
                 },
-                set: function (v) {
-                    this.point.x = v - this.size.width;
+                set: function (right) {
+                    this.point.x = right - this.size.width;
                 }
             },
             y: {
                 get: function () {
                     return this.point.y;
                 },
-                set: function (v) {
-                    this.point.y = v;
+                set: function (y) {
+                    this.point.y = y;
                 }
             },
-            top: {
+            height: {
                 get: function () {
-                    return this.point.y;
+                    return this.size.height;
                 },
-                set: function (v) {
-                    this.point.y = v;
+                set: function (height) {
+                    this.size.height = height;
                 }
             },
             bottom: {
                 get: function () {
                     return this.point.y + this.size.height;
                 },
-                set: function (v) {
-                    this.point.y = v - this.size.height;
+                set: function (bottom) {
+                    this.point.y = bottom - this.size.height;
                 }
             }
         });
     }
 
-    Rectangle.prototype.set = function (x, y, width,
-            height) {
-        this.point = new Point(x, y);
-        this.size = new Size(width, height);
+    Rectangle.prototype.set = function (x, y, width, height) {
+        this.point.set(x, y);
+        this.size.set(width, height);
+    };
+
+    Rectangle.prototype.clone = function () {
+        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+    };
+
+    Rectangle.prototype.toString = function () {
+        return fmt("[$1 x $2]", this.point.toString(), this.size.toString());
     };
 
     return Rectangle;
@@ -605,9 +610,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             commandPack = {},
             tokenizer,
             tokens,
+            tokenRows,
+            scrollLines,
             theme,
-            pointerX,
-            pointerY,
+            pointer = new Point(),
             tabWidth,
             tabString,
             currentTouchID,
@@ -615,26 +621,20 @@ function Primrose(renderToElementOrID, Renderer, options) {
             keyNames = [],
             history = [],
             historyFrame = -1,
-            scrollLeft = 0,
             gridBounds = new Rectangle(),
-            lineCountWidth = 0,
-            leftGutterWidth = 0,
-            topGutterHeight = 0,
-            rightGutterWidth = 0,
-            bottomGutterHeight = 0,
-            tokenRows = null,
-            lineCount = 0,
+            topLeftGutter = new Size(),
+            bottomRightGutter = new Size(),
             dragging = false,
             focused = false,
             changed = false,
             showLineNumbers = true,
             showScrollBars = true,
             wordWrap = false,
+            wheelScrollSpeed = 0,
             renderer = new Renderer(renderToElementOrID, options),
             surrogate = cascadeElement("primrose-surrogate-textarea-" +
                     renderer.id, "textarea", HTMLTextAreaElement),
             surrogateContainer;
-
 
     //////////////////////////////////////////////////////////////////////////
     // public fields
@@ -642,7 +642,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.frontCursor = new Cursor();
     this.backCursor = new Cursor();
-    this.scrollTop = 0;
+    this.scroll = new Point();
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -654,13 +654,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
     }
 
     function clampScroll() {
-        if (self.scrollTop < 0) {
-            self.scrollTop = 0;
+        if (self.scroll.y < 0) {
+            self.scroll.y = 0;
         }
         else
-            while (0 < self.scrollTop && self.scrollTop > self.lineCount -
-                    gridBounds.height) {
-                --self.scrollTop;
+            while (0 < self.scroll.y && 
+                self.scroll.y > scrollLines.length - gridBounds.height) {
+                --self.scroll.y;
             }
     }
 
@@ -696,12 +696,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     function setCursorXY(cursor, x, y) {
         changed = true;
-        pointerX = x;
-        pointerY = y;
-        var lines = self.getLines();
-        var cell = renderer.pixel2cell(x, y, scrollLeft, self.scrollTop,
-                gridBounds);
-        cursor.setXY(cell.x, cell.y, lines);
+        pointer.set(x, y);
+        renderer.pixel2cell(pointer, self.scroll, gridBounds);
+        cursor.setXY(pointer.x, pointer.y, scrollLines);
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
@@ -763,7 +760,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 if (cmd.hasOwnProperty(key)) {
                     var func = cmd[key];
                     if (!(func instanceof Function)) {
-                        func = self.insertAtCursor.bind(self, func);
+                        func = self.overwriteText.bind(self, func);
                     }
                     commandPack[key] = func;
                 }
@@ -777,7 +774,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
         addCommandPack(keyboardSystem);
         addCommandPack(operatingSystem);
-        addCommandPack(browser);
         addCommandPack(commandSystem);
     }
 
@@ -788,6 +784,56 @@ function Primrose(renderToElementOrID, Renderer, options) {
             cursor[method](lines);
             self.scrollIntoView(cursor);
         };
+    }
+
+    function performLayout() {
+        var lineCountWidth;
+        if (showLineNumbers) {
+            lineCountWidth = Math.max(1, Math.ceil(Math.log(
+                    self.getLineCount()) / Math.LN10));
+            topLeftGutter.width = 1;
+        }
+        else {
+            lineCountWidth = 0;
+            topLeftGutter.width = 0;
+        }
+
+        if (showScrollBars) {
+            bottomRightGutter.set(1, 1);
+        }
+        else {
+            bottomRightGutter.set(0, 0);
+        }
+
+        gridBounds.set(
+                topLeftGutter.width + lineCountWidth,
+                0,
+                Math.floor(self.getWidth() /
+                        renderer.character.width) - gridBounds.x - bottomRightGutter.width,
+                Math.floor(self.getHeight() /
+                        renderer.character.height) - bottomRightGutter.height);
+
+        // group the tokens into rows
+        scrollLines = [""];
+        tokenRows = [[]];
+        var tokenQueue = tokens.slice();
+        for (var i = 0; i < tokenQueue.length; ++i) {
+            var t = tokenQueue[i].clone();
+            var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
+            var lb = t.type === "newlines" || wrap;
+            if(wrap) {
+                tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
+            }
+            
+            tokenRows[tokenRows.length - 1].push(t);
+            scrollLines[scrollLines.length - 1] += t.value;
+
+            if (lb) {
+                tokenRows.push([]);
+                scrollLines.push("");
+            }
+        }
+        return lineCountWidth;
     }
 
 
@@ -830,8 +876,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
         return renderer;
     };
 
+    this.setWheelScrollSpeed = function (v) {
+        wheelScrollSpeed = v || 25;
+    };
+
+    this.getWheelScrollSpeed = function () {
+        return wheelScrollSpeed;
+    };
+
     this.setWordWrap = function (v) {
-        wordWrap = v;
+        wordWrap = v || false;
         this.forceUpdate();
     };
 
@@ -993,6 +1047,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
         return history[historyFrame].slice();
     };
 
+    this.getLineCount = function () {
+        return history[historyFrame].length;
+    };
+
+    this.getText = function () {
+        return history[historyFrame].join("\n");
+    };
+
     this.pushUndo = function (lines) {
         if (historyFrame < history.length - 1) {
             history.splice(historyFrame + 1);
@@ -1036,29 +1098,23 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.scrollIntoView = function (currentCursor) {
-        this.scrollTop += minDelta(currentCursor.y, this.scrollTop,
-                this.scrollTop + gridBounds.height);
-        scrollLeft += minDelta(currentCursor.x, scrollLeft, scrollLeft +
+        this.scroll.y += minDelta(currentCursor.y, this.scroll.y,
+                this.scroll.y + gridBounds.height);
+        this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x +
                 gridBounds.width);
         clampScroll();
     };
 
     this.increaseFontSize = function () {
         ++theme.fontSize;
-        renderer.resize();
+        changed = renderer.resize();
     };
 
     this.decreaseFontSize = function () {
         if (theme.fontSize > 1) {
             --theme.fontSize;
-            renderer.resize();
+            changed = renderer.resize();
         }
-    };
-
-    this.getText = function () {
-        return this.getLines()
-                .join(
-                        "\n");
     };
 
     this.setText = function (txt) {
@@ -1066,9 +1122,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         txt = txt.replace(/\r\n/g, "\n");
         var lines = txt.split("\n");
         this.pushUndo(lines);
-        if (this.drawText) {
-            this.drawText();
-        }
+        this.drawText();
     };
 
     this.getPixelRatio = function () {
@@ -1076,48 +1130,28 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.cell2i = function (x, y) {
-        var dy,
-                lines =
-                this.getLines(),
-                i = 0;
-        for (dy = 0; dy < y; ++dy) {
-            i += lines[dy].length + 1;
+        var i = 0;
+        for (var dy = 0; dy < y; ++dy) {
+            i += scrollLines[dy].length + 1;
         }
         i += x;
         return i;
     };
 
     this.i2cell = function (i) {
-        var lines = this.getLines();
-        for (var y = 0; y < lines.length; ++y) {
-            if (i <= lines.length) {
+        for (var y = 0; y < scrollLines.length; ++y) {
+            if (i <= scrollLines.length) {
                 return {x: i, y: y};
             }
             else {
-                i -= lines.length - 1;
+                i -= scrollLines.length - 1;
             }
-        }
-    };
-
-    this.deleteSelection = function () {
-        if (this.frontCursor.i !== this.backCursor.i) {
-            // TODO: don't rejoin the string first.
-            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
-                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-                    lines = this.getLines(),
-                    text = lines.join("\n"),
-                    left = text.substring(0, minCursor.i),
-                    right = text.substring(maxCursor.i);
-            maxCursor.copy(minCursor);
-            this.setText(left + right);
-            clampScroll();
         }
     };
 
     this.readWheel = function (evt) {
         if (focused) {
-            this.scrollTop += Math.floor(evt.deltaY /
-                    renderer.characterHeight);
+            this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
             clampScroll();
             evt.preventDefault();
             this.forceUpdate();
@@ -1177,31 +1211,29 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
     };
 
-    this.insertAtCursor = function (str) {
-        if (str.length > 0) {
-            str = str.replace(/\r\n/g, "\n");
-            this.deleteSelection();
-            var lines = this.getLines();
-            var parts = str.split("\n");
-            parts[0] = lines[this.frontCursor.y].substring(0,
-                    this.frontCursor.x) + parts[0];
-            parts[parts.length - 1] += lines[this.frontCursor.y].substring(
-                    this.frontCursor.x);
-            lines.splice.bind(lines, this.frontCursor.y, 1)
-                    .apply(
-                            lines,
-                            parts);
+    this.overwriteText = function (str) {
+        str = str || "";        
+        str = str.replace(/\r\n/g, "\n");
+        
+        if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+            // TODO: don't rejoin the string first.
+            var minCursor = Cursor.min(this.frontCursor, this.backCursor),
+                    maxCursor = Cursor.max(this.frontCursor, this.backCursor),
+                    text = this.getText(),
+                    left = text.substring(0, minCursor.i),
+                    right = text.substring(maxCursor.i);
             for (var i = 0; i < str.length; ++i) {
-                this.frontCursor.right(lines);
+                minCursor.right(scrollLines);
             }
-            this.backCursor.copy(this.frontCursor);
-            this.scrollIntoView(this.frontCursor);
-            this.pushUndo(lines);
+            maxCursor.copy(minCursor);
+            this.setText(left + str + right);
+            this.scrollIntoView(maxCursor);
+            clampScroll();
         }
     };
 
     this.pasteAtCursor = function (str) {
-        this.insertAtCursor(str);
+        this.overwriteText(str);
         this.drawText();
     };
 
@@ -1209,8 +1241,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         if (this.frontCursor.i !== this.backCursor.i) {
             var minCursor = Cursor.min(this.frontCursor, this.backCursor),
                     maxCursor = Cursor.max(this.frontCursor, this.backCursor),
-                    lines = this.getLines(),
-                    text = lines.join("\n"),
+                    text = this.getText(),
                     str = text.substring(minCursor.i, maxCursor.i);
             evt.clipboardData.setData("text/plain", str);
         }
@@ -1219,7 +1250,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.cutSelectedText = function (evt) {
         this.copySelectedText(evt);
-        this.deleteSelection();
+        this.overwriteText();
         this.drawText();
     };
 
@@ -1270,14 +1301,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
             if (func) {
                 this.frontCursor.moved = false;
                 this.backCursor.moved = false;
-                var lines = this.getLines();
-                func(self, lines);
-                lines = this.getLines();
+                func(self, scrollLines);
                 if (this.frontCursor.moved && !this.backCursor.moved) {
                     this.backCursor.copy(this.frontCursor);
                 }
-                this.frontCursor.rectify(lines);
-                this.backCursor.rectify(lines);
+                this.frontCursor.rectify(scrollLines);
+                this.backCursor.rectify(scrollLines);
+                clampScroll();
                 evt.preventDefault();
             }
 
@@ -1290,74 +1320,15 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var t,
-                    i;
-
-            this.lineCount = 1;
-
-            for (i = 0; i < tokens.length; ++i) {
-                if (tokens[i].type === "newlines") {
-                    ++this.lineCount;
-                }
-            }
-
-            if (showLineNumbers) {
-                lineCountWidth = Math.max(1, Math.ceil(Math.log(
-                        this.lineCount) / Math.LN10));
-                leftGutterWidth = 1;
-            }
-            else {
-                lineCountWidth = 0;
-                leftGutterWidth = 0;
-            }
-
-            if (showScrollBars) {
-                rightGutterWidth = 1;
-                bottomGutterHeight = 1;
-            }
-            else {
-                rightGutterWidth = 0;
-                bottomGutterHeight = 0;
-            }
-
-            gridBounds.set(
-                    leftGutterWidth + lineCountWidth,
-                    0,
-                    Math.floor(this.getWidth() / renderer.characterWidth) -
-                    gridBounds.x - rightGutterWidth,
-                    Math.floor(this.getHeight() / renderer.characterHeight) -
-                    bottomGutterHeight);
-
-            // group the tokens into rows
-            var currentRow = [],
-                    rowX = 0;
-            tokenRows = [currentRow];
-            for (i = 0; i < tokens.length; ++i) {
-                t = tokens[i].clone();
-                currentRow.push(t);
-                rowX += t.value.length;
-                if (wordWrap && rowX >= gridBounds.width || t.type ===
-                        "newlines") {
-                    currentRow = [];
-                    tokenRows.push(currentRow);
-                    if (wordWrap && rowX >= gridBounds.width && t.type !==
-                            "newlines") {
-                        currentRow.push(t.splitAt(gridBounds.width - rowX +
-                                t.value.length));
-                    }
-                    rowX = 0;
-                }
-            }
+            var lineCountWidth = performLayout();
 
             renderer.render(
                     tokenRows,
                     this.frontCursor, this.backCursor,
                     gridBounds,
-                    scrollLeft, this.scrollTop,
+                    this.scroll.x, this.scroll.y,
                     focused, showLineNumbers, showScrollBars,
-                    lineCountWidth,
-                    leftGutterWidth, topGutterHeight, rightGutterWidth,
-                    bottomGutterHeight);
+                    lineCountWidth);
 
             changed = false;
         }
@@ -1366,9 +1337,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
+
+    //
+    // different browsers have different sets of keycodes for less-frequently
+    // used keys like.
     browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" :
             (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
 
+    //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
     surrogateContainer = makeHidingContainer(
@@ -1376,7 +1352,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     document.body.appendChild(surrogateContainer);
 
-    this.setWordWrap(!!options.wordWrap);
+    this.setWheelScrollSpeed(options.wheelScrollSpeed);
+    this.setWordWrap(!options.disableWordWrap);
     this.setShowLineNumbers(!options.hideLineNumbers);
     this.setShowScrollBars(!options.hideScrollBars);
     this.setTabWidth(options.tabWidth);
@@ -1409,7 +1386,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", renderer.resize.bind(renderer));
+    window.addEventListener("resize", function(){
+        changed = renderer.resize();
+        self.drawText();
+    });
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
@@ -2100,7 +2080,7 @@ Commands.DEFAULT = (function () {
             if (prim.frontCursor.i === prim.backCursor.i) {
                 prim.frontCursor.left(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_ENTER: function (prim, lines) {
@@ -2108,14 +2088,14 @@ Commands.DEFAULT = (function () {
             for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
                 indent += " ";
             }
-            prim.insertAtCursor("\n" + indent);
+            prim.overwriteText("\n" + indent);
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_DELETE: function (prim, lines) {
             if (prim.frontCursor.i === prim.backCursor.i) {
                 prim.backCursor.right(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         SHIFT_DELETE: function (prim, lines) {
@@ -2123,13 +2103,13 @@ Commands.DEFAULT = (function () {
                 prim.frontCursor.home(lines);
                 prim.backCursor.end(lines);
             }
-            prim.deleteSelection();
+            prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_TAB: function (prim, lines) {
             var ts = prim.getTabString();
             if (prim.frontCursor.y === prim.backCursor.y) {
-                prim.insertAtCursor(ts);
+                prim.overwriteText(ts);
             }
             else {
                 var a = Cursor.min(prim.frontCursor, prim.backCursor);
@@ -2201,10 +2181,8 @@ Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEDOWN", "PageDown");;/*
 function makeURL(url, queryMap) {
     var output = [];
     for (var key in queryMap) {
-        if (queryMap.hasOwnProperty(key) &&
-                !(queryMap[key] instanceof Function)) {
-            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(
-                    queryMap[key]));
+        if (queryMap.hasOwnProperty(key) && !(queryMap[key] instanceof Function)) {
+            output.push(encodeURIComponent(key) + "=" + encodeURIComponent(queryMap[key]));
         }
     }
     return url + "?" + output.join("&");
@@ -2271,8 +2249,7 @@ function XXX(msg, v) {
 
 function E(elem, evt, thunk) {
     if (!elem || !elem.addEventListener) {
-        throw XXX("must supply an element with an addEventListener method",
-                elem);
+        throw XXX("must supply an element with an addEventListener method", elem);
     }
     if (!evt || typeof (evt) !== "string") {
         throw XXX("must provide the name of an event", evt);
@@ -2323,8 +2300,7 @@ function agg(arr, get, red) {
             return obj[key];
         }).bind(window, get);
     }
-    return arr.map(get)
-            .reduce(red);
+    return arr.map(get).reduce(red);
 }
 
 function add(a, b) {
@@ -2369,8 +2345,7 @@ function group(arr, getKey, getValue) {
 
 // unicode-aware string reverse
 var reverse = function (str) {
-    str = str.replace(reverse.combiningMarks, function (match, capture1,
-            capture2) {
+    str = str.replace(reverse.combiningMarks, function (match, capture1, capture2) {
         return reverse(capture2) + capture1;
     })
             .replace(reverse.surrogatePair, "$2$1");
@@ -2380,8 +2355,7 @@ var reverse = function (str) {
     }
     return res;
 };
-reverse.combiningMarks =
-        /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
+reverse.combiningMarks = /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g;
 reverse.surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
 
 // An object inspection function.
@@ -2391,8 +2365,7 @@ function help(obj) {
     var evnts = [];
     if (obj) {
         for (var field in obj) {
-            if (field.indexOf("on") === 0 && (obj !== navigator || field !==
-                    "onLine")) {
+            if (field.indexOf("on") === 0 && (obj !== navigator || field !== "onLine")) {
                 // `online` is a known element that is not an event, but looks like
                 // an event to the most basic assumption.
                 evnts.push(field.substring(2));
@@ -2407,9 +2380,7 @@ function help(obj) {
 
         var type = typeof (obj);
         if (type === "function") {
-            type = obj.toString()
-                    .match(
-                            /(function [^(]*)/)[1];
+            type = obj.toString().match(/(function [^(]*)/)[1];
         }
         else if (type === "object") {
             type = null;
@@ -2427,15 +2398,13 @@ function help(obj) {
                         var testObject = parentObject.obj[field];
                         if (testObject) {
                             if (typeof (testObject) === "function") {
-                                if (testObject.prototype &&
-                                        obj instanceof testObject) {
+                                if (testObject.prototype && obj instanceof testObject) {
                                     type = parentObject.prefix + field;
                                     break;
                                 }
                             }
                             else if (!testObject.___tried___) {
-                                q.push({prefix: parentObject.prefix + field +
-                                            ".", obj: testObject});
+                                q.push({prefix: parentObject.prefix + field + ".", obj: testObject});
                             }
                         }
                     }
@@ -2498,8 +2467,7 @@ function cascadeElement(id, tag, DOMClass) {
     }
 
     if (elem === null) {
-        throw new Error(id + " does not refer to a valid " + tag +
-                " element.");
+        throw new Error(id + " does not refer to a valid " + tag + " element.");
     }
     else {
         elem.innerHTML = "";
@@ -2572,8 +2540,7 @@ function fmt(template) {
                         val = val.toString();
                     }
                     if (pad && pad.length > 0) {
-                        var paddingRegex = new RegExp("^\\d{" + (pad.length +
-                                1) + "}(\\.\\d+)?");
+                        var paddingRegex = new RegExp("^\\d{" + (pad.length + 1) + "}(\\.\\d+)?");
                         while (!paddingRegex.test(val)) {
                             val = "0" + val;
                         }
@@ -2588,10 +2555,7 @@ function fmt(template) {
 
 fmt.addMillis = function (val, txt) {
     return txt.replace(/( AM| PM|$)/, function (match, g1) {
-        return (val.getMilliseconds() / 1000).toString()
-                .substring(
-                        1) +
-                g1;
+        return (val.getMilliseconds() / 1000).toString().substring(1) + g1;
     });
 };
 
@@ -2672,10 +2636,8 @@ function readForm(ctrls) {
     if (ctrls) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if ((c.tagName === "INPUT" || c.tagName === "SELECT") &&
-                    (!c.dataset || !c.dataset.skipcache)) {
-                if (c.type === "text" || c.type === "password" || c.tagName ===
-                        "SELECT") {
+            if ((c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
+                if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     state[name] = c.value;
                 }
                 else if (c.type === "checkbox" || c.type === "radio") {
@@ -2691,11 +2653,8 @@ function writeForm(ctrls, state) {
     if (state) {
         for (var name in ctrls) {
             var c = ctrls[name];
-            if (state[name] !== null && state[name] !== undefined &&
-                    (c.tagName === "INPUT" || c.tagName === "SELECT") &&
-                    (!c.dataset || !c.dataset.skipcache)) {
-                if (c.type === "text" || c.type === "password" || c.tagName ===
-                        "SELECT") {
+            if (state[name] !== null && state[name] !== undefined && (c.tagName === "INPUT" || c.tagName === "SELECT") && (!c.dataset || !c.dataset.skipcache)) {
+                if (c.type === "text" || c.type === "password" || c.tagName === "SELECT") {
                     c.value = state[name];
                 }
                 else if (c.type === "checkbox" || c.type === "radio") {
@@ -2763,65 +2722,46 @@ function makeHidingContainer(id, obj) {
 
 // snagged and adapted from http://detectmobilebrowsers.com/
 var isMobile = (function (a) {
-    return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
-            a) ||
-            /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-                    a.substring(
-                            0,
-                            4));
+    return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4));
 })(navigator.userAgent || navigator.vendor || window.opera),
         isiOS = /Apple-iP(hone|od|ad)/.test(navigator.userAgent || ""),
         isOSX = /Macintosh/.test(navigator.userAgent || ""),
         isWindows = /Windows/.test(navigator.userAgent || ""),
         isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
         isFirefox = typeof InstallTrigger !== 'undefined',
-        isSafari = Object.prototype.toString.call(window.HTMLElement)
-        .indexOf(
-                'Constructor') >
-        0,
+        isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0,
         isChrome = !!window.chrome && !isOpera,
         isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 
-navigator.vibrate = navigator.vibrate || navigator.webkitVibrate ||
-        navigator.mozVibrate;
-navigator.getUserMedia = navigator.getUserMedia ||
-        navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia || navigator.oGetUserMedia;
-window.RTCPeerConnection = window.RTCPeerConnection ||
-        window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate ||
-        window.RTCIceCandidate;
-window.RTCSessionDescription = window.RTCSessionDescription ||
-        window.mozRTCSessionDescription || window.RTCSessionDescription;
+navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate;
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+window.RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+window.RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.RTCIceCandidate;
+window.RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.RTCSessionDescription;
 
 // this doesn't seem to actually work
-screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation ||
-        screen.msLockOrientation || function () {
-        };
+screen.lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation || function () {
+};
 
 // full-screen-ism polyfill
 if (!document.documentElement.requestFullscreen) {
     if (document.documentElement.msRequestFullscreen) {
-        document.documentElement.requestFullscreen =
-                document.documentElement.msRequestFullscreen;
+        document.documentElement.requestFullscreen = document.documentElement.msRequestFullscreen;
         document.exitFullscreen = document.msExitFullscreen;
     }
     else if (document.documentElement.mozRequestFullScreen) {
-        document.documentElement.requestFullscreen =
-                document.documentElement.mozRequestFullScreen;
+        document.documentElement.requestFullscreen = document.documentElement.mozRequestFullScreen;
         document.exitFullscreen = document.mozCancelFullScreen;
     }
     else if (document.documentElement.webkitRequestFullscreen) {
-        document.documentElement.requestFullscreen =
-                document.documentElement.webkitRequestFullscreen;
+        document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
         document.exitFullscreen = document.webkitExitFullscreen;
     }
 }
 
 function isFullScreenMode() {
-    return (document.fullscreenElement || document.mozFullScreenElement ||
-            document.webkitFullscreenElement || document.msFullscreenElement);
+    return (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 }
 
 function requestFullScreen(vrDisplay, success) {
@@ -2834,8 +2774,7 @@ function requestFullScreen(vrDisplay, success) {
             document.documentElement.requestFullscreen({vrDisplay: vrDisplay});
         }
         else {
-            document.documentElement.requestFullscreen(
-                    Element.ALLOW_KEYBOARD_INPUT);
+            document.documentElement.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         }
         var interval = setInterval(function () {
             if (isFullScreenMode()) {
@@ -2899,21 +2838,13 @@ function addFullScreenShim() {
     });
 }
 
-var exitPointerLock = (document.exitPointerLock ||
-        document.webkitExitPointerLock || document.mozExitPointerLock ||
-        function () {
-        }).bind(document);
+var exitPointerLock = (document.exitPointerLock || document.webkitExitPointerLock || document.mozExitPointerLock || function () {
+}).bind(document);
 function isPointerLocked() {
-    return !!(document.pointerLockElement ||
-            document.webkitPointerLockElement ||
-            document.mozPointerLockElement);
+    return !!(document.pointerLockElement || document.webkitPointerLockElement || document.mozPointerLockElement);
 }
-var requestPointerLock =
-        (document.documentElement.requestPointerLock ||
-                document.documentElement.webkitRequestPointerLock ||
-                document.documentElement.mozRequestPointerLock ||
-                function () {
-                }).bind(document.documentElement);;/* 
+var requestPointerLock = (document.documentElement.requestPointerLock || document.documentElement.webkitRequestPointerLock || document.documentElement.mozRequestPointerLock || function () {
+}).bind(document.documentElement);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2997,13 +2928,13 @@ OperatingSystems.OSX = (function () {
             prim.scrollIntoView(prim.frontCursor);
         },
         META_DOWNARROW: function (prim, lines) {
-            if (prim.scrollTop < lines.length) {
-                ++prim.scrollTop;
+            if (prim.scroll.y < lines.length) {
+                ++prim.scroll.y;
             }
         },
         META_UPARROW: function (prim, lines) {
-            if (prim.scrollTop > 0) {
-                --prim.scrollTop;
+            if (prim.scroll.y > 0) {
+                --prim.scroll.y;
             }
         }
     };
@@ -3052,14 +2983,14 @@ OperatingSystems.WINDOWS = (function () {
             prim.scrollIntoView(prim.frontCursor);
         },
         CTRL_DOWNARROW: function (prim, lines) {
-            if (prim.scrollTop < lines.length) {
-                ++prim.scrollTop;
+            if (prim.scroll.y < lines.length) {
+                ++prim.scroll.y;
             }
             prim.forceUpdate();
         },
         CTRL_UPARROW: function (prim, lines) {
-            if (prim.scrollTop > 0) {
-                --prim.scrollTop;
+            if (prim.scroll.y > 0) {
+                --prim.scroll.y;
             }
             prim.forceUpdate();
         }
@@ -3093,51 +3024,40 @@ Renderers.Canvas = (function () {
     "use strict";
     function CanvasRenderer(canvasElementOrID, options) {
         var self = this,
-                canvas = cascadeElement(canvasElementOrID, "canvas",
-                HTMLCanvasElement),
-                bgCanvas = cascadeElement(canvas.id + "-back", "canvas",
-                HTMLCanvasElement),
-                fgCanvas = cascadeElement(canvas.id + "-front", "canvas",
-                HTMLCanvasElement),
-                trimCanvas = cascadeElement(canvas.id + "-trim", "canvas",
-                HTMLCanvasElement),
+                canvas = cascadeElement(canvasElementOrID, "canvas", HTMLCanvasElement),
+                bgCanvas = cascadeElement(canvas.id + "-back", "canvas", HTMLCanvasElement),
+                fgCanvas = cascadeElement(canvas.id + "-front", "canvas", HTMLCanvasElement),
+                trimCanvas = cascadeElement(canvas.id + "-trim", "canvas", HTMLCanvasElement),
                 gfx = canvas.getContext("2d"),
                 fgfx = fgCanvas.getContext("2d"),
                 bgfx = bgCanvas.getContext("2d"),
                 tgfx = trimCanvas.getContext("2d"),
                 theme = null,
-                texture = null,
-                pickingTexture =
-                null,
-                pickingPixelBuffer =
-                null;
+                texture = null, pickingTexture = null, pickingPixelBuffer = null;
 
-        this.characterWidth = 0;
-        this.characterHeight = 0;
-
+        this.character = new Size();
         this.id = canvas.id;
 
         this.setTheme = function (t) {
             theme = t;
         };
 
-        this.pixel2cell = function (x, y, scrollLeft, scrollTop, gridBounds) {
+        this.pixel2cell = function (point, scroll, gridBounds) {
             var r = this.getPixelRatio();
-            x = Math.floor(x * r / this.characterWidth) + scrollLeft -
-                    gridBounds.x;
-            y = Math.floor((y * r / this.characterHeight) - 0.25) + scrollTop;
-            return {x: x, y: y};
+            point.set(
+                    Math.floor(point.x * r / this.character.width) + scroll.x - gridBounds.x,
+                    Math.floor((point.y * r / this.character.height) - 0.25) + scroll.y);
         };
 
         this.resize = function () {
             var r = this.getPixelRatio(),
-                    oldCharacterWidth = this.characterWidth,
-                    oldCharacterHeight = this.characterHeight,
+                    oldCharacterWidth = this.character.width,
+                    oldCharacterHeight = this.character.height,
                     oldWidth = canvas.width,
                     oldHeight = canvas.height,
                     oldFont = gfx.font;
 
-            this.characterHeight = theme.fontSize * r;
+            this.character.height = theme.fontSize * r;
             bgCanvas.width =
                     fgCanvas.width =
                     trimCanvas.width =
@@ -3147,15 +3067,13 @@ Renderers.Canvas = (function () {
                     trimCanvas.height =
                     canvas.height =
                     canvas.clientHeight * r;
-            gfx.font = this.characterHeight + "px " + theme.fontFamily;
+            gfx.font = this.character.height + "px " + theme.fontFamily;
             // measure 100 letter M's, then divide by 100, to get the width of an M
             // to two decimal places on systems that return integer values from
             // measureText.
-            this.characterWidth = gfx.measureText(
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width /
-                    100;
-            var changed = oldCharacterWidth !== this.characterWidth ||
-                    oldCharacterHeight !== this.characterHeight ||
+            this.character.width = gfx.measureText("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width / 100;
+            var changed = oldCharacterWidth !== this.character.width ||
+                    oldCharacterHeight !== this.character.height ||
                     oldWidth !== canvas.width ||
                     oldHeight !== canvas.height ||
                     oldFont !== gfx.font;
@@ -3179,20 +3097,18 @@ Renderers.Canvas = (function () {
         function fillRect(gfx, fill, x, y, w, h) {
             gfx.fillStyle = fill;
             gfx.fillRect(
-                    x * self.characterWidth,
-                    y * self.characterHeight,
-                    w * self.characterWidth + 1,
-                    h * self.characterHeight + 1);
+                    x * self.character.width,
+                    y * self.character.height,
+                    w * self.character.width + 1,
+                    h * self.character.height + 1);
         }
 
-        function renderCanvasBackground(tokenRows, frontCursor, backCursor,
-                gridBounds, scrollLeft, scrollTop, focused) {
+        function renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused) {
             var minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor),
                     tokenFront = new Cursor(),
                     tokenBack = new Cursor(),
-                    clearFunc = theme.regular.backColor ? "fillRect" :
-                    "clearRect";
+                    clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
             if (theme.regular.backColor) {
                 bgfx.fillStyle = theme.regular.backColor;
@@ -3200,26 +3116,19 @@ Renderers.Canvas = (function () {
 
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
-            bgfx.translate((gridBounds.x - scrollLeft) * self.characterWidth,
-                    -scrollTop * self.characterHeight);
-            for (var y = 0,
-                    lastLine =
-                    -1;
-                    y <
-                    tokenRows.length;
-                    ++y) {
+            bgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
+            
+
+            // draw the current row highlighter
+            if (focused) {
+                fillRect(bgfx, theme.regular.currentRowBackColor || Themes.DEFAULT.regular.currentRowBackColor,
+                        0, minCursor.y + 0.2,
+                        gridBounds.width, maxCursor.y - minCursor.y + 1);
+            }
+                
+            for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
-                // be able to draw brand-new rows that don't have any tokens yet
-                var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
-
-                // draw the current row highlighter
-                if (focused && currentLine === backCursor.y) {
-                    fillRect(bgfx, theme.regular.currentRowBackColor ||
-                            Themes.DEFAULT.regular.currentRowBackColor,
-                            0, (y + 0.2),
-                            gridBounds.width, 1);
-                }
 
                 for (var i = 0; i < row.length; ++i) {
                     var t = row[i];
@@ -3228,19 +3137,14 @@ Renderers.Canvas = (function () {
 
                     // skip drawing tokens that aren't in view
                     if (scrollTop <= y && y < scrollTop + gridBounds.height &&
-                            scrollLeft <= tokenBack.x && tokenFront.x <
-                            scrollLeft + gridBounds.width) {
+                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridBounds.width) {
                         // draw the selection box
-                        var inSelection = minCursor.i <= tokenBack.i &&
-                                tokenFront.i < maxCursor.i;
+                        var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
                         if (inSelection) {
-                            var selectionFront = Cursor.max(minCursor,
-                                    tokenFront);
-                            var selectionBack = Cursor.min(maxCursor,
-                                    tokenBack);
+                            var selectionFront = Cursor.max(minCursor, tokenFront);
+                            var selectionBack = Cursor.min(maxCursor, tokenBack);
                             var cw = selectionBack.i - selectionFront.i;
-                            fillRect(bgfx, theme.regular.selectedBackColor ||
-                                    Themes.DEFAULT.regular.selectedBackColor,
+                            fillRect(bgfx, theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
                                     selectionFront.x, selectionFront.y + 0.2,
                                     cw, 1);
                         }
@@ -3259,32 +3163,30 @@ Renderers.Canvas = (function () {
                 bgfx.beginPath();
                 bgfx.strokeStyle = theme.cursorColor || "black";
                 bgfx.moveTo(
-                        minCursor.x * self.characterWidth,
-                        minCursor.y * self.characterHeight);
+                        minCursor.x * self.character.width,
+                        minCursor.y * self.character.height);
                 bgfx.lineTo(
-                        minCursor.x * self.characterWidth,
-                        (minCursor.y + 1.25) * self.characterHeight);
+                        minCursor.x * self.character.width,
+                        (minCursor.y + 1.25) * self.character.height);
                 bgfx.moveTo(
-                        maxCursor.x * self.characterWidth + 1,
-                        maxCursor.y * self.characterHeight);
+                        maxCursor.x * self.character.width + 1,
+                        maxCursor.y * self.character.height);
                 bgfx.lineTo(
-                        maxCursor.x * self.characterWidth + 1,
-                        (maxCursor.y + 1.25) * self.characterHeight);
+                        maxCursor.x * self.character.width + 1,
+                        (maxCursor.y + 1.25) * self.character.height);
                 bgfx.stroke();
             }
             bgfx.restore();
         }
 
-        function renderCanvasForeground(tokenRows, gridBounds, scrollLeft,
-                scrollTop) {
+        function renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop) {
             var tokenFront = new Cursor(),
                     tokenBack = new Cursor(),
                     maxLineWidth = 0;
 
             fgfx.clearRect(0, 0, canvas.width, canvas.height);
             fgfx.save();
-            fgfx.translate((gridBounds.x - scrollLeft) * self.characterWidth,
-                    -scrollTop * self.characterHeight);
+            fgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
             for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
@@ -3295,24 +3197,19 @@ Renderers.Canvas = (function () {
 
                     // skip drawing tokens that aren't in view
                     if (scrollTop <= y && y < scrollTop + gridBounds.height &&
-                            scrollLeft <= tokenBack.x && tokenFront.x <
-                            scrollLeft + gridBounds.width) {
+                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridBounds.width) {
 
                         // draw the text
                         var style = theme[t.type] || {};
-                        var font = (style.fontWeight ||
-                                theme.regular.fontWeight || "") +
-                                " " + (style.fontStyle ||
-                                        theme.regular.fontStyle || "") +
-                                " " + self.characterHeight + "px " +
-                                theme.fontFamily;
+                        var font = (style.fontWeight || theme.regular.fontWeight || "") +
+                                " " + (style.fontStyle || theme.regular.fontStyle || "") +
+                                " " + self.character.height + "px " + theme.fontFamily;
                         fgfx.font = font.trim();
-                        fgfx.fillStyle = style.foreColor ||
-                                theme.regular.foreColor;
+                        fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
                         fgfx.fillText(
                                 t.value,
-                                tokenFront.x * self.characterWidth,
-                                (y + 1) * self.characterHeight);
+                                tokenFront.x * self.character.width,
+                                (y + 1) * self.character.height);
                     }
 
                     tokenFront.copy(tokenBack);
@@ -3327,46 +3224,32 @@ Renderers.Canvas = (function () {
             return maxLineWidth;
         }
 
-        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop,
-                showLineNumbers, showScrollBars, lineCountWidth,
-                leftGutterWidth, topGutterHeight, rightGutterWidth,
-                bottomGutterHeight, maxLineWidth) {
+        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth) {
             tgfx.clearRect(0, 0, canvas.width, canvas.height);
             tgfx.save();
-            tgfx.translate(0, -scrollTop * self.characterHeight);
+            tgfx.translate(0, -scrollTop * self.character.height);
             if (showLineNumbers) {
-                for (var y = scrollTop,
-                        lastLine =
-                        -1;
-                        y <
-                        scrollTop +
-                        gridBounds.height &&
-                        y <
-                        tokenRows.length;
-                        ++y) {
+                for (var y = scrollTop, lastLine = -1; y < scrollTop + gridBounds.height && y < tokenRows.length; ++y) {
                     // draw the tokens on this row
                     var row = tokenRows[y];
                     // be able to draw brand-new rows that don't have any tokens yet
-                    var currentLine = row.length > 0 ? row[0].line : lastLine +
-                            1;
+                    var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
                     // draw the left gutter
                     var lineNumber = currentLine.toString();
                     while (lineNumber.length < lineCountWidth) {
                         lineNumber = " " + lineNumber;
                     }
                     fillRect(tgfx,
-                            theme.regular.selectedBackColor ||
-                            Themes.DEFAULT.regular.selectedBackColor,
+                            theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor,
                             0, y + 0.2,
-                            (lineNumber.length + leftGutterWidth), 1);
-                    tgfx.font = "bold " + self.characterHeight + "px " +
-                            theme.fontFamily;
+                            gridBounds.x, 1);
+                    tgfx.font = "bold " + self.character.height + "px " + theme.fontFamily;
 
                     if (currentLine > lastLine) {
                         tgfx.fillStyle = theme.regular.foreColor;
                         tgfx.fillText(
                                 lineNumber,
-                                0, (y + 1) * self.characterHeight);
+                                0, (y + 1) * self.character.height);
                     }
                     lastLine = currentLine;
                 }
@@ -3376,34 +3259,27 @@ Renderers.Canvas = (function () {
 
             // draw the scrollbars
             if (showScrollBars) {
-                var drawWidth = gridBounds.width * self.characterWidth;
-                var drawHeight = gridBounds.height * self.characterHeight;
-                var scrollX = (scrollLeft * drawWidth) / maxLineWidth +
-                        gridBounds.x * self.characterWidth;
-                var scrollY = (scrollTop * drawHeight) / tokenRows.length +
-                        gridBounds.y * self.characterHeight;
-                var scrollBarWidth = gridBounds.width * drawWidth /
-                        maxLineWidth - (gridBounds.x + rightGutterWidth) *
-                        self.characterWidth;
-                var scrollBarHeight = gridBounds.height * drawHeight /
-                        tokenRows.length - (gridBounds.y +
-                        bottomGutterHeight) * self.characterHeight;
+                var drawWidth = gridBounds.width * self.character.width;
+                var drawHeight = gridBounds.height * self.character.height;
+                var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridBounds.x * self.character.width;
+                var scrollY = (scrollTop * drawHeight) / tokenRows.length + gridBounds.y * self.character.height;
+                var scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth);
+                var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
 
-                tgfx.fillStyle = theme.regular.selectedBackColor ||
-                        Themes.DEFAULT.regular.selectedBackColor;
+                tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
                 tgfx.fillRect(
                         scrollX,
-                        (gridBounds.height + 0.25) * self.characterHeight,
-                        Math.max(self.characterWidth, scrollBarWidth),
-                        self.characterHeight);
+                        (gridBounds.height + 0.25) * self.character.height,
+                        Math.max(self.character.width, scrollBarWidth),
+                        self.character.height);
 
                 //vertical
                 tgfx.fillRect(
-                        canvas.width - self.characterWidth,
+                        canvas.width - self.character.width,
                         scrollY,
-                        self.characterWidth,
-                        Math.max(self.characterHeight, scrollBarHeight));
+                        self.character.width,
+                        Math.max(self.character.height, scrollBarHeight));
             }
         }
 
@@ -3412,19 +3288,12 @@ Renderers.Canvas = (function () {
                 gridBounds,
                 scrollLeft, scrollTop,
                 focused, showLineNumbers, showScrollBars,
-                lineCountWidth,
-                leftGutterWidth, topGutterHeight, rightGutterWidth,
-                bottomGutterHeight) {
+                lineCountWidth) {
             var maxLineWidth = 0;
 
-            renderCanvasBackground(tokenRows, frontCursor, backCursor,
-                    gridBounds, scrollLeft, scrollTop, focused);
-            maxLineWidth = renderCanvasForeground(tokenRows, gridBounds,
-                    scrollLeft, scrollTop);
-            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop,
-                    showLineNumbers, showScrollBars, lineCountWidth,
-                    leftGutterWidth, topGutterHeight, rightGutterWidth,
-                    bottomGutterHeight, maxLineWidth);
+            renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused);
+            maxLineWidth = renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop);
+            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth);
 
             gfx.clearRect(0, 0, canvas.width, canvas.height);
             gfx.drawImage(bgCanvas, 0, 0);
@@ -3462,26 +3331,14 @@ Renderers.Canvas = (function () {
                 var gfx = c.getContext("2d"),
                         pixels = gfx.createImageData(w, h);
 
-                for (var i = 0,
-                        p =
-                        0,
-                        l =
-                        w *
-                        h;
-                        i <
-                        l;
-                        ++i, p +=
-                        4) {
+                for (var i = 0, p = 0, l = w * h; i < l; ++i, p += 4) {
                     pixels.data[p] = (0xff0000 & i) >> 16;
                     pixels.data[p + 1] = (0x00ff00 & i) >> 8;
                     pixels.data[p + 2] = (0x0000ff & i) >> 0;
                     pixels.data[p + 3] = 0xff;
                 }
                 gfx.putImageData(pixels, 0, 0);
-                pickingTexture = new THREE.Texture(c, THREE.UVMapping,
-                        THREE.RepeatWrapping, THREE.RepeatWrapping,
-                        THREE.NearestFilter, THREE.NearestMipMapNearestFilter,
-                        THREE.RGBAFormat, THREE.UnsignedByteType, 0);
+                pickingTexture = new THREE.Texture(c, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.RGBAFormat, THREE.UnsignedByteType, 0);
                 pickingTexture.needsUpdate = true;
             }
             return pickingTexture;
@@ -3496,8 +3353,7 @@ Renderers.Canvas = (function () {
                 pickingPixelBuffer = new Uint8Array(4);
             }
 
-            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE,
-                    pickingPixelBuffer);
+            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pickingPixelBuffer);
 
             var i = (pickingPixelBuffer[0] << 16) |
                     (pickingPixelBuffer[1] << 8) |
@@ -3506,16 +3362,14 @@ Renderers.Canvas = (function () {
         };
 
 
-        if (!(canvasElementOrID instanceof HTMLCanvasElement) &&
-                options.width && options.height) {
+        if (!(canvasElementOrID instanceof HTMLCanvasElement) && options.width && options.height) {
             canvas.style.position = "absolute";
             canvas.style.width = options.width;
             canvas.style.height = options.height;
         }
 
         if (!canvas.parentElement) {
-            document.body.appendChild(makeHidingContainer(
-                    "primrose-container-" + canvas.id, canvas));
+            document.body.appendChild(makeHidingContainer("primrose-container-" + canvas.id, canvas));
         }
     }
 
@@ -3626,4 +3480,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.4.0.0";
+};Primrose.VERSION = "v0.5.0.0";
