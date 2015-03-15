@@ -66,6 +66,9 @@ function Grammar(name, grammar) {
                         // insert the new token into the token list
                         var midx = res[res.length - 1];
                         var start = res.index;
+                        for(var k = 1; k < res.length - 1; ++k){
+                            start += res[k].length;
+                        }
                         var end = start + midx.length;
                         if(start === 0){
                             // the rule matches the start of the token

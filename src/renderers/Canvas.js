@@ -219,7 +219,7 @@ Renderers.Canvas = (function () {
             return maxLineWidth;
         }
 
-        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth) {
+        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth) {
             tgfx.clearRect(0, 0, canvas.width, canvas.height);
             tgfx.save();
             tgfx.translate(0, -scrollTop * self.character.height);
@@ -263,11 +263,13 @@ Renderers.Canvas = (function () {
 
                 tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
-                tgfx.fillRect(
+                if(!wordWrap){
+                    tgfx.fillRect(
                         scrollX,
                         (gridBounds.height + 0.25) * self.character.height,
                         Math.max(self.character.width, scrollBarWidth),
                         self.character.height);
+                }
 
                 //vertical
                 tgfx.fillRect(
@@ -282,13 +284,13 @@ Renderers.Canvas = (function () {
                 frontCursor, backCursor,
                 gridBounds,
                 scrollLeft, scrollTop,
-                focused, showLineNumbers, showScrollBars,
+                focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth) {
             var maxLineWidth = 0;
 
             renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused);
             maxLineWidth = renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop);
-            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth);
+            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth);
 
             gfx.clearRect(0, 0, canvas.width, canvas.height);
             gfx.drawImage(bgCanvas, 0, 0);

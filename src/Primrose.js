@@ -214,7 +214,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
 
         if (showScrollBars) {
-            bottomRightGutter.set(1, 1);
+            bottomRightGutter.set(1, wordWrap ? 0 : 1);
         }
         else {
             bottomRightGutter.set(0, 0);
@@ -755,7 +755,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
                     this.frontCursor, this.backCursor,
                     gridBounds,
                     this.scroll.x, this.scroll.y,
-                    focused, showLineNumbers, showScrollBars,
+                    focused, showLineNumbers, showScrollBars, wordWrap,
                     lineCountWidth);
 
             changed = false;

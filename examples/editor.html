@@ -17,11 +17,14 @@
         <script type="text/javascript" src="../src/command_packs/Default.js"></script>
         <script type="text/javascript" src="../src/grammars/JavaScript.js"></script>
         <script type="text/javascript" src="../src/grammars/PlainText.js"></script>
+        <script type="text/javascript" src="../src/grammars/TestResults.js"></script>
         <script type="text/javascript" src="../src/operating_systems/OSX.js"></script>
         <script type="text/javascript" src="../src/operating_systems/Windows.js"></script>
         <script type="text/javascript" src="../src/renderers/Canvas.js"></script>
         <script type="text/javascript" src="../src/themes/Dark.js"></script>
         <script type="text/javascript" src="../src/themes/Default.js"></script>
+        <script type="text/javascript" src="../test/testing.js"></script>
+        <script type="text/javascript" src="../test/Grammar.js"></script>
         <style type="text/css">
             html, body{
                 position:absolute;
@@ -44,7 +47,8 @@
                 <div><input type="checkbox" id="toggleScrollBars"><label for="toggleScrollBars">Scroll bars</label></div>
             </div>
             <div style="position:absolute;top:2em;bottom:0;width:100%;">
-                <canvas id="output" style="position:absolute;height:100%;width:100%;"></canvas>
+                <canvas id="output" style="position:absolute;height:100%;width:50%;"></canvas>
+                <canvas id="testResults" style="position:absolute;left:50%;height:100%;width:50%;"></canvas>
             </div>
         </div>
         
@@ -136,6 +140,12 @@ function demo() {
                         file: demo.toString(),
                         keyEventSource: window,
                         pointerEventSource: output
+                    });
+                    
+                    tests = new Primrose(testResults, Renderers.Canvas, {
+                        file: stringTest(Grammar),
+                        tokenizer: Grammar.TestResults,
+                        theme: Themes.Dark
                     });
                
                     window.addEventListener("wheel", prim.readWheel.bind(prim));  
