@@ -15,11 +15,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Rule(name, test) {
+var Rule = (function () {
     "use strict";
-    this.name = name;
-    this.test = test;
-}
+
+    function Rule(name, test) {
+        this.name = name;
+        this.test = test;
+    }
+
+    Rule.prototype.carveOutMatchedToken = function (tokens, j) {
+        var token = tokens[j];
+        if (token.type === "regular") {
+            var res = this.test.exec(token.value);
+            if (res) {
+                // Only use the last group that matches the regex, to allow for more 
+                // complex regexes that can match in special contexts, but not make 
+                // the context part of the token.
+                var midx = res[res.length - 1];
+                var start = res.index;
+                // We skip the first record, because it's not a captured group, it's
+                // just the entire matched text.
+                for (var k = 1; k < res.length - 1; ++k) {
+                    start += res[k].length;
+                }
+
+                var end = start + midx.length;
+                if (start === 0) {
+                    // the rule matches the start of the token
+                    token.type = this.name;
+                    if (end < token.value.length) {
+                        // but not the end
+                        var next = token.splitAt(end);
+                        next.type = "regular";
+                        tokens.splice(j + 1, 0, next);
+                    }
+                }
+                else {
+                    // the rule matches from the middle of the token
+                    var mid = token.splitAt(start);
+                    if (midx.length < mid.value.length) {
+                        // but not the end
+                        var right = mid.splitAt(midx.length);
+                        tokens.splice(j + 1, 0, right);
+                    }
+                    mid.type = this.name;
+                    tokens.splice(j + 1, 0, mid);
+                }
+            }
+        }
+    };
+
+    return Rule;
+})();
 
 var Token = (function () {
     "use strict";
@@ -51,54 +98,9 @@ function Grammar(name, grammar) {
         return new Rule(rule[0], rule[1]);
     });
 
-    this.tokenize = function (text) {
-        // all text starts off as regular text, then gets cut up into tokens of
-        // more specific type
-        var tokens = [new Token(text, "regular", 0)];
-        for (var i = 0; i < this.grammar.length; ++i) {
-            var rule = this.grammar[i];
-            for (var j = 0; j < tokens.length; ++j) {
-                var left = tokens[j];
-
-                if (left.type === "regular") {
-                    var res = rule.test.exec(left.value);
-                    if (res) {
-                        // insert the new token into the token list
-                        var midx = res[res.length - 1];
-                        var start = res.index;
-                        for(var k = 1; k < res.length - 1; ++k){
-                            start += res[k].length;
-                        }
-                        var end = start + midx.length;
-                        if(start === 0){
-                            // the rule matches the start of the token
-                            left.type = rule.name;
-                            if(end < left.value.length){
-                                // but not the end
-                                var next = left.splitAt(end);
-                                next.type = "regular";
-                                tokens.splice(j + 1, 0, next);
-                            }
-                        }
-                        else{
-                            // the rule matches from the middle of the token
-                            var mid = left.splitAt(start);
-                            if(midx.length < mid.value.length) {
-                                // but not the end
-                                var right = mid.splitAt(midx.length);
-                                tokens.splice(j + 1, 0, right);
-                            }
-                            mid.type = rule.name;
-                            tokens.splice(j + 1, 0, mid);
-                        }
-                    }
-                }
-            }
-        }
-
-        // normalize tokens
+    function crudeParsing(tokens) {
         var blockOn = false, line = 0;
-        for (i = 0; i < tokens.length; ++i) {
+        for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
             t.line = line;
             if (t.type === "newlines") {
@@ -118,6 +120,20 @@ function Grammar(name, grammar) {
                 t.type = "comments";
             }
         }
+    }
+
+    this.tokenize = function (text) {
+        // all text starts off as regular text, then gets cut up into tokens of
+        // more specific type
+        var tokens = [new Token(text, "regular", 0)];
+        for (var i = 0; i < this.grammar.length; ++i) {
+            var rule = this.grammar[i];
+            for (var j = 0; j < tokens.length; ++j) {
+                rule.carveOutMatchedToken(tokens, j);
+            }
+        }
+
+        crudeParsing(tokens);
         return tokens;
     };
 }
