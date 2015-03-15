@@ -27,6 +27,13 @@ var Point = (function () {
         this.y = y;
     };
 
+    Point.prototype.copy = function (p) {
+        if (p) {
+            this.x = p.x;
+            this.y = p.y;
+        }
+    };
+
     Point.prototype.clone = function () {
         return new Point(this.x, this.y);
     };
@@ -47,6 +54,13 @@ var Size = (function () {
     Size.prototype.set = function (width, height) {
         this.width = width;
         this.height = height;
+    };
+
+    Size.prototype.copy = function (s) {
+        if (s) {
+            this.width = s.width;
+            this.height = s.height;
+        }
     };
 
     Size.prototype.clone = function () {
@@ -121,6 +135,13 @@ var Rectangle = (function () {
     Rectangle.prototype.set = function (x, y, width, height) {
         this.point.set(x, y);
         this.size.set(width, height);
+    };
+
+    Rectangle.prototype.copy = function (r) {
+        if (r) {
+            this.point.copy(r.point);
+            this.size.copy(r.size);
+        }
     };
 
     Rectangle.prototype.clone = function () {
