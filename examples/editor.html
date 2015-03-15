@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
         <title>Primrose: Canvas-based text editor</title>
+        <script type="text/javascript" src="rosetta_24_game.js"></script>
         <script type="text/javascript" src="../src/core.js"></script>
         <script type="text/javascript" src="../src/Cursor.js"></script>
         <script type="text/javascript" src="../src/Dimensions.js"></script>
@@ -51,98 +52,28 @@
                 <canvas id="testResultsView" style="position:absolute;left:50%;height:100%;width:50%;"></canvas>
             </div>
         </div>
-        
+
         <script type="text/javascript">
             var prim, ctrls;
 
-function demo() {
-
-//123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789_123456789
-
-    //////////////////////////////////////////////////////////////////
-    // copied from: http://rosettacode.org/wiki/24_game#JavaScript  //
-    //////////////////////////////////////////////////////////////////
-
-    function twentyfour(numbers, input) {
-        var invalidChars = /[^\d\+\*\/\s-\(\)]/;
-
-        var validNums = function (str) {
-            // Create a duplicate of our input numbers, so that
-            // both lists will be sorted.
-            var mnums = numbers.slice();
-            mnums.sort();
-
-            // Sort after mapping to numbers, to make comparisons valid.
-            return str.replace(/[^\d\s]/g, " ")
-                    .trim()
-                    .split(/\s+/)
-                    .map(function (n) {
-                        return parseInt(n, 10);
-                    })
-                    .sort()
-                    .every(function (v, i) {
-                        return v === mnums[i];
-                    });
-        };
-
-        var validEval = function (input) {
-            try {
-                return eval(input);
-            } catch (e) {
-                return {error: e.toString()};
-            }
-        };
-
-        if (input.trim() === "")
-            return "You must enter a value.";
-        if (input.match(invalidChars))
-            return "Invalid chars used, try again. Use only:\n + - * / ( )";
-        if (!validNums(input))
-            return "Wrong numbers used, try again.";
-        var calc = validEval(input);
-        if (typeof calc !== 'number')
-            return "That is not a valid input; please try again.";
-        if (calc !== 24)
-            return "Wrong answer: " + String(calc) + "; please try again.";
-        return input + " == 24.  Congratulations!";
-    };
-
-// I/O below.
-
-    while (true) {
-        var numbers = [1, 2, 3, 4].map(function () {
-            return Math.floor(Math.random() * 8 + 1);
-        });
-
-        var input = prompt(
-                "Your numbers are:\n" + numbers.join(" ") +
-                "\nEnter expression. (use only + - * / and parens).\n", +"'x' to exit.", "");
-
-        if (input === 'x') {
-            break;
-        }
-        alert(twentyfour(numbers, input));
-    }
-}
-                    
-            function onToggle(e, f){
-                e.addEventListener("change", function(){
+            function onToggle(e, f) {
+                e.addEventListener("change", function () {
                     prim["set" + f](e.checked);
                 });
                 e.checked = prim["get" + f]();
             }
-                    
+
             window.addEventListener("load", function () {
                 ctrls = findEverything();
 
-                with(ctrls){
+                with (ctrls) {
                     prim = new Primrose(output, Renderers.Canvas, {
-                        file: demo.toString(),
+                        file: rosetta_24_game.toString(),
                         keyEventSource: window,
                         pointerEventSource: output,
                         wheelEventSource: output
                     });
-                    
+
                     var results = stringTest(Grammar);
                     results = results + results;
                     results = results + results;
@@ -153,10 +84,10 @@ function demo() {
                         tokenizer: Grammar.TestResults,
                         theme: Themes.Dark
                     });
-               
+
                     prim.placeSurrogateUnder(prim.getRenderer().getCanvas());
                     prim.focus();
-                    
+
                     controls.appendChild(prim.operatingSystemSelect);
                     controls.appendChild(prim.keyboardSelect);
                     controls.appendChild(prim.commandSystemSelect);
