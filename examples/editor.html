@@ -48,7 +48,7 @@
             </div>
             <div style="position:absolute;top:2em;bottom:0;width:100%;">
                 <canvas id="output" style="position:absolute;height:100%;width:50%;"></canvas>
-                <canvas id="testResults" style="position:absolute;left:50%;height:100%;width:50%;"></canvas>
+                <canvas id="testResultsView" style="position:absolute;left:50%;height:100%;width:50%;"></canvas>
             </div>
         </div>
         
@@ -139,18 +139,23 @@ function demo() {
                     prim = new Primrose(output, Renderers.Canvas, {
                         file: demo.toString(),
                         keyEventSource: window,
-                        pointerEventSource: output
+                        pointerEventSource: output,
+                        wheelEventSource: output
                     });
                     
-                    tests = new Primrose(testResults, Renderers.Canvas, {
-                        file: stringTest(Grammar),
+                    var results = stringTest(Grammar);
+                    results = results + results;
+                    results = results + results;
+                    results = results + results;
+                    testResults = new Primrose(testResultsView, Renderers.Canvas, {
+                        file: results,
+                        wheelEventSource: testResultsView,
                         tokenizer: Grammar.TestResults,
                         theme: Themes.Dark
                     });
                
-                    window.addEventListener("wheel", prim.readWheel.bind(prim));  
-                    prim.placeSurrogateUnder(prim.getRenderer().getCanvas());                       
-                    prim.focus();                    
+                    prim.placeSurrogateUnder(prim.getRenderer().getCanvas());
+                    prim.focus();
                     
                     controls.appendChild(prim.operatingSystemSelect);
                     controls.appendChild(prim.keyboardSelect);

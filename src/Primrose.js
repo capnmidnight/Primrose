@@ -578,12 +578,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.readWheel = function (evt) {
-        if (focused) {
-            this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
-            clampScroll();
-            evt.preventDefault();
-            this.forceUpdate();
-        }
+        this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
+        clampScroll();
+        evt.preventDefault();
+        this.forceUpdate();
     };
 
     this.startPicking = function (gl, x, y) {
@@ -615,7 +613,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         surrogate.focus();
     };
 
-    this.bindEvents = function (keyEventSource, pointerEventSource) {
+    this.bindEvents = function (keyEventSource, pointerEventSource, wheelEventSource) {
         if (keyEventSource) {
             keyEventSource.addEventListener("keydown", this.editText.bind(
                     this));
@@ -636,6 +634,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
                     this, pointerEventSource));
             pointerEventSource.addEventListener("touchend", touchEnd.bind(
                     this));
+        }
+        
+        if(wheelEventSource){
+            wheelEventSource.addEventListener("wheel", this.readWheel.bind(this));
         }
     };
 
@@ -791,7 +793,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setOperatingSystem(options.os);
     this.setCommandSystem(options.commands);
     this.setText(options.file);
-    this.bindEvents(options.keyEventSource, options.pointerEventSource);
+    this.bindEvents(options.keyEventSource, options.pointerEventSource, options.wheelEventSource);
 
     this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
             renderer.id, Themes, theme.name, self, "setTheme", "theme");
