@@ -799,7 +799,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.id, Themes, theme.name, self, "setTheme", "theme");
     this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
             renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
-            "language syntax");
+            "language syntax", Grammar);
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
             renderer.id, CodePages, codePage.name, self, "setCodePage",
             "localization");

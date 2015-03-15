@@ -511,19 +511,22 @@ function reloadPage() {
     document.location = document.location.href;
 }
 
-function makeSelectorFromObj(id, obj, def, target, prop, lbl) {
+function makeSelectorFromObj(id, obj, def, target, prop, lbl, typeFilter) {
     var elem = cascadeElement(id, "select", HTMLSelectElement);
     var items = [];
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
-            var opt = document.createElement("option");
-            var val = obj[key].name || key;
-            opt.innerHTML = val;
-            items.push(obj[key]);
-            if (val === def) {
-                opt.selected = "selected";
+            var val = obj[key];
+            if (!typeFilter || val instanceof typeFilter){
+                val = val.name || key;
+                var opt = document.createElement("option");
+                opt.innerHTML = val;
+                items.push(obj[key]);
+                if (val === def) {
+                    opt.selected = "selected";
+                }
+                elem.appendChild(opt);
             }
-            elem.appendChild(opt);
         }
     }
 
@@ -541,12 +544,12 @@ function makeSelectorFromObj(id, obj, def, target, prop, lbl) {
 
     var container = cascadeElement("container -" + id, "div", HTMLDivElement);
     var label = cascadeElement("label-" + id, "span", HTMLSpanElement);
-    label.innerHTML = " - " + lbl;
+    label.innerHTML = lbl + ": ";
     label.for = elem;
     elem.title = lbl;
     elem.alt = lbl;
-    container.appendChild(elem);
     container.appendChild(label);
+    container.appendChild(elem);
     return container;
 }
 
