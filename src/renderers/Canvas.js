@@ -258,12 +258,11 @@ Renderers.Canvas = (function () {
                 var drawHeight = gridBounds.height * self.character.height;
                 var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridBounds.x * self.character.width;
                 var scrollY = (scrollTop * drawHeight) / tokenRows.length + gridBounds.y * self.character.height;
-                var scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth);
-                var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
 
                 tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
-                if(!wordWrap){
+                if(!wordWrap && maxLineWidth > gridBounds.width){
+                    var scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth);
                     tgfx.fillRect(
                         scrollX,
                         (gridBounds.height + 0.25) * self.character.height,
@@ -272,11 +271,14 @@ Renderers.Canvas = (function () {
                 }
 
                 //vertical
-                tgfx.fillRect(
-                        canvas.width - self.character.width,
-                        scrollY,
-                        self.character.width,
-                        Math.max(self.character.height, scrollBarHeight));
+                if(tokenRows.length > gridBounds.height){
+                    var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
+                    tgfx.fillRect(
+                            canvas.width - self.character.width,
+                            scrollY,
+                            self.character.width,
+                            Math.max(self.character.height, scrollBarHeight));
+                }
             }
         }
 

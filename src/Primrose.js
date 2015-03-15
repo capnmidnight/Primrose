@@ -86,8 +86,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.scroll.y = 0;
         }
         else
-            while (0 < self.scroll.y && 
-                self.scroll.y > scrollLines.length - gridBounds.height) {
+            while (0 < self.scroll.y &&
+                    self.scroll.y > scrollLines.length - gridBounds.height) {
                 --self.scroll.y;
             }
     }
@@ -220,13 +220,15 @@ function Primrose(renderToElementOrID, Renderer, options) {
             bottomRightGutter.set(0, 0);
         }
 
-        gridBounds.set(
-                topLeftGutter.width + lineCountWidth,
-                0,
-                Math.floor(self.getWidth() /
-                        renderer.character.width) - gridBounds.x - bottomRightGutter.width,
-                Math.floor(self.getHeight() /
-                        renderer.character.height) - bottomRightGutter.height);
+        var x = topLeftGutter.width + lineCountWidth,
+            y = 0,
+            w = Math.floor(self.getWidth() / renderer.character.width) -
+                x -
+                bottomRightGutter.width,
+            h = Math.floor(self.getHeight() / renderer.character.height) -
+                y -
+                bottomRightGutter.height;
+        gridBounds.set(x, y, w, h);
 
         // group the tokens into rows
         scrollLines = [""];
@@ -236,10 +238,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var t = tokenQueue[i].clone();
             var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
             var lb = t.type === "newlines" || wrap;
-            if(wrap) {
+            if (wrap) {
                 tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
             }
-            
+
             tokenRows[tokenRows.length - 1].push(t);
             scrollLines[scrollLines.length - 1] += t.value;
 
@@ -527,7 +529,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.scrollIntoView = function (currentCursor) {
         this.scroll.y += minDelta(currentCursor.y, this.scroll.y, this.scroll.y + gridBounds.height);
-        if(!wordWrap){
+        if (!wordWrap) {
             this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x + gridBounds.width);
         }
         clampScroll();
@@ -635,16 +637,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
             pointerEventSource.addEventListener("touchend", touchEnd.bind(
                     this));
         }
-        
-        if(wheelEventSource){
+
+        if (wheelEventSource) {
             wheelEventSource.addEventListener("wheel", this.readWheel.bind(this));
         }
     };
 
     this.overwriteText = function (str) {
-        str = str || "";        
+        str = str || "";
         str = str.replace(/\r\n/g, "\n");
-        
+
         if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
             // TODO: don't rejoin the string first.
             var minCursor = Cursor.min(this.frontCursor, this.backCursor),
@@ -816,7 +818,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", function(){
+    window.addEventListener("resize", function () {
         changed = renderer.resize();
         self.drawText();
     });
