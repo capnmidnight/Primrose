@@ -19,6 +19,22 @@
 
 // Pyschologist.js: so named because it keeps me from going crazy
 
+function copyObject(dest, source, depth){
+    depth = depth | 0;
+    for(var key in source){
+        if(source.hasOwnProperty(key)){
+            if(typeof(source[key]) !== "object"){
+                dest[key] = source[key];
+            }
+            else if(depth < 3){
+                if(!dest[key]){
+                    dest[key] = {};
+                }
+                copyObject(dest[key], source[key], depth + 1);
+            }
+        }
+    }
+}
 
 function makeURL(url, queryMap) {
     var output = [];
@@ -376,7 +392,7 @@ function fmt(template) {
                 }
                 else {
                     if (precision && precision.length > 0) {
-                        val = sigfig(val, precision.length);
+                        val = fmt.sigfig(val, precision.length);
                     }
                     else {
                         val = val.toString();
@@ -401,7 +417,7 @@ fmt.addMillis = function (val, txt) {
     });
 };
 
-function sigfig(x, y) {
+fmt.sigfig = function(x, y) {
     var p = Math.pow(10, y);
     var v = (Math.round(x * p) / p).toString();
     if (y > 0) {
@@ -414,7 +430,7 @@ function sigfig(x, y) {
             v += "0";
     }
     return v;
-}
+};
 
 var px = fmt.bind(this, "$1px");
 var pct = fmt.bind(this, "$1%");

@@ -85,11 +85,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
         if (self.scroll.y < 0) {
             self.scroll.y = 0;
         }
-        else
+        else {
             while (0 < self.scroll.y &&
                     self.scroll.y > scrollLines.length - gridBounds.height) {
                 --self.scroll.y;
             }
+        }
     }
 
     function readClipboard(evt) {
@@ -384,22 +385,20 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setCodePage = function (cp) {
         changed = true;
-        var key,
-                code,
-                lang = (navigator.languages && navigator.languages[0]) ||
-                navigator.language ||
-                navigator.userLanguage ||
-                navigator.browserLanguage;
-
-        if (!lang || lang === "en") {
-            lang = "en-US";
-        }
-
-        codePage = cp;
-
+        var key, code, char, name;
+        codePage = cp
         if (!codePage) {
-            for (key in CodePages) {
-                cp = CodePages[key];
+            var lang = (navigator.languages && navigator.languages[0]) ||
+                    navigator.language ||
+                    navigator.userLanguage ||
+                    navigator.browserLanguage;
+
+            if (!lang || lang === "en") {
+                lang = "en-US";
+            }
+
+            for (key in CodePage) {
+                cp = CodePage[key];
                 if (cp.language === lang) {
                     codePage = cp;
                     break;
@@ -407,7 +406,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             }
 
             if (!codePage) {
-                codePage = CodePages.EN_US;
+                codePage = CodePage.EN_US;
             }
         }
 
@@ -424,8 +423,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
                 for (code in codes) {
-                    var char,
-                            name;
                     if (code.indexOf("_") > -1) {
                         var parts = code.split(' '),
                                 browser = parts[0];
@@ -757,18 +754,22 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var lineCountWidth = performLayout();
-
-            renderer.render(
-                    tokenRows,
-                    this.frontCursor, this.backCursor,
-                    gridBounds,
-                    this.scroll.x, this.scroll.y,
-                    focused, showLineNumbers, showScrollBars, wordWrap,
-                    lineCountWidth);
-
-            changed = false;
+            this.forceDraw();
         }
+    };
+
+    this.forceDraw = function () {
+        var lineCountWidth = performLayout();
+
+        renderer.render(
+                tokenRows,
+                this.frontCursor, this.backCursor,
+                gridBounds,
+                this.scroll.x, this.scroll.y,
+                focused, showLineNumbers, showScrollBars, wordWrap,
+                lineCountWidth);
+
+        changed = false;
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -808,8 +809,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
             "language syntax", Grammar);
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
-            renderer.id, CodePages, codePage.name, self, "setCodePage",
-            "localization");
+            renderer.id, CodePage, codePage.name, self, "setCodePage",
+            "localization", CodePage);
     this.commandSystemSelect = makeSelectorFromObj(
             "primrose-command-system-selector-" + renderer.id, Commands,
             commandSystem.name, self, "setCommandSystem", "command system");

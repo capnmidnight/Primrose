@@ -458,7 +458,7 @@ function Grammar(name, grammar) {
 // eventually, this will have configurable values for different locales.
 
 
-var CodePages = {};
+var CodePage = {};
 var Themes = {};
 var Renderers = {};
 
@@ -976,8 +976,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
         codePage = cp;
 
         if (!codePage) {
-            for (key in CodePages) {
-                cp = CodePages[key];
+            for (key in CodePage) {
+                cp = CodePage[key];
                 if (cp.language === lang) {
                     codePage = cp;
                     break;
@@ -985,7 +985,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             }
 
             if (!codePage) {
-                codePage = CodePages.EN_US;
+                codePage = CodePage.EN_US;
             }
         }
 
@@ -1371,7 +1371,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
             "language syntax");
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
-            renderer.id, CodePages, codePage.name, self, "setCodePage",
+            renderer.id, CodePage, codePage.name, self, "setCodePage",
             "localization");
     this.commandSystemSelect = makeSelectorFromObj(
             "primrose-command-system-selector-" + renderer.id, Commands,
@@ -1411,7 +1411,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.DE_QWERTZ = (function () {
+CodePage.DE_QWERTZ = (function () {
     "use strict";
     return {
         name: "Deutsch: QWERTZ",
@@ -1591,7 +1591,7 @@ CodePages.DE_QWERTZ = (function () {
         }
     };
 })();
-Keys.addNumPad(CodePages.DE_QWERTZ);;/* 
+Keys.addNumPad(CodePage.DE_QWERTZ);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1608,7 +1608,7 @@ Keys.addNumPad(CodePages.DE_QWERTZ);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.EN_UKX = (function () {
+CodePage.EN_UKX = (function () {
     "use strict";
     return {
         name: "English: UK Extended",
@@ -1743,7 +1743,7 @@ CodePages.EN_UKX = (function () {
         }
     };
 })();
-Keys.addNumPad(CodePages.EN_UKX);;/* 
+Keys.addNumPad(CodePage.EN_UKX);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1760,7 +1760,7 @@ Keys.addNumPad(CodePages.EN_UKX);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.EN_US = (function () {
+CodePage.EN_US = (function () {
     "use strict";
     return {
         name: "English: USA",
@@ -1870,7 +1870,7 @@ CodePages.EN_US = (function () {
     };
 })();
 
-Keys.addNumPad(CodePages.EN_US);;/* 
+Keys.addNumPad(CodePage.EN_US);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1887,7 +1887,7 @@ Keys.addNumPad(CodePages.EN_US);;/*
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePages.FR_AZERTY = (function () {
+CodePage.FR_AZERTY = (function () {
     "use strict";
     return {
         name: "Français: AZERTY",
@@ -2049,7 +2049,7 @@ CodePages.FR_AZERTY = (function () {
         }
     };
 })();
-Keys.addNumPad(CodePages.FR_AZERTY);;/* 
+Keys.addNumPad(CodePage.FR_AZERTY);;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2534,7 +2534,7 @@ function fmt(template) {
                 }
                 else {
                     if (precision && precision.length > 0) {
-                        val = sigfig(val, precision.length);
+                        val = fmt.sigfig(val, precision.length);
                     }
                     else {
                         val = val.toString();
@@ -2559,7 +2559,7 @@ fmt.addMillis = function (val, txt) {
     });
 };
 
-function sigfig(x, y) {
+fmt.sigfig = function(x, y) {
     var p = Math.pow(10, y);
     var v = (Math.round(x * p) / p).toString();
     if (y > 0) {
@@ -2572,7 +2572,7 @@ function sigfig(x, y) {
             v += "0";
     }
     return v;
-}
+};
 
 var px = fmt.bind(this, "$1px");
 var pct = fmt.bind(this, "$1%");
