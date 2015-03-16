@@ -786,12 +786,26 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.pasteAtCursor(str);
         }
     }
+    
+    function setSurrogateSize(){
+        var bounds = renderer.getCanvas().getBoundingClientRect();
+        surrogateContainer.style.left = px(bounds.left);
+        surrogateContainer.style.top = px(window.scrollY + bounds.top);
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
+        surrogate.style.fontFamily = theme.fontFamily;
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.fontSize = px(ch * 0.99);
+        surrogate.style.lineHeight = px(ch);
+        
+    }
 
     function setCursorXY(cursor, x, y) {
         changed = true;
         pointer.set(x, y);
         renderer.pixel2cell(pointer, self.scroll, gridBounds);
         cursor.setXY(pointer.x, pointer.y, scrollLines);
+        setSurrogateCursor();
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
@@ -912,6 +926,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 y -
                 bottomRightGutter.height;
         gridBounds.set(x, y, w, h);
+        var cw = renderer.character.width / renderer.getPixelRatio();
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.left = px(gridBounds.x * cw);
+        surrogate.style.top = px(gridBounds.y * ch);
+        surrogate.style.width = px(gridBounds.width * cw);
+        surrogate.style.height = px(gridBounds.height * ch);
 
         // group the tokens into rows
         scrollLines = [""];
@@ -1225,6 +1245,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
             changed = renderer.resize();
         }
     };
+    
+    function setSurrogateCursor(){
+        surrogate.selectionStart = self.frontCursor.i;
+        surrogate.selectionEnd = self.backCursor.i;        
+    }
 
     this.setText = function (txt) {
         txt = txt || "";
@@ -1232,6 +1257,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
         var lines = txt.split("\n");
         this.pushUndo(lines);
         this.drawText();
+        surrogate.value = txt;
+        setSurrogateCursor();
     };
 
     this.getPixelRatio = function () {
@@ -1338,8 +1365,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             this.scrollIntoView(maxCursor);
             clampScroll();
             maxCursor.copy(minCursor);
-            changed = true;
-            this.drawText();
+            this.forceDraw();
         }
     };
 
@@ -1363,20 +1389,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
         this.copySelectedText(evt);
         this.overwriteText();
         this.drawText();
-    };
-
-    this.placeSurrogateUnder = function (elem) {
-        if (surrogate && elem) {
-            // wait a brief amount of time to make sure the browser rendering 
-            // engine had time to catch up
-            setTimeout(function () {
-                var bounds = elem.getBoundingClientRect();
-                surrogate.style.left = bounds.left + "px";
-                surrogate.style.top = window.scrollY + bounds.top + "px";
-                surrogate.style.width = (bounds.right - bounds.left) + "px";
-                surrogate.style.height = (bounds.bottom - bounds.top) + "px";
-            }, 250);
-        }
     };
 
     this.editText = function (evt) {
@@ -1445,6 +1457,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 this.scroll.x, this.scroll.y,
                 focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth);
+                
+        setSurrogateCursor();
 
         changed = false;
     };
@@ -1465,7 +1479,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     surrogateContainer = makeHidingContainer(
             "primrose-surrogate-textarea-container-" + renderer.id, surrogate);
 
-    document.body.appendChild(surrogateContainer);
+    document.body.insertBefore(surrogateContainer, document.body.children[0]);
 
     this.setWheelScrollSpeed(options.wheelScrollSpeed);
     this.setWordWrap(!options.disableWordWrap);
@@ -1503,12 +1517,14 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     window.addEventListener("resize", function () {
         changed = renderer.resize();
-        self.drawText();
+        setSurrogateSize();
+        self.forceDraw();
     });
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
     surrogate.addEventListener("paste", readClipboard.bind(this));
+    setSurrogateSize();
 };/* 
  * Copyright (C) 2015 Sean
  *
@@ -3031,7 +3047,7 @@ Renderers.Canvas = (function () {
         this.pixel2cell = function (point, scroll, gridBounds) {
             var r = this.getPixelRatio();
             point.set(
-                    Math.floor(point.x * r / this.character.width) + scroll.x - gridBounds.x,
+                    Math.round(point.x * r / this.character.width) + scroll.x - gridBounds.x,
                     Math.floor((point.y * r / this.character.height) - 0.25) + scroll.y);
         };
 
@@ -3470,4 +3486,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.5.1.1";
+};Primrose.VERSION = "v0.6.0.0";

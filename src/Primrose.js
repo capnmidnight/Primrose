@@ -16,7 +16,7 @@
  */
 
 function Primrose(renderToElementOrID, Renderer, options) {
-//    "use strict";
+    "use strict";
     var self = this;
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
