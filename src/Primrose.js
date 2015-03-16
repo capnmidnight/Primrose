@@ -656,13 +656,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
                     text = this.getText(),
                     left = text.substring(0, minCursor.i),
                     right = text.substring(maxCursor.i);
-            for (var i = 0; i < str.length; ++i) {
-                minCursor.right(scrollLines);
-            }
-            maxCursor.copy(minCursor);
             this.setText(left + str + right);
+            minCursor.advanceN(scrollLines, str.length);
             this.scrollIntoView(maxCursor);
             clampScroll();
+            maxCursor.copy(minCursor);
+            changed = true;
+            this.drawText();
         }
     };
 

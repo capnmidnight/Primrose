@@ -58,15 +58,20 @@ var Cursor = (function () {
         }
     };
 
-    Cursor.prototype.left = function (lines) {
-        if (this.i > 0) {
-            --this.i;
-            --this.x;
-            if (this.x < 0) {
-                --this.y;
-                this.x = lines[this.y].length;
-            }
+    Cursor.prototype.fullhome = function (lines) {
+        this.i = 0;
+        this.x = 0;
+        this.y = 0;
+        this.moved = true;
+    };
+
+    Cursor.prototype.fullend = function (lines) {
+        this.i = 0;
+        for(var i = 0; i < lines.length; ++i){
+            this.i += lines[i].length;
         }
+        this.y = lines.length - 1;
+        this.x = lines[this.y].length;
         this.moved = true;
     };
 
@@ -85,20 +90,21 @@ var Cursor = (function () {
         this.moved = true;
     };
 
-    Cursor.prototype.right = function (lines) {
-        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
-            ++this.i;
-            ++this.x;
-            if (this.x > lines[this.y].length) {
-                this.x = 0;
-                ++this.y;
+    Cursor.prototype.left = function (lines) {
+        if (this.i > 0) {
+            --this.i;
+            --this.x;
+            if (this.x < 0) {
+                --this.y;
+                this.x = lines[this.y].length;
             }
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
 
     Cursor.prototype.skipright = function (lines) {
-        if (this.x === lines[this.y].length) {
+        if (this.x === lines[this.y].length || lines[this.y][this.x] === '\n') {
             this.right(lines);
         }
         else {
@@ -108,6 +114,27 @@ var Cursor = (function () {
             var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
             this.i += dx;
             this.x += dx;
+            this.reverseFromNewline(lines);
+        }
+        this.moved = true;
+    };
+
+    Cursor.prototype.right = function (lines) {
+        this.advanceN(lines, 1);
+    };
+
+    Cursor.prototype.advanceN = function (lines, n) {
+        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
+            this.i += n;
+            this.x += n;
+            while (this.x > lines[this.y].length) {
+                this.x -= lines[this.y].length;
+                ++this.y;
+            }
+            if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
+                ++this.y;
+                this.x = 0;
+            }
         }
         this.moved = true;
     };
@@ -118,27 +145,11 @@ var Cursor = (function () {
         this.moved = true;
     };
 
-    Cursor.prototype.fullhome = function (lines) {
-        this.i = 0;
-        this.x = 0;
-        this.y = 0;
-        this.moved = true;
-    };
-
     Cursor.prototype.end = function (lines) {
         var dx = lines[this.y].length - this.x;
         this.i += dx;
         this.x += dx;
-        this.moved = true;
-    };
-
-    Cursor.prototype.fullend = function (lines) {
-        this.i += lines[this.y].length - this.x;
-        while (this.y < lines.length - 1) {
-            ++this.y;
-            this.i += lines[this.y].length;
-        }
-        this.x = lines[this.y].length;
+        this.reverseFromNewline(lines);
         this.moved = true;
     };
 
@@ -148,6 +159,7 @@ var Cursor = (function () {
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
             this.i -= lines[this.y].length - dx;
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
@@ -158,16 +170,7 @@ var Cursor = (function () {
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
             this.i += lines[this.y - 1].length + dx;
-        }
-        this.moved = true;
-    };
-
-    Cursor.prototype.setXY = function (x, y, lines) {
-        this.y = Math.max(0, Math.min(lines.length - 1, y));
-        this.x = Math.max(0, Math.min(lines[this.y].length, x));
-        this.i = this.x;
-        for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
@@ -179,7 +182,27 @@ var Cursor = (function () {
         for (var i = 0; i < this.y; ++i) {
             this.i += lines[i].length;
         }
+        this.reverseFromNewline(lines);
         this.moved = true;
     };
+
+    Cursor.prototype.setXY = function (x, y, lines) {
+        this.y = Math.max(0, Math.min(lines.length - 1, y));
+        this.x = Math.max(0, Math.min(lines[this.y].length, x));
+        this.i = this.x;
+        for (var i = 0; i < this.y; ++i) {
+            this.i += lines[i].length;
+        }
+        this.reverseFromNewline(lines);
+        this.moved = true;
+    };
+
+    Cursor.prototype.reverseFromNewline = function (lines) {
+        if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
+            --this.x;
+            --this.i;
+        }
+    };
+
     return Cursor;
 })();
