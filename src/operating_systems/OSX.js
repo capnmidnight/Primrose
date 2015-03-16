@@ -18,38 +18,7 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.OSX = (function () {
-    "use strict";
-    return {
-        name: "OSX",
-        META_a: function (prim, lines) {
-            prim.frontCursor.fullhome(lines);
-            prim.backCursor.fullend(lines);
-        },
-        METASHIFT_z: function (prim, lines) {
-            prim.redo();
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        META_z: function (prim, lines) {
-            prim.undo();
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        META_DOWNARROW: function (prim, lines) {
-            if (prim.scroll.y < lines.length) {
-                ++prim.scroll.y;
-            }
-        },
-        META_UPARROW: function (prim, lines) {
-            if (prim.scroll.y > 0) {
-                --prim.scroll.y;
-            }
-        }
-    };
-})();
-
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "LEFTARROW", "Home");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "RIGHTARROW", "End");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "UPARROW", "FullHome");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "DOWNARROW", "FullEnd");
-Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "LEFTARROW", "SkipLeft");
+OperatingSystem.OSX = new OperatingSystem(
+        "OS X", "META", "ALT", "METASHIFT_z",
+        "META", "LEFTARROW", "RIGHTARROW",
+        "META", "UPARROW", "DOWNARROW");

@@ -472,7 +472,7 @@ function Tile(i, c, bg, fg, style, weight){
 }
 
 var Commands = {};
-var OperatingSystems = {};
+var OperatingSystem = {};
 var Keys = (function(){
     "use strict";
     return {
@@ -928,8 +928,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setOperatingSystem = function (os) {
         changed = true;
-        operatingSystem = os || (isOSX ? OperatingSystems.OSX :
-                OperatingSystems.WINDOWS);
+        operatingSystem = os || (isOSX ? OperatingSystem.OSX :
+                OperatingSystem.WINDOWS);
         refreshCommandPack();
     };
 
@@ -1376,9 +1376,9 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.commandSystemSelect = makeSelectorFromObj(
             "primrose-command-system-selector-" + renderer.id, Commands,
             commandSystem.name, self, "setCommandSystem", "command system");
-    this.operatingSystemSelect = makeSelectorFromObj(
+    this.OperatingSystemelect = makeSelectorFromObj(
             "primrose-operating-system-selector-" + renderer.id,
-            OperatingSystems, operatingSystem.name, self, "setOperatingSystem",
+            OperatingSystem, operatingSystem.name, self, "setOperatingSystem",
             "shortcut style");
 
 
@@ -2911,7 +2911,7 @@ Grammar.PlainText = new Grammar("PlainText", [
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.OSX = (function () {
+OperatingSystem.OSX = (function () {
     "use strict";
     return {
         name: "OSX",
@@ -2940,12 +2940,12 @@ OperatingSystems.OSX = (function () {
     };
 })();
 
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "LEFTARROW", "Home");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "RIGHTARROW", "End");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "UPARROW", "FullHome");
-Keys.makeCursorCommand(OperatingSystems.OSX, "META", "DOWNARROW", "FullEnd");
-Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "LEFTARROW", "SkipLeft");
+Keys.makeCursorCommand(OperatingSystem.OSX, "META", "LEFTARROW", "Home");
+Keys.makeCursorCommand(OperatingSystem.OSX, "META", "RIGHTARROW", "End");
+Keys.makeCursorCommand(OperatingSystem.OSX, "META", "UPARROW", "FullHome");
+Keys.makeCursorCommand(OperatingSystem.OSX, "META", "DOWNARROW", "FullEnd");
+Keys.makeCursorCommand(OperatingSystem.OSX, "ALT", "RIGHTARROW", "SkipRight");
+Keys.makeCursorCommand(OperatingSystem.OSX, "ALT", "LEFTARROW", "SkipLeft");
 ;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -2965,7 +2965,7 @@ Keys.makeCursorCommand(OperatingSystems.OSX, "ALT", "LEFTARROW", "SkipLeft");
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystems.WINDOWS = (function () {
+OperatingSystem.WINDOWS = (function () {
     "use strict";
     return {
         name: "Windows",
@@ -2997,12 +2997,12 @@ OperatingSystems.WINDOWS = (function () {
     };
 })();
 
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "HOME", "Home");
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "", "END", "End");
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "HOME", "FullHome");
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "END", "FullEnd");
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OperatingSystems.WINDOWS, "CTRL", "LEFTARROW", "SkipLeft");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "", "HOME", "Home");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "", "END", "End");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "HOME", "FullHome");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "END", "FullEnd");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "RIGHTARROW", "SkipRight");
+Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "LEFTARROW", "SkipLeft");
 ;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *

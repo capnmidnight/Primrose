@@ -351,8 +351,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setOperatingSystem = function (os) {
         changed = true;
-        operatingSystem = os || (isOSX ? OperatingSystems.OSX :
-                OperatingSystems.WINDOWS);
+        operatingSystem = os || (isOSX ? OperatingSystem.OSX :
+                OperatingSystem.WINDOWS);
         refreshCommandPack();
     };
 
@@ -805,19 +805,19 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
             renderer.id, Themes, theme.name, self, "setTheme", "theme");
+    this.commandSystemSelect = makeSelectorFromObj(
+            "primrose-command-system-selector-" + renderer.id, Commands,
+            commandSystem.name, self, "setCommandSystem", "command system");
     this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
             renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
             "language syntax", Grammar);
     this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
             renderer.id, CodePage, codePage.name, self, "setCodePage",
             "localization", CodePage);
-    this.commandSystemSelect = makeSelectorFromObj(
-            "primrose-command-system-selector-" + renderer.id, Commands,
-            commandSystem.name, self, "setCommandSystem", "command system");
     this.operatingSystemSelect = makeSelectorFromObj(
             "primrose-operating-system-selector-" + renderer.id,
-            OperatingSystems, operatingSystem.name, self, "setOperatingSystem",
-            "shortcut style");
+            OperatingSystem, operatingSystem.name, self, "setOperatingSystem",
+            "shortcut style", OperatingSystem);
 
 
     //////////////////////////////////////////////////////////////////////////

@@ -99,10 +99,3 @@ Commands.DEFAULT = (function () {
         }
     };
 })();
-
-Keys.makeCursorCommand(Commands.DEFAULT, "", "LEFTARROW", "Left");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "RIGHTARROW", "Right");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "UPARROW", "Up");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "DOWNARROW", "Down");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEUP", "PageUp");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEDOWN", "PageDown");

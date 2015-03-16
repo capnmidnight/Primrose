@@ -18,16 +18,9 @@
 var Themes = {};
 var Renderers = {};
 var Commands = {};
-var OperatingSystems = {};
 
 var Keys = (function () {
     "use strict";
-    function setCursorCommand(obj, mod, key, func, cur) {
-        var name = mod + "_" + key;
-        obj[name] = function (prim, lines) {
-            prim["cursor" + func](lines, prim[cur + "Cursor"]);
-        };
-    }
     var Keys = {
         ///////////////////////////////////////////////////////////////////////////
         // modifiers
@@ -99,11 +92,7 @@ var Keys = (function () {
         F9: 120,
         F10: 121,
         F11: 122,
-        F12: 123,
-        makeCursorCommand: function (obj, baseMod, key, func) {
-            setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
-            setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
-        }
+        F12: 123
     };
 
     // create a reverse mapping from keyCode to name.
