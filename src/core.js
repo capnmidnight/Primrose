@@ -572,11 +572,11 @@ function makeSelectorFromObj(id, obj, def, target, prop, lbl, typeFilter) {
 function makeHidingContainer(id, obj) {
     var elem = cascadeElement(id, "div", HTMLDivElement);
     elem.style.position = "absolute";
-    elem.style.left = 0;
-    elem.style.top = 0;
-    elem.style.width = 0;
-    elem.style.height = 0;
-    elem.style.overflow = "hidden";
+//    elem.style.left = 0;
+//    elem.style.top = 0;
+//    elem.style.width = 0;
+//    elem.style.height = 0;
+//    elem.style.overflow = "hidden";
     elem.appendChild(obj);
     return elem;
 }

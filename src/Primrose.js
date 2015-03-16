@@ -16,7 +16,7 @@
  */
 
 function Primrose(renderToElementOrID, Renderer, options) {
-    "use strict";
+//    "use strict";
     var self = this;
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
@@ -235,6 +235,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 y -
                 bottomRightGutter.height;
         gridBounds.set(x, y, w, h);
+        
+        surrogate.style.left = px(gridBounds.x * renderer.character.width);
+        surrogate.style.top = px(gridBounds.y * renderer.character.height);
+        surrogate.style.width = px(gridBounds.width * renderer.character.width);
+        surrogate.style.height = px(gridBounds.height * renderer.character.height);
 
         // group the tokens into rows
         scrollLines = [""];
@@ -552,6 +557,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setText = function (txt) {
         txt = txt || "";
         txt = txt.replace(/\r\n/g, "\n");
+        surrogate.value = txt;
         var lines = txt.split("\n");
         this.pushUndo(lines);
         this.drawText();
@@ -693,10 +699,11 @@ function Primrose(renderToElementOrID, Renderer, options) {
             // engine had time to catch up
             setTimeout(function () {
                 var bounds = elem.getBoundingClientRect();
-                surrogate.style.left = bounds.left + "px";
-                surrogate.style.top = window.scrollY + bounds.top + "px";
-                surrogate.style.width = (bounds.right - bounds.left) + "px";
-                surrogate.style.height = (bounds.bottom - bounds.top) + "px";
+                surrogateContainer.style.left = bounds.left + "px";
+                surrogateContainer.style.top = window.scrollY + bounds.top + "px";
+                surrogateContainer.style.width = (bounds.right - bounds.left) + "px";
+                surrogateContainer.style.height = (bounds.bottom - bounds.top) + "px";
+                surrogateContainer.style.opacity = 0.5;
             }, 250);
         }
     };
@@ -825,7 +832,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     window.addEventListener("resize", function () {
         changed = renderer.resize();
-        self.drawText();
+        self.forceDraw();
     });
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
