@@ -104,11 +104,10 @@ function displayTest(func, log) {
                     : "x";
         }
 
-        log(fmt("Test results for $1: [$2] $3 succeeded, $4 failed", name, beam, result.succeeded, result.failed));
+        log(fmt("Test results for $1: [$2]\n\n$3 succeeded, $4 failed", name, beam, result.succeeded, result.failed));
 
-        log("Details:");
         if (result.succeeded > 0) {
-            log("    Successes:");
+            log("\n    Successes:");
             for (var key in result.success) {
                 if (result.success[key]) {
                     log(fmt("        $1 succeeded after $2ms", key, result.success[key].dt));
@@ -117,7 +116,7 @@ function displayTest(func, log) {
         }
 
         if (result.failed > 0) {
-            log("    Failures:");
+            log("\n    Failures:");
             for (var key in result.failure) {
                 if (result.failure[key]) {
                     var val = result.failure[key];

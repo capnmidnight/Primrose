@@ -25,6 +25,5 @@ Grammar.TestResults = new Grammar("TestResults", [
     ["functions", /^    Failures:/],
     ["comments", /(\d+ms:)(.*)/],
     ["keywords", /(Test results for )(\w+):/],
-    ["keywords", /^Details:/],
     ["strings", /        \w+/]
 ]);
