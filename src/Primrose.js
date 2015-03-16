@@ -114,13 +114,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
         var bounds = renderer.getCanvas().getBoundingClientRect();
         surrogateContainer.style.left = px(bounds.left);
         surrogateContainer.style.top = px(window.scrollY + bounds.top);
-        surrogateContainer.style.width = px(bounds.right - bounds.left);
-        surrogateContainer.style.height = px(bounds.bottom - bounds.top);
-        //surrogateContainer.style.visibility = "hidden";
-        surrogateContainer.style.opacity = 0.5;
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
-        surrogate.style.fontSize = px(renderer.character.height * 0.99);
-        surrogate.style.lineHeight = px(renderer.character.height);
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.fontSize = px(ch * 0.99);
+        surrogate.style.lineHeight = px(ch);
         
     }
 
@@ -250,11 +249,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 y -
                 bottomRightGutter.height;
         gridBounds.set(x, y, w, h);
-        
-        surrogate.style.left = px(gridBounds.x * renderer.character.width);
-        surrogate.style.top = px(gridBounds.y * renderer.character.height);
-        surrogate.style.width = px(gridBounds.width * renderer.character.width);
-        surrogate.style.height = px(gridBounds.height * renderer.character.height);
+        var cw = renderer.character.width / renderer.getPixelRatio();
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.left = px(gridBounds.x * cw);
+        surrogate.style.top = px(gridBounds.y * ch);
+        surrogate.style.width = px(gridBounds.width * cw);
+        surrogate.style.height = px(gridBounds.height * ch);
 
         // group the tokens into rows
         scrollLines = [""];
