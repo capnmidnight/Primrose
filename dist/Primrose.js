@@ -18,6 +18,104 @@ https://github.com/capnmidnight/Primrose*/
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var CodePage = (function () {
+    "use strict";
+    function CodePage(name, lang, options) {
+        this.name = name;
+        this.language = lang;
+
+        copyObject(this, {
+            NORMAL: {
+                "65": "a",
+                "66": "b",
+                "67": "c",
+                "68": "d",
+                "69": "e",
+                "70": "f",
+                "71": "g",
+                "72": "h",
+                "73": "i",
+                "74": "j",
+                "75": "k",
+                "76": "l",
+                "77": "m",
+                "78": "n",
+                "79": "o",
+                "80": "p",
+                "81": "q",
+                "82": "r",
+                "83": "s",
+                "84": "t",
+                "85": "u",
+                "86": "v",
+                "87": "w",
+                "88": "x",
+                "89": "y",
+                "90": "z"
+            },
+            SHIFT: {
+                "65": "A",
+                "66": "B",
+                "67": "C",
+                "68": "D",
+                "69": "E",
+                "70": "F",
+                "71": "G",
+                "72": "H",
+                "73": "I",
+                "74": "J",
+                "75": "K",
+                "76": "L",
+                "77": "M",
+                "78": "N",
+                "79": "O",
+                "80": "P",
+                "81": "Q",
+                "82": "R",
+                "83": "S",
+                "84": "T",
+                "85": "U",
+                "86": "V",
+                "87": "W",
+                "88": "X",
+                "89": "Y",
+                "90": "Z"
+            }
+        });
+
+        copyObject(this, options);
+
+        for (var i = 0; i <= 9; ++i) {
+            var code = Keys["NUMPAD" + i];
+            this.NORMAL[code] = i.toString();
+        }
+    }
+    
+    CodePage.DEAD = function(key){
+        return function (prim) {
+            prim.setDeadKeyState("DEAD" + key);
+        };
+    };
+    
+    return CodePage;
+})();
+;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 var Cursor = (function () {
     "use strict";
     function Cursor(i, x, y) {
@@ -452,6 +550,86 @@ var Keys = (function () {
     }
     
     return Keys;
+})();;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var OperatingSystem = (function () {
+    "use strict";
+    
+    function setCursorCommand(obj, mod, key, func, cur) {
+        var name = mod + "_" + key;
+        obj[name] = function (prim, lines) {
+            prim["cursor" + func](lines, prim[cur + "Cursor"]);
+        };
+    }
+    
+    function makeCursorCommand(obj, baseMod, key, func) {
+        setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
+        setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+    }
+    
+    function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
+        this.name = name;
+
+        this[pre1 + "_a"] = function (prim, lines) {
+            prim.frontCursor.fullhome(lines);
+            prim.backCursor.fullend(lines);
+            prim.forceUpdate();
+        };
+
+        this[redo] = function (prim, lines) {
+            prim.redo();
+            prim.scrollIntoView(prim.frontCursor);
+        };
+
+        this[pre1 + "_z"] = function (prim, lines) {
+            prim.undo();
+            prim.scrollIntoView(prim.frontCursor);
+        };
+
+        this[pre1 + "_DOWNARROW"] = function (prim, lines) {
+            if (prim.scroll.y < lines.length) {
+                ++prim.scroll.y;
+            }
+            prim.forceUpdate();
+        };
+
+        this[pre1 + "_UPARROW"] = function (prim, lines) {
+            if (prim.scroll.y > 0) {
+                --prim.scroll.y;
+            }
+            prim.forceUpdate();
+        };
+
+        makeCursorCommand(this, "", "LEFTARROW", "Left");
+        makeCursorCommand(this, "", "RIGHTARROW", "Right");     
+        makeCursorCommand(this, "", "UPARROW", "Up");
+        makeCursorCommand(this, "", "DOWNARROW", "Down");
+        makeCursorCommand(this, "", "PAGEUP", "PageUp");
+        makeCursorCommand(this, "", "PAGEDOWN", "PageDown");
+        makeCursorCommand(this, pre2, "LEFTARROW", "SkipLeft");
+        makeCursorCommand(this, pre2, "RIGHTARROW", "SkipRight");   
+        makeCursorCommand(this, pre3, home, "Home");
+        makeCursorCommand(this, pre3, end, "End");
+        makeCursorCommand(this, pre4, fullHome, "FullHome");
+        makeCursorCommand(this, pre4, fullEnd, "FullEnd");
+    }
+
+    return OperatingSystem;
 })();;/* 
  * Copyright (C) 2015 Sean
  *
@@ -1488,104 +1666,6 @@ var Size = (function () {
 
     return Size;
 })();;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-var CodePage = (function () {
-    "use strict";
-    function CodePage(name, lang, options) {
-        this.name = name;
-        this.language = lang;
-
-        copyObject(this, {
-            NORMAL: {
-                "65": "a",
-                "66": "b",
-                "67": "c",
-                "68": "d",
-                "69": "e",
-                "70": "f",
-                "71": "g",
-                "72": "h",
-                "73": "i",
-                "74": "j",
-                "75": "k",
-                "76": "l",
-                "77": "m",
-                "78": "n",
-                "79": "o",
-                "80": "p",
-                "81": "q",
-                "82": "r",
-                "83": "s",
-                "84": "t",
-                "85": "u",
-                "86": "v",
-                "87": "w",
-                "88": "x",
-                "89": "y",
-                "90": "z"
-            },
-            SHIFT: {
-                "65": "A",
-                "66": "B",
-                "67": "C",
-                "68": "D",
-                "69": "E",
-                "70": "F",
-                "71": "G",
-                "72": "H",
-                "73": "I",
-                "74": "J",
-                "75": "K",
-                "76": "L",
-                "77": "M",
-                "78": "N",
-                "79": "O",
-                "80": "P",
-                "81": "Q",
-                "82": "R",
-                "83": "S",
-                "84": "T",
-                "85": "U",
-                "86": "V",
-                "87": "W",
-                "88": "X",
-                "89": "Y",
-                "90": "Z"
-            }
-        });
-
-        copyObject(this, options);
-
-        for (var i = 0; i <= 9; ++i) {
-            var code = Keys["NUMPAD" + i];
-            this.NORMAL[code] = i.toString();
-        }
-    }
-    
-    CodePage.DEAD = function(key){
-        return function (prim) {
-            prim.setDeadKeyState("DEAD" + key);
-        };
-    };
-    
-    return CodePage;
-})();
-;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2887,86 +2967,6 @@ OperatingSystem.OSX = new OperatingSystem(
         "META", "LEFTARROW", "RIGHTARROW",
         "META", "UPARROW", "DOWNARROW");
 ;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-var OperatingSystem = (function () {
-    "use strict";
-    
-    function setCursorCommand(obj, mod, key, func, cur) {
-        var name = mod + "_" + key;
-        obj[name] = function (prim, lines) {
-            prim["cursor" + func](lines, prim[cur + "Cursor"]);
-        };
-    }
-    
-    function makeCursorCommand(obj, baseMod, key, func) {
-        setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
-        setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
-    }
-    
-    function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
-        this.name = name;
-
-        this[pre1 + "_a"] = function (prim, lines) {
-            prim.frontCursor.fullhome(lines);
-            prim.backCursor.fullend(lines);
-            prim.forceUpdate();
-        };
-
-        this[redo] = function (prim, lines) {
-            prim.redo();
-            prim.scrollIntoView(prim.frontCursor);
-        };
-
-        this[pre1 + "_z"] = function (prim, lines) {
-            prim.undo();
-            prim.scrollIntoView(prim.frontCursor);
-        };
-
-        this[pre1 + "_DOWNARROW"] = function (prim, lines) {
-            if (prim.scroll.y < lines.length) {
-                ++prim.scroll.y;
-            }
-            prim.forceUpdate();
-        };
-
-        this[pre1 + "_UPARROW"] = function (prim, lines) {
-            if (prim.scroll.y > 0) {
-                --prim.scroll.y;
-            }
-            prim.forceUpdate();
-        };
-
-        makeCursorCommand(this, "", "LEFTARROW", "Left");
-        makeCursorCommand(this, "", "RIGHTARROW", "Right");     
-        makeCursorCommand(this, "", "UPARROW", "Up");
-        makeCursorCommand(this, "", "DOWNARROW", "Down");
-        makeCursorCommand(this, "", "PAGEUP", "PageUp");
-        makeCursorCommand(this, "", "PAGEDOWN", "PageDown");
-        makeCursorCommand(this, pre2, "LEFTARROW", "SkipLeft");
-        makeCursorCommand(this, pre2, "RIGHTARROW", "SkipRight");   
-        makeCursorCommand(this, pre3, home, "Home");
-        makeCursorCommand(this, pre3, end, "End");
-        makeCursorCommand(this, pre4, fullHome, "FullHome");
-        makeCursorCommand(this, pre4, fullEnd, "FullEnd");
-    }
-
-    return OperatingSystem;
-})();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
