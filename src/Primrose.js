@@ -661,8 +661,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
             this.scrollIntoView(maxCursor);
             clampScroll();
             maxCursor.copy(minCursor);
-            changed = true;
-            this.drawText();
+            this.forceDraw();
         }
     };
 

@@ -40,7 +40,7 @@ Renderers.Canvas = (function () {
         this.pixel2cell = function (point, scroll, gridBounds) {
             var r = this.getPixelRatio();
             point.set(
-                    Math.floor(point.x * r / this.character.width) + scroll.x - gridBounds.x,
+                    Math.round(point.x * r / this.character.width) + scroll.x - gridBounds.x,
                     Math.floor((point.y * r / this.character.height) - 0.25) + scroll.y);
         };
 
