@@ -1,4 +1,4 @@
-/*! Primrose 2015-03-05
+/*! Primrose 2015-03-16
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -61,15 +61,20 @@ var Cursor = (function () {
         }
     };
 
-    Cursor.prototype.left = function (lines) {
-        if (this.i > 0) {
-            --this.i;
-            --this.x;
-            if (this.x < 0) {
-                --this.y;
-                this.x = lines[this.y].length;
-            }
+    Cursor.prototype.fullhome = function (lines) {
+        this.i = 0;
+        this.x = 0;
+        this.y = 0;
+        this.moved = true;
+    };
+
+    Cursor.prototype.fullend = function (lines) {
+        this.i = 0;
+        for(var i = 0; i < lines.length; ++i){
+            this.i += lines[i].length;
         }
+        this.y = lines.length - 1;
+        this.x = lines[this.y].length;
         this.moved = true;
     };
 
@@ -88,20 +93,21 @@ var Cursor = (function () {
         this.moved = true;
     };
 
-    Cursor.prototype.right = function (lines) {
-        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
-            ++this.i;
-            ++this.x;
-            if (this.x > lines[this.y].length) {
-                this.x = 0;
-                ++this.y;
+    Cursor.prototype.left = function (lines) {
+        if (this.i > 0) {
+            --this.i;
+            --this.x;
+            if (this.x < 0) {
+                --this.y;
+                this.x = lines[this.y].length;
             }
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
 
     Cursor.prototype.skipright = function (lines) {
-        if (this.x === lines[this.y].length) {
+        if (this.x === lines[this.y].length || lines[this.y][this.x] === '\n') {
             this.right(lines);
         }
         else {
@@ -111,6 +117,27 @@ var Cursor = (function () {
             var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
             this.i += dx;
             this.x += dx;
+            this.reverseFromNewline(lines);
+        }
+        this.moved = true;
+    };
+
+    Cursor.prototype.right = function (lines) {
+        this.advanceN(lines, 1);
+    };
+
+    Cursor.prototype.advanceN = function (lines, n) {
+        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
+            this.i += n;
+            this.x += n;
+            while (this.x > lines[this.y].length) {
+                this.x -= lines[this.y].length;
+                ++this.y;
+            }
+            if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
+                ++this.y;
+                this.x = 0;
+            }
         }
         this.moved = true;
     };
@@ -121,27 +148,11 @@ var Cursor = (function () {
         this.moved = true;
     };
 
-    Cursor.prototype.fullhome = function (lines) {
-        this.i = 0;
-        this.x = 0;
-        this.y = 0;
-        this.moved = true;
-    };
-
     Cursor.prototype.end = function (lines) {
         var dx = lines[this.y].length - this.x;
         this.i += dx;
         this.x += dx;
-        this.moved = true;
-    };
-
-    Cursor.prototype.fullend = function (lines) {
-        this.i += lines[this.y].length - this.x;
-        while (this.y < lines.length - 1) {
-            ++this.y;
-            this.i += lines[this.y].length;
-        }
-        this.x = lines[this.y].length;
+        this.reverseFromNewline(lines);
         this.moved = true;
     };
 
@@ -151,6 +162,7 @@ var Cursor = (function () {
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
             this.i -= lines[this.y].length - dx;
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
@@ -161,16 +173,7 @@ var Cursor = (function () {
             var dx = Math.min(0, lines[this.y].length - this.x);
             this.x += dx;
             this.i += lines[this.y - 1].length + dx;
-        }
-        this.moved = true;
-    };
-
-    Cursor.prototype.setXY = function (x, y, lines) {
-        this.y = Math.max(0, Math.min(lines.length - 1, y));
-        this.x = Math.max(0, Math.min(lines[this.y].length, x));
-        this.i = this.x;
-        for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+            this.reverseFromNewline(lines);
         }
         this.moved = true;
     };
@@ -182,143 +185,29 @@ var Cursor = (function () {
         for (var i = 0; i < this.y; ++i) {
             this.i += lines[i].length;
         }
+        this.reverseFromNewline(lines);
         this.moved = true;
     };
+
+    Cursor.prototype.setXY = function (x, y, lines) {
+        this.y = Math.max(0, Math.min(lines.length - 1, y));
+        this.x = Math.max(0, Math.min(lines[this.y].length, x));
+        this.i = this.x;
+        for (var i = 0; i < this.y; ++i) {
+            this.i += lines[i].length;
+        }
+        this.reverseFromNewline(lines);
+        this.moved = true;
+    };
+
+    Cursor.prototype.reverseFromNewline = function (lines) {
+        if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
+            --this.x;
+            --this.i;
+        }
+    };
+
     return Cursor;
-})();;/* 
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-var Point = (function () {
-    "use strict";
-    function Point(x, y) {
-        this.set(x || 0, y || 0);
-    }
-
-    Point.prototype.set = function (x, y) {
-        this.x = x;
-        this.y = y;
-    };
-
-    Point.prototype.clone = function () {
-        return new Point(this.x, this.y);
-    };
-
-    Point.prototype.toString = function () {
-        return fmt("(x:$1, y:$2)", this.x, this.y);
-    };
-
-    return Point;
-})();
-
-var Size = (function () {
-    "use strict";
-    function Size(width, height) {
-        this.set(width || 0, height || 0);
-    }
-
-    Size.prototype.set = function (width, height) {
-        this.width = width;
-        this.height = height;
-    };
-
-    Size.prototype.clone = function () {
-        return new Size(this.width, this.height);
-    };
-
-    Size.prototype.toString = function () {
-        return fmt("<w:$1, h:$2>", this.width, this.height);
-    };
-
-    return Size;
-})();
-
-var Rectangle = (function () {
-    "use strict";
-    function Rectangle(x, y, width, height) {
-        this.point = new Point(x, y);
-        this.size = new Size(width, height);
-
-        Object.defineProperties(this, {
-            x: {
-                get: function () {
-                    return this.point.x;
-                },
-                set: function (x) {
-                    this.point.x = x;
-                }
-            },
-            width: {
-                get: function () {
-                    return this.size.width;
-                },
-                set: function (width) {
-                    this.size.width = width;
-                }
-            },
-            right: {
-                get: function () {
-                    return this.point.x + this.size.width;
-                },
-                set: function (right) {
-                    this.point.x = right - this.size.width;
-                }
-            },
-            y: {
-                get: function () {
-                    return this.point.y;
-                },
-                set: function (y) {
-                    this.point.y = y;
-                }
-            },
-            height: {
-                get: function () {
-                    return this.size.height;
-                },
-                set: function (height) {
-                    this.size.height = height;
-                }
-            },
-            bottom: {
-                get: function () {
-                    return this.point.y + this.size.height;
-                },
-                set: function (bottom) {
-                    this.point.y = bottom - this.size.height;
-                }
-            }
-        });
-    }
-
-    Rectangle.prototype.set = function (x, y, width, height) {
-        this.point.set(x, y);
-        this.size.set(width, height);
-    };
-
-    Rectangle.prototype.clone = function () {
-        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-    };
-
-    Rectangle.prototype.toString = function () {
-        return fmt("[$1 x $2]", this.point.toString(), this.size.toString());
-    };
-
-    return Rectangle;
 })();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -336,11 +225,58 @@ var Rectangle = (function () {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Rule(name, test) {
+var Rule = (function () {
     "use strict";
-    this.name = name;
-    this.test = test;
-}
+
+    function Rule(name, test) {
+        this.name = name;
+        this.test = test;
+    }
+
+    Rule.prototype.carveOutMatchedToken = function (tokens, j) {
+        var token = tokens[j];
+        if (token.type === "regular") {
+            var res = this.test.exec(token.value);
+            if (res) {
+                // Only use the last group that matches the regex, to allow for more 
+                // complex regexes that can match in special contexts, but not make 
+                // the context part of the token.
+                var midx = res[res.length - 1];
+                var start = res.index;
+                // We skip the first record, because it's not a captured group, it's
+                // just the entire matched text.
+                for (var k = 1; k < res.length - 1; ++k) {
+                    start += res[k].length;
+                }
+
+                var end = start + midx.length;
+                if (start === 0) {
+                    // the rule matches the start of the token
+                    token.type = this.name;
+                    if (end < token.value.length) {
+                        // but not the end
+                        var next = token.splitAt(end);
+                        next.type = "regular";
+                        tokens.splice(j + 1, 0, next);
+                    }
+                }
+                else {
+                    // the rule matches from the middle of the token
+                    var mid = token.splitAt(start);
+                    if (midx.length < mid.value.length) {
+                        // but not the end
+                        var right = mid.splitAt(midx.length);
+                        tokens.splice(j + 1, 0, right);
+                    }
+                    mid.type = this.name;
+                    tokens.splice(j + 1, 0, mid);
+                }
+            }
+        }
+    };
+
+    return Rule;
+})();
 
 var Token = (function () {
     "use strict";
@@ -372,51 +308,9 @@ function Grammar(name, grammar) {
         return new Rule(rule[0], rule[1]);
     });
 
-    this.tokenize = function (text) {
-        // all text starts off as regular text, then gets cut up into tokens of
-        // more specific type
-        var tokens = [new Token(text, "regular", 0)];
-        for (var i = 0; i < this.grammar.length; ++i) {
-            var rule = this.grammar[i];
-            for (var j = 0; j < tokens.length; ++j) {
-                var left = tokens[j];
-
-                if (left.type === "regular") {
-                    var res = rule.test.exec(left.value);
-                    if (res) {
-                        // insert the new token into the token list
-                        var midx = res[res.length - 1];
-                        var start = res.index;
-                        var end = start + midx.length;
-                        if(start === 0){
-                            // the rule matches the start of the token
-                            left.type = rule.name;
-                            if(end < left.value.length){
-                                // but not the end
-                                var next = left.splitAt(end);
-                                next.type = "regular";
-                                tokens.splice(j + 1, 0, next);
-                            }
-                        }
-                        else{
-                            // the rule matches from the middle of the token
-                            var mid = left.splitAt(start);
-                            if(midx.length < mid.value.length) {
-                                // but not the end
-                                var right = mid.splitAt(midx.length);
-                                tokens.splice(j + 1, 0, right);
-                            }
-                            mid.type = rule.name;
-                            tokens.splice(j + 1, 0, mid);
-                        }
-                    }
-                }
-            }
-        }
-
-        // normalize tokens
+    function crudeParsing(tokens) {
         var blockOn = false, line = 0;
-        for (i = 0; i < tokens.length; ++i) {
+        for (var i = 0; i < tokens.length; ++i) {
             var t = tokens[i];
             t.line = line;
             if (t.type === "newlines") {
@@ -436,6 +330,20 @@ function Grammar(name, grammar) {
                 t.type = "comments";
             }
         }
+    }
+
+    this.tokenize = function (text) {
+        // all text starts off as regular text, then gets cut up into tokens of
+        // more specific type
+        var tokens = [new Token(text, "regular", 0)];
+        for (var i = 0; i < this.grammar.length; ++i) {
+            var rule = this.grammar[i];
+            for (var j = 0; j < tokens.length; ++j) {
+                rule.carveOutMatchedToken(tokens, j);
+            }
+        }
+
+        crudeParsing(tokens);
         return tokens;
     };
 };/* 
@@ -455,123 +363,141 @@ function Grammar(name, grammar) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// eventually, this will have configurable values for different locales.
-
-
-var CodePage = {};
 var Themes = {};
 var Renderers = {};
-
-function Tile(i, c, bg, fg, style, weight){
-    this.index = i;
-    this.char = c;
-    this.backColor = bg;
-    this.foreColor = fg;
-    this.fontStyle = style;
-    this.fontWeight = weight;
-}
-
 var Commands = {};
-var OperatingSystem = {};
-var Keys = (function(){
+
+var Keys = (function () {
     "use strict";
-    return {
-    ///////////////////////////////////////////////////////////////////////////
-    // modifiers
-    ///////////////////////////////////////////////////////////////////////////
-    MODIFIER_KEYS: ["CTRL", "ALT", "META", "SHIFT"],
-    SHIFT: 16,
-    CTRL: 17,
-    ALT: 18,
-    META_L: 91,
-    META_R: 92,
-    ///////////////////////////////////////////////////////////////////////////
-    // whitespace
-    ///////////////////////////////////////////////////////////////////////////
-    BACKSPACE: 8,
-    TAB: 9,
-    ENTER: 13,
-    SPACEBAR: 32,
-    DELETE: 46,
-    ///////////////////////////////////////////////////////////////////////////
-    // lock keys
-    ///////////////////////////////////////////////////////////////////////////
-    PAUSEBREAK: 19,
-    CAPSLOCK: 20,
-    NUMLOCK: 144,
-    SCROLLLOCK: 145,
-    INSERT: 45,
-    ///////////////////////////////////////////////////////////////////////////
-    // navigation keys
-    ///////////////////////////////////////////////////////////////////////////
-    ESCAPE: 27,
-    PAGEUP: 33,
-    PAGEDOWN: 34,
-    END: 35,
-    HOME: 36,
-    LEFTARROW: 37,
-    UPARROW: 38,
-    RIGHTARROW: 39,
-    DOWNARROW: 40,
-    SELECTKEY: 93,
-    ///////////////////////////////////////////////////////////////////////////
-    // numpad
-    ///////////////////////////////////////////////////////////////////////////
-    NUMPAD0: 96,
-    NUMPAD1: 97,
-    NUMPAD2: 98,
-    NUMPAD3: 99,
-    NUMPAD4: 100,
-    NUMPAD5: 101,
-    NUMPAD6: 102,
-    NUMPAD7: 103,
-    NUMPAD8: 104,
-    NUMPAD9: 105,
-    MULTIPLY: 106,
-    ADD: 107,
-    SUBTRACT: 109,
-    DECIMALPOINT: 110,
-    DIVIDE: 111,
-    ///////////////////////////////////////////////////////////////////////////
-    // function keys
-    ///////////////////////////////////////////////////////////////////////////
-    F1: 112,
-    F2: 113,
-    F3: 114,
-    F4: 115,
-    F5: 116,
-    F6: 117,
-    F7: 118,
-    F8: 119,
-    F9: 120,
-    F10: 121,
-    F11: 122,
-    F12: 123,
-    setCursorCommand: function (obj, mod, key, func, cur) {
-        var name = mod + "_" + key;
-        obj[name] = function (prim, lines) {
-            prim["cursor" + func](lines, prim[cur + "Cursor"]);
-        };
-    },
-    makeCursorCommand: function (obj, baseMod, key, func) {
-        Keys.setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
-        Keys.setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
-    },
-    addNumPad: function(obj){
-        for(var i = 0; i <= 9; ++i){
-            var code = Keys["NUMPAD" + i];
-            obj.NORMAL[code] = i.toString();
+    var Keys = {
+        ///////////////////////////////////////////////////////////////////////////
+        // modifiers
+        ///////////////////////////////////////////////////////////////////////////
+        MODIFIER_KEYS: ["CTRL", "ALT", "META", "SHIFT"],
+        SHIFT: 16,
+        CTRL: 17,
+        ALT: 18,
+        META_L: 91,
+        META_R: 92,
+        ///////////////////////////////////////////////////////////////////////////
+        // whitespace
+        ///////////////////////////////////////////////////////////////////////////
+        BACKSPACE: 8,
+        TAB: 9,
+        ENTER: 13,
+        SPACEBAR: 32,
+        DELETE: 46,
+        ///////////////////////////////////////////////////////////////////////////
+        // lock keys
+        ///////////////////////////////////////////////////////////////////////////
+        PAUSEBREAK: 19,
+        CAPSLOCK: 20,
+        NUMLOCK: 144,
+        SCROLLLOCK: 145,
+        INSERT: 45,
+        ///////////////////////////////////////////////////////////////////////////
+        // navigation keys
+        ///////////////////////////////////////////////////////////////////////////
+        ESCAPE: 27,
+        PAGEUP: 33,
+        PAGEDOWN: 34,
+        END: 35,
+        HOME: 36,
+        LEFTARROW: 37,
+        UPARROW: 38,
+        RIGHTARROW: 39,
+        DOWNARROW: 40,
+        SELECTKEY: 93,
+        ///////////////////////////////////////////////////////////////////////////
+        // numpad
+        ///////////////////////////////////////////////////////////////////////////
+        NUMPAD0: 96,
+        NUMPAD1: 97,
+        NUMPAD2: 98,
+        NUMPAD3: 99,
+        NUMPAD4: 100,
+        NUMPAD5: 101,
+        NUMPAD6: 102,
+        NUMPAD7: 103,
+        NUMPAD8: 104,
+        NUMPAD9: 105,
+        MULTIPLY: 106,
+        ADD: 107,
+        SUBTRACT: 109,
+        DECIMALPOINT: 110,
+        DIVIDE: 111,
+        ///////////////////////////////////////////////////////////////////////////
+        // function keys
+        ///////////////////////////////////////////////////////////////////////////
+        F1: 112,
+        F2: 113,
+        F3: 114,
+        F4: 115,
+        F5: 116,
+        F6: 117,
+        F7: 118,
+        F8: 119,
+        F9: 120,
+        F10: 121,
+        F11: 122,
+        F12: 123
+    };
+
+    // create a reverse mapping from keyCode to name.
+    for (var key in Keys) {
+        var val = Keys[key];
+        if (Keys.hasOwnProperty(key) && typeof (val) === "number") {
+            Keys[val] = key;
         }
     }
-};
-})();
+    
+    return Keys;
+})();;/* 
+ * Copyright (C) 2015 Sean
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-for(var key in Keys){
-    var val = Keys[key];
-    if(Keys.hasOwnProperty(key) && typeof(val) === "number"){
-        Keys[val] = key;
+
+var Point = (function () {
+    "use strict";
+    function Point(x, y) {
+        this.set(x || 0, y || 0);
     }
-};/* 
+
+    Point.prototype.set = function (x, y) {
+        this.x = x;
+        this.y = y;
+    };
+
+    Point.prototype.copy = function (p) {
+        if (p) {
+            this.x = p.x;
+            this.y = p.y;
+        }
+    };
+
+    Point.prototype.clone = function () {
+        return new Point(this.x, this.y);
+    };
+
+    Point.prototype.toString = function () {
+        return fmt("(x:$1, y:$2)", this.x, this.y);
+    };
+
+    return Point;
+})();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -651,30 +577,19 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     function refreshTokens() {
         tokens = tokenizer.tokenize(self.getText());
+        self.drawText();
     }
 
     function clampScroll() {
         if (self.scroll.y < 0) {
             self.scroll.y = 0;
         }
-        else
-            while (0 < self.scroll.y && 
-                self.scroll.y > scrollLines.length - gridBounds.height) {
+        else {
+            while (0 < self.scroll.y &&
+                    self.scroll.y > scrollLines.length - gridBounds.height) {
                 --self.scroll.y;
             }
-    }
-
-    function minDelta(v, minV, maxV) {
-        var dvMinV = v - minV,
-                dvMaxV = v - maxV + 5,
-                dv = 0;
-        if (dvMinV < 0 || dvMaxV >= 0) {
-            // compare the absolute values, so we get the smallest change
-            // regardless of direction.
-            dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
         }
-
-        return dv;
     }
 
     function readClipboard(evt) {
@@ -799,19 +714,26 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
 
         if (showScrollBars) {
-            bottomRightGutter.set(1, 1);
+            if (wordWrap) {
+                bottomRightGutter.set(1, 0);
+            }
+            else {
+                bottomRightGutter.set(1, 1);
+            }
         }
         else {
             bottomRightGutter.set(0, 0);
         }
 
-        gridBounds.set(
-                topLeftGutter.width + lineCountWidth,
-                0,
-                Math.floor(self.getWidth() /
-                        renderer.character.width) - gridBounds.x - bottomRightGutter.width,
-                Math.floor(self.getHeight() /
-                        renderer.character.height) - bottomRightGutter.height);
+        var x = topLeftGutter.width + lineCountWidth,
+                y = 0,
+                w = Math.floor(self.getWidth() / renderer.character.width) -
+                x -
+                bottomRightGutter.width,
+                h = Math.floor(self.getHeight() / renderer.character.height) -
+                y -
+                bottomRightGutter.height;
+        gridBounds.set(x, y, w, h);
 
         // group the tokens into rows
         scrollLines = [""];
@@ -821,10 +743,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var t = tokenQueue[i].clone();
             var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
             var lb = t.type === "newlines" || wrap;
-            if(wrap) {
+            if (wrap) {
                 tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
             }
-            
+
             tokenRows[tokenRows.length - 1].push(t);
             scrollLines[scrollLines.length - 1] += t.value;
 
@@ -962,20 +884,18 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setCodePage = function (cp) {
         changed = true;
-        var key,
-                code,
-                lang = (navigator.languages && navigator.languages[0]) ||
-                navigator.language ||
-                navigator.userLanguage ||
-                navigator.browserLanguage;
-
-        if (!lang || lang === "en") {
-            lang = "en-US";
-        }
-
+        var key, code, char, name;
         codePage = cp;
-
         if (!codePage) {
+            var lang = (navigator.languages && navigator.languages[0]) ||
+                    navigator.language ||
+                    navigator.userLanguage ||
+                    navigator.browserLanguage;
+
+            if (!lang || lang === "en") {
+                lang = "en-US";
+            }
+
             for (key in CodePage) {
                 cp = CodePage[key];
                 if (cp.language === lang) {
@@ -1002,8 +922,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
             var codes = codePage[type];
             if (typeof (codes) === "object") {
                 for (code in codes) {
-                    var char,
-                            name;
                     if (code.indexOf("_") > -1) {
                         var parts = code.split(' '),
                                 browser = parts[0];
@@ -1097,11 +1015,24 @@ function Primrose(renderToElementOrID, Renderer, options) {
         return tabString;
     };
 
+    function minDelta(v, minV, maxV) {
+        var dvMinV = v - minV,
+                dvMaxV = v - maxV + 5,
+                dv = 0;
+        if (dvMinV < 0 || dvMaxV >= 0) {
+            // compare the absolute values, so we get the smallest change
+            // regardless of direction.
+            dv = Math.abs(dvMinV) < Math.abs(dvMaxV) ? dvMinV : dvMaxV;
+        }
+
+        return dv;
+    }
+
     this.scrollIntoView = function (currentCursor) {
-        this.scroll.y += minDelta(currentCursor.y, this.scroll.y,
-                this.scroll.y + gridBounds.height);
-        this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x +
-                gridBounds.width);
+        this.scroll.y += minDelta(currentCursor.y, this.scroll.y, this.scroll.y + gridBounds.height);
+        if (!wordWrap) {
+            this.scroll.x += minDelta(currentCursor.x, this.scroll.x, this.scroll.x + gridBounds.width);
+        }
         clampScroll();
     };
 
@@ -1150,12 +1081,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
     };
 
     this.readWheel = function (evt) {
-        if (focused) {
-            this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
-            clampScroll();
-            evt.preventDefault();
-            this.forceUpdate();
-        }
+        this.scroll.y += Math.floor(evt.deltaY / wheelScrollSpeed);
+        clampScroll();
+        evt.preventDefault();
+        this.forceUpdate();
     };
 
     this.startPicking = function (gl, x, y) {
@@ -1187,7 +1116,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         surrogate.focus();
     };
 
-    this.bindEvents = function (keyEventSource, pointerEventSource) {
+    this.bindEvents = function (keyEventSource, pointerEventSource, wheelEventSource) {
         if (keyEventSource) {
             keyEventSource.addEventListener("keydown", this.editText.bind(
                     this));
@@ -1209,12 +1138,16 @@ function Primrose(renderToElementOrID, Renderer, options) {
             pointerEventSource.addEventListener("touchend", touchEnd.bind(
                     this));
         }
+
+        if (wheelEventSource) {
+            wheelEventSource.addEventListener("wheel", this.readWheel.bind(this));
+        }
     };
 
     this.overwriteText = function (str) {
-        str = str || "";        
+        str = str || "";
         str = str.replace(/\r\n/g, "\n");
-        
+
         if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
             // TODO: don't rejoin the string first.
             var minCursor = Cursor.min(this.frontCursor, this.backCursor),
@@ -1222,13 +1155,13 @@ function Primrose(renderToElementOrID, Renderer, options) {
                     text = this.getText(),
                     left = text.substring(0, minCursor.i),
                     right = text.substring(maxCursor.i);
-            for (var i = 0; i < str.length; ++i) {
-                minCursor.right(scrollLines);
-            }
-            maxCursor.copy(minCursor);
             this.setText(left + str + right);
+            minCursor.advanceN(scrollLines, str.length);
             this.scrollIntoView(maxCursor);
             clampScroll();
+            maxCursor.copy(minCursor);
+            changed = true;
+            this.drawText();
         }
     };
 
@@ -1320,18 +1253,22 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.drawText = function () {
         if (changed && theme && tokens) {
-            var lineCountWidth = performLayout();
-
-            renderer.render(
-                    tokenRows,
-                    this.frontCursor, this.backCursor,
-                    gridBounds,
-                    this.scroll.x, this.scroll.y,
-                    focused, showLineNumbers, showScrollBars,
-                    lineCountWidth);
-
-            changed = false;
+            this.forceDraw();
         }
+    };
+
+    this.forceDraw = function () {
+        var lineCountWidth = performLayout();
+
+        renderer.render(
+                tokenRows,
+                this.frontCursor, this.backCursor,
+                gridBounds,
+                this.scroll.x, this.scroll.y,
+                focused, showLineNumbers, showScrollBars, wordWrap,
+                lineCountWidth);
+
+        changed = false;
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -1363,30 +1300,30 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setOperatingSystem(options.os);
     this.setCommandSystem(options.commands);
     this.setText(options.file);
-    this.bindEvents(options.keyEventSource, options.pointerEventSource);
+    this.bindEvents(options.keyEventSource, options.pointerEventSource, options.wheelEventSource);
 
     this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
             renderer.id, Themes, theme.name, self, "setTheme", "theme");
-    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
-            renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
-            "language syntax");
-    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
-            renderer.id, CodePage, codePage.name, self, "setCodePage",
-            "localization");
     this.commandSystemSelect = makeSelectorFromObj(
             "primrose-command-system-selector-" + renderer.id, Commands,
             commandSystem.name, self, "setCommandSystem", "command system");
-    this.OperatingSystemelect = makeSelectorFromObj(
+    this.tokenizerSelect = makeSelectorFromObj("primrose-tokenizer-selector-" +
+            renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
+            "language syntax", Grammar);
+    this.keyboardSelect = makeSelectorFromObj("primrose-keyboard-selector-" +
+            renderer.id, CodePage, codePage.name, self, "setCodePage",
+            "localization", CodePage);
+    this.operatingSystemSelect = makeSelectorFromObj(
             "primrose-operating-system-selector-" + renderer.id,
             OperatingSystem, operatingSystem.name, self, "setOperatingSystem",
-            "shortcut style");
+            "shortcut style", OperatingSystem);
 
 
     //////////////////////////////////////////////////////////////////////////
     // wire up event handlers
     //////////////////////////////////////////////////////////////////////////
 
-    window.addEventListener("resize", function(){
+    window.addEventListener("resize", function () {
         changed = renderer.resize();
         self.drawText();
     });
@@ -1395,7 +1332,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
     surrogate.addEventListener("paste", readClipboard.bind(this));
 };/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ * Copyright (C) 2015 Sean
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1411,645 +1348,638 @@ function Primrose(renderToElementOrID, Renderer, options) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-CodePage.DE_QWERTZ = (function () {
+var Rectangle = (function () {
     "use strict";
-    return {
-        name: "Deutsch: QWERTZ",
-        language: "de",
-        deadKeys: [220, 221, 160, 192],
-        NORMAL: {
-            "48": "0",
-            "49": "1",
-            "50": "2",
-            "51": "3",
-            "52": "4",
-            "53": "5",
-            "54": "6",
-            "55": "7",
-            "56": "8",
-            "57": "9",
-            "60": "<",
-            "63": "ß",
-            "65": "a",
-            "66": "b",
-            "67": "c",
-            "68": "d",
-            "69": "e",
-            "70": "f",
-            "71": "g",
-            "72": "h",
-            "73": "i",
-            "74": "j",
-            "75": "k",
-            "76": "l",
-            "77": "m",
-            "78": "n",
-            "79": "o",
-            "80": "p",
-            "81": "q",
-            "82": "r",
-            "83": "s",
-            "84": "t",
-            "85": "u",
-            "86": "v",
-            "87": "w",
-            "88": "x",
-            "89": "y",
-            "90": "z",
-            "160": function (prim) {
-                prim.setDeadKeyState("DEAD3");
-            },
-            "163": "#",
-            "171": "+",
-            "173": "-",
-            "186": "ü",
-            "187": "+",
-            "188": ",",
-            "189": "-",
-            "190": ".",
-            "191": "#",
-            "192": function (prim) {
-                prim.setDeadKeyState("DEAD4");
-            },
-            "219": "ß",
-            "220": function (prim) {
-                prim.setDeadKeyState("DEAD1");
-            },
-            "221": function (prim) {
-                prim.setDeadKeyState("DEAD2");
-            },
-            "222": "ä",
-            "226": "<"
-        },
-        DEAD1NORMAL: {
-            "65": "â",
-            "69": "ê",
-            "73": "î",
-            "79": "ô",
-            "85": "û",
-            "190": "."
-        },
-        DEAD2NORMAL: {
-            "65": "á",
-            "69": "é",
-            "73": "í",
-            "79": "ó",
-            "83": "s",
-            "85": "ú",
-            "89": "ý"
-        },
-        SHIFT: {
-            "48": "=",
-            "49": "!",
-            "50": "\"",
-            "51": "§",
-            "52": "$",
-            "53": "%",
-            "54": "&",
-            "55": "/",
-            "56": "(",
-            "57": ")",
-            "60": ">",
-            "63": "?",
-            "65": "A",
-            "66": "B",
-            "67": "C",
-            "68": "D",
-            "69": "E",
-            "70": "F",
-            "71": "G",
-            "72": "H",
-            "73": "I",
-            "74": "J",
-            "75": "K",
-            "76": "L",
-            "77": "M",
-            "78": "N",
-            "79": "O",
-            "80": "P",
-            "81": "Q",
-            "82": "R",
-            "83": "S",
-            "84": "T",
-            "85": "U",
-            "86": "V",
-            "87": "W",
-            "88": "X",
-            "89": "Y",
-            "90": "Z",
-            "163": "'",
-            "171": "*",
-            "173": "_",
-            "186": "Ü",
-            "187": "*",
-            "188": ";",
-            "189": "_",
-            "190": ":",
-            "191": "'",
-            "192": "Ö",
-            "219": "?",
-            "222": "Ä",
-            "226": ">"
-        },
-        CTRLALT: {
-            "48": "}",
-            "50": "²",
-            "51": "³",
-            "55": "{",
-            "56": "[",
-            "57": "]",
-            "60": "|",
-            "63": "\\",
-            "69": "€",
-            "77": "µ",
-            "81": "@",
-            "171": "~",
-            "187": "~",
-            "219": "\\",
-            "226": "|"
-        },
-        CTRLALTSHIFT: {
-            "63": "ẞ",
-            "219": "ẞ"
-        },
-        DEAD3NORMAL: {
-            "65": "a",
-            "69": "e",
-            "73": "i",
-            "79": "o",
-            "85": "u",
-            "190": "."
-        },
-        DEAD4NORMAL: {
-            "65": "a",
-            "69": "e",
-            "73": "i",
-            "79": "o",
-            "83": "s",
-            "85": "u",
-            "89": "y"
-        }
-    };
-})();
-Keys.addNumPad(CodePage.DE_QWERTZ);;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+    function Rectangle(x, y, width, height) {
+        this.point = new Point(x, y);
+        this.size = new Size(width, height);
 
-CodePage.EN_UKX = (function () {
-    "use strict";
-    return {
-        name: "English: UK Extended",
-        language: "en-GB",
-        CTRLALT: {
-            "52": "€",
-            "65": "á",
-            "69": "é",
-            "73": "í",
-            "79": "ó",
-            "85": "ú",
-            "163": "\\",
-            "192": "¦",
-            "222": "\\",
-            "223": "¦"
-        },
-        CTRLALTSHIFT: {
-            "65": "Á",
-            "69": "É",
-            "73": "Í",
-            "79": "Ó",
-            "85": "Ú",
-            "222": "|"
-        },
-        NORMAL: {
-            "48": "0",
-            "49": "1",
-            "50": "2",
-            "51": "3",
-            "52": "4",
-            "53": "5",
-            "54": "6",
-            "55": "7",
-            "56": "8",
-            "57": "9",
-            "59": ";",
-            "61": "=",
-            "65": "a",
-            "66": "b",
-            "67": "c",
-            "68": "d",
-            "69": "e",
-            "70": "f",
-            "71": "g",
-            "72": "h",
-            "73": "i",
-            "74": "j",
-            "75": "k",
-            "76": "l",
-            "77": "m",
-            "78": "n",
-            "79": "o",
-            "80": "p",
-            "81": "q",
-            "82": "r",
-            "83": "s",
-            "84": "t",
-            "85": "u",
-            "86": "v",
-            "87": "w",
-            "88": "x",
-            "89": "y",
-            "90": "z",
-            "163": "#",
-            "173": "-",
-            "186": ";",
-            "187": "=",
-            "188": ",",
-            "189": "-",
-            "190": ".",
-            "191": "/",
-            "192": "'",
-            "219": "[",
-            "220": "\\",
-            "221": "]",
-            "222": "#",
-            "223": "`"
-        },
-        SHIFT: {
-            "48": ")",
-            "49": "!",
-            "50": "\"",
-            "51": "£",
-            "52": "$",
-            "53": "%",
-            "54": "^",
-            "55": "&",
-            "56": "*",
-            "57": "(",
-            "59": ":",
-            "61": "+",
-            "65": "A",
-            "66": "B",
-            "67": "C",
-            "68": "D",
-            "69": "E",
-            "70": "F",
-            "71": "G",
-            "72": "H",
-            "73": "I",
-            "74": "J",
-            "75": "K",
-            "76": "L",
-            "77": "M",
-            "78": "N",
-            "79": "O",
-            "80": "P",
-            "81": "Q",
-            "82": "R",
-            "83": "S",
-            "84": "T",
-            "85": "U",
-            "86": "V",
-            "87": "W",
-            "88": "X",
-            "89": "Y",
-            "90": "Z",
-            "163": "~",
-            "173": "_",
-            "186": ":",
-            "187": "+",
-            "188": "<",
-            "189": "_",
-            "190": ">",
-            "191": "?",
-            "192": "@",
-            "219": "{",
-            "220": "|",
-            "221": "}",
-            "222": "~",
-            "223": "¬"
-        }
-    };
-})();
-Keys.addNumPad(CodePage.EN_UKX);;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-CodePage.EN_US = (function () {
-    "use strict";
-    return {
-        name: "English: USA",
-        language: "en-US",
-        NORMAL: {
-            "48": "0",
-            "49": "1",
-            "50": "2",
-            "51": "3",
-            "52": "4",
-            "53": "5",
-            "54": "6",
-            "55": "7",
-            "56": "8",
-            "57": "9",
-            "59": ";",
-            "61": "=",
-            "65": "a",
-            "66": "b",
-            "67": "c",
-            "68": "d",
-            "69": "e",
-            "70": "f",
-            "71": "g",
-            "72": "h",
-            "73": "i",
-            "74": "j",
-            "75": "k",
-            "76": "l",
-            "77": "m",
-            "78": "n",
-            "79": "o",
-            "80": "p",
-            "81": "q",
-            "82": "r",
-            "83": "s",
-            "84": "t",
-            "85": "u",
-            "86": "v",
-            "87": "w",
-            "88": "x",
-            "89": "y",
-            "90": "z",
-            "173": "-",
-            "186": ";",
-            "187": "=",
-            "188": ",",
-            "189": "-",
-            "190": ".",
-            "191": "/",
-            "219": "[",
-            "220": "\\",
-            "221": "]",
-            "222": "'"
-        },
-        SHIFT: {
-            "48": ")",
-            "49": "!",
-            "50": "@",
-            "51": "#",
-            "52": "$",
-            "53": "%",
-            "54": "^",
-            "55": "&",
-            "56": "*",
-            "57": "(",
-            "59": ":",
-            "61": "+",
-            "65": "A",
-            "66": "B",
-            "67": "C",
-            "68": "D",
-            "69": "E",
-            "70": "F",
-            "71": "G",
-            "72": "H",
-            "73": "I",
-            "74": "J",
-            "75": "K",
-            "76": "L",
-            "77": "M",
-            "78": "N",
-            "79": "O",
-            "80": "P",
-            "81": "Q",
-            "82": "R",
-            "83": "S",
-            "84": "T",
-            "85": "U",
-            "86": "V",
-            "87": "W",
-            "88": "X",
-            "89": "Y",
-            "90": "Z",
-            "173": "_",
-            "186": ":",
-            "187": "+",
-            "188": "<",
-            "189": "_",
-            "190": ">",
-            "191": "?",
-            "219": "{",
-            "220": "|",
-            "221": "}",
-            "222": "\""
-        }
-    };
-})();
-
-Keys.addNumPad(CodePage.EN_US);;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-CodePage.FR_AZERTY = (function () {
-    "use strict";
-    return {
-        name: "Français: AZERTY",
-        language: "fr",
-        deadKeys: [221, 50, 55],
-        NORMAL: {
-            "48": "à",
-            "49": "&",
-            "50": "é",
-            "51": "\"",
-            "52": "'",
-            "53": "(",
-            "54": "-",
-            "55": "è",
-            "56": "_",
-            "57": "ç",
-            "65": "a",
-            "66": "b",
-            "67": "c",
-            "68": "d",
-            "69": "e",
-            "70": "f",
-            "71": "g",
-            "72": "h",
-            "73": "i",
-            "74": "j",
-            "75": "k",
-            "76": "l",
-            "77": "m",
-            "78": "n",
-            "79": "o",
-            "80": "p",
-            "81": "q",
-            "82": "r",
-            "83": "s",
-            "84": "t",
-            "85": "u",
-            "86": "v",
-            "87": "w",
-            "88": "x",
-            "89": "y",
-            "90": "z",
-            "186": "$",
-            "187": "=",
-            "188": ",",
-            "190": ";",
-            "191": ":",
-            "192": "ù",
-            "219": ")",
-            "220": "*",
-            "221": function (prim) {
-                prim.setDeadKeyState("DEAD1");
+        Object.defineProperties(this, {
+            x: {
+                get: function () {
+                    return this.point.x;
+                },
+                set: function (x) {
+                    this.point.x = x;
+                }
             },
-            "222": "²",
-            "223": "!",
-            "226": "<"
-        },
-        SHIFT: {
-            "48": "0",
-            "49": "1",
-            "50": "2",
-            "51": "3",
-            "52": "4",
-            "53": "5",
-            "54": "6",
-            "55": "7",
-            "56": "8",
-            "57": "9",
-            "65": "A",
-            "66": "B",
-            "67": "C",
-            "68": "D",
-            "69": "E",
-            "70": "F",
-            "71": "G",
-            "72": "H",
-            "73": "I",
-            "74": "J",
-            "75": "K",
-            "76": "L",
-            "77": "M",
-            "78": "N",
-            "79": "O",
-            "80": "P",
-            "81": "Q",
-            "82": "R",
-            "83": "S",
-            "84": "T",
-            "85": "U",
-            "86": "V",
-            "87": "W",
-            "88": "X",
-            "89": "Y",
-            "90": "Z",
-            "186": "£",
-            "187": "+",
-            "188": "?",
-            "190": ".",
-            "191": "/",
-            "192": "%",
-            "219": "°",
-            "220": "µ",
-            "223": "§",
-            "226": ">"
-        },
-        CTRLALT: {
-            "48": "@",
-            "50": function (prim) {
-                prim.setDeadKeyState("DEAD2");
+            left: {
+                get: function () {
+                    return this.point.x;
+                },
+                set: function (x) {
+                    this.point.x = x;
+                }
             },
-            "51": "#",
-            "52": "{",
-            "53": "[",
-            "54": "|",
-            "55": function (prim) {
-                prim.setDeadKeyState("DEAD3");
+            width: {
+                get: function () {
+                    return this.size.width;
+                },
+                set: function (width) {
+                    this.size.width = width;
+                }
             },
-            "56": "\\",
-            "57": "^",
-            "69": "€",
-            "186": "¤",
-            "187": "}",
-            "219": "]"
-        },
-        DEAD1NORMAL: {
-            "65": "â",
-            "69": "ê",
-            "73": "î",
-            "79": "ô",
-            "85": "û"
-        },
-        DEAD2NORMAL: {
-            "65": "ã",
-            "78": "ñ",
-            "79": "õ"
-        },
-        DEAD2CTRLALT: {
-            "50": function (prim) {
-                prim.setDeadKeyState("DEAD2");
+            right: {
+                get: function () {
+                    return this.point.x + this.size.width;
+                },
+                set: function (right) {
+                    this.point.x = right - this.size.width;
+                }
             },
-            "55": function (prim) {
-                prim.setDeadKeyState("DEAD3");
+            y: {
+                get: function () {
+                    return this.point.y;
+                },
+                set: function (y) {
+                    this.point.y = y;
+                }
+            },
+            top: {
+                get: function () {
+                    return this.point.y;
+                },
+                set: function (y) {
+                    this.point.y = y;
+                }
+            },
+            height: {
+                get: function () {
+                    return this.size.height;
+                },
+                set: function (height) {
+                    this.size.height = height;
+                }
+            },
+            bottom: {
+                get: function () {
+                    return this.point.y + this.size.height;
+                },
+                set: function (bottom) {
+                    this.point.y = bottom - this.size.height;
+                }
             }
-        },
-        DEAD1CTRLALT: {
-            "50": function (prim) {
-                prim.setDeadKeyState("DEAD2");
-            }
-        },
-        DEAD3NORMAL: {
-            "48": "à",
-            "50": "é",
-            "55": "è",
-            "65": "à",
-            "69": "è",
-            "73": "ì",
-            "79": "ò",
-            "85": "ù"
+        });
+    }
+
+    Rectangle.prototype.set = function (x, y, width, height) {
+        this.point.set(x, y);
+        this.size.set(width, height);
+    };
+
+    Rectangle.prototype.copy = function (r) {
+        if (r) {
+            this.point.copy(r.point);
+            this.size.copy(r.size);
         }
     };
+
+    Rectangle.prototype.clone = function () {
+        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+    };
+
+    Rectangle.prototype.toString = function () {
+        return fmt("[$1 x $2]", this.point.toString(), this.size.toString());
+    };
+
+    return Rectangle;
+})();;/* 
+ * Copyright (C) 2015 Sean
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var Size = (function () {
+    "use strict";
+    function Size(width, height) {
+        this.set(width || 0, height || 0);
+    }
+
+    Size.prototype.set = function (width, height) {
+        this.width = width;
+        this.height = height;
+    };
+
+    Size.prototype.copy = function (s) {
+        if (s) {
+            this.width = s.width;
+            this.height = s.height;
+        }
+    };
+
+    Size.prototype.clone = function () {
+        return new Size(this.width, this.height);
+    };
+
+    Size.prototype.toString = function () {
+        return fmt("<w:$1, h:$2>", this.width, this.height);
+    };
+
+    return Size;
+})();;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var CodePage = (function () {
+    "use strict";
+    function CodePage(name, lang, options) {
+        this.name = name;
+        this.language = lang;
+
+        copyObject(this, {
+            NORMAL: {
+                "65": "a",
+                "66": "b",
+                "67": "c",
+                "68": "d",
+                "69": "e",
+                "70": "f",
+                "71": "g",
+                "72": "h",
+                "73": "i",
+                "74": "j",
+                "75": "k",
+                "76": "l",
+                "77": "m",
+                "78": "n",
+                "79": "o",
+                "80": "p",
+                "81": "q",
+                "82": "r",
+                "83": "s",
+                "84": "t",
+                "85": "u",
+                "86": "v",
+                "87": "w",
+                "88": "x",
+                "89": "y",
+                "90": "z"
+            },
+            SHIFT: {
+                "65": "A",
+                "66": "B",
+                "67": "C",
+                "68": "D",
+                "69": "E",
+                "70": "F",
+                "71": "G",
+                "72": "H",
+                "73": "I",
+                "74": "J",
+                "75": "K",
+                "76": "L",
+                "77": "M",
+                "78": "N",
+                "79": "O",
+                "80": "P",
+                "81": "Q",
+                "82": "R",
+                "83": "S",
+                "84": "T",
+                "85": "U",
+                "86": "V",
+                "87": "W",
+                "88": "X",
+                "89": "Y",
+                "90": "Z"
+            }
+        });
+
+        copyObject(this, options);
+
+        for (var i = 0; i <= 9; ++i) {
+            var code = Keys["NUMPAD" + i];
+            this.NORMAL[code] = i.toString();
+        }
+    }
+    
+    CodePage.DEAD = function(key){
+        return function (prim) {
+            prim.setDeadKeyState("DEAD" + key);
+        };
+    };
+    
+    return CodePage;
 })();
-Keys.addNumPad(CodePage.FR_AZERTY);;/* 
+;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+CodePage.DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+    deadKeys: [220, 221, 160, 192],
+    NORMAL: {
+        "48": "0",
+        "49": "1",
+        "50": "2",
+        "51": "3",
+        "52": "4",
+        "53": "5",
+        "54": "6",
+        "55": "7",
+        "56": "8",
+        "57": "9",
+        "60": "<",
+        "63": "ß",
+        "160": CodePage.DEAD(3),
+        "163": "#",
+        "171": "+",
+        "173": "-",
+        "186": "ü",
+        "187": "+",
+        "188": ",",
+        "189": "-",
+        "190": ".",
+        "191": "#",
+        "192": CodePage.DEAD(4),
+        "219": "ß",
+        "220": CodePage.DEAD(1),
+        "221": CodePage.DEAD(2),
+        "222": "ä",
+        "226": "<"
+    },
+    DEAD1NORMAL: {
+        "65": "â",
+        "69": "ê",
+        "73": "î",
+        "79": "ô",
+        "85": "û",
+        "190": "."
+    },
+    DEAD2NORMAL: {
+        "65": "á",
+        "69": "é",
+        "73": "í",
+        "79": "ó",
+        "83": "s",
+        "85": "ú",
+        "89": "ý"
+    },
+    SHIFT: {
+        "48": "=",
+        "49": "!",
+        "50": "\"",
+        "51": "§",
+        "52": "$",
+        "53": "%",
+        "54": "&",
+        "55": "/",
+        "56": "(",
+        "57": ")",
+        "60": ">",
+        "63": "?",
+        "163": "'",
+        "171": "*",
+        "173": "_",
+        "186": "Ü",
+        "187": "*",
+        "188": ";",
+        "189": "_",
+        "190": ":",
+        "191": "'",
+        "192": "Ö",
+        "219": "?",
+        "222": "Ä",
+        "226": ">"
+    },
+    CTRLALT: {
+        "48": "}",
+        "50": "²",
+        "51": "³",
+        "55": "{",
+        "56": "[",
+        "57": "]",
+        "60": "|",
+        "63": "\\",
+        "69": "€",
+        "77": "µ",
+        "81": "@",
+        "171": "~",
+        "187": "~",
+        "219": "\\",
+        "226": "|"
+    },
+    CTRLALTSHIFT: {
+        "63": "ẞ",
+        "219": "ẞ"
+    },
+    DEAD3NORMAL: {
+        "65": "a",
+        "69": "e",
+        "73": "i",
+        "79": "o",
+        "85": "u",
+        "190": "."
+    },
+    DEAD4NORMAL: {
+        "65": "a",
+        "69": "e",
+        "73": "i",
+        "79": "o",
+        "83": "s",
+        "85": "u",
+        "89": "y"
+    }
+});;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+CodePage.EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+    CTRLALT: {
+        "52": "€",
+        "65": "á",
+        "69": "é",
+        "73": "í",
+        "79": "ó",
+        "85": "ú",
+        "163": "\\",
+        "192": "¦",
+        "222": "\\",
+        "223": "¦"
+    },
+    CTRLALTSHIFT: {
+        "65": "Á",
+        "69": "É",
+        "73": "Í",
+        "79": "Ó",
+        "85": "Ú",
+        "222": "|"
+    },
+    NORMAL: {
+        "48": "0",
+        "49": "1",
+        "50": "2",
+        "51": "3",
+        "52": "4",
+        "53": "5",
+        "54": "6",
+        "55": "7",
+        "56": "8",
+        "57": "9",
+        "59": ";",
+        "61": "=",
+        "163": "#",
+        "173": "-",
+        "186": ";",
+        "187": "=",
+        "188": ",",
+        "189": "-",
+        "190": ".",
+        "191": "/",
+        "192": "'",
+        "219": "[",
+        "220": "\\",
+        "221": "]",
+        "222": "#",
+        "223": "`"
+    }, SHIFT: {
+        "48": ")",
+        "49": "!",
+        "50": "\"",
+        "51": "£",
+        "52": "$",
+        "53": "%",
+        "54": "^",
+        "55": "&",
+        "56": "*",
+        "57": "(",
+        "59": ":",
+        "61": "+",
+        "163": "~",
+        "173": "_",
+        "186": ":",
+        "187": "+",
+        "188": "<",
+        "189": "_",
+        "190": ">",
+        "191": "?",
+        "192": "@",
+        "219": "{",
+        "220": "|",
+        "221": "}",
+        "222": "~",
+        "223": "¬"
+    }
+});;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+CodePage.EN_US = new CodePage("English: USA", "en-US", {
+    NORMAL: {
+        "48": "0",
+        "49": "1",
+        "50": "2",
+        "51": "3",
+        "52": "4",
+        "53": "5",
+        "54": "6",
+        "55": "7",
+        "56": "8",
+        "57": "9",
+        "59": ";",
+        "61": "=",
+        "173": "-",
+        "186": ";",
+        "187": "=",
+        "188": ",",
+        "189": "-",
+        "190": ".",
+        "191": "/",
+        "219": "[",
+        "220": "\\",
+        "221": "]",
+        "222": "'"
+    },
+    SHIFT: {
+        "48": ")",
+        "49": "!",
+        "50": "@",
+        "51": "#",
+        "52": "$",
+        "53": "%",
+        "54": "^",
+        "55": "&",
+        "56": "*",
+        "57": "(",
+        "59": ":",
+        "61": "+",
+        "173": "_",
+        "186": ":",
+        "187": "+",
+        "188": "<",
+        "189": "_",
+        "190": ">",
+        "191": "?",
+        "219": "{",
+        "220": "|",
+        "221": "}",
+        "222": "\""
+    }
+});;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+CodePage.FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+    deadKeys: [221, 50, 55],
+    NORMAL: {
+        "48": "à",
+        "49": "&",
+        "50": "é",
+        "51": "\"",
+        "52": "'",
+        "53": "(",
+        "54": "-",
+        "55": "è",
+        "56": "_",
+        "57": "ç",
+        "186": "$",
+        "187": "=",
+        "188": ",",
+        "190": ";",
+        "191": ":",
+        "192": "ù",
+        "219": ")",
+        "220": "*",
+        "221": CodePage.DEAD(1),
+        "222": "²",
+        "223": "!",
+        "226": "<"
+    },
+    SHIFT: {
+        "48": "0",
+        "49": "1",
+        "50": "2",
+        "51": "3",
+        "52": "4",
+        "53": "5",
+        "54": "6",
+        "55": "7",
+        "56": "8",
+        "57": "9",
+        "186": "£",
+        "187": "+",
+        "188": "?",
+        "190": ".",
+        "191": "/",
+        "192": "%",
+        "219": "°",
+        "220": "µ",
+        "223": "§",
+        "226": ">"
+    },
+    CTRLALT: {
+        "48": "@",
+        "50": CodePage.DEAD(2),
+        "51": "#",
+        "52": "{",
+        "53": "[",
+        "54": "|",
+        "55": CodePage.DEAD(3),
+        "56": "\\",
+        "57": "^",
+        "69": "€",
+        "186": "¤",
+        "187": "}",
+        "219": "]"
+    },
+    DEAD1NORMAL: {
+        "65": "â",
+        "69": "ê",
+        "73": "î",
+        "79": "ô",
+        "85": "û"
+    },
+    DEAD2NORMAL: {
+        "65": "ã",
+        "78": "ñ",
+        "79": "õ"
+    },
+    DEAD3NORMAL: {
+        "48": "à",
+        "50": "é",
+        "55": "è",
+        "65": "à",
+        "69": "è",
+        "73": "ì",
+        "79": "ò",
+        "85": "ù"
+    }
+});;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2149,14 +2079,7 @@ Commands.DEFAULT = (function () {
             }
         }
     };
-})();
-
-Keys.makeCursorCommand(Commands.DEFAULT, "", "LEFTARROW", "Left");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "RIGHTARROW", "Right");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "UPARROW", "Up");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "DOWNARROW", "Down");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEUP", "PageUp");
-Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEDOWN", "PageDown");;/*
+})();;/*
  https://www.github.com/capnmidnight/VR
  Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
  All rights reserved.
@@ -2177,6 +2100,22 @@ Keys.makeCursorCommand(Commands.DEFAULT, "", "PAGEDOWN", "PageDown");;/*
 
 // Pyschologist.js: so named because it keeps me from going crazy
 
+function copyObject(dest, source, depth){
+    depth = depth | 0;
+    for(var key in source){
+        if(source.hasOwnProperty(key)){
+            if(typeof(source[key]) !== "object"){
+                dest[key] = source[key];
+            }
+            else if(depth < 3){
+                if(!dest[key]){
+                    dest[key] = {};
+                }
+                copyObject(dest[key], source[key], depth + 1);
+            }
+        }
+    }
+}
 
 function makeURL(url, queryMap) {
     var output = [];
@@ -2669,19 +2608,22 @@ function reloadPage() {
     document.location = document.location.href;
 }
 
-function makeSelectorFromObj(id, obj, def, target, prop, lbl) {
+function makeSelectorFromObj(id, obj, def, target, prop, lbl, typeFilter) {
     var elem = cascadeElement(id, "select", HTMLSelectElement);
     var items = [];
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
-            var opt = document.createElement("option");
-            var val = obj[key].name || key;
-            opt.innerHTML = val;
-            items.push(obj[key]);
-            if (val === def) {
-                opt.selected = "selected";
+            var val = obj[key];
+            if (!typeFilter || val instanceof typeFilter){
+                val = val.name || key;
+                var opt = document.createElement("option");
+                opt.innerHTML = val;
+                items.push(obj[key]);
+                if (val === def) {
+                    opt.selected = "selected";
+                }
+                elem.appendChild(opt);
             }
-            elem.appendChild(opt);
         }
     }
 
@@ -2699,12 +2641,12 @@ function makeSelectorFromObj(id, obj, def, target, prop, lbl) {
 
     var container = cascadeElement("container -" + id, "div", HTMLDivElement);
     var label = cascadeElement("label-" + id, "span", HTMLSpanElement);
-    label.innerHTML = " - " + lbl;
+    label.innerHTML = lbl + ": ";
     label.for = elem;
     elem.title = lbl;
     elem.alt = lbl;
-    container.appendChild(elem);
     container.appendChild(label);
+    container.appendChild(elem);
     return container;
 }
 
@@ -2866,8 +2808,9 @@ Grammar.JavaScript = new Grammar("JavaScript", [
     ["comments", /\/\/.*$/],
     ["startBlockComments", /\/\*/],
     ["endBlockComments", /\*\//],
-    ["strings", /"(?:\\"|[^"]*)"/],
-    ["strings", /'(?:\\'|[^']*)'/],
+    ["strings", /"(?:\\"|[^"])*"/],
+    ["strings", /'(?:\\'|[^'])*'/],
+    ["strings", /\/(?:\\\/|[^/])*\/\w*/],
     ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
     ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
     ["functions", /(\w+)(?:\s*\()/],
@@ -2908,45 +2851,122 @@ Grammar.PlainText = new Grammar("PlainText", [
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+Grammar.TestResults = new Grammar("TestResults", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["numbers", /(\[)(o+)/],
+    ["numbers", /(\d+ succeeded), 0 failed/],
+    ["numbers", /^    Successes:/],
+    ["functions", /(x+)\]/],
+    ["functions", /[1-9]\d* failed/],
+    ["functions", /^    Failures:/],
+    ["comments", /(\d+ms:)(.*)/],
+    ["keywords", /(Test results for )(\w+):/],
+    ["strings", /        \w+/]
+]);;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystem.OSX = (function () {
+OperatingSystem.OSX = new OperatingSystem(
+        "OS X", "META", "ALT", "METASHIFT_z",
+        "META", "LEFTARROW", "RIGHTARROW",
+        "META", "UPARROW", "DOWNARROW");
+;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var OperatingSystem = (function () {
     "use strict";
-    return {
-        name: "OSX",
-        META_a: function (prim, lines) {
+    
+    function setCursorCommand(obj, mod, key, func, cur) {
+        var name = mod + "_" + key;
+        obj[name] = function (prim, lines) {
+            prim["cursor" + func](lines, prim[cur + "Cursor"]);
+        };
+    }
+    
+    function makeCursorCommand(obj, baseMod, key, func) {
+        setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
+        setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
+    }
+    
+    function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
+        this.name = name;
+
+        this[pre1 + "_a"] = function (prim, lines) {
             prim.frontCursor.fullhome(lines);
             prim.backCursor.fullend(lines);
-        },
-        METASHIFT_z: function (prim, lines) {
+            prim.forceUpdate();
+        };
+
+        this[redo] = function (prim, lines) {
             prim.redo();
             prim.scrollIntoView(prim.frontCursor);
-        },
-        META_z: function (prim, lines) {
+        };
+
+        this[pre1 + "_z"] = function (prim, lines) {
             prim.undo();
             prim.scrollIntoView(prim.frontCursor);
-        },
-        META_DOWNARROW: function (prim, lines) {
+        };
+
+        this[pre1 + "_DOWNARROW"] = function (prim, lines) {
             if (prim.scroll.y < lines.length) {
                 ++prim.scroll.y;
             }
-        },
-        META_UPARROW: function (prim, lines) {
+            prim.forceUpdate();
+        };
+
+        this[pre1 + "_UPARROW"] = function (prim, lines) {
             if (prim.scroll.y > 0) {
                 --prim.scroll.y;
             }
-        }
-    };
-})();
+            prim.forceUpdate();
+        };
 
-Keys.makeCursorCommand(OperatingSystem.OSX, "META", "LEFTARROW", "Home");
-Keys.makeCursorCommand(OperatingSystem.OSX, "META", "RIGHTARROW", "End");
-Keys.makeCursorCommand(OperatingSystem.OSX, "META", "UPARROW", "FullHome");
-Keys.makeCursorCommand(OperatingSystem.OSX, "META", "DOWNARROW", "FullEnd");
-Keys.makeCursorCommand(OperatingSystem.OSX, "ALT", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OperatingSystem.OSX, "ALT", "LEFTARROW", "SkipLeft");
-;/* 
+        makeCursorCommand(this, "", "LEFTARROW", "Left");
+        makeCursorCommand(this, "", "RIGHTARROW", "Right");     
+        makeCursorCommand(this, "", "UPARROW", "Up");
+        makeCursorCommand(this, "", "DOWNARROW", "Down");
+        makeCursorCommand(this, "", "PAGEUP", "PageUp");
+        makeCursorCommand(this, "", "PAGEDOWN", "PageDown");
+        makeCursorCommand(this, pre2, "LEFTARROW", "SkipLeft");
+        makeCursorCommand(this, pre2, "RIGHTARROW", "SkipRight");   
+        makeCursorCommand(this, pre3, home, "Home");
+        makeCursorCommand(this, pre3, end, "End");
+        makeCursorCommand(this, pre4, fullHome, "FullHome");
+        makeCursorCommand(this, pre4, fullEnd, "FullEnd");
+    }
+
+    return OperatingSystem;
+})();;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -2965,44 +2985,10 @@ Keys.makeCursorCommand(OperatingSystem.OSX, "ALT", "LEFTARROW", "SkipLeft");
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystem.WINDOWS = (function () {
-    "use strict";
-    return {
-        name: "Windows",
-        CTRL_a: function (prim, lines) {
-            prim.frontCursor.fullhome(lines);
-            prim.backCursor.fullend(lines);
-            prim.forceUpdate();
-        },
-        CTRL_y: function (prim, lines) {
-            prim.redo();
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        CTRL_z: function (prim, lines) {
-            prim.undo();
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        CTRL_DOWNARROW: function (prim, lines) {
-            if (prim.scroll.y < lines.length) {
-                ++prim.scroll.y;
-            }
-            prim.forceUpdate();
-        },
-        CTRL_UPARROW: function (prim, lines) {
-            if (prim.scroll.y > 0) {
-                --prim.scroll.y;
-            }
-            prim.forceUpdate();
-        }
-    };
-})();
-
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "", "HOME", "Home");
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "", "END", "End");
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "HOME", "FullHome");
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "END", "FullEnd");
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "RIGHTARROW", "SkipRight");
-Keys.makeCursorCommand(OperatingSystem.WINDOWS, "CTRL", "LEFTARROW", "SkipLeft");
+OperatingSystem.WINDOWS = new OperatingSystem(
+        "Windows", "CTRL", "CTRL", "CTRL_y",
+        "", "HOME", "END",
+        "CTRL", "HOME", "END");
 ;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3117,7 +3103,7 @@ Renderers.Canvas = (function () {
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
             bgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
-            
+
 
             // draw the current row highlighter
             if (focused) {
@@ -3125,7 +3111,7 @@ Renderers.Canvas = (function () {
                         0, minCursor.y + 0.2,
                         gridBounds.width, maxCursor.y - minCursor.y + 1);
             }
-                
+
             for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
@@ -3224,7 +3210,7 @@ Renderers.Canvas = (function () {
             return maxLineWidth;
         }
 
-        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth) {
+        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth) {
             tgfx.clearRect(0, 0, canvas.width, canvas.height);
             tgfx.save();
             tgfx.translate(0, -scrollTop * self.character.height);
@@ -3263,23 +3249,27 @@ Renderers.Canvas = (function () {
                 var drawHeight = gridBounds.height * self.character.height;
                 var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridBounds.x * self.character.width;
                 var scrollY = (scrollTop * drawHeight) / tokenRows.length + gridBounds.y * self.character.height;
-                var scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth);
-                var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
 
                 tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
-                tgfx.fillRect(
+                if(!wordWrap && maxLineWidth > gridBounds.width){
+                    var scrollBarWidth = drawWidth * (gridBounds.width / maxLineWidth);
+                    tgfx.fillRect(
                         scrollX,
                         (gridBounds.height + 0.25) * self.character.height,
                         Math.max(self.character.width, scrollBarWidth),
                         self.character.height);
+                }
 
                 //vertical
-                tgfx.fillRect(
-                        canvas.width - self.character.width,
-                        scrollY,
-                        self.character.width,
-                        Math.max(self.character.height, scrollBarHeight));
+                if(tokenRows.length > gridBounds.height){
+                    var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
+                    tgfx.fillRect(
+                            canvas.width - self.character.width,
+                            scrollY,
+                            self.character.width,
+                            Math.max(self.character.height, scrollBarHeight));
+                }
             }
         }
 
@@ -3287,13 +3277,13 @@ Renderers.Canvas = (function () {
                 frontCursor, backCursor,
                 gridBounds,
                 scrollLeft, scrollTop,
-                focused, showLineNumbers, showScrollBars,
+                focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth) {
             var maxLineWidth = 0;
 
             renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused);
             maxLineWidth = renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop);
-            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, lineCountWidth, maxLineWidth);
+            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth);
 
             gfx.clearRect(0, 0, canvas.width, canvas.height);
             gfx.drawImage(bgCanvas, 0, 0);
@@ -3480,4 +3470,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.5.0.0";
+};Primrose.VERSION = "v0.5.1.1";

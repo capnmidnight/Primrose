@@ -386,7 +386,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setCodePage = function (cp) {
         changed = true;
         var key, code, char, name;
-        codePage = cp
+        codePage = cp;
         if (!codePage) {
             var lang = (navigator.languages && navigator.languages[0]) ||
                     navigator.language ||
