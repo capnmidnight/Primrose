@@ -109,12 +109,27 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.pasteAtCursor(str);
         }
     }
+    
+    function setSurrogateSize(){
+        var bounds = renderer.getCanvas().getBoundingClientRect();
+        surrogateContainer.style.left = px(bounds.left);
+        surrogateContainer.style.top = px(window.scrollY + bounds.top);
+        surrogateContainer.style.width = px(bounds.right - bounds.left);
+        surrogateContainer.style.height = px(bounds.bottom - bounds.top);
+        //surrogateContainer.style.visibility = "hidden";
+        surrogateContainer.style.opacity = 0.5;
+        surrogate.style.fontFamily = theme.fontFamily;
+        surrogate.style.fontSize = px(renderer.character.height * 0.99);
+        surrogate.style.lineHeight = px(renderer.character.height);
+        
+    }
 
     function setCursorXY(cursor, x, y) {
         changed = true;
         pointer.set(x, y);
         renderer.pixel2cell(pointer, self.scroll, gridBounds);
         cursor.setXY(pointer.x, pointer.y, scrollLines);
+        setSurrogateCursor();
     }
 
     function mouseButtonDown(pointerEventSource, evt) {
@@ -553,14 +568,20 @@ function Primrose(renderToElementOrID, Renderer, options) {
             changed = renderer.resize();
         }
     };
+    
+    function setSurrogateCursor(){
+        surrogate.selectionStart = self.frontCursor.i;
+        surrogate.selectionEnd = self.backCursor.i;        
+    }
 
     this.setText = function (txt) {
         txt = txt || "";
         txt = txt.replace(/\r\n/g, "\n");
-        surrogate.value = txt;
         var lines = txt.split("\n");
         this.pushUndo(lines);
         this.drawText();
+        surrogate.value = txt;
+        setSurrogateCursor();
     };
 
     this.getPixelRatio = function () {
@@ -693,21 +714,6 @@ function Primrose(renderToElementOrID, Renderer, options) {
         this.drawText();
     };
 
-    this.placeSurrogateUnder = function (elem) {
-        if (surrogate && elem) {
-            // wait a brief amount of time to make sure the browser rendering 
-            // engine had time to catch up
-            setTimeout(function () {
-                var bounds = elem.getBoundingClientRect();
-                surrogateContainer.style.left = bounds.left + "px";
-                surrogateContainer.style.top = window.scrollY + bounds.top + "px";
-                surrogateContainer.style.width = (bounds.right - bounds.left) + "px";
-                surrogateContainer.style.height = (bounds.bottom - bounds.top) + "px";
-                surrogateContainer.style.opacity = 0.5;
-            }, 250);
-        }
-    };
-
     this.editText = function (evt) {
         evt = evt || event;
 
@@ -774,6 +780,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 this.scroll.x, this.scroll.y,
                 focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth);
+                
+        setSurrogateCursor();
 
         changed = false;
     };
@@ -794,7 +802,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     surrogateContainer = makeHidingContainer(
             "primrose-surrogate-textarea-container-" + renderer.id, surrogate);
 
-    document.body.appendChild(surrogateContainer);
+    document.body.insertBefore(surrogateContainer, document.body.children[0]);
 
     this.setWheelScrollSpeed(options.wheelScrollSpeed);
     this.setWordWrap(!options.disableWordWrap);
@@ -832,10 +840,12 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     window.addEventListener("resize", function () {
         changed = renderer.resize();
+        setSurrogateSize();
         self.forceDraw();
     });
 
     surrogate.addEventListener("copy", this.copySelectedText.bind(this));
     surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
     surrogate.addEventListener("paste", readClipboard.bind(this));
+    setSurrogateSize();
 }
