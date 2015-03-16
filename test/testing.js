@@ -15,42 +15,53 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Assert = {
-    ALPHA: 0.0000000000001,
-    areEqual: function(expected, actual, msg){
-        if(expected !== actual
-            && (typeof(expected) !== "number"
-                || typeof(actual) !== "number"
+var Assert = (function () {
+    "use strict";
+    function getDifference(expected, actual) {
+        return typeof (expected) !== "number"
+                || typeof (actual) !== "number"
                 || Math.abs(actual - expected)
-            || (Number.isNaN(expected)
-                ^ Number.isNaN(actual))) > Assert.ALPHA){
-            throw new Error(fmt("$3(expected value) $1 != $2 (actual value)", expected, actual, msg ? "[" + msg + "] " : ""));
-        }
-    },
-
-    throwsError: function(thunk){
-        var errored;
-        try{
-            thunk();
-            errored = false;
-        }
-        catch(exp){
-            errored = true;
-        }
-        if(!errored){
-            throw new Error("Excpected an error but there was none");
-        }
-    },
-
-    isNotNull: function(obj, msg){
-        if(obj === null || obj === undefined){
-            throw new Error((msg ? "[" + msg + "] " : "") + "object was null");
-        }
+                || (Number.isNaN(expected)
+                        ^ Number.isNaN(actual));
     }
-};
+    function errr(op, expected, actual, msg){
+        return fmt("$3(expected value) $1 $4 $2 (actual value)", expected, actual, msg ? "[" + msg + "] " : "", op);
+    }
+    return {
+        ALPHA: 0.0000000000001,
+        areEqual: function (expected, actual, msg) {
+            if (expected !== actual && getDifference(expected, actual) >= Assert.ALPHA) {
+                throw new Error(errr("!=", expected, actual, msg));
+            }
+        },
+        areNotEqual: function (expected, actual, msg) {
+            if (expected === actual || getDifference(expected, actual) < Assert.ALPHA) {
+                throw new Error(errr("==", expected, actual, msg));
+            }
+        },
+        throwsError: function (thunk) {
+            var errored;
+            try {
+                thunk();
+                errored = false;
+            }
+            catch (exp) {
+                errored = true;
+            }
+            if (!errored) {
+                throw new Error("Excpected an error but there was none");
+            }
+        },
+        isNotNull: function (obj, msg) {
+            if (obj === null || obj === undefined) {
+                throw new Error((msg ? "[" + msg + "] " : "") + "object was null");
+            }
+        }
+    };
+})();
 
-function test(func, printer){
-    if(func.tests){
+function test(func) {
+    if (func.tests) {
         var results = {
             success: {},
             failure: {},
@@ -58,21 +69,18 @@ function test(func, printer){
             failed: 0,
             succeeded: 0
         };
-        for(var key in func.tests){
-            if(func.tests[key]
-                && typeof(func.tests[key]) === "function"){
-                if(printer){
-                    printer(fmt("Running $1:", key));
-                }
+        for (var key in func.tests) {
+            if (func.tests[key]
+                    && typeof (func.tests[key]) === "function") {
                 var start = Date.now();
                 ++results.total;
-                try{
+                try {
                     func.tests[key]();
                     ++results.succeeded;
                     var end = Date.now();
                     results.success[key] = {dt: (end - start)};
                 }
-                catch(exp){
+                catch (exp) {
                     ++results.failed;
                     var end = Date.now();
                     results.failure[key] = {dt: (end - start), msg: exp.message, stack: exp.stack || false};
@@ -83,37 +91,38 @@ function test(func, printer){
     return results;
 }
 
-function displayTest(func, log){
-    if(func && func.tests){
-        var result = test(func, log),
-            nameMatch = /function (\w+)\(/,
-            matches = func.toString().match(nameMatch),
-            name = matches && matches[1],
-            beam = "";
-        for(var i = 0; i < result.total; ++i){
+function displayTest(func, log) {
+    if (func && func.tests) {
+        var result = test(func),
+                nameMatch = /function (\w+)\(/,
+                matches = func.toString().match(nameMatch),
+                name = matches && matches[1],
+                beam = "";
+        for (var i = 0; i < result.total; ++i) {
             beam += i < result.succeeded
-                ? "o"
-                : "x";
+                    ? "o"
+                    : "x";
         }
+
         log(fmt("Test results for $1: [$2] $3 succeeded, $4 failed", name, beam, result.succeeded, result.failed));
 
         log("Details:");
-        if(result.succeeded > 0){
+        if (result.succeeded > 0) {
             log("    Successes:");
-            for(var key in result.success){
-                if(result.success[key]){
+            for (var key in result.success) {
+                if (result.success[key]) {
                     log(fmt("        $1 succeeded after $2ms", key, result.success[key].dt));
                 }
             }
         }
 
-        if(result.failed > 0){
+        if (result.failed > 0) {
             log("    Failures:");
-            for(var key in result.failure){
-                if(result.failure[key]){
+            for (var key in result.failure) {
+                if (result.failure[key]) {
                     var val = result.failure[key];
                     log(fmt("        $1 FAILED after $2ms: $3", key, val.dt, val.msg));
-                    if(val.stack && val.stack.indexOf("at Object.Assert") === -1){
+                    if (val.stack && val.stack.indexOf("at Object.Assert") === -1) {
                         log(fmt("        $1", val.stack));
                     }
                 }
@@ -122,13 +131,13 @@ function displayTest(func, log){
     }
 }
 
-function consoleTest(func){
+function consoleTest(func) {
     displayTest(func, console.log.bind(console));
 }
 
-function stringTest(func){
+function stringTest(func) {
     var accum = "";
-    var log = function(txt){
+    var log = function (txt) {
         accum += txt + "\n";
     };
     displayTest(func, log);

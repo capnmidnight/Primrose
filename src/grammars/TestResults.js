@@ -18,9 +18,13 @@
 Grammar.TestResults = new Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["numbers", /(\[)(o+)/],
-    ["comments", /(\d+ms:)(.*)/],
-    ["numbers", /\d+ms/],
+    ["numbers", /(\d+ succeeded), 0 failed/],
+    ["numbers", /^    Successes:/],
     ["functions", /(x+)\]/],
-    ["keywords", /(?:Details:|Successes:|Failures:)/],
+    ["functions", /[1-9]\d* failed/],
+    ["functions", /^    Failures:/],
+    ["comments", /(\d+ms:)(.*)/],
+    ["keywords", /(Test results for )(\w+):/],
+    ["keywords", /^Details:/],
     ["strings", /        \w+/]
 ]);

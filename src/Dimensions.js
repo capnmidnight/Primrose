@@ -89,6 +89,14 @@ var Rectangle = (function () {
                     this.point.x = x;
                 }
             },
+            left: {
+                get: function () {
+                    return this.point.x;
+                },
+                set: function (x) {
+                    this.point.x = x;
+                }
+            },
             width: {
                 get: function () {
                     return this.size.width;
@@ -106,6 +114,14 @@ var Rectangle = (function () {
                 }
             },
             y: {
+                get: function () {
+                    return this.point.y;
+                },
+                set: function (y) {
+                    this.point.y = y;
+                }
+            },
+            top: {
                 get: function () {
                     return this.point.y;
                 },

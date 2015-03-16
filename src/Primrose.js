@@ -214,18 +214,23 @@ function Primrose(renderToElementOrID, Renderer, options) {
         }
 
         if (showScrollBars) {
-            bottomRightGutter.set(1, wordWrap ? 0 : 1);
+            if (wordWrap) {
+                bottomRightGutter.set(1, 0);
+            }
+            else {
+                bottomRightGutter.set(1, 1);
+            }
         }
         else {
             bottomRightGutter.set(0, 0);
         }
 
         var x = topLeftGutter.width + lineCountWidth,
-            y = 0,
-            w = Math.floor(self.getWidth() / renderer.character.width) -
+                y = 0,
+                w = Math.floor(self.getWidth() / renderer.character.width) -
                 x -
                 bottomRightGutter.width,
-            h = Math.floor(self.getHeight() / renderer.character.height) -
+                h = Math.floor(self.getHeight() / renderer.character.height) -
                 y -
                 bottomRightGutter.height;
         gridBounds.set(x, y, w, h);

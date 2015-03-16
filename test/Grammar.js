@@ -16,16 +16,6 @@
  */
 
 Grammar.tests = {
-    captureOnlyAGroup: function () {
-        var src = "function(){ a.b.c = \"asdf\"; }";
-        var tokens = Grammar.JavaScript.tokenize(src);
-        var res = tokens.map(function (t) {
-            return t.value;
-        }).join("");
-        Assert.areEqual(src, res);
-        Assert.areEqual("c", tokens[2].value, "token isn't right value");
-        Assert.areEqual("members", tokens[2].type, "token types do not match");
-    },
     aSimpleString: function () {
         var src = "\"a\"";
         var tokens = Grammar.JavaScript.tokenize(src);
