@@ -19,7 +19,7 @@
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-Commands.DEFAULT = (function () {
+Commands.TextEditor = (function () {
     "use strict";
     return {
         name: "Basic commands",

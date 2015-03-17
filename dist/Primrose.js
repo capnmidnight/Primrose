@@ -1049,7 +1049,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
     this.setOperatingSystem = function (os) {
         changed = true;
         operatingSystem = os || (isOSX ? OperatingSystem.OSX :
-                OperatingSystem.WINDOWS);
+                OperatingSystem.Windows);
         refreshCommandPack();
     };
 
@@ -1059,7 +1059,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
 
     this.setCommandSystem = function (cmd) {
         changed = true;
-        commandSystem = cmd || Commands.DEFAULT;
+        commandSystem = cmd || Commands.TextEditor;
         refreshCommandPack();
     };
 
@@ -2096,7 +2096,7 @@ CodePage.FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-Commands.DEFAULT = (function () {
+Commands.TextEditor = (function () {
     "use strict";
     return {
         name: "Basic commands",
@@ -3001,7 +3001,7 @@ OperatingSystem.OSX = new OperatingSystem(
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystem.WINDOWS = new OperatingSystem(
+OperatingSystem.Windows = new OperatingSystem(
         "Windows", "CTRL", "CTRL", "CTRL_y",
         "", "HOME", "END",
         "CTRL", "HOME", "END");
