@@ -109,8 +109,8 @@ function Primrose(renderToElementOrID, Renderer, options) {
             self.pasteAtCursor(str);
         }
     }
-    
-    function setSurrogateSize(){
+
+    function setSurrogateSize() {
         var bounds = renderer.getCanvas().getBoundingClientRect();
         surrogateContainer.style.left = px(bounds.left);
         surrogateContainer.style.top = px(window.scrollY + bounds.top);
@@ -120,7 +120,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
         var ch = renderer.character.height / renderer.getPixelRatio();
         surrogate.style.fontSize = px(ch * 0.99);
         surrogate.style.lineHeight = px(ch);
-        
+
     }
 
     function setCursorXY(cursor, x, y) {
@@ -568,10 +568,10 @@ function Primrose(renderToElementOrID, Renderer, options) {
             changed = renderer.resize();
         }
     };
-    
-    function setSurrogateCursor(){
+
+    function setSurrogateCursor() {
         surrogate.selectionStart = self.frontCursor.i;
-        surrogate.selectionEnd = self.backCursor.i;        
+        surrogate.selectionEnd = self.backCursor.i;
     }
 
     this.setText = function (txt) {
@@ -780,7 +780,7 @@ function Primrose(renderToElementOrID, Renderer, options) {
                 this.scroll.x, this.scroll.y,
                 focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth);
-                
+
         setSurrogateCursor();
 
         changed = false;

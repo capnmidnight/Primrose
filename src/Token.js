@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 Sean
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,31 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Point = (function () {
+var Token = (function () {
     "use strict";
-    function Point(x, y) {
-        this.set(x || 0, y || 0);
+    function Token(value, type, index, line) {
+        this.value = value;
+        this.type = type;
+        this.index = index;
+        this.line = line;
     }
 
-    Point.prototype.set = function (x, y) {
-        this.x = x;
-        this.y = y;
+    Token.prototype.clone = function () {
+        return new Token(this.value, this.type, this.index, this.line);
     };
 
-    Point.prototype.copy = function (p) {
-        if (p) {
-            this.x = p.x;
-            this.y = p.y;
-        }
+    Token.prototype.splitAt = function (i) {
+        var next = this.value.substring(i);
+        this.value = this.value.substring(0, i);
+        return new Token(next, this.type, this.index + i, this.line);
     };
 
-    Point.prototype.clone = function () {
-        return new Point(this.x, this.y);
-    };
-
-    Point.prototype.toString = function () {
-        return fmt("(x:$1, y:$2)", this.x, this.y);
-    };
-
-    return Point;
+    return Token;
 })();
