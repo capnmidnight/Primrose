@@ -133,7 +133,6 @@ var Primrose = (function () {
         }
 
         function pointerStart(x, y) {
-            console.log(fmt("$1, $2", x, y));
             if (options.pointerEventSource) {
                 for (var i = 0; i < Primrose.EDITORS.length; ++i) {
                     var e = Primrose.EDITORS[i];

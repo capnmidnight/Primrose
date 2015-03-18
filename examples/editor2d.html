@@ -59,7 +59,6 @@
             <div style="position:absolute;top:2em;bottom:0;width:100%;">
                 <canvas id="editorCanvas" style="position:absolute;height:100%;width:50%;cursor:text"></canvas>
                 <canvas id="testResultsCanvas" style="position:absolute;left:50%;height:100%;width:25%;"></canvas>
-                <canvas id="menuCanvas" style="position:absolute;left:75%;height:100%;width:25%;"></canvas>
             </div>
         </div>
 
@@ -94,13 +93,6 @@
                         wheelEventSource: testResultsCanvas,
                         tokenizer: Grammar.TestResults,
                         theme: Themes.Dark
-                    });
-
-                    var menu = new Primrose(menuCanvas, Renderers.Canvas, {
-                        file: "asdf",
-                        keyEventSource: window,
-                        pointerEventSource: menuCanvas,
-                        wheelEventSource: menuCanvas
                     });
 
                     editor.focus();
