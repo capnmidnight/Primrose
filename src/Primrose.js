@@ -136,7 +136,7 @@ var Primrose = (function () {
             if (options.pointerEventSource) {
                 for (var i = 0; i < Primrose.EDITORS.length; ++i) {
                     var e = Primrose.EDITORS[i];
-                    if (e !== this) {
+                    if (e !== self) {
                         e.blur();
                     }
                 }
