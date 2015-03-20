@@ -190,7 +190,9 @@ var Cursor = (function () {
                 --this.y;
                 this.x = lines[this.y].length;
             }
-            this.reverseFromNewline(lines);
+            if(this.reverseFromNewline(lines)){
+                ++this.i;
+            }
         }
         this.moved = true;
     };
@@ -292,7 +294,10 @@ var Cursor = (function () {
     Cursor.prototype.reverseFromNewline = function (lines) {
         if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
             --this.x;
+            --this.i;
+            return true;
         }
+        return false;
     };
 
     return Cursor;
@@ -3519,4 +3524,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.6.2.2";
+};Primrose.VERSION = "v0.6.2.3";
