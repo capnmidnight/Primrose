@@ -49,15 +49,6 @@ var Cursor = (function () {
         this.moved = false;
     };
 
-    Cursor.prototype.rectify = function (lines) {
-        if (this.y >= lines.length) {
-            this.y = lines.length - 1;
-        }
-        if (this.x > lines[this.y].length) {
-            this.x = lines[this.y].length;
-        }
-    };
-
     Cursor.prototype.fullhome = function (lines) {
         this.i = 0;
         this.x = 0;
@@ -200,7 +191,6 @@ var Cursor = (function () {
     Cursor.prototype.reverseFromNewline = function (lines) {
         if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
             --this.x;
-            --this.i;
         }
     };
 

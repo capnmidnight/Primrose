@@ -761,8 +761,6 @@ var Primrose = (function () {
                         if (this.frontCursor.moved && !this.backCursor.moved) {
                             this.backCursor.copy(this.frontCursor);
                         }
-                        this.frontCursor.rectify(scrollLines);
-                        this.backCursor.rectify(scrollLines);
                         clampScroll();
                         evt.preventDefault();
                     }
