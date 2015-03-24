@@ -1,4 +1,4 @@
-/*! Primrose 2015-03-20
+/*! Primrose 2015-03-24
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -968,7 +968,9 @@ var Primrose = (function () {
         this.setTheme = function (t) {
             theme = t || Themes.DEFAULT;
             renderer.setTheme(theme);
-            changed = renderer.resize();
+            renderer.resize();
+            changed = true;
+            this.drawText();
         };
 
         this.getTheme = function () {
@@ -3524,4 +3526,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.6.2.3";
+};Primrose.VERSION = "v0.6.2.4";

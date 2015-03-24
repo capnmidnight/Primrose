@@ -372,7 +372,9 @@ var Primrose = (function () {
         this.setTheme = function (t) {
             theme = t || Themes.DEFAULT;
             renderer.setTheme(theme);
-            changed = renderer.resize();
+            renderer.resize();
+            changed = true;
+            this.drawText();
         };
 
         this.getTheme = function () {
