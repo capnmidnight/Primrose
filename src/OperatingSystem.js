@@ -20,8 +20,8 @@ var OperatingSystem = (function () {
     
     function setCursorCommand(obj, mod, key, func, cur) {
         var name = mod + "_" + key;
-        obj[name] = function (prim, lines) {
-            prim["cursor" + func](lines, prim[cur + "Cursor"]);
+        obj[name] = function (prim, tokenRows) {
+            prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
         };
     }
     
@@ -33,30 +33,30 @@ var OperatingSystem = (function () {
     function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
         this.name = name;
 
-        this[pre1 + "_a"] = function (prim, lines) {
-            prim.frontCursor.fullhome(lines);
-            prim.backCursor.fullend(lines);
+        this[pre1 + "_a"] = function (prim, tokenRows) {
+            prim.frontCursor.fullhome(tokenRows);
+            prim.backCursor.fullend(tokenRows);
             prim.forceUpdate();
         };
 
-        this[redo] = function (prim, lines) {
+        this[redo] = function (prim, tokenRows) {
             prim.redo();
             prim.scrollIntoView(prim.frontCursor);
         };
 
-        this[pre1 + "_z"] = function (prim, lines) {
+        this[pre1 + "_z"] = function (prim, tokenRows) {
             prim.undo();
             prim.scrollIntoView(prim.frontCursor);
         };
 
-        this[pre1 + "_DOWNARROW"] = function (prim, lines) {
-            if (prim.scroll.y < lines.length) {
+        this[pre1 + "_DOWNARROW"] = function (prim, tokenRows) {
+            if (prim.scroll.y < tokenRows.length) {
                 ++prim.scroll.y;
             }
             prim.forceUpdate();
         };
 
-        this[pre1 + "_UPARROW"] = function (prim, lines) {
+        this[pre1 + "_UPARROW"] = function (prim, tokenRows) {
             if (prim.scroll.y > 0) {
                 --prim.scroll.y;
             }

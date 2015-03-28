@@ -25,77 +25,40 @@ Commands.TextEditor = (function () {
         name: "Basic commands",
         NORMAL_SPACEBAR: " ",
         SHIFT_SPACEBAR: " ",
-        NORMAL_BACKSPACE: function (prim, lines) {
+        NORMAL_BACKSPACE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.frontCursor.left(lines);
+                prim.frontCursor.left(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_ENTER: function (prim, lines) {
+        NORMAL_ENTER: function (prim, tokenRows) {
             var indent = "";
-            for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
-                indent += " ";
+            var tokenRow = tokenRows[prim.frontCursor.y];
+            if(tokenRow.length > 0 && tokenRow[0].type === "whitespace"){
+                indent = tokenRow[0].value;
             }
             prim.overwriteText("\n" + indent);
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_DELETE: function (prim, lines) {
+        NORMAL_DELETE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.backCursor.right(lines);
+                prim.backCursor.right(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        SHIFT_DELETE: function (prim, lines) {
+        SHIFT_DELETE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.frontCursor.home(lines);
-                prim.backCursor.end(lines);
+                prim.frontCursor.home(tokenRows);
+                prim.backCursor.end(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_TAB: function (prim, lines) {
+        NORMAL_TAB: function (prim, tokenRows) {
             var ts = prim.getTabString();
-            if (prim.frontCursor.y === prim.backCursor.y) {
-                prim.overwriteText(ts);
-            }
-            else {
-                var a = Cursor.min(prim.frontCursor, prim.backCursor);
-                var b = Cursor.max(prim.frontCursor, prim.backCursor);
-                a.home(lines);
-                b.end(lines);
-                for (var y = a.y; y <= b.y; ++y) {
-                    lines[y] = ts + lines[y];
-                }
-                a.setXY(0, a.y, lines);
-                b.setXY(0, b.y, lines);
-                b.end(lines);
-                prim.pushUndo(lines);
-            }
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        SHIFT_TAB: function (prim, lines) {
-            var a = Cursor.min(prim.frontCursor, prim.backCursor);
-            var b = Cursor.max(prim.frontCursor, prim.backCursor);
-            a.home(lines);
-            b.home(lines);
-            var tw = prim.getTabWidth();
-            var ts = prim.getTabString();
-            var edited = false;
-            for (var y = a.y; y <= b.y; ++y) {
-                if (lines[y].substring(0, tw) === ts) {
-                    lines[y] = lines[y].substring(tw);
-                    edited = true;
-                }
-            }
-            if (edited) {
-                a.setXY(0, a.y, lines);
-                b.setXY(0, b.y, lines);
-                b.end(lines);
-                prim.pushUndo(lines);
-                prim.scrollIntoView(prim.frontCursor);
-            }
+            prim.overwriteText(ts);
         }
     };
 })();

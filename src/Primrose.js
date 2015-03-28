@@ -40,7 +40,6 @@ var Primrose = (function () {
                 tokenizer,
                 tokens,
                 tokenRows,
-                scrollLines,
                 theme,
                 pointer = new Point(),
                 tabWidth,
@@ -89,7 +88,7 @@ var Primrose = (function () {
             }
             else {
                 while (0 < self.scroll.y &&
-                        self.scroll.y > scrollLines.length - gridBounds.height) {
+                        self.scroll.y > tokenRows.length - gridBounds.height) {
                     --self.scroll.y;
                 }
             }
@@ -128,7 +127,7 @@ var Primrose = (function () {
             changed = true;
             pointer.set(x, y);
             renderer.pixel2cell(pointer, self.scroll, gridBounds);
-            cursor.setXY(pointer.x, pointer.y, scrollLines);
+            cursor.setXY(pointer.x, pointer.y, tokenRows);
             setSurrogateCursor();
         }
 
@@ -224,9 +223,9 @@ var Primrose = (function () {
 
         function makeCursorCommand(name) {
             var method = name.toLowerCase();
-            self["cursor" + name] = function (lines, cursor) {
+            self["cursor" + name] = function (tokenRows, cursor) {
                 changed = true;
-                cursor[method](lines);
+                cursor[method](tokenRows);
                 self.scrollIntoView(cursor);
             };
         }
@@ -272,12 +271,12 @@ var Primrose = (function () {
             surrogate.style.height = px(gridBounds.height * ch);
 
             // group the tokens into rows
-            scrollLines = [""];
             tokenRows = [[]];
+            var currentRowWidth = 0;
             var tokenQueue = tokens.slice();
             for (var i = 0; i < tokenQueue.length; ++i) {
                 var t = tokenQueue[i].clone();
-                var widthLeft = gridBounds.width - scrollLines[scrollLines.length - 1].length;
+                var widthLeft = gridBounds.width - currentRowWidth;
                 var wrap = wordWrap && t.value.length > widthLeft;
                 var breakLine = t.type === "newlines" || wrap;
                 if (wrap) {
@@ -285,11 +284,11 @@ var Primrose = (function () {
                 }
 
                 tokenRows[tokenRows.length - 1].push(t);
-                scrollLines[scrollLines.length - 1] += t.value;
+                currentRowWidth += t.value.length;
 
                 if (breakLine) {
                     tokenRows.push([]);
-                    scrollLines.push("");
+                    currentRowWidth = 0;
                 }
             }
             return lineCountWidth;
@@ -305,15 +304,15 @@ var Primrose = (function () {
             "Home", "End",
             "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
-        this.cursorPageUp = function (lines, cursor) {
+        this.cursorPageUp = function (tokenRows, cursor) {
             changed = true;
-            cursor.incY(-gridBounds.height, lines);
+            cursor.incY(-gridBounds.height, tokenRows);
             this.scrollIntoView(cursor);
         };
 
-        this.cursorPageDown = function (lines, cursor) {
+        this.cursorPageDown = function (tokenRows, cursor) {
             changed = true;
-            cursor.incY(gridBounds.height, lines);
+            cursor.incY(gridBounds.height, tokenRows);
             this.scrollIntoView(cursor);
         };
 
@@ -609,19 +608,28 @@ var Primrose = (function () {
         this.cell2i = function (x, y) {
             var i = 0;
             for (var dy = 0; dy < y; ++dy) {
-                i += scrollLines[dy].length + 1;
+                var tokenRow = tokenRows[dy];
+                for(var dx = 0; dx < tokenRow.length; ++dx){
+                    i += tokenRow[dx].value.length;
+                }
+                ++i;
             }
             i += x;
             return i;
         };
 
         this.i2cell = function (i) {
-            for (var y = 0; y < scrollLines.length; ++y) {
-                if (i <= scrollLines.length) {
+            for (var y = 0; y < tokenRows.length; ++y) {
+                var tokenRow = tokenRows[y];
+                var rowWidth = 0;
+                for(var x = 0; x < tokenRow.length; ++x){
+                    rowWidth += tokenRow[x].value.length;
+                }
+                if (i <= rowWidth) {
                     return {x: i, y: y};
                 }
                 else {
-                    i -= scrollLines.length - 1;
+                    i -= rowWidth - 1;
                 }
             }
         };
@@ -696,7 +704,7 @@ var Primrose = (function () {
                         left = text.substring(0, minCursor.i),
                         right = text.substring(maxCursor.i);
                 this.setText(left + str + right);
-                minCursor.advanceN(scrollLines, str.length);
+                minCursor.advanceN(tokenRows, str.length);
                 this.scrollIntoView(maxCursor);
                 clampScroll();
                 maxCursor.copy(minCursor);
@@ -760,7 +768,7 @@ var Primrose = (function () {
                     if (func) {
                         this.frontCursor.moved = false;
                         this.backCursor.moved = false;
-                        func(self, scrollLines);
+                        func(self, tokenRows);
                         if (this.frontCursor.moved && !this.backCursor.moved) {
                             this.backCursor.copy(this.frontCursor);
                         }
