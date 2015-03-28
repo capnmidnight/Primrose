@@ -1,4 +1,4 @@
-/*! Primrose 2015-03-24
+/*! Primrose 2015-03-28
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -150,149 +150,174 @@ var Cursor = (function () {
         this.moved = false;
     };
 
-    Cursor.prototype.fullhome = function (lines) {
+    Cursor.prototype.fullhome = function (tokenRows) {
         this.i = 0;
         this.x = 0;
         this.y = 0;
         this.moved = true;
     };
-
-    Cursor.prototype.fullend = function (lines) {
-        this.i = 0;
-        for(var i = 0; i < lines.length; ++i){
-            this.i += lines[i].length;
+    
+    function rebuildLine(tokenRows, y){
+        var tokenRow = tokenRows[y];
+        var line = "";
+        for(var i = 0; i < tokenRow.length; ++i){
+            line += tokenRow[i].value;
         }
-        this.y = lines.length - 1;
-        this.x = lines[this.y].length;
+        return line;
+    }
+
+    Cursor.prototype.fullend = function (tokenRows) {
+        this.i = 0;
+        var lastLength = 0;
+        for(var y = 0; y < tokenRows.length; ++y){
+            var line = rebuildLine(tokenRows, y);
+            lastLength = line.length;
+            this.i += lastLength;
+        }
+        this.y = tokenRows.length - 1;
+        this.x = lastLength;
         this.moved = true;
     };
 
-    Cursor.prototype.skipleft = function (lines) {
+    Cursor.prototype.skipleft = function (tokenRows) {
         if (this.x === 0) {
-            this.left(lines);
+            this.left(tokenRows);
         }
         else {
             var x = this.x - 1;
-            var line = reverse(lines[this.y].substring(0, x));
-            var m = line.match(/(\s|\W)+/);
-            var dx = m ? (m.index + m[0].length + 1) : line.length;
+            var line = rebuildLine(tokenRows, this.y);
+            var word = reverse(line.substring(0, x));
+            var m = word.match(/(\s|\W)+/);
+            var dx = m ? (m.index + m[0].length + 1) : word.length;
             this.i -= dx;
             this.x -= dx;
         }
         this.moved = true;
     };
 
-    Cursor.prototype.left = function (lines) {
+    Cursor.prototype.left = function (tokenRows) {
         if (this.i > 0) {
             --this.i;
             --this.x;
             if (this.x < 0) {
                 --this.y;
-                this.x = lines[this.y].length;
+                var line = rebuildLine(tokenRows, this.y);
+                this.x = line.length;
             }
-            if(this.reverseFromNewline(lines)){
+            if(this.reverseFromNewline(tokenRows)){
                 ++this.i;
             }
         }
         this.moved = true;
     };
 
-    Cursor.prototype.skipright = function (lines) {
-        if (this.x === lines[this.y].length || lines[this.y][this.x] === '\n') {
-            this.right(lines);
+    Cursor.prototype.skipright = function (tokenRows) {
+        var line = rebuildLine(tokenRows, this.y);
+        if (this.x === line.length || line[line.length - 1] === '\n') {
+            this.right(tokenRows);
         }
         else {
             var x = this.x + 1;
-            var line = lines[this.y].substring(x);
+            line = line.substring(x);
             var m = line.match(/(\s|\W)+/);
             var dx = m ? (m.index + m[0].length + 1) : (line.length - this.x);
             this.i += dx;
             this.x += dx;
-            this.reverseFromNewline(lines);
+            this.reverseFromNewline(tokenRows);
         }
         this.moved = true;
     };
 
-    Cursor.prototype.right = function (lines) {
-        this.advanceN(lines, 1);
+    Cursor.prototype.right = function (tokenRows) {
+        this.advanceN(tokenRows, 1);
     };
 
-    Cursor.prototype.advanceN = function (lines, n) {
-        if (this.y < lines.length - 1 || this.x < lines[this.y].length) {
-            this.i += n;
-            this.x += n;
-            while (this.x > lines[this.y].length) {
-                this.x -= lines[this.y].length;
-                ++this.y;
-            }
-            if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
-                ++this.y;
-                this.x = 0;
+    Cursor.prototype.advanceN = function (tokenRows, n) {
+        if (this.y < tokenRows.length - 1){
+            var line = rebuildLine(tokenRows, this.y);
+            if(this.x < line.length) {
+                this.i += n;
+                this.x += n;
+                while (this.x > line.length) {
+                    this.x -= line.length;
+                    ++this.y;
+                }
+                if (this.x > 0 && line[this.x - 1] === '\n') {
+                    ++this.y;
+                    this.x = 0;
+                }
             }
         }
         this.moved = true;
     };
 
-    Cursor.prototype.home = function (lines) {
+    Cursor.prototype.home = function (tokenRows) {
         this.i -= this.x;
         this.x = 0;
         this.moved = true;
     };
 
-    Cursor.prototype.end = function (lines) {
-        var dx = lines[this.y].length - this.x;
+    Cursor.prototype.end = function (tokenRows) {
+        var line = rebuildLine(tokenRows, this.y);
+        var dx = line.length - this.x;
         this.i += dx;
         this.x += dx;
-        this.reverseFromNewline(lines);
+        this.reverseFromNewline(tokenRows);
         this.moved = true;
     };
 
-    Cursor.prototype.up = function (lines) {
+    Cursor.prototype.up = function (tokenRows) {
         if (this.y > 0) {
             --this.y;
-            var dx = Math.min(0, lines[this.y].length - this.x);
+            var line = rebuildLine(tokenRows, this.y);
+            var dx = Math.min(0, line.length - this.x);
             this.x += dx;
-            this.i -= lines[this.y].length - dx;
-            this.reverseFromNewline(lines);
+            this.i -= line.length - dx;
+            this.reverseFromNewline(tokenRows);
         }
         this.moved = true;
     };
 
-    Cursor.prototype.down = function (lines) {
-        if (this.y < lines.length - 1) {
+    Cursor.prototype.down = function (tokenRows) {
+        if (this.y < tokenRows.length - 1) {
             ++this.y;
-            var dx = Math.min(0, lines[this.y].length - this.x);
+            var line = rebuildLine(tokenRows, this.y);
+            var pLine = rebuildLine(tokenRows, this.y - 1);
+            var dx = Math.min(0, line.length - this.x);
             this.x += dx;
-            this.i += lines[this.y - 1].length + dx;
-            this.reverseFromNewline(lines);
+            this.i += pLine.length + dx;
+            this.reverseFromNewline(tokenRows);
         }
         this.moved = true;
     };
 
-    Cursor.prototype.incY = function (dy, lines) {
-        this.y = Math.max(0, Math.min(lines.length - 1, this.y + dy));
-        this.x = Math.max(0, Math.min(lines[this.y].length, this.x));
+    Cursor.prototype.incY = function (dy, tokenRows) {
+        this.y = Math.max(0, Math.min(tokenRows.length - 1, this.y + dy));
+        var line = rebuildLine(tokenRows, this.y);
+        this.x = Math.max(0, Math.min(line.length, this.x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+            this.i += rebuildLine(tokenRows, i).length;
         }
-        this.reverseFromNewline(lines);
+        this.reverseFromNewline(tokenRows);
         this.moved = true;
     };
 
-    Cursor.prototype.setXY = function (x, y, lines) {
-        this.y = Math.max(0, Math.min(lines.length - 1, y));
-        this.x = Math.max(0, Math.min(lines[this.y].length, x));
+    Cursor.prototype.setXY = function (x, y, tokenRows) {
+        this.y = Math.max(0, Math.min(tokenRows.length - 1, y));
+        var line = rebuildLine(tokenRows, this.y);
+        this.x = Math.max(0, Math.min(line.length, x));
         this.i = this.x;
         for (var i = 0; i < this.y; ++i) {
-            this.i += lines[i].length;
+            this.i += rebuildLine(tokenRows, i).length;
         }
-        this.reverseFromNewline(lines);
+        this.reverseFromNewline(tokenRows);
         this.moved = true;
     };
 
-    Cursor.prototype.reverseFromNewline = function (lines) {
-        if (this.x > 0 && lines[this.y][this.x - 1] === '\n') {
+    Cursor.prototype.reverseFromNewline = function (tokenRows) {
+        var line = rebuildLine(tokenRows, this.y);
+        if (this.x > 0 && line[this.x - 1] === '\n') {
             --this.x;
             --this.i;
             return true;
@@ -492,8 +517,8 @@ var OperatingSystem = (function () {
     
     function setCursorCommand(obj, mod, key, func, cur) {
         var name = mod + "_" + key;
-        obj[name] = function (prim, lines) {
-            prim["cursor" + func](lines, prim[cur + "Cursor"]);
+        obj[name] = function (prim, tokenRows) {
+            prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
         };
     }
     
@@ -505,30 +530,30 @@ var OperatingSystem = (function () {
     function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
         this.name = name;
 
-        this[pre1 + "_a"] = function (prim, lines) {
-            prim.frontCursor.fullhome(lines);
-            prim.backCursor.fullend(lines);
+        this[pre1 + "_a"] = function (prim, tokenRows) {
+            prim.frontCursor.fullhome(tokenRows);
+            prim.backCursor.fullend(tokenRows);
             prim.forceUpdate();
         };
 
-        this[redo] = function (prim, lines) {
+        this[redo] = function (prim, tokenRows) {
             prim.redo();
             prim.scrollIntoView(prim.frontCursor);
         };
 
-        this[pre1 + "_z"] = function (prim, lines) {
+        this[pre1 + "_z"] = function (prim, tokenRows) {
             prim.undo();
             prim.scrollIntoView(prim.frontCursor);
         };
 
-        this[pre1 + "_DOWNARROW"] = function (prim, lines) {
-            if (prim.scroll.y < lines.length) {
+        this[pre1 + "_DOWNARROW"] = function (prim, tokenRows) {
+            if (prim.scroll.y < tokenRows.length) {
                 ++prim.scroll.y;
             }
             prim.forceUpdate();
         };
 
-        this[pre1 + "_UPARROW"] = function (prim, lines) {
+        this[pre1 + "_UPARROW"] = function (prim, tokenRows) {
             if (prim.scroll.y > 0) {
                 --prim.scroll.y;
             }
@@ -636,9 +661,9 @@ var Primrose = (function () {
                 tokenizer,
                 tokens,
                 tokenRows,
-                scrollLines,
                 theme,
                 pointer = new Point(),
+                lastPointer = new Point(),
                 tabWidth,
                 tabString,
                 currentTouchID,
@@ -685,7 +710,7 @@ var Primrose = (function () {
             }
             else {
                 while (0 < self.scroll.y &&
-                        self.scroll.y > scrollLines.length - gridBounds.height) {
+                        self.scroll.y > tokenRows.length - gridBounds.height) {
                     --self.scroll.y;
                 }
             }
@@ -724,8 +749,46 @@ var Primrose = (function () {
             changed = true;
             pointer.set(x, y);
             renderer.pixel2cell(pointer, self.scroll, gridBounds);
-            cursor.setXY(pointer.x, pointer.y, scrollLines);
-            setSurrogateCursor();
+            var gx = pointer.x - self.scroll.x;
+            var gy = pointer.y - self.scroll.y;
+            var onBottom = gy >= gridBounds.height;
+            var onLeft = gx < 0;
+            var onRight = pointer.x >= gridBounds.width;
+            if(!onBottom && !onLeft && !onRight){
+                cursor.setXY(pointer.x, pointer.y, tokenRows);
+                setSurrogateCursor();
+                self.backCursor.copy(cursor);
+            }
+            else if(onRight && !onBottom){
+                var scrollHeight = tokenRows.length - gridBounds.height;
+                if(gy >= 0 && scrollHeight >= 0){
+                    var sy = gy * scrollHeight / gridBounds.height;
+                    self.scroll.y = Math.floor(sy);
+                }
+            }
+            else if(onBottom && !onLeft){
+                var maxWidth = 0;
+                for(var dy = 0; dy < tokenRows.length; ++dy){
+                    var tokenRow = tokenRows[dy];
+                    var width = 0;
+                    for(var dx = 0; dx < tokenRow.length; ++dx){
+                        width += tokenRow[dx].value.length;
+                    }
+                    maxWidth = Math.max(maxWidth, width);
+                }
+                var scrollWidth = maxWidth - gridBounds.width;
+                if(gx >= 0 && scrollWidth >= 0){
+                    var sx = gx * scrollWidth / gridBounds.width;
+                    self.scroll.x = Math.floor(sx);
+                }
+            }
+            else if(onLeft && !onBottom){
+                // clicked in number-line gutter
+            }
+            else{
+                // clicked in the lower-left corner
+            }
+            lastPointer.copy(pointer);
         }
 
         function pointerStart(x, y) {
@@ -820,9 +883,9 @@ var Primrose = (function () {
 
         function makeCursorCommand(name) {
             var method = name.toLowerCase();
-            self["cursor" + name] = function (lines, cursor) {
+            self["cursor" + name] = function (tokenRows, cursor) {
                 changed = true;
-                cursor[method](lines);
+                cursor[method](tokenRows);
                 self.scrollIntoView(cursor);
             };
         }
@@ -868,23 +931,24 @@ var Primrose = (function () {
             surrogate.style.height = px(gridBounds.height * ch);
 
             // group the tokens into rows
-            scrollLines = [""];
             tokenRows = [[]];
+            var currentRowWidth = 0;
             var tokenQueue = tokens.slice();
             for (var i = 0; i < tokenQueue.length; ++i) {
                 var t = tokenQueue[i].clone();
-                var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
-                var lb = t.type === "newlines" || wrap;
+                var widthLeft = gridBounds.width - currentRowWidth;
+                var wrap = wordWrap && t.value.length > widthLeft;
+                var breakLine = t.type === "newlines" || wrap;
                 if (wrap) {
-                    tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
+                    tokenQueue.splice(i + 1, 0, t.splitAt(widthLeft));
                 }
 
                 tokenRows[tokenRows.length - 1].push(t);
-                scrollLines[scrollLines.length - 1] += t.value;
+                currentRowWidth += t.value.length;
 
-                if (lb) {
+                if (breakLine) {
                     tokenRows.push([]);
-                    scrollLines.push("");
+                    currentRowWidth = 0;
                 }
             }
             return lineCountWidth;
@@ -900,15 +964,15 @@ var Primrose = (function () {
             "Home", "End",
             "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
-        this.cursorPageUp = function (lines, cursor) {
+        this.cursorPageUp = function (tokenRows, cursor) {
             changed = true;
-            cursor.incY(-gridBounds.height, lines);
+            cursor.incY(-gridBounds.height, tokenRows);
             this.scrollIntoView(cursor);
         };
 
-        this.cursorPageDown = function (lines, cursor) {
+        this.cursorPageDown = function (tokenRows, cursor) {
             changed = true;
-            cursor.incY(gridBounds.height, lines);
+            cursor.incY(gridBounds.height, tokenRows);
             this.scrollIntoView(cursor);
         };
 
@@ -1204,19 +1268,28 @@ var Primrose = (function () {
         this.cell2i = function (x, y) {
             var i = 0;
             for (var dy = 0; dy < y; ++dy) {
-                i += scrollLines[dy].length + 1;
+                var tokenRow = tokenRows[dy];
+                for(var dx = 0; dx < tokenRow.length; ++dx){
+                    i += tokenRow[dx].value.length;
+                }
+                ++i;
             }
             i += x;
             return i;
         };
 
         this.i2cell = function (i) {
-            for (var y = 0; y < scrollLines.length; ++y) {
-                if (i <= scrollLines.length) {
+            for (var y = 0; y < tokenRows.length; ++y) {
+                var tokenRow = tokenRows[y];
+                var rowWidth = 0;
+                for(var x = 0; x < tokenRow.length; ++x){
+                    rowWidth += tokenRow[x].value.length;
+                }
+                if (i <= rowWidth) {
                     return {x: i, y: y};
                 }
                 else {
-                    i -= scrollLines.length - 1;
+                    i -= rowWidth - 1;
                 }
             }
         };
@@ -1240,7 +1313,6 @@ var Primrose = (function () {
 
         this.startPointer = function (x, y) {
             setCursorXY(this.frontCursor, x, y);
-            this.backCursor.copy(this.frontCursor);
             dragging = true;
             this.drawText();
         };
@@ -1291,7 +1363,7 @@ var Primrose = (function () {
                         left = text.substring(0, minCursor.i),
                         right = text.substring(maxCursor.i);
                 this.setText(left + str + right);
-                minCursor.advanceN(scrollLines, str.length);
+                minCursor.advanceN(tokenRows, str.length);
                 this.scrollIntoView(maxCursor);
                 clampScroll();
                 maxCursor.copy(minCursor);
@@ -1355,7 +1427,7 @@ var Primrose = (function () {
                     if (func) {
                         this.frontCursor.moved = false;
                         this.backCursor.moved = false;
-                        func(self, scrollLines);
+                        func(self, tokenRows);
                         if (this.frontCursor.moved && !this.backCursor.moved) {
                             this.backCursor.copy(this.frontCursor);
                         }
@@ -2142,77 +2214,40 @@ Commands.TextEditor = (function () {
         name: "Basic commands",
         NORMAL_SPACEBAR: " ",
         SHIFT_SPACEBAR: " ",
-        NORMAL_BACKSPACE: function (prim, lines) {
+        NORMAL_BACKSPACE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.frontCursor.left(lines);
+                prim.frontCursor.left(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_ENTER: function (prim, lines) {
+        NORMAL_ENTER: function (prim, tokenRows) {
             var indent = "";
-            for (var i = 0; i < lines[prim.frontCursor.y].length && lines[prim.frontCursor.y][i] === " "; ++i) {
-                indent += " ";
+            var tokenRow = tokenRows[prim.frontCursor.y];
+            if(tokenRow.length > 0 && tokenRow[0].type === "whitespace"){
+                indent = tokenRow[0].value;
             }
             prim.overwriteText("\n" + indent);
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_DELETE: function (prim, lines) {
+        NORMAL_DELETE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.backCursor.right(lines);
+                prim.backCursor.right(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        SHIFT_DELETE: function (prim, lines) {
+        SHIFT_DELETE: function (prim, tokenRows) {
             if (prim.frontCursor.i === prim.backCursor.i) {
-                prim.frontCursor.home(lines);
-                prim.backCursor.end(lines);
+                prim.frontCursor.home(tokenRows);
+                prim.backCursor.end(tokenRows);
             }
             prim.overwriteText();
             prim.scrollIntoView(prim.frontCursor);
         },
-        NORMAL_TAB: function (prim, lines) {
+        NORMAL_TAB: function (prim, tokenRows) {
             var ts = prim.getTabString();
-            if (prim.frontCursor.y === prim.backCursor.y) {
-                prim.overwriteText(ts);
-            }
-            else {
-                var a = Cursor.min(prim.frontCursor, prim.backCursor);
-                var b = Cursor.max(prim.frontCursor, prim.backCursor);
-                a.home(lines);
-                b.end(lines);
-                for (var y = a.y; y <= b.y; ++y) {
-                    lines[y] = ts + lines[y];
-                }
-                a.setXY(0, a.y, lines);
-                b.setXY(0, b.y, lines);
-                b.end(lines);
-                prim.pushUndo(lines);
-            }
-            prim.scrollIntoView(prim.frontCursor);
-        },
-        SHIFT_TAB: function (prim, lines) {
-            var a = Cursor.min(prim.frontCursor, prim.backCursor);
-            var b = Cursor.max(prim.frontCursor, prim.backCursor);
-            a.home(lines);
-            b.home(lines);
-            var tw = prim.getTabWidth();
-            var ts = prim.getTabString();
-            var edited = false;
-            for (var y = a.y; y <= b.y; ++y) {
-                if (lines[y].substring(0, tw) === ts) {
-                    lines[y] = lines[y].substring(tw);
-                    edited = true;
-                }
-            }
-            if (edited) {
-                a.setXY(0, a.y, lines);
-                b.setXY(0, b.y, lines);
-                b.end(lines);
-                prim.pushUndo(lines);
-                prim.scrollIntoView(prim.frontCursor);
-            }
+            prim.overwriteText(ts);
         }
     };
 })();;/*
@@ -3526,4 +3561,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.6.2.4";
+};Primrose.VERSION = "v0.7.0.0";

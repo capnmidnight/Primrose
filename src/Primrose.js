@@ -42,6 +42,7 @@ var Primrose = (function () {
                 tokenRows,
                 theme,
                 pointer = new Point(),
+                lastPointer = new Point(),
                 tabWidth,
                 tabString,
                 currentTouchID,
@@ -127,8 +128,46 @@ var Primrose = (function () {
             changed = true;
             pointer.set(x, y);
             renderer.pixel2cell(pointer, self.scroll, gridBounds);
-            cursor.setXY(pointer.x, pointer.y, tokenRows);
-            setSurrogateCursor();
+            var gx = pointer.x - self.scroll.x;
+            var gy = pointer.y - self.scroll.y;
+            var onBottom = gy >= gridBounds.height;
+            var onLeft = gx < 0;
+            var onRight = pointer.x >= gridBounds.width;
+            if(!onBottom && !onLeft && !onRight){
+                cursor.setXY(pointer.x, pointer.y, tokenRows);
+                setSurrogateCursor();
+                self.backCursor.copy(cursor);
+            }
+            else if(onRight && !onBottom){
+                var scrollHeight = tokenRows.length - gridBounds.height;
+                if(gy >= 0 && scrollHeight >= 0){
+                    var sy = gy * scrollHeight / gridBounds.height;
+                    self.scroll.y = Math.floor(sy);
+                }
+            }
+            else if(onBottom && !onLeft){
+                var maxWidth = 0;
+                for(var dy = 0; dy < tokenRows.length; ++dy){
+                    var tokenRow = tokenRows[dy];
+                    var width = 0;
+                    for(var dx = 0; dx < tokenRow.length; ++dx){
+                        width += tokenRow[dx].value.length;
+                    }
+                    maxWidth = Math.max(maxWidth, width);
+                }
+                var scrollWidth = maxWidth - gridBounds.width;
+                if(gx >= 0 && scrollWidth >= 0){
+                    var sx = gx * scrollWidth / gridBounds.width;
+                    self.scroll.x = Math.floor(sx);
+                }
+            }
+            else if(onLeft && !onBottom){
+                // clicked in number-line gutter
+            }
+            else{
+                // clicked in the lower-left corner
+            }
+            lastPointer.copy(pointer);
         }
 
         function pointerStart(x, y) {
@@ -653,7 +692,6 @@ var Primrose = (function () {
 
         this.startPointer = function (x, y) {
             setCursorXY(this.frontCursor, x, y);
-            this.backCursor.copy(this.frontCursor);
             dragging = true;
             this.drawText();
         };
