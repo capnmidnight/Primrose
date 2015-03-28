@@ -277,16 +277,17 @@ var Primrose = (function () {
             var tokenQueue = tokens.slice();
             for (var i = 0; i < tokenQueue.length; ++i) {
                 var t = tokenQueue[i].clone();
-                var wrap = wordWrap && scrollLines[scrollLines.length - 1].length + t.value.length > gridBounds.width;
-                var lb = t.type === "newlines" || wrap;
+                var widthLeft = gridBounds.width - scrollLines[scrollLines.length - 1].length;
+                var wrap = wordWrap && t.value.length > widthLeft;
+                var breakLine = t.type === "newlines" || wrap;
                 if (wrap) {
-                    tokenQueue.splice(i + 1, 0, t.splitAt(gridBounds.width - scrollLines[scrollLines.length - 1].length));
+                    tokenQueue.splice(i + 1, 0, t.splitAt(widthLeft));
                 }
 
                 tokenRows[tokenRows.length - 1].push(t);
                 scrollLines[scrollLines.length - 1] += t.value;
 
-                if (lb) {
+                if (breakLine) {
                     tokenRows.push([]);
                     scrollLines.push("");
                 }
