@@ -29,6 +29,8 @@ Renderers.Canvas = (function () {
                 tgfx = trimCanvas.getContext("2d"),
                 theme = null,
                 texture = null, pickingTexture = null, pickingPixelBuffer = null;
+        
+        this.VSCROLL_WIDTH = 2;
 
         this.character = new Size();
         this.id = canvas.id;
@@ -274,9 +276,9 @@ Renderers.Canvas = (function () {
                 if(tokenRows.length > gridBounds.height){
                     var scrollBarHeight = drawHeight * (gridBounds.height / tokenRows.length);
                     tgfx.fillRect(
-                            canvas.width - self.character.width,
+                            canvas.width - self.VSCROLL_WIDTH * self.character.width,
                             scrollY,
-                            self.character.width,
+                            self.VSCROLL_WIDTH * self.character.width,
                             Math.max(self.character.height, scrollBarHeight));
                 }
             }

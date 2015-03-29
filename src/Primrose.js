@@ -279,10 +279,10 @@ var Primrose = (function () {
 
             if (showScrollBars) {
                 if (wordWrap) {
-                    bottomRightGutter.set(1, 0);
+                    bottomRightGutter.set(renderer.VSCROLL_WIDTH, 0);
                 }
                 else {
-                    bottomRightGutter.set(1, 1);
+                    bottomRightGutter.set(renderer.VSCROLL_WIDTH, 1);
                 }
             }
             else {
