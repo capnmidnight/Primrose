@@ -99,7 +99,7 @@ var Primrose = (function () {
             evt.returnValue = false;
             var clipboard = evt.clipboardData || window.clipboardData,
                     str = clipboard.getData(window.clipboardData ? "Text" :
-                    "text/plain");
+                            "text/plain");
             if (str) {
                 self.pasteAtCursor(str);
             }
@@ -714,15 +714,17 @@ var Primrose = (function () {
         function setFalse(evt) {
             evt.returnValue = false;
         }
-        
+
         this.bindEvents = function (k, p, w) {
             if (k) {
                 k.addEventListener("keydown", this.editText.bind(this));
                 surrogate.addEventListener("beforecopy", setFalse);
                 surrogate.addEventListener("beforecut", setFalse);
                 k.addEventListener("beforepaste", setFalse);
-                surrogate.addEventListener("copy", this.copySelectedText.bind(this));
-                surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
+                surrogate.addEventListener("copy", this.copySelectedText.bind(
+                        this));
+                surrogate.addEventListener("cut", this.cutSelectedText.bind(
+                        this));
                 k.addEventListener("paste", readClipboard.bind(this));
             }
 
