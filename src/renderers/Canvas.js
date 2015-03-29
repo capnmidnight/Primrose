@@ -98,7 +98,7 @@ Renderers.Canvas = (function () {
                     h * self.character.height + 1);
         }
 
-        function renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused) {
+        function renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scroll, focused) {
             var minCursor = Cursor.min(frontCursor, backCursor),
                     maxCursor = Cursor.max(frontCursor, backCursor),
                     tokenFront = new Cursor(),
@@ -111,7 +111,7 @@ Renderers.Canvas = (function () {
 
             bgfx[clearFunc](0, 0, canvas.width, canvas.height);
             bgfx.save();
-            bgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
+            bgfx.translate((gridBounds.x - scroll.x) * self.character.width, -scroll.y * self.character.height);
 
 
             // draw the current row highlighter
@@ -131,8 +131,8 @@ Renderers.Canvas = (function () {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scrollTop <= y && y < scrollTop + gridBounds.height &&
-                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridBounds.width) {
+                    if (scroll.y <= y && y < scroll.y + gridBounds.height &&
+                            scroll.x <= tokenBack.x && tokenFront.x < scroll.x + gridBounds.width) {
                         // draw the selection box
                         var inSelection = minCursor.i <= tokenBack.i && tokenFront.i < maxCursor.i;
                         if (inSelection) {
@@ -174,14 +174,14 @@ Renderers.Canvas = (function () {
             bgfx.restore();
         }
 
-        function renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop) {
+        function renderCanvasForeground(tokenRows, gridBounds, scroll) {
             var tokenFront = new Cursor(),
                     tokenBack = new Cursor(),
                     maxLineWidth = 0;
 
             fgfx.clearRect(0, 0, canvas.width, canvas.height);
             fgfx.save();
-            fgfx.translate((gridBounds.x - scrollLeft) * self.character.width, -scrollTop * self.character.height);
+            fgfx.translate((gridBounds.x - scroll.x) * self.character.width, -scroll.y * self.character.height);
             for (var y = 0; y < tokenRows.length; ++y) {
                 // draw the tokens on this row
                 var row = tokenRows[y];
@@ -191,8 +191,8 @@ Renderers.Canvas = (function () {
                     tokenBack.i += t.value.length;
 
                     // skip drawing tokens that aren't in view
-                    if (scrollTop <= y && y < scrollTop + gridBounds.height &&
-                            scrollLeft <= tokenBack.x && tokenFront.x < scrollLeft + gridBounds.width) {
+                    if (scroll.y <= y && y < scroll.y + gridBounds.height &&
+                            scroll.x <= tokenBack.x && tokenFront.x < scroll.x + gridBounds.width) {
 
                         // draw the text
                         var style = theme[t.type] || {};
@@ -219,12 +219,12 @@ Renderers.Canvas = (function () {
             return maxLineWidth;
         }
 
-        function renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth) {
+        function renderCanvasTrim(tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth) {
             tgfx.clearRect(0, 0, canvas.width, canvas.height);
             tgfx.save();
-            tgfx.translate(0, -scrollTop * self.character.height);
+            tgfx.translate(0, -scroll.y * self.character.height);
             if (showLineNumbers) {
-                for (var y = scrollTop, lastLine = -1; y < scrollTop + gridBounds.height && y < tokenRows.length; ++y) {
+                for (var y = scroll.y, lastLine = -1; y < scroll.y + gridBounds.height && y < tokenRows.length; ++y) {
                     // draw the tokens on this row
                     var row = tokenRows[y];
                     // be able to draw brand-new rows that don't have any tokens yet
@@ -256,8 +256,8 @@ Renderers.Canvas = (function () {
             if (showScrollBars) {
                 var drawWidth = gridBounds.width * self.character.width;
                 var drawHeight = gridBounds.height * self.character.height;
-                var scrollX = (scrollLeft * drawWidth) / maxLineWidth + gridBounds.x * self.character.width;
-                var scrollY = (scrollTop * drawHeight) / tokenRows.length + gridBounds.y * self.character.height;
+                var scrollX = (scroll.x * drawWidth) / maxLineWidth + gridBounds.x * self.character.width;
+                var scrollY = (scroll.y * drawHeight) / tokenRows.length + gridBounds.y * self.character.height;
 
                 tgfx.fillStyle = theme.regular.selectedBackColor || Themes.DEFAULT.regular.selectedBackColor;
                 // horizontal
@@ -285,14 +285,14 @@ Renderers.Canvas = (function () {
         this.render = function (tokenRows,
                 frontCursor, backCursor,
                 gridBounds,
-                scrollLeft, scrollTop,
+                scroll,
                 focused, showLineNumbers, showScrollBars, wordWrap,
                 lineCountWidth) {
             var maxLineWidth = 0;
 
-            renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scrollLeft, scrollTop, focused);
-            maxLineWidth = renderCanvasForeground(tokenRows, gridBounds, scrollLeft, scrollTop);
-            renderCanvasTrim(tokenRows, gridBounds, scrollLeft, scrollTop, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth);
+            renderCanvasBackground(tokenRows, frontCursor, backCursor, gridBounds, scroll, focused);
+            maxLineWidth = renderCanvasForeground(tokenRows, gridBounds, scroll);
+            renderCanvasTrim(tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, maxLineWidth);
 
             gfx.clearRect(0, 0, canvas.width, canvas.height);
             gfx.drawImage(bgCanvas, 0, 0);

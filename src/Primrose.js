@@ -769,7 +769,6 @@ var Primrose = (function () {
 
         this.copySelectedText = function (evt) {
             evt.returnValue = false;
-            console.log("copying text");
             if (this.frontCursor.i !== this.backCursor.i) {
                 var minCursor = Cursor.min(this.frontCursor, this.backCursor),
                         maxCursor = Cursor.max(this.frontCursor,
@@ -853,7 +852,7 @@ var Primrose = (function () {
                     tokenRows,
                     this.frontCursor, this.backCursor,
                     gridBounds,
-                    this.scroll.x, this.scroll.y,
+                    this.scroll,
                     focused, showLineNumbers, showScrollBars, wordWrap,
                     lineCountWidth);
 
