@@ -81,15 +81,15 @@
                         wheelEventSource: editorCanvas
                     });
 
-                    var results = [
-                        Point,
-                        Size,
-                        Rectangle,
-                        Grammar
-                    ].map(stringTest).join("\n===---===---===---===---===---===---===---===---===---===\n\n");
-
-                    var testResults = new Primrose(testResultsCanvas, Renderers.Canvas, {
-                        file: results,
+                    new Primrose(testResultsCanvas, Renderers.Canvas, {
+                        file: [
+                            Point,
+                            Size,
+                            Rectangle,
+                            Grammar
+                        ].map(stringTest)
+                                .join(
+                                "\n===---===---===---===---===---===---===---===---===---===\n\n"),
                         wheelEventSource: testResultsCanvas,
                         tokenizer: Grammar.TestResults,
                         theme: Themes.Dark

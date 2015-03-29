@@ -96,18 +96,11 @@ var Primrose = (function () {
         }
 
         function readClipboard(evt) {
-            var i = evt.clipboardData.types.indexOf("text/plain");
-            if (i < 0) {
-                for (i = 0; i < evt.clipboardData.types.length; ++i) {
-                    if (/^text/.test(evt.clipboardData.types[i])) {
-                        break;
-                    }
-                }
-            }
-            if (i >= 0) {
-                var type = evt.clipboardData.types[i],
-                        str = evt.clipboardData.getData(type);
-                evt.preventDefault();
+            evt.returnValue = false;
+            var clipboard = evt.clipboardData || window.clipboardData,
+                    str = clipboard.getData(window.clipboardData ? "Text" :
+                    "text/plain");
+            if (str) {
                 self.pasteAtCursor(str);
             }
         }
@@ -718,29 +711,33 @@ var Primrose = (function () {
             surrogate.focus();
         };
 
-        this.bindEvents = function (keyEventSource, pointerEventSource,
-                wheelEventSource) {
-            if (keyEventSource) {
-                keyEventSource.addEventListener("keydown", this.editText.bind(
-                        this));
+        function setFalse(evt) {
+            evt.returnValue = false;
+        }
+        
+        this.bindEvents = function (k, p, w) {
+            if (k) {
+                k.addEventListener("keydown", this.editText.bind(this));
+                surrogate.addEventListener("beforecopy", setFalse);
+                surrogate.addEventListener("beforecut", setFalse);
+                k.addEventListener("beforepaste", setFalse);
+                surrogate.addEventListener("copy", this.copySelectedText.bind(this));
+                surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
+                k.addEventListener("paste", readClipboard.bind(this));
             }
 
-            if (pointerEventSource) {
-                pointerEventSource.addEventListener("wheel",
-                        this.readWheel.bind(
-                                this));
-                pointerEventSource.addEventListener("mousedown",
-                        mouseButtonDown);
-                pointerEventSource.addEventListener("mousemove", mouseMove);
-                pointerEventSource.addEventListener("mouseup", mouseButtonUp);
-                pointerEventSource.addEventListener("touchstart", touchStart);
-                pointerEventSource.addEventListener("touchmove", touchMove);
-                pointerEventSource.addEventListener("touchend", touchEnd);
+            if (p) {
+                p.addEventListener("wheel", this.readWheel.bind(this));
+                p.addEventListener("mousedown", mouseButtonDown);
+                p.addEventListener("mousemove", mouseMove);
+                p.addEventListener("mouseup", mouseButtonUp);
+                p.addEventListener("touchstart", touchStart);
+                p.addEventListener("touchmove", touchMove);
+                p.addEventListener("touchend", touchEnd);
             }
 
-            if (wheelEventSource) {
-                wheelEventSource.addEventListener("wheel", this.readWheel.bind(
-                        this));
+            if (w) {
+                w.addEventListener("wheel", this.readWheel.bind(this));
             }
         };
 
@@ -771,13 +768,17 @@ var Primrose = (function () {
         };
 
         this.copySelectedText = function (evt) {
+            evt.returnValue = false;
+            console.log("copying text");
             if (this.frontCursor.i !== this.backCursor.i) {
                 var minCursor = Cursor.min(this.frontCursor, this.backCursor),
                         maxCursor = Cursor.max(this.frontCursor,
                                 this.backCursor),
                         text = this.getText(),
                         str = text.substring(minCursor.i, maxCursor.i);
-                evt.clipboardData.setData("text/plain", str);
+                var clipboard = evt.clipboardData || window.clipboardData;
+                clipboard.setData(window.clipboardData ? "Text" : "text/plain",
+                        str);
             }
             evt.preventDefault();
         };
@@ -927,9 +928,6 @@ var Primrose = (function () {
             self.forceDraw();
         });
 
-        surrogate.addEventListener("copy", this.copySelectedText.bind(this));
-        surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
-        surrogate.addEventListener("paste", readClipboard.bind(this));
         setSurrogateSize();
     }
 
