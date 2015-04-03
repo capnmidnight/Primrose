@@ -95,16 +95,6 @@ var Primrose = (function () {
             }
         }
 
-        function readClipboard(evt) {
-            evt.returnValue = false;
-            var clipboard = evt.clipboardData || window.clipboardData,
-                    str = clipboard.getData(window.clipboardData ? "Text" :
-                            "text/plain");
-            if (str) {
-                self.pasteAtCursor(str);
-            }
-        }
-
         function setSurrogateSize() {
             var bounds = renderer.getCanvas()
                     .getBoundingClientRect();
@@ -715,17 +705,12 @@ var Primrose = (function () {
             evt.returnValue = false;
         }
 
-        this.bindEvents = function (k, p, w) {
+        this.bindEvents = function (k, p, w, c) {
             if (k) {
                 k.addEventListener("keydown", this.editText.bind(this));
                 surrogate.addEventListener("beforecopy", setFalse);
                 surrogate.addEventListener("beforecut", setFalse);
                 k.addEventListener("beforepaste", setFalse);
-                surrogate.addEventListener("copy", this.copySelectedText.bind(
-                        this));
-                surrogate.addEventListener("cut", this.cutSelectedText.bind(
-                        this));
-                k.addEventListener("paste", readClipboard.bind(this));
             }
 
             if (p) {
@@ -740,6 +725,14 @@ var Primrose = (function () {
 
             if (w) {
                 w.addEventListener("wheel", this.readWheel.bind(this));
+            }
+            
+            if (c) {
+                surrogate.addEventListener("copy", this.copySelectedText.bind(this));
+                surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
+                if (k) {
+                    k.addEventListener("paste", this.readClipboard.bind(this));
+                }
             }
         };
 
@@ -788,6 +781,16 @@ var Primrose = (function () {
             this.copySelectedText(evt);
             this.overwriteText();
             this.drawText();
+        };
+
+        this.readClipboard = function(evt) {
+            evt.returnValue = false;
+            var clipboard = evt.clipboardData || window.clipboardData,
+                    str = clipboard.getData(window.clipboardData ? "Text" :
+                            "text/plain");
+            if (str) {
+                this.pasteAtCursor(str);
+            }
         };
 
         this.editText = function (evt) {
@@ -896,7 +899,7 @@ var Primrose = (function () {
         this.setCommandSystem(options.commands);
         this.setText(options.file);
         this.bindEvents(options.keyEventSource, options.pointerEventSource,
-                options.wheelEventSource);
+                options.wheelEventSource, !options.disableClipboard);
 
         this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
                 renderer.id, Themes, theme.name, self, "setTheme", "theme");
