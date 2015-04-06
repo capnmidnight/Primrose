@@ -726,7 +726,7 @@ var Primrose = (function () {
             if (w) {
                 w.addEventListener("wheel", this.readWheel.bind(this));
             }
-            
+
             if (c) {
                 surrogate.addEventListener("copy", this.copySelectedText.bind(this));
                 surrogate.addEventListener("cut", this.cutSelectedText.bind(this));
@@ -783,7 +783,7 @@ var Primrose = (function () {
             this.drawText();
         };
 
-        this.readClipboard = function(evt) {
+        this.readClipboard = function (evt) {
             evt.returnValue = false;
             var clipboard = evt.clipboardData || window.clipboardData,
                     str = clipboard.getData(window.clipboardData ? "Text" :
@@ -898,14 +898,20 @@ var Primrose = (function () {
         this.setOperatingSystem(options.os);
         this.setCommandSystem(options.commands);
         this.setText(options.file);
-        options.keyEventSource = options.keyEventSource || window;
-        options.pointerEventSource = options.pointerEventSource || renderer.getCanvas();
-        options.wheelEventSource = options.wheelEventSource || renderer.getCanvas();
+        if (options.keyEventSource === undefined) {
+            options.keyEventSource = options.keyEventSource || window;
+        }
+        if (options.pointerEventSource === undefined) {
+            options.pointerEventSource = options.pointerEventSource || renderer.getCanvas();
+        }
+        if (options.wheelEventSource === undefined) {
+            options.wheelEventSource = options.wheelEventSource || renderer.getCanvas();
+        }
         this.bindEvents(
-            options.keyEventSource,
-            options.pointerEventSource,
-            options.wheelEventSource,
-            !options.disableClipboard);
+                options.keyEventSource,
+                options.pointerEventSource,
+                options.wheelEventSource,
+                !options.disableClipboard);
 
         this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
                 renderer.id, Themes, theme.name, self, "setTheme", "theme");
