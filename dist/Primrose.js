@@ -651,7 +651,7 @@ var Primrose = (function () {
         //////////////////////////////////////////////////////////////////////////
         // private fields
         //////////////////////////////////////////////////////////////////////////
-
+        Renderer = Renderer || Renderers.Canvas;
         var codePage,
                 operatingSystem,
                 browser,
@@ -1519,8 +1519,14 @@ var Primrose = (function () {
         this.setOperatingSystem(options.os);
         this.setCommandSystem(options.commands);
         this.setText(options.file);
-        this.bindEvents(options.keyEventSource, options.pointerEventSource,
-                options.wheelEventSource, !options.disableClipboard);
+        options.keyEventSource = options.keyEventSource || window;
+        options.pointerEventSource = options.pointerEventSource || renderer.getCanvas();
+        options.wheelEventSource = options.wheelEventSource || renderer.getCanvas();
+        this.bindEvents(
+            options.keyEventSource,
+            options.pointerEventSource,
+            options.wheelEventSource,
+            !options.disableClipboard);
 
         this.themeSelect = makeSelectorFromObj("primrose-theme-selector-" +
                 renderer.id, Themes, theme.name, self, "setTheme", "theme");
@@ -3590,4 +3596,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.7.3.1";
+};Primrose.VERSION = "v0.7.3.2";
