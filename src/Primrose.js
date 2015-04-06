@@ -899,13 +899,13 @@ var Primrose = (function () {
         this.setCommandSystem(options.commands);
         this.setText(options.file);
         if (options.keyEventSource === undefined) {
-            options.keyEventSource = options.keyEventSource || window;
+            options.keyEventSource = window;
         }
         if (options.pointerEventSource === undefined) {
-            options.pointerEventSource = options.pointerEventSource || renderer.getCanvas();
+            options.pointerEventSource = renderer.getCanvas();
         }
         if (options.wheelEventSource === undefined) {
-            options.wheelEventSource = options.wheelEventSource || renderer.getCanvas();
+            options.wheelEventSource = renderer.getCanvas();
         }
         this.bindEvents(
                 options.keyEventSource,
