@@ -619,8 +619,8 @@ var Primrose = (function () {
         };
 
         function setSurrogateCursor() {
-            surrogate.selectionStart = self.frontCursor.i;
-            surrogate.selectionEnd = self.backCursor.i;
+            surrogate.selectionStart = Math.min(self.frontCursor.i, self.backCursor.i);
+            surrogate.selectionEnd = Math.max(self.frontCursor.i, self.backCursor.i);
         }
 
         this.setText = function (txt) {

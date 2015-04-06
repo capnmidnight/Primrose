@@ -1,4 +1,4 @@
-/*! Primrose 2015-04-02
+/*! Primrose 2015-04-06
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
 /* 
@@ -1240,8 +1240,8 @@ var Primrose = (function () {
         };
 
         function setSurrogateCursor() {
-            surrogate.selectionStart = self.frontCursor.i;
-            surrogate.selectionEnd = self.backCursor.i;
+            surrogate.selectionStart = Math.min(self.frontCursor.i, self.backCursor.i);
+            surrogate.selectionEnd = Math.max(self.frontCursor.i, self.backCursor.i);
         }
 
         this.setText = function (txt) {
@@ -3590,4 +3590,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.7.2.1";
+};Primrose.VERSION = "v0.7.3.1";
