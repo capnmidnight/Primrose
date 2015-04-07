@@ -1,113 +1,110 @@
 ﻿<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
-        <title>Primrose: Canvas-based text editor</title>
-        <script type="text/javascript" src="rosetta_24_game.js"></script>
-        <script type="text/javascript" src="../src/core.js"></script>
-        <script type="text/javascript" src="../src/Cursor.js"></script>
-        <script type="text/javascript" src="../src/Point.js"></script>
-        <script type="text/javascript" src="../src/Size.js"></script>
-        <script type="text/javascript" src="../src/Rectangle.js"></script>
-        <script type="text/javascript" src="../src/Rule.js"></script>
-        <script type="text/javascript" src="../src/Token.js"></script>
-        <script type="text/javascript" src="../src/Grammar.js"></script>
-        <script type="text/javascript" src="../src/Keys.js"></script>
-        <script type="text/javascript" src="../src/Primrose.js"></script>
-        <script type="text/javascript" src="../src/CodePage.js"></script>
-        <script type="text/javascript" src="../src/code_pages/DE_QWERTZ.js"></script>
-        <script type="text/javascript" src="../src/code_pages/EN_UKX.js"></script>
-        <script type="text/javascript" src="../src/code_pages/EN_US.js"></script>
-        <script type="text/javascript" src="../src/code_pages/FR_AZERTY.js"></script>
-        <script type="text/javascript" src="../src/command_packs/TextEditor.js"></script>
-        <script type="text/javascript" src="../src/grammars/JavaScript.js"></script>
-        <script type="text/javascript" src="../src/grammars/PlainText.js"></script>
-        <script type="text/javascript" src="../src/grammars/TestResults.js"></script>
-        <script type="text/javascript" src="../src/OperatingSystem.js"></script>
-        <script type="text/javascript" src="../src/operating_systems/OSX.js"></script>
-        <script type="text/javascript" src="../src/operating_systems/Windows.js"></script>
-        <script type="text/javascript" src="../src/renderers/Canvas.js"></script>
-        <script type="text/javascript" src="../src/themes/Dark.js"></script>
-        <script type="text/javascript" src="../src/themes/Default.js"></script>
-        <script type="text/javascript" src="../test/testing.js"></script>
-        <script type="text/javascript" src="../test/Point.js"></script>
-        <script type="text/javascript" src="../test/Size.js"></script>
-        <script type="text/javascript" src="../test/Rectangle.js"></script>
-        <script type="text/javascript" src="../test/Grammar.js"></script>
-        <style type="text/css">
-            html, body{
-                position:absolute;
-                height:100%;
-                width:100%;
-                padding:0;
-                margin:0;
-            }
-            #controls > div{
-                display: inline-block;
-                padding-right: 0.5em;
-            }
-        </style>
-    </head>
-    <body>
-        <div style="position:absolute;height:100%;width:100%">
-            <div id="controls" style="position:absolute;height:7em;width:100%">
-                <div><input type="checkbox" id="toggleWordWrap"><label for="toggleWordWrap">Word wrap</label></div>
-                <div><input type="checkbox" id="toggleLineNumbers"><label for="toggleLineNumbers">Line numbers</label></div>
-                <div><input type="checkbox" id="toggleScrollBars"><label for="toggleScrollBars">Scroll bars</label></div>
-            </div>
-            <div style="position:absolute;top:2em;bottom:0;width:100%;">
-                <canvas id="editorCanvas" style="position:absolute;height:100%;width:75%;cursor:text"></canvas>
-                <canvas id="testResultsCanvas" style="position:absolute;left:75%;height:100%;width:25%;"></canvas>
-            </div>
-        </div>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+    <title>Primrose: Canvas-based text editor</title>
+    <script type="text/javascript" src="rosetta_24_game.js"></script>
+    <script type="text/javascript" src="../src/core.js"></script>
+    <script type="text/javascript" src="../src/Cursor.js"></script>
+    <script type="text/javascript" src="../src/Point.js"></script>
+    <script type="text/javascript" src="../src/Size.js"></script>
+    <script type="text/javascript" src="../src/Rectangle.js"></script>
+    <script type="text/javascript" src="../src/Rule.js"></script>
+    <script type="text/javascript" src="../src/Token.js"></script>
+    <script type="text/javascript" src="../src/Grammar.js"></script>
+    <script type="text/javascript" src="../src/Keys.js"></script>
+    <script type="text/javascript" src="../src/Primrose.js"></script>
+    <script type="text/javascript" src="../src/CodePage.js"></script>
+    <script type="text/javascript" src="../src/code_pages/DE_QWERTZ.js"></script>
+    <script type="text/javascript" src="../src/code_pages/EN_UKX.js"></script>
+    <script type="text/javascript" src="../src/code_pages/EN_US.js"></script>
+    <script type="text/javascript" src="../src/code_pages/FR_AZERTY.js"></script>
+    <script type="text/javascript" src="../src/command_packs/TextEditor.js"></script>
+    <script type="text/javascript" src="../src/grammars/JavaScript.js"></script>
+    <script type="text/javascript" src="../src/grammars/PlainText.js"></script>
+    <script type="text/javascript" src="../src/grammars/TestResults.js"></script>
+    <script type="text/javascript" src="../src/OperatingSystem.js"></script>
+    <script type="text/javascript" src="../src/operating_systems/OSX.js"></script>
+    <script type="text/javascript" src="../src/operating_systems/Windows.js"></script>
+    <script type="text/javascript" src="../src/renderers/Canvas.js"></script>
+    <script type="text/javascript" src="../src/themes/Dark.js"></script>
+    <script type="text/javascript" src="../src/themes/Default.js"></script>
+    <script type="text/javascript" src="../test/testing.js"></script>
+    <script type="text/javascript" src="../test/Point.js"></script>
+    <script type="text/javascript" src="../test/Size.js"></script>
+    <script type="text/javascript" src="../test/Rectangle.js"></script>
+    <script type="text/javascript" src="../test/Grammar.js"></script>
+    <style type="text/css">
+      html, body{
+        position:absolute;
+        height:100%;
+        width:100%;
+        padding:0;
+        margin:0;
+      }
+      #controls > div{
+        display: inline-block;
+        padding-right: 0.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="position:absolute;height:100%;width:100%">
+      <div id="controls" style="position:absolute;height:7em;width:100%">
+        <div><input type="checkbox" id="toggleWordWrap"><label for="toggleWordWrap">Word wrap</label></div>
+        <div><input type="checkbox" id="toggleLineNumbers"><label for="toggleLineNumbers">Line numbers</label></div>
+        <div><input type="checkbox" id="toggleScrollBars"><label for="toggleScrollBars">Scroll bars</label></div>
+      </div>
+      <div style="position:absolute;top:2em;bottom:0;width:100%;">
+        <canvas id="editorCanvas" style="position:absolute;height:100%;width:75%;cursor:text"></canvas>
+        <canvas id="testResultsCanvas" style="position:absolute;left:75%;height:100%;width:25%;"></canvas>
+      </div>
+    </div>
 
-        <script type="text/javascript">
-            window.addEventListener("load", function () {
+    <script type="text/javascript">
+      window.addEventListener( "load", function () {
 
-                function onToggle(e, f) {
-                    e.addEventListener("change", function () {
-                        editor["set" + f](e.checked);
-                    });
-                    e.checked = editor["get" + f]();
-                }
-                var ctrls = findEverything();
+        function onToggle ( e, f ) {
+          e.addEventListener( "change", function () {
+            editor["set" + f]( e.checked );
+          } );
+          e.checked = editor["get" + f]();
+        }
+        var ctrls = findEverything();
 
-                with (ctrls) {
-                    var editor = new Primrose(editorCanvas, Renderers.Canvas, {
-                        file: rosetta_24_game.toString(),
-                        keyEventSource: window,
-                        pointerEventSource: editorCanvas,
-                        wheelEventSource: editorCanvas
-                    });
+        with ( ctrls ) {
+          var editor = new Primrose( editorCanvas, Renderers.Canvas, {
+            file: rosetta_24_game.toString()
+          } );
 
-                    new Primrose(testResultsCanvas, Renderers.Canvas, {
-                        file: [
-                            Point,
-                            Size,
-                            Rectangle,
-                            Grammar
-                        ].map(stringTest)
-                                .join(
-                                "\n===---===---===---===---===---===---===---===---===---===\n\n"),
-                        wheelEventSource: testResultsCanvas,
-                        tokenizer: Grammar.TestResults,
-                        theme: Themes.Dark
-                    });
+          new Primrose( testResultsCanvas, Renderers.Canvas, {
+            file: [
+              Point,
+              Size,
+              Rectangle,
+              Grammar
+            ].map( stringTest )
+                .join(
+                    "\n===---===---===---===---===---===---===---===---===---===\n\n" ),
+            readOnly: true,
+            tokenizer: Grammar.TestResults,
+            theme: Themes.Dark
+          } );
 
-                    editor.focus();
+          editor.focus();
 
-                    controls.appendChild(editor.operatingSystemSelect);
-                    controls.appendChild(editor.keyboardSelect);
-                    controls.appendChild(editor.commandSystemSelect);
-                    controls.appendChild(editor.tokenizerSelect);
-                    controls.appendChild(editor.themeSelect);
+          controls.appendChild( editor.operatingSystemSelect );
+          controls.appendChild( editor.keyboardSelect );
+          controls.appendChild( editor.commandSystemSelect );
+          controls.appendChild( editor.tokenizerSelect );
+          controls.appendChild( editor.themeSelect );
 
-                    onToggle(toggleLineNumbers, "ShowLineNumbers");
-                    onToggle(toggleScrollBars, "ShowScrollBars");
-                    onToggle(toggleWordWrap, "WordWrap");
-                }
-            });
-        </script>
-    </body>
+          onToggle( toggleLineNumbers, "ShowLineNumbers" );
+          onToggle( toggleScrollBars, "ShowScrollBars" );
+          onToggle( toggleWordWrap, "WordWrap" );
+        }
+      } );
+    </script>
+  </body>
 </html>

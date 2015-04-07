@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.PlainText = new Grammar("PlainText", [
-    ["newlines", /(?:\r\n|\r|\n)/]
-]);
+Grammar.PlainText = new Grammar( "PlainText", [
+  [ "newlines", /(?:\r\n|\r|\n)/ ]
+] );

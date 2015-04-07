@@ -1,30 +1,31 @@
 {
-  "name" : "Primrose",
-  "description" : "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
-  "version" : "0.7.3.2",
-  "author" : {
-    "name" : "Sean T. McBeth",
-    "email" : "sean@seanmcbeth.com",
-    "url" : "https://www.seanmcbeth.com"
+  "name": "Primrose",
+  "description": "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
+  "version": "0.7.3.3",
+  "author": {
+    "name": "Sean T. McBeth",
+    "email": "sean@seanmcbeth.com",
+    "url": "https://www.seanmcbeth.com"
   },
-  "license" : {
-    "type" : "gplv3"
+  "license": {
+    "type": "gplv3"
   },
-  "homepage" : "https://github.com/capnmidnight/Primrose",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/capnmidnight/Primrose.git"
+  "homepage": "https://github.com/capnmidnight/Primrose",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/capnmidnight/Primrose.git"
   },
-  "bugs" : {
-    "url" : "https://github.com/capnmidnight/Primrose/issues"
+  "bugs": {
+    "url": "https://github.com/capnmidnight/Primrose/issues"
   },
-  "keywords" : [ "text", "editor", "HTML5", "canvas", "syntax", "highlighting" ],
-  "devDependencies" : {
-    "grunt" : "^0.4.5",
-    "grunt-contrib-clean" : "^0.6.0",
-    "grunt-contrib-concat" : "^0.5.0",
-    "grunt-contrib-copy" : "^0.7.0",
-    "grunt-contrib-jshint" : "^0.10.0",
-    "grunt-contrib-uglify" : "^0.7.0"
+  "keywords": [ "text", "editor", "HTML5", "canvas", "syntax", "highlighting"
+  ],
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.7.0"
   }
 }

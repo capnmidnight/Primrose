@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,24 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Token = (function () {
-    "use strict";
-    function Token(value, type, index, line) {
-        this.value = value;
-        this.type = type;
-        this.index = index;
-        this.line = line;
-    }
+var Token = ( function () {
+  "use strict";
+  function Token ( value, type, index, line ) {
+    this.value = value;
+    this.type = type;
+    this.index = index;
+    this.line = line;
+  }
 
-    Token.prototype.clone = function () {
-        return new Token(this.value, this.type, this.index, this.line);
-    };
+  Token.prototype.clone = function () {
+    return new Token( this.value, this.type, this.index, this.line );
+  };
 
-    Token.prototype.splitAt = function (i) {
-        var next = this.value.substring(i);
-        this.value = this.value.substring(0, i);
-        return new Token(next, this.type, this.index + i, this.line);
-    };
+  Token.prototype.splitAt = function ( i ) {
+    var next = this.value.substring( i );
+    this.value = this.value.substring( 0, i );
+    return new Token( next, this.type, this.index + i, this.line );
+  };
 
-    return Token;
-})();
+  return Token;
+} )();

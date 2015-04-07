@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,15 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.TestResults = new Grammar("TestResults", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["numbers", /(\[)(o+)/],
-    ["numbers", /(\d+ succeeded), 0 failed/],
-    ["numbers", /^    Successes:/],
-    ["functions", /(x+)\]/],
-    ["functions", /[1-9]\d* failed/],
-    ["functions", /^    Failures:/],
-    ["comments", /(\d+ms:)(.*)/],
-    ["keywords", /(Test results for )(\w+):/],
-    ["strings", /        \w+/]
-]);
+Grammar.TestResults = new Grammar( "TestResults", [
+  [ "newlines", /(?:\r\n|\r|\n)/ ],
+  [ "numbers", /(\[)(o+)/ ],
+  [ "numbers", /(\d+ succeeded), 0 failed/ ],
+  [ "numbers", /^    Successes:/ ],
+  [ "functions", /(x+)\]/ ],
+  [ "functions", /[1-9]\d* failed/ ],
+  [ "functions", /^    Failures:/ ],
+  [ "comments", /(\d+ms:)(.*)/ ],
+  [ "keywords", /(Test results for )(\w+):/ ],
+  [ "strings", /        \w+/ ]
+] );

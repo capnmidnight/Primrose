@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,67 +15,68 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var OperatingSystem = (function () {
-    "use strict";
-    
-    function setCursorCommand(obj, mod, key, func, cur) {
-        var name = mod + "_" + key;
-        obj[name] = function (prim, tokenRows) {
-            prim["cursor" + func](tokenRows, prim[cur + "Cursor"]);
-        };
-    }
-    
-    function makeCursorCommand(obj, baseMod, key, func) {
-        setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
-        setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
-    }
-    
-    function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd) {
-        this.name = name;
+var OperatingSystem = ( function () {
+  "use strict";
 
-        this[pre1 + "_a"] = function (prim, tokenRows) {
-            prim.frontCursor.fullhome(tokenRows);
-            prim.backCursor.fullend(tokenRows);
-            prim.forceUpdate();
-        };
+  function setCursorCommand ( obj, mod, key, func, cur ) {
+    var name = mod + "_" + key;
+    obj[name] = function ( prim, tokenRows ) {
+      prim["cursor" + func]( tokenRows, prim[cur + "Cursor"] );
+    };
+  }
 
-        this[redo] = function (prim, tokenRows) {
-            prim.redo();
-            prim.scrollIntoView(prim.frontCursor);
-        };
+  function makeCursorCommand ( obj, baseMod, key, func ) {
+    setCursorCommand( obj, baseMod || "NORMAL", key, func, "front" );
+    setCursorCommand( obj, baseMod + "SHIFT", key, func, "back" );
+  }
 
-        this[pre1 + "_z"] = function (prim, tokenRows) {
-            prim.undo();
-            prim.scrollIntoView(prim.frontCursor);
-        };
+  function OperatingSystem ( name, pre1, pre2, redo, pre3, home, end, pre4,
+      fullHome, fullEnd ) {
+    this.name = name;
 
-        this[pre1 + "_DOWNARROW"] = function (prim, tokenRows) {
-            if (prim.scroll.y < tokenRows.length) {
-                ++prim.scroll.y;
-            }
-            prim.forceUpdate();
-        };
+    this[pre1 + "_a"] = function ( prim, tokenRows ) {
+      prim.frontCursor.fullhome( tokenRows );
+      prim.backCursor.fullend( tokenRows );
+      prim.forceUpdate();
+    };
 
-        this[pre1 + "_UPARROW"] = function (prim, tokenRows) {
-            if (prim.scroll.y > 0) {
-                --prim.scroll.y;
-            }
-            prim.forceUpdate();
-        };
+    this[redo] = function ( prim, tokenRows ) {
+      prim.redo();
+      prim.scrollIntoView( prim.frontCursor );
+    };
 
-        makeCursorCommand(this, "", "LEFTARROW", "Left");
-        makeCursorCommand(this, "", "RIGHTARROW", "Right");     
-        makeCursorCommand(this, "", "UPARROW", "Up");
-        makeCursorCommand(this, "", "DOWNARROW", "Down");
-        makeCursorCommand(this, "", "PAGEUP", "PageUp");
-        makeCursorCommand(this, "", "PAGEDOWN", "PageDown");
-        makeCursorCommand(this, pre2, "LEFTARROW", "SkipLeft");
-        makeCursorCommand(this, pre2, "RIGHTARROW", "SkipRight");   
-        makeCursorCommand(this, pre3, home, "Home");
-        makeCursorCommand(this, pre3, end, "End");
-        makeCursorCommand(this, pre4, fullHome, "FullHome");
-        makeCursorCommand(this, pre4, fullEnd, "FullEnd");
-    }
+    this[pre1 + "_z"] = function ( prim, tokenRows ) {
+      prim.undo();
+      prim.scrollIntoView( prim.frontCursor );
+    };
 
-    return OperatingSystem;
-})();
+    this[pre1 + "_DOWNARROW"] = function ( prim, tokenRows ) {
+      if ( prim.scroll.y < tokenRows.length ) {
+        ++prim.scroll.y;
+      }
+      prim.forceUpdate();
+    };
+
+    this[pre1 + "_UPARROW"] = function ( prim, tokenRows ) {
+      if ( prim.scroll.y > 0 ) {
+        --prim.scroll.y;
+      }
+      prim.forceUpdate();
+    };
+
+    makeCursorCommand( this, "", "LEFTARROW", "Left" );
+    makeCursorCommand( this, "", "RIGHTARROW", "Right" );
+    makeCursorCommand( this, "", "UPARROW", "Up" );
+    makeCursorCommand( this, "", "DOWNARROW", "Down" );
+    makeCursorCommand( this, "", "PAGEUP", "PageUp" );
+    makeCursorCommand( this, "", "PAGEDOWN", "PageDown" );
+    makeCursorCommand( this, pre2, "LEFTARROW", "SkipLeft" );
+    makeCursorCommand( this, pre2, "RIGHTARROW", "SkipRight" );
+    makeCursorCommand( this, pre3, home, "Home" );
+    makeCursorCommand( this, pre3, end, "End" );
+    makeCursorCommand( this, pre4, fullHome, "FullHome" );
+    makeCursorCommand( this, pre4, fullEnd, "FullEnd" );
+  }
+
+  return OperatingSystem;
+} )();

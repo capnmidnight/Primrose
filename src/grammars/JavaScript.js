@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,16 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.JavaScript = new Grammar("JavaScript", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["comments", /\/\/.*$/],
-    ["startBlockComments", /\/\*/],
-    ["endBlockComments", /\*\//],
-    ["strings", /"(?:\\"|[^"])*"/],
-    ["strings", /'(?:\\'|[^'])*'/],
-    ["strings", /\/(?:\\\/|[^/])*\/\w*/],
-    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-    ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/],
-    ["functions", /(\w+)(?:\s*\()/],
-    ["members", /(?:(?:\w+\.)+)(\w+)/]
-]);
+Grammar.JavaScript = new Grammar( "JavaScript", [
+  [ "newlines", /(?:\r\n|\r|\n)/ ],
+  [ "comments", /\/\/.*$/ ],
+  [ "startBlockComments", /\/\*/ ],
+  [ "endBlockComments", /\*\// ],
+  [ "strings", /"(?:\\"|[^"])*"/ ],
+  [ "strings", /'(?:\\'|[^'])*'/ ],
+  [ "strings", /\/(?:\\\/|[^/])*\/\w*/ ],
+  [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
+  [ "keywords",
+    /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
+  ],
+  [ "functions", /(\w+)(?:\s*\()/ ],
+  [ "members", /(?:(?:\w+\.)+)(\w+)/ ]
+] );
