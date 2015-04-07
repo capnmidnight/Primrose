@@ -618,6 +618,11 @@ var Primrose = ( function () {
       }
     };
 
+    this.setFontSize = function ( v ) {
+      theme.fontSize = v;
+      changed = renderer.resize();
+    };
+
     function setSurrogateCursor () {
       surrogate.selectionStart = Math.min( self.frontCursor.i,
           self.backCursor.i );
@@ -896,6 +901,7 @@ var Primrose = ( function () {
     this.setShowScrollBars( !options.hideScrollBars );
     this.setTabWidth( options.tabWidth );
     this.setTheme( options.theme );
+    this.setFontSize( options.fontSize || 14 );
     this.setTokenizer( options.tokenizer );
     this.setCodePage( options.codePage );
     this.setOperatingSystem( options.os );
