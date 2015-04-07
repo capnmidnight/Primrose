@@ -25,7 +25,9 @@ var Primrose = ( function () {
     //////////////////////////////////////////////////////////////////////////
 
     options = options || {};
-
+    if ( typeof options === "string" ) {
+      options = {file: options};
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // private fields
@@ -543,6 +545,23 @@ var Primrose = ( function () {
       return history[historyFrame].join( "\n" );
     };
 
+    this.setText = function ( txt ) {
+      txt = txt || "";
+      txt = txt.replace( /\r\n/g, "\n" );
+      var lines = txt.split( "\n" );
+      this.pushUndo( lines );
+      this.drawText();
+      surrogate.value = txt;
+      setSurrogateCursor();
+    };
+
+    Object.defineProperties( this, {
+      value: {
+        get: this.getText,
+        set: this.setText
+      }
+    } );
+
     this.pushUndo = function ( lines ) {
       if ( historyFrame < history.length - 1 ) {
         history.splice( historyFrame + 1 );
@@ -631,16 +650,6 @@ var Primrose = ( function () {
       surrogate.selectionEnd = Math.max( self.frontCursor.i,
           self.backCursor.i );
     }
-
-    this.setText = function ( txt ) {
-      txt = txt || "";
-      txt = txt.replace( /\r\n/g, "\n" );
-      var lines = txt.split( "\n" );
-      this.pushUndo( lines );
-      this.drawText();
-      surrogate.value = txt;
-      setSurrogateCursor();
-    };
 
     this.getPixelRatio = function () {
       return window.devicePixelRatio || 1;
