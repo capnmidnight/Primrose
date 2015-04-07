@@ -719,16 +719,18 @@ var Primrose = ( function () {
     }
 
     function setSurrogateSize () {
-      var bounds = renderer.getCanvas()
-          .getBoundingClientRect();
-      surrogateContainer.style.left = px( bounds.left );
-      surrogateContainer.style.top = px( window.scrollY + bounds.top );
-      surrogateContainer.style.width = 0;
-      surrogateContainer.style.height = 0;
-      surrogate.style.fontFamily = theme.fontFamily;
-      var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.fontSize = px( ch * 0.99 );
-      surrogate.style.lineHeight = px( ch );
+      if ( theme ) {
+        var bounds = renderer.getCanvas()
+            .getBoundingClientRect();
+        surrogateContainer.style.left = px( bounds.left );
+        surrogateContainer.style.top = px( window.scrollY + bounds.top );
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
+        surrogate.style.fontFamily = theme.fontFamily;
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.fontSize = px( ch * 0.99 );
+        surrogate.style.lineHeight = px( ch );
+      }
     }
 
     function setCursorXY ( cursor, x, y ) {
@@ -1241,6 +1243,11 @@ var Primrose = ( function () {
       }
     };
 
+    this.setFontSize = function ( v ) {
+      theme.fontSize = v;
+      changed = renderer.resize();
+    };
+
     function setSurrogateCursor () {
       surrogate.selectionStart = Math.min( self.frontCursor.i,
           self.backCursor.i );
@@ -1471,6 +1478,11 @@ var Primrose = ( function () {
     };
 
     this.drawText = function () {
+      if ( renderer.hasResized() ) {
+        changed = renderer.resize();
+        setSurrogateSize();
+      }
+
       if ( changed && theme && tokens ) {
         this.forceDraw();
       }
@@ -1519,20 +1531,25 @@ var Primrose = ( function () {
     this.setShowScrollBars( !options.hideScrollBars );
     this.setTabWidth( options.tabWidth );
     this.setTheme( options.theme );
+    this.setFontSize( options.fontSize || 14 );
     this.setTokenizer( options.tokenizer );
     this.setCodePage( options.codePage );
     this.setOperatingSystem( options.os );
     this.setCommandSystem( options.commands );
     this.setText( options.file );
-    if ( !options.readOnly && options.keyEventSource === undefined ) {
-      options.keyEventSource = window;
+
+    if ( options.autoBindEvents || renderer.autoBindEvents ) {
+      if ( !options.readOnly && options.keyEventSource === undefined ) {
+        options.keyEventSource = window;
+      }
+      if ( options.pointerEventSource === undefined ) {
+        options.pointerEventSource = renderer.getCanvas();
+      }
+      if ( options.wheelEventSource === undefined ) {
+        options.wheelEventSource = renderer.getCanvas();
+      }
     }
-    if ( options.pointerEventSource === undefined ) {
-      options.pointerEventSource = renderer.getCanvas();
-    }
-    if ( options.wheelEventSource === undefined ) {
-      options.wheelEventSource = renderer.getCanvas();
-    }
+    
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
@@ -1558,17 +1575,6 @@ var Primrose = ( function () {
         OperatingSystem, operatingSystem.name, self,
         "setOperatingSystem",
         "shortcut style", OperatingSystem );
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // wire up event handlers
-    //////////////////////////////////////////////////////////////////////////
-
-    window.addEventListener( "resize", function () {
-      changed = renderer.resize();
-      setSurrogateSize();
-      self.forceDraw();
-    } );
 
     setSurrogateSize();
   }
@@ -3183,13 +3189,13 @@ Renderers.Canvas = ( function () {
   function CanvasRenderer ( canvasElementOrID, options ) {
     var self = this,
         canvas = cascadeElement( canvasElementOrID, "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         bgCanvas = cascadeElement( canvas.id + "-back", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         fgCanvas = cascadeElement( canvas.id + "-front", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         trimCanvas = cascadeElement( canvas.id + "-trim", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
         bgfx = bgCanvas.getContext( "2d" ),
@@ -3203,6 +3209,7 @@ Renderers.Canvas = ( function () {
 
     this.character = new Size();
     this.id = canvas.id;
+    this.autoBindEvents = true;
 
     this.setTheme = function ( t ) {
       theme = t;
@@ -3217,36 +3224,49 @@ Renderers.Canvas = ( function () {
           scroll.y );
     };
 
-    this.resize = function () {
+    this.hasResized = function () {
       var r = this.getPixelRatio(),
-          oldCharacterWidth = this.character.width,
-          oldCharacterHeight = this.character.height,
           oldWidth = canvas.width,
           oldHeight = canvas.height,
-          oldFont = gfx.font;
+          newWidth = canvas.clientWidth * r,
+          newHeight = canvas.clientHeight * r;
+      return oldWidth !== newWidth || oldHeight !== newHeight;
+    };
 
-      this.character.height = theme.fontSize * r;
-      bgCanvas.width =
-          fgCanvas.width =
-          trimCanvas.width =
-          canvas.width = canvas.clientWidth * r;
-      bgCanvas.height =
-          fgCanvas.height =
-          trimCanvas.height =
-          canvas.height =
-          canvas.clientHeight * r;
-      gfx.font = this.character.height + "px " + theme.fontFamily;
-      // measure 100 letter M's, then divide by 100, to get the width of an M
-      // to two decimal places on systems that return integer values from
-      // measureText.
-      this.character.width = gfx.measureText(
-          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
-          100;
-      var changed = oldCharacterWidth !== this.character.width ||
-          oldCharacterHeight !== this.character.height ||
-          oldWidth !== canvas.width ||
-          oldHeight !== canvas.height ||
-          oldFont !== gfx.font;
+    this.resize = function () {
+      var changed = false;
+      if ( theme ) {
+        var r = this.getPixelRatio(),
+            oldCharacterWidth = this.character.width,
+            oldCharacterHeight = this.character.height,
+            oldWidth = canvas.width,
+            oldHeight = canvas.height,
+            newWidth = canvas.clientWidth * r,
+            newHeight = canvas.clientHeight * r,
+            oldFont = gfx.font;
+
+        this.character.height = theme.fontSize * r;
+        bgCanvas.width =
+            fgCanvas.width =
+            trimCanvas.width =
+            canvas.width = newWidth;
+        bgCanvas.height =
+            fgCanvas.height =
+            trimCanvas.height =
+            canvas.height = newHeight;
+        gfx.font = this.character.height + "px " + theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = gfx.measureText(
+            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
+            100;
+        changed = oldCharacterWidth !== this.character.width ||
+            oldCharacterHeight !== this.character.height ||
+            oldWidth !== canvas.width ||
+            oldHeight !== canvas.height ||
+            oldFont !== gfx.font;
+      }
       return changed;
     };
 
@@ -3409,7 +3429,8 @@ Renderers.Canvas = ( function () {
       tgfx.translate( 0, -scroll.y * self.character.height );
       if ( showLineNumbers ) {
         for ( var y = scroll.y,
-            lastLine = -1; y < scroll.y + gridBounds.height && y < tokenRows.length; ++y ) {
+            lastLine = -1; y < scroll.y + gridBounds.height && y <
+            tokenRows.length; ++y ) {
           // draw the tokens on this row
           var row = tokenRows[y];
           // be able to draw brand-new rows that don't have any tokens yet
@@ -3568,6 +3589,7 @@ Renderers.Canvas = ( function () {
     }
 
     if ( !canvas.parentElement ) {
+      this.autoBindEvents = false;
       document.body.appendChild( makeHidingContainer( "primrose-container-" +
           canvas.id, canvas ) );
     }
@@ -3680,4 +3702,4 @@ Themes.DEFAULT = {
         foreColor: "red",
         fontStyle: "underline italic"
     }
-};Primrose.VERSION = "v0.7.3.3";
+};Primrose.VERSION = "v0.7.4.3";

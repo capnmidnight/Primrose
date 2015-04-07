@@ -20,13 +20,13 @@ Renderers.Canvas = ( function () {
   function CanvasRenderer ( canvasElementOrID, options ) {
     var self = this,
         canvas = cascadeElement( canvasElementOrID, "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         bgCanvas = cascadeElement( canvas.id + "-back", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         fgCanvas = cascadeElement( canvas.id + "-front", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         trimCanvas = cascadeElement( canvas.id + "-trim", "canvas",
-        HTMLCanvasElement ),
+            HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
         bgfx = bgCanvas.getContext( "2d" ),
@@ -40,6 +40,7 @@ Renderers.Canvas = ( function () {
 
     this.character = new Size();
     this.id = canvas.id;
+    this.autoBindEvents = true;
 
     this.setTheme = function ( t ) {
       theme = t;
@@ -54,36 +55,49 @@ Renderers.Canvas = ( function () {
           scroll.y );
     };
 
-    this.resize = function () {
+    this.hasResized = function () {
       var r = this.getPixelRatio(),
-          oldCharacterWidth = this.character.width,
-          oldCharacterHeight = this.character.height,
           oldWidth = canvas.width,
           oldHeight = canvas.height,
-          oldFont = gfx.font;
+          newWidth = canvas.clientWidth * r,
+          newHeight = canvas.clientHeight * r;
+      return oldWidth !== newWidth || oldHeight !== newHeight;
+    };
 
-      this.character.height = theme.fontSize * r;
-      bgCanvas.width =
-          fgCanvas.width =
-          trimCanvas.width =
-          canvas.width = canvas.clientWidth * r;
-      bgCanvas.height =
-          fgCanvas.height =
-          trimCanvas.height =
-          canvas.height =
-          canvas.clientHeight * r;
-      gfx.font = this.character.height + "px " + theme.fontFamily;
-      // measure 100 letter M's, then divide by 100, to get the width of an M
-      // to two decimal places on systems that return integer values from
-      // measureText.
-      this.character.width = gfx.measureText(
-          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
-          100;
-      var changed = oldCharacterWidth !== this.character.width ||
-          oldCharacterHeight !== this.character.height ||
-          oldWidth !== canvas.width ||
-          oldHeight !== canvas.height ||
-          oldFont !== gfx.font;
+    this.resize = function () {
+      var changed = false;
+      if ( theme ) {
+        var r = this.getPixelRatio(),
+            oldCharacterWidth = this.character.width,
+            oldCharacterHeight = this.character.height,
+            oldWidth = canvas.width,
+            oldHeight = canvas.height,
+            newWidth = canvas.clientWidth * r,
+            newHeight = canvas.clientHeight * r,
+            oldFont = gfx.font;
+
+        this.character.height = theme.fontSize * r;
+        bgCanvas.width =
+            fgCanvas.width =
+            trimCanvas.width =
+            canvas.width = newWidth;
+        bgCanvas.height =
+            fgCanvas.height =
+            trimCanvas.height =
+            canvas.height = newHeight;
+        gfx.font = this.character.height + "px " + theme.fontFamily;
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = gfx.measureText(
+            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
+            100;
+        changed = oldCharacterWidth !== this.character.width ||
+            oldCharacterHeight !== this.character.height ||
+            oldWidth !== canvas.width ||
+            oldHeight !== canvas.height ||
+            oldFont !== gfx.font;
+      }
       return changed;
     };
 
@@ -246,7 +260,8 @@ Renderers.Canvas = ( function () {
       tgfx.translate( 0, -scroll.y * self.character.height );
       if ( showLineNumbers ) {
         for ( var y = scroll.y,
-            lastLine = -1; y < scroll.y + gridBounds.height && y < tokenRows.length; ++y ) {
+            lastLine = -1; y < scroll.y + gridBounds.height && y <
+            tokenRows.length; ++y ) {
           // draw the tokens on this row
           var row = tokenRows[y];
           // be able to draw brand-new rows that don't have any tokens yet
@@ -405,6 +420,7 @@ Renderers.Canvas = ( function () {
     }
 
     if ( !canvas.parentElement ) {
+      this.autoBindEvents = false;
       document.body.appendChild( makeHidingContainer( "primrose-container-" +
           canvas.id, canvas ) );
     }

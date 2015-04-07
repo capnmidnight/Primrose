@@ -96,16 +96,18 @@ var Primrose = ( function () {
     }
 
     function setSurrogateSize () {
-      var bounds = renderer.getCanvas()
-          .getBoundingClientRect();
-      surrogateContainer.style.left = px( bounds.left );
-      surrogateContainer.style.top = px( window.scrollY + bounds.top );
-      surrogateContainer.style.width = 0;
-      surrogateContainer.style.height = 0;
-      surrogate.style.fontFamily = theme.fontFamily;
-      var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.fontSize = px( ch * 0.99 );
-      surrogate.style.lineHeight = px( ch );
+      if ( theme ) {
+        var bounds = renderer.getCanvas()
+            .getBoundingClientRect();
+        surrogateContainer.style.left = px( bounds.left );
+        surrogateContainer.style.top = px( window.scrollY + bounds.top );
+        surrogateContainer.style.width = 0;
+        surrogateContainer.style.height = 0;
+        surrogate.style.fontFamily = theme.fontFamily;
+        var ch = renderer.character.height / renderer.getPixelRatio();
+        surrogate.style.fontSize = px( ch * 0.99 );
+        surrogate.style.lineHeight = px( ch );
+      }
     }
 
     function setCursorXY ( cursor, x, y ) {
@@ -853,6 +855,11 @@ var Primrose = ( function () {
     };
 
     this.drawText = function () {
+      if ( renderer.hasResized() ) {
+        changed = renderer.resize();
+        setSurrogateSize();
+      }
+
       if ( changed && theme && tokens ) {
         this.forceDraw();
       }
@@ -907,15 +914,19 @@ var Primrose = ( function () {
     this.setOperatingSystem( options.os );
     this.setCommandSystem( options.commands );
     this.setText( options.file );
-    if ( !options.readOnly && options.keyEventSource === undefined ) {
-      options.keyEventSource = window;
+
+    if ( options.autoBindEvents || renderer.autoBindEvents ) {
+      if ( !options.readOnly && options.keyEventSource === undefined ) {
+        options.keyEventSource = window;
+      }
+      if ( options.pointerEventSource === undefined ) {
+        options.pointerEventSource = renderer.getCanvas();
+      }
+      if ( options.wheelEventSource === undefined ) {
+        options.wheelEventSource = renderer.getCanvas();
+      }
     }
-    if ( options.pointerEventSource === undefined ) {
-      options.pointerEventSource = renderer.getCanvas();
-    }
-    if ( options.wheelEventSource === undefined ) {
-      options.wheelEventSource = renderer.getCanvas();
-    }
+    
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
@@ -941,17 +952,6 @@ var Primrose = ( function () {
         OperatingSystem, operatingSystem.name, self,
         "setOperatingSystem",
         "shortcut style", OperatingSystem );
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // wire up event handlers
-    //////////////////////////////////////////////////////////////////////////
-
-    window.addEventListener( "resize", function () {
-      changed = renderer.resize();
-      setSurrogateSize();
-      self.forceDraw();
-    } );
 
     setSurrogateSize();
   }

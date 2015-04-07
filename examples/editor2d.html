@@ -78,7 +78,7 @@
             file: rosetta_24_game.toString()
           } );
 
-          new Primrose( testResultsCanvas, Renderers.Canvas, {
+          var tests = new Primrose( testResultsCanvas, Renderers.Canvas, {
             file: [
               Point,
               Size,
@@ -93,6 +93,14 @@
           } );
 
           editor.focus();
+
+          function update(){
+            requestAnimationFrame(update);
+            editor.drawText();
+            tests.drawText();
+          };
+
+          requestAnimationFrame(update);
 
           controls.appendChild( editor.operatingSystemSelect );
           controls.appendChild( editor.keyboardSelect );
