@@ -420,6 +420,14 @@ function fmt ( template ) {
   } );
 }
 
+function log(){
+  console.log(fmt.apply(window, arguments));
+}
+
+function err(){  
+  console.error(fmt.apply(window, arguments));
+}
+
 fmt.addMillis = function ( val, txt ) {
   return txt.replace( /( AM| PM|$)/, function ( match, g1 ) {
     return ( val.getMilliseconds() / 1000 ).toString()

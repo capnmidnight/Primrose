@@ -63,37 +63,30 @@
     </div>
 
     <script type="text/javascript">
-      window.addEventListener( "load", function () {
+      window.addEventListener("load", function () {
 
-        function onToggle ( e, f ) {
-          e.addEventListener( "change", function () {
-            editor["set" + f]( e.checked );
-          } );
-          e.checked = editor["get" + f]();
-        }
         var ctrls = findEverything();
-
-        with ( ctrls ) {
-          var editor = new Primrose( editorCanvas );
+        with (ctrls) {
+          var editor = new Primrose(editorCanvas);
           editor.value = rosetta_24_game.toString();
 
-          var tests = new Primrose( testResultsCanvas, {
-            file: [
-              Point,
-              Size,
-              Rectangle,
-              Grammar
-            ].map( stringTest )
-                .join(
-                    "\n===---===---===---===---===---===---===---===---===---===\n\n" ),
+          var testText = [
+            Point,
+            Size,
+            Rectangle,
+            Grammar
+          ].map(stringTest)
+              .join("\n===---===---===---===---===---===---===---===---===---===\n\n");
+          var tests = new Primrose(testResultsCanvas, {
+            file: testText,
             readOnly: true,
             tokenizer: Grammar.TestResults,
             theme: Themes.Dark
-          } );
+          });
 
           editor.focus();
 
-          function update(){
+          function update() {
             requestAnimationFrame(update);
             editor.drawText();
             tests.drawText();
@@ -101,17 +94,24 @@
 
           requestAnimationFrame(update);
 
-          controls.appendChild( editor.operatingSystemSelect );
-          controls.appendChild( editor.keyboardSelect );
-          controls.appendChild( editor.commandSystemSelect );
-          controls.appendChild( editor.tokenizerSelect );
-          controls.appendChild( editor.themeSelect );
+          controls.appendChild(editor.operatingSystemSelect);
+          controls.appendChild(editor.keyboardSelect);
+          controls.appendChild(editor.commandSystemSelect);
+          controls.appendChild(editor.tokenizerSelect);
+          controls.appendChild(editor.themeSelect);
 
-          onToggle( toggleLineNumbers, "ShowLineNumbers" );
-          onToggle( toggleScrollBars, "ShowScrollBars" );
-          onToggle( toggleWordWrap, "WordWrap" );
+          function onToggle(e, f) {
+            e.addEventListener("change", function () {
+              editor["set" + f](e.checked);
+            });
+            e.checked = editor["get" + f]();
+          }
+
+          onToggle(toggleLineNumbers, "ShowLineNumbers");
+          onToggle(toggleScrollBars, "ShowScrollBars");
+          onToggle(toggleWordWrap, "WordWrap");
         }
-      } );
+      });
     </script>
   </body>
 </html>
