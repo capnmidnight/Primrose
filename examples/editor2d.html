@@ -74,11 +74,11 @@
         var ctrls = findEverything();
 
         with ( ctrls ) {
-          var editor = new Primrose( editorCanvas, Renderers.Canvas, {
+          var editor = new Primrose( editorCanvas, {
             file: rosetta_24_game.toString()
           } );
 
-          var tests = new Primrose( testResultsCanvas, Renderers.Canvas, {
+          var tests = new Primrose( testResultsCanvas, {
             file: [
               Point,
               Size,

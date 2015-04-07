@@ -16,7 +16,7 @@
  */
 
 var Primrose = ( function () {
-  function Primrose ( renderToElementOrID, Renderer, options ) {
+  function Primrose ( renderToElementOrID, options ) {
     "use strict";
     var self = this;
     Primrose.EDITORS.push( this );
@@ -30,8 +30,8 @@ var Primrose = ( function () {
     //////////////////////////////////////////////////////////////////////////
     // private fields
     //////////////////////////////////////////////////////////////////////////
-    Renderer = Renderer || Renderers.Canvas;
-    var codePage,
+    var Renderer = options.renderer || Renderers.Canvas,
+        codePage,
         operatingSystem,
         browser,
         commandSystem,
@@ -926,7 +926,7 @@ var Primrose = ( function () {
         options.wheelEventSource = renderer.getCanvas();
       }
     }
-    
+
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
