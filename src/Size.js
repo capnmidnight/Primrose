@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var Size = ( function () {
+define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );
   }
@@ -38,8 +38,8 @@ var Size = ( function () {
   };
 
   Size.prototype.toString = function () {
-    return fmt( "<w:$1, h:$2>", this.width, this.height );
+    return qp.fmt( "<w:$1, h:$2>", this.width, this.height );
   };
 
   return Size;
-} )();
+} );

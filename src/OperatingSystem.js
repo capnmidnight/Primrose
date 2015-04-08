@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var OperatingSystem = ( function () {
+define( function ( require ) {
   "use strict";
 
   function setCursorCommand ( obj, mod, key, func, cur ) {
@@ -79,4 +78,4 @@ var OperatingSystem = ( function () {
   }
 
   return OperatingSystem;
-} )();
+} );

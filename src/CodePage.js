@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var CodePage = ( function () {
+define( function ( require ) {
   "use strict";
+  var Keys = require( "./Keys" ),
+      qp = require( "./core" );
+      
   function CodePage ( name, lang, options ) {
     this.name = name;
     this.language = lang;
 
-    copyObject( this, {
+    qp.copyObject( this, {
       NORMAL: {
         "65": "a",
         "66": "b",
@@ -80,7 +82,7 @@ var CodePage = ( function () {
       }
     } );
 
-    copyObject( this, options );
+    qp.copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
       var code = Keys["NUMPAD" + i];
@@ -95,4 +97,4 @@ var CodePage = ( function () {
   };
 
   return CodePage;
-} )();
+} );

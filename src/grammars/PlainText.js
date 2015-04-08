@@ -15,6 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.PlainText = new Grammar( "PlainText", [
-  [ "newlines", /(?:\r\n|\r|\n)/ ]
-] );
+define(function (require) {
+  "use strict";
+  var Grammar = require("../Grammar");
+  Grammar.PlainText = new Grammar("PlainText", [
+    ["newlines", /(?:\r\n|\r|\n)/]
+  ]);
+  return Grammar;
+});

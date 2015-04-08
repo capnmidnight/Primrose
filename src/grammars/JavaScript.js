@@ -14,19 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-Grammar.JavaScript = new Grammar( "JavaScript", [
-  [ "newlines", /(?:\r\n|\r|\n)/ ],
-  [ "comments", /\/\/.*$/ ],
-  [ "startBlockComments", /\/\*/ ],
-  [ "endBlockComments", /\*\// ],
-  [ "strings", /"(?:\\"|[^"])*"/ ],
-  [ "strings", /'(?:\\'|[^'])*'/ ],
-  [ "strings", /\/(?:\\\/|[^/])*\/\w*/ ],
-  [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
-  [ "keywords",
-    /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
-  ],
-  [ "functions", /(\w+)(?:\s*\()/ ],
-  [ "members", /(?:(?:\w+\.)+)(\w+)/ ]
-] );
+define(function (require) {
+  "use strict";
+  var Grammar = require("../Grammar");
+  Grammar.JavaScript = new Grammar("JavaScript", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["comments", /\/\/.*$/],
+    ["startBlockComments", /\/\*/],
+    ["endBlockComments", /\*\//],
+    ["strings", /"(?:\\"|[^"])*"/],
+    ["strings", /'(?:\\'|[^'])*'/],
+    ["strings", /\/(?:\\\/|[^/])*\/\w*/],
+    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
+    ["keywords",
+      /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
+    ],
+    ["functions", /(\w+)(?:\s*\()/],
+    ["members", /(?:(?:\w+\.)+)(\w+)/]
+  ]);
+  return Grammar;
+});

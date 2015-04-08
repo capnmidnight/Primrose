@@ -14,19 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var Primrose = ( function () {
+define( function ( require ) {
+  "use strict";
+  var Renderers = require( "./renderers/Canvas" ),
+      Point = require( "./Point" ),
+      Rectangle = require( "./Rectangle" ),
+      Size = require( "./Size" ),
+      qp = require( "./core" ),
+      Cursor = require( "./Cursor" ),
+      Themes = require( "./themes/Default" ),
+      Grammar = require( "./grammars/JavaScript" ),
+      CodePage = require( "./code_pages/EN_US" ),
+      Keys = require( "./Keys" ),
+      OperatingSystem = require( "./operating_systems/OSX" ) && require(
+      "./operating_systems/Windows" ),
+      Commands = require( "./command_packs/TextEditor" ),
+      EDITORS = [];
   function Primrose ( renderToElementOrID, options ) {
-    "use strict";
     var self = this;
-    Primrose.EDITORS.push( this );
+    EDITORS.push( this );
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
 
-    options = options || {};
+    options = options || { };
     if ( typeof options === "string" ) {
-      options = {file: options};
+      options = { file: options };
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -38,7 +51,7 @@ var Primrose = ( function () {
         browser,
         commandSystem,
         keyboardSystem,
-        commandPack = {},
+        commandPack = { },
         tokenizer,
         tokens,
         tokenRows,
@@ -63,7 +76,7 @@ var Primrose = ( function () {
         wordWrap = false,
         wheelScrollSpeed = 0,
         renderer = new Renderer( renderToElementOrID, options ),
-        surrogate = cascadeElement( "primrose-surrogate-textarea-" +
+        surrogate = qp.cascadeElement( "primrose-surrogate-textarea-" +
             renderer.id, "textarea", HTMLTextAreaElement ),
         surrogateContainer;
 
@@ -101,14 +114,14 @@ var Primrose = ( function () {
       if ( theme ) {
         var bounds = renderer.getCanvas()
             .getBoundingClientRect();
-        surrogateContainer.style.left = px( bounds.left );
-        surrogateContainer.style.top = px( window.scrollY + bounds.top );
+        surrogateContainer.style.left = qp.px( bounds.left );
+        surrogateContainer.style.top = qp.px( window.scrollY + bounds.top );
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
         var ch = renderer.character.height / renderer.getPixelRatio();
-        surrogate.style.fontSize = px( ch * 0.99 );
-        surrogate.style.lineHeight = px( ch );
+        surrogate.style.fontSize = qp.px( ch * 0.99 );
+        surrogate.style.lineHeight = qp.px( ch );
       }
     }
 
@@ -160,8 +173,8 @@ var Primrose = ( function () {
 
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
-        for ( var i = 0; i < Primrose.EDITORS.length; ++i ) {
-          var e = Primrose.EDITORS[i];
+        for ( var i = 0; i < EDITORS.length; ++i ) {
+          var e = EDITORS[i];
           if ( e !== self ) {
             e.blur();
           }
@@ -243,7 +256,7 @@ var Primrose = ( function () {
 
     function refreshCommandPack () {
       if ( keyboardSystem && operatingSystem && commandSystem ) {
-        commandPack = {};
+        commandPack = { };
       }
       addCommandPack( keyboardSystem );
       addCommandPack( operatingSystem );
@@ -296,10 +309,10 @@ var Primrose = ( function () {
       gridBounds.set( x, y, w, h );
       var cw = renderer.character.width / renderer.getPixelRatio();
       var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.left = px( gridBounds.x * cw );
-      surrogate.style.top = px( gridBounds.y * ch );
-      surrogate.style.width = px( gridBounds.width * cw );
-      surrogate.style.height = px( gridBounds.height * ch );
+      surrogate.style.left = qp.px( gridBounds.x * cw );
+      surrogate.style.top = qp.px( gridBounds.y * ch );
+      surrogate.style.width = qp.px( gridBounds.width * cw );
+      surrogate.style.height = qp.px( gridBounds.height * ch );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -419,7 +432,7 @@ var Primrose = ( function () {
 
     this.setOperatingSystem = function ( os ) {
       changed = true;
-      operatingSystem = os || ( isOSX ? OperatingSystem.OSX :
+      operatingSystem = os || ( qp.isOSX ? OperatingSystem.OSX :
           OperatingSystem.Windows );
       refreshCommandPack();
     };
@@ -489,7 +502,7 @@ var Primrose = ( function () {
         }
       }
 
-      keyboardSystem = {};
+      keyboardSystem = { };
       for ( var type in codePage ) {
         var codes = codePage[type];
         if ( typeof ( codes ) === "object" ) {
@@ -676,7 +689,7 @@ var Primrose = ( function () {
           rowWidth += tokenRow[x].value.length;
         }
         if ( i <= rowWidth ) {
-          return {x: i, y: y};
+          return { x: i, y: y };
         }
         else {
           i -= rowWidth - 1;
@@ -897,14 +910,16 @@ var Primrose = ( function () {
     //
     // different browsers have different sets of keycodes for less-frequently
     // used keys like.
-    browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE ?
-        "IE" :
-        ( isOpera ? "OPERA" : ( isSafari ? "SAFARI" : "UNKNOWN" ) ) ) );
+    browser = qp.isChrome ? "CHROMIUM" : ( qp.isFirefox ? "FIREFOX" :
+        ( qp.isIE ?
+            "IE" :
+            ( qp.isOpera ? "OPERA" : ( qp.isSafari ? "SAFARI" :
+                "UNKNOWN" ) ) ) );
 
     //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
-    surrogateContainer = makeHidingContainer(
+    surrogateContainer = qp.makeHidingContainer(
         "primrose-surrogate-textarea-container-" + renderer.id,
         surrogate );
 
@@ -942,21 +957,21 @@ var Primrose = ( function () {
         options.wheelEventSource,
         !options.disableClipboard );
 
-    this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
+    this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
         renderer.id, Themes, theme.name, self, "setTheme", "theme" );
-    this.commandSystemSelect = makeSelectorFromObj(
+    this.commandSystemSelect = qp.makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Commands,
         commandSystem.name, self, "setCommandSystem",
         "command system" );
-    this.tokenizerSelect = makeSelectorFromObj(
+    this.tokenizerSelect = qp.makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
         "language syntax", Grammar );
-    this.keyboardSelect = makeSelectorFromObj(
+    this.keyboardSelect = qp.makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, CodePage, codePage.name, self, "setCodePage",
         "localization", CodePage );
-    this.operatingSystemSelect = makeSelectorFromObj(
+    this.operatingSystemSelect = qp.makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         OperatingSystem, operatingSystem.name, self,
         "setOperatingSystem",
@@ -965,7 +980,5 @@ var Primrose = ( function () {
     setSurrogateSize();
   }
 
-  Primrose.EDITORS = [ ];
-
   return Primrose;
-} )();
+} );

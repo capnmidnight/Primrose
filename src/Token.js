@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var Token = ( function () {
+define(function(require){
   "use strict";
   function Token ( value, type, index, line ) {
     this.value = value;
@@ -35,4 +34,4 @@ var Token = ( function () {
   };
 
   return Token;
-} )();
+} );

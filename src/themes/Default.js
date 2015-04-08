@@ -14,41 +14,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+define( function ( require ) {
+  "use strict";
+  var Themes = require( "../Themes" );
 
-Themes.DEFAULT = {
+  Themes.DEFAULT = {
     name: "Light",
     fontFamily: "monospace",
     cursorColor: "black",
     fontSize: 14,
     regular: {
-        backColor: "white",
-        foreColor: "black",
-        currentRowBackColor: "#f0f0f0",
-        selectedBackColor: "#c0c0c0"
+      backColor: "white",
+      foreColor: "black",
+      currentRowBackColor: "#f0f0f0",
+      selectedBackColor: "#c0c0c0"
     },
     strings: {
-        foreColor: "#aa9900",
-        fontStyle: "italic"
+      foreColor: "#aa9900",
+      fontStyle: "italic"
     },
     numbers: {
-        foreColor: "green"
+      foreColor: "green"
     },
     comments: {
-        foreColor: "grey",
-        fontStyle: "italic"
+      foreColor: "grey",
+      fontStyle: "italic"
     },
     keywords: {
-        foreColor: "blue"
+      foreColor: "blue"
     },
     functions: {
-        foreColor: "brown",
-        fontWeight: "bold"
+      foreColor: "brown",
+      fontWeight: "bold"
     },
     members: {
-        foreColor: "green"
+      foreColor: "green"
     },
     error: {
-        foreColor: "red",
-        fontStyle: "underline italic"
+      foreColor: "red",
+      fontStyle: "underline italic"
     }
-};
+  };
+
+  return Themes;
+} );

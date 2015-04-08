@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Point = ( function () {
+define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Point ( x, y ) {
     this.set( x || 0, y || 0 );
   }
@@ -38,8 +39,8 @@ var Point = ( function () {
   };
 
   Point.prototype.toString = function () {
-    return fmt( "(x:$1, y:$2)", this.x, this.y );
+    return qp.fmt( "(x:$1, y:$2)", this.x, this.y );
   };
 
   return Point;
-} )();
+} );

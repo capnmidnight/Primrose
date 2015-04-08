@@ -15,15 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Grammar.TestResults = new Grammar( "TestResults", [
-  [ "newlines", /(?:\r\n|\r|\n)/ ],
-  [ "numbers", /(\[)(o+)/ ],
-  [ "numbers", /(\d+ succeeded), 0 failed/ ],
-  [ "numbers", /^    Successes:/ ],
-  [ "functions", /(x+)\]/ ],
-  [ "functions", /[1-9]\d* failed/ ],
-  [ "functions", /^    Failures:/ ],
-  [ "comments", /(\d+ms:)(.*)/ ],
-  [ "keywords", /(Test results for )(\w+):/ ],
-  [ "strings", /        \w+/ ]
-] );
+define(function (require) {
+  "use strict";
+  var Grammar = require("../Grammar");
+  Grammar.TestResults = new Grammar("TestResults", [
+    ["newlines", /(?:\r\n|\r|\n)/],
+    ["numbers", /(\[)(o+)/],
+    ["numbers", /(\d+ succeeded), 0 failed/],
+    ["numbers", /^    Successes:/],
+    ["functions", /(x+)\]/],
+    ["functions", /[1-9]\d* failed/],
+    ["functions", /^    Failures:/],
+    ["comments", /(\d+ms:)(.*)/],
+    ["keywords", /(Test results for )(\w+):/],
+    ["strings", /        \w+/]
+  ]);
+  return Grammar;
+});

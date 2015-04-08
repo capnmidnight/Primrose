@@ -15,8 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Rectangle = ( function () {
+define( function ( require ) {
   "use strict";
+  var Point = require( "./Point" ),
+      Size = require( "./Size" ),
+      qp = require( "./core" );
   function Rectangle ( x, y, width, height ) {
     this.point = new Point( x, y );
     this.size = new Size( width, height );
@@ -107,8 +110,8 @@ var Rectangle = ( function () {
   };
 
   Rectangle.prototype.toString = function () {
-    return fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
+    return qp.fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
   };
 
   return Rectangle;
-} )();
+} );

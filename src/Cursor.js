@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-var Cursor = ( function () {
+define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -85,7 +85,7 @@ var Cursor = ( function () {
     else {
       var x = this.x - 1;
       var line = rebuildLine( tokenRows, this.y );
-      var word = reverse( line.substring( 0, x ) );
+      var word = qp.reverse( line.substring( 0, x ) );
       var m = word.match( /(\s|\W)+/ );
       var dx = m ? ( m.index + m[0].length + 1 ) : word.length;
       this.i -= dx;
@@ -225,4 +225,4 @@ var Cursor = ( function () {
   };
 
   return Cursor;
-} )();
+} );

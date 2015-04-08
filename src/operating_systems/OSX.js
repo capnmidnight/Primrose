@@ -18,7 +18,12 @@
 
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-OperatingSystem.OSX = new OperatingSystem(
-    "OS X", "META", "ALT", "METASHIFT_z",
-    "META", "LEFTARROW", "RIGHTARROW",
-    "META", "UPARROW", "DOWNARROW" );
+define(function (require) {
+  "use strict";
+  var OperatingSystem = require("../OperatingSystem");
+  OperatingSystem.OSX = new OperatingSystem(
+      "OS X", "META", "ALT", "METASHIFT_z",
+      "META", "LEFTARROW", "RIGHTARROW",
+      "META", "UPARROW", "DOWNARROW");
+  return OperatingSystem;
+});
