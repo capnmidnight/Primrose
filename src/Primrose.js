@@ -28,6 +28,15 @@ define( function ( require ) {
       Grammar = require( "./Grammar" ),
       EDITORS = [ ];
 
+  function renderPump () {
+    requestAnimationFrame( renderPump );
+    for ( var i = 0; i < EDITORS.length; ++i ) {
+      EDITORS[i].drawText();
+    }
+  }
+
+  requestAnimationFrame( renderPump );
+
   function Primrose ( renderToElementOrID, options ) {
     var self = this;
     EDITORS.push( this );
@@ -901,6 +910,17 @@ define( function ( require ) {
       changed = false;
     };
 
+    this.appendControls = function ( elem ) {
+      elem.appendChild( this.lineNumberToggler );
+      elem.appendChild( this.wordWrapToggler );
+      elem.appendChild( this.scrollBarToggler );
+      elem.appendChild( this.operatingSystemSelect );
+      elem.appendChild( this.keyboardSelect );
+      elem.appendChild( this.commandSystemSelect );
+      elem.appendChild( this.tokenizerSelect );
+      elem.appendChild( this.themeSelect );
+    };
+
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
@@ -917,6 +937,7 @@ define( function ( require ) {
     //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
+    surrogate.addEventListener( "blur", this.blur.bind( this ) );
     surrogateContainer = qp.makeHidingContainer(
         "primrose-surrogate-textarea-container-" + renderer.id,
         surrogate );
@@ -939,7 +960,7 @@ define( function ( require ) {
 
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {
-        options.keyEventSource = window;
+        options.keyEventSource = surrogate;
       }
       if ( options.pointerEventSource === undefined ) {
         options.pointerEventSource = renderer.getCanvas();
@@ -955,42 +976,103 @@ define( function ( require ) {
         options.wheelEventSource,
         !options.disableClipboard );
 
-    this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
+    function makeToggler ( id, value, lblTxt, funcName ) {
+      var span = document.createElement( "span" );
+
+      var check = document.createElement( "input" );
+      check.type = "checkbox";
+      check.checked = value;
+      check.id = id;
+      span.appendChild( check );
+
+      var lbl = document.createElement( "label" );
+      lbl.innerHTML = lblTxt + " ";
+      lbl.for = id;
+      span.appendChild( lbl );
+
+      check.addEventListener( "change", function () {
+        self[funcName]( check.checked );
+      } );
+      return span;
+    }
+
+    function makeSelectorFromObj ( id, obj, def, target, prop, lbl,
+        typeFilter ) {
+      var elem = qp.cascadeElement( id, "select", window.HTMLSelectElement );
+      var items = [ ];
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty( key ) ) {
+          var val = obj[key];
+          if ( !typeFilter || val instanceof typeFilter ) {
+            val = val.name || key;
+            var opt = document.createElement( "option" );
+            opt.innerHTML = val;
+            items.push( obj[key] );
+            if ( val === def ) {
+              opt.selected = "selected";
+            }
+            elem.appendChild( opt );
+          }
+        }
+      }
+
+      if ( typeof target[prop] === "function" ) {
+        elem.addEventListener( "change", function () {
+          target[prop]( items[elem.selectedIndex] );
+        } );
+      }
+      else {
+        elem.addEventListener( "change", function () {
+          target[prop] = items[elem.selectedIndex];
+        } );
+      }
+
+      var container = qp.cascadeElement( "container -" + id, "div",
+          window.HTMLDivElement );
+      var label = qp.cascadeElement( "label-" + id, "span",
+          window.HTMLSpanElement );
+      label.innerHTML = lbl + ": ";
+      label.for = elem;
+      elem.title = lbl;
+      elem.alt = lbl;
+      container.appendChild( label );
+      container.appendChild( elem );
+      return container;
+    }
+
+    this.lineNumberToggler = makeToggler( "primrose-line-number-toggler-" +
+        renderer.id, !options.hideLineNumbers, "Line numbers",
+        "setShowLineNumbers" );
+    this.wordWrapToggler = makeToggler( "primrose-word-wrap-toggler-" +
+        renderer.id, !options.disableWordWrap, "Line wrap", "setWordWrap" );
+    this.scrollBarToggler = makeToggler( "primrose-scrollbar-toggler-" +
+        renderer.id, !options.hideScrollBars, "Scroll bars",
+        "setShowScrollBars" );
+    this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
         renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
-    this.commandSystemSelect = qp.makeSelectorFromObj(
+    this.commandSystemSelect = makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
         commandSystem.name, self, "setCommandSystem",
-        "command system" );
-    this.tokenizerSelect = qp.makeSelectorFromObj(
+        "Command system" );
+    this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
-        "language syntax", Grammar );
-    this.keyboardSelect = qp.makeSelectorFromObj(
+        "Language syntax", Grammar );
+    this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "localization", CodePage );
-    this.operatingSystemSelect = qp.makeSelectorFromObj(
+        "Localization", CodePage );
+    this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "shortcut style", OperatingSystem );
+        "Shortcut style", OperatingSystem );
 
     setSurrogateSize();
   }
 
-  Primrose.Themes = {
-    Default: require( "./themes/Default" ),
-    Dark: require( "./themes/Dark" )
-  };
 
-  Primrose.Renderers = {
-    Canvas: require( "./renderers/Canvas" )
-  };
-
-  Primrose.OperatingSystems = {
-    Windows: require( "./operating_systems/Windows" ),
-    OSX: require( "./operating_systems/OSX" )
-  };
+  Primrose.Keys = Keys;
 
   Primrose.CodePages = {
     EN_US: require( "./code_pages/EN_US" ),
@@ -1008,8 +1090,20 @@ define( function ( require ) {
     PlainText: require( "./grammars/PlainText" ),
     TestResults: require( "./grammars/TestResults" )
   };
-  
-  Primrose.Keys = Keys;
+
+  Primrose.Themes = {
+    Default: require( "./themes/Default" ),
+    Dark: require( "./themes/Dark" )
+  };
+
+  Primrose.Renderers = {
+    Canvas: require( "./renderers/Canvas" )
+  };
+
+  Primrose.OperatingSystems = {
+    Windows: require( "./operating_systems/Windows" ),
+    OSX: require( "./operating_systems/OSX" )
+  };
 
   return Primrose;
 } );

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2015 Sean
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-define( function ( require ) {
+require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
+    Primrose ) {
   "use strict";
-  var qp = require( "../../src/core" ),
-      Primrose = require( "../../src/Primrose" ),
-      modA = qp.isOSX ? "metaKey" : "ctrlKey",
+  var modA = qp.isOSX ? "metaKey" : "ctrlKey",
       modB = qp.isOSX ? "altKey" : "shiftKey",
       cmdPre = qp.isOSX ? "CMD+OPT" : "CTRL+SHIFT",
       vrDisplay,
@@ -28,6 +26,7 @@ define( function ( require ) {
       vrEffect,
       renderer,
       ctrls = qp.findEverything();
+  var THREE = window.THREE;
   function clearKeyOption ( evt ) {
     this.value = "";
     this.dataset.keycode = "";
@@ -48,39 +47,6 @@ define( function ( require ) {
     elem.addEventListener( "keyup", setKeyOption );
   }
 
-  var mockVRDisplay = {
-    getRecommendedEyeRenderRect: function ( side ) {
-      if ( side === "left" ) {
-        return { x: 0, y: 0, width: 1182, height: 1461, top: 0, right: 1182,
-          bottom: 1461, left: 0 };
-      }
-      else {
-        return { x: 1182, y: 0, width: 1182, height: 1461, top: 0,
-          right: 2364,
-          bottom: 1461, left: 1182 };
-      }
-    },
-    getEyeTranslation: function ( side ) {
-      if ( side === "left" ) {
-        return { x: -0.03200000151991844, y: -0, z: -0, w: 0 };
-      }
-      else {
-        return { x: 0.03200000151991844, y: -0, z: -0, w: 0 };
-      }
-    },
-    getRecommendedEyeFieldOfView: function ( side ) {
-      if ( side === "left" ) {
-        return { upDegrees: 53.0464661134181,
-          rightDegrees: 47.527693754615306,
-          downDegrees: 53.0464661134181, leftDegrees: 46.63209544498114 };
-      }
-      else {
-        return { upDegrees: 53.0464661134181,
-          rightDegrees: 46.63209544498114,
-          downDegrees: 53.0464661134181, leftDegrees: 47.527693754615306 };
-      }
-    }
-  };
   function goFullscreen ( ) {
     ctrls.main.style.display = "none";
     var elem = ctrls.output;
@@ -88,46 +54,23 @@ define( function ( require ) {
       if ( !vrEffect ) {
         vrEffect = new THREE.VREffect( renderer, vrDisplay );
       }
-      if ( elem.webkitRequestFullscreen ) {
-        elem.webkitRequestFullscreen( { vrDisplay: vrDisplay } );
-      }
-      else if ( elem.mozRequestFullScreen ) {
-        elem.mozRequestFullScreen( { vrDisplay: vrDisplay } );
-      }
+
+      elem.requestFullscreen( { vrDisplay: vrDisplay } );
     }
     else {
-      if ( elem.requestFullscreen ) {
-        elem.requestFullscreen( );
-      }
-      else if ( elem.webkitRequestFullscreen ) {
-        elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
-      }
-      else if ( elem.mozRequestFullScreen ) {
-        elem.mozRequestFullScreen( );
-      }
-      else if ( elem.msRequestFullscreen ) {
-        elem.msRequestFullscreen( );
-      }
+      elem.requestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
     }
 
-    if ( elem.requestPointerLock ) {
-      elem.requestPointerLock( );
-    }
-    else if ( elem.webkitRequestPointerLock ) {
-      elem.webkitRequestPointerLock( );
-    }
-    else if ( elem.mozRequestPointerLock ) {
-      elem.mozRequestPointerLock( );
-    }
+    elem.requestPointerLock( );
   }
 
   function gotVRDevices ( devices ) {
     for ( var i = 0; i < devices.length; ++i ) {
       var device = devices[i];
-      if ( device instanceof HMDVRDevice ) {
+      if ( device instanceof window.HMDVRDevice ) {
         vrDisplay = device;
       }
-      else if ( device instanceof PositionSensorVRDevice ) {
+      else if ( device instanceof window.PositionSensorVRDevice ) {
         vrSensor = device;
       }
       if ( vrSensor && vrDisplay ) {
@@ -289,11 +232,11 @@ setInterval(function(){\n\
     if ( vrDisplay ) {
       ctrls.goRegular.style.display = "none";
       ctrls.nightly.display = "none";
-      ctrls.goVR.addEventListener("click", goFullscreen);
+      ctrls.goVR.addEventListener( "click", goFullscreen );
     }
     else {
       ctrls.goVR.style.display = "none";
-      ctrls.goRegular.addEventListener("click", goFullscreen);
+      ctrls.goRegular.addEventListener( "click", goFullscreen );
     }
 
     refreshSize( );
@@ -351,7 +294,8 @@ setInterval(function(){\n\
           evt.preventDefault( );
         }
         else if ( currentEditor ) {
-          if ( ( qp.isOSX && evt.keyCode === 69 ) || ( !qp.isOSX && evt.keyCode ===
+          if ( ( qp.isOSX && evt.keyCode === 69 ) || ( !qp.isOSX &&
+              evt.keyCode ===
               32 ) ) {
             try {
               eval( currentEditor.getText( ) );

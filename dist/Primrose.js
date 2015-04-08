@@ -655,6 +655,15 @@ define( function ( require ) {
       Grammar = require( "./Grammar" ),
       EDITORS = [ ];
 
+  function renderPump () {
+    requestAnimationFrame( renderPump );
+    for ( var i = 0; i < EDITORS.length; ++i ) {
+      EDITORS[i].drawText();
+    }
+  }
+
+  requestAnimationFrame( renderPump );
+
   function Primrose ( renderToElementOrID, options ) {
     var self = this;
     EDITORS.push( this );
@@ -662,9 +671,9 @@ define( function ( require ) {
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
 
-    options = options || { };
+    options = options || {};
     if ( typeof options === "string" ) {
-      options = { file: options };
+      options = {file: options};
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -676,7 +685,7 @@ define( function ( require ) {
         browser,
         commandSystem,
         keyboardSystem,
-        commandPack = { },
+        commandPack = {},
         tokenizer,
         tokens,
         tokenRows,
@@ -881,7 +890,7 @@ define( function ( require ) {
 
     function refreshCommandPack () {
       if ( keyboardSystem && operatingSystem && commandSystem ) {
-        commandPack = { };
+        commandPack = {};
       }
       addCommandPack( keyboardSystem );
       addCommandPack( operatingSystem );
@@ -1127,7 +1136,7 @@ define( function ( require ) {
         }
       }
 
-      keyboardSystem = { };
+      keyboardSystem = {};
       for ( var type in codePage ) {
         var codes = codePage[type];
         if ( typeof ( codes ) === "object" ) {
@@ -1314,7 +1323,7 @@ define( function ( require ) {
           rowWidth += tokenRow[x].value.length;
         }
         if ( i <= rowWidth ) {
-          return { x: i, y: y };
+          return {x: i, y: y};
         }
         else {
           i -= rowWidth - 1;
@@ -1528,6 +1537,17 @@ define( function ( require ) {
       changed = false;
     };
 
+    this.appendControls = function ( elem ) {
+      elem.appendChild( this.lineNumberToggler );
+      elem.appendChild( this.wordWrapToggler );
+      elem.appendChild( this.scrollBarToggler );
+      elem.appendChild( this.operatingSystemSelect );
+      elem.appendChild( this.keyboardSelect );
+      elem.appendChild( this.commandSystemSelect );
+      elem.appendChild( this.tokenizerSelect );
+      elem.appendChild( this.themeSelect );
+    };
+
     //////////////////////////////////////////////////////////////////////////
     // initialization
     /////////////////////////////////////////////////////////////////////////
@@ -1544,6 +1564,7 @@ define( function ( require ) {
     //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
+    surrogate.addEventListener( "blur", this.blur.bind( this ) );
     surrogateContainer = qp.makeHidingContainer(
         "primrose-surrogate-textarea-container-" + renderer.id,
         surrogate );
@@ -1566,7 +1587,7 @@ define( function ( require ) {
 
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {
-        options.keyEventSource = window;
+        options.keyEventSource = surrogate;
       }
       if ( options.pointerEventSource === undefined ) {
         options.pointerEventSource = renderer.getCanvas();
@@ -1582,25 +1603,51 @@ define( function ( require ) {
         options.wheelEventSource,
         !options.disableClipboard );
 
+    function makeToggler (id, value, lblTxt, funcName) {
+      var span = document.createElement("span");
+
+      var check = document.createElement("input");
+      check.type = "checkbox";
+      check.checked = value;
+      check.id = id;
+      span.appendChild(check);
+
+      var lbl = document.createElement("label");
+      lbl.innerHTML = lblTxt + " ";
+      lbl.for = id;
+      span.appendChild(lbl);
+
+      check.addEventListener("change", function(){
+        self[funcName](check.checked);
+      });
+      return span;
+    }
+
+    this.lineNumberToggler = makeToggler( "primrose-line-number-toggler-" +
+        renderer.id, !options.hideLineNumbers, "Line numbers", "setShowLineNumbers" );
+    this.wordWrapToggler = makeToggler("primrose-word-wrap-toggler-" +
+        renderer.id, !options.disableWordWrap, "Line wrap", "setWordWrap" );
+    this.scrollBarToggler = makeToggler("primrose-scrollbar-toggler-" +
+        renderer.id, !options.hideScrollBars, "Scroll bars", "setShowScrollBars" );
     this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
         renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
     this.commandSystemSelect = qp.makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
         commandSystem.name, self, "setCommandSystem",
-        "command system" );
+        "Command system" );
     this.tokenizerSelect = qp.makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
-        "language syntax", Grammar );
+        "Language syntax", Grammar );
     this.keyboardSelect = qp.makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "localization", CodePage );
+        "Localization", CodePage );
     this.operatingSystemSelect = qp.makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "shortcut style", OperatingSystem );
+        "Shortcut style", OperatingSystem );
 
     setSurrogateSize();
   }
@@ -1635,7 +1682,7 @@ define( function ( require ) {
     PlainText: require( "./grammars/PlainText" ),
     TestResults: require( "./grammars/TestResults" )
   };
-  
+
   Primrose.Keys = Keys;
 
   return Primrose;
@@ -2380,17 +2427,17 @@ define(function (require) {
  https://www.github.com/capnmidnight/VR
  Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
  All rights reserved.
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -2403,43 +2450,63 @@ define( function ( require ) {
   // polyfills
   /////////////////////////////////////////////////////////////////////////////
 
-  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate ||
-      navigator.mozVibrate;
+  navigator.vibrate = navigator.vibrate ||
+      navigator.webkitVibrate ||
+      navigator.mozVibrate ||
+      function () {
+      };
+
   navigator.getUserMedia = navigator.getUserMedia ||
-      navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
-      navigator.msGetUserMedia || navigator.oGetUserMedia;
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia ||
+      navigator.oGetUserMedia ||
+      function () {
+      };
+
   window.RTCPeerConnection = window.RTCPeerConnection ||
-      window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+      window.webkitRTCPeerConnection ||
+      window.mozRTCPeerConnection ||
+      function () {
+      };
+
   window.RTCIceCandidate = window.RTCIceCandidate ||
       window.mozRTCIceCandidate ||
-      window.RTCIceCandidate;
+      function () {
+      };
+
   window.RTCSessionDescription = window.RTCSessionDescription ||
-      window.mozRTCSessionDescription || window.RTCSessionDescription;
+      window.mozRTCSessionDescription ||
+      function () {
+      };
+
+  window.Element.prototype.requestPointerLock = window.Element.prototype.requestPointerLock ||
+      window.Element.prototype.webkitRequestPointerLock ||
+      window.Element.prototype.mozRequestPointerLock ||
+      function () {
+      };
+
+  window.Element.prototype.requestFullscreen = window.Element.prototype.requestFullscreen ||
+      window.Element.prototype.webkitRequestFullscreen ||
+      window.Element.prototype.mozRequestFullScreen ||
+      window.Element.prototype.msRequestFullscreen ||
+      function () {
+      };
+
+  window.Document.prototype.exitFullscreen = window.Document.prototype.exitFullscreen ||
+      window.Document.prototype.webkitExitFullscreen ||
+      window.Document.prototype.mozCancelFullScreen ||
+      window.Document.prototype.msExitFullscreen ||
+      function () {
+      };
 
 // this doesn't seem to actually work
   screen.lockOrientation = screen.lockOrientation ||
       screen.mozLockOrientation ||
-      screen.msLockOrientation || function () {
+      screen.msLockOrientation ||
+      function () {
       };
 
-// full-screen-ism polyfill
-  if ( !document.documentElement.requestFullscreen ) {
-    if ( document.documentElement.msRequestFullscreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.msRequestFullscreen;
-      document.exitFullscreen = document.msExitFullscreen;
-    }
-    else if ( document.documentElement.mozRequestFullScreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.mozRequestFullScreen;
-      document.exitFullscreen = document.mozCancelFullScreen;
-    }
-    else if ( document.documentElement.webkitRequestFullscreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.webkitRequestFullscreen;
-      document.exitFullscreen = document.webkitExitFullscreen;
-    }
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   //  end polyfils
@@ -2475,10 +2542,10 @@ define( function ( require ) {
    is the template itself. However, you cannot reference the first position,
    as zero digit characters are used to indicate the width of number to
    pad values out to.
-   
+
    Numerical precision padding is indicated with a period and trailing
    zeros.
-   
+
    examples:
    fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
    fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
@@ -2590,7 +2657,7 @@ define( function ( require ) {
         }
         else if ( depth < 3 ) {
           if ( !dest[key] ) {
-            dest[key] = { };
+            dest[key] = {};
           }
           copyObject( dest[key], source[key], depth + 1 );
         }
@@ -2599,8 +2666,8 @@ define( function ( require ) {
   }
 
   function help ( obj ) {
-    var funcs = { };
-    var props = { };
+    var funcs = {};
+    var props = {};
     var evnts = [ ];
     if ( obj ) {
       for ( var field in obj ) {
@@ -2629,7 +2696,7 @@ define( function ( require ) {
           type = obj.constructor.name;
         }
         else {
-          var q = [ { prefix: "", obj: window } ];
+          var q = [ {prefix: "", obj: window} ];
           var traversed = [ ];
           while ( q.length > 0 && type === null ) {
             var parentObject = q.shift();
@@ -2645,8 +2712,8 @@ define( function ( require ) {
                   }
                 }
                 else if ( !testObject.___tried___ ) {
-                  q.push( { prefix: parentObject.prefix + field + ".",
-                    obj: testObject } );
+                  q.push( {prefix: parentObject.prefix + field + ".",
+                    obj: testObject} );
                 }
               }
             }
@@ -2800,7 +2867,7 @@ define( function ( require ) {
         var key = getKey ? getKey( obj ) : obj;
         var val = getValue ? getValue( obj ) : obj;
         if ( groups.length === 0 || groups[groups.length - 1].key !== key ) {
-          groups.push( { key: key, values: [ ] } );
+          groups.push( {key: key, values: [ ]} );
         }
         groups[groups.length - 1].values.push( val );
       }
@@ -2856,7 +2923,7 @@ define( function ( require ) {
     ems: fmt.bind( this, "$1em" ),
     findEverything: function ( elem, obj ) {
       elem = elem || document;
-      obj = obj || { };
+      obj = obj || {};
       var arr = elem.querySelectorAll( "*" );
       for ( var i = 0; i < arr.length; ++i ) {
         var e = arr[i];
@@ -2903,7 +2970,7 @@ define( function ( require ) {
       }
     },
     readForm: function ( ctrls ) {
-      var state = { };
+      var state = {};
       if ( ctrls ) {
         for ( var name in ctrls ) {
           var c = ctrls[name];
@@ -2976,7 +3043,8 @@ define( function ( require ) {
 
       var container = cascadeElement( "container -" + id, "div",
           window.HTMLDivElement );
-      var label = cascadeElement( "label-" + id, "span", window.HTMLSpanElement );
+      var label = cascadeElement( "label-" + id, "span",
+          window.HTMLSpanElement );
       label.innerHTML = lbl + ": ";
       label.for = elem;
       elem.title = lbl;
@@ -3024,7 +3092,7 @@ define( function ( require ) {
       }
       if ( !isFullScreenMode() ) {
         if ( vrDisplay ) {
-          document.documentElement.requestFullscreen( { vrDisplay: vrDisplay
+          document.documentElement.requestFullscreen( {vrDisplay: vrDisplay
           } );
         }
         else {

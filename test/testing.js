@@ -18,8 +18,8 @@
 define( function ( require ) {
   "use strict";
 
-  var qp = require("../src/core");
-  
+  var qp = require( "../src/core" );
+
   function getDifference ( expected, actual ) {
     return typeof ( expected ) !== "number"
         || typeof ( actual ) !== "number"
@@ -36,12 +36,13 @@ define( function ( require ) {
   function test ( func ) {
     if ( func.tests ) {
       var results = {
-        success: { },
-        failure: { },
+        success: {},
+        failure: {},
         total: 0,
         failed: 0,
         succeeded: 0
-      }, exp;
+      },
+      exp;
       for ( var key in func.tests ) {
         if ( func.tests[key]
             && typeof ( func.tests[key] ) === "function" ) {
@@ -51,13 +52,13 @@ define( function ( require ) {
             func.tests[key]();
             ++results.succeeded;
             var end = Date.now();
-            results.success[key] = { dt: ( end - start ) };
+            results.success[key] = {dt: ( end - start )};
           }
           catch ( exp ) {
             ++results.failed;
             var end = Date.now();
-            results.failure[key] = { dt: ( end - start ), msg: exp.message,
-              stack: exp.stack || false };
+            results.failure[key] = {dt: ( end - start ), msg: exp.message,
+              stack: exp.stack || false};
           }
         }
       }
@@ -79,7 +80,8 @@ define( function ( require ) {
             : "x";
       }
 
-      log( qp.fmt( "Test results for $1: [$2]\n\n$3 succeeded, $4 failed", name,
+      log( qp.fmt( "Test results for $1: [$2]\n\n$3 succeeded, $4 failed",
+          name,
           beam, result.succeeded, result.failed ) );
 
       if ( result.succeeded > 0 ) {
@@ -142,15 +144,27 @@ define( function ( require ) {
       }
     },
     consoleTest: function ( func ) {
-      displayTest( func, console.log.bind( console ) );
+      if ( func instanceof Array ) {
+        func.forEach( Assert.consoleTest );
+      }
+      else {
+        displayTest( func, console.log.bind( console ) );
+      }
     },
     stringTest: function ( func ) {
-      var accum = "";
-      var log = function ( txt ) {
-        accum += txt + "\n";
-      };
-      displayTest( func, log );
-      return accum;
+      if ( func instanceof Array ) {
+        return func.map( Assert.stringTest )
+            .join(
+            "\n===---===---===---===---===---===---===---===---===---===\n\n" );
+      }
+      else {
+        var accum = "";
+        var log = function ( txt ) {
+          accum += txt + "\n";
+        };
+        displayTest( func, log );
+        return accum;
+      }
     }
   };
 

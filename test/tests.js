@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Sean
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-require( [ "../../src/Primrose", "../../test/testing", "../rosetta_24_game",
-  "../../test/tests" ], function ( Primrose, Assert, rosetta_24_game,
-    testObjects ) {
-  "use strict";
 
-  var editor = new Primrose( "editorCanvas", rosetta_24_game.toString() );
-  new Primrose( "testResultsCanvas", {
-    file: Assert.stringTest( testObjects ),
-    readOnly: true,
-    tokenizer: Primrose.Grammars.TestResults,
-    theme: Primrose.Themes.Dark
-  } );
-
-  editor.appendControls( document.getElementById( "controls" ) );
+define( function ( require ) {
+  return [
+    require( "./Point" ),
+    require( "./Size" ),
+    require( "./Rectangle" ),
+    require( "./Grammar" )
+  ];
 } );

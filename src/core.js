@@ -2,17 +2,17 @@
  https://www.github.com/capnmidnight/VR
  Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
  All rights reserved.
- 
+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -25,43 +25,63 @@ define( function ( require ) {
   // polyfills
   /////////////////////////////////////////////////////////////////////////////
 
-  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate ||
-      navigator.mozVibrate;
+  navigator.vibrate = navigator.vibrate ||
+      navigator.webkitVibrate ||
+      navigator.mozVibrate ||
+      function () {
+      };
+
   navigator.getUserMedia = navigator.getUserMedia ||
-      navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||
-      navigator.msGetUserMedia || navigator.oGetUserMedia;
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia ||
+      navigator.oGetUserMedia ||
+      function () {
+      };
+
   window.RTCPeerConnection = window.RTCPeerConnection ||
-      window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+      window.webkitRTCPeerConnection ||
+      window.mozRTCPeerConnection ||
+      function () {
+      };
+
   window.RTCIceCandidate = window.RTCIceCandidate ||
       window.mozRTCIceCandidate ||
-      window.RTCIceCandidate;
+      function () {
+      };
+
   window.RTCSessionDescription = window.RTCSessionDescription ||
-      window.mozRTCSessionDescription || window.RTCSessionDescription;
+      window.mozRTCSessionDescription ||
+      function () {
+      };
+
+  window.Element.prototype.requestPointerLock = window.Element.prototype.requestPointerLock ||
+      window.Element.prototype.webkitRequestPointerLock ||
+      window.Element.prototype.mozRequestPointerLock ||
+      function () {
+      };
+
+  window.Element.prototype.requestFullscreen = window.Element.prototype.requestFullscreen ||
+      window.Element.prototype.webkitRequestFullscreen ||
+      window.Element.prototype.mozRequestFullScreen ||
+      window.Element.prototype.msRequestFullscreen ||
+      function () {
+      };
+
+  window.Document.prototype.exitFullscreen = window.Document.prototype.exitFullscreen ||
+      window.Document.prototype.webkitExitFullscreen ||
+      window.Document.prototype.mozCancelFullScreen ||
+      window.Document.prototype.msExitFullscreen ||
+      function () {
+      };
 
 // this doesn't seem to actually work
   screen.lockOrientation = screen.lockOrientation ||
       screen.mozLockOrientation ||
-      screen.msLockOrientation || function () {
+      screen.msLockOrientation ||
+      function () {
       };
 
-// full-screen-ism polyfill
-  if ( !document.documentElement.requestFullscreen ) {
-    if ( document.documentElement.msRequestFullscreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.msRequestFullscreen;
-      document.exitFullscreen = document.msExitFullscreen;
-    }
-    else if ( document.documentElement.mozRequestFullScreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.mozRequestFullScreen;
-      document.exitFullscreen = document.mozCancelFullScreen;
-    }
-    else if ( document.documentElement.webkitRequestFullscreen ) {
-      document.documentElement.requestFullscreen =
-          document.documentElement.webkitRequestFullscreen;
-      document.exitFullscreen = document.webkitExitFullscreen;
-    }
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   //  end polyfils
@@ -97,10 +117,10 @@ define( function ( require ) {
    is the template itself. However, you cannot reference the first position,
    as zero digit characters are used to indicate the width of number to
    pad values out to.
-   
+
    Numerical precision padding is indicated with a period and trailing
    zeros.
-   
+
    examples:
    fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
    fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
@@ -564,48 +584,6 @@ define( function ( require ) {
     },
     reloadPage: function () {
       document.location = document.location.href;
-    },
-    makeSelectorFromObj: function ( id, obj, def, target, prop, lbl,
-        typeFilter ) {
-      var elem = cascadeElement( id, "select", window.HTMLSelectElement );
-      var items = [ ];
-      for ( var key in obj ) {
-        if ( obj.hasOwnProperty( key ) ) {
-          var val = obj[key];
-          if ( !typeFilter || val instanceof typeFilter ) {
-            val = val.name || key;
-            var opt = document.createElement( "option" );
-            opt.innerHTML = val;
-            items.push( obj[key] );
-            if ( val === def ) {
-              opt.selected = "selected";
-            }
-            elem.appendChild( opt );
-          }
-        }
-      }
-
-      if ( typeof target[prop] === "function" ) {
-        elem.addEventListener( "change", function () {
-          target[prop]( items[elem.selectedIndex] );
-        } );
-      }
-      else {
-        elem.addEventListener( "change", function () {
-          target[prop] = items[elem.selectedIndex];
-        } );
-      }
-
-      var container = cascadeElement( "container -" + id, "div",
-          window.HTMLDivElement );
-      var label = cascadeElement( "label-" + id, "span", window.HTMLSpanElement );
-      label.innerHTML = lbl + ": ";
-      label.for = elem;
-      elem.title = lbl;
-      elem.alt = lbl;
-      container.appendChild( label );
-      container.appendChild( elem );
-      return container;
     },
     makeHidingContainer: function ( id, obj ) {
       var elem = cascadeElement( id, "div", window.HTMLDivElement );
