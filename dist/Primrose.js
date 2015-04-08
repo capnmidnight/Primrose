@@ -702,7 +702,7 @@ define( function ( require ) {
         wheelScrollSpeed = 0,
         renderer = new Renderer( renderToElementOrID, options ),
         surrogate = qp.cascadeElement( "primrose-surrogate-textarea-" +
-            renderer.id, "textarea", HTMLTextAreaElement ),
+            renderer.id, "textarea", window.HTMLTextAreaElement ),
         surrogateContainer;
 
     //////////////////////////////////////////////////////////////////////////
@@ -870,7 +870,7 @@ define( function ( require ) {
         for ( var key in cmd ) {
           if ( cmd.hasOwnProperty( key ) ) {
             var func = cmd[key];
-            if ( !( func instanceof Function ) ) {
+            if ( typeof func !== "function" ) {
               func = self.overwriteText.bind( self, func );
             }
             commandPack[key] = func;
@@ -1635,6 +1635,8 @@ define( function ( require ) {
     PlainText: require( "./grammars/PlainText" ),
     TestResults: require( "./grammars/TestResults" )
   };
+  
+  Primrose.Keys = Keys;
 
   return Primrose;
 } );;/*
@@ -2596,13 +2598,87 @@ define( function ( require ) {
     }
   }
 
+  function help ( obj ) {
+    var funcs = { };
+    var props = { };
+    var evnts = [ ];
+    if ( obj ) {
+      for ( var field in obj ) {
+        if ( field.indexOf( "on" ) === 0 && ( obj !== navigator || field !==
+            "onLine" ) ) {
+          // `online` is a known element that is not an event, but looks like
+          // an event to the most basic assumption.
+          evnts.push( field.substring( 2 ) );
+        }
+        else if ( typeof ( obj[field] ) === "function" ) {
+          funcs[field] = obj[field];
+        }
+        else {
+          props[field] = obj[field];
+        }
+      }
+
+      var type = typeof ( obj );
+      if ( type === "function" ) {
+        type = obj.toString()
+            .match( /(function [^(]*)/ )[1];
+      }
+      else if ( type === "object" ) {
+        type = null;
+        if ( obj.constructor && obj.constructor.name ) {
+          type = obj.constructor.name;
+        }
+        else {
+          var q = [ { prefix: "", obj: window } ];
+          var traversed = [ ];
+          while ( q.length > 0 && type === null ) {
+            var parentObject = q.shift();
+            parentObject.___traversed___ = true;
+            traversed.push( parentObject );
+            for ( field in parentObject.obj ) {
+              var testObject = parentObject.obj[field];
+              if ( testObject ) {
+                if ( typeof ( testObject ) === "function" ) {
+                  if ( testObject.prototype && obj instanceof testObject ) {
+                    type = parentObject.prefix + field;
+                    break;
+                  }
+                }
+                else if ( !testObject.___tried___ ) {
+                  q.push( { prefix: parentObject.prefix + field + ".",
+                    obj: testObject } );
+                }
+              }
+            }
+          }
+          traversed.forEach( function ( o ) {
+            delete o.___traversed___;
+          } );
+        }
+      }
+      obj = {
+        type: type,
+        events: evnts,
+        functions: funcs,
+        properties: props
+      };
+
+      console.debug( obj );
+
+      return obj;
+    }
+    else {
+      console.warn( "Object was falsey." );
+    }
+  }
+
   return {
     copyObject: copyObject,
     makeURL: function ( url, queryMap ) {
       var output = [ ];
       for ( var key in queryMap ) {
         if ( queryMap.hasOwnProperty( key ) &&
-            !( queryMap[key] instanceof Function ) ) {
+            typeof queryMap[key] !== "function" ) {
           output.push( encodeURIComponent( key ) + "=" + encodeURIComponent(
               queryMap[key] ) );
         }
@@ -2750,80 +2826,7 @@ define( function ( require ) {
       }
       return reverse;
     } )(),
-// An object inspection function.
-    help: function ( obj ) {
-      var funcs = { };
-      var props = { };
-      var evnts = [ ];
-      if ( obj ) {
-        for ( var field in obj ) {
-          if ( field.indexOf( "on" ) === 0 && ( obj !== navigator || field !==
-              "onLine" ) ) {
-            // `online` is a known element that is not an event, but looks like
-            // an event to the most basic assumption.
-            evnts.push( field.substring( 2 ) );
-          }
-          else if ( typeof ( obj[field] ) === "function" ) {
-            funcs[field] = obj[field];
-          }
-          else {
-            props[field] = obj[field];
-          }
-        }
-
-        var type = typeof ( obj );
-        if ( type === "function" ) {
-          type = obj.toString()
-              .match( /(function [^(]*)/ )[1];
-        }
-        else if ( type === "object" ) {
-          type = null;
-          if ( obj.constructor && obj.constructor.name ) {
-            type = obj.constructor.name;
-          }
-          else {
-            var q = [ { prefix: "", obj: window } ];
-            var traversed = [ ];
-            while ( q.length > 0 && type === null ) {
-              var parentObject = q.shift();
-              parentObject.___traversed___ = true;
-              traversed.push( parentObject );
-              for ( field in parentObject.obj ) {
-                var testObject = parentObject.obj[field];
-                if ( testObject ) {
-                  if ( typeof ( testObject ) === "function" ) {
-                    if ( testObject.prototype && obj instanceof testObject ) {
-                      type = parentObject.prefix + field;
-                      break;
-                    }
-                  }
-                  else if ( !testObject.___tried___ ) {
-                    q.push( { prefix: parentObject.prefix + field + ".",
-                      obj: testObject } );
-                  }
-                }
-              }
-            }
-            traversed.forEach( function ( o ) {
-              delete o.___traversed___;
-            } );
-          }
-        }
-        obj = {
-          type: type,
-          events: evnts,
-          functions: funcs,
-          properties: props
-        };
-
-        console.debug( obj );
-
-        return obj;
-      }
-      else {
-        console.warn( "Object was falsey." );
-      }
-    },
+    help: help,
     /*
      * 1) If id is a string, tries to find the DOM element that has said ID
      *      a) if it exists, and it matches the expected tag type, returns the
@@ -2942,7 +2945,7 @@ define( function ( require ) {
     },
     makeSelectorFromObj: function ( id, obj, def, target, prop, lbl,
         typeFilter ) {
-      var elem = cascadeElement( id, "select", HTMLSelectElement );
+      var elem = cascadeElement( id, "select", window.HTMLSelectElement );
       var items = [ ];
       for ( var key in obj ) {
         if ( obj.hasOwnProperty( key ) ) {
@@ -2960,7 +2963,7 @@ define( function ( require ) {
         }
       }
 
-      if ( target[prop] instanceof Function ) {
+      if ( typeof target[prop] === "function" ) {
         elem.addEventListener( "change", function () {
           target[prop]( items[elem.selectedIndex] );
         } );
@@ -2972,8 +2975,8 @@ define( function ( require ) {
       }
 
       var container = cascadeElement( "container -" + id, "div",
-          HTMLDivElement );
-      var label = cascadeElement( "label-" + id, "span", HTMLSpanElement );
+          window.HTMLDivElement );
+      var label = cascadeElement( "label-" + id, "span", window.HTMLSpanElement );
       label.innerHTML = lbl + ": ";
       label.for = elem;
       elem.title = lbl;
@@ -2983,7 +2986,7 @@ define( function ( require ) {
       return container;
     },
     makeHidingContainer: function ( id, obj ) {
-      var elem = cascadeElement( id, "div", HTMLDivElement );
+      var elem = cascadeElement( id, "div", window.HTMLDivElement );
       elem.style.position = "absolute";
       elem.style.left = 0;
       elem.style.top = 0;
@@ -3004,7 +3007,7 @@ define( function ( require ) {
     isOSX: /Macintosh/.test( navigator.userAgent || "" ),
     isWindows: /Windows/.test( navigator.userAgent || "" ),
     isOpera: isOpera,
-    isFirefox: typeof InstallTrigger !== 'undefined',
+    isFirefox: typeof window.InstallTrigger !== 'undefined',
     isSafari: Object.prototype.toString.call( window.HTMLElement )
         .indexOf( 'Constructor' ) > 0,
     isChrome: !!window.chrome && !isOpera,
@@ -3015,7 +3018,7 @@ define( function ( require ) {
           document.webkitFullscreenElement || document.msFullscreenElement );
     },
     requestFullScreen: function ( vrDisplay, success ) {
-      if ( vrDisplay instanceof Function ) {
+      if ( !success ) {
         success = vrDisplay;
         vrDisplay = null;
       }
@@ -3026,7 +3029,7 @@ define( function ( require ) {
         }
         else {
           document.documentElement.requestFullscreen(
-              Element.ALLOW_KEYBOARD_INPUT );
+              window.Element.ALLOW_KEYBOARD_INPUT );
         }
         var interval = setInterval( function () {
           if ( isFullScreenMode() ) {
@@ -3269,13 +3272,13 @@ define( function ( require ) {
   return function ( canvasElementOrID, options ) {
     var self = this,
         canvas = qp.cascadeElement( canvasElementOrID, "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         bgCanvas = qp.cascadeElement( canvas.id + "-back", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         fgCanvas = qp.cascadeElement( canvas.id + "-front", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         trimCanvas = qp.cascadeElement( canvas.id + "-trim", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
         bgfx = bgCanvas.getContext( "2d" ),
@@ -3609,7 +3612,7 @@ define( function ( require ) {
     };
 
     this.getTexture = function ( anisotropy ) {
-      if ( window.THREE && !texture ) {
+      if ( typeof window.THREE !== "undefined" && !texture ) {
         texture = new THREE.Texture( canvas );
         texture.anisotropy = anisotropy || 8;
         texture.needsUpdate = true;
@@ -3665,7 +3668,7 @@ define( function ( require ) {
     };
 
 
-    if ( !( canvasElementOrID instanceof HTMLCanvasElement ) &&
+    if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
         options.width && options.height ) {
       canvas.style.position = "absolute";
       canvas.style.width = options.width;
@@ -3674,7 +3677,7 @@ define( function ( require ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( makeHidingContainer( "primrose-container-" +
+      document.body.appendChild( qp.makeHidingContainer( "primrose-container-" +
           canvas.id, canvas ) );
     }
   };
@@ -3788,4 +3791,4 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-} );Primrose.VERSION = "v0.8.0.1";
+} );Primrose.VERSION = "v0.9.0.0";

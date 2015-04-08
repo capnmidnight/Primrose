@@ -24,13 +24,13 @@ define( function ( require ) {
   return function ( canvasElementOrID, options ) {
     var self = this,
         canvas = qp.cascadeElement( canvasElementOrID, "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         bgCanvas = qp.cascadeElement( canvas.id + "-back", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         fgCanvas = qp.cascadeElement( canvas.id + "-front", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         trimCanvas = qp.cascadeElement( canvas.id + "-trim", "canvas",
-            HTMLCanvasElement ),
+            window.HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
         bgfx = bgCanvas.getContext( "2d" ),
@@ -364,7 +364,7 @@ define( function ( require ) {
     };
 
     this.getTexture = function ( anisotropy ) {
-      if ( window.THREE && !texture ) {
+      if ( typeof window.THREE !== "undefined" && !texture ) {
         texture = new THREE.Texture( canvas );
         texture.anisotropy = anisotropy || 8;
         texture.needsUpdate = true;
@@ -420,7 +420,7 @@ define( function ( require ) {
     };
 
 
-    if ( !( canvasElementOrID instanceof HTMLCanvasElement ) &&
+    if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
         options.width && options.height ) {
       canvas.style.position = "absolute";
       canvas.style.width = options.width;

@@ -41,7 +41,7 @@ define( function ( require ) {
         total: 0,
         failed: 0,
         succeeded: 0
-      };
+      }, exp;
       for ( var key in func.tests ) {
         if ( func.tests[key]
             && typeof ( func.tests[key] ) === "function" ) {

@@ -20,7 +20,6 @@ define( function ( require ) {
   "use strict";
   var qp = require( "../../src/core" ),
       Primrose = require( "../../src/Primrose" ),
-      Keys = require("../../src/Keys"),
       modA = qp.isOSX ? "metaKey" : "ctrlKey",
       modB = qp.isOSX ? "altKey" : "shiftKey",
       cmdPre = qp.isOSX ? "CMD+OPT" : "CTRL+SHIFT",
@@ -36,7 +35,7 @@ define( function ( require ) {
 
   function setKeyOption ( evt ) {
     this.dataset.keycode = evt.keyCode;
-    this.value = this.value || Keys[evt.keyCode];
+    this.value = this.value || Primrose.Keys[evt.keyCode];
     this.value = this.value.toLowerCase( )
         .replace( "arrow", " arrow" );
     this.blur( );
@@ -101,7 +100,7 @@ define( function ( require ) {
         elem.requestFullscreen( );
       }
       else if ( elem.webkitRequestFullscreen ) {
-        elem.webkitRequestFullscreen( Element.ALLOW_KEYBOARD_INPUT );
+        elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
       }
       else if ( elem.mozRequestFullScreen ) {
         elem.mozRequestFullScreen( );
@@ -333,7 +332,8 @@ setInterval(function(){\n\
     }
 
     function keyDown ( evt ) {
-      if ( evt.keyCode === Keys.ESCAPE ) {
+      var exp;
+      if ( evt.keyCode === Primrose.Keys.ESCAPE ) {
         vrEffect = null;
         refreshSize( );
         prim1.forceUpdate( );
@@ -351,7 +351,7 @@ setInterval(function(){\n\
           evt.preventDefault( );
         }
         else if ( currentEditor ) {
-          if ( ( isOSX && evt.keyCode === 69 ) || ( !isOSX && evt.keyCode ===
+          if ( ( qp.isOSX && evt.keyCode === 69 ) || ( !qp.isOSX && evt.keyCode ===
               32 ) ) {
             try {
               eval( currentEditor.getText( ) );

@@ -75,7 +75,7 @@ define( function ( require ) {
         wheelScrollSpeed = 0,
         renderer = new Renderer( renderToElementOrID, options ),
         surrogate = qp.cascadeElement( "primrose-surrogate-textarea-" +
-            renderer.id, "textarea", HTMLTextAreaElement ),
+            renderer.id, "textarea", window.HTMLTextAreaElement ),
         surrogateContainer;
 
     //////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ define( function ( require ) {
         for ( var key in cmd ) {
           if ( cmd.hasOwnProperty( key ) ) {
             var func = cmd[key];
-            if ( !( func instanceof Function ) ) {
+            if ( typeof func !== "function" ) {
               func = self.overwriteText.bind( self, func );
             }
             commandPack[key] = func;
@@ -1008,6 +1008,8 @@ define( function ( require ) {
     PlainText: require( "./grammars/PlainText" ),
     TestResults: require( "./grammars/TestResults" )
   };
+  
+  Primrose.Keys = Keys;
 
   return Primrose;
 } );
