@@ -64,7 +64,6 @@ define( function ( require ) {
     } );
     e.checked = editor["get" + f]();
   }
-  ;
 
   onToggle( ctrls.toggleLineNumbers, "ShowLineNumbers" );
   onToggle( ctrls.toggleScrollBars, "ShowScrollBars" );

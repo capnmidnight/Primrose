@@ -429,7 +429,7 @@ define( function ( require ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( makeHidingContainer( "primrose-container-" +
+      document.body.appendChild( qp.makeHidingContainer( "primrose-container-" +
           canvas.id, canvas ) );
     }
   };

@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>Primrose: Canvas-based text editor</title>
+    <script type="text/javascript" src="../../lib/three.min.js"></script>
+    <script type="text/javascript" src="../../lib/VREffect.js"></script>
+    <script type="text/javascript" src="../../lib/InsideSphereGeometry.js"></script>
+    <script type="text/javascript" data-main="editor3d" src="../../lib/require.js" async></script>
+    <link type="text/css" rel="stylesheet" href="editor3d.css">
+  </head>
+  <body>
+    <div id="outputContainer">
+      <canvas id="output"></canvas>
+    </div>
+
+    <article id="main">
+      <a class="primary button" id="goVR">
+        <div id="fullScreenMsg">Go VR!</div>
+        <small>hit ESC to exit.</small>
+      </a>
+      <a class="primary button" id="goRegular">
+        Go full-screen<br>
+        <small>hit ESC to exit.</small>
+      </a>
+      <p id="nightly">Use with <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a> or
+        <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chrome WebVR</a>
+        to view in virtual reality! Read more about WebVR at <a href="http://mozvr.com/" target="_blank">MozVR.com</a></p>
+
+      <h2>Instructions:</h2>
+      <ul>
+        <li>Use <kbd>SHIFT+mouse</kbd> or a one-finger drag to look around</li>
+        <li>Use keyboard (default <kbd>WASD</kbd>) or two-finger drag to navigate.</li>
+        <li>Click on the editor objects start editing.</li>
+        <li>Use common keyboard controls to edit the text.</li>
+        <li>Click off from an editor object to exit editing.</li>
+        <li><kbd>CTRL+SHIFT+SPACE</kbd> (Windows/Linux) or <kbd>CMD+OPT+E</kbd> (OS X) to execute code from editor.</li>
+        <li><kbd><span class="cmdLabel"></span>+Up-Arrow</kbd> to increase font size.</li>
+        <li><kbd><span class="cmdLabel"></span>+Down-Arrow</kbd> to decrease font size.</li>
+      </ul>
+      <table id="settings">
+        <thead>
+          <tr>
+            <th>Navigation</th>
+            <th>Settings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <em>(Tap new key in each textbox)</em><br>
+              <input type="text" id="forwardKey" size="5"><label for="forwardKey"> - forward</label><br>
+              <input type="text" id="leftKey" size="5"><label for="leftKey"> - left</label><br>
+              <input type="text" id="backKey" size="5"><label for="backKey"> - back</label><br>
+              <input type="text" id="rightKey" size="5"><label for="rightKey"> - right</label><br>
+            </td>
+            <td>
+              <input type="checkbox" id="toggleLineNumbers" checked><label for="toggleLineNumbers">Show line numbers</label><br>
+              <input type="checkbox" id="toggleScrollBars" checked><label for="toggleScrollBars">Show scroll bars</label>
+              <div id="controls">
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </body>
+</html>

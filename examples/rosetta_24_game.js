@@ -65,7 +65,6 @@ define( function ( require ) {
         return "Wrong answer: " + String( calc ) + "; please try again.";
       return input + " == 24.  Congratulations!";
     }
-    ;
 
 // I/O below.
 
@@ -84,5 +83,5 @@ define( function ( require ) {
       }
       alert( twentyfour( numbers, input ) );
     }
-  }
+  };
 } );

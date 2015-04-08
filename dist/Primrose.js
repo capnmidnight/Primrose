@@ -101,26 +101,6 @@ define( function ( require ) {
 
   return CodePage;
 } );
-;/* 
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function(require){
-  return {};
-});
 ;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -139,6 +119,7 @@ define(function(require){
  */
 define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -207,7 +188,7 @@ define( function ( require ) {
     else {
       var x = this.x - 1;
       var line = rebuildLine( tokenRows, this.y );
-      var word = reverse( line.substring( 0, x ) );
+      var word = qp.reverse( line.substring( 0, x ) );
       var m = word.match( /(\s|\W)+/ );
       var dx = m ? ( m.index + m[0].length + 1 ) : word.length;
       this.i -= dx;
@@ -618,6 +599,7 @@ define( function ( require ) {
 
 define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Point ( x, y ) {
     this.set( x || 0, y || 0 );
   }
@@ -639,7 +621,7 @@ define( function ( require ) {
   };
 
   Point.prototype.toString = function () {
-    return fmt( "(x:$1, y:$2)", this.x, this.y );
+    return qp.fmt( "(x:$1, y:$2)", this.x, this.y );
   };
 
   return Point;
@@ -661,22 +643,21 @@ define( function ( require ) {
  */
 define( function ( require ) {
   "use strict";
-  var Renderers = require( "./renderers/Canvas" ),
+
+  var qp = require( "./core" ),
       Point = require( "./Point" ),
-      Rectangle = require( "./Rectangle" ),
       Size = require( "./Size" ),
-      qp = require( "./core" ),
+      Rectangle = require( "./Rectangle" ),
       Cursor = require( "./Cursor" ),
-      Themes = require( "./themes/Default" ),
-      Grammar = require( "./grammars/JavaScript" ),
-      CodePage = require( "./code_pages/EN_US" ),
       Keys = require( "./Keys" ),
-      OperatingSystem = require( "./operating_systems/OSX" ) && require(
-      "./operating_systems/Windows" ),
-      Commands = require( "./command_packs/TextEditor" );
+      CodePage = require( "./CodePage" ),
+      OperatingSystem = require( "./OperatingSystem" ),
+      Grammar = require( "./Grammar" ),
+      EDITORS = [ ];
+
   function Primrose ( renderToElementOrID, options ) {
     var self = this;
-    Primrose.EDITORS.push( this );
+    EDITORS.push( this );
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
@@ -689,7 +670,7 @@ define( function ( require ) {
     //////////////////////////////////////////////////////////////////////////
     // private fields
     //////////////////////////////////////////////////////////////////////////
-    var Renderer = options.renderer || Renderers.Canvas,
+    var Renderer = options.renderer || Primrose.Renderers.Canvas,
         codePage,
         operatingSystem,
         browser,
@@ -758,14 +739,14 @@ define( function ( require ) {
       if ( theme ) {
         var bounds = renderer.getCanvas()
             .getBoundingClientRect();
-        surrogateContainer.style.left = px( bounds.left );
-        surrogateContainer.style.top = px( window.scrollY + bounds.top );
+        surrogateContainer.style.left = qp.px( bounds.left );
+        surrogateContainer.style.top = qp.px( window.scrollY + bounds.top );
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
         var ch = renderer.character.height / renderer.getPixelRatio();
-        surrogate.style.fontSize = px( ch * 0.99 );
-        surrogate.style.lineHeight = px( ch );
+        surrogate.style.fontSize = qp.px( ch * 0.99 );
+        surrogate.style.lineHeight = qp.px( ch );
       }
     }
 
@@ -817,8 +798,8 @@ define( function ( require ) {
 
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
-        for ( var i = 0; i < Primrose.EDITORS.length; ++i ) {
-          var e = Primrose.EDITORS[i];
+        for ( var i = 0; i < EDITORS.length; ++i ) {
+          var e = EDITORS[i];
           if ( e !== self ) {
             e.blur();
           }
@@ -953,10 +934,10 @@ define( function ( require ) {
       gridBounds.set( x, y, w, h );
       var cw = renderer.character.width / renderer.getPixelRatio();
       var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.left = px( gridBounds.x * cw );
-      surrogate.style.top = px( gridBounds.y * ch );
-      surrogate.style.width = px( gridBounds.width * cw );
-      surrogate.style.height = px( gridBounds.height * ch );
+      surrogate.style.left = qp.px( gridBounds.x * cw );
+      surrogate.style.top = qp.px( gridBounds.y * ch );
+      surrogate.style.width = qp.px( gridBounds.width * cw );
+      surrogate.style.height = qp.px( gridBounds.height * ch );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -1058,7 +1039,7 @@ define( function ( require ) {
     };
 
     this.setTheme = function ( t ) {
-      theme = t || Themes.DEFAULT;
+      theme = t || Primrose.Themes.Default;
       renderer.setTheme( theme );
       renderer.resize();
       changed = true;
@@ -1076,8 +1057,8 @@ define( function ( require ) {
 
     this.setOperatingSystem = function ( os ) {
       changed = true;
-      operatingSystem = os || ( qp.isOSX ? OperatingSystem.OSX :
-          OperatingSystem.Windows );
+      operatingSystem = os || ( qp.isOSX ? Primrose.OperatingSystems.OSX :
+          Primrose.OperatingSystems.Windows );
       refreshCommandPack();
     };
 
@@ -1087,7 +1068,7 @@ define( function ( require ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Commands.TextEditor;
+      commandSystem = cmd || Primrose.Commands.TextEditor;
       refreshCommandPack();
     };
 
@@ -1125,8 +1106,8 @@ define( function ( require ) {
           lang = "en-US";
         }
 
-        for ( key in CodePage ) {
-          cp = CodePage[key];
+        for ( key in Primrose.CodePages ) {
+          cp = Primrose.CodePages[key];
           if ( cp.language === lang ) {
             codePage = cp;
             break;
@@ -1134,7 +1115,7 @@ define( function ( require ) {
         }
 
         if ( !codePage ) {
-          codePage = CodePage.EN_US;
+          codePage = Primrose.CodePages.EN_US;
         }
       }
 
@@ -1177,7 +1158,7 @@ define( function ( require ) {
 
     this.setTokenizer = function ( tk ) {
       changed = true;
-      tokenizer = tk || Grammar.JavaScript;
+      tokenizer = tk || Primrose.Grammars.JavaScript;
       if ( history && history.length > 0 ) {
         refreshTokens();
         if ( this.drawText ) {
@@ -1601,30 +1582,59 @@ define( function ( require ) {
         options.wheelEventSource,
         !options.disableClipboard );
 
-    this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
-        renderer.id, Themes, theme.name, self, "setTheme", "theme" );
-    this.commandSystemSelect = makeSelectorFromObj(
-        "primrose-command-system-selector-" + renderer.id, Commands,
+    this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
+        renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
+    this.commandSystemSelect = qp.makeSelectorFromObj(
+        "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
         commandSystem.name, self, "setCommandSystem",
         "command system" );
-    this.tokenizerSelect = makeSelectorFromObj(
+    this.tokenizerSelect = qp.makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
-        renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
+        renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
         "language syntax", Grammar );
-    this.keyboardSelect = makeSelectorFromObj(
+    this.keyboardSelect = qp.makeSelectorFromObj(
         "primrose-keyboard-selector-" +
-        renderer.id, CodePage, codePage.name, self, "setCodePage",
+        renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
         "localization", CodePage );
-    this.operatingSystemSelect = makeSelectorFromObj(
+    this.operatingSystemSelect = qp.makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
-        OperatingSystem, operatingSystem.name, self,
+        Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
         "shortcut style", OperatingSystem );
 
     setSurrogateSize();
   }
 
-  Primrose.EDITORS = [ ];
+  Primrose.Themes = {
+    Default: require( "./themes/Default" ),
+    Dark: require( "./themes/Dark" )
+  };
+
+  Primrose.Renderers = {
+    Canvas: require( "./renderers/Canvas" )
+  };
+
+  Primrose.OperatingSystems = {
+    Windows: require( "./operating_systems/Windows" ),
+    OSX: require( "./operating_systems/OSX" )
+  };
+
+  Primrose.CodePages = {
+    EN_US: require( "./code_pages/EN_US" ),
+    EN_UKX: require( "./code_pages/EN_UKX" ),
+    FR_AZERTY: require( "./code_pages/FR_AZERTY" ),
+    DE_QWERTZ: require( "./code_pages/DE_QWERTZ" )
+  };
+
+  Primrose.Commands = {
+    TextEditor: require( "./command_packs/TextEditor" )
+  };
+
+  Primrose.Grammars = {
+    JavaScript: require( "./grammars/JavaScript" ),
+    PlainText: require( "./grammars/PlainText" ),
+    TestResults: require( "./grammars/TestResults" )
+  };
 
   return Primrose;
 } );;/*
@@ -1646,8 +1656,9 @@ define( function ( require ) {
 
 define( function ( require ) {
   "use strict";
-  var Point = require( "./Point" );
-  var Size = require( "./Size" );
+  var Point = require( "./Point" ),
+      Size = require( "./Size" ),
+      qp = require( "./core" );
   function Rectangle ( x, y, width, height ) {
     this.point = new Point( x, y );
     this.size = new Size( width, height );
@@ -1738,30 +1749,11 @@ define( function ( require ) {
   };
 
   Rectangle.prototype.toString = function () {
-    return fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
+    return qp.fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
   };
 
   return Rectangle;
-} );;/* 
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function(require){
-  return {};
-});;/*
+} );;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1847,6 +1839,7 @@ define(function(require){
  */
 define( function ( require ) {
   "use strict";
+  var qp = require("./core");
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );
   }
@@ -1868,30 +1861,11 @@ define( function ( require ) {
   };
 
   Size.prototype.toString = function () {
-    return fmt( "<w:$1, h:$2>", this.width, this.height );
+    return qp.fmt( "<w:$1, h:$2>", this.width, this.height );
   };
 
   return Size;
-} );;/* 
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function(require){
-  return {};
-});;/*
+} );;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1947,7 +1921,7 @@ define(function(require){
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+  return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
       "48": "0",
@@ -2082,7 +2056,7 @@ define(function (require) {
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+  return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
       "65": "á",
@@ -2179,7 +2153,7 @@ define(function (require) {
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.EN_US = new CodePage("English: USA", "en-US", {
+  return new CodePage("English: USA", "en-US", {
     NORMAL: {
       "48": "0",
       "49": "1",
@@ -2231,7 +2205,6 @@ define(function (require) {
       "222": "\""
     }
   });
-  return CodePage;
 });;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -2252,7 +2225,7 @@ define(function (require) {
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+  return new CodePage("Français: AZERTY", "fr", {
     deadKeys: [221, 50, 55],
     NORMAL: {
       "48": "à",
@@ -2361,8 +2334,7 @@ define(function (require) {
 // If SHIFT is held, then "back"
 define(function (require) {
   "use strict";
-  var Commands = require("../Commands");
-  Commands.TextEditor = {
+  return {
     name: "Basic commands",
     NORMAL_SPACEBAR: " ",
     SHIFT_SPACEBAR: " ",
@@ -2402,8 +2374,6 @@ define(function (require) {
       prim.overwriteText(ts);
     }
   };
-
-  return Commands;
 });;/*
  https://www.github.com/capnmidnight/VR
  Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
@@ -2425,6 +2395,7 @@ define(function (require) {
 
 // Pyschologist.js: so named because it keeps me from going crazy
 define( function ( require ) {
+  "use strict";
 
   /////////////////////////////////////////////////////////////////////////////
   // polyfills
@@ -2522,6 +2493,9 @@ define( function ( require ) {
     // -            then one or more zero digit (0) characters
     var paramRegex = /\$(0*)(\d+)(?:\.(0+))?/g;
     var args = arguments;
+    if ( typeof template !== "string" ) {
+      template = template.toString();
+    }
     return template.replace( paramRegex, function ( m, pad, index,
         precision ) {
       index = parseInt( index, 10 );
@@ -2621,7 +2595,7 @@ define( function ( require ) {
       }
     }
   }
-  
+
   return {
     copyObject: copyObject,
     makeURL: function ( url, queryMap ) {
@@ -2987,13 +2961,12 @@ define( function ( require ) {
       }
 
       if ( target[prop] instanceof Function ) {
-        E( elem, "change", function () {
+        elem.addEventListener( "change", function () {
           target[prop]( items[elem.selectedIndex] );
         } );
       }
       else {
-
-        E( elem, "change", function () {
+        elem.addEventListener( "change", function () {
           target[prop] = items[elem.selectedIndex];
         } );
       }
@@ -3144,8 +3117,9 @@ define( function ( require ) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 define(function (require) {
+  "use strict";
   var Grammar = require("../Grammar");
-  Grammar.JavaScript = new Grammar("JavaScript", [
+  return new Grammar("JavaScript", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["comments", /\/\/.*$/],
     ["startBlockComments", /\/\*/],
@@ -3160,7 +3134,6 @@ define(function (require) {
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
   ]);
-  return Grammar;
 });;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3179,11 +3152,11 @@ define(function (require) {
  */
 
 define(function (require) {
+  "use strict";
   var Grammar = require("../Grammar");
-  Grammar.PlainText = new Grammar("PlainText", [
+  return new Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
-  return Grammar;
 });;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3202,8 +3175,9 @@ define(function (require) {
  */
 
 define(function (require) {
+  "use strict";
   var Grammar = require("../Grammar");
-  Grammar.TestResults = new Grammar("TestResults", [
+  return new Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["numbers", /(\[)(o+)/],
     ["numbers", /(\d+ succeeded), 0 failed/],
@@ -3215,7 +3189,6 @@ define(function (require) {
     ["keywords", /(Test results for )(\w+):/],
     ["strings", /        \w+/]
   ]);
-  return Grammar;
 });;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3237,12 +3210,12 @@ define(function (require) {
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
 define(function (require) {
+  "use strict";
   var OperatingSystem = require("../OperatingSystem");
-  OperatingSystem.OSX = new OperatingSystem(
+  return new OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",
       "META", "LEFTARROW", "RIGHTARROW",
       "META", "UPARROW", "DOWNARROW");
-  return OperatingSystem;
 });;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3263,12 +3236,12 @@ define(function (require) {
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
 define(function (require) {
+  "use strict";
   var OperatingSystem = require("../OperatingSystem");
-  OperatingSystem.Windows = new OperatingSystem(
+  return new OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",
       "CTRL", "HOME", "END");
-  return OperatingSystem;
 });
 ;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
@@ -3288,11 +3261,12 @@ define(function (require) {
  */
 define( function ( require ) {
   "use strict";
-  var Renderers = require( "../Renderers" ),
-  qp = require("../core"),
-  Size = require("../Size");
-  
-  Renderers.Canvas = function ( canvasElementOrID, options ) {
+  var qp = require( "../core" ),
+      Size = require( "../Size" ),
+      Cursor = require( "../Cursor" ),
+      defaultTheme = require( "../themes/Default" );
+
+  return function ( canvasElementOrID, options ) {
     var self = this,
         canvas = qp.cascadeElement( canvasElementOrID, "canvas",
             HTMLCanvasElement ),
@@ -3424,7 +3398,7 @@ define( function ( require ) {
       // draw the current row highlighter
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
-            Themes.DEFAULT.regular.currentRowBackColor,
+            defaultTheme.regular.currentRowBackColor,
             0, minCursor.y + 0.2,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
@@ -3450,7 +3424,7 @@ define( function ( require ) {
               var selectionBack = Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
-                  Themes.DEFAULT.regular.selectedBackColor,
+                  defaultTheme.regular.selectedBackColor,
                   selectionFront.x, selectionFront.y + 0.2,
                   cw, 1 );
             }
@@ -3552,7 +3526,7 @@ define( function ( require ) {
           }
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
-              Themes.DEFAULT.regular.selectedBackColor,
+              defaultTheme.regular.selectedBackColor,
               0, y + 0.2,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
@@ -3580,7 +3554,7 @@ define( function ( require ) {
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
-            Themes.DEFAULT.regular.selectedBackColor;
+            defaultTheme.regular.selectedBackColor;
         // horizontal
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );
@@ -3704,8 +3678,6 @@ define( function ( require ) {
           canvas.id, canvas ) );
     }
   };
-
-  return Renderers;
 } );;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3724,9 +3696,7 @@ define( function ( require ) {
  */
 define( function ( require ) {
   "use strict";
-  var Themes = require( "../Themes" );
-
-  Themes.Dark = {
+  return {
     name: "Dark",
     fontFamily: "monospace",
     cursorColor: "white",
@@ -3763,7 +3733,6 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-  return Themes;
 } );;/* 
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -3782,9 +3751,7 @@ define( function ( require ) {
  */
 define( function ( require ) {
   "use strict";
-  var Themes = require( "../Themes" );
-
-  Themes.DEFAULT = {
+  return {
     name: "Light",
     fontFamily: "monospace",
     cursorColor: "black",
@@ -3821,6 +3788,4 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-
-  return Themes;
 } );Primrose.VERSION = "v0.8.0.1";
