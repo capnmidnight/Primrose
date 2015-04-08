@@ -18,7 +18,7 @@
 define(function (require) {
   "use strict";
   var Grammar = require("../Grammar");
-  Grammar.TestResults = new Grammar("TestResults", [
+  return new Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["numbers", /(\[)(o+)/],
     ["numbers", /(\d+ succeeded), 0 failed/],
@@ -30,5 +30,4 @@ define(function (require) {
     ["keywords", /(Test results for )(\w+):/],
     ["strings", /        \w+/]
   ]);
-  return Grammar;
 });

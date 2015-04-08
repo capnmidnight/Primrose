@@ -16,12 +16,12 @@
  */
 define( function ( require ) {
   "use strict";
-  var Renderers = require( "../Renderers" ),
-      qp = require( "../core" ),
+  var qp = require( "../core" ),
       Size = require( "../Size" ),
-      Cursor = require( "../Cursor" );
+      Cursor = require( "../Cursor" ),
+      defaultTheme = require( "../themes/Default" );
 
-  Renderers.Canvas = function ( canvasElementOrID, options ) {
+  return function ( canvasElementOrID, options ) {
     var self = this,
         canvas = qp.cascadeElement( canvasElementOrID, "canvas",
             HTMLCanvasElement ),
@@ -153,7 +153,7 @@ define( function ( require ) {
       // draw the current row highlighter
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
-            Themes.DEFAULT.regular.currentRowBackColor,
+            defaultTheme.regular.currentRowBackColor,
             0, minCursor.y + 0.2,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
@@ -179,7 +179,7 @@ define( function ( require ) {
               var selectionBack = Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
-                  Themes.DEFAULT.regular.selectedBackColor,
+                  defaultTheme.regular.selectedBackColor,
                   selectionFront.x, selectionFront.y + 0.2,
                   cw, 1 );
             }
@@ -281,7 +281,7 @@ define( function ( require ) {
           }
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
-              Themes.DEFAULT.regular.selectedBackColor,
+              defaultTheme.regular.selectedBackColor,
               0, y + 0.2,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
@@ -309,7 +309,7 @@ define( function ( require ) {
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
-            Themes.DEFAULT.regular.selectedBackColor;
+            defaultTheme.regular.selectedBackColor;
         // horizontal
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );
@@ -433,6 +433,4 @@ define( function ( require ) {
           canvas.id, canvas ) );
     }
   };
-
-  return Renderers;
 } );

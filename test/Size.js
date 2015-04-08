@@ -16,8 +16,10 @@
  */
 define( function ( require ) {
   "use strict";
+
   var Assert = require( "./testing" ),
       Size = require( "../src/Size" );
+  
   Size.tests = {
     zero: function () {
       var p = new Size();

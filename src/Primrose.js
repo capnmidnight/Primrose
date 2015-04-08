@@ -16,20 +16,18 @@
  */
 define( function ( require ) {
   "use strict";
-  var Renderers = require( "./renderers/Canvas" ),
+
+  var qp = require( "./core" ),
       Point = require( "./Point" ),
-      Rectangle = require( "./Rectangle" ),
       Size = require( "./Size" ),
-      qp = require( "./core" ),
+      Rectangle = require( "./Rectangle" ),
       Cursor = require( "./Cursor" ),
-      Themes = require( "./themes/Default" ),
-      Grammar = require( "./grammars/JavaScript" ),
-      CodePage = require( "./code_pages/EN_US" ),
       Keys = require( "./Keys" ),
-      OperatingSystem = require( "./operating_systems/OSX" ) && require(
-      "./operating_systems/Windows" ),
-      Commands = require( "./command_packs/TextEditor" ),
-      EDITORS = [];
+      CodePage = require( "./CodePage" ),
+      OperatingSystem = require( "./OperatingSystem" ),
+      Grammar = require( "./Grammar" ),
+      EDITORS = [ ];
+
   function Primrose ( renderToElementOrID, options ) {
     var self = this;
     EDITORS.push( this );
@@ -45,7 +43,7 @@ define( function ( require ) {
     //////////////////////////////////////////////////////////////////////////
     // private fields
     //////////////////////////////////////////////////////////////////////////
-    var Renderer = options.renderer || Renderers.Canvas,
+    var Renderer = options.renderer || Primrose.Renderers.Canvas,
         codePage,
         operatingSystem,
         browser,
@@ -414,7 +412,7 @@ define( function ( require ) {
     };
 
     this.setTheme = function ( t ) {
-      theme = t || Themes.DEFAULT;
+      theme = t || Primrose.Themes.Default;
       renderer.setTheme( theme );
       renderer.resize();
       changed = true;
@@ -432,8 +430,8 @@ define( function ( require ) {
 
     this.setOperatingSystem = function ( os ) {
       changed = true;
-      operatingSystem = os || ( qp.isOSX ? OperatingSystem.OSX :
-          OperatingSystem.Windows );
+      operatingSystem = os || ( qp.isOSX ? Primrose.OperatingSystems.OSX :
+          Primrose.OperatingSystems.Windows );
       refreshCommandPack();
     };
 
@@ -443,7 +441,7 @@ define( function ( require ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Commands.TextEditor;
+      commandSystem = cmd || Primrose.Commands.TextEditor;
       refreshCommandPack();
     };
 
@@ -481,8 +479,8 @@ define( function ( require ) {
           lang = "en-US";
         }
 
-        for ( key in CodePage ) {
-          cp = CodePage[key];
+        for ( key in Primrose.CodePages ) {
+          cp = Primrose.CodePages[key];
           if ( cp.language === lang ) {
             codePage = cp;
             break;
@@ -490,7 +488,7 @@ define( function ( require ) {
         }
 
         if ( !codePage ) {
-          codePage = CodePage.EN_US;
+          codePage = Primrose.CodePages.EN_US;
         }
       }
 
@@ -533,7 +531,7 @@ define( function ( require ) {
 
     this.setTokenizer = function ( tk ) {
       changed = true;
-      tokenizer = tk || Grammar.JavaScript;
+      tokenizer = tk || Primrose.Grammars.JavaScript;
       if ( history && history.length > 0 ) {
         refreshTokens();
         if ( this.drawText ) {
@@ -958,27 +956,58 @@ define( function ( require ) {
         !options.disableClipboard );
 
     this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
-        renderer.id, Themes, theme.name, self, "setTheme", "theme" );
+        renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
     this.commandSystemSelect = qp.makeSelectorFromObj(
-        "primrose-command-system-selector-" + renderer.id, Commands,
+        "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
         commandSystem.name, self, "setCommandSystem",
         "command system" );
     this.tokenizerSelect = qp.makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
-        renderer.id, Grammar, tokenizer.name, self, "setTokenizer",
+        renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
         "language syntax", Grammar );
     this.keyboardSelect = qp.makeSelectorFromObj(
         "primrose-keyboard-selector-" +
-        renderer.id, CodePage, codePage.name, self, "setCodePage",
+        renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
         "localization", CodePage );
     this.operatingSystemSelect = qp.makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
-        OperatingSystem, operatingSystem.name, self,
+        Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
         "shortcut style", OperatingSystem );
 
     setSurrogateSize();
   }
+
+  Primrose.Themes = {
+    Default: require( "./themes/Default" ),
+    Dark: require( "./themes/Dark" )
+  };
+
+  Primrose.Renderers = {
+    Canvas: require( "./renderers/Canvas" )
+  };
+
+  Primrose.OperatingSystems = {
+    Windows: require( "./operating_systems/Windows" ),
+    OSX: require( "./operating_systems/OSX" )
+  };
+
+  Primrose.CodePages = {
+    EN_US: require( "./code_pages/EN_US" ),
+    EN_UKX: require( "./code_pages/EN_UKX" ),
+    FR_AZERTY: require( "./code_pages/FR_AZERTY" ),
+    DE_QWERTZ: require( "./code_pages/DE_QWERTZ" )
+  };
+
+  Primrose.Commands = {
+    TextEditor: require( "./command_packs/TextEditor" )
+  };
+
+  Primrose.Grammars = {
+    JavaScript: require( "./grammars/JavaScript" ),
+    PlainText: require( "./grammars/PlainText" ),
+    TestResults: require( "./grammars/TestResults" )
+  };
 
   return Primrose;
 } );

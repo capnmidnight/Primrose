@@ -21,8 +21,7 @@
 // If SHIFT is held, then "back"
 define(function (require) {
   "use strict";
-  var Commands = require("../Commands");
-  Commands.TextEditor = {
+  return {
     name: "Basic commands",
     NORMAL_SPACEBAR: " ",
     SHIFT_SPACEBAR: " ",
@@ -62,6 +61,4 @@ define(function (require) {
       prim.overwriteText(ts);
     }
   };
-
-  return Commands;
 });

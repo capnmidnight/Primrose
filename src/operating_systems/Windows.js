@@ -20,9 +20,8 @@
 define(function (require) {
   "use strict";
   var OperatingSystem = require("../OperatingSystem");
-  OperatingSystem.Windows = new OperatingSystem(
+  return new OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",
       "CTRL", "HOME", "END");
-  return OperatingSystem;
 });

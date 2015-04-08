@@ -18,7 +18,7 @@
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.EN_UKX = new CodePage("English: UK Extended", "en-GB", {
+  return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
       "65": "á",

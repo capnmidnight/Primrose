@@ -14,62 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-require([
-  "../../src/core",
-  "../rosetta_24_game",
-  "../../src/themes/Dark",
-  "../../src/Primrose",
-  "../../test/testing",
-  "../../test/Point",
-  "../../test/Size",
-  "../../test/Rectangle",
-  "../../test/Grammar"], function (qp, rosetta_24_game, Themes, Primrose, Assert, Point, Size, Rectangle, Grammar) {
+define( function ( require ) {
   "use strict";
-  var ctrls = qp.findEverything();
-  var editor = new Primrose(ctrls.editorCanvas);
-  editor.value = rosetta_24_game.toString();
 
-  var testText = [
-    Point,
-    Size,
-    Rectangle,
-    Grammar
-  ].map(Assert.stringTest)
+  var qp = require( "../../src/core" ),
+      rosetta_24_game = require( "../rosetta_24_game" ),
+      Primrose = require( "../../src/Primrose" ),
+      Assert = require( "../../test/testing" ),
+      Point = require( "../../test/Point" ),
+      Size = require( "../../test/Size" ),
+      Rectangle = require( "../../test/Rectangle" ),
+      Grammar = require( "../../test/Grammar" ),
+      ctrls = qp.findEverything(),
+      editor = new Primrose( ctrls.editorCanvas, rosetta_24_game.toString() ),
+      testText = [
+        Point,
+        Size,
+        Rectangle,
+        Grammar
+      ].map( Assert.stringTest )
       .join(
-          "\n===---===---===---===---===---===---===---===---===---===\n\n");
-  var tests = new Primrose(ctrls.testResultsCanvas, {
-    file: testText,
-    readOnly: true,
-    tokenizer: Grammar.TestResults,
-    theme: Themes.Dark
-  });
+          "\n===---===---===---===---===---===---===---===---===---===\n\n" ),
+      tests = new Primrose( ctrls.testResultsCanvas, {
+        file: testText,
+        readOnly: true,
+        tokenizer: Primrose.Grammars.TestResults,
+        theme: Primrose.Themes.Dark
+      } );
 
   editor.focus();
 
-  function update() {
-    requestAnimationFrame(update);
+  function update () {
+    requestAnimationFrame( update );
     editor.drawText();
     tests.drawText();
   }
 
-  requestAnimationFrame(update);
+  requestAnimationFrame( update );
 
-  ctrls.controls.appendChild(editor.operatingSystemSelect);
-  ctrls.controls.appendChild(editor.keyboardSelect);
-  ctrls.controls.appendChild(editor.commandSystemSelect);
-  ctrls.controls.appendChild(editor.tokenizerSelect);
-  ctrls.controls.appendChild(editor.themeSelect);
+  ctrls.controls.appendChild( editor.operatingSystemSelect );
+  ctrls.controls.appendChild( editor.keyboardSelect );
+  ctrls.controls.appendChild( editor.commandSystemSelect );
+  ctrls.controls.appendChild( editor.tokenizerSelect );
+  ctrls.controls.appendChild( editor.themeSelect );
 
-  function onToggle(e, f) {
-    e.addEventListener("change", function () {
-      editor["set" + f](e.checked);
-    });
+  function onToggle ( e, f ) {
+    e.addEventListener( "change", function () {
+      editor["set" + f]( e.checked );
+    } );
     e.checked = editor["get" + f]();
   }
   ;
 
-  onToggle(ctrls.toggleLineNumbers, "ShowLineNumbers");
-  onToggle(ctrls.toggleScrollBars, "ShowScrollBars");
-  onToggle(ctrls.toggleWordWrap, "WordWrap");
-});
+  onToggle( ctrls.toggleLineNumbers, "ShowLineNumbers" );
+  onToggle( ctrls.toggleScrollBars, "ShowScrollBars" );
+  onToggle( ctrls.toggleWordWrap, "WordWrap" );
+} );

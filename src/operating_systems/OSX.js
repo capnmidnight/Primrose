@@ -21,9 +21,8 @@
 define(function (require) {
   "use strict";
   var OperatingSystem = require("../OperatingSystem");
-  OperatingSystem.OSX = new OperatingSystem(
+  return new OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",
       "META", "LEFTARROW", "RIGHTARROW",
       "META", "UPARROW", "DOWNARROW");
-  return OperatingSystem;
 });

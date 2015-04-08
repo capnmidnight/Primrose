@@ -18,7 +18,7 @@
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
+  return new CodePage("Français: AZERTY", "fr", {
     deadKeys: [221, 50, 55],
     NORMAL: {
       "48": "à",

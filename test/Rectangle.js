@@ -16,8 +16,10 @@
  */
 define( function ( require ) {
   "use strict";
+
   var Assert = require( "./testing" ),
       Rectangle = require( "../src/Rectangle" );
+  
   Rectangle.tests = {
     zero: function () {
       var p = new Rectangle();

@@ -18,7 +18,7 @@
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.EN_US = new CodePage("English: USA", "en-US", {
+  return new CodePage("English: USA", "en-US", {
     NORMAL: {
       "48": "0",
       "49": "1",
@@ -70,5 +70,4 @@ define(function (require) {
       "222": "\""
     }
   });
-  return CodePage;
 });

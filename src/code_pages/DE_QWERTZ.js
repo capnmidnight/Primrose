@@ -18,7 +18,7 @@
 define(function (require) {
   "use strict";
   var CodePage = require("../CodePage");
-  CodePage.DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
+  return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
       "48": "0",

@@ -16,12 +16,15 @@
  */
 define( function ( require ) {
   "use strict";
+
   var Assert = require( "./testing" ),
-      Grammar = require( "../src/Grammar" );
+      Grammar = require( "../src/Grammar" ),
+      js = require("../src/grammars/JavaScript");
+
   Grammar.tests = {
     aSimpleString: function () {
       var src = "\"a\"";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )
@@ -31,7 +34,7 @@ define( function ( require ) {
     },
     twoStrings: function () {
       var src = "\"a\" b \"c\"";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )
@@ -43,7 +46,7 @@ define( function ( require ) {
     },
     singleLineBlockComment: function () {
       var src = "/* asdf one 2 three 4 */";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )
@@ -54,7 +57,7 @@ define( function ( require ) {
     },
     multiLineBlockComment: function () {
       var src = "/*\n asdf one\n2 three 4\n*/";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )
@@ -66,7 +69,7 @@ define( function ( require ) {
     multipleMultiLineBlockComment: function () {
       var src =
           "/*\n asdf one\n2 three 4\n*/\nfunction(){\n/*\n asdf one\n2 three 4\n*/\n}";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )
@@ -88,7 +91,7 @@ define( function ( require ) {
           "        */\n" +
           "    }\n" +
           "}";
-      var tokens = Grammar.JavaScript.tokenize( src );
+      var tokens = js.tokenize( src );
       var res = tokens.map( function ( t ) {
         return t.value;
       } )

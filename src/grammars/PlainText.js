@@ -18,8 +18,7 @@
 define(function (require) {
   "use strict";
   var Grammar = require("../Grammar");
-  Grammar.PlainText = new Grammar("PlainText", [
+  return new Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
-  return Grammar;
 });

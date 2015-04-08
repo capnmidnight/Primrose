@@ -17,6 +17,7 @@
 
 define( function ( require ) {
   "use strict";
+
   var qp = require("../src/core");
   
   function getDifference ( expected, actual ) {

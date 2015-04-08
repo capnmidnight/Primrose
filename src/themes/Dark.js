@@ -16,9 +16,7 @@
  */
 define( function ( require ) {
   "use strict";
-  var Themes = require( "../Themes" );
-
-  Themes.Dark = {
+  return {
     name: "Dark",
     fontFamily: "monospace",
     cursorColor: "white",
@@ -55,5 +53,4 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-  return Themes;
 } );

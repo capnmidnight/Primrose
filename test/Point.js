@@ -15,9 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 define( function ( require ) {
-
+  "use strict";
+  
   var Assert = require( "./testing" ),
       Point = require( "../src/Point" );
+  
   Point.tests = {
     zero: function () {
       var p = new Point();

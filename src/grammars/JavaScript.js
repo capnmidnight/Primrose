@@ -17,7 +17,7 @@
 define(function (require) {
   "use strict";
   var Grammar = require("../Grammar");
-  Grammar.JavaScript = new Grammar("JavaScript", [
+  return new Grammar("JavaScript", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["comments", /\/\/.*$/],
     ["startBlockComments", /\/\*/],
@@ -32,5 +32,4 @@ define(function (require) {
     ["functions", /(\w+)(?:\s*\()/],
     ["members", /(?:(?:\w+\.)+)(\w+)/]
   ]);
-  return Grammar;
 });
