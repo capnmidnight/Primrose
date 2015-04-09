@@ -345,6 +345,93 @@ define( function ( require ) {
       return lineCountWidth;
     }
 
+    function setFalse ( evt ) {
+      evt.returnValue = false;
+    }
+
+    function setSurrogateCursor () {
+      surrogate.selectionStart = Math.min( self.frontCursor.i,
+          self.backCursor.i );
+      surrogate.selectionEnd = Math.max( self.frontCursor.i,
+          self.backCursor.i );
+    }
+
+    function minDelta ( v, minV, maxV ) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if ( dvMinV < 0 || dvMaxV >= 0 ) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs( dvMinV ) < Math.abs( dvMaxV ) ? dvMinV : dvMaxV;
+      }
+
+      return dv;
+    }
+
+    function makeToggler ( id, value, lblTxt, funcName ) {
+      var span = document.createElement( "span" );
+
+      var check = document.createElement( "input" );
+      check.type = "checkbox";
+      check.checked = value;
+      check.id = id;
+      span.appendChild( check );
+
+      var lbl = document.createElement( "label" );
+      lbl.innerHTML = lblTxt + " ";
+      lbl.for = id;
+      span.appendChild( lbl );
+
+      check.addEventListener( "change", function () {
+        self[funcName]( check.checked );
+      } );
+      return span;
+    }
+
+    function makeSelectorFromObj ( id, obj, def, target, prop, lbl, filter ) {
+      var elem = qp.cascadeElement( id, "select", window.HTMLSelectElement );
+      var items = [ ];
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty( key ) ) {
+          var val = obj[key];
+          if ( !filter || val instanceof filter ) {
+            val = val.name || key;
+            var opt = document.createElement( "option" );
+            opt.innerHTML = val;
+            items.push( obj[key] );
+            if ( val === def ) {
+              opt.selected = "selected";
+            }
+            elem.appendChild( opt );
+          }
+        }
+      }
+
+      if ( typeof target[prop] === "function" ) {
+        elem.addEventListener( "change", function () {
+          target[prop]( items[elem.selectedIndex] );
+        } );
+      }
+      else {
+        elem.addEventListener( "change", function () {
+          target[prop] = items[elem.selectedIndex];
+        } );
+      }
+
+      var container = qp.cascadeElement( "container -" + id, "div",
+          window.HTMLDivElement );
+      var label = qp.cascadeElement( "label-" + id, "span",
+          window.HTMLSpanElement );
+      label.innerHTML = lbl + ": ";
+      label.for = elem;
+      elem.title = lbl;
+      elem.alt = lbl;
+      container.appendChild( label );
+      container.appendChild( elem );
+      return container;
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
     // public methods
@@ -624,19 +711,6 @@ define( function ( require ) {
       return tabString;
     };
 
-    function minDelta ( v, minV, maxV ) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if ( dvMinV < 0 || dvMaxV >= 0 ) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs( dvMinV ) < Math.abs( dvMaxV ) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-
     this.scrollIntoView = function ( currentCursor ) {
       this.scroll.y += minDelta( currentCursor.y, this.scroll.y,
           this.scroll.y + gridBounds.height );
@@ -663,13 +737,6 @@ define( function ( require ) {
       theme.fontSize = v;
       changed = renderer.resize();
     };
-
-    function setSurrogateCursor () {
-      surrogate.selectionStart = Math.min( self.frontCursor.i,
-          self.backCursor.i );
-      surrogate.selectionEnd = Math.max( self.frontCursor.i,
-          self.backCursor.i );
-    }
 
     this.getPixelRatio = function () {
       return window.devicePixelRatio || 1;
@@ -739,10 +806,6 @@ define( function ( require ) {
       surrogate.focus();
     };
 
-    function setFalse ( evt ) {
-      evt.returnValue = false;
-    }
-
     this.bindEvents = function ( k, p, w, c ) {
       if ( k ) {
         k.addEventListener( "keydown", this.editText.bind( this ) );
@@ -796,11 +859,6 @@ define( function ( require ) {
       }
     };
 
-    this.pasteAtCursor = function ( str ) {
-      this.overwriteText( str );
-      this.drawText();
-    };
-
     this.copySelectedText = function ( evt ) {
       evt.returnValue = false;
       if ( this.frontCursor.i !== this.backCursor.i ) {
@@ -828,7 +886,7 @@ define( function ( require ) {
           str = clipboard.getData( window.clipboardData ? "Text" :
               "text/plain" );
       if ( str ) {
-        this.pasteAtCursor( str );
+        this.overwriteText( str );
       }
     };
 
@@ -945,6 +1003,18 @@ define( function ( require ) {
     document.body.insertBefore( surrogateContainer,
         document.body.children[0] );
 
+    if ( options.autoBindEvents || renderer.autoBindEvents ) {
+      if ( !options.readOnly && options.keyEventSource === undefined ) {
+        options.keyEventSource = surrogate;
+      }
+      if ( options.pointerEventSource === undefined ) {
+        options.pointerEventSource = renderer.getCanvas();
+      }
+      if ( options.wheelEventSource === undefined ) {
+        options.wheelEventSource = renderer.getCanvas();
+      }
+    }
+
     this.setWheelScrollSpeed( options.wheelScrollSpeed );
     this.setWordWrap( !options.disableWordWrap );
     this.setShowLineNumbers( !options.hideLineNumbers );
@@ -958,87 +1028,11 @@ define( function ( require ) {
     this.setCommandSystem( options.commands );
     this.setText( options.file );
 
-    if ( options.autoBindEvents || renderer.autoBindEvents ) {
-      if ( !options.readOnly && options.keyEventSource === undefined ) {
-        options.keyEventSource = surrogate;
-      }
-      if ( options.pointerEventSource === undefined ) {
-        options.pointerEventSource = renderer.getCanvas();
-      }
-      if ( options.wheelEventSource === undefined ) {
-        options.wheelEventSource = renderer.getCanvas();
-      }
-    }
-
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
         options.wheelEventSource,
         !options.disableClipboard );
-
-    function makeToggler ( id, value, lblTxt, funcName ) {
-      var span = document.createElement( "span" );
-
-      var check = document.createElement( "input" );
-      check.type = "checkbox";
-      check.checked = value;
-      check.id = id;
-      span.appendChild( check );
-
-      var lbl = document.createElement( "label" );
-      lbl.innerHTML = lblTxt + " ";
-      lbl.for = id;
-      span.appendChild( lbl );
-
-      check.addEventListener( "change", function () {
-        self[funcName]( check.checked );
-      } );
-      return span;
-    }
-
-    function makeSelectorFromObj ( id, obj, def, target, prop, lbl,
-        typeFilter ) {
-      var elem = qp.cascadeElement( id, "select", window.HTMLSelectElement );
-      var items = [ ];
-      for ( var key in obj ) {
-        if ( obj.hasOwnProperty( key ) ) {
-          var val = obj[key];
-          if ( !typeFilter || val instanceof typeFilter ) {
-            val = val.name || key;
-            var opt = document.createElement( "option" );
-            opt.innerHTML = val;
-            items.push( obj[key] );
-            if ( val === def ) {
-              opt.selected = "selected";
-            }
-            elem.appendChild( opt );
-          }
-        }
-      }
-
-      if ( typeof target[prop] === "function" ) {
-        elem.addEventListener( "change", function () {
-          target[prop]( items[elem.selectedIndex] );
-        } );
-      }
-      else {
-        elem.addEventListener( "change", function () {
-          target[prop] = items[elem.selectedIndex];
-        } );
-      }
-
-      var container = qp.cascadeElement( "container -" + id, "div",
-          window.HTMLDivElement );
-      var label = qp.cascadeElement( "label-" + id, "span",
-          window.HTMLSpanElement );
-      label.innerHTML = lbl + ": ";
-      label.for = elem;
-      elem.title = lbl;
-      elem.alt = lbl;
-      container.appendChild( label );
-      container.appendChild( elem );
-      return container;
-    }
 
     this.lineNumberToggler = makeToggler( "primrose-line-number-toggler-" +
         renderer.id, !options.hideLineNumbers, "Line numbers",
