@@ -90,6 +90,7 @@ require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
         lastMouseY,
         lastTouchX,
         lastTouchY,
+        touchCount = 0,
         pointerX,
         pointerY,
         currentObject,
@@ -249,11 +250,9 @@ setInterval(function(){\n\
           canvasHeight = styleHeight * ratio;
       if ( vrEffect ) {
         canvasWidth = vrEffect.left.renderRect.width +
-            vrEffect.left.renderRect.width;
+            vrEffect.right.renderRect.width;
         canvasHeight = Math.max( vrEffect.left.renderRect.height,
-            vrEffect.left.renderRect.height );
-        prim1.forceUpdate( );
-        prim2.forceUpdate( );
+            vrEffect.right.renderRect.height );
       }
       renderer.domElement.style.width = qp.px( styleWidth );
       renderer.domElement.style.height = qp.px( styleHeight );
@@ -448,7 +447,6 @@ setInterval(function(){\n\
       }
     }
 
-    var touchCount = 0;
     function touchStart ( evt ) {
       lastTouchX = 0;
       lastTouchY = 0;
