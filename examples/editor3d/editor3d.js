@@ -55,7 +55,7 @@ require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
         vrEffect = new THREE.VREffect( renderer, vrDisplay );
       }
 
-      elem.requestFullscreen( { vrDisplay: vrDisplay } );
+      elem.requestFullscreen( { vrDisplay: vrDisplay, vrTimewarp: true } );
     }
     else {
       elem.requestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
@@ -248,10 +248,10 @@ setInterval(function(){\n\
           canvasWidth = styleWidth * ratio,
           canvasHeight = styleHeight * ratio;
       if ( vrEffect ) {
-        var leftRect = vrDisplay.getRecommendedEyeRenderRect( "left" ),
-            rightRect = vrDisplay.getRecommendedEyeRenderRect( "right" );
-        canvasWidth = leftRect.width + rightRect.width;
-        canvasHeight = Math.max( leftRect.height, rightRect.height );
+        canvasWidth = vrEffect.left.renderRect.width +
+            vrEffect.left.renderRect.width;
+        canvasHeight = Math.max( vrEffect.left.renderRect.height,
+            vrEffect.left.renderRect.height );
         prim1.forceUpdate( );
         prim2.forceUpdate( );
       }
@@ -524,7 +524,8 @@ setInterval(function(){\n\
       body.rotateX( pitch );
       sky.position.copy( body.position );
       if ( vrSensor ) {
-        var state = vrSensor.getState( );
+        var state = vrSensor.getImmediateState ? vrSensor.getImmediateState()
+            : vrSensor.getState( );
         if ( state.position ) {
           camera.position.set( state.position.x, state.position.y,
               state.position.z );
