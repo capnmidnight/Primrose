@@ -104,8 +104,8 @@ require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
         h = 1,
         w2 = 2,
         prim1 = new Primrose( "editor1", {
-          width: ( w1 * 1024 ) + "px",
-          height: ( h * 1024 ) + "px",
+          width: qp.px( w1 * 1024 ),
+          height: qp.px( h * 1024 ),
           fontSize: 36,
           file: "var ball = textured(box(0.25, 0.25, 0.25), 'bg1.jpg');\n\
 scene.add(ball);\n\n\
@@ -120,8 +120,8 @@ setInterval(function(){\n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
         prim2 = new Primrose( "editor2", {
-          width: ( w2 * 1024 ) + "px",
-          height: ( h * 1024 ) + "px",
+          width: qp.px( w2 * 1024 ),
+          height: qp.px( h * 1024 ),
           fontSize: 24,
           file: "var ball = textured(sphere(0.25, // radius\n\
                             10, // slices\n\
@@ -255,8 +255,8 @@ setInterval(function(){\n\
         prim1.forceUpdate( );
         prim2.forceUpdate( );
       }
-      renderer.domElement.style.width = styleWidth + "px";
-      renderer.domElement.style.height = styleHeight + "px";
+      renderer.domElement.style.width = qp.px( styleWidth );
+      renderer.domElement.style.height = qp.px( styleHeight );
       renderer.domElement.width = canvasWidth;
       renderer.domElement.height = canvasHeight;
       renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
@@ -448,11 +448,22 @@ setInterval(function(){\n\
       }
     }
 
+    var touchCount = 0;
     function touchStart ( evt ) {
-      lastTouchX = evt.touches[0].clientX;
-      lastTouchY = evt.touches[0].clientY;
+      lastTouchX = 0;
+      lastTouchY = 0;
+      for(var i = 0; i < evt.touches.length; ++i){
+        lastTouchX += evt.touches[i].clientX;
+        lastTouchY += evt.touches[i].clientY;
+      }
+      lastTouchX /= evt.touches.length;
+      lastTouchY /= evt.touches.length;
       setPointer( lastTouchX, lastTouchY );
       pick( "start" );
+      touchCount = 0;
+      if(evt.touches.length <= 2){
+        touchCount = evt.touches.length;
+      }
     }
 
     function touchMove ( evt ) {
@@ -464,12 +475,13 @@ setInterval(function(){\n\
       }
       x /= evt.touches.length;
       y /= evt.touches.length;
+
       if ( evt.shiftKey ) {
-        if ( evt.touches.length === 1 ) {
+        if ( touchCount === 1 ) {
           heading += ( x - lastTouchX ) * 0.005;
           pitch += ( y - lastTouchY ) * 0.005;
         }
-        else {
+        else if(lastTouchX !== null && lastTouchY !== null) {
           touchStrafe = ( x - lastTouchX ) / 2;
           touchDrive = ( y - lastTouchY ) / 2;
         }
@@ -486,11 +498,15 @@ setInterval(function(){\n\
       }
 
       if ( evt.touches.length === 0 ) {
+        touchCount = 0;
         touchDrive = 0;
         if ( currentEditor && currentEditor.isFocused( ) ) {
           currentEditor.endPointer( );
         }
       }
+
+      lastTouchX = null;
+      lastTouchY = null;
     }
 
     function update ( dt ) {
