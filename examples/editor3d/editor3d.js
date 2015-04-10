@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*global THREE*/
+
 require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
     Primrose ) {
   "use strict";
@@ -26,7 +28,7 @@ require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
       vrEffect,
       renderer,
       ctrls = qp.findEverything();
-  var THREE = window.THREE;
+
   function clearKeyOption ( evt ) {
     this.value = "";
     this.dataset.keycode = "";

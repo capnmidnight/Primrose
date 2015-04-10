@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/*global THREE*/
+
 define( function ( require ) {
   "use strict";
   var qp = require( "../core" ),
@@ -356,8 +359,6 @@ define( function ( require ) {
         texture.needsUpdate = true;
       }
     };
-
-
 
     this.getCanvas = function () {
       return canvas;
