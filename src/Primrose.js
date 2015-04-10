@@ -119,7 +119,7 @@ define( function ( require ) {
 
     function setSurrogateSize () {
       if ( theme ) {
-        var bounds = renderer.getCanvas()
+        var bounds = renderer.getDOMElement()
             .getBoundingClientRect();
         surrogateContainer.style.left = qp.px( bounds.left );
         surrogateContainer.style.top = qp.px( window.scrollY + bounds.top );
@@ -454,6 +454,10 @@ define( function ( require ) {
       this.scrollIntoView( cursor );
     };
 
+    this.getDOMElement = function(){
+      return renderer.getDOMElement();
+    }
+
     this.focus = function () {
       focused = true;
       this.forceUpdate();
@@ -738,10 +742,6 @@ define( function ( require ) {
       changed = renderer.resize();
     };
 
-    this.getPixelRatio = function () {
-      return window.devicePixelRatio || 1;
-    };
-
     this.cell2i = function ( x, y ) {
       var i = 0;
       for ( var dy = 0; dy < y; ++dy ) {
@@ -1008,10 +1008,10 @@ define( function ( require ) {
         options.keyEventSource = surrogate;
       }
       if ( options.pointerEventSource === undefined ) {
-        options.pointerEventSource = renderer.getCanvas();
+        options.pointerEventSource = renderer.getDOMElement();
       }
       if ( options.wheelEventSource === undefined ) {
-        options.wheelEventSource = renderer.getCanvas();
+        options.wheelEventSource = renderer.getDOMElement();
       }
     }
 
@@ -1091,7 +1091,8 @@ define( function ( require ) {
   };
 
   Primrose.Renderers = {
-    Canvas: require( "./renderers/Canvas" )
+    Canvas: require( "./renderers/Canvas" ),
+    DOM: require( "./renderers/DOM" )
   };
 
   Primrose.OperatingSystems = {

@@ -19,13 +19,24 @@ require( [ "../../src/Primrose", "../../test/testing", "../rosetta_24_game",
     testObjects ) {
   "use strict";
 
-  var editor = new Primrose( "editorCanvas", rosetta_24_game.toString() );
-  new Primrose( "testResultsCanvas", {
+  var editor = new Primrose( "editor",{
+    file: rosetta_24_game.toString(),
+    autoBindEvents: true,
+    renderer: Primrose.Renderers.Canvas
+  });
+
+  var tests = new Primrose( "testResults", {
     file: Assert.stringTest( testObjects ),
     readOnly: true,
+    autoBindEvents: true,
     tokenizer: Primrose.Grammars.TestResults,
-    theme: Primrose.Themes.Dark
+    theme: Primrose.Themes.Dark,
+    renderer: Primrose.Renderers.Canvas
   } );
+
+  var container = document.getElementById("editorContainer");
+  editorContainer.appendChild(editor.getDOMElement());
+  editorContainer.appendChild(tests.getDOMElement());
 
   editor.appendControls( document.getElementById( "controls" ) );
 } );

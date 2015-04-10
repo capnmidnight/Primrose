@@ -14,7 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* 
+/*
     Created on : Apr 8, 2015, 11:04:21 AM
     Author     : Sean T. McBeth
 */
@@ -26,7 +26,29 @@ html, body{
   padding:0;
   margin:0;
 }
+
 #controls > div{
   display: inline-block;
   padding-right: 0.5em;
+}
+
+#editorContainer{
+  position:absolute;
+  top:2em;
+  bottom:0;
+  width:100%;
+}
+
+#editor{
+  position:absolute;
+  height:100%;
+  width:75%;
+  cursor:text;
+}
+
+#testResults{
+  position:absolute;
+  left:75%;
+  height:100%;
+  width:25%;
 }
