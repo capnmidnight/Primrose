@@ -117,20 +117,26 @@ window.Primrose.Cursor = ( function ( ) {
     this.advanceN( tokenRows, 1 );
   };
 
+  Cursor.prototype.fixCursor = function ( tokenRows ) {
+    this.x = this.i;
+    this.y = 0;
+    var line = rebuildLine( tokenRows, this.y );
+    while ( this.x > line.length ) {
+      this.x -= line.length;
+      ++this.y;
+      line = rebuildLine( tokenRows, this.y );
+    }
+  };
+
   Cursor.prototype.advanceN = function ( tokenRows, n ) {
-    if ( this.y < tokenRows.length - 1 ) {
-      var line = rebuildLine( tokenRows, this.y );
-      if ( this.x < line.length ) {
-        this.i += n;
-        this.x += n;
-        while ( this.x > line.length ) {
-          this.x -= line.length;
-          ++this.y;
-        }
-        if ( this.x > 0 && line[this.x - 1] === '\n' ) {
-          ++this.y;
-          this.x = 0;
-        }
+    var line = rebuildLine( tokenRows, this.y );
+    if ( this.y < tokenRows.length - 1 || this.x < line.length ) {
+      this.i += n;
+      this.fixCursor( tokenRows );
+      line = rebuildLine( tokenRows, this.y );
+      if ( this.x > 0 && line[this.x - 1] === '\n' ) {
+        ++this.y;
+        this.x = 0;
       }
     }
     this.moved = true;

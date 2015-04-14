@@ -1,4 +1,3 @@
-/* global qp */
 window.Primrose = window.Primrose || { };
 window.Primrose.CodePage = ( function ( ) {
   "use strict";

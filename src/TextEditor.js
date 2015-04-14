@@ -21,20 +21,12 @@ window.Primrose = window.Primrose || { };
 window.Primrose.TextBox = ( function ( ) {
   "use strict";
 
-  var Point = Primrose.Point,
-      Size = Primrose.Size,
-      Rectangle = Primrose.Rectangle,
-      Cursor = Primrose.Cursor,
-      Keys = Primrose.Keys,
-      CodePage = Primrose.CodePage,
-      OperatingSystem = Primrose.OperatingSystem,
-      Grammar = Primrose.Grammar,
-      EDITORS = [ ];
+  var EDITORS = [ ];
 
   function renderPump () {
     requestAnimationFrame( renderPump );
     for ( var i = 0; i < EDITORS.length; ++i ) {
-      if(EDITORS[i].drawText){
+      if ( EDITORS[i].drawText ) {
         EDITORS[i].drawText();
       }
     }
@@ -61,15 +53,15 @@ window.Primrose.TextBox = ( function ( ) {
         codePage,
         operatingSystem,
         browser,
-        commandSystem,
+        CommandSystem,
         keyboardSystem,
-        commandPack = { },
+        commandPack,
         tokenizer,
         tokens,
         tokenRows,
         theme,
-        pointer = new Point(),
-        lastPointer = new Point(),
+        pointer = new Primrose.Point(),
+        lastPointer = new Primrose.Point(),
         tabWidth,
         tabString,
         currentTouchID,
@@ -77,9 +69,9 @@ window.Primrose.TextBox = ( function ( ) {
         keyNames = [ ],
         history = [ ],
         historyFrame = -1,
-        gridBounds = new Rectangle(),
-        topLeftGutter = new Size(),
-        bottomRightGutter = new Size(),
+        gridBounds = new Primrose.Rectangle(),
+        topLeftGutter = new Primrose.Size(),
+        bottomRightGutter = new Primrose.Size(),
         dragging = false,
         focused = false,
         changed = false,
@@ -96,9 +88,9 @@ window.Primrose.TextBox = ( function ( ) {
     // public fields
     //////////////////////////////////////////////////////////////////////////
 
-    this.frontCursor = new Cursor();
-    this.backCursor = new Cursor();
-    this.scroll = new Point();
+    this.frontCursor = new Primrose.Cursor();
+    this.backCursor = new Primrose.Cursor();
+    this.scroll = new Primrose.Point();
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -183,6 +175,11 @@ window.Primrose.TextBox = ( function ( ) {
       lastPointer.copy( pointer );
     }
 
+    function fixCursor () {
+      self.frontCursor.fixCursor( tokenRows );
+      self.backCursor.fixCursor( tokenRows );
+    }
+    
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
         for ( var i = 0; i < EDITORS.length; ++i ) {
@@ -252,27 +249,11 @@ window.Primrose.TextBox = ( function ( ) {
       }
     }
 
-    function addCommandPack ( cmd ) {
-      if ( cmd ) {
-        for ( var key in cmd ) {
-          if ( cmd.hasOwnProperty( key ) ) {
-            var func = cmd[key];
-            if ( typeof func !== "function" ) {
-              func = self.overwriteText.bind( self, func );
-            }
-            commandPack[key] = func;
-          }
-        }
-      }
-    }
-
     function refreshCommandPack () {
-      if ( keyboardSystem && operatingSystem && commandSystem ) {
-        commandPack = { };
+      if ( keyboardSystem && operatingSystem && CommandSystem ) {
+        commandPack = new CommandSystem( operatingSystem, keyboardSystem,
+            self );
       }
-      addCommandPack( keyboardSystem );
-      addCommandPack( operatingSystem );
-      addCommandPack( commandSystem );
     }
 
     function makeCursorCommand ( name ) {
@@ -546,7 +527,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Primrose.CommandPacks.TextEditor;
+      CommandSystem = cmd || Primrose.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
@@ -598,8 +579,8 @@ window.Primrose.TextBox = ( function ( ) {
       }
 
       keyNames = [ ];
-      for ( key in Keys ) {
-        code = Keys[key];
+      for ( key in Primrose.Keys ) {
+        code = Primrose.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -694,6 +675,7 @@ window.Primrose.TextBox = ( function ( ) {
         ++historyFrame;
       }
       refreshTokens();
+      fixCursor();
     };
 
     this.undo = function () {
@@ -702,6 +684,7 @@ window.Primrose.TextBox = ( function ( ) {
         --historyFrame;
       }
       refreshTokens();
+      fixCursor();
     };
 
     this.setTabWidth = function ( tw ) {
@@ -849,14 +832,16 @@ window.Primrose.TextBox = ( function ( ) {
 
       if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
         // TODO: don't rejoin the string first.
-        var minCursor = Cursor.min( this.frontCursor, this.backCursor ),
-            maxCursor = Cursor.max( this.frontCursor,
+        var minCursor = Primrose.Cursor.min( this.frontCursor,
+            this.backCursor ),
+            maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
             text = this.getText(),
             left = text.substring( 0, minCursor.i ),
-            right = text.substring( maxCursor.i );
+            right = text.substring( maxCursor.i ),
+            removed = maxCursor.i - minCursor.i;
         this.setText( left + str + right );
-        minCursor.advanceN( tokenRows, str.length );
+        minCursor.advanceN( tokenRows, Math.max( 0, str.length - removed ) );
         this.scrollIntoView( maxCursor );
         clampScroll();
         maxCursor.copy( minCursor );
@@ -867,8 +852,9 @@ window.Primrose.TextBox = ( function ( ) {
     this.copySelectedText = function ( evt ) {
       evt.returnValue = false;
       if ( this.frontCursor.i !== this.backCursor.i ) {
-        var minCursor = Cursor.min( this.frontCursor, this.backCursor ),
-            maxCursor = Cursor.max( this.frontCursor,
+        var minCursor = Primrose.Cursor.min( this.frontCursor,
+            this.backCursor ),
+            maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
             text = this.getText(),
             str = text.substring( minCursor.i, maxCursor.i );
@@ -900,9 +886,9 @@ window.Primrose.TextBox = ( function ( ) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Keys.CTRL && key !== Keys.ALT && key !==
-            Keys.META_L &&
-            key !== Keys.META_R && key !== Keys.SHIFT ) {
+        if ( key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !==
+            Primrose.Keys.META_L &&
+            key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -1051,21 +1037,21 @@ window.Primrose.TextBox = ( function ( ) {
         renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
     this.commandSystemSelect = makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
-        commandSystem.name, self, "setCommandSystem",
+        CommandSystem.name, self, "setCommandSystem",
         "Command system" );
     this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
-        "Language syntax", Grammar );
+        "Language syntax", Primrose.Grammar );
     this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "Localization", CodePage );
+        "Localization", Primrose.CodePage );
     this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "Shortcut style", OperatingSystem );
+        "Shortcut style", Primrose.OperatingSystem );
     setSurrogateSize();
   }
 
