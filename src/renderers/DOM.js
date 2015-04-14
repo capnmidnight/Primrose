@@ -97,13 +97,13 @@ window.Primrose.Renderers.DOM = ( function ( ) {
 
   return function ( domElementOrID, options ) {
     var self = this,
-        div = qp.cascadeElement( domElementOrID, "div",
+        div = cascadeElement( domElementOrID, "div",
             window.HTMLDivElement ),
-        bgDiv = qp.cascadeElement( div.id + "-back", "div",
+        bgDiv = cascadeElement( div.id + "-back", "div",
             window.HTMLDivElement ),
-        fgDiv = qp.cascadeElement( div.id + "-front", "div",
+        fgDiv = cascadeElement( div.id + "-front", "div",
             window.HTMLDivElement ),
-        trimDiv = qp.cascadeElement( div.id + "-trim", "div",
+        trimDiv = cascadeElement( div.id + "-trim", "div",
             window.HTMLDivElement ),
         gfx = div.getContext( "2d" ),
         fgfx = fgDiv.getContext( "2d" ),
@@ -427,7 +427,7 @@ window.Primrose.Renderers.DOM = ( function ( ) {
 
     if ( !div.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( qp.makeHidingContainer(
+      document.body.appendChild( makeHidingContainer(
           "primrose-container-" +
           div.id, div ) );
     }

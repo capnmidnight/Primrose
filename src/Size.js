@@ -25,7 +25,7 @@ window.Primrose.Size = (function ( ) {
   };
 
   Size.prototype.toString = function () {
-    return qp.fmt( "<w:$1, h:$2>", this.width, this.height );
+    return fmt( "<w:$1, h:$2>", this.width, this.height );
   };
 
   return Size;

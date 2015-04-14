@@ -93,7 +93,7 @@ window.Primrose.Rectangle = ( function ( ) {
   };
 
   Rectangle.prototype.toString = function () {
-    return qp.fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
+    return fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
   };
 
   return Rectangle;

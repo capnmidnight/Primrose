@@ -24,7 +24,7 @@ window.Primrose.Point = ( function ( ) {
   };
 
   Point.prototype.toString = function () {
-    return qp.fmt( "(x:$1, y:$2)", this.x, this.y );
+    return fmt( "(x:$1, y:$2)", this.x, this.y );
   };
 
   return Point;

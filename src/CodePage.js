@@ -7,7 +7,7 @@ window.Primrose.CodePage = ( function ( ) {
     this.name = name;
     this.language = lang;
 
-    qp.copyObject( this, {
+    copyObject( this, {
       NORMAL: {
         "65": "a",
         "66": "b",
@@ -66,7 +66,7 @@ window.Primrose.CodePage = ( function ( ) {
       }
     } );
 
-    qp.copyObject( this, options );
+    copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
       var code = Primrose.Keys["NUMPAD" + i];

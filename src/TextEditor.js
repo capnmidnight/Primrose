@@ -88,7 +88,7 @@ window.Primrose.TextBox = ( function ( ) {
         wordWrap = false,
         wheelScrollSpeed = 0,
         renderer = new Renderer( renderToElementOrID, options ),
-        surrogate = qp.cascadeElement( "primrose-surrogate-textarea-" +
+        surrogate = cascadeElement( "primrose-surrogate-textarea-" +
             renderer.id, "textarea", window.HTMLTextAreaElement ),
         surrogateContainer;
 
@@ -126,14 +126,14 @@ window.Primrose.TextBox = ( function ( ) {
       if ( theme ) {
         var bounds = renderer.getDOMElement()
             .getBoundingClientRect();
-        surrogateContainer.style.left = qp.px( bounds.left );
-        surrogateContainer.style.top = qp.px( window.scrollY + bounds.top );
+        surrogateContainer.style.left = px( bounds.left );
+        surrogateContainer.style.top = px( window.scrollY + bounds.top );
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
         var ch = renderer.character.height / renderer.getPixelRatio();
-        surrogate.style.fontSize = qp.px( ch * 0.99 );
-        surrogate.style.lineHeight = qp.px( ch );
+        surrogate.style.fontSize = px( ch * 0.99 );
+        surrogate.style.lineHeight = px( ch );
       }
     }
 
@@ -321,10 +321,10 @@ window.Primrose.TextBox = ( function ( ) {
       gridBounds.set( x, y, w, h );
       var cw = renderer.character.width / renderer.getPixelRatio();
       var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.left = qp.px( gridBounds.x * cw );
-      surrogate.style.top = qp.px( gridBounds.y * ch );
-      surrogate.style.width = qp.px( gridBounds.width * cw );
-      surrogate.style.height = qp.px( gridBounds.height * ch );
+      surrogate.style.left = px( gridBounds.x * cw );
+      surrogate.style.top = px( gridBounds.y * ch );
+      surrogate.style.width = px( gridBounds.width * cw );
+      surrogate.style.height = px( gridBounds.height * ch );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -395,7 +395,7 @@ window.Primrose.TextBox = ( function ( ) {
     }
 
     function makeSelectorFromObj ( id, obj, def, target, prop, lbl, filter ) {
-      var elem = qp.cascadeElement( id, "select", window.HTMLSelectElement );
+      var elem = cascadeElement( id, "select", window.HTMLSelectElement );
       var items = [ ];
       for ( var key in obj ) {
         if ( obj.hasOwnProperty( key ) ) {
@@ -424,9 +424,9 @@ window.Primrose.TextBox = ( function ( ) {
         } );
       }
 
-      var container = qp.cascadeElement( "container -" + id, "div",
+      var container = cascadeElement( "container -" + id, "div",
           window.HTMLDivElement );
-      var label = qp.cascadeElement( "label-" + id, "span",
+      var label = cascadeElement( "label-" + id, "span",
           window.HTMLSpanElement );
       label.innerHTML = lbl + ": ";
       label.for = elem;
@@ -535,7 +535,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.setOperatingSystem = function ( os ) {
       changed = true;
-      operatingSystem = os || ( qp.isOSX ? Primrose.OperatingSystems.OSX :
+      operatingSystem = os || ( isOSX ? Primrose.OperatingSystems.OSX :
           Primrose.OperatingSystems.Windows );
       refreshCommandPack();
     };
@@ -991,17 +991,17 @@ window.Primrose.TextBox = ( function ( ) {
     //
     // different browsers have different sets of keycodes for less-frequently
     // used keys like.
-    browser = qp.isChrome ? "CHROMIUM" : ( qp.isFirefox ? "FIREFOX" :
-        ( qp.isIE ?
+    browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" :
+        ( isIE ?
             "IE" :
-            ( qp.isOpera ? "OPERA" : ( qp.isSafari ? "SAFARI" :
+            ( isOpera ? "OPERA" : ( isSafari ? "SAFARI" :
                 "UNKNOWN" ) ) ) );
 
     //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
     surrogate.style.position = "absolute";
     surrogate.addEventListener( "blur", this.blur.bind( this ) );
-    surrogateContainer = qp.makeHidingContainer(
+    surrogateContainer = makeHidingContainer(
         "primrose-surrogate-textarea-container-" + renderer.id,
         surrogate );
 

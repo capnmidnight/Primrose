@@ -80,7 +80,7 @@ var Assert = ( function ( ) {
             : "x";
       }
 
-      log( qp.fmt( "Test results for $1: [$2]\n\n$3 succeeded, $4 failed",
+      log( fmt( "Test results for $1: [$2]\n\n$3 succeeded, $4 failed",
           name,
           beam, result.succeeded, result.failed ) );
 
@@ -88,7 +88,7 @@ var Assert = ( function ( ) {
         log( "\n    Successes:" );
         for ( var key in result.success ) {
           if ( result.success[key] ) {
-            log( qp.fmt( "        $1 succeeded after $2ms", key,
+            log( fmt( "        $1 succeeded after $2ms", key,
                 result.success[key].dt ) );
           }
         }
@@ -99,11 +99,11 @@ var Assert = ( function ( ) {
         for ( var key in result.failure ) {
           if ( result.failure[key] ) {
             var val = result.failure[key];
-            log( qp.fmt( "        $1 FAILED after $2ms: $3", key, val.dt,
+            log( fmt( "        $1 FAILED after $2ms: $3", key, val.dt,
                 val.msg ) );
             if ( val.stack && val.stack.indexOf( "at Object.Assert" ) ===
                 -1 ) {
-              log( qp.fmt( "        $1", val.stack ) );
+              log( fmt( "        $1", val.stack ) );
             }
           }
         }

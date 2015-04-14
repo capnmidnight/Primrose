@@ -71,7 +71,7 @@ window.Primrose.Cursor = ( function ( ) {
     else {
       var x = this.x - 1;
       var line = rebuildLine( tokenRows, this.y );
-      var word = qp.reverse( line.substring( 0, x ) );
+      var word = reverse( line.substring( 0, x ) );
       var m = word.match( /(\s|\W)+/ );
       var dx = m ? ( m.index + m[0].length + 1 ) : word.length;
       this.i -= dx;

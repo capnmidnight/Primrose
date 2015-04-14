@@ -19,14 +19,14 @@
 
 function editor3d () {
   "use strict";
-  var modA = qp.isOSX ? "metaKey" : "ctrlKey",
-      modB = qp.isOSX ? "altKey" : "shiftKey",
-      cmdPre = qp.isOSX ? "CMD+OPT" : "CTRL+SHIFT",
+  var modA = isOSX ? "metaKey" : "ctrlKey",
+      modB = isOSX ? "altKey" : "shiftKey",
+      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
       vrDisplay,
       vrSensor,
       vrEffect,
       renderer,
-      ctrls = qp.findEverything();
+      ctrls = findEverything();
   function clearKeyOption ( evt ) {
     this.value = "";
     this.dataset.keycode = "";
@@ -105,8 +105,8 @@ function editor3d () {
         h = 1,
         w2 = 2,
         prim1 = new Primrose.TextBox( "editor1", {
-          width: qp.px( w1 * 1024 ),
-          height: qp.px( h * 1024 ),
+          width: px( w1 * 1024 ),
+          height: px( h * 1024 ),
           fontSize: 36,
           file: "var ball = textured(box(0.25, 0.25, 0.25), 'bg1.jpg');\n\
 scene.add(ball);\n\n\
@@ -127,8 +127,8 @@ setInterval(function(){\n\
           Primrose.Size
         ],
         prim2 = new Primrose.TextBox( "editor2", {
-          width: qp.px( w2 * 1024 ),
-          height: qp.px( h * 1024 ),
+          width: px( w2 * 1024 ),
+          height: px( h * 1024 ),
           fontSize: 24,
           file: Assert.stringTest( testObjects ),
           readOnly: true,
@@ -252,8 +252,8 @@ setInterval(function(){\n\
         canvasHeight = Math.max( vrEffect.left.renderRect.height,
             vrEffect.right.renderRect.height );
       }
-      renderer.domElement.style.width = qp.px( styleWidth );
-      renderer.domElement.style.height = qp.px( styleHeight );
+      renderer.domElement.style.width = px( styleWidth );
+      renderer.domElement.style.height = px( styleHeight );
       renderer.domElement.width = canvasWidth;
       renderer.domElement.height = canvasHeight;
       renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
@@ -291,7 +291,7 @@ setInterval(function(){\n\
           evt.preventDefault( );
         }
         else if ( currentEditor ) {
-          if ( ( qp.isOSX && evt.keyCode === 69 ) || ( !qp.isOSX &&
+          if ( ( isOSX && evt.keyCode === 69 ) || ( !isOSX &&
               evt.keyCode ===
               32 ) ) {
             try {
@@ -370,7 +370,7 @@ setInterval(function(){\n\
     function mouseDown ( evt ) {
       if ( evt.target === ctrls.output ) {
         dragging = true;
-        if ( !qp.isPointerLocked( ) ) {
+        if ( !isPointerLocked( ) ) {
           lastMouseX = evt.clientX;
           lastMouseY = evt.clientY;
           setPointer( lastMouseX, lastMouseY );
@@ -400,7 +400,7 @@ setInterval(function(){\n\
     }
 
     function mouseMove ( evt ) {
-      if ( qp.isPointerLocked( ) ) {
+      if ( isPointerLocked( ) ) {
         var dx = evt.movementX,
             dy = evt.movementY;
         if ( dx === undefined ) {

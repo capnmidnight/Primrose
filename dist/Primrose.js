@@ -5,8 +5,7 @@ https://github.com/capnmidnight/Primrose*/
 window.Primrose = window.Primrose || { };
 window.Primrose.CodePage = ( function ( ) {
   "use strict";
-  var Keys = Primrose.Keys;
-      
+
   function CodePage ( name, lang, options ) {
     this.name = name;
     this.language = lang;
@@ -73,7 +72,7 @@ window.Primrose.CodePage = ( function ( ) {
     qp.copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
-      var code = Keys["NUMPAD" + i];
+      var code = Primrose.Keys["NUMPAD" + i];
       this.NORMAL[code] = i.toString();
     }
   }
@@ -302,14 +301,12 @@ window.Primrose.Cursor = ( function ( ) {
 } )();;window.Primrose = window.Primrose || { };
 window.Primrose.Grammar = ( function ( ) {
   "use strict";
-  var Rule = Primrose.Rule,
-      Token = Primrose.Token;
 
   function Grammar ( name, grammar ) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map( function ( rule ) {
-      return new Rule( rule[0], rule[1] );
+      return new Primrose.Rule( rule[0], rule[1] );
     } );
 
     function crudeParsing ( tokens ) {
@@ -340,7 +337,7 @@ window.Primrose.Grammar = ( function ( ) {
     this.tokenize = function ( text ) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
-      var tokens = [ new Token( text, "regular", 0 ) ];
+      var tokens = [ new Primrose.Token( text, "regular", 0 ) ];
       for ( var i = 0; i < this.grammar.length; ++i ) {
         var rule = this.grammar[i];
         for ( var j = 0; j < tokens.length; ++j ) {
@@ -539,13 +536,10 @@ window.Primrose.Point = ( function ( ) {
 window.Primrose = window.Primrose || { };
 window.Primrose.Rectangle = ( function ( ) {
   "use strict";
-  
-  var Point = Primrose.Point,
-      Size = Primrose.Size;
-      
+
   function Rectangle ( x, y, width, height ) {
-    this.point = new Point( x, y );
-    this.size = new Size( width, height );
+    this.point = new Primrose.Point( x, y );
+    this.size = new Primrose.Size( width, height );
 
     Object.defineProperties( this, {
       x: {
@@ -756,7 +750,9 @@ window.Primrose.TextBox = ( function ( ) {
   function renderPump () {
     requestAnimationFrame( renderPump );
     for ( var i = 0; i < EDITORS.length; ++i ) {
-      EDITORS[i].drawText();
+      if(EDITORS[i].drawText){
+        EDITORS[i].drawText();
+      }
     }
   }
 
@@ -1266,7 +1262,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Primrose.Commands.TextEditor;
+      commandSystem = cmd || Primrose.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
@@ -1786,7 +1782,6 @@ window.Primrose.TextBox = ( function ( ) {
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
         "Shortcut style", OperatingSystem );
-
     setSurrogateSize();
   }
 
@@ -2016,7 +2011,7 @@ window.Primrose.CodePages.EN_UKX = (function () {
   });
 })();;window.Primrose = window.Primrose || { };
 window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CpdePages.EN_US = (function () {
+window.Primrose.CodePages.EN_US = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("English: USA", "en-US", {
@@ -2270,9 +2265,9 @@ window.Primrose.OperatingSystems.OSX = ( function () {
 // so we don't have to include handlers for them here.
 window.Primrose = window.Primrose || { };
 window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || {};
-window.Primrose.Windows = (function () {
+window.Primrose.OperatingSystems.Windows = (function () {
   "use strict";
-  
+
   return new Primrose.OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",
@@ -2284,10 +2279,6 @@ window.Primrose = window.Primrose || { };
 window.Primrose.Renderers = window.Primrose.Renderers || { };
 window.Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
-  
-  var Size = Primrose.Size,
-      Cursor = Primrose.Cursor,
-      defaultTheme = Primrose.Themes.Default;
 
   return function ( canvasElementOrID, options ) {
     var self = this,
@@ -2310,7 +2301,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     this.VSCROLL_WIDTH = 2;
 
-    this.character = new Size();
+    this.character = new Primrose.Size();
     this.id = canvas.id;
     this.autoBindEvents = true;
 
@@ -2402,10 +2393,10 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
         gridBounds, scroll, focused ) {
-      var minCursor = Cursor.min( frontCursor, backCursor ),
-          maxCursor = Cursor.max( frontCursor, backCursor ),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
+      var minCursor = Primrose.Cursor.min( frontCursor, backCursor ),
+          maxCursor = Primrose.Cursor.max( frontCursor, backCursor ),
+          tokenFront = new Primrose.Cursor(),
+          tokenBack = new Primrose.Cursor(),
           clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
       if ( theme.regular.backColor ) {
@@ -2421,7 +2412,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
       // draw the current row highlighter
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
-            defaultTheme.regular.currentRowBackColor,
+            Primrose.Themes.Default.regular.currentRowBackColor,
             0, minCursor.y + 0.2,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
@@ -2443,11 +2434,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
                 maxCursor.i;
             if ( inSelection ) {
-              var selectionFront = Cursor.max( minCursor, tokenFront );
-              var selectionBack = Cursor.min( maxCursor, tokenBack );
+              var selectionFront = Primrose.Cursor.max( minCursor, tokenFront );
+              var selectionBack = Primrose.Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
-                  defaultTheme.regular.selectedBackColor,
+                  Primrose.Themes.Default.regular.selectedBackColor,
                   selectionFront.x, selectionFront.y + 0.2,
                   cw, 1 );
             }
@@ -2472,8 +2463,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
     }
 
     function renderCanvasForeground ( tokenRows, gridBounds, scroll ) {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
+      var tokenFront = new Primrose.Cursor(),
+          tokenBack = new Primrose.Cursor(),
           maxLineWidth = 0;
 
       fgfx.clearRect( 0, 0, canvas.width, canvas.height );
@@ -2538,7 +2529,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
           }
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
-              defaultTheme.regular.selectedBackColor,
+              Primrose.Themes.Default.regular.selectedBackColor,
               0, y + 0.2,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
@@ -2566,7 +2557,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
-            defaultTheme.regular.selectedBackColor;
+            Primrose.Themes.Default.regular.selectedBackColor;
         // horizontal
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );
@@ -3207,4 +3198,4 @@ window.Primrose.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();Primrose.VERSION = "v0.9.0";
+} )();Primrose.VERSION = "v0.9.1";

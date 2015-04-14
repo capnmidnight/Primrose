@@ -7,13 +7,13 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
   return function ( canvasElementOrID, options ) {
     var self = this,
-        canvas = qp.cascadeElement( canvasElementOrID, "canvas",
+        canvas = cascadeElement( canvasElementOrID, "canvas",
             window.HTMLCanvasElement ),
-        bgCanvas = qp.cascadeElement( canvas.id + "-back", "canvas",
+        bgCanvas = cascadeElement( canvas.id + "-back", "canvas",
             window.HTMLCanvasElement ),
-        fgCanvas = qp.cascadeElement( canvas.id + "-front", "canvas",
+        fgCanvas = cascadeElement( canvas.id + "-front", "canvas",
             window.HTMLCanvasElement ),
-        trimCanvas = qp.cascadeElement( canvas.id + "-trim", "canvas",
+        trimCanvas = cascadeElement( canvas.id + "-trim", "canvas",
             window.HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
@@ -400,7 +400,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( qp.makeHidingContainer(
+      document.body.appendChild( makeHidingContainer(
           "primrose-container-" +
           canvas.id, canvas ) );
     }
