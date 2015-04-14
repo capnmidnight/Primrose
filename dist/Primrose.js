@@ -1,5 +1,5 @@
 /*
-  Primrose v0.9.1 2015-04-14
+  Primrose v0.9.2 2015-04-14
   gplv3
   Copyright (C) 2015 Sean T. McBeth [sean@seanmcbeth.com]
   https://www.primroseeditor.com
@@ -725,8 +725,7 @@ function isPointerLocked () {
 var requestPointerLock = ( document.documentElement.requestPointerLock ||
     document.documentElement.webkitRequestPointerLock ||
     document.documentElement.mozRequestPointerLock || function () {
-    } ).bind( document.documentElement );;/* global qp */
-window.Primrose = window.Primrose || { };
+    } ).bind( document.documentElement );;window.Primrose = window.Primrose || { };
 window.Primrose.CodePage = ( function ( ) {
   "use strict";
 
@@ -809,11 +808,21 @@ window.Primrose.CodePage = ( function ( ) {
 
   return CodePage;
 } ) ();
-;/* global qp */
+;window.Primrose = window.Primrose || { };
+window.Primrose.CommandPack = ( function ( ) {
+  "use strict";
+
+  function CommandPack ( name, commands ) {
+    this.name = name;
+    copyObject(this, commands);
+  }
+
+  return CommandPack;
+} )();;/* global qp */
 window.Primrose = window.Primrose || { };
 window.Primrose.Cursor = ( function ( ) {
   "use strict";
-  
+
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -909,7 +918,7 @@ window.Primrose.Cursor = ( function ( ) {
 
   Cursor.prototype.skipright = function ( tokenRows ) {
     var line = rebuildLine( tokenRows, this.y );
-    if ( this.x === line.length || line[line.length - 1] === '\n' ) {
+    if ( this.x === line.length || line[this.x] === '\n' ) {
       this.right( tokenRows );
     }
     else {
@@ -924,24 +933,39 @@ window.Primrose.Cursor = ( function ( ) {
     this.moved = true;
   };
 
+  Cursor.prototype.fixCursor = function ( tokenRows ) {
+    this.x = this.i;
+    this.y = 0;
+    var total = 0;
+    var line = rebuildLine( tokenRows, this.y );
+    while ( this.x > line.length ) {
+      this.x -= line.length;
+      total += line.length;
+      if ( this.y >= tokenRows.length - 1 ) {
+        this.i = total;
+        this.x = line.length;
+        this.moved = true;
+        break;
+      }
+      ++this.y;
+      line = rebuildLine( tokenRows, this.y );
+    }
+    return this.moved;
+  };
+
   Cursor.prototype.right = function ( tokenRows ) {
     this.advanceN( tokenRows, 1 );
   };
 
   Cursor.prototype.advanceN = function ( tokenRows, n ) {
-    if ( this.y < tokenRows.length - 1 ) {
-      var line = rebuildLine( tokenRows, this.y );
-      if ( this.x < line.length ) {
-        this.i += n;
-        this.x += n;
-        while ( this.x > line.length ) {
-          this.x -= line.length;
-          ++this.y;
-        }
-        if ( this.x > 0 && line[this.x - 1] === '\n' ) {
-          ++this.y;
-          this.x = 0;
-        }
+    var line = rebuildLine( tokenRows, this.y );
+    if ( this.y < tokenRows.length - 1 || this.x < line.length ) {
+      this.i += n;
+      this.fixCursor( tokenRows );
+      line = rebuildLine( tokenRows, this.y );
+      if ( this.x > 0 && line[this.x - 1] === '\n' ) {
+        ++this.y;
+        this.x = 0;
       }
     }
     this.moved = true;
@@ -1461,20 +1485,12 @@ window.Primrose = window.Primrose || { };
 window.Primrose.TextBox = ( function ( ) {
   "use strict";
 
-  var Point = Primrose.Point,
-      Size = Primrose.Size,
-      Rectangle = Primrose.Rectangle,
-      Cursor = Primrose.Cursor,
-      Keys = Primrose.Keys,
-      CodePage = Primrose.CodePage,
-      OperatingSystem = Primrose.OperatingSystem,
-      Grammar = Primrose.Grammar,
-      EDITORS = [ ];
+  var EDITORS = [ ];
 
   function renderPump () {
     requestAnimationFrame( renderPump );
     for ( var i = 0; i < EDITORS.length; ++i ) {
-      if(EDITORS[i].drawText){
+      if ( EDITORS[i].drawText ) {
         EDITORS[i].drawText();
       }
     }
@@ -1501,15 +1517,15 @@ window.Primrose.TextBox = ( function ( ) {
         codePage,
         operatingSystem,
         browser,
-        commandSystem,
+        CommandSystem,
         keyboardSystem,
-        commandPack = { },
+        commandPack,
         tokenizer,
         tokens,
         tokenRows,
         theme,
-        pointer = new Point(),
-        lastPointer = new Point(),
+        pointer = new Primrose.Point(),
+        lastPointer = new Primrose.Point(),
         tabWidth,
         tabString,
         currentTouchID,
@@ -1517,9 +1533,9 @@ window.Primrose.TextBox = ( function ( ) {
         keyNames = [ ],
         history = [ ],
         historyFrame = -1,
-        gridBounds = new Rectangle(),
-        topLeftGutter = new Size(),
-        bottomRightGutter = new Size(),
+        gridBounds = new Primrose.Rectangle(),
+        topLeftGutter = new Primrose.Size(),
+        bottomRightGutter = new Primrose.Size(),
         dragging = false,
         focused = false,
         changed = false,
@@ -1536,9 +1552,9 @@ window.Primrose.TextBox = ( function ( ) {
     // public fields
     //////////////////////////////////////////////////////////////////////////
 
-    this.frontCursor = new Cursor();
-    this.backCursor = new Cursor();
-    this.scroll = new Point();
+    this.frontCursor = new Primrose.Cursor();
+    this.backCursor = new Primrose.Cursor();
+    this.scroll = new Primrose.Point();
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -1546,7 +1562,7 @@ window.Primrose.TextBox = ( function ( ) {
     //////////////////////////////////////////////////////////////////////////
 
     function refreshTokens () {
-      tokens = tokenizer.tokenize( self.getText() );
+      tokens = tokenizer.tokenize( self.value );
       self.drawText();
     }
 
@@ -1623,6 +1639,14 @@ window.Primrose.TextBox = ( function ( ) {
       lastPointer.copy( pointer );
     }
 
+    function fixCursor () {
+      var moved = self.frontCursor.fixCursor( tokenRows ) ||
+          self.backCursor.fixCursor( tokenRows );
+      if ( moved ) {
+        self.forceDraw();
+      }
+    }
+
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
         for ( var i = 0; i < EDITORS.length; ++i ) {
@@ -1692,27 +1716,11 @@ window.Primrose.TextBox = ( function ( ) {
       }
     }
 
-    function addCommandPack ( cmd ) {
-      if ( cmd ) {
-        for ( var key in cmd ) {
-          if ( cmd.hasOwnProperty( key ) ) {
-            var func = cmd[key];
-            if ( typeof func !== "function" ) {
-              func = self.overwriteText.bind( self, func );
-            }
-            commandPack[key] = func;
-          }
-        }
-      }
-    }
-
     function refreshCommandPack () {
-      if ( keyboardSystem && operatingSystem && commandSystem ) {
-        commandPack = { };
+      if ( keyboardSystem && operatingSystem && CommandSystem ) {
+        commandPack = new CommandSystem( operatingSystem, keyboardSystem,
+            self );
       }
-      addCommandPack( keyboardSystem );
-      addCommandPack( operatingSystem );
-      addCommandPack( commandSystem );
     }
 
     function makeCursorCommand ( name ) {
@@ -1986,7 +1994,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Primrose.CommandPacks.TextEditor;
+      CommandSystem = cmd || Primrose.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
@@ -2038,8 +2046,8 @@ window.Primrose.TextBox = ( function ( ) {
       }
 
       keyNames = [ ];
-      for ( key in Keys ) {
-        code = Keys[key];
+      for ( key in Primrose.Keys ) {
+        code = Primrose.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -2097,24 +2105,21 @@ window.Primrose.TextBox = ( function ( ) {
       return history[historyFrame].length;
     };
 
-    this.getText = function () {
-      return history[historyFrame].join( "\n" );
-    };
-
-    this.setText = function ( txt ) {
-      txt = txt || "";
-      txt = txt.replace( /\r\n/g, "\n" );
-      var lines = txt.split( "\n" );
-      this.pushUndo( lines );
-      this.drawText();
-      surrogate.value = txt;
-      setSurrogateCursor();
-    };
 
     Object.defineProperties( this, {
       value: {
-        get: this.getText,
-        set: this.setText
+        get: function () {
+          return history[historyFrame].join( "\n" );
+        },
+        set: function ( txt ) {
+          txt = txt || "";
+          txt = txt.replace( /\r\n/g, "\n" );
+          var lines = txt.split( "\n" );
+          this.pushUndo( lines );
+          this.drawText();
+          surrogate.value = txt;
+          setSurrogateCursor();
+        }
       }
     } );
 
@@ -2134,6 +2139,7 @@ window.Primrose.TextBox = ( function ( ) {
         ++historyFrame;
       }
       refreshTokens();
+      fixCursor();
     };
 
     this.undo = function () {
@@ -2142,6 +2148,7 @@ window.Primrose.TextBox = ( function ( ) {
         --historyFrame;
       }
       refreshTokens();
+      fixCursor();
     };
 
     this.setTabWidth = function ( tw ) {
@@ -2289,14 +2296,16 @@ window.Primrose.TextBox = ( function ( ) {
 
       if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
         // TODO: don't rejoin the string first.
-        var minCursor = Cursor.min( this.frontCursor, this.backCursor ),
-            maxCursor = Cursor.max( this.frontCursor,
+        var minCursor = Primrose.Cursor.min( this.frontCursor,
+            this.backCursor ),
+            maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
-            text = this.getText(),
+            text = this.value,
             left = text.substring( 0, minCursor.i ),
-            right = text.substring( maxCursor.i );
-        this.setText( left + str + right );
-        minCursor.advanceN( tokenRows, str.length );
+            right = text.substring( maxCursor.i ),
+            removed = maxCursor.i - minCursor.i;
+        this.value = left + str + right;
+        minCursor.advanceN( tokenRows, Math.max( 0, str.length - removed ) );
         this.scrollIntoView( maxCursor );
         clampScroll();
         maxCursor.copy( minCursor );
@@ -2307,10 +2316,11 @@ window.Primrose.TextBox = ( function ( ) {
     this.copySelectedText = function ( evt ) {
       evt.returnValue = false;
       if ( this.frontCursor.i !== this.backCursor.i ) {
-        var minCursor = Cursor.min( this.frontCursor, this.backCursor ),
-            maxCursor = Cursor.max( this.frontCursor,
+        var minCursor = Primrose.Cursor.min( this.frontCursor,
+            this.backCursor ),
+            maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
-            text = this.getText(),
+            text = this.value,
             str = text.substring( minCursor.i, maxCursor.i );
         var clipboard = evt.clipboardData || window.clipboardData;
         clipboard.setData( window.clipboardData ? "Text" : "text/plain",
@@ -2340,9 +2350,9 @@ window.Primrose.TextBox = ( function ( ) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Keys.CTRL && key !== Keys.ALT && key !==
-            Keys.META_L &&
-            key !== Keys.META_R && key !== Keys.SHIFT ) {
+        if ( key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !==
+            Primrose.Keys.META_L &&
+            key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -2392,25 +2402,27 @@ window.Primrose.TextBox = ( function ( ) {
         setSurrogateSize();
       }
 
-      if ( changed && theme && tokens ) {
+      if ( changed ) {
         this.forceDraw();
       }
     };
 
     this.forceDraw = function () {
-      var lineCountWidth = performLayout();
+      if ( tokens ) {
+        var lineCountWidth = performLayout();
 
-      renderer.render(
-          tokenRows,
-          this.frontCursor, this.backCursor,
-          gridBounds,
-          this.scroll,
-          focused, showLineNumbers, showScrollBars, wordWrap,
-          lineCountWidth );
+        renderer.render(
+            tokenRows,
+            this.frontCursor, this.backCursor,
+            gridBounds,
+            this.scroll,
+            focused, showLineNumbers, showScrollBars, wordWrap,
+            lineCountWidth );
 
-      setSurrogateCursor();
+        setSurrogateCursor();
 
-      changed = false;
+        changed = false;
+      }
     };
 
     this.appendControls = function ( elem ) {
@@ -2471,7 +2483,7 @@ window.Primrose.TextBox = ( function ( ) {
     this.setCodePage( options.codePage );
     this.setOperatingSystem( options.os );
     this.setCommandSystem( options.commands );
-    this.setText( options.file );
+    this.value = options.file;
 
     this.bindEvents(
         options.keyEventSource,
@@ -2491,21 +2503,21 @@ window.Primrose.TextBox = ( function ( ) {
         renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
     this.commandSystemSelect = makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
-        commandSystem.name, self, "setCommandSystem",
+        CommandSystem.name, self, "setCommandSystem",
         "Command system" );
     this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
-        "Language syntax", Grammar );
+        "Language syntax", Primrose.Grammar );
     this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "Localization", CodePage );
+        "Localization", Primrose.CodePage );
     this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "Shortcut style", OperatingSystem );
+        "Shortcut style", Primrose.OperatingSystem );
     setSurrogateSize();
   }
 
@@ -2900,7 +2912,7 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
       prim.overwriteText();
       prim.scrollIntoView( prim.frontCursor );
     },
-    NORMAL_ENTER: function ( prim, tokenRows ) {
+    NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
       var indent = "";
       var tokenRow = tokenRows[prim.frontCursor.y];
       if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
@@ -2929,6 +2941,75 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
       prim.overwriteText( ts );
     }
   };
+} )();;// For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front.
+// If SHIFT is held, then "back"
+window.Primrose = window.Primrose || { };
+window.Primrose.CommandPacks = window.Primrose.CommandPacks || { };
+window.Primrose.CommandPacks.TextEditor = ( function () {
+  "use strict";
+
+  function TextEditor ( operatingSystem, codePage, editor ) {
+    var commands = {
+      NORMAL_SPACEBAR: " ",
+      SHIFT_SPACEBAR: " ",
+      NORMAL_BACKSPACE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.frontCursor.left( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
+        var indent = "";
+        var tokenRow = tokenRows[prim.frontCursor.y];
+        if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
+          indent = tokenRow[0].value;
+        }
+        prim.overwriteText( "\n" + indent );
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_DELETE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.backCursor.right( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      SHIFT_DELETE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.frontCursor.home( tokenRows );
+          prim.backCursor.end( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_TAB: function ( prim, tokenRows ) {
+        var ts = prim.getTabString();
+        prim.overwriteText( ts );
+      }
+    };
+
+    var allCommands = {};
+
+    copyObject( allCommands, codePage );
+    copyObject( allCommands, operatingSystem );
+    copyObject( allCommands, commands );
+
+    for ( var key in allCommands ) {
+      if ( allCommands.hasOwnProperty( key ) ) {
+        var func = allCommands[key];
+        if ( typeof func !== "function" ) {
+          func = editor.overwriteText.bind( editor, func );
+        }
+        allCommands[key] = func;
+      }
+    }
+
+    Primrose.CommandPack.call( this, "Text editor commands", allCommands );
+  }
+  inherit( TextEditor, Primrose.CommandPack );
+  return TextEditor;
 } )();;window.Primrose = window.Primrose || { };
 window.Primrose.Grammars = window.Primrose.Grammars || { };
 window.Primrose.Grammars.JavaScript = ( function () {
@@ -2961,18 +3042,18 @@ window.Primrose.Grammars.PlainText = (function (require) {
 window.Primrose.Grammars = window.Primrose.Grammars || { };
 window.Primrose.Grammars.TestResults = (function () {
   "use strict";
-  
+
   return new Primrose.Grammar("TestResults", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["numbers", /(\[)(o+)/],
-    ["numbers", /(\d+ succeeded), 0 failed/],
-    ["numbers", /^    Successes:/],
-    ["functions", /(x+)\]/],
-    ["functions", /[1-9]\d* failed/],
-    ["functions", /^    Failures:/],
-    ["comments", /(\d+ms:)(.*)/],
-    ["keywords", /(Test results for )(\w+):/],
-    ["strings", /        \w+/]
+    ["newlines", /(?:\r\n|\r|\n)/, true],
+    ["numbers", /(\[)(o+)/, true],
+    ["numbers", /(\d+ succeeded), 0 failed/, true],
+    ["numbers", /^    Successes:/, true],
+    ["functions", /(x+)\]/, true],
+    ["functions", /[1-9]\d* failed/, true],
+    ["functions", /^    Failures:/, true],
+    ["comments", /(\d+ms:)(.*)/, true],
+    ["keywords", /(Test results for )(\w+):/, true],
+    ["strings", /        \w+/, true]
   ]);
 })();;// cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
@@ -3158,7 +3239,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
                 maxCursor.i;
             if ( inSelection ) {
-              var selectionFront = Primrose.Cursor.max( minCursor, tokenFront );
+              var selectionFront = Primrose.Cursor.max( minCursor,
+                  tokenFront );
               var selectionBack = Primrose.Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
@@ -3311,21 +3393,23 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         scroll,
         focused, showLineNumbers, showScrollBars, wordWrap,
         lineCountWidth ) {
-      var maxLineWidth = 0;
+      if ( theme ) {
+        var maxLineWidth = 0;
 
-      renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
-          scroll, focused );
-      maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
-      renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
-          showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
+        renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
+            scroll, focused );
+        maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
+        renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
+            showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
 
-      gfx.clearRect( 0, 0, canvas.width, canvas.height );
-      gfx.drawImage( bgCanvas, 0, 0 );
-      gfx.drawImage( fgCanvas, 0, 0 );
-      gfx.drawImage( trimCanvas, 0, 0 );
+        gfx.clearRect( 0, 0, canvas.width, canvas.height );
+        gfx.drawImage( bgCanvas, 0, 0 );
+        gfx.drawImage( fgCanvas, 0, 0 );
+        gfx.drawImage( trimCanvas, 0, 0 );
 
-      if ( texture ) {
-        texture.needsUpdate = true;
+        if ( texture ) {
+          texture.needsUpdate = true;
+        }
       }
     };
 
@@ -3922,4 +4006,4 @@ window.Primrose.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();Primrose.VERSION = "v0.9.1";
+} )();Primrose.VERSION = "v0.9.2";
