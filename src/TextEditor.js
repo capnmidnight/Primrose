@@ -98,7 +98,7 @@ window.Primrose.TextBox = ( function ( ) {
     //////////////////////////////////////////////////////////////////////////
 
     function refreshTokens () {
-      tokens = tokenizer.tokenize( self.getText() );
+      tokens = tokenizer.tokenize( self.value );
       self.drawText();
     }
 
@@ -176,10 +176,13 @@ window.Primrose.TextBox = ( function ( ) {
     }
 
     function fixCursor () {
-      self.frontCursor.fixCursor( tokenRows );
-      self.backCursor.fixCursor( tokenRows );
+      var moved = self.frontCursor.fixCursor( tokenRows ) ||
+          self.backCursor.fixCursor( tokenRows );
+      if ( moved ) {
+        self.forceDraw();
+      }
     }
-    
+
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
         for ( var i = 0; i < EDITORS.length; ++i ) {
@@ -638,24 +641,21 @@ window.Primrose.TextBox = ( function ( ) {
       return history[historyFrame].length;
     };
 
-    this.getText = function () {
-      return history[historyFrame].join( "\n" );
-    };
-
-    this.setText = function ( txt ) {
-      txt = txt || "";
-      txt = txt.replace( /\r\n/g, "\n" );
-      var lines = txt.split( "\n" );
-      this.pushUndo( lines );
-      this.drawText();
-      surrogate.value = txt;
-      setSurrogateCursor();
-    };
 
     Object.defineProperties( this, {
       value: {
-        get: this.getText,
-        set: this.setText
+        get: function () {
+          return history[historyFrame].join( "\n" );
+        },
+        set: function ( txt ) {
+          txt = txt || "";
+          txt = txt.replace( /\r\n/g, "\n" );
+          var lines = txt.split( "\n" );
+          this.pushUndo( lines );
+          this.drawText();
+          surrogate.value = txt;
+          setSurrogateCursor();
+        }
       }
     } );
 
@@ -836,11 +836,11 @@ window.Primrose.TextBox = ( function ( ) {
             this.backCursor ),
             maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
-            text = this.getText(),
+            text = this.value,
             left = text.substring( 0, minCursor.i ),
             right = text.substring( maxCursor.i ),
             removed = maxCursor.i - minCursor.i;
-        this.setText( left + str + right );
+        this.value = left + str + right;
         minCursor.advanceN( tokenRows, Math.max( 0, str.length - removed ) );
         this.scrollIntoView( maxCursor );
         clampScroll();
@@ -856,7 +856,7 @@ window.Primrose.TextBox = ( function ( ) {
             this.backCursor ),
             maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
-            text = this.getText(),
+            text = this.value,
             str = text.substring( minCursor.i, maxCursor.i );
         var clipboard = evt.clipboardData || window.clipboardData;
         clipboard.setData( window.clipboardData ? "Text" : "text/plain",
@@ -938,25 +938,27 @@ window.Primrose.TextBox = ( function ( ) {
         setSurrogateSize();
       }
 
-      if ( changed && theme && tokens ) {
+      if ( changed ) {
         this.forceDraw();
       }
     };
 
     this.forceDraw = function () {
-      var lineCountWidth = performLayout();
+      if ( tokens ) {
+        var lineCountWidth = performLayout();
 
-      renderer.render(
-          tokenRows,
-          this.frontCursor, this.backCursor,
-          gridBounds,
-          this.scroll,
-          focused, showLineNumbers, showScrollBars, wordWrap,
-          lineCountWidth );
+        renderer.render(
+            tokenRows,
+            this.frontCursor, this.backCursor,
+            gridBounds,
+            this.scroll,
+            focused, showLineNumbers, showScrollBars, wordWrap,
+            lineCountWidth );
 
-      setSurrogateCursor();
+        setSurrogateCursor();
 
-      changed = false;
+        changed = false;
+      }
     };
 
     this.appendControls = function ( elem ) {
@@ -1017,7 +1019,7 @@ window.Primrose.TextBox = ( function ( ) {
     this.setCodePage( options.codePage );
     this.setOperatingSystem( options.os );
     this.setCommandSystem( options.commands );
-    this.setText( options.file );
+    this.value = options.file;
 
     this.bindEvents(
         options.keyEventSource,

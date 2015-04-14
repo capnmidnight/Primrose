@@ -159,7 +159,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
                 maxCursor.i;
             if ( inSelection ) {
-              var selectionFront = Primrose.Cursor.max( minCursor, tokenFront );
+              var selectionFront = Primrose.Cursor.max( minCursor,
+                  tokenFront );
               var selectionBack = Primrose.Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
@@ -312,21 +313,23 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         scroll,
         focused, showLineNumbers, showScrollBars, wordWrap,
         lineCountWidth ) {
-      var maxLineWidth = 0;
+      if ( theme ) {
+        var maxLineWidth = 0;
 
-      renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
-          scroll, focused );
-      maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
-      renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
-          showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
+        renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
+            scroll, focused );
+        maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
+        renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
+            showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
 
-      gfx.clearRect( 0, 0, canvas.width, canvas.height );
-      gfx.drawImage( bgCanvas, 0, 0 );
-      gfx.drawImage( fgCanvas, 0, 0 );
-      gfx.drawImage( trimCanvas, 0, 0 );
+        gfx.clearRect( 0, 0, canvas.width, canvas.height );
+        gfx.drawImage( bgCanvas, 0, 0 );
+        gfx.drawImage( fgCanvas, 0, 0 );
+        gfx.drawImage( trimCanvas, 0, 0 );
 
-      if ( texture ) {
-        texture.needsUpdate = true;
+        if ( texture ) {
+          texture.needsUpdate = true;
+        }
       }
     };
 

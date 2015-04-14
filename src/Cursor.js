@@ -113,19 +113,28 @@ window.Primrose.Cursor = ( function ( ) {
     this.moved = true;
   };
 
-  Cursor.prototype.right = function ( tokenRows ) {
-    this.advanceN( tokenRows, 1 );
-  };
-
   Cursor.prototype.fixCursor = function ( tokenRows ) {
     this.x = this.i;
     this.y = 0;
+    var total = 0;
     var line = rebuildLine( tokenRows, this.y );
     while ( this.x > line.length ) {
       this.x -= line.length;
+      total += line.length;
+      if ( this.y >= tokenRows.length - 1 ) {
+        this.i = total;
+        this.x = line.length;
+        this.moved = true;
+        break;
+      }
       ++this.y;
       line = rebuildLine( tokenRows, this.y );
     }
+    return this.moved;
+  };
+
+  Cursor.prototype.right = function ( tokenRows ) {
+    this.advanceN( tokenRows, 1 );
   };
 
   Cursor.prototype.advanceN = function ( tokenRows, n ) {
