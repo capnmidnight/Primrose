@@ -1,27 +1,37 @@
-var pkgConfig = require( "./package.json" );
 module.exports = function ( grunt ) {
   // Project configuration.
+  var banner = "/*\n\
+  <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
+  <%= pkg.license.type %>\n\
+  Copyright (C) 2015 <%= pkg.author.name %> [<%= pkg.author.email %>]\n\
+  <%= pkg.homepage %>\n\
+  <%= pkg.repository.url %>\n\
+*/\n";
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
+    clean: {
+      default: [ "dist/" ]
+    },
     jshint: {
-      all: [ "src/**/*.js" ]
+      default: [ "core.js", "src/**/*.js" ]
     },
     concat: {
       options: {
-        banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n"
-            + "Copyright (C) 2015 <%= pkg.author %>\n"
-            + "<%= pkg.homepage %>*/\n",
+        banner: banner,
         separator: ";",
-        footer: "Primrose.VERSION = \"v" + pkgConfig.version + "\";"
+        footer: "Primrose.VERSION = \"v<%= pkg.version %>\";"
       },
-      build: {
+      default: {
         files: {
-          "dist/Primrose.js": [ "src/**/*.js" ]
+          "dist/Primrose.js": [ "core.js", "src/**/*.js" ]
         }
       }
     },
     uglify: {
-      build: {
+      options: {
+        banner: banner
+      },
+      default: {
         files: [ {
             src: "dist/Primrose.js",
             dest: "dist/Primrose.min.js"
@@ -30,10 +40,11 @@ module.exports = function ( grunt ) {
     }
   } );
 
+  grunt.loadNpmTasks( "grunt-contrib-clean" );
   grunt.loadNpmTasks( "grunt-contrib-jshint" );
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default", [ "jshint", "concat", "uglify" ] );
+  grunt.registerTask( "default", [ "clean", "jshint", "concat", "uglify" ] );
 
 };
