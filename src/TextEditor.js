@@ -320,11 +320,14 @@ window.Primrose.TextBox = ( function ( ) {
         var wrap = wordWrap && t.value.length > widthLeft;
         var breakLine = t.type === "newlines" || wrap;
         if ( wrap ) {
-          tokenQueue.splice( i + 1, 0, t.splitAt( widthLeft ) );
+          var split = t.value.length > gridBounds.width ? widthLeft : 0;
+          tokenQueue.splice( i + 1, 0, t.splitAt( split ) );
         }
 
-        tokenRows[tokenRows.length - 1].push( t );
-        currentRowWidth += t.value.length;
+        if ( t.value.length > 0 ) {
+          tokenRows[tokenRows.length - 1].push( t );
+          currentRowWidth += t.value.length;
+        }
 
         if ( breakLine ) {
           tokenRows.push( [ ] );
