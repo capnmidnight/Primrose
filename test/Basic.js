@@ -53,7 +53,27 @@
     printingMathVariable: function () {
       runProgramTest("10 LET X = 17 + 22\n\
 20 PRINT X\n\
-30 END", "5");
+30 END", "39");
+    },
+    gotoSkipsLine: function () {
+      runProgramTest("10 GOTO 30\n\
+20 PRINT \"OH NO\"\n\
+30 PRINT \"OH YES!\"\n\
+40 END", "OH YES!");
+    },
+    ifStatement: function () {
+      runProgramTest("10 LET X = 5\n\
+20 IF X < 10 THEN PRINT \"OH YES\"\n\
+30 IF X > 10 THEN PRINT \"OH NO!\" ELSE PRINT \"OKAY!\"\n\
+40 END", "OH YES\nOKAY!");
+    },
+    gotoLooping: function () {
+      runProgramTest("10 LET X = 0\n\
+20 IF X >= 10 THEN GOTO 60\n\
+30 PRINT X\n\
+40 LET X = X + 1\n\
+50 GOTO 20\n\
+60 END", "0\n1\n2\n3\n4\n5\n6\n7\n8\n9");
     }
   };
 } )();

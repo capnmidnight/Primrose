@@ -11,27 +11,36 @@ window.Primrose.Grammars.Basic = ( function () {
     [ "keywords",
       /\b(?:LET|DATA|READ|IF|THEN|ELSE|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOTO|GOSUB|RETURN|ON|DEF FN|PRINT|INPUT|TAB|AT|END)\b/
     ],
-    [ "operators", /(?:\+|-|\*|\/|=)/ ],
+    [ "operators", /(?:\+|-|\*|\/|>=|<=|=|<|>|OR|AND|NOT)/ ],
     [ "identifiers", /\w+/ ]
   ] );
 
   grammar.interpret = function ( sourceCode, input, output, error ) {
-    var tokens = this.tokenize(sourceCode);
+    var tokens = this.tokenize( sourceCode );
     var program = { };
     var lineNumbers = [ ];
-    var lines = [];
-    var currentLine = [];
-    while(tokens.length > 0){
+    var lines = [ ];
+    var currentLine = [ ];
+    while ( tokens.length > 0 ) {
       var token = tokens.shift();
-      if(token.type === "newlines"){
-        lines.push(currentLine);
-        currentLine = [];
+      if ( token.type === "newlines" ) {
+        lines.push( currentLine );
+        currentLine = [ ];
       }
-      else if(token.type !== "regular"){
-        currentLine.push(token);
+      else if ( token.type !== "regular" ) {
+        if ( token.value === "OR" ) {
+          token.value = "||";
+        }
+        else if ( token.value === "AND" ) {
+          token.value = "&&";
+        }
+        else if ( token.value === "NOT" ) {
+          token.value = "!";
+        }
+        currentLine.push( token );
       }
     }
-    lines.push(currentLine);
+    lines.push( currentLine );
 
     for ( var i = 0; i < lines.length; ++i ) {
       var line = lines[i];
@@ -43,7 +52,7 @@ window.Primrose.Grammars.Basic = ( function () {
           break;
         }
         else {
-          lineNumber = lineNumber.value;
+          lineNumber = parseFloat( lineNumber.value );
           lineNumbers.push( lineNumber );
           program[lineNumber] = line;
         }
@@ -55,15 +64,16 @@ window.Primrose.Grammars.Basic = ( function () {
 
     function getLine () {
       var lineNumber = lineNumbers[counter];
-      return program[lineNumber];
+      return program[lineNumber].slice();
     }
 
     function evaluate ( line ) {
       with ( state ) {
-        return eval( line.map( function ( token ) {
+        var script = line.map( function ( token ) {
           return token.value;
         } )
-            .join( " " ) );
+            .join( " " );
+        return eval( script );
       }
     }
 
@@ -85,23 +95,66 @@ window.Primrose.Grammars.Basic = ( function () {
       output( evaluate( line ) );
     }
 
+    function setProgramCounter ( line ) {
+      var lineNumber = parseFloat( evaluate( line ) );
+      counter = -1;
+
+      while ( counter < lineNumbers.length - 1 &&
+          lineNumbers[counter + 1] < lineNumber ) {
+        ++counter;
+      }
+    }
+
+    function conditional ( line ) {
+      var thenIndex = -1,
+          elseIndex = -1;
+      for ( var i = 0; i < line.length; ++i ) {
+        if ( line[i].type === "keywords" && line[i].value === "THEN" ) {
+          thenIndex = i;
+        }
+        else if ( line[i].type === "keywords" && line[i].value === "ELSE" ) {
+          elseIndex = i;
+        }
+      }
+      if ( thenIndex === -1 ) {
+        error( "BLBHBALBHA" );
+      }
+      else {
+        var condition = line.slice( 0, thenIndex );
+        var thenClause,
+            elseClause;
+        if ( elseIndex === -1 ) {
+          thenClause = line.slice( thenIndex + 1 );
+        }
+        else {
+          thenClause = line.slice( thenIndex + 1, elseIndex );
+          elseClause = line.slice( elseIndex + 1 );
+        }
+        if ( evaluate( condition ) ) {
+          process( thenClause );
+        }
+        else if ( elseClause ) {
+          process( elseClause );
+        }
+      }
+    }
+
     var commands = {
       LET: setValue,
-      PRINT: print
-
-          //|DATA|IF|THEN|ELSE|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOTO|GOSUB|RETURN|ON|DEF FN|INPUT|TAB|AT|END
+      PRINT: print,
+      GOTO: setProgramCounter,
+      IF: conditional
+          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|INPUT|TAB|AT|END
     };
 
-    var line = getLine();
-    while ( line.length !== 1 || line[0].type !== "keywords" ||
-        line[0].value !== "END" ) {
+    function process ( line ) {
       var op = line.shift();
       if ( !op ) {
         error( "Blank lines are not allowed" );
       }
       else if ( op.type !== "keywords" ) {
         error( "The first operation in a line must be a keyword. >>> " +
-            op.value );
+            op.value + " (" + op.type + ")" );
       }
       else {
         if ( commands.hasOwnProperty( op.value ) ) {
@@ -111,6 +164,14 @@ window.Primrose.Grammars.Basic = ( function () {
           error( "Unknown command. >>> " + op.value );
         }
       }
+    }
+
+    var line = getLine();
+    while ( counter < lineNumbers.length &&
+        ( line.length !== 1 ||
+            line[0].type !== "keywords" ||
+            line[0].value !== "END" ) ) {
+      process( line );
       ++counter;
       line = getLine();
     }
