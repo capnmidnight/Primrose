@@ -15,7 +15,8 @@ window.Primrose.Grammars.Basic = ( function () {
     [ "identifiers", /\w+/ ]
   ] );
 
-  grammar.interpret = function ( tokens, input, output, error ) {
+  grammar.interpret = function ( sourceCode, input, output, error ) {
+    var tokens = this.tokenize(sourceCode);
     var program = { };
     var lineNumbers = [ ];
     var lines = [];

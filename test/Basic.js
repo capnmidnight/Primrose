@@ -18,7 +18,6 @@
 /* global Primose, Assert */
 ( function () {
   function runProgramTest ( program, expectedOutput ) {
-    var tokens = Primrose.Grammars.Basic.tokenize( program );
     var input = null;
     var buffer = "";
     var output = function ( msg ) {
@@ -29,7 +28,7 @@
       buffer += msg;
     };
     var error = Assert.fail;
-    Primrose.Grammars.Basic.interpret( tokens, input, output, error );
+    Primrose.Grammars.Basic.interpret( program, input, output, error );
     Assert.areEqual( expectedOutput, buffer );
   }
 
@@ -52,7 +51,7 @@
 30 END", "5");
     },
     printingMathVariable: function () {
-      runProgramTest("10 LET X = 5\n\
+      runProgramTest("10 LET X = 17 + 22\n\
 20 PRINT X\n\
 30 END", "5");
     }
