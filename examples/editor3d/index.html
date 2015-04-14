@@ -5,10 +5,12 @@
     <script type="text/javascript" src="../../lib/three.min.js"></script>
     <script type="text/javascript" src="../../lib/VREffect.js"></script>
     <script type="text/javascript" src="../../lib/InsideSphereGeometry.js"></script>
-    <script type="text/javascript" data-main="editor3d" src="../../lib/require.js" async></script>
+    <script type="text/javascript" src="../../lib/core.js"></script>
+    <script type="text/javascript" src="../../dist/Primrose.js"></script>
+    <script type="text/javascript" src="editor3d.js"></script>
     <link type="text/css" rel="stylesheet" href="editor3d.css">
   </head>
-  <body>
+  <body onload="editor3d()">
     <div id="outputContainer">
       <canvas id="output"></canvas>
     </div>

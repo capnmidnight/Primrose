@@ -14,18 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( function ( require ) {
+
+/* global qp */
+
+window.Primrose = window.Primrose || { };
+window.Primrose.TextBox = ( function ( ) {
   "use strict";
 
-  var qp = require( "./core" ),
-      Point = require( "./Point" ),
-      Size = require( "./Size" ),
-      Rectangle = require( "./Rectangle" ),
-      Cursor = require( "./Cursor" ),
-      Keys = require( "./Keys" ),
-      CodePage = require( "./CodePage" ),
-      OperatingSystem = require( "./OperatingSystem" ),
-      Grammar = require( "./Grammar" ),
+  var Point = Primrose.Point,
+      Size = Primrose.Size,
+      Rectangle = Primrose.Rectangle,
+      Cursor = Primrose.Cursor,
+      Keys = Primrose.Keys,
+      CodePage = Primrose.CodePage,
+      OperatingSystem = Primrose.OperatingSystem,
+      Grammar = Primrose.Grammar,
       EDITORS = [ ];
 
   function renderPump () {
@@ -37,7 +40,7 @@ define( function ( require ) {
 
   requestAnimationFrame( renderPump );
 
-  function Primrose ( renderToElementOrID, options ) {
+  function TextBox ( renderToElementOrID, options ) {
     var self = this;
     EDITORS.push( this );
     //////////////////////////////////////////////////////////////////////////
@@ -454,9 +457,9 @@ define( function ( require ) {
       this.scrollIntoView( cursor );
     };
 
-    this.getDOMElement = function(){
+    this.getDOMElement = function () {
       return renderer.getDOMElement();
-    }
+    };
 
     this.focus = function () {
       focused = true;
@@ -1065,40 +1068,5 @@ define( function ( require ) {
     setSurrogateSize();
   }
 
-
-  Primrose.Keys = Keys;
-
-  Primrose.CodePages = {
-    EN_US: require( "./code_pages/EN_US" ),
-    EN_UKX: require( "./code_pages/EN_UKX" ),
-    FR_AZERTY: require( "./code_pages/FR_AZERTY" ),
-    DE_QWERTZ: require( "./code_pages/DE_QWERTZ" )
-  };
-
-  Primrose.Commands = {
-    TextEditor: require( "./command_packs/TextEditor" )
-  };
-
-  Primrose.Grammars = {
-    JavaScript: require( "./grammars/JavaScript" ),
-    PlainText: require( "./grammars/PlainText" ),
-    TestResults: require( "./grammars/TestResults" )
-  };
-
-  Primrose.Themes = {
-    Default: require( "./themes/Default" ),
-    Dark: require( "./themes/Dark" )
-  };
-
-  Primrose.Renderers = {
-    Canvas: require( "./renderers/Canvas" ),
-    DOM: require( "./renderers/DOM" )
-  };
-
-  Primrose.OperatingSystems = {
-    Windows: require( "./operating_systems/Windows" ),
-    OSX: require( "./operating_systems/OSX" )
-  };
-
-  return Primrose;
-} );
+  return TextBox;
+} )();

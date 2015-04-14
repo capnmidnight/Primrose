@@ -1,28 +1,13 @@
-/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+/*global THREE, qp*/
 
-/*global THREE*/
-
-define( function ( require ) {
+window.Primrose = window.Primrose || { };
+window.Primrose.Renderers = window.Primrose.Renderers || { };
+window.Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
-  var qp = require( "../core" ),
-      Size = require( "../Size" ),
-      Cursor = require( "../Cursor" ),
-      defaultTheme = require( "../themes/Default" );
+  
+  var Size = Primrose.Size,
+      Cursor = Primrose.Cursor,
+      defaultTheme = Primrose.Themes.Default;
 
   return function ( canvasElementOrID, options ) {
     var self = this,
@@ -199,9 +184,9 @@ define( function ( require ) {
       // draw the cursor caret
       if ( focused ) {
         var cc = theme.cursorColor || "black";
-        var cw = 1 / self.character.width;
-        fillRect(bgfx, cc, minCursor.x, minCursor.y, cw, 1);
-        fillRect(bgfx, cc, maxCursor.x, maxCursor.y, cw, 1);
+        var w = 1 / self.character.width;
+        fillRect( bgfx, cc, minCursor.x, minCursor.y, w, 1 );
+        fillRect( bgfx, cc, maxCursor.x, maxCursor.y, w, 1 );
       }
       bgfx.restore();
     }
@@ -419,8 +404,9 @@ define( function ( require ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( qp.makeHidingContainer( "primrose-container-" +
+      document.body.appendChild( qp.makeHidingContainer(
+          "primrose-container-" +
           canvas.id, canvas ) );
     }
   };
-} );
+} )();

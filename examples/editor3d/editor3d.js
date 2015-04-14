@@ -15,10 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global THREE*/
+/*global THREE, qp, Primrose */
 
-require( [ "../../src/core", "../../src/Primrose" ], function ( qp,
-    Primrose ) {
+function editor3d () {
   "use strict";
   var modA = qp.isOSX ? "metaKey" : "ctrlKey",
       modB = qp.isOSX ? "altKey" : "shiftKey",
@@ -452,7 +451,7 @@ setInterval(function(){\n\
     function touchStart ( evt ) {
       lastTouchX = 0;
       lastTouchY = 0;
-      for(var i = 0; i < evt.touches.length; ++i){
+      for ( var i = 0; i < evt.touches.length; ++i ) {
         lastTouchX += evt.touches[i].clientX;
         lastTouchY += evt.touches[i].clientY;
       }
@@ -461,7 +460,7 @@ setInterval(function(){\n\
       setPointer( lastTouchX, lastTouchY );
       pick( "start" );
       touchCount = 0;
-      if(evt.touches.length <= 2){
+      if ( evt.touches.length <= 2 ) {
         touchCount = evt.touches.length;
       }
     }
@@ -481,7 +480,7 @@ setInterval(function(){\n\
           heading += ( x - lastTouchX ) * 0.005;
           pitch += ( y - lastTouchY ) * 0.005;
         }
-        else if(lastTouchX !== null && lastTouchY !== null) {
+        else if ( lastTouchX !== null && lastTouchY !== null ) {
           touchStrafe = ( x - lastTouchX ) / 2;
           touchDrive = ( y - lastTouchY ) / 2;
         }
@@ -658,4 +657,4 @@ setInterval(function(){\n\
   else {
     PrimroseDemo( );
   }
-} );
+}

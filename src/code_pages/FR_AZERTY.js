@@ -1,25 +1,10 @@
-/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+window.Primrose = window.Primrose || { };
+window.Primrose.CodePages = window.Primrose.CodePages || { };
+window.Primrose.CodePages.FR_AZERTY = ( function () {
   "use strict";
-  var CodePage = require("../CodePage");
-  return new CodePage("Français: AZERTY", "fr", {
-    deadKeys: [221, 50, 55],
+  var CodePage = Primrose.CodePage;
+  return new CodePage( "Français: AZERTY", "fr", {
+    deadKeys: [ 221, 50, 55 ],
     NORMAL: {
       "48": "à",
       "49": "&",
@@ -39,7 +24,7 @@ define(function (require) {
       "192": "ù",
       "219": ")",
       "220": "*",
-      "221": CodePage.DEAD(1),
+      "221": CodePage.DEAD( 1 ),
       "222": "²",
       "223": "!",
       "226": "<"
@@ -68,12 +53,12 @@ define(function (require) {
     },
     CTRLALT: {
       "48": "@",
-      "50": CodePage.DEAD(2),
+      "50": CodePage.DEAD( 2 ),
       "51": "#",
       "52": "{",
       "53": "[",
       "54": "|",
-      "55": CodePage.DEAD(3),
+      "55": CodePage.DEAD( 3 ),
       "56": "\\",
       "57": "^",
       "69": "€",
@@ -103,5 +88,5 @@ define(function (require) {
       "79": "ò",
       "85": "ù"
     }
-  });
-});
+  } );
+} )();

@@ -1,26 +1,11 @@
-/*! Primrose 2015-04-08
+/*! Primrose 2015-04-14
 Copyright (C) 2015 [object Object]
 https://github.com/capnmidnight/Primrose*/
-/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+/* global qp */
+window.Primrose = window.Primrose || { };
+window.Primrose.CodePage = ( function ( ) {
   "use strict";
-  var Keys = require( "./Keys" ),
-      qp = require( "./core" );
+  var Keys = Primrose.Keys;
       
   function CodePage ( name, lang, options ) {
     this.name = name;
@@ -100,26 +85,12 @@ define( function ( require ) {
   };
 
   return CodePage;
-} );
-;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+} ) ();
+;/* global qp */
+window.Primrose = window.Primrose || { };
+window.Primrose.Cursor = ( function ( ) {
   "use strict";
-  var qp = require("./core");
+  
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -328,27 +299,11 @@ define( function ( require ) {
   };
 
   return Cursor;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define( function ( require ) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Grammar = ( function ( ) {
   "use strict";
-  var Rule = require( "./Rule" ),
-      Token = require( "./Token" );
+  var Rule = Primrose.Rule,
+      Token = Primrose.Token;
 
   function Grammar ( name, grammar ) {
     this.name = name;
@@ -399,23 +354,8 @@ define( function ( require ) {
   }
 
   return Grammar;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Keys = ( function ( ) {
   "use strict";
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////
@@ -500,23 +440,8 @@ define( function ( require ) {
   }
 
   return Keys;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.OperatingSystem = ( function ( ) {
   "use strict";
 
   function setCursorCommand ( obj, mod, key, func, cur ) {
@@ -580,26 +505,11 @@ define( function ( require ) {
   }
 
   return OperatingSystem;
-} );;/*
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define( function ( require ) {
+} )();;/* global qp */
+window.Primrose = window.Primrose || { };
+window.Primrose.Point = ( function ( ) {
   "use strict";
-  var qp = require("./core");
+
   function Point ( x, y ) {
     this.set( x || 0, y || 0 );
   }
@@ -625,7 +535,192 @@ define( function ( require ) {
   };
 
   return Point;
-} );;/*
+} )();;/*global qp*/
+window.Primrose = window.Primrose || { };
+window.Primrose.Rectangle = ( function ( ) {
+  "use strict";
+  
+  var Point = Primrose.Point,
+      Size = Primrose.Size;
+      
+  function Rectangle ( x, y, width, height ) {
+    this.point = new Point( x, y );
+    this.size = new Size( width, height );
+
+    Object.defineProperties( this, {
+      x: {
+        get: function () {
+          return this.point.x;
+        },
+        set: function ( x ) {
+          this.point.x = x;
+        }
+      },
+      left: {
+        get: function () {
+          return this.point.x;
+        },
+        set: function ( x ) {
+          this.point.x = x;
+        }
+      },
+      width: {
+        get: function () {
+          return this.size.width;
+        },
+        set: function ( width ) {
+          this.size.width = width;
+        }
+      },
+      right: {
+        get: function () {
+          return this.point.x + this.size.width;
+        },
+        set: function ( right ) {
+          this.point.x = right - this.size.width;
+        }
+      },
+      y: {
+        get: function () {
+          return this.point.y;
+        },
+        set: function ( y ) {
+          this.point.y = y;
+        }
+      },
+      top: {
+        get: function () {
+          return this.point.y;
+        },
+        set: function ( y ) {
+          this.point.y = y;
+        }
+      },
+      height: {
+        get: function () {
+          return this.size.height;
+        },
+        set: function ( height ) {
+          this.size.height = height;
+        }
+      },
+      bottom: {
+        get: function () {
+          return this.point.y + this.size.height;
+        },
+        set: function ( bottom ) {
+          this.point.y = bottom - this.size.height;
+        }
+      }
+    } );
+  }
+
+  Rectangle.prototype.set = function ( x, y, width, height ) {
+    this.point.set( x, y );
+    this.size.set( width, height );
+  };
+
+  Rectangle.prototype.copy = function ( r ) {
+    if ( r ) {
+      this.point.copy( r.point );
+      this.size.copy( r.size );
+    }
+  };
+
+  Rectangle.prototype.clone = function () {
+    return new Rectangle( this.point.x, this.point.y, this.size.width,
+        this.size.height );
+  };
+
+  Rectangle.prototype.toString = function () {
+    return qp.fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
+  };
+
+  return Rectangle;
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Rule = ( function ( ) {
+  "use strict";
+
+  function Rule ( name, test ) {
+    this.name = name;
+    this.test = test;
+  }
+
+  Rule.prototype.carveOutMatchedToken = function ( tokens, j ) {
+    var token = tokens[j];
+    if ( token.type === "regular" ) {
+      var res = this.test.exec( token.value );
+      if ( res ) {
+        // Only use the last group that matches the regex, to allow for more
+        // complex regexes that can match in special contexts, but not make
+        // the context part of the token.
+        var midx = res[res.length - 1];
+        var start = res.index;
+        // We skip the first record, because it's not a captured group, it's
+        // just the entire matched text.
+        for ( var k = 1; k < res.length - 1; ++k ) {
+          start += res[k].length;
+        }
+
+        var end = start + midx.length;
+        if ( start === 0 ) {
+          // the rule matches the start of the token
+          token.type = this.name;
+          if ( end < token.value.length ) {
+            // but not the end
+            var next = token.splitAt( end );
+            next.type = "regular";
+            tokens.splice( j + 1, 0, next );
+          }
+        }
+        else {
+          // the rule matches from the middle of the token
+          var mid = token.splitAt( start );
+          if ( midx.length < mid.value.length ) {
+            // but not the end
+            var right = mid.splitAt( midx.length );
+            tokens.splice( j + 1, 0, right );
+          }
+          mid.type = this.name;
+          tokens.splice( j + 1, 0, mid );
+        }
+      }
+    }
+  };
+
+  return Rule;
+} )();;/* global qp */
+
+window.Primrose = window.Primrose || { };
+window.Primrose.Size = (function ( ) {
+  "use strict";
+  
+  function Size ( width, height ) {
+    this.set( width || 0, height || 0 );
+  }
+
+  Size.prototype.set = function ( width, height ) {
+    this.width = width;
+    this.height = height;
+  };
+
+  Size.prototype.copy = function ( s ) {
+    if ( s ) {
+      this.width = s.width;
+      this.height = s.height;
+    }
+  };
+
+  Size.prototype.clone = function () {
+    return new Size( this.width, this.height );
+  };
+
+  Size.prototype.toString = function () {
+    return qp.fmt( "<w:$1, h:$2>", this.width, this.height );
+  };
+
+  return Size;
+} )();;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -641,18 +736,21 @@ define( function ( require ) {
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-define( function ( require ) {
+
+/* global qp */
+
+window.Primrose = window.Primrose || { };
+window.Primrose.TextBox = ( function ( ) {
   "use strict";
 
-  var qp = require( "./core" ),
-      Point = require( "./Point" ),
-      Size = require( "./Size" ),
-      Rectangle = require( "./Rectangle" ),
-      Cursor = require( "./Cursor" ),
-      Keys = require( "./Keys" ),
-      CodePage = require( "./CodePage" ),
-      OperatingSystem = require( "./OperatingSystem" ),
-      Grammar = require( "./Grammar" ),
+  var Point = Primrose.Point,
+      Size = Primrose.Size,
+      Rectangle = Primrose.Rectangle,
+      Cursor = Primrose.Cursor,
+      Keys = Primrose.Keys,
+      CodePage = Primrose.CodePage,
+      OperatingSystem = Primrose.OperatingSystem,
+      Grammar = Primrose.Grammar,
       EDITORS = [ ];
 
   function renderPump () {
@@ -664,16 +762,16 @@ define( function ( require ) {
 
   requestAnimationFrame( renderPump );
 
-  function Primrose ( renderToElementOrID, options ) {
+  function TextBox ( renderToElementOrID, options ) {
     var self = this;
     EDITORS.push( this );
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
 
-    options = options || {};
+    options = options || { };
     if ( typeof options === "string" ) {
-      options = {file: options};
+      options = { file: options };
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -685,7 +783,7 @@ define( function ( require ) {
         browser,
         commandSystem,
         keyboardSystem,
-        commandPack = {},
+        commandPack = { },
         tokenizer,
         tokens,
         tokenRows,
@@ -746,7 +844,7 @@ define( function ( require ) {
 
     function setSurrogateSize () {
       if ( theme ) {
-        var bounds = renderer.getCanvas()
+        var bounds = renderer.getDOMElement()
             .getBoundingClientRect();
         surrogateContainer.style.left = qp.px( bounds.left );
         surrogateContainer.style.top = qp.px( window.scrollY + bounds.top );
@@ -890,7 +988,7 @@ define( function ( require ) {
 
     function refreshCommandPack () {
       if ( keyboardSystem && operatingSystem && commandSystem ) {
-        commandPack = {};
+        commandPack = { };
       }
       addCommandPack( keyboardSystem );
       addCommandPack( operatingSystem );
@@ -972,6 +1070,93 @@ define( function ( require ) {
       return lineCountWidth;
     }
 
+    function setFalse ( evt ) {
+      evt.returnValue = false;
+    }
+
+    function setSurrogateCursor () {
+      surrogate.selectionStart = Math.min( self.frontCursor.i,
+          self.backCursor.i );
+      surrogate.selectionEnd = Math.max( self.frontCursor.i,
+          self.backCursor.i );
+    }
+
+    function minDelta ( v, minV, maxV ) {
+      var dvMinV = v - minV,
+          dvMaxV = v - maxV + 5,
+          dv = 0;
+      if ( dvMinV < 0 || dvMaxV >= 0 ) {
+        // compare the absolute values, so we get the smallest change
+        // regardless of direction.
+        dv = Math.abs( dvMinV ) < Math.abs( dvMaxV ) ? dvMinV : dvMaxV;
+      }
+
+      return dv;
+    }
+
+    function makeToggler ( id, value, lblTxt, funcName ) {
+      var span = document.createElement( "span" );
+
+      var check = document.createElement( "input" );
+      check.type = "checkbox";
+      check.checked = value;
+      check.id = id;
+      span.appendChild( check );
+
+      var lbl = document.createElement( "label" );
+      lbl.innerHTML = lblTxt + " ";
+      lbl.for = id;
+      span.appendChild( lbl );
+
+      check.addEventListener( "change", function () {
+        self[funcName]( check.checked );
+      } );
+      return span;
+    }
+
+    function makeSelectorFromObj ( id, obj, def, target, prop, lbl, filter ) {
+      var elem = qp.cascadeElement( id, "select", window.HTMLSelectElement );
+      var items = [ ];
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty( key ) ) {
+          var val = obj[key];
+          if ( !filter || val instanceof filter ) {
+            val = val.name || key;
+            var opt = document.createElement( "option" );
+            opt.innerHTML = val;
+            items.push( obj[key] );
+            if ( val === def ) {
+              opt.selected = "selected";
+            }
+            elem.appendChild( opt );
+          }
+        }
+      }
+
+      if ( typeof target[prop] === "function" ) {
+        elem.addEventListener( "change", function () {
+          target[prop]( items[elem.selectedIndex] );
+        } );
+      }
+      else {
+        elem.addEventListener( "change", function () {
+          target[prop] = items[elem.selectedIndex];
+        } );
+      }
+
+      var container = qp.cascadeElement( "container -" + id, "div",
+          window.HTMLDivElement );
+      var label = qp.cascadeElement( "label-" + id, "span",
+          window.HTMLSpanElement );
+      label.innerHTML = lbl + ": ";
+      label.for = elem;
+      elem.title = lbl;
+      elem.alt = lbl;
+      container.appendChild( label );
+      container.appendChild( elem );
+      return container;
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
     // public methods
@@ -992,6 +1177,10 @@ define( function ( require ) {
       changed = true;
       cursor.incY( gridBounds.height, tokenRows );
       this.scrollIntoView( cursor );
+    };
+
+    this.getDOMElement = function () {
+      return renderer.getDOMElement();
     };
 
     this.focus = function () {
@@ -1136,7 +1325,7 @@ define( function ( require ) {
         }
       }
 
-      keyboardSystem = {};
+      keyboardSystem = { };
       for ( var type in codePage ) {
         var codes = codePage[type];
         if ( typeof ( codes ) === "object" ) {
@@ -1251,19 +1440,6 @@ define( function ( require ) {
       return tabString;
     };
 
-    function minDelta ( v, minV, maxV ) {
-      var dvMinV = v - minV,
-          dvMaxV = v - maxV + 5,
-          dv = 0;
-      if ( dvMinV < 0 || dvMaxV >= 0 ) {
-        // compare the absolute values, so we get the smallest change
-        // regardless of direction.
-        dv = Math.abs( dvMinV ) < Math.abs( dvMaxV ) ? dvMinV : dvMaxV;
-      }
-
-      return dv;
-    }
-
     this.scrollIntoView = function ( currentCursor ) {
       this.scroll.y += minDelta( currentCursor.y, this.scroll.y,
           this.scroll.y + gridBounds.height );
@@ -1291,17 +1467,6 @@ define( function ( require ) {
       changed = renderer.resize();
     };
 
-    function setSurrogateCursor () {
-      surrogate.selectionStart = Math.min( self.frontCursor.i,
-          self.backCursor.i );
-      surrogate.selectionEnd = Math.max( self.frontCursor.i,
-          self.backCursor.i );
-    }
-
-    this.getPixelRatio = function () {
-      return window.devicePixelRatio || 1;
-    };
-
     this.cell2i = function ( x, y ) {
       var i = 0;
       for ( var dy = 0; dy < y; ++dy ) {
@@ -1323,7 +1488,7 @@ define( function ( require ) {
           rowWidth += tokenRow[x].value.length;
         }
         if ( i <= rowWidth ) {
-          return {x: i, y: y};
+          return { x: i, y: y };
         }
         else {
           i -= rowWidth - 1;
@@ -1365,10 +1530,6 @@ define( function ( require ) {
       dragging = false;
       surrogate.focus();
     };
-
-    function setFalse ( evt ) {
-      evt.returnValue = false;
-    }
 
     this.bindEvents = function ( k, p, w, c ) {
       if ( k ) {
@@ -1423,11 +1584,6 @@ define( function ( require ) {
       }
     };
 
-    this.pasteAtCursor = function ( str ) {
-      this.overwriteText( str );
-      this.drawText();
-    };
-
     this.copySelectedText = function ( evt ) {
       evt.returnValue = false;
       if ( this.frontCursor.i !== this.backCursor.i ) {
@@ -1455,7 +1611,7 @@ define( function ( require ) {
           str = clipboard.getData( window.clipboardData ? "Text" :
               "text/plain" );
       if ( str ) {
-        this.pasteAtCursor( str );
+        this.overwriteText( str );
       }
     };
 
@@ -1572,6 +1728,18 @@ define( function ( require ) {
     document.body.insertBefore( surrogateContainer,
         document.body.children[0] );
 
+    if ( options.autoBindEvents || renderer.autoBindEvents ) {
+      if ( !options.readOnly && options.keyEventSource === undefined ) {
+        options.keyEventSource = surrogate;
+      }
+      if ( options.pointerEventSource === undefined ) {
+        options.pointerEventSource = renderer.getDOMElement();
+      }
+      if ( options.wheelEventSource === undefined ) {
+        options.wheelEventSource = renderer.getDOMElement();
+      }
+    }
+
     this.setWheelScrollSpeed( options.wheelScrollSpeed );
     this.setWordWrap( !options.disableWordWrap );
     this.setShowLineNumbers( !options.hideLineNumbers );
@@ -1585,65 +1753,35 @@ define( function ( require ) {
     this.setCommandSystem( options.commands );
     this.setText( options.file );
 
-    if ( options.autoBindEvents || renderer.autoBindEvents ) {
-      if ( !options.readOnly && options.keyEventSource === undefined ) {
-        options.keyEventSource = surrogate;
-      }
-      if ( options.pointerEventSource === undefined ) {
-        options.pointerEventSource = renderer.getCanvas();
-      }
-      if ( options.wheelEventSource === undefined ) {
-        options.wheelEventSource = renderer.getCanvas();
-      }
-    }
-
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
         options.wheelEventSource,
         !options.disableClipboard );
 
-    function makeToggler (id, value, lblTxt, funcName) {
-      var span = document.createElement("span");
-
-      var check = document.createElement("input");
-      check.type = "checkbox";
-      check.checked = value;
-      check.id = id;
-      span.appendChild(check);
-
-      var lbl = document.createElement("label");
-      lbl.innerHTML = lblTxt + " ";
-      lbl.for = id;
-      span.appendChild(lbl);
-
-      check.addEventListener("change", function(){
-        self[funcName](check.checked);
-      });
-      return span;
-    }
-
     this.lineNumberToggler = makeToggler( "primrose-line-number-toggler-" +
-        renderer.id, !options.hideLineNumbers, "Line numbers", "setShowLineNumbers" );
-    this.wordWrapToggler = makeToggler("primrose-word-wrap-toggler-" +
+        renderer.id, !options.hideLineNumbers, "Line numbers",
+        "setShowLineNumbers" );
+    this.wordWrapToggler = makeToggler( "primrose-word-wrap-toggler-" +
         renderer.id, !options.disableWordWrap, "Line wrap", "setWordWrap" );
-    this.scrollBarToggler = makeToggler("primrose-scrollbar-toggler-" +
-        renderer.id, !options.hideScrollBars, "Scroll bars", "setShowScrollBars" );
-    this.themeSelect = qp.makeSelectorFromObj( "primrose-theme-selector-" +
+    this.scrollBarToggler = makeToggler( "primrose-scrollbar-toggler-" +
+        renderer.id, !options.hideScrollBars, "Scroll bars",
+        "setShowScrollBars" );
+    this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
         renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
-    this.commandSystemSelect = qp.makeSelectorFromObj(
+    this.commandSystemSelect = makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
         commandSystem.name, self, "setCommandSystem",
         "Command system" );
-    this.tokenizerSelect = qp.makeSelectorFromObj(
+    this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
         renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
         "Language syntax", Grammar );
-    this.keyboardSelect = qp.makeSelectorFromObj(
+    this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
         renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
         "Localization", CodePage );
-    this.operatingSystemSelect = qp.makeSelectorFromObj(
+    this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
@@ -1652,285 +1790,9 @@ define( function ( require ) {
     setSurrogateSize();
   }
 
-  Primrose.Themes = {
-    Default: require( "./themes/Default" ),
-    Dark: require( "./themes/Dark" )
-  };
-
-  Primrose.Renderers = {
-    Canvas: require( "./renderers/Canvas" )
-  };
-
-  Primrose.OperatingSystems = {
-    Windows: require( "./operating_systems/Windows" ),
-    OSX: require( "./operating_systems/OSX" )
-  };
-
-  Primrose.CodePages = {
-    EN_US: require( "./code_pages/EN_US" ),
-    EN_UKX: require( "./code_pages/EN_UKX" ),
-    FR_AZERTY: require( "./code_pages/FR_AZERTY" ),
-    DE_QWERTZ: require( "./code_pages/DE_QWERTZ" )
-  };
-
-  Primrose.Commands = {
-    TextEditor: require( "./command_packs/TextEditor" )
-  };
-
-  Primrose.Grammars = {
-    JavaScript: require( "./grammars/JavaScript" ),
-    PlainText: require( "./grammars/PlainText" ),
-    TestResults: require( "./grammars/TestResults" )
-  };
-
-  Primrose.Keys = Keys;
-
-  return Primrose;
-} );;/*
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define( function ( require ) {
-  "use strict";
-  var Point = require( "./Point" ),
-      Size = require( "./Size" ),
-      qp = require( "./core" );
-  function Rectangle ( x, y, width, height ) {
-    this.point = new Point( x, y );
-    this.size = new Size( width, height );
-
-    Object.defineProperties( this, {
-      x: {
-        get: function () {
-          return this.point.x;
-        },
-        set: function ( x ) {
-          this.point.x = x;
-        }
-      },
-      left: {
-        get: function () {
-          return this.point.x;
-        },
-        set: function ( x ) {
-          this.point.x = x;
-        }
-      },
-      width: {
-        get: function () {
-          return this.size.width;
-        },
-        set: function ( width ) {
-          this.size.width = width;
-        }
-      },
-      right: {
-        get: function () {
-          return this.point.x + this.size.width;
-        },
-        set: function ( right ) {
-          this.point.x = right - this.size.width;
-        }
-      },
-      y: {
-        get: function () {
-          return this.point.y;
-        },
-        set: function ( y ) {
-          this.point.y = y;
-        }
-      },
-      top: {
-        get: function () {
-          return this.point.y;
-        },
-        set: function ( y ) {
-          this.point.y = y;
-        }
-      },
-      height: {
-        get: function () {
-          return this.size.height;
-        },
-        set: function ( height ) {
-          this.size.height = height;
-        }
-      },
-      bottom: {
-        get: function () {
-          return this.point.y + this.size.height;
-        },
-        set: function ( bottom ) {
-          this.point.y = bottom - this.size.height;
-        }
-      }
-    } );
-  }
-
-  Rectangle.prototype.set = function ( x, y, width, height ) {
-    this.point.set( x, y );
-    this.size.set( width, height );
-  };
-
-  Rectangle.prototype.copy = function ( r ) {
-    if ( r ) {
-      this.point.copy( r.point );
-      this.size.copy( r.size );
-    }
-  };
-
-  Rectangle.prototype.clone = function () {
-    return new Rectangle( this.point.x, this.point.y, this.size.width,
-        this.size.height );
-  };
-
-  Rectangle.prototype.toString = function () {
-    return qp.fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
-  };
-
-  return Rectangle;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function(require){
-  "use strict";
-
-  function Rule ( name, test ) {
-    this.name = name;
-    this.test = test;
-  }
-
-  Rule.prototype.carveOutMatchedToken = function ( tokens, j ) {
-    var token = tokens[j];
-    if ( token.type === "regular" ) {
-      var res = this.test.exec( token.value );
-      if ( res ) {
-        // Only use the last group that matches the regex, to allow for more
-        // complex regexes that can match in special contexts, but not make
-        // the context part of the token.
-        var midx = res[res.length - 1];
-        var start = res.index;
-        // We skip the first record, because it's not a captured group, it's
-        // just the entire matched text.
-        for ( var k = 1; k < res.length - 1; ++k ) {
-          start += res[k].length;
-        }
-
-        var end = start + midx.length;
-        if ( start === 0 ) {
-          // the rule matches the start of the token
-          token.type = this.name;
-          if ( end < token.value.length ) {
-            // but not the end
-            var next = token.splitAt( end );
-            next.type = "regular";
-            tokens.splice( j + 1, 0, next );
-          }
-        }
-        else {
-          // the rule matches from the middle of the token
-          var mid = token.splitAt( start );
-          if ( midx.length < mid.value.length ) {
-            // but not the end
-            var right = mid.splitAt( midx.length );
-            tokens.splice( j + 1, 0, right );
-          }
-          mid.type = this.name;
-          tokens.splice( j + 1, 0, mid );
-        }
-      }
-    }
-  };
-
-  return Rule;
-} );;/*
- * Copyright (C) 2015 Sean
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
-  "use strict";
-  var qp = require("./core");
-  function Size ( width, height ) {
-    this.set( width || 0, height || 0 );
-  }
-
-  Size.prototype.set = function ( width, height ) {
-    this.width = width;
-    this.height = height;
-  };
-
-  Size.prototype.copy = function ( s ) {
-    if ( s ) {
-      this.width = s.width;
-      this.height = s.height;
-    }
-  };
-
-  Size.prototype.clone = function () {
-    return new Size( this.width, this.height );
-  };
-
-  Size.prototype.toString = function () {
-    return qp.fmt( "<w:$1, h:$2>", this.width, this.height );
-  };
-
-  return Size;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define(function(require){
+  return TextBox;
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Token = ( function () {
   "use strict";
   function Token ( value, type, index, line ) {
     this.value = value;
@@ -1950,26 +1812,11 @@ define(function(require){
   };
 
   return Token;
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.CodePages = window.Primrose.CodePages || {};
+window.Primrose.CodePages.DE_QWERTZ = (function () {
   "use strict";
-  var CodePage = require("../CodePage");
+  var CodePage = Primrose.CodePage;
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
@@ -2085,26 +1932,11 @@ define(function (require) {
       "89": "y"
     }
   });
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+})();;window.Primrose = window.Primrose || { };
+window.Primrose.CodePages = window.Primrose.CodePages || {};
+window.Primrose.CodePages.EN_UKX = (function () {
   "use strict";
-  var CodePage = require("../CodePage");
+  var CodePage = Primrose.CodePage;
   return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
@@ -2182,26 +2014,11 @@ define(function (require) {
       "223": "¬"
     }
   });
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+})();;window.Primrose = window.Primrose || { };
+window.Primrose.CodePages = window.Primrose.CodePages || {};
+window.Primrose.CpdePages.EN_US = (function () {
   "use strict";
-  var CodePage = require("../CodePage");
+  var CodePage = Primrose.CodePage;
   return new CodePage("English: USA", "en-US", {
     NORMAL: {
       "48": "0",
@@ -2254,28 +2071,13 @@ define(function (require) {
       "222": "\""
     }
   });
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+})();;window.Primrose = window.Primrose || { };
+window.Primrose.CodePages = window.Primrose.CodePages || { };
+window.Primrose.CodePages.FR_AZERTY = ( function () {
   "use strict";
-  var CodePage = require("../CodePage");
-  return new CodePage("Français: AZERTY", "fr", {
-    deadKeys: [221, 50, 55],
+  var CodePage = Primrose.CodePage;
+  return new CodePage( "Français: AZERTY", "fr", {
+    deadKeys: [ 221, 50, 55 ],
     NORMAL: {
       "48": "à",
       "49": "&",
@@ -2295,7 +2097,7 @@ define(function (require) {
       "192": "ù",
       "219": ")",
       "220": "*",
-      "221": CodePage.DEAD(1),
+      "221": CodePage.DEAD( 1 ),
       "222": "²",
       "223": "!",
       "226": "<"
@@ -2324,12 +2126,12 @@ define(function (require) {
     },
     CTRLALT: {
       "48": "@",
-      "50": CodePage.DEAD(2),
+      "50": CodePage.DEAD( 2 ),
       "51": "#",
       "52": "{",
       "53": "[",
       "54": "|",
-      "55": CodePage.DEAD(3),
+      "55": CodePage.DEAD( 3 ),
       "56": "\\",
       "57": "^",
       "69": "€",
@@ -2359,896 +2161,89 @@ define(function (require) {
       "79": "ò",
       "85": "ù"
     }
-  });
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-// For all of these commands, the "current" cursor is:
+  } );
+} )();;// For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-define(function (require) {
+window.Primrose = window.Primrose || { };
+window.Primrose.CommandPacks = window.Primrose.CommandPacks || { };
+window.Primrose.CommandPacks.TextEditor = ( function () {
   "use strict";
+
   return {
     name: "Basic commands",
     NORMAL_SPACEBAR: " ",
     SHIFT_SPACEBAR: " ",
-    NORMAL_BACKSPACE: function (prim, tokenRows) {
-      if (prim.frontCursor.i === prim.backCursor.i) {
-        prim.frontCursor.left(tokenRows);
+    NORMAL_BACKSPACE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.frontCursor.left( tokenRows );
       }
       prim.overwriteText();
-      prim.scrollIntoView(prim.frontCursor);
+      prim.scrollIntoView( prim.frontCursor );
     },
-    NORMAL_ENTER: function (prim, tokenRows) {
+    NORMAL_ENTER: function ( prim, tokenRows ) {
       var indent = "";
       var tokenRow = tokenRows[prim.frontCursor.y];
-      if (tokenRow.length > 0 && tokenRow[0].type === "whitespace") {
+      if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
         indent = tokenRow[0].value;
       }
-      prim.overwriteText("\n" + indent);
-      prim.scrollIntoView(prim.frontCursor);
+      prim.overwriteText( "\n" + indent );
+      prim.scrollIntoView( prim.frontCursor );
     },
-    NORMAL_DELETE: function (prim, tokenRows) {
-      if (prim.frontCursor.i === prim.backCursor.i) {
-        prim.backCursor.right(tokenRows);
+    NORMAL_DELETE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.backCursor.right( tokenRows );
       }
       prim.overwriteText();
-      prim.scrollIntoView(prim.frontCursor);
+      prim.scrollIntoView( prim.frontCursor );
     },
-    SHIFT_DELETE: function (prim, tokenRows) {
-      if (prim.frontCursor.i === prim.backCursor.i) {
-        prim.frontCursor.home(tokenRows);
-        prim.backCursor.end(tokenRows);
+    SHIFT_DELETE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.frontCursor.home( tokenRows );
+        prim.backCursor.end( tokenRows );
       }
       prim.overwriteText();
-      prim.scrollIntoView(prim.frontCursor);
+      prim.scrollIntoView( prim.frontCursor );
     },
-    NORMAL_TAB: function (prim, tokenRows) {
+    NORMAL_TAB: function ( prim, tokenRows ) {
       var ts = prim.getTabString();
-      prim.overwriteText(ts);
+      prim.overwriteText( ts );
     }
   };
-});;/*
- https://www.github.com/capnmidnight/VR
- Copyright (c) 2014 - 2015 Sean T. McBeth <sean@seanmcbeth.com>
- All rights reserved.
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-// Pyschologist.js: so named because it keeps me from going crazy
-define( function ( require ) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Grammars = window.Primrose.Grammars || { };
+window.Primrose.Grammars.JavaScript = ( function () {
   "use strict";
 
-  /////////////////////////////////////////////////////////////////////////////
-  // polyfills
-  /////////////////////////////////////////////////////////////////////////////
-
-  navigator.vibrate = navigator.vibrate ||
-      navigator.webkitVibrate ||
-      navigator.mozVibrate ||
-      function () {
-      };
-
-  navigator.getUserMedia = navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia ||
-      navigator.msGetUserMedia ||
-      navigator.oGetUserMedia ||
-      function () {
-      };
-
-  window.RTCPeerConnection = window.RTCPeerConnection ||
-      window.webkitRTCPeerConnection ||
-      window.mozRTCPeerConnection ||
-      function () {
-      };
-
-  window.RTCIceCandidate = window.RTCIceCandidate ||
-      window.mozRTCIceCandidate ||
-      function () {
-      };
-
-  window.RTCSessionDescription = window.RTCSessionDescription ||
-      window.mozRTCSessionDescription ||
-      function () {
-      };
-
-  window.Element.prototype.requestPointerLock = window.Element.prototype.requestPointerLock ||
-      window.Element.prototype.webkitRequestPointerLock ||
-      window.Element.prototype.mozRequestPointerLock ||
-      function () {
-      };
-
-  window.Element.prototype.requestFullscreen = window.Element.prototype.requestFullscreen ||
-      window.Element.prototype.webkitRequestFullscreen ||
-      window.Element.prototype.mozRequestFullScreen ||
-      window.Element.prototype.msRequestFullscreen ||
-      function () {
-      };
-
-  window.Document.prototype.exitFullscreen = window.Document.prototype.exitFullscreen ||
-      window.Document.prototype.webkitExitFullscreen ||
-      window.Document.prototype.mozCancelFullScreen ||
-      window.Document.prototype.msExitFullscreen ||
-      function () {
-      };
-
-// this doesn't seem to actually work
-  screen.lockOrientation = screen.lockOrientation ||
-      screen.mozLockOrientation ||
-      screen.msLockOrientation ||
-      function () {
-      };
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  //  end polyfils
-  /////////////////////////////////////////////////////////////////////////////
-
-  function addMillis ( val, txt ) {
-    return txt.replace( /( AM| PM|$)/, function ( match, g1 ) {
-      return ( val.getMilliseconds() / 1000 ).toString()
-          .substring( 1 ) + g1;
-    } );
-  }
-
-  function sigfig ( x, y ) {
-    var p = Math.pow( 10, y );
-    var v = ( Math.round( x * p ) / p ).toString();
-    if ( y > 0 ) {
-      var i = v.indexOf( "." );
-      if ( i === -1 ) {
-        v += ".";
-        i = v.length - 1;
-      }
-      while ( v.length - i - 1 < y )
-        v += "0";
-    }
-    return v;
-  }
-
-  /*
-   Replace template place holders in a string with a positional value.
-   Template place holders start with a dollar sign ($) and are followed
-   by a digit that references the parameter position of the value to
-   use in the text replacement. Note that the first position, position 0,
-   is the template itself. However, you cannot reference the first position,
-   as zero digit characters are used to indicate the width of number to
-   pad values out to.
-
-   Numerical precision padding is indicated with a period and trailing
-   zeros.
-
-   examples:
-   fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
-   fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
-   fmt("$1.00 + $2.00 = $3.00", Math.sqrt(2), Math.PI, 9001)
-   => "1.41 + 3.14 = 9001.00"
-   fmt("$001.000", Math.PI) => 003.142
-   */
-  function fmt ( template ) {
-    // - match a dollar sign ($) literally,
-    // - (optional) then zero or more zero digit (0) characters, greedily
-    // - then one or more digits (the previous rule would necessitate that
-    //      the first of these digits be at least one).
-    // - (optional) then a period (.) literally
-    // -            then one or more zero digit (0) characters
-    var paramRegex = /\$(0*)(\d+)(?:\.(0+))?/g;
-    var args = arguments;
-    if ( typeof template !== "string" ) {
-      template = template.toString();
-    }
-    return template.replace( paramRegex, function ( m, pad, index,
-        precision ) {
-      index = parseInt( index, 10 );
-      if ( 0 <= index && index < args.length ) {
-        var val = args[index];
-        if ( val !== null && val !== undefined ) {
-          if ( val instanceof Date && precision ) {
-            switch ( precision.length ) {
-              case 1:
-                val = val.getYear();
-                break;
-              case 2:
-                val = ( val.getMonth() + 1 ) + "/" + val.getYear();
-                break;
-              case 3:
-                val = val.toLocaleDateString();
-                break;
-              case 4:
-                val = addMillis( val, val.toLocaleTimeString() );
-                break;
-              case 5:
-              case 6:
-                val = val.toLocaleString();
-                break;
-              default:
-                val = addMillis( val, val.toLocaleString() );
-                break;
-            }
-            return val;
-          }
-          else {
-            if ( precision && precision.length > 0 ) {
-              val = sigfig( val, precision.length );
-            }
-            else {
-              val = val.toString();
-            }
-            if ( pad && pad.length > 0 ) {
-              var paddingRegex = new RegExp( "^\\d{" + ( pad.length + 1 ) +
-                  "}(\\.\\d+)?" );
-              while ( !paddingRegex.test( val ) ) {
-                val = "0" + val;
-              }
-            }
-            return val;
-          }
-        }
-      }
-      return undefined;
-    } );
-  }
-  var isOpera = !!window.opera || navigator.userAgent.indexOf( ' OPR/' ) >= 0;
-
-  function cascadeElement ( id, tag, DOMClass ) {
-    var elem = null;
-    if ( id === null ) {
-      elem = document.createElement( tag );
-      elem.id = id = "auto_" + tag + Date.now();
-    }
-    else if ( DOMClass === undefined || id instanceof DOMClass ) {
-      elem = id;
-    }
-    else if ( typeof ( id ) === "string" ) {
-      elem = document.getElementById( id );
-      if ( elem === null ) {
-        elem = document.createElement( tag );
-        elem.id = id;
-      }
-      else if ( elem.tagName !== tag.toUpperCase() ) {
-        elem = null;
-      }
-    }
-
-    if ( elem === null ) {
-      throw new Error( id + " does not refer to a valid " + tag +
-          " element." );
-    }
-    else {
-      elem.innerHTML = "";
-    }
-    return elem;
-  }
-
-  function copyObject ( dest, source, depth ) {
-    depth = depth | 0;
-    for ( var key in source ) {
-      if ( source.hasOwnProperty( key ) ) {
-        if ( typeof ( source[key] ) !== "object" ) {
-          dest[key] = source[key];
-        }
-        else if ( depth < 3 ) {
-          if ( !dest[key] ) {
-            dest[key] = {};
-          }
-          copyObject( dest[key], source[key], depth + 1 );
-        }
-      }
-    }
-  }
-
-  function help ( obj ) {
-    var funcs = {};
-    var props = {};
-    var evnts = [ ];
-    if ( obj ) {
-      for ( var field in obj ) {
-        if ( field.indexOf( "on" ) === 0 && ( obj !== navigator || field !==
-            "onLine" ) ) {
-          // `online` is a known element that is not an event, but looks like
-          // an event to the most basic assumption.
-          evnts.push( field.substring( 2 ) );
-        }
-        else if ( typeof ( obj[field] ) === "function" ) {
-          funcs[field] = obj[field];
-        }
-        else {
-          props[field] = obj[field];
-        }
-      }
-
-      var type = typeof ( obj );
-      if ( type === "function" ) {
-        type = obj.toString()
-            .match( /(function [^(]*)/ )[1];
-      }
-      else if ( type === "object" ) {
-        type = null;
-        if ( obj.constructor && obj.constructor.name ) {
-          type = obj.constructor.name;
-        }
-        else {
-          var q = [ {prefix: "", obj: window} ];
-          var traversed = [ ];
-          while ( q.length > 0 && type === null ) {
-            var parentObject = q.shift();
-            parentObject.___traversed___ = true;
-            traversed.push( parentObject );
-            for ( field in parentObject.obj ) {
-              var testObject = parentObject.obj[field];
-              if ( testObject ) {
-                if ( typeof ( testObject ) === "function" ) {
-                  if ( testObject.prototype && obj instanceof testObject ) {
-                    type = parentObject.prefix + field;
-                    break;
-                  }
-                }
-                else if ( !testObject.___tried___ ) {
-                  q.push( {prefix: parentObject.prefix + field + ".",
-                    obj: testObject} );
-                }
-              }
-            }
-          }
-          traversed.forEach( function ( o ) {
-            delete o.___traversed___;
-          } );
-        }
-      }
-      obj = {
-        type: type,
-        events: evnts,
-        functions: funcs,
-        properties: props
-      };
-
-      console.debug( obj );
-
-      return obj;
-    }
-    else {
-      console.warn( "Object was falsey." );
-    }
-  }
-
-  return {
-    copyObject: copyObject,
-    makeURL: function ( url, queryMap ) {
-      var output = [ ];
-      for ( var key in queryMap ) {
-        if ( queryMap.hasOwnProperty( key ) &&
-            typeof queryMap[key] !== "function" ) {
-          output.push( encodeURIComponent( key ) + "=" + encodeURIComponent(
-              queryMap[key] ) );
-        }
-      }
-      return url + "?" + output.join( "&" );
-    },
-    XHR: function ( url, method, type, progress, error, success, data ) {
-      var xhr = new XMLHttpRequest();
-      xhr.onerror = error;
-      xhr.onabort = error;
-      xhr.onprogress = progress;
-      xhr.onload = function () {
-        if ( xhr.status < 400 ) {
-          if ( success ) {
-            success( xhr.response );
-          }
-        }
-        else if ( error ) {
-          error();
-        }
-      };
-
-      xhr.open( method, url );
-      if ( type ) {
-        xhr.responseType = type;
-      }
-      if ( data ) {
-        xhr.setRequestHeader( "Content-Type",
-            "application/json;charset=UTF-8" );
-        xhr.send( JSON.stringify( data ) );
-      }
-      else {
-        xhr.send();
-      }
-    },
-    GET: function ( url, type, progress, error, success ) {
-      type = type || "text";
-      XHR( url, "GET", type, progress, error, success );
-    },
-    POST: function ( url, data, type, progress, error, success ) {
-      XHR( url, "POST", type, progress, error, success, data );
-    },
-    getObject: function ( url, progress, error, success ) {
-      var progressThunk = success && error && progress,
-          errorThunk = ( success && error ) || ( error && progress ),
-          successThunk = success || error || progress;
-      GET( url, "json", progressThunk, errorThunk, successThunk );
-    },
-    sendObject: function ( url, data, progress, error, success ) {
-      POST( url, data, "json",
-          success && error && progress,
-          ( success && error ) || ( error && progress ),
-          success || error || progress );
-    },
-// Applying Array's slice method to array-like objects. Called with
-// no parameters, this function converts array-like objects into
-// JavaScript Arrays.
-    arr: function ( arg, a, b ) {
-      return Array.prototype.slice.call( arg, a, b );
-    },
-    map: function ( arr, fun ) {
-      return Array.prototype.map.call( arr, fun );
-    },
-    reduce: function ( arr, fun, base ) {
-      return Array.prototype.reduce.call( arr, fun, base );
-    },
-    filter: function ( arr, fun ) {
-      return Array.prototype.filter.call( arr, fun );
-    },
-    ofType: function ( arr, t ) {
-      if ( typeof ( t ) === "function" ) {
-        return filter( arr, function ( elem ) {
-          return elem instanceof t;
-        } );
-      }
-      else {
-        return filter( arr, function ( elem ) {
-          return typeof ( elem ) === t;
-        } );
-      }
-    },
-    agg: function ( arr, get, red ) {
-      if ( typeof ( get ) !== "function" ) {
-        get = ( function ( key, obj ) {
-          return obj[key];
-        } ).bind( window, get );
-      }
-      return arr.map( get )
-          .reduce( red );
-    },
-    add: function ( a, b ) {
-      return a + b;
-    },
-    sum: function ( arr, get ) {
-      return agg( arr, get, add );
-    },
-    group: function ( arr, getKey, getValue ) {
-      var groups = [ ];
-      // we don't want to modify the original array.
-      var clone = arr.slice();
-
-      // Sorting the array by the group key criteeria first
-      // simplifies the grouping step. With a sorted array
-      // by the keys, grouping can be done in a single pass.
-      clone.sort( function ( a, b ) {
-        var ka = getKey ? getKey( a ) : a;
-        var kb = getKey ? getKey( b ) : b;
-        if ( ka < kb ) {
-          return -1;
-        }
-        else if ( ka > kb ) {
-          return 1;
-        }
-        return 0;
-      } );
-
-      for ( var i = 0; i < clone.length; ++i ) {
-        var obj = clone[i];
-        var key = getKey ? getKey( obj ) : obj;
-        var val = getValue ? getValue( obj ) : obj;
-        if ( groups.length === 0 || groups[groups.length - 1].key !== key ) {
-          groups.push( {key: key, values: [ ]} );
-        }
-        groups[groups.length - 1].values.push( val );
-      }
-      return groups;
-    },
-// unicode-aware string reverse
-    reverse: ( function () {
-      var combiningMarks =
-          /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
-          surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
-
-      function reverse ( str ) {
-        str = str.replace( combiningMarks, function ( match, capture1,
-            capture2 ) {
-          return reverse( capture2 ) + capture1;
-        } )
-            .replace( surrogatePair, "$2$1" );
-        var res = "";
-        for ( var i = str.length - 1; i >= 0; --i ) {
-          res += str[i];
-        }
-        return res;
-      }
-      return reverse;
-    } )(),
-    help: help,
-    /*
-     * 1) If id is a string, tries to find the DOM element that has said ID
-     *      a) if it exists, and it matches the expected tag type, returns the
-     *          element, or throws an error if validation fails.
-     *      b) if it doesn't exist, creates it and sets its ID to the provided
-     *          id, then returns the new DOM element, not yet placed in the
-     *          document anywhere.
-     * 2) If id is a DOM element, validates that it is of the expected type,
-     *      a) returning the DOM element back if it's good,
-     *      b) or throwing an error if it is not
-     * 3) If id is null, creates the DOM element to match the expected type.
-     * @param {string|DOM element|null} id
-     * @param {string} tag name
-     * @param {function} DOMclass
-     * @returns DOM element
-     */
-    cascadeElement: cascadeElement,
-    fmt: fmt,
-    log: function () {
-      console.log( fmt.apply( window, arguments ) );
-    },
-    err: function () {
-      console.error( fmt.apply( window, arguments ) );
-    },
-    px: fmt.bind( this, "$1px" ),
-    pct: fmt.bind( this, "$1%" ),
-    ems: fmt.bind( this, "$1em" ),
-    findEverything: function ( elem, obj ) {
-      elem = elem || document;
-      obj = obj || {};
-      var arr = elem.querySelectorAll( "*" );
-      for ( var i = 0; i < arr.length; ++i ) {
-        var e = arr[i];
-        if ( e.id && e.id.length > 0 ) {
-          obj[e.id] = e;
-          if ( e.parentElement ) {
-            e.parentElement[e.id] = e;
-          }
-        }
-      }
-      return obj;
-    },
-    inherit: function ( classType, parentType ) {
-      classType.prototype = Object.create( parentType.prototype );
-      classType.prototype.constructor = classType;
-    },
-    getSetting: function ( name, defValue ) {
-      if ( window.localStorage ) {
-        var val = window.localStorage.getItem( name );
-        if ( val ) {
-          try {
-            return JSON.parse( val );
-          }
-          catch ( exp ) {
-            console.error( "getSetting", name, val, typeof ( val ), exp );
-          }
-        }
-      }
-      return defValue;
-    },
-    setSetting: function ( name, val ) {
-      if ( window.localStorage && val ) {
-        try {
-          window.localStorage.setItem( name, JSON.stringify( val ) );
-        }
-        catch ( exp ) {
-          console.error( "setSetting", name, val, typeof ( val ), exp );
-        }
-      }
-    },
-    deleteSetting: function ( name ) {
-      if ( window.localStorage ) {
-        window.localStorage.removeItem( name );
-      }
-    },
-    readForm: function ( ctrls ) {
-      var state = {};
-      if ( ctrls ) {
-        for ( var name in ctrls ) {
-          var c = ctrls[name];
-          if ( ( c.tagName === "INPUT" || c.tagName === "SELECT" ) &&
-              ( !c.dataset || !c.dataset.skipcache ) ) {
-            if ( c.type === "text" || c.type === "password" || c.tagName ===
-                "SELECT" ) {
-              state[name] = c.value;
-            }
-            else if ( c.type === "checkbox" || c.type === "radio" ) {
-              state[name] = c.checked;
-            }
-          }
-        }
-      }
-      return state;
-    },
-    writeForm: function ( ctrls, state ) {
-      if ( state ) {
-        for ( var name in ctrls ) {
-          var c = ctrls[name];
-          if ( state[name] !== null && state[name] !== undefined &&
-              ( c.tagName ===
-                  "INPUT" || c.tagName === "SELECT" ) && ( !c.dataset ||
-              !c.dataset.skipcache ) ) {
-            if ( c.type === "text" || c.type === "password" || c.tagName ===
-                "SELECT" ) {
-              c.value = state[name];
-            }
-            else if ( c.type === "checkbox" || c.type === "radio" ) {
-              c.checked = state[name];
-            }
-          }
-        }
-      }
-    },
-    reloadPage: function () {
-      document.location = document.location.href;
-    },
-    makeSelectorFromObj: function ( id, obj, def, target, prop, lbl,
-        typeFilter ) {
-      var elem = cascadeElement( id, "select", window.HTMLSelectElement );
-      var items = [ ];
-      for ( var key in obj ) {
-        if ( obj.hasOwnProperty( key ) ) {
-          var val = obj[key];
-          if ( !typeFilter || val instanceof typeFilter ) {
-            val = val.name || key;
-            var opt = document.createElement( "option" );
-            opt.innerHTML = val;
-            items.push( obj[key] );
-            if ( val === def ) {
-              opt.selected = "selected";
-            }
-            elem.appendChild( opt );
-          }
-        }
-      }
-
-      if ( typeof target[prop] === "function" ) {
-        elem.addEventListener( "change", function () {
-          target[prop]( items[elem.selectedIndex] );
-        } );
-      }
-      else {
-        elem.addEventListener( "change", function () {
-          target[prop] = items[elem.selectedIndex];
-        } );
-      }
-
-      var container = cascadeElement( "container -" + id, "div",
-          window.HTMLDivElement );
-      var label = cascadeElement( "label-" + id, "span",
-          window.HTMLSpanElement );
-      label.innerHTML = lbl + ": ";
-      label.for = elem;
-      elem.title = lbl;
-      elem.alt = lbl;
-      container.appendChild( label );
-      container.appendChild( elem );
-      return container;
-    },
-    makeHidingContainer: function ( id, obj ) {
-      var elem = cascadeElement( id, "div", window.HTMLDivElement );
-      elem.style.position = "absolute";
-      elem.style.left = 0;
-      elem.style.top = 0;
-      elem.style.width = 0;
-      elem.style.height = 0;
-      elem.style.overflow = "hidden";
-      elem.appendChild( obj );
-      return elem;
-    },
-// snagged and adapted from http://detectmobilebrowsers.com/
-    isMobile: ( function ( a ) {
-      return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
-          a ) ||
-          /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-              a.substring( 0, 4 ) );
-    } )( navigator.userAgent || navigator.vendor || window.opera ),
-    isiOS: /Apple-iP(hone|od|ad)/.test( navigator.userAgent || "" ),
-    isOSX: /Macintosh/.test( navigator.userAgent || "" ),
-    isWindows: /Windows/.test( navigator.userAgent || "" ),
-    isOpera: isOpera,
-    isFirefox: typeof window.InstallTrigger !== 'undefined',
-    isSafari: Object.prototype.toString.call( window.HTMLElement )
-        .indexOf( 'Constructor' ) > 0,
-    isChrome: !!window.chrome && !isOpera,
-    isIE: /*@cc_on!@*/false || !!document.documentMode,
-    // fullscreen-isms
-    isFullScreenMode: function () {
-      return ( document.fullscreenElement || document.mozFullScreenElement ||
-          document.webkitFullscreenElement || document.msFullscreenElement );
-    },
-    requestFullScreen: function ( vrDisplay, success ) {
-      if ( !success ) {
-        success = vrDisplay;
-        vrDisplay = null;
-      }
-      if ( !isFullScreenMode() ) {
-        if ( vrDisplay ) {
-          document.documentElement.requestFullscreen( {vrDisplay: vrDisplay
-          } );
-        }
-        else {
-          document.documentElement.requestFullscreen(
-              window.Element.ALLOW_KEYBOARD_INPUT );
-        }
-        var interval = setInterval( function () {
-          if ( isFullScreenMode() ) {
-            clearInterval( interval );
-            screen.lockOrientation( "landscape-primary" );
-            if ( success ) {
-              success();
-            }
-          }
-        }, 1000 );
-      }
-      else if ( success ) {
-        success();
-      }
-    },
-    exitFullScreen: function () {
-      if ( isFullScreenMode() ) {
-        document.exitFullscreen();
-      }
-    },
-    toggleFullScreen: function () {
-      if ( document.documentElement.requestFullscreen ) {
-        if ( isFullScreenMode() ) {
-          exitFullScreen();
-        }
-        else {
-          requestFullScreen();
-        }
-      }
-    },
-    addFullScreenShim: function () {
-      var elems = arr( arguments );
-      elems = elems.map( function ( e ) {
-        return {
-          elem: e,
-          events: help( e ).events
-        };
-      } );
-
-      function removeFullScreenShim () {
-        elems.forEach( function ( elem ) {
-          elem.events.forEach( function ( e ) {
-            elem.elem.removeEventListener( e, fullScreenShim );
-          } );
-        } );
-      }
-
-      function fullScreenShim ( evt ) {
-        requestFullScreen( removeFullScreenShim );
-      }
-
-      elems.forEach( function ( elem ) {
-        elem.events.forEach( function ( e ) {
-          if ( e.indexOf( "fullscreenerror" ) < 0 ) {
-            elem.elem.addEventListener( e, fullScreenShim, false );
-          }
-        } );
-      } );
-    },
-    exitPointerLock: ( document.exitPointerLock ||
-        document.webkitExitPointerLock || document.mozExitPointerLock ||
-        function () {
-        } ).bind( document ),
-    isPointerLocked: function () {
-      return !!( document.pointerLockElement ||
-          document.webkitPointerLockElement ||
-          document.mozPointerLockElement );
-    },
-    requestPointerLock: ( document.documentElement.requestPointerLock ||
-        document.documentElement.webkitRequestPointerLock ||
-        document.documentElement.mozRequestPointerLock || function () {
-        } ).bind( document.documentElement )
-  };
-} );;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define(function (require) {
-  "use strict";
-  var Grammar = require("../Grammar");
-  return new Grammar("JavaScript", [
-    ["newlines", /(?:\r\n|\r|\n)/],
-    ["comments", /\/\/.*$/],
-    ["startBlockComments", /\/\*/],
-    ["endBlockComments", /\*\//],
-    ["strings", /"(?:\\"|[^"])*"/],
-    ["strings", /'(?:\\'|[^'])*'/],
-    ["strings", /\/(?:\\\/|[^/])*\/\w*/],
-    ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/],
-    ["keywords",
+  return new Primrose.Grammar( "JavaScript", [
+    [ "newlines", /(?:\r\n|\r|\n)/ ],
+    [ "comments", /\/\/.*$/ ],
+    [ "startBlockComments", /\/\*/ ],
+    [ "endBlockComments", /\*\// ],
+    [ "strings", /"(?:\\"|[^"])*"/ ],
+    [ "strings", /'(?:\\'|[^'])*'/ ],
+    [ "strings", /\/(?:\\\/|[^/])*\/\w*/ ],
+    [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
+    [ "keywords",
       /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
     ],
-    ["functions", /(\w+)(?:\s*\()/],
-    ["members", /(?:(?:\w+\.)+)(\w+)/]
-  ]);
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+    [ "functions", /(\w+)(?:\s*\()/ ],
+    [ "members", /(?:(?:\w+\.)+)(\w+)/ ]
+  ] );
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Grammars = window.Primrose.Grammars || { };
+window.Primrose.Grammars.PlainText = (function (require) {
   "use strict";
-  var Grammar = require("../Grammar");
-  return new Grammar("PlainText", [
+  
+  return new Primrose.Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-define(function (require) {
+});;window.Primrose = window.Primrose || { };
+window.Primrose.Grammars = window.Primrose.Grammars || { };
+window.Primrose.Grammars.TestResults = (function () {
   "use strict";
-  var Grammar = require("../Grammar");
-  return new Grammar("TestResults", [
+  
+  return new Primrose.Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/],
     ["numbers", /(\[)(o+)/],
     ["numbers", /(\d+ succeeded), 0 failed/],
@@ -3260,82 +2255,39 @@ define(function (require) {
     ["keywords", /(Test results for )(\w+):/],
     ["strings", /        \w+/]
   ]);
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-// cut, copy, and paste commands are events that the browser manages,
+})();;// cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-define(function (require) {
+window.Primrose = window.Primrose || { };
+window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || { };
+window.Primrose.OperatingSystems.OSX = ( function () {
   "use strict";
-  var OperatingSystem = require("../OperatingSystem");
-  return new OperatingSystem(
+
+  return new Primrose.OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",
       "META", "LEFTARROW", "RIGHTARROW",
-      "META", "UPARROW", "DOWNARROW");
-});;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-// cut, copy, and paste commands are events that the browser manages,
+      "META", "UPARROW", "DOWNARROW" );
+} )();;// cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-define(function (require) {
+window.Primrose = window.Primrose || { };
+window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || {};
+window.Primrose.Windows = (function () {
   "use strict";
-  var OperatingSystem = require("../OperatingSystem");
-  return new OperatingSystem(
+  
+  return new Primrose.OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",
       "CTRL", "HOME", "END");
-});
-;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+})();
+;/*global THREE, qp*/
+
+window.Primrose = window.Primrose || { };
+window.Primrose.Renderers = window.Primrose.Renderers || { };
+window.Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
-  var qp = require( "../core" ),
-      Size = require( "../Size" ),
-      Cursor = require( "../Cursor" ),
-      defaultTheme = require( "../themes/Default" );
+  
+  var Size = Primrose.Size,
+      Cursor = Primrose.Cursor,
+      defaultTheme = Primrose.Themes.Default;
 
   return function ( canvasElementOrID, options ) {
     var self = this,
@@ -3511,21 +2463,10 @@ define( function ( require ) {
 
       // draw the cursor caret
       if ( focused ) {
-        bgfx.beginPath();
-        bgfx.strokeStyle = theme.cursorColor || "black";
-        bgfx.moveTo(
-            minCursor.x * self.character.width,
-            minCursor.y * self.character.height );
-        bgfx.lineTo(
-            minCursor.x * self.character.width,
-            ( minCursor.y + 1.25 ) * self.character.height );
-        bgfx.moveTo(
-            maxCursor.x * self.character.width + 1,
-            maxCursor.y * self.character.height );
-        bgfx.lineTo(
-            maxCursor.x * self.character.width + 1,
-            ( maxCursor.y + 1.25 ) * self.character.height );
-        bgfx.stroke();
+        var cc = theme.cursorColor || "black";
+        var w = 1 / self.character.width;
+        fillRect( bgfx, cc, minCursor.x, minCursor.y, w, 1 );
+        fillRect( bgfx, cc, maxCursor.x, maxCursor.y, w, 1 );
       }
       bgfx.restore();
     }
@@ -3673,9 +2614,7 @@ define( function ( require ) {
       }
     };
 
-
-
-    this.getCanvas = function () {
+    this.getDOMElement = function () {
       return canvas;
     };
 
@@ -3745,27 +2684,450 @@ define( function ( require ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( qp.makeHidingContainer( "primrose-container-" +
+      document.body.appendChild( qp.makeHidingContainer(
+          "primrose-container-" +
           canvas.id, canvas ) );
     }
   };
-} );;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+} )();;/*global THREE, qp*/
+
+window.Primrose = window.Primrose || { };
+window.Primrose.Renderers = window.Primrose.Renderers || { };
+window.Primrose.Renderers.DOM = ( function ( ) {
+  "use strict";
+  
+  var Size = Primrose.Size,
+      Cursor = Primrose.Cursor,
+      defaultTheme = Primrose.Themes.Default;
+
+  function FakeContext ( target ) {
+    var self = this;
+    this.font = null;
+    this.fillStyle = null;
+    var translate = [ new Point() ];
+
+    function setFont(elem){
+      elem.style.font = self.font;
+      elem.style.lineHeight = px(parseInt(self.font, 10));
+      elem.style.padding = "0";
+      elem.style.margin = "0";
+    }
+
+    this.measureText = function ( txt ) {
+      var tester = document.createElement( "div" );
+      setFont(tester);
+      tester.style.position = "absolute";
+      tester.style.visibility = "hidden";
+      tester.innerHTML = txt;
+      document.body.appendChild( tester );
+      var size = new Size( tester.clientWidth, tester.clientHeight );
+      document.body.removeChild( tester );
+      return size;
+    };
+
+    this.clearRect = function(){
+        target.innerHTML = "";
+    };
+
+    this.drawImage = function(img, x, y){
+      var top = translate[translate.length - 1];
+      img.style.position = "absolute";
+      img.style.left = px(x + top.x);
+      img.style.top = px(y + top.y);
+      target.appendChild(img);
+    };
+
+    this.fillRect = function ( x, y, w, h ) {
+      var top = translate[translate.length - 1];
+      var box = document.createElement( "div" );
+      box.style.position = "absolute";
+      box.style.left = px( x + top.x);
+      box.style.top = px( y + top.y );
+      box.style.width = px( w );
+      box.style.height = px( h );
+      box.style.backgroundColor = this.fillStyle;
+      target.appendChild( box );
+    };
+
+    this.fillText = function(str, x, y){
+      var top = translate[translate.length - 1];
+      var box = document.createElement( "span" );
+      box.style.position = "absolute";
+      box.style.left = px( x + top.x );
+      box.style.top = px( y + top.y );
+      setFont(box);
+      box.style.color = this.fillStyle;
+      box.appendChild(document.createTextNode(str));
+      target.appendChild( box );
+    };
+
+    this.save = function () {
+      var top = translate[translate.length - 1];
+      translate.push(top.clone());
+    };
+
+    this.restore = function(){
+      translate.pop();
+    };
+
+    this.translate = function(x, y){
+      var top = translate[translate.length - 1];
+      top.x += x;
+      top.y += y;
+    };
+  }
+
+  window.HTMLDivElement.prototype.getContext = function ( type ) {
+    if ( type !== "2d" ) {
+      throw new Exception( "type parameter needs to be '2d'." );
+    }
+    this.style.width = pct(100);
+    this.style.height = pct(100);
+    return new FakeContext( this );
+  };
+
+  return function ( domElementOrID, options ) {
+    var self = this,
+        div = qp.cascadeElement( domElementOrID, "div",
+            window.HTMLDivElement ),
+        bgDiv = qp.cascadeElement( div.id + "-back", "div",
+            window.HTMLDivElement ),
+        fgDiv = qp.cascadeElement( div.id + "-front", "div",
+            window.HTMLDivElement ),
+        trimDiv = qp.cascadeElement( div.id + "-trim", "div",
+            window.HTMLDivElement ),
+        gfx = div.getContext( "2d" ),
+        fgfx = fgDiv.getContext( "2d" ),
+        bgfx = bgDiv.getContext( "2d" ),
+        tgfx = trimDiv.getContext( "2d" ),
+        theme = null,
+        oldWidth = null,
+        oldHeight = null;
+
+    this.VSCROLL_WIDTH = 2;
+
+    this.character = new Size();
+    this.id = div.id;
+    this.autoBindEvents = true;
+
+    this.setTheme = function ( t ) {
+      theme = t;
+    };
+
+    this.pixel2cell = function ( point, scroll, gridBounds ) {
+      point.set(
+          Math.round( point.x / this.character.width ) + scroll.x -
+          gridBounds.x,
+          Math.floor( ( point.y / this.character.height ) - 0.25 ) +
+          scroll.y );
+    };
+
+    this.hasResized = function () {
+      var newWidth = div.clientWidth,
+          newHeight = div.clientHeight;
+      return oldWidth !== newWidth || oldHeight !== newHeight;
+    };
+
+    this.resize = function () {
+      var changed = false;
+      if ( theme ) {
+        var oldCharacterWidth = this.character.width,
+            oldCharacterHeight = this.character.height,
+            newWidth = div.clientWidth,
+            newHeight = div.clientHeight,
+            oldFont = gfx.font;
+        this.character.height = theme.fontSize;
+        gfx.font = px( this.character.height ) + " " + theme.fontFamily;
+
+        // measure 100 letter M's, then divide by 100, to get the width of an M
+        // to two decimal places on systems that return integer values from
+        // measureText.
+        this.character.width = gfx.measureText(
+            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
+            100;
+        changed = oldCharacterWidth !== this.character.width ||
+            oldCharacterHeight !== this.character.height ||
+            oldFont !== gfx.font;
+
+        if ( newWidth > 0 && newHeight > 0 ) {
+          bgDiv.width =
+              fgDiv.width =
+              trimDiv.width = newWidth;
+          bgDiv.height =
+              fgDiv.height =
+              trimDiv.height = newHeight;
+
+          changed = changed ||
+              oldWidth !== newWidth ||
+              oldHeight !== newWidth;
+
+          oldWidth = newWidth;
+          oldHeight = newHeight;
+        }
+      }
+      return changed;
+    };
+
+    this.setSize = function ( w, h ) {
+      div.style.width = px( w );
+      div.style.height = px( h );
+      return this.resize();
+    };
+
+    this.getWidth = function () {
+      return oldWidth;
+    };
+
+    this.getHeight = function () {
+      return oldHeight;
+    };
+
+    function fillRect ( gfx, fill, x, y, w, h ) {
+      gfx.fillStyle = fill;
+      gfx.fillRect(
+          x * self.character.width,
+          y * self.character.height,
+          w * self.character.width + 1,
+          h * self.character.height + 1 );
+    }
+
+    function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
+        gridBounds, scroll, focused ) {
+      var minCursor = Cursor.min( frontCursor, backCursor ),
+          maxCursor = Cursor.max( frontCursor, backCursor ),
+          tokenFront = new Cursor(),
+          tokenBack = new Cursor();
+
+      if ( theme.regular.backColor ) {
+        bgfx.fillStyle = theme.regular.backColor;
+        bgDiv.style.backgroundColor = theme.regular.backColor;
+      }
+
+      bgfx.clearRect( 0, 0, oldWidth, oldHeight );
+      bgfx.save();
+      bgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
+          -scroll.y * self.character.height );
+
+
+      // draw the current row highlighter
+      if ( focused ) {
+        fillRect( bgfx, theme.regular.currentRowBackColor ||
+            defaultTheme.regular.currentRowBackColor,
+            0, minCursor.y + 0.2,
+            gridBounds.width, maxCursor.y - minCursor.y + 1 );
+      }
+
+      for ( var y = 0; y < tokenRows.length; ++y ) {
+        // draw the tokens on this row
+        var row = tokenRows[y];
+
+        for ( var i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
+              scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
+              gridBounds.width ) {
+            // draw the selection box
+            var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
+                maxCursor.i;
+            if ( inSelection ) {
+              var selectionFront = Cursor.max( minCursor, tokenFront );
+              var selectionBack = Cursor.min( maxCursor, tokenBack );
+              var cw = selectionBack.i - selectionFront.i;
+              fillRect( bgfx, theme.regular.selectedBackColor ||
+                  defaultTheme.regular.selectedBackColor,
+                  selectionFront.x, selectionFront.y + 0.2,
+                  cw, 1 );
+            }
+          }
+
+          tokenFront.copy( tokenBack );
+        }
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+      }
+
+      // draw the cursor caret
+      if ( focused ) {
+        var cc = theme.cursorColor || "black";
+        var w = 1 / self.character.width;
+        fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
+        fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+      }
+      bgfx.restore();
+    }
+
+    function renderCanvasForeground ( tokenRows, gridBounds, scroll ) {
+      var tokenFront = new Cursor(),
+          tokenBack = new Cursor(),
+          maxLineWidth = 0;
+
+      fgfx.clearRect( 0, 0, oldWidth, oldHeight );
+      fgfx.save();
+      fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
+          -scroll.y * self.character.height );
+      for ( var y = 0; y < tokenRows.length; ++y ) {
+        // draw the tokens on this row
+        var row = tokenRows[y];
+        for ( var i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+
+          // skip drawing tokens that aren't in view
+          if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
+              scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
+              gridBounds.width ) {
+
+            // draw the text
+            var style = theme[t.type] || { };
+            var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
+                " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
+                " " + self.character.height + "px " + theme.fontFamily;
+            fgfx.font = font.trim();
+            fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+            fgfx.fillText(
+                t.value,
+                tokenFront.x * self.character.width,
+                y * self.character.height );
+          }
+
+          tokenFront.copy( tokenBack );
+        }
+
+        maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+      }
+      fgfx.restore();
+      return maxLineWidth;
+    }
+
+    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
+        showScrollBars, wordWrap, lineCountWidth, maxLineWidth ) {
+      tgfx.clearRect( 0, 0, oldWidth, oldHeight );
+      tgfx.save();
+      tgfx.translate( 0, -scroll.y * self.character.height );
+      if ( showLineNumbers ) {
+        for ( var y = scroll.y,
+            lastLine = -1; y < scroll.y + gridBounds.height && y <
+            tokenRows.length; ++y ) {
+          // draw the tokens on this row
+          var row = tokenRows[y];
+          // be able to draw brand-new rows that don't have any tokens yet
+          var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
+          // draw the left gutter
+          var lineNumber = currentLine.toString();
+          while ( lineNumber.length < lineCountWidth ) {
+            lineNumber = " " + lineNumber;
+          }
+          fillRect( tgfx,
+              theme.regular.selectedBackColor ||
+              defaultTheme.regular.selectedBackColor,
+              0, y + 0.2,
+              gridBounds.x, 1 );
+          tgfx.font = "bold " + self.character.height + "px " +
+              theme.fontFamily;
+
+          if ( currentLine > lastLine ) {
+            tgfx.fillStyle = theme.regular.foreColor;
+            tgfx.fillText(
+                lineNumber,
+                0, y * self.character.height );
+          }
+          lastLine = currentLine;
+        }
+      }
+
+      tgfx.restore();
+
+      // draw the scrollbars
+      if ( showScrollBars ) {
+        var drawWidth = gridBounds.width * self.character.width;
+        var drawHeight = gridBounds.height * self.character.height;
+        var scrollX = ( scroll.x * drawWidth ) / maxLineWidth + gridBounds.x *
+            self.character.width;
+        var scrollY = ( scroll.y * drawHeight ) / tokenRows.length +
+            gridBounds.y * self.character.height;
+
+        tgfx.fillStyle = theme.regular.selectedBackColor ||
+            defaultTheme.regular.selectedBackColor;
+        // horizontal
+        if ( !wordWrap && maxLineWidth > gridBounds.width ) {
+          var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );
+          tgfx.fillRect(
+              scrollX,
+              ( gridBounds.height + 0.25 ) * self.character.height,
+              Math.max( self.character.width, scrollBarWidth ),
+              self.character.height );
+        }
+
+        //vertical
+        if ( tokenRows.length > gridBounds.height ) {
+          var scrollBarHeight = drawHeight * ( gridBounds.height /
+              tokenRows.length );
+          tgfx.fillRect(
+              oldWidth - self.VSCROLL_WIDTH * self.character.width,
+              scrollY,
+              self.VSCROLL_WIDTH * self.character.width,
+              Math.max( self.character.height, scrollBarHeight ) );
+        }
+      }
+    }
+
+    this.render = function ( tokenRows,
+        frontCursor, backCursor,
+        gridBounds,
+        scroll,
+        focused, showLineNumbers, showScrollBars, wordWrap,
+        lineCountWidth ) {
+      var maxLineWidth = 0;
+
+      renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
+          scroll, focused );
+      maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
+      renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
+          showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
+
+      gfx.clearRect( 0, 0, oldWidth, oldHeight );
+      gfx.drawImage( bgDiv, 0, 0 );
+      gfx.drawImage( fgDiv, 0, 0 );
+      gfx.drawImage( trimDiv, 0, 0 );
+    };
+
+    this.getDOMElement = function () {
+      return div;
+    };
+
+    this.getPixelRatio = function () {
+      return 1;
+    };
+
+    if ( !( domElementOrID instanceof window.HTMLDivElement ) &&
+        options.width && options.height ) {
+      div.style.position = "absolute";
+      div.style.width = options.width;
+      div.style.height = options.height;
+    }
+
+    if ( !div.parentElement ) {
+      this.autoBindEvents = false;
+      document.body.appendChild( qp.makeHidingContainer(
+          "primrose-container-" +
+          div.id, div ) );
+    }
+  };
+} );;/*global THREE, qp*/
+
+window.Primrose = window.Primrose || { };
+window.Primrose.Themes = window.Primrose.Themes || { };
+window.Primrose.Themes.Dark = ( function ( ) {
   "use strict";
   return {
     name: "Dark",
@@ -3804,23 +3166,9 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-} );;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-define( function ( require ) {
+} )();;window.Primrose = window.Primrose || { };
+window.Primrose.Themes = window.Primrose.Themes || { };
+window.Primrose.Themes.Default = ( function ( ) {
   "use strict";
   return {
     name: "Light",
@@ -3859,4 +3207,4 @@ define( function ( require ) {
       fontStyle: "underline italic"
     }
   };
-} );Primrose.VERSION = "v0.9.0.0";
+} )();Primrose.VERSION = "v0.9.0";
