@@ -2,7 +2,7 @@
 window.Primrose = window.Primrose || { };
 window.Primrose.Cursor = ( function ( ) {
   "use strict";
-  
+
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -98,7 +98,7 @@ window.Primrose.Cursor = ( function ( ) {
 
   Cursor.prototype.skipright = function ( tokenRows ) {
     var line = rebuildLine( tokenRows, this.y );
-    if ( this.x === line.length || line[line.length - 1] === '\n' ) {
+    if ( this.x === line.length || line[this.x] === '\n' ) {
       this.right( tokenRows );
     }
     else {
