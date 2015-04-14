@@ -4,10 +4,6 @@ window.Primrose = window.Primrose || { };
 window.Primrose.Renderers = window.Primrose.Renderers || { };
 window.Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
-  
-  var Size = Primrose.Size,
-      Cursor = Primrose.Cursor,
-      defaultTheme = Primrose.Themes.Default;
 
   return function ( canvasElementOrID, options ) {
     var self = this,
@@ -30,7 +26,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     this.VSCROLL_WIDTH = 2;
 
-    this.character = new Size();
+    this.character = new Primrose.Size();
     this.id = canvas.id;
     this.autoBindEvents = true;
 
@@ -122,10 +118,10 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
         gridBounds, scroll, focused ) {
-      var minCursor = Cursor.min( frontCursor, backCursor ),
-          maxCursor = Cursor.max( frontCursor, backCursor ),
-          tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
+      var minCursor = Primrose.Cursor.min( frontCursor, backCursor ),
+          maxCursor = Primrose.Cursor.max( frontCursor, backCursor ),
+          tokenFront = new Primrose.Cursor(),
+          tokenBack = new Primrose.Cursor(),
           clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
       if ( theme.regular.backColor ) {
@@ -141,7 +137,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
       // draw the current row highlighter
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
-            defaultTheme.regular.currentRowBackColor,
+            Primrose.Themes.Default.regular.currentRowBackColor,
             0, minCursor.y + 0.2,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
@@ -163,11 +159,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
                 maxCursor.i;
             if ( inSelection ) {
-              var selectionFront = Cursor.max( minCursor, tokenFront );
-              var selectionBack = Cursor.min( maxCursor, tokenBack );
+              var selectionFront = Primrose.Cursor.max( minCursor, tokenFront );
+              var selectionBack = Primrose.Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
-                  defaultTheme.regular.selectedBackColor,
+                  Primrose.Themes.Default.regular.selectedBackColor,
                   selectionFront.x, selectionFront.y + 0.2,
                   cw, 1 );
             }
@@ -192,8 +188,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
     }
 
     function renderCanvasForeground ( tokenRows, gridBounds, scroll ) {
-      var tokenFront = new Cursor(),
-          tokenBack = new Cursor(),
+      var tokenFront = new Primrose.Cursor(),
+          tokenBack = new Primrose.Cursor(),
           maxLineWidth = 0;
 
       fgfx.clearRect( 0, 0, canvas.width, canvas.height );
@@ -258,7 +254,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
           }
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
-              defaultTheme.regular.selectedBackColor,
+              Primrose.Themes.Default.regular.selectedBackColor,
               0, y + 0.2,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
@@ -286,7 +282,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
-            defaultTheme.regular.selectedBackColor;
+            Primrose.Themes.Default.regular.selectedBackColor;
         // horizontal
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );

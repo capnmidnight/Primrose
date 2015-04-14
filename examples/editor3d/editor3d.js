@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global THREE, qp, Primrose */
+/*global THREE, qp, Primrose, Assert */
 
 function editor3d () {
   "use strict";
@@ -27,7 +27,6 @@ function editor3d () {
       vrEffect,
       renderer,
       ctrls = qp.findEverything();
-
   function clearKeyOption ( evt ) {
     this.value = "";
     this.dataset.keycode = "";
@@ -105,7 +104,7 @@ function editor3d () {
         w1 = 1,
         h = 1,
         w2 = 2,
-        prim1 = new Primrose( "editor1", {
+        prim1 = new Primrose.TextBox( "editor1", {
           width: qp.px( w1 * 1024 ),
           height: qp.px( h * 1024 ),
           fontSize: 36,
@@ -121,23 +120,21 @@ setInterval(function(){\n\
 \n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
-        prim2 = new Primrose( "editor2", {
+        testObjects = [
+          Primrose.Grammar,
+          Primrose.Point,
+          Primrose.Rectangle,
+          Primrose.Size
+        ],
+        prim2 = new Primrose.TextBox( "editor2", {
           width: qp.px( w2 * 1024 ),
           height: qp.px( h * 1024 ),
           fontSize: 24,
-          file: "var ball = textured(sphere(0.25, // radius\n\
-                            10, // slices\n\
-                            10), // rings\n\
-                     0xffff00); // a color hex code, an Image, a Canvas, a Primrose object, or string path to an image\n\
-scene.add(ball);\n\
-var radius = 3, angle = 0, dAngle = Math.PI / 360;\n\
-setInterval(function(){\n\
-  ball.position.x = radius * Math.cos(angle);\n\
-  ball.position.y = radius * Math.sin(angle);\n\
-  angle += dAngle;\n\
-}, 16);\n\
-\n\
-// focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
+          file: Assert.stringTest( testObjects ),
+          readOnly: true,
+          tokenizer: Primrose.Grammars.TestResults,
+          theme: Primrose.Themes.Dark,
+          renderer: Primrose.Renderers.Canvas
         } ),
         scene = new THREE.Scene( ),
         pickingScene = new THREE.Scene( ),
@@ -582,7 +579,7 @@ setInterval(function(){\n\
           texture = THREE.ImageUtils.loadTexture( txt );
           texture.anisotropy = renderer.getMaxAnisotropy( );
         }
-        else if ( txt instanceof Primrose ) {
+        else if ( txt instanceof Primrose.TextBox ) {
           texture = txt.getRenderer( )
               .getTexture( renderer.getMaxAnisotropy( ) );
         }

@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define( function ( require ) {
-  "use strict";
+/* global qp */
 
-  var qp = require( "../src/core" );
+var Assert = ( function ( ) {
+  "use strict";
 
   function getDifference ( expected, actual ) {
     return typeof ( expected ) !== "number"
@@ -169,4 +169,4 @@ define( function ( require ) {
   };
 
   return Assert;
-} );
+} )();

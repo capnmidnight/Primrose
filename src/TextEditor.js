@@ -34,7 +34,9 @@ window.Primrose.TextBox = ( function ( ) {
   function renderPump () {
     requestAnimationFrame( renderPump );
     for ( var i = 0; i < EDITORS.length; ++i ) {
-      EDITORS[i].drawText();
+      if(EDITORS[i].drawText){
+        EDITORS[i].drawText();
+      }
     }
   }
 
@@ -544,7 +546,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.setCommandSystem = function ( cmd ) {
       changed = true;
-      commandSystem = cmd || Primrose.Commands.TextEditor;
+      commandSystem = cmd || Primrose.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
@@ -1064,7 +1066,6 @@ window.Primrose.TextBox = ( function ( ) {
         Primrose.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
         "Shortcut style", OperatingSystem );
-
     setSurrogateSize();
   }
 

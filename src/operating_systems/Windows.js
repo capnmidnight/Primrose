@@ -2,9 +2,9 @@
 // so we don't have to include handlers for them here.
 window.Primrose = window.Primrose || { };
 window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || {};
-window.Primrose.Windows = (function () {
+window.Primrose.OperatingSystems.Windows = (function () {
   "use strict";
-  
+
   return new Primrose.OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",

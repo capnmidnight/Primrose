@@ -14,18 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-require( [ "../../src/Primrose", "../../test/testing", "../rosetta_24_game",
-  "../../test/tests" ], function ( Primrose, Assert, rosetta_24_game,
-    testObjects ) {
+
+/* global rosetta_24_game, Assert, Primrose */
+
+function editor2d () {
   "use strict";
 
-  var editor = new Primrose( "editor",{
+  var editor = new Primrose.TextBox( "editor", {
     file: rosetta_24_game.toString(),
     autoBindEvents: true,
     renderer: Primrose.Renderers.Canvas
-  });
+  } );
 
-  var tests = new Primrose( "testResults", {
+  var testObjects = [
+    Primrose.Grammar,
+    Primrose.Point,
+    Primrose.Rectangle,
+    Primrose.Size
+  ];
+
+  var tests = new Primrose.TextBox( "testResults", {
     file: Assert.stringTest( testObjects ),
     readOnly: true,
     autoBindEvents: true,
@@ -34,9 +42,9 @@ require( [ "../../src/Primrose", "../../test/testing", "../rosetta_24_game",
     renderer: Primrose.Renderers.Canvas
   } );
 
-  var container = document.getElementById("editorContainer");
-  editorContainer.appendChild(editor.getDOMElement());
-  editorContainer.appendChild(tests.getDOMElement());
+  var container = document.getElementById( "editorContainer" );
+  container.appendChild( editor.getDOMElement() );
+  container.appendChild( tests.getDOMElement() );
 
   editor.appendControls( document.getElementById( "controls" ) );
-} );
+}

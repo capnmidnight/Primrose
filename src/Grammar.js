@@ -1,14 +1,12 @@
 window.Primrose = window.Primrose || { };
 window.Primrose.Grammar = ( function ( ) {
   "use strict";
-  var Rule = Primrose.Rule,
-      Token = Primrose.Token;
 
   function Grammar ( name, grammar ) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map( function ( rule ) {
-      return new Rule( rule[0], rule[1] );
+      return new Primrose.Rule( rule[0], rule[1] );
     } );
 
     function crudeParsing ( tokens ) {
@@ -39,7 +37,7 @@ window.Primrose.Grammar = ( function ( ) {
     this.tokenize = function ( text ) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
-      var tokens = [ new Token( text, "regular", 0 ) ];
+      var tokens = [ new Primrose.Token( text, "regular", 0 ) ];
       for ( var i = 0; i < this.grammar.length; ++i ) {
         var rule = this.grammar[i];
         for ( var j = 0; j < tokens.length; ++j ) {

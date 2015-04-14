@@ -2,13 +2,10 @@
 window.Primrose = window.Primrose || { };
 window.Primrose.Rectangle = ( function ( ) {
   "use strict";
-  
-  var Point = Primrose.Point,
-      Size = Primrose.Size;
-      
+
   function Rectangle ( x, y, width, height ) {
-    this.point = new Point( x, y );
-    this.size = new Size( width, height );
+    this.point = new Primrose.Point( x, y );
+    this.size = new Primrose.Size( width, height );
 
     Object.defineProperties( this, {
       x: {
