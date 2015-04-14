@@ -27,6 +27,7 @@ function editor2d () {
   } );
 
   var testObjects = [
+    Primrose.Grammars.Basic,
     Primrose.Grammar,
     Primrose.Point,
     Primrose.Rectangle,

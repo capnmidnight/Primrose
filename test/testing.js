@@ -36,8 +36,8 @@ var Assert = ( function ( ) {
   function test ( func ) {
     if ( func.tests ) {
       var results = {
-        success: {},
-        failure: {},
+        success: { },
+        failure: { },
         total: 0,
         failed: 0,
         succeeded: 0
@@ -52,13 +52,13 @@ var Assert = ( function ( ) {
             func.tests[key]();
             ++results.succeeded;
             var end = Date.now();
-            results.success[key] = {dt: ( end - start )};
+            results.success[key] = { dt: ( end - start ) };
           }
           catch ( exp ) {
             ++results.failed;
             var end = Date.now();
-            results.failure[key] = {dt: ( end - start ), msg: exp.message,
-              stack: exp.stack || false};
+            results.failure[key] = { dt: ( end - start ), msg: exp.message,
+              stack: exp.stack || false };
           }
         }
       }
@@ -113,6 +113,9 @@ var Assert = ( function ( ) {
 
   var Assert = {
     ALPHA: 0.0000000000001,
+    fail: function ( msg ) {
+      throw new Error( errr( msg ) );
+    },
     areEqual: function ( expected, actual, msg ) {
       if ( expected !== actual && getDifference( expected, actual ) >=
           Assert.ALPHA ) {
@@ -155,7 +158,7 @@ var Assert = ( function ( ) {
       if ( func instanceof Array ) {
         return func.map( Assert.stringTest )
             .join(
-            "\n===---===---===---===---===---===---===---===---===---===\n\n" );
+                "\n===---===---===---===---===---===---===---===---===---===\n\n" );
       }
       else {
         var accum = "";

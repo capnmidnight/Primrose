@@ -105,6 +105,7 @@ function editor3d () {
         h = 1,
         w2 = 2,
         prim1 = new Primrose.TextBox( "editor1", {
+          tokenizer: Primrose.Grammars.Basic,
           width: px( w1 * 1024 ),
           height: px( h * 1024 ),
           fontSize: 36,
@@ -121,6 +122,7 @@ setInterval(function(){\n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
         testObjects = [
+          Primrose.Grammars.Basic,
           Primrose.Grammar,
           Primrose.Point,
           Primrose.Rectangle,
@@ -175,6 +177,7 @@ setInterval(function(){\n\
         flatEditor = textured( flatGeom, prim2 ),
         flatEditorPicker = textured( flatGeom, prim2.getRenderer( )
             .getPickingTexture( ) );
+
     body.position.set( 0, 0, w1 );
     floor.position.set( 0, -3, 0 );
     flatEditor.position.x = flatEditorPicker.position.x = 4;
