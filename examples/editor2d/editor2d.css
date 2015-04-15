@@ -34,7 +34,7 @@ html, body{
 
 #editorContainer{
   position:absolute;
-  top:2em;
+  top:0;
   bottom:0;
   width:100%;
 }
@@ -42,13 +42,13 @@ html, body{
 #editor{
   position:absolute;
   height:100%;
-  width:75%;
+  width:50%;
   cursor:text;
 }
 
 #testResults{
   position:absolute;
-  left:75%;
+  left:50%;
   height:100%;
-  width:25%;
+  width:50%;
 }

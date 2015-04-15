@@ -23,63 +23,96 @@ function editor2d () {
   var EDITOR_CODE_KEY = "primrose-sample-code";
 
   var editor = new Primrose.TextBox( "editor", {
-    file: getSetting(EDITOR_CODE_KEY, "10 INPUT \"A value: \", X\n\
-20 IF X < 1 THEN GOTO 60 ELSE PRINT \"HOKAY MANG\"\n\
-30 IF X > 0 THEN PRINT \"FIZZ\" ELSE GOTO 10\n\
-40 LET X = X - 1\n\
-50 GOTO 30\n\
-60 END"),
+    file: getSetting( EDITOR_CODE_KEY,
+        "rem print a circle\n\
+1 input 'enter outer radius: ', r\n\
+2 input 'enter inner radius: ', q\n\
+3 if r > q then goto 10\n\
+4 println 'outer radius must be larger than inner radius'\n\
+5 goto 1\n\
+rem\n\
+rem\n\
+rem use remarks to break up code\n\
+rem\n\
+rem\n\
+10 let d = 2 * r + 1\n\
+11 let y = 0\n\
+20 if y >= d then goto 90\n\
+30 let x = 0\n\
+40 if x >= d then goto 70\n\
+41 let dy = y - r\n\
+42 let dx = x - r\n\
+43 let z = dx * dx + dy * dy\n\
+44 if q * q <= z and z <= r * r then print 'o' else print '.'\n\
+50 let x = x + 1\n\
+60 goto 40\n\
+70 let y = y + 1\n\
+71 println ''\n\
+80 goto 20\n\
+90 end\n\
+rem hit ctrl+enter to run program\n\
+rem what you see is what you get, there aren't many features\n\
+rem to this simple BASIC clone" ),
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
-    renderer: Primrose.Renderers.Canvas
+    hideLineNumbers: true
+  } );
+
+  var output = new Primrose.TextBox( "testResults", {
+    file: "",
+    autoBindEvents: true,
+    tokenizer: Primrose.Grammars.PlainText,
+    theme: Primrose.Themes.Dark,
+    hideLineNumbers: true
   } );
 
   window.onbeforeunload = function ( ) {
-    setSetting(EDITOR_CODE_KEY, editor.value);
+    setSetting( EDITOR_CODE_KEY, editor.value );
   };
 
   var running = false;
   var inputCallback = null;
   var currentIndex = 0;
+  output.addEventListener( "keydown", function ( evt ) {
+    if ( running && inputCallback && evt.keyCode === Primrose.Keys.ENTER ) {
+      var str = output.value.substring( currentIndex );
+      str = str.substring( 0, str.length - 1 );
+      inputCallback( str );
+      inputCallback = null;
+    }
+  } );
   editor.addEventListener( "keydown", function ( evt ) {
-    if ( evt.keyCode === Primrose.Keys.ENTER) {
-      if(running && inputCallback){
-        var str = editor.value.substring(currentIndex);
-        str = str.substring(0, str.length - 1);
-        inputCallback(str);
-        inputCallback = null;
-      }
-      else if ( !running && evt.ctrlKey ) {
-        running = true;
-        var input = function ( callback ) {
-          inputCallback = callback;
-          currentIndex = editor.value.length;
-          editor.selectionStart = editor.selectionEnd = currentIndex;
+    if ( !running && evt.ctrlKey && evt.keyCode === Primrose.Keys.ENTER ) {
+      running = true;
+      var input = function ( callback ) {
+        inputCallback = callback;
+        currentIndex = output.value.length;
+        editor.blur();
+        output.focus();
+        output.selectionStart = output.selectionEnd = currentIndex;
+        output.forceDraw();
+      };
+      var stdout = function ( str ) {
+        output.value += str;
+      };
+      var stderr = stdout;
+      var next = function () {
+        if ( running ) {
+          setTimeout( looper, 1 );
+        }
+      };
+      var done = function () {
+        if ( running ) {
+          stdout( "PROGRAM COMPLETE\n" );
+          running = false;
+          editor.selectionStart = editor.selectionEnd = editor.value.length;
           editor.forceDraw();
-        };
-        var output = function ( str ) {
-          editor.value += str;
-        };
-        var error = output;
-        var next = function () {
-          if ( running ) {
-            setTimeout( looper, 1 );
-          }
-        };
-        var done = function () {
-          if ( running ) {
-            output( "PROGRAM COMPLETE\n" );
-            running = false;
-            editor.selectionStart = editor.selectionEnd = editor.value.length;
-            editor.forceDraw();
-          }
-        };
-        var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
-            output,
-            error, next, done );
-        editor.value += "\n";
-        next();
-      }
+        }
+      };
+      var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
+          stdout,
+          stderr, next, done );
+      next();
     }
   } );
 
@@ -91,18 +124,9 @@ function editor2d () {
     Primrose.Size
   ];
 
-  var tests = new Primrose.TextBox( "testResults", {
-    file: Assert.stringTest( testObjects ),
-    readOnly: true,
-    autoBindEvents: true,
-    tokenizer: Primrose.Grammars.TestResults,
-    theme: Primrose.Themes.Dark,
-    renderer: Primrose.Renderers.Canvas
-  } );
+  Assert.consoleTest( testObjects );
 
   var container = document.getElementById( "editorContainer" );
   container.appendChild( editor.getDOMElement() );
-  container.appendChild( tests.getDOMElement() );
-
-  editor.appendControls( document.getElementById( "controls" ) );
+  container.appendChild( output.getDOMElement() );
 }

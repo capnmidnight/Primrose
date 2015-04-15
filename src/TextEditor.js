@@ -861,15 +861,14 @@ window.Primrose.TextBox = ( function ( ) {
       str = str.replace( /\r\n/g, "\n" );
 
       if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
-        // TODO: don't rejoin the string first.
         var minCursor = Primrose.Cursor.min( this.frontCursor,
             this.backCursor ),
             maxCursor = Primrose.Cursor.max( this.frontCursor,
                 this.backCursor ),
+            // TODO: don't recalc the string first.
             text = this.value,
             left = text.substring( 0, minCursor.i ),
-            right = text.substring( maxCursor.i ),
-            removed = maxCursor.i - minCursor.i;
+            right = text.substring( maxCursor.i );
         this.value = left + str + right;
         minCursor.advanceN( tokenRows, Math.max( 0, str.length ) );
         this.scrollIntoView( maxCursor );
