@@ -23,7 +23,8 @@ window.Primrose.Grammars.Basic = ( function () {
         lines = [ ],
         currentLine = [ ],
         state = { },
-        counter = 0;
+        counter = 0,
+        isDone = false;
 
     while ( tokens.length > 0 ) {
       var token = tokens.shift();
@@ -174,14 +175,6 @@ window.Primrose.Grammars.Basic = ( function () {
       return true;
     }
 
-    function isEndOfProgram () {
-      var line = getLine();
-      return counter >= lineNumbers.length ||
-          ( line.length === 1 &&
-              line[0].type === "keywords" &&
-              line[0].value === "END" );
-    }
-
     function waitForInput ( line ) {
       if ( line.length > 1 && line[0].type === "strings" ) {
         var promptText = line.shift();
@@ -198,25 +191,29 @@ window.Primrose.Grammars.Basic = ( function () {
       return false;
     }
 
+    function programComplete(){
+      isDone = true;
+      done();
+      return false;
+    }
+
     var commands = {
       LET: setValue,
       PRINT: print,
       GOTO: setProgramCounter,
       IF: checkConditional,
-      INPUT: waitForInput
+      INPUT: waitForInput,
+      END: programComplete
           //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|TAB|AT|END
     };
 
     return function () {
-      if ( !isEndOfProgram() ) {
+      if ( !isDone ) {
         var goNext = process( getLine() );
         ++counter;
         if(goNext){
           next();
         }
-      }
-      else {
-        done();
       }
     };
   };
