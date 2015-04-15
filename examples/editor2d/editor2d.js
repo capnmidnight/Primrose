@@ -21,9 +21,60 @@ function editor2d () {
   "use strict";
 
   var editor = new Primrose.TextBox( "editor", {
-    file: rosetta_24_game.toString(),
+    file: "10 INPUT \"A value: \", X\n\
+20 IF X < 1 THEN GOTO 60 ELSE PRINT \"HOKAY MANG\"\n\
+30 IF X > 0 THEN PRINT \"FIZZ\" ELSE GOTO 10\n\
+40 LET X = X - 1\n\
+50 GOTO 30\n\
+60 END",
     autoBindEvents: true,
+    tokenizer: Primrose.Grammars.Basic,
     renderer: Primrose.Renderers.Canvas
+  } );
+
+  var running = false;
+  var inputCallback = null;
+  var currentIndex = 0;
+  editor.addEventListener( "keydown", function ( evt ) {
+    if ( evt.keyCode === Primrose.Keys.ENTER) {
+      if(running && inputCallback){
+        var str = editor.value.substring(currentIndex);
+        str = str.substring(0, str.length - 1);
+        inputCallback(str);
+        inputCallback = null;
+      }
+      else if ( !running && evt.ctrlKey ) {
+        running = true;
+        var input = function ( callback ) {
+          inputCallback = callback;
+          currentIndex = editor.value.length;
+          editor.selectionStart = editor.selectionEnd = currentIndex;
+          editor.forceDraw();
+        };
+        var output = function ( str ) {
+          editor.value += str;
+        };
+        var error = output;
+        var next = function () {
+          if ( running ) {
+            setTimeout( looper, 1 );
+          }
+        };
+        var done = function () {
+          if ( running ) {
+            output( "program complete\n" );
+            running = false;
+            editor.selectionStart = editor.selectionEnd = editor.value.length;
+            editor.forceDraw();
+          }
+        };
+        var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
+            output,
+            error, next, done );
+        editor.value += "\n";
+        next();
+      }
+    }
   } );
 
   var testObjects = [

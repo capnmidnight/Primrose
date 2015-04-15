@@ -215,6 +215,12 @@ window.Primrose.Cursor = ( function ( ) {
     this.moved = true;
   };
 
+  Cursor.prototype.setI = function ( i, tokenRows ) {
+    this.i = i;
+    this.fixCursor(tokenRows);
+    this.moved = true;
+  };
+
   Cursor.prototype.reverseFromNewline = function ( tokenRows ) {
     var line = rebuildLine( tokenRows, this.y );
     if ( this.x > 0 && line[this.x - 1] === '\n' ) {

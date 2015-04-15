@@ -434,6 +434,12 @@ window.Primrose.TextBox = ( function ( ) {
       "Home", "End",
       "FullHome", "FullEnd" ].map( makeCursorCommand.bind( this ) );
 
+    this.addEventListener = function ( event, thunk ) {
+      if ( event === "keydown" ) {
+        options.keyEventSource.addEventListener( event, thunk );
+      }
+    };
+
     this.cursorPageUp = function ( tokenRows, cursor ) {
       changed = true;
       cursor.incY( -gridBounds.height, tokenRows );
@@ -658,6 +664,27 @@ window.Primrose.TextBox = ( function ( ) {
           this.drawText();
           surrogate.value = txt;
           setSurrogateCursor();
+        }
+      },
+      selectionStart: {
+        get: function () {
+          return this.frontCursor.i;
+        },
+        set: function ( i ) {
+          this.frontCursor.setI( i, tokenRows );
+        }
+      },
+      selectionEnd: {
+        get: function () {
+          return this.backCursor.i;
+        },
+        set: function ( i ) {
+          this.backCursor.setI( i, tokenRows );
+        }
+      },
+      selectionDirection:{
+        get: function(){
+          return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
         }
       }
     } );

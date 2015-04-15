@@ -15,12 +15,16 @@ window.Primrose.Grammars.Basic = ( function () {
     [ "identifiers", /\w+/ ]
   ] );
 
-  grammar.interpret = function ( sourceCode, input, output, error ) {
-    var tokens = this.tokenize( sourceCode );
-    var program = { };
-    var lineNumbers = [ ];
-    var lines = [ ];
-    var currentLine = [ ];
+  grammar.interpret = function ( sourceCode, input, output, error, next,
+      done ) {
+    var tokens = this.tokenize( sourceCode ),
+        program = { },
+        lineNumbers = [ ],
+        lines = [ ],
+        currentLine = [ ],
+        state = { },
+        counter = 0;
+
     while ( tokens.length > 0 ) {
       var token = tokens.shift();
       if ( token.type === "newlines" ) {
@@ -59,21 +63,24 @@ window.Primrose.Grammars.Basic = ( function () {
       }
     }
 
-    var state = { };
-    var counter = 0;
-
     function getLine () {
       var lineNumber = lineNumbers[counter];
-      return program[lineNumber].slice();
+      return lineNumber && program[lineNumber] && program[lineNumber].slice();
     }
 
     function evaluate ( line ) {
+      var script = line.map( function ( token ) {
+        return token.value;
+      } )
+          .join( " " );
       with ( state ) {
-        var script = line.map( function ( token ) {
-          return token.value;
-        } )
-            .join( " " );
-        return eval( script );
+        try {
+          return eval( script );
+        }
+        catch ( exp ) {
+          console.error( exp.message );
+          console.error( script );
+        }
       }
     }
 
@@ -89,10 +96,14 @@ window.Primrose.Grammars.Basic = ( function () {
       else {
         state[name.value] = evaluate( line );
       }
+
+      return true;
     }
 
     function print ( line ) {
-      output( evaluate( line ) );
+      output( evaluate( line ) + "\n" );
+
+      return true;
     }
 
     function setProgramCounter ( line ) {
@@ -103,6 +114,8 @@ window.Primrose.Grammars.Basic = ( function () {
           lineNumbers[counter + 1] < lineNumber ) {
         ++counter;
       }
+
+      return true;
     }
 
     function checkConditional ( line ) {
@@ -131,12 +144,14 @@ window.Primrose.Grammars.Basic = ( function () {
           elseClause = line.slice( elseIndex + 1 );
         }
         if ( evaluate( condition ) ) {
-          process( thenClause );
+          return process( thenClause );
         }
         else if ( elseClause ) {
-          process( elseClause );
+          return process( elseClause );
         }
       }
+
+      return true;
     }
 
     function process ( line ) {
@@ -150,12 +165,13 @@ window.Primrose.Grammars.Basic = ( function () {
       }
       else {
         if ( commands.hasOwnProperty( op.value ) ) {
-          commands[op.value]( line );
+          return commands[op.value]( line );
         }
         else {
           error( "Unknown command. >>> " + op.value );
         }
       }
+      return true;
     }
 
     function isEndOfProgram () {
@@ -166,20 +182,43 @@ window.Primrose.Grammars.Basic = ( function () {
               line[0].value === "END" );
     }
 
+    function waitForInput ( line ) {
+      if ( line.length > 1 && line[0].type === "strings" ) {
+        var promptText = line.shift();
+        var txt = promptText.value;
+        txt = txt.substring( 1, txt.length - 1 );
+        output( txt );
+      }
+      input( function ( str ) {
+        setValue( [ line[0], { type: "operators", value: "=" }, {
+            type: "strings", value: "\"" + str + "\"" } ] );
+        next();
+      } );
+
+      return false;
+    }
+
     var commands = {
       LET: setValue,
       PRINT: print,
       GOTO: setProgramCounter,
-      IF: checkConditional
-          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|INPUT|TAB|AT|END
+      IF: checkConditional,
+      INPUT: waitForInput
+          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|TAB|AT|END
     };
 
-    var line = getLine();
-    while ( !isEndOfProgram() ) {
-      process( line );
-      ++counter;
-      line = getLine();
-    }
+    return function () {
+      if ( !isEndOfProgram() ) {
+        var goNext = process( getLine() );
+        ++counter;
+        if(goNext){
+          next();
+        }
+      }
+      else {
+        done();
+      }
+    };
   };
 
   return grammar;
