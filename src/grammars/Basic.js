@@ -105,7 +105,7 @@ window.Primrose.Grammars.Basic = ( function () {
       }
     }
 
-    function conditional ( line ) {
+    function checkConditional ( line ) {
       var thenIndex = -1,
           elseIndex = -1;
       for ( var i = 0; i < line.length; ++i ) {
@@ -139,14 +139,6 @@ window.Primrose.Grammars.Basic = ( function () {
       }
     }
 
-    var commands = {
-      LET: setValue,
-      PRINT: print,
-      GOTO: setProgramCounter,
-      IF: conditional
-          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|INPUT|TAB|AT|END
-    };
-
     function process ( line ) {
       var op = line.shift();
       if ( !op ) {
@@ -166,11 +158,24 @@ window.Primrose.Grammars.Basic = ( function () {
       }
     }
 
+    function isEndOfProgram () {
+      var line = getLine();
+      return counter >= lineNumbers.length ||
+          ( line.length === 1 &&
+              line[0].type === "keywords" &&
+              line[0].value === "END" );
+    }
+
+    var commands = {
+      LET: setValue,
+      PRINT: print,
+      GOTO: setProgramCounter,
+      IF: checkConditional
+          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|INPUT|TAB|AT|END
+    };
+
     var line = getLine();
-    while ( counter < lineNumbers.length &&
-        ( line.length !== 1 ||
-            line[0].type !== "keywords" ||
-            line[0].value !== "END" ) ) {
+    while ( !isEndOfProgram() ) {
       process( line );
       ++counter;
       line = getLine();
