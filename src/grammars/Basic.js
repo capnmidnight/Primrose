@@ -185,15 +185,19 @@ window.Primrose.Grammars.Basic = ( function () {
       input( function ( str ) {
         setValue( [ line[0], { type: "operators", value: "=" }, {
             type: "strings", value: "\"" + str + "\"" } ] );
-        next();
+        if ( next ) {
+          next();
+        }
       } );
 
       return false;
     }
 
-    function programComplete(){
+    function programComplete () {
       isDone = true;
-      done();
+      if ( done ) {
+        done();
+      }
       return false;
     }
 
@@ -211,7 +215,7 @@ window.Primrose.Grammars.Basic = ( function () {
       if ( !isDone ) {
         var goNext = process( getLine() );
         ++counter;
-        if(goNext){
+        if ( goNext && next ) {
           next();
         }
       }
