@@ -183,8 +183,14 @@ window.Primrose.Grammars.Basic = ( function () {
         output( txt );
       }
       input( function ( str ) {
-        setValue( [ line[0], { type: "operators", value: "=" }, {
-            type: "strings", value: "\"" + str + "\"" } ] );
+        var valueToken = null;
+        if ( /-?\d+(\.\d+)?/.test( str ) ) {
+          valueToken = { type: "numbers", value: str };
+        }
+        else {
+          valueToken = { type: "strings", value: "\"" + str + "\"" };
+        }
+        setValue( [ line[0], { type: "operators", value: "=" }, valueToken ] );
         if ( next ) {
           next();
         }

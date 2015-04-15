@@ -20,17 +20,23 @@
 function editor2d () {
   "use strict";
 
+  var EDITOR_CODE_KEY = "primrose-sample-code";
+
   var editor = new Primrose.TextBox( "editor", {
-    file: "10 INPUT \"A value: \", X\n\
+    file: getSetting(EDITOR_CODE_KEY, "10 INPUT \"A value: \", X\n\
 20 IF X < 1 THEN GOTO 60 ELSE PRINT \"HOKAY MANG\"\n\
 30 IF X > 0 THEN PRINT \"FIZZ\" ELSE GOTO 10\n\
 40 LET X = X - 1\n\
 50 GOTO 30\n\
-60 END",
+60 END"),
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
     renderer: Primrose.Renderers.Canvas
   } );
+
+  window.onbeforeunload = function ( ) {
+    setSetting(EDITOR_CODE_KEY, editor.value);
+  };
 
   var running = false;
   var inputCallback = null;
@@ -62,7 +68,7 @@ function editor2d () {
         };
         var done = function () {
           if ( running ) {
-            output( "program complete\n" );
+            output( "PROGRAM COMPLETE\n" );
             running = false;
             editor.selectionStart = editor.selectionEnd = editor.value.length;
             editor.forceDraw();

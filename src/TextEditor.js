@@ -871,7 +871,7 @@ window.Primrose.TextBox = ( function ( ) {
             right = text.substring( maxCursor.i ),
             removed = maxCursor.i - minCursor.i;
         this.value = left + str + right;
-        minCursor.advanceN( tokenRows, Math.max( 0, str.length - removed ) );
+        minCursor.advanceN( tokenRows, Math.max( 0, str.length ) );
         this.scrollIntoView( maxCursor );
         clampScroll();
         maxCursor.copy( minCursor );
