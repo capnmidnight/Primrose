@@ -327,13 +327,23 @@ function help ( obj ) {
       properties: props
     };
 
-    console.debug( obj );
-
     return obj;
   }
   else {
     console.warn( "Object was falsey." );
   }
+}
+
+function help2(obj){
+  var info = help(obj);
+  console.log(fmt("$1 -------\n\
+  properties:\n\
+    $2\n\
+  methods:\n\
+    $3",
+    info.type,
+    Object.keys(info.properties).map(function(k){return k+": "+info.properties[k];}).join("\n    "),
+    Object.keys(info.functions).join("\n    ")));
 }
 
 function makeURL ( url, queryMap ) {

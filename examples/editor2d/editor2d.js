@@ -94,6 +94,8 @@ rem to this simple BASIC clone" ),
       };
       var stdout = function ( str ) {
         output.value += str;
+        output.selectionStart = output.selectionEnd = output.value.length;
+        output.scrollIntoView(output.frontCursor);
       };
       var stderr = stdout;
       var next = function () {
