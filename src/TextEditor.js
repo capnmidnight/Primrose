@@ -317,7 +317,7 @@ window.Primrose.TextBox = ( function ( ) {
       for ( var i = 0; i < tokenQueue.length; ++i ) {
         var t = tokenQueue[i].clone();
         var widthLeft = gridBounds.width - currentRowWidth;
-        var wrap = wordWrap && t.value.length > widthLeft;
+        var wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
         var breakLine = t.type === "newlines" || wrap;
         if ( wrap ) {
           var split = t.value.length > gridBounds.width ? widthLeft : 0;

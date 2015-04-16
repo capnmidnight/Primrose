@@ -390,11 +390,18 @@ function XHR ( url, method, type, progress, error, success, data ) {
 
 function GET ( url, type, progress, error, success ) {
   type = type || "text";
-  XHR( url, "GET", type, progress, error, success );
+
+  var progressThunk = success && error && progress,
+      errorThunk = ( success && error ) || ( error && progress ),
+      successThunk = success || error || progress;
+  XHR( url, "GET", type, progressThunk, errorThunk, successThunk );
 }
 
 function POST ( url, data, type, progress, error, success ) {
-  XHR( url, "POST", type, progress, error, success, data );
+  var progressThunk = success && error && progress,
+      errorThunk = ( success && error ) || ( error && progress ),
+      successThunk = success || error || progress;
+  XHR( url, "POST", type, progressThunk, errorThunk, successThunk );
 }
 
 function getObject ( url, progress, error, success ) {

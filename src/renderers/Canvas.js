@@ -22,7 +22,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         theme = null,
         texture = null,
         pickingTexture = null,
-        pickingPixelBuffer = null;
+        pickingPixelBuffer = null,
+        strictSize = options.strictSize;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -36,11 +37,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     this.pixel2cell = function ( point, scroll, gridBounds ) {
       var r = this.getPixelRatio();
+      var x = point.x * canvas.width / canvas.clientWidth;
+      var y = point.y * canvas.height / canvas.clientHeight;
       point.set(
-          Math.round( point.x * r / this.character.width ) + scroll.x -
-          gridBounds.x,
-          Math.floor( ( point.y * r / this.character.height ) - 0.25 ) +
-          scroll.y );
+          Math.round( x * r / this.character.width ) + scroll.x - gridBounds.x,
+          Math.floor( ( y * r / this.character.height ) - 0.25 ) + scroll.y );
     };
 
     this.hasResized = function () {
@@ -60,8 +61,10 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             oldCharacterHeight = this.character.height,
             oldWidth = canvas.width,
             oldHeight = canvas.height,
-            newWidth = canvas.clientWidth * r,
-            newHeight = canvas.clientHeight * r,
+            newWidth = ( strictSize && strictSize.width ) ||
+            ( canvas.clientWidth * r ),
+            newHeight = ( strictSize && strictSize.height ) ||
+            ( canvas.clientHeight * r ),
             oldFont = gfx.font;
         this.character.height = theme.fontSize * r;
         gfx.font = this.character.height + "px " + theme.fontFamily;
@@ -390,7 +393,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
       var i = ( pickingPixelBuffer[0] << 16 ) |
           ( pickingPixelBuffer[1] << 8 ) |
           ( pickingPixelBuffer[2] << 0 );
-      return { x: i % canvas.width, y: i / canvas.width };
+      return { x: i % canvas.clientWidth, y: i / canvas.clientWidth };
     };
 
 

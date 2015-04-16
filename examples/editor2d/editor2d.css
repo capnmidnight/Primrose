@@ -41,14 +41,14 @@ html, body{
 
 #editor{
   position:absolute;
-  height:100%;
   width:50%;
+  height:100%;
   cursor:text;
 }
 
 #testResults{
   position:absolute;
   left:50%;
-  height:100%;
   width:50%;
+  height:100%;
 }

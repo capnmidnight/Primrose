@@ -18,5 +18,9 @@ window.Primrose.Token = ( function () {
     return new Token( next, this.type, this.index + i, this.line );
   };
 
+  Token.prototype.toString = function(){
+    return fmt("($1): $2", this.type, this.value);
+  };
+
   return Token;
 } )();

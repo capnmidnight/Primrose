@@ -55,6 +55,7 @@ rem what you see is what you get, there aren't many features\n\
 rem to this simple BASIC clone" ),
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
+    theme: Primrose.Themes.Dark,
     hideLineNumbers: true
   } );
 
@@ -111,22 +112,33 @@ rem to this simple BASIC clone" ),
           editor.forceDraw();
         }
       };
+      var clearScreen = function(){
+        output.selectionStart = output.selectionEnd = 0;
+        output.value = "";
+      };
+
+      var loadFile = function(fileName, callback){
+        GET(fileName, "text", function(file){
+          editor.value = file;
+          callback();
+        });
+      };
       var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
           stdout,
-          stderr, next, done );
+          stderr, next, done, clearScreen, loadFile );
       next();
     }
   } );
 
-  var testObjects = [
-    Primrose.Grammars.Basic,
-    Primrose.Grammar,
-    Primrose.Point,
-    Primrose.Rectangle,
-    Primrose.Size
-  ];
-
-  Assert.consoleTest( testObjects );
+//  var testObjects = [
+//    Primrose.Grammars.Basic,
+//    Primrose.Grammar,
+//    Primrose.Point,
+//    Primrose.Rectangle,
+//    Primrose.Size
+//  ];
+//
+//  Assert.consoleTest( testObjects );
 
   var container = document.getElementById( "editorContainer" );
   container.appendChild( editor.getDOMElement() );
