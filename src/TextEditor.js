@@ -73,6 +73,7 @@ window.Primrose.TextBox = ( function ( ) {
         topLeftGutter = new Primrose.Size(),
         bottomRightGutter = new Primrose.Size(),
         dragging = false,
+        scrolling = false,
         focused = false,
         changed = false,
         showLineNumbers = true,
@@ -138,12 +139,13 @@ window.Primrose.TextBox = ( function ( ) {
       var onBottom = gy >= gridBounds.height;
       var onLeft = gx < 0;
       var onRight = pointer.x >= gridBounds.width;
-      if ( !onBottom && !onLeft && !onRight ) {
+      if ( !scrolling && !onBottom && !onLeft && !onRight ) {
         cursor.setXY( pointer.x, pointer.y, tokenRows );
         setSurrogateCursor();
         self.backCursor.copy( cursor );
       }
-      else if ( onRight && !onBottom ) {
+      else if ( scrolling || onRight && !onBottom ) {
+        scrolling = true;
         var scrollHeight = tokenRows.length - gridBounds.height;
         if ( gy >= 0 && scrollHeight >= 0 ) {
           var sy = gy * scrollHeight / gridBounds.height;
@@ -823,6 +825,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.endPointer = function () {
       dragging = false;
+      scrolling = false;
       surrogate.focus();
     };
 
