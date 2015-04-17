@@ -13,10 +13,10 @@
 13 REM a few minor changes to correct a few bugs in the copy that I found, as
 14 REM well as to fudge a few minor issues with my interpreter.
 15 REM
-16 REM Run the program at any time by hitting CTRL+ENTER on your keyboard. Type
-17 REM commands when prompted. The game mostly uses numeric commands, but there
-18 REM is a shooting mini-game that requires you to quickly type a given word,
-19 REM so pay attention for when it comes up.
+16 REM Run the program at any time by hitting CTRL+ENTER on your keyboard.
+17 REM Type commands when prompted. The game mostly uses numeric commands, but
+18 REM there is a shooting mini-game that requires you to quickly type a given
+19 REM word, so pay attention for when it comes up.
 20 REM
 21 REM As of right now, the interpreter has a minor issue that it will not be
 22 REM able to read your input correctly if you move the cursor before typing.

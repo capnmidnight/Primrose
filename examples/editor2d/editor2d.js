@@ -57,6 +57,9 @@ function editor2d () {
 
   function loadFile ( fileName, callback ) {
     GET( fileName.toLowerCase(), "text", function ( file ) {
+      if ( isOSX ) {
+        file = file.replace( "CTRL+ENTER", "CMD+OPT+E" );
+      }
       editor.value = currentProgram = file;
       if ( callback ) {
         callback();
@@ -94,8 +97,13 @@ function editor2d () {
       inputCallback = null;
     }
     else if ( !running &&
-        evt.ctrlKey &&
-        evt.keyCode === Primrose.Keys.ENTER ) {
+        ( !isOSX &&
+            evt.ctrlKey &&
+            evt.keyCode === Primrose.Keys.ENTER ) ||
+        ( isOSX &&
+            evt.metaKey &&
+            evt.altKey &&
+            evt.keyCode === Primrose.Keys.E ) ) {
 
       running = true;
 
