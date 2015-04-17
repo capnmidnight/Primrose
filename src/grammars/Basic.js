@@ -311,7 +311,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             }
           }
         }
-        return true;
       }
       catch ( exp ) {
         console.error( exp );
@@ -320,7 +319,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         }
         error( exp.message );
       }
-      return programComplete( );
+      return pauseBeforeComplete();
     }
 
     function pauseBeforeComplete () {
