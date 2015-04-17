@@ -325,9 +325,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     function pauseBeforeComplete () {
       output( "PROGRAM COMPLETE - PRESS RETURN TO FINISH." );
       input( function ( str ) {
-        programComplete();
-        if ( next ) {
-          next();
+        isDone = true;
+        if ( done ) {
+          done( );
         }
       } );
       return false;
@@ -425,14 +425,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
           next( );
         }
       } );
-      return false;
-    }
-
-    function programComplete ( ) {
-      isDone = true;
-      if ( done ) {
-        done( );
-      }
       return false;
     }
 
