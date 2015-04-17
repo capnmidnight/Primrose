@@ -41,6 +41,7 @@ function editor2d () {
 
   function done () {
     if ( running ) {
+      flush( );
       running = false;
       editor.setTokenizer( Primrose.Grammars.Basic );
       editor.value = currentProgram;
@@ -65,14 +66,23 @@ function editor2d () {
 
   loadFile( "oregon.bas" );
 
+  function flush () {
+    if ( buffer.length > 0 ) {
+      editor.value += buffer;
+      buffer = "";
+    }
+  }
+
   function input ( callback ) {
+    flush();
     inputCallback = callback;
     toEnd( );
     currentIndex = editor.selectionStart;
   }
 
+  var buffer = "";
   function stdout ( str ) {
-    editor.value += str;
+    buffer += str;
     toEnd( );
   }
 
