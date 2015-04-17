@@ -224,7 +224,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       line.forEach( function ( t, i ) {
         if ( t.type === "operators" ) {
           if ( t.value === "," ) {
-            if(nest === 0){
+            if ( nest === 0 ) {
               t.value = "+ \", \" + ";
             }
           }
@@ -237,10 +237,10 @@ window.Primrose.Grammars.Basic = ( function ( ) {
               endLine = "";
             }
           }
-          else if(t.value === "("){
+          else if ( t.value === "(" ) {
             ++nest;
           }
-          else if(t.value === ")"){
+          else if ( t.value === ")" ) {
             --nest;
           }
         }
@@ -430,9 +430,21 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function untilLoop ( line ) {
-      var val = !evaluate( line );
-      console.log( "looping " + val );
-      return conditionalReturn( val );
+      var cond = !evaluate( line );
+      return conditionalReturn( cond );
+    }
+
+    function whileLoop ( line ) {
+      var cond = evaluate( line );
+      if ( !cond ) {
+        do {
+          ++counter;
+        } while ( counter < program.length && getLine()[0].value !== "WEND" );
+      }
+      else {
+        returnStack.push( toNum( lineNumbers[counter] ) );
+      }
+      return true;
     }
 
     function stackReturn ( ) {
@@ -475,26 +487,27 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return true;
     }
 
-    function defineFunction(line){
+    function defineFunction ( line ) {
       var name = line.shift().value;
       var signature = "";
       var body = "";
       var fillSig = true;
-      for(var i = 0; i < line.length; ++i){
+      for ( var i = 0; i < line.length; ++i ) {
         var t = line[i];
-        if(t.type === "operators" && t.value === "="){
+        if ( t.type === "operators" && t.value === "=" ) {
           fillSig = false;
         }
-        else if(fillSig){
+        else if ( fillSig ) {
           signature += t.value;
         }
-        else{
+        else {
           body += t.value;
         }
       }
       name = "FN" + name;
-      var script = "(function " + name + signature + "{ return " + body + "; })";
-      state[name] = eval(script);
+      var script = "(function " + name + signature + "{ return " + body +
+          "; })";
+      state[name] = eval( script );
       return true;
     }
 
@@ -519,8 +532,10 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       RESTORE: restoreData,
       REPEAT: setRepeat,
       UNTIL: untilLoop,
-      " DEF FN": defineFunction
-          //FOR|TO|STEP|NEXT|WHILE|WEND|AT
+      " DEF FN": defineFunction,
+      WHILE: whileLoop,
+      WEND: stackReturn
+          //FOR|TO|STEP|NEXT
     };
 
     return function ( ) {
