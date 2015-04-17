@@ -190,7 +190,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         error( "Identifier expected. >>> " + name.value );
       }
       else if ( equals.type === "operators" && equals.value === "=" ) {
-        state[name.value] = evaluate( line );
+        var val = evaluate( line );
+        state[name.value] = val;
       }
       else if ( equals.type === "operators" && equals.value === "[" ) {
         var idxExpr = [ ];
@@ -202,7 +203,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
           line.shift( ); // burn the close paren
           equals = line.shift( );
           if ( equals.type === "operators" && equals.value === "=" ) {
-            state[name.value][evaluate( idxExpr )] = evaluate( line );
+            var val = evaluate( line );
+            state[name.value][evaluate( idxExpr )] = val;
           }
         }
       }
@@ -231,7 +233,11 @@ window.Primrose.Grammars.Basic = ( function ( ) {
           }
         }
       } );
-      output( ( evaluate( line ) || "" ) + endLine );
+      var txt = evaluate( line );
+      if ( txt === undefined ) {
+        txt = "";
+      }
+      output( txt + endLine );
       return true;
     }
 
@@ -412,7 +418,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function untilLoop ( line ) {
-      return conditionalReturn( evaluate( line ) );
+      var val = !evaluate( line );
+      console.log( "looping " + val );
+      return conditionalReturn( val );
     }
 
     function stackReturn ( ) {
