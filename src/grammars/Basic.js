@@ -10,7 +10,10 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
     [ "keywords",
-      /\b(?:RESTORE|REPEAT|RETURN|LOAD|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|DEF FN|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
+      /\b(?:RESTORE|REPEAT|RETURN|LOAD|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
+    ],
+    [ "keywords",
+      /^ DEF FN/
     ],
     [ "operators",
       /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
@@ -217,10 +220,13 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     function print ( line ) {
       var endLine = "\n";
+      var nest = 0;
       line.forEach( function ( t, i ) {
         if ( t.type === "operators" ) {
           if ( t.value === "," ) {
-            t.value = "+ \", \" + ";
+            if(nest === 0){
+              t.value = "+ \", \" + ";
+            }
           }
           else if ( t.value === ";" ) {
             t.value = "+ \" \"";
@@ -230,6 +236,12 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             else {
               endLine = "";
             }
+          }
+          else if(t.value === "("){
+            ++nest;
+          }
+          else if(t.value === ")"){
+            --nest;
           }
         }
       } );
@@ -463,6 +475,29 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return true;
     }
 
+    function defineFunction(line){
+      var name = line.shift().value;
+      var signature = "";
+      var body = "";
+      var fillSig = true;
+      for(var i = 0; i < line.length; ++i){
+        var t = line[i];
+        if(t.type === "operators" && t.value === "="){
+          fillSig = false;
+        }
+        else if(fillSig){
+          signature += t.value;
+        }
+        else{
+          body += t.value;
+        }
+      }
+      name = "FN" + name;
+      var script = "(function " + name + signature + "{ return " + body + "; })";
+      state[name] = eval(script);
+      return true;
+    }
+
     var commands = {
       DIM: declareVariable,
       LET: setValue,
@@ -483,8 +518,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       READ: readData,
       RESTORE: restoreData,
       REPEAT: setRepeat,
-      UNTIL: untilLoop
-          //FOR|TO|STEP|NEXT|WHILE|WEND|DEF FN|AT
+      UNTIL: untilLoop,
+      " DEF FN": defineFunction
+          //FOR|TO|STEP|NEXT|WHILE|WEND|AT
     };
 
     return function ( ) {
