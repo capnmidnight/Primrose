@@ -129,11 +129,12 @@ rem to this simple BASIC clone" ),
       };
 
       var loadFile = function(fileName, callback){
-        GET(fileName, "text", function(file){
+        GET(fileName.toLowerCase(), "text", function(file){
           editor.value = file;
           callback();
         });
       };
+
       var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
           stdout,
           stderr, next, done, clearScreen, loadFile );
