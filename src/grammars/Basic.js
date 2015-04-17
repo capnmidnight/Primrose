@@ -34,9 +34,11 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         isDone = false,
         program = { },
         lineNumbers = [ ],
-        lines = [ ],
         currentLine = [ ],
+        lines = [ currentLine ],
         data = [ ],
+        returnStack = [ ],
+        forLoopCounters = { },
         dataCounter = 0,
         state = {
           INT: function ( v ) {
@@ -64,7 +66,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         };
 
     function toNum ( ln ) {
-      return new Primrose.Token( ln, "numbers" );
+      return new Primrose.Token( ln.toString(), "numbers" );
     }
 
     function toStr ( str ) {
@@ -83,8 +85,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     while ( tokens.length > 0 ) {
       var token = tokens.shift( );
       if ( token.type === "newlines" ) {
-        lines.push( currentLine );
         currentLine = [ ];
+        lines.push( currentLine );
       }
       else if ( token.type !== "regular" && token.type !== "comments" ) {
         token.value = tokenMap[token.value] || token.value;
@@ -107,29 +109,67 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       }
     }
 
-    lines.push( currentLine );
     for ( var i = 0; i < lines.length; ++i ) {
       var line = lines[i];
       if ( line.length > 0 ) {
+        var lastLine = lineNumbers[lineNumbers.length - 1];
         var lineNumber = line.shift( );
+
         if ( lineNumber.type !== "lineNumbers" ) {
-          error( "All lines must start with a line number. >>> " + line.join(
-              ", " ) );
-          break;
-        }
-        else {
-          lineNumber = parseFloat( lineNumber.value );
-          var lastLine = lineNumbers[lineNumbers.length - 1];
-          if ( !lastLine || lineNumber > lastLine ) {
-            lineNumbers.push( lineNumber );
-            program[lineNumber] = line;
+          line.unshift( lineNumber );
+
+          if ( lastLine === undefined ) {
+            lastLine = -1;
           }
-          else {
-            throw new Error( "expected line number greater than " + lastLine +
-                ", but received " + lineNumber + "." );
+
+          lineNumber = toNum( lastLine + 1 );
+        }
+
+        lineNumber = parseFloat( lineNumber.value );
+        if ( lastLine && lineNumber <= lastLine ) {
+          throw new Error( "expected line number greater than " + lastLine +
+              ", but received " + lineNumber + "." );
+        }
+        else if ( line.length > 0 ) {
+          lineNumbers.push( lineNumber );
+          program[lineNumber] = line;
+        }
+      }
+    }
+
+
+    function process ( line ) {
+      var op;
+      try {
+        if ( line && line.length > 0 ) {
+          op = line.shift( );
+          if ( op ) {
+            if ( commands.hasOwnProperty( op.value ) ) {
+              return commands[op.value]( line );
+            }
+            else if ( isNumber( op.value ) ) {
+              return setProgramCounter( [ op ] );
+            }
+            else if ( state[op.value] ||
+                ( line.length > 0 && line[0].type === "operators" &&
+                    line[0].value === "=" ) ) {
+              line.unshift( op );
+              return setValue( line );
+            }
+            else {
+              error( "Unknown command. >>> " + op.value );
+            }
           }
         }
       }
+      catch ( exp ) {
+        console.error( exp );
+        if ( op ) {
+          console.log( op.toString() );
+        }
+        error( exp.message );
+      }
+      return pauseBeforeComplete();
     }
 
     function error ( msg ) {
@@ -137,10 +177,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function getLine ( i ) {
-      i = i || counter;
       var lineNumber = lineNumbers[i];
-      return lineNumber && program[lineNumber] &&
-          program[lineNumber].slice( );
+      var line = program[lineNumber];
+      return line && line.slice( );
     }
 
     function evaluate ( line ) {
@@ -222,7 +261,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     function print ( line ) {
       var endLine = "\n";
       var nest = 0;
-      line.forEach( function ( t, i ) {
+      line = line.map( function ( t, i ) {
+        t = t.clone();
         if ( t.type === "operators" ) {
           if ( t.value === "," ) {
             if ( nest === 0 ) {
@@ -236,6 +276,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             }
             else {
               endLine = "";
+              console.log("whomp");
             }
           }
           else if ( t.value === "(" ) {
@@ -245,6 +286,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             --nest;
           }
         }
+        return t;
       } );
       var txt = evaluate( line );
       if ( txt === undefined ) {
@@ -306,39 +348,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       }
 
       return true;
-    }
-
-    function process ( line ) {
-      var op;
-      try {
-        if ( line && line.length > 0 ) {
-          op = line.shift( );
-          if ( op ) {
-            if ( commands.hasOwnProperty( op.value ) ) {
-              return commands[op.value]( line );
-            }
-            else if ( isNumber( op.value ) ) {
-              return setProgramCounter( [ op ] );
-            }
-            else if ( state[op.value] ||
-                ( line[0].type === "operators" && line[0].value === "=" ) ) {
-              line.unshift( op );
-              return setValue( line );
-            }
-            else {
-              error( "Unknown command. >>> " + op.value );
-            }
-          }
-        }
-      }
-      catch ( exp ) {
-        console.error( exp );
-        if ( op ) {
-          console.log( op.toString() );
-        }
-        error( exp.message );
-      }
-      return pauseBeforeComplete();
     }
 
     function pauseBeforeComplete () {
@@ -415,7 +424,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return true;
     }
 
-    var returnStack = [ ];
     function gotoSubroutine ( line ) {
       returnStack.push( toNum( lineNumbers[counter + 1] ) );
       return setProgramCounter( line );
@@ -461,7 +469,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return true;
     }
 
-    var forLoopCounters = { };
+    var FOR_LOOP_DELIMS = [ "=", "TO", "STEP" ];
 
     function forLoop ( line ) {
       var n = lineNumbers[counter];
@@ -474,11 +482,11 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       var i = 0;
       for ( i = 0; i < line.length; ++i ) {
         var t = line[i];
-        if ( t.value === "=" || t.value === "TO" || t.value === "STEP" ) {
-          ++a;
-          if ( t.value === "=" ) {
+        if ( t.value === FOR_LOOP_DELIMS[a] ) {
+          if ( a === 0 ) {
             varExpr.push( t );
           }
+          ++a;
         }
         else {
           arrs[a].push( t );
@@ -604,7 +612,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     return function ( ) {
       if ( !isDone ) {
-        var line = getLine( );
+        var line = getLine( counter );
         var goNext = process( line );
         ++counter;
         if ( goNext && next ) {
