@@ -37,9 +37,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         dataCounter = 0,
         state = {
           INT: function ( v ) {
-            return Math.floor( parseFloat( v ) );
+            return v | 0;
           },
-          RND: function ( v ) {
+          RND: function ( ) {
             return Math.random( );
           },
           CLK: function ( ) {
@@ -324,7 +324,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     function pauseBeforeComplete () {
       output( "PROGRAM COMPLETE - PRESS RETURN TO FINISH." );
-      input( function ( str ) {
+      input( function ( ) {
         isDone = true;
         if ( done ) {
           done( );
