@@ -19,8 +19,7 @@
 
 function editor2d () {
   "use strict";
-  addFullScreenShim(window);
-  var EDITOR_CODE_KEY = "primrose-sample-code";
+//  addFullScreenShim(window);
 
   var editor = new Primrose.TextBox( "editor", {
     autoBindEvents: true,
@@ -29,13 +28,10 @@ function editor2d () {
     hideLineNumbers: true
   } );
 
-  window.onbeforeunload = function ( ) {
-    setSetting( EDITOR_CODE_KEY, editor.value );
-  };
-
   var running = false;
   var inputCallback = null;
   var currentIndex = 0;
+  var currentProgram = null;
 
   function toEnd (  ) {
     editor.selectionStart = editor.selectionEnd = editor.value.length;
@@ -45,10 +41,10 @@ function editor2d () {
 
   function done () {
     if ( running ) {
-      stdout( "PROGRAM COMPLETE\n" );
       running = false;
       editor.setTokenizer( Primrose.Grammars.Basic );
-      loadFile( "oregon.bas", toEnd );
+      editor.value = currentProgram;
+      toEnd( );
     }
   }
 
@@ -60,7 +56,7 @@ function editor2d () {
 
   function loadFile ( fileName, callback ) {
     GET( fileName.toLowerCase(), "text", function ( file ) {
-      editor.value = file;
+      editor.value = currentProgram = file;
       if ( callback ) {
         callback();
       }
@@ -99,7 +95,8 @@ function editor2d () {
         }
       };
 
-      var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
+      currentProgram = editor.value;
+      var looper = Primrose.Grammars.Basic.interpret( currentProgram, input,
           stdout, stdout, next, clearScreen, loadFile, done );
       editor.setTokenizer( Primrose.Grammars.PlainText );
       clearScreen();

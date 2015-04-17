@@ -323,6 +323,17 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return programComplete( );
     }
 
+    function pauseBeforeComplete () {
+      output( "PROGRAM COMPLETE - PRESS RETURN TO FINISH." );
+      input( function ( str ) {
+        programComplete();
+        if ( next ) {
+          next();
+        }
+      } );
+      return false;
+    }
+
     function waitForInput ( line ) {
       var toVar = line.pop();
       if ( line.length > 0 ) {
@@ -346,18 +357,20 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function onStatement ( line ) {
-      var oldLine = line.slice(),
-          idxExpr = [ ],
+      var idxExpr = [ ],
           idx = null,
           targets = [ ],
           exp;
       try {
-        while ( line.length > 0 && ( line[0].type !== "keywords" ||
-            line[0].value !== "GOTO" ) ) {
+        while ( line.length > 0 &&
+            ( line[0].type !== "keywords" ||
+                line[0].value !== "GOTO" ) ) {
           idxExpr.push( line.shift( ) );
         }
+
         if ( line.length > 0 ) {
           line.shift( ); // burn the goto;
+
           for ( var i = 0; i < line.length; ++i ) {
             var t = line[i];
             if ( t.type !== "operators" ||
@@ -365,17 +378,16 @@ window.Primrose.Grammars.Basic = ( function ( ) {
               targets.push( t );
             }
           }
-          idx = evaluate( idxExpr );
+
+          idx = evaluate( idxExpr ) - 1;
+
           if ( 0 <= idx && idx < targets.length ) {
-            return setProgramCounter( [ targets[idx - 1] ] );
+            return setProgramCounter( [ targets[idx] ] );
           }
         }
       }
       catch ( exp ) {
         console.error( exp );
-        console.log( oldLine.join( "," ) );
-        console.log( idxExpr.join( "," ) );
-        console.log( idx );
       }
       return true;
     }
@@ -459,8 +471,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       GOTO: setProgramCounter,
       IF: checkConditional,
       INPUT: waitForInput,
-      END: programComplete,
-      STOP: programComplete,
+      END: pauseBeforeComplete,
+      STOP: pauseBeforeComplete,
       REM: noop,
       "'": noop,
       CLS: clearScreen,
