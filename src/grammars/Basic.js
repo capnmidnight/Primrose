@@ -364,7 +364,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         } );
         var idx = evaluate( idxExpr );
         if ( 0 <= idx && idx < targets.length ) {
-          return setProgramCounter( [ targets[idx] ] );
+          return setProgramCounter( [ targets[idx - 1] ] );
         }
         return true;
       }
