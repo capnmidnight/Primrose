@@ -1,34 +1,36 @@
-1 REM  This is a restored version of the original OREGON TRAIL program
-2 REM  written by Bill Heinemann from 1971 to 1978. This is the text-
-3 REM  only version of the game, which is probably not the version that
-4 REM  most people remember. However, I find it to be an interesting bit
-5 REM  of computing history all on its own.
-6 REM
-7 REM  You can see the source code here, which only comes out to about
-8 REM  690 lines of CDC Cyber BASIC, a rather neat dialect without some
-9 REM  of the more curious warts of its older cousins. I've made a few
-10 REM minor changes to correct a few bugs in the original copy that I
-11 REM found, as well as to fudge a few minor issues with my interpreter.
-12 REM
-13 REM Run the program at any time by hitting CTRL+ENTER on your key-
-14 REM board. Type commands when prompted. The game mostly uses numeric
-15 REM commands, but there is a shooting mini-game that requires you to
-16 REM quickly type a given word, so pay attention for when it comes up.
-17 REM
-18 REM As of right now, the interpreter has a minor issue that it will
-19 REM not be able to read your input correctly if you move the cursor
-20 REM before typing. If you do move the cursor, just hit CTRL+END (or
-21 REM CMD+END on your Apple ][e descendent) and the cursor will be put
-22 REM back in the correct place.
-23 REM
-24 REM                                                         thank you
-25 REM                                                    Sean T. McBeth
-26 REM                                    https://www.primroseeditor.com
-27 REM =================================================================
-28 REM
-29 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
-30 REM ORIGINAL PROGRAMMING BY BILL HEINEMANN - 1971
-31 REM SUPPORT RESEARCH AND MATERIALS BY DON RAWITSCH,
+1  REM This is a restored version of the original OREGON TRAIL program written
+2  REM by Don Rawitsch and Bill Heinemann from 1971 to 1978. This is the text-
+3  REM only version of the game, which is almost certainly not the version that
+4  REM most people will remember. However, I find it to be an interesting bit
+5  REM of computing history, nonetheless.
+6  REM
+7  REM You can read more about the history of OREGON TRAIL here:
+8  REM        http://bit.ly/1PYytsT
+9  REM        http://www.citypages.com/content/printVersion/1740595/
+10 REM
+11 REM You can see the source code here, which less than 700 lines of a dialect
+12 REM of BASIC for the CDC Cyber 70/73-26 mainframe computer. I've had to make
+13 REM a few minor changes to correct a few bugs in the copy that I found, as
+14 REM well as to fudge a few minor issues with my interpreter.
+15 REM
+16 REM Run the program at any time by hitting CTRL+ENTER on your keyboard. Type
+17 REM commands when prompted. The game mostly uses numeric commands, but there
+18 REM is a shooting mini-game that requires you to quickly type a given word,
+19 REM so pay attention for when it comes up.
+20 REM
+21 REM As of right now, the interpreter has a minor issue that it will not be
+22 REM able to read your input correctly if you move the cursor before typing.
+23 REM If you do move the cursor, just hit CTRL+END (or CMD+DONW ARROW on your
+24 REM Apple ][ descendent) and the cursor will be placed correctly.
+25 REM
+26 REM                                                                thank you
+27 REM                                                           Sean T. McBeth
+28 REM                                           https://www.primroseeditor.com
+29 REM ========================================================================
+30 REM
+31 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
+32 REM ORIGINAL PROGRAMMING BY BILL HEINEMANN - 1971
+33 REM SUPPORT RESEARCH AND MATERIALS BY DON RAWITSCH,
 40 REM      MINNESOTA EDUCATIONAL COMPUTING CONSORTIUM STAFF
 50 REM CDC CYBER 70/73-26     BASIC 3.1
 60 REM DOCUMENTATION BOOKLET 'OREGON' AVAILABLE FROM

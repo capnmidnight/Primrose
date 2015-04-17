@@ -4,17 +4,15 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
   var grammar = new Primrose.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
-    [ "lineNumbers", /^\d+/ ],
-    [ "comments", /^ REM.*$/ ],
+    [ "lineNumbers", /^\d+\s+/ ],
+    [ "comments", /^REM.*$/ ],
     [ "strings", /"(?:\\"|[^"])*"/ ],
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
     [ "keywords",
       /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
     ],
-    [ "keywords",
-      /^ DEF FN/
-    ],
+    [ "keywords", /^DEF FN/ ],
     [ "operators",
       /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
     ],
@@ -276,7 +274,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             }
             else {
               endLine = "";
-              console.log("whomp");
             }
           }
           else if ( t.value === "(" ) {
@@ -545,6 +542,10 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function readData ( line ) {
+      if ( data.length === 0 ) {
+        var dataLine = findNext( "DATA" );
+        process( getLine( dataLine ) );
+      }
       var value = data[dataCounter];
       ++dataCounter;
       line.push( EQUAL_SIGN );
@@ -602,7 +603,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       RESTORE: restoreData,
       REPEAT: setRepeat,
       UNTIL: untilLoop,
-      " DEF FN": defineFunction,
+      "DEF FN": defineFunction,
       WHILE: whileLoop,
       WEND: stackReturn,
       FOR: forLoop,
