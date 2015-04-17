@@ -1,5 +1,3 @@
-/*global THREE, qp*/
-
 window.Primrose = window.Primrose || { };
 window.Primrose.Themes = window.Primrose.Themes || { };
 window.Primrose.Themes.Dark = ( function ( ) {
@@ -9,6 +7,9 @@ window.Primrose.Themes.Dark = ( function ( ) {
     fontFamily: "monospace",
     cursorColor: "white",
     fontSize: 14,
+    lineNumbers: {
+      foreColor: "white"
+    },
     regular: {
       backColor: "black",
       foreColor: "#c0c0c0",

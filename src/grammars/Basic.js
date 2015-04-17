@@ -136,8 +136,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       errorOut( "At line " + lineNumbers[counter] + ": " + msg );
     }
 
-    function getLine ( ) {
-      var lineNumber = lineNumbers[counter];
+    function getLine ( i ) {
+      i = i || counter;
+      var lineNumber = lineNumbers[i];
       return lineNumber && program[lineNumber] &&
           program[lineNumber].slice( );
     }
@@ -434,12 +435,20 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return conditionalReturn( cond );
     }
 
+    function findNext ( str ) {
+      for ( i = counter + 1; i < lineNumbers.length; ++i ) {
+        var l = getLine( i );
+        if ( l[0].value === str ) {
+          return i;
+        }
+      }
+      return lineNumbers.length;
+    }
+
     function whileLoop ( line ) {
       var cond = evaluate( line );
       if ( !cond ) {
-        do {
-          ++counter;
-        } while ( counter < program.length && getLine()[0].value !== "WEND" );
+        counter = findNext( "WEND" );
       }
       else {
         returnStack.push( toNum( lineNumbers[counter] ) );
@@ -457,7 +466,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       var skipExpr = [ ];
       var arrs = [ varExpr, fromExpr, toExpr, skipExpr ];
       var a = 0;
-      for ( var i = 0; i < line.length; ++i ) {
+      var i = 0;
+      for ( i = 0; i < line.length; ++i ) {
         var t = line[i];
         if ( t.value === "=" || t.value === "TO" || t.value === "STEP" ) {
           ++a;
@@ -483,9 +493,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       var cond = forLoopCounters[n] <= end;
       if ( !cond ) {
         delete forLoopCounters[n];
-        do {
-          ++counter;
-        } while ( counter < program.length && getLine()[0].value !== "NEXT" );
+        counter = findNext( "NEXT" );
       }
       else {
         varExpr.push( toNum( forLoopCounters[n] ) );
