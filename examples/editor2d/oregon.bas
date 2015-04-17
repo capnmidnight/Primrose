@@ -1,6 +1,34 @@
-10 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
-20 REM ORIGINAL PROGRAMMING BY BILL HEINEMANN - 1971
-30 REM SUPPORT RESEARCH AND MATERIALS BY DON RAWITSCH,
+1 REM  This is a restored version of the original OREGON TRAIL program
+2 REM  written by Bill Heinemann from 1971 to 1978. This is the text-
+3 REM  only version of the game, which is probably not the version that
+4 REM  most people remember. However, I find it to be an interesting bit
+5 REM  of computing history all on its own.
+6 REM
+7 REM  You can see the source code here, which only comes out to about
+8 REM  690 lines of CDC Cyber BASIC, a rather neat dialect without some
+9 REM  of the more curious warts of its older cousins. I've made a few
+10 REM minor changes to correct a few bugs in the original copy that I
+11 REM found, as well as to fudge a few minor issues with my interpreter.
+12 REM
+13 REM You may run the program at any time by hitting CTRL+ENTER on your
+14 REM keyboard. Type commands when prompt. The game mostly uses numeric
+15 REM commands, but there is a shooting mini-game that requires you to
+16 REM quickly type a given word, so pay attention for when it comes up.
+17 REM
+18 REM As of right now, the interpreter has a minor issue that it will
+19 REM not be able to read your input correctly if you move the cursor
+20 REM before typing. If you do move the cursor, just hit CTRL+END (or
+21 REM CMD+END on your Apple ][e descendent) and the cursor will be put
+22 REM back in the correct place.
+23 REM
+24 REM                                                         thank you
+25 REM                                                    Sean T. McBeth
+26 REM                                    https://www.primroseeditor.com
+27 REM =================================================================
+28 REM
+29 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
+30 REM ORIGINAL PROGRAMMING BY BILL HEINEMANN - 1971
+31 REM SUPPORT RESEARCH AND MATERIALS BY DON RAWITSCH,
 40 REM      MINNESOTA EDUCATIONAL COMPUTING CONSORTIUM STAFF
 50 REM CDC CYBER 70/73-26     BASIC 3.1
 60 REM DOCUMENTATION BOOKLET 'OREGON' AVAILABLE FROM
