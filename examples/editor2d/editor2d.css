@@ -41,14 +41,7 @@ html, body{
 
 #editor{
   position:absolute;
-  width:50%;
+  width:100%;
   height:100%;
   cursor:text;
-}
-
-#testResults{
-  position:absolute;
-  left:50%;
-  width:50%;
-  height:100%;
 }

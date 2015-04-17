@@ -23,46 +23,8 @@ function editor2d () {
   var EDITOR_CODE_KEY = "primrose-sample-code";
 
   var editor = new Primrose.TextBox( "editor", {
-    file: getSetting( EDITOR_CODE_KEY,
-        "rem print a circle\n\
-1 input 'enter outer radius: ', r\n\
-2 input 'enter inner radius: ', q\n\
-3 if r > q then goto 10\n\
-4 println 'outer radius must be larger than inner radius'\n\
-5 goto 1\n\
-rem\n\
-rem\n\
-rem use remarks to break up code\n\
-rem\n\
-rem\n\
-10 let d = 2 * r + 1\n\
-11 let y = 0\n\
-20 if y >= d then goto 90\n\
-30 let x = 0\n\
-40 if x >= d then goto 70\n\
-41 let dy = y - r\n\
-42 let dx = x - r\n\
-43 let z = dx * dx + dy * dy\n\
-44 if q * q <= z and z <= r * r then print 'o' else print '.'\n\
-50 let x = x + 1\n\
-60 goto 40\n\
-70 let y = y + 1\n\
-71 println ''\n\
-80 goto 20\n\
-90 end\n\
-rem hit ctrl+enter to run program\n\
-rem what you see is what you get, there aren't many features\n\
-rem to this simple BASIC clone" ),
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
-    theme: Primrose.Themes.Dark,
-    hideLineNumbers: true
-  } );
-
-  var output = new Primrose.TextBox( "testResults", {
-    file: "",
-    autoBindEvents: true,
-    tokenizer: Primrose.Grammars.PlainText,
     theme: Primrose.Themes.Dark,
     hideLineNumbers: true
   } );
@@ -75,43 +37,61 @@ rem to this simple BASIC clone" ),
   var inputCallback = null;
   var currentIndex = 0;
 
-  output.addEventListener( "keydown", function ( evt ) {
+  function toEnd (  ) {
+    editor.selectionStart = editor.selectionEnd = editor.value.length;
+    editor.scrollIntoView( editor.frontCursor );
+    editor.forceUpdate();
+  }
+
+  function done () {
+    if ( running ) {
+      stdout( "PROGRAM COMPLETE\n" );
+      running = false;
+      editor.setTokenizer(Primrose.Grammars.Basic);
+      loadFile( "oregon.bas", toEnd );
+    }
+  }
+
+  function clearScreen () {
+    editor.selectionStart = editor.selectionEnd = 0;
+    editor.value = "";
+    return true;
+  }
+
+  function loadFile ( fileName, callback ) {
+    GET( fileName.toLowerCase(), "text", function ( file ) {
+      editor.value = file;
+      if ( callback ) {
+        callback();
+      }
+    } );
+  }
+
+  loadFile("oregon.bas");
+
+  function input ( callback ) {
+    inputCallback = callback;
+    toEnd( );
+    currentIndex = editor.selectionStart;
+  }
+
+  function stdout ( str ) {
+    editor.value += str;
+    toEnd( );
+  }
+
+  editor.addEventListener( "keydown", function ( evt ) {
     if ( running && inputCallback && evt.keyCode === Primrose.Keys.ENTER ) {
-      var str = output.value.substring( currentIndex );
+      var str = editor.value.substring( currentIndex );
       str = str.substring( 0, str.length - 1 );
       inputCallback( str );
       inputCallback = null;
     }
-  } );
-
-  function toEnd ( ed ) {
-    ed.selectionStart = ed.selectionEnd = ed.value.length;
-    ed.scrollIntoView( ed.frontCursor );
-    ed.forceUpdate();
-  }
-  function focus ( ed ) {
-    ed.focus();
-    toEnd( ed );
-  }
-
-  editor.addEventListener( "keydown", function ( evt ) {
-    if ( !running &&
+    else if ( !running &&
         evt.ctrlKey &&
         evt.keyCode === Primrose.Keys.ENTER ) {
+
       running = true;
-
-      var input = function ( callback ) {
-        inputCallback = callback;
-        toEnd( output );
-        currentIndex = output.selectionStart;
-      };
-
-      var stdout = function ( str ) {
-        output.value += str;
-        toEnd( output );
-      };
-
-      var stderr = stdout;
 
       var next = function () {
         if ( running ) {
@@ -119,46 +99,14 @@ rem to this simple BASIC clone" ),
         }
       };
 
-      var done = function () {
-        if ( running ) {
-          stdout( "PROGRAM COMPLETE\n" );
-          running = false;
-          focus( editor );
-        }
-      };
-
-      var clearScreen = function () {
-        output.selectionStart = output.selectionEnd = 0;
-        output.value = "";
-        return true;
-      };
-
-      var loadFile = function ( fileName, callback ) {
-        GET( fileName.toLowerCase(), "text", function ( file ) {
-          editor.value = file;
-          callback();
-        } );
-      };
-
       var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
-          stdout,
-          stderr, next, done, clearScreen, loadFile );
-      focus( output );
+          stdout, stdout, next, clearScreen, loadFile, done );
+      editor.setTokenizer(Primrose.Grammars.PlainText);
+      clearScreen();
       next();
     }
   } );
 
-//  var testObjects = [
-//    Primrose.Grammars.Basic,
-//    Primrose.Grammar,
-//    Primrose.Point,
-//    Primrose.Rectangle,
-//    Primrose.Size
-//  ];
-//
-//  Assert.consoleTest( testObjects );
-
   var container = document.getElementById( "editorContainer" );
   container.appendChild( editor.getDOMElement() );
-  container.appendChild( output.getDOMElement() );
 }

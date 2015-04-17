@@ -24,7 +24,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
   };
 
   grammar.interpret = function ( sourceCode, input, output, errorOut, next,
-      done, clearScreen, loadFile ) {
+      clearScreen, loadFile, done ) {
     var tokens = this.tokenize( sourceCode ),
         EQUAL_SIGN = new Primrose.Token( "=", "operators" ),
         counter = 0,
