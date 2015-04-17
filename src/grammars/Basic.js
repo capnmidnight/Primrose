@@ -613,11 +613,11 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     return function ( ) {
       if ( !isDone ) {
-        var line = getLine( counter );
-        var goNext = process( line );
-        ++counter;
-        if ( goNext && next ) {
-          next( );
+        var goNext = true;
+        while (goNext){
+          var line = getLine( counter );
+          goNext = process( line );
+          ++counter;
         }
       }
     };
