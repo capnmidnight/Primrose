@@ -10,7 +10,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
     [ "keywords",
-      /\b(?:RESTORE|REPEAT|RETURN|LOAD|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
+      /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
     ],
     [ "keywords",
       /^ DEF FN/
@@ -147,8 +147,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       var script = line.map( function ( token ) {
         return token.value;
       } )
-          .join( " " ),
-          exp;
+          .join( " " );
       with ( state ) {
         try {
           return eval( script );
@@ -190,11 +189,12 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     function setValue ( line ) {
       var name = line.shift( );
       var equals = line.shift( );
+      var val = null;
       if ( name.type !== "identifiers" ) {
         error( "Identifier expected. >>> " + name.value );
       }
       else if ( equals.type === "operators" && equals.value === "=" ) {
-        var val = evaluate( line );
+        val = evaluate( line );
         state[name.value] = val;
       }
       else if ( equals.type === "operators" && equals.value === "[" ) {
@@ -207,7 +207,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
           line.shift( ); // burn the close paren
           equals = line.shift( );
           if ( equals.type === "operators" && equals.value === "=" ) {
-            var val = evaluate( line );
+            val = evaluate( line );
             state[name.value][evaluate( idxExpr )] = val;
           }
         }
@@ -267,8 +267,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     function checkConditional ( line ) {
       var thenIndex = -1,
-          elseIndex = -1;
-      for ( var i = 0; i < line.length; ++i ) {
+          elseIndex = -1,
+          i;
+      for ( i = 0; i < line.length; ++i ) {
         if ( line[i].type === "keywords" && line[i].value === "THEN" ) {
           thenIndex = i;
         }
@@ -281,7 +282,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       }
       else {
         var condition = line.slice( 0, thenIndex );
-        for ( var i = 0; i < condition.length; ++i ) {
+        for ( i = 0; i < condition.length; ++i ) {
           var t = condition[i];
           if ( t.type === "operators" && t.value === "=" ) {
             t.value = "==";
@@ -308,8 +309,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function process ( line ) {
-      var exp,
-          op;
+      var op;
       try {
         if ( line && line.length > 0 ) {
           op = line.shift( );
@@ -352,6 +352,12 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return false;
     }
 
+    function labelLine ( line ) {
+      line.push( EQUAL_SIGN );
+      line.push( toNum( lineNumbers[counter] ) );
+      return setValue( line );
+    }
+
     function waitForInput ( line ) {
       var toVar = line.pop();
       if ( line.length > 0 ) {
@@ -377,8 +383,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     function onStatement ( line ) {
       var idxExpr = [ ],
           idx = null,
-          targets = [ ],
-          exp;
+          targets = [ ];
       try {
         while ( line.length > 0 &&
             ( line[0].type !== "keywords" ||
@@ -593,7 +598,8 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       WHILE: whileLoop,
       WEND: stackReturn,
       FOR: forLoop,
-      NEXT: stackReturn
+      NEXT: stackReturn,
+      LABEL: labelLine
     };
 
     return function ( ) {

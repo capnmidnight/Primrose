@@ -10,8 +10,8 @@
 10 REM minor changes to correct a few bugs in the original copy that I
 11 REM found, as well as to fudge a few minor issues with my interpreter.
 12 REM
-13 REM You may run the program at any time by hitting CTRL+ENTER on your
-14 REM keyboard. Type commands when prompt. The game mostly uses numeric
+13 REM Run the program at any time by hitting CTRL+ENTER on your key-
+14 REM board. Type commands when prompted. The game mostly uses numeric
 15 REM commands, but there is a shooting mini-game that requires you to
 16 REM quickly type a given word, so pay attention for when it comes up.
 17 REM

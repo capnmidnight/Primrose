@@ -1,5 +1,5 @@
 /*
-  Primrose v0.10.0 2015-04-15
+  Primrose v0.10.0 2015-04-17
   gplv3
   Copyright (C) 2015 Sean T. McBeth [sean@seanmcbeth.com]
   https://www.primroseeditor.com
@@ -341,16 +341,8 @@ function help ( obj ) {
   }
 }
 
-function help2(obj){
-  var info = help(obj);
-  console.log(fmt("$1 -------\n\
-  properties:\n\
-    $2\n\
-  methods:\n\
-    $3",
-    info.type,
-    Object.keys(info.properties).map(function(k){return k+": "+info.properties[k];}).join("\n    "),
-    Object.keys(info.functions).join("\n    ")));
+function isNumber ( str ) {
+  return !isNaN( str );
 }
 
 function makeURL ( url, queryMap ) {
@@ -397,11 +389,18 @@ function XHR ( url, method, type, progress, error, success, data ) {
 
 function GET ( url, type, progress, error, success ) {
   type = type || "text";
-  XHR( url, "GET", type, progress, error, success );
+
+  var progressThunk = success && error && progress,
+      errorThunk = ( success && error ) || ( error && progress ),
+      successThunk = success || error || progress;
+  XHR( url, "GET", type, progressThunk, errorThunk, successThunk );
 }
 
 function POST ( url, data, type, progress, error, success ) {
-  XHR( url, "POST", type, progress, error, success, data );
+  var progressThunk = success && error && progress,
+      errorThunk = ( success && error ) || ( error && progress ),
+      successThunk = success || error || progress;
+  XHR( url, "POST", type, progressThunk, errorThunk, successThunk );
 }
 
 function getObject ( url, progress, error, success ) {
@@ -1553,6 +1552,7 @@ window.Primrose.TextBox = ( function ( ) {
         topLeftGutter = new Primrose.Size(),
         bottomRightGutter = new Primrose.Size(),
         dragging = false,
+        scrolling = false,
         focused = false,
         changed = false,
         showLineNumbers = true,
@@ -1618,12 +1618,13 @@ window.Primrose.TextBox = ( function ( ) {
       var onBottom = gy >= gridBounds.height;
       var onLeft = gx < 0;
       var onRight = pointer.x >= gridBounds.width;
-      if ( !onBottom && !onLeft && !onRight ) {
+      if ( !scrolling && !onBottom && !onLeft && !onRight ) {
         cursor.setXY( pointer.x, pointer.y, tokenRows );
         setSurrogateCursor();
         self.backCursor.copy( cursor );
       }
-      else if ( onRight && !onBottom ) {
+      else if ( scrolling || onRight && !onBottom ) {
+        scrolling = true;
         var scrollHeight = tokenRows.length - gridBounds.height;
         if ( gy >= 0 && scrollHeight >= 0 ) {
           var sy = gy * scrollHeight / gridBounds.height;
@@ -1665,12 +1666,6 @@ window.Primrose.TextBox = ( function ( ) {
 
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
-        for ( var i = 0; i < EDITORS.length; ++i ) {
-          var e = EDITORS[i];
-          if ( e !== self ) {
-            e.blur();
-          }
-        }
         self.focus();
         var bounds =
             options.pointerEventSource.getBoundingClientRect();
@@ -1797,7 +1792,7 @@ window.Primrose.TextBox = ( function ( ) {
       for ( var i = 0; i < tokenQueue.length; ++i ) {
         var t = tokenQueue[i].clone();
         var widthLeft = gridBounds.width - currentRowWidth;
-        var wrap = wordWrap && t.value.length > widthLeft;
+        var wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
         var breakLine = t.type === "newlines" || wrap;
         if ( wrap ) {
           var split = t.value.length > gridBounds.width ? widthLeft : 0;
@@ -1937,11 +1932,19 @@ window.Primrose.TextBox = ( function ( ) {
     };
 
     this.focus = function () {
+      for ( var i = 0; i < EDITORS.length; ++i ) {
+        var e = EDITORS[i];
+        if ( e !== self ) {
+          e.blur();
+        }
+      }
+      surrogate.focus();
       focused = true;
       this.forceUpdate();
     };
 
     this.blur = function () {
+      surrogate.blur();
       focused = false;
       this.forceUpdate();
     };
@@ -2301,6 +2304,7 @@ window.Primrose.TextBox = ( function ( ) {
 
     this.endPointer = function () {
       dragging = false;
+      scrolling = false;
       surrogate.focus();
     };
 
@@ -2585,6 +2589,10 @@ window.Primrose.Token = ( function () {
     var next = this.value.substring( i );
     this.value = this.value.substring( 0, i );
     return new Token( next, this.type, this.index + i, this.line );
+  };
+
+  Token.prototype.toString = function(){
+    return fmt("[$1: $2]", this.type, this.value);
   };
 
   return Token;
@@ -3057,82 +3065,147 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
   return TextEditor;
 } )();;window.Primrose = window.Primrose || { };
 window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.Basic = ( function () {
+window.Primrose.Grammars.Basic = ( function ( ) {
 
   var grammar = new Primrose.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
-    [ "lineNumbers", /^\d+ / ],
-    [ "comments", /^REM.*$/ ],
+    [ "lineNumbers", /^\d+/ ],
+    [ "comments", /^ REM.*$/ ],
+    [ "strings", /"(?:\\"|[^"])*"/ ],
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
     [ "keywords",
-      /\b(?:LET|DATA|READ|IF|THEN|ELSE|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOTO|GOSUB|RETURN|ON|DEF FN|TAB|AT|END)\b/
+      /\b(?:RESTORE|REPEAT|RETURN|LOAD|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
     ],
-    [ "functions", /(?:PRINT(?:LN)?|INPUT)/ ],
-    [ "operators", /(?:\+|-|\*|\/|>=|<=|=|<|>|OR|AND|NOT|MOD|\(|\))/ ],
-    [ "identifiers", /\w+/ ]
+    [ "keywords",
+      /^ DEF FN/
+    ],
+    [ "operators",
+      /(?:\+|;|,|-|\*\*|\*|\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\(|\)|\[|\])/
+    ],
+    [ "identifiers", /\w+\$?/ ]
   ] );
 
   var oldTokenize = grammar.tokenize;
   grammar.tokenize = function ( code ) {
-    return oldTokenize.call( this, code.toUpperCase() );
+    return oldTokenize.call( this, code.toUpperCase( ) );
   };
 
-  grammar.interpret = function ( sourceCode, input, output, error, next,
-      done ) {
+  grammar.interpret = function ( sourceCode, input, output, errorOut, next,
+      clearScreen, loadFile, done ) {
     var tokens = this.tokenize( sourceCode ),
+        EQUAL_SIGN = new Primrose.Token( "=", "operators" ),
+        counter = 0,
+        isDone = false,
         program = { },
         lineNumbers = [ ],
         lines = [ ],
         currentLine = [ ],
-        state = { },
-        counter = 0,
-        isDone = false;
+        data = [ ],
+        dataCounter = 0,
+        state = {
+          INT: function ( v ) {
+            return v | 0;
+          },
+          RND: function ( ) {
+            return Math.random( );
+          },
+          CLK: function ( ) {
+            return Date.now( ) / 3600000;
+          },
+          LINE: function ( ) {
+            return lineNumbers[counter];
+          },
+          TAB: function ( v ) {
+            var str = "";
+            for ( var i = 0; i < v; ++i ) {
+              str += " ";
+            }
+            return str;
+          },
+          POW: function ( a, b ) {
+            return Math.pow( a, b );
+          }
+        };
+
+    function toNum ( ln ) {
+      return new Primrose.Token( ln, "numbers" );
+    }
+
+    function toStr ( str ) {
+      return new Primrose.Token( "\"" + str.replace( "\n", "\\n" )
+          .replace( "\"", "\\\"" ) + "\"", "strings" );
+    }
+
+    var tokenMap = {
+      "OR": "||",
+      "AND": "&&",
+      "NOT": "!",
+      "MOD": "%",
+      "<>": "!="
+    };
 
     while ( tokens.length > 0 ) {
-      var token = tokens.shift();
+      var token = tokens.shift( );
       if ( token.type === "newlines" ) {
         lines.push( currentLine );
         currentLine = [ ];
       }
       else if ( token.type !== "regular" && token.type !== "comments" ) {
-        if ( token.value === "OR" ) {
-          token.value = "||";
+        token.value = tokenMap[token.value] || token.value;
+
+        if ( token.type === "identifiers" &&
+            token.value[token.value.length - 1] === "$" &&
+            tokens[0].type === "operators" &&
+            tokens[0].value === "(" ) {
+          tokens[0].value = "[";
+          for ( var j = 1; j < tokens.length; ++j ) {
+            if ( tokens[j].type === "operators" && tokens[j].value ===
+                ")" ) {
+              tokens[j].value = "]";
+              break;
+            }
+          }
         }
-        else if ( token.value === "AND" ) {
-          token.value = "&&";
-        }
-        else if ( token.value === "NOT" ) {
-          token.value = "!";
-        }
-        else if ( token.value === "MOD" ) {
-          token.value = "%";
-        }
+
         currentLine.push( token );
       }
     }
-    lines.push( currentLine );
 
+    lines.push( currentLine );
     for ( var i = 0; i < lines.length; ++i ) {
       var line = lines[i];
       if ( line.length > 0 ) {
-        var lineNumber = line.shift();
+        var lineNumber = line.shift( );
         if ( lineNumber.type !== "lineNumbers" ) {
-          error( "All lines must start with a line number. >>> " +
-              lineNumber.value );
+          error( "All lines must start with a line number. >>> " + line.join(
+              ", " ) );
           break;
         }
         else {
           lineNumber = parseFloat( lineNumber.value );
-          lineNumbers.push( lineNumber );
-          program[lineNumber] = line;
+          var lastLine = lineNumbers[lineNumbers.length - 1];
+          if ( !lastLine || lineNumber > lastLine ) {
+            lineNumbers.push( lineNumber );
+            program[lineNumber] = line;
+          }
+          else {
+            throw new Error( "expected line number greater than " + lastLine +
+                ", but received " + lineNumber + "." );
+          }
         }
       }
     }
 
-    function getLine () {
-      var lineNumber = lineNumbers[counter];
-      return lineNumber && program[lineNumber] && program[lineNumber].slice();
+    function error ( msg ) {
+      errorOut( "At line " + lineNumbers[counter] + ": " + msg );
+    }
+
+    function getLine ( i ) {
+      i = i || counter;
+      var lineNumber = lineNumbers[i];
+      return lineNumber && program[lineNumber] &&
+          program[lineNumber].slice( );
     }
 
     function evaluate ( line ) {
@@ -3145,44 +3218,110 @@ window.Primrose.Grammars.Basic = ( function () {
           return eval( script );
         }
         catch ( exp ) {
-          console.error( exp.message );
+          console.debug( line.join( ", " ) );
+          console.error( exp );
           console.error( script );
+          error( exp.message + ": " + script );
         }
       }
     }
 
+    function declareVariable ( line ) {
+      var id = line.shift( );
+      if ( id.type !== "identifiers" ) {
+        error( "Identifier expected: " + id.value );
+      }
+      else {
+        var val = null;
+        id = id.value;
+        if ( id[id.length - 1] === "$" ) {
+          val = [ ];
+          if ( line.length === 3 &&
+              line[0].type === "operators" && line[0].value === "(" &&
+              line[1].type === "numbers" &&
+              line[2].type === "operators" && line[2].value === ")" ) {
+            for ( var i = Math.floor( parseFloat( line[1].value ) ); i > 0;
+                --i ) {
+              val.push( null );
+            }
+          }
+        }
+        state[id] = val;
+        return true;
+      }
+    }
+
     function setValue ( line ) {
-      var name = line.shift();
-      var equals = line.shift();
+      var name = line.shift( );
+      var equals = line.shift( );
+      var val = null;
       if ( name.type !== "identifiers" ) {
         error( "Identifier expected. >>> " + name.value );
       }
-      else if ( equals.type !== "operators" && equals.value !== "=" ) {
-        error( "Expected equals sign. >>> " + equals.value );
+      else if ( equals.type === "operators" && equals.value === "=" ) {
+        val = evaluate( line );
+        state[name.value] = val;
+      }
+      else if ( equals.type === "operators" && equals.value === "[" ) {
+        var idxExpr = [ ];
+        while ( line.length > 0 && line[0].type !== "operators" &&
+            line[0].value !== "]" ) {
+          idxExpr.push( line.shift( ) );
+        }
+        if ( line.length > 0 ) {
+          line.shift( ); // burn the close paren
+          equals = line.shift( );
+          if ( equals.type === "operators" && equals.value === "=" ) {
+            val = evaluate( line );
+            state[name.value][evaluate( idxExpr )] = val;
+          }
+        }
       }
       else {
-        state[name.value] = evaluate( line );
+        error( "Expected equals sign. >>> " + equals.value );
       }
 
       return true;
     }
 
     function print ( line ) {
-      output( evaluate( line ) );
-
-      return true;
-    }
-
-    function println ( line ) {
-      output( evaluate( line ) + "\n" );
-
+      var endLine = "\n";
+      var nest = 0;
+      line.forEach( function ( t, i ) {
+        if ( t.type === "operators" ) {
+          if ( t.value === "," ) {
+            if ( nest === 0 ) {
+              t.value = "+ \", \" + ";
+            }
+          }
+          else if ( t.value === ";" ) {
+            t.value = "+ \" \"";
+            if ( i < line.length - 1 ) {
+              t.value += " + ";
+            }
+            else {
+              endLine = "";
+            }
+          }
+          else if ( t.value === "(" ) {
+            ++nest;
+          }
+          else if ( t.value === ")" ) {
+            --nest;
+          }
+        }
+      } );
+      var txt = evaluate( line );
+      if ( txt === undefined ) {
+        txt = "";
+      }
+      output( txt + endLine );
       return true;
     }
 
     function setProgramCounter ( line ) {
       var lineNumber = parseFloat( evaluate( line ) );
       counter = -1;
-
       while ( counter < lineNumbers.length - 1 &&
           lineNumbers[counter + 1] < lineNumber ) {
         ++counter;
@@ -3193,8 +3332,9 @@ window.Primrose.Grammars.Basic = ( function () {
 
     function checkConditional ( line ) {
       var thenIndex = -1,
-          elseIndex = -1;
-      for ( var i = 0; i < line.length; ++i ) {
+          elseIndex = -1,
+          i;
+      for ( i = 0; i < line.length; ++i ) {
         if ( line[i].type === "keywords" && line[i].value === "THEN" ) {
           thenIndex = i;
         }
@@ -3203,11 +3343,11 @@ window.Primrose.Grammars.Basic = ( function () {
         }
       }
       if ( thenIndex === -1 ) {
-        error( "BLBHBALBHA" );
+        error( "Expected THEN clause." );
       }
       else {
         var condition = line.slice( 0, thenIndex );
-        for ( var i = 0; i < condition.length; ++i ) {
+        for ( i = 0; i < condition.length; ++i ) {
           var t = condition[i];
           if ( t.type === "operators" && t.value === "=" ) {
             t.value = "==";
@@ -3234,86 +3374,305 @@ window.Primrose.Grammars.Basic = ( function () {
     }
 
     function process ( line ) {
-      var op = line.shift();
-      if ( !op ) {
-        error( "Blank lines are not allowed" );
-      }
-      else if ( op.type !== "keywords" && op.type !== "functions" ) {
-        error( "The first operation in a line must be a keyword. >>> " +
-            op.value + " (" + op.type + ")" );
-      }
-      else {
-        if ( commands.hasOwnProperty( op.value ) ) {
-          return commands[op.value]( line );
+      var op;
+      try {
+        if ( line && line.length > 0 ) {
+          op = line.shift( );
+          if ( op ) {
+            if ( commands.hasOwnProperty( op.value ) ) {
+              return commands[op.value]( line );
+            }
+            else if ( isNumber( op.value ) ) {
+              return setProgramCounter( [ op ] );
+            }
+            else if ( state[op.value] ||
+                ( line[0].type === "operators" && line[0].value === "=" ) ) {
+              line.unshift( op );
+              return setValue( line );
+            }
+            else {
+              error( "Unknown command. >>> " + op.value );
+            }
+          }
         }
-        else {
-          error( "Unknown command. >>> " + op.value );
-        }
       }
-      return programComplete();
+      catch ( exp ) {
+        console.error( exp );
+        if ( op ) {
+          console.log( op.toString() );
+        }
+        error( exp.message );
+      }
+      return pauseBeforeComplete();
+    }
+
+    function pauseBeforeComplete () {
+      output( "PROGRAM COMPLETE - PRESS RETURN TO FINISH." );
+      input( function ( ) {
+        isDone = true;
+        if ( done ) {
+          done( );
+        }
+      } );
+      return false;
     }
 
     function waitForInput ( line ) {
-      if ( line.length > 1 && line[0].type === "strings" ) {
-        var promptText = line.shift();
-        var txt = promptText.value;
-        txt = txt.substring( 1, txt.length - 1 );
-        output( txt );
+      var toVar = line.pop();
+      if ( line.length > 0 ) {
+        print( line );
       }
       input( function ( str ) {
+        str = str.toUpperCase();
         var valueToken = null;
-        if ( /-?\d+(\.\d+)?/.test( str ) ) {
-          valueToken = { type: "numbers", value: str };
+        if ( isNumber( str ) ) {
+          valueToken = toNum( str );
         }
         else {
-          valueToken = { type: "strings", value: "\"" + str + "\"" };
+          valueToken = toStr( str );
         }
-        setValue( [ line[0], { type: "operators", value: "=" }, valueToken ] );
+        setValue( [ toVar, EQUAL_SIGN, valueToken ] );
         if ( next ) {
-          next();
+          next( );
         }
       } );
-
       return false;
     }
 
-    function programComplete () {
-      isDone = true;
-      if ( done ) {
-        done();
+    function onStatement ( line ) {
+      var idxExpr = [ ],
+          idx = null,
+          targets = [ ];
+      try {
+        while ( line.length > 0 &&
+            ( line[0].type !== "keywords" ||
+                line[0].value !== "GOTO" ) ) {
+          idxExpr.push( line.shift( ) );
+        }
+
+        if ( line.length > 0 ) {
+          line.shift( ); // burn the goto;
+
+          for ( var i = 0; i < line.length; ++i ) {
+            var t = line[i];
+            if ( t.type !== "operators" ||
+                t.value !== "," ) {
+              targets.push( t );
+            }
+          }
+
+          idx = evaluate( idxExpr ) - 1;
+
+          if ( 0 <= idx && idx < targets.length ) {
+            return setProgramCounter( [ targets[idx] ] );
+          }
+        }
       }
+      catch ( exp ) {
+        console.error( exp );
+      }
+      return true;
+    }
+
+    var returnStack = [ ];
+    function gotoSubroutine ( line ) {
+      returnStack.push( toNum( lineNumbers[counter + 1] ) );
+      return setProgramCounter( line );
+    }
+
+    function setRepeat ( ) {
+      returnStack.push( toNum( lineNumbers[counter] ) );
+      return true;
+    }
+
+    function conditionalReturn ( cond ) {
+      var ret = true;
+      var val = returnStack.pop();
+      if ( val && cond ) {
+        ret = setProgramCounter( [ val ] );
+      }
+      return ret;
+    }
+
+    function untilLoop ( line ) {
+      var cond = !evaluate( line );
+      return conditionalReturn( cond );
+    }
+
+    function findNext ( str ) {
+      for ( i = counter + 1; i < lineNumbers.length; ++i ) {
+        var l = getLine( i );
+        if ( l[0].value === str ) {
+          return i;
+        }
+      }
+      return lineNumbers.length;
+    }
+
+    function whileLoop ( line ) {
+      var cond = evaluate( line );
+      if ( !cond ) {
+        counter = findNext( "WEND" );
+      }
+      else {
+        returnStack.push( toNum( lineNumbers[counter] ) );
+      }
+      return true;
+    }
+
+    var forLoopCounters = { };
+
+    function forLoop ( line ) {
+      var n = lineNumbers[counter];
+      var varExpr = [ ];
+      var fromExpr = [ ];
+      var toExpr = [ ];
+      var skipExpr = [ ];
+      var arrs = [ varExpr, fromExpr, toExpr, skipExpr ];
+      var a = 0;
+      var i = 0;
+      for ( i = 0; i < line.length; ++i ) {
+        var t = line[i];
+        if ( t.value === "=" || t.value === "TO" || t.value === "STEP" ) {
+          ++a;
+          if ( t.value === "=" ) {
+            varExpr.push( t );
+          }
+        }
+        else {
+          arrs[a].push( t );
+        }
+      }
+
+      var skip = 1;
+      if ( skipExpr.length > 0 ) {
+        skip = evaluate( skipExpr );
+      }
+
+      if ( forLoopCounters[n] === undefined ) {
+        forLoopCounters[n] = evaluate( fromExpr );
+      }
+
+      var end = evaluate( toExpr );
+      var cond = forLoopCounters[n] <= end;
+      if ( !cond ) {
+        delete forLoopCounters[n];
+        counter = findNext( "NEXT" );
+      }
+      else {
+        varExpr.push( toNum( forLoopCounters[n] ) );
+        process( varExpr );
+        forLoopCounters[n] += skip;
+        returnStack.push( toNum( lineNumbers[counter] ) );
+      }
+      return true;
+    }
+
+    function stackReturn ( ) {
+      return conditionalReturn( true );
+    }
+
+    function loadCodeFile ( line ) {
+      loadFile( evaluate( line ), function ( ) {
+        if ( next ) {
+          next( );
+        }
+      } );
       return false;
     }
 
-    function noop () {
+    function noop ( ) {
+      return true;
+    }
+
+    function loadData ( line ) {
+      while ( line.length > 0 ) {
+        var t = line.shift();
+        if ( t.type !== "operators" ) {
+          data.push( t.value );
+        }
+      }
+      return true;
+    }
+
+    function readData ( line ) {
+      var value = data[dataCounter];
+      ++dataCounter;
+      line.push( EQUAL_SIGN );
+      line.push( toNum( value ) );
+      return setValue( line );
+    }
+
+    function restoreData () {
+      dataCounter = 0;
+      return true;
+    }
+
+    function defineFunction ( line ) {
+      var name = line.shift().value;
+      var signature = "";
+      var body = "";
+      var fillSig = true;
+      for ( var i = 0; i < line.length; ++i ) {
+        var t = line[i];
+        if ( t.type === "operators" && t.value === "=" ) {
+          fillSig = false;
+        }
+        else if ( fillSig ) {
+          signature += t.value;
+        }
+        else {
+          body += t.value;
+        }
+      }
+      name = "FN" + name;
+      var script = "(function " + name + signature + "{ return " + body +
+          "; })";
+      state[name] = eval( script );
       return true;
     }
 
     var commands = {
+      DIM: declareVariable,
       LET: setValue,
       PRINT: print,
-      PRINTLN: println,
       GOTO: setProgramCounter,
       IF: checkConditional,
       INPUT: waitForInput,
-      END: programComplete,
-      REM: noop
-          //|DATA|FOR|TO|STEP|NEXT|WHILE|WEND|REPEAT|UNTIL|GOSUB|RETURN|ON|DEF FN|TAB|AT|END
+      END: pauseBeforeComplete,
+      STOP: pauseBeforeComplete,
+      REM: noop,
+      "'": noop,
+      CLS: clearScreen,
+      ON: onStatement,
+      GOSUB: gotoSubroutine,
+      RETURN: stackReturn,
+      LOAD: loadCodeFile,
+      DATA: loadData,
+      READ: readData,
+      RESTORE: restoreData,
+      REPEAT: setRepeat,
+      UNTIL: untilLoop,
+      " DEF FN": defineFunction,
+      WHILE: whileLoop,
+      WEND: stackReturn,
+      FOR: forLoop,
+      NEXT: stackReturn
     };
 
-    return function () {
+    return function ( ) {
       if ( !isDone ) {
-        var goNext = process( getLine() );
+        var line = getLine( );
+        var goNext = process( line );
         ++counter;
         if ( goNext && next ) {
-          next();
+          next( );
         }
       }
     };
   };
-
   return grammar;
-} )();;window.Primrose = window.Primrose || { };
+} )( );;window.Primrose = window.Primrose || { };
 window.Primrose.Grammars = window.Primrose.Grammars || { };
 window.Primrose.Grammars.JavaScript = ( function () {
   "use strict";
@@ -3405,7 +3764,8 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         theme = null,
         texture = null,
         pickingTexture = null,
-        pickingPixelBuffer = null;
+        pickingPixelBuffer = null,
+        strictSize = options.strictSize;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -3419,11 +3779,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     this.pixel2cell = function ( point, scroll, gridBounds ) {
       var r = this.getPixelRatio();
+      var x = point.x * canvas.width / canvas.clientWidth;
+      var y = point.y * canvas.height / canvas.clientHeight;
       point.set(
-          Math.round( point.x * r / this.character.width ) + scroll.x -
-          gridBounds.x,
-          Math.floor( ( point.y * r / this.character.height ) - 0.25 ) +
-          scroll.y );
+          Math.round( x * r / this.character.width ) + scroll.x - gridBounds.x,
+          Math.floor( ( y * r / this.character.height ) - 0.25 ) + scroll.y );
     };
 
     this.hasResized = function () {
@@ -3443,8 +3803,10 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
             oldCharacterHeight = this.character.height,
             oldWidth = canvas.width,
             oldHeight = canvas.height,
-            newWidth = canvas.clientWidth * r,
-            newHeight = canvas.clientHeight * r,
+            newWidth = ( strictSize && strictSize.width ) ||
+            ( canvas.clientWidth * r ),
+            newHeight = ( strictSize && strictSize.height ) ||
+            ( canvas.clientHeight * r ),
             oldFont = gfx.font;
         this.character.height = theme.fontSize * r;
         gfx.font = this.character.height + "px " + theme.fontFamily;
@@ -3773,7 +4135,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
       var i = ( pickingPixelBuffer[0] << 16 ) |
           ( pickingPixelBuffer[1] << 8 ) |
           ( pickingPixelBuffer[2] << 0 );
-      return { x: i % canvas.width, y: i / canvas.width };
+      return { x: i % canvas.clientWidth, y: i / canvas.clientWidth };
     };
 
 
@@ -4225,9 +4587,7 @@ window.Primrose.Renderers.DOM = ( function ( ) {
           div.id, div ) );
     }
   };
-} );;/*global THREE, qp*/
-
-window.Primrose = window.Primrose || { };
+} );;window.Primrose = window.Primrose || { };
 window.Primrose.Themes = window.Primrose.Themes || { };
 window.Primrose.Themes.Dark = ( function ( ) {
   "use strict";
@@ -4236,6 +4596,9 @@ window.Primrose.Themes.Dark = ( function ( ) {
     fontFamily: "monospace",
     cursorColor: "white",
     fontSize: 14,
+    lineNumbers: {
+      foreColor: "white"
+    },
     regular: {
       backColor: "black",
       foreColor: "#c0c0c0",
