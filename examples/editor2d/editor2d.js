@@ -84,6 +84,16 @@ rem to this simple BASIC clone" ),
     }
   } );
 
+  function toEnd ( ed ) {
+    ed.selectionStart = ed.selectionEnd = ed.value.length;
+    ed.scrollIntoView( ed.frontCursor );
+    ed.forceUpdate();
+  }
+  function focus ( ed ) {
+    ed.focus();
+    toEnd( ed );
+  }
+
   editor.addEventListener( "keydown", function ( evt ) {
     if ( !running &&
         evt.ctrlKey &&
@@ -92,17 +102,13 @@ rem to this simple BASIC clone" ),
 
       var input = function ( callback ) {
         inputCallback = callback;
-        currentIndex = output.value.length;
-        editor.blur();
-        output.focus();
-        output.selectionStart = output.selectionEnd = currentIndex;
-        output.forceDraw();
+        toEnd( output );
+        currentIndex = output.selectionStart;
       };
 
       var stdout = function ( str ) {
         output.value += str;
-        output.selectionStart = output.selectionEnd = output.value.length;
-        output.scrollIntoView(output.frontCursor);
+        toEnd( output );
       };
 
       var stderr = stdout;
@@ -117,27 +123,27 @@ rem to this simple BASIC clone" ),
         if ( running ) {
           stdout( "PROGRAM COMPLETE\n" );
           running = false;
-          editor.selectionStart = editor.selectionEnd = editor.value.length;
-          editor.forceDraw();
+          focus( editor );
         }
       };
 
-      var clearScreen = function(){
+      var clearScreen = function () {
         output.selectionStart = output.selectionEnd = 0;
         output.value = "";
         return true;
       };
 
-      var loadFile = function(fileName, callback){
-        GET(fileName.toLowerCase(), "text", function(file){
+      var loadFile = function ( fileName, callback ) {
+        GET( fileName.toLowerCase(), "text", function ( file ) {
           editor.value = file;
           callback();
-        });
+        } );
       };
 
       var looper = Primrose.Grammars.Basic.interpret( editor.value, input,
           stdout,
           stderr, next, done, clearScreen, loadFile );
+      focus( output );
       next();
     }
   } );

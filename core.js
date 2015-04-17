@@ -334,16 +334,27 @@ function help ( obj ) {
   }
 }
 
-function help2(obj){
-  var info = help(obj);
-  console.log(fmt("$1 -------\n\
+function printHelp ( obj ) {
+  var info = help( obj );
+  console.log( fmt(
+      "$1 -------\n\
   properties:\n\
     $2\n\
   methods:\n\
     $3",
-    info.type,
-    Object.keys(info.properties).map(function(k){return k+": "+info.properties[k];}).join("\n    "),
-    Object.keys(info.functions).join("\n    ")));
+      info.type,
+      Object.keys( info.properties )
+      .map( function ( k ) {
+        return k + ": " + info.properties[k];
+      } )
+      .join( "\n    " ),
+      Object.keys( info.functions )
+      .join(
+          "\n    " ) ) );
+}
+
+function isNumber ( str ) {
+  return !isNaN( str );
 }
 
 function makeURL ( url, queryMap ) {

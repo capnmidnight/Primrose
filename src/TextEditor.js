@@ -185,12 +185,6 @@ window.Primrose.TextBox = ( function ( ) {
 
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
-        for ( var i = 0; i < EDITORS.length; ++i ) {
-          var e = EDITORS[i];
-          if ( e !== self ) {
-            e.blur();
-          }
-        }
         self.focus();
         var bounds =
             options.pointerEventSource.getBoundingClientRect();
@@ -457,11 +451,19 @@ window.Primrose.TextBox = ( function ( ) {
     };
 
     this.focus = function () {
+      for ( var i = 0; i < EDITORS.length; ++i ) {
+        var e = EDITORS[i];
+        if ( e !== self ) {
+          e.blur();
+        }
+      }
+      surrogate.focus();
       focused = true;
       this.forceUpdate();
     };
 
     this.blur = function () {
+      surrogate.blur();
       focused = false;
       this.forceUpdate();
     };
