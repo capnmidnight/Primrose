@@ -74,6 +74,7 @@ rem to this simple BASIC clone" ),
   var running = false;
   var inputCallback = null;
   var currentIndex = 0;
+
   output.addEventListener( "keydown", function ( evt ) {
     if ( running && inputCallback && evt.keyCode === Primrose.Keys.ENTER ) {
       var str = output.value.substring( currentIndex );
@@ -82,9 +83,13 @@ rem to this simple BASIC clone" ),
       inputCallback = null;
     }
   } );
+
   editor.addEventListener( "keydown", function ( evt ) {
-    if ( !running && evt.ctrlKey && evt.keyCode === Primrose.Keys.ENTER ) {
+    if ( !running &&
+        evt.ctrlKey &&
+        evt.keyCode === Primrose.Keys.ENTER ) {
       running = true;
+
       var input = function ( callback ) {
         inputCallback = callback;
         currentIndex = output.value.length;
@@ -93,17 +98,21 @@ rem to this simple BASIC clone" ),
         output.selectionStart = output.selectionEnd = currentIndex;
         output.forceDraw();
       };
+
       var stdout = function ( str ) {
         output.value += str;
         output.selectionStart = output.selectionEnd = output.value.length;
         output.scrollIntoView(output.frontCursor);
       };
+
       var stderr = stdout;
+
       var next = function () {
         if ( running ) {
           setTimeout( looper, 1 );
         }
       };
+
       var done = function () {
         if ( running ) {
           stdout( "PROGRAM COMPLETE\n" );
@@ -112,9 +121,11 @@ rem to this simple BASIC clone" ),
           editor.forceDraw();
         }
       };
+
       var clearScreen = function(){
         output.selectionStart = output.selectionEnd = 0;
         output.value = "";
+        return true;
       };
 
       var loadFile = function(fileName, callback){
