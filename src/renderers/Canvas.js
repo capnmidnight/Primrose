@@ -23,7 +23,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         texture = null,
         pickingTexture = null,
         pickingPixelBuffer = null,
-        strictSize = options.strictSize;
+        strictSize = options.size;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -398,10 +398,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
 
     if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
-        options.width && options.height ) {
+        strictSize ) {
+      console.log("setting size");
       canvas.style.position = "absolute";
-      canvas.style.width = options.width;
-      canvas.style.height = options.height;
+      canvas.style.width = strictSize.width;
+      canvas.style.height = strictSize.height;
     }
 
     if ( !canvas.parentElement ) {

@@ -1,5 +1,5 @@
 /*
-  Primrose v0.11.0 2015-04-17
+  Primrose v0.11.3 2015-04-18
   gplv3
   Copyright (C) 2015 Sean T. McBeth [sean@seanmcbeth.com]
   https://www.primroseeditor.com
@@ -1777,7 +1777,7 @@ window.Primrose.TextBox = ( function ( ) {
               renderer.character.height ) -
           y -
           bottomRightGutter.height;
-      gridBounds.set( x, y, w, h );
+      gridBounds.set( x + 2, y, w - 2, h - 2 );
       var cw = renderer.character.width / renderer.getPixelRatio();
       var ch = renderer.character.height / renderer.getPixelRatio();
       surrogate.style.left = px( gridBounds.x * cw );
@@ -3781,7 +3781,7 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
         texture = null,
         pickingTexture = null,
         pickingPixelBuffer = null,
-        strictSize = options.strictSize;
+        strictSize = options.size;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -4156,10 +4156,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
 
     if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
-        options.width && options.height ) {
+        strictSize ) {
+      console.log("setting size");
       canvas.style.position = "absolute";
-      canvas.style.width = options.width;
-      canvas.style.height = options.height;
+      canvas.style.width = strictSize.width;
+      canvas.style.height = strictSize.height;
     }
 
     if ( !canvas.parentElement ) {
@@ -4688,4 +4689,4 @@ window.Primrose.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();Primrose.VERSION = "v0.11.0";
+} )();Primrose.VERSION = "v0.11.3";

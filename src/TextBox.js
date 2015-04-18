@@ -298,7 +298,7 @@ window.Primrose.TextBox = ( function ( ) {
               renderer.character.height ) -
           y -
           bottomRightGutter.height;
-      gridBounds.set( x, y, w, h );
+      gridBounds.set( x + 2, y, w - 2, h - 2 );
       var cw = renderer.character.width / renderer.getPixelRatio();
       var ch = renderer.character.height / renderer.getPixelRatio();
       surrogate.style.left = px( gridBounds.x * cw );
