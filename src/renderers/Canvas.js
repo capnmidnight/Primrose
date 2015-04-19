@@ -399,7 +399,6 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
 
     if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
         strictSize ) {
-      console.log("setting size");
       canvas.style.position = "absolute";
       canvas.style.width = strictSize.width;
       canvas.style.height = strictSize.height;
