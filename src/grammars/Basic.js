@@ -10,7 +10,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
     [ "keywords",
-      /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK)\b/
+      /\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\b/
     ],
     [ "keywords", /^DEF FN/ ],
     [ "operators",
@@ -47,6 +47,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
           },
           CLK: function ( ) {
             return Date.now( ) / 3600000;
+          },
+          LEN: function ( id ) {
+            return id.length;
           },
           LINE: function ( ) {
             return lineNumbers[counter];
@@ -88,21 +91,6 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       }
       else if ( token.type !== "regular" && token.type !== "comments" ) {
         token.value = tokenMap[token.value] || token.value;
-
-        if ( token.type === "identifiers" &&
-            token.value[token.value.length - 1] === "$" &&
-            tokens[0].type === "operators" &&
-            tokens[0].value === "(" ) {
-          tokens[0].value = "[";
-          for ( var j = 1; j < tokens.length; ++j ) {
-            if ( tokens[j].type === "operators" && tokens[j].value ===
-                ")" ) {
-              tokens[j].value = "]";
-              break;
-            }
-          }
-        }
-
         currentLine.push( token );
       }
     }
@@ -152,7 +140,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
                 ( line.length > 0 && line[0].type === "operators" &&
                     line[0].value === "=" ) ) {
               line.unshift( op );
-              return setValue( line );
+              return translate( line );
             }
             else {
               error( "Unknown command. >>> " + op.value );
@@ -181,10 +169,39 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function evaluate ( line ) {
-      var script = line.map( function ( token ) {
-        return token.value;
-      } )
-          .join( " " );
+      var script = "";
+      for(var i = 0; i < line.length; ++i){
+        var t = line[i];
+        var nest = 0;
+        if(t.type === "identifiers" &&
+            typeof state[t.value] !== "function" &&
+            i < line.length - 1 &&
+            line[i+1].value === "("){
+          for(var j = i + 1; j < line.length; ++j){
+            var t2 = line[j];
+            if(t2.value === "("){
+              if(nest === 0){
+                t2.value = "[";
+              }
+              ++nest;
+            }
+            else if(t2.value === ")"){
+              --nest;
+              if(nest === 0){
+                t2.value = "]";
+              }
+            }
+            else if(t2.value === "," && nest === 1){
+              t2.value = "][";
+            }
+
+            if(nest === 0){
+              break;
+            }
+          }
+        }
+        script += t.value;
+      }
       with ( state ) {
         try {
           return eval( script );
@@ -199,61 +216,67 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     }
 
     function declareVariable ( line ) {
-      var id = line.shift( );
-      if ( id.type !== "identifiers" ) {
-        error( "Identifier expected: " + id.value );
+      var decl = [ ],
+          decls = [ decl ],
+          nest = 0,
+          i;
+      for ( i = 0; i < line.length; ++i ) {
+        var t = line[i];
+        if ( t.value === "(" ) {
+          ++nest;
+        }
+        else if ( t.value === ")" ) {
+          --nest;
+        }
+        if ( nest === 0 && t.value === "," ) {
+          decl = [ ];
+          decls.push( decl );
+        }
+        else {
+          decl.push( t );
+        }
       }
-      else {
-        var val = null;
-        id = id.value;
-        if ( id[id.length - 1] === "$" ) {
-          val = [ ];
-          if ( line.length === 3 &&
-              line[0].type === "operators" && line[0].value === "(" &&
-              line[1].type === "numbers" &&
-              line[2].type === "operators" && line[2].value === ")" ) {
-            for ( var i = Math.floor( parseFloat( line[1].value ) ); i > 0;
-                --i ) {
-              val.push( null );
+      for ( i = 0; i < decls.length; ++i ) {
+        decl = decls[i];
+        var id = decl.shift( );
+        if ( id.type !== "identifiers" ) {
+          error( "Identifier expected: " + id.value );
+        }
+        else {
+          var val = null,
+              j;
+          id = id.value;
+          if ( decl[0].value === "(" && decl[decl.length - 1].value === ")" ) {
+            var sizes = [ ];
+            for ( j = 1; j < decl.length - 1; ++j ) {
+              if ( decl[j].type === "numbers" ) {
+                sizes.push( decl[j].value | 0 );
+              }
+            }
+            if ( sizes.length === 0 ) {
+              val = [ ];
+            }
+            else {
+              val = new Array( sizes[0] );
+              var queue = [val];
+              for( j = 1; j < sizes.length; ++j){
+                var size = sizes[j];
+                for(var k = 0, l = queue.length; k < l; ++k){
+                  var arr = queue.shift();
+                  for(var m = 0; m < arr.length; ++m){
+                    arr[m] = new Array(size);
+                    if(j < sizes.length - 1){
+                      queue.push(arr[m]);
+                    }
+                  }
+                }
+              }
             }
           }
-        }
-        state[id] = val;
-        return true;
-      }
-    }
-
-    function setValue ( line ) {
-      var name = line.shift( );
-      var equals = line.shift( );
-      var val = null;
-      if ( name.type !== "identifiers" ) {
-        error( "Identifier expected. >>> " + name.value );
-      }
-      else if ( equals.type === "operators" && equals.value === "=" ) {
-        val = evaluate( line );
-        state[name.value] = val;
-      }
-      else if ( equals.type === "operators" && equals.value === "[" ) {
-        var idxExpr = [ ];
-        while ( line.length > 0 && line[0].type !== "operators" &&
-            line[0].value !== "]" ) {
-          idxExpr.push( line.shift( ) );
-        }
-        if ( line.length > 0 ) {
-          line.shift( ); // burn the close paren
-          equals = line.shift( );
-          if ( equals.type === "operators" && equals.value === "=" ) {
-            val = evaluate( line );
-            state[name.value][evaluate( idxExpr )] = val;
-          }
+          state[id] = val;
+          return true;
         }
       }
-      else {
-        error( "Expected equals sign. >>> " + equals.value );
-      }
-
-      return true;
     }
 
     function print ( line ) {
@@ -361,7 +384,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     function labelLine ( line ) {
       line.push( EQUAL_SIGN );
       line.push( toNum( lineNumbers[counter] ) );
-      return setValue( line );
+      return translate( line );
     }
 
     function waitForInput ( line ) {
@@ -378,7 +401,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
         else {
           valueToken = toStr( str );
         }
-        setValue( [ toVar, EQUAL_SIGN, valueToken ] );
+        evaluate( [ toVar, EQUAL_SIGN, valueToken ] );
         if ( next ) {
           next( );
         }
@@ -550,7 +573,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       ++dataCounter;
       line.push( EQUAL_SIGN );
       line.push( toNum( value ) );
-      return setValue( line );
+      return translate( line );
     }
 
     function restoreData () {
@@ -582,9 +605,14 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       return true;
     }
 
+    function translate(line){
+      evaluate(line);
+      return true;
+    }
+
     var commands = {
       DIM: declareVariable,
-      LET: setValue,
+      LET: translate,
       PRINT: print,
       GOTO: setProgramCounter,
       IF: checkConditional,
@@ -614,7 +642,7 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     return function ( ) {
       if ( !isDone ) {
         var goNext = true;
-        while (goNext){
+        while ( goNext ) {
           var line = getLine( counter );
           goNext = process( line );
           ++counter;
