@@ -1,5 +1,5 @@
 /*
-  Primrose v0.11.3 2015-04-18
+  Primrose v0.11.4 2015-04-19
   gplv3
   Copyright (C) 2015 Sean T. McBeth [sean@seanmcbeth.com]
   https://www.primroseeditor.com
@@ -41,20 +41,23 @@ window.RTCSessionDescription = window.RTCSessionDescription ||
     function () {
     };
 
-window.Element.prototype.requestPointerLock = window.Element.prototype.requestPointerLock ||
+window.Element.prototype.requestPointerLock =
+    window.Element.prototype.requestPointerLock ||
     window.Element.prototype.webkitRequestPointerLock ||
     window.Element.prototype.mozRequestPointerLock ||
     function () {
     };
 
-window.Element.prototype.requestFullscreen = window.Element.prototype.requestFullscreen ||
+window.Element.prototype.requestFullscreen =
+    window.Element.prototype.requestFullscreen ||
     window.Element.prototype.webkitRequestFullscreen ||
     window.Element.prototype.mozRequestFullScreen ||
     window.Element.prototype.msRequestFullscreen ||
     function () {
     };
 
-window.Document.prototype.exitFullscreen = window.Document.prototype.exitFullscreen ||
+window.Document.prototype.exitFullscreen =
+    window.Document.prototype.exitFullscreen ||
     window.Document.prototype.webkitExitFullscreen ||
     window.Document.prototype.mozCancelFullScreen ||
     window.Document.prototype.msExitFullscreen ||
@@ -252,18 +255,23 @@ function cascadeElement ( id, tag, DOMClass ) {
   return elem;
 }
 
-function copyObject ( dest, source, depth ) {
-  depth = depth | 0;
-  for ( var key in source ) {
-    if ( source.hasOwnProperty( key ) ) {
-      if ( typeof ( source[key] ) !== "object" ) {
-        dest[key] = source[key];
-      }
-      else if ( depth < 3 ) {
-        if ( !dest[key] ) {
-          dest[key] = { };
+function copyObject ( dest, source ) {
+  var stack = [ { dest: dest, source: source } ];
+  while ( stack.length > 0 ) {
+    var frame = stack.pop(),
+        source = frame.source,
+        dest = frame.dest;
+    for ( var key in source ) {
+      if ( source.hasOwnProperty( key ) ) {
+        if ( typeof ( source[key] ) !== "object" ) {
+          dest[key] = source[key];
         }
-        copyObject( dest[key], source[key], depth + 1 );
+        else {
+          if ( !dest[key] ) {
+            dest[key] = { };
+          }
+          stack.push( { dest: dest[key], source: source[key] } );
+        }
       }
     }
   }
@@ -800,7 +808,7 @@ window.Primrose.CodePage = ( function ( ) {
         "90": "Z"
       }
     } );
-
+    
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
@@ -1133,7 +1141,7 @@ window.Primrose.Keys = ( function ( ) {
     BACKSPACE: 8,
     TAB: 9,
     ENTER: 13,
-    SPACEBAR: 32,
+    SPACE: 32,
     DELETE: 46,
     ///////////////////////////////////////////////////////////////////////////
     // lock keys
@@ -1156,6 +1164,48 @@ window.Primrose.Keys = ( function ( ) {
     RIGHTARROW: 39,
     DOWNARROW: 40,
     SELECTKEY: 93,
+    ///////////////////////////////////////////////////////////////////////////
+    // numbers
+    ///////////////////////////////////////////////////////////////////////////
+    NUMBER0: 48,
+    NUMBER1: 49,
+    NUMBER2: 50,
+    NUMBER3: 51,
+    NUMBER4: 52,
+    NUMBER5: 53,
+    NUMBER6: 54,
+    NUMBER7: 55,
+    NUMBER8: 56,
+    NUMBER9: 57,
+    ///////////////////////////////////////////////////////////////////////////
+    // letters
+    ///////////////////////////////////////////////////////////////////////////
+    A: 65,
+    B: 66,
+    C: 67,
+    D: 68,
+    E: 69,
+    F: 70,
+    G: 71,
+    H: 72,
+    I: 73,
+    J: 74,
+    K: 75,
+    L: 76,
+    M: 77,
+    N: 78,
+    O: 79,
+    P: 80,
+    Q: 81,
+    R: 82,
+    S: 83,
+    T: 84,
+    U: 85,
+    V: 86,
+    W: 87,
+    X: 88,
+    Y: 89,
+    Z: 90,
     ///////////////////////////////////////////////////////////////////////////
     // numpad
     ///////////////////////////////////////////////////////////////////////////
@@ -2956,8 +3006,8 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
 
   return {
     name: "Basic commands",
-    NORMAL_SPACEBAR: " ",
-    SHIFT_SPACEBAR: " ",
+    NORMAL_SPACE: " ",
+    SHIFT_SPACE: " ",
     NORMAL_BACKSPACE: function ( prim, tokenRows ) {
       if ( prim.frontCursor.i === prim.backCursor.i ) {
         prim.frontCursor.left( tokenRows );
@@ -3004,8 +3054,8 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
 
   function TextEditor ( operatingSystem, codePage, editor ) {
     var commands = {
-      NORMAL_SPACEBAR: " ",
-      SHIFT_SPACEBAR: " ",
+      NORMAL_SPACE: " ",
+      SHIFT_SPACE: " ",
       NORMAL_BACKSPACE: function ( prim, tokenRows ) {
         if ( prim.frontCursor.i === prim.backCursor.i ) {
           prim.frontCursor.left( tokenRows );
@@ -3043,7 +3093,7 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
       }
     };
 
-    var allCommands = {};
+    var allCommands = { };
 
     copyObject( allCommands, codePage );
     copyObject( allCommands, operatingSystem );
@@ -4688,4 +4738,4 @@ window.Primrose.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();Primrose.VERSION = "v0.11.3";
+} )();Primrose.VERSION = "v0.11.4";

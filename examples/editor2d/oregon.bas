@@ -13,7 +13,7 @@
 13 REM minor changes to correct a few bugs in the copy that I found, as well as
 14 REM to fudge a few minor issues with my interpreter.
 15 REM
-16 REM Run the program at any time by hitting CTRL+ENTER on your keyboard.
+16 REM Run the program at any time by hitting CTRL+SHIFT+SPACE on your keyboard.
 17 REM Type commands when prompted. The game mostly uses numeric commands, but
 18 REM there is a shooting mini-game that requires you to quickly type a given
 19 REM word, so pay attention for when it comes up.

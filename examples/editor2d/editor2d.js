@@ -58,7 +58,7 @@ function editor2d () {
   function loadFile ( fileName, callback ) {
     GET( fileName.toLowerCase(), "text", function ( file ) {
       if ( isOSX ) {
-        file = file.replace( "CTRL+ENTER", "CMD+OPT+E" );
+        file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
       }
       editor.value = currentProgram = file;
       if ( callback ) {

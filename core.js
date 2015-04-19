@@ -34,20 +34,23 @@ window.RTCSessionDescription = window.RTCSessionDescription ||
     function () {
     };
 
-window.Element.prototype.requestPointerLock = window.Element.prototype.requestPointerLock ||
+window.Element.prototype.requestPointerLock =
+    window.Element.prototype.requestPointerLock ||
     window.Element.prototype.webkitRequestPointerLock ||
     window.Element.prototype.mozRequestPointerLock ||
     function () {
     };
 
-window.Element.prototype.requestFullscreen = window.Element.prototype.requestFullscreen ||
+window.Element.prototype.requestFullscreen =
+    window.Element.prototype.requestFullscreen ||
     window.Element.prototype.webkitRequestFullscreen ||
     window.Element.prototype.mozRequestFullScreen ||
     window.Element.prototype.msRequestFullscreen ||
     function () {
     };
 
-window.Document.prototype.exitFullscreen = window.Document.prototype.exitFullscreen ||
+window.Document.prototype.exitFullscreen =
+    window.Document.prototype.exitFullscreen ||
     window.Document.prototype.webkitExitFullscreen ||
     window.Document.prototype.mozCancelFullScreen ||
     window.Document.prototype.msExitFullscreen ||
@@ -245,18 +248,23 @@ function cascadeElement ( id, tag, DOMClass ) {
   return elem;
 }
 
-function copyObject ( dest, source, depth ) {
-  depth = depth | 0;
-  for ( var key in source ) {
-    if ( source.hasOwnProperty( key ) ) {
-      if ( typeof ( source[key] ) !== "object" ) {
-        dest[key] = source[key];
-      }
-      else if ( depth < 3 ) {
-        if ( !dest[key] ) {
-          dest[key] = { };
+function copyObject ( dest, source ) {
+  var stack = [ { dest: dest, source: source } ];
+  while ( stack.length > 0 ) {
+    var frame = stack.pop(),
+        source = frame.source,
+        dest = frame.dest;
+    for ( var key in source ) {
+      if ( source.hasOwnProperty( key ) ) {
+        if ( typeof ( source[key] ) !== "object" ) {
+          dest[key] = source[key];
         }
-        copyObject( dest[key], source[key], depth + 1 );
+        else {
+          if ( !dest[key] ) {
+            dest[key] = { };
+          }
+          stack.push( { dest: dest[key], source: source[key] } );
+        }
       }
     }
   }

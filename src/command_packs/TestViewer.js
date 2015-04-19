@@ -8,8 +8,8 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
 
   return {
     name: "Basic commands",
-    NORMAL_SPACEBAR: " ",
-    SHIFT_SPACEBAR: " ",
+    NORMAL_SPACE: " ",
+    SHIFT_SPACE: " ",
     NORMAL_BACKSPACE: function ( prim, tokenRows ) {
       if ( prim.frontCursor.i === prim.backCursor.i ) {
         prim.frontCursor.left( tokenRows );

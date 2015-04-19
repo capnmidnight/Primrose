@@ -64,7 +64,7 @@ window.Primrose.CodePage = ( function ( ) {
         "90": "Z"
       }
     } );
-
+    
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {

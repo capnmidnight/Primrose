@@ -8,8 +8,8 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
 
   function TextEditor ( operatingSystem, codePage, editor ) {
     var commands = {
-      NORMAL_SPACEBAR: " ",
-      SHIFT_SPACEBAR: " ",
+      NORMAL_SPACE: " ",
+      SHIFT_SPACE: " ",
       NORMAL_BACKSPACE: function ( prim, tokenRows ) {
         if ( prim.frontCursor.i === prim.backCursor.i ) {
           prim.frontCursor.left( tokenRows );
@@ -47,7 +47,7 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
       }
     };
 
-    var allCommands = {};
+    var allCommands = { };
 
     copyObject( allCommands, codePage );
     copyObject( allCommands, operatingSystem );
