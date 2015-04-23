@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Grammar = ( function ( ) {
+/* global Primrose */
+Primrose.Grammar = ( function ( ) {
   "use strict";
 
   function Grammar ( name, grammar ) {

@@ -1,9 +1,7 @@
-/* global qp */
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Size = (function ( ) {
+/* global Primrose */
+Primrose.Size = (function ( ) {
   "use strict";
-  
+
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );
   }

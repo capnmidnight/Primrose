@@ -1,6 +1,5 @@
-/* global qp */
-window.Primrose = window.Primrose || { };
-window.Primrose.Point = ( function ( ) {
+/* global qp, Primrose */
+Primrose.Point = ( function ( ) {
   "use strict";
 
   function Point ( x, y ) {

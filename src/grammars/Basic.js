@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.Basic = ( function ( ) {
+/* global Primrose */
+Primrose.Grammars.Basic = ( function ( ) {
 
   var grammar = new Primrose.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
@@ -125,35 +124,25 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
 
     function process ( line ) {
-      var op;
-      try {
-        if ( line && line.length > 0 ) {
-          op = line.shift( );
-          if ( op ) {
-            if ( commands.hasOwnProperty( op.value ) ) {
-              return commands[op.value]( line );
-            }
-            else if ( isNumber( op.value ) ) {
-              return setProgramCounter( [ op ] );
-            }
-            else if ( state[op.value] ||
-                ( line.length > 0 && line[0].type === "operators" &&
-                    line[0].value === "=" ) ) {
-              line.unshift( op );
-              return translate( line );
-            }
-            else {
-              error( "Unknown command. >>> " + op.value );
-            }
+      if ( line && line.length > 0 ) {
+        var op = line.shift( );
+        if ( op ) {
+          if ( commands.hasOwnProperty( op.value ) ) {
+            return commands[op.value]( line );
+          }
+          else if ( isNumber( op.value ) ) {
+            return setProgramCounter( [ op ] );
+          }
+          else if ( state[op.value] ||
+              ( line.length > 0 && line[0].type === "operators" &&
+                  line[0].value === "=" ) ) {
+            line.unshift( op );
+            return translate( line );
+          }
+          else {
+            error( "Unknown command. >>> " + op.value );
           }
         }
-      }
-      catch ( exp ) {
-        console.error( exp );
-        if ( op ) {
-          console.log( op.toString() );
-        }
-        error( exp.message );
       }
       return pauseBeforeComplete();
     }
@@ -170,41 +159,41 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     function evaluate ( line ) {
       var script = "";
-      for(var i = 0; i < line.length; ++i){
+      for ( var i = 0; i < line.length; ++i ) {
         var t = line[i];
         var nest = 0;
-        if(t.type === "identifiers" &&
+        if ( t.type === "identifiers" &&
             typeof state[t.value] !== "function" &&
             i < line.length - 1 &&
-            line[i+1].value === "("){
-          for(var j = i + 1; j < line.length; ++j){
+            line[i + 1].value === "(" ) {
+          for ( var j = i + 1; j < line.length; ++j ) {
             var t2 = line[j];
-            if(t2.value === "("){
-              if(nest === 0){
+            if ( t2.value === "(" ) {
+              if ( nest === 0 ) {
                 t2.value = "[";
               }
               ++nest;
             }
-            else if(t2.value === ")"){
+            else if ( t2.value === ")" ) {
               --nest;
-              if(nest === 0){
+              if ( nest === 0 ) {
                 t2.value = "]";
               }
             }
-            else if(t2.value === "," && nest === 1){
+            else if ( t2.value === "," && nest === 1 ) {
               t2.value = "][";
             }
 
-            if(nest === 0){
+            if ( nest === 0 ) {
               break;
             }
           }
         }
         script += t.value;
       }
-      with ( state ) {
+      with ( state ) { // jshint ignore:line
         try {
-          return eval( script );
+          return eval( script ); // jshint ignore:line
         }
         catch ( exp ) {
           console.debug( line.join( ", " ) );
@@ -258,15 +247,16 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             }
             else {
               val = new Array( sizes[0] );
-              var queue = [val];
-              for( j = 1; j < sizes.length; ++j){
+              var queue = [ val ];
+              for ( j = 1; j < sizes.length; ++j ) {
                 var size = sizes[j];
-                for(var k = 0, l = queue.length; k < l; ++k){
+                for ( var k = 0,
+                    l = queue.length; k < l; ++k ) {
                   var arr = queue.shift();
-                  for(var m = 0; m < arr.length; ++m){
-                    arr[m] = new Array(size);
-                    if(j < sizes.length - 1){
-                      queue.push(arr[m]);
+                  for ( var m = 0; m < arr.length; ++m ) {
+                    arr[m] = new Array( size );
+                    if ( j < sizes.length - 1 ) {
+                      queue.push( arr[m] );
                     }
                   }
                 }
@@ -601,12 +591,12 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       name = "FN" + name;
       var script = "(function " + name + signature + "{ return " + body +
           "; })";
-      state[name] = eval( script );
+      state[name] = eval( script ); // jshint ignore:line
       return true;
     }
 
-    function translate(line){
-      evaluate(line);
+    function translate ( line ) {
+      evaluate( line );
       return true;
     }
 

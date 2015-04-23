@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CodePages.DE_QWERTZ = (function () {
+/* global Primrose */
+Primrose.CodePages.DE_QWERTZ = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("Deutsch: QWERTZ", "de", {

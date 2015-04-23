@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.CommandPack = ( function ( ) {
+/* global Primrose */
+Primrose.CommandPack = ( function ( ) {
   "use strict";
 
   function CommandPack ( name, commands ) {

@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Rule = ( function ( ) {
+/* global Primrose */
+Primrose.Rule = ( function ( ) {
   "use strict";
 
   function Rule ( name, test ) {

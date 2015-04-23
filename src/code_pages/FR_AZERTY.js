@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || { };
-window.Primrose.CodePages.FR_AZERTY = ( function () {
+/* global Primrose */
+Primrose.CodePages.FR_AZERTY = ( function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage( "Français: AZERTY", "fr", {

@@ -1,3 +1,5 @@
+/* global THREE */
+
 // Pyschologist.js: so named because it keeps me from going crazy
 
 /////////////////////////////////////////////////////////////////////////////
@@ -251,9 +253,9 @@ function cascadeElement ( id, tag, DOMClass ) {
 function copyObject ( dest, source ) {
   var stack = [ { dest: dest, source: source } ];
   while ( stack.length > 0 ) {
-    var frame = stack.pop(),
-        source = frame.source,
-        dest = frame.dest;
+    var frame = stack.pop();
+    source = frame.source;
+    dest = frame.dest;
     for ( var key in source ) {
       if ( source.hasOwnProperty( key ) ) {
         if ( typeof ( source[key] ) !== "object" ) {
@@ -736,3 +738,125 @@ var requestPointerLock = ( document.documentElement.requestPointerLock ||
     document.documentElement.webkitRequestPointerLock ||
     document.documentElement.mozRequestPointerLock || function () {
     } ).bind( document.documentElement );
+
+var Primrose = {
+  Themes: { },
+  Renderers: { },
+  OperatingSystems: { },
+  Grammars: { },
+  CommandPacks: { },
+  CodePages: { }
+};
+
+Primrose.SeansVREffect = function ( renderer, vrHMD ) {
+  "use strict";
+  var translations = [ new THREE.Matrix4(), new THREE.Matrix4() ];
+  var viewports = [ new THREE.Box2(), new THREE.Box2() ];
+  this.setHMD = function ( vrHMD ) {
+    if ( vrHMD.getEyeParameters ) {
+      this.left = vrHMD.getEyeParameters( "left" );
+      this.right = vrHMD.getEyeParameters( "right" );
+    }
+    else {
+      this.left = {
+        renderRect: vrHMD.getRecommendedEyeRenderRect( "left" ),
+        eyeTranslation: vrHMD.getEyeTranslation( "left" ),
+        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView( "left" )
+      };
+
+      this.right = {
+        renderRect: vrHMD.getRecommendedEyeRenderRect( "right" ),
+        eyeTranslation: vrHMD.getEyeTranslation( "right" ),
+        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView( "right" )
+      };
+    }
+
+    setTrans( translations[0], this.left.eyeTranslation );
+    setTrans( translations[1], this.right.eyeTranslation );
+    setView( viewports[0], this.left.renderRect );
+    setView( viewports[1], this.right.renderRect );
+  };
+
+  function setTrans ( m, t ) {
+    m.makeTranslation( t.x, t.y, t.z );
+  }
+
+  function setView ( b, r ) {
+    b.min.set( r.x, r.y );
+    b.max.set( r.x + r.width, r.y + r.height );
+  }
+
+  this.setHMD( vrHMD );
+
+  this.render = function ( scene, camera, renderTarget, forceClear ) {
+    if ( camera.parent === undefined ) {
+      camera.updateMatrixWorld();
+    }
+
+    camera.projectionMatrix = this.FovToProjection(
+        this.left.recommendedFieldOfView, true,
+        camera.near, camera.far );
+
+    renderer.renderStereo( scene, camera, renderTarget, forceClear,
+        translations, viewports );
+  };
+
+  this.FovToNDCScaleOffset = function ( fov ) {
+    var pxscale = 2.0 / ( fov.leftTan + fov.rightTan );
+    var pxoffset = ( fov.leftTan - fov.rightTan ) * pxscale * 0.5;
+    var pyscale = 2.0 / ( fov.upTan + fov.downTan );
+    var pyoffset = ( fov.upTan - fov.downTan ) * pyscale * 0.5;
+    return { scale: [ pxscale, pyscale ], offset: [ pxoffset, pyoffset ] };
+  };
+
+  this.FovPortToProjection = function ( fov, rightHanded, zNear, zFar )
+  {
+    rightHanded = rightHanded === undefined ? true : rightHanded;
+    zNear = zNear === undefined ? 0.01 : zNear;
+    zFar = zFar === undefined ? 10000.0 : zFar;
+
+    var handednessScale = rightHanded ? -1.0 : 1.0;
+
+
+    // and with scale/offset info for normalized device coords
+    var scaleAndOffset = this.FovToNDCScaleOffset( fov );
+
+    // start with an identity matrix
+    var mobj = new THREE.Matrix4().set(
+        // X result, map clip edges to [-w,+w]
+        scaleAndOffset.scale[0],
+        0.0,
+        scaleAndOffset.offset[0] * handednessScale,
+        0.0,
+        // Y result, map clip edges to [-w,+w]
+        // Y offset is negated because this proj matrix transforms from world coords with Y=up,
+        // but the NDC scaling has Y=down (thanks D3D?)
+        0.0,
+        scaleAndOffset.scale[1],
+        -scaleAndOffset.offset[1] * handednessScale,
+        0.0,
+        // Z result (up to the app)
+        0.0,
+        0.0,
+        zFar / ( zNear - zFar ) * -handednessScale,
+        ( zFar * zNear ) / ( zNear - zFar ),
+        // W result (= Z in)
+        0.0,
+        0.0,
+        handednessScale,
+        0.0
+        );
+
+    return mobj;
+  };
+
+  this.FovToProjection = function ( fov, rightHanded, zNear, zFar ) {
+    var fovPort = {
+      upTan: Math.tan( fov.upDegrees * Math.PI / 180.0 ),
+      downTan: Math.tan( fov.downDegrees * Math.PI / 180.0 ),
+      leftTan: Math.tan( fov.leftDegrees * Math.PI / 180.0 ),
+      rightTan: Math.tan( fov.rightDegrees * Math.PI / 180.0 )
+    };
+    return this.FovPortToProjection( fovPort, rightHanded, zNear, zFar );
+  };
+};

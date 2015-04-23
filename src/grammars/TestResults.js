@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.TestResults = (function () {
+/* global Primrose */
+Primrose.Grammars.TestResults = (function () {
   "use strict";
 
   return new Primrose.Grammar("TestResults", [

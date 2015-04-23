@@ -1,9 +1,8 @@
-// For all of these commands, the "current" cursor is:
+/* global Primrose */
+// // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-window.Primrose = window.Primrose || { };
-window.Primrose.CommandPacks = window.Primrose.CommandPacks || { };
-window.Primrose.CommandPacks.TextEditor = ( function () {
+Primrose.CommandPacks.TextEditor = ( function () {
   "use strict";
 
   function TextEditor ( operatingSystem, codePage, editor ) {

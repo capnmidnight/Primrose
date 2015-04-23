@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Themes = window.Primrose.Themes || { };
-window.Primrose.Themes.Default = ( function ( ) {
+/* global Primrose */
+Primrose.Themes.Default = ( function ( ) {
   "use strict";
   return {
     name: "Light",

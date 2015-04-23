@@ -15,10 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global qp */
-
-window.Primrose = window.Primrose || { };
-window.Primrose.TextBox = ( function ( ) {
+/* global qp, Primrose */
+Primrose.TextBox = ( function ( ) {
   "use strict";
 
   var EDITORS = [ ];

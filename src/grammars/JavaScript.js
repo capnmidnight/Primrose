@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.JavaScript = ( function () {
+/* global Primrose */
+Primrose.Grammars.JavaScript = ( function () {
   "use strict";
 
   return new Primrose.Grammar( "JavaScript", [

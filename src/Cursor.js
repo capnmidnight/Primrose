@@ -1,6 +1,5 @@
-/* global qp */
-window.Primrose = window.Primrose || { };
-window.Primrose.Cursor = ( function ( ) {
+/* global qp, Primrose */
+Primrose.Cursor = ( function ( ) {
   "use strict";
 
   function Cursor ( i, x, y ) {

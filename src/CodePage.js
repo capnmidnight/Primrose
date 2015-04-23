@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.CodePage = ( function ( ) {
+/* global Primrose */
+Primrose.CodePage = ( function ( ) {
   "use strict";
 
   function CodePage ( name, lang, options ) {
@@ -64,7 +64,7 @@ window.Primrose.CodePage = ( function ( ) {
         "90": "Z"
       }
     } );
-    
+
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {

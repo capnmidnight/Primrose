@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Keys = ( function ( ) {
+/* global Primrose */
+Primrose.Keys = ( function ( ) {
   "use strict";
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////

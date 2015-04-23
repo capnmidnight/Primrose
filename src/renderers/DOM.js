@@ -1,10 +1,7 @@
-/*global THREE, qp*/
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Renderers = window.Primrose.Renderers || { };
-window.Primrose.Renderers.DOM = ( function ( ) {
+/*global THREE, qp, Primrose */
+Primrose.Renderers.DOM = ( function ( ) {
   "use strict";
-  
+
   var Size = Primrose.Size,
       Cursor = Primrose.Cursor,
       defaultTheme = Primrose.Themes.Default;

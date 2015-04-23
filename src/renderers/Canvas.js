@@ -1,8 +1,5 @@
-/*global THREE, qp*/
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Renderers = window.Primrose.Renderers || { };
-window.Primrose.Renderers.Canvas = ( function ( ) {
+/*global THREE, qp, Primrose */
+Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
 
   return function ( canvasElementOrID, options ) {

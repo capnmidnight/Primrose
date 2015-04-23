@@ -1,6 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CodePages.EN_US = (function () {
+/* global Primrose */
+Primrose.CodePages.EN_US = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("English: USA", "en-US", {

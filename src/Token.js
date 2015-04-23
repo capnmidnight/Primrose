@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.Token = ( function () {
+/* global Primrose */
+Primrose.Token = ( function () {
   "use strict";
   function Token ( value, type, index, line ) {
     this.value = value;

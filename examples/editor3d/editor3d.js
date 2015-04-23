@@ -52,7 +52,7 @@ function editor3d () {
     var elem = ctrls.output;
     if ( vrDisplay ) {
       if ( !vrEffect ) {
-        vrEffect = new THREE.VREffect( renderer, vrDisplay );
+        vrEffect = new Primrose.SeansVREffect( renderer, vrDisplay );
       }
 
       elem.requestFullscreen( { vrDisplay: vrDisplay, vrTimewarp: true } );

@@ -12,6 +12,17 @@ module.exports = function ( grunt ) {
     clean: {
       default: [ "dist/" ]
     },
+    exec: {
+      build_THREE: "cd ../three.js/utils/build && build.bat"
+    },
+    copy: {
+      copy_THREE: {
+        files: [
+          { expand: true, flatten: true, src: [ '../three.js/build/*' ],
+            dest: 'lib/', filter: 'isFile' }
+        ]
+      }
+    },
     jshint: {
       default: [ "core.js", "src/**/*.js" ]
     },
@@ -41,10 +52,13 @@ module.exports = function ( grunt ) {
   } );
 
   grunt.loadNpmTasks( "grunt-contrib-clean" );
+  grunt.loadNpmTasks( "grunt-exec" );
+  grunt.loadNpmTasks( "grunt-contrib-copy" );
   grunt.loadNpmTasks( "grunt-contrib-jshint" );
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default", [ "clean", "jshint", "concat", "uglify" ] );
+  grunt.registerTask( "default", [ "clean", "exec", "copy", "jshint", "concat",
+    "uglify" ] );
 
 };

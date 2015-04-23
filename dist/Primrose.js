@@ -1,10 +1,12 @@
 /*
-  Primrose v0.11.5 2015-04-19
+  Primrose v0.11.5 2015-04-23
   gplv3
   Copyright (C) 2015 Sean T. McBeth [sean@seanmcbeth.com]
   https://www.primroseeditor.com
   https://github.com/capnmidnight/Primrose.git
 */
+/* global THREE */
+
 // Pyschologist.js: so named because it keeps me from going crazy
 
 /////////////////////////////////////////////////////////////////////////////
@@ -258,9 +260,9 @@ function cascadeElement ( id, tag, DOMClass ) {
 function copyObject ( dest, source ) {
   var stack = [ { dest: dest, source: source } ];
   while ( stack.length > 0 ) {
-    var frame = stack.pop(),
-        source = frame.source,
-        dest = frame.dest;
+    var frame = stack.pop();
+    source = frame.source;
+    dest = frame.dest;
     for ( var key in source ) {
       if ( source.hasOwnProperty( key ) ) {
         if ( typeof ( source[key] ) !== "object" ) {
@@ -742,8 +744,131 @@ function isPointerLocked () {
 var requestPointerLock = ( document.documentElement.requestPointerLock ||
     document.documentElement.webkitRequestPointerLock ||
     document.documentElement.mozRequestPointerLock || function () {
-    } ).bind( document.documentElement );;window.Primrose = window.Primrose || { };
-window.Primrose.CodePage = ( function ( ) {
+    } ).bind( document.documentElement );
+
+var Primrose = {
+  Themes: { },
+  Renderers: { },
+  OperatingSystems: { },
+  Grammars: { },
+  CommandPacks: { },
+  CodePages: { }
+};
+
+Primrose.SeansVREffect = function ( renderer, vrHMD ) {
+  "use strict";
+  var translations = [ new THREE.Matrix4(), new THREE.Matrix4() ];
+  var viewports = [ new THREE.Box2(), new THREE.Box2() ];
+  this.setHMD = function ( vrHMD ) {
+    if ( vrHMD.getEyeParameters ) {
+      this.left = vrHMD.getEyeParameters( "left" );
+      this.right = vrHMD.getEyeParameters( "right" );
+    }
+    else {
+      this.left = {
+        renderRect: vrHMD.getRecommendedEyeRenderRect( "left" ),
+        eyeTranslation: vrHMD.getEyeTranslation( "left" ),
+        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView( "left" )
+      };
+
+      this.right = {
+        renderRect: vrHMD.getRecommendedEyeRenderRect( "right" ),
+        eyeTranslation: vrHMD.getEyeTranslation( "right" ),
+        recommendedFieldOfView: vrHMD.getRecommendedEyeFieldOfView( "right" )
+      };
+    }
+
+    setTrans( translations[0], this.left.eyeTranslation );
+    setTrans( translations[1], this.right.eyeTranslation );
+    setView( viewports[0], this.left.renderRect );
+    setView( viewports[1], this.right.renderRect );
+  };
+
+  function setTrans ( m, t ) {
+    m.makeTranslation( t.x, t.y, t.z );
+  }
+
+  function setView ( b, r ) {
+    b.min.set( r.x, r.y );
+    b.max.set( r.x + r.width, r.y + r.height );
+  }
+
+  this.setHMD( vrHMD );
+
+  this.render = function ( scene, camera, renderTarget, forceClear ) {
+    if ( camera.parent === undefined ) {
+      camera.updateMatrixWorld();
+    }
+
+    camera.projectionMatrix = this.FovToProjection(
+        this.left.recommendedFieldOfView, true,
+        camera.near, camera.far );
+
+    renderer.renderStereo( scene, camera, renderTarget, forceClear,
+        translations, viewports );
+  };
+
+  this.FovToNDCScaleOffset = function ( fov ) {
+    var pxscale = 2.0 / ( fov.leftTan + fov.rightTan );
+    var pxoffset = ( fov.leftTan - fov.rightTan ) * pxscale * 0.5;
+    var pyscale = 2.0 / ( fov.upTan + fov.downTan );
+    var pyoffset = ( fov.upTan - fov.downTan ) * pyscale * 0.5;
+    return { scale: [ pxscale, pyscale ], offset: [ pxoffset, pyoffset ] };
+  };
+
+  this.FovPortToProjection = function ( fov, rightHanded, zNear, zFar )
+  {
+    rightHanded = rightHanded === undefined ? true : rightHanded;
+    zNear = zNear === undefined ? 0.01 : zNear;
+    zFar = zFar === undefined ? 10000.0 : zFar;
+
+    var handednessScale = rightHanded ? -1.0 : 1.0;
+
+
+    // and with scale/offset info for normalized device coords
+    var scaleAndOffset = this.FovToNDCScaleOffset( fov );
+
+    // start with an identity matrix
+    var mobj = new THREE.Matrix4().set(
+        // X result, map clip edges to [-w,+w]
+        scaleAndOffset.scale[0],
+        0.0,
+        scaleAndOffset.offset[0] * handednessScale,
+        0.0,
+        // Y result, map clip edges to [-w,+w]
+        // Y offset is negated because this proj matrix transforms from world coords with Y=up,
+        // but the NDC scaling has Y=down (thanks D3D?)
+        0.0,
+        scaleAndOffset.scale[1],
+        -scaleAndOffset.offset[1] * handednessScale,
+        0.0,
+        // Z result (up to the app)
+        0.0,
+        0.0,
+        zFar / ( zNear - zFar ) * -handednessScale,
+        ( zFar * zNear ) / ( zNear - zFar ),
+        // W result (= Z in)
+        0.0,
+        0.0,
+        handednessScale,
+        0.0
+        );
+
+    return mobj;
+  };
+
+  this.FovToProjection = function ( fov, rightHanded, zNear, zFar ) {
+    var fovPort = {
+      upTan: Math.tan( fov.upDegrees * Math.PI / 180.0 ),
+      downTan: Math.tan( fov.downDegrees * Math.PI / 180.0 ),
+      leftTan: Math.tan( fov.leftDegrees * Math.PI / 180.0 ),
+      rightTan: Math.tan( fov.rightDegrees * Math.PI / 180.0 )
+    };
+    return this.FovPortToProjection( fovPort, rightHanded, zNear, zFar );
+  };
+};
+;/* global Primrose */
+Primrose.CodePage = ( function ( ) {
   "use strict";
 
   function CodePage ( name, lang, options ) {
@@ -808,7 +933,7 @@ window.Primrose.CodePage = ( function ( ) {
         "90": "Z"
       }
     } );
-    
+
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
@@ -825,8 +950,8 @@ window.Primrose.CodePage = ( function ( ) {
 
   return CodePage;
 } ) ();
-;window.Primrose = window.Primrose || { };
-window.Primrose.CommandPack = ( function ( ) {
+;/* global Primrose */
+Primrose.CommandPack = ( function ( ) {
   "use strict";
 
   function CommandPack ( name, commands ) {
@@ -835,9 +960,9 @@ window.Primrose.CommandPack = ( function ( ) {
   }
 
   return CommandPack;
-} )();;/* global qp */
-window.Primrose = window.Primrose || { };
-window.Primrose.Cursor = ( function ( ) {
+} )();
+;/* global qp, Primrose */
+Primrose.Cursor = ( function ( ) {
   "use strict";
 
   function Cursor ( i, x, y ) {
@@ -1069,8 +1194,9 @@ window.Primrose.Cursor = ( function ( ) {
   };
 
   return Cursor;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Grammar = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Grammar = ( function ( ) {
   "use strict";
 
   function Grammar ( name, grammar ) {
@@ -1122,8 +1248,9 @@ window.Primrose.Grammar = ( function ( ) {
   }
 
   return Grammar;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Keys = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Keys = ( function ( ) {
   "use strict";
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////
@@ -1250,8 +1377,9 @@ window.Primrose.Keys = ( function ( ) {
   }
 
   return Keys;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.OperatingSystem = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.OperatingSystem = ( function ( ) {
   "use strict";
 
   function setCursorCommand ( obj, mod, key, func, cur ) {
@@ -1315,9 +1443,9 @@ window.Primrose.OperatingSystem = ( function ( ) {
   }
 
   return OperatingSystem;
-} )();;/* global qp */
-window.Primrose = window.Primrose || { };
-window.Primrose.Point = ( function ( ) {
+} )();
+;/* global qp, Primrose */
+Primrose.Point = ( function ( ) {
   "use strict";
 
   function Point ( x, y ) {
@@ -1345,9 +1473,9 @@ window.Primrose.Point = ( function ( ) {
   };
 
   return Point;
-} )();;/*global qp*/
-window.Primrose = window.Primrose || { };
-window.Primrose.Rectangle = ( function ( ) {
+} )();
+;/* global qp, Primrose */
+Primrose.Rectangle = ( function ( ) {
   "use strict";
 
   function Rectangle ( x, y, width, height ) {
@@ -1444,8 +1572,9 @@ window.Primrose.Rectangle = ( function ( ) {
   };
 
   return Rectangle;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Rule = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Rule = ( function ( ) {
   "use strict";
 
   function Rule ( name, test ) {
@@ -1496,12 +1625,11 @@ window.Primrose.Rule = ( function ( ) {
   };
 
   return Rule;
-} )();;/* global qp */
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Size = (function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Size = (function ( ) {
   "use strict";
-  
+
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );
   }
@@ -1527,7 +1655,8 @@ window.Primrose.Size = (function ( ) {
   };
 
   return Size;
-} )();;/*
+} )();
+;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -1544,10 +1673,8 @@ window.Primrose.Size = (function ( ) {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global qp */
-
-window.Primrose = window.Primrose || { };
-window.Primrose.TextBox = ( function ( ) {
+/* global qp, Primrose */
+Primrose.TextBox = ( function ( ) {
   "use strict";
 
   var EDITORS = [ ];
@@ -2621,8 +2748,9 @@ window.Primrose.TextBox = ( function ( ) {
   }
 
   return TextBox;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Token = ( function () {
+} )();
+;/* global Primrose */
+Primrose.Token = ( function () {
   "use strict";
   function Token ( value, type, index, line ) {
     this.value = value;
@@ -2646,9 +2774,9 @@ window.Primrose.Token = ( function () {
   };
 
   return Token;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CodePages.DE_QWERTZ = (function () {
+} )();
+;/* global Primrose */
+Primrose.CodePages.DE_QWERTZ = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("Deutsch: QWERTZ", "de", {
@@ -2766,9 +2894,9 @@ window.Primrose.CodePages.DE_QWERTZ = (function () {
       "89": "y"
     }
   });
-})();;window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CodePages.EN_UKX = (function () {
+})();
+;/* global Primrose */
+Primrose.CodePages.EN_UKX = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("English: UK Extended", "en-GB", {
@@ -2848,9 +2976,9 @@ window.Primrose.CodePages.EN_UKX = (function () {
       "223": "¬"
     }
   });
-})();;window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || {};
-window.Primrose.CodePages.EN_US = (function () {
+})();
+;/* global Primrose */
+Primrose.CodePages.EN_US = (function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage("English: USA", "en-US", {
@@ -2905,9 +3033,9 @@ window.Primrose.CodePages.EN_US = (function () {
       "222": "\""
     }
   });
-})();;window.Primrose = window.Primrose || { };
-window.Primrose.CodePages = window.Primrose.CodePages || { };
-window.Primrose.CodePages.FR_AZERTY = ( function () {
+})();
+;/* global Primrose */
+Primrose.CodePages.FR_AZERTY = ( function () {
   "use strict";
   var CodePage = Primrose.CodePage;
   return new CodePage( "Français: AZERTY", "fr", {
@@ -2996,12 +3124,11 @@ window.Primrose.CodePages.FR_AZERTY = ( function () {
       "85": "ù"
     }
   } );
-} )();;// For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front.
+} )();
+;// If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-window.Primrose = window.Primrose || { };
-window.Primrose.CommandPacks = window.Primrose.CommandPacks || { };
-window.Primrose.CommandPacks.TextEditor = ( function () {
+/* global Primrose */
+Primrose.CommandPacks.TextEditor = ( function () {
   "use strict";
 
   return {
@@ -3044,12 +3171,12 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
       prim.overwriteText( ts );
     }
   };
-} )();;// For all of these commands, the "current" cursor is:
+} )();
+;/* global Primrose */
+// // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-window.Primrose = window.Primrose || { };
-window.Primrose.CommandPacks = window.Primrose.CommandPacks || { };
-window.Primrose.CommandPacks.TextEditor = ( function () {
+Primrose.CommandPacks.TextEditor = ( function () {
   "use strict";
 
   function TextEditor ( operatingSystem, codePage, editor ) {
@@ -3113,9 +3240,9 @@ window.Primrose.CommandPacks.TextEditor = ( function () {
   }
   inherit( TextEditor, Primrose.CommandPack );
   return TextEditor;
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.Basic = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Grammars.Basic = ( function ( ) {
 
   var grammar = new Primrose.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
@@ -3240,35 +3367,25 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
 
     function process ( line ) {
-      var op;
-      try {
-        if ( line && line.length > 0 ) {
-          op = line.shift( );
-          if ( op ) {
-            if ( commands.hasOwnProperty( op.value ) ) {
-              return commands[op.value]( line );
-            }
-            else if ( isNumber( op.value ) ) {
-              return setProgramCounter( [ op ] );
-            }
-            else if ( state[op.value] ||
-                ( line.length > 0 && line[0].type === "operators" &&
-                    line[0].value === "=" ) ) {
-              line.unshift( op );
-              return translate( line );
-            }
-            else {
-              error( "Unknown command. >>> " + op.value );
-            }
+      if ( line && line.length > 0 ) {
+        var op = line.shift( );
+        if ( op ) {
+          if ( commands.hasOwnProperty( op.value ) ) {
+            return commands[op.value]( line );
+          }
+          else if ( isNumber( op.value ) ) {
+            return setProgramCounter( [ op ] );
+          }
+          else if ( state[op.value] ||
+              ( line.length > 0 && line[0].type === "operators" &&
+                  line[0].value === "=" ) ) {
+            line.unshift( op );
+            return translate( line );
+          }
+          else {
+            error( "Unknown command. >>> " + op.value );
           }
         }
-      }
-      catch ( exp ) {
-        console.error( exp );
-        if ( op ) {
-          console.log( op.toString() );
-        }
-        error( exp.message );
       }
       return pauseBeforeComplete();
     }
@@ -3285,41 +3402,41 @@ window.Primrose.Grammars.Basic = ( function ( ) {
 
     function evaluate ( line ) {
       var script = "";
-      for(var i = 0; i < line.length; ++i){
+      for ( var i = 0; i < line.length; ++i ) {
         var t = line[i];
         var nest = 0;
-        if(t.type === "identifiers" &&
+        if ( t.type === "identifiers" &&
             typeof state[t.value] !== "function" &&
             i < line.length - 1 &&
-            line[i+1].value === "("){
-          for(var j = i + 1; j < line.length; ++j){
+            line[i + 1].value === "(" ) {
+          for ( var j = i + 1; j < line.length; ++j ) {
             var t2 = line[j];
-            if(t2.value === "("){
-              if(nest === 0){
+            if ( t2.value === "(" ) {
+              if ( nest === 0 ) {
                 t2.value = "[";
               }
               ++nest;
             }
-            else if(t2.value === ")"){
+            else if ( t2.value === ")" ) {
               --nest;
-              if(nest === 0){
+              if ( nest === 0 ) {
                 t2.value = "]";
               }
             }
-            else if(t2.value === "," && nest === 1){
+            else if ( t2.value === "," && nest === 1 ) {
               t2.value = "][";
             }
 
-            if(nest === 0){
+            if ( nest === 0 ) {
               break;
             }
           }
         }
         script += t.value;
       }
-      with ( state ) {
+      with ( state ) { // jshint ignore:line
         try {
-          return eval( script );
+          return eval( script ); // jshint ignore:line
         }
         catch ( exp ) {
           console.debug( line.join( ", " ) );
@@ -3373,15 +3490,16 @@ window.Primrose.Grammars.Basic = ( function ( ) {
             }
             else {
               val = new Array( sizes[0] );
-              var queue = [val];
-              for( j = 1; j < sizes.length; ++j){
+              var queue = [ val ];
+              for ( j = 1; j < sizes.length; ++j ) {
                 var size = sizes[j];
-                for(var k = 0, l = queue.length; k < l; ++k){
+                for ( var k = 0,
+                    l = queue.length; k < l; ++k ) {
                   var arr = queue.shift();
-                  for(var m = 0; m < arr.length; ++m){
-                    arr[m] = new Array(size);
-                    if(j < sizes.length - 1){
-                      queue.push(arr[m]);
+                  for ( var m = 0; m < arr.length; ++m ) {
+                    arr[m] = new Array( size );
+                    if ( j < sizes.length - 1 ) {
+                      queue.push( arr[m] );
                     }
                   }
                 }
@@ -3716,12 +3834,12 @@ window.Primrose.Grammars.Basic = ( function ( ) {
       name = "FN" + name;
       var script = "(function " + name + signature + "{ return " + body +
           "; })";
-      state[name] = eval( script );
+      state[name] = eval( script ); // jshint ignore:line
       return true;
     }
 
-    function translate(line){
-      evaluate(line);
+    function translate ( line ) {
+      evaluate( line );
       return true;
     }
 
@@ -3766,9 +3884,9 @@ window.Primrose.Grammars.Basic = ( function ( ) {
     };
   };
   return grammar;
-} )( );;window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.JavaScript = ( function () {
+} )( );
+;/* global Primrose */
+Primrose.Grammars.JavaScript = ( function () {
   "use strict";
 
   return new Primrose.Grammar( "JavaScript", [
@@ -3786,17 +3904,17 @@ window.Primrose.Grammars.JavaScript = ( function () {
     [ "functions", /(\w+)(?:\s*\()/ ],
     [ "members", /(?:(?:\w+\.)+)(\w+)/ ]
   ] );
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.PlainText = (function () {
+} )();
+;/* global Primrose */
+Primrose.Grammars.PlainText = (function () {
   "use strict";
 
   return new Primrose.Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
-})();;window.Primrose = window.Primrose || { };
-window.Primrose.Grammars = window.Primrose.Grammars || { };
-window.Primrose.Grammars.TestResults = (function () {
+})();
+;/* global Primrose */
+Primrose.Grammars.TestResults = (function () {
   "use strict";
 
   return new Primrose.Grammar("TestResults", [
@@ -3811,22 +3929,20 @@ window.Primrose.Grammars.TestResults = (function () {
     ["keywords", /(Test results for )(\w+):/, true],
     ["strings", /        \w+/, true]
   ]);
-})();;// cut, copy, and paste commands are events that the browser manages,
-// so we don't have to include handlers for them here.
-window.Primrose = window.Primrose || { };
-window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || { };
-window.Primrose.OperatingSystems.OSX = ( function () {
+})();
+;/* global Primrose */
+Primrose.OperatingSystems.OSX = ( function () {
   "use strict";
 
   return new Primrose.OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",
       "META", "LEFTARROW", "RIGHTARROW",
       "META", "UPARROW", "DOWNARROW" );
-} )();;// cut, copy, and paste commands are events that the browser manages,
+} )();
+;// cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
-window.Primrose = window.Primrose || { };
-window.Primrose.OperatingSystems = window.Primrose.OperatingSystems || {};
-window.Primrose.OperatingSystems.Windows = (function () {
+/* global Primrose */
+Primrose.OperatingSystems.Windows = (function () {
   "use strict";
 
   return new Primrose.OperatingSystem(
@@ -3834,11 +3950,8 @@ window.Primrose.OperatingSystems.Windows = (function () {
       "", "HOME", "END",
       "CTRL", "HOME", "END");
 })();
-;/*global THREE, qp*/
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Renderers = window.Primrose.Renderers || { };
-window.Primrose.Renderers.Canvas = ( function ( ) {
+;/*global THREE, qp, Primrose */
+Primrose.Renderers.Canvas = ( function ( ) {
   "use strict";
 
   return function ( canvasElementOrID, options ) {
@@ -4247,13 +4360,11 @@ window.Primrose.Renderers.Canvas = ( function ( ) {
           canvas.id, canvas ) );
     }
   };
-} )();;/*global THREE, qp*/
-
-window.Primrose = window.Primrose || { };
-window.Primrose.Renderers = window.Primrose.Renderers || { };
-window.Primrose.Renderers.DOM = ( function ( ) {
+} )();
+;/*global THREE, qp, Primrose */
+Primrose.Renderers.DOM = ( function ( ) {
   "use strict";
-  
+
   var Size = Primrose.Size,
       Cursor = Primrose.Cursor,
       defaultTheme = Primrose.Themes.Default;
@@ -4681,9 +4792,9 @@ window.Primrose.Renderers.DOM = ( function ( ) {
           div.id, div ) );
     }
   };
-} );;window.Primrose = window.Primrose || { };
-window.Primrose.Themes = window.Primrose.Themes || { };
-window.Primrose.Themes.Dark = ( function ( ) {
+} );
+;/* global Primrose */
+Primrose.Themes.Dark = ( function ( ) {
   "use strict";
   return {
     name: "Dark",
@@ -4725,9 +4836,9 @@ window.Primrose.Themes.Dark = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();;window.Primrose = window.Primrose || { };
-window.Primrose.Themes = window.Primrose.Themes || { };
-window.Primrose.Themes.Default = ( function ( ) {
+} )();
+;/* global Primrose */
+Primrose.Themes.Default = ( function ( ) {
   "use strict";
   return {
     name: "Light",
@@ -4766,4 +4877,5 @@ window.Primrose.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();Primrose.VERSION = "v0.11.5";
+} )();
+Primrose.VERSION = "v0.11.5";

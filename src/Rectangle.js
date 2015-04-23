@@ -1,6 +1,5 @@
-/*global qp*/
-window.Primrose = window.Primrose || { };
-window.Primrose.Rectangle = ( function ( ) {
+/* global qp, Primrose */
+Primrose.Rectangle = ( function ( ) {
   "use strict";
 
   function Rectangle ( x, y, width, height ) {

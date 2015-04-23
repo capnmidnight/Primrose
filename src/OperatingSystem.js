@@ -1,5 +1,5 @@
-window.Primrose = window.Primrose || { };
-window.Primrose.OperatingSystem = ( function ( ) {
+/* global Primrose */
+Primrose.OperatingSystem = ( function ( ) {
   "use strict";
 
   function setCursorCommand ( obj, mod, key, func, cur ) {
