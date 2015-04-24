@@ -52,7 +52,7 @@ function editor3d () {
     var elem = ctrls.output;
     if ( vrDisplay ) {
       if ( !vrEffect ) {
-        vrEffect = new Primrose.SeansVREffect( renderer, vrDisplay );
+        vrEffect = new SeansVREffect( renderer, vrDisplay );
       }
 
       elem.requestFullscreen( { vrDisplay: vrDisplay, vrTimewarp: true } );
@@ -105,11 +105,10 @@ function editor3d () {
         h = 1,
         w2 = 2,
         prim1 = new Primrose.TextBox( "editor1", {
-          tokenizer: Primrose.Grammars.Basic,
-          width: px( w1 * 1024 ),
-          height: px( h * 1024 ),
+          tokenizer: Primrose.Grammars.JavaScript,
+          size: new Primrose.Size(w1 * 1024, h * 1024),
           fontSize: 36,
-          file: "var ball = textured(box(0.25, 0.25, 0.25), 'bg1.jpg');\n\
+          file: "var ball = textured(box(0.25, 0.25, 0.25), '../images/bg1.jpg');\n\
 scene.add(ball);\n\n\
 ball.position.y = 0.25;\n\
 var radius = 3, angle = 0, dAngle = Math.PI / 360;\n\
@@ -121,20 +120,16 @@ setInterval(function(){\n\
 \n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
-        testObjects = [
-          Primrose.Grammars.Basic,
-          Primrose.Grammar,
-          Primrose.Point,
-          Primrose.Rectangle,
-          Primrose.Size
-        ],
         prim2 = new Primrose.TextBox( "editor2", {
-          width: px( w2 * 1024 ),
-          height: px( h * 1024 ),
+          size: new Primrose.Size(w2 * 1024, h * 1024 ),
           fontSize: 24,
-          file: Assert.stringTest( testObjects ),
+          file: "FOR I = 1 TO 10\n\
+  PRINT I, \"Hello, world!\"\n\
+NEXT\n\
+PRINT \"All done!\"\n\
+END",
           readOnly: true,
-          tokenizer: Primrose.Grammars.TestResults,
+          tokenizer: Primrose.Grammars.Basic,
           theme: Primrose.Themes.Dark,
           renderer: Primrose.Renderers.Canvas
         } ),
@@ -167,8 +162,8 @@ setInterval(function(){\n\
     } );
     var gl = renderer.getContext( ),
         sky = textured( shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-            "bg2.jpg" ),
-        floor = textured( box( 25, 1, 25 ), "deck.png", 25, 25 ),
+            "../images/bg2.jpg" ),
+        floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
         shellGeom = shell( w1, 5, 10 ),
         shellEditor = textured( shellGeom, prim1 ),
         shellEditorPicker = textured( shellGeom, prim1.getRenderer( )
@@ -266,14 +261,6 @@ setInterval(function(){\n\
       fakeCamera.updateProjectionMatrix( );
     }
 
-    function log ( msg ) {
-      console.log( msg );
-      if ( currentEditor ) {
-        currentEditor.overwriteText( msg );
-        currentEditor.drawText( );
-      }
-    }
-
     function keyDown ( evt ) {
       var exp;
       if ( evt.keyCode === Primrose.Keys.ESCAPE ) {
@@ -294,16 +281,18 @@ setInterval(function(){\n\
           evt.preventDefault( );
         }
         else if ( currentEditor ) {
-          if ( ( isOSX && evt.keyCode === 69 ) || ( !isOSX &&
-              evt.keyCode ===
-              32 ) ) {
-            try {
-              eval( currentEditor.getText( ) );
+          if ( ( isOSX && evt.keyCode === 69 ) ||
+              ( !isOSX && evt.keyCode === 32 ) ) {
+            var grammar = currentEditor.getTokenizer();
+            if(grammar.interpret){
+              try {
+                grammar.interpret( currentEditor.value );
+              }
+              catch ( exp ) {
+                log( exp.message );
+              }
+              evt.preventDefault( );
             }
-            catch ( exp ) {
-              log( exp.message );
-            }
-            evt.preventDefault( );
           }
           else if ( evt.keyCode === 38 ) {
             currentEditor.increaseFontSize( );
@@ -628,7 +617,7 @@ setInterval(function(){\n\
       }
       var phiStart = Math.PI + phi * 0.5;
       var thetaStart = ( Math.PI - theta ) * 0.5;
-      var geom = new THREE.InsideSphereGeometry( r, slices, rings, phiStart,
+      var geom = new InsideSphereGeometry( r, slices, rings, phiStart,
           phi,
           thetaStart, theta, true );
       return geom;

@@ -13,12 +13,19 @@ module.exports = function ( grunt ) {
       default: [ "dist/" ]
     },
     exec: {
-      build_THREE: "cd ../three.js/utils/build && build.bat"
+      build_THREE: "cd ../three.js/utils/build && build.bat",
+      build_Heather: "cd ../Heather && grunt"
     },
     copy: {
       copy_THREE: {
         files: [
           { expand: true, flatten: true, src: [ '../three.js/build/*' ],
+            dest: 'lib/', filter: 'isFile' }
+        ]
+      },
+      copy_Heather: {
+        files: [
+          { expand: true, flatten: true, src: [ '../Heather/dist/*' ],
             dest: 'lib/', filter: 'isFile' }
         ]
       }

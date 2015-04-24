@@ -1,23 +1,21 @@
 {
   "name": "Primrose",
   "description": "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
-  "version": "0.11.5",
-  "author": {
-    "name": "Sean T. McBeth",
-    "email": "sean@seanmcbeth.com",
-    "url": "https://www.seanmcbeth.com"
-  },
-  "license": {
-    "type": "gplv3"
-  },
+  "version": "0.12.0",
+  "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
+  "license": "GPL-3.0",
   "homepage": "https://www.primroseeditor.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/capnmidnight/Primrose.git"
   },
-  "bugs": {
-    "url": "https://github.com/capnmidnight/Primrose/issues"
-  },
+  "bugs": "https://github.com/capnmidnight/Primrose/issues",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist/",
+    "lib/"
+  ],
   "keywords": [
     "text",
     "editor",
@@ -34,5 +32,8 @@
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.7.0"
+  },
+  "dependencies": {
+    "Heather": "git://github.com/capnmidnight/Heather.git"
   }
 }

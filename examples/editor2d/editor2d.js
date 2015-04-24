@@ -24,7 +24,7 @@ function editor2d () {
   var editor = new Primrose.TextBox( "editor", {
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
-    theme: Primrose.Themes.Dark,
+    theme: Primrose.Themes.Default,
     hideLineNumbers: true
   } );
 
@@ -67,7 +67,7 @@ function editor2d () {
     } );
   }
 
-  loadFile( "oregon.bas" );
+  loadFile( "../oregon.bas" );
 
   function flush () {
     if ( buffer.length > 0 ) {
