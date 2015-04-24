@@ -68,4 +68,7 @@ module.exports = function ( grunt ) {
   grunt.registerTask( "default", [ "clean", "exec", "copy", "jshint", "concat",
     "uglify" ] );
 
+  grunt.registerTask( "localonly", [ "clean", "copy", "jshint", "concat",
+    "uglify" ] );
+
 };
