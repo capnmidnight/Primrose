@@ -1,7 +1,7 @@
 /*
   Primrose v0.12.0 2015-04-24
   
-  Copyright (C) 2015  []
+  Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
   https://github.com/capnmidnight/Primrose.git
 */

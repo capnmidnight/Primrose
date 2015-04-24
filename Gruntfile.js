@@ -3,7 +3,7 @@ module.exports = function ( grunt ) {
   var banner = "/*\n\
   <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
   <%= pkg.license.type %>\n\
-  Copyright (C) 2015 <%= pkg.author.name %> [<%= pkg.author.email %>]\n\
+  Copyright (C) 2015 <%= pkg.author %>\n\
   <%= pkg.homepage %>\n\
   <%= pkg.repository.url %>\n\
 */\n";
