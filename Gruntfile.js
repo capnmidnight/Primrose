@@ -18,7 +18,7 @@ module.exports = function ( grunt ) {
     copyConfig.copy_THREE = {
       files: [
         { expand: true, flatten: true, src: [ '../three.js/build/*' ],
-          dest: 'javascripts/', filter: 'isFile' }
+          dest: 'lib/', filter: 'isFile' }
       ]
     };
   }
@@ -29,7 +29,7 @@ module.exports = function ( grunt ) {
     copyConfig.copy_Heather = {
       files: [
         { expand: true, flatten: true, src: [ '../Heather/dist/*' ],
-          dest: 'javascripts/', filter: 'isFile' }
+          dest: 'lib/', filter: 'isFile' }
       ]
     };
   }
