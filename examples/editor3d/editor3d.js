@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*global THREE, qp, Primrose, Assert */
+/*global THREE, qp, Primrose, Assert, isOSX */
 
 function editor3d () {
   "use strict";
@@ -105,6 +105,7 @@ function editor3d () {
         h = 1,
         w2 = 2,
         prim1 = new Primrose.Controls.TextBox( "editor1", {
+          keyEventSource: window,
           tokenizer: Primrose.Grammars.JavaScript,
           size: new Primrose.Size(w1 * 1024, h * 1024),
           fontSize: 36,
@@ -121,17 +122,16 @@ setInterval(function(){\n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
         prim2 = new Primrose.Controls.TextBox( "editor2", {
+          keyEventSource: window,
+          tokenizer: Primrose.Grammars.Basic,
+          theme: Primrose.Themes.Dark,
           size: new Primrose.Size(w2 * 1024, h * 1024 ),
           fontSize: 24,
           file: "FOR I = 1 TO 10\n\
   PRINT I, \"Hello, world!\"\n\
 NEXT\n\
 PRINT \"All done!\"\n\
-END",
-          readOnly: true,
-          tokenizer: Primrose.Grammars.Basic,
-          theme: Primrose.Themes.Dark,
-          renderer: Primrose.Renderers.Canvas
+END"
         } ),
         scene = new THREE.Scene( ),
         pickingScene = new THREE.Scene( ),
@@ -269,12 +269,8 @@ END",
         prim1.forceUpdate( );
         prim2.forceUpdate( );
       }
-      if ( currentEditor && currentEditor.isFocused( ) ) {
-        currentEditor.editText( evt );
-      }
-      else {
-        keyState[evt.keyCode] = true;
-      }
+
+      keyState[evt.keyCode] = true;
       if ( evt[modA] && evt[modB] ) {
         if ( evt.keyCode === 70 ) {
           goFullscreen( );
@@ -432,7 +428,7 @@ END",
 
     function mouseUp ( evt ) {
       dragging = false;
-      if ( currentEditor && currentEditor.isFocused( ) ) {
+      if ( currentEditor && currentEditor.focused ) {
         currentEditor.endPointer( );
       }
     }
@@ -488,7 +484,7 @@ END",
       if ( evt.touches.length === 0 ) {
         touchCount = 0;
         touchDrive = 0;
-        if ( currentEditor && currentEditor.isFocused( ) ) {
+        if ( currentEditor && currentEditor.focused ) {
           currentEditor.endPointer( );
         }
       }
@@ -624,7 +620,7 @@ END",
     }
 
     function pick ( op ) {
-      if ( currentEditor && currentEditor.isFocused( ) ) {
+      if ( currentEditor && currentEditor.focused ) {
         var r = vrEffect ? vrEffect : renderer;
         scene.remove( body );
         pickingScene.add( body );

@@ -1,18 +1,63 @@
-/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+/* global Primrose */
+Primrose.Control = ( function () {
+  "use strict";
 
+  var CONTROLS = [ ];
 
+  function updateControls () {
+    for ( var i = 0; i < CONTROLS.length; ++i ) {
+      CONTROLS[i].render();
+    }
+    requestAnimationFrame( updateControls );
+  }
+
+  requestAnimationFrame( updateControls );
+
+  function Control () {
+    CONTROLS.push( this );
+    this.focused = false;
+    this.changed = false;
+  }
+
+  Control.prototype.render = function(){
+    this.changed = false;
+  };
+
+  Control.prototype.update = function () {
+    if(this.changed){
+      this.render();
+    }
+  };
+
+  Control.prototype.forceUpdate = function(){
+    this.changed = true;
+    this.update();
+  };
+
+  Control.prototype.dispose = function () {
+    for ( var i = CONTROLS.length - 1; i >= 0; --i ) {
+      if ( CONTROLS[i] === this ) {
+        CONTROLS.splice( i, 1 );
+        break;
+      }
+    }
+  };
+
+  Control.prototype.focus = function () {
+    for ( var i = 0; i < CONTROLS.length; ++i ) {
+      var e = CONTROLS[i];
+      if ( e !== this ) {
+        e.blur();
+      }
+    }
+    this.focused = true;
+    this.forceUpdate();
+  };
+
+  Control.prototype.blur = function () {
+    this.focused = false;
+    this.forceUpdate();
+  };
+
+  return Control;
+} )();

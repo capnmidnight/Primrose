@@ -24,7 +24,7 @@ function editor2d () {
   var editor = new Primrose.Controls.TextBox( "editor", {
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
-    theme: Primrose.Themes.Default,
+    theme: Primrose.Themes.Dark,
     hideLineNumbers: true
   } );
 

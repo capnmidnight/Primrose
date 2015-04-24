@@ -311,7 +311,7 @@ function PrimroseDemo ( err ) {
       flush();
     }
     else {
-      editor.editText( evt );
+      editor.keyDown( evt );
       var str = editor.value.substring( currentEditIndex );
       inputCallback( str.trim() );
       inputCallback = null;
@@ -350,7 +350,7 @@ function PrimroseDemo ( err ) {
   }
 
   function keyDown ( evt ) {
-    if ( !lastEditor || !lastEditor.isFocused() ) {
+    if ( !lastEditor || !lastEditor.focused ) {
       keyState[evt.keyCode] = true;
     }
     else if ( running && inputCallback && evt.keyCode ===
@@ -361,7 +361,7 @@ function PrimroseDemo ( err ) {
       execute();
     }
     else if ( lastEditor ) {
-      lastEditor.editText( evt );
+      lastEditor.keyDown( evt );
     }
   }
 
@@ -493,7 +493,7 @@ function PrimroseDemo ( err ) {
 
   function mouseUp ( evt ) {
     dragging = false;
-    if ( lastEditor && lastEditor.isFocused() ) {
+    if ( lastEditor && lastEditor.focused ) {
       lastEditor.endPointer();
     }
   }
@@ -525,7 +525,7 @@ function PrimroseDemo ( err ) {
     x /= evt.touches.length;
     y /= evt.touches.length;
 
-    if ( !lastEditor || !lastEditor.isFocused() ) {
+    if ( !lastEditor || !lastEditor.focused ) {
       if ( touchCount === 1 ) {
         touchStrafe = ( x - lastTouchX );
         touchDrive = ( y - lastTouchY );
@@ -702,7 +702,7 @@ function PrimroseDemo ( err ) {
   }
 
   function pick ( op ) {
-    if ( lastEditor && lastEditor.isFocused() ) {
+    if ( lastEditor && lastEditor.focused ) {
       var r = vrEffect ? vrEffect : renderer;
       scene.remove( body );
       r.render( pickingScene, camera, back, true );

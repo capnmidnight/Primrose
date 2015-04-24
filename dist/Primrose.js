@@ -5,6 +5,23 @@
   https://www.primroseeditor.com
   https://github.com/capnmidnight/Primrose.git
 */
+/*
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 var Primrose = {
   CodePages: { },
   CommandPacks: { },
@@ -108,24 +125,69 @@ Primrose.CommandPack = ( function ( ) {
 
   return CommandPack;
 } )();
-;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+;/* global Primrose */
+Primrose.Control = ( function () {
+  "use strict";
 
+  var CONTROLS = [ ];
 
+  function updateControls () {
+    for ( var i = 0; i < CONTROLS.length; ++i ) {
+      CONTROLS[i].render();
+    }
+    requestAnimationFrame( updateControls );
+  }
+
+  requestAnimationFrame( updateControls );
+
+  function Control () {
+    CONTROLS.push( this );
+    this.focused = false;
+    this.changed = false;
+  }
+
+  Control.prototype.render = function(){
+    this.changed = false;
+  };
+
+  Control.prototype.update = function () {
+    if(this.changed){
+      this.render();
+    }
+  };
+
+  Control.prototype.forceUpdate = function(){
+    this.changed = true;
+    this.update();
+  };
+
+  Control.prototype.dispose = function () {
+    for ( var i = CONTROLS.length - 1; i >= 0; --i ) {
+      if ( CONTROLS[i] === this ) {
+        CONTROLS.splice( i, 1 );
+        break;
+      }
+    }
+  };
+
+  Control.prototype.focus = function () {
+    for ( var i = 0; i < CONTROLS.length; ++i ) {
+      var e = CONTROLS[i];
+      if ( e !== this ) {
+        e.blur();
+      }
+    }
+    this.focused = true;
+    this.forceUpdate();
+  };
+
+  Control.prototype.blur = function () {
+    this.focused = false;
+    this.forceUpdate();
+  };
+
+  return Control;
+} )();
 ;/* global qp, Primrose */
 Primrose.Cursor = ( function ( ) {
   "use strict";
@@ -1313,61 +1375,24 @@ Primrose.CommandPacks.TextEditor = ( function () {
   inherit( TextEditor, Primrose.CommandPack );
   return TextEditor;
 } )();
-;/* 
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+;/* global Primrose */
+Primrose.Controls.Keyboard = ( function () {
+  "use strict";
 
+  function Keyboard () {
+    Primrose.Control.call(this);
+  }
 
-;/*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+  inherit(Keyboard, Primrose.Control);
 
-/* global qp, Primrose */
+  return Keyboard;
+} )();
+;/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari */
 Primrose.Controls.TextBox = ( function ( ) {
   "use strict";
 
-  var EDITORS = [ ];
-
-  function renderPump () {
-    requestAnimationFrame( renderPump );
-    for ( var i = 0; i < EDITORS.length; ++i ) {
-      if ( EDITORS[i].drawText ) {
-        EDITORS[i].drawText();
-      }
-    }
-  }
-
-  requestAnimationFrame( renderPump );
-
   function TextBox ( renderToElementOrID, options ) {
     var self = this;
-    EDITORS.push( this );
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
@@ -1376,6 +1401,8 @@ Primrose.Controls.TextBox = ( function ( ) {
     if ( typeof options === "string" ) {
       options = { file: options };
     }
+
+    Primrose.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
     // private fields
@@ -1405,8 +1432,6 @@ Primrose.Controls.TextBox = ( function ( ) {
         bottomRightGutter = new Primrose.Size(),
         dragging = false,
         scrolling = false,
-        focused = false,
-        changed = false,
         showLineNumbers = true,
         showScrollBars = true,
         wordWrap = false,
@@ -1431,7 +1456,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     function refreshTokens () {
       tokens = tokenizer.tokenize( self.value );
-      self.drawText();
+      self.update();
     }
 
     function clampScroll () {
@@ -1462,7 +1487,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     }
 
     function setCursorXY ( cursor, x, y ) {
-      changed = true;
+      self.changed = true;
       pointer.set( x, y );
       renderer.pixel2cell( pointer, self.scroll, gridBounds );
       var gx = pointer.x - self.scroll.x;
@@ -1512,7 +1537,7 @@ Primrose.Controls.TextBox = ( function ( ) {
       var moved = self.frontCursor.fixCursor( tokenRows ) ||
           self.backCursor.fixCursor( tokenRows );
       if ( moved ) {
-        self.forceDraw();
+        self.render();
       }
     }
 
@@ -1541,19 +1566,19 @@ Primrose.Controls.TextBox = ( function ( ) {
     }
 
     function mouseMove ( evt ) {
-      if ( focused ) {
+      if ( self.focused ) {
         pointerMove( evt.clientX, evt.clientY );
       }
     }
 
     function mouseButtonUp ( evt ) {
-      if ( focused && evt.button === 0 ) {
+      if ( self.focused && evt.button === 0 ) {
         self.endPointer();
       }
     }
 
     function touchStart ( evt ) {
-      if ( focused && evt.touches.length > 0 && !dragging ) {
+      if ( self.focused && evt.touches.length > 0 && !dragging ) {
         var t = evt.touches[0];
         pointerStart( t.clientX, t.clientY );
         currentTouchID = t.identifier;
@@ -1589,7 +1614,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     function makeCursorCommand ( name ) {
       var method = name.toLowerCase();
       self["cursor" + name] = function ( tokenRows, cursor ) {
-        changed = true;
+        self.changed = true;
         cursor[method]( tokenRows );
         self.scrollIntoView( cursor );
       };
@@ -1644,7 +1669,8 @@ Primrose.Controls.TextBox = ( function ( ) {
       for ( var i = 0; i < tokenQueue.length; ++i ) {
         var t = tokenQueue[i].clone();
         var widthLeft = gridBounds.width - currentRowWidth;
-        var wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
+        var wrap = wordWrap && t.type !== "newlines" && t.value.length >
+            widthLeft;
         var breakLine = t.type === "newlines" || wrap;
         if ( wrap ) {
           var split = t.value.length > gridBounds.width ? widthLeft : 0;
@@ -1768,13 +1794,13 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.cursorPageUp = function ( tokenRows, cursor ) {
-      changed = true;
+      this.changed = true;
       cursor.incY( -gridBounds.height, tokenRows );
       this.scrollIntoView( cursor );
     };
 
     this.cursorPageDown = function ( tokenRows, cursor ) {
-      changed = true;
+      this.changed = true;
       cursor.incY( gridBounds.height, tokenRows );
       this.scrollIntoView( cursor );
     };
@@ -1784,25 +1810,13 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.focus = function () {
-      for ( var i = 0; i < EDITORS.length; ++i ) {
-        var e = EDITORS[i];
-        if ( e !== self ) {
-          e.blur();
-        }
-      }
       surrogate.focus();
-      focused = true;
-      this.forceUpdate();
+      Primrose.Control.prototype.focus.call( this );
     };
 
     this.blur = function () {
       surrogate.blur();
-      focused = false;
-      this.forceUpdate();
-    };
-
-    this.isFocused = function () {
-      return focused;
+      Primrose.Control.prototype.blur.call( this );
     };
 
     this.getRenderer = function () {
@@ -1848,8 +1862,8 @@ Primrose.Controls.TextBox = ( function ( ) {
       theme = t || Primrose.Themes.Default;
       renderer.setTheme( theme );
       renderer.resize();
-      changed = true;
-      this.drawText();
+      this.changed = true;
+      this.update();
     };
 
     this.getTheme = function () {
@@ -1857,12 +1871,12 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.setDeadKeyState = function ( st ) {
-      changed = true;
+      this.changed = true;
       deadKeyState = st || "";
     };
 
     this.setOperatingSystem = function ( os ) {
-      changed = true;
+      this.changed = true;
       operatingSystem = os || ( isOSX ? Primrose.OperatingSystems.OSX :
           Primrose.OperatingSystems.Windows );
       refreshCommandPack();
@@ -1873,13 +1887,13 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.setCommandSystem = function ( cmd ) {
-      changed = true;
+      this.changed = true;
       CommandSystem = cmd || Primrose.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
     this.setSize = function ( w, h ) {
-      changed = renderer.setSize( w, h );
+      this.changed = renderer.setSize( w, h );
     };
 
     this.getWidth = function () {
@@ -1890,13 +1904,8 @@ Primrose.Controls.TextBox = ( function ( ) {
       return renderer.getHeight();
     };
 
-    this.forceUpdate = function () {
-      changed = true;
-      this.drawText();
-    };
-
     this.setCodePage = function ( cp ) {
-      changed = true;
+      this.changed = true;
       var key,
           code,
           char,
@@ -1963,13 +1972,11 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.setTokenizer = function ( tk ) {
-      changed = true;
+      this.changed = true;
       tokenizer = tk || Primrose.Grammars.JavaScript;
       if ( history && history.length > 0 ) {
         refreshTokens();
-        if ( this.drawText ) {
-          this.drawText();
-        }
+        this.update();
       }
     };
 
@@ -1996,7 +2003,7 @@ Primrose.Controls.TextBox = ( function ( ) {
           txt = txt.replace( /\r\n/g, "\n" );
           var lines = txt.split( "\n" );
           this.pushUndo( lines );
-          this.drawText();
+          this.update();
           surrogate.value = txt;
           setSurrogateCursor();
         }
@@ -2017,9 +2024,10 @@ Primrose.Controls.TextBox = ( function ( ) {
           this.backCursor.setI( i, tokenRows );
         }
       },
-      selectionDirection:{
-        get: function(){
-          return this.frontCursor.i <= this.backCursor.i ? "forward" : "backward";
+      selectionDirection: {
+        get: function () {
+          return this.frontCursor.i <= this.backCursor.i ? "forward"
+              : "backward";
         }
       }
     } );
@@ -2035,7 +2043,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.redo = function () {
-      changed = true;
+      this.changed = true;
       if ( historyFrame < history.length - 1 ) {
         ++historyFrame;
       }
@@ -2044,7 +2052,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.undo = function () {
-      changed = true;
+      this.changed = true;
       if ( historyFrame > 0 ) {
         --historyFrame;
       }
@@ -2080,19 +2088,19 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.increaseFontSize = function () {
       ++theme.fontSize;
-      changed = renderer.resize();
+      this.changed = renderer.resize();
     };
 
     this.decreaseFontSize = function () {
       if ( theme.fontSize > 1 ) {
         --theme.fontSize;
-        changed = renderer.resize();
+        this.changed = renderer.resize();
       }
     };
 
     this.setFontSize = function ( v ) {
       theme.fontSize = v;
-      changed = renderer.resize();
+      this.changed = renderer.resize();
     };
 
     this.cell2i = function ( x, y ) {
@@ -2144,13 +2152,13 @@ Primrose.Controls.TextBox = ( function ( ) {
     this.startPointer = function ( x, y ) {
       setCursorXY( this.frontCursor, x, y );
       dragging = true;
-      this.drawText();
+      this.update();
     };
 
     this.movePointer = function ( x, y ) {
       if ( dragging ) {
         setCursorXY( this.backCursor, x, y );
-        this.drawText();
+        this.update();
       }
     };
 
@@ -2162,10 +2170,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.bindEvents = function ( k, p, w, c ) {
       if ( k ) {
-        k.addEventListener( "keydown", this.editText.bind( this ) );
-        surrogate.addEventListener( "beforecopy", setFalse );
-        surrogate.addEventListener( "beforecut", setFalse );
-        k.addEventListener( "beforepaste", setFalse );
+        k.addEventListener( "keydown", this.keyDown.bind( this ) );
       }
 
       if ( p ) {
@@ -2183,10 +2188,13 @@ Primrose.Controls.TextBox = ( function ( ) {
       }
 
       if ( c ) {
+        surrogate.addEventListener( "beforecopy", setFalse );
         surrogate.addEventListener( "copy", this.copySelectedText.bind(
             this ) );
+        surrogate.addEventListener( "beforecut", setFalse );
         surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ) );
         if ( k ) {
+          k.addEventListener( "beforepaste", setFalse );
           k.addEventListener( "paste", this.readClipboard.bind( this ) );
         }
       }
@@ -2210,7 +2218,7 @@ Primrose.Controls.TextBox = ( function ( ) {
         this.scrollIntoView( maxCursor );
         clampScroll();
         maxCursor.copy( minCursor );
-        this.forceDraw();
+        this.render();
       }
     };
 
@@ -2233,7 +2241,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     this.cutSelectedText = function ( evt ) {
       this.copySelectedText( evt );
       this.overwriteText();
-      this.drawText();
+      this.update();
     };
 
     this.readClipboard = function ( evt ) {
@@ -2246,8 +2254,8 @@ Primrose.Controls.TextBox = ( function ( ) {
       }
     };
 
-    this.editText = function ( evt ) {
-      if ( focused ) {
+    this.keyDown = function ( evt ) {
+      if ( this.focused ) {
         evt = evt || event;
 
         var key = evt.keyCode;
@@ -2293,22 +2301,20 @@ Primrose.Controls.TextBox = ( function ( ) {
             deadKeyState = "";
           }
         }
-        this.drawText();
+        this.update();
       }
     };
 
-    this.drawText = function () {
+    this.update = function () {
       if ( renderer.hasResized() ) {
-        changed = renderer.resize();
+        this.changed = renderer.resize();
         setSurrogateSize();
       }
 
-      if ( changed ) {
-        this.forceDraw();
-      }
+      Primrose.Control.prototype.update.call( this );
     };
 
-    this.forceDraw = function () {
+    this.render = function () {
       if ( tokens ) {
         var lineCountWidth = performLayout();
 
@@ -2317,12 +2323,12 @@ Primrose.Controls.TextBox = ( function ( ) {
             this.frontCursor, this.backCursor,
             gridBounds,
             this.scroll,
-            focused, showLineNumbers, showScrollBars, wordWrap,
+            this.focused, showLineNumbers, showScrollBars, wordWrap,
             lineCountWidth );
 
         setSurrogateCursor();
 
-        changed = false;
+        Primrose.Control.prototype.render.call( this );
       }
     };
 
@@ -2421,6 +2427,8 @@ Primrose.Controls.TextBox = ( function ( ) {
         "Shortcut style", Primrose.OperatingSystem );
     setSurrogateSize();
   }
+
+  inherit( TextBox, Primrose.Control );
 
   return TextBox;
 } )();
