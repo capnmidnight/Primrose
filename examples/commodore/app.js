@@ -146,7 +146,7 @@ function PrimroseDemo ( err ) {
       sky = textured( skyGeom, "../images/bg2.jpg" ),
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
-      editor = new Primrose.TextBox( "textEditor", {
+      editor = new Primrose.Controls.TextBox( "textEditor", {
         size: new Primrose.Size( 1024, 1024 ),
         fontSize: (vrDisplay ? 40 : 20) / window.devicePixelRatio,
         tokenizer: Primrose.Grammars.Basic,
@@ -637,7 +637,7 @@ function PrimroseDemo ( err ) {
         texture = THREE.ImageUtils.loadTexture( txt );
         texture.anisotropy = renderer.getMaxAnisotropy();
       }
-      else if ( txt instanceof Primrose.TextBox ) {
+      else if ( txt instanceof Primrose.Controls.TextBox ) {
         texture = txt.getRenderer()
             .getTexture( renderer.getMaxAnisotropy() );
       }
@@ -668,7 +668,7 @@ function PrimroseDemo ( err ) {
       obj = geometry;
     }
 
-    if ( txt instanceof Primrose.TextBox ) {
+    if ( txt instanceof Primrose.Controls.TextBox ) {
       obj.editor = txt;
     }
 

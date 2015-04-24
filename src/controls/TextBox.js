@@ -16,7 +16,7 @@
  */
 
 /* global qp, Primrose */
-Primrose.TextBox = ( function ( ) {
+Primrose.Controls.TextBox = ( function ( ) {
   "use strict";
 
   var EDITORS = [ ];

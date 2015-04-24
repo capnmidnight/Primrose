@@ -21,7 +21,7 @@ function editor2d () {
   "use strict";
 //  addFullScreenShim(window);
 
-  var editor = new Primrose.TextBox( "editor", {
+  var editor = new Primrose.Controls.TextBox( "editor", {
     autoBindEvents: true,
     tokenizer: Primrose.Grammars.Basic,
     theme: Primrose.Themes.Default,

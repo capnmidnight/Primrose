@@ -104,7 +104,7 @@ function editor3d () {
         w1 = 1,
         h = 1,
         w2 = 2,
-        prim1 = new Primrose.TextBox( "editor1", {
+        prim1 = new Primrose.Controls.TextBox( "editor1", {
           tokenizer: Primrose.Grammars.JavaScript,
           size: new Primrose.Size(w1 * 1024, h * 1024),
           fontSize: 36,
@@ -120,7 +120,7 @@ setInterval(function(){\n\
 \n\
 // focus on this window and hit CTRL+SHIFT+SPACE (Windows/Linux) or CMD+OPT+E (OS X) to execute."
         } ),
-        prim2 = new Primrose.TextBox( "editor2", {
+        prim2 = new Primrose.Controls.TextBox( "editor2", {
           size: new Primrose.Size(w2 * 1024, h * 1024 ),
           fontSize: 24,
           file: "FOR I = 1 TO 10\n\
@@ -571,7 +571,7 @@ END",
           texture = THREE.ImageUtils.loadTexture( txt );
           texture.anisotropy = renderer.getMaxAnisotropy( );
         }
-        else if ( txt instanceof Primrose.TextBox ) {
+        else if ( txt instanceof Primrose.Controls.TextBox ) {
           texture = txt.getRenderer( )
               .getTexture( renderer.getMaxAnisotropy( ) );
         }

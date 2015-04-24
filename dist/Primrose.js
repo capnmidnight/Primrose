@@ -6,12 +6,13 @@
   https://github.com/capnmidnight/Primrose.git
 */
 var Primrose = {
-  Themes: { },
-  Renderers: { },
-  OperatingSystems: { },
-  Grammars: { },
+  CodePages: { },
   CommandPacks: { },
-  CodePages: { }
+  Controls: { },
+  Grammars: { },
+  OperatingSystems: { },
+  Renderers: { },
+  Themes: { }
 };
 ;/* global Primrose */
 Primrose.CodePage = ( function ( ) {
@@ -107,6 +108,24 @@ Primrose.CommandPack = ( function ( ) {
 
   return CommandPack;
 } )();
+;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 ;/* global qp, Primrose */
 Primrose.Cursor = ( function ( ) {
   "use strict";
@@ -802,6 +821,516 @@ Primrose.Size = (function ( ) {
 
   return Size;
 } )();
+;/* global Primrose */
+Primrose.Token = ( function () {
+  "use strict";
+  function Token ( value, type, index, line ) {
+    this.value = value;
+    this.type = type;
+    this.index = index;
+    this.line = line;
+  }
+
+  Token.prototype.clone = function () {
+    return new Token( this.value, this.type, this.index, this.line );
+  };
+
+  Token.prototype.splitAt = function ( i ) {
+    var next = this.value.substring( i );
+    this.value = this.value.substring( 0, i );
+    return new Token( next, this.type, this.index + i, this.line );
+  };
+
+  Token.prototype.toString = function(){
+    return fmt("[$1: $2]", this.type, this.value);
+  };
+
+  return Token;
+} )();
+;/* global Primrose */
+Primrose.CodePages.DE_QWERTZ = (function () {
+  "use strict";
+  var CodePage = Primrose.CodePage;
+  return new CodePage("Deutsch: QWERTZ", "de", {
+    deadKeys: [220, 221, 160, 192],
+    NORMAL: {
+      "48": "0",
+      "49": "1",
+      "50": "2",
+      "51": "3",
+      "52": "4",
+      "53": "5",
+      "54": "6",
+      "55": "7",
+      "56": "8",
+      "57": "9",
+      "60": "<",
+      "63": "ß",
+      "160": CodePage.DEAD(3),
+      "163": "#",
+      "171": "+",
+      "173": "-",
+      "186": "ü",
+      "187": "+",
+      "188": ",",
+      "189": "-",
+      "190": ".",
+      "191": "#",
+      "192": CodePage.DEAD(4),
+      "219": "ß",
+      "220": CodePage.DEAD(1),
+      "221": CodePage.DEAD(2),
+      "222": "ä",
+      "226": "<"
+    },
+    DEAD1NORMAL: {
+      "65": "â",
+      "69": "ê",
+      "73": "î",
+      "79": "ô",
+      "85": "û",
+      "190": "."
+    },
+    DEAD2NORMAL: {
+      "65": "á",
+      "69": "é",
+      "73": "í",
+      "79": "ó",
+      "83": "s",
+      "85": "ú",
+      "89": "ý"
+    },
+    SHIFT: {
+      "48": "=",
+      "49": "!",
+      "50": "\"",
+      "51": "§",
+      "52": "$",
+      "53": "%",
+      "54": "&",
+      "55": "/",
+      "56": "(",
+      "57": ")",
+      "60": ">",
+      "63": "?",
+      "163": "'",
+      "171": "*",
+      "173": "_",
+      "186": "Ü",
+      "187": "*",
+      "188": ";",
+      "189": "_",
+      "190": ":",
+      "191": "'",
+      "192": "Ö",
+      "219": "?",
+      "222": "Ä",
+      "226": ">"
+    },
+    CTRLALT: {
+      "48": "}",
+      "50": "²",
+      "51": "³",
+      "55": "{",
+      "56": "[",
+      "57": "]",
+      "60": "|",
+      "63": "\\",
+      "69": "€",
+      "77": "µ",
+      "81": "@",
+      "171": "~",
+      "187": "~",
+      "219": "\\",
+      "226": "|"
+    },
+    CTRLALTSHIFT: {
+      "63": "ẞ",
+      "219": "ẞ"
+    },
+    DEAD3NORMAL: {
+      "65": "a",
+      "69": "e",
+      "73": "i",
+      "79": "o",
+      "85": "u",
+      "190": "."
+    },
+    DEAD4NORMAL: {
+      "65": "a",
+      "69": "e",
+      "73": "i",
+      "79": "o",
+      "83": "s",
+      "85": "u",
+      "89": "y"
+    }
+  });
+})();
+;/* global Primrose */
+Primrose.CodePages.EN_UKX = (function () {
+  "use strict";
+  var CodePage = Primrose.CodePage;
+  return new CodePage("English: UK Extended", "en-GB", {
+    CTRLALT: {
+      "52": "€",
+      "65": "á",
+      "69": "é",
+      "73": "í",
+      "79": "ó",
+      "85": "ú",
+      "163": "\\",
+      "192": "¦",
+      "222": "\\",
+      "223": "¦"
+    },
+    CTRLALTSHIFT: {
+      "65": "Á",
+      "69": "É",
+      "73": "Í",
+      "79": "Ó",
+      "85": "Ú",
+      "222": "|"
+    },
+    NORMAL: {
+      "48": "0",
+      "49": "1",
+      "50": "2",
+      "51": "3",
+      "52": "4",
+      "53": "5",
+      "54": "6",
+      "55": "7",
+      "56": "8",
+      "57": "9",
+      "59": ";",
+      "61": "=",
+      "163": "#",
+      "173": "-",
+      "186": ";",
+      "187": "=",
+      "188": ",",
+      "189": "-",
+      "190": ".",
+      "191": "/",
+      "192": "'",
+      "219": "[",
+      "220": "\\",
+      "221": "]",
+      "222": "#",
+      "223": "`"
+    }, SHIFT: {
+      "48": ")",
+      "49": "!",
+      "50": "\"",
+      "51": "£",
+      "52": "$",
+      "53": "%",
+      "54": "^",
+      "55": "&",
+      "56": "*",
+      "57": "(",
+      "59": ":",
+      "61": "+",
+      "163": "~",
+      "173": "_",
+      "186": ":",
+      "187": "+",
+      "188": "<",
+      "189": "_",
+      "190": ">",
+      "191": "?",
+      "192": "@",
+      "219": "{",
+      "220": "|",
+      "221": "}",
+      "222": "~",
+      "223": "¬"
+    }
+  });
+})();
+;/* global Primrose */
+Primrose.CodePages.EN_US = (function () {
+  "use strict";
+  var CodePage = Primrose.CodePage;
+  return new CodePage("English: USA", "en-US", {
+    NORMAL: {
+      "48": "0",
+      "49": "1",
+      "50": "2",
+      "51": "3",
+      "52": "4",
+      "53": "5",
+      "54": "6",
+      "55": "7",
+      "56": "8",
+      "57": "9",
+      "59": ";",
+      "61": "=",
+      "173": "-",
+      "186": ";",
+      "187": "=",
+      "188": ",",
+      "189": "-",
+      "190": ".",
+      "191": "/",
+      "219": "[",
+      "220": "\\",
+      "221": "]",
+      "222": "'"
+    },
+    SHIFT: {
+      "48": ")",
+      "49": "!",
+      "50": "@",
+      "51": "#",
+      "52": "$",
+      "53": "%",
+      "54": "^",
+      "55": "&",
+      "56": "*",
+      "57": "(",
+      "59": ":",
+      "61": "+",
+      "173": "_",
+      "186": ":",
+      "187": "+",
+      "188": "<",
+      "189": "_",
+      "190": ">",
+      "191": "?",
+      "219": "{",
+      "220": "|",
+      "221": "}",
+      "222": "\""
+    }
+  });
+})();
+;/* global Primrose */
+Primrose.CodePages.FR_AZERTY = ( function () {
+  "use strict";
+  var CodePage = Primrose.CodePage;
+  return new CodePage( "Français: AZERTY", "fr", {
+    deadKeys: [ 221, 50, 55 ],
+    NORMAL: {
+      "48": "à",
+      "49": "&",
+      "50": "é",
+      "51": "\"",
+      "52": "'",
+      "53": "(",
+      "54": "-",
+      "55": "è",
+      "56": "_",
+      "57": "ç",
+      "186": "$",
+      "187": "=",
+      "188": ",",
+      "190": ";",
+      "191": ":",
+      "192": "ù",
+      "219": ")",
+      "220": "*",
+      "221": CodePage.DEAD( 1 ),
+      "222": "²",
+      "223": "!",
+      "226": "<"
+    },
+    SHIFT: {
+      "48": "0",
+      "49": "1",
+      "50": "2",
+      "51": "3",
+      "52": "4",
+      "53": "5",
+      "54": "6",
+      "55": "7",
+      "56": "8",
+      "57": "9",
+      "186": "£",
+      "187": "+",
+      "188": "?",
+      "190": ".",
+      "191": "/",
+      "192": "%",
+      "219": "°",
+      "220": "µ",
+      "223": "§",
+      "226": ">"
+    },
+    CTRLALT: {
+      "48": "@",
+      "50": CodePage.DEAD( 2 ),
+      "51": "#",
+      "52": "{",
+      "53": "[",
+      "54": "|",
+      "55": CodePage.DEAD( 3 ),
+      "56": "\\",
+      "57": "^",
+      "69": "€",
+      "186": "¤",
+      "187": "}",
+      "219": "]"
+    },
+    DEAD1NORMAL: {
+      "65": "â",
+      "69": "ê",
+      "73": "î",
+      "79": "ô",
+      "85": "û"
+    },
+    DEAD2NORMAL: {
+      "65": "ã",
+      "78": "ñ",
+      "79": "õ"
+    },
+    DEAD3NORMAL: {
+      "48": "à",
+      "50": "é",
+      "55": "è",
+      "65": "à",
+      "69": "è",
+      "73": "ì",
+      "79": "ò",
+      "85": "ù"
+    }
+  } );
+} )();
+;// If SHIFT is not held, then "front.
+// If SHIFT is held, then "back"
+/* global Primrose */
+Primrose.CommandPacks.TextEditor = ( function () {
+  "use strict";
+
+  return {
+    name: "Basic commands",
+    NORMAL_SPACE: " ",
+    SHIFT_SPACE: " ",
+    NORMAL_BACKSPACE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.frontCursor.left( tokenRows );
+      }
+      prim.overwriteText();
+      prim.scrollIntoView( prim.frontCursor );
+    },
+    NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
+      var indent = "";
+      var tokenRow = tokenRows[prim.frontCursor.y];
+      if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
+        indent = tokenRow[0].value;
+      }
+      prim.overwriteText( "\n" + indent );
+      prim.scrollIntoView( prim.frontCursor );
+    },
+    NORMAL_DELETE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.backCursor.right( tokenRows );
+      }
+      prim.overwriteText();
+      prim.scrollIntoView( prim.frontCursor );
+    },
+    SHIFT_DELETE: function ( prim, tokenRows ) {
+      if ( prim.frontCursor.i === prim.backCursor.i ) {
+        prim.frontCursor.home( tokenRows );
+        prim.backCursor.end( tokenRows );
+      }
+      prim.overwriteText();
+      prim.scrollIntoView( prim.frontCursor );
+    },
+    NORMAL_TAB: function ( prim, tokenRows ) {
+      var ts = prim.getTabString();
+      prim.overwriteText( ts );
+    }
+  };
+} )();
+;/* global Primrose */
+// // For all of these commands, the "current" cursor is:
+// If SHIFT is not held, then "front.
+// If SHIFT is held, then "back"
+Primrose.CommandPacks.TextEditor = ( function () {
+  "use strict";
+
+  function TextEditor ( operatingSystem, codePage, editor ) {
+    var commands = {
+      NORMAL_SPACE: " ",
+      SHIFT_SPACE: " ",
+      NORMAL_BACKSPACE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.frontCursor.left( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
+        var indent = "";
+        var tokenRow = tokenRows[prim.frontCursor.y];
+        if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
+          indent = tokenRow[0].value;
+        }
+        prim.overwriteText( "\n" + indent );
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_DELETE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.backCursor.right( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      SHIFT_DELETE: function ( prim, tokenRows ) {
+        if ( prim.frontCursor.i === prim.backCursor.i ) {
+          prim.frontCursor.home( tokenRows );
+          prim.backCursor.end( tokenRows );
+        }
+        prim.overwriteText();
+        prim.scrollIntoView( prim.frontCursor );
+      },
+      NORMAL_TAB: function ( prim, tokenRows ) {
+        var ts = prim.getTabString();
+        prim.overwriteText( ts );
+      }
+    };
+
+    var allCommands = { };
+
+    copyObject( allCommands, codePage );
+    copyObject( allCommands, operatingSystem );
+    copyObject( allCommands, commands );
+
+    for ( var key in allCommands ) {
+      if ( allCommands.hasOwnProperty( key ) ) {
+        var func = allCommands[key];
+        if ( typeof func !== "function" ) {
+          func = editor.overwriteText.bind( editor, func );
+        }
+        allCommands[key] = func;
+      }
+    }
+
+    Primrose.CommandPack.call( this, "Text editor commands", allCommands );
+  }
+  inherit( TextEditor, Primrose.CommandPack );
+  return TextEditor;
+} )();
+;/* 
+ * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 ;/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
@@ -820,7 +1349,7 @@ Primrose.Size = (function ( ) {
  */
 
 /* global qp, Primrose */
-Primrose.TextBox = ( function ( ) {
+Primrose.Controls.TextBox = ( function ( ) {
   "use strict";
 
   var EDITORS = [ ];
@@ -1894,498 +2423,6 @@ Primrose.TextBox = ( function ( ) {
   }
 
   return TextBox;
-} )();
-;/* global Primrose */
-Primrose.Token = ( function () {
-  "use strict";
-  function Token ( value, type, index, line ) {
-    this.value = value;
-    this.type = type;
-    this.index = index;
-    this.line = line;
-  }
-
-  Token.prototype.clone = function () {
-    return new Token( this.value, this.type, this.index, this.line );
-  };
-
-  Token.prototype.splitAt = function ( i ) {
-    var next = this.value.substring( i );
-    this.value = this.value.substring( 0, i );
-    return new Token( next, this.type, this.index + i, this.line );
-  };
-
-  Token.prototype.toString = function(){
-    return fmt("[$1: $2]", this.type, this.value);
-  };
-
-  return Token;
-} )();
-;/* global Primrose */
-Primrose.CodePages.DE_QWERTZ = (function () {
-  "use strict";
-  var CodePage = Primrose.CodePage;
-  return new CodePage("Deutsch: QWERTZ", "de", {
-    deadKeys: [220, 221, 160, 192],
-    NORMAL: {
-      "48": "0",
-      "49": "1",
-      "50": "2",
-      "51": "3",
-      "52": "4",
-      "53": "5",
-      "54": "6",
-      "55": "7",
-      "56": "8",
-      "57": "9",
-      "60": "<",
-      "63": "ß",
-      "160": CodePage.DEAD(3),
-      "163": "#",
-      "171": "+",
-      "173": "-",
-      "186": "ü",
-      "187": "+",
-      "188": ",",
-      "189": "-",
-      "190": ".",
-      "191": "#",
-      "192": CodePage.DEAD(4),
-      "219": "ß",
-      "220": CodePage.DEAD(1),
-      "221": CodePage.DEAD(2),
-      "222": "ä",
-      "226": "<"
-    },
-    DEAD1NORMAL: {
-      "65": "â",
-      "69": "ê",
-      "73": "î",
-      "79": "ô",
-      "85": "û",
-      "190": "."
-    },
-    DEAD2NORMAL: {
-      "65": "á",
-      "69": "é",
-      "73": "í",
-      "79": "ó",
-      "83": "s",
-      "85": "ú",
-      "89": "ý"
-    },
-    SHIFT: {
-      "48": "=",
-      "49": "!",
-      "50": "\"",
-      "51": "§",
-      "52": "$",
-      "53": "%",
-      "54": "&",
-      "55": "/",
-      "56": "(",
-      "57": ")",
-      "60": ">",
-      "63": "?",
-      "163": "'",
-      "171": "*",
-      "173": "_",
-      "186": "Ü",
-      "187": "*",
-      "188": ";",
-      "189": "_",
-      "190": ":",
-      "191": "'",
-      "192": "Ö",
-      "219": "?",
-      "222": "Ä",
-      "226": ">"
-    },
-    CTRLALT: {
-      "48": "}",
-      "50": "²",
-      "51": "³",
-      "55": "{",
-      "56": "[",
-      "57": "]",
-      "60": "|",
-      "63": "\\",
-      "69": "€",
-      "77": "µ",
-      "81": "@",
-      "171": "~",
-      "187": "~",
-      "219": "\\",
-      "226": "|"
-    },
-    CTRLALTSHIFT: {
-      "63": "ẞ",
-      "219": "ẞ"
-    },
-    DEAD3NORMAL: {
-      "65": "a",
-      "69": "e",
-      "73": "i",
-      "79": "o",
-      "85": "u",
-      "190": "."
-    },
-    DEAD4NORMAL: {
-      "65": "a",
-      "69": "e",
-      "73": "i",
-      "79": "o",
-      "83": "s",
-      "85": "u",
-      "89": "y"
-    }
-  });
-})();
-;/* global Primrose */
-Primrose.CodePages.EN_UKX = (function () {
-  "use strict";
-  var CodePage = Primrose.CodePage;
-  return new CodePage("English: UK Extended", "en-GB", {
-    CTRLALT: {
-      "52": "€",
-      "65": "á",
-      "69": "é",
-      "73": "í",
-      "79": "ó",
-      "85": "ú",
-      "163": "\\",
-      "192": "¦",
-      "222": "\\",
-      "223": "¦"
-    },
-    CTRLALTSHIFT: {
-      "65": "Á",
-      "69": "É",
-      "73": "Í",
-      "79": "Ó",
-      "85": "Ú",
-      "222": "|"
-    },
-    NORMAL: {
-      "48": "0",
-      "49": "1",
-      "50": "2",
-      "51": "3",
-      "52": "4",
-      "53": "5",
-      "54": "6",
-      "55": "7",
-      "56": "8",
-      "57": "9",
-      "59": ";",
-      "61": "=",
-      "163": "#",
-      "173": "-",
-      "186": ";",
-      "187": "=",
-      "188": ",",
-      "189": "-",
-      "190": ".",
-      "191": "/",
-      "192": "'",
-      "219": "[",
-      "220": "\\",
-      "221": "]",
-      "222": "#",
-      "223": "`"
-    }, SHIFT: {
-      "48": ")",
-      "49": "!",
-      "50": "\"",
-      "51": "£",
-      "52": "$",
-      "53": "%",
-      "54": "^",
-      "55": "&",
-      "56": "*",
-      "57": "(",
-      "59": ":",
-      "61": "+",
-      "163": "~",
-      "173": "_",
-      "186": ":",
-      "187": "+",
-      "188": "<",
-      "189": "_",
-      "190": ">",
-      "191": "?",
-      "192": "@",
-      "219": "{",
-      "220": "|",
-      "221": "}",
-      "222": "~",
-      "223": "¬"
-    }
-  });
-})();
-;/* global Primrose */
-Primrose.CodePages.EN_US = (function () {
-  "use strict";
-  var CodePage = Primrose.CodePage;
-  return new CodePage("English: USA", "en-US", {
-    NORMAL: {
-      "48": "0",
-      "49": "1",
-      "50": "2",
-      "51": "3",
-      "52": "4",
-      "53": "5",
-      "54": "6",
-      "55": "7",
-      "56": "8",
-      "57": "9",
-      "59": ";",
-      "61": "=",
-      "173": "-",
-      "186": ";",
-      "187": "=",
-      "188": ",",
-      "189": "-",
-      "190": ".",
-      "191": "/",
-      "219": "[",
-      "220": "\\",
-      "221": "]",
-      "222": "'"
-    },
-    SHIFT: {
-      "48": ")",
-      "49": "!",
-      "50": "@",
-      "51": "#",
-      "52": "$",
-      "53": "%",
-      "54": "^",
-      "55": "&",
-      "56": "*",
-      "57": "(",
-      "59": ":",
-      "61": "+",
-      "173": "_",
-      "186": ":",
-      "187": "+",
-      "188": "<",
-      "189": "_",
-      "190": ">",
-      "191": "?",
-      "219": "{",
-      "220": "|",
-      "221": "}",
-      "222": "\""
-    }
-  });
-})();
-;/* global Primrose */
-Primrose.CodePages.FR_AZERTY = ( function () {
-  "use strict";
-  var CodePage = Primrose.CodePage;
-  return new CodePage( "Français: AZERTY", "fr", {
-    deadKeys: [ 221, 50, 55 ],
-    NORMAL: {
-      "48": "à",
-      "49": "&",
-      "50": "é",
-      "51": "\"",
-      "52": "'",
-      "53": "(",
-      "54": "-",
-      "55": "è",
-      "56": "_",
-      "57": "ç",
-      "186": "$",
-      "187": "=",
-      "188": ",",
-      "190": ";",
-      "191": ":",
-      "192": "ù",
-      "219": ")",
-      "220": "*",
-      "221": CodePage.DEAD( 1 ),
-      "222": "²",
-      "223": "!",
-      "226": "<"
-    },
-    SHIFT: {
-      "48": "0",
-      "49": "1",
-      "50": "2",
-      "51": "3",
-      "52": "4",
-      "53": "5",
-      "54": "6",
-      "55": "7",
-      "56": "8",
-      "57": "9",
-      "186": "£",
-      "187": "+",
-      "188": "?",
-      "190": ".",
-      "191": "/",
-      "192": "%",
-      "219": "°",
-      "220": "µ",
-      "223": "§",
-      "226": ">"
-    },
-    CTRLALT: {
-      "48": "@",
-      "50": CodePage.DEAD( 2 ),
-      "51": "#",
-      "52": "{",
-      "53": "[",
-      "54": "|",
-      "55": CodePage.DEAD( 3 ),
-      "56": "\\",
-      "57": "^",
-      "69": "€",
-      "186": "¤",
-      "187": "}",
-      "219": "]"
-    },
-    DEAD1NORMAL: {
-      "65": "â",
-      "69": "ê",
-      "73": "î",
-      "79": "ô",
-      "85": "û"
-    },
-    DEAD2NORMAL: {
-      "65": "ã",
-      "78": "ñ",
-      "79": "õ"
-    },
-    DEAD3NORMAL: {
-      "48": "à",
-      "50": "é",
-      "55": "è",
-      "65": "à",
-      "69": "è",
-      "73": "ì",
-      "79": "ò",
-      "85": "ù"
-    }
-  } );
-} )();
-;// If SHIFT is not held, then "front.
-// If SHIFT is held, then "back"
-/* global Primrose */
-Primrose.CommandPacks.TextEditor = ( function () {
-  "use strict";
-
-  return {
-    name: "Basic commands",
-    NORMAL_SPACE: " ",
-    SHIFT_SPACE: " ",
-    NORMAL_BACKSPACE: function ( prim, tokenRows ) {
-      if ( prim.frontCursor.i === prim.backCursor.i ) {
-        prim.frontCursor.left( tokenRows );
-      }
-      prim.overwriteText();
-      prim.scrollIntoView( prim.frontCursor );
-    },
-    NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
-      var indent = "";
-      var tokenRow = tokenRows[prim.frontCursor.y];
-      if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
-        indent = tokenRow[0].value;
-      }
-      prim.overwriteText( "\n" + indent );
-      prim.scrollIntoView( prim.frontCursor );
-    },
-    NORMAL_DELETE: function ( prim, tokenRows ) {
-      if ( prim.frontCursor.i === prim.backCursor.i ) {
-        prim.backCursor.right( tokenRows );
-      }
-      prim.overwriteText();
-      prim.scrollIntoView( prim.frontCursor );
-    },
-    SHIFT_DELETE: function ( prim, tokenRows ) {
-      if ( prim.frontCursor.i === prim.backCursor.i ) {
-        prim.frontCursor.home( tokenRows );
-        prim.backCursor.end( tokenRows );
-      }
-      prim.overwriteText();
-      prim.scrollIntoView( prim.frontCursor );
-    },
-    NORMAL_TAB: function ( prim, tokenRows ) {
-      var ts = prim.getTabString();
-      prim.overwriteText( ts );
-    }
-  };
-} )();
-;/* global Primrose */
-// // For all of these commands, the "current" cursor is:
-// If SHIFT is not held, then "front.
-// If SHIFT is held, then "back"
-Primrose.CommandPacks.TextEditor = ( function () {
-  "use strict";
-
-  function TextEditor ( operatingSystem, codePage, editor ) {
-    var commands = {
-      NORMAL_SPACE: " ",
-      SHIFT_SPACE: " ",
-      NORMAL_BACKSPACE: function ( prim, tokenRows ) {
-        if ( prim.frontCursor.i === prim.backCursor.i ) {
-          prim.frontCursor.left( tokenRows );
-        }
-        prim.overwriteText();
-        prim.scrollIntoView( prim.frontCursor );
-      },
-      NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
-        var indent = "";
-        var tokenRow = tokenRows[prim.frontCursor.y];
-        if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
-          indent = tokenRow[0].value;
-        }
-        prim.overwriteText( "\n" + indent );
-        prim.scrollIntoView( prim.frontCursor );
-      },
-      NORMAL_DELETE: function ( prim, tokenRows ) {
-        if ( prim.frontCursor.i === prim.backCursor.i ) {
-          prim.backCursor.right( tokenRows );
-        }
-        prim.overwriteText();
-        prim.scrollIntoView( prim.frontCursor );
-      },
-      SHIFT_DELETE: function ( prim, tokenRows ) {
-        if ( prim.frontCursor.i === prim.backCursor.i ) {
-          prim.frontCursor.home( tokenRows );
-          prim.backCursor.end( tokenRows );
-        }
-        prim.overwriteText();
-        prim.scrollIntoView( prim.frontCursor );
-      },
-      NORMAL_TAB: function ( prim, tokenRows ) {
-        var ts = prim.getTabString();
-        prim.overwriteText( ts );
-      }
-    };
-
-    var allCommands = { };
-
-    copyObject( allCommands, codePage );
-    copyObject( allCommands, operatingSystem );
-    copyObject( allCommands, commands );
-
-    for ( var key in allCommands ) {
-      if ( allCommands.hasOwnProperty( key ) ) {
-        var func = allCommands[key];
-        if ( typeof func !== "function" ) {
-          func = editor.overwriteText.bind( editor, func );
-        }
-        allCommands[key] = func;
-      }
-    }
-
-    Primrose.CommandPack.call( this, "Text editor commands", allCommands );
-  }
-  inherit( TextEditor, Primrose.CommandPack );
-  return TextEditor;
 } )();
 ;/* global Primrose */
 Primrose.Grammars.Basic = ( function ( ) {

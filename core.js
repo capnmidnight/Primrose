@@ -1,8 +1,9 @@
 var Primrose = {
-  Themes: { },
-  Renderers: { },
-  OperatingSystems: { },
-  Grammars: { },
+  CodePages: { },
   CommandPacks: { },
-  CodePages: { }
+  Controls: { },
+  Grammars: { },
+  OperatingSystems: { },
+  Renderers: { },
+  Themes: { }
 };
