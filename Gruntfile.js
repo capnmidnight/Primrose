@@ -1,3 +1,5 @@
+var fs = require("fs");
+
 module.exports = function ( grunt ) {
   // Project configuration.
   var banner = "/*\n\
@@ -6,30 +8,39 @@ module.exports = function ( grunt ) {
   Copyright (C) 2015 <%= pkg.author %>\n\
   <%= pkg.homepage %>\n\
   <%= pkg.repository.url %>\n\
-*/\n";
+*/\n",
+      execConfig = { },
+      copyConfig = { };
+
+  if ( fs.existsSync( "../three.js" ) ) {
+    console.log("including three.js lib");
+    execConfig.build_THREE = "cd ../three.js/utils/build && build.bat";
+    copyConfig.copy_THREE = {
+      files: [
+        { expand: true, flatten: true, src: [ '../three.js/build/*' ],
+          dest: 'javascripts/', filter: 'isFile' }
+      ]
+    };
+  }
+
+  if ( fs.existsSync( "../Heather" ) ) {
+    console.log("including Heather lib");
+    execConfig.build_Heather = "cd ../Heather && grunt";
+    copyConfig.copy_Heather = {
+      files: [
+        { expand: true, flatten: true, src: [ '../Heather/dist/*' ],
+          dest: 'javascripts/', filter: 'isFile' }
+      ]
+    };
+  }
+
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
     clean: {
       default: [ "dist/" ]
     },
-    exec: {
-      build_THREE: "cd ../three.js/utils/build && build.bat",
-      build_Heather: "cd ../Heather && grunt"
-    },
-    copy: {
-      copy_THREE: {
-        files: [
-          { expand: true, flatten: true, src: [ '../three.js/build/*' ],
-            dest: 'lib/', filter: 'isFile' }
-        ]
-      },
-      copy_Heather: {
-        files: [
-          { expand: true, flatten: true, src: [ '../Heather/dist/*' ],
-            dest: 'lib/', filter: 'isFile' }
-        ]
-      }
-    },
+    exec: execConfig,
+    copy: copyConfig,
     jshint: {
       default: [ "core.js", "src/**/*.js" ]
     },
