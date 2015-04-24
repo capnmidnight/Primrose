@@ -712,7 +712,7 @@ function PrimroseDemo ( err ) {
   }
 }
 
-function demoSetup () {
+function init () {
   if ( navigator.getVRDevices ) {
     navigator.getVRDevices()
         .then( gotVRDevices )

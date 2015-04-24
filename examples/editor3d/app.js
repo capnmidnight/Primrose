@@ -17,7 +17,7 @@
 
 /*global THREE, qp, Primrose, Assert, isOSX */
 
-function editor3d () {
+function init () {
   "use strict";
   var modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",

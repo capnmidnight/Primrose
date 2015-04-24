@@ -17,7 +17,7 @@
 
 /* global rosetta_24_game, Assert, Primrose */
 
-function editor2d () {
+function init () {
   "use strict";
 //  addFullScreenShim(window);
 
