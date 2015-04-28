@@ -3,16 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-/* global isOSX, Primrose, THREE, ctrls, isMobile */
-var modA = isOSX ? "metaKey" : "ctrlKey";
-var modB = isOSX ? "altKey" : "shiftKey";
-var cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT";
-var vrDisplay,
-    vrSensor,
-    vrEffect,
-    renderer,
-    lastTab,
-    ctrls;
+/* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
 
 function clearKeyOption ( evt ) {
   this.value = "";
@@ -34,88 +25,36 @@ function setupKeyOption ( elem, char, code ) {
   elem.addEventListener( "keyup", setKeyOption );
 }
 
-function goFullscreen () {
-  var elem = ctrls.output;
-  if ( vrDisplay ) {
-    if ( !vrEffect ) {
-      vrEffect = new SeansVREffect( renderer, vrDisplay );
-    }
-    if ( elem.webkitRequestFullscreen ) {
-      elem.webkitRequestFullscreen( { vrDisplay: vrDisplay } );
-    }
-    else if ( elem.mozRequestFullScreen ) {
-      elem.mozRequestFullScreen( { vrDisplay: vrDisplay } );
-    }
-  }
-  else {
-    if ( elem.requestFullscreen ) {
-      elem.requestFullscreen();
-    }
-    else if ( elem.webkitRequestFullscreen ) {
-      elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
-    }
-    else if ( elem.mozRequestFullScreen ) {
-      elem.mozRequestFullScreen();
-    }
-    else if ( elem.msRequestFullscreen ) {
-      elem.msRequestFullscreen();
-    }
-  }
-
-  if ( elem.requestPointerLock ) {
-    elem.requestPointerLock();
-  }
-  else if ( elem.webkitRequestPointerLock ) {
-    elem.webkitRequestPointerLock();
-  }
-  else if ( elem.mozRequestPointerLock ) {
-    elem.mozRequestPointerLock();
-  }
-}
-
-function gotVRDevices ( devices ) {
-  for ( var i = 0; i < devices.length; ++i ) {
-    var device = devices[i];
-    if ( device instanceof window.HMDVRDevice ) {
-      vrDisplay = device;
-    }
-    else if ( device instanceof window.PositionSensorVRDevice ) {
-      vrSensor = device;
-    }
-    if ( vrSensor && vrDisplay ) {
-      break;
-    }
-  }
-  PrimroseDemo();
-}
-
-function PrimroseDemo ( err ) {
+function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   if ( err ) {
     console.error( err );
   }
-
-  ctrls = findEverything();
-
-  var lt = 0,
-      dragging = false,
-      lastMouseX,
+  var lastMouseX,
       lastMouseY,
       lastTouchX,
       lastTouchY,
-      touchCount = 0,
       pointerX,
       pointerY,
       currentEditor,
       lastEditor,
+      lt = 0,
+      touchCount = 0,
       touchDrive = 0,
       touchStrafe = 0,
-      SPEED = 0.0005,
       heading = 0,
       pitch = 0,
+      SPEED = 0.0005,
+      inVR = false,
+      dragging = false,
       keyState = { },
+      modA = isOSX ? "metaKey" : "ctrlKey",
+      modB = isOSX ? "altKey" : "shiftKey",
+      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
+      execKey = isOSX ? "E" : "SPACE",
       scene = new THREE.Scene(),
       pickingScene = new THREE.Scene(),
       body = new THREE.Object3D(),
+      ctrls = findEverything(),
       camera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
           ctrls.output.height, 0.1, 1000 ),
       back = new THREE.WebGLRenderTarget( ctrls.output.width,
@@ -133,27 +72,29 @@ function PrimroseDemo ( err ) {
       mouse = new THREE.Vector3( 0, 0, 0 ),
       raycaster = new THREE.Raycaster( new THREE.Vector3(),
           new THREE.Vector3(), 0, 50 ),
-      pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000 );
-  back.generateMipMaps = false;
-  renderer = new THREE.WebGLRenderer( {
-    canvas: ctrls.output,
-    alpha: true,
-    antialias: true
-  } );
-
-  var gl = renderer.getContext(),
+      pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000 ),
+      renderer = new THREE.WebGLRenderer( {
+        canvas: ctrls.output,
+        alpha: true,
+        antialias: true
+      } ),
+      vrEffect = new SeansVREffect( renderer, vrDisplay ),
+      gl = renderer.getContext(),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
       sky = textured( skyGeom, "../images/bg2.jpg" ),
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
       editor = new Primrose.Controls.TextBox( "textEditor", {
         size: new Primrose.Size( 1024, 1024 ),
-        fontSize: (vrDisplay ? 40 : 20) / window.devicePixelRatio,
+        fontSize: ( vrDisplay ? 40 : 20 ) / window.devicePixelRatio,
         tokenizer: Primrose.Grammars.Basic,
         theme: Primrose.Themes.Dark,
         hideLineNumbers: true,
         hideScrollBars: true
-      } );
+      } ),
+      terminal = new Primrose.Terminal( editor );
+
+  back.generateMipMaps = false;
 
   loader.load( "commodore_pet.json", function ( f ) {
     scene.add( f );
@@ -177,79 +118,11 @@ function PrimroseDemo ( err ) {
   scene.add( body );
   scene.add( pointer );
 
-
-
-  var running = false;
-  var inputCallback = null;
-  var currentEditIndex = 0;
-  var currentProgram = null;
-  var originalGrammar = null;
-
-  function toEnd (  ) {
-    editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView( editor.frontCursor );
-    editor.forceUpdate();
-  }
-
-  function done () {
-    if ( running ) {
-      flush( );
-      running = false;
-      if ( originalGrammar ) {
-        editor.setTokenizer( originalGrammar );
-      }
-      editor.value = currentProgram;
-      toEnd( );
-    }
-  }
-
-  function clearScreen () {
-    editor.selectionStart = editor.selectionEnd = 0;
-    editor.value = "";
-    return true;
-  }
-
-  function loadFile ( fileName, callback ) {
-    GET( fileName.toLowerCase(), "text", function ( file ) {
-      if ( isOSX ) {
-        file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
-      }
-      editor.value = currentProgram = file;
-      if ( callback ) {
-        callback();
-      }
-    } );
-  }
-
-  loadFile( "../oregon.bas" );
-  var pageSize = vrDisplay ? 10 : 40;
-  var outputQueue = [ ];
-  function flush () {
-    if ( buffer.length > 0 ) {
-      var lines = buffer.split( "\n" );
-      for ( var i = 0; i < pageSize && lines.length > 0; ++i ) {
-        outputQueue.push( lines.shift() );
-      }
-      if ( lines.length > 0 ) {
-        outputQueue.push( " ----- more -----" );
-      }
-      buffer = lines.join( "\n" );
-    }
-  }
-
-  function input ( callback ) {
-    inputCallback = callback;
-    flush( );
-  }
-
-  var buffer = "";
-  function stdout ( str ) {
-    buffer += str;
-  }
-
   window.addEventListener( "resize", refreshSize );
   window.addEventListener( "keydown", keyDown );
-  window.addEventListener( "keyup", keyUp );
+  window.addEventListener( "keyup", function ( evt ) {
+    keyState[evt.keyCode] = false;
+  } );
   window.addEventListener( "wheel", mouseWheel );
   window.addEventListener( "paste", paste );
   ctrls.output.addEventListener( "mousedown", mouseDown );
@@ -272,11 +145,15 @@ function PrimroseDemo ( err ) {
   if ( vrDisplay ) {
     ctrls.goRegular.style.display = "none";
     ctrls.nightly.display = "none";
-    ctrls.goVR.addEventListener( "click", goFullscreen );
+    ctrls.goVR.addEventListener( "click", function () {
+      requestFullScreen( ctrls.output, vrDisplay );
+      inVR = true;
+    } );
   }
   else {
     ctrls.goVR.style.display = "none";
-    ctrls.goRegular.addEventListener( "click", goFullscreen );
+    ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
+        ctrls.output ) );
   }
 
   refreshSize();
@@ -289,7 +166,7 @@ function PrimroseDemo ( err ) {
         ratio = window.devicePixelRatio || 1,
         canvasWidth = styleWidth * ratio,
         canvasHeight = styleHeight * ratio;
-    if ( vrEffect ) {
+    if ( inVR ) {
       canvasWidth = vrEffect.left.renderRect.width +
           vrEffect.right.renderRect.width;
       canvasHeight = Math.max( vrEffect.left.renderRect.height,
@@ -306,67 +183,30 @@ function PrimroseDemo ( err ) {
     fakeCamera.updateProjectionMatrix( );
   }
 
-  function sendInput ( evt ) {
-    if ( buffer.length > 0 ) {
-      flush();
-    }
-    else {
-      editor.keyDown( evt );
-      var str = editor.value.substring( currentEditIndex );
-      inputCallback( str.trim() );
-      inputCallback = null;
-    }
-  }
 
-  function isExecuteCommand ( evt ) {
-    return ( !isOSX &&
-        evt.ctrlKey &&
-        evt.shiftKey &&
-        evt.keyCode === Primrose.Keys.SPACE ) ||
-        ( isOSX &&
-            evt.metaKey &&
-            evt.altKey &&
-            evt.keyCode === Primrose.Keys.E );
-  }
-
-  function execute () {
-    originalGrammar = lastEditor.getTokenizer();
-    if ( originalGrammar && originalGrammar.interpret ) {
-      running = true;
-
-      var next = function () {
-        if ( running ) {
-          setTimeout( looper, 1 );
-        }
-      };
-
-      currentProgram = editor.value;
-      var looper = originalGrammar.interpret( currentProgram, input,
-          stdout, stdout, next, clearScreen, loadFile, done );
-      editor.setTokenizer( Primrose.Grammars.PlainText );
-      clearScreen();
-      next();
-    }
-  }
+  terminal.loadFile( "../oregon.bas" );
 
   function keyDown ( evt ) {
-    if ( !lastEditor || !lastEditor.focused ) {
+    if ( !lastEditor ||
+        !lastEditor.focused ) {
       keyState[evt.keyCode] = true;
     }
-    else if ( running && inputCallback && evt.keyCode ===
-        Primrose.Keys.ENTER ) {
-      sendInput( evt );
+    else if ( terminal.running &&
+        terminal.waitingForInput &&
+        evt.keyCode === Primrose.Keys.ENTER ) {
+      terminal.sendInput( evt );
     }
-    else if ( !running && isExecuteCommand( evt ) ) {
-      execute();
+    else if ( !terminal.running &&
+        isExecuteCommand( evt ) ) {
+      terminal.execute();
     }
     else if ( lastEditor ) {
       lastEditor.keyDown( evt );
     }
   }
 
-  function keyUp ( evt ) {
-    keyState[evt.keyCode] = false;
+  function isExecuteCommand ( evt ) {
+    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
   }
 
   function setPointer ( x, y ) {
@@ -607,15 +447,11 @@ function PrimroseDemo ( err ) {
 
   function render ( t ) {
     requestAnimationFrame( render );
-    if ( outputQueue.length > 0 ) {
-      editor.value += outputQueue.shift() + "\n";
-      toEnd( );
-      currentEditIndex = editor.selectionStart;
-    }
+    terminal.update();
     if ( lt ) {
       update( t - lt );
     }
-    var r = vrEffect || renderer;
+    var r = inVR ? vrEffect : renderer;
     r.render( scene, camera );
     lt = t;
   }
@@ -694,33 +530,20 @@ function PrimroseDemo ( err ) {
     if ( theta === undefined ) {
       theta = Math.PI * 0.5;
     }
-    var phiStart = Math.PI + phi * 0.5;
-    var thetaStart = ( Math.PI - theta ) * 0.5;
-    var geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
-        thetaStart, theta, true );
+    var phiStart = Math.PI + phi * 0.5,
+        thetaStart = ( Math.PI - theta ) * 0.5,
+        geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
+            thetaStart, theta, true );
     return geom;
   }
 
   function pick ( op ) {
     if ( lastEditor && lastEditor.focused ) {
-      var r = vrEffect ? vrEffect : renderer;
+      var r = inVR ? vrEffect : renderer;
       scene.remove( body );
       r.render( pickingScene, camera, back, true );
       scene.add( body );
       lastEditor[op + "Picking"]( gl, pointerX, pointerY );
     }
-  }
-}
-
-function init () {
-  if ( navigator.getVRDevices ) {
-    navigator.getVRDevices()
-        .then( gotVRDevices )
-        .catch( PrimroseDemo );
-  } else if ( navigator.mozGetVRDevices ) {
-    navigator.mozGetVRDevices( gotVRDevices );
-  }
-  else {
-    PrimroseDemo();
   }
 }
