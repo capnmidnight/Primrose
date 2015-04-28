@@ -71,6 +71,12 @@ Primrose.CodePage = ( function ( ) {
       var code = Primrose.Keys["NUMPAD" + i];
       this.NORMAL[code] = i.toString();
     }
+
+    this.NORMAL[Primrose.Keys.MULTIPLY] = "*";
+    this.NORMAL[Primrose.Keys.ADD] = "+";
+    this.NORMAL[Primrose.Keys.SUBTRACT] = "-";
+    this.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
+    this.NORMAL[Primrose.Keys.DIVIDE] = "/";
   }
 
   CodePage.DEAD = function ( key ) {

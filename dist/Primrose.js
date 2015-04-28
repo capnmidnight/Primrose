@@ -1,5 +1,5 @@
 /*
-  Primrose v0.12.1 2015-04-28
+  Primrose v0.12.2 2015-04-28
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -104,6 +104,12 @@ Primrose.CodePage = ( function ( ) {
       var code = Primrose.Keys["NUMPAD" + i];
       this.NORMAL[code] = i.toString();
     }
+
+    this.NORMAL[Primrose.Keys.MULTIPLY] = "*";
+    this.NORMAL[Primrose.Keys.ADD] = "+";
+    this.NORMAL[Primrose.Keys.SUBTRACT] = "-";
+    this.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
+    this.NORMAL[Primrose.Keys.DIVIDE] = "/";
   }
 
   CodePage.DEAD = function ( key ) {
@@ -4577,4 +4583,4 @@ Primrose.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.12.1";
+Primrose.VERSION = "v0.12.2";
