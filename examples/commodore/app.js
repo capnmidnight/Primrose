@@ -48,7 +48,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       execKey = isOSX ? "E" : "SPACE",
       scene = new THREE.Scene(),
       pickingScene = new THREE.Scene(),
-      body = new THREE.Object3D(),
       ctrls = findEverything(),
       camera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
           ctrls.output.height, 0.1, 1000 ),
@@ -62,8 +61,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
             type: THREE.UnsignedByteType,
             stencilBuffer: false
           } ),
-      fakeCamera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
-          ctrls.output.height, 0.001, 1000 ),
       mouse = new THREE.Vector3( 0, 0, 0 ),
       raycaster = new THREE.Raycaster( new THREE.Vector3(),
           new THREE.Vector3(), 0, 50 ),
@@ -76,8 +73,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       vrEffect = new SeansVREffect( renderer, vrDisplay ),
       gl = renderer.getContext(),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-      sky = textured( skyGeom, "../images/bg2.jpg" ),
-      floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
+      sky = textured( skyGeom, "images/bg2.jpg" ),
+      floor = textured( box( 25, 1, 25 ), "images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
       editor = new Primrose.Controls.TextBox( "textEditor", {
         size: new Primrose.Size( 1024, 1024 ),
@@ -87,7 +84,12 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         hideLineNumbers: true,
         hideScrollBars: true
       } ),
-      terminal = new Primrose.Terminal( editor );
+      terminal = new Primrose.Terminal( editor ),
+      UP = new THREE.Vector3(0, 1, 0),
+      RIGHT = new THREE.Vector3(1, 0, 0),
+      qPitch = new THREE.Quaternion(),
+      qRift = new THREE.Quaternion(),
+      position = new THREE.Vector3();
 
   back.generateMipMaps = false;
 
@@ -103,14 +105,12 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     } );
   } );
 
-  body.position.set( 0, 0, vrDisplay || isMobile ? 1 : 0.35 );
+  position.set( 0, 0, vrDisplay || isMobile ? 1 : 0.35 );
   floor.position.set( 0, -3, 0 );
 
   scene.add( sky );
-  body.add( camera );
-  scene.add( fakeCamera );
   scene.add( floor );
-  scene.add( body );
+  scene.add( camera );
   scene.add( pointer );
 
   window.addEventListener( "resize", refreshSize );
@@ -175,9 +175,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     renderer.domElement.height = canvasHeight;
     renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
     back.setSize( canvasWidth, canvasHeight );
-    fakeCamera.aspect = camera.aspect = canvasWidth / canvasHeight;
     camera.updateProjectionMatrix( );
-    fakeCamera.updateProjectionMatrix( );
   }
 
   function keyDown ( evt ) {
@@ -210,9 +208,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         2 * ( x / ctrls.output.width ) - 1,
         -2 * ( y / ctrls.output.height ) + 1 );
 
-    fakeCamera.position.copy( body.position );
-    fakeCamera.rotation.copy( body.rotation );
-    raycaster.setFromCamera( mouse, fakeCamera );
+    raycaster.setFromCamera( mouse, camera );
     if ( currentEditor ) {
       lastEditor = currentEditor;
     }
@@ -395,44 +391,45 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     var cos = Math.cos( heading ),
         sin = Math.sin( heading );
     if ( keyState[ctrls.forwardKey.dataset.keycode] ) {
-      body.position.z -= dt * SPEED * cos;
-      body.position.x -= dt * SPEED * sin;
+      position.z -= dt * SPEED * cos;
+      position.x -= dt * SPEED * sin;
     }
     else if ( keyState[ctrls.backKey.dataset.keycode] ) {
-      body.position.z += dt * SPEED * cos;
-      body.position.x += dt * SPEED * sin;
+      position.z += dt * SPEED * cos;
+      position.x += dt * SPEED * sin;
     }
     if ( keyState[ctrls.leftKey.dataset.keycode] ) {
-      body.position.x -= dt * SPEED * cos;
-      body.position.z += dt * SPEED * sin;
+      position.x -= dt * SPEED * cos;
+      position.z += dt * SPEED * sin;
     }
     else if ( keyState[ctrls.rightKey.dataset.keycode] ) {
-      body.position.x += dt * SPEED * cos;
-      body.position.z -= dt * SPEED * sin;
+      position.x += dt * SPEED * cos;
+      position.z -= dt * SPEED * sin;
     }
 
-    body.position.z += dt * SPEED * ( touchStrafe * sin - touchDrive * cos );
-    body.position.x -= dt * SPEED * ( touchStrafe * cos + touchDrive * sin );
-    body.position.x = Math.min( 12.5, Math.max( -12.5, body.position.x ) );
-    body.position.z = Math.min( 12.5, Math.max( -12.5, body.position.z ) );
+    position.z += dt * SPEED * ( touchStrafe * sin - touchDrive * cos );
+    position.x -= dt * SPEED * ( touchStrafe * cos + touchDrive * sin );
+    position.x = Math.min( 12.5, Math.max( -12.5, position.x ) );
+    position.z = Math.min( 12.5, Math.max( -12.5, position.z ) );
 
-    body.rotation.set( 0, 0, 0, 0 );
-    body.rotateY( heading );
-    body.rotateX( pitch );
+    qPitch.setFromAxisAngle(RIGHT, pitch);
+    camera.quaternion.setFromAxisAngle(UP, heading);
+    camera.quaternion.multiply(qPitch);
 
-    sky.position.copy( body.position );
-
+    camera.position.copy(position);
     if ( vrSensor ) {
       var state = vrSensor.getState();
-      if ( state.position ) {
-        camera.position.set( state.position.x, state.position.y,
-            state.position.z );
-      }
       if ( state.orientation ) {
-        camera.quaternion.set( state.orientation.x, state.orientation.y,
-            state.orientation.z, state.orientation.w );
+        qRift.copy(state.orientation);
+        camera.quaternion.multiply(qRift);
+      }
+
+      if (state.position ) {
+        camera.position.add(state.position);
       }
     }
+
+    sky.position.copy( camera.position );
 
     if ( dragging ) {
       pick( "move" );
@@ -534,9 +531,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   function pick ( op ) {
     if ( lastEditor && lastEditor.focused ) {
       var r = inVR ? vrEffect : renderer;
-      scene.remove( body );
       r.render( pickingScene, camera, back, true );
-      scene.add( body );
       lastEditor[op + "Picking"]( gl, pointerX, pointerY );
     }
   }
