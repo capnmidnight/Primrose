@@ -1,5 +1,5 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
-
+var log = null;
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
@@ -8,13 +8,13 @@ function clearKeyOption ( evt ) {
 function setKeyOption ( evt ) {
   this.dataset.keycode = evt.keyCode;
   this.value = this.value || Primrose.Keys[evt.keyCode];
-  this.value = this.value.toLowerCase()
+  this.value = this.value.toLowerCase( )
       .replace( "arrow", " arrow" );
-  this.blur();
+  this.blur( );
 }
 
 function setupKeyOption ( elem, char, code ) {
-  elem.value = char.toLowerCase();
+  elem.value = char.toLowerCase( );
   elem.dataset.keycode = code;
   elem.addEventListener( "keydown", clearKeyOption );
   elem.addEventListener( "keyup", setKeyOption );
@@ -34,26 +34,8 @@ function put ( object ) {
   };
 }
 
-function move ( object ) {
-  return {
-    to: function ( x, y, z ) {
-      object.position.set( x, y, z );
-    },
-    toX: function ( x ) {
-      object.position.setX( x );
-    },
-    toY: function ( y ) {
-      object.position.setY( y );
-    },
-    toZ: function ( z ) {
-      object.position.setZ( z );
-    }
-  };
-}
-
 function textured ( geometry, txt, unshaded, o, s, t ) {
   var material;
-
   if ( o === undefined ) {
     o = 1;
   }
@@ -81,7 +63,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       texture = THREE.ImageUtils.loadTexture( txt );
     }
     else if ( txt instanceof Primrose.Controls.TextBox ) {
-      texture = txt.getRenderer()
+      texture = txt.getRenderer( )
           .getTexture( );
     }
     else {
@@ -139,6 +121,9 @@ function v3 ( x, y, z ) {
 }
 
 function quad ( w, h ) {
+  if ( h === undefined ) {
+    h = w;
+  }
   return new THREE.PlaneBufferGeometry( w, h );
 }
 
@@ -150,8 +135,8 @@ function box ( w, h, l ) {
   return new THREE.BoxGeometry( w, h, l );
 }
 
-function hub () {
-  return new THREE.Object3D();
+function hub ( ) {
+  return new THREE.Object3D( );
 }
 
 function sphere ( r, slices, rings ) {
@@ -194,13 +179,12 @@ function testDemo ( scene ) {
       size = 0.1,
       scale = 3,
       spacing = size * scale,
-      h = put( hub() )
+      h = put( hub( ) )
       .on( scene )
       .at( 0, 0, -1 ),
       cubes = from( 0 )
       .to( rows * cols )
-      .exec( function (
-          i ) {
+      .exec( function ( i ) {
         var r = ( i / cols ) | 0,
             c = i % cols;
         return put( textured( sphere( size ), "../images/bg2.jpg" ) )
@@ -210,7 +194,6 @@ function testDemo ( scene ) {
                 ( c - cols / 2 ) * spacing,
                 0 );
       } );
-
   var t = 0;
   return function ( dt ) {
     t += dt / 500;
@@ -226,7 +209,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   if ( err ) {
     console.error( err );
   }
-  var lastMouseX,
+  var vrParams,
+      lastMouseX,
       lastMouseY,
       lastTouchX,
       lastTouchY,
@@ -250,10 +234,10 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
       cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
-      scene = new THREE.Scene(),
-      subScene = new THREE.Object3D(),
-      pickingScene = new THREE.Scene(),
-      ctrls = findEverything(),
+      scene = new THREE.Scene( ),
+      subScene = new THREE.Object3D( ),
+      pickingScene = new THREE.Scene( ),
+      ctrls = findEverything( ),
       camera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
           ctrls.output.height, 0.1, 1000 ),
       back = new THREE.WebGLRenderTarget( ctrls.output.width,
@@ -267,16 +251,15 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
             stencilBuffer: false
           } ),
       mouse = new THREE.Vector3( 0, 0, 0 ),
-      raycaster = new THREE.Raycaster( new THREE.Vector3(),
-          new THREE.Vector3(), 0, 50 ),
+      raycaster = new THREE.Raycaster( new THREE.Vector3( ),
+          new THREE.Vector3( ), 0, 50 ),
       pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true ),
       renderer = new THREE.WebGLRenderer( {
         canvas: ctrls.output,
         alpha: true,
         antialias: true
       } ),
-      vrEffect = new SeansVREffect( renderer, vrDisplay ),
-      gl = renderer.getContext(),
+      gl = renderer.getContext( ),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
       sky = textured( skyGeom, "../images/bg2.jpg", true ),
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", true, 1, 25,
@@ -284,36 +267,162 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       light = new THREE.PointLight( 0xffffff ),
       UP = new THREE.Vector3( 0, 1, 0 ),
       RIGHT = new THREE.Vector3( 1, 0, 0 ),
-      qPitch = new THREE.Quaternion(),
-      qRift = new THREE.Quaternion(),
-      position = new THREE.Vector3(),
-      src = getSetting( "code", testDemo.toString() );
+      qPitch = new THREE.Quaternion( ),
+      qRift = new THREE.Quaternion( ),
+      position = new THREE.Vector3( ),
+      src = getSetting( "code", testDemo.toString( ) ),
+      translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
+      viewports = [ new THREE.Box2(), new THREE.Box2() ];
 
-  if ( src === testDemo.toString() ) {
+  function setTrans ( m, t ) {
+    m.makeTranslation( t.x, t.y, t.z );
+  }
+
+  function setView ( b, r ) {
+    b.min.set( r.x, r.y );
+    b.max.set( r.x + r.width, r.y + r.height );
+  }
+
+  if ( vrDisplay ) {
+    if ( vrDisplay.getEyeParameters ) {
+      vrParams = {
+        left: vrDisplay.getEyeParameters( "left" ),
+        right: vrDisplay.getEyeParameters( "right" )
+      };
+    }
+    else {
+      vrParams = {
+        left: {
+          renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
+          eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
+          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+              "left" )
+        },
+        right: {
+          renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
+          eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
+          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+              "right" )
+        }
+      };
+    }
+
+    setTrans( translations[0], vrParams.left.eyeTranslation );
+    setTrans( translations[1], vrParams.right.eyeTranslation );
+    setView( viewports[0], vrParams.left.renderRect );
+    setView( viewports[1], vrParams.right.renderRect );
+  }
+
+  if ( src === testDemo.toString( ) ) {
     var lines = src.replace( "\r\n", "\n" )
         .split( "\n" );
-    lines.pop();
-    lines.shift();
+    lines.pop( );
+    lines.shift( );
     for ( var i = 0; i < lines.length; ++i ) {
       lines[i] = lines[i].substring( 2 );
     }
     src = lines.join( "\n" );
   }
 
-  var editor = new Primrose.Controls.TextBox( "textEditor", {
-    size: new Primrose.Size( 1024, 1024 ),
-    fontSize: 20 / window.devicePixelRatio,
-    tokenizer: Primrose.Grammars.JavaScript,
-    file: src
-  } ),
-      editorSize = 1,
-      editorGeom = shell( editorSize, 5, 10 ),
-      editorShell = textured( editorGeom, editor, true, 0.75 );
+  function makeEditor ( id, w, h, x, y, z, rx, ry, rz, options ) {
+    options.size = new Primrose.Size( 1024 * w, 1024 * h );
+    options.fontSize = ( options.fontSize || 30 ) / window.devicePixelRatio;
+    options.theme = Primrose.Themes.Dark;
+    options.tokenizer = options.tokenizer || Primrose.Grammars.PlainText;
+    var t = new Primrose.Controls.TextBox( id, options );
+    var o = textured( quad( w, h ), t, true, 0.75 );
+    var p = textured( quad( w, h ), t.getRenderer( )
+        .getPickingTexture( ), true );
+    o.position.set( x, y, z );
+    o.rotation.set( rx, ry, rz );
+    p.position.set( x, y, z );
+    p.rotation.set( rx, ry, rz );
+    scene.add( o );
+    pickingScene.add( p );
+    return o;
+  }
+
+  var output = makeEditor( "outputBox",
+      1, 0.25, 0, -0.59, 3.09, -Math.PI / 4, 0, 0,
+      {
+        readOnly: true,
+        hideLineNumbers: true
+      } ),
+      documentation = makeEditor( "docBox",
+          1, 1, 0.85, 0, 3.35, 0, -Math.PI / 4, 0,
+          {
+            readOnly: true,
+            hideLineNumbers: true,
+            fontSize: 20,
+            file: "functions:\n\
+  log( msg );\n\
+    print a message to the window below the editor.\n\
+\n\
+  put( objectA ).on( objectB )[.at( x, y, z )];\n\
+    objectA: a THREE.Object3D to be added to another,\n\
+    objectB: a THREE.Object3D where objectA will be added,\n\
+    x, y, z: a location to set for objectA relative to objectB\n\
+\n\
+  light( color [, intensity[, distance[, decay]]] );\n\
+    creates a THREE.PointLight with the same parameters.\n\
+\n\
+  v3( x, y, z );\n\
+    creates a THREE.Vector3 with the same parameters.\n\
+\n\
+  quad( width[, height] );\n\
+    creates a THREE.PlaneBufferGeometry with the same parameters.\n\
+    if height is undefined, height is set to width (square).\n\
+\n\
+  box( width[, height, length] );\n\
+    creates a THREE.BoxGeometry with the same parameters.\n\
+    if height is undefined, height and length are set to width (cube).\n\
+\n\
+  hub( );\n\
+    creates a raw THREE.Object3D. Useful for combining objects.\n\
+\n\
+  sphere( radius[, slices, rings] );\n\
+    creates a THREE.SphereGeometry with the same parameters.\n\
+\n\
+  shell( radius[, slices, rings[, phi, theta]] );\n\
+    creates a portion of the inside surface of a sphere.\n\
+\n\
+  from( start ).to( end ).exec( thunk );\n\
+    iterates on the range [start, end), passing the index as the parameter\n\
+    to thunk, accumulating an array of thunk's return value.\n\
+\n\
+  textured( geometry, txt[, unshaded[, opacity[, txtRepeatS, txtRepeatT]]] );\n\
+    geometry: a THREE.Geometry object\n\
+    txt: a material definition of some kind. It could be a:\n\
+      number - a solid hex color\n\
+      string - a path to a texture image\n\
+      Primrose.Controls.TextBox - a text editor\n\
+    unshaded: set to true to use constant lighting (default false)\n\
+    opacity: 1 - opaque, 0 - transparent (default 1).\n\
+    txtRepeatS: texture repeat in S direction (default 1).\n\
+    txtRepeat: texture repeat in T direction (default 1)"
+          } ),
+      editor = makeEditor( "textEditor",
+          1, 1, 0, 0, 3, 0, 0, 0,
+          {
+            tokenizer: Primrose.Grammars.JavaScript,
+            file: src
+          } );
+
+  log = function (  ) {
+    if ( output.editor ) {
+      var msg = Array.prototype.join.call( arguments, ", " );
+      output.editor.value += msg + "\n";
+      output.editor.selectionStart = output.editor.selectionEnd = output.editor.value.length;
+      output.editor.scrollIntoView( output.editor.frontCursor );
+      output.editor.forceUpdate( );
+    }
+  };
+
+  log( fmt( "$1+E to show/hide editor", cmdPre ) );
 
   back.generateMipMaps = false;
 
   floor.position.set( 0, -3, 0 );
-  editorShell.position.set( 0, 0, -editorSize );
   light.position.set( 5, 5, 5 );
   position.set( 0, 0, 4 );
 
@@ -322,8 +431,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   scene.add( floor );
   scene.add( pointer );
   scene.add( subScene );
-  scene.add( camera );
-  camera.add( editorShell );
 
   window.addEventListener( "resize", refreshSize );
   window.addEventListener( "keydown", keyDown );
@@ -332,8 +439,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   } );
   window.addEventListener( "wheel", mouseWheel );
   window.addEventListener( "paste", paste );
-  window.addEventListener( "unload", function () {
-    var script = editor.value;
+  window.addEventListener( "unload", function ( ) {
+    var script = editor.editor.value;
     if ( script.length > 0 ) {
       setSetting( "code", script );
     }
@@ -359,9 +466,16 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   if ( vrDisplay ) {
     ctrls.goRegular.style.display = "none";
     ctrls.nightly.display = "none";
-    ctrls.goVR.addEventListener( "click", function () {
+    ctrls.goVR.addEventListener( "click", function ( ) {
       requestFullScreen( ctrls.output, vrDisplay );
       inVR = true;
+      camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+          vrParams.left.recommendedFieldOfView.rightDegrees );
+      camera.aspect = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+          vrParams.left.recommendedFieldOfView.rightDegrees ) /
+          ( vrParams.left.recommendedFieldOfView.upDegrees +
+              vrParams.left.recommendedFieldOfView.downDegrees );
+      camera.updateProjectionMatrix();
     } );
   }
   else {
@@ -370,21 +484,21 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         ctrls.output ) );
   }
 
-  refreshSize();
+  refreshSize( );
 
   requestAnimationFrame( render );
 
-  function refreshSize () {
+  function refreshSize ( ) {
     var styleWidth = ctrls.outputContainer.clientWidth,
         styleHeight = ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
         canvasWidth = styleWidth * ratio,
         canvasHeight = styleHeight * ratio;
     if ( inVR ) {
-      canvasWidth = vrEffect.left.renderRect.width +
-          vrEffect.right.renderRect.width;
-      canvasHeight = Math.max( vrEffect.left.renderRect.height,
-          vrEffect.right.renderRect.height );
+      canvasWidth = vrParams.left.renderRect.width +
+          vrParams.right.renderRect.width;
+      canvasHeight = Math.max( vrParams.left.renderRect.height,
+          vrParams.right.renderRect.height );
     }
     renderer.domElement.style.width = px( styleWidth );
     renderer.domElement.style.height = px( styleHeight );
@@ -396,26 +510,24 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function keyDown ( evt ) {
-    if ( evt[modA] && evt[modB] ) {
-      if ( evt.keyCode === Primrose.Keys.E ) {
-        editorShell.visible = !editorShell.visible;
-        if ( !editorShell.visible && lastEditor && lastEditor.focused ) {
-          lastEditor.blur();
-          lastEditor = null;
-        }
-      }
-      else if ( evt.keyCode === Primrose.Keys.UPARROW ) {
-        editor.increaseFontSize();
-      }
-      else if ( evt.keyCode === Primrose.Keys.DOWNARROW ) {
-        editor.decreaseFontSize();
+    var mod = evt[modA] && evt[modB];
+    if ( mod && evt.keyCode === Primrose.Keys.E ) {
+      documentation.visible = output.visible = editor.visible = !editor.visible;
+      if ( !editor.visible && lastEditor && lastEditor.focused ) {
+        lastEditor.blur( );
+        lastEditor = null;
       }
     }
-    else if ( !lastEditor ||
-        !lastEditor.focused ) {
+    else if ( mod && evt.keyCode === Primrose.Keys.UPARROW ) {
+      lastEditor.increaseFontSize( );
+    }
+    else if ( mod && evt.keyCode === Primrose.Keys.DOWNARROW ) {
+      lastEditor.decreaseFontSize( );
+    }
+    else if ( !lastEditor || !lastEditor.focused ) {
       keyState[evt.keyCode] = true;
     }
-    else if ( lastEditor ) {
+    else if ( lastEditor && !lastEditor.readOnly ) {
       lastEditor.keyDown( evt );
     }
 
@@ -461,7 +573,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function paste ( evt ) {
-    if ( lastEditor ) {
+    if ( lastEditor && !lastEditor.readOnly ) {
       lastEditor.readClipboard( evt );
     }
   }
@@ -476,19 +588,13 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     var good = false;
     if ( evt.target === ctrls.output ) {
       if ( currentEditor ) {
-        currentEditor.focus();
-        evt.preventDefault();
-        if ( !window.onbeforeunload ) {
-          window.onbeforeunload = function () {
-            return "Are you sure you want to leave?";
-          };
-        }
+        currentEditor.focus( );
         good = true;
       }
     }
 
-    if ( !good && lastEditor ) {
-      lastEditor.blur();
+    if ( !good && lastEditor && lastEditor.focused ) {
+      lastEditor.blur( );
       lastEditor = null;
     }
   }
@@ -496,19 +602,22 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   function mouseDown ( evt ) {
     if ( evt.target === ctrls.output ) {
       dragging = true;
-      if ( !isPointerLocked() ) {
+      if ( !isPointerLocked( ) ) {
         lastMouseX = evt.clientX;
         lastMouseY = evt.clientY;
-        setPointer( lastMouseX, lastMouseY );
-        pick( "start" );
       }
+      editorFocus( evt );
+      setPointer( lastMouseX, lastMouseY );
+      pick( "start" );
     }
-    editorFocus( evt );
+    else {
+      editorFocus( evt );
+    }
   }
 
   function mouseMove ( evt ) {
-    var rotating = evt.shiftKey || !editorShell.visible;
-    if ( isPointerLocked() ) {
+    var rotating = evt.shiftKey || !editor.visible;
+    if ( isPointerLocked( ) ) {
       var dx = evt.movementX,
           dy = evt.movementY;
       if ( dx === undefined ) {
@@ -549,7 +658,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   function mouseUp ( evt ) {
     dragging = false;
     if ( lastEditor && lastEditor.focused ) {
-      lastEditor.endPointer();
+      lastEditor.endPointer( );
     }
   }
 
@@ -612,12 +721,18 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
   }
 
+  function renderScene ( s, rt, fc ) {
+    if ( inVR ) {
+      renderer.renderStereo( s, camera, rt, fc, translations, viewports );
+    }
+    else {
+      renderer.render( s, camera, rt, fc );
+    }
+  }
+
   function pick ( op ) {
     if ( lastEditor && lastEditor.focused ) {
-      var r = inVR ? vrEffect : renderer;
-      scene.remove( body );
-      r.render( pickingScene, camera, back, true );
-      scene.add( body );
+      renderScene( pickingScene, back, true );
       lastEditor[op + "Picking"]( gl, pointerX, pointerY );
     }
   }
@@ -646,14 +761,15 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     position.x -= dt * SPEED * ( touchStrafe * cos + touchDrive * sin );
     position.x = Math.min( 12.5, Math.max( -12.5, position.x ) );
     position.z = Math.min( 12.5, Math.max( -12.5, position.z ) );
-
-    qPitch.setFromAxisAngle( RIGHT, pitch );
     camera.quaternion.setFromAxisAngle( UP, heading );
-    camera.quaternion.multiply( qPitch );
+    if ( !inVR ) {
+      qPitch.setFromAxisAngle( RIGHT, pitch );
+      camera.quaternion.multiply( qPitch );
+    }
 
     camera.position.copy( position );
     if ( vrSensor ) {
-      var state = vrSensor.getState();
+      var state = vrSensor.getState( );
       if ( state.orientation ) {
         qRift.copy( state.orientation );
         camera.quaternion.multiply( qRift );
@@ -662,6 +778,10 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       if ( state.position ) {
         camera.position.add( state.position );
       }
+    }
+
+    if ( dragging ) {
+      pick( "move" );
     }
 
     if ( !scriptUpdateTimeout ) {
@@ -674,10 +794,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       }
       catch ( exp ) {
         console.error( exp );
+        log( "ERR: " + exp.message );
         scriptAnimate = null;
-      }
-      if ( dragging ) {
-        pick( "move" );
       }
     }
   }
@@ -687,28 +805,31 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     if ( lt ) {
       update( t - lt );
     }
-    var r = inVR ? vrEffect : renderer;
-    r.render( scene, camera );
+
+    renderScene( scene );
     lt = t;
   }
 
-  function updateScript () {
-    var newScript = editor.value;
-    if ( newScript !== lastScript ) {
-      try {
-        var scriptUpdate = new Function( "scene",
-            newScript );
-        for ( var i = subScene.children.length - 1; i >= 0; --i ) {
-          subScene.remove( subScene.children[i] );
+  function updateScript ( ) {
+    if ( editor.editor ) {
+      var newScript = editor.editor.value;
+      if ( newScript !== lastScript ) {
+        try {
+          var scriptUpdate = new Function( "scene",
+              newScript );
+          for ( var i = subScene.children.length - 1; i >= 0; --i ) {
+            subScene.remove( subScene.children[i] );
+          }
+          scriptAnimate = scriptUpdate( subScene );
         }
-        scriptAnimate = scriptUpdate( subScene );
+        catch ( exp ) {
+          console.error( exp );
+          log( "ERR: " + exp.message );
+          scriptAnimate = null;
+        }
+        lastScript = newScript;
       }
-      catch ( exp ) {
-        console.error( exp );
-        scriptAnimate = null;
-      }
-      lastScript = newScript;
+      scriptUpdateTimeout = null;
     }
-    scriptUpdateTimeout = null;
   }
 }
