@@ -337,10 +337,9 @@ Primrose.Renderers.Canvas = ( function ( ) {
       return canvas;
     };
 
-    this.getTexture = function ( anisotropy ) {
+    this.getTexture = function (  ) {
       if ( typeof window.THREE !== "undefined" && !texture ) {
         texture = new THREE.Texture( canvas );
-        texture.anisotropy = anisotropy || 8;
         texture.needsUpdate = true;
       }
       return texture;

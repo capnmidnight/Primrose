@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
 
 function clearKeyOption ( evt ) {
@@ -155,7 +150,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
         ctrls.output ) );
   }
-  
+
   terminal.loadFile( "../oregon.bas" );
 
   refreshSize();
