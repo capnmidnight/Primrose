@@ -155,6 +155,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
         ctrls.output ) );
   }
+  
+  terminal.loadFile( "../oregon.bas" );
 
   refreshSize();
 
@@ -182,9 +184,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     camera.updateProjectionMatrix( );
     fakeCamera.updateProjectionMatrix( );
   }
-
-
-  terminal.loadFile( "../oregon.bas" );
 
   function keyDown ( evt ) {
     if ( !lastEditor ||
