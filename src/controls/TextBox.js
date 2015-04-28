@@ -13,6 +13,10 @@ Primrose.Controls.TextBox = ( function ( ) {
       options = { file: options };
     }
 
+    if(options.readOnly){
+      options.disableClipboard = true;
+    }
+
     Primrose.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
@@ -800,8 +804,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
       if ( c ) {
         surrogate.addEventListener( "beforecopy", setFalse );
-        surrogate.addEventListener( "copy", this.copySelectedText.bind(
-            this ) );
+        surrogate.addEventListener( "copy", this.copySelectedText.bind( this ) );
         surrogate.addEventListener( "beforecut", setFalse );
         surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ) );
         if ( k ) {
@@ -977,6 +980,8 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     document.body.insertBefore( surrogateContainer,
         document.body.children[0] );
+
+    this.readOnly = !!options.readOnly;
 
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {

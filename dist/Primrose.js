@@ -1,5 +1,5 @@
 /*
-  Primrose v0.12.2 2015-04-28
+  Primrose v0.12.3 2015-04-28
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -1917,6 +1917,10 @@ Primrose.Controls.TextBox = ( function ( ) {
       options = { file: options };
     }
 
+    if(options.readOnly){
+      options.disableClipboard = true;
+    }
+
     Primrose.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
@@ -2704,8 +2708,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
       if ( c ) {
         surrogate.addEventListener( "beforecopy", setFalse );
-        surrogate.addEventListener( "copy", this.copySelectedText.bind(
-            this ) );
+        surrogate.addEventListener( "copy", this.copySelectedText.bind( this ) );
         surrogate.addEventListener( "beforecut", setFalse );
         surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ) );
         if ( k ) {
@@ -2881,6 +2884,8 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     document.body.insertBefore( surrogateContainer,
         document.body.children[0] );
+
+    this.readOnly = !!options.readOnly;
 
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {
@@ -4583,4 +4588,4 @@ Primrose.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.12.2";
+Primrose.VERSION = "v0.12.3";
