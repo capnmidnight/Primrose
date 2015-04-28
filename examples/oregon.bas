@@ -2,18 +2,16 @@
 2  REM        http://bit.ly/1PYytsT
 3  REM        http://www.citypages.com/content/printVersion/1740595/
 4  REM
-5  REM You can see the source code here, which is less than 700 lines of BASIC for the CDC Cyber 70/73-26 mainframe computer. I've had to make a few minor changes to correct a few bugs in the copy that I found, as well as to fudge a few minor issues with my interpreter.
+5  REM Run the program at any time by hitting CTRL+SHIFT+SPACE on your keyboard. Type commands when prompted. The game mostly uses numeric commands, but there is a shooting mini-game that requires you to quickly type a given word, so pay attention for when it comes up.
 6  REM
-7  REM Run the program at any time by hitting CTRL+SHIFT+SPACE on your keyboard. Type commands when prompted. The game mostly uses numeric commands, but there is a shooting mini-game that requires you to quickly type a given word, so pay attention for when it comes up.
+7  REM You can see the source code here, which is less than 700 lines of BASIC for the CDC Cyber 70/73-26 mainframe computer. I've had to make a few minor changes to correct a few bugs in the copy that I found. As of right now, the interpreter has a minor issue that it will not be able to read your input correctly if you move the cursor before typing. If you do move the cursor, just hit CTRL+END (or CMD+DOWN ARROW on your Apple ][ descendent) and the cursor will be placed correctly.
 8  REM
-9  REM As of right now, the interpreter has a minor issue that it will not be able to read your input correctly if you move the cursor before typing. If you do move the cursor, just hit CTRL+END (or CMD+DOWN ARROW on your Apple ][ descendent) and the cursor will be placed correctly.
-10 REM
-11 REM thank you
-12 REM Sean T. McBeth
-13 REM https://www.primroseeditor.com
-14 REM ==========================================================================================================================================================================================================================
-15 REM
-16 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
+9  REM thank you
+10 REM Sean T. McBeth
+11 REM https://www.primroseeditor.com
+12 REM =========================================================================
+13 REM
+14 REM PROGRAM NAME - OREGON        VERSION: 01/01/78
 20 REM ORIGINAL PROGRAMMING BY BILL HEINEMANN - 1971
 30 REM SUPPORT RESEARCH AND MATERIALS BY DON RAWITSCH,
 40 REM      MINNESOTA EDUCATIONAL COMPUTING CONSORTIUM STAFF

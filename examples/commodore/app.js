@@ -155,7 +155,7 @@ function PrimroseDemo ( err ) {
         hideScrollBars: true
       } );
 
-  loader.load( "monitor.json", function ( f ) {
+  loader.load( "commodore_pet.json", function ( f ) {
     scene.add( f );
     f.position.set( -0.1, -0.1, 0 );
     f.traverse( function ( obj ) {
