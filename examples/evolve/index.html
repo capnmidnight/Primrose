@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>A simple genetic algorithm experiment</title>
+    <script type="text/javascript" src="/lib/Heather.min.js"></script>
+    <script type="text/javascript" src="/dist/Primrose.min.js"></script>
+    <script type="text/javascript">
+/* global Primrose */
+      function init() {
+      "use strict";
+// initialize our genes;
+      var pool,
+          pump,
+          width,
+          run,
+          height,
+          g,
+          imgData,
+          codeBlocks,
+          codeBlockNames,
+          fitnessScript,
+          fitnessScriptSource,
+          fitness,
+          mutateScript,
+          mutateScriptSource,
+          mutate,
+          breedScript,
+          breedScriptSource,
+          breed,
+          date,
+          exp,
+          mutationRate,
+          crossoverRate,
+          scripts = {
+            Red: "var val = 0, i, r, g, b, a;\n\
+for(i = 0;i < gene.length;i+=4){\n\
+  r = gene[i];\n\
+  g = gene[i+1];\n\
+  b = gene[i+2];\n\
+  a = gene[i+3];\n\
+  val += (r-g-b+a)*a;\n\
+}\n\
+return val;\n\
+",
+            Green: "var val = 0, i, r, g, b, a;\n\
+for(i = 0;i < gene.length;i+=4){\n\
+  r = gene[i];\n\
+  g = gene[i+1];\n\
+  b = gene[i+2];\n\
+  a = gene[i+3];\n\
+  val += (-r+g-b+a)*a;\n\
+}\n\
+return val;\n\
+",
+            Blue: "var val = 0, i, r, g, b, a;\n\
+for(i = 0;i < gene.length;i+=4){\n\
+  r = gene[i];\n\
+  g = gene[i+1];\n\
+  b = gene[i+2];\n\
+  a = gene[i+3];\n\
+  val += (-r-g+b+a)*a;\n\
+}\n\
+return val;\n\
+",
+            Rainbow: "var val = 0, i, r, g, b, a, p, s, w;\n\
+w = gene.length / 32;\n\
+for(i=0;i < gene.length;i+=4){\n\
+  r = gene[i];\n\
+  g = gene[i+1];\n\
+  b = gene[i+2];\n\
+  a = gene[i+3];\n\
+  p = Math.floor(i/4);\n\
+  s = (Math.floor(p/w)+date.getMinutes())%8;\n\
+  if((s&4)!=0) r*=-1;\n\
+  if((s&2)!=0) g*=-1;\n\
+  if((s&1)!=0) b*=-1;\n\
+  val += (r+g+b+a)*a;\n\
+}\n\
+return val;\n\
+",
+            Complex: "if(gene.age===undefined){\n\
+   gene.age=1;\n\
+   if(this.counter===undefined){\n\
+      this.counter = 0;\n\
+   }\n\
+   else{\n\
+      this.counter ++;\n\
+   }\n\
+}else{\n\
+   gene.age++;\n\
+}\n\
+\n\
+var i, n, seg, r, g, b, a;\n\
+var val = 0;\n\
+var numpix = gene.length / 4;\n\
+var w = numpix / 8;\n\
+for(i = 0;\n\
+    i < gene.length;\n\
+    i+=4){\n\
+  r = gene[i];\n\
+  g = gene[i+1];\n\
+  b = gene[i+2];\n\
+  a = gene[i+3];\n\
+  n = i / 4;\n\
+  seg = (Math.floor(n / w) + Math.floor(this.counter/10000)) % 8;\n\
+  if((seg&4)===0) r*=-1;\n\
+  if((seg&2)===0) g*=-1;\n\
+  if((seg&2)===0) b*=-1;\n\
+  val += a*(r+g+b+a)/gene.age;\n\
+}\n\
+return val;\n\
+"
+          },
+              ctrls = findEverything();
+
+      function setMutationRate() {
+        mutationRate = 1 / parseFloat(ctrls.mutationRate.value);
+      }
+
+      function setCrossoverRate() {
+        crossoverRate = 1 / parseFloat(ctrls.crossoverRate.value);
+      }
+        ctrls.scriptVis.innerHTML = evaluate.toString();
+        setMutationRate();
+        setCrossoverRate();
+        ctrls.mutationRate.addEventListener("change", setMutationRate);
+        ctrls.crossoverRate.addEventListener("change", setCrossoverRate);
+        fitnessScriptSource = new Primrose.Controls.TextBox(ctrls.fitnessFunction);
+        mutateScriptSource = new Primrose.Controls.TextBox(ctrls.mutateFunction,
+            "if(rate <= 0.3333){\n\
+  for(var i = 0; i < 4; ++i){\n\
+    gene.push(gene.shift());\n\
+  }\n\
+}\n\
+else if(rate <= 0.6667){\n\
+  var copy = gene.slice();\n\
+  for(var i = 0; i < copy.length; ++i){\n\
+    gene[gene.length - 1 - i] = copy[i];\n\
+  }\n\
+}\n\
+else{\n\
+  var i = Math.floor(Math.random()*gene.length);\n\
+  gene[i] = Math.floor(Math.random()*255);\n\
+}\n\
+");
+        breedScriptSource = new Primrose.Controls.TextBox(ctrls.breedFunction,
+            "for(var j = 0; j < child.length; ++j){\n\
+  var n = Math.floor(j*parents.length/child.length);\n\
+  child[j] = parents[n][j];\n\
+}\n\
+");
+        fitnessScriptSource.keyboardSelect.style.display = "inline-block";
+        ctrls.texters.appendChild(fitnessScriptSource.keyboardSelect);
+        width = ctrls.surface.width;
+        run = width * 4;
+        height = ctrls.surface.height;
+        g = ctrls.surface.getContext("2d");
+        imgData = g.createImageData(width, height);
+        g.fillStyle = "rgb(0, 0, 0)";
+
+        codeBlockNames = ["fitness", "mutate", "breed"];
+        codeBlocks = codeBlockNames.map(function (name, i) {
+          var opt = document.createElement("option");
+          opt.innerHTML = name;
+          ctrls.functions.appendChild(opt);
+          var b = ctrls[name + "FuncBlock"];
+          if (i > 0) {
+            b.style.display = "none";
+          }
+          return b;
+        });
+        ctrls.functions.addEventListener("change", function () {
+          var n = ctrls.functions.selectedIndex;
+          for (var i = 0; i < codeBlocks.length; ++i) {
+            codeBlocks[i].style.display = n === i ? "block" : "none";
+          }
+        });
+
+        reset();
+
+        for (var key in scripts) {
+          var opt = document.createElement("option");
+          opt.innerHTML = key;
+          opt.value = scripts[key];
+          ctrls.store.appendChild(opt);
+        }
+        load(ctrls.store);
+
+
+      function reset() {
+        var i,
+            j;
+        if (!pool)
+          pool = [];
+        for (i = 0; i < height * 2;
+            ++i) { // make twice the space for children to grow
+          if (!pool[i])
+            pool[i] = [];
+          for (j = 0; j < run; ++j) {
+            pool[i][j] = 0;
+          }
+        }
+      }
+
+      function toggle() {
+        if (ctrls.btnStart.innerHTML === "Start") {
+          start();
+        }
+        else {
+          stop();
+        }
+      }
+
+      function edit() {
+        stop();
+        ctrls.surface.style.display = "none";
+        ctrls.texters.style.display = "block";
+        ctrls.about.style.display = "none";
+      }
+
+      function about() {
+        stop();
+        ctrls.surface.style.display = "none";
+        ctrls.texters.style.display = "none";
+        ctrls.about.style.display = "block";
+      }
+
+      function start() {
+        if (!pump) {
+          ctrls.surface.style.display = "block";
+          ctrls.texters.style.display = "none";
+          ctrls.about.style.display = "none";
+          ctrls.btnStart.innerHTML = "Stop";
+          scriptChanged();
+          evaluate();
+        }
+      }
+
+      function stop() {
+        if (pump) {
+          clearTimeout(pump);
+          pump = null;
+          ctrls.btnStart.innerHTML = "Start";
+        }
+      }
+
+      function scriptChanged() {
+        ctrls.error.innerHTML = "";
+        if (fitnessScript !== fitnessScriptSource.value) {
+          fitnessScript = fitnessScriptSource.value;
+          try {
+            fitness = new Function("gene", "date", fitnessScript);
+          }
+          catch (exp) {
+            ctrls.error.innerHTML += exp.message + "<br>";
+          }
+        }
+        if (breedScript !== breedScriptSource.value) {
+          breedScript = breedScriptSource.value;
+          try {
+            breed = new Function("parents", "child", breedScript);
+          }
+          catch (exp) {
+            ctrls.error.innerHTML += exp.message + "<br>";
+          }
+        }
+        if (mutateScript !== mutateScriptSource.value) {
+          mutateScript = mutateScriptSource.value;
+          try {
+            mutate = new Function("gene", "rate", mutateScript);
+          }
+          catch (exp) {
+            ctrls.error.innerHTML += exp.message + "<br>";
+          }
+        }
+      }
+
+      function sortGenes(a, b) {
+        var val;
+        try {
+          val = fitness(b, date) - fitness(a, date);
+        }
+        catch (exp) {
+          ctrls.error.innerHTML = exp.message;
+        }
+        return val;
+      }
+
+      function draw() {
+        var i,
+            j,
+            t;
+        for (i = 0; i < height; ++i) {
+          for (j = 0, t = i * run; j < run; j++, t++) {
+            imgData.data[t] = pool[i][j];
+          }
+        }
+        g.putImageData(imgData, 0, 0);
+      }
+
+      function breedInternal(i) {
+        if (Math.random() <= crossoverRate) {
+          breed([pool[i], pool[i + 1]], pool[i + height]);
+        }
+      }
+
+      function mutateInternal(gene) {
+        var x = Math.random();
+        if (x <= mutationRate) {
+          mutate(gene, x / mutationRate);
+        }
+      }
+
+      function evaluate() {
+        date = new Date();
+        if (g) {
+          for (var i = 0; i < height; i += 2) {
+            breedInternal(i);
+            mutateInternal(pool[i]);
+            mutateInternal(pool[i + 1]);
+            mutateInternal(pool[i + height]);
+          }
+          pool.sort(sortGenes);
+          draw();
+          pump = setTimeout(evaluate, 1);
+        }
+      }
+
+      function load(sel) {
+        fitnessScriptSource.value = sel.options[sel.selectedIndex].value;
+        scriptChanged();
+      }
+
+      ctrls.btnStart.addEventListener("click", toggle);
+      ctrls.store.addEventListener("change", load.bind(window, ctrls.store));
+      ctrls.btnReset.addEventListener("click", reset);
+      ctrls.btnEdit.addEventListener("click", edit);
+      ctrls.btnAbout.addEventListener("click", about);
+    }
+    </script>
+    <link rel="stylesheet" type="text/css" href="evolve.css">
+  </head>
+  <body onload="init()">
+    <pre id="scriptVis"></pre>
+    <div id="codeArea">
+      <div id="drawing">
+        <canvas id="surface" width="300" height="200"></canvas>
+        <div id="texters">
+          <select id="functions"></select>
+
+          <div id="fitnessFuncBlock" style="display:inline-block">
+            <div style="color:green">/* Each pixel in a row is 4 consecutive bytes in the gene array.*/</div>
+            <div><span style="color:blue">function</span><select id="store" onchange="load(this)">
+              </select>(gene, date){</div>
+            <canvas id="fitnessFunction" class="code-editor"></canvas>
+          </div>
+
+          <div id="mutateFuncBlock" style="display:inline-block">
+            <div style="color:green">/* The gene parameter is an array of pixel values, and the rate parameter is magic. */</div>
+            <div><span style="color:blue">function</span> mutate(gene, rate){</div>
+            <canvas id="mutateFunction" class="code-editor"></canvas>
+          </div>
+
+          <div id="breedFuncBlock" style="display:inline-block">
+            <div style="color:green">/* The parents parameter is an array of genes, and the child parameter is a gene. */</div>
+            <div><span style="color:blue">function</span> breed(parents, child){</div>
+            <canvas id="breedFunction" class="code-editor"></canvas>
+            <div id="error"></div>
+          </div>
+
+          <span>}</span>
+        </div>
+        <div id="about"><iframe width="560" height="315" src="https://www.youtube.com/embed/5SXsu_MEzmU" frameborder="0" allowfullscreen></iframe></div>
+      </div>
+      <div id="controls">
+        <label for="mutationRate">Mutation rate (1 in X):</label> <input type="number" id="mutationRate" value="4" min="1" max="10000"><br>
+        <label for="crossoverRate">Crossover rate (1 in Y):</label> <input type="number" id="crossoverRate" value="1" min="1" max="10000"><br>
+        <br>
+        <button id="btnStart" type="button">Start</button>
+        <button id="btnReset" type="button" onclick="reset()">Reset</button>
+        <button id="btnEdit" type="button" onclick="edit()">Edit</button>
+        <button id="btnAbout" type="button" onclick="about()">About</button>
+        <button type="button" onclick="document.location = '/'">Exit</button>
+      </div>
+    </div>
+  </body>
+</html>
