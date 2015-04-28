@@ -1,5 +1,5 @@
 /*
-  Primrose v0.12.0 2015-04-28
+  Primrose v0.12.1 2015-04-28
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -3989,10 +3989,9 @@ Primrose.Renderers.Canvas = ( function ( ) {
       return canvas;
     };
 
-    this.getTexture = function ( anisotropy ) {
+    this.getTexture = function (  ) {
       if ( typeof window.THREE !== "undefined" && !texture ) {
         texture = new THREE.Texture( canvas );
-        texture.anisotropy = anisotropy || 8;
         texture.needsUpdate = true;
       }
       return texture;
@@ -4578,4 +4577,4 @@ Primrose.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.12.0";
+Primrose.VERSION = "v0.12.1";
