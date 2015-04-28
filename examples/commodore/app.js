@@ -73,8 +73,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       vrEffect = new SeansVREffect( renderer, vrDisplay ),
       gl = renderer.getContext(),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-      sky = textured( skyGeom, "images/bg2.jpg" ),
-      floor = textured( box( 25, 1, 25 ), "images/deck.png", 25, 25 ),
+      sky = textured( skyGeom, "../images/bg2.jpg" ),
+      floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
       editor = new Primrose.Controls.TextBox( "textEditor", {
         size: new Primrose.Size( 1024, 1024 ),
