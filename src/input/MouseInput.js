@@ -93,10 +93,10 @@ Primrose.Input.MouseInput = ( function () {
       }
     };
 
-    DOMElement.requestPointerLock = DOMElement.requestPointerLock
-        || DOMElement.webkitRequestPointerLock
-        || DOMElement.mozRequestPointerLock
-        || function () {
+    DOMElement.requestPointerLock = DOMElement.requestPointerLock ||
+        DOMElement.webkitRequestPointerLock ||
+        DOMElement.mozRequestPointerLock ||
+        function () {
         };
 
     this.requestPointerLock = function () {
@@ -118,9 +118,9 @@ Primrose.Input.MouseInput = ( function () {
   }
 
   MouseInput.isPointerLocked = function () {
-    return !!( document.pointerLockElement
-        || document.webkitPointerLockElement
-        || document.mozPointerLockElement );
+    return !!( document.pointerLockElement ||
+        document.webkitPointerLockElement ||
+        document.mozPointerLockElement );
   };
   MouseInput.AXES = [ "X", "Y", "Z" ];
   Primrose.Input.ButtonAndAxisInput.inherit( MouseInput );

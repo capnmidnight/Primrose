@@ -1,7 +1,8 @@
 /* global Primrose */
 
 Primrose.Input.ButtonAndAxisInput = ( function () {
-  function ButtonAndAxisInput ( name, commands, socket, oscope, offset, axes ) {
+  function ButtonAndAxisInput ( name, commands, socket, oscope, offset,
+      axes ) {
     this.offset = offset || 0;
     Primrose.NetworkedInput.call( this, name, commands, socket, oscope );
     this.inputState.axes = [ ];
@@ -70,29 +71,29 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
 
   ButtonAndAxisInput.prototype.getValue = function ( name ) {
     var i = this.commandNames.indexOf( name );
-    return ( ( this.enabled || ( this.receiving && this.socketReady ) )
-        && i > -1
-        && !this.commands[i].disabled
-        && this.commandState[name]
-        && this.commandState[name].value ) || 0;
+    return ( ( this.enabled || ( this.receiving && this.socketReady ) ) &&
+        i > -1 &&
+        !this.commands[i].disabled &&
+        this.commandState[name] &&
+        this.commandState[name].value ) || 0;
   };
 
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
     var i = this.commandNames.indexOf( name );
-    return ( this.enabled || ( this.receiving && this.socketReady ) )
-        && i > -1
-        && !this.commands[i].disabled
-        && this.commandState[name]
-        && this.commandState[name].pressed;
+    return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
+        i > -1 &&
+        !this.commands[i].disabled &&
+        this.commandState[name] &&
+        this.commandState[name].pressed;
   };
 
   ButtonAndAxisInput.prototype.isUp = function ( name ) {
     var i = this.commandNames.indexOf( name );
-    return ( this.enabled || ( this.receiving && this.socketReady ) )
-        && i > -1
-        && !this.commands[i].disabled
-        && this.commandState[name]
-        && !this.commandState[name].pressed;
+    return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
+        i > -1 &&
+        !this.commands[i].disabled &&
+        this.commandState[name] &&
+        !this.commandState[name].pressed;
   };
 
   ButtonAndAxisInput.prototype.maybeClone = function ( arr ) {
@@ -136,13 +137,14 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
       metaKeysSet, dt ) {
     if ( metaKeysSet ) {
       var pressed = true,
-          value = 0;
+          value = 0,
+          n, v;
 
       if ( cmd.buttons ) {
-        for ( var n = 0; n < cmd.buttons.length; ++n ) {
+        for ( n = 0; n < cmd.buttons.length; ++n ) {
           var b = cmd.buttons[n];
           var p = !!this.inputState.buttons[b.index];
-          var v = p ? b.sign : 0;
+          v = p ? b.sign : 0;
           pressed = pressed && ( p && !b.toggle || !p && b.toggle );
           if ( Math.abs( v ) > Math.abs( value ) ) {
             value = v;
@@ -151,9 +153,9 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
       }
 
       if ( cmd.axes ) {
-        for ( var n = 0; n < cmd.axes.length; ++n ) {
+        for ( n = 0; n < cmd.axes.length; ++n ) {
           var a = cmd.axes[n];
-          var v = a.sign * this.inputState.axes[a.index];
+          v = a.sign * this.inputState.axes[a.index];
           if ( Math.abs( v ) > Math.abs( value ) ) {
             value = v;
           }
@@ -161,8 +163,8 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
       }
 
       if ( cmd.commands ) {
-        for ( var n = 0; n < cmd.commands.length; ++n ) {
-          var v = this.getValue( cmd.commands[n] );
+        for ( n = 0; n < cmd.commands.length; ++n ) {
+          v = this.getValue( cmd.commands[n] );
           if ( Math.abs( v ) > Math.abs( value ) ) {
             value = v;
           }
@@ -177,7 +179,7 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
         value += cmd.offset;
       }
 
-      if ( cmd.deadzone && Math.abs( v ) < cmd.deadzone ) {
+      if ( cmd.deadzone && Math.abs( value ) < cmd.deadzone ) {
         value = 0;
       }
 

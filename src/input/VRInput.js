@@ -1,7 +1,8 @@
 /* global Primrose, HMDVRDevice, PositionSensorVRDevice */
 Primrose.Input.VRInput = ( function () {
   function VRInput ( name, commands, elem, selectedID ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, null, null, 1,
+    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, null, null,
+        1,
         VRInput.AXES );
     this.devices = { };
     this.sensor = null;
@@ -9,13 +10,13 @@ Primrose.Input.VRInput = ( function () {
     if ( navigator.getVRDevices ) {
       navigator.getVRDevices()
           .then( this.enumerateVRDevices.bind( this, elem,
-          selectedID ) );
+              selectedID ) );
     } else if ( navigator.mozGetVRDevices ) {
       navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem,
           selectedID ) );
     }
   }
-  ;
+
   VRInput.AXES = [
     "X", "Y", "Z",
     "VX", "VY", "VZ",
@@ -58,9 +59,10 @@ Primrose.Input.VRInput = ( function () {
 
   VRInput.prototype.enumerateVRDevices = function ( elem, selectedID,
       devices ) {
+    var id;
     for ( var i = 0; i < devices.length; ++i ) {
       var device = devices[i];
-      var id = device.hardwareUnitId;
+      id = device.hardwareUnitId;
       if ( !this.devices[id] ) {
         this.devices[id] = {
           display: null,
@@ -76,7 +78,7 @@ Primrose.Input.VRInput = ( function () {
       }
     }
 
-    for ( var id in this.devices ) {
+    for ( id in this.devices ) {
       var option = document.createElement( "option" );
       option.value = id;
       option.innerHTML = this.devices[id].sensor.deviceName;

@@ -1,20 +1,24 @@
 /* global Primrose */
 
 Primrose.Input.KeyboardInput = ( function () {
+  function makeCommand ( thisObj, cmd ) {
+    return function ( update ) {
+      textEntry = true;
+      text = "";
+      insertionPoint = 0;
+      onTextEntry = update;
+      onTextEntry( false, "|" );
+      this.enable( false );
+    }.bind( thisObj, cmd.commandUp );
+  }
+  
   function KeyboardInput ( name, DOMElement, commands, socket, oscope ) {
     DOMElement = DOMElement || window;
 
     for ( var i = 0; i < commands.length; ++i ) {
       var cmd = commands[i];
       if ( cmd.preamble ) {
-        cmd.commandUp = function ( update ) {
-          textEntry = true;
-          text = "";
-          insertionPoint = 0;
-          onTextEntry = update;
-          onTextEntry( false, "|" );
-          this.enable( false );
-        }.bind( this, cmd.commandUp );
+        cmd.commandUp = makeCommand( this, cmd.commandUp );
       }
     }
 
@@ -28,8 +32,8 @@ Primrose.Input.KeyboardInput = ( function () {
 
     function execute ( stateChange, event ) {
       if ( textEntry && stateChange ) {
-        if ( event.keyCode === KeyboardInput.ENTER
-            || event.keyCode === KeyboardInput.ESCAPE ) {
+        if ( event.keyCode === KeyboardInput.ENTER ||
+            event.keyCode === KeyboardInput.ESCAPE ) {
           textEntry = false;
           if ( event.keyCode === KeyboardInput.ENTER ) {
             onTextEntry( true, text );

@@ -23,8 +23,8 @@ Primrose.Input.TouchInput = ( function () {
           for ( var j = 0; j < buttonBounds.length; ++j ) {
             this.setButton( j, false );
             var b = buttonBounds[j];
-            if ( b.x <= t.pageX && t.pageX < b.x2
-                && b.y <= t.pageY && t.pageY < b.y2 ) {
+            if ( b.x <= t.pageX && t.pageX < b.x2 &&
+                b.y <= t.pageY && t.pageY < b.y2 ) {
               this.setButton( j, stateChange );
             }
           }

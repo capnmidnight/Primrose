@@ -49,7 +49,7 @@ Primrose.NetworkedInput = ( function () {
       this.addCommand( commands[i] );
     }
 
-    for ( var i = 0; i < NetworkedInput.META_KEYS.length; ++i ) {
+    for ( i = 0; i < NetworkedInput.META_KEYS.length; ++i ) {
       this.inputState[NetworkedInput.META_KEYS[i]] = false;
     }
   }
@@ -92,11 +92,11 @@ Primrose.NetworkedInput = ( function () {
           if ( cmd.metaKeys ) {
             for ( var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n ) {
               var m = cmd.metaKeys[n];
-              metaKeysSet = metaKeysSet
-                  && ( this.inputState[NetworkedInput.META_KEYS[m.index]] &&
-                      m.toggle
-                      || !this.inputState[NetworkedInput.META_KEYS[m.index]] &&
-                  !m.toggle );
+              metaKeysSet = metaKeysSet &&
+                  ( this.inputState[NetworkedInput.META_KEYS[m.index]] &&
+                      m.toggle ||
+                      !this.inputState[NetworkedInput.META_KEYS[m.index]] &&
+                      !m.toggle );
             }
           }
 
@@ -107,9 +107,9 @@ Primrose.NetworkedInput = ( function () {
             cmdState.repeatCount++;
           }
 
-          cmdState.fireAgain = cmdState.pressed
-              && cmdState.lt >= cmd.dt
-              && cmdState.repeatCount >= cmd.repetitions;
+          cmdState.fireAgain = cmdState.pressed &&
+              cmdState.lt >= cmd.dt &&
+              cmdState.repeatCount >= cmd.repetitions;
 
           if ( cmdState.fireAgain ) {
             cmdState.lt = 0;
@@ -168,8 +168,9 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.decodeStateSnapshot = function ( snapshot ) {
+    var cmd;
     for ( var c = 0; c < this.commands.length; ++c ) {
-      var cmd = this.commands[c];
+      cmd = this.commands[c];
       var cmdState = this.commandState[cmd.name];
       cmdState.wasPressed = cmdState.pressed;
     }
@@ -181,7 +182,7 @@ Primrose.NetworkedInput = ( function () {
       var pressed = ( cmdIndex & 0x1 ) !== 0;
       var fireAgain = ( flags & 0x2 ) !== 0;
       cmdIndex >>= 2;
-      var cmd = this.commands[cmdIndex];
+      cmd = this.commands[cmdIndex];
       var flags = parseInt( parts[2], 10 );
       this.commandState[cmd.name] = {
         value: parseFloat( parts[1] ),

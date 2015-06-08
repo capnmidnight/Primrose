@@ -13,17 +13,19 @@ Primrose.Input.GamepadInput = ( function () {
     this.superUpdate = this.update;
 
     this.checkDevice = function ( pad ) {
-      for ( var i = 0; i < pad.buttons.length; ++i ) {
+      var i;
+      for ( i = 0; i < pad.buttons.length; ++i ) {
         this.setButton( i, pad.buttons[i].pressed );
       }
-      for ( var i = 0; i < pad.axes.length; ++i ) {
+      for ( i = 0; i < pad.axes.length; ++i ) {
         this.setAxis( GamepadInput.AXES[i], pad.axes[i] );
       }
     };
 
     this.update = function ( dt ) {
       var pads,
-          currentPads = [ ];
+          currentPads = [ ],
+          i;
 
       if ( navigator.getGamepads ) {
         pads = navigator.getGamepads();
@@ -33,7 +35,7 @@ Primrose.Input.GamepadInput = ( function () {
       }
 
       if ( pads ) {
-        for ( var i = 0; i < pads.length; ++i ) {
+        for ( i = 0; i < pads.length; ++i ) {
           var pad = pads[i];
           if ( pad ) {
             if ( connectedGamepads.indexOf( pad.id ) === -1 ) {
@@ -48,7 +50,7 @@ Primrose.Input.GamepadInput = ( function () {
         }
       }
 
-      for ( var i = connectedGamepads.length - 1; i >= 0; --i ) {
+      for ( i = connectedGamepads.length - 1; i >= 0; --i ) {
         if ( currentPads.indexOf( connectedGamepads[i] ) === -1 ) {
           onDisconnected( connectedGamepads[i] );
           connectedGamepads.splice( i, 1 );

@@ -1,4 +1,4 @@
-var fs = require("fs");
+var fs = require( "fs" );
 
 module.exports = function ( grunt ) {
   // Project configuration.
@@ -12,16 +12,26 @@ module.exports = function ( grunt ) {
       execConfig = { },
       copyConfig = { };
 
-  if ( fs.existsSync( "../three.js" ) ) {
-    console.log("including three.js lib");
-    execConfig.build_THREE = "cd ../three.js/utils/build && build.bat";
-    copyConfig.copy_THREE = {
-      files: [
-        { expand: true, flatten: true, src: [ '../three.js/build/*' ],
-          dest: 'lib/', filter: 'isFile' }
-      ]
-    };
+  var execConfig = { },
+      copyConfig = { };
+
+  function depend ( name, rootDir, buildDir, buildCmd, binDir ) {
+    if ( fs.existsSync( rootDir ) ) {
+      console.log( "including " + name );
+      execConfig["build_" + name] = "cd " + rootDir + "/" + buildDir + " && " +
+          buildCmd;
+      copyConfig["copy_" + name] = {
+        files: [
+          { expand: true, flatten: true, src: [ rootDir + "/" + binDir + "/*"
+            ],
+            dest: 'lib/', filter: 'isFile' }
+        ]
+      };
+    }
   }
+
+  depend( "THREE", "../three.js", "utils/build", "build.bat", "build" );
+  depend( "cannon.js", "../cannon.js", "", "grunt", "build" );
 
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
@@ -65,10 +75,10 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default", [ "clean", "exec", "copy", "jshint", "concat",
-    "uglify" ] );
+  grunt.registerTask( "default",
+      [ "clean", "exec", "copy", "jshint", "concat", "uglify" ] );
 
-  grunt.registerTask( "localonly", [ "clean", "copy", "jshint", "concat",
-    "uglify" ] );
+  grunt.registerTask( "localonly",
+      [ "clean", "copy", "jshint", "concat", "uglify" ] );
 
 };
