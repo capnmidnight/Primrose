@@ -7,7 +7,7 @@ function clearKeyOption ( evt ) {
 
 function setKeyOption ( evt ) {
   this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.Keys[evt.keyCode];
+  this.value = this.value || Primrose.UI.Text.Keys[evt.keyCode];
   this.value = this.value.toLowerCase()
       .replace( "arrow", " arrow" );
   this.blur();
@@ -24,7 +24,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   if ( err ) {
     console.error( err );
   }
-  var lastMouseX,
+  var vrParams,
+      lastMouseX,
       lastMouseY,
       lastTouchX,
       lastTouchY,
@@ -70,26 +71,65 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         alpha: true,
         antialias: true
       } ),
-      vrEffect = new SeansVREffect( renderer, vrDisplay ),
+      inVR = false,
       gl = renderer.getContext(),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
       sky = textured( skyGeom, "../images/bg2.jpg" ),
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
-      editor = new Primrose.Controls.TextBox( "textEditor", {
-        size: new Primrose.Size( 1024, 1024 ),
+      editor = new Primrose.UI.Text.Controls.TextBox( "textEditor", {
+        size: new Primrose.UI.Text.Size( 1024, 1024 ),
         fontSize: ( vrDisplay ? 40 : 20 ) / window.devicePixelRatio,
-        tokenizer: Primrose.Grammars.Basic,
-        theme: Primrose.Themes.Dark,
+        tokenizer: Primrose.UI.Text.Grammars.Basic,
+        theme: Primrose.UI.Text.Themes.Dark,
         hideLineNumbers: true,
         hideScrollBars: true
       } ),
-      terminal = new Primrose.Terminal( editor ),
+      terminal = new Primrose.UI.Text.Terminal( editor ),
       UP = new THREE.Vector3(0, 1, 0),
       RIGHT = new THREE.Vector3(1, 0, 0),
       qPitch = new THREE.Quaternion(),
       qRift = new THREE.Quaternion(),
       position = new THREE.Vector3();
+
+  function setTrans ( m, t ) {
+    m.makeTranslation( t.x, t.y, t.z );
+  }
+
+  function setView ( b, r ) {
+    b.min.set( r.x, r.y );
+    b.max.set( r.x + r.width, r.y + r.height );
+  }
+
+  if ( vrDisplay ) {
+    if ( vrDisplay.getEyeParameters ) {
+      vrParams = {
+        left: vrDisplay.getEyeParameters( "left" ),
+        right: vrDisplay.getEyeParameters( "right" )
+      };
+    }
+    else {
+      vrParams = {
+        left: {
+          renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
+          eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
+          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+              "left" )
+        },
+        right: {
+          renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
+          eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
+          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+              "right" )
+        }
+      };
+    }
+
+    setTrans( translations[0], vrParams.left.eyeTranslation );
+    setTrans( translations[1], vrParams.right.eyeTranslation );
+    setView( viewports[0], vrParams.left.renderRect );
+    setView( viewports[1], vrParams.right.renderRect );
+  }
 
   back.generateMipMaps = false;
 
@@ -137,37 +177,38 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   setupKeyOption( ctrls.forwardKey, "W", 87 );
   setupKeyOption( ctrls.backKey, "S", 83 );
 
-  if ( vrDisplay ) {
-    ctrls.goRegular.style.display = "none";
-    ctrls.nightly.display = "none";
-    ctrls.goVR.addEventListener( "click", function () {
-      requestFullScreen( ctrls.output, vrDisplay );
-      inVR = true;
-    } );
-  }
-  else {
-    ctrls.goVR.style.display = "none";
-    ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
-        ctrls.output ) );
-  }
-
   terminal.loadFile( "../oregon.bas" );
 
-  refreshSize();
+  ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
+      ctrls.output ) );
+  if ( vrDisplay ) {
+    ctrls.goVR.style.display = "inline-block";
+    ctrls.goVR.addEventListener( "click", function ( ) {
+      requestFullScreen( ctrls.output, vrDisplay );
+      inVR = true;
+      camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+          vrParams.left.recommendedFieldOfView.rightDegrees );
+      refreshSize();
+    } );
+  }
+
+  refreshSize( );
 
   requestAnimationFrame( render );
 
-  function refreshSize () {
+  function refreshSize ( ) {
     var styleWidth = ctrls.outputContainer.clientWidth,
         styleHeight = ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
         canvasWidth = styleWidth * ratio,
-        canvasHeight = styleHeight * ratio;
+        canvasHeight = styleHeight * ratio,
+        aspectWidth = canvasWidth;
     if ( inVR ) {
-      canvasWidth = vrEffect.left.renderRect.width +
-          vrEffect.right.renderRect.width;
-      canvasHeight = Math.max( vrEffect.left.renderRect.height,
-          vrEffect.right.renderRect.height );
+      canvasWidth = vrParams.left.renderRect.width +
+          vrParams.right.renderRect.width;
+      canvasHeight = Math.max( vrParams.left.renderRect.height,
+          vrParams.right.renderRect.height );
+      aspectWidth = canvasWidth / 2;
     }
     renderer.domElement.style.width = px( styleWidth );
     renderer.domElement.style.height = px( styleHeight );
@@ -175,6 +216,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     renderer.domElement.height = canvasHeight;
     renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
     back.setSize( canvasWidth, canvasHeight );
+    camera.aspect = aspectWidth / canvasHeight;
     camera.updateProjectionMatrix( );
   }
 
@@ -185,7 +227,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
     else if ( terminal.running &&
         terminal.waitingForInput &&
-        evt.keyCode === Primrose.Keys.ENTER ) {
+        evt.keyCode === Primrose.UI.Text.Keys.ENTER ) {
       terminal.sendInput( evt );
     }
     else if ( !terminal.running &&
@@ -198,7 +240,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function isExecuteCommand ( evt ) {
-    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
+    return evt[modA] && evt[modB] && evt.keyCode === Primrose.UI.Text.Keys[execKey];
   }
 
   function setPointer ( x, y ) {
@@ -464,7 +506,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         texture = THREE.ImageUtils.loadTexture( txt );
         texture.anisotropy = renderer.getMaxAnisotropy();
       }
-      else if ( txt instanceof Primrose.Controls.TextBox ) {
+      else if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
         texture = txt.getRenderer()
             .getTexture( renderer.getMaxAnisotropy() );
       }
@@ -495,7 +537,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       obj = geometry;
     }
 
-    if ( txt instanceof Primrose.Controls.TextBox ) {
+    if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
       obj.editor = txt;
     }
 

@@ -1,5 +1,5 @@
 /*
-  Primrose v0.12.3 2015-04-28
+  Primrose v0.12.3 2015-06-08
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -23,16 +23,20 @@
  */
 
 var Primrose = {
-  CodePages: { },
-  CommandPacks: { },
-  Controls: { },
-  Grammars: { },
-  OperatingSystems: { },
-  Renderers: { },
-  Themes: { }
+  UI: {
+    Text: {
+      CodePages: { },
+      CommandPacks: { },
+      Controls: { },
+      Grammars: { },
+      OperatingSystems: { },
+      Renderers: { },
+      Themes: { }
+    }
+  }
 };
 ;/* global Primrose */
-Primrose.CodePage = ( function ( ) {
+Primrose.UI.Text.CodePage = ( function ( ) {
   "use strict";
 
   function CodePage ( name, lang, options ) {
@@ -101,15 +105,15 @@ Primrose.CodePage = ( function ( ) {
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
-      var code = Primrose.Keys["NUMPAD" + i];
+      var code = Primrose.UI.Text.Keys["NUMPAD" + i];
       this.NORMAL[code] = i.toString();
     }
 
-    this.NORMAL[Primrose.Keys.MULTIPLY] = "*";
-    this.NORMAL[Primrose.Keys.ADD] = "+";
-    this.NORMAL[Primrose.Keys.SUBTRACT] = "-";
-    this.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
-    this.NORMAL[Primrose.Keys.DIVIDE] = "/";
+    this.NORMAL[Primrose.UI.Text.Keys.MULTIPLY] = "*";
+    this.NORMAL[Primrose.UI.Text.Keys.ADD] = "+";
+    this.NORMAL[Primrose.UI.Text.Keys.SUBTRACT] = "-";
+    this.NORMAL[Primrose.UI.Text.Keys.DECIMALPOINT] = ".";
+    this.NORMAL[Primrose.UI.Text.Keys.DIVIDE] = "/";
   }
 
   CodePage.DEAD = function ( key ) {
@@ -121,7 +125,7 @@ Primrose.CodePage = ( function ( ) {
   return CodePage;
 } ) ();
 ;/* global Primrose */
-Primrose.CommandPack = ( function ( ) {
+Primrose.UI.Text.CommandPack = ( function ( ) {
   "use strict";
 
   function CommandPack ( name, commands ) {
@@ -132,7 +136,7 @@ Primrose.CommandPack = ( function ( ) {
   return CommandPack;
 } )();
 ;/* global Primrose */
-Primrose.Control = ( function () {
+Primrose.UI.Text.Control = ( function () {
   "use strict";
 
   var CONTROLS = [ ];
@@ -195,7 +199,7 @@ Primrose.Control = ( function () {
   return Control;
 } )();
 ;/* global qp, Primrose */
-Primrose.Cursor = ( function ( ) {
+Primrose.UI.Text.Cursor = ( function ( ) {
   "use strict";
 
   function Cursor ( i, x, y ) {
@@ -429,14 +433,14 @@ Primrose.Cursor = ( function ( ) {
   return Cursor;
 } )();
 ;/* global Primrose */
-Primrose.Grammar = ( function ( ) {
+Primrose.UI.Text.Grammar = ( function ( ) {
   "use strict";
 
   function Grammar ( name, grammar ) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
     this.grammar = grammar.map( function ( rule ) {
-      return new Primrose.Rule( rule[0], rule[1] );
+      return new Primrose.UI.Text.Rule( rule[0], rule[1] );
     } );
 
     function crudeParsing ( tokens ) {
@@ -467,7 +471,7 @@ Primrose.Grammar = ( function ( ) {
     this.tokenize = function ( text ) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
-      var tokens = [ new Primrose.Token( text, "regular", 0 ) ];
+      var tokens = [ new Primrose.UI.Text.Token( text, "regular", 0 ) ];
       for ( var i = 0; i < this.grammar.length; ++i ) {
         var rule = this.grammar[i];
         for ( var j = 0; j < tokens.length; ++j ) {
@@ -483,7 +487,7 @@ Primrose.Grammar = ( function ( ) {
   return Grammar;
 } )();
 ;/* global Primrose */
-Primrose.Keys = ( function ( ) {
+Primrose.UI.Text.Keys = ( function ( ) {
   "use strict";
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////
@@ -612,7 +616,7 @@ Primrose.Keys = ( function ( ) {
   return Keys;
 } )();
 ;/* global Primrose */
-Primrose.OperatingSystem = ( function ( ) {
+Primrose.UI.Text.OperatingSystem = ( function ( ) {
   "use strict";
 
   function setCursorCommand ( obj, mod, key, func, cur ) {
@@ -678,7 +682,7 @@ Primrose.OperatingSystem = ( function ( ) {
   return OperatingSystem;
 } )();
 ;/* global qp, Primrose */
-Primrose.Point = ( function ( ) {
+Primrose.UI.Text.Point = ( function ( ) {
   "use strict";
 
   function Point ( x, y ) {
@@ -708,12 +712,12 @@ Primrose.Point = ( function ( ) {
   return Point;
 } )();
 ;/* global qp, Primrose */
-Primrose.Rectangle = ( function ( ) {
+Primrose.UI.Text.Rectangle = ( function ( ) {
   "use strict";
 
   function Rectangle ( x, y, width, height ) {
-    this.point = new Primrose.Point( x, y );
-    this.size = new Primrose.Size( width, height );
+    this.point = new Primrose.UI.Text.Point( x, y );
+    this.size = new Primrose.UI.Text.Size( width, height );
 
     Object.defineProperties( this, {
       x: {
@@ -807,7 +811,7 @@ Primrose.Rectangle = ( function ( ) {
   return Rectangle;
 } )();
 ;/* global Primrose */
-Primrose.Rule = ( function ( ) {
+Primrose.UI.Text.Rule = ( function ( ) {
   "use strict";
 
   function Rule ( name, test ) {
@@ -860,7 +864,7 @@ Primrose.Rule = ( function ( ) {
   return Rule;
 } )();
 ;/* global Primrose */
-Primrose.Size = (function ( ) {
+Primrose.UI.Text.Size = (function ( ) {
   "use strict";
 
   function Size ( width, height ) {
@@ -890,7 +894,7 @@ Primrose.Size = (function ( ) {
   return Size;
 } )();
 ;/* global Primrose, isOSX */
-Primrose.Terminal = function ( inputEditor, outputEditor ) {
+Primrose.UI.Text.Terminal = function ( inputEditor, outputEditor ) {
   "use strict";
 
   outputEditor = outputEditor || inputEditor;
@@ -983,7 +987,7 @@ Primrose.Terminal = function ( inputEditor, outputEditor ) {
       currentProgram = inputEditor.value;
       looper = originalGrammar.interpret( currentProgram, input, stdout,
           stdout, next, clearScreen, this.loadFile.bind( this ), done );
-      outputEditor.setTokenizer( Primrose.Grammars.PlainText );
+      outputEditor.setTokenizer( Primrose.UI.Text.Grammars.PlainText );
       clearScreen();
       next();
     }
@@ -1010,7 +1014,7 @@ Primrose.Terminal = function ( inputEditor, outputEditor ) {
   };
 };
 ;/* global Primrose */
-Primrose.Token = ( function () {
+Primrose.UI.Text.Token = ( function () {
   "use strict";
   function Token ( value, type, index, line ) {
     this.value = value;
@@ -1036,9 +1040,9 @@ Primrose.Token = ( function () {
   return Token;
 } )();
 ;/* global Primrose */
-Primrose.CodePages.DE_QWERTZ = (function () {
+Primrose.UI.Text.CodePages.DE_QWERTZ = (function () {
   "use strict";
-  var CodePage = Primrose.CodePage;
+  var CodePage = Primrose.UI.Text.CodePage;
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
@@ -1156,9 +1160,9 @@ Primrose.CodePages.DE_QWERTZ = (function () {
   });
 })();
 ;/* global Primrose */
-Primrose.CodePages.EN_UKX = (function () {
+Primrose.UI.Text.CodePages.EN_UKX = (function () {
   "use strict";
-  var CodePage = Primrose.CodePage;
+  var CodePage = Primrose.UI.Text.CodePage;
   return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
@@ -1238,9 +1242,9 @@ Primrose.CodePages.EN_UKX = (function () {
   });
 })();
 ;/* global Primrose */
-Primrose.CodePages.EN_US = (function () {
+Primrose.UI.Text.CodePages.EN_US = (function () {
   "use strict";
-  var CodePage = Primrose.CodePage;
+  var CodePage = Primrose.UI.Text.CodePage;
   return new CodePage("English: USA", "en-US", {
     NORMAL: {
       "48": "0",
@@ -1295,9 +1299,9 @@ Primrose.CodePages.EN_US = (function () {
   });
 })();
 ;/* global Primrose */
-Primrose.CodePages.FR_AZERTY = ( function () {
+Primrose.UI.Text.CodePages.FR_AZERTY = ( function () {
   "use strict";
-  var CodePage = Primrose.CodePage;
+  var CodePage = Primrose.UI.Text.CodePage;
   return new CodePage( "Français: AZERTY", "fr", {
     deadKeys: [ 221, 50, 55 ],
     NORMAL: {
@@ -1388,7 +1392,7 @@ Primrose.CodePages.FR_AZERTY = ( function () {
 ;// If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
 /* global Primrose */
-Primrose.CommandPacks.TextEditor = ( function () {
+Primrose.UI.Text.CommandPacks.TextEditor = ( function () {
   "use strict";
 
   return {
@@ -1436,7 +1440,7 @@ Primrose.CommandPacks.TextEditor = ( function () {
 // // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-Primrose.CommandPacks.TextEditor = ( function () {
+Primrose.UI.Text.CommandPacks.TextEditor = ( function () {
   "use strict";
 
   function TextEditor ( operatingSystem, codePage, editor ) {
@@ -1496,13 +1500,13 @@ Primrose.CommandPacks.TextEditor = ( function () {
       }
     }
 
-    Primrose.CommandPack.call( this, "Text editor commands", allCommands );
+    Primrose.UI.Text.CommandPack.call( this, "Text editor commands", allCommands );
   }
-  inherit( TextEditor, Primrose.CommandPack );
+  inherit( TextEditor, Primrose.UI.Text.CommandPack );
   return TextEditor;
 } )();
 ;/* global Primrose */
-Primrose.Controls.Keyboard = ( function () {
+Primrose.UI.Text.Controls.Keyboard = ( function () {
   "use strict";
 
   function Keyboard ( id, options ) {
@@ -1516,7 +1520,7 @@ Primrose.Controls.Keyboard = ( function () {
       options = { file: options };
     }
 
-    Primrose.Control.call( this );
+    Primrose.UI.Text.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
     // private fields
@@ -1682,8 +1686,8 @@ Primrose.Controls.Keyboard = ( function () {
 
     this.setOperatingSystem = function ( os ) {
       this.changed = true;
-      operatingSystem = os || ( isOSX ? Primrose.OperatingSystems.OSX :
-          Primrose.OperatingSystems.Windows );
+      operatingSystem = os || ( isOSX ? Primrose.UI.Text.OperatingSystems.OSX :
+          Primrose.UI.Text.OperatingSystems.Windows );
       refreshCommandPack();
     };
 
@@ -1720,8 +1724,8 @@ Primrose.Controls.Keyboard = ( function () {
           lang = "en-US";
         }
 
-        for ( key in Primrose.CodePages ) {
-          cp = Primrose.CodePages[key];
+        for ( key in Primrose.UI.Text.CodePages ) {
+          cp = Primrose.UI.Text.CodePages[key];
           if ( cp.language === lang ) {
             codePage = cp;
             break;
@@ -1729,13 +1733,13 @@ Primrose.Controls.Keyboard = ( function () {
         }
 
         if ( !codePage ) {
-          codePage = Primrose.CodePages.EN_US;
+          codePage = Primrose.UI.Text.CodePages.EN_US;
         }
       }
 
       keyNames = [ ];
-      for ( key in Primrose.Keys ) {
-        code = Primrose.Keys[key];
+      for ( key in Primrose.UI.Text.Keys ) {
+        code = Primrose.UI.Text.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -1806,9 +1810,9 @@ Primrose.Controls.Keyboard = ( function () {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !==
-            Primrose.Keys.META_L &&
-            key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT ) {
+        if ( key !== Primrose.UI.Text.Keys.CTRL && key !== Primrose.UI.Text.Keys.ALT && key !==
+            Primrose.UI.Text.Keys.META_L &&
+            key !== Primrose.UI.Text.Keys.META_R && key !== Primrose.UI.Text.Keys.SHIFT ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -1853,7 +1857,7 @@ Primrose.Controls.Keyboard = ( function () {
     };
 
     this.render = function () {
-      Primrose.Control.prototype.render.call( this );
+      Primrose.UI.Text.Control.prototype.render.call( this );
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -1889,21 +1893,21 @@ Primrose.Controls.Keyboard = ( function () {
 
     this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
-        DOMElement.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "Localization", Primrose.CodePage );
+        DOMElement.id, Primrose.UI.Text.CodePages, codePage.name, self, "setCodePage",
+        "Localization", Primrose.UI.Text.CodePage );
     this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + DOMElement.id,
-        Primrose.OperatingSystems, operatingSystem.name, self,
+        Primrose.UI.Text.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "Shortcut style", Primrose.OperatingSystem );
+        "Shortcut style", Primrose.UI.Text.OperatingSystem );
   }
 
-  inherit( Keyboard, Primrose.Control );
+  inherit( Keyboard, Primrose.UI.Text.Control );
 
   return Keyboard;
 } )();
 ;/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari */
-Primrose.Controls.TextBox = ( function ( ) {
+Primrose.UI.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
   function TextBox ( renderToElementOrID, options ) {
@@ -1921,12 +1925,12 @@ Primrose.Controls.TextBox = ( function ( ) {
       options.disableClipboard = true;
     }
 
-    Primrose.Control.call( this );
+    Primrose.UI.Text.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
     // private fields
     //////////////////////////////////////////////////////////////////////////
-    var Renderer = options.renderer || Primrose.Renderers.Canvas,
+    var Renderer = options.renderer || Primrose.UI.Text.Renderers.Canvas,
         codePage,
         operatingSystem,
         browser,
@@ -1937,8 +1941,8 @@ Primrose.Controls.TextBox = ( function ( ) {
         tokens,
         tokenRows,
         theme,
-        pointer = new Primrose.Point(),
-        lastPointer = new Primrose.Point(),
+        pointer = new Primrose.UI.Text.Point(),
+        lastPointer = new Primrose.UI.Text.Point(),
         tabWidth,
         tabString,
         currentTouchID,
@@ -1946,9 +1950,9 @@ Primrose.Controls.TextBox = ( function ( ) {
         keyNames = [ ],
         history = [ ],
         historyFrame = -1,
-        gridBounds = new Primrose.Rectangle(),
-        topLeftGutter = new Primrose.Size(),
-        bottomRightGutter = new Primrose.Size(),
+        gridBounds = new Primrose.UI.Text.Rectangle(),
+        topLeftGutter = new Primrose.UI.Text.Size(),
+        bottomRightGutter = new Primrose.UI.Text.Size(),
         dragging = false,
         scrolling = false,
         showLineNumbers = true,
@@ -1964,9 +1968,9 @@ Primrose.Controls.TextBox = ( function ( ) {
     // public fields
     //////////////////////////////////////////////////////////////////////////
 
-    this.frontCursor = new Primrose.Cursor();
-    this.backCursor = new Primrose.Cursor();
-    this.scroll = new Primrose.Point();
+    this.frontCursor = new Primrose.UI.Text.Cursor();
+    this.backCursor = new Primrose.UI.Text.Cursor();
+    this.scroll = new Primrose.UI.Text.Point();
 
 
     //////////////////////////////////////////////////////////////////////////
@@ -2330,12 +2334,12 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.focus = function () {
       surrogate.focus();
-      Primrose.Control.prototype.focus.call( this );
+      Primrose.UI.Text.Control.prototype.focus.call( this );
     };
 
     this.blur = function () {
       surrogate.blur();
-      Primrose.Control.prototype.blur.call( this );
+      Primrose.UI.Text.Control.prototype.blur.call( this );
     };
 
     this.getRenderer = function () {
@@ -2378,7 +2382,7 @@ Primrose.Controls.TextBox = ( function ( ) {
     };
 
     this.setTheme = function ( t ) {
-      theme = t || Primrose.Themes.Default;
+      theme = t || Primrose.UI.Text.Themes.Default;
       renderer.setTheme( theme );
       renderer.resize();
       this.changed = true;
@@ -2396,8 +2400,8 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.setOperatingSystem = function ( os ) {
       this.changed = true;
-      operatingSystem = os || ( isOSX ? Primrose.OperatingSystems.OSX :
-          Primrose.OperatingSystems.Windows );
+      operatingSystem = os || ( isOSX ? Primrose.UI.Text.OperatingSystems.OSX :
+          Primrose.UI.Text.OperatingSystems.Windows );
       refreshCommandPack();
     };
 
@@ -2407,7 +2411,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.setCommandSystem = function ( cmd ) {
       this.changed = true;
-      CommandSystem = cmd || Primrose.CommandPacks.TextEditor;
+      CommandSystem = cmd || Primrose.UI.Text.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
@@ -2440,8 +2444,8 @@ Primrose.Controls.TextBox = ( function ( ) {
           lang = "en-US";
         }
 
-        for ( key in Primrose.CodePages ) {
-          cp = Primrose.CodePages[key];
+        for ( key in Primrose.UI.Text.CodePages ) {
+          cp = Primrose.UI.Text.CodePages[key];
           if ( cp.language === lang ) {
             codePage = cp;
             break;
@@ -2449,13 +2453,13 @@ Primrose.Controls.TextBox = ( function ( ) {
         }
 
         if ( !codePage ) {
-          codePage = Primrose.CodePages.EN_US;
+          codePage = Primrose.UI.Text.CodePages.EN_US;
         }
       }
 
       keyNames = [ ];
-      for ( key in Primrose.Keys ) {
-        code = Primrose.Keys[key];
+      for ( key in Primrose.UI.Text.Keys ) {
+        code = Primrose.UI.Text.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -2492,7 +2496,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
     this.setTokenizer = function ( tk ) {
       this.changed = true;
-      tokenizer = tk || Primrose.Grammars.JavaScript;
+      tokenizer = tk || Primrose.UI.Text.Grammars.JavaScript;
       if ( history && history.length > 0 ) {
         refreshTokens();
         this.update();
@@ -2723,9 +2727,9 @@ Primrose.Controls.TextBox = ( function ( ) {
       str = str.replace( /\r\n/g, "\n" );
 
       if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
-        var minCursor = Primrose.Cursor.min( this.frontCursor,
+        var minCursor = Primrose.UI.Text.Cursor.min( this.frontCursor,
             this.backCursor ),
-            maxCursor = Primrose.Cursor.max( this.frontCursor,
+            maxCursor = Primrose.UI.Text.Cursor.max( this.frontCursor,
                 this.backCursor ),
             // TODO: don't recalc the string first.
             text = this.value,
@@ -2743,9 +2747,9 @@ Primrose.Controls.TextBox = ( function ( ) {
     this.copySelectedText = function ( evt ) {
       evt.returnValue = false;
       if ( this.frontCursor.i !== this.backCursor.i ) {
-        var minCursor = Primrose.Cursor.min( this.frontCursor,
+        var minCursor = Primrose.UI.Text.Cursor.min( this.frontCursor,
             this.backCursor ),
-            maxCursor = Primrose.Cursor.max( this.frontCursor,
+            maxCursor = Primrose.UI.Text.Cursor.max( this.frontCursor,
                 this.backCursor ),
             text = this.value,
             str = text.substring( minCursor.i, maxCursor.i );
@@ -2777,9 +2781,9 @@ Primrose.Controls.TextBox = ( function ( ) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !==
-            Primrose.Keys.META_L &&
-            key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT ) {
+        if ( key !== Primrose.UI.Text.Keys.CTRL && key !== Primrose.UI.Text.Keys.ALT && key !==
+            Primrose.UI.Text.Keys.META_L &&
+            key !== Primrose.UI.Text.Keys.META_R && key !== Primrose.UI.Text.Keys.SHIFT ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -2829,7 +2833,7 @@ Primrose.Controls.TextBox = ( function ( ) {
         setSurrogateSize();
       }
 
-      Primrose.Control.prototype.update.call( this );
+      Primrose.UI.Text.Control.prototype.update.call( this );
     };
 
     this.render = function () {
@@ -2846,7 +2850,7 @@ Primrose.Controls.TextBox = ( function ( ) {
 
         setSurrogateCursor();
 
-        Primrose.Control.prototype.render.call( this );
+        Primrose.UI.Text.Control.prototype.render.call( this );
       }
     };
 
@@ -2927,35 +2931,35 @@ Primrose.Controls.TextBox = ( function ( ) {
         renderer.id, !options.hideScrollBars, "Scroll bars",
         "setShowScrollBars" );
     this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
-        renderer.id, Primrose.Themes, theme.name, self, "setTheme", "theme" );
+        renderer.id, Primrose.UI.Text.Themes, theme.name, self, "setTheme", "theme" );
     this.commandSystemSelect = makeSelectorFromObj(
-        "primrose-command-system-selector-" + renderer.id, Primrose.Commands,
+        "primrose-command-system-selector-" + renderer.id, Primrose.UI.Text.Commands,
         CommandSystem.name, self, "setCommandSystem",
         "Command system" );
     this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
-        renderer.id, Primrose.Grammars, tokenizer.name, self, "setTokenizer",
-        "Language syntax", Primrose.Grammar );
+        renderer.id, Primrose.UI.Text.Grammars, tokenizer.name, self, "setTokenizer",
+        "Language syntax", Primrose.UI.Text.Grammar );
     this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
-        renderer.id, Primrose.CodePages, codePage.name, self, "setCodePage",
-        "Localization", Primrose.CodePage );
+        renderer.id, Primrose.UI.Text.CodePages, codePage.name, self, "setCodePage",
+        "Localization", Primrose.UI.Text.CodePage );
     this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
-        Primrose.OperatingSystems, operatingSystem.name, self,
+        Primrose.UI.Text.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
-        "Shortcut style", Primrose.OperatingSystem );
+        "Shortcut style", Primrose.UI.Text.OperatingSystem );
     setSurrogateSize();
   }
 
-  inherit( TextBox, Primrose.Control );
+  inherit( TextBox, Primrose.UI.Text.Control );
 
   return TextBox;
 } )();
 ;/* global Primrose */
-Primrose.Grammars.Basic = ( function ( ) {
+Primrose.UI.Text.Grammars.Basic = ( function ( ) {
 
-  var grammar = new Primrose.Grammar( "BASIC", [
+  var grammar = new Primrose.UI.Text.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
     [ "lineNumbers", /^\d+\s+/ ],
     [ "comments", /^REM.*$/ ],
@@ -2980,7 +2984,7 @@ Primrose.Grammars.Basic = ( function ( ) {
   grammar.interpret = function ( sourceCode, input, output, errorOut, next,
       clearScreen, loadFile, done ) {
     var tokens = this.tokenize( sourceCode ),
-        EQUAL_SIGN = new Primrose.Token( "=", "operators" ),
+        EQUAL_SIGN = new Primrose.UI.Text.Token( "=", "operators" ),
         counter = 0,
         isDone = false,
         program = { },
@@ -3020,11 +3024,11 @@ Primrose.Grammars.Basic = ( function ( ) {
         };
 
     function toNum ( ln ) {
-      return new Primrose.Token( ln.toString(), "numbers" );
+      return new Primrose.UI.Text.Token( ln.toString(), "numbers" );
     }
 
     function toStr ( str ) {
-      return new Primrose.Token( "\"" + str.replace( "\n", "\\n" )
+      return new Primrose.UI.Text.Token( "\"" + str.replace( "\n", "\\n" )
           .replace( "\"", "\\\"" ) + "\"", "strings" );
     }
 
@@ -3597,10 +3601,10 @@ Primrose.Grammars.Basic = ( function ( ) {
   return grammar;
 } )( );
 ;/* global Primrose */
-Primrose.Grammars.JavaScript = ( function () {
+Primrose.UI.Text.Grammars.JavaScript = ( function () {
   "use strict";
 
-  return new Primrose.Grammar( "JavaScript", [
+  return new Primrose.UI.Text.Grammar( "JavaScript", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
     [ "comments", /\/\/.*$/ ],
     [ "startBlockComments", /\/\*/ ],
@@ -3617,18 +3621,18 @@ Primrose.Grammars.JavaScript = ( function () {
   ] );
 } )();
 ;/* global Primrose */
-Primrose.Grammars.PlainText = (function () {
+Primrose.UI.Text.Grammars.PlainText = (function () {
   "use strict";
 
-  return new Primrose.Grammar("PlainText", [
+  return new Primrose.UI.Text.Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
 })();
 ;/* global Primrose */
-Primrose.Grammars.TestResults = (function () {
+Primrose.UI.Text.Grammars.TestResults = (function () {
   "use strict";
 
-  return new Primrose.Grammar("TestResults", [
+  return new Primrose.UI.Text.Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/, true],
     ["numbers", /(\[)(o+)/, true],
     ["numbers", /(\d+ succeeded), 0 failed/, true],
@@ -3642,10 +3646,10 @@ Primrose.Grammars.TestResults = (function () {
   ]);
 })();
 ;/* global Primrose */
-Primrose.OperatingSystems.OSX = ( function () {
+Primrose.UI.Text.OperatingSystems.OSX = ( function () {
   "use strict";
 
-  return new Primrose.OperatingSystem(
+  return new Primrose.UI.Text.OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",
       "META", "LEFTARROW", "RIGHTARROW",
       "META", "UPARROW", "DOWNARROW" );
@@ -3653,16 +3657,16 @@ Primrose.OperatingSystems.OSX = ( function () {
 ;// cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.
 /* global Primrose */
-Primrose.OperatingSystems.Windows = (function () {
+Primrose.UI.Text.OperatingSystems.Windows = (function () {
   "use strict";
 
-  return new Primrose.OperatingSystem(
+  return new Primrose.UI.Text.OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",
       "CTRL", "HOME", "END");
 })();
 ;/*global THREE, qp, Primrose */
-Primrose.Renderers.Canvas = ( function ( ) {
+Primrose.UI.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
   return function ( canvasElementOrID, options ) {
@@ -3687,7 +3691,7 @@ Primrose.Renderers.Canvas = ( function ( ) {
 
     this.VSCROLL_WIDTH = 2;
 
-    this.character = new Primrose.Size();
+    this.character = new Primrose.UI.Text.Size();
     this.id = canvas.id;
     this.autoBindEvents = true;
 
@@ -3781,10 +3785,10 @@ Primrose.Renderers.Canvas = ( function ( ) {
 
     function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
         gridBounds, scroll, focused ) {
-      var minCursor = Primrose.Cursor.min( frontCursor, backCursor ),
-          maxCursor = Primrose.Cursor.max( frontCursor, backCursor ),
-          tokenFront = new Primrose.Cursor(),
-          tokenBack = new Primrose.Cursor(),
+      var minCursor = Primrose.UI.Text.Cursor.min( frontCursor, backCursor ),
+          maxCursor = Primrose.UI.Text.Cursor.max( frontCursor, backCursor ),
+          tokenFront = new Primrose.UI.Text.Cursor(),
+          tokenBack = new Primrose.UI.Text.Cursor(),
           clearFunc = theme.regular.backColor ? "fillRect" : "clearRect";
 
       if ( theme.regular.backColor ) {
@@ -3800,7 +3804,7 @@ Primrose.Renderers.Canvas = ( function ( ) {
       // draw the current row highlighter
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
-            Primrose.Themes.Default.regular.currentRowBackColor,
+            Primrose.UI.Text.Themes.Default.regular.currentRowBackColor,
             0, minCursor.y + 0.2,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
@@ -3822,12 +3826,12 @@ Primrose.Renderers.Canvas = ( function ( ) {
             var inSelection = minCursor.i <= tokenBack.i && tokenFront.i <
                 maxCursor.i;
             if ( inSelection ) {
-              var selectionFront = Primrose.Cursor.max( minCursor,
+              var selectionFront = Primrose.UI.Text.Cursor.max( minCursor,
                   tokenFront );
-              var selectionBack = Primrose.Cursor.min( maxCursor, tokenBack );
+              var selectionBack = Primrose.UI.Text.Cursor.min( maxCursor, tokenBack );
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
-                  Primrose.Themes.Default.regular.selectedBackColor,
+                  Primrose.UI.Text.Themes.Default.regular.selectedBackColor,
                   selectionFront.x, selectionFront.y + 0.2,
                   cw, 1 );
             }
@@ -3852,8 +3856,8 @@ Primrose.Renderers.Canvas = ( function ( ) {
     }
 
     function renderCanvasForeground ( tokenRows, gridBounds, scroll ) {
-      var tokenFront = new Primrose.Cursor(),
-          tokenBack = new Primrose.Cursor(),
+      var tokenFront = new Primrose.UI.Text.Cursor(),
+          tokenBack = new Primrose.UI.Text.Cursor(),
           maxLineWidth = 0;
 
       fgfx.clearRect( 0, 0, canvas.width, canvas.height );
@@ -3918,7 +3922,7 @@ Primrose.Renderers.Canvas = ( function ( ) {
           }
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
-              Primrose.Themes.Default.regular.selectedBackColor,
+              Primrose.UI.Text.Themes.Default.regular.selectedBackColor,
               0, y + 0.2,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
@@ -3946,7 +3950,7 @@ Primrose.Renderers.Canvas = ( function ( ) {
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
-            Primrose.Themes.Default.regular.selectedBackColor;
+            Primrose.UI.Text.Themes.Default.regular.selectedBackColor;
         // horizontal
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth );
@@ -4072,12 +4076,12 @@ Primrose.Renderers.Canvas = ( function ( ) {
   };
 } )();
 ;/*global THREE, qp, Primrose */
-Primrose.Renderers.DOM = ( function ( ) {
+Primrose.UI.Text.Renderers.DOM = ( function ( ) {
   "use strict";
 
-  var Size = Primrose.Size,
-      Cursor = Primrose.Cursor,
-      defaultTheme = Primrose.Themes.Default;
+  var Size = Primrose.UI.Text.Size,
+      Cursor = Primrose.UI.Text.Cursor,
+      defaultTheme = Primrose.UI.Text.Themes.Default;
 
   function FakeContext ( target ) {
     var self = this;
@@ -4504,7 +4508,7 @@ Primrose.Renderers.DOM = ( function ( ) {
   };
 } );
 ;/* global Primrose */
-Primrose.Themes.Dark = ( function ( ) {
+Primrose.UI.Text.Themes.Dark = ( function ( ) {
   "use strict";
   return {
     name: "Dark",
@@ -4548,7 +4552,7 @@ Primrose.Themes.Dark = ( function ( ) {
   };
 } )();
 ;/* global Primrose */
-Primrose.Themes.Default = ( function ( ) {
+Primrose.UI.Text.Themes.Default = ( function ( ) {
   "use strict";
   return {
     name: "Light",

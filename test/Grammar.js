@@ -19,10 +19,10 @@
 
 "use strict";
 
-Primrose.Grammar.tests = {
+Primrose.UI.Text.Grammar.tests = {
   aSimpleString: function () {
     var src = "\"a\"";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )
@@ -32,7 +32,7 @@ Primrose.Grammar.tests = {
   },
   twoStrings: function () {
     var src = "\"a\" b \"c\"";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )
@@ -44,7 +44,7 @@ Primrose.Grammar.tests = {
   },
   singleLineBlockComment: function () {
     var src = "/* asdf one 2 three 4 */";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )
@@ -55,7 +55,7 @@ Primrose.Grammar.tests = {
   },
   multiLineBlockComment: function () {
     var src = "/*\n asdf one\n2 three 4\n*/";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )
@@ -67,7 +67,7 @@ Primrose.Grammar.tests = {
   multipleMultiLineBlockComment: function () {
     var src =
         "/*\n asdf one\n2 three 4\n*/\nfunction(){\n/*\n asdf one\n2 three 4\n*/\n}";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )
@@ -89,7 +89,7 @@ Primrose.Grammar.tests = {
         "        */\n" +
         "    }\n" +
         "}";
-    var tokens = Primrose.Grammars.JavaScript.tokenize( src );
+    var tokens = Primrose.UI.Text.Grammars.JavaScript.tokenize( src );
     var res = tokens.map( function ( t ) {
       return t.value;
     } )

@@ -1,5 +1,11 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
-var log = null;
+var log = null,
+    GRASS = THREE.ImageUtils.loadTexture("../images/grass.png"),
+    ROCK = THREE.ImageUtils.loadTexture("../images/rock.png"),
+    SAND = THREE.ImageUtils.loadTexture("../images/sand.png"),
+    WATER = THREE.ImageUtils.loadTexture("../images/water.png"),
+    DECK = THREE.ImageUtils.loadTexture("../images/deck.png");
+
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
@@ -7,7 +13,7 @@ function clearKeyOption ( evt ) {
 
 function setKeyOption ( evt ) {
   this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.Keys[evt.keyCode];
+  this.value = this.value || Primrose.UI.Text.Keys[evt.keyCode];
   this.value = this.value.toLowerCase( )
       .replace( "arrow", " arrow" );
   this.blur( );
@@ -62,7 +68,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     if ( typeof txt === "string" ) {
       texture = THREE.ImageUtils.loadTexture( txt );
     }
-    else if ( txt instanceof Primrose.Controls.TextBox ) {
+    else if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
       texture = txt.getRenderer( )
           .getTexture( );
     }
@@ -105,11 +111,34 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     obj = geometry;
   }
 
-  if ( txt instanceof Primrose.Controls.TextBox ) {
+  if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
     obj.editor = txt;
   }
 
   return obj;
+}
+
+function brick ( txt, w, h, l ) {
+  return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
+}
+
+function fill ( txt, w, h, l ) {
+  if ( h === undefined ) {
+    h = 1;
+    if ( l === undefined ) {
+      l = 1;
+      if ( w === undefined ) {
+        w = 1;
+      }
+    }
+  }
+  var point = hub();
+  for ( var y = 0; y < h; ++y ) {
+      put( brick( txt, w, 1, l ) )
+          .on( point )
+          .at( w / 2, y, l / 2 );
+  }
+  return point;
 }
 
 function light ( color, intensity, distance, decay ) {
@@ -174,34 +203,67 @@ function from ( start ) {
 }
 
 function testDemo ( scene ) {
-  var rows = 20,
-      cols = 5,
-      size = 0.1,
-      scale = 3,
-      spacing = size * scale,
-      h = put( hub( ) )
-      .on( scene )
-      .at( 0, 0, -1 ),
-      cubes = from( 0 )
-      .to( rows * cols )
-      .exec( function ( i ) {
-        var r = ( i / cols ) | 0,
-            c = i % cols;
-        return put( textured( sphere( size ), "../images/bg2.jpg" ) )
-            .on( h )
-            .at(
-                ( r - rows / 2 ) * spacing,
-                ( c - cols / 2 ) * spacing,
-                0 );
-      } );
-  var t = 0;
-  return function ( dt ) {
-    t += dt / 500;
-    h.rotation.set( 0, 0, t / 10 );
-    cubes.forEach( function ( q ) {
-      q.rotation.set( t * 0.2, t, t * 0.5 );
-    } );
-  };
+var start = put( hub() )
+    .on( scene )
+    .at( -12, -3, -12 );
+
+put( fill( WATER, 25, 1, 12 ) )
+    .on( start )
+    .at( 0, 0, 12 );
+
+for ( var z = 0; z < 12; ++z ) {
+  var x = z;
+  var w = 25 - x;
+  put( fill( GRASS, w, 1, 1 ) )
+      .on( start )
+      .at( 0, 0, z );
+
+  put( fill( SAND, x, 1, 1 ) )
+      .on( start )
+      .at( w, 0, z );
+
+  if ( z < 10 ) {
+    for ( var x = 0; x < 10; ++x ) {
+      h = 10 - Math.sqrt( z * z + x * x );
+      put( fill( ROCK, 1, h, 1 ) )
+          .on( start )
+          .at( x, 1, z );
+    }
+  }
+}
+
+var sun = put( hub() )
+    .on( start )
+    .at( 10, 10, -3 );
+function sunBit () {
+  return textured( box( 1 ), 0xffff00, true, 0.125 );
+}
+put( sunBit() )
+    .on( sun )
+    .at( 1, 0, 0 );
+put( sunBit() )
+    .on( sun )
+    .at( -1, 0, 0 );
+put( sunBit() )
+    .on( sun )
+    .at( 0, 1, 0 );
+put( sunBit() )
+    .on( sun )
+    .at( 0, -1, 0 );
+put( sunBit() )
+    .on( sun )
+    .at( 0, 0, 1 );
+put( sunBit() )
+    .on( sun )
+    .at( 0, 0, -1 );
+
+var t = 0;
+function update ( dt ) {
+  t += dt * 0.0005;
+  sun.rotation.set( t, t / 2, t / 5 );
+}
+log( "ok" );
+return update;
 }
 
 function PrimroseDemo ( vrDisplay, vrSensor, err ) {
@@ -216,6 +278,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       lastTouchY,
       pointerX,
       pointerY,
+      lastPointerX,
+      lastPointerY,
       currentEditor,
       lastEditor,
       lastScript,
@@ -262,8 +326,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       gl = renderer.getContext( ),
       skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
       sky = textured( skyGeom, "../images/bg2.jpg", true ),
-      floor = textured( box( 25, 1, 25 ), "../images/deck.png", true, 1, 25,
-          25 ),
       light = new THREE.PointLight( 0xffffff ),
       UP = new THREE.Vector3( 0, 1, 0 ),
       RIGHT = new THREE.Vector3( 1, 0, 0 ),
@@ -325,11 +387,11 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function makeEditor ( id, w, h, x, y, z, rx, ry, rz, options ) {
-    options.size = new Primrose.Size( 1024 * w, 1024 * h );
+    options.size = new Primrose.UI.Text.Size( 1024 * w, 1024 * h );
     options.fontSize = ( options.fontSize || 30 ) / window.devicePixelRatio;
-    options.theme = Primrose.Themes.Dark;
-    options.tokenizer = options.tokenizer || Primrose.Grammars.PlainText;
-    var t = new Primrose.Controls.TextBox( id, options );
+    options.theme = Primrose.UI.Text.Themes.Dark;
+    options.tokenizer = options.tokenizer || Primrose.UI.Text.Grammars.PlainText;
+    var t = new Primrose.UI.Text.Controls.TextBox( id, options );
     var o = textured( quad( w, h ), t, true, 0.75 );
     var p = textured( quad( w, h ), t.getRenderer( )
         .getPickingTexture( ), true );
@@ -343,13 +405,13 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   var output = makeEditor( "outputBox",
-      1, 0.25, 0, -0.59, 3.09, -Math.PI / 4, 0, 0,
+      1, 0.25, 0, -0.59, 6.09, -Math.PI / 4, 0, 0,
       {
         readOnly: true,
         hideLineNumbers: true
       } ),
       documentation = makeEditor( "docBox",
-          1, 1, 0.85, 0, 3.35, 0, -Math.PI / 4, 0,
+          1, 1, 0.85, 0, 6.35, 0, -Math.PI / 4, 0,
           {
             readOnly: true,
             hideLineNumbers: true,
@@ -366,8 +428,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   light( color [, intensity[, distance[, decay]]] );\n\
     creates a THREE.PointLight with the same parameters.\n\
 \n\
-  v3( x, y, z );\n\
-    creates a THREE.Vector3 with the same parameters.\n\
+  brick( txtName );\n\
+    creates a textured cube with the named texture, one of:\n\
+      [SAND, WATER, ROCK, GRASS, DECK].\n\
 \n\
   quad( width[, height] );\n\
     creates a THREE.PlaneBufferGeometry with the same parameters.\n\
@@ -395,16 +458,16 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     txt: a material definition of some kind. It could be a:\n\
       number - a solid hex color\n\
       string - a path to a texture image\n\
-      Primrose.Controls.TextBox - a text editor\n\
+      Primrose.UI.Text.Controls.TextBox - a text editor\n\
     unshaded: set to true to use constant lighting (default false)\n\
     opacity: 1 - opaque, 0 - transparent (default 1).\n\
     txtRepeatS: texture repeat in S direction (default 1).\n\
     txtRepeat: texture repeat in T direction (default 1)"
           } ),
       editor = makeEditor( "textEditor",
-          1, 1, 0, 0, 3, 0, 0, 0,
+          1, 1, 0, 0, 6, 0, 0, 0,
           {
-            tokenizer: Primrose.Grammars.JavaScript,
+            tokenizer: Primrose.UI.Text.Grammars.JavaScript,
             file: src
           } );
 
@@ -422,13 +485,11 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   back.generateMipMaps = false;
 
-  floor.position.set( 0, -3, 0 );
   light.position.set( 5, 5, 5 );
-  position.set( 0, 0, 4 );
+  position.set( 0, 0, 8 );
 
   scene.add( sky );
   scene.add( light );
-  scene.add( floor );
   scene.add( pointer );
   scene.add( subScene );
 
@@ -446,9 +507,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
   } );
 
-  ctrls.output.addEventListener( "mousedown", mouseDown );
-  ctrls.output.addEventListener( "mousemove", mouseMove );
-  ctrls.output.addEventListener( "mouseup", mouseUp );
+  window.addEventListener( "mousedown", mouseDown );
+  window.addEventListener( "mousemove", mouseMove );
+  window.addEventListener( "mouseup", mouseUp );
   ctrls.output.addEventListener( "touchstart", touchStart );
   ctrls.output.addEventListener( "touchmove", touchMove );
   ctrls.output.addEventListener( "touchend", touchEnd );
@@ -463,26 +524,16 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   setupKeyOption( ctrls.forwardKey, "W", 87 );
   setupKeyOption( ctrls.backKey, "S", 83 );
 
-  if ( vrDisplay ) {
-    ctrls.goRegular.style.display = "none";
-    ctrls.nightly.display = "none";
-    ctrls.goVR.addEventListener( "click", function ( ) {
-      requestFullScreen( ctrls.output, vrDisplay );
-      inVR = true;
-      camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
-          vrParams.left.recommendedFieldOfView.rightDegrees );
-      camera.aspect = ( vrParams.left.recommendedFieldOfView.leftDegrees +
-          vrParams.left.recommendedFieldOfView.rightDegrees ) /
-          ( vrParams.left.recommendedFieldOfView.upDegrees +
-              vrParams.left.recommendedFieldOfView.downDegrees );
-      camera.updateProjectionMatrix();
-    } );
-  }
-  else {
-    ctrls.goVR.style.display = "none";
-    ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
-        ctrls.output ) );
-  }
+  ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
+      ctrls.output ) );
+  ctrls.goVR.style.display = !!vrDisplay ? "inline-block" : "none";
+  ctrls.goVR.addEventListener( "click", function ( ) {
+    requestFullScreen( ctrls.output, vrDisplay );
+    inVR = true;
+    camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+        vrParams.left.recommendedFieldOfView.rightDegrees );
+    refreshSize();
+  } );
 
   refreshSize( );
 
@@ -493,12 +544,14 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         styleHeight = ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
         canvasWidth = styleWidth * ratio,
-        canvasHeight = styleHeight * ratio;
+        canvasHeight = styleHeight * ratio,
+        aspectWidth = canvasWidth;
     if ( inVR ) {
       canvasWidth = vrParams.left.renderRect.width +
           vrParams.right.renderRect.width;
       canvasHeight = Math.max( vrParams.left.renderRect.height,
           vrParams.right.renderRect.height );
+      aspectWidth = canvasWidth / 2;
     }
     renderer.domElement.style.width = px( styleWidth );
     renderer.domElement.style.height = px( styleHeight );
@@ -506,22 +559,23 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     renderer.domElement.height = canvasHeight;
     renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
     back.setSize( canvasWidth, canvasHeight );
+    camera.aspect = aspectWidth / canvasHeight;
     camera.updateProjectionMatrix( );
   }
 
   function keyDown ( evt ) {
     var mod = evt[modA] && evt[modB];
-    if ( mod && evt.keyCode === Primrose.Keys.E ) {
+    if ( mod && evt.keyCode === Primrose.UI.Text.Keys.E ) {
       documentation.visible = output.visible = editor.visible = !editor.visible;
       if ( !editor.visible && lastEditor && lastEditor.focused ) {
         lastEditor.blur( );
         lastEditor = null;
       }
     }
-    else if ( mod && evt.keyCode === Primrose.Keys.UPARROW ) {
+    else if ( mod && evt.keyCode === Primrose.UI.Text.Keys.UPARROW ) {
       lastEditor.increaseFontSize( );
     }
-    else if ( mod && evt.keyCode === Primrose.Keys.DOWNARROW ) {
+    else if ( mod && evt.keyCode === Primrose.UI.Text.Keys.DOWNARROW ) {
       lastEditor.decreaseFontSize( );
     }
     else if ( !lastEditor || !lastEditor.focused ) {
@@ -538,37 +592,63 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function setPointer ( x, y ) {
-    pointerX = x;
-    pointerY = ctrls.output.height - y;
-    mouse.set(
-        2 * ( x / ctrls.output.width ) - 1,
-        -2 * ( y / ctrls.output.height ) + 1 );
+    if ( lastPointerX !== undefined ) {
+      var dx = x - lastPointerX,
+          dy = y - lastPointerY,
+          nextX = pointerX + dx,
+          nextY = pointerY + dy;
+      if ( nextX < 0 || nextX > ctrls.output.width ) {
+        dx = 0;
+      }
+      if ( nextY < 0 || nextY > ctrls.output.height ) {
+        dy = 0;
+      }
+      pointerX += dx;
+      pointerY += dy;
 
-    raycaster.setFromCamera( mouse, camera );
-    if ( currentEditor ) {
-      lastEditor = currentEditor;
-    }
-    currentEditor = null;
-    var objects = raycaster.intersectObject( scene, true );
-    var firstObj = objects.length > 0 && objects[0].object;
-    if ( firstObj === sky || firstObj === floor ) {
-      pointer.position.copy( raycaster.ray.direction );
-      pointer.position.multiplyScalar( 3 );
-      pointer.position.add( raycaster.ray.origin );
-    }
-    else {
+      mouse.set(
+          2 * ( pointerX / ctrls.output.width ) - 1,
+          -2 * ( pointerY / ctrls.output.height ) + 1 );
+
+      raycaster.setFromCamera( mouse, camera );
+      if ( currentEditor ) {
+        lastEditor = currentEditor;
+      }
+      currentEditor = null;
+      var objects = raycaster.intersectObject( scene, true );
+      var found = false;
       for ( var i = 0; i < objects.length; ++i ) {
         var obj = objects[i];
-        if ( obj.object !== pointer ) {
+        if ( obj.object.editor ) {
           pointer.position.set( 0, 0, 0 );
           pointer.lookAt( obj.face.normal );
           pointer.position.copy( obj.point );
-          if ( obj.object.editor ) {
-            currentEditor = obj.object.editor;
-          }
+          currentEditor = obj.object.editor;
+          found = true;
           break;
         }
       }
+      if ( !found ) {
+        pointer.position.copy( raycaster.ray.direction );
+        pointer.position.multiplyScalar( 3 );
+        pointer.position.add( raycaster.ray.origin );
+      }
+    }
+    else {
+      pointerX = x;
+      pointerY = y;
+    }
+    lastPointerX = x;
+    lastPointerY = y;
+    var good = false;
+    if ( currentEditor ) {
+      currentEditor.focus( );
+      good = true;
+    }
+
+    if ( !good && lastEditor && lastEditor.focused ) {
+      lastEditor.blur( );
+      lastEditor = null;
     }
   }
 
@@ -584,35 +664,15 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
   }
 
-  function editorFocus ( evt ) {
-    var good = false;
-    if ( evt.target === ctrls.output ) {
-      if ( currentEditor ) {
-        currentEditor.focus( );
-        good = true;
-      }
-    }
-
-    if ( !good && lastEditor && lastEditor.focused ) {
-      lastEditor.blur( );
-      lastEditor = null;
-    }
-  }
-
   function mouseDown ( evt ) {
-    if ( evt.target === ctrls.output ) {
-      dragging = true;
-      if ( !isPointerLocked( ) ) {
-        lastMouseX = evt.clientX;
-        lastMouseY = evt.clientY;
-      }
-      editorFocus( evt );
-      setPointer( lastMouseX, lastMouseY );
-      pick( "start" );
+    dragging = true;
+    if ( !isPointerLocked( ) ) {
+      lastMouseX = evt.clientX;
+      lastMouseY = evt.clientY;
     }
-    else {
-      editorFocus( evt );
-    }
+
+    setPointer( lastMouseX, lastMouseY );
+    pick( "start" );
   }
 
   function mouseMove ( evt ) {
@@ -650,6 +710,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       lastMouseX = x;
       lastMouseY = y;
     }
+
     if ( lastMouseX !== undefined ) {
       setPointer( lastMouseX, lastMouseY );
     }
@@ -671,12 +732,13 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
     lastTouchX /= evt.touches.length;
     lastTouchY /= evt.touches.length;
-    setPointer( lastTouchX, lastTouchY );
-    pick( "start" );
-    if ( evt.touches.length <= 2 && evt.touches.length > touchCount ) {
+    if ( evt.touches.length <= 3 && evt.touches.length > touchCount ) {
       touchCount = evt.touches.length;
     }
-    editorFocus( evt );
+    if ( touchCount === 1 ) {
+      setPointer( lastTouchX, lastTouchY );
+      pick( "start" );
+    }
   }
 
   function touchMove ( evt ) {
@@ -689,22 +751,20 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     x /= evt.touches.length;
     y /= evt.touches.length;
 
-    if ( !lastEditor || !lastEditor.focused ) {
-      if ( touchCount === 1 ) {
-        touchStrafe = ( x - lastTouchX );
-        touchDrive = ( y - lastTouchY );
-      }
-      else {
-        heading += ( x - lastTouchX ) * 0.005;
-        pitch += ( y - lastTouchY ) * 0.005;
-      }
-    }
-    else {
+    if ( touchCount === 1 ) {
       dragging = true;
+      setPointer( x, y );
+    }
+    else if ( touchCount === 2 ) {
+      touchStrafe = ( x - lastTouchX ) * 0.05;
+      touchDrive = ( y - lastTouchY ) * 0.05;
+    }
+    else if ( touchCount === 3 ) {
+      heading += ( x - lastTouchX ) * 0.005;
+      pitch += ( y - lastTouchY ) * 0.005;
     }
     lastTouchX = x;
     lastTouchY = y;
-    setPointer( lastTouchX, lastTouchY );
     evt.preventDefault( );
   }
 
@@ -715,8 +775,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       touchCount = 0;
       touchDrive = 0;
       touchStrafe = 0;
-      if ( currentEditor && currentEditor.isFocused( ) ) {
-        currentEditor.endPointer( );
+      if ( lastEditor && lastEditor.focused ) {
+        lastEditor.endPointer( );
       }
     }
   }
@@ -733,7 +793,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   function pick ( op ) {
     if ( lastEditor && lastEditor.focused ) {
       renderScene( pickingScene, back, true );
-      lastEditor[op + "Picking"]( gl, pointerX, pointerY );
+      lastEditor[op + "Picking"]( gl, pointerX, ctrls.output.height -
+          pointerY );
     }
   }
 

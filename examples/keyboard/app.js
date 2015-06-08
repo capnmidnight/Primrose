@@ -21,7 +21,7 @@ function init () {
   "use strict";
 //  addFullScreenShim(window);
 
-  var editor = new Primrose.Controls.Keyboard( "keyboard", {
+  var editor = new Primrose.UI.Text.Controls.Keyboard( "keyboard", {
   } );
 
   var container = document.getElementById( "editorContainer" );
