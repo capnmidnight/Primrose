@@ -7,7 +7,7 @@ function clearKeyOption ( evt ) {
 
 function setKeyOption ( evt ) {
   this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.UI.Text.Keys[evt.keyCode];
+  this.value = this.value || Primrose.Text.Keys[evt.keyCode];
   this.value = this.value.toLowerCase()
       .replace( "arrow", " arrow" );
   this.blur();
@@ -77,15 +77,15 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       sky = textured( skyGeom, "../images/bg2.jpg" ),
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
       loader = new THREE.ObjectLoader(),
-      editor = new Primrose.UI.Text.Controls.TextBox( "textEditor", {
-        size: new Primrose.UI.Text.Size( 1024, 1024 ),
+      editor = new Primrose.Text.Controls.TextBox( "textEditor", {
+        size: new Primrose.Text.Size( 1024, 1024 ),
         fontSize: ( vrDisplay ? 40 : 20 ) / window.devicePixelRatio,
-        tokenizer: Primrose.UI.Text.Grammars.Basic,
-        theme: Primrose.UI.Text.Themes.Dark,
+        tokenizer: Primrose.Text.Grammars.Basic,
+        theme: Primrose.Text.Themes.Dark,
         hideLineNumbers: true,
         hideScrollBars: true
       } ),
-      terminal = new Primrose.UI.Text.Terminal( editor ),
+      terminal = new Primrose.Text.Terminal( editor ),
       UP = new THREE.Vector3(0, 1, 0),
       RIGHT = new THREE.Vector3(1, 0, 0),
       qPitch = new THREE.Quaternion(),
@@ -227,7 +227,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
     else if ( terminal.running &&
         terminal.waitingForInput &&
-        evt.keyCode === Primrose.UI.Text.Keys.ENTER ) {
+        evt.keyCode === Primrose.Text.Keys.ENTER ) {
       terminal.sendInput( evt );
     }
     else if ( !terminal.running &&
@@ -240,7 +240,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function isExecuteCommand ( evt ) {
-    return evt[modA] && evt[modB] && evt.keyCode === Primrose.UI.Text.Keys[execKey];
+    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Text.Keys[execKey];
   }
 
   function setPointer ( x, y ) {
@@ -506,7 +506,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         texture = THREE.ImageUtils.loadTexture( txt );
         texture.anisotropy = renderer.getMaxAnisotropy();
       }
-      else if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
+      else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
         texture = txt.getRenderer()
             .getTexture( renderer.getMaxAnisotropy() );
       }
@@ -537,7 +537,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       obj = geometry;
     }
 
-    if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
+    if ( txt instanceof Primrose.Text.Controls.TextBox ) {
       obj.editor = txt;
     }
 

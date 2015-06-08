@@ -16,15 +16,14 @@
  */
 
 var Primrose = {
-  UI: {
-    Text: {
-      CodePages: { },
-      CommandPacks: { },
-      Controls: { },
-      Grammars: { },
-      OperatingSystems: { },
-      Renderers: { },
-      Themes: { }
-    }
-  }
+  Text: {
+    CodePages: { },
+    CommandPacks: { },
+    Controls: { },
+    Grammars: { },
+    OperatingSystems: { },
+    Renderers: { },
+    Themes: { }
+  },
+  Audio: {}
 };

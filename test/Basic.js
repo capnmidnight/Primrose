@@ -32,7 +32,7 @@
       isDone = true;
     };
 
-    var looper = Primrose.UI.Text.Grammars.Basic.interpret( program, input, output,
+    var looper = Primrose.Text.Grammars.Basic.interpret( program, input, output,
         error, next, done );
 
     while ( !isDone ) {
@@ -41,7 +41,7 @@
     Assert.areEqual( expectedOutput, buffer );
   }
 
-  Primrose.UI.Text.Grammars.Basic.tests = {
+  Primrose.Text.Grammars.Basic.tests = {
     printingHello: function () {
       runProgramTest( "10 PRINT \"HELLO\"\n\
 20 END", "HELLO\n" );

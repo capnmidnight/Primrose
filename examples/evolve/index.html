@@ -126,8 +126,8 @@ return val;\n\
         setCrossoverRate();
         ctrls.mutationRate.addEventListener("change", setMutationRate);
         ctrls.crossoverRate.addEventListener("change", setCrossoverRate);
-        fitnessScriptSource = new Primrose.UI.Text.Controls.TextBox(ctrls.fitnessFunction);
-        mutateScriptSource = new Primrose.UI.Text.Controls.TextBox(ctrls.mutateFunction,
+        fitnessScriptSource = new Primrose.Text.Controls.TextBox(ctrls.fitnessFunction);
+        mutateScriptSource = new Primrose.Text.Controls.TextBox(ctrls.mutateFunction,
             "if(rate <= 0.3333){\n\
   for(var i = 0; i < 4; ++i){\n\
     gene.push(gene.shift());\n\
@@ -144,7 +144,7 @@ else{\n\
   gene[i] = Math.floor(Math.random()*255);\n\
 }\n\
 ");
-        breedScriptSource = new Primrose.UI.Text.Controls.TextBox(ctrls.breedFunction,
+        breedScriptSource = new Primrose.Text.Controls.TextBox(ctrls.breedFunction,
             "for(var j = 0; j < child.length; ++j){\n\
   var n = Math.floor(j*parents.length/child.length);\n\
   child[j] = parents[n][j];\n\

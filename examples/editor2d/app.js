@@ -21,10 +21,10 @@ function init () {
   "use strict";
 //  addFullScreenShim(window);
 
-  var editor = new Primrose.UI.Text.Controls.TextBox( "editor", {
+  var editor = new Primrose.Text.Controls.TextBox( "editor", {
     autoBindEvents: true,
-    tokenizer: Primrose.UI.Text.Grammars.Basic,
-    theme: Primrose.UI.Text.Themes.Dark,
+    tokenizer: Primrose.Text.Grammars.Basic,
+    theme: Primrose.Text.Themes.Dark,
     hideLineNumbers: true
   } );
 
@@ -43,7 +43,7 @@ function init () {
     if ( running ) {
       flush( );
       running = false;
-      editor.setTokenizer( Primrose.UI.Text.Grammars.Basic );
+      editor.setTokenizer( Primrose.Text.Grammars.Basic );
       editor.value = currentProgram;
       toEnd( );
     }
@@ -90,7 +90,7 @@ function init () {
   }
 
   editor.addEventListener( "keydown", function ( evt ) {
-    if ( running && inputCallback && evt.keyCode === Primrose.UI.Text.Keys.ENTER ) {
+    if ( running && inputCallback && evt.keyCode === Primrose.Text.Keys.ENTER ) {
       var str = editor.value.substring( currentEditIndex );
       str = str.substring( 0, str.length - 1 );
       inputCallback( str );
@@ -99,11 +99,11 @@ function init () {
     else if ( !running &&
         ( !isOSX &&
             evt.ctrlKey &&
-            evt.keyCode === Primrose.UI.Text.Keys.ENTER ) ||
+            evt.keyCode === Primrose.Text.Keys.ENTER ) ||
         ( isOSX &&
             evt.metaKey &&
             evt.altKey &&
-            evt.keyCode === Primrose.UI.Text.Keys.E ) ) {
+            evt.keyCode === Primrose.Text.Keys.E ) ) {
 
       running = true;
 
@@ -114,9 +114,9 @@ function init () {
       };
 
       currentProgram = editor.value;
-      var looper = Primrose.UI.Text.Grammars.Basic.interpret( currentProgram, input,
+      var looper = Primrose.Text.Grammars.Basic.interpret( currentProgram, input,
           stdout, stdout, next, clearScreen, loadFile, done );
-      editor.setTokenizer( Primrose.UI.Text.Grammars.PlainText );
+      editor.setTokenizer( Primrose.Text.Grammars.PlainText );
       clearScreen();
       next();
     }

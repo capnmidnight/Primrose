@@ -13,7 +13,7 @@ function clearKeyOption ( evt ) {
 
 function setKeyOption ( evt ) {
   this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.UI.Text.Keys[evt.keyCode];
+  this.value = this.value || Primrose.Text.Keys[evt.keyCode];
   this.value = this.value.toLowerCase( )
       .replace( "arrow", " arrow" );
   this.blur( );
@@ -68,7 +68,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     if ( typeof txt === "string" ) {
       texture = THREE.ImageUtils.loadTexture( txt );
     }
-    else if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
+    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
       texture = txt.getRenderer( )
           .getTexture( );
     }
@@ -111,7 +111,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     obj = geometry;
   }
 
-  if ( txt instanceof Primrose.UI.Text.Controls.TextBox ) {
+  if ( txt instanceof Primrose.Text.Controls.TextBox ) {
     obj.editor = txt;
   }
 
@@ -387,11 +387,11 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function makeEditor ( id, w, h, x, y, z, rx, ry, rz, options ) {
-    options.size = new Primrose.UI.Text.Size( 1024 * w, 1024 * h );
+    options.size = new Primrose.Text.Size( 1024 * w, 1024 * h );
     options.fontSize = ( options.fontSize || 30 ) / window.devicePixelRatio;
-    options.theme = Primrose.UI.Text.Themes.Dark;
-    options.tokenizer = options.tokenizer || Primrose.UI.Text.Grammars.PlainText;
-    var t = new Primrose.UI.Text.Controls.TextBox( id, options );
+    options.theme = Primrose.Text.Themes.Dark;
+    options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
+    var t = new Primrose.Text.Controls.TextBox( id, options );
     var o = textured( quad( w, h ), t, true, 0.75 );
     var p = textured( quad( w, h ), t.getRenderer( )
         .getPickingTexture( ), true );
@@ -458,7 +458,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     txt: a material definition of some kind. It could be a:\n\
       number - a solid hex color\n\
       string - a path to a texture image\n\
-      Primrose.UI.Text.Controls.TextBox - a text editor\n\
+      Primrose.Text.Controls.TextBox - a text editor\n\
     unshaded: set to true to use constant lighting (default false)\n\
     opacity: 1 - opaque, 0 - transparent (default 1).\n\
     txtRepeatS: texture repeat in S direction (default 1).\n\
@@ -467,7 +467,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       editor = makeEditor( "textEditor",
           1, 1, 0, 0, 6, 0, 0, 0,
           {
-            tokenizer: Primrose.UI.Text.Grammars.JavaScript,
+            tokenizer: Primrose.Text.Grammars.JavaScript,
             file: src
           } );
 
@@ -565,17 +565,17 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   function keyDown ( evt ) {
     var mod = evt[modA] && evt[modB];
-    if ( mod && evt.keyCode === Primrose.UI.Text.Keys.E ) {
+    if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
       documentation.visible = output.visible = editor.visible = !editor.visible;
       if ( !editor.visible && lastEditor && lastEditor.focused ) {
         lastEditor.blur( );
         lastEditor = null;
       }
     }
-    else if ( mod && evt.keyCode === Primrose.UI.Text.Keys.UPARROW ) {
+    else if ( mod && evt.keyCode === Primrose.Text.Keys.UPARROW ) {
       lastEditor.increaseFontSize( );
     }
-    else if ( mod && evt.keyCode === Primrose.UI.Text.Keys.DOWNARROW ) {
+    else if ( mod && evt.keyCode === Primrose.Text.Keys.DOWNARROW ) {
       lastEditor.decreaseFontSize( );
     }
     else if ( !lastEditor || !lastEditor.focused ) {
