@@ -203,67 +203,67 @@ function from ( start ) {
 }
 
 function testDemo ( scene ) {
-var start = put( hub() )
-    .on( scene )
-    .at( -12, -3, -12 );
+  var start = put( hub() )
+      .on( scene )
+      .at( -12, -3, -12 );
 
-put( fill( WATER, 25, 1, 12 ) )
-    .on( start )
-    .at( 0, 0, 12 );
-
-for ( var z = 0; z < 12; ++z ) {
-  var x = z;
-  var w = 25 - x;
-  put( fill( GRASS, w, 1, 1 ) )
+  put( fill( WATER, 25, 1, 12 ) )
       .on( start )
-      .at( 0, 0, z );
+      .at( 0, 0, 12 );
 
-  put( fill( SAND, x, 1, 1 ) )
-      .on( start )
-      .at( w, 0, z );
+  for ( var z = 0; z < 12; ++z ) {
+    var x = z;
+    var w = 25 - x;
+    put( fill( GRASS, w, 1, 1 ) )
+        .on( start )
+        .at( 0, 0, z );
 
-  if ( z < 10 ) {
-    for ( var x = 0; x < 10; ++x ) {
-      h = 10 - Math.sqrt( z * z + x * x );
-      put( fill( ROCK, 1, h, 1 ) )
-          .on( start )
-          .at( x, 1, z );
+    put( fill( SAND, x, 1, 1 ) )
+        .on( start )
+        .at( w, 0, z );
+
+    if ( z < 10 ) {
+      for ( var x = 0; x < 10; ++x ) {
+        h = 10 - Math.sqrt( z * z + x * x );
+        put( fill( ROCK, 1, h, 1 ) )
+            .on( start )
+            .at( x, 1, z );
+      }
     }
   }
-}
 
-var sun = put( hub() )
-    .on( start )
-    .at( 10, 10, -3 );
-function sunBit () {
-  return textured( box( 1 ), 0xffff00, true, 0.125 );
-}
-put( sunBit() )
-    .on( sun )
-    .at( 1, 0, 0 );
-put( sunBit() )
-    .on( sun )
-    .at( -1, 0, 0 );
-put( sunBit() )
-    .on( sun )
-    .at( 0, 1, 0 );
-put( sunBit() )
-    .on( sun )
-    .at( 0, -1, 0 );
-put( sunBit() )
-    .on( sun )
-    .at( 0, 0, 1 );
-put( sunBit() )
-    .on( sun )
-    .at( 0, 0, -1 );
+  var sun = put( hub() )
+      .on( start )
+      .at( 10, 10, -3 );
+  function sunBit () {
+    return textured( box( 1 ), 0xffff00, true, 0.125 );
+  }
+  put( sunBit() )
+      .on( sun )
+      .at( 1, 0, 0 );
+  put( sunBit() )
+      .on( sun )
+      .at( -1, 0, 0 );
+  put( sunBit() )
+      .on( sun )
+      .at( 0, 1, 0 );
+  put( sunBit() )
+      .on( sun )
+      .at( 0, -1, 0 );
+  put( sunBit() )
+      .on( sun )
+      .at( 0, 0, 1 );
+  put( sunBit() )
+      .on( sun )
+      .at( 0, 0, -1 );
 
-var t = 0;
-function update ( dt ) {
-  t += dt * 0.0005;
-  sun.rotation.set( t, t / 2, t / 5 );
-}
-log( "ok" );
-return update;
+  var t = 0;
+  function update ( dt ) {
+    t += dt * 0.0005;
+    sun.rotation.set( t, t / 2, t / 5 );
+  }
+  log( "ok" );
+  return update;
 }
 
 function PrimroseDemo ( vrDisplay, vrSensor, err ) {

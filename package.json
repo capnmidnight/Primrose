@@ -32,8 +32,5 @@
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.7.0"
-  },
-  "dependencies": {
-    "Heather": "git://github.com/capnmidnight/Heather.git"
   }
 }

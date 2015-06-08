@@ -23,17 +23,6 @@ module.exports = function ( grunt ) {
     };
   }
 
-  if ( fs.existsSync( "../Heather" ) ) {
-    console.log("including Heather lib");
-    execConfig.build_Heather = "cd ../Heather && grunt";
-    copyConfig.copy_Heather = {
-      files: [
-        { expand: true, flatten: true, src: [ '../Heather/dist/*' ],
-          dest: 'lib/', filter: 'isFile' }
-      ]
-    };
-  }
-
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
     clean: {
