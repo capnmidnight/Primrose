@@ -1,20 +1,22 @@
 /* global Primrose, io */
 Primrose.Output.HapticGlove = ( function () {
-  function HapticGlove () {
+  function HapticGlove (port, addr) {
 
-    var addr = HapticGlove.DEFAULT_HOST,
-        socket,
+    port = port || HapticGlove.DEFAULT_PORT;
+    addr = addr || HapticGlove.DEFAULT_HOST;
+
+    var socket,
         fingerState = 0;
 
-    if ( HapticGlove.DEFAULT_PORT !== 80 ) {
-      addr += ":" + HapticGlove.DEFAULT_PORT;
+    if ( port !== 80 ) {
+      addr += ":" + port;
     }
 
     if ( window.hasOwnProperty( "io" ) ) {
       socket = io.connect( addr, {
         "reconnect": true,
         "reconnection delay": 1000,
-        "max reconnection attempts": 60
+        "max reconnection attempts": 5
       } );
     }
 
@@ -31,7 +33,7 @@ Primrose.Output.HapticGlove = ( function () {
 
   }
 
-  HapticGlove.DEFAULT_PORT = 9080;
+  HapticGlove.DEFAULT_PORT = 8383;
   HapticGlove.DEFAULT_HOST = document.location.hostname;
   return HapticGlove;
 } )();

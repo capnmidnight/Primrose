@@ -4,7 +4,15 @@ var DEBUG_VR = false;
 
 function StartDemo ( ) {
   "use strict";
-  var application = new Primrose.VRApplication(),
+  var application = new Primrose.VRApplication(
+        "glove demo",
+        "../models/scene2.dae",
+        "../models/button.dae", null,
+        "../models/bear.dae", 1.75, 1.3,
+        "../audio/click.mp3",
+        "../audio/ocean.mp3",
+        null
+      ),
       vrParams,
       vrDisplay,
       vrSensor,

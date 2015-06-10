@@ -2,14 +2,17 @@
 
 Primrose.Input.Camera = ( function () {
   function CameraInput ( elem, id, size, x, y, z, options ) {
-    MediaStreamTrack.getVideoTracks( function ( infos ) {
+    MediaStreamTrack.getSources( function ( infos ) {
       for ( var i = 0; i < infos.length; ++i ) {
-        var option = document.createElement( "option" );
-        option.value = infos[i].id;
-        option.innerHTML = fmt( "[Facing: $1] [ID: $2...]", infos[i].facing ||
-            "N/A", infos[i].id.substring( 0, 8 ) );
-        option.selected = infos[i].id === id;
-        elem.appendChild( option );
+        if ( infos[i].kind === "video" ) {
+          var option = document.createElement( "option" );
+          option.value = infos[i].id;
+          option.innerHTML = fmt( "[Facing: $1] [ID: $2...]",
+              infos[i].facing ||
+              "N/A", infos[i].id.substring( 0, 8 ) );
+          option.selected = infos[i].id === id;
+          elem.appendChild( option );
+        }
       }
     } );
 
@@ -101,11 +104,11 @@ Primrose.Input.Camera = ( function () {
       }
 
       tryModesFirstThen( source, function ( err ) {
-        console.error( "Couldn't connect at requested resolutions. Reason: ",
-            err );
+        console.error( "Couldn't connect at requested resolutions." );
+        console.error( err );
         getUserMediaFallthrough( true,
             console.log.bind( console,
-            "Connected to camera at default resolution" ),
+                "Connected to camera at default resolution" ),
             console.error.bind( console, "Final connect attempt" ) );
       } );
     }.bind( this );

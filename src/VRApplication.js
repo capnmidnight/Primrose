@@ -1,4 +1,4 @@
-/* global Primrose, THREE, io, CryptoJS, fmt, Notification */
+/* global Primrose, THREE, io, CryptoJS, fmt, Notification, requestFullScreen */
 Primrose.VRApplication = ( function () {
   /*
    Create a new VR Application!
@@ -44,6 +44,7 @@ Primrose.VRApplication = ( function () {
     this.enableMousePitch = true;
     this.currentUser = null;
     this.mainScene = null;
+    this.userList = new Primrose.Text.Controls.TextBox("userList");
 
     //
     // speech input
@@ -200,10 +201,11 @@ Primrose.VRApplication = ( function () {
     // list. This makes it easy to preconfigure the program to certain specs
     // and let the user override the others.
     //
-    var NO_HMD_SMARTPHONE = "Smartphone - no HMD";
-    this.stateList = new StateList( this.ctrls.deviceTypes, this.ctrls, [
+    var HMD_SMARTPHONE = "Smartphone HMD",
+      NO_HMD_SMARTPHONE = "Smartphone - no HMD";
+    this.stateList = new Primrose.StateList( this.ctrls.deviceTypes, this.ctrls, [
       { name: "-- select device type --" },
-      { name: "PC", values: {
+      { name: "PC (no HMD)", values: {
           speechEnable: { checked: false },
           speechTransmit: { checked: false },
           speechReceive: { checked: false },
@@ -231,7 +233,36 @@ Primrose.VRApplication = ( function () {
           renderingStyle: { value: "regular" },
           defaultDisplay: { checked: true }
         } },
-      { name: "Smartphone HMD", values: {
+
+      { name: "PC (with HMD)", values: {
+          speechEnable: { checked: false },
+          speechTransmit: { checked: false },
+          speechReceive: { checked: false },
+          keyboardEnable: { checked: true },
+          keyboardTransmit: { checked: true },
+          keyboardReceive: { checked: false },
+          mouseEnable: { checked: true },
+          mouseTransmit: { checked: true },
+          mouseReceive: { checked: false },
+          gamepadEnable: { checked: true },
+          gamepadTransmit: { checked: true },
+          gamepadReceive: { checked: false },
+          leapEnable: { checked: true },
+          leapTransmit: { checked: true },
+          leapReceive: { checked: false },
+          touchEnable: { checked: false },
+          touchTransmit: { checked: false },
+          touchReceive: { checked: true },
+          headEnable: { checked: false },
+          headTransmit: { checked: false },
+          headReceive: { checked: true },
+          locationEnable: { checked: false },
+          locationTransmit: { checked: false },
+          locationReceive: { checked: true },
+          renderingStyle: { value: "regular" },
+          defaultDisplay: { checked: true }
+        } },
+      { name: HMD_SMARTPHONE, values: {
           speechEnable: { checked: false },
           speechTransmit: { checked: false },
           speechReceive: { checked: true },
@@ -338,7 +369,7 @@ Primrose.VRApplication = ( function () {
     //
     // Setup audio
     //
-    this.audio = new Audio3D();
+    this.audio = new Primrose.Output.Audio3D();
     this.audio.loadBuffer( clickSound, null, function ( buffer ) {
       this.clickSound = buffer;
     }.bind( this ) );
@@ -351,8 +382,7 @@ Primrose.VRApplication = ( function () {
     //
     // Setup networking
     //
-    if ( this.ctrls.appCacheReload.style.display === "none" &&
-        navigator.onLine ) {
+    if ( navigator.onLine ) {
       this.ctrls.connectButton.addEventListener( "click", this.login.bind(
           this ), false );
 
@@ -374,8 +404,9 @@ Primrose.VRApplication = ( function () {
           "Failed to connect to websocket server. Available socket controllers are:" ) );
       this.socket.on( "handshakeComplete", this.completeHandshake.bind(
           this ) );
-      this.proxy = new WebRTCSocket( this.socket,
-          this.ctrls.defaultDisplay.checked );
+      this.proxy = new Primrose.WebRTCSocket(
+          this.socket,
+          this.ctrls.deviceTypes.value !== HMD_SMARTPHONE);
     }
 
     //
@@ -388,15 +419,6 @@ Primrose.VRApplication = ( function () {
     this.setupModuleEvents( this.speech, "speech" );
     this.setupModuleEvents( this.keyboard, "keyboard" );
     this.setupModuleEvents( this.mouse, "mouse" );
-
-    window.addEventListener( "touchend", this.showOnscreenControls.bind(
-        this ), false );
-
-    window.addEventListener( "mousemove", function () {
-      if ( !Primrose.Input.Mouse.isPointerLocked() ) {
-        this.showOnscreenControls();
-      }
-    }.bind( this ), false );
 
     window.addEventListener( "keyup", function ( evt ) {
       if ( evt.keyCode === Primrose.Input.Keyboard.GRAVEACCENT ) {
@@ -435,28 +457,19 @@ Primrose.VRApplication = ( function () {
       }
     };
 
-    this.ctrls.fullScreenButton.addEventListener( "click", function () {
-      this.fullScreen();
-      this.mouse.requestPointerLock();
-    }.bind( this ), false );
-
-    this.ctrls.menuButton.addEventListener( "click", this.showOptions.bind(
-        this ), false );
+  this.ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
+      this.ctrls.output ) );
+  this.ctrls.goVR.addEventListener( "click", function ( ) {
+    requestFullScreen( ctrls.output, vrDisplay );
+    inVR = true;
+    camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+        vrParams.left.recommendedFieldOfView.rightDegrees );
+    refreshSize();
+  } );
 
     this.ctrls.renderingStyle.addEventListener( "change", function () {
       this.chooseRenderingEffect( this.ctrls.renderingStyle.value );
     }.bind( this ), false );
-
-    this.ctrls.textEntry.addEventListener( "change", function () {
-      this.showTyping( true, true, this.ctrls.textEntry.value );
-      this.ctrls.textEntry.value = "";
-    }.bind( this ), false );
-
-    var closers = document.getElementsByClassName( "closeSectionButton" );
-    for ( var i = 0; i < closers.length; ++i ) {
-      closers[i].addEventListener( "click", this.hideOptions.bind( this ),
-          false );
-    }
   }
 
   inherit( VRApplication, Primrose.Application );
@@ -536,7 +549,6 @@ Primrose.VRApplication = ( function () {
     this.ctrls.options.style.display = "none";
     this.fullScreen();
     this.keyboard.pause( false );
-    this.showOnscreenControls();
     this.mouse.requestPointerLock();
   };
 
@@ -548,23 +560,6 @@ Primrose.VRApplication = ( function () {
     else {
       this.hideOptions();
     }
-  };
-
-//
-// the touch-screen and mouse-controls for accessing the options screen
-//
-  VRApplication.prototype.hideOnscreenControls = function () {
-    this.ctrls.onScreenControls.style.display = "none";
-    this.hideControlsTimeout = null;
-  };
-
-  VRApplication.prototype.showOnscreenControls = function () {
-    this.ctrls.onScreenControls.style.display = "";
-    if ( this.hideControlsTimeout ) {
-      clearTimeout( this.hideControlsTimeout );
-    }
-    this.hideControlsTimeout = setTimeout( this.hideOnscreenControls.bind(
-        this ), 3000 );
   };
 
   VRApplication.prototype.chooseRenderingEffect = function ( type ) {
@@ -799,14 +794,14 @@ Primrose.VRApplication = ( function () {
       list.push( k );
     }
     list.sort();
-    this.ctrls.userList.innerHTML = "";
+    var userList = "";
     for ( var i = 0; i < list.length; ++i ) {
       if ( list[i] !== Primrose.Application.DEFAULT_USER_NAME ) {
-        var entry = document.createElement( "div" );
-        entry.appendChild( document.createTextNode( list[i] ) );
-        this.ctrls.userList.appendChild( entry );
+        userList += list[i] + "\n";
       }
     }
+
+    this.userList.value = userList;
   };
 
   VRApplication.prototype.connectGamepad = function ( id ) {
