@@ -1,6 +1,8 @@
-Primrose.Audio.Audio3DOutput = ( function () {
+/* global Primrose */
 
-  function Audio3DOutput () {
+Primrose.Output.Audio3D = ( function () {
+
+  function Audio3D () {
 
     function piano ( n ) {
       return 440 * Math.pow( base, n - 49 );
@@ -50,7 +52,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     }
   }
 
-  Audio3DOutput.prototype.sawtooth = function ( i, volume, duration ) {
+  Audio3D.prototype.sawtooth = function ( i, volume, duration ) {
     if ( this.isAvailable ) {
       var osc = this.oscillators[i];
       if ( osc ) {
@@ -67,7 +69,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.loadBuffer = function ( src, progress, success ) {
+  Audio3D.prototype.loadBuffer = function ( src, progress, success ) {
     if ( !success ) {
       throw new Error(
           "You need to provide a callback function for when the audio finishes loading" );
@@ -109,7 +111,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.loadBufferCascadeSrcList = function ( srcs, progress,
+  Audio3D.prototype.loadBufferCascadeSrcList = function ( srcs, progress,
       success, index ) {
     index = index || 0;
     if ( index === srcs.length ) {
@@ -149,7 +151,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.createRawSound = function ( pcmData, success ) {
+  Audio3D.prototype.createRawSound = function ( pcmData, success ) {
     if ( pcmData.length !== 1 && pcmData.length !== 2 ) {
       throw new Error( "Incorrect number of channels. Expected 1 or 2, got " +
           pcmData.length );
@@ -173,7 +175,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     success( buffer );
   };
 
-  Audio3DOutput.prototype.createSound = function ( loop, success, buffer ) {
+  Audio3D.prototype.createSound = function ( loop, success, buffer ) {
     var snd = {
       volume: this.context.createGain(),
       source: this.context.createBufferSource()
@@ -184,7 +186,7 @@ Primrose.Audio.Audio3DOutput = ( function () {
     success( snd );
   };
 
-  Audio3DOutput.prototype.create3DSound = function ( x, y, z, success, snd ) {
+  Audio3D.prototype.create3DSound = function ( x, y, z, success, snd ) {
     snd.panner = this.context.createPanner();
     snd.panner.setPosition( x, y, z );
     snd.panner.connect( this.mainVolume );
@@ -192,48 +194,48 @@ Primrose.Audio.Audio3DOutput = ( function () {
     success( snd );
   };
 
-  Audio3DOutput.prototype.createFixedSound = function ( success, snd ) {
+  Audio3D.prototype.createFixedSound = function ( success, snd ) {
     snd.volume.connect( this.mainVolume );
     success( snd );
   };
 
-  Audio3DOutput.prototype.loadSound = function ( src, loop, progress,
+  Audio3D.prototype.loadSound = function ( src, loop, progress,
       success ) {
     this.loadBuffer( src, progress, this.createSound.bind( this, loop,
         success ) );
   };
 
-  Audio3DOutput.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
+  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
       progress, success ) {
     this.loadBufferCascadeSrcList( srcs, progress, this.createSound.bind( this,
         loop, success ) );
   };
 
-  Audio3DOutput.prototype.load3DSound = function ( src, loop, x, y, z,
+  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z,
       progress, success ) {
     this.loadSound( src, loop, progress, this.create3DSound.bind( this, x, y,
         z, success ) );
   };
 
-  Audio3DOutput.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
+  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
       y, z, progress, success ) {
     this.loadSoundCascadeSrcList()( srcs, loop, progress,
         this.create3DSound.bind( this, x, y, z, success ) );
   };
 
-  Audio3DOutput.prototype.loadFixedSound = function ( src, loop, progress,
+  Audio3D.prototype.loadFixedSound = function ( src, loop, progress,
       success ) {
     this.loadSound( src, loop, progress, this.createFixedSound.bind( this,
         success ) );
   };
 
-  Audio3DOutput.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
+  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
       progress, success ) {
     this.loadSoundCascadeSrcList( srcs, loop, progress,
         this.createFixedSound.bind( this, success ) );
   };
 
-  Audio3DOutput.prototype.playBufferImmediate = function ( buffer, volume ) {
+  Audio3D.prototype.playBufferImmediate = function ( buffer, volume ) {
     this.createSound( false, this.createFixedSound.bind( this, function (
         snd ) {
       snd.volume.gain.value = volume;
@@ -244,5 +246,5 @@ Primrose.Audio.Audio3DOutput = ( function () {
     } ), buffer );
   };
 
-  return Audio3DOutput;
+  return Audio3D;
 } )();

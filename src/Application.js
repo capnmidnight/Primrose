@@ -2,7 +2,7 @@
 
 Primrose.Application = ( function () {
 
-  function Application ( name ) {
+  function Application ( name, options ) {
     this.formStateKey = name + " - formState";
     this.formState = getSetting( this.formStateKey );
     this.ctrls = findEverything();

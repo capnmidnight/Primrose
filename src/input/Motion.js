@@ -1,6 +1,6 @@
 /* global Primrose */
 
-Primrose.Input.MotionInput = ( function () {
+Primrose.Input.Motion = ( function () {
   /*
    Class: Angle
 
@@ -351,7 +351,7 @@ Primrose.Input.MotionInput = ( function () {
       !window.opera && navigator.userAgent.indexOf( ' OPR/' ) < 0;
 
   function MotionInput ( name, commands, socket, oscope ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1, MotionInput.AXES );
 
     var corrector = new MotionCorrector(
@@ -368,7 +368,7 @@ Primrose.Input.MotionInput = ( function () {
 
   MotionInput.AXES = [ "HEADING", "PITCH", "ROLL", "D_HEADING", "D_PITCH",
     "D_ROLL", "ACCELX", "ACCELY", "ACCELZ" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( MotionInput );
+  Primrose.Input.ButtonAndAxis.inherit( MotionInput );
 
   return MotionInput;
 } )();

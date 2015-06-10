@@ -28,3 +28,16 @@ function setupKeyOption ( outElem, elemArr, index, char, code ) {
   elem.addEventListener( "keydown", clearKeyOption );
   elem.addEventListener( "keyup", setKeyOption.bind( elem, outElem, elemArr ) );
 }
+
+function combineDefaults(a, b){
+  var c = {}, k;
+  for(k in a){
+    c[k] = a[k];
+  }
+  for(k in b){
+    if(!c.hasOwnProperty(k)){
+      c[k] = b[k];
+    }
+  }
+  return c;
+}

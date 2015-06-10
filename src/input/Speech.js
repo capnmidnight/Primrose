@@ -1,6 +1,6 @@
 /* global Primrose */
 
-Primrose.Input.SpeechInput = ( function () {
+Primrose.Input.Speech = ( function () {
   /*
    Class: SpeechInput
 

@@ -16,8 +16,8 @@
  */
 
 var Primrose = {
-  Audio: {},
   Input:{},
+  Output: {},
   Text: {
     CodePages: { },
     CommandPacks: { },

@@ -1,6 +1,6 @@
 /* global Primrose */
 
-Primrose.Input.TouchInput = ( function () {
+Primrose.Input.Touch = ( function () {
   function TouchInput ( name, DOMElement, buttonBounds, commands, socket,
       oscope ) {
     DOMElement = DOMElement || window;
@@ -11,7 +11,7 @@ Primrose.Input.TouchInput = ( function () {
       b.y2 = b.y + b.h;
     }
 
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         TouchInput.AXES );
 
     function setState ( stateChange, setAxis, event ) {
@@ -53,6 +53,6 @@ Primrose.Input.TouchInput = ( function () {
     TouchInput.AXES.push( "X" + i );
     TouchInput.AXES.push( "Y" + i );
   }
-  Primrose.Input.ButtonAndAxisInput.inherit( TouchInput );
+  Primrose.Input.ButtonAndAxis.inherit( TouchInput );
   return TouchInput;
 } )();

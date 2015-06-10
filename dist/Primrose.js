@@ -634,7 +634,7 @@ Primrose.VRApplication = ( function () {
     Primrose.Application.call( this, name );
     this.options = combineDefaults( options, VRApplication );
     this.listeners = { ready: [ ], update: [ ] };
-    this.glove = new HapticGloveOutput();
+    this.glove = new HapticGlove();
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
     this.cameraMount = new THREE.Object3D();
@@ -934,7 +934,7 @@ Primrose.VRApplication = ( function () {
     //
     // Setup audio
     //
-    this.audio = new Audio3DOutput();
+    this.audio = new Audio3D();
     this.audio.loadBuffer( clickSound, null, function ( buffer ) {
       this.clickSound = buffer;
     }.bind( this ) );
@@ -2070,9 +2070,9 @@ Primrose.WebRTCSocket = ( function () {
   }
   return WebRTCSocket;
 } )();
-;Primrose.Audio.Audio3DOutput = ( function () {
+;Primrose.Audio.Audio3D = ( function () {
 
-  function Audio3DOutput () {
+  function Audio3D () {
 
     function piano ( n ) {
       return 440 * Math.pow( base, n - 49 );
@@ -2122,7 +2122,7 @@ Primrose.WebRTCSocket = ( function () {
     }
   }
 
-  Audio3DOutput.prototype.sawtooth = function ( i, volume, duration ) {
+  Audio3D.prototype.sawtooth = function ( i, volume, duration ) {
     if ( this.isAvailable ) {
       var osc = this.oscillators[i];
       if ( osc ) {
@@ -2139,7 +2139,7 @@ Primrose.WebRTCSocket = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.loadBuffer = function ( src, progress, success ) {
+  Audio3D.prototype.loadBuffer = function ( src, progress, success ) {
     if ( !success ) {
       throw new Error(
           "You need to provide a callback function for when the audio finishes loading" );
@@ -2181,7 +2181,7 @@ Primrose.WebRTCSocket = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.loadBufferCascadeSrcList = function ( srcs, progress,
+  Audio3D.prototype.loadBufferCascadeSrcList = function ( srcs, progress,
       success, index ) {
     index = index || 0;
     if ( index === srcs.length ) {
@@ -2221,7 +2221,7 @@ Primrose.WebRTCSocket = ( function () {
     }
   };
 
-  Audio3DOutput.prototype.createRawSound = function ( pcmData, success ) {
+  Audio3D.prototype.createRawSound = function ( pcmData, success ) {
     if ( pcmData.length !== 1 && pcmData.length !== 2 ) {
       throw new Error( "Incorrect number of channels. Expected 1 or 2, got " +
           pcmData.length );
@@ -2245,7 +2245,7 @@ Primrose.WebRTCSocket = ( function () {
     success( buffer );
   };
 
-  Audio3DOutput.prototype.createSound = function ( loop, success, buffer ) {
+  Audio3D.prototype.createSound = function ( loop, success, buffer ) {
     var snd = {
       volume: this.context.createGain(),
       source: this.context.createBufferSource()
@@ -2256,7 +2256,7 @@ Primrose.WebRTCSocket = ( function () {
     success( snd );
   };
 
-  Audio3DOutput.prototype.create3DSound = function ( x, y, z, success, snd ) {
+  Audio3D.prototype.create3DSound = function ( x, y, z, success, snd ) {
     snd.panner = this.context.createPanner();
     snd.panner.setPosition( x, y, z );
     snd.panner.connect( this.mainVolume );
@@ -2264,48 +2264,48 @@ Primrose.WebRTCSocket = ( function () {
     success( snd );
   };
 
-  Audio3DOutput.prototype.createFixedSound = function ( success, snd ) {
+  Audio3D.prototype.createFixedSound = function ( success, snd ) {
     snd.volume.connect( this.mainVolume );
     success( snd );
   };
 
-  Audio3DOutput.prototype.loadSound = function ( src, loop, progress,
+  Audio3D.prototype.loadSound = function ( src, loop, progress,
       success ) {
     this.loadBuffer( src, progress, this.createSound.bind( this, loop,
         success ) );
   };
 
-  Audio3DOutput.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
+  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
       progress, success ) {
     this.loadBufferCascadeSrcList( srcs, progress, this.createSound.bind( this,
         loop, success ) );
   };
 
-  Audio3DOutput.prototype.load3DSound = function ( src, loop, x, y, z,
+  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z,
       progress, success ) {
     this.loadSound( src, loop, progress, this.create3DSound.bind( this, x, y,
         z, success ) );
   };
 
-  Audio3DOutput.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
+  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
       y, z, progress, success ) {
     this.loadSoundCascadeSrcList()( srcs, loop, progress,
         this.create3DSound.bind( this, x, y, z, success ) );
   };
 
-  Audio3DOutput.prototype.loadFixedSound = function ( src, loop, progress,
+  Audio3D.prototype.loadFixedSound = function ( src, loop, progress,
       success ) {
     this.loadSound( src, loop, progress, this.createFixedSound.bind( this,
         success ) );
   };
 
-  Audio3DOutput.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
+  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
       progress, success ) {
     this.loadSoundCascadeSrcList( srcs, loop, progress,
         this.createFixedSound.bind( this, success ) );
   };
 
-  Audio3DOutput.prototype.playBufferImmediate = function ( buffer, volume ) {
+  Audio3D.prototype.playBufferImmediate = function ( buffer, volume ) {
     this.createSound( false, this.createFixedSound.bind( this, function (
         snd ) {
       snd.volume.gain.value = volume;
@@ -2316,11 +2316,11 @@ Primrose.WebRTCSocket = ( function () {
     } ), buffer );
   };
 
-  return Audio3DOutput;
+  return Audio3D;
 } )();
 ;/* global Primrose, speechSynthesis */
 
-Primrose.Audio.SpeechOutput = ( function ( ) {
+Primrose.Audio.Speech = ( function ( ) {
   function pickRandomOption ( options, key, min, max ) {
     if ( options[key] === undefined ) {
       options[key] = min + ( max - min ) * Math.random( );
@@ -3290,7 +3290,7 @@ var reverse = ( function ( ) {
 )( );
 ;/* global Primrose */
 
-Primrose.Input.ButtonAndAxisInput = ( function () {
+Primrose.Input.ButtonAndAxis = ( function () {
   function ButtonAndAxisInput ( name, commands, socket, oscope, offset,
       axes ) {
     this.offset = offset || 0;
@@ -3505,7 +3505,7 @@ Primrose.Input.ButtonAndAxisInput = ( function () {
 } )();
 ;/* global Primrose, MediaStreamTrack, THREE */
 
-Primrose.Input.CameraInput = ( function () {
+Primrose.Input.Camera = ( function () {
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getVideoTracks( function ( infos ) {
       for ( var i = 0; i < infos.length; ++i ) {
@@ -3636,9 +3636,9 @@ Primrose.Input.CameraInput = ( function () {
 } )();
 ;/* global Primrose */
 
-Primrose.Input.GamepadInput = ( function () {
+Primrose.Input.Gamepad = ( function () {
   function GamepadInput ( name, commands, socket, oscope, gpid ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         GamepadInput.AXES, true );
     var connectedGamepads = [ ],
         listeners = {
@@ -3772,12 +3772,12 @@ Primrose.Input.GamepadInput = ( function () {
   }
 
   GamepadInput.AXES = [ "LSX", "LSY", "RSX", "RSY" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( GamepadInput );
+  Primrose.Input.ButtonAndAxis.inherit( GamepadInput );
   return GamepadInput;
 } )();
 ;/* global Primrose */
 
-Primrose.Input.KeyboardInput = ( function () {
+Primrose.Input.Keyboard = ( function () {
   function makeCommand ( thisObj, cmd ) {
     return function ( update ) {
       textEntry = true;
@@ -3799,7 +3799,7 @@ Primrose.Input.KeyboardInput = ( function () {
       }
     }
 
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 0, 0 );
 
     var textEntry = false,
@@ -3874,7 +3874,7 @@ Primrose.Input.KeyboardInput = ( function () {
     DOMElement.addEventListener( "keyup", execute.bind( this, false ), false );
   }
 
-  Primrose.Input.ButtonAndAxisInput.inherit( KeyboardInput );
+  Primrose.Input.ButtonAndAxis.inherit( KeyboardInput );
 
   KeyboardInput.BACKSPACE = 8;
   KeyboardInput.TAB = 9;
@@ -4089,7 +4089,7 @@ Primrose.Input.KeyboardInput = ( function () {
 } )();
 ;/* global Primrose, requestAnimationFrame, Leap */
 
-Primrose.Input.LeapMotionInput = ( function () {
+Primrose.Input.LeapMotion = ( function () {
   function processFingerParts ( i ) {
     return LeapMotionInput.FINGER_PARTS.map( function ( p ) {
       return "FINGER" + i + p.toUpperCase();
@@ -4098,7 +4098,7 @@ Primrose.Input.LeapMotionInput = ( function () {
 
   function LeapMotionInput ( name, commands, socket, oscope ) {
     this.isStreaming = false;
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1,
         LeapMotionInput.AXES );
     this.controller = new Leap.Controller( { enableGestures: true } );
@@ -4161,7 +4161,7 @@ Primrose.Input.LeapMotionInput = ( function () {
     "FINGER9MCPX", "FINGER9MCPY",
     "FINGER9CARPX", "FINGER9CARPY" ];
 
-  Primrose.Input.ButtonAndAxisInput.inherit( LeapMotionInput );
+  Primrose.Input.ButtonAndAxis.inherit( LeapMotionInput );
 
   LeapMotionInput.CONNECTION_TIMEOUT = 5000;
   LeapMotionInput.prototype.E = function ( e, f ) {
@@ -4243,10 +4243,10 @@ Primrose.Input.LeapMotionInput = ( function () {
   return LeapMotionInput;
 } )();
 ;/* global Primrose */
-Primrose.Input.LocationInput = ( function () {
+Primrose.Input.Location = ( function () {
   function LocationInput ( name, commands, socket, options, oscope ) {
     this.options = combineDefaults( options, LocationInput );
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         LocationInput.AXES );
     this.available = !!navigator.geolocation;
     if ( this.available ) {
@@ -4260,7 +4260,7 @@ Primrose.Input.LocationInput = ( function () {
   }
   LocationInput.AXES = [ "LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING",
     "SPEED" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( LocationInput );
+  Primrose.Input.ButtonAndAxis.inherit( LocationInput );
 
   LocationInput.DEFAULTS = {
     enableHighAccuracy: true,
@@ -4280,7 +4280,7 @@ Primrose.Input.LocationInput = ( function () {
 } )();
 ;/* global Primrose */
 
-Primrose.Input.MotionInput = ( function () {
+Primrose.Input.Motion = ( function () {
   /*
    Class: Angle
 
@@ -4631,7 +4631,7 @@ Primrose.Input.MotionInput = ( function () {
       !window.opera && navigator.userAgent.indexOf( ' OPR/' ) < 0;
 
   function MotionInput ( name, commands, socket, oscope ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1, MotionInput.AXES );
 
     var corrector = new MotionCorrector(
@@ -4648,16 +4648,16 @@ Primrose.Input.MotionInput = ( function () {
 
   MotionInput.AXES = [ "HEADING", "PITCH", "ROLL", "D_HEADING", "D_PITCH",
     "D_ROLL", "ACCELX", "ACCELY", "ACCELZ" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( MotionInput );
+  Primrose.Input.ButtonAndAxis.inherit( MotionInput );
 
   return MotionInput;
 } )();
 ;/* global Primrose */
 
-Primrose.Input.MouseInput = ( function () {
+Primrose.Input.Mouse = ( function () {
   function MouseInput ( name, DOMElement, commands, socket, oscope ) {
     DOMElement = DOMElement || window;
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1, MouseInput.AXES );
 
     this.setLocation = function ( x, y ) {
@@ -4777,12 +4777,12 @@ Primrose.Input.MouseInput = ( function () {
         document.mozPointerLockElement );
   };
   MouseInput.AXES = [ "X", "Y", "Z" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( MouseInput );
+  Primrose.Input.ButtonAndAxis.inherit( MouseInput );
   return MouseInput;
 } )();
 ;/* global Primrose */
 
-Primrose.Input.SpeechInput = ( function () {
+Primrose.Input.Speech = ( function () {
   /*
    Class: SpeechInput
 
@@ -4994,7 +4994,7 @@ Primrose.Input.SpeechInput = ( function () {
 } )();
 ;/* global Primrose */
 
-Primrose.Input.TouchInput = ( function () {
+Primrose.Input.Touch = ( function () {
   function TouchInput ( name, DOMElement, buttonBounds, commands, socket,
       oscope ) {
     DOMElement = DOMElement || window;
@@ -5005,7 +5005,7 @@ Primrose.Input.TouchInput = ( function () {
       b.y2 = b.y + b.h;
     }
 
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         TouchInput.AXES );
 
     function setState ( stateChange, setAxis, event ) {
@@ -5047,13 +5047,13 @@ Primrose.Input.TouchInput = ( function () {
     TouchInput.AXES.push( "X" + i );
     TouchInput.AXES.push( "Y" + i );
   }
-  Primrose.Input.ButtonAndAxisInput.inherit( TouchInput );
+  Primrose.Input.ButtonAndAxis.inherit( TouchInput );
   return TouchInput;
 } )();
 ;/* global Primrose, HMDVRDevice, PositionSensorVRDevice */
-Primrose.Input.VRInput = ( function () {
+Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, elem, selectedID ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, null, null,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null,
         1,
         VRInput.AXES );
     this.devices = { };
@@ -5077,7 +5077,7 @@ Primrose.Input.VRInput = ( function () {
     "RVX", "RVY", "RVZ",
     "RAX", "RAY", "RAZ"
   ];
-  Primrose.Input.ButtonAndAxisInput.inherit( VRInput );
+  Primrose.Input.ButtonAndAxis.inherit( VRInput );
 
   VRInput.prototype.update = function ( dt ) {
     if ( this.sensor ) {
@@ -5106,7 +5106,7 @@ Primrose.Input.VRInput = ( function () {
       this.setAxis( "RAY", state.angularAcceleration.y );
       this.setAxis( "RAZ", state.angularAcceleration.z );
     }
-    Primrose.Input.ButtonAndAxisInput.prototype.update.call( this, dt );
+    Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
   };
 
   VRInput.prototype.enumerateVRDevices = function ( elem, selectedID,

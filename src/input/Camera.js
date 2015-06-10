@@ -1,6 +1,6 @@
 /* global Primrose, MediaStreamTrack, THREE */
 
-Primrose.Input.CameraInput = ( function () {
+Primrose.Input.Camera = ( function () {
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getVideoTracks( function ( infos ) {
       for ( var i = 0; i < infos.length; ++i ) {

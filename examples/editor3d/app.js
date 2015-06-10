@@ -1,48 +1,10 @@
-/* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
+/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
 var log = null,
     GRASS = THREE.ImageUtils.loadTexture("../images/grass.png"),
     ROCK = THREE.ImageUtils.loadTexture("../images/rock.png"),
     SAND = THREE.ImageUtils.loadTexture("../images/sand.png"),
     WATER = THREE.ImageUtils.loadTexture("../images/water.png"),
     DECK = THREE.ImageUtils.loadTexture("../images/deck.png");
-
-function clearKeyOption ( evt ) {
-  this.value = "";
-  this.dataset.keycode = "";
-}
-
-function setKeyOption ( evt ) {
-  this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.Text.Keys[evt.keyCode];
-  this.value = this.value.toLowerCase( )
-      .replace( "arrow", " arrow" );
-  this.blur( );
-}
-
-function setupKeyOption ( elem, char, code ) {
-  elem.value = char.toLowerCase( );
-  elem.dataset.keycode = code;
-  elem.addEventListener( "keydown", clearKeyOption );
-  elem.addEventListener( "keyup", setKeyOption );
-}
-
-function put ( object ) {
-  return {
-    on: function ( s ) {
-      s.add( object );
-      return {
-        at: function ( x, y, z ) {
-          object.position.set( x, y, z );
-          return object;
-        }
-      };
-    }
-  };
-}
-
-function brick ( txt, w, h, l ) {
-  return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
-}
 
 function fill ( txt, w, h, l ) {
   if ( h === undefined ) {
@@ -61,49 +23,6 @@ function fill ( txt, w, h, l ) {
           .at( w / 2, y, l / 2 );
   }
   return point;
-}
-
-function light ( color, intensity, distance, decay ) {
-  return new THREE.PointLight( color, intensity, distance, decay );
-}
-
-function v3 ( x, y, z ) {
-  return new THREE.Vector3( x, y, z );
-}
-
-function quad ( w, h ) {
-  if ( h === undefined ) {
-    h = w;
-  }
-  return new THREE.PlaneBufferGeometry( w, h );
-}
-
-function box ( w, h, l ) {
-  if ( h === undefined ) {
-    h = w;
-    l = w;
-  }
-  return new THREE.BoxGeometry( w, h, l );
-}
-
-function hub ( ) {
-  return new THREE.Object3D( );
-}
-
-function from ( start ) {
-  return {
-    to: function ( end ) {
-      return {
-        exec: function ( thunk ) {
-          var arr = [ ];
-          for ( var i = start; i < end; ++i ) {
-            arr[i] = thunk( i );
-          }
-          return arr;
-        }
-      };
-    }
-  };
 }
 
 function testDemo ( scene ) {

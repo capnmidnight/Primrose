@@ -1,6 +1,6 @@
 /* global Primrose */
 
-Primrose.Input.ButtonAndAxisInput = ( function () {
+Primrose.Input.ButtonAndAxis = ( function () {
   function ButtonAndAxisInput ( name, commands, socket, oscope, offset,
       axes ) {
     this.offset = offset || 0;

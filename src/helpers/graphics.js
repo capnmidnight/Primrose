@@ -160,6 +160,71 @@ if ( typeof window.THREE !== "undefined" ) {
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
 
+
+function axis ( length, width ) {
+  return obj3(
+      box( length, width, width, 0xff0000 ),
+      box( width, width, length, 0x00ff00 ),
+      box( width, length, width, 0x0000ff )
+      );
+}
+
+function box ( w, h, l ) {
+  if ( h === undefined ) {
+    h = w;
+    l = w;
+  }
+  return new THREE.BoxGeometry( w, h, l );
+}
+
+function light ( color, intensity, distance, decay ) {
+  return new THREE.PointLight( color, intensity, distance, decay );
+}
+
+function v3 ( x, y, z ) {
+  return new THREE.Vector3( x, y, z );
+}
+
+function quad ( w, h ) {
+  if ( h === undefined ) {
+    h = w;
+  }
+  return new THREE.PlaneBufferGeometry( w, h );
+}
+
+function hub ( ) {
+  return new THREE.Object3D( );
+}
+
+function brick ( txt, w, h, l ) {
+  return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
+}
+
+function put ( object ) {
+  return {
+    on: function ( s ) {
+      s.add( object );
+      return {
+        at: function ( x, y, z ) {
+          object.position.set( x, y, z );
+          return object;
+        }
+      };
+    }
+  };
+}
+
+function axis ( length, width ) {
+  var center = hub();
+  put( brick( 0xff0000, length, width, width ) )
+      .on( center );
+  put( brick( 0x00ff00, width, width, length ) )
+      .on( center );
+  put( brick( 0x0000ff, width, length, width ) )
+      .on( center );
+  return center;
+}
+
 function textured ( geometry, txt, unshaded, o, s, t ) {
   var material;
   if ( o === undefined ) {
@@ -256,20 +321,21 @@ function shell ( r, slices, rings, phi, theta ) {
   return geom;
 }
 
-  function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, options ) {
-    options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
-    options.fontSize = options.fontSize || 30;
-    options.theme = options.theme || Primrose.Text.Themes.Dark;
-    options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
-    var t = new Primrose.Text.Controls.TextBox( id, options );
-    var o = textured( quad( w, h ), t, true, 0.75 );
-    var p = textured( quad( w, h ), t.getRenderer( )
-        .getPickingTexture( ), true );
-    o.position.set( x, y, z );
-    o.rotation.set( rx, ry, rz );
-    p.position.set( x, y, z );
-    p.rotation.set( rx, ry, rz );
-    scene.add( o );
-    pickingScene.add( p );
-    return o;
-  }
+function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
+    options ) {
+  options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
+  options.fontSize = options.fontSize || 30;
+  options.theme = options.theme || Primrose.Text.Themes.Dark;
+  options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
+  var t = new Primrose.Text.Controls.TextBox( id, options );
+  var o = textured( quad( w, h ), t, true, 0.75 );
+  var p = textured( quad( w, h ), t.getRenderer( )
+      .getPickingTexture( ), true );
+  o.position.set( x, y, z );
+  o.rotation.set( rx, ry, rz );
+  p.position.set( x, y, z );
+  p.rotation.set( rx, ry, rz );
+  scene.add( o );
+  pickingScene.add( p );
+  return o;
+}

@@ -1,6 +1,6 @@
 /* global Primrose, requestAnimationFrame, Leap */
 
-Primrose.Input.LeapMotionInput = ( function () {
+Primrose.Input.LeapMotion = ( function () {
   function processFingerParts ( i ) {
     return LeapMotionInput.FINGER_PARTS.map( function ( p ) {
       return "FINGER" + i + p.toUpperCase();
@@ -9,7 +9,7 @@ Primrose.Input.LeapMotionInput = ( function () {
 
   function LeapMotionInput ( name, commands, socket, oscope ) {
     this.isStreaming = false;
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1,
         LeapMotionInput.AXES );
     this.controller = new Leap.Controller( { enableGestures: true } );
@@ -72,7 +72,7 @@ Primrose.Input.LeapMotionInput = ( function () {
     "FINGER9MCPX", "FINGER9MCPY",
     "FINGER9CARPX", "FINGER9CARPY" ];
 
-  Primrose.Input.ButtonAndAxisInput.inherit( LeapMotionInput );
+  Primrose.Input.ButtonAndAxis.inherit( LeapMotionInput );
 
   LeapMotionInput.CONNECTION_TIMEOUT = 5000;
   LeapMotionInput.prototype.E = function ( e, f ) {

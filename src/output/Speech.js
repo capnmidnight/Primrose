@@ -1,6 +1,6 @@
 /* global Primrose, speechSynthesis */
 
-Primrose.Audio.SpeechOutput = ( function ( ) {
+Primrose.Output.Speech = ( function ( ) {
   function pickRandomOption ( options, key, min, max ) {
     if ( options[key] === undefined ) {
       options[key] = min + ( max - min ) * Math.random( );

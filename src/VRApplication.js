@@ -3,33 +3,37 @@ Primrose.VRApplication = ( function () {
   /*
    Create a new VR Application!
 
-   `name` - name the application, for use with saving settings separately from other applications on the same domain
+   `name` - name the application, for use with saving settings separately from
+   other applications on the same domain
    `sceneModel` - the scene to present to the user, in COLLADA format
    `buttonModel` - the model to use to make buttons, in COLLADA format
    `buttonOptions` - configuration parameters for buttons
-   `maxThrow` - the distance the button may move
-   `minDeflection` - the angle boundary in which to do hit tests on the button
-   `colorUnpressed` - the color of the button when it is not depressed
-   `colorPressed` - the color of the button when it is depressed
+   | `maxThrow` - the distance the button may move
+   | `minDeflection` - the angle boundary in which to do hit tests on the button
+   | `colorUnpressed` - the color of the button when it is not depressed
+   | `colorPressed` - the color of the button when it is depressed
    `avatarModel` - the model to use for players in the game, in COLLADA format
    `avatarHeight` - the offset from the ground at which to place the camera
    `walkSpeed` - how quickly the avatar moves across the ground
    `clickSound` - the sound that plays when the user types
    `ambientSound` - background hum or music
    `options` - optional values to override defaults
-   `gravity` - the acceleration applied to falling objects (default: 9.8)
-   `backgroundColor` - the color that WebGL clears the background with before drawing (default: 0x000000)
-   `drawDistance` - the far plane of the camera (default: 500)
-   `chatTextSize` - the size of a single line of text, in world units (default: 0.25)
-   `dtNetworkUpdate` - the amount of time to allow to elapse between sending state to teh server (default: 0.125)
+   | `gravity` - the acceleration applied to falling objects (default: 9.8)
+   | `backgroundColor` - the color that WebGL clears the background with before
+   drawing (default: 0x000000)
+   | `drawDistance` - the far plane of the camera (default: 500)
+   | `chatTextSize` - the size of a single line of text, in world units
+   (default: 0.25)
+   | `dtNetworkUpdate` - the amount of time to allow to elapse between sending
+   state to teh server (default: 0.125)
    */
   function VRApplication ( name, sceneModel, buttonModel, buttonOptions,
       avatarModel, avatarHeight, walkSpeed, clickSound, ambientSound,
       options ) {
-    Primrose.Application.call( this, name );
-    this.options = combineDefaults( options, VRApplication );
+    Primrose.Application.call( this, name, options );
+    this.options = combineDefaults( this.options, VRApplication );
     this.listeners = { ready: [ ], update: [ ] };
-    this.glove = new HapticGloveOutput();
+    this.glove = new Primrose.Output.HapticGlove();
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
     this.cameraMount = new THREE.Object3D();
@@ -44,7 +48,7 @@ Primrose.VRApplication = ( function () {
     //
     // speech input
     //
-    this.speech = new Primrose.SpeechInput( "speech", [
+    this.speech = new Primrose.Input.Speech( "speech", [
       { name: "options", keywords: [ "options" ],
         commandUp: this.toggleOptions.bind( this ) },
       { name: "chat", preamble: true, keywords: [ "message" ],
@@ -56,24 +60,24 @@ Primrose.VRApplication = ( function () {
     //
     // keyboard input
     //
-    this.keyboard = new Primrose.KeyboardInput( "keyboard", window, [
-      { name: "strafeLeft", buttons: [ -Primrose.KeyboardInput.A,
-          -Primrose.KeyboardInput.LEFTARROW ] },
-      { name: "strafeRight", buttons: [ Primrose.KeyboardInput.D,
-          Primrose.KeyboardInput.RIGHT ]
+    this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
+      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
+          -Primrose.Input.Keyboard.LEFTARROW ] },
+      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
+          Primrose.Input.Keyboard.RIGHT ]
       },
-      { name: "driveForward", buttons: [ -Primrose.KeyboardInput.W,
-          -Primrose.KeyboardInput.UPARROW ] },
-      { name: "driveBack", buttons: [ Primrose.KeyboardInput.S,
-          Primrose.KeyboardInput.DOWNARROW
+      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
+          -Primrose.Input.Keyboard.UPARROW ] },
+      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
+          Primrose.Input.Keyboard.DOWNARROW
         ] },
-      { name: "jump", buttons: [ Primrose.KeyboardInput.SPACEBAR ],
+      { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
         commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "camera", buttons: [ Primrose.KeyboardInput.C ] },
-      { name: "debug", buttons: [ Primrose.KeyboardInput.X ] },
-      { name: "resetPosition", buttons: [ Primrose.KeyboardInput.P ],
+      { name: "camera", buttons: [ Primrose.Input.Keyboard.C ] },
+      { name: "debug", buttons: [ Primrose.Input.Keyboard.X ] },
+      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ],
         commandUp: this.resetPosition.bind( this ) },
-      { name: "chat", preamble: true, buttons: [ Primrose.KeyboardInput.T ],
+      { name: "chat", preamble: true, buttons: [ Primrose.Input.Keyboard.T ],
         commandUp: this.showTyping.bind( this, true ) }
     ], this.proxy );
     this.keyboard.pause( true );
@@ -81,8 +85,8 @@ Primrose.VRApplication = ( function () {
     //
     // mouse input
     //
-    this.mouse = new Primrose.MouseInput( "mouse", this.fullscreenElement, [
-      { name: "dx", axes: [ -Primrose.MouseInput.X ], delta: true, scale: 0.5
+    this.mouse = new Primrose.Input.Mouse( "mouse", this.fullscreenElement, [
+      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
       },
       { name: "heading", commands: [ "dx" ], metaKeys: [
           -Primrose.NetworkedInput.SHIFT
@@ -91,7 +95,7 @@ Primrose.VRApplication = ( function () {
           Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI *
             0.2,
         max: Math.PI * 0.2 },
-      { name: "dy", axes: [ -Primrose.MouseInput.Y ], delta: true, scale: 0.5
+      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
       },
       { name: "pitch", commands: [ "dy" ], metaKeys: [
           -Primrose.NetworkedInput.SHIFT ],
@@ -100,7 +104,7 @@ Primrose.VRApplication = ( function () {
           Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI *
             0.125,
         max: Math.PI * 0.125 },
-      { name: "dz", axes: [ Primrose.MouseInput.Z ], delta: true },
+      { name: "dz", axes: [ Primrose.Input.Mouse.Z ], delta: true },
       { name: "pointerDistance", commands: [ "dz" ], integrate: true,
         scale: 0.1, min: 0, max: 10 },
       { name: "pointerPress", buttons: [ 1 ], integrate: true, scale: 100,
@@ -110,45 +114,50 @@ Primrose.VRApplication = ( function () {
     //
     // capacitive touch screen input
     //
-    this.touch = new Primrose.TouchInput( "touch", this.fullscreenElement,
+    this.touch = new Primrose.Input.Touch( "touch", this.fullscreenElement,
         null, [
-          { name: "heading", axes: [ Primrose.TouchInput.DX0 ], integrate: true
+          { name: "heading", axes: [ Primrose.Input.Touch.DX0 ],
+            integrate: true
           },
-          { name: "drive", axes: [ -Primrose.TouchInput.DY0 ] }
+          { name: "drive", axes: [ -Primrose.Input.Touch.DY0 ] }
         ], this.proxy );
 
     //
     // smartphone orientation sensor-based head tracking
     //
-    this.head = new Primrose.MotionInput( "head", [
-      { name: "pitch", axes: [ Primrose.MotionInput.PITCH ] },
-      { name: "heading", axes: [ -Primrose.MotionInput.HEADING ] },
-      { name: "roll", axes: [ -Primrose.MotionInput.ROLL ] }
+    this.head = new Primrose.Input.Motion( "head", [
+      { name: "pitch", axes: [ Primrose.Input.Motion.PITCH ] },
+      { name: "heading", axes: [ -Primrose.Input.Motion.HEADING ] },
+      { name: "roll", axes: [ -Primrose.Input.Motion.ROLL ] }
     ], this.proxy );
 
     //
     // VR HEAD MOUNTED DISPLAY OOOOOH YEAH!
     //
-    this.vr = new Primrose.VRInput( "hmd", [
-      { name: "pitch", axes: [ Primrose.VRInput.RX ] },
-      { name: "heading", axes: [ Primrose.VRInput.RY ] },
-      { name: "roll", axes: [ Primrose.VRInput.RZ ] },
-      { name: "homogeneous", axes: [ Primrose.VRInput.RW ] }
-    ], this.ctrls.hmdListing, this.formState && this.formState.hmdListing ||
-        "" );
+    this.vr = new Primrose.Input.VR(
+        "hmd",
+        [
+          { name: "pitch", axes: [ Primrose.Input.VR.RX ] },
+          { name: "heading", axes: [ Primrose.Input.VR.RY ] },
+          { name: "roll", axes: [ Primrose.Input.VR.RZ ] },
+          { name: "homogeneous", axes: [ Primrose.Input.VR.RW ] }
+        ],
+        this.ctrls.hmdListing,
+        this.formState && this.formState.hmdListing || "" );
 
-    this.ctrls.hmdListing.addEventListener( "change", this.changeHMD.bind(
-        this ) );
+    this.ctrls.hmdListing.addEventListener(
+        "change",
+        this.changeHMD.bind( this ) );
 
     //
     // gamepad input
     //
-    this.gamepad = new Primrose.GamepadInput( "gamepad", [
-      { name: "strafe", axes: [ Primrose.GamepadInput.LSX ] },
-      { name: "drive", axes: [ Primrose.GamepadInput.LSY ] },
-      { name: "heading", axes: [ -Primrose.GamepadInput.RSX ], integrate: true
+    this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
+      { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
+      { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
       },
-      { name: "pitch", axes: [ Primrose.GamepadInput.RSY ], integrate: true },
+      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true },
       { name: "options", buttons: [ 9 ], commandUp: this.toggleOptions.bind(
             this ) }
     ], this.proxy );
@@ -159,12 +168,12 @@ Primrose.VRApplication = ( function () {
     //
     // geolocation input
     //
-    this.location = new Primrose.LocationInput( "location", [ ], this.proxy );
+    this.location = new Primrose.Input.Location( "location", [ ], this.proxy );
 
     //
     // passthrough camera
     //
-    this.passthrough = new Primrose.CameraInput( this.ctrls.cameraListing,
+    this.passthrough = new Primrose.Input.Camera( this.ctrls.cameraListing,
         this.formState && this.formState.cameraListing || "", 1, 0, 0, -1 );
     this.ctrls.cameraListing.addEventListener( "change", function () {
       this.passthrough.connect( this.ctrls.cameraListing.value );
@@ -175,15 +184,15 @@ Primrose.VRApplication = ( function () {
     //
     var leapCommands = [ ];
     leapCommands.push( { name: "HAND0X", axes: [
-        Primrose.LeapMotionInput.HAND0X ],
+        Primrose.Input.LeapMotion.HAND0X ],
       scale: -0.015 } );
     leapCommands.push( { name: "HAND0Y", axes: [
-        Primrose.LeapMotionInput.HAND0Y ],
+        Primrose.Input.LeapMotion.HAND0Y ],
       scale: 0.015, offset: -4 } );
     leapCommands.push( { name: "HAND0Z", axes: [
-        Primrose.LeapMotionInput.HAND0Z ],
+        Primrose.Input.LeapMotion.HAND0Z ],
       scale: -0.015, offset: 3 } );
-    this.leap = new Primrose.LeapMotionInput( "leap", leapCommands,
+    this.leap = new Primrose.Input.LeapMotion( "leap", leapCommands,
         this.proxy );
 
     //
@@ -329,7 +338,7 @@ Primrose.VRApplication = ( function () {
     //
     // Setup audio
     //
-    this.audio = new Audio3DOutput();
+    this.audio = new Audio3D();
     this.audio.loadBuffer( clickSound, null, function ( buffer ) {
       this.clickSound = buffer;
     }.bind( this ) );
@@ -384,13 +393,13 @@ Primrose.VRApplication = ( function () {
         this ), false );
 
     window.addEventListener( "mousemove", function () {
-      if ( !Primrose.MouseInput.isPointerLocked() ) {
+      if ( !Primrose.Input.Mouse.isPointerLocked() ) {
         this.showOnscreenControls();
       }
     }.bind( this ), false );
 
     window.addEventListener( "keyup", function ( evt ) {
-      if ( evt.keyCode === Primrose.KeyboardInput.GRAVEACCENT ) {
+      if ( evt.keyCode === Primrose.Input.Keyboard.GRAVEACCENT ) {
         this.toggleOptions();
       }
     }.bind( this ), false );
@@ -1222,33 +1231,6 @@ Primrose.VRApplication = ( function () {
 
     this.wasFocused = this.focused;
   };
-
-
-
-
-  function obj3 () {
-    var obj = new THREE.Object3D();
-    for ( var i = 0; i < arguments.length; ++i ) {
-      obj.add( arguments[i] );
-    }
-    return obj;
-  }
-
-  function box ( x, y, z, c ) {
-    var geom = new THREE.BoxGeometry( x, y, z );
-    var mat = new THREE.MeshBasicMaterial( { color: c } );
-    var mesh = new THREE.Mesh( geom, mat );
-    mesh.position.set( x / 2, y / 2, z / 2 );
-    return mesh;
-  }
-
-  function axis ( length, width ) {
-    return obj3(
-        box( length, width, width, 0xff0000 ),
-        box( width, width, length, 0x00ff00 ),
-        box( width, length, width, 0x0000ff )
-        );
-  }
 
   return VRApplication;
 } )();

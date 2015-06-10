@@ -1,8 +1,8 @@
 /* global Primrose */
-Primrose.Input.LocationInput = ( function () {
+Primrose.Input.Location = ( function () {
   function LocationInput ( name, commands, socket, options, oscope ) {
     this.options = combineDefaults( options, LocationInput );
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         LocationInput.AXES );
     this.available = !!navigator.geolocation;
     if ( this.available ) {
@@ -16,7 +16,7 @@ Primrose.Input.LocationInput = ( function () {
   }
   LocationInput.AXES = [ "LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING",
     "SPEED" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( LocationInput );
+  Primrose.Input.ButtonAndAxis.inherit( LocationInput );
 
   LocationInput.DEFAULTS = {
     enableHighAccuracy: true,

@@ -1,9 +1,9 @@
 /* global Primrose */
 
-Primrose.Input.MouseInput = ( function () {
+Primrose.Input.Mouse = ( function () {
   function MouseInput ( name, DOMElement, commands, socket, oscope ) {
     DOMElement = DOMElement || window;
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 1, MouseInput.AXES );
 
     this.setLocation = function ( x, y ) {
@@ -123,6 +123,6 @@ Primrose.Input.MouseInput = ( function () {
         document.mozPointerLockElement );
   };
   MouseInput.AXES = [ "X", "Y", "Z" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( MouseInput );
+  Primrose.Input.ButtonAndAxis.inherit( MouseInput );
   return MouseInput;
 } )();

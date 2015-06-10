@@ -1,7 +1,7 @@
 /* global Primrose, HMDVRDevice, PositionSensorVRDevice */
-Primrose.Input.VRInput = ( function () {
+Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, elem, selectedID ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, null, null,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null,
         1,
         VRInput.AXES );
     this.devices = { };
@@ -25,7 +25,7 @@ Primrose.Input.VRInput = ( function () {
     "RVX", "RVY", "RVZ",
     "RAX", "RAY", "RAZ"
   ];
-  Primrose.Input.ButtonAndAxisInput.inherit( VRInput );
+  Primrose.Input.ButtonAndAxis.inherit( VRInput );
 
   VRInput.prototype.update = function ( dt ) {
     if ( this.sensor ) {
@@ -54,7 +54,7 @@ Primrose.Input.VRInput = ( function () {
       this.setAxis( "RAY", state.angularAcceleration.y );
       this.setAxis( "RAZ", state.angularAcceleration.z );
     }
-    Primrose.Input.ButtonAndAxisInput.prototype.update.call( this, dt );
+    Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
   };
 
   VRInput.prototype.enumerateVRDevices = function ( elem, selectedID,

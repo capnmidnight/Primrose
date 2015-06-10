@@ -4,7 +4,8 @@ var DEBUG_VR = false;
 
 function StartDemo ( ) {
   "use strict";
-  var vrParams,
+  var application = new Primrose.VRApplication(),
+      vrParams,
       vrDisplay,
       vrSensor,
       lastMouseX,

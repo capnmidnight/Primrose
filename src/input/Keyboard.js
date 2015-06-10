@@ -1,6 +1,6 @@
 /* global Primrose */
 
-Primrose.Input.KeyboardInput = ( function () {
+Primrose.Input.Keyboard = ( function () {
   function makeCommand ( thisObj, cmd ) {
     return function ( update ) {
       textEntry = true;
@@ -22,7 +22,7 @@ Primrose.Input.KeyboardInput = ( function () {
       }
     }
 
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
         oscope, 0, 0 );
 
     var textEntry = false,
@@ -97,7 +97,7 @@ Primrose.Input.KeyboardInput = ( function () {
     DOMElement.addEventListener( "keyup", execute.bind( this, false ), false );
   }
 
-  Primrose.Input.ButtonAndAxisInput.inherit( KeyboardInput );
+  Primrose.Input.ButtonAndAxis.inherit( KeyboardInput );
 
   KeyboardInput.BACKSPACE = 8;
   KeyboardInput.TAB = 9;

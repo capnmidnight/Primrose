@@ -1,8 +1,8 @@
 /* global Primrose */
 
-Primrose.Input.GamepadInput = ( function () {
+Primrose.Input.Gamepad = ( function () {
   function GamepadInput ( name, commands, socket, oscope, gpid ) {
-    Primrose.Input.ButtonAndAxisInput.call( this, name, commands, socket, oscope, 1,
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
         GamepadInput.AXES, true );
     var connectedGamepads = [ ],
         listeners = {
@@ -136,6 +136,6 @@ Primrose.Input.GamepadInput = ( function () {
   }
 
   GamepadInput.AXES = [ "LSX", "LSY", "RSX", "RSY" ];
-  Primrose.Input.ButtonAndAxisInput.inherit( GamepadInput );
+  Primrose.Input.ButtonAndAxis.inherit( GamepadInput );
   return GamepadInput;
 } )();
