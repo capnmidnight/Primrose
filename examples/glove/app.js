@@ -2,35 +2,6 @@
 
 var DEBUG_VR = false;
 
-function clearKeyOption ( evt ) {
-  this.value = "";
-  this.dataset.keycode = "";
-}
-
-function setKeyOption ( elemArr, evt ) {
-  this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.Text.Keys[evt.keyCode];
-  this.value = this.value.toLocaleLowerCase()
-      .replace( "arrow", "" );
-  this.blur( );
-  var text = elemArr.map( function ( e ) {
-    return e.value.toLocaleUpperCase();
-  } )
-      .join( ", " );
-  if ( text.length === 10 ) {
-    text = text.replace( /, /g, "" );
-  }
-  document.getElementById( "keyControlNote" ).innerHTML = text;
-}
-
-function setupKeyOption ( elemArr, index, char, code ) {
-  var elem = elemArr[index];
-  elem.value = char.toLocaleLowerCase( );
-  elem.dataset.keycode = code;
-  elem.addEventListener( "keydown", clearKeyOption );
-  elem.addEventListener( "keyup", setKeyOption.bind( elem, elemArr ) );
-}
-
 function StartDemo ( ) {
   "use strict";
   var vrParams,
@@ -63,6 +34,12 @@ function StartDemo ( ) {
       subScene = new THREE.Object3D( ),
       pickingScene = new THREE.Scene( ),
       ctrls = findEverything( ),
+      keyOptionControls = [
+        ctrls.forwardKey,
+        ctrls.leftKey,
+        ctrls.backKey,
+        ctrls.rightKey
+      ],
       camera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
           ctrls.output.height, 0.1, 1000 ),
       back = new THREE.WebGLRenderTarget( ctrls.output.width,
@@ -182,17 +159,10 @@ function StartDemo ( ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  var keyOptionControls = [
-    ctrls.forwardKey,
-    ctrls.leftKey,
-    ctrls.backKey,
-    ctrls.rightKey
-  ];
-
-  setupKeyOption( keyOptionControls, 0, "W", 87 );
-  setupKeyOption( keyOptionControls, 1, "A", 65 );
-  setupKeyOption( keyOptionControls, 2, "S", 83 );
-  setupKeyOption( keyOptionControls, 3, "D", 68 );
+  setupKeyOption( ctrls.keyControlNote, keyOptionControls, 0, "W", 87 );
+  setupKeyOption( ctrls.keyControlNote, keyOptionControls, 1, "A", 65 );
+  setupKeyOption( ctrls.keyControlNote, keyOptionControls, 2, "S", 83 );
+  setupKeyOption( ctrls.keyControlNote, keyOptionControls, 3, "D", 68 );
 
   ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
       ctrls.output ) );
