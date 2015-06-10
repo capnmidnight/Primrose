@@ -15,23 +15,35 @@ module.exports = function ( grunt ) {
   var execConfig = { },
       copyConfig = { };
 
-  function depend ( name, rootDir, buildDir, buildCmd, binDir ) {
-    if ( fs.existsSync( rootDir ) ) {
-      console.log( "including " + name );
-      execConfig["build_" + name] = "cd " + rootDir + "/" + buildDir + " && " +
-          buildCmd;
+  function copyFile ( name, fileName ) {
+    if ( fs.existsSync( fileName ) ) {
       copyConfig["copy_" + name] = {
         files: [
-          { expand: true, flatten: true, src: [ rootDir + "/" + binDir + "/*"
-            ],
-            dest: 'lib/', filter: 'isFile' }
+          {
+            expand: true,
+            flatten: true,
+            src: [ fileName ],
+            dest: 'lib/',
+            filter: 'isFile'
+          }
         ]
       };
     }
   }
 
+  function depend ( name, rootDir, buildDir, buildCmd, binDir ) {
+    if ( fs.existsSync( rootDir ) ) {
+      console.log( "including " + name );
+      execConfig["build_" + name] = "cd " + rootDir + "/" + buildDir + " && " +
+          buildCmd;
+      copyFile( name, rootDir + "/" + binDir + "/*" );
+    }
+  }
+
   depend( "THREE", "../three.js", "utils/build", "build.bat", "build" );
   depend( "cannon.js", "../cannon.js", "", "grunt", "build" );
+  copyFile( "THREE/ColladaLoader",
+      "../three.js/examples/js/loaders/ColladaLoader.js" );
 
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),

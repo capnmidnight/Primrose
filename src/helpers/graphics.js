@@ -1,5 +1,5 @@
-/* global THREE */
-var startWithVR = ( function () {
+/* global THREE, Primrose */
+var findVR = ( function () {
   "use strict";
 
   function gotVRDevices ( thunk, devices ) {
@@ -20,7 +20,7 @@ var startWithVR = ( function () {
     thunk( vrDisplay, vrSensor );
   }
 
-  function startWithVR ( thunk ) {
+  function findVR ( thunk ) {
     if ( navigator.getVRDevices ) {
       navigator.getVRDevices()
           .then( gotVRDevices.bind( window, thunk ) )
@@ -32,7 +32,7 @@ var startWithVR = ( function () {
       thunk();
     }
   }
-  return startWithVR;
+  return findVR;
 } )();
 
 function InsideSphereGeometry ( radius, widthSegments, heightSegments,
@@ -159,3 +159,117 @@ if ( typeof window.THREE !== "undefined" ) {
   InsideSphereGeometry.prototype = Object.create( THREE.Geometry.prototype );
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
+
+function textured ( geometry, txt, unshaded, o, s, t ) {
+  var material;
+  if ( o === undefined ) {
+    o = 1;
+  }
+
+  if ( typeof txt === "number" ) {
+    if ( unshaded ) {
+      material = new THREE.MeshBasicMaterial( {
+        transparent: true,
+        color: txt,
+        opacity: o,
+        shading: THREE.FlatShading
+      } );
+    }
+    else {
+      material = new THREE.MeshLambertMaterial( {
+        transparent: true,
+        color: txt,
+        opacity: o
+      } );
+    }
+  }
+  else {
+    var texture;
+    if ( typeof txt === "string" ) {
+      texture = THREE.ImageUtils.loadTexture( txt );
+    }
+    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
+      texture = txt.getRenderer( )
+          .getTexture( );
+    }
+    else {
+      texture = txt;
+    }
+
+    if ( unshaded ) {
+      material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        map: texture,
+        transparent: true,
+        shading: THREE.FlatShading,
+        side: THREE.DoubleSide,
+        opacity: o
+      } );
+    }
+    else {
+      material = new THREE.MeshLambertMaterial( {
+        color: 0xffffff,
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        opacity: o
+      } );
+    }
+
+    if ( s * t > 1 ) {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set( s, t );
+    }
+  }
+
+  var obj = null;
+  if ( geometry.type.indexOf( "Geometry" ) > -1 ) {
+    obj = new THREE.Mesh( geometry, material );
+  }
+  else if ( geometry instanceof THREE.Object3D ) {
+    geometry.material = material;
+    obj = geometry;
+  }
+
+  if ( txt instanceof Primrose.Text.Controls.TextBox ) {
+    obj.editor = txt;
+  }
+
+  return obj;
+}
+
+function sphere ( r, slices, rings ) {
+  return new THREE.SphereGeometry( r, slices, rings );
+}
+
+function shell ( r, slices, rings, phi, theta ) {
+  if ( phi === undefined ) {
+    phi = Math.PI * 0.5;
+  }
+  if ( theta === undefined ) {
+    theta = Math.PI * 0.5;
+  }
+  var phiStart = Math.PI + phi * 0.5,
+      thetaStart = ( Math.PI - theta ) * 0.5,
+      geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
+          thetaStart, theta, true );
+  return geom;
+}
+
+  function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, options ) {
+    options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
+    options.fontSize = options.fontSize || 30;
+    options.theme = options.theme || Primrose.Text.Themes.Dark;
+    options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
+    var t = new Primrose.Text.Controls.TextBox( id, options );
+    var o = textured( quad( w, h ), t, true, 0.75 );
+    var p = textured( quad( w, h ), t.getRenderer( )
+        .getPickingTexture( ), true );
+    o.position.set( x, y, z );
+    o.rotation.set( rx, ry, rz );
+    p.position.set( x, y, z );
+    p.rotation.set( rx, ry, rz );
+    scene.add( o );
+    pickingScene.add( p );
+    return o;
+  }

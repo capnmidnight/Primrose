@@ -3,21 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
-    <title>Primrose: Canvas-based text editor</title>
+    <title>Haptic Glove</title>
+
     <script src="../../lib/three.min.js" type="text/javascript"></script>
+    <script src="../../lib/ColladaLoader.js" type="text/javascript"></script>
+    <script src="../../lib/cannon.min.js" type="text/javascript"></script>
 
     <script src="../../core.js" type="text/javascript"></script>
-
-    <script src="../../src/Application.js" type="text/javascript"></script>
-    <script src="../../src/Button.js" type="text/javascript"></script>
-    <script src="../../src/ButtonFactory.js" type="text/javascript"></script>
-    <script src="../../src/ModelLoader.js" type="text/javascript"></script>
-    <script src="../../src/NetworkedInput.js" type="text/javascript"></script>
-    <script src="../../src/VRApplication.js" type="text/javascript"></script>
-    <script src="../../src/WebRTCSocket.js" type="text/javascript"></script>
-
-    <script src="../../src/audio/Audio3DOutput.js" type="text/javascript"></script>
-    <script src="../../src/audio/SpeechOutput.js" type="text/javascript"></script>
 
     <script src="../../src/helpers/DOM.js" type="text/javascript"></script>
     <script src="../../src/helpers/arrays.js" type="text/javascript"></script>
@@ -32,6 +24,17 @@
     <script src="../../src/helpers/polyfills.js" type="text/javascript"></script>
     <script src="../../src/helpers/requests.js" type="text/javascript"></script>
     <script src="../../src/helpers/reverse.js" type="text/javascript"></script>
+
+    <script src="../../src/Application.js" type="text/javascript"></script>
+    <script src="../../src/Button.js" type="text/javascript"></script>
+    <script src="../../src/ButtonFactory.js" type="text/javascript"></script>
+    <script src="../../src/ModelLoader.js" type="text/javascript"></script>
+    <script src="../../src/NetworkedInput.js" type="text/javascript"></script>
+    <script src="../../src/VRApplication.js" type="text/javascript"></script>
+    <script src="../../src/WebRTCSocket.js" type="text/javascript"></script>
+
+    <script src="../../src/audio/Audio3DOutput.js" type="text/javascript"></script>
+    <script src="../../src/audio/SpeechOutput.js" type="text/javascript"></script>
 
     <script src="../../src/input/ButtonAndAxisInput.js" type="text/javascript"></script>
     <script src="../../src/input/CameraInput.js" type="text/javascript"></script>
@@ -87,35 +90,31 @@
 
     <link type="text/css" rel="stylesheet" href="style.css">
   </head>
-  <body onload="findVR(PrimroseDemo)">
+  <body onload="StartDemo()">
     <div id="outputContainer">
       <canvas id="output"></canvas>
     </div>
 
     <article id="main">
+
       <a class="primary button" id="goVR">
         <div id="fullScreenMsg">Go VR!</div>
         <small>hit ESC to exit.</small>
       </a>
+
       <a class="primary button" id="goRegular">
         Go full-screen<br>
         <small>hit ESC to exit.</small>
       </a>
+
       <p id="nightly">Use with <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a> or
         <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chrome WebVR</a>
         to view in virtual reality! Read more about WebVR at <a href="http://mozvr.com/" target="_blank">MozVR.com</a></p>
 
       <h2>Instructions:</h2>
       <ul>
-        <li>Use a one-finger drag or mouse to interact with editor.</li>
-        <li>Use a two-finger drag or keyboard (default <kbd>WASD</kbd>) to navigate.</li>
-        <li>Use a three-finger drag or <kbd>SHIFT+mouse</kbd> to look around</li>
-        <li>Click on the editor objects start editing.</li>
-        <li>Use common keyboard controls to edit the text.</li>
-        <li>Code executes automatically after 500ms.</li>
-        <li>Click off from an editor object to exit editing, or hit <kbd><span class="cmdLabel">+E</kbd> to show/hide editor.</li>
-        <li><kbd><span class="cmdLabel"></span>+Up-Arrow</kbd> to increase font size.</li>
-        <li><kbd><span class="cmdLabel"></span>+Down-Arrow</kbd> to decrease font size.</li>
+        <li>Use the keyboard (<kbd id="keyControlNote">WASD</kbd>) to navigate.</li>
+        <li>Use <kbd>SHIFT+mouse</kbd> to look around</li>
       </ul>
       <table id="settings">
         <thead>

@@ -1,181 +1,41 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
-var log = null,
-    GRASS = THREE.ImageUtils.loadTexture("../images/grass.png"),
-    ROCK = THREE.ImageUtils.loadTexture("../images/rock.png"),
-    SAND = THREE.ImageUtils.loadTexture("../images/sand.png"),
-    WATER = THREE.ImageUtils.loadTexture("../images/water.png"),
-    DECK = THREE.ImageUtils.loadTexture("../images/deck.png");
+
+var DEBUG_VR = false;
 
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
 }
 
-function setKeyOption ( evt ) {
+function setKeyOption ( elemArr, evt ) {
   this.dataset.keycode = evt.keyCode;
   this.value = this.value || Primrose.Text.Keys[evt.keyCode];
-  this.value = this.value.toLowerCase( )
-      .replace( "arrow", " arrow" );
+  this.value = this.value.toLocaleLowerCase()
+      .replace( "arrow", "" );
   this.blur( );
+  var text = elemArr.map( function ( e ) {
+    return e.value.toLocaleUpperCase();
+  } )
+      .join( ", " );
+  if ( text.length === 10 ) {
+    text = text.replace( /, /g, "" );
+  }
+  document.getElementById( "keyControlNote" ).innerHTML = text;
 }
 
-function setupKeyOption ( elem, char, code ) {
-  elem.value = char.toLowerCase( );
+function setupKeyOption ( elemArr, index, char, code ) {
+  var elem = elemArr[index];
+  elem.value = char.toLocaleLowerCase( );
   elem.dataset.keycode = code;
   elem.addEventListener( "keydown", clearKeyOption );
-  elem.addEventListener( "keyup", setKeyOption );
+  elem.addEventListener( "keyup", setKeyOption.bind( elem, elemArr ) );
 }
 
-function put ( object ) {
-  return {
-    on: function ( s ) {
-      s.add( object );
-      return {
-        at: function ( x, y, z ) {
-          object.position.set( x, y, z );
-          return object;
-        }
-      };
-    }
-  };
-}
-
-function brick ( txt, w, h, l ) {
-  return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
-}
-
-function fill ( txt, w, h, l ) {
-  if ( h === undefined ) {
-    h = 1;
-    if ( l === undefined ) {
-      l = 1;
-      if ( w === undefined ) {
-        w = 1;
-      }
-    }
-  }
-  var point = hub();
-  for ( var y = 0; y < h; ++y ) {
-      put( brick( txt, w, 1, l ) )
-          .on( point )
-          .at( w / 2, y, l / 2 );
-  }
-  return point;
-}
-
-function light ( color, intensity, distance, decay ) {
-  return new THREE.PointLight( color, intensity, distance, decay );
-}
-
-function v3 ( x, y, z ) {
-  return new THREE.Vector3( x, y, z );
-}
-
-function quad ( w, h ) {
-  if ( h === undefined ) {
-    h = w;
-  }
-  return new THREE.PlaneBufferGeometry( w, h );
-}
-
-function box ( w, h, l ) {
-  if ( h === undefined ) {
-    h = w;
-    l = w;
-  }
-  return new THREE.BoxGeometry( w, h, l );
-}
-
-function hub ( ) {
-  return new THREE.Object3D( );
-}
-
-function from ( start ) {
-  return {
-    to: function ( end ) {
-      return {
-        exec: function ( thunk ) {
-          var arr = [ ];
-          for ( var i = start; i < end; ++i ) {
-            arr[i] = thunk( i );
-          }
-          return arr;
-        }
-      };
-    }
-  };
-}
-
-function testDemo ( scene ) {
-  var start = put( hub() )
-      .on( scene )
-      .at( -12, -3, -12 );
-
-  put( fill( WATER, 25, 1, 12 ) )
-      .on( start )
-      .at( 0, 0, 12 );
-
-  for ( var z = 0; z < 12; ++z ) {
-    var x = z;
-    var w = 25 - x;
-    put( fill( GRASS, w, 1, 1 ) )
-        .on( start )
-        .at( 0, 0, z );
-
-    put( fill( SAND, x, 1, 1 ) )
-        .on( start )
-        .at( w, 0, z );
-
-    if ( z < 10 ) {
-      for ( var x = 0; x < 10; ++x ) {
-        h = 10 - Math.sqrt( z * z + x * x );
-        put( fill( ROCK, 1, h, 1 ) )
-            .on( start )
-            .at( x, 1, z );
-      }
-    }
-  }
-
-  var sun = put( hub() )
-      .on( start )
-      .at( 10, 10, -3 );
-  function sunBit () {
-    return textured( box( 1 ), 0xffff00, true, 0.125 );
-  }
-  put( sunBit() )
-      .on( sun )
-      .at( 1, 0, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( -1, 0, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 1, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, -1, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 0, 1 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 0, -1 );
-
-  var t = 0;
-  function update ( dt ) {
-    t += dt * 0.0005;
-    sun.rotation.set( t, t / 2, t / 5 );
-  }
-  log( "ok" );
-  return update;
-}
-
-function PrimroseDemo ( vrDisplay, vrSensor, err ) {
+function StartDemo ( ) {
   "use strict";
-  if ( err ) {
-    console.error( err );
-  }
   var vrParams,
+      vrDisplay,
+      vrSensor,
       lastMouseX,
       lastMouseY,
       lastTouchX,
@@ -186,9 +46,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       lastPointerY,
       currentEditor,
       lastEditor,
-      lastScript,
-      scriptUpdateTimeout,
-      scriptAnimate,
       lt = 0,
       touchCount = 0,
       touchDrive = 0,
@@ -236,7 +93,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       qPitch = new THREE.Quaternion( ),
       qRift = new THREE.Quaternion( ),
       position = new THREE.Vector3( ),
-      src = getSetting( "code", testDemo.toString( ) ),
       translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
       viewports = [ new THREE.Box2(), new THREE.Box2() ];
 
@@ -249,125 +105,52 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     b.max.set( r.x + r.width, r.y + r.height );
   }
 
-  if ( vrDisplay ) {
-    if ( vrDisplay.getEyeParameters ) {
-      vrParams = {
-        left: vrDisplay.getEyeParameters( "left" ),
-        right: vrDisplay.getEyeParameters( "right" )
-      };
-    }
-    else {
-      vrParams = {
-        left: {
-          renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
-          eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
-          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
-              "left" )
-        },
-        right: {
-          renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
-          eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
-          recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
-              "right" )
+  function checkForVR () {
+    findVR( function ( display, sensor ) {
+      if ( display && ( display.deviceName !== "Mockulus Rift" ||
+          DEBUG_VR ) ) {
+        vrDisplay = display;
+        vrSensor = sensor;
+      }
+
+      if ( !vrDisplay ) {
+        ctrls.goVR.style.display = "none";
+        setTimeout( checkForVR, 5000 );
+      }
+      else {
+        ctrls.goVR.style.display = "inline-block";
+        if ( vrDisplay.getEyeParameters ) {
+          vrParams = {
+            left: vrDisplay.getEyeParameters( "left" ),
+            right: vrDisplay.getEyeParameters( "right" )
+          };
         }
-      };
-    }
+        else {
+          vrParams = {
+            left: {
+              renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
+              eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
+              recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+                  "left" )
+            },
+            right: {
+              renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
+              eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
+              recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+                  "right" )
+            }
+          };
+        }
 
-    setTrans( translations[0], vrParams.left.eyeTranslation );
-    setTrans( translations[1], vrParams.right.eyeTranslation );
-    setView( viewports[0], vrParams.left.renderRect );
-    setView( viewports[1], vrParams.right.renderRect );
+        setTrans( translations[0], vrParams.left.eyeTranslation );
+        setTrans( translations[1], vrParams.right.eyeTranslation );
+        setView( viewports[0], vrParams.left.renderRect );
+        setView( viewports[1], vrParams.right.renderRect );
+      }
+    } );
   }
 
-  if ( src === testDemo.toString( ) ) {
-    var lines = src.replace( "\r\n", "\n" )
-        .split( "\n" );
-    lines.pop( );
-    lines.shift( );
-    for ( var i = 0; i < lines.length; ++i ) {
-      lines[i] = lines[i].substring( 2 );
-    }
-    src = lines.join( "\n" );
-  }
-
-  var output = makeEditor( scene, pickingScene, "outputBox",
-      1, 0.25, 0, -0.59, 6.09, -Math.PI / 4, 0, 0,
-      {
-        readOnly: true,
-        hideLineNumbers: true
-      } ),
-      documentation = makeEditor( scene, pickingScene, "docBox",
-          1, 1, 0.85, 0, 6.35, 0, -Math.PI / 4, 0,
-          {
-            readOnly: true,
-            hideLineNumbers: true,
-            fontSize: 20,
-            file: "functions:\n\
-  log( msg );\n\
-    print a message to the window below the editor.\n\
-\n\
-  put( objectA ).on( objectB )[.at( x, y, z )];\n\
-    objectA: a THREE.Object3D to be added to another,\n\
-    objectB: a THREE.Object3D where objectA will be added,\n\
-    x, y, z: a location to set for objectA relative to objectB\n\
-\n\
-  light( color [, intensity[, distance[, decay]]] );\n\
-    creates a THREE.PointLight with the same parameters.\n\
-\n\
-  brick( txtName );\n\
-    creates a textured cube with the named texture, one of:\n\
-      [SAND, WATER, ROCK, GRASS, DECK].\n\
-\n\
-  quad( width[, height] );\n\
-    creates a THREE.PlaneBufferGeometry with the same parameters.\n\
-    if height is undefined, height is set to width (square).\n\
-\n\
-  box( width[, height, length] );\n\
-    creates a THREE.BoxGeometry with the same parameters.\n\
-    if height is undefined, height and length are set to width (cube).\n\
-\n\
-  hub( );\n\
-    creates a raw THREE.Object3D. Useful for combining objects.\n\
-\n\
-  sphere( radius[, slices, rings] );\n\
-    creates a THREE.SphereGeometry with the same parameters.\n\
-\n\
-  shell( radius[, slices, rings[, phi, theta]] );\n\
-    creates a portion of the inside surface of a sphere.\n\
-\n\
-  from( start ).to( end ).exec( thunk );\n\
-    iterates on the range [start, end), passing the index as the parameter\n\
-    to thunk, accumulating an array of thunk's return value.\n\
-\n\
-  textured( geometry, txt[, unshaded[, opacity[, txtRepeatS, txtRepeatT]]] );\n\
-    geometry: a THREE.Geometry object\n\
-    txt: a material definition of some kind. It could be a:\n\
-      number - a solid hex color\n\
-      string - a path to a texture image\n\
-      Primrose.Text.Controls.TextBox - a text editor\n\
-    unshaded: set to true to use constant lighting (default false)\n\
-    opacity: 1 - opaque, 0 - transparent (default 1).\n\
-    txtRepeatS: texture repeat in S direction (default 1).\n\
-    txtRepeat: texture repeat in T direction (default 1)"
-          } ),
-      editor = makeEditor( scene, pickingScene, "textEditor",
-          1, 1, 0, 0, 6, 0, 0, 0,
-          {
-            tokenizer: Primrose.Text.Grammars.JavaScript,
-            file: src
-          } );
-
-  log = function (  ) {
-    if ( output.editor ) {
-      var msg = Array.prototype.join.call( arguments, ", " );
-      output.editor.value += msg + "\n";
-      output.editor.selectionStart = output.editor.selectionEnd = output.editor.value.length;
-      output.editor.scrollIntoView( output.editor.frontCursor );
-      output.editor.forceUpdate( );
-    }
-  };
-
-  log( fmt( "$1+E to show/hide editor", cmdPre ) );
+  checkForVR();
 
   back.generateMipMaps = false;
 
@@ -386,12 +169,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   } );
   window.addEventListener( "wheel", mouseWheel );
   window.addEventListener( "paste", paste );
-  window.addEventListener( "unload", function ( ) {
-    var script = editor.editor.value;
-    if ( script.length > 0 ) {
-      setSetting( "code", script );
-    }
-  } );
 
   window.addEventListener( "mousedown", mouseDown );
   window.addEventListener( "mousemove", mouseMove );
@@ -405,14 +182,20 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  setupKeyOption( ctrls.leftKey, "A", 65 );
-  setupKeyOption( ctrls.rightKey, "D", 68 );
-  setupKeyOption( ctrls.forwardKey, "W", 87 );
-  setupKeyOption( ctrls.backKey, "S", 83 );
+  var keyOptionControls = [
+    ctrls.forwardKey,
+    ctrls.leftKey,
+    ctrls.backKey,
+    ctrls.rightKey
+  ];
+
+  setupKeyOption( keyOptionControls, 0, "W", 87 );
+  setupKeyOption( keyOptionControls, 1, "A", 65 );
+  setupKeyOption( keyOptionControls, 2, "S", 83 );
+  setupKeyOption( keyOptionControls, 3, "D", 68 );
 
   ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
       ctrls.output ) );
-  ctrls.goVR.style.display = !!vrDisplay ? "inline-block" : "none";
   ctrls.goVR.addEventListener( "click", function ( ) {
     requestFullScreen( ctrls.output, vrDisplay );
     inVR = true;
@@ -452,8 +235,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   function keyDown ( evt ) {
     var mod = evt[modA] && evt[modB];
     if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
-      documentation.visible = output.visible = editor.visible = !editor.visible;
-      if ( !editor.visible && lastEditor && lastEditor.focused ) {
+      if ( lastEditor && lastEditor.focused ) {
         lastEditor.blur( );
         lastEditor = null;
       }
@@ -469,11 +251,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     }
     else if ( lastEditor && !lastEditor.readOnly ) {
       lastEditor.keyDown( evt );
-    }
-
-    if ( scriptUpdateTimeout ) {
-      clearTimeout( scriptUpdateTimeout );
-      scriptUpdateTimeout = null;
     }
   }
 
@@ -562,7 +339,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   }
 
   function mouseMove ( evt ) {
-    var rotating = evt.shiftKey || !editor.visible;
+    var rotating = evt.shiftKey;
     if ( isPointerLocked( ) ) {
       var dx = evt.movementX,
           dy = evt.movementY;
@@ -686,8 +463,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   function update ( dt ) {
     var cos = Math.cos( heading ),
-        sin = Math.sin( heading ),
-        exp;
+        sin = Math.sin( heading );
     if ( keyState[ctrls.forwardKey.dataset.keycode] ) {
       position.z -= dt * SPEED * cos;
       position.x -= dt * SPEED * sin;
@@ -731,54 +507,16 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     if ( dragging ) {
       pick( "move" );
     }
-
-    if ( !scriptUpdateTimeout ) {
-      scriptUpdateTimeout = setTimeout( updateScript, 500 );
-    }
-
-    if ( scriptAnimate ) {
-      try {
-        scriptAnimate( dt );
-      }
-      catch ( exp ) {
-        console.error( exp );
-        log( "ERR: " + exp.message );
-        scriptAnimate = null;
-      }
-    }
   }
 
   function render ( t ) {
     requestAnimationFrame( render );
+
     if ( lt ) {
       update( t - lt );
     }
 
     renderScene( scene );
     lt = t;
-  }
-
-  function updateScript ( ) {
-    if ( editor.editor ) {
-      var newScript = editor.editor.value,
-          exp;
-      if ( newScript !== lastScript ) {
-        try {
-          var scriptUpdate = new Function( "scene",
-              newScript );
-          for ( var i = subScene.children.length - 1; i >= 0; --i ) {
-            subScene.remove( subScene.children[i] );
-          }
-          scriptAnimate = scriptUpdate( subScene );
-        }
-        catch ( exp ) {
-          console.error( exp );
-          log( "ERR: " + exp.message );
-          scriptAnimate = null;
-        }
-        lastScript = newScript;
-      }
-      scriptUpdateTimeout = null;
-    }
   }
 }
