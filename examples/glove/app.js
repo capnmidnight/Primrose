@@ -6,12 +6,11 @@ function StartDemo ( ) {
   "use strict";
   var application = new Primrose.VRApplication(
         "glove demo",
-        "../models/scene2.dae",
-        "../models/button.dae", null,
-        "../models/bear.dae", 1.75, 1.3,
+        "../models/scene.json",
+        "../models/button.json", null,
+        "../models/bear.json", 1.75, 1.3,
         "../audio/click.mp3",
-        "../audio/ocean.mp3",
-        null
+        "../audio/ocean.mp3"
       ),
       vrParams,
       vrDisplay,
@@ -90,53 +89,6 @@ function StartDemo ( ) {
     b.min.set( r.x, r.y );
     b.max.set( r.x + r.width, r.y + r.height );
   }
-
-  function checkForVR () {
-    findVR( function ( display, sensor ) {
-      if ( display && ( display.deviceName !== "Mockulus Rift" ||
-          DEBUG_VR ) ) {
-        vrDisplay = display;
-        vrSensor = sensor;
-      }
-
-      if ( !vrDisplay ) {
-        ctrls.goVR.style.display = "none";
-        setTimeout( checkForVR, 5000 );
-      }
-      else {
-        ctrls.goVR.style.display = "inline-block";
-        if ( vrDisplay.getEyeParameters ) {
-          vrParams = {
-            left: vrDisplay.getEyeParameters( "left" ),
-            right: vrDisplay.getEyeParameters( "right" )
-          };
-        }
-        else {
-          vrParams = {
-            left: {
-              renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
-              eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
-              recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
-                  "left" )
-            },
-            right: {
-              renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
-              eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
-              recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
-                  "right" )
-            }
-          };
-        }
-
-        setTrans( translations[0], vrParams.left.eyeTranslation );
-        setTrans( translations[1], vrParams.right.eyeTranslation );
-        setView( viewports[0], vrParams.left.renderRect );
-        setView( viewports[1], vrParams.right.renderRect );
-      }
-    } );
-  }
-
-  checkForVR();
 
   back.generateMipMaps = false;
 

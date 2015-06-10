@@ -33,7 +33,7 @@ Primrose.VRApplication = ( function () {
     Primrose.Application.call( this, name, options );
     this.options = combineDefaults( this.options, VRApplication );
     this.listeners = { ready: [ ], update: [ ] };
-    this.glove = new Primrose.Output.HapticGlove();
+    //this.glove = new Primrose.Output.HapticGlove();
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
     this.cameraMount = new THREE.Object3D();
@@ -44,7 +44,7 @@ Primrose.VRApplication = ( function () {
     this.enableMousePitch = true;
     this.currentUser = null;
     this.mainScene = null;
-    this.userList = new Primrose.Text.Controls.TextBox("userList");
+    this.userList = new Primrose.Text.Controls.TextBox( "userList" );
 
     //
     // speech input
@@ -150,6 +150,69 @@ Primrose.VRApplication = ( function () {
         "change",
         this.changeHMD.bind( this ) );
 
+    var DEBUG_VR = false,
+        vrParams,
+        vrDisplay,
+        vrSensor,
+        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
+        viewports = [ new THREE.Box2(), new THREE.Box2() ];
+
+    function setTrans ( m, t ) {
+      m.makeTranslation( t.x, t.y, t.z );
+    }
+
+    function setView ( b, r ) {
+      b.min.set( r.x, r.y );
+      b.max.set( r.x + r.width, r.y + r.height );
+    }
+
+    function checkForVR () {
+      findVR( function ( display, sensor ) {
+        if ( display && ( display.deviceName !== "Mockulus Rift" ||
+            DEBUG_VR ) ) {
+          vrDisplay = display;
+          vrSensor = sensor;
+        }
+
+        if ( !vrDisplay ) {
+          this.ctrls.goVR.style.display = "none";
+          setTimeout( checkForVR.bind(this), 5000 );
+        }
+        else {
+          this.ctrls.goVR.style.display = "inline-block";
+          if ( vrDisplay.getEyeParameters ) {
+            vrParams = {
+              left: vrDisplay.getEyeParameters( "left" ),
+              right: vrDisplay.getEyeParameters( "right" )
+            };
+          }
+          else {
+            vrParams = {
+              left: {
+                renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
+                eyeTranslation: vrDisplay.getEyeTranslation( "left" ),
+                recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+                    "left" )
+              },
+              right: {
+                renderRect: vrDisplay.getRecommendedEyeRenderRect( "right" ),
+                eyeTranslation: vrDisplay.getEyeTranslation( "right" ),
+                recommendedFieldOfView: vrDisplay.getRecommendedEyeFieldOfView(
+                    "right" )
+              }
+            };
+          }
+
+          setTrans( translations[0], vrParams.left.eyeTranslation );
+          setTrans( translations[1], vrParams.right.eyeTranslation );
+          setView( viewports[0], vrParams.left.renderRect );
+          setView( viewports[1], vrParams.right.renderRect );
+        }
+      }.bind(this) );
+    }
+
+    checkForVR.call(this);
+
     //
     // gamepad input
     //
@@ -202,123 +265,123 @@ Primrose.VRApplication = ( function () {
     // and let the user override the others.
     //
     var HMD_SMARTPHONE = "Smartphone HMD",
-      NO_HMD_SMARTPHONE = "Smartphone - no HMD";
-    this.stateList = new Primrose.StateList( this.ctrls.deviceTypes, this.ctrls, [
-      { name: "-- select device type --" },
-      { name: "PC (no HMD)", values: {
-          speechEnable: { checked: false },
-          speechTransmit: { checked: false },
-          speechReceive: { checked: false },
-          keyboardEnable: { checked: true },
-          keyboardTransmit: { checked: true },
-          keyboardReceive: { checked: false },
-          mouseEnable: { checked: true },
-          mouseTransmit: { checked: true },
-          mouseReceive: { checked: false },
-          gamepadEnable: { checked: true },
-          gamepadTransmit: { checked: true },
-          gamepadReceive: { checked: false },
-          leapEnable: { checked: true },
-          leapTransmit: { checked: true },
-          leapReceive: { checked: false },
-          touchEnable: { checked: false },
-          touchTransmit: { checked: false },
-          touchReceive: { checked: true },
-          headEnable: { checked: false },
-          headTransmit: { checked: false },
-          headReceive: { checked: true },
-          locationEnable: { checked: false },
-          locationTransmit: { checked: false },
-          locationReceive: { checked: true },
-          renderingStyle: { value: "regular" },
-          defaultDisplay: { checked: true }
-        } },
-
-      { name: "PC (with HMD)", values: {
-          speechEnable: { checked: false },
-          speechTransmit: { checked: false },
-          speechReceive: { checked: false },
-          keyboardEnable: { checked: true },
-          keyboardTransmit: { checked: true },
-          keyboardReceive: { checked: false },
-          mouseEnable: { checked: true },
-          mouseTransmit: { checked: true },
-          mouseReceive: { checked: false },
-          gamepadEnable: { checked: true },
-          gamepadTransmit: { checked: true },
-          gamepadReceive: { checked: false },
-          leapEnable: { checked: true },
-          leapTransmit: { checked: true },
-          leapReceive: { checked: false },
-          touchEnable: { checked: false },
-          touchTransmit: { checked: false },
-          touchReceive: { checked: true },
-          headEnable: { checked: false },
-          headTransmit: { checked: false },
-          headReceive: { checked: true },
-          locationEnable: { checked: false },
-          locationTransmit: { checked: false },
-          locationReceive: { checked: true },
-          renderingStyle: { value: "regular" },
-          defaultDisplay: { checked: true }
-        } },
-      { name: HMD_SMARTPHONE, values: {
-          speechEnable: { checked: false },
-          speechTransmit: { checked: false },
-          speechReceive: { checked: true },
-          keyboardEnable: { checked: false },
-          keyboardTransmit: { checked: false },
-          keyboardReceive: { checked: true },
-          mouseEnable: { checked: false },
-          mouseTransmit: { checked: false },
-          mouseReceive: { checked: true },
-          gamepadEnable: { checked: false },
-          gamepadTransmit: { checked: false },
-          gamepadReceive: { checked: true },
-          leapEnable: { checked: false },
-          leapTransmit: { checked: false },
-          leapReceive: { checked: true },
-          touchEnable: { checked: false },
-          touchTransmit: { checked: false },
-          touchReceive: { checked: true },
-          headEnable: { checked: true },
-          headTransmit: { checked: true },
-          headReceive: { checked: false },
-          locationEnable: { checked: true },
-          locationTransmit: { checked: true },
-          locationReceive: { checked: false },
-          renderingStyle: { value: "cardboard" },
-          defaultDisplay: { checked: false }
-        } },
-      { name: NO_HMD_SMARTPHONE, values: {
-          speechEnable: { checked: false },
-          speechTransmit: { checked: false },
-          speechReceive: { checked: false },
-          keyboardEnable: { checked: false },
-          keyboardTransmit: { checked: false },
-          keyboardReceive: { checked: false },
-          mouseEnable: { checked: false },
-          mouseTransmit: { checked: false },
-          mouseReceive: { checked: false },
-          gamepadEnable: { checked: false },
-          gamepadTransmit: { checked: false },
-          gamepadReceive: { checked: false },
-          leapEnable: { checked: false },
-          leapTransmit: { checked: false },
-          leapReceive: { checked: false },
-          touchEnable: { checked: true },
-          touchTransmit: { checked: true },
-          touchReceive: { checked: false },
-          headEnable: { checked: true },
-          headTransmit: { checked: true },
-          headReceive: { checked: false },
-          locationEnable: { checked: true },
-          locationTransmit: { checked: true },
-          locationReceive: { checked: false },
-          renderingStyle: { value: "regular" },
-          defaultDisplay: { checked: true }
-        } }
-    ] );
+        NO_HMD_SMARTPHONE = "Smartphone - no HMD";
+    this.stateList = new Primrose.StateList( this.ctrls.deviceTypes,
+        this.ctrls, [
+          { name: "-- select device type --" },
+          { name: "PC (no HMD)", values: {
+              speechEnable: { checked: false },
+              speechTransmit: { checked: false },
+              speechReceive: { checked: false },
+              keyboardEnable: { checked: true },
+              keyboardTransmit: { checked: true },
+              keyboardReceive: { checked: false },
+              mouseEnable: { checked: true },
+              mouseTransmit: { checked: true },
+              mouseReceive: { checked: false },
+              gamepadEnable: { checked: true },
+              gamepadTransmit: { checked: true },
+              gamepadReceive: { checked: false },
+              leapEnable: { checked: true },
+              leapTransmit: { checked: true },
+              leapReceive: { checked: false },
+              touchEnable: { checked: false },
+              touchTransmit: { checked: false },
+              touchReceive: { checked: true },
+              headEnable: { checked: false },
+              headTransmit: { checked: false },
+              headReceive: { checked: true },
+              locationEnable: { checked: false },
+              locationTransmit: { checked: false },
+              locationReceive: { checked: true },
+              renderingStyle: { value: "regular" },
+              defaultDisplay: { checked: true }
+            } },
+          { name: "PC (with HMD)", values: {
+              speechEnable: { checked: false },
+              speechTransmit: { checked: false },
+              speechReceive: { checked: false },
+              keyboardEnable: { checked: true },
+              keyboardTransmit: { checked: true },
+              keyboardReceive: { checked: false },
+              mouseEnable: { checked: true },
+              mouseTransmit: { checked: true },
+              mouseReceive: { checked: false },
+              gamepadEnable: { checked: true },
+              gamepadTransmit: { checked: true },
+              gamepadReceive: { checked: false },
+              leapEnable: { checked: true },
+              leapTransmit: { checked: true },
+              leapReceive: { checked: false },
+              touchEnable: { checked: false },
+              touchTransmit: { checked: false },
+              touchReceive: { checked: true },
+              headEnable: { checked: false },
+              headTransmit: { checked: false },
+              headReceive: { checked: true },
+              locationEnable: { checked: false },
+              locationTransmit: { checked: false },
+              locationReceive: { checked: true },
+              renderingStyle: { value: "regular" },
+              defaultDisplay: { checked: true }
+            } },
+          { name: HMD_SMARTPHONE, values: {
+              speechEnable: { checked: false },
+              speechTransmit: { checked: false },
+              speechReceive: { checked: true },
+              keyboardEnable: { checked: false },
+              keyboardTransmit: { checked: false },
+              keyboardReceive: { checked: true },
+              mouseEnable: { checked: false },
+              mouseTransmit: { checked: false },
+              mouseReceive: { checked: true },
+              gamepadEnable: { checked: false },
+              gamepadTransmit: { checked: false },
+              gamepadReceive: { checked: true },
+              leapEnable: { checked: false },
+              leapTransmit: { checked: false },
+              leapReceive: { checked: true },
+              touchEnable: { checked: false },
+              touchTransmit: { checked: false },
+              touchReceive: { checked: true },
+              headEnable: { checked: true },
+              headTransmit: { checked: true },
+              headReceive: { checked: false },
+              locationEnable: { checked: true },
+              locationTransmit: { checked: true },
+              locationReceive: { checked: false },
+              renderingStyle: { value: "cardboard" },
+              defaultDisplay: { checked: false }
+            } },
+          { name: NO_HMD_SMARTPHONE, values: {
+              speechEnable: { checked: false },
+              speechTransmit: { checked: false },
+              speechReceive: { checked: false },
+              keyboardEnable: { checked: false },
+              keyboardTransmit: { checked: false },
+              keyboardReceive: { checked: false },
+              mouseEnable: { checked: false },
+              mouseTransmit: { checked: false },
+              mouseReceive: { checked: false },
+              gamepadEnable: { checked: false },
+              gamepadTransmit: { checked: false },
+              gamepadReceive: { checked: false },
+              leapEnable: { checked: false },
+              leapTransmit: { checked: false },
+              leapReceive: { checked: false },
+              touchEnable: { checked: true },
+              touchTransmit: { checked: true },
+              touchReceive: { checked: false },
+              headEnable: { checked: true },
+              headTransmit: { checked: true },
+              headReceive: { checked: false },
+              locationEnable: { checked: true },
+              locationTransmit: { checked: true },
+              locationReceive: { checked: false },
+              renderingStyle: { value: "regular" },
+              defaultDisplay: { checked: true }
+            } }
+        ] );
 
     //
     // restoring the options the user selected
@@ -360,7 +423,7 @@ Primrose.VRApplication = ( function () {
     Primrose.ModelLoader.loadScene( sceneModel, function ( sceneGraph ) {
       this.mainScene = sceneGraph;
       this.scene.add( sceneGraph );
-      var cam = this.mainScene.Camera.children[0];
+      var cam = this.mainScene.Camera;
       this.scene.remove( cam );
       this.camera = new THREE.PerspectiveCamera( cam.fov, cam.aspect, cam.near,
           this.options.drawDistance );
@@ -382,7 +445,7 @@ Primrose.VRApplication = ( function () {
     //
     // Setup networking
     //
-    if ( navigator.onLine ) {
+    if ( navigator.onLine && false ) {
       this.ctrls.connectButton.addEventListener( "click", this.login.bind(
           this ), false );
 
@@ -406,7 +469,7 @@ Primrose.VRApplication = ( function () {
           this ) );
       this.proxy = new Primrose.WebRTCSocket(
           this.socket,
-          this.ctrls.deviceTypes.value !== HMD_SMARTPHONE);
+          this.ctrls.deviceTypes.value !== HMD_SMARTPHONE );
     }
 
     //
@@ -457,15 +520,16 @@ Primrose.VRApplication = ( function () {
       }
     };
 
-  this.ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
-      this.ctrls.output ) );
-  this.ctrls.goVR.addEventListener( "click", function ( ) {
-    requestFullScreen( ctrls.output, vrDisplay );
-    inVR = true;
-    camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
-        vrParams.left.recommendedFieldOfView.rightDegrees );
-    refreshSize();
-  } );
+    this.ctrls.goRegular.addEventListener( "click", requestFullScreen.bind(
+        window,
+        this.ctrls.output ) );
+    this.ctrls.goVR.addEventListener( "click", function ( ) {
+      requestFullScreen( ctrls.output, vrDisplay );
+      inVR = true;
+      camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
+          vrParams.left.recommendedFieldOfView.rightDegrees );
+      refreshSize();
+    } );
 
     this.ctrls.renderingStyle.addEventListener( "change", function () {
       this.chooseRenderingEffect( this.ctrls.renderingStyle.value );

@@ -6,8 +6,8 @@ Primrose.ButtonFactory = ( function () {
 
   function ButtonFactory ( templateFile, options ) {
     this.options = options;
-    Primrose.ModelLoader.loadCollada( templateFile, function ( obj ) {
-      this.template = obj.children[0];
+    Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
+      this.template = obj;
     }.bind( this ) );
   }
 

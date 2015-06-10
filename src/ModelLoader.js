@@ -1,21 +1,31 @@
 /* global Primrose, THREE */
 
 Primrose.ModelLoader = ( function () {
-  var COLLADA = new THREE.ColladaLoader();
+  var COLLADA = new THREE.ColladaLoader(),
+      JSON = new THREE.ObjectLoader();
   COLLADA.options.convertUpAxis = true;
 
   function ModelLoader ( src, success ) {
     if ( src ) {
-      ModelLoader.loadCollada( src, function ( scene ) {
+      var done = function ( scene ) {
         this.template = scene;
         if ( success ) {
           success( scene );
         }
-      }.bind( this ) );
+      }.bind( this );
+      if ( src.endsWith( ".dae" ) ) {
+        console.error( "COLLADA is currently broken in Three.js" );
+        if ( false ) {
+          loadCollada( src, done );
+        }
+      }
+      else if ( src.endsWith( ".json" ) ) {
+        loadJSON( src, done );
+      }
     }
   }
 
-  ModelLoader.setProperties = function ( object ) {
+  function setProperties ( object ) {
     object.traverse( function ( child ) {
       for ( var i = 0; i < child.children.length; ++i ) {
         var obj = child.children[i];
@@ -34,32 +44,39 @@ Primrose.ModelLoader = ( function () {
     } );
   };
 
-  ModelLoader.loadCollada = function ( src, success ) {
+  function loadCollada ( src, success ) {
     COLLADA.load( src, function ( collada ) {
-      ModelLoader.setProperties( collada.scene );
+      setProperties( collada.scene );
       if ( success ) {
         success( collada.scene );
       }
     } );
   };
 
-  ModelLoader.loadScene = function ( src, success ) {
-    ModelLoader.loadCollada( src, function ( scene ) {
-      scene.buttons = [ ];
-      scene.traverse( function ( child ) {
-        if ( child.isButton ) {
-          scene.buttons.push( new Primrose.Button( child.parent,
-              child.name ) );
-        }
-        if ( child.name ) {
-          scene[child.name] = child;
-        }
-      } );
+  function loadJSON ( src, success ) {
+    JSON.load( src, function ( json ) {
+      setProperties( json );
       if ( success ) {
-        success( scene );
+        success( json );
       }
     } );
   };
+
+  function buildScene ( success, scene ) {
+    scene.buttons = [ ];
+    scene.traverse( function ( child ) {
+      if ( child.isButton ) {
+        scene.buttons.push( new Primrose.Button( child.parent,
+            child.name ) );
+      }
+      if ( child.name ) {
+        scene[child.name] = child;
+      }
+    } );
+    if ( success ) {
+      success( scene );
+    }
+  }
 
   ModelLoader.prototype.clone = function () {
     var obj = this.template.clone();
@@ -76,8 +93,28 @@ Primrose.ModelLoader = ( function () {
       }
     }.bind( this ) );
 
-    ModelLoader.setProperties( obj );
+    setProperties( obj );
     return obj;
+  };
+
+
+  ModelLoader.loadScene = function ( src, success ) {
+    var done = buildScene.bind( window, success );
+    if ( src.endsWith( ".dae" ) ) {
+      loadCollada( src, done );
+    }
+    else if ( src.endsWith( ".json" ) ) {
+      loadJSON( src, done );
+    }
+  };
+
+  ModelLoader.loadObject = function ( src, success ) {
+    if ( src.endsWith( ".dae" ) ) {
+      loadCollada( src, success );
+    }
+    else if ( src.endsWith( ".json" ) ) {
+      loadJSON( src, success );
+    }
   };
 
   return ModelLoader;

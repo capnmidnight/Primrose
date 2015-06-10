@@ -80,6 +80,7 @@ article{
   max-height: 95%;
   width: 50em;
   padding: 3em;
+  overflow-y: scroll;
 }
 
 input, select{
