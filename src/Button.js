@@ -9,47 +9,17 @@ Primrose.Button = ( function () {
     this.options.colorPressed = new THREE.Color( this.options.colorPressed );
 
     this.listeners = { click: [ ] };
-    this.base = model;
-    this.position = this.base.position;
-    this.rotation = this.base.rotation;
+    this.cap = model.children[0];
+    this.cap.name = name;
+    this.cap.isSolid = true;
+    this.cap.material = this.cap.material.clone();
+    this.color = this.cap.material.color;
+    this.base = model.children[1];
     this.name = name;
     this.toggle = false;
     this.value = false;
     this.pressed = false;
     this.wasPressed = false;
-    this.direction = new THREE.Vector3();
-    this.testPoint = new THREE.Vector3();
-    this.raycaster = new THREE.Raycaster( this.testPoint, this.direction, 0,
-        1 );
-
-    for ( var i = 0; i < this.base.children.length && !this.cap; ++i ) {
-      var obj = this.base.children[i];
-      if ( obj instanceof THREE.Object3D ) {
-        for ( var j = 0; j < obj.children.length && !this.cap; ++j ) {
-          var subObj = obj.children[j];
-          if ( subObj.material ) {
-            for ( var k = 0; k < subObj.material.materials.length && !this.cap;
-                ++k ) {
-              var m = subObj.material.materials[k];
-              if ( m.name === "button" ) {
-                this.cap = obj;
-                this.cap.name = name;
-                this.rest = this.cap.position.clone();
-              }
-            }
-          }
-        }
-      }
-    }
-    if ( this.cap ) {
-      var capMesh = this.cap.children[0];
-      capMesh.material = capMesh.material.clone();
-      this.color = capMesh.material.materials[0].color;
-    }
-    else {
-      throw new Error( fmt( "Couldn't find a cap for the button [$1: $2].",
-          this.base.name, name ) );
-    }
   }
 
   Button.DEFAULTS = {
@@ -67,59 +37,32 @@ Primrose.Button = ( function () {
     }
   };
 
-  Button.prototype.test = function ( cameraPosition, pointer ) {
-    var tag = null;
+  Button.prototype.fire = function () {
+    for ( var i = 0; i < this.listeners.click.length; ++i ) {
+      this.listeners.click[i].call( this );
+    }
+  };
+
+  Button.prototype.moveBy = function(x, y, z){
+    this.base.position.x += x;
+    this.base.position.y += y;
+    this.base.position.z += z;
+    this.cap.physics.position.x += x;
+    this.cap.physics.position.y += y;
+    this.cap.physics.position.z += z;
+  };
+
+  Button.prototype.readContacts = function ( contacts ) {
     this.wasPressed = this.pressed;
     this.pressed = false;
-    this.cap.position.y = this.rest.y;
 
-    var len = this.direction.copy( this.cap.position )
-        .add( this.position )
-        .sub( pointer.position )
-        .length();
-    if ( len <= this.options.minDistance ) {
-      this.testPoint.copy( pointer.position )
-          .sub( cameraPosition )
-          .normalize();
-
-      this.direction.copy( this.cap.position )
-          .add( this.position )
-          .sub( cameraPosition )
-          .normalize();
-      var dot = this.direction.dot( this.testPoint );
-      if ( this.options.minDeflection < dot ) {
-        this.testPoint.copy( pointer.position );
-        this.testPoint.y += this.options.minDistance;
-        this.direction.set( 0, -1, 0 );
-        this.raycaster.ray.origin.copy( this.testPoint );
-        this.raycaster.ray.direction.copy( this.direction );
-        this.raycaster.far = this.options.minDistance * 2;
-        var intersections = this.raycaster.intersectObject(
-            this.cap.children[0] );
-        if ( intersections.length > 0 ) {
-          var inter = intersections[0];
-          this.testPoint.copy( inter.face.normal );
-          this.testPoint.applyEuler( this.base.rotation );
-          dot = this.testPoint.dot( pointer.velocity );
-          if ( dot < 0 ) {
-            var y = inter.point.y;
-            var proportion = Math.max( 0, Math.min( this.options.maxThrow, y -
-                pointer.position.y ) / this.options.maxThrow );
-            this.touched = proportion > 0;
-            this.cap.position.y = this.rest.y - proportion *
-                this.options.maxThrow;
-            this.pressed = proportion === 1;
-            tag = inter.point;
-          }
-        }
+    for ( var i = 0; i < contacts.length; ++i ) {
+      var contact = contacts[i];
+      if ( contact.bi.graphics === this.cap || contact.bj.graphics === this.cap ) {
+        this.pressed = true;
+        break;
       }
     }
-
-    var fire = function () {
-      for ( var i = 0; i < this.listeners.click.length; ++i ) {
-        this.listeners.click[i].call( this );
-      }
-    }.bind( this );
 
     if ( this.pressed && !this.wasPressed ) {
       if ( this.toggle ) {
@@ -134,13 +77,13 @@ Primrose.Button = ( function () {
     }
 
     if ( this.value ) {
-      fire();
+      this.fire();
       this.color.copy( this.options.colorPressed );
     }
     else {
       this.color.copy( this.options.colorUnpressed );
     }
-    return tag;
   };
+
   return Button;
 } )();

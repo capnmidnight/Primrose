@@ -191,6 +191,8 @@ Primrose.VRApplication = ( function () {
     this.buttonFactory = new Primrose.ButtonFactory( buttonModel,
         buttonOptions );
 
+    this.buttons = [ ];
+
     this.groundMaterial = new CANNON.Material( "groundMaterial" );
     this.bodyMaterial = new CANNON.Material( "bodyMaterial" );
     this.bodyGroundContact = new CANNON.ContactMaterial(
@@ -240,12 +242,15 @@ Primrose.VRApplication = ( function () {
       return addPhysicsBody.call( this, obj, body, shape );
     }
 
-    function makeCube ( obj, radius ) {
-      var body = new CANNON.Body( { mass: 1, material: this.bodyMaterial } );
-      var shape = new CANNON.Box(
-          radius && new CANNON.Vec3( radius, radius, radius ) ||
-          obj.geometry.boundingBox.max );
-      return addPhysicsBody.call( this, obj, body, shape, radius );
+    function makeCube ( obj ) {
+      var body = new CANNON.Body( { mass: 1, material: this.bodyMaterial,
+        type: CANNON.Body.STATIC } );
+      var b = obj.geometry.boundingBox,
+          dx = b.max.x - b.min.x,
+          dy = b.max.y - b.min.y,
+          dz = b.max.z - b.min.z;
+      var shape = new CANNON.Box( new CANNON.Vec3( dx / 2, dy / 2, dz / 2 ) );
+      return addPhysicsBody.call( this, obj, body, shape );
     }
 
     function makeBall ( obj, radius, skipObj ) {
@@ -255,6 +260,16 @@ Primrose.VRApplication = ( function () {
           obj.geometry.boundingSphere.radius );
       return addPhysicsBody.call( this, obj, body, shape, radius, skipObj );
     }
+
+    this.makeButton = function ( toggle ) {
+      var btn = this.buttonFactory.create( toggle );
+      this.buttons.push( btn );
+      this.scene[btn.name] = btn;
+      this.scene.add( btn.base );
+      this.scene.add( btn.cap );
+      makeCube.call( this, btn.cap );
+      return btn;
+    };
 
     function waitForResources ( t ) {
       this.lt = t;
@@ -271,9 +286,9 @@ Primrose.VRApplication = ( function () {
         this.glove = new Primrose.Output.HapticGlove( {
           scene: this.scene,
           camera: this.camera
-        }, 5, 4, 9080 );
+        }, 5, 5, 9080 );
         for ( var i = 0; i < this.glove.numJoints; ++i ) {
-          var s = textured( sphere( 0.05, 8, 8 ), 0xff0000 >> i );
+          var s = textured( sphere( 0.1, 8, 8 ), 0xff0000 >> i );
           this.scene.add( s );
           this.glove.addTip( makeBall.call( this, s ) );
         }
@@ -353,14 +368,6 @@ Primrose.VRApplication = ( function () {
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to teh server
-  };
-
-  VRApplication.prototype.makeButton = function ( toggle ) {
-    var btn = this.buttonFactory.create( toggle );
-    this.scene.buttons.push( btn );
-    this.scene[btn.name] = btn;
-    this.scene.add( btn.base );
-    return btn;
   };
 
   VRApplication.prototype.addEventListener = function ( event, thunk ) {
@@ -555,6 +562,9 @@ Primrose.VRApplication = ( function () {
     }
 
     this.glove.readContacts( this.world.contacts );
+    for ( j = 0; j < this.buttons.length; ++j ) {
+      this.buttons[j].readContacts( this.world.contacts );
+    }
     this.onground = false;
     for ( j = 0; j < this.world.contacts.length; ++j ) {
       c = this.world.contacts[j];

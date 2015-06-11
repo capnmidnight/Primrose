@@ -10,29 +10,40 @@ Primrose.Output.HapticGlove = ( function () {
       tips.push( body );
     };
 
-    var leap = new Leap.Controller( { enableGestures: false } )
-        .use( 'transform', {
-          vr: true,
-          effectiveParent: options.camera
-        } )
-        .use( 'boneHand', {
-          scene: options.scene,
-          arm: true
-        } )
+    var scale = 50,
+        enabled = true,
+        connected = false;
+
+    var leap = new Leap.Controller( {
+      enableGestures: false
+    } )
         .on( "frame", readFrame )
         .connect( );
+
+    var tipNames = [
+      "tipPosition",
+      "dipPosition",
+      "pipPosition",
+      "mcpPosition",
+      "carpPosition"
+    ];
+
     function readFrame ( frame ) {
       if ( frame.valid ) {
-        if ( frame.hands.length > 0 ) {
+        enabled = frame.hands.length > 0;
+        if ( enabled ) {
           var h = frame.hands[0];
           for ( var i = 0; i < fingers; ++i ) {
             var f = h.fingers[i];
             for ( var j = 0; j < joints; ++j ) {
-              var n = i * joints + j;
+              var n = i + j * joints;
               if ( n < tips.length ) {
-                var p = f.positions[f.positions.length - j - 1];
+                var p = f[tipNames[j]];
                 var t = tips[n];
-                t.position.set( p[0], p[1], p[2] );
+                t.position.set(
+                    p[0] / scale,
+                    p[1] / scale,
+                    p[2] / scale );
               }
             }
           }
@@ -53,15 +64,22 @@ Primrose.Output.HapticGlove = ( function () {
       "max reconnection attempts": 5
     } );
 
-    socket.on( "connect", console.log.bind( console, "Connected!" ) );
+    socket.on( "connect", function () {
+      connected = true;
+      console.log( "Connected!" );
+    } );
+
+    socket.on( "disconnect", function () {
+      connected = false;
+      console.log( "Disconnected!" );
+    } );
 
     this.readContacts = function ( contacts ) {
       var count = 0;
       for ( var f = 0; f < fingers; ++f ) {
-        var n = f * joints;
-        var t = tips[n];
+        var t = tips[f];
         var found = false;
-        for ( var c = 0; count < 2 && c < contacts.length; ++c ) {
+        for ( var c = 0; enabled && count < 2 && c < contacts.length; ++c ) {
           var contact = contacts[c];
           if ( contact.bi === t ) {
             if ( contact.bj.graphics && contact.bj.graphics.isSolid ) {
@@ -85,7 +103,9 @@ Primrose.Output.HapticGlove = ( function () {
       else {
         fingerState = fingerState & ~mask & 0x1f;
       }
-      socket.emit( "data", fingerState );
+      if ( connected ) {
+        socket.emit( "data", fingerState );
+      }
     };
   }
 
