@@ -838,7 +838,7 @@ Primrose.VRApplication = ( function () {
     var styleWidth = this.ctrls.outputContainer.clientWidth,
         styleHeight = this.ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
-        fieldOfView = 50,
+        fieldOfView = 75,
         canvasWidth = styleWidth * ratio,
         canvasHeight = styleHeight * ratio,
         aspectWidth = canvasWidth;
@@ -858,6 +858,7 @@ Primrose.VRApplication = ( function () {
     this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
     this.back.setSize( canvasWidth, canvasHeight );
     this.camera.fov = fieldOfView;
+    console.log(this.camera.scale);
     this.camera.aspect = aspectWidth / canvasHeight;
     this.camera.updateProjectionMatrix( );
   };
@@ -1149,7 +1150,9 @@ Primrose.VRApplication = ( function () {
     requestAnimationFrame( waitForResources.bind( this ) );
   };
 
-  var lastDebug = null;
+  var lastDebug = null,
+    roll, pitch, heading, dHeading, pointerPitch, pointerHeading,
+    pointerDistance, strafe, drive;
 
   VRApplication.prototype.animate = function ( t ) {
     requestAnimationFrame( this.animate );
@@ -1167,36 +1170,33 @@ Primrose.VRApplication = ( function () {
       this.gamepad.update( dt );
       this.leap.update( dt );
 
-      var roll = this.head.getValue( "roll" );
-      var pitch = this.head.getValue( "pitch" );
+      roll = this.head.getValue( "roll" );
+      pitch = this.head.getValue( "pitch" );
       if ( this.enableMousePitch ) {
         pitch += this.gamepad.getValue( "pitch" ) +
             this.mouse.getValue( "pitch" );
       }
 
-      var heading = this.head.getValue( "heading" ) +
+      heading = this.head.getValue( "heading" ) +
           this.gamepad.getValue( "heading" ) +
           this.touch.getValue( "heading" ) +
           this.mouse.getValue( "heading" );
 
-      var dHeading = this.head.getValue( "dheading" ) +
+      dHeading = this.head.getValue( "dheading" ) +
           this.gamepad.getValue( "dheading" ) +
           this.touch.getValue( "dheading" ) +
           this.mouse.getValue( "dheading" );
 
-      var pointerPitch = pitch +
+      pointerPitch = pitch +
           this.leap.getValue( "HAND0Y" ) +
           this.mouse.getValue( "pointerPitch" );
-      var pointerHeading = heading +
+      pointerHeading = heading +
           this.leap.getValue( "HAND0X" ) +
           this.mouse.getValue( "pointerHeading" );
-      var pointerDistance = ( this.leap.getValue( "HAND0Z" ) +
+      pointerDistance = ( this.leap.getValue( "HAND0Z" ) +
           this.mouse.getValue( "pointerDistance" ) +
           this.mouse.getValue( "pointerPress" ) +
           2 ) / Math.cos( pointerPitch );
-
-      var strafe = 0;
-      var drive = 0;
 
       this.passthrough.mesh.visible = this.keyboard.isDown( "passthrough" );
       if ( this.passthrough.mesh.visible ) {
@@ -1313,7 +1313,15 @@ Primrose.VRApplication = ( function () {
       this.qRoll.setFromAxisAngle( FORWARD, roll );
       this.camera.quaternion.multiply( this.qRoll );
 
-      if ( !this.inVR ) {
+      if(this.inVR){
+        this.qRift.set(
+          this.vr.getValue( "pitch" ),
+          this.vr.getValue( "heading" ),
+          this.vr.getValue( "roll" ),
+          this.vr.getValue( "homogeneous" ) );
+        this.camera.quaternion.multiply( this.qRift );
+      }
+      else {
         this.qPitch.setFromAxisAngle( RIGHT, pitch );
         this.camera.quaternion.multiply( this.qPitch );
       }
@@ -1326,15 +1334,7 @@ Primrose.VRApplication = ( function () {
           this.vr.getValue( "y" ),
           this.currentUser.physics.position.z +
           this.vr.getValue( "z" ) +
-          -1);
-      if(this.inVR){
-        this.qRift.set(
-          this.vr.getValue( "pitch" ),
-          this.vr.getValue( "heading" ),
-          this.vr.getValue( "roll" ),
-          this.vr.getValue( "homogeneous" ) );
-        this.camera.quaternion.multiply( this.qRift );
-      }
+          1);
       //
       // draw
       //
