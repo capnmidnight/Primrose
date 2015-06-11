@@ -3,7 +3,7 @@
 Primrose.Input.Camera = ( function () {
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getSources( function ( infos ) {
-      var option = option = document.createElement( "option" );
+      var option = document.createElement( "option" );
       option.value = "";
       option.innerHTML = "-- select camera --";
       elem.appendChild( option );

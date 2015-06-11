@@ -9,6 +9,16 @@ Primrose.ModelLoader = ( function () {
     return collada.scene;
   }
 
+  function fixJSONScene(json){
+    json.traverse(function(obj){
+      if(obj.geometry){
+        obj.geometry.computeBoundingSphere();
+        obj.geometry.computeBoundingBox();
+      }
+    });
+    return json;
+  }
+
   function buildScene ( success, scene ) {
     scene.buttons = [ ];
     scene.traverse( function ( child ) {
@@ -98,7 +108,9 @@ Primrose.ModelLoader = ( function () {
       }
     }
     else if ( src.endsWith( ".json" ) ) {
-      JSON.load( src, done );
+      JSON.load( src, function (json){
+        done(fixJSONScene(json));
+      });
     }
   };
 

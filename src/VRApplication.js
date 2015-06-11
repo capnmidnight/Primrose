@@ -1,4 +1,4 @@
-/* global Primrose, THREE, io, CryptoJS, fmt, Notification, requestFullScreen */
+/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen */
 Primrose.VRApplication = ( function () {
   /*
    Create a new VR Application!
@@ -27,8 +27,8 @@ Primrose.VRApplication = ( function () {
    | `dtNetworkUpdate` - the amount of time to allow to elapse between sending
    state to teh server (default: 0.125)
    */
-  var UP = new THREE.Vector3( 0, 1, 0 ),
-      RIGHT = new THREE.Vector3( 1, 0, 0 ),
+  var RIGHT = new THREE.Vector3( 1, 0, 0 ),
+      UP = new THREE.Vector3( 0, 1, 0 ),
       FORWARD = new THREE.Vector3( 0, 0, 1 );
   function VRApplication ( name, sceneModel, skyBoxImage, buttonModel,
       buttonOptions,
@@ -50,6 +50,7 @@ Primrose.VRApplication = ( function () {
     this.enableMousePitch = true;
     this.currentUser = null;
     this.userList = new Primrose.Text.Controls.TextBox( "userList" );
+    this.world = new CANNON.World();
     this.keyOptionControls = [
       this.ctrls.forwardKey,
       this.ctrls.leftKey,
@@ -57,8 +58,12 @@ Primrose.VRApplication = ( function () {
       this.ctrls.rightKey
     ];
 
-    var skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI );
-    this.sky = textured( skyGeom, skyBoxImage, true );
+
+    this.world.defaultContactMaterial.friction = 0.2;
+    this.world.gravity.set( 0, -this.options.gravity, 0 );
+    this.world.broadphase = new CANNON.SAPBroadphase(this.world);
+
+    this.sky = textured( shell( 50, 8, 4, Math.PI * 2, Math.PI ), skyBoxImage, true );
 
     setupKeyOption(
         this.ctrls.keyControlNote, this.keyOptionControls, 0, "W", 87 );
@@ -73,8 +78,6 @@ Primrose.VRApplication = ( function () {
     // speech input
     //
     this.speech = new Primrose.Input.Speech( "speech", [
-      { name: "options", keywords: [ "options" ],
-        commandUp: this.toggleOptions.bind( this ) },
       { name: "chat", preamble: true, keywords: [ "message" ],
         commandUp: function () {
           this.showTyping( true, true, this.speech.getValue( "chat" ) );
@@ -109,29 +112,16 @@ Primrose.VRApplication = ( function () {
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", window, [
-      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
-      },
-      { name: "heading", commands: [ "dx" ], metaKeys: [
-          -Primrose.NetworkedInput.SHIFT
-        ], integrate: true },
-      { name: "pointerHeading", commands: [ "dx" ], metaKeys: [
-          Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI *
-            0.2,
-        max: Math.PI * 0.2 },
-      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
-      },
-      { name: "pitch", commands: [ "dy" ], metaKeys: [
-          -Primrose.NetworkedInput.SHIFT ],
-        integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
-      { name: "pointerPitch", commands: [ "dy" ], metaKeys: [
-          Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI *
-            0.125,
-        max: Math.PI * 0.125 },
+      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
+      { name: "heading", commands: [ "dx" ], metaKeys: [ -Primrose.NetworkedInput.SHIFT ], integrate: true },
+      { name: "dheading", commands: [ "dx" ], metaKeys: [ -Primrose.NetworkedInput.SHIFT ] },
+      { name: "pointerHeading", commands: [ "dx" ], metaKeys: [ Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI * 0.2, max: Math.PI * 0.2 },
+      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
+      { name: "pitch", commands: [ "dy" ], metaKeys: [ -Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
+      { name: "pointerPitch", commands: [ "dy" ], metaKeys: [ Primrose.NetworkedInput.SHIFT ], integrate: true, min: -Math.PI * 0.125, max: Math.PI * 0.125 },
       { name: "dz", axes: [ Primrose.Input.Mouse.Z ], delta: true },
-      { name: "pointerDistance", commands: [ "dz" ], integrate: true,
-        scale: 0.1, min: 0, max: 10 },
-      { name: "pointerPress", buttons: [ 1 ], integrate: true, scale: 100,
-        offset: -50, min: 0, max: 5 }
+      { name: "pointerDistance", commands: [ "dz" ], integrate: true, scale: 0.1, min: 0, max: 10 },
+      { name: "pointerPress", buttons: [ 1 ], integrate: true, scale: 100, offset: -50, min: 0, max: 5 }
     ], this.proxy );
 
     //
@@ -139,9 +129,9 @@ Primrose.VRApplication = ( function () {
     //
     this.touch = new Primrose.Input.Touch( "touch", this.ctrls.frontBuffer,
         null, [
-          { name: "heading", axes: [ Primrose.Input.Touch.DX0 ],
-            integrate: true
-          },
+          { name: "dx", axes:[ Primrose.Input.Touch.DX0 ]},
+          { name: "heading", axes: [ Primrose.Input.Touch.DX0 ], integrate: true },
+          { name: "dheading", commands: [ "dx" ] },
           { name: "drive", axes: [ -Primrose.Input.Touch.DY0 ] }
         ], this.proxy );
 
@@ -151,6 +141,7 @@ Primrose.VRApplication = ( function () {
     this.head = new Primrose.Input.Motion( "head", [
       { name: "pitch", axes: [ Primrose.Input.Motion.PITCH ] },
       { name: "heading", axes: [ -Primrose.Input.Motion.HEADING ] },
+      { name: "dheading", commands: [ "heading" ], delta: true },
       { name: "roll", axes: [ -Primrose.Input.Motion.ROLL ] }
     ], this.proxy );
 
@@ -246,11 +237,9 @@ Primrose.VRApplication = ( function () {
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
       { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
       { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
-      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
-      },
-      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true },
-      { name: "options", buttons: [ 9 ], commandUp: this.toggleOptions.bind(
-            this ) }
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true },
+      { name: "dheading", commands: [ "heading" ], delta: true },
+      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ], this.proxy );
 
     this.gamepad.addEventListener( "gamepadconnected",
@@ -427,19 +416,19 @@ Primrose.VRApplication = ( function () {
       canvas: this.ctrls.frontBuffer
     } );
     this.renderer.setClearColor( this.options.backgroundColor );
-    this.gl = this.renderer.getContext( ),
-        this.back = new THREE.WebGLRenderTarget(
-            this.ctrls.frontBuffer.width,
-            this.ctrls.frontBuffer.height,
-            {
-              wrapS: THREE.ClampToEdgeWrapping,
-              wrapT: THREE.ClampToEdgeWrapping,
-              magFilter: THREE.LinearFilter,
-              minFilter: THREE.LinearFilter,
-              format: THREE.RGBAFormat,
-              type: THREE.UnsignedByteType,
-              stencilBuffer: false
-            } );
+    this.gl = this.renderer.getContext( );
+    this.back = new THREE.WebGLRenderTarget(
+        this.ctrls.frontBuffer.width,
+        this.ctrls.frontBuffer.height,
+        {
+          wrapS: THREE.ClampToEdgeWrapping,
+          wrapT: THREE.ClampToEdgeWrapping,
+          magFilter: THREE.LinearFilter,
+          minFilter: THREE.LinearFilter,
+          format: THREE.RGBAFormat,
+          type: THREE.UnsignedByteType,
+          stencilBuffer: false
+        } );
 
     this.back.generateMipMaps = false;
     this.testPoint = new THREE.Vector3();
@@ -454,14 +443,139 @@ Primrose.VRApplication = ( function () {
         );
     this.hand.name = "HAND0";
     this.hand.add( new THREE.PointLight( 0xffff00, 1, 7 ) );
-    this.hand.velocity = new THREE.Vector3();
+
+    this.groundMaterial = new CANNON.Material("groundMaterial");
+    this.bodyMaterial = new CANNON.Material("bodyMaterial");
+    this.bodyGroundContact = new CANNON.ContactMaterial(
+        this.bodyMaterial,
+        this.groundMaterial,
+        {
+          friction: 0.4,
+          restitution: 0.3,
+          contactEquationStiffness: 1e8,
+          contactEquationRelaxation: 3,
+          frictionEquationStiffness: 1e8,
+          frictionEquationRegularizationTime: 3
+        });
+    this.bodyBodyContact = new CANNON.ContactMaterial(
+        this.bodyMaterial,
+        this.bodyMaterial,
+        {
+          friction: 0.4,
+          restitution: 0.3,
+          contactEquationStiffness: 1e8,
+          contactEquationRelaxation: 3,
+          frictionEquationStiffness: 1e8,
+          frictionEquationRegularizationTime: 3
+        });
+    this.world.addContactMaterial(this.bodyGroundContact);
+    this.world.addContactMaterial(this.bodyBodyContact);
+
+    function addPhysicsBody(obj, body, shape){
+      body.addShape( shape );
+      body.linearDamping = body.angularDamping = 0.5;
+      obj.physics = body;
+      body.graphics = obj;
+      body.position.copy(obj.position);
+      body.quaternion.copy(obj.quaternion);
+      this.world.add(body);
+    }
+
+    function makePlane(obj){
+        var shape = new CANNON.Plane();
+        var body = new CANNON.Body({ mass: 0, material: this.groundMaterial });
+        addPhysicsBody.call(this, obj, body, shape);
+    }
+
+    function makeHeightmap(obj){
+      var verts = obj.geometry.attributes.position.array;
+      var heightmap = [];
+      var factor = 10;
+      var minX, minY, minZ, maxX, maxY, maxZ, sizeX, sizeZ, i, j, x, y, z;
+      minX = minY = minZ = Number.MAX_VALUE;
+      maxX = maxY = maxZ = Number.MIN_VALUE;
+      for(j = 0; j < 2; ++j){
+        if(j === 1){
+          sizeZ = maxZ - minZ;
+          sizeX = maxX - minX;
+          for(z = 0; z < sizeZ; ++z){
+            heightmap[z] = new Array(sizeX);
+            for(x = 0; x < sizeX; ++x){
+              heightmap[z][x] = [];
+            }
+          }
+        }
+        for(i = 0; i < verts.length; i += 3){
+          x = Math.round(verts[i] * factor);
+          y = verts[i+1];
+          z = Math.round(verts[i+2] * factor);
+          if(j === 0){
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            minZ = Math.min(minZ, z);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            maxZ = Math.max(maxZ, z);
+          }
+          else{
+            x -= minX;
+            y -= minY;
+            z -= minZ;
+            heightmap[z] = heightmap[z] || [];
+            heightmap[z][x] = heightmap[z][x] || [];
+            heightmap[z][x].push(y);
+          }
+        }
+      }
+
+      for(z = 0; z < sizeZ; ++z){
+        for(x = 0; x < sizeX; ++x){
+          var arr = heightmap[z][x];
+          var avg = 0;
+          for(y = 0; y < arr.length; ++y){
+            avg += y;
+          }
+          if(arr.length > 0){
+            avg /= arr.length;
+          }
+          else{
+            avg = 0;
+          }
+          heightmap[z][x] = avg;
+        }
+      }
+      var body = new CANNON.Body( { mass: 0, material: this.groundMaterial } );
+      var shape = new CANNON.Heightfield(heightmap, {
+        elementSize: 1 / factor,
+        minValue: minY,
+        maxValue: maxY
+      });
+      body.position.set(minX / factor, 0, minZ / factor);
+      addPhysicsBody.call(this, obj, body, shape);
+    }
+
+    function makeBallObject(obj){
+      var body = new CANNON.Body( { mass: 1, material: this.bodyMaterial } );
+      var shape = new CANNON.Sphere( obj.geometry.boundingSphere.radius );
+      addPhysicsBody.call(this, obj, body, shape);
+    }
 
     Primrose.ModelLoader.loadScene( sceneModel, function ( sceneGraph ) {
       this.scene = sceneGraph;
-      this.scene.add( this.sky );
+      this.scene.traverse( function ( obj ) {
+        if ( obj.isSolid ) {
+          if(obj.name === "Terrain" || obj.name.startsWith("Plane")){
+            makePlane.call(this, obj);
+          }
+          else{
+            makeBallObject.call(this, obj);
+          }
+        }
+      }.bind(this) );
+      //this.scene.add( this.sky );
       this.scene.add( this.hand );
       this.avatar = new Primrose.ModelLoader( avatarModel, function () {
-        this.addUser( { x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0, heading: 0,
+        this.addUser( { x: 0, y: 10, z: 0, dx: 0, dy: 0, dz: 0, heading: 0,
           dHeading: 0, userName: this.userName } );
       }.bind( this ) );
       this.camera = this.scene.Camera;
@@ -521,12 +635,6 @@ Primrose.VRApplication = ( function () {
     this.setupModuleEvents( this.keyboard, "keyboard" );
     this.setupModuleEvents( this.mouse, "mouse" );
 
-    window.addEventListener( "keyup", function ( evt ) {
-      if ( evt.keyCode === Primrose.Input.Keyboard.GRAVEACCENT ) {
-        this.toggleOptions();
-      }
-    }.bind( this ), false );
-
     window.addEventListener( "resize", this.setSize.bind( this ), false );
 
     window.addEventListener( "focus", function () {
@@ -553,6 +661,46 @@ Primrose.VRApplication = ( function () {
       else if ( this.ctrls.frontBuffer.mozRequestFullScreen ) {
         this.ctrls.frontBuffer.mozRequestFullScreen( {
           vrDisplay: this.vr.display } );
+      }
+    };
+
+    this.addUser = function ( userState, skipMakingChatList ) {
+      var user = null;
+      if ( !this.users[userState.userName] ) {
+        if ( this.userName === Primrose.Application.DEFAULT_USER_NAME ||
+            userState.userName !== this.userName ) {
+          user = this.avatar.clone().children[0];
+          user.nameObj = new Primrose.Text.PlainText(
+              userState.userName, 0.5,
+              "white", "transparent",
+              0, this.avatarHeight + 2.5, 0,
+              "center" );
+          user.add( user.nameObj );
+
+          if ( userState.userName === Primrose.Application.DEFAULT_USER_NAME ) {
+            this.currentUser = user;
+          }
+          else {
+            this.showMessage( "$1 has joined", userState.userName );
+          }
+
+          this.scene.add( user );
+          makeBallObject.call(this, user);
+        }
+        else {
+          delete this.users[Primrose.Application.DEFAULT_USER_NAME];
+          user = this.currentUser;
+        }
+      }
+      else {
+        user = this.users[userState.userName];
+      }
+
+      this.users[userState.userName] = user;
+      this.updateUserState( true, userState );
+
+      if ( !skipMakingChatList ) {
+        this.makeChatList();
       }
     };
 
@@ -583,7 +731,6 @@ Primrose.VRApplication = ( function () {
 
   VRApplication.CONNECTED_TEXT = "Disconnect";
   VRApplication.DISCONNECTED_TEXT = "Connect";
-  VRApplication.RIGHT = new THREE.Vector3( -1, 0, 0 );
 
   VRApplication.prototype.makeButton = function ( toggle ) {
     var btn = this.buttonFactory.create( toggle );
@@ -637,31 +784,7 @@ Primrose.VRApplication = ( function () {
     }
   };
 
-  VRApplication.prototype.showOptions = function () {
-    this.ctrls.options.style.display = "";
-    this.keyboard.pause( true );
-    this.mouse.exitPointerLock();
-  };
-
-  VRApplication.prototype.hideOptions = function () {
-    this.ctrls.options.style.display = "none";
-    this.fullScreen();
-    this.keyboard.pause( false );
-    this.mouse.requestPointerLock();
-  };
-
-  VRApplication.prototype.toggleOptions = function () {
-    var show = this.ctrls.options.style.display !== "";
-    if ( show ) {
-      this.showOptions();
-    }
-    else {
-      this.hideOptions();
-    }
-  };
-
   VRApplication.prototype.chooseRenderingEffect = function ( type ) {
-    this.oculusCorrector.rotation.set( 0, 0, 0, "XYZ" );
     if ( this.lastRenderingType !== type ) {
       switch ( type ) {
         case "anaglyph":
@@ -689,7 +812,6 @@ Primrose.VRApplication = ( function () {
         case "vr":
           this.effect = new THREE.VREffect( this.renderer, this.vr.display );
           this.enableMousePitch = false;
-          this.oculusCorrector.rotation.set( 0, -Math.PI / 3, 0, "XYZ" );
           break;
         default:
           this.effect = null;
@@ -776,53 +898,6 @@ Primrose.VRApplication = ( function () {
     }
   };
 
-  VRApplication.prototype.addUser = function ( userState,
-      skipMakingChatList ) {
-    var user = null;
-    if ( !this.users[userState.userName] ) {
-      if ( this.userName === Primrose.Application.DEFAULT_USER_NAME ||
-          userState.userName !== this.userName ) {
-        user = new THREE.Object3D();
-        var model = this.avatar.clone();
-        user.animation = model.animation;
-        model.position.z = 1.33;
-        user.add( model );
-
-        user.nameObj = new Primrose.Text.PlainText(
-            userState.userName, 0.5,
-            "white", "transparent",
-            0, this.avatarHeight + 2.5, 0,
-            "center" );
-        user.add( user.nameObj );
-
-        user.velocity = new THREE.Vector3();
-
-        if ( userState.userName === Primrose.Application.DEFAULT_USER_NAME ) {
-          this.currentUser = user;
-        }
-        else {
-          this.showMessage( "$1 has joined", userState.userName );
-        }
-
-        this.scene.add( user );
-      }
-      else {
-        delete this.users[Primrose.Application.DEFAULT_USER_NAME];
-        user = this.currentUser;
-      }
-    }
-    else {
-      user = this.users[userState.userName];
-    }
-
-    this.users[userState.userName] = user;
-    this.updateUserState( true, userState );
-
-    if ( !skipMakingChatList ) {
-      this.makeChatList();
-    }
-  };
-
   VRApplication.prototype.connectToServer = function () {
     this.socket.emit( "handshake", "demo" );
     this.ctrls.connectButton.innerHTML = VRApplication.DISCONNECTED_TEXT;
@@ -876,7 +951,7 @@ Primrose.VRApplication = ( function () {
     }
     else {
       if ( firstTime ) {
-        user.position.set(
+        user.physics.position.set(
             userState.x,
             // just in case the user falls through the world,
             // reloading will get them back to level.
@@ -886,13 +961,13 @@ Primrose.VRApplication = ( function () {
         user.dHeading = 0;
       }
       else {
-        user.velocity.set(
+        user.physics.velocity.set(
             ( ( userState.x + userState.dx * this.options.dtNetworkUpdate ) -
-                user.position.x ) / this.options.dtNetworkUpdate,
+                user.physics.position.x ) / this.options.dtNetworkUpdate,
             ( ( userState.y + userState.dy * this.options.dtNetworkUpdate ) -
-                user.position.y ) / this.options.dtNetworkUpdate,
+                user.physics.position.y ) / this.options.dtNetworkUpdate,
             ( ( userState.z + userState.dz * this.options.dtNetworkUpdate ) -
-                user.position.z ) / this.options.dtNetworkUpdate );
+                user.physics.position.z ) / this.options.dtNetworkUpdate );
         user.dHeading = ( ( userState.heading + userState.dHeading *
             this.options.dtNetworkUpdate ) - user.heading ) /
             this.options.dtNetworkUpdate;
@@ -936,13 +1011,13 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.resetPosition = function () {
-    this.currentUser.position.set( 0, 2, 0 );
-    this.currentUser.velocity.set( 0, 0, 0 );
+    this.currentUser.physics.position.set( 0, 2, 0 );
+    this.currentUser.physics.velocity.set( 0, 0, 0 );
   };
 
   VRApplication.prototype.jump = function () {
     if ( this.onground ) {
-      this.currentUser.velocity.y += 10;
+      this.currentUser.physics.velocity.y += 10;
       this.onground = false;
     }
   };
@@ -1080,7 +1155,7 @@ Primrose.VRApplication = ( function () {
     requestAnimationFrame( this.animate );
     var dt = ( t - this.lt ) * 0.001;
     this.lt = t;
-
+    var j;
     if ( this.wasFocused && this.focused ) {
       THREE.AnimationHandler.update( dt );
       this.speech.update( dt );
@@ -1103,6 +1178,11 @@ Primrose.VRApplication = ( function () {
           this.gamepad.getValue( "heading" ) +
           this.touch.getValue( "heading" ) +
           this.mouse.getValue( "heading" );
+
+      var dHeading = this.head.getValue( "dheading" ) +
+          this.gamepad.getValue( "dheading" ) +
+          this.touch.getValue( "dheading" ) +
+          this.mouse.getValue( "dheading" );
 
       var pointerPitch = pitch +
           this.leap.getValue( "HAND0Y" ) +
@@ -1137,8 +1217,7 @@ Primrose.VRApplication = ( function () {
         //
         // update user position and view
         //
-        this.currentUser.dHeading = ( heading - this.currentUser.heading ) /
-            dt;
+        this.currentUser.dHeading = dHeading;
         strafe = this.keyboard.getValue( "strafeRight" ) +
             this.keyboard.getValue( "strafeLeft" ) +
             this.gamepad.getValue( "strafe" );
@@ -1147,7 +1226,7 @@ Primrose.VRApplication = ( function () {
             this.gamepad.getValue( "drive" ) +
             this.touch.getValue( "drive" );
 
-        if ( this.onground || this.currentUser.position.y < -0.5 ) {
+        if ( this.onground || this.currentUser.physics.position.y < -0.5 ) {
           if ( this.autoWalking ) {
             strafe = 0;
             drive = -0.5;
@@ -1165,69 +1244,21 @@ Primrose.VRApplication = ( function () {
           len = strafe * Math.cos( heading ) + drive * Math.sin( heading );
           drive = drive * Math.cos( heading ) - strafe * Math.sin( heading );
           strafe = len;
-          this.currentUser.velocity.x = this.currentUser.velocity.x * 0.9 +
+          this.currentUser.physics.velocity.x = this.currentUser.physics.velocity.x * 0.9 +
               strafe * 0.1;
-          this.currentUser.velocity.z = this.currentUser.velocity.z * 0.9 +
+          this.currentUser.physics.velocity.z = this.currentUser.physics.velocity.z * 0.9 +
               drive * 0.1;
+          this.currentUser.physics.angularVelocity.y = this.currentUser.dHeading;
         }
-
-        this.currentUser.velocity.y -= dt * this.options.gravity;
 
         //
         // do collision detection
         //
-        /*
-        var len = this.currentUser.velocity.length() * dt,
-            inter,
-            i;
-        this.direction.copy( this.currentUser.velocity );
-        this.direction.normalize();
-        this.testPoint.copy( this.currentUser.position );
-        this.testPoint.y += this.avatarHeight / 2;
-        this.raycaster.ray.origin.copy( this.testPoint );
-        this.raycaster.ray.direction.copy( this.direction );
-        this.raycaster.far = len;
-        var intersections = this.raycaster.intersectObject( this.scene, true );
-        for ( i = 0; i < intersections.length; ++i ) {
-          inter = intersections[i];
-          if ( inter.object.parent.isSolid ) {
-            this.testPoint.copy( inter.face.normal );
-            this.testPoint.applyEuler( inter.object.parent.rotation );
-            this.currentUser.velocity.reflect( this.testPoint );
-            var d = this.testPoint.dot( this.camera.up );
-            if ( d > 0.75 ) {
-              this.currentUser.position.y = inter.point.y;
-              this.currentUser.velocity.y = 0;
-              this.onground = true;
-            }
-          }
-        }
-*/
-        // ground test
-        this.testPoint.copy( this.currentUser.velocity )
-            .multiplyScalar( dt )
-            .add( this.currentUser.position );
-        var GROUND_TEST_HEIGHT = 3;
-        this.testPoint.y += GROUND_TEST_HEIGHT;
-        this.direction.set( 0, -1, 0 );
-        this.raycaster.ray.origin.copy( this.testPoint );
-        this.raycaster.ray.direction.copy( this.direction );
-        this.raycaster.far = GROUND_TEST_HEIGHT * 2;
-
-        for(var j = 0; j < this.scene.children.length; ++j){
-          var child = this.scene.children[j];
-          var intersections = this.raycaster.intersectObject( child, false );
-          for ( i = 0; i < intersections.length; ++i ) {
-            var inter = intersections[i];
-            if ( inter.object.isSolid &&
-                inter.distance < GROUND_TEST_HEIGHT ) {
-              this.testPoint.copy( inter.face.normal );
-              this.testPoint.applyEuler( inter.object.parent.rotation );
-              this.currentUser.position.y = inter.point.y;
-              this.currentUser.velocity.y = 0;
-              this.onground = true;
-            }
-          }
+        this.world.step( dt );
+        for(j = 0; j < this.world.bodies.length; ++j){
+          var obj = this.world.bodies[j];
+          obj.graphics.position.copy(obj.position);
+          obj.graphics.quaternion.copy(obj.quaternion);
         }
 
         //
@@ -1238,16 +1269,16 @@ Primrose.VRApplication = ( function () {
         if ( this.frame > this.options.dtNetworkUpdate ) {
           this.frame -= this.options.dtNetworkUpdate;
           var state = {
-            x: this.currentUser.position.x,
-            y: this.currentUser.position.y,
-            z: this.currentUser.position.z,
-            dx: this.currentUser.velocity.x,
-            dy: this.currentUser.velocity.y,
-            dz: this.currentUser.velocity.z,
+            x: this.currentUser.physics.position.x,
+            y: this.currentUser.physics.position.y,
+            z: this.currentUser.physics.position.z,
+            dx: this.currentUser.physics.velocity.x,
+            dy: this.currentUser.physics.velocity.y,
+            dz: this.currentUser.physics.velocity.z,
             heading: this.currentUser.heading,
             dHeading: ( this.currentUser.heading -
                 this.currentUser.lastHeading ) / this.options.dtNetworkUpdate,
-            isRunning: this.currentUser.velocity.length() > 0
+            isRunning: this.currentUser.physics.velocity.length() > 0
           };
           this.currentUser.lastHeading = this.currentUser.heading;
           if ( this.socket ) {
@@ -1255,60 +1286,6 @@ Primrose.VRApplication = ( function () {
           }
         }
       }
-
-      //
-      // update avatars
-      //
-      for ( var key in this.users ) {
-        var user = this.users[key];
-        this.testPoint.copy( user.velocity );
-        this.testPoint.multiplyScalar( dt );
-        user.position.add( this.testPoint );
-        user.heading += user.dHeading * dt;
-        user.rotation.set( 0, user.heading, 0, "XYZ" );
-        if ( user !== this.currentUser ) {
-          // we have to offset the rotation of the name so the user
-          // can read it.
-          user.nameObj.rotation.set( 0, this.currentUser.heading -
-              user.heading, 0, "XYZ" );
-          if ( false ) {
-            if ( !user.animation.isPlaying && user.velocity.length() >= 2 ) {
-              user.animation.play();
-            }
-            else if ( user.animation.isPlaying && user.velocity.length() <
-                2 ) {
-              user.animation.stop();
-            }
-          }
-        }
-      }
-
-      //
-      // place pointer
-      //
-      this.direction.set( 0, 0, -pointerDistance )
-          .applyAxisAngle( VRApplication.RIGHT, -pointerPitch )
-          .applyAxisAngle( this.camera.up, pointerHeading );
-
-      this.testPoint.copy( this.hand.position );
-      this.hand.position.copy( this.currentUser.position )
-          .add(
-              this.direction );
-      this.hand.velocity.copy( this.hand.position )
-          .sub(
-              this.testPoint );
-
-      for ( var j = 0; j < this.scene.buttons.length; ++j ) {
-        var btn = this.scene.buttons[j];
-        var tag = btn.test( this.currentUser.position, this.hand );
-        if ( tag ) {
-          this.hand.position.copy( tag );
-        }
-        else {
-          btn.test( this.currentUser.position, this.currentUser );
-        }
-      }
-
 
       if ( this.dragging ) {
         this.pick( "move" );
@@ -1319,12 +1296,12 @@ Primrose.VRApplication = ( function () {
       //
       // update audio
       //
-      this.testPoint.copy( this.currentUser.position );
+      this.testPoint.copy( this.currentUser.physics.position );
       this.testPoint.divideScalar( 10 );
       this.audio.setPosition( this.testPoint.x, this.testPoint.y,
           this.testPoint.z );
-      this.audio.setVelocity( this.currentUser.velocity.x,
-          this.currentUser.velocity.y, this.currentUser.velocity.z );
+      this.audio.setVelocity( this.currentUser.physics.velocity.x,
+          this.currentUser.physics.velocity.y, this.currentUser.physics.velocity.z );
       this.testPoint.normalize();
       this.audio.setOrientation( this.testPoint.x, this.testPoint.y,
           this.testPoint.z, 0, 1, 0 );
@@ -1332,7 +1309,7 @@ Primrose.VRApplication = ( function () {
       //
       // update the camera
       //
-      this.camera.quaternion.setFromAxisAngle( UP, heading );
+      this.camera.quaternion.copy(this.currentUser.physics.quaternion);
       this.qRoll.setFromAxisAngle( FORWARD, roll );
       this.camera.quaternion.multiply( this.qRoll );
 
@@ -1341,20 +1318,23 @@ Primrose.VRApplication = ( function () {
         this.camera.quaternion.multiply( this.qPitch );
       }
 
-      this.camera.quaternion.set(
+      this.camera.position.set(
+          this.currentUser.physics.position.x +
+          this.vr.getValue( "x" ),
+          this.currentUser.physics.position.y +
+          this.avatarHeight +
+          this.vr.getValue( "y" ),
+          this.currentUser.physics.position.z +
+          this.vr.getValue( "z" ) +
+          -1);
+      if(this.inVR){
+        this.qRift.set(
           this.vr.getValue( "pitch" ),
           this.vr.getValue( "heading" ),
           this.vr.getValue( "roll" ),
           this.vr.getValue( "homogeneous" ) );
-      this.camera.quaternion.multiply( this.qRift );
-      this.camera.position.set(
-          this.currentUser.position.x +
-          this.vr.getValue( "x" ),
-          this.currentUser.position.y +
-          this.avatarHeight +
-          this.vr.getValue( "y" ),
-          this.currentUser.position.z +
-          this.vr.getValue( "z" ) );
+        this.camera.quaternion.multiply( this.qRift );
+      }
       //
       // draw
       //
