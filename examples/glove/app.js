@@ -7,7 +7,6 @@ function StartDemo ( ) {
   var application = new Primrose.VRApplication(
       "glove demo",
       "../models/scene2.json",
-      "../images/bg2.jpg",
       "../models/button.json", {
         maxThrow: 0.1,
         minDeflection: 10,
@@ -15,9 +14,7 @@ function StartDemo ( ) {
         colorPressed: 0x007f00,
         toggle: true
       },
-  "../models/bear.json", 6.5, 1.3,
-      "../audio/click.mp3",
-      "../audio/ocean.mp3", {
+      1.7, 1.3, {
         backgroundColor: 0xafbfff
       }
   );

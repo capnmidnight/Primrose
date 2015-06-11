@@ -8,7 +8,9 @@
     <script src="../../lib/three.min.js" type="text/javascript"></script>
     <script src="../../lib/ColladaLoader.js" type="text/javascript"></script>
     <script src="../../lib/cannon.js" type="text/javascript"></script>
-    <script src="../../lib/leap-0.6.4.min.js" type="text/javascript"></script>
+    <script src="../../lib/leap-0.6.4.js" type="text/javascript"></script>
+    <script src="../../lib/leap-plugins-0.1.10.js" type="text/javascript"></script>
+    <script src="../../lib/leap.rigged-hand-0.1.7.js" type="text/javascript"></script>
     <script src="../../lib/socket.io.min.js" type="text/javascript"></script>
     <script src="../../lib/sha512.min.js" type="text/javascript"></script>
 
@@ -109,7 +111,7 @@
       <p id="nightly">Use with <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a> or
         <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chrome WebVR</a>
         to view in virtual reality! Read more about WebVR at <a href="http://mozvr.com/" target="_blank">MozVR.com</a></p>
-
+<!--
       <h2>Login:</h2>
       <p>
         <input type="email" id="email" placeholder="<email@host.com>"><label for="password">Email address</label><br>
@@ -118,106 +120,15 @@
         <a class="primary button" id="connectButton">Connect to server<br>
           <small>enables multi-player and shared-device mode</small></a>
       </p>
-
+-->
       <h2>Instructions:</h2>
       <ul>
-        <li>Use the keyboard (<kbd id="keyControlNote">WASD</kbd>) to navigate.</li>
+        <li>Use the keyboard (<kbd>WASD</kbd>) to navigate.</li>
         <li>Use <kbd>SHIFT+mouse</kbd> to look around.</li>
-        <li>Login with email address and password to play on multi-player server.</li>
+        <!--<li>Login with email address and password to play on multi-player server.</li>-->
         <li><em>Oculus Rift DK2 compatible!</em> Use WebVR-enabled browser (see above).</li>
         <li><em>Google Cardboard compatible!</em> Use PC for input and smartphone as HMD.</li>
       </ul>
-
-      <table id="settings">
-        <thead>
-          <tr>
-            <th>Navigation</th>
-            <th>Settings</th>
-            <th>Peripherals</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <em>(Tap new key in each textbox)</em><br>
-              <input type="text" id="forwardKey" size="5"><label for="forwardKey"> - forward</label><br>
-              <input type="text" id="leftKey" size="5"><label for="leftKey"> - left</label><br>
-              <input type="text" id="backKey" size="5"><label for="backKey"> - back</label><br>
-              <input type="text" id="rightKey" size="5"><label for="rightKey"> - right</label><br>
-            </td>
-            <td>
-              <select id="deviceTypes"></select><label for="deviceTypes">Device type</label><br>
-              <select id="hmdListing"></select><label for="hmdListing">Head-mounted display</label><br>
-              <select id="cameraListing"></select><label for="cameraListing">Pass-through camera</label><br>
-              <select id="renderingStyle"></select><label for="renderingStyle">Rendering style</label><br>
-              <input type="checkbox" id="defaultDisplay"><label for="defaultDisplay">Use as primary system</label><br>
-            </td>
-            <td>
-              <table>
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>enable</th>
-                    <th>tx</th>
-                    <th>rx</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>speech</td>
-                    <td><input type="checkbox" id="speechEnable"></td>
-                    <td><input type="checkbox" id="speechTransmit"></td>
-                    <td><input type="checkbox" id="speechReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>keyboard</td>
-                    <td><input type="checkbox" id="keyboardEnable"></td>
-                    <td><input type="checkbox" id="keyboardTransmit"></td>
-                    <td><input type="checkbox" id="keyboardReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>mouse</td>
-                    <td><input type="checkbox" id="mouseEnable"></td>
-                    <td><input type="checkbox" id="mouseTransmit"></td>
-                    <td><input type="checkbox" id="mouseReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>gamepad</td>
-                    <td><input type="checkbox" id="gamepadEnable"></td>
-                    <td><input type="checkbox" id="gamepadTransmit"></td>
-                    <td><input type="checkbox" id="gamepadReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>leap</td>
-                    <td><input type="checkbox" id="leapEnable"></td>
-                    <td><input type="checkbox" id="leapTransmit"></td>
-                    <td><input type="checkbox" id="leapReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>touch</td>
-                    <td><input type="checkbox" id="touchEnable"></td>
-                    <td><input type="checkbox" id="touchTransmit"></td>
-                    <td><input type="checkbox" id="touchReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>head</td>
-                    <td><input type="checkbox" id="headEnable"></td>
-                    <td><input type="checkbox" id="headTransmit"></td>
-                    <td><input type="checkbox" id="headReceive"></td>
-                  </tr>
-                  <tr>
-                    <td>location</td>
-                    <td><input type="checkbox" id="locationEnable"></td>
-                    <td><input type="checkbox" id="locationTransmit"></td>
-                    <td><input type="checkbox" id="locationReceive"></td>
-                  </tr>
-                  <tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </article>
   </body>
 </html>
