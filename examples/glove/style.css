@@ -127,7 +127,7 @@ a:visited{
   color: rgb(255, 204, 110);
 }
 
-#outputContainer, #output{
+#outputContainer, #frontBuffer{
   position: fixed;
   top: 0;
   box-sizing: border-box;
