@@ -34,10 +34,10 @@ Primrose.VRApplication = ( function () {
       buttonOptions,
       avatarModel, avatarHeight, walkSpeed, clickSound, ambientSound,
       options ) {
-    Primrose.Application.call( this, name, options );
-    this.options = combineDefaults( this.options, VRApplication );
+    this.options = combineDefaults( options, VRApplication.DEFAULTS );
+    Primrose.Application.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
-    //this.glove = new Primrose.Output.HapticGlove();
+    this.glove = new Primrose.Output.HapticGlove();
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
     this.qRoll = new THREE.Quaternion( );
@@ -88,7 +88,7 @@ Primrose.VRApplication = ( function () {
       { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
           -Primrose.Input.Keyboard.LEFTARROW ] },
       { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
-          Primrose.Input.Keyboard.RIGHT ]
+          Primrose.Input.Keyboard.RIGHTARROW ]
       },
       { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
           -Primrose.Input.Keyboard.UPARROW ] },
@@ -97,19 +97,18 @@ Primrose.VRApplication = ( function () {
         ] },
       { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
         commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "camera", buttons: [ Primrose.Input.Keyboard.C ] },
+      { name: "passthrough", buttons: [ Primrose.Input.Keyboard.C ] },
       { name: "debug", buttons: [ Primrose.Input.Keyboard.X ] },
       { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ],
         commandUp: this.resetPosition.bind( this ) },
       { name: "chat", preamble: true, buttons: [ Primrose.Input.Keyboard.T ],
         commandUp: this.showTyping.bind( this, true ) }
     ], this.proxy );
-    this.keyboard.pause( true );
 
     //
     // mouse input
     //
-    this.mouse = new Primrose.Input.Mouse( "mouse", this.fullscreenElement, [
+    this.mouse = new Primrose.Input.Mouse( "mouse", window, [
       { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
       },
       { name: "heading", commands: [ "dx" ], metaKeys: [
@@ -138,7 +137,7 @@ Primrose.VRApplication = ( function () {
     //
     // capacitive touch screen input
     //
-    this.touch = new Primrose.Input.Touch( "touch", this.fullscreenElement,
+    this.touch = new Primrose.Input.Touch( "touch", this.ctrls.frontBuffer,
         null, [
           { name: "heading", axes: [ Primrose.Input.Touch.DX0 ],
             integrate: true
@@ -265,13 +264,11 @@ Primrose.VRApplication = ( function () {
     //
     // passthrough camera
     //
-    if ( false ) {
-      this.passthrough = new Primrose.Input.Camera( this.ctrls.cameraListing,
-          this.formState && this.formState.cameraListing || "", 1, 0, 0, -1 );
-      this.ctrls.cameraListing.addEventListener( "change", function () {
-        this.passthrough.connect( this.ctrls.cameraListing.value );
-      }.bind( this ) );
-    }
+    this.passthrough = new Primrose.Input.Camera( this.ctrls.cameraListing,
+        this.formState && this.formState.cameraListing || "", 1, 0, 0, -1 );
+    this.ctrls.cameraListing.addEventListener( "change", function () {
+      this.passthrough.connect( this.ctrls.cameraListing.value );
+    }.bind( this ) );
 
     //
     // Leap Motion input
@@ -467,11 +464,7 @@ Primrose.VRApplication = ( function () {
         this.addUser( { x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0, heading: 0,
           dHeading: 0, userName: this.userName } );
       }.bind( this ) );
-      var cam = this.scene.Camera;
-      this.scene.remove( cam );
-      this.camera = new THREE.PerspectiveCamera( cam.fov, cam.aspect, cam.near,
-          this.options.drawDistance );
-      this.scene.add( this.camera );
+      this.camera = this.scene.Camera;
     }.bind( this ) );
 
     //
@@ -553,12 +546,12 @@ Primrose.VRApplication = ( function () {
     }.bind( this ), false );
 
     this.fullScreen = function () {
-      if ( this.fullscreenElement.webkitRequestFullscreen ) {
-        this.fullscreenElement.webkitRequestFullscreen( {
+      if ( this.ctrls.frontBuffer.webkitRequestFullscreen ) {
+        this.ctrls.frontBuffer.webkitRequestFullscreen( {
           vrDisplay: this.vr.display } );
       }
-      else if ( this.fullscreenElement.mozRequestFullScreen ) {
-        this.fullscreenElement.mozRequestFullScreen( {
+      else if ( this.ctrls.frontBuffer.mozRequestFullScreen ) {
+        this.ctrls.frontBuffer.mozRequestFullScreen( {
           vrDisplay: this.vr.display } );
       }
     };
@@ -569,8 +562,6 @@ Primrose.VRApplication = ( function () {
     this.ctrls.goVR.addEventListener( "click", function ( ) {
       requestFullScreen( this.ctrls.frontBuffer, vrDisplay );
       this.inVR = true;
-      camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
-          vrParams.left.recommendedFieldOfView.rightDegrees );
       this.setSize();
     }.bind( this ) );
 
@@ -725,6 +716,7 @@ Primrose.VRApplication = ( function () {
     var styleWidth = this.ctrls.outputContainer.clientWidth,
         styleHeight = this.ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
+        fieldOfView = 50,
         canvasWidth = styleWidth * ratio,
         canvasHeight = styleHeight * ratio,
         aspectWidth = canvasWidth;
@@ -734,6 +726,8 @@ Primrose.VRApplication = ( function () {
       canvasHeight = Math.max( this.vrParams.left.renderRect.height,
           this.vrParams.right.renderRect.height );
       aspectWidth = canvasWidth / 2;
+      fieldOfView = ( this.vrParams.left.recommendedFieldOfView.leftDegrees +
+          this.vrParams.left.recommendedFieldOfView.rightDegrees );
     }
     this.renderer.domElement.style.width = px( styleWidth );
     this.renderer.domElement.style.height = px( styleHeight );
@@ -741,10 +735,9 @@ Primrose.VRApplication = ( function () {
     this.renderer.domElement.height = canvasHeight;
     this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
     this.back.setSize( canvasWidth, canvasHeight );
-    if ( this.camera ) {
-      this.camera.aspect = aspectWidth / canvasHeight;
-      this.camera.updateProjectionMatrix( );
-    }
+    this.camera.fov = fieldOfView;
+    this.camera.aspect = aspectWidth / canvasHeight;
+    this.camera.updateProjectionMatrix( );
   };
 
   VRApplication.prototype.login = function () {
@@ -806,7 +799,6 @@ Primrose.VRApplication = ( function () {
 
         if ( userState.userName === Primrose.Application.DEFAULT_USER_NAME ) {
           this.currentUser = user;
-          console.log(user.position);
         }
         else {
           this.showMessage( "$1 has joined", userState.userName );
@@ -1057,28 +1049,29 @@ Primrose.VRApplication = ( function () {
     }
   };
 
+
+  function waitForResources ( t ) {
+    this.lt = t;
+    if ( this.camera && this.scene && this.currentUser &&
+        this.buttonFactory.template ) {
+      this.setSize( );
+
+      if ( this.passthrough ) {
+        this.camera.add( this.passthrough.mesh );
+      }
+
+      this.leap.start();
+      this.animate = this.animate.bind( this );
+      this.fire( "ready" );
+      requestAnimationFrame( this.animate );
+    }
+    else {
+      requestAnimationFrame( waitForResources.bind( this ) );
+    }
+  }
+
   VRApplication.prototype.start = function () {
-    var waitForResources = function ( t ) {
-      this.lt = t;
-      if ( this.camera && this.scene && this.currentUser &&
-          this.buttonFactory.template ) {
-        this.setSize( );
-
-        if ( this.passthrough ) {
-          this.camera.add( this.passthrough.mesh );
-        }
-
-        this.leap.start();
-        this.animate = this.animate.bind( this );
-        this.fire( "ready" );
-        requestAnimationFrame( this.animate );
-      }
-      else {
-        requestAnimationFrame( waitForResources );
-      }
-    }.bind( this );
-
-    requestAnimationFrame( waitForResources );
+    requestAnimationFrame( waitForResources.bind( this ) );
   };
 
   var lastDebug = null;
@@ -1110,6 +1103,7 @@ Primrose.VRApplication = ( function () {
           this.gamepad.getValue( "heading" ) +
           this.touch.getValue( "heading" ) +
           this.mouse.getValue( "heading" );
+
       var pointerPitch = pitch +
           this.leap.getValue( "HAND0Y" ) +
           this.mouse.getValue( "pointerPitch" );
@@ -1124,11 +1118,9 @@ Primrose.VRApplication = ( function () {
       var strafe = 0;
       var drive = 0;
 
-      if ( this.passthrough ) {
-        this.passthrough.mesh.visible = this.keyboard.isDown( "camera" );
-        if ( this.passthrough.mesh.visible ) {
-          this.passthrough.update();
-        }
+      this.passthrough.mesh.visible = this.keyboard.isDown( "passthrough" );
+      if ( this.passthrough.mesh.visible ) {
+        this.passthrough.update();
       }
 
       if ( lastDebug ) {
@@ -1184,6 +1176,7 @@ Primrose.VRApplication = ( function () {
         //
         // do collision detection
         //
+        /*
         var len = this.currentUser.velocity.length() * dt,
             inter,
             i;
@@ -1209,7 +1202,7 @@ Primrose.VRApplication = ( function () {
             }
           }
         }
-
+*/
         // ground test
         this.testPoint.copy( this.currentUser.velocity )
             .multiplyScalar( dt )
@@ -1220,16 +1213,20 @@ Primrose.VRApplication = ( function () {
         this.raycaster.ray.origin.copy( this.testPoint );
         this.raycaster.ray.direction.copy( this.direction );
         this.raycaster.far = GROUND_TEST_HEIGHT * 2;
-        intersections = this.raycaster.intersectObject( this.scene, true );
-        for ( i = 0; i < intersections.length; ++i ) {
-          inter = intersections[i];
-          if ( inter.object.parent.isSolid &&
-              inter.distance < GROUND_TEST_HEIGHT ) {
-            this.testPoint.copy( inter.face.normal );
-            this.testPoint.applyEuler( inter.object.parent.rotation );
-            this.currentUser.position.y = inter.point.y;
-            this.currentUser.velocity.y = 0;
-            this.onground = true;
+
+        for(var j = 0; j < this.scene.children.length; ++j){
+          var child = this.scene.children[j];
+          var intersections = this.raycaster.intersectObject( child, false );
+          for ( i = 0; i < intersections.length; ++i ) {
+            var inter = intersections[i];
+            if ( inter.object.isSolid &&
+                inter.distance < GROUND_TEST_HEIGHT ) {
+              this.testPoint.copy( inter.face.normal );
+              this.testPoint.applyEuler( inter.object.parent.rotation );
+              this.currentUser.position.y = inter.point.y;
+              this.currentUser.velocity.y = 0;
+              this.onground = true;
+            }
           }
         }
 
@@ -1318,20 +1315,19 @@ Primrose.VRApplication = ( function () {
       }
 
       this.fire( "update", dt );
+
       //
       // update audio
       //
-      if ( false ) {
-        this.testPoint.copy( this.currentUser.position );
-        this.testPoint.divideScalar( 10 );
-        this.audio.setPosition( this.testPoint.x, this.testPoint.y,
-            this.testPoint.z );
-        this.audio.setVelocity( this.currentUser.velocity.x,
-            this.currentUser.velocity.y, this.currentUser.velocity.z );
-        this.testPoint.normalize();
-        this.audio.setOrientation( this.testPoint.x, this.testPoint.y,
-            this.testPoint.z, 0, 1, 0 );
-      }
+      this.testPoint.copy( this.currentUser.position );
+      this.testPoint.divideScalar( 10 );
+      this.audio.setPosition( this.testPoint.x, this.testPoint.y,
+          this.testPoint.z );
+      this.audio.setVelocity( this.currentUser.velocity.x,
+          this.currentUser.velocity.y, this.currentUser.velocity.z );
+      this.testPoint.normalize();
+      this.audio.setOrientation( this.testPoint.x, this.testPoint.y,
+          this.testPoint.z, 0, 1, 0 );
 
       //
       // update the camera
@@ -1352,15 +1348,16 @@ Primrose.VRApplication = ( function () {
           this.vr.getValue( "homogeneous" ) );
       this.camera.quaternion.multiply( this.qRift );
       this.camera.position.set(
-          this.currentUser.position.x + this.vr.getValue( "x" ),
-          this.currentUser.position.y + this.avatarHeight + this.vr.getValue(
-              "y" ),
-          this.currentUser.position.z + this.vr.getValue( "z" ) );
-
+          this.currentUser.position.x +
+          this.vr.getValue( "x" ),
+          this.currentUser.position.y +
+          this.avatarHeight +
+          this.vr.getValue( "y" ),
+          this.currentUser.position.z +
+          this.vr.getValue( "z" ) );
       //
       // draw
       //
-      console.log(this.camera);
       this.renderScene( this.scene );
     }
 

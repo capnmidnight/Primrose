@@ -1,17 +1,7 @@
 /* global Primrose */
 
 Primrose.Input.Keyboard = ( function () {
-  function makeCommand ( thisObj, cmd ) {
-    return function ( update ) {
-      textEntry = true;
-      text = "";
-      insertionPoint = 0;
-      onTextEntry = update;
-      onTextEntry( false, "|" );
-      this.enable( false );
-    }.bind( thisObj, cmd.commandUp );
-  }
-  
+
   function KeyboardInput ( name, DOMElement, commands, socket, oscope ) {
     DOMElement = DOMElement || window;
 
@@ -29,6 +19,17 @@ Primrose.Input.Keyboard = ( function () {
         onTextEntry = null,
         text = null,
         insertionPoint = null;
+
+    function makeCommand ( thisObj, cmd ) {
+      return function ( update ) {
+        textEntry = true;
+        text = "";
+        insertionPoint = 0;
+        onTextEntry = update;
+        onTextEntry( false, "|" );
+        this.enable( false );
+      }.bind( thisObj, cmd.commandUp );
+    }
 
     function execute ( stateChange, event ) {
       if ( textEntry && stateChange ) {
