@@ -346,12 +346,14 @@ Primrose.VRApplication = ( function () {
 
     this.currentUser = makeBall.call(
         this,
-        new THREE.Vector3( 0, 3, 2 ),
+        new THREE.Vector3( 0, 3, 5 ),
         this.avatarHeight / 2, true );
 
-    this.ctrls.goRegular.addEventListener( "click", requestFullScreen.bind(
-        window,
-        this.ctrls.frontBuffer ) );
+    this.ctrls.goRegular.addEventListener( "click", function () {
+      requestFullScreen( this.ctrls.frontBuffer );
+      this.setSize();
+    }.bind( this ) );
+
     this.ctrls.goVR.addEventListener( "click", function ( ) {
       requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
       this.inVR = true;
