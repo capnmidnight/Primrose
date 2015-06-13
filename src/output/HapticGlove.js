@@ -11,7 +11,7 @@ Primrose.Output.HapticGlove = ( function () {
     };
 
     var scale = 50,
-        enabled = true,
+        enabled = false,
         connected = false;
 
     var leap = new Leap.Controller( {

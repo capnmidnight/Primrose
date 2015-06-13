@@ -23,7 +23,7 @@ function StartDemo ( ) {
   application.addEventListener( "ready", function () {
     for(var i = 0; i < 5; ++i){
       btns.push(application.makeButton());
-      btns[i].moveBy((i - 2) * 2, 0, -2);
+      btns[i].moveBy((i - 2) * 2, 0, -1.5);
     }
   } );
 
