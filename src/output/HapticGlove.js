@@ -1,11 +1,11 @@
 /* global Primrose, io, Leap */
 Primrose.Output.HapticGlove = ( function () {
-  function HapticGlove ( options, fingers, joints, port, addr ) {
+  function HapticGlove ( options, hands, fingers, joints, port, addr ) {
 
     port = port || HapticGlove.DEFAULT_PORT;
     addr = addr || HapticGlove.DEFAULT_HOST;
     var tips = [ ];
-    this.numJoints = fingers * joints;
+    this.numJoints = hands * fingers * joints;
     this.addTip = function ( body ) {
       tips.push( body );
     };
@@ -31,18 +31,18 @@ Primrose.Output.HapticGlove = ( function () {
     function readFrame ( frame ) {
       if ( frame.valid ) {
         enabled = frame.hands.length > 0;
-        if ( enabled ) {
-          var h = frame.hands[0];
-          for ( var i = 0; i < fingers; ++i ) {
-            var f = h.fingers[i];
+        for ( var h = 0; h < hands && h < frame.hands.length; ++h ) {
+          var hand = frame.hands[h];
+          for ( var f = 0; f < fingers; ++f ) {
+            var finger = hand.fingers[f];
             for ( var j = 0; j < joints; ++j ) {
-              var n = i + j * joints;
+              var n = h * fingers * joints + f * joints + j;
               if ( n < tips.length ) {
-                var p = f[tipNames[j]];
+                var p = finger[tipNames[j]];
                 var t = tips[n];
                 t.position.set(
                     p[0] / scale,
-                    p[1] / scale,
+                    ( p[1] / scale ) - 0.5,
                     p[2] / scale );
               }
             }
@@ -76,16 +76,18 @@ Primrose.Output.HapticGlove = ( function () {
 
     this.readContacts = function ( contacts ) {
       var count = 0;
-      for ( var f = 0; f < fingers; ++f ) {
-        var t = tips[f];
-        var found = false;
-        for ( var c = 0; enabled && count < 2 && c < contacts.length; ++c ) {
-          var contact = contacts[c];
-          if ( contact.bi === t ) {
-            if ( contact.bj.graphics && contact.bj.graphics.isSolid ) {
-              this.setFingerState( f, true );
-              found = true;
-              ++count;
+      for ( var h = 0; h < hands && count < 2; ++h ) {
+        for ( var f = 0; f < fingers; ++f ) {
+          var t = tips[f];
+          var found = false;
+          for ( var c = 0; enabled && count < 2 && c < contacts.length; ++c ) {
+            var contact = contacts[c];
+            if ( contact.bi === t ) {
+              if ( contact.bj.graphics && contact.bj.graphics.isSolid ) {
+                this.setFingerState( f, true );
+                found = true;
+                ++count;
+              }
             }
           }
         }

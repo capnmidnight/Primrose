@@ -32,7 +32,7 @@ Primrose.Output.Audio3D = ( function () {
         gn.gain.value = 0;
         var osc = this.context.createOscillator();
         osc.frequency.value = piano( i + 1 );
-        osc.type = "sine";
+        osc.type = "square";
         osc.start();
         osc.connect( gn );
         gn.connect( this.mainVolume );
