@@ -254,8 +254,8 @@ Primrose.VRApplication = ( function () {
       return addPhysicsBody.call( this, obj, body, shape );
     }
 
-    function makeBall ( obj, radius, skipObj ) {
-      var body = new CANNON.Body( { mass: 1, material: this.bodyMaterial,
+    function makeBall ( obj, mass, radius, skipObj ) {
+      var body = new CANNON.Body( { mass: mass, material: this.bodyMaterial,
         fixedRotation: true } );
       var shape = new CANNON.Sphere( radius ||
           obj.geometry.boundingSphere.radius );
@@ -288,12 +288,7 @@ Primrose.VRApplication = ( function () {
           scene: this.scene,
           camera: this.camera
         }, 2, 5, 5, 9080 );
-        for ( var i = 0; i < this.glove.numJoints; ++i ) {
-          var s = textured( sphere( 0.1, 8, 8 ), 0xff0000 >> i );
-          this.scene.add( s );
-          this.glove.addTip( makeBall.call( this, s ) );
-        }
-
+        
         this.fire( "ready" );
         requestAnimationFrame( this.animate );
       }
@@ -314,7 +309,7 @@ Primrose.VRApplication = ( function () {
             makePlane.call( this, obj );
           }
           else {
-            makeBall.call( this, obj );
+            makeBall.call( this, obj, 1 );
           }
         }
       }.bind( this ) );
@@ -348,7 +343,9 @@ Primrose.VRApplication = ( function () {
     this.currentUser = makeBall.call(
         this,
         new THREE.Vector3( 0, 3, 5 ),
-        this.avatarHeight / 2, true );
+        1,
+        this.avatarHeight / 2,
+        true );
 
     this.ctrls.goRegular.addEventListener( "click", function () {
       requestFullScreen( this.ctrls.frontBuffer );
@@ -604,17 +601,10 @@ Primrose.VRApplication = ( function () {
       this.camera.quaternion.multiply( this.qRift );
 
       if ( state.position ) {
-        this.pRift.copy( state.position );
+        this.pRift.copy( state.position ).multiplyScalar(5);
       }
+
       this.camera.position.add( this.pRift );
-
-      if( state.linearVelocity ){
-        this.currentUser.velocity.copy( state.linearVelocity );
-      }
-
-      if( state.linearAcceleration ){
-        this.currentUser.force.copy( state.linearAcceleration );
-      }
     }
 
     this.camera.position.y += this.avatarHeight;

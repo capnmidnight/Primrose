@@ -10,15 +10,23 @@ Primrose.Output.HapticGlove = ( function () {
       tips.push( body );
     };
 
-    var scale = 50,
+    var scale = -50,
+        offX = 0,
+        offY = 1.3,
+        offZ = 1,
         enabled = false,
         connected = false;
 
-    var leap = new Leap.Controller( {
-      enableGestures: false
-    } )
-        .on( "frame", readFrame )
-        .connect( );
+    // Connect to localhost and start getting frames
+    Leap.loop();
+
+    Leap.loopController.use( 'transform', {
+      vr: true,
+      effectiveParent: options.camera
+    } ).use( 'boneHand', {
+      scene: options.scene,
+      arm: true
+    } ).on("frame", readFrame);
 
     var tipNames = [
       "tipPosition",
@@ -41,9 +49,9 @@ Primrose.Output.HapticGlove = ( function () {
                 var p = finger[tipNames[j]];
                 var t = tips[n];
                 t.position.set(
-                    p[0] / scale,
-                    ( p[1] / scale ) - 0.5,
-                    p[2] / scale );
+                    p[0] / scale + offX,
+                    p[2] / scale + offY,
+                    p[1] / scale + offZ );
               }
             }
           }
@@ -57,7 +65,7 @@ Primrose.Output.HapticGlove = ( function () {
     if ( port !== 80 ) {
       addr += ":" + port;
     }
-    console.log( addr );
+
     socket = io.connect( addr, {
       "reconnect": true,
       "reconnection delay": 1000,
@@ -66,12 +74,10 @@ Primrose.Output.HapticGlove = ( function () {
 
     socket.on( "connect", function () {
       connected = true;
-      console.log( "Connected!" );
     } );
 
     socket.on( "disconnect", function () {
       connected = false;
-      console.log( "Disconnected!" );
     } );
 
     this.readContacts = function ( contacts ) {
