@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <title>Test keyCodes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <select id="c"></select>
+    <input id="v" type="text" placeholder="code page name">
+    <input id="n" type="text" placeholder="friendly name">
+    <input id="l" type="text" placeholder="language code"> (use <a href="http://tools.ietf.org/rfc/bcp/bcp47.txt" target="_blank">BCP-47</a> for reference)<br>
+    <input id="x" type="text" placeholder="type codes here"><br>
+    <div id="t" style="font-family:monospace; font-size:10pt;white-space: pre; column-count: 7;-webkit-column-count: 7;-moz-column-count: 7;"></div>
+    <script type="text/javascript" src="javascripts/Primrose.min.js"></script>
+    <script type="text/javascript">
+      var browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE
+          ? "IE" : ( isOpera ? "OPERA" : ( isSafari ? "SAFARI"
+          : "UNKNOWN" ) ) ) );
+      var t = document.getElementById( "t" );
+      var v = document.getElementById( "v" );
+      var n = document.getElementById( "n" );
+      var l = document.getElementById( "l" );
+      var x = document.getElementById( "x" );
+
+      var codePage;
+      function setCodePage ( cp ) {
+        codePage = cp;
+        if ( codePage ) {
+          for ( var key in CodePage ) {
+            if ( CodePage[key].name === codePage.name ) {
+              v.value = key;
+              n.value = CodePage[key].name;
+              l.value = CodePage[key].language;
+              break;
+            }
+          }
+        }
+        else {
+          codePage = {};
+          n.value = "";
+          l.value = "";
+        }
+        drawPage();
+      }
+      setCodePage( CodePage.EN_US );
+      var c = makeSelectorFromObj( "c", CodePage, codePage.name, window,
+          "setCodePage" );
+
+      v.addEventListener( "change", function () {
+        setCodePage( CodePage[v.value] );
+      } );
+
+      n.addEventListener( "change", function () {
+        codePage = codePage || {};
+        codePage.name = n.value;
+        drawPage();
+      } );
+
+      l.addEventListener( "change", function () {
+        codePage = codePage || {};
+        codePage.language = l.value;
+        drawPage();
+      } );
+
+      function drawPage () {
+        t.value = "CodePage." + v.value + " = {\n";
+        for ( var key in codePage ) {
+          t.value += "    " + key + ": ";
+          var val = codePage[key];
+          var typ = typeof ( val );
+          if ( typ === "string" || typ === "number" ) {
+            t.value += "\"" + val + "\",\n";
+          }
+          else if ( val instanceof Array ) {
+            t.value += "[" + val.join( ", " ) + "],\n";
+          }
+          else {
+            t.value += "{\n";
+            for ( var name in val ) {
+              t.value += "        \"" + name + "\": ";
+              var val2 = val[name];
+              if ( val2 instanceof Function ) {
+                val2 = val2.toString()
+                    .replace( "anonymous", "" )
+                    .replace( /\n\/\*\*\//, "" );
+              }
+              else if ( typeof ( val2 ) === "string" ) {
+                val2 = "\"" + val2.replace( /\\/g, "\\\\" )
+                    .replace( /"/g, "\\\"" ) + "\"";
+              }
+              else {
+                val2 = val2.toString();
+              }
+              t.value += val2 + ",\n";
+            }
+            t.value += "    },\n";
+          }
+        }
+        t.value += "};";
+        t.textContent = t.value;
+        t.innerText = t.value;
+      }
+      var commandName,
+          code,
+          deadKey = "";
+      x.addEventListener( "keydown", function ( evt ) {
+        if ( evt.location === 0 ) {
+          commandName = "";
+          if ( evt.ctrlKey ) {
+            commandName += "CTRL";
+          }
+          if ( evt.altKey ) {
+            commandName += "ALT";
+          }
+          if ( evt.metaKey ) {
+            commandName += "META";
+          }
+          if ( evt.shiftKey ) {
+            commandName += "SHIFT";
+          }
+          if ( commandName === "" ) {
+            commandName += "NORMAL";
+          }
+          if ( codePage.deadKeys ) {
+            var dk = codePage.deadKeys.indexOf( code );
+            if ( dk > -1 ) {
+              deadKey = "DEAD" + ( dk + 1 );
+            }
+          }
+          code = evt.keyCode;
+          x.value = "";
+        }
+      } );
+
+      x.addEventListener( "keyup", function ( evt ) {
+        if ( evt.keyCode !== 8
+            && evt.keyCode !== 16
+            && evt.keyCode !== 17
+            && evt.keyCode !== 18
+            && evt.keyCode !== 91 ) {
+          commandName = deadKey + commandName;
+          if ( !codePage[commandName] ) {
+            codePage[commandName] = {};
+          }
+          if ( x.value.length > 0 ) {
+            if ( codePage[commandName][code] !== undefined &&
+                codePage[commandName][code] !== x.value ) {
+              code = browser + "_" + code;
+            }
+            codePage[commandName][code] = x.value;
+            deadKey = "";
+          }
+          else {
+            if ( !codePage.deadKeys ) {
+              codePage.deadKeys = [ ];
+            }
+            var dk = codePage.deadKeys.indexOf( code );
+            if ( dk === -1 ) {
+              dk = codePage.deadKeys.length;
+              codePage.deadKeys.push( code );
+            }
+            ++dk;
+            codePage[commandName][code] = new Function( "prim",
+                "prim.setDeadKeyState(\"DEAD" + dk + "\");" );
+          }
+          x.value = commandName + " " + code + " " + x.value;
+          drawPage();
+        }
+      } );
+
+      window.addEventListener( "copy", function ( evt ) {
+        var str = t.textContent || t.innerText;
+        evt.clipboardData.setData( "text/plain", str );
+        evt.preventDefault();
+      } );
+    </script>
+  </body>
+</html>

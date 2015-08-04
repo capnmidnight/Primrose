@@ -1,32 +1,33 @@
 /* global Primrose, io, Leap */
 Primrose.Output.HapticGlove = ( function () {
-  function HapticGlove ( options, hands, fingers, joints, port, addr ) {
+  function HapticGlove ( options ) {
 
-    port = port || HapticGlove.DEFAULT_PORT;
-    addr = addr || HapticGlove.DEFAULT_HOST;
-    var tips = [ ];
-    this.numJoints = hands * fingers * joints;
-    this.addTip = function ( body ) {
-      tips.push( body );
-    };
+    options.port = options.port || HapticGlove.DEFAULT_PORT;
+    options.addr = options.addr || HapticGlove.DEFAULT_HOST;
+    this.tips = [ ];
+    this.numJoints = options.hands * options.fingers * options.joints;
 
-    var scale = -50,
-        offX = 0,
-        offY = 1.3,
-        offZ = 1,
-        enabled = false,
+    var enabled = false,
         connected = false;
 
-    // Connect to localhost and start getting frames
     Leap.loop();
 
-    Leap.loopController.use( 'transform', {
-      vr: true,
-      effectiveParent: options.camera
-    } ).use( 'boneHand', {
-      scene: options.scene,
-      arm: true
-    } ).on("frame", readFrame);
+    this.setEnvironment = function ( opts ) {
+      options.world = opts.world;
+      options.scene = opts.scene;
+      options.camera = opts.camera;
+
+      Leap.loopController.use( "transform", {
+        vr: true,
+        effectiveParent: options.camera
+      } )
+          .use( 'boneHand', {
+            scene: options.scene,
+            arm: true
+          } )
+          .on( "frame", readFrame.bind(this) );
+
+    };
 
     var tipNames = [
       "tipPosition",
@@ -39,19 +40,16 @@ Primrose.Output.HapticGlove = ( function () {
     function readFrame ( frame ) {
       if ( frame.valid ) {
         enabled = frame.hands.length > 0;
-        for ( var h = 0; h < hands && h < frame.hands.length; ++h ) {
+        for ( var h = 0; h < options.hands && h < frame.hands.length; ++h ) {
           var hand = frame.hands[h];
-          for ( var f = 0; f < fingers; ++f ) {
+          for ( var f = 0; f < options.fingers; ++f ) {
             var finger = hand.fingers[f];
-            for ( var j = 0; j < joints; ++j ) {
-              var n = h * fingers * joints + f * joints + j;
-              if ( n < tips.length ) {
+            for ( var j = 0; j < options.joints; ++j ) {
+              var n = h * options.fingers * options.joints + f * options.joints + j;
+              if ( n < this.tips.length ) {
                 var p = finger[tipNames[j]];
-                var t = tips[n];
-                t.position.set(
-                    p[0] / scale + offX,
-                    p[2] / scale + offY,
-                    p[1] / scale + offZ );
+                var t = this.tips[n];
+                t.position.set( p[0], p[1], p[2]) ;
               }
             }
           }
@@ -62,11 +60,11 @@ Primrose.Output.HapticGlove = ( function () {
     var socket,
         fingerState = 0;
 
-    if ( port !== 80 ) {
-      addr += ":" + port;
+    if ( options.port !== 80 ) {
+      options.addr += ":" + options.port;
     }
 
-    socket = io.connect( addr, {
+    socket = io.connect( options.addr, {
       "reconnect": true,
       "reconnection delay": 1000,
       "max reconnection attempts": 5
@@ -74,20 +72,22 @@ Primrose.Output.HapticGlove = ( function () {
 
     socket.on( "connect", function () {
       connected = true;
+      console.log( "Connected!" );
     } );
 
     socket.on( "disconnect", function () {
       connected = false;
+      console.log( "Disconnected!" );
     } );
 
     this.readContacts = function ( contacts ) {
       var count = 0;
-      for ( var h = 0; h < hands && count < 2; ++h ) {
-        for ( var f = 0; f < fingers; ++f ) {
-          var t = tips[f];
-          var found = false;
-          for ( var c = 0; enabled && count < 2 && c < contacts.length; ++c ) {
-            var contact = contacts[c];
+      for ( var c = 0; enabled && count < 2 && c < contacts.length; ++c ) {
+        var contact = contacts[c];
+        for ( var h = 0; h < options.hands && count < 2; ++h ) {
+          for ( var f = 0; f < options.fingers; ++f ) {
+            var t = this.tips[f];
+            var found = false;
             if ( contact.bi === t ) {
               if ( contact.bj.graphics && contact.bj.graphics.isSolid ) {
                 this.setFingerState( f, true );

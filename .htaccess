@@ -1,0 +1,27 @@
+# RewriteEngine On
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+AddType text/cache-manifest .appcache
+ExpiresByType text/cache-manifest "access plus 0 seconds"
+#Gzip
+<ifmodule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript text/javascript
+</ifmodule>
+#End Gzip
+# BEGIN Caching
+<ifModule mod_headers.c>
+<filesMatch "\\.(ico|pdf|flv|jpg|jpeg|png|gif|swf|js)$">
+Header set Cache-Control "max-age=2592000, public"
+</filesMatch>
+<filesMatch "\\.(css|json)$">
+Header set Cache-Control "max-age=604800, public"
+</filesMatch>
+<filesMatch "\\.(html)$">
+Header set Cache-Control "max-age=1, private, must-revalidate"
+</filesMatch>
+</ifModule>
+# END Caching
+<IfModule pagespeed_module>
+ ModPagespeed on
+ ModPagespeedEnableFilters remove_comments,rewrite_javascript,rewrite_css,rewrite_images
+</IfModule>

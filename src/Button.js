@@ -58,25 +58,13 @@ Primrose.Button = ( function () {
 
     for ( var i = 0; i < contacts.length; ++i ) {
       var contact = contacts[i];
-      if ( contact.bi.graphics === this.cap || contact.bj.graphics === this.cap ) {
+      if ( contact.bi.graphics === this.cap || contact.bj.graphics === this.cap) {
         this.pressed = true;
         break;
       }
     }
 
-    if ( this.pressed && !this.wasPressed ) {
-      if ( this.toggle ) {
-        this.value = !this.value;
-      }
-      else {
-        this.value = this.pressed;
-      }
-    }
-    else if ( !this.toggle && !this.pressed ) {
-      this.value = false;
-    }
-
-    if ( this.value ) {
+    if ( this.pressed ) {
       this.fire();
       this.color.copy( this.options.colorPressed );
     }

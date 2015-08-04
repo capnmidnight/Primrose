@@ -37,12 +37,12 @@ Primrose.VRApplication = ( function () {
     Primrose.Application.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
     this.avatarHeight = avatarHeight;
-    this.walkSpeed = walkSpeed * 10;
+    this.walkSpeed = walkSpeed;
     this.qRoll = new THREE.Quaternion( );
     this.qPitch = new THREE.Quaternion( );
     this.qRift = new THREE.Quaternion( );
     this.pRift = new THREE.Vector3( );
-    this.onground = false;
+    this.onground = true;
     this.lt = 0;
     this.frame = 0;
     this.enableMousePitch = true;
@@ -181,7 +181,12 @@ Primrose.VRApplication = ( function () {
     //
     // Setup THREE.js
     //
-    this.glove = null;
+    this.glove = new Primrose.Output.HapticGlove( {
+      hands: 2,
+      fingers: 5,
+      joints: 1,
+      port: 9080
+    });
     this.scene = null;
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
@@ -244,8 +249,12 @@ Primrose.VRApplication = ( function () {
     }
 
     function makeCube ( obj ) {
-      var body = new CANNON.Body( { mass: 1, material: this.bodyMaterial,
-        type: CANNON.Body.STATIC } );
+      var body = new CANNON.Body( {
+        mass: 1,
+        material: this.bodyMaterial,
+        fixedRotation: true,
+        type: CANNON.Body.STATIC
+      } );
       var b = obj.geometry.boundingBox,
           dx = b.max.x - b.min.x,
           dy = b.max.y - b.min.y,
@@ -255,10 +264,16 @@ Primrose.VRApplication = ( function () {
     }
 
     function makeBall ( obj, mass, radius, skipObj ) {
-      var body = new CANNON.Body( { mass: mass, material: this.bodyMaterial,
-        fixedRotation: true } );
-      var shape = new CANNON.Sphere( radius ||
-          obj.geometry.boundingSphere.radius );
+      if(mass === undefined){
+        mass = 1;
+      }
+      var body = new CANNON.Body( {
+        mass: mass,
+        material: this.bodyMaterial,
+        fixedRotation: true
+      } );
+      var shape = new CANNON.Sphere(
+          (radius || obj.geometry.boundingSphere.radius ));
       return addPhysicsBody.call( this, obj, body, shape, radius, skipObj );
     }
 
@@ -283,12 +298,18 @@ Primrose.VRApplication = ( function () {
         }
 
         this.animate = this.animate.bind( this );
-
-        this.glove = new Primrose.Output.HapticGlove( {
+        this.glove.setEnvironment({
           scene: this.scene,
-          camera: this.camera
-        }, 2, 5, 5, 9080 );
-        
+          camera: this.camera,
+          world: this.world
+        });
+
+        for ( var i = 0; i < this.glove.numJoints; ++i ) {
+          var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
+          this.scene.add( s );
+          this.glove.tips.push( makeBall.call( this, s ) );
+        }
+
         this.fire( "ready" );
         requestAnimationFrame( this.animate );
       }
@@ -340,12 +361,8 @@ Primrose.VRApplication = ( function () {
       }
     };
 
-    this.currentUser = makeBall.call(
-        this,
-        new THREE.Vector3( 0, 3, 5 ),
-        1,
-        this.avatarHeight / 2,
-        true );
+    this.currentUser = new THREE.Object3D();
+    this.currentUser.velocity = new THREE.Vector3();
 
     this.ctrls.goRegular.addEventListener( "click", function () {
       requestFullScreen( this.ctrls.frontBuffer );
@@ -494,7 +511,7 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.resetPosition = function () {
-    this.currentUser.position.set( 0, 2, 0 );
+    this.currentUser.position.set( 0, 1, 0 );
     this.currentUser.velocity.set( 0, 0, 0 );
   };
 
@@ -527,14 +544,15 @@ Primrose.VRApplication = ( function () {
     this.mouse.update( dt );
     this.gamepad.update( dt );
 
-    strafe = this.keyboard.getValue( "strafeRight" ) +
-        this.keyboard.getValue( "strafeLeft" ) +
-        this.gamepad.getValue( "strafe" );
-    drive = this.keyboard.getValue( "driveBack" ) +
-        this.keyboard.getValue( "driveForward" ) +
-        this.gamepad.getValue( "drive" );
-
     if ( this.onground ) {
+
+      strafe = this.keyboard.getValue( "strafeRight" ) +
+          this.keyboard.getValue( "strafeLeft" ) +
+          this.gamepad.getValue( "strafe" );
+      drive = this.keyboard.getValue( "driveBack" ) +
+          this.keyboard.getValue( "driveForward" ) +
+          this.gamepad.getValue( "drive" );
+
       if ( strafe || drive ) {
         len = this.walkSpeed * Math.min( 1, 1 / Math.sqrt( drive * drive +
             strafe * strafe ) );
@@ -546,8 +564,8 @@ Primrose.VRApplication = ( function () {
       strafe *= len;
       drive *= len;
       len = strafe * Math.cos( heading ) + drive * Math.sin( heading );
-      drive = drive * Math.cos( heading ) - strafe * Math.sin( heading );
-      strafe = len;
+      drive = (drive * Math.cos( heading ) - strafe * Math.sin( heading )) * dt;
+      strafe = len * dt;
       this.currentUser.velocity.x = this.currentUser.velocity.x * 0.9 +
           strafe * 0.1;
       this.currentUser.velocity.z = this.currentUser.velocity.z * 0.9 +
@@ -567,17 +585,11 @@ Primrose.VRApplication = ( function () {
       }
     }
 
+    this.currentUser.position.add(this.currentUser.velocity);
+
     this.glove.readContacts( this.world.contacts );
     for ( j = 0; j < this.buttons.length; ++j ) {
       this.buttons[j].readContacts( this.world.contacts );
-    }
-    this.onground = false;
-    for ( j = 0; j < this.world.contacts.length; ++j ) {
-      c = this.world.contacts[j];
-      if ( c.bi === this.currentUser ) {
-        this.onground = true;
-        break;
-      }
     }
 
     if ( this.dragging ) {
@@ -601,9 +613,8 @@ Primrose.VRApplication = ( function () {
       this.camera.quaternion.multiply( this.qRift );
 
       if ( state.position ) {
-        this.pRift.copy( state.position ).multiplyScalar(5);
+        this.pRift.copy( state.position );
       }
-
       this.camera.position.add( this.pRift );
     }
 

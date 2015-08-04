@@ -68,14 +68,13 @@ module.exports = function ( grunt ) {
       }
     },
     uglify: {
-      options: {
-        banner: banner
-      },
       default: {
-        files: [ {
-            src: "dist/Primrose.js",
-            dest: "dist/Primrose.min.js"
-          } ]
+        files: [ "Primrose", "store", "mailchimp" ].map( function ( s ) {
+          return{
+            src: "javascripts/" + s + ".js",
+            dest: "javascripts/" + s + ".min.js"
+          };
+        } )
       }
     }
   } );
