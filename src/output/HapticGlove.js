@@ -95,10 +95,10 @@ Primrose.Output.HapticGlove = ( function () {
                 ++count;
               }
             }
+            if ( !found ) {
+              this.setFingerState( f, false );
+            }
           }
-        }
-        if ( !found ) {
-          this.setFingerState( f, false );
         }
       }
     };

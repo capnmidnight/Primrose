@@ -2,7 +2,8 @@ var fs = require( "fs" );
 
 module.exports = function ( grunt ) {
   // Project configuration.
-  var banner = "/*\n\
+  var banner =
+      "/*\n\
   <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
   <%= pkg.license.type %>\n\
   Copyright (C) 2015 <%= pkg.author %>\n\
@@ -23,7 +24,7 @@ module.exports = function ( grunt ) {
             expand: true,
             flatten: true,
             src: [ fileName ],
-            dest: 'lib/',
+            dest: 'javascripts/',
             filter: 'isFile'
           }
         ]
@@ -47,14 +48,9 @@ module.exports = function ( grunt ) {
 
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
-    clean: {
-      default: [ "dist/" ]
-    },
     exec: execConfig,
     copy: copyConfig,
-    jshint: {
-      default: [ "core.js", "src/**/*.js" ]
-    },
+    jshint: { default: [ "core.js", "src/**/*.js" ] },
     concat: {
       options: {
         banner: banner,
@@ -63,16 +59,25 @@ module.exports = function ( grunt ) {
       },
       default: {
         files: {
-          "dist/Primrose.js": [ "core.js", "src/**/*.js" ]
+          "javascripts/Primrose.js": [ "core.js", "src/**/*.js" ]
         }
       }
     },
     uglify: {
       default: {
-        files: [ "Primrose", "store", "mailchimp" ].map( function ( s ) {
+        files: [
+          "Primrose",
+          "cannon",
+          "cannonApp",
+          "ColladaLoader",
+          "ga",
+          "mailchimp",
+          "rosetta_24_game",
+          "store",
+          "three"].map( function ( s ) {
           return{
             src: "javascripts/" + s + ".js",
-            dest: "javascripts/" + s + ".min.js"
+            dest: "lib/" + s + ".min.js"
           };
         } )
       }
@@ -86,10 +91,10 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default",
-      [ "clean", "exec", "copy", "jshint", "concat", "uglify" ] );
+  grunt.registerTask( "buildall",
+      [ "exec", "copy", "jshint", "concat", "uglify" ] );
 
-  grunt.registerTask( "localonly",
-      [ "clean", "copy", "jshint", "concat", "uglify" ] );
+  grunt.registerTask( "default",
+      [ "copy", "jshint", "concat", "uglify" ] );
 
 };

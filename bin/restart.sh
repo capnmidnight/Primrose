@@ -11,5 +11,5 @@ if [ $choice != "N" ]; then
 fi
 cd ..
 git pull
-cd bin
+cd server
 forever --uid "PrimroseServer" -a start /usr/local/bin/npm start
