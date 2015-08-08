@@ -13,8 +13,7 @@
   "files": [
     "LICENSE",
     "README.md",
-    "dist/",
-    "lib/"
+    "bin/"
   ],
   "keywords": [
     "text",
