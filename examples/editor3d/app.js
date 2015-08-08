@@ -1,10 +1,10 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
 var log = null,
-    GRASS = THREE.ImageUtils.loadTexture("../images/grass.png"),
-    ROCK = THREE.ImageUtils.loadTexture("../images/rock.png"),
-    SAND = THREE.ImageUtils.loadTexture("../images/sand.png"),
-    WATER = THREE.ImageUtils.loadTexture("../images/water.png"),
-    DECK = THREE.ImageUtils.loadTexture("../images/deck.png");
+    GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
+    ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
+    SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
+    WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
+    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" );
 
 function fill ( txt, w, h, l ) {
   if ( h === undefined ) {
@@ -18,9 +18,9 @@ function fill ( txt, w, h, l ) {
   }
   var point = hub();
   for ( var y = 0; y < h; ++y ) {
-      put( brick( txt, w, 1, l ) )
-          .on( point )
-          .at( w / 2, y, l / 2 );
+    put( brick( txt, w, 1, l ) )
+        .on( point )
+        .at( w / 2, y, l / 2 );
   }
   return point;
 }
@@ -324,13 +324,14 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  setupKeyOption( ctrls.leftKey, "A", 65 );
-  setupKeyOption( ctrls.rightKey, "D", 68 );
-  setupKeyOption( ctrls.forwardKey, "W", 87 );
-  setupKeyOption( ctrls.backKey, "S", 83 );
+  var elems = [ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey];
+  setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );
+  setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
+  setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
+  setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
 
-  ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
-      ctrls.output ) );
+  ctrls.goRegular.addEventListener( "click",
+      requestFullScreen.bind( window, ctrls.output ) );
   ctrls.goVR.style.display = !!vrDisplay ? "inline-block" : "none";
   ctrls.goVR.addEventListener( "click", function ( ) {
     requestFullScreen( ctrls.output, vrDisplay );

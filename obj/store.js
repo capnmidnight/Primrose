@@ -1,4 +1,11 @@
 /*
+  Primrose v0.12.3 2015-08-08
+  
+  Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
+  https://www.primroseeditor.com
+  https://github.com/capnmidnight/Primrose.git
+*/
+/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -169,3 +176,4 @@ function initStore ( ) {
         ctrls.purchaseSuccess, ctrls.purchaseError, "editor_license" );
   } );
 }
+Primrose.VERSION = "v0.12.3";
