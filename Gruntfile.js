@@ -1,3 +1,5 @@
+/* global module */
+
 var fs = require( "fs" );
 
 module.exports = function ( grunt ) {
@@ -24,7 +26,7 @@ module.exports = function ( grunt ) {
             expand: true,
             flatten: true,
             src: [ fileName ],
-            dest: 'javascripts/',
+            dest: 'obj/',
             filter: 'isFile'
           }
         ]
@@ -33,7 +35,11 @@ module.exports = function ( grunt ) {
   }
 
   function depend ( name, rootDir, buildDir, buildCmd, binDir ) {
-    if ( fs.existsSync( rootDir ) ) {
+    if ( !fs.existsSync( rootDir ) ) {
+      console.log( name +
+          " is not installed. Need to clone the git repository." );
+    }
+    else {
       console.log( "including " + name );
       execConfig["build_" + name] = "cd " + rootDir + "/" + buildDir + " && " +
           buildCmd;
@@ -50,7 +56,7 @@ module.exports = function ( grunt ) {
     pkg: grunt.file.readJSON( "package.json" ),
     exec: execConfig,
     copy: copyConfig,
-    jshint: { default: [ "core.js", "src/**/*.js" ] },
+    jshint: "src/**/*.js",
     concat: {
       options: {
         banner: banner,
@@ -59,27 +65,33 @@ module.exports = function ( grunt ) {
       },
       default: {
         files: {
-          "javascripts/Primrose.js": [ "core.js", "src/**/*.js" ]
+          "obj/Primrose.js": [ "src/core.js", "src/fx/**/*.js" ]
         }
       }
     },
     uglify: {
       default: {
-        files: [
+       files: [
           "Primrose",
-          "cannon",
-          "cannonApp",
-          "ColladaLoader",
           "ga",
           "mailchimp",
-          "rosetta_24_game",
           "store",
-          "three"].map( function ( s ) {
+          "three",
+          "ColladaLoader",
+          "cannon" ].map( function ( s ) {
+          var f = "obj/" + s + ".js",
+              exists = fs.existsSync( f );
+          if ( !exists ) {
+            console.error( "Couldn't find file: " + o.src );
+          }
           return{
-            src: "javascripts/" + s + ".js",
-            dest: "lib/" + s + ".min.js"
+            src: f,
+            dest: "bin/" + s + ".min.js"
           };
         } )
+            .filter( function ( o ) {
+              return o;
+            } )
       }
     }
   } );
