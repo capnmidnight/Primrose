@@ -55,7 +55,7 @@ if ( options.dev ) {
     res.status( err.status || 500 );
     res.render( "error", {
       message: err.message,
-      error: err6
+      error: err
     } );
   } );
 }
@@ -120,5 +120,5 @@ server.listen( options.port );
 server.on( "error", onError );
 server.on( "listening", onListening );
 if ( options.dev ) {
-  start( !options.dev, options.port );
+  start( false, options.port );
 }
