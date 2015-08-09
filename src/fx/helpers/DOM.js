@@ -75,3 +75,48 @@ function makeHidingContainer ( id, obj ) {
   elem.appendChild( obj );
   return elem;
 }
+
+
+
+function makeSelectorFromObj ( id, obj, def, target, prop, lbl, filter ) {
+  var elem = cascadeElement( id, "select", window.HTMLSelectElement );
+  var items = [ ];
+  for ( var key in obj ) {
+    if ( obj.hasOwnProperty( key ) ) {
+      var val = obj[key];
+      if ( !filter || val instanceof filter ) {
+        val = val.name || key;
+        var opt = document.createElement( "option" );
+        opt.innerHTML = val;
+        items.push( obj[key] );
+        if ( val === def ) {
+          opt.selected = "selected";
+        }
+        elem.appendChild( opt );
+      }
+    }
+  }
+
+  if ( typeof target[prop] === "function" ) {
+    elem.addEventListener( "change", function () {
+      target[prop]( items[elem.selectedIndex] );
+    } );
+  }
+  else {
+    elem.addEventListener( "change", function () {
+      target[prop] = items[elem.selectedIndex];
+    } );
+  }
+
+  var container = cascadeElement( "container -" + id, "div",
+      window.HTMLDivElement );
+  var label = cascadeElement( "label-" + id, "span",
+      window.HTMLSpanElement );
+  label.innerHTML = lbl + ": ";
+  label.for = elem;
+  elem.title = lbl;
+  elem.alt = lbl;
+  container.appendChild( label );
+  container.appendChild( elem );
+  return container;
+}

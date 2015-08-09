@@ -28,8 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <input id="l" type="text" placeholder="language code"> (use <a href="http://tools.ietf.org/rfc/bcp/bcp47.txt" target="_blank">BCP-47</a> for reference)<br>
     <input id="x" type="text" placeholder="type codes here"><br>
     <div id="t" style="font-family:monospace; font-size:10pt;white-space: pre; column-count: 7;-webkit-column-count: 7;-moz-column-count: 7;"></div>
+    <script type="text/javascript" src="../../bin/ga.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/three.js/build/three.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/cannon/build/cannon.min.js"></script>
     <script type="text/javascript" src="../../bin/Primrose.min.js"></script>
     <script type="text/javascript">
+      ga("send", "pageview");
       var browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE
           ? "IE" : ( isOpera ? "OPERA" : ( isSafari ? "SAFARI"
           : "UNKNOWN" ) ) ) );
@@ -43,11 +47,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       function setCodePage ( cp ) {
         codePage = cp;
         if ( codePage ) {
-          for ( var key in CodePage ) {
-            if ( CodePage[key].name === codePage.name ) {
+          for ( var key in Primrose.Text.CodePages ) {
+            if ( Primrose.Text.CodePages[key].name === codePage.name ) {
               v.value = key;
-              n.value = CodePage[key].name;
-              l.value = CodePage[key].language;
+              n.value = Primrose.Text.CodePages[key].name;
+              l.value = Primrose.Text.CodePages[key].language;
               break;
             }
           }
@@ -59,12 +63,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         }
         drawPage();
       }
-      setCodePage( CodePage.EN_US );
-      var c = makeSelectorFromObj( "c", CodePage, codePage.name, window,
+      setCodePage( Primrose.Text.CodePages.EN_US );
+      var c = makeSelectorFromObj( "c", Primrose.Text.CodePages, codePage.name, window,
           "setCodePage" );
 
       v.addEventListener( "change", function () {
-        setCodePage( CodePage[v.value] );
+        setCodePage( Primrose.Text.CodePages[v.value] );
       } );
 
       n.addEventListener( "change", function () {
@@ -80,7 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       } );
 
       function drawPage () {
-        t.value = "CodePage." + v.value + " = {\n";
+        t.value = "Primrose.Text.CodePages." + v.value + " = {\n";
         for ( var key in codePage ) {
           t.value += "    " + key + ": ";
           var val = codePage[key];
