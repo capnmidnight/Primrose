@@ -26,10 +26,10 @@
     "highlighting"
   ],
   "dependencies": {
-    "cannon.js": "git+https://github.com/schteppe/cannon.js.git",
+    "cannon": "schteppe/cannon.js",
     "leapjs": "^0.6.4",
     "socket.io": "^1.3.6",
-    "three.js": "git+https://github.com/capnmidnight/three.js.git"
+    "three.js": "capnmidnight/three.js"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

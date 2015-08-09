@@ -19,7 +19,6 @@
 
 window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
 window.ftypes = [ 'email', 'text', 'text' ];
-var $mcj = jQuery.noConflict( true );
 
 var ctrls,
     prices,

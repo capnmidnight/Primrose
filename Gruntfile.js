@@ -30,7 +30,6 @@ module.exports = function ( grunt ) {
           "src/store",
           "obj/Primrose",
           "lib/analytics",
-          "lib/ColladaLoader",
           "lib/ga",
           "lib/mailchimp" ].map( function ( s ) {
           return{

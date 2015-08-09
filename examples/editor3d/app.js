@@ -17,11 +17,9 @@ function fill ( txt, w, h, l ) {
     }
   }
   var point = hub();
-  for ( var y = 0; y < h; ++y ) {
-    put( brick( txt, w, 1, l ) )
-        .on( point )
-        .at( w / 2, y, l / 2 );
-  }
+  put( brick( txt, w, h, l ) )
+      .on( point )
+      .at( w / 2, h / 2, l / 2 );
   return point;
 }
 
@@ -30,60 +28,29 @@ function testDemo ( scene ) {
       .on( scene )
       .at( -12, -3, -12 );
 
-  put( fill( WATER, 25, 1, 12 ) )
-      .on( start )
-      .at( 0, 0, 12 );
-
-  for ( var z = 0; z < 12; ++z ) {
-    var x = z;
-    var w = 25 - x;
-    put( fill( GRASS, w, 1, 1 ) )
-        .on( start )
-        .at( 0, 0, z );
-
-    put( fill( SAND, x, 1, 1 ) )
-        .on( start )
-        .at( w, 0, z );
-
-    if ( z < 10 ) {
-      for ( var x = 0; x < 10; ++x ) {
-        h = 10 - Math.sqrt( z * z + x * x );
-        put( fill( ROCK, 1, h, 1 ) )
-            .on( start )
-            .at( x, 1, z );
-      }
-    }
-  }
+  put( fill( GRASS, 25, 1, 25 ) )
+      .on( start );
 
   var sun = put( hub() )
       .on( start )
       .at( 10, 10, -3 );
-  function sunBit () {
-    return textured( box( 1 ), 0xffff00, true, 0.125 );
+  function sunBit ( x, y, z ) {
+    put( textured( box( 1 ), 0xffff00, true, 0.125 ) )
+        .on( sun )
+        .at( x, y, z );
   }
-  put( sunBit() )
-      .on( sun )
-      .at( 1, 0, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( -1, 0, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 1, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, -1, 0 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 0, 1 );
-  put( sunBit() )
-      .on( sun )
-      .at( 0, 0, -1 );
+  sunBit( 1, 0, 0 );
+  sunBit( -1, 0, 0 );
+  sunBit( 0, 1, 0 );
+  sunBit( 0, -1, 0 );
+  sunBit( 0, 0, 1 );
+  sunBit( 0, 0, -1 );
 
   var t = 0;
   function update ( dt ) {
     t += dt * 0.0005;
     sun.rotation.set( t, t / 2, t / 5 );
+    log( 1000 / dt );
   }
   log( "ok" );
   return update;
@@ -324,7 +291,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  var elems = [ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey];
+  var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
+  ];
   setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );
   setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
   setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
