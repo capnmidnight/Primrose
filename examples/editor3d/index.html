@@ -4,90 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
     <title>Primrose: Canvas-based text editor</title>
-    <script src="../../lib/three.min.js" type="text/javascript"></script>
-
-    <script src="../../core.js" type="text/javascript"></script>
-
-    <script src="../../src/Application.js" type="text/javascript"></script>
-    <script src="../../src/Button.js" type="text/javascript"></script>
-    <script src="../../src/ButtonFactory.js" type="text/javascript"></script>
-    <script src="../../src/ModelLoader.js" type="text/javascript"></script>
-    <script src="../../src/NetworkedInput.js" type="text/javascript"></script>
-    <script src="../../src/VRApplication.js" type="text/javascript"></script>
-    <script src="../../src/WebRTCSocket.js" type="text/javascript"></script>
-
-    <script src="../../src/audio/Audio3D.js" type="text/javascript"></script>
-    <script src="../../src/audio/Speech.js" type="text/javascript"></script>
-
-    <script src="../../src/helpers/DOM.js" type="text/javascript"></script>
-    <script src="../../src/helpers/arrays.js" type="text/javascript"></script>
-    <script src="../../src/helpers/camera.js" type="text/javascript"></script>
-    <script src="../../src/helpers/flags.js" type="text/javascript"></script>
-    <script src="../../src/helpers/fmt.js" type="text/javascript"></script>
-    <script src="../../src/helpers/forms.js" type="text/javascript"></script>
-    <script src="../../src/helpers/fullscreen.js" type="text/javascript"></script>
-    <script src="../../src/helpers/graphics.js" type="text/javascript"></script>
-    <script src="../../src/helpers/help.js" type="text/javascript"></script>
-    <script src="../../src/helpers/oop.js" type="text/javascript"></script>
-    <script src="../../src/helpers/polyfills.js" type="text/javascript"></script>
-    <script src="../../src/helpers/requests.js" type="text/javascript"></script>
-    <script src="../../src/helpers/reverse.js" type="text/javascript"></script>
-
-    <script src="../../src/input/ButtonAndAxisInput.js" type="text/javascript"></script>
-    <script src="../../src/input/CameraInput.js" type="text/javascript"></script>
-    <script src="../../src/input/GamepadInput.js" type="text/javascript"></script>
-    <script src="../../src/input/KeyboardInput.js" type="text/javascript"></script>
-    <script src="../../src/input/LeapMotionInput.js" type="text/javascript"></script>
-    <script src="../../src/input/LocationInput.js" type="text/javascript"></script>
-    <script src="../../src/input/MotionInput.js" type="text/javascript"></script>
-    <script src="../../src/input/MouseInput.js" type="text/javascript"></script>
-    <script src="../../src/input/SpeechInput.js" type="text/javascript"></script>
-    <script src="../../src/input/TouchInput.js" type="text/javascript"></script>
-    <script src="../../src/input/VRInput.js" type="text/javascript"></script>
-
-    <script src="../../src/text/CodePage.js" type="text/javascript"></script>
-    <script src="../../src/text/CommandPack.js" type="text/javascript"></script>
-    <script src="../../src/text/Control.js" type="text/javascript"></script>
-    <script src="../../src/text/Cursor.js" type="text/javascript"></script>
-    <script src="../../src/text/Grammar.js" type="text/javascript"></script>
-    <script src="../../src/text/Keys.js" type="text/javascript"></script>
-    <script src="../../src/text/OperatingSystem.js" type="text/javascript"></script>
-    <script src="../../src/text/Point.js" type="text/javascript"></script>
-    <script src="../../src/text/Rectangle.js" type="text/javascript"></script>
-    <script src="../../src/text/Rule.js" type="text/javascript"></script>
-    <script src="../../src/text/Size.js" type="text/javascript"></script>
-    <script src="../../src/text/Terminal.js" type="text/javascript"></script>
-    <script src="../../src/text/Token.js" type="text/javascript"></script>
-    <script src="../../src/text/code_pages/DE_QWERTZ.js" type="text/javascript"></script>
-    <script src="../../src/text/code_pages/EN_UKX.js" type="text/javascript"></script>
-    <script src="../../src/text/code_pages/EN_US.js" type="text/javascript"></script>
-    <script src="../../src/text/code_pages/FR_AZERTY.js" type="text/javascript"></script>
-    <script src="../../src/text/command_packs/TextEditor.js" type="text/javascript"></script>
-    <script src="../../src/text/controls/Keyboard.js" type="text/javascript"></script>
-    <script src="../../src/text/controls/TextBox.js" type="text/javascript"></script>
-    <script src="../../src/text/grammars/Basic.js" type="text/javascript"></script>
-    <script src="../../src/text/grammars/JavaScript.js" type="text/javascript"></script>
-    <script src="../../src/text/grammars/PlainText.js" type="text/javascript"></script>
-    <script src="../../src/text/grammars/TestResults.js" type="text/javascript"></script>
-    <script src="../../src/text/operating_systems/OSX.js" type="text/javascript"></script>
-    <script src="../../src/text/operating_systems/Windows.js" type="text/javascript"></script>
-    <script src="../../src/text/renderers/Canvas.js" type="text/javascript"></script>
-    <script src="../../src/text/renderers/DOM.js" type="text/javascript"></script>
-    <script src="../../src/text/themes/Dark.js" type="text/javascript"></script>
-    <script src="../../src/text/themes/Default.js" type="text/javascript"></script>
-
-    <script src="../../test/testing.js" type="text/javascript"></script>
-    <script src="../../test/Basic.js" type="text/javascript"></script>
-    <script src="../../test/Grammar.js" type="text/javascript"></script>
-    <script src="../../test/Point.js" type="text/javascript"></script>
-    <script src="../../test/Rectangle.js" type="text/javascript"></script>
-    <script src="../../test/Size.js" type="text/javascript"></script>
+    <script type="text/javascript" src="../../bin/ga.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/three.js/build/three.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/cannon/build/cannon.min.js"></script>
+    <script type="text/javascript" src="../../bin/Primrose.min.js"></script>
 
     <script src="app.js" type="text/javascript"></script>
 
     <link type="text/css" rel="stylesheet" href="style.css">
   </head>
-  <body onload="findVR(PrimroseDemo)">
+  <body onload="ga('send', 'pageview');findVR(PrimroseDemo);">
     <div id="outputContainer">
       <canvas id="output"></canvas>
     </div>
