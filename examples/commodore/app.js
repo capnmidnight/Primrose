@@ -90,7 +90,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       RIGHT = new THREE.Vector3(1, 0, 0),
       qPitch = new THREE.Quaternion(),
       qRift = new THREE.Quaternion(),
-      position = new THREE.Vector3();
+      position = new THREE.Vector3(),
+      translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
+      viewports = [ new THREE.Box2(), new THREE.Box2() ];
 
   function setTrans ( m, t ) {
     m.makeTranslation( t.x, t.y, t.z );
@@ -108,7 +110,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
         right: vrDisplay.getEyeParameters( "right" )
       };
     }
-    else {
+    else if( vrDisplay.getRecommendedEyeRenderRect ) {
       vrParams = {
         left: {
           renderRect: vrDisplay.getRecommendedEyeRenderRect( "left" ),
@@ -123,6 +125,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
               "right" )
         }
       };
+    }
+    else{
+      console.error("Couldn't figure out how to process the VR Display object", vrDisplay);
     }
 
     setTrans( translations[0], vrParams.left.eyeTranslation );
@@ -480,13 +485,21 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   function render ( t ) {
     requestAnimationFrame( render );
-    terminal.update();
     if ( lt ) {
       update( t - lt );
     }
-    var r = inVR ? vrEffect : renderer;
-    r.render( scene, camera );
+
+    renderScene( scene );
     lt = t;
+  }
+
+  function renderScene ( s, rt, fc ) {
+    if ( inVR ) {
+      renderer.renderStereo( s, camera, rt, fc, translations, viewports );
+    }
+    else {
+      renderer.render( s, camera, rt, fc );
+    }
   }
 
   function textured ( geometry, txt, s, t ) {
@@ -572,9 +585,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   function pick ( op ) {
     if ( lastEditor && lastEditor.focused ) {
-      var r = inVR ? vrEffect : renderer;
-      r.render( pickingScene, camera, back, true );
-      lastEditor[op + "Picking"]( gl, pointerX, pointerY );
+      renderScene( pickingScene, back, true );
+      lastEditor[op + "Picking"]( gl, pointerX, ctrls.output.height -
+          pointerY );
     }
   }
 }
