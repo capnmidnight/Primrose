@@ -17,15 +17,7 @@ Primrose.Output.HapticGlove = ( function () {
       options.scene = opts.scene;
       options.camera = opts.camera;
 
-      Leap.loopController.use( "transform", {
-        vr: true,
-        effectiveParent: options.camera
-      } )
-          .use( 'boneHand', {
-            scene: options.scene,
-            arm: true
-          } )
-          .on( "frame", readFrame.bind(this) );
+      Leap.loopController.on( "frame", readFrame.bind(this) );
 
     };
 
