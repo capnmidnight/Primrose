@@ -53,7 +53,7 @@ function POST ( url, data, type, progress, error, success ) {
   var progressThunk = success && error && progress,
       errorThunk = ( success && error ) || ( error && progress ),
       successThunk = success || error || progress;
-  XHR( url, "POST", type, progressThunk, errorThunk, successThunk );
+  XHR( url, "POST", type, progressThunk, errorThunk, successThunk, data );
 }
 
 function getObject ( url, progress, error, success ) {

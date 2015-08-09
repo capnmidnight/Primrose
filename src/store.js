@@ -77,11 +77,11 @@ function makeItemPurchase ( btn, lbl, stat, err, item ) {
   var purchaseError = false;
 
   function onPurchaseError ( btn, err, msg, ref ) {
-    console.error( msg, ref || "", errMsg, errMail, errRef );
-
     var errMsg = document.getElementById( err.id + "-msg" );
     var errRef = document.getElementById( err.id + "-ref" );
     var errMail = document.getElementById( err.id + "-email" );
+
+    console.error( msg, ref || "", errMsg, errMail, errRef );
 
     errMsg.innerHTML = msg;
     errMail.innerHTML = "Sean T. McBeth &lt;sean@primroseeditor.com&gt;";
