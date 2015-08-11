@@ -1,6 +1,20 @@
 /* global module */
 
-var fs = require( "fs" );
+var fs = require( "fs" ),
+    uglifyFiles = [
+      "src/store",
+      "obj/Primrose",
+      "lib/analytics",
+      "lib/ga",
+      "lib/mailchimp" ].map( function ( s ) {
+  return{
+    src: s + ".js",
+    dest: s.replace( /^(src|obj|lib)/, "bin" ) + ".min.js"
+  };
+} ),
+    copyFiles = uglifyFiles.map( function ( o ) {
+      return { src: o.src, dest: o.src.replace( /^(src|obj|lib)/, "bin" ) };
+    } );
 
 module.exports = function ( grunt ) {
   grunt.initConfig( {
@@ -26,17 +40,12 @@ module.exports = function ( grunt ) {
     },
     uglify: {
       default: {
-        files: [
-          "src/store",
-          "obj/Primrose",
-          "lib/analytics",
-          "lib/ga",
-          "lib/mailchimp" ].map( function ( s ) {
-          return{
-            src: s + ".js",
-            dest: s.replace( /^(src|obj|lib)/, "bin" ) + ".min.js"
-          };
-        } )
+        files: uglifyFiles
+      }
+    },
+    copy: {
+      default: {
+        files: copyFiles
       }
     }
   } );
@@ -48,6 +57,6 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default", [ "jshint", "concat", "uglify" ] );
+  grunt.registerTask( "default", [ "jshint", "concat", "uglify", "copy" ] );
 
 };
