@@ -95,9 +95,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
-        var ch = renderer.character.height / renderer.getPixelRatio();
-        surrogate.style.fontSize = px( ch * 0.99 );
-        surrogate.style.lineHeight = px( ch );
+        surrogate.style.fontSize = px( renderer.character.height * 0.99 );
+        surrogate.style.lineHeight = px( renderer.character.height );
       }
     }
 
@@ -270,12 +269,10 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           y -
           bottomRightGutter.height;
       gridBounds.set( x + 2, y, w - 2, h - 2 );
-      var cw = renderer.character.width / renderer.getPixelRatio();
-      var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.left = px( gridBounds.x * cw );
-      surrogate.style.top = px( gridBounds.y * ch );
-      surrogate.style.width = px( gridBounds.width * cw );
-      surrogate.style.height = px( gridBounds.height * ch );
+      surrogate.style.left = px( gridBounds.x * renderer.character.width );
+      surrogate.style.top = px( gridBounds.y * renderer.character.height );
+      surrogate.style.width = px( gridBounds.width * renderer.character.width );
+      surrogate.style.height = px( gridBounds.height * renderer.character.height );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];

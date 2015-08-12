@@ -33,37 +33,34 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     };
 
     this.pixel2cell = function ( point, scroll, gridBounds ) {
-      var r = this.getPixelRatio();
       var x = point.x * canvas.width / canvas.clientWidth;
       var y = point.y * canvas.height / canvas.clientHeight;
       point.set(
-          Math.round( x * r / this.character.width ) + scroll.x - gridBounds.x,
-          Math.floor( ( y * r / this.character.height ) - 0.25 ) + scroll.y );
+          Math.round( x / this.character.width ) + scroll.x - gridBounds.x,
+          Math.floor( ( y / this.character.height ) - 0.25 ) + scroll.y );
     };
 
     this.hasResized = function () {
-      var r = this.getPixelRatio(),
-          oldWidth = canvas.width,
+      var oldWidth = canvas.width,
           oldHeight = canvas.height,
-          newWidth = canvas.clientWidth * r,
-          newHeight = canvas.clientHeight * r;
+          newWidth = canvas.clientWidth,
+          newHeight = canvas.clientHeight;
       return oldWidth !== newWidth || oldHeight !== newHeight;
     };
 
     this.resize = function () {
       var changed = false;
       if ( theme ) {
-        var r = this.getPixelRatio(),
-            oldCharacterWidth = this.character.width,
+        var oldCharacterWidth = this.character.width,
             oldCharacterHeight = this.character.height,
             oldWidth = canvas.width,
             oldHeight = canvas.height,
             newWidth = ( strictSize && strictSize.width ) ||
-            ( canvas.clientWidth * r ),
+            canvas.clientWidth,
             newHeight = ( strictSize && strictSize.height ) ||
-            ( canvas.clientHeight * r ),
+            canvas.clientHeight,
             oldFont = gfx.font;
-        this.character.height = theme.fontSize * r;
+        this.character.height = theme.fontSize;
         gfx.font = this.character.height + "px " + theme.fontFamily;
         // measure 100 letter M's, then divide by 100, to get the width of an M
         // to two decimal places on systems that return integer values from
@@ -372,10 +369,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         pickingTexture.needsUpdate = true;
       }
       return pickingTexture;
-    };
-
-    this.getPixelRatio = function () {
-      return window.devicePixelRatio || 1;
     };
 
     this.getPixelIndex = function ( gl, x, y ) {

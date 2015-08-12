@@ -34,11 +34,13 @@ function testDemo ( scene ) {
   var sun = put( hub() )
       .on( start )
       .at( 10, 10, -3 );
+
   function sunBit ( x, y, z ) {
     put( textured( box( 1 ), 0xffff00, true, 0.125 ) )
         .on( sun )
         .at( x, y, z );
   }
+
   sunBit( 1, 0, 0 );
   sunBit( -1, 0, 0 );
   sunBit( 0, 1, 0 );
@@ -50,7 +52,6 @@ function testDemo ( scene ) {
   function update ( dt ) {
     t += dt * 0.0005;
     sun.rotation.set( t, t / 2, t / 5 );
-    log( 1000 / dt );
   }
   log( "ok" );
   return update;

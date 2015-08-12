@@ -1,3 +1,4 @@
+/* global isMobile */
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
@@ -9,8 +10,8 @@ function isFullScreenMode () {
 var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
-  
-  if ( USE_VR_DISPLAY_PARAMETER && vrDisplay ) {
+
+  if ( (!isMobile || USE_VR_DISPLAY_PARAMETER) && vrDisplay ) {
     fullScreenParam = { vrDisplay: vrDisplay };
   }
 

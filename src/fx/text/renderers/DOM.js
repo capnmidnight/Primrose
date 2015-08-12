@@ -411,10 +411,6 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       return div;
     };
 
-    this.getPixelRatio = function () {
-      return 1;
-    };
-
     if ( !( domElementOrID instanceof window.HTMLDivElement ) &&
         options.width && options.height ) {
       div.style.position = "absolute";

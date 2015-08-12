@@ -1,5 +1,5 @@
 /*
-  Primrose v0.12.3 2015-08-11
+  Primrose v0.12.3 2015-08-12
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -1865,7 +1865,8 @@ function writeForm ( ctrls, state ) {
     }
   }
 }
-;// fullscreen-isms
+;/* global isMobile */
+// fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
       document.mozFullScreenElement ||
@@ -1876,8 +1877,8 @@ function isFullScreenMode () {
 var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
-  
-  if ( USE_VR_DISPLAY_PARAMETER && vrDisplay ) {
+
+  if ( (!isMobile || USE_VR_DISPLAY_PARAMETER) && vrDisplay ) {
     fullScreenParam = { vrDisplay: vrDisplay };
   }
 
@@ -6838,9 +6839,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         surrogateContainer.style.width = 0;
         surrogateContainer.style.height = 0;
         surrogate.style.fontFamily = theme.fontFamily;
-        var ch = renderer.character.height / renderer.getPixelRatio();
-        surrogate.style.fontSize = px( ch * 0.99 );
-        surrogate.style.lineHeight = px( ch );
+        surrogate.style.fontSize = px( renderer.character.height * 0.99 );
+        surrogate.style.lineHeight = px( renderer.character.height );
       }
     }
 
@@ -7013,12 +7013,10 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           y -
           bottomRightGutter.height;
       gridBounds.set( x + 2, y, w - 2, h - 2 );
-      var cw = renderer.character.width / renderer.getPixelRatio();
-      var ch = renderer.character.height / renderer.getPixelRatio();
-      surrogate.style.left = px( gridBounds.x * cw );
-      surrogate.style.top = px( gridBounds.y * ch );
-      surrogate.style.width = px( gridBounds.width * cw );
-      surrogate.style.height = px( gridBounds.height * ch );
+      surrogate.style.left = px( gridBounds.x * renderer.character.width );
+      surrogate.style.top = px( gridBounds.y * renderer.character.height );
+      surrogate.style.width = px( gridBounds.width * renderer.character.width );
+      surrogate.style.height = px( gridBounds.height * renderer.character.height );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -8535,37 +8533,34 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     };
 
     this.pixel2cell = function ( point, scroll, gridBounds ) {
-      var r = this.getPixelRatio();
       var x = point.x * canvas.width / canvas.clientWidth;
       var y = point.y * canvas.height / canvas.clientHeight;
       point.set(
-          Math.round( x * r / this.character.width ) + scroll.x - gridBounds.x,
-          Math.floor( ( y * r / this.character.height ) - 0.25 ) + scroll.y );
+          Math.round( x / this.character.width ) + scroll.x - gridBounds.x,
+          Math.floor( ( y / this.character.height ) - 0.25 ) + scroll.y );
     };
 
     this.hasResized = function () {
-      var r = this.getPixelRatio(),
-          oldWidth = canvas.width,
+      var oldWidth = canvas.width,
           oldHeight = canvas.height,
-          newWidth = canvas.clientWidth * r,
-          newHeight = canvas.clientHeight * r;
+          newWidth = canvas.clientWidth,
+          newHeight = canvas.clientHeight;
       return oldWidth !== newWidth || oldHeight !== newHeight;
     };
 
     this.resize = function () {
       var changed = false;
       if ( theme ) {
-        var r = this.getPixelRatio(),
-            oldCharacterWidth = this.character.width,
+        var oldCharacterWidth = this.character.width,
             oldCharacterHeight = this.character.height,
             oldWidth = canvas.width,
             oldHeight = canvas.height,
             newWidth = ( strictSize && strictSize.width ) ||
-            ( canvas.clientWidth * r ),
+            canvas.clientWidth,
             newHeight = ( strictSize && strictSize.height ) ||
-            ( canvas.clientHeight * r ),
+            canvas.clientHeight,
             oldFont = gfx.font;
-        this.character.height = theme.fontSize * r;
+        this.character.height = theme.fontSize;
         gfx.font = this.character.height + "px " + theme.fontFamily;
         // measure 100 letter M's, then divide by 100, to get the width of an M
         // to two decimal places on systems that return integer values from
@@ -8874,10 +8869,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         pickingTexture.needsUpdate = true;
       }
       return pickingTexture;
-    };
-
-    this.getPixelRatio = function () {
-      return window.devicePixelRatio || 1;
     };
 
     this.getPixelIndex = function ( gl, x, y ) {
@@ -9321,10 +9312,6 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
 
     this.getDOMElement = function () {
       return div;
-    };
-
-    this.getPixelRatio = function () {
-      return 1;
     };
 
     if ( !( domElementOrID instanceof window.HTMLDivElement ) &&
