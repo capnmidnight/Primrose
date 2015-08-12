@@ -1,5 +1,8 @@
 /* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen */
 Primrose.VRApplication = ( function () {
+  if(typeof(THREE) === "undefined"){
+    return function(){};
+  }
   /*
    Create a new VR Application!
 
@@ -94,15 +97,10 @@ Primrose.VRApplication = ( function () {
 
     var DEBUG_VR = false,
         translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-        viewports = [ new THREE.Box2(), new THREE.Box2() ];
+        viewports = [ ];
 
     function setTrans ( m, t ) {
       m.makeTranslation( t.x, t.y, t.z );
-    }
-
-    function setView ( b, r ) {
-      b.min.set( r.x, r.y );
-      b.max.set( r.x + r.width, r.y + r.height );
     }
 
     function checkForVR () {
@@ -146,8 +144,8 @@ Primrose.VRApplication = ( function () {
 
           setTrans( translations[0], this.vrParams.left.eyeTranslation );
           setTrans( translations[1], this.vrParams.right.eyeTranslation );
-          setView( viewports[0], this.vrParams.left.renderRect );
-          setView( viewports[1], this.vrParams.right.renderRect );
+          viewports[0] = this.vrParams.left.renderRect;
+          viewports[1] = this.vrParams.right.renderRect;
         }
       }.bind( this ) );
     }
@@ -341,19 +339,18 @@ Primrose.VRApplication = ( function () {
 
     this.fullScreen = function () {
       if ( this.ctrls.frontBuffer.webkitRequestFullscreen ) {
-        this.ctrls.frontBuffer.webkitRequestFullscreen( {
-          vrDisplay: this.vrDisplay } );
+        this.ctrls.frontBuffer.webkitRequestFullscreen(  );
       }
       else if ( this.ctrls.frontBuffer.mozRequestFullScreen ) {
-        this.ctrls.frontBuffer.mozRequestFullScreen( {
-          vrDisplay: this.vrDisplay } );
+        this.ctrls.frontBuffer.mozRequestFullScreen(  );
       }
     };
 
 
     this.renderScene = function ( s, rt, fc ) {
       if ( this.inVR ) {
-        this.renderer.renderStereo( s, this.camera, rt, fc, translations,
+        this.renderer.renderStereo( s, this.camera, rt, fc,
+            translations,
             viewports );
       }
       else {

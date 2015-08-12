@@ -124,7 +124,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       position = new THREE.Vector3( ),
       src = getSetting( "code", testDemo.toString( ) ),
       translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-      viewports = [ new THREE.Box2(), new THREE.Box2() ];
+      viewports = [ ];
 
   function setTrans ( m, t ) {
     m.makeTranslation( t.x, t.y, t.z );
@@ -161,8 +161,8 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
     setTrans( translations[0], vrParams.left.eyeTranslation );
     setTrans( translations[1], vrParams.right.eyeTranslation );
-    setView( viewports[0], vrParams.left.renderRect );
-    setView( viewports[1], vrParams.right.renderRect );
+    viewports[0] = vrParams.left.renderRect;
+    viewports[1] = vrParams.right.renderRect;
   }
 
   if ( src === testDemo.toString( ) ) {

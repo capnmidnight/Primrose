@@ -1,6 +1,9 @@
 /* global Primrose, THREE */
 
 Primrose.ModelLoader = ( function () {
+  if(typeof(THREE) === "undefined"){
+    return function(){};
+  }
   var COLLADA = new THREE.ColladaLoader(),
       JSON = new THREE.ObjectLoader();
   COLLADA.options.convertUpAxis = true;
