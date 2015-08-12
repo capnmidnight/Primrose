@@ -1,17 +1,18 @@
 /* global module */
 
 var fs = require( "fs" ),
-    uglifyFiles = [
+    files = [
       "src/store",
       "obj/Primrose",
       "lib/analytics",
       "lib/ga",
-      "lib/mailchimp" ].map( function ( s ) {
-  return{
-    src: s + ".js",
-    dest: s.replace( /^(src|obj|lib)/, "bin" ) + ".min.js"
-  };
-} ),
+      "lib/mailchimp" ],
+    uglifyFiles = files.map( function ( s ) {
+      return{
+        src: s + ".js",
+        dest: s.replace( /^(src|obj|lib)/, "bin" ) + ".min.js"
+      };
+    } ),
     copyFiles = uglifyFiles.map( function ( o ) {
       return { src: o.src, dest: o.src.replace( /^(src|obj|lib)/, "bin" ) };
     } );
@@ -20,7 +21,7 @@ module.exports = function ( grunt ) {
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
     jshint: { default: "src/**/*.js" },
-    clean: ["obj", "bin"],
+    clean: [ "obj", "bin" ],
     concat: {
       options: {
         banner: "/*\n\
@@ -58,5 +59,6 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks( "grunt-contrib-concat" );
   grunt.loadNpmTasks( "grunt-contrib-uglify" );
 
-  grunt.registerTask( "default", [ "jshint", "clean", "concat", "uglify", "copy" ] );
+  grunt.registerTask( "default", [ "jshint", "clean", "concat", "uglify",
+    "copy" ] );
 };

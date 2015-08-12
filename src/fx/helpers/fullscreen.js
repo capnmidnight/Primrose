@@ -6,29 +6,28 @@ function isFullScreenMode () {
       document.msFullscreenElement );
 }
 
-
+var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
-  if ( vrDisplay ) {
-    if ( elem.webkitRequestFullscreen ) {
-      elem.webkitRequestFullscreen( { vrDisplay: vrDisplay } );
-    }
-    else if ( elem.mozRequestFullScreen ) {
-      elem.mozRequestFullScreen( { vrDisplay: vrDisplay } );
-    }
+  var fullScreenParam;
+  
+  if ( USE_VR_DISPLAY_PARAMETER && vrDisplay ) {
+    fullScreenParam = { vrDisplay: vrDisplay };
   }
-  else {
-    if ( elem.requestFullscreen ) {
-      elem.requestFullscreen();
-    }
-    else if ( elem.webkitRequestFullscreen ) {
-      elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
-    }
-    else if ( elem.mozRequestFullScreen ) {
-      elem.mozRequestFullScreen();
-    }
-    else if ( elem.msRequestFullscreen ) {
-      elem.msRequestFullscreen();
-    }
+
+  if ( elem.webkitRequestFullscreen && fullScreenParam ) {
+    elem.webkitRequestFullscreen( fullScreenParam );
+  }
+  else if ( elem.webkitRequestFullscreen && !fullScreenParam ) {
+    elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
+  }
+  else if ( elem.requestFullscreen ) {
+    elem.requestFullscreen();
+  }
+  else if ( elem.mozRequestFullScreen ) {
+    elem.mozRequestFullScreen();
+  }
+  else if ( elem.msRequestFullscreen ) {
+    elem.msRequestFullscreen();
   }
 
   if ( elem.requestPointerLock ) {

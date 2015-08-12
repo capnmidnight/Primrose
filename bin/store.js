@@ -1,11 +1,4 @@
 /*
-  Primrose v0.12.3 2015-08-08
-  
-  Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
-  https://www.primroseeditor.com
-  https://github.com/capnmidnight/Primrose.git
-*/
-/*
  * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +19,6 @@
 
 window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
 window.ftypes = [ 'email', 'text', 'text' ];
-var $mcj = jQuery.noConflict( true );
 
 var ctrls,
     prices,
@@ -85,11 +77,11 @@ function makeItemPurchase ( btn, lbl, stat, err, item ) {
   var purchaseError = false;
 
   function onPurchaseError ( btn, err, msg, ref ) {
-    console.error( msg, ref || "", errMsg, errMail, errRef );
-
     var errMsg = document.getElementById( err.id + "-msg" );
     var errRef = document.getElementById( err.id + "-ref" );
     var errMail = document.getElementById( err.id + "-email" );
+
+    console.error( msg, ref || "", errMsg, errMail, errRef );
 
     errMsg.innerHTML = msg;
     errMail.innerHTML = "Sean T. McBeth &lt;sean@primroseeditor.com&gt;";
@@ -176,4 +168,3 @@ function initStore ( ) {
         ctrls.purchaseSuccess, ctrls.purchaseError, "editor_license" );
   } );
 }
-Primrose.VERSION = "v0.12.3";

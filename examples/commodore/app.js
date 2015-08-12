@@ -184,8 +184,9 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   terminal.loadFile( "../oregon.bas" );
 
-  ctrls.goRegular.addEventListener( "click", requestFullScreen.bind( window,
-      ctrls.output ) );
+  ctrls.goRegular.addEventListener( "click",
+    requestFullScreen.bind( window, ctrls.output ) );
+    
   if ( vrDisplay ) {
     ctrls.goVR.style.display = "inline-block";
     ctrls.goVR.addEventListener( "click", function ( ) {
