@@ -85,7 +85,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       SPEED = 0.005,
       inVR = false,
       dragging = false,
-      keyState = { },
+      keyState = {},
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
       cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
@@ -299,16 +299,28 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
   setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
   setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
 
-  ctrls.goRegular.addEventListener( "click",
-      requestFullScreen.bind( window, ctrls.output ) );
+  function onFullScreen ( elem, vrDisplay ) {
+    requestFullScreen( elem, vrDisplay );
+    history.pushState( null, "Primrose > full screen", "#fullscreen" );
+  }
+
+  ctrls.goRegular.addEventListener( "click", onFullScreen.bind( window, ctrls.output ) );
   ctrls.goVR.style.display = !!vrDisplay ? "inline-block" : "none";
   ctrls.goVR.addEventListener( "click", function ( ) {
-    requestFullScreen( ctrls.output, vrDisplay );
+    onFullScreen( ctrls.output, vrDisplay );
     inVR = true;
     camera.fov = ( vrParams.left.recommendedFieldOfView.leftDegrees +
         vrParams.left.recommendedFieldOfView.rightDegrees );
     refreshSize();
   } );
+  
+  window.addEventListener( "popstate", function ( evt ) {
+    if ( isFullScreenMode() ) {
+      inVR = false;
+      exitFullScreen();
+      evt.preventDefault();
+    }
+  }, true );
 
   refreshSize( );
 
