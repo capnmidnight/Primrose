@@ -20,7 +20,11 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         texture = null,
         pickingTexture = null,
         pickingPixelBuffer = null,
-        strictSize = options.size;
+        strictSize = options.size,
+        rowCache = {},
+        lastLines = null,
+        lastMaxLineWidth = null,
+        lastScrollY = -1;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -71,6 +75,10 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         changed = oldCharacterWidth !== this.character.width ||
             oldCharacterHeight !== this.character.height ||
             oldFont !== gfx.font;
+
+        if ( changed ) {
+          rowCache = {};
+        }
 
         if ( newWidth > 0 && newHeight > 0 ) {
           bgCanvas.width =
@@ -184,52 +192,87 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       }
       bgfx.restore();
     }
-
-    function renderCanvasForeground ( tokenRows, gridBounds, scroll ) {
+    
+    function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
-          maxLineWidth = 0;
+          maxLineWidth = 0,
+          good = lastLines !== null && scroll.y === lastScrollY,
+          lineOffsetY = Math.ceil(self.character.height * 0.2),
+          i;
 
-      fgfx.clearRect( 0, 0, canvas.width, canvas.height );
-      fgfx.save();
-      fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
-          -scroll.y * self.character.height );
-      for ( var y = 0; y < tokenRows.length; ++y ) {
-        // draw the tokens on this row
-        var row = tokenRows[y];
-        for ( var i = 0; i < row.length; ++i ) {
-          var t = row[i];
-          tokenBack.x += t.value.length;
-          tokenBack.i += t.value.length;
+      if ( good ) {
+        good = lastLines.length === lines.length;
+        if ( good ) {
+          for ( i = 0; i < lines.length && good; ++i ) {
+            good = lastLines[i] === lines[i];
+          }
+        }
+      }
 
-          // skip drawing tokens that aren't in view
-          if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
-              scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-              gridBounds.width ) {
+      if ( !good ) {
+        fgfx.clearRect( 0, 0, canvas.width, canvas.height );
+        fgfx.save();
+        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
+            -scroll.y * self.character.height );
+        for ( var y = 0; y < tokenRows.length; ++y ) {
+          // draw the tokens on this row
+          var line = lines[y],
+              row = tokenRows[y];
 
-            // draw the text
-            var style = theme[t.type] || { };
-            var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
-                " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
-                " " + self.character.height + "px " + theme.fontFamily;
-            fgfx.font = font.trim();
-            fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-            fgfx.fillText(
-                t.value,
-                tokenFront.x * self.character.width,
-                ( y + 1 ) * self.character.height );
+          for ( i = 0; i < row.length; ++i ) {
+            var t = row[i];
+            tokenBack.x += t.value.length;
+            tokenBack.i += t.value.length;
+
+            // skip drawing tokens that aren't in view
+            if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
+                scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
+                gridBounds.width ) {
+
+              // draw the text
+
+              if ( rowCache[line] !== undefined ) {
+                if ( i === 0 ) {
+                  fgfx.putImageData( rowCache[line], 0, y * self.character.height + lineOffsetY );
+                }
+              }
+              else {
+                var style = theme[t.type] || {};
+                var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
+                    " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
+                    " " + self.character.height + "px " + theme.fontFamily;
+                fgfx.font = font.trim();
+                fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+                fgfx.fillText(
+                    t.value,
+                    tokenFront.x * self.character.width,
+                    ( y + 1 ) * self.character.height );
+              }
+            }
+
+            tokenFront.copy( tokenBack );
           }
 
-          tokenFront.copy( tokenBack );
+          maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
+          tokenFront.x = 0;
+          ++tokenFront.y;
+          tokenBack.copy( tokenFront );
+          if ( rowCache[line] === undefined ) {
+            rowCache[line] = fgfx.getImageData(
+                0, Math.floor( y * self.character.height ) + lineOffsetY,
+                fgCanvas.width, Math.ceil( self.character.height ) );
+          }
         }
-
-        maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
-        tokenFront.x = 0;
-        ++tokenFront.y;
-        tokenBack.copy( tokenFront );
+        fgfx.restore();
+        lastMaxLineWidth = maxLineWidth;
+        lastLines = lines;
+        lastScrollY = scroll.y;
+        return maxLineWidth;
       }
-      fgfx.restore();
-      return maxLineWidth;
+      else {
+        return lastMaxLineWidth;
+      }
     }
 
     function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
@@ -304,7 +347,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       }
     }
 
-    this.render = function ( tokenRows,
+    this.render = function ( tokenRows, lines,
         frontCursor, backCursor,
         gridBounds,
         scroll,
@@ -315,7 +358,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
         renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
             scroll, focused );
-        maxLineWidth = renderCanvasForeground( tokenRows, gridBounds, scroll );
+        maxLineWidth = renderCanvasForeground( tokenRows, lines, gridBounds, scroll );
         renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
             showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
 
@@ -382,7 +425,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       var i = ( pickingPixelBuffer[0] << 16 ) |
           ( pickingPixelBuffer[1] << 8 ) |
           ( pickingPixelBuffer[2] << 0 );
-      return { x: i % canvas.clientWidth, y: i / canvas.clientWidth };
+      return {x: i % canvas.clientWidth, y: i / canvas.clientWidth};
     };
 
 

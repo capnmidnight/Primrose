@@ -32,6 +32,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         tokenizer,
         tokens,
         tokenRows,
+        lines,
         theme,
         pointer = new Primrose.Text.Point(),
         lastPointer = new Primrose.Text.Point(),
@@ -276,6 +277,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
+      lines = [""];
       var currentRowWidth = 0;
       var tokenQueue = tokens.slice();
       for ( var i = 0; i < tokenQueue.length; ++i ) {
@@ -291,11 +293,13 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
         if ( t.value.length > 0 ) {
           tokenRows[tokenRows.length - 1].push( t );
+          lines[lines.length - 1] += JSON.stringify(t);
           currentRowWidth += t.value.length;
         }
 
         if ( breakLine ) {
           tokenRows.push( [ ] );
+          lines.push("");
           currentRowWidth = 0;
         }
       }
@@ -931,6 +935,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
         renderer.render(
             tokenRows,
+            lines,
             this.frontCursor, this.backCursor,
             gridBounds,
             this.scroll,
@@ -961,15 +966,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     //
     // different browsers have different sets of keycodes for less-frequently
     // used keys like.
-    browser = isChrome 
-    ? "CHROMIUM" 
-    : ( isFirefox 
-        ? "FIREFOX" 
-        : ( isIE 
-            ? "IE"
-            : ( isOpera 
-                ? "OPERA" 
-                : ( isSafari ? "SAFARI" : "UNKNOWN" ) ) ) );
+    browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE ? "IE" : ( isOpera ? "OPERA" : ( isSafari ? "SAFARI" : "UNKNOWN" ) ) ) );
 
     //
     // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
