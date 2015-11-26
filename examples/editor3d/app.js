@@ -125,7 +125,10 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       position = new THREE.Vector3( ),
       src = getSetting( "code", testDemo.toString( ) ),
       translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-      viewports = [ ];
+      viewports = [ ],
+      projectionMatrices,
+      vrEffect = new THREE.VREffect(renderer);
+
 
   function setTrans ( m, t ) {
     m.makeTranslation( t.x, t.y, t.z );
@@ -339,6 +342,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       canvasHeight = Math.max( vrParams.left.renderRect.height,
           vrParams.right.renderRect.height );
       aspectWidth = canvasWidth / 2;
+      projectionMatrices = vrEffect.getProjectionMatrices( camera );
     }
     renderer.domElement.style.width = px( styleWidth );
     renderer.domElement.style.height = px( styleHeight );
@@ -570,7 +574,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
 
   function renderScene ( s, rt, fc ) {
     if ( inVR ) {
-      renderer.renderStereo( s, camera, rt, fc, translations, viewports );
+      renderer.renderStereo( s, camera, rt, fc, translations, viewports, projectionMatrices );
     }
     else {
       renderer.render( s, camera, rt, fc );

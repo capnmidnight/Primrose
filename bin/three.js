@@ -20439,7 +20439,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	// Rendering
 
-	this.renderStereo = function ( scene, camera, renderTarget, forceClear, stereoTransforms, stereoViewports ) {
+	var _matrixWorldInverse = new THREE.Matrix4();
+	
+	this.renderStereo = function ( scene, camera, renderTarget, forceClear, stereoTransforms, stereoViewports, stereoProjections ) {
 
         if ( camera instanceof THREE.Camera === false ) {
 
@@ -20449,22 +20451,26 @@ THREE.WebGLRenderer = function ( parameters ) {
 		}
 
         updateEverything.call(this, scene, camera, renderTarget, forceClear );
+        _matrixWorldInverse.copy(camera.matrixWorldInverse);
 
         this.enableScissorTest( true );
         for( var i = 0; i < stereoViewports.length; ++i){
-            var m = stereoTransforms[i];
+            var m = stereoTransforms[i],
+            	mInverse = stereoTransforms[1-i];
             var v = stereoViewports[i];
             
             this.setViewport( v.left, v.top, v.width, v.height );
             this.setScissor( v.left, v.top, v.width, v.height );
 
             camera.matrixWorld.multiply(m);
+            camera.matrixWorldInverse.multiplyMatrices( mInverse, _matrixWorldInverse );
+
+			camera.projectionMatrix = stereoProjections[i];
+            _projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+			_frustum.setFromMatrix( _projScreenMatrix );
+            
             renderEverything.call(this, scene, camera );
-            var me = m.elements;
-            me[12] *= -1;
-            me[13] *= -1;
-            me[14] *= -1;
-            camera.matrixWorld.multiply(m);
+            camera.matrixWorld.multiply( mInverse );
         }
         this.enableScissorTest( false );
 
