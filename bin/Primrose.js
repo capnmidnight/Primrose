@@ -1,5 +1,5 @@
 /*
-  Primrose v0.15.0 2015-11-25
+  Primrose v0.15.1 2015-11-28
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -5503,65 +5503,6 @@ Primrose.Text.OperatingSystem = ( function ( ) {
 
   return OperatingSystem;
 } )();
-;/* global Primrose, THREE */
-
-Primrose.Text.PlainText = ( function () {
-
-  function PlainText ( text, size, fgcolor, bgcolor, x, y, z, hAlign ) {
-    text = text.replace( /\r\n/g, "\n" );
-    var lines = text.split( "\n" );
-    hAlign = hAlign || "center";
-    var lineHeight = ( size * 1000 );
-    var boxHeight = lineHeight * lines.length;
-
-    var textCanvas = document.createElement( "canvas" );
-    var textContext = textCanvas.getContext( "2d" );
-    textContext.font = lineHeight + "px Arial";
-    var width = textContext.measureText( text ).width;
-
-    textCanvas.width = width;
-    textCanvas.height = boxHeight;
-    textContext.font = lineHeight * 0.8 + "px Arial";
-    if ( bgcolor !== "transparent" ) {
-      textContext.fillStyle = bgcolor;
-      textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height );
-    }
-    textContext.fillStyle = fgcolor;
-    textContext.textBaseline = "top";
-
-    for ( var i = 0; i < lines.length; ++i ) {
-      textContext.fillText( lines[i], 0, i * lineHeight );
-    }
-
-    var texture = new THREE.Texture( textCanvas );
-    texture.needsUpdate = true;
-
-    var material = new THREE.MeshBasicMaterial( {
-      map: texture,
-      transparent: bgcolor === "transparent",
-      useScreenCoordinates: false,
-      color: 0xffffff,
-      shading: THREE.FlatShading
-    } );
-
-    var textGeometry = new THREE.PlaneGeometry( size * width / lineHeight,
-        size * lines.length );
-    textGeometry.computeBoundingBox();
-    textGeometry.computeVertexNormals();
-
-    var textMesh = new THREE.Mesh( textGeometry, material );
-    if ( hAlign === "left" ) {
-      x -= textGeometry.boundingBox.min.x;
-    }
-    else if ( hAlign === "right" ) {
-      x += textGeometry.boundingBox.min.x;
-    }
-    textMesh.position.set( x, y, z );
-    return textMesh;
-  }
-
-  return PlainText;
-} )();
 ;/* global qp, Primrose */
 Primrose.Text.Point = ( function ( ) {
   "use strict";
@@ -6742,6 +6683,65 @@ Primrose.Text.Controls.Keyboard = ( function () {
   inherit( Keyboard, Primrose.Text.Control );
 
   return Keyboard;
+} )();
+;/* global Primrose, THREE */
+
+Primrose.Text.Controls.PlainText = ( function () {
+
+  function PlainText ( text, size, fgcolor, bgcolor, x, y, z, hAlign ) {
+    text = text.replace( /\r\n/g, "\n" );
+    var lines = text.split( "\n" );
+    hAlign = hAlign || "center";
+    var lineHeight = ( size * 1000 );
+    var boxHeight = lineHeight * lines.length;
+
+    var textCanvas = document.createElement( "canvas" );
+    var textContext = textCanvas.getContext( "2d" );
+    textContext.font = lineHeight + "px Arial";
+    var width = textContext.measureText( text ).width;
+
+    textCanvas.width = width;
+    textCanvas.height = boxHeight;
+    textContext.font = lineHeight * 0.8 + "px Arial";
+    if ( bgcolor !== "transparent" ) {
+      textContext.fillStyle = bgcolor;
+      textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height );
+    }
+    textContext.fillStyle = fgcolor;
+    textContext.textBaseline = "top";
+
+    for ( var i = 0; i < lines.length; ++i ) {
+      textContext.fillText( lines[i], 0, i * lineHeight );
+    }
+
+    var texture = new THREE.Texture( textCanvas );
+    texture.needsUpdate = true;
+
+    var material = new THREE.MeshBasicMaterial( {
+      map: texture,
+      transparent: bgcolor === "transparent",
+      useScreenCoordinates: false,
+      color: 0xffffff,
+      shading: THREE.FlatShading
+    } );
+
+    var textGeometry = new THREE.PlaneGeometry( size * width / lineHeight,
+        size * lines.length );
+    textGeometry.computeBoundingBox();
+    textGeometry.computeVertexNormals();
+
+    var textMesh = new THREE.Mesh( textGeometry, material );
+    if ( hAlign === "left" ) {
+      x -= textGeometry.boundingBox.min.x;
+    }
+    else if ( hAlign === "right" ) {
+      x += textGeometry.boundingBox.min.x;
+    }
+    textMesh.position.set( x, y, z );
+    return textMesh;
+  }
+
+  return PlainText;
 } )();
 ;/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari */
 Primrose.Text.Controls.TextBox = ( function ( ) {
@@ -8694,33 +8694,31 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       }
       bgfx.restore();
     }
-    
+
     function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
           maxLineWidth = 0,
-          good = lastLines !== null && scroll.y === lastScrollY,
-          lineOffsetY = Math.ceil(self.character.height * 0.2),
-          i;
+          good = scroll.y === lastScrollY && lastLines !== null && lastLines.length === lines.length,
+          lineOffsetY = Math.ceil( self.character.height * 0.2 ),
+          i,
+          wasGood = good;
 
-      if ( good ) {
-        good = lastLines.length === lines.length;
-        if ( good ) {
-          for ( i = 0; i < lines.length && good; ++i ) {
-            good = lastLines[i] === lines[i];
-          }
-        }
+      for ( i = 0; i < lines.length && good; ++i ) {
+        good = lastLines[i] === lines[i];
       }
 
       if ( !good ) {
         fgfx.clearRect( 0, 0, canvas.width, canvas.height );
         fgfx.save();
-        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
-            -scroll.y * self.character.height );
+        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
         for ( var y = 0; y < tokenRows.length; ++y ) {
           // draw the tokens on this row
           var line = lines[y],
-              row = tokenRows[y];
+              row = tokenRows[y],
+              drawn = false,
+              textY = (y + 1 - scroll.y) * self.character.height,
+              imageY = (y - scroll.y) * self.character.height + lineOffsetY;
 
           for ( i = 0; i < row.length; ++i ) {
             var t = row[i];
@@ -8733,10 +8731,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
                 gridBounds.width ) {
 
               // draw the text
-
               if ( rowCache[line] !== undefined ) {
                 if ( i === 0 ) {
-                  fgfx.putImageData( rowCache[line], 0, y * self.character.height + lineOffsetY );
+                  fgfx.putImageData( rowCache[line], 0, imageY );
                 }
               }
               else {
@@ -8749,7 +8746,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
                 fgfx.fillText(
                     t.value,
                     tokenFront.x * self.character.width,
-                    ( y + 1 ) * self.character.height );
+                    textY );
+                drawn = true;
               }
             }
 
@@ -8760,10 +8758,12 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           tokenFront.x = 0;
           ++tokenFront.y;
           tokenBack.copy( tokenFront );
-          if ( rowCache[line] === undefined ) {
+          if ( drawn && rowCache[line] === undefined ) {
             rowCache[line] = fgfx.getImageData(
-                0, Math.floor( y * self.character.height ) + lineOffsetY,
-                fgCanvas.width, Math.ceil( self.character.height ) );
+                0, 
+                imageY,
+                fgCanvas.width, 
+                self.character.height );
           }
         }
         fgfx.restore();
@@ -9009,6 +9009,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       box.style.position = "absolute";
       box.style.left = px( x + top.x );
       box.style.top = px( y + top.y );
+      box.style.whiteSpace = "pre";
       setFont(box);
       box.style.color = this.fillStyle;
       box.appendChild(document.createTextNode(str));
@@ -9335,7 +9336,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       }
     }
 
-    this.render = function ( tokenRows,
+    this.render = function ( tokenRows, lines,
         frontCursor, backCursor,
         gridBounds,
         scroll,
@@ -9459,4 +9460,4 @@ Primrose.Text.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.15.0";
+Primrose.VERSION = "v0.15.1";

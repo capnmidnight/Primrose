@@ -192,33 +192,31 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       }
       bgfx.restore();
     }
-    
+
     function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
           maxLineWidth = 0,
-          good = lastLines !== null && scroll.y === lastScrollY,
-          lineOffsetY = Math.ceil(self.character.height * 0.2),
-          i;
+          good = scroll.y === lastScrollY && lastLines !== null && lastLines.length === lines.length,
+          lineOffsetY = Math.ceil( self.character.height * 0.2 ),
+          i,
+          wasGood = good;
 
-      if ( good ) {
-        good = lastLines.length === lines.length;
-        if ( good ) {
-          for ( i = 0; i < lines.length && good; ++i ) {
-            good = lastLines[i] === lines[i];
-          }
-        }
+      for ( i = 0; i < lines.length && good; ++i ) {
+        good = lastLines[i] === lines[i];
       }
 
       if ( !good ) {
         fgfx.clearRect( 0, 0, canvas.width, canvas.height );
         fgfx.save();
-        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
-            -scroll.y * self.character.height );
+        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
         for ( var y = 0; y < tokenRows.length; ++y ) {
           // draw the tokens on this row
           var line = lines[y],
-              row = tokenRows[y];
+              row = tokenRows[y],
+              drawn = false,
+              textY = (y + 1 - scroll.y) * self.character.height,
+              imageY = (y - scroll.y) * self.character.height + lineOffsetY;
 
           for ( i = 0; i < row.length; ++i ) {
             var t = row[i];
@@ -231,10 +229,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
                 gridBounds.width ) {
 
               // draw the text
-
               if ( rowCache[line] !== undefined ) {
                 if ( i === 0 ) {
-                  fgfx.putImageData( rowCache[line], 0, y * self.character.height + lineOffsetY );
+                  fgfx.putImageData( rowCache[line], 0, imageY );
                 }
               }
               else {
@@ -247,7 +244,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
                 fgfx.fillText(
                     t.value,
                     tokenFront.x * self.character.width,
-                    ( y + 1 ) * self.character.height );
+                    textY );
+                drawn = true;
               }
             }
 
@@ -258,10 +256,12 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           tokenFront.x = 0;
           ++tokenFront.y;
           tokenBack.copy( tokenFront );
-          if ( rowCache[line] === undefined ) {
+          if ( drawn && rowCache[line] === undefined ) {
             rowCache[line] = fgfx.getImageData(
-                0, Math.floor( y * self.character.height ) + lineOffsetY,
-                fgCanvas.width, Math.ceil( self.character.height ) );
+                0, 
+                imageY,
+                fgCanvas.width, 
+                self.character.height );
           }
         }
         fgfx.restore();

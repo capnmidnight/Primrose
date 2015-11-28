@@ -1,6 +1,6 @@
 /* global Primrose, THREE */
 
-Primrose.Text.PlainText = ( function () {
+Primrose.Text.Controls.PlainText = ( function () {
 
   function PlainText ( text, size, fgcolor, bgcolor, x, y, z, hAlign ) {
     text = text.replace( /\r\n/g, "\n" );

@@ -61,6 +61,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       box.style.position = "absolute";
       box.style.left = px( x + top.x );
       box.style.top = px( y + top.y );
+      box.style.whiteSpace = "pre";
       setFont(box);
       box.style.color = this.fillStyle;
       box.appendChild(document.createTextNode(str));
@@ -387,7 +388,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       }
     }
 
-    this.render = function ( tokenRows,
+    this.render = function ( tokenRows, lines,
         frontCursor, backCursor,
         gridBounds,
         scroll,
