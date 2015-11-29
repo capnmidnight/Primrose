@@ -30,22 +30,22 @@ var fs = require( "fs" ),
 
 copyFiles.push( {
   src: "bin/Primrose.js",
-  dest: "bin/Pimrose.<%= pkg.version %>.js"
+  dest: "bin/Primrose-<%= pkg.version %>.js"
 } );
 
 copyFiles.push( {
   src: "bin/Primrose.min.js",
-  dest: "bin/Pimrose.<%= pkg.version %>.min.js"
+  dest: "bin/Primrose-<%= pkg.version %>.min.js"
 } );
 
 copyFiles.push( {
   src: "bin/Primrose.js",
-  dest: "archive/Pimrose.<%= pkg.version %>.js"
+  dest: "archive/Primrose-<%= pkg.version %>.js"
 } );
 
 copyFiles.push( {
   src: "bin/Primrose.min.js",
-  dest: "archive/Pimrose.<%= pkg.version %>.min.js"
+  dest: "archive/Primrose-<%= pkg.version %>.min.js"
 } );
 
 
