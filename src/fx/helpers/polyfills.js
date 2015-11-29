@@ -12,6 +12,11 @@ navigator.getUserMedia = navigator.getUserMedia ||
     function () {
     };
 
+window.AudioContext = window.AudioContext ||
+    window.webkitAudioContext ||
+    function(){
+    };
+
 window.RTCPeerConnection = window.RTCPeerConnection ||
     window.webkitRTCPeerConnection ||
     window.mozRTCPeerConnection ||

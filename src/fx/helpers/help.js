@@ -1,7 +1,8 @@
 function help ( obj ) {
-  var funcs = { };
-  var props = { };
-  var evnts = [ ];
+  var funcs = { },
+      props = { },
+      evnts = [ ];
+  
   if ( obj ) {
     for ( var field in obj ) {
       if ( field.indexOf( "on" ) === 0 && ( obj !== navigator || field !==
@@ -56,6 +57,7 @@ function help ( obj ) {
         } );
       }
     }
+    
     obj = {
       type: type,
       events: evnts,

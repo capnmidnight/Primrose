@@ -37,7 +37,7 @@ Primrose.VRApplication = ( function () {
       buttonOptions, avatarHeight, walkSpeed,
       options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
-    Primrose.Application.call( this, name, this.options );
+    Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
@@ -373,7 +373,7 @@ Primrose.VRApplication = ( function () {
     }.bind( this ) );
   }
 
-  inherit( VRApplication, Primrose.Application );
+  inherit( VRApplication, Primrose.ChatApplication );
 
   VRApplication.DEFAULTS = {
     gravity: 9.8, // the acceleration applied to falling objects

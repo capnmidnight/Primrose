@@ -327,14 +327,14 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
   options.fontSize = options.fontSize || 30;
   options.theme = options.theme || Primrose.Text.Themes.Dark;
   options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
-  if(options.opacity === undefined){
+  if ( options.opacity === undefined ) {
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      makeGeom = (id === "textEditor") ? shell.bind(this, 1, 10, 10) : quad.bind(this, w, h),
+      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, 10, 10 ) : quad.bind( this, w, h ),
       o = textured( makeGeom(), t, true, options.opacity ),
       p = textured( makeGeom(), t.getRenderer( )
-      .getPickingTexture( ), true );
+          .getPickingTexture( ), true );
   o.position.set( x, y, z );
   o.rotation.set( rx, ry, rz );
   p.position.set( x, y, z );

@@ -1,5 +1,5 @@
 /*
-  Primrose v0.15.1 2015-11-28
+  Primrose v0.16.0 2015-11-29
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -23,42 +23,162 @@
  */
 
 var Primrose = {
-  Input:{},
+  Input: {},
   Output: {},
   Text: {
-    CodePages: { },
-    CommandPacks: { },
-    Controls: { },
-    Grammars: { },
-    OperatingSystems: { },
-    Renderers: { },
-    Themes: { }
-  }
+    CodePages: {},
+    CommandPacks: {},
+    Controls: {},
+    Grammars: {},
+    OperatingSystems: {},
+    Renderers: {},
+    Themes: {}
+  },
+  SYS_FONTS: "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', " +
+      "'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif",
+  SKINS: [ "#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2",
+    "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49",
+    "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836",
+    "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
+    "#5B0001", "#302E2E" ]
 };
-;/* global Primrose */
+;/* global Primrose, isFirefox */
 
 Primrose.Application = ( function () {
-
-  function Application ( name, options ) {
-    this.formStateKey = name + " - formState";
-    this.formState = getSetting( this.formStateKey );
-    this.ctrls = findEverything();
-    this.fullscreenElement = document.documentElement;
-    this.options = combineDefaults( options, Application );
-    this.users = { };
-    this.chatLines = [ ];
-    this.userName = Application.DEFAULT_USER_NAME;
-    this.focused = true;
-    this.wasFocused = false;
+  // This function is what is called a "Higher-order function", i.e. it is a function that takes a function as a parameter. Think of it as a function that doesn't know how to do the entire job, but it knows how to do some of it, and asks for the rest of the job as a parameter. It's a convenient way to be able to combine different bits of functionality without having to write the same code over and over again.
+  function FCT ( thunk, evt ) {
+    // for every point that has changed (we don't need to update points that didn't change, and on the touchend event, there is no element for the most recently released finger in the regular "touches" property).
+    for ( var i = 0; i < evt.changedTouches.length; ++i ) {
+      // call whatever function we were given. It's going to be one of start/move/end above, and as you can see, we're overriding the default value of the idx parameter.
+      thunk.call( this, evt.changedTouches[i], evt.changedTouches[i].identifier );
+    }
+    evt.preventDefault();
   }
 
-  Application.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
-  Application.DEFAULTS = {
-  };
+// we want to wire up all of the event handlers to the Canvas element itself, so that the X and Y coordinates of the events are offset correctly into the container.
+  function E ( elem, k, f, t ) {
+    var elems;
+    if ( elem instanceof String || typeof elem === "string" ) {
+      elems = Array.prototype.slice.call( document.querySelectorAll( elem ) );
+    } else {
+      elems = [ elem ];
+    }
+    for ( var i = 0; i < elems.length; ++i ) {
+      elem = elems[i];
+      if ( t ) {
+        elem.addEventListener( k, FCT.bind( elem, f ), false );
+      } else {
+        elem.addEventListener( k, f.bind( elem ), false );
+      }
+    }
+    return elems;
+  }
 
-  return Application;
-} )();
-;/* global Primrose, THREE */
+  function beginApp ( update, render, resize, elem ) {
+    var lt = 0,
+        dt = 0,
+        points = {},
+        keys = {},
+        onpaint = function onpaint ( t ) {
+          var ticker = requestAnimationFrame( onpaint );
+          try {
+            dt = t - lt;
+            update( dt, points, keys );
+            render( dt );
+          } catch ( err ) {
+            cancelAnimationFrame( ticker );
+            throw err;
+          }
+          lt = t;
+        };
+
+    // This function gets called the first time a mouse button is pressed or a new finger touches the screen. The idx value defaults to 10 because mouse clicks don't have an identifier value, but we need one to keep track of mouse clicks separately than touches, which do have identifier values, ending at 9.
+    function setPoint ( evt, idx ) {
+      if ( idx === undefined ) {
+        idx = 10;
+      }
+
+      if ( idx === 10 ) {
+        evt.preventDefault();
+      }
+
+      var obj = points[idx] || {};
+      obj.x = evt.clientX;
+      obj.y = evt.clientY;
+      obj.rx = evt.radiusX;
+      obj.ry = evt.radiusY;
+      obj.b = evt.buttons;
+
+      if ( isFirefox && obj.rx !== undefined ) {
+        obj.rx /= 3;
+        obj.ry /= 3;
+      }
+
+      if ( obj.b === undefined ) {
+        obj.b = 1;
+      }
+
+      if ( obj.rx === undefined ) {
+        if ( obj.b === 0 ) {
+          obj.rx = 1;
+          obj.ry = 1;
+        }
+        else {
+          obj.rx = 1.5;
+          obj.ry = 1.5;
+        }
+      }
+
+      points[idx] = obj;
+    }
+
+    // This function gets called anytime the mouse or one of the fingers is released. It just cleans up our tracking objects, so the next time the mouse button is pressed, it can all start over again.
+    function endPoint ( evt, idx ) {
+      if ( idx === undefined ) {
+        idx = 10;
+      }
+
+      if ( idx === 10 ) {
+        evt.preventDefault();
+      }
+
+      points[idx] = null;
+    }
+
+    function keyDown ( evt ) {
+      keys[evt.keyCode] = true;
+      keys.shift = evt.shiftKey;
+      keys.ctrl = evt.ctrlKey;
+      keys.alt = evt.altKey;
+    }
+
+    function keyUp ( evt ) {
+      keys[evt.keyCode] = false;
+      keys.shift = evt.shiftKey;
+      keys.ctrl = evt.ctrlKey;
+      keys.alt = evt.altKey;
+    }
+
+    E( elem, "mousedown", setPoint );
+    E( elem, "mousemove", setPoint );
+    E( elem, "mouseup", endPoint );
+    E( elem, "mouseout", endPoint );
+
+    E( elem, "touchstart", setPoint, true );
+    E( elem, "touchmove", setPoint, true );
+    E( elem, "touchend", endPoint, true );
+
+    E( window, "keydown", keyDown );
+    E( window, "keyup", keyUp );
+
+    E( window, "resize", resize );
+
+    resize();
+    requestAnimationFrame( requestAnimationFrame.bind( window, onpaint ) );
+  }
+
+  return beginApp;
+} )();;/* global Primrose, THREE */
 
 Primrose.Button = ( function () {
   function Button ( model, name, options ) {
@@ -158,6 +278,29 @@ Primrose.ButtonFactory = ( function () {
   };
 
   return ButtonFactory;
+} )();
+;/* global Primrose */
+
+Primrose.ChatApplication = ( function () {
+
+  function ChatApplication ( name, options ) {
+    this.formStateKey = name + " - formState";
+    this.formState = getSetting( this.formStateKey );
+    this.ctrls = findEverything();
+    this.fullscreenElement = document.documentElement;
+    this.options = combineDefaults( options, ChatApplication );
+    this.users = { };
+    this.chatLines = [ ];
+    this.userName = ChatApplication.DEFAULT_USER_NAME;
+    this.focused = true;
+    this.wasFocused = false;
+  }
+
+  ChatApplication.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
+  ChatApplication.DEFAULTS = {
+  };
+
+  return ChatApplication;
 } )();
 ;/* global Primrose, THREE */
 
@@ -661,7 +804,7 @@ Primrose.VRApplication = ( function () {
       buttonOptions, avatarHeight, walkSpeed,
       options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
-    Primrose.Application.call( this, name, this.options );
+    Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
     this.avatarHeight = avatarHeight;
     this.walkSpeed = walkSpeed;
@@ -997,7 +1140,7 @@ Primrose.VRApplication = ( function () {
     }.bind( this ) );
   }
 
-  inherit( VRApplication, Primrose.Application );
+  inherit( VRApplication, Primrose.ChatApplication );
 
   VRApplication.DEFAULTS = {
     gravity: 9.8, // the acceleration applied to falling objects
@@ -1459,7 +1602,124 @@ Primrose.WebRTCSocket = ( function () {
   }
   return WebRTCSocket;
 } )();
-;function reloadPage () {
+;/* global Primrose, URL */
+
+Primrose.Workerize = ( function () {
+  function Workerize ( func ) {
+    // First, rebuild the script that defines the class. Since we're dealing
+    // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
+    // a conversion at a point post-script reconstruction, pre-workerization.
+
+    // start with the constructor function
+    var script = func.toString(),
+        // strip out the name in a way that Internet Explorer also undrestands 
+        // (IE doesn't have the Function.name property supported by Chrome and
+        // Firefox)
+        name = script.match( /function (\w+)\(/ )[1],
+        k;
+
+    // then rebuild the member methods
+    for ( k in func.prototype ) {
+      // We preserve some formatting so it's easy to read the code in the debug
+      // view. Yes, you'll be able to see the generated code in your browser's
+      // debugger.
+      script += "\n\n" + name + ".prototype." + k + " = " + func.prototype[k].toString() + ";";
+    }
+
+    // Automatically instantiate an object out of the class inside the worker,
+    // in such a way that the user-defined function won't be able to get to it.
+    script += "\n\n(function(){\n  var instance = new " + name + "();";
+
+    // Create a mapper from the events that the class defines to the worker-side
+    // postMessage method, to send message to the UI thread that one of the
+    // events occured.
+    script += "\n  if(instance.addEventListener){\n" +
+        "    for(var k in instance.listeners) {\n" +
+        "      instance.addEventListener(k, function(){\n" +
+        "        var args = Array.prototype.slice.call(arguments);\n" +
+        "        postMessage(args);\n" +
+        "      }.bind(this, k));\n" +
+        "    }\n" +
+        "  }";
+
+    // Create a mapper from the worker-side onmessage event, to receive messages
+    // from the UI thread that methods were called on the object.
+    script += "\n\n  onmessage = function(evt){\n" +
+        "    var f = evt.data.shift();\n" +
+        "    if(instance[f]){\n" +
+        "      instance[f].apply(instance, evt.data);\n" +
+        "    }\n" +
+        "  }\n\n" +
+        "})();";
+
+    // The binary-large-object can be used to convert the script from text to a
+    // data URI, because workers can only be created from same-origin URIs.
+    this.worker = Workerize.createWorker( script, false );
+
+    // create a mapper from the UI-thread side onmessage event, to receive
+    // messages from the worker thread that events occured and pass them on to
+    // the UI thread.
+    this.listeners = {};
+    this.worker.onmessage = function ( e ) {
+      var f = e.data.shift();
+      if ( this.listeners[f] ) {
+        this.listeners[f].forEach( function ( g ) {
+          return g.apply( this, e.data );
+        } );
+      }
+    }.bind( this );
+
+    // create mappers from the UI-thread side method calls to the UI-thread side
+    // postMessage method, to inform the worker thread that methods were called,
+    // with parameters.
+    for ( k in func.prototype ) {
+      // we skip the addEventListener method because we override it in a
+      // different way, to be able to pass messages across the thread boundary.
+      if ( k !== "addEventListener" ) {
+        // make the name of the function the first argument, no matter what.
+        this[k] = this.methodShim.bind( this, k );
+      }
+    }
+  }
+
+  Workerize.prototype.methodShim = function () {
+    // convert the varargs array to a real array
+    var args = Array.prototype.slice.call( arguments );
+    this.worker.postMessage( args );
+  };
+
+  // Adding an event listener just registers a function as being ready to
+  // receive events, it doesn't do anything with the worker thread yet.
+  Workerize.prototype.addEventListener = function ( evt, thunk ) {
+    if ( !this.listeners[evt] ) {
+      this.listeners[evt] = [ ];
+    }
+    this.listeners[evt].push( thunk );
+  };
+
+  Workerize.createWorker = function ( script ) {
+    var stripFunc = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+    if ( typeof script === "function" ) {
+      script = script.toString();
+    }
+
+    if ( stripFunc ) {
+      script = script.trim();
+      var start = script.indexOf( '{' );
+      script = script.substring( start + 1, script.length - 1 );
+    }
+
+    var blob = new Blob( [ script ], {
+      type: "text/javascript"
+    } ),
+        dataURI = URL.createObjectURL( blob );
+
+    return new Worker( dataURI );
+  };
+
+  return Workerize;
+} )();;function reloadPage () {
   document.location = document.location.href;
 }
 
@@ -1793,7 +2053,11 @@ var fmt = ( function () {
 
 var px = fmt.bind( this, "$1px" ),
     pct = fmt.bind( this, "$1%" ),
-    ems = fmt.bind( this, "$1em" );
+    ems = fmt.bind( this, "$1em" ),
+    rgb = fmt.bind(this, "rgb($1, $2, $3)"),
+    rgba = fmt.bind(this, "rgba($1, $2, $3, $4)"),
+    hsl = fmt.bind(this, "hsl($1, $2, $3)"),
+    hsla = fmt.bind(this, "hsla($1, $2, $3, $4)");
 ;function getSetting ( name, defValue ) {
   if ( window.localStorage ) {
     var val = window.localStorage.getItem( name );
@@ -1865,7 +2129,7 @@ function writeForm ( ctrls, state ) {
     }
   }
 }
-;/* global isMobile */
+;/* global isMobile, help */
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
@@ -1878,8 +2142,8 @@ var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( (!isMobile || USE_VR_DISPLAY_PARAMETER) && vrDisplay ) {
-    fullScreenParam = { vrDisplay: vrDisplay };
+  if ( ( !isMobile || USE_VR_DISPLAY_PARAMETER ) && vrDisplay ) {
+    fullScreenParam = {vrDisplay: vrDisplay};
   }
 
   if ( elem.webkitRequestFullscreen && fullScreenParam ) {
@@ -1922,6 +2186,35 @@ function toggleFullScreen ( elem, vrDisplay ) {
   else {
     requestFullScreen( elem, vrDisplay );
   }
+}
+
+function addFullScreenShim ( elems ) {
+  elems = elems.map( function ( e ) {
+    return {
+      elem: e,
+      events: help( e ).events
+    };
+  } );
+
+  function removeFullScreenShim () {
+    elems.forEach( function ( elem ) {
+      elem.events.forEach( function ( e ) {
+        elem.removeEventListener( e, fullScreenShim );
+      } );
+    } );
+  }
+
+  function fullScreenShim ( evt ) {
+    requestFullScreen( removeFullScreenShim );
+  }
+
+  elems.forEach( function ( elem ) {
+    elem.events.forEach( function ( e ) {
+      if ( e.indexOf( "fullscreenerror" ) < 0 ) {
+        elem.addEventListener( e, fullScreenShim, false );
+      }
+    } );
+  } );
 }
 
 var exitPointerLock = ( document.exitPointerLock ||
@@ -2268,14 +2561,14 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
   options.fontSize = options.fontSize || 30;
   options.theme = options.theme || Primrose.Text.Themes.Dark;
   options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
-  if(options.opacity === undefined){
+  if ( options.opacity === undefined ) {
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      makeGeom = (id === "textEditor") ? shell.bind(this, 1, 10, 10) : quad.bind(this, w, h),
+      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, 10, 10 ) : quad.bind( this, w, h ),
       o = textured( makeGeom(), t, true, options.opacity ),
       p = textured( makeGeom(), t.getRenderer( )
-      .getPickingTexture( ), true );
+          .getPickingTexture( ), true );
   o.position.set( x, y, z );
   o.rotation.set( rx, ry, rz );
   p.position.set( x, y, z );
@@ -2285,9 +2578,10 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
   return o;
 }
 ;function help ( obj ) {
-  var funcs = { };
-  var props = { };
-  var evnts = [ ];
+  var funcs = { },
+      props = { },
+      evnts = [ ];
+  
   if ( obj ) {
     for ( var field in obj ) {
       if ( field.indexOf( "on" ) === 0 && ( obj !== navigator || field !==
@@ -2342,6 +2636,7 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
         } );
       }
     }
+    
     obj = {
       type: type,
       events: evnts,
@@ -2355,7 +2650,23 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
     console.warn( "Object was falsey." );
   }
 }
-;function copyObject ( dest, source ) {
+;var TAU = 2 * Math.PI;
+
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randomInt(min, max) {
+  if(max === undefined){
+    max = min;
+    min = 0;
+  }
+  return Math.floor(randomRange(min, max));
+}
+
+function randomSteps(min, max, steps) {
+  return min + randomInt(0, (1 + max - min) / steps) * steps;
+};function copyObject ( dest, source ) {
   var stack = [ { dest: dest, source: source } ];
   while ( stack.length > 0 ) {
     var frame = stack.pop();
@@ -2436,6 +2747,11 @@ navigator.getUserMedia = navigator.getUserMedia ||
     navigator.msGetUserMedia ||
     navigator.oGetUserMedia ||
     function () {
+    };
+
+window.AudioContext = window.AudioContext ||
+    window.webkitAudioContext ||
+    function(){
     };
 
 window.RTCPeerConnection = window.RTCPeerConnection ||
@@ -4811,7 +5127,94 @@ Primrose.Output.HapticGlove = ( function () {
   HapticGlove.DEFAULT_HOST = document.location.hostname;
   return HapticGlove;
 } )();
-;/* global Primrose, speechSynthesis */
+;/* global Primrose */
+
+Primrose.Output.Music = ( function () {
+
+  var PIANO_BASE = Math.pow( 2, 1 / 12 ),
+      MAX_NOTE_COUNT = navigator.maxTouchPoints + 1;
+
+  function piano ( n ) {
+    return 440 * Math.pow( PIANO_BASE, n - 49 );
+  }
+
+  function Music ( numNotes, type ) {
+    this.audio = new AudioContext();
+    if ( this.audio && this.audio.createGain ) {
+      if ( numNotes === undefined ) {
+        numNotes = MAX_NOTE_COUNT;
+      }
+      if ( type === undefined ) {
+        type = "sawtooth";
+      }
+      this.available = true;
+      this.mainVolume = this.audio.createGain();
+      this.mainVolume.connect( this.audio.destination );
+      this.numNotes = numNotes;
+      this.oscillators = [ ];
+
+      for ( var i = 0; i < this.numNotes; ++i ) {
+        var o = this.audio.createOscillator(),
+            g = this.audio.createGain();
+        o.type = type;
+        o.frequency.value = 0;
+        o.connect( g );
+        o.start();
+        g.connect( this.mainVolume );
+        this.oscillators.push( {
+          osc: o,
+          gn: g,
+          timeout: null
+        } );
+      }
+    } else {
+      this.available = false;
+      IS_IN_GRID = true;
+    }
+  }
+
+  Music.prototype.noteOn = function ( volume, i, n ) {
+    if ( this.available ) {
+      if ( n === undefined ) {
+        n = 0;
+      }
+      var o = this.oscillators[n % this.numNotes],
+          f = piano( parseFloat( i ) + 1 );
+      o.gn.gain.value = volume;
+      o.osc.frequency.setValueAtTime( f, 0 );
+      return o;
+    }
+  };
+
+  Music.prototype.noteOff = function ( n ) {
+    if ( this.available ) {
+      if ( n === undefined ) {
+        n = 0;
+      }
+      var o = this.oscillators[n % this.numNotes];
+      o.osc.frequency.setValueAtTime( 0, 0 );
+    }
+  };
+
+  Music.prototype.play = function ( i, volume, duration, n ) {
+    if ( this.available ) {
+      if ( n === undefined ) {
+        n = 0;
+      }
+      var o = this.noteOn( volume, i, n );
+      if ( o.timeout ) {
+        clearTimeout( o.timeout );
+        o.timeout = null;
+      }
+      o.timeout = setTimeout( ( function ( n, o ) {
+        this.noteOff( n );
+        o.timeout = null;
+      } ).bind( this, n, o ), duration * 1000 );
+    }
+  };
+
+  return Music;
+} )();;/* global Primrose, speechSynthesis */
 
 Primrose.Output.Speech = ( function ( ) {
   function pickRandomOption ( options, key, min, max ) {
@@ -9463,4 +9866,4 @@ Primrose.Text.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.15.1";
+Primrose.VERSION = "v0.16.0";

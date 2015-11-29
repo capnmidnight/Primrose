@@ -26,12 +26,11 @@ function init () {
     tokenizer: Primrose.Text.Grammars.Basic,
     theme: Primrose.Text.Themes.Dark,
     hideLineNumbers: true
-  } );
-
-  var running = false;
-  var inputCallback = null;
-  var currentEditIndex = 0;
-  var currentProgram = null;
+  } ),
+      running = false,
+      inputCallback = null,
+      currentEditIndex = 0,
+      currentProgram = null;
 
   function toEnd (  ) {
     editor.selectionStart = editor.selectionEnd = editor.value.length;

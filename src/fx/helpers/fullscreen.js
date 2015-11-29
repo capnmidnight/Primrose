@@ -1,4 +1,4 @@
-/* global isMobile */
+/* global isMobile, help */
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
@@ -11,8 +11,8 @@ var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( (!isMobile || USE_VR_DISPLAY_PARAMETER) && vrDisplay ) {
-    fullScreenParam = { vrDisplay: vrDisplay };
+  if ( ( !isMobile || USE_VR_DISPLAY_PARAMETER ) && vrDisplay ) {
+    fullScreenParam = {vrDisplay: vrDisplay};
   }
 
   if ( elem.webkitRequestFullscreen && fullScreenParam ) {
@@ -55,6 +55,35 @@ function toggleFullScreen ( elem, vrDisplay ) {
   else {
     requestFullScreen( elem, vrDisplay );
   }
+}
+
+function addFullScreenShim ( elems ) {
+  elems = elems.map( function ( e ) {
+    return {
+      elem: e,
+      events: help( e ).events
+    };
+  } );
+
+  function removeFullScreenShim () {
+    elems.forEach( function ( elem ) {
+      elem.events.forEach( function ( e ) {
+        elem.removeEventListener( e, fullScreenShim );
+      } );
+    } );
+  }
+
+  function fullScreenShim ( evt ) {
+    requestFullScreen( removeFullScreenShim );
+  }
+
+  elems.forEach( function ( elem ) {
+    elem.events.forEach( function ( e ) {
+      if ( e.indexOf( "fullscreenerror" ) < 0 ) {
+        elem.addEventListener( e, fullScreenShim, false );
+      }
+    } );
+  } );
 }
 
 var exitPointerLock = ( document.exitPointerLock ||

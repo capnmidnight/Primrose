@@ -109,4 +109,8 @@ var fmt = ( function () {
 
 var px = fmt.bind( this, "$1px" ),
     pct = fmt.bind( this, "$1%" ),
-    ems = fmt.bind( this, "$1em" );
+    ems = fmt.bind( this, "$1em" ),
+    rgb = fmt.bind(this, "rgb($1, $2, $3)"),
+    rgba = fmt.bind(this, "rgba($1, $2, $3, $4)"),
+    hsl = fmt.bind(this, "hsl($1, $2, $3)"),
+    hsla = fmt.bind(this, "hsla($1, $2, $3, $4)");
