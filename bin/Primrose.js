@@ -21,7 +21,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+console.clear();
 var Primrose = {
   Input: {},
   Output: {},
@@ -9867,3 +9867,4 @@ Primrose.Text.Themes.Default = ( function ( ) {
   };
 } )();
 Primrose.VERSION = "v0.16.0";
+console.log("Using Primrose v0.16.0. Find out more at http://www.primroseeditor.com");

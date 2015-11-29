@@ -29,7 +29,7 @@ var fs = require( "fs" ),
 module.exports = function ( grunt ) {
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
-    jshint: { default: "src/**/*.js" },
+    jshint: {default: "src/**/*.js"},
     clean: [ "obj", "bin" ],
     concat: {
       options: {
@@ -41,7 +41,8 @@ module.exports = function ( grunt ) {
   <%= pkg.repository.url %>\n\
 */\n",
         separator: ";",
-        footer: "Primrose.VERSION = \"v<%= pkg.version %>\";"
+        footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
+            "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at http://www.primroseeditor.com\");"
       },
       default: {
         files: {
