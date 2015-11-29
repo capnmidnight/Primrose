@@ -1,24 +1,32 @@
 /* global Primrose, THREE */
 
 Primrose.ModelLoader = ( function () {
-  if(typeof(THREE) === "undefined"){
-    return function(){};
+  if ( typeof ( THREE ) === "undefined" ) {
+    return function () {
+    };
   }
-  var COLLADA = new THREE.ColladaLoader(),
-      JSON = new THREE.ObjectLoader();
-  COLLADA.options.convertUpAxis = true;
+  var COLLADA, JSON;
+  
+  if ( THREE.ColladaLoader ) {
+    COLLADA = new THREE.ColladaLoader();
+    COLLADA.options.convertUpAxis = true;
+  }
+
+  if ( THREE.ObjectLoader ) {
+    JSON = new THREE.ObjectLoader();
+  }
 
   function fixColladaScene ( collada ) {
     return collada.scene;
   }
 
-  function fixJSONScene(json){
-    json.traverse(function(obj){
-      if(obj.geometry){
+  function fixJSONScene ( json ) {
+    json.traverse( function ( obj ) {
+      if ( obj.geometry ) {
         obj.geometry.computeBoundingSphere();
         obj.geometry.computeBoundingBox();
       }
-    });
+    } );
     return json;
   }
 
@@ -39,19 +47,19 @@ Primrose.ModelLoader = ( function () {
   }
 
   var propertyTests = {
-    isButton: function(obj){
-      return (obj.material && obj.material.name.match(/^button\d+$/));
+    isButton: function ( obj ) {
+      return ( obj.material && obj.material.name.match( /^button\d+$/ ) );
     },
-    isSolid: function(obj){
-      return !obj.name.match(/^(water|sky)/);
+    isSolid: function ( obj ) {
+      return !obj.name.match( /^(water|sky)/ );
     }
   };
 
   function setProperties ( object ) {
     object.traverse( function ( obj ) {
       if ( obj instanceof THREE.Mesh ) {
-        for(var prop in propertyTests){
-          obj[prop] = obj[prop] || propertyTests[prop](obj);
+        for ( var prop in propertyTests ) {
+          obj[prop] = obj[prop] || propertyTests[prop]( obj );
         }
       }
     } );
@@ -103,17 +111,24 @@ Primrose.ModelLoader = ( function () {
     };
 
     if ( src.endsWith( ".dae" ) ) {
-      console.error( "COLLADA seems to be broken right now" );
-      if ( false ) {
+      if ( !COLLADA || true ) {
+        console.error( "COLLADA seems to be broken right now" );
+      }
+      else {
         COLLADA.load( src, function ( collada ) {
           done( fixColladaScene( collada ) );
         } );
       }
     }
     else if ( src.endsWith( ".json" ) ) {
-      JSON.load( src, function (json){
-        done(fixJSONScene(json));
-      });
+      if ( !JSON ) {
+        console.error( "JSON seems to be broken right now" );
+      }
+      else {
+        JSON.load( src, function ( json ) {
+          done( fixJSONScene( json ) );
+        } );
+      }
     }
   };
 

@@ -12,6 +12,9 @@ var fs = require( "fs" ),
       "node_modules/socket.io-client/socket.io.js",
       "node_modules/three.js/build/three.js"
     ],
+    buildFiles = {
+      "obj/Primrose.js": [ "src/core.js", "src/fx/**/*.js" ]
+    },
     uglifyFiles = files.map( function ( s ) {
       return{
         src: s,
@@ -24,6 +27,26 @@ var fs = require( "fs" ),
         dest: s.replace( /.*\/(.*).js/, "bin/$1.js" )
       };
     } );
+
+copyFiles.push( {
+  src: "bin/Primrose.js",
+  dest: "bin/Pimrose.<%= pkg.version %>.js"
+} );
+
+copyFiles.push( {
+  src: "bin/Primrose.min.js",
+  dest: "bin/Pimrose.<%= pkg.version %>.min.js"
+} );
+
+copyFiles.push( {
+  src: "bin/Primrose.js",
+  dest: "archive/Pimrose.<%= pkg.version %>.js"
+} );
+
+copyFiles.push( {
+  src: "bin/Primrose.min.js",
+  dest: "archive/Pimrose.<%= pkg.version %>.min.js"
+} );
 
 
 module.exports = function ( grunt ) {
@@ -45,9 +68,7 @@ module.exports = function ( grunt ) {
             "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at http://www.primroseeditor.com\");"
       },
       default: {
-        files: {
-          "obj/Primrose.js": [ "src/core.js", "src/fx/**/*.js" ]
-        }
+        files: buildFiles
       }
     },
     uglify: {
