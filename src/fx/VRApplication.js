@@ -51,8 +51,6 @@ Primrose.VRApplication = ( function () {
     this.enableMousePitch = true;
     this.currentUser = null;
     this.vrParams = null;
-    this.vrDisplay = null;
-    this.vrSensor = null;
     this.inVR = false;
     this.world = new CANNON.World();
     this.world.defaultContactMaterial.friction = 0.2;
@@ -111,46 +109,21 @@ Primrose.VRApplication = ( function () {
     }
 
     function checkForVR () {
-      findVR( function ( display, sensor ) {
-        if ( display && ( display.deviceName !== "Mockulus Rift" ||
-            DEBUG_VR ) ) {
-          this.vrDisplay = display;
-          this.vrSensor = sensor;
-        }
+      var deviceIDs = Object.keys(this.vr.devices);
+      if(deviceIDs.length > 0){
+        this.ctrls.goVR.style.display = "inline-block";
+        this.vr.connect(deviceIDs[0]);
+        this.vrParams = this.vr.getParams();
 
-        if ( !this.vrDisplay ) {
-          this.ctrls.goVR.style.display = "none";
-          setTimeout( checkForVR.bind( this ), 5000 );
-        }
-        else {
-          this.ctrls.goVR.style.display = "inline-block";
-          if ( this.vrDisplay.getEyeParameters ) {
-            this.vrParams = {
-              left: this.vrDisplay.getEyeParameters( "left" ),
-              right: this.vrDisplay.getEyeParameters( "right" )
-            };
-          }
-          else {
-            this.vrParams = {
-              left: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("left" ),
-                eyeTranslation: this.vrDisplay.getEyeTranslation( "left" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("left" )
-              },
-              right: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("right" ),
-                eyeTranslation: this.vrDisplay.getEyeTranslation( "right" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("right" )
-              }
-            };
-          }
-
-          setTrans( translations[0], this.vrParams.left.eyeTranslation );
-          setTrans( translations[1], this.vrParams.right.eyeTranslation );
-          viewports[0] = this.vrParams.left.renderRect;
-          viewports[1] = this.vrParams.right.renderRect;
-        }
-      }.bind( this ) );
+        setTrans( translations[0], this.vrParams.left.eyeTranslation );
+        setTrans( translations[1], this.vrParams.right.eyeTranslation );
+        viewports[0] = this.vrParams.left.renderRect;
+        viewports[1] = this.vrParams.right.renderRect;
+      }
+      else{
+        this.ctrls.goVR.style.display = "none";
+        setTimeout( checkForVR.bind( this ), 1000 );
+      }
     }
 
     if(this.ctrls.goVR){
@@ -377,7 +350,7 @@ Primrose.VRApplication = ( function () {
     
     if(this.ctrls.goVR){
       this.ctrls.goVR.addEventListener( "click", function ( ) {
-        requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
+        requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
         this.inVR = true;
         this.setSize();
       }.bind( this ) );
@@ -525,14 +498,14 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.zero = function () {
-    if ( this.vrSensor ) {
-      this.vrSensor.resetSensor();
+    if ( this.vr.sensor ) {
+      this.vr.sensor.resetSensor();
     }
   };
 
   VRApplication.prototype.jump = function () {
     if ( this.onground ) {
-      this.currentUser.velocity.y += 10;
+      this.currentUser.velocity.y += 1;
       this.onground = false;
     }
   };
@@ -615,19 +588,13 @@ Primrose.VRApplication = ( function () {
         obj.graphics.quaternion.copy( obj.quaternion );
       }
     }
-
-    this.currentUser.position.add(this.currentUser.velocity);
-
-    if(this.glove){
-      this.glove.readContacts( this.world.contacts );
-    }
     
     for ( j = 0; j < this.buttons.length; ++j ) {
       this.buttons[j].readContacts( this.world.contacts );
     }
 
-    if ( this.dragging ) {
-      this.pick( "move" );
+    if(this.glove){
+      this.glove.readContacts( this.world.contacts );
     }
 
     this.fire( "update", dt );
@@ -639,7 +606,7 @@ Primrose.VRApplication = ( function () {
     this.camera.position.copy( this.currentUser.position );
 
     if ( this.inVR ) {
-      var state = this.vrSensor.getState();
+      var state = this.vr.sensor.getState();
 
       if ( state.orientation ) {
         this.qRift.copy( state.orientation );

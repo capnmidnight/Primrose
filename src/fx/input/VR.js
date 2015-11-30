@@ -1,19 +1,22 @@
 /* global Primrose, HMDVRDevice, PositionSensorVRDevice */
 Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, elem, selectedID ) {
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null,
-        1,
-        VRInput.AXES );
-    this.devices = { };
+    if ( commands === undefined || commands === null ) {
+      commands = VRInput.AXES.map( function ( a ) {
+        return {
+          name: a,
+          axes: [ Primrose.Input.VR[a] ]
+        };
+      } );
+    }
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null, 1, VRInput.AXES );
+    this.devices = {};
     this.sensor = null;
     this.display = null;
     if ( navigator.getVRDevices ) {
-      navigator.getVRDevices()
-          .then( this.enumerateVRDevices.bind( this, elem,
-              selectedID ) );
+      navigator.getVRDevices().then( this.enumerateVRDevices.bind( this, elem, selectedID ) );
     } else if ( navigator.mozGetVRDevices ) {
-      navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem,
-          selectedID ) );
+      navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem, selectedID ) );
     }
   }
 
@@ -57,8 +60,7 @@ Primrose.Input.VR = ( function () {
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
   };
 
-  VRInput.prototype.enumerateVRDevices = function ( elem, selectedID,
-      devices ) {
+  VRInput.prototype.enumerateVRDevices = function ( elem, selectedID, devices ) {
     var id;
     for ( var i = 0; i < devices.length; ++i ) {
       var device = devices[i];
@@ -78,12 +80,14 @@ Primrose.Input.VR = ( function () {
       }
     }
 
-    for ( id in this.devices ) {
-      var option = document.createElement( "option" );
-      option.value = id;
-      option.innerHTML = this.devices[id].sensor.deviceName;
-      option.selected = ( selectedID === id );
-      elem.appendChild( option );
+    if ( elem ) {
+      for ( id in this.devices ) {
+        var option = document.createElement( "option" );
+        option.value = id;
+        option.innerHTML = this.devices[id].sensor.deviceName;
+        option.selected = ( selectedID === id );
+        elem.appendChild( option );
+      }
     }
 
     this.connect( selectedID );
@@ -94,6 +98,33 @@ Primrose.Input.VR = ( function () {
     if ( device ) {
       this.sensor = device.sensor;
       this.display = device.display;
+    }
+  };
+
+  VRInput.prototype.getParams = function () {
+    if ( this.display ) {
+      var params = null;
+      if ( this.display.getEyeParameters ) {
+        params = {
+          left: this.display.getEyeParameters( "left" ),
+          right: this.display.getEyeParameters( "right" )
+        };
+      }
+      else {
+        params = {
+          left: {
+            renderRect: this.display.getRecommendedEyeRenderRect( "left" ),
+            eyeTranslation: this.display.getEyeTranslation( "left" ),
+            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "left" )
+          },
+          right: {
+            renderRect: this.display.getRecommendedEyeRenderRect( "right" ),
+            eyeTranslation: this.display.getEyeTranslation( "right" ),
+            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "right" )
+          }
+        };
+      }
+      return params;
     }
   };
 
