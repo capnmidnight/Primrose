@@ -1,8 +1,7 @@
 /* global Primrose */
 
 Primrose.Input.ButtonAndAxis = ( function () {
-  function ButtonAndAxisInput ( name, commands, socket, oscope, offset,
-      axes ) {
+  function ButtonAndAxisInput ( name, commands, socket, oscope, offset, axes ) {
     this.offset = offset || 0;
     Primrose.NetworkedInput.call( this, name, commands, socket, oscope );
     this.inputState.axes = [ ];

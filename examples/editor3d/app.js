@@ -108,7 +108,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       mouse = new THREE.Vector3( 0, 0, 0 ),
       raycaster = new THREE.Raycaster( new THREE.Vector3( ),
           new THREE.Vector3( ), 0, 50 ),
-      pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true ),
+      pointer = textured( sphere( 0.02, 4, 2 ), 0xff0000, true ),
       renderer = new THREE.WebGLRenderer( {
         canvas: ctrls.output,
         alpha: true,

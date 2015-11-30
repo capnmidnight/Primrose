@@ -18,9 +18,14 @@ Primrose.Input.Mouse = ( function () {
 
     this.readEvent = function ( event ) {
       if ( MouseInput.isPointerLocked() ) {
-        this.setMovement(
-            event.movementX || event.webkitMovementX || event.mozMovementX || 0,
-            event.movementY || event.webkitMovementY || event.mozMovementY || 0 );
+        var mx = event.movementX,
+            my = event.movementY;
+        
+        if(mx === undefined){
+          mx = event.webkitMovementX || event.mozMovementX || 0;
+          my = event.webkitMovementY || event.mozMovementY || 0;
+        }
+        this.setMovement(mx, my);
       }
       else {
         this.setLocation( event.clientX, event.clientY );

@@ -42,6 +42,7 @@ Primrose.VRApplication = ( function () {
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
     this.qPitch = new THREE.Quaternion( );
+    this.qHeading = new THREE.Quaternion( );
     this.qRift = new THREE.Quaternion( );
     this.pRift = new THREE.Vector3( );
     this.onground = true;
@@ -59,7 +60,6 @@ Primrose.VRApplication = ( function () {
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
     this.music = new Primrose.Output.Music(this.audio.context);
-    this.pointer = pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true );
 
     //
     // keyboard input
@@ -83,6 +83,24 @@ Primrose.VRApplication = ( function () {
       { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
       { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
     ] );
+
+    //
+    // gamepad input
+    //
+    this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
+      { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
+      { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true },
+      { name: "dheading", commands: [ "heading" ], delta: true },
+      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
+    ] );
+
+    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
+    
+    //
+    // VR input
+    //
+    this.vr = new Primrose.Input.VR( "vr" );
 
     var DEBUG_VR = false,
         translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
@@ -138,19 +156,6 @@ Primrose.VRApplication = ( function () {
     if(this.ctrls.goVR){
       checkForVR.call( this );
     }
-
-    //
-    // gamepad input
-    //
-    this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
-      { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
-      { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
-      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true },
-      { name: "dheading", commands: [ "heading" ], delta: true },
-      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
-    ] );
-
-    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
 
     //
     // restoring the options the user selected
@@ -291,6 +296,8 @@ Primrose.VRApplication = ( function () {
       this.lt = t;
       
       if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
+        this.pointer = makeBall.call(this, textured( sphere( 0.02, 4, 2 ), 0xff0000, true ), 1, 0.002);
+        this.camera.add(this.pointer.graphics);
         this.setSize( );
 
         if ( this.passthrough ) {
@@ -531,6 +538,7 @@ Primrose.VRApplication = ( function () {
   };
 
   var heading = 0,
+      pitch = 0,
       strafe,
       drive;
 
@@ -546,15 +554,24 @@ Primrose.VRApplication = ( function () {
     this.mouse.update( dt );
     this.gamepad.update( dt );
 
+    if(!this.inVR) {
+      pitch = this.gamepad.getValue("pitch") + 
+          this.mouse.getValue("pitch");
+    }
+
     if ( this.onground ) {
+      
+      heading = this.gamepad.getValue("heading") +
+          this.mouse.getValue("heading");
 
       strafe = this.keyboard.getValue( "strafeRight" ) +
           this.keyboard.getValue( "strafeLeft" ) +
           this.gamepad.getValue( "strafe" );
+      
       drive = this.keyboard.getValue( "driveBack" ) +
           this.keyboard.getValue( "driveForward" ) +
           this.gamepad.getValue( "drive" );
-
+      
       if ( strafe || drive ) {
         len = this.walkSpeed * Math.min( 1, 1 / Math.sqrt( drive * drive +
             strafe * strafe ) );
@@ -568,12 +585,24 @@ Primrose.VRApplication = ( function () {
       len = strafe * Math.cos( heading ) + drive * Math.sin( heading );
       drive = (drive * Math.cos( heading ) - strafe * Math.sin( heading )) * dt;
       strafe = len * dt;
-      this.currentUser.velocity.x = this.currentUser.velocity.x * 0.9 +
-          strafe * 0.1;
-      this.currentUser.velocity.z = this.currentUser.velocity.z * 0.9 +
-          drive * 0.1;
+      this.qPitch.setFromAxisAngle( RIGHT, pitch );
+      this.currentUser.velocity.x = strafe;
+      this.currentUser.velocity.z = drive;
       this.currentUser.quaternion.setFromAxisAngle( UP, heading );
+      this.currentUser.quaternion.multiply(this.qPitch);
     }
+    else{
+      this.currentUser.velocity.y -= this.options.gravity * dt;
+    }
+    
+    this.currentUser.position.add(this.currentUser.velocity);
+    if(!this.onground && this.currentUser.position.y < 0){
+      this.onground = true;
+      this.currentUser.position.y = 0;
+      this.currentUser.velocity.y = 0;
+    }
+    this.pointer.position.set(0, 0, -1);
+    this.pointer.velocity.set(0, 0, 0);
 
     //
     // do collision detection
