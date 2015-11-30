@@ -321,8 +321,7 @@ function shell ( r, slices, rings, phi, theta ) {
   return geom;
 }
 
-function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz,
-    options ) {
+function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, options ) {
   options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
   options.fontSize = options.fontSize || 30;
   options.theme = options.theme || Primrose.Text.Themes.Dark;

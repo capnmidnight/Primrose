@@ -1,4 +1,4 @@
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari */
+/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, HTMLCanvasElement */
 Primrose.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
@@ -53,9 +53,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         wordWrap = false,
         wheelScrollSpeed = 0,
         renderer = new Renderer( renderToElementOrID, options ),
-        surrogate = cascadeElement( "primrose-surrogate-textarea-" +
-            renderer.id, "textarea", window.HTMLTextAreaElement ),
-        surrogateContainer;
+        surrogate = null,
+        surrogateContainer = null;
 
     //////////////////////////////////////////////////////////////////////////
     // public fields
@@ -87,20 +86,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     }
 
-    function setSurrogateSize () {
-      if ( theme ) {
-        var bounds = renderer.getDOMElement()
-            .getBoundingClientRect();
-        surrogateContainer.style.left = px( bounds.left );
-        surrogateContainer.style.top = px( window.scrollY + bounds.top );
-        surrogateContainer.style.width = 0;
-        surrogateContainer.style.height = 0;
-        surrogate.style.fontFamily = theme.fontFamily;
-        surrogate.style.fontSize = px( renderer.character.height * 0.99 );
-        surrogate.style.lineHeight = px( renderer.character.height );
-      }
-    }
-
     function setCursorXY ( cursor, x, y ) {
       self.changed = true;
       pointer.set( x, y );
@@ -112,7 +97,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       var onRight = pointer.x >= gridBounds.width;
       if ( !scrolling && !onBottom && !onLeft && !onRight ) {
         cursor.setXY( pointer.x, pointer.y, tokenRows );
-        setSurrogateCursor();
         self.backCursor.copy( cursor );
       }
       else if ( scrolling || onRight && !onBottom ) {
@@ -238,8 +222,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     function performLayout () {
       var lineCountWidth;
       if ( showLineNumbers ) {
-        lineCountWidth = Math.max( 1, Math.ceil( Math.log(
-            self.getLineCount() ) / Math.LN10 ) );
+        lineCountWidth = Math.max( 1, Math.ceil( Math.log(self.getLineCount() ) / Math.LN10 ) );
         topLeftGutter.width = 1;
       }
       else {
@@ -270,10 +253,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           y -
           bottomRightGutter.height;
       gridBounds.set( x + 2, y, w - 2, h - 2 );
-      surrogate.style.left = px( gridBounds.x * renderer.character.width );
-      surrogate.style.top = px( gridBounds.y * renderer.character.height );
-      surrogate.style.width = px( gridBounds.width * renderer.character.width );
-      surrogate.style.height = px( gridBounds.height * renderer.character.height );
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -308,13 +287,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     function setFalse ( evt ) {
       evt.returnValue = false;
-    }
-
-    function setSurrogateCursor () {
-      surrogate.selectionStart = Math.min( self.frontCursor.i,
-          self.backCursor.i );
-      surrogate.selectionEnd = Math.max( self.frontCursor.i,
-          self.backCursor.i );
     }
 
     function minDelta ( v, minV, maxV ) {
@@ -425,15 +397,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       return renderer.getDOMElement();
     };
 
-    this.focus = function () {
-      surrogate.focus();
-      Primrose.Text.Control.prototype.focus.call( this );
-    };
-
-    this.blur = function () {
-      surrogate.blur();
-      Primrose.Text.Control.prototype.blur.call( this );
-    };
+    this.focus = Primrose.Text.Control.prototype.focus.bind( this );
+    this.blur = Primrose.Text.Control.prototype.blur.bind( this );
 
     this.getRenderer = function () {
       return renderer;
@@ -620,8 +585,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           var lines = txt.split( "\n" );
           this.pushUndo( lines );
           this.update();
-          surrogate.value = txt;
-          setSurrogateCursor();
         }
       },
       selectionStart: {
@@ -781,37 +744,56 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.endPointer = function () {
       dragging = false;
       scrolling = false;
-      surrogate.focus();
     };
 
-    this.bindEvents = function ( k, p, w, c ) {
-      if ( k ) {
-        k.addEventListener( "keydown", this.keyDown.bind( this ) );
-      }
+    this.bindEvents = function ( k, p, w, enableClipboard ) {
 
       if ( p ) {
-        p.addEventListener( "wheel", this.readWheel.bind( this ) );
-        p.addEventListener( "mousedown", mouseButtonDown );
-        p.addEventListener( "mousemove", mouseMove );
-        p.addEventListener( "mouseup", mouseButtonUp );
-        p.addEventListener( "touchstart", touchStart );
-        p.addEventListener( "touchmove", touchMove );
-        p.addEventListener( "touchend", touchEnd );
+        p.addEventListener( "wheel", this.readWheel.bind( this ), false );
+        p.addEventListener( "mousedown", mouseButtonDown, false );
+        p.addEventListener( "mousemove", mouseMove, false );
+        p.addEventListener( "mouseup", mouseButtonUp, false );
+        p.addEventListener( "touchstart", touchStart, false );
+        p.addEventListener( "touchmove", touchMove, false );
+        p.addEventListener( "touchend", touchEnd, false );
       }
 
       if ( w ) {
-        w.addEventListener( "wheel", this.readWheel.bind( this ) );
+        w.addEventListener( "wheel", this.readWheel.bind( this ), false );
       }
 
-      if ( c ) {
-        surrogate.addEventListener( "beforecopy", setFalse );
-        surrogate.addEventListener( "copy", this.copySelectedText.bind( this ) );
-        surrogate.addEventListener( "beforecut", setFalse );
-        surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ) );
-        if ( k ) {
-          k.addEventListener( "beforepaste", setFalse );
-          k.addEventListener( "paste", this.readClipboard.bind( this ) );
+      if ( k ) {
+
+        if ( k instanceof HTMLCanvasElement && !k.tabindex ) {
+          k.tabindex = 0;
         }
+          
+        if ( enableClipboard ) {
+          //
+          // the `surrogate` textarea makes clipboard events possible
+          surrogate = cascadeElement( "primrose-surrogate-textarea-" + renderer.id, "textarea", window.HTMLTextAreaElement );
+          surrogateContainer = makeHidingContainer( "primrose-surrogate-textarea-container-" + renderer.id, surrogate );
+          surrogateContainer.style.position = "absolute";
+          surrogateContainer.style.overflow = "hidden";
+          surrogateContainer.style.width = 0;
+          surrogateContainer.style.height = 0;
+          document.body.insertBefore( surrogateContainer, document.body.children[0] );
+
+          k.addEventListener( "beforepaste", setFalse, false );
+          k.addEventListener( "paste", this.readClipboard.bind( this ), false );
+          k.addEventListener( "keydown", function ( evt ) {
+            if ( self.focused && operatingSystem.isClipboardReadingEvent( evt ) ) {
+              surrogate.style.display = "block";
+              surrogate.focus();
+            }
+          }, true );
+          surrogate.addEventListener( "beforecopy", setFalse, false );
+          surrogate.addEventListener( "copy", this.copySelectedText.bind( this ), false );
+          surrogate.addEventListener( "beforecut", setFalse, false );
+          surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ), false );
+        }
+        
+        k.addEventListener( "keydown", this.keyDown.bind( this ), false );
       }
     };
 
@@ -851,6 +833,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             str );
       }
       evt.preventDefault();
+      surrogate.style.display = "none";
+      options.keyEventSource.focus();
     };
 
     this.cutSelectedText = function ( evt ) {
@@ -923,7 +907,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.update = function () {
       if ( renderer.hasResized() ) {
         this.changed = renderer.resize();
-        setSurrogateSize();
       }
 
       Primrose.Text.Control.prototype.update.call( this );
@@ -941,8 +924,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             this.scroll,
             this.focused, showLineNumbers, showScrollBars, wordWrap,
             lineCountWidth );
-
-        setSurrogateCursor();
 
         Primrose.Text.Control.prototype.render.call( this );
       }
@@ -968,22 +949,11 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     // used keys like.
     browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE ? "IE" : ( isOpera ? "OPERA" : ( isSafari ? "SAFARI" : "UNKNOWN" ) ) ) );
 
-    //
-    // the `surrogate` textarea makes the soft-keyboard appear on mobile devices.
-    surrogate.style.position = "absolute";
-    surrogate.addEventListener( "blur", this.blur.bind( this ) );
-    surrogateContainer = makeHidingContainer(
-        "primrose-surrogate-textarea-container-" + renderer.id,
-        surrogate );
-
-    document.body.insertBefore( surrogateContainer,
-        document.body.children[0] );
-
     this.readOnly = !!options.readOnly;
-
+    
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {
-        options.keyEventSource = surrogate;
+        options.keyEventSource = renderer.getDOMElement();
       }
       if ( options.pointerEventSource === undefined ) {
         options.pointerEventSource = renderer.getDOMElement();
@@ -1005,7 +975,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.setOperatingSystem( options.os );
     this.setCommandSystem( options.commands );
     this.value = options.file;
-
     this.bindEvents(
         options.keyEventSource,
         options.pointerEventSource,
@@ -1039,7 +1008,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         Primrose.Text.OperatingSystems, operatingSystem.name, self,
         "setOperatingSystem",
         "Shortcut style", Primrose.Text.OperatingSystem );
-    setSurrogateSize();
   }
 
   inherit( TextBox, Primrose.Text.Control );

@@ -47,6 +47,12 @@ Primrose.Text.OperatingSystem = ( function ( ) {
       }
       prim.forceUpdate();
     };
+  
+    this.isClipboardReadingEvent = function(evt){
+      return evt[pre1.toLowerCase() + "Key"] && //meta or ctrl
+          (evt.keyCode === 67 || // C
+          evt.keyCode === 88); // X
+    };
 
     makeCursorCommand( this, "", "LEFTARROW", "Left" );
     makeCursorCommand( this, "", "RIGHTARROW", "Right" );

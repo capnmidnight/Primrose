@@ -23,6 +23,7 @@ function init () {
 
   var editor = new Primrose.Text.Controls.TextBox( "editor", {
     autoBindEvents: true,
+    keyEventSource: window,
     tokenizer: Primrose.Text.Grammars.Basic,
     theme: Primrose.Text.Themes.Dark,
     hideLineNumbers: true

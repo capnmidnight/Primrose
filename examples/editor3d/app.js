@@ -240,6 +240,7 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
       editor = makeEditor( scene, pickingScene, "textEditor",
           1, 1, 0, 0, 6, 0, 0, 0,
           {
+            keyEventSource: window,
             tokenizer: Primrose.Text.Grammars.JavaScript,
             file: src
           } );
@@ -272,7 +273,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     keyState[evt.keyCode] = false;
   } );
   window.addEventListener( "wheel", mouseWheel );
-  window.addEventListener( "paste", paste );
   window.addEventListener( "unload", function ( ) {
     var script = editor.editor.value;
     if ( script.length > 0 ) {
@@ -368,9 +368,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     else if ( !lastEditor || !lastEditor.focused ) {
       keyState[evt.keyCode] = true;
     }
-    else if ( lastEditor && !lastEditor.readOnly ) {
-      lastEditor.keyDown( evt );
-    }
 
     if ( scriptUpdateTimeout ) {
       clearTimeout( scriptUpdateTimeout );
@@ -436,12 +433,6 @@ function PrimroseDemo ( vrDisplay, vrSensor, err ) {
     if ( !good && lastEditor && lastEditor.focused ) {
       lastEditor.blur( );
       lastEditor = null;
-    }
-  }
-
-  function paste ( evt ) {
-    if ( lastEditor && !lastEditor.readOnly ) {
-      lastEditor.readClipboard( evt );
     }
   }
 

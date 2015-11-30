@@ -5,7 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
     <title>Primrose: Canvas-based text editor</title>
 
+    <!--
     <script type="text/javascript" src="../../bin/Primrose.min.js"></script>
+    -->
+    <script src="../../src/core.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/DOM.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/arrays.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/flags.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/fmt.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/forms.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/fullscreen.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/graphics.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/help.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/math.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/oop.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/options.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/polyfills.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/requests.js" type="text/javascript"></script>
+    <script src="../../src/fx/helpers/reverse.js" type="text/javascript"></script>
+    <script src="../../src/fx/Application.js" type="text/javascript"></script>
+    <script src="../../src/fx/Button.js" type="text/javascript"></script>
+    <script src="../../src/fx/ButtonFactory.js" type="text/javascript"></script>
+    <script src="../../src/fx/ChatApplication.js" type="text/javascript"></script>
+    <script src="../../src/fx/ModelLoader.js" type="text/javascript"></script>
+    <script src="../../src/fx/NetworkedInput.js" type="text/javascript"></script>
+    <script src="../../src/fx/StateList.js" type="text/javascript"></script>
+    <script src="../../src/fx/VRApplication.js" type="text/javascript"></script>
+    <script src="../../src/fx/WebRTCSocket.js" type="text/javascript"></script>
+    <script src="../../src/fx/Workerize.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/ButtonAndAxis.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Camera.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Gamepad.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Keyboard.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/LeapMotion.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Location.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Motion.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Mouse.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Speech.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/Touch.js" type="text/javascript"></script>
+    <script src="../../src/fx/input/VR.js" type="text/javascript"></script>
+    <script src="../../src/fx/output/Audio3D.js" type="text/javascript"></script>
+    <script src="../../src/fx/output/HapticGlove.js" type="text/javascript"></script>
+    <script src="../../src/fx/output/Music.js" type="text/javascript"></script>
+    <script src="../../src/fx/output/Speech.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/CodePage.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/CommandPack.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Control.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Cursor.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Grammar.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Keys.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/OperatingSystem.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Point.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Rectangle.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Rule.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Size.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Terminal.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/Token.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/code_pages/DE_QWERTZ.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/code_pages/EN_UKX.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/code_pages/EN_US.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/code_pages/FR_AZERTY.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/command_packs/TestViewer.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/command_packs/TextEditor.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/controls/Keyboard.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/controls/PlainText.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/controls/TextBox.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/grammars/Basic.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/grammars/JavaScript.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/grammars/PlainText.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/grammars/TestResults.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/operating_systems/OSX.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/operating_systems/Windows.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/renderers/Canvas.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/renderers/DOM.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/themes/Dark.js" type="text/javascript"></script>
+    <script src="../../src/fx/text/themes/Default.js" type="text/javascript"></script>
 
     <script src="app.js" type="text/javascript"></script>
 
