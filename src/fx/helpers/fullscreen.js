@@ -7,11 +7,10 @@ function isFullScreenMode () {
       document.msFullscreenElement );
 }
 
-var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( ( !isMobile || USE_VR_DISPLAY_PARAMETER ) && vrDisplay ) {
+  if ( vrDisplay ) {
     fullScreenParam = {vrDisplay: vrDisplay};
   }
 
