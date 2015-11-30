@@ -6,9 +6,14 @@ Primrose.ButtonFactory = ( function () {
 
   function ButtonFactory ( templateFile, options ) {
     this.options = options;
-    Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
-      this.template = obj;
-    }.bind( this ) );
+    if(typeof templateFile === "string"){
+      Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
+        this.template = obj;
+      }.bind( this ) );
+    }
+    else{
+      this.template = templateFile;
+    }
   }
 
 

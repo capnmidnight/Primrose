@@ -8,20 +8,21 @@ Primrose.VRApplication = ( function () {
 
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
-   `sceneModel` - the scene to present to the user, in COLLADA format
-   `buttonModel` - the model to use to make buttons, in COLLADA format
-   `buttonOptions` - configuration parameters for buttons
-   | `maxThrow` - the distance the button may move
-   | `minDeflection` - the angle boundary in which to do hit tests on the button
-   | `colorUnpressed` - the color of the button when it is not depressed
-   | `colorPressed` - the color of the button when it is depressed
-   `avatarModel` - the model to use for players in the game, in COLLADA format
-   `avatarHeight` - the offset from the ground at which to place the camera
-   `walkSpeed` - how quickly the avatar moves across the ground
+   `avatarModel` - the model to use for players in the game, in THREE JOSON format
    `clickSound` - the sound that plays when the user types
    `ambientSound` - background hum or music
    `options` - optional values to override defaults
+   | `avatarHeight` - the offset from the ground at which to place the camera
+   | `walkSpeed` - how quickly the avatar moves across the ground
+   | `button`
+      | `model` - the model to use to make buttons, in THREE JSON format
+      | `options` - configuration parameters for buttons
+        | `maxThrow` - the distance the button may move
+        | `minDeflection` - the angle boundary in which to do hit tests on the button
+        | `colorUnpressed` - the color of the button when it is not depressed
+        | `colorPressed` - the color of the button when it is depressed
    | `gravity` - the acceleration applied to falling objects (default: 9.8)
+   | `useLeap` - use the Leap Motion device
    | `backgroundColor` - the color that WebGL clears the background with before
    drawing (default: 0x000000)
    | `drawDistance` - the far plane of the camera (default: 500)
@@ -33,14 +34,12 @@ Primrose.VRApplication = ( function () {
   var RIGHT = new THREE.Vector3( 1, 0, 0 ),
       UP = new THREE.Vector3( 0, 1, 0 ),
       FORWARD = new THREE.Vector3( 0, 0, 1 );
-  function VRApplication ( name, sceneModel, buttonModel,
-      buttonOptions, avatarHeight, walkSpeed,
-      options ) {
+  function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
-    this.avatarHeight = avatarHeight;
-    this.walkSpeed = walkSpeed;
+    this.avatarHeight = this.options.avatarHeight;
+    this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
     this.qPitch = new THREE.Quaternion( );
     this.qRift = new THREE.Quaternion( );
@@ -116,18 +115,14 @@ Primrose.VRApplication = ( function () {
           else {
             this.vrParams = {
               left: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect(
-                    "left" ),
+                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("left" ),
                 eyeTranslation: this.vrDisplay.getEyeTranslation( "left" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView(
-                    "left" )
+                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("left" )
               },
               right: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect(
-                    "right" ),
+                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("right" ),
                 eyeTranslation: this.vrDisplay.getEyeTranslation( "right" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView(
-                    "right" )
+                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("right" )
               }
             };
           }
@@ -140,7 +135,9 @@ Primrose.VRApplication = ( function () {
       }.bind( this ) );
     }
 
-    checkForVR.call( this );
+    if(this.ctrls.goVR){
+      checkForVR.call( this );
+    }
 
     //
     // gamepad input
@@ -148,14 +145,12 @@ Primrose.VRApplication = ( function () {
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
       { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
       { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
-      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
-      },
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true },
       { name: "dheading", commands: [ "heading" ], delta: true },
       { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ] );
 
-    this.gamepad.addEventListener( "gamepadconnected",
-        this.connectGamepad.bind( this ), false );
+    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
 
     //
     // restoring the options the user selected
@@ -165,25 +160,42 @@ Primrose.VRApplication = ( function () {
       var state = readForm( this.ctrls );
       setSetting( this.formStateKey, state );
     }.bind( this ), false );
+    
+    if(window.Leap && this.options.useLeap){
+      this.glove = new Primrose.Output.HapticGlove( {
+        hands: 2,
+        fingers: 5,
+        joints: 1,
+        port: 9080
+      });
+    }
 
     //
     // Setup THREE.js
     //
-    this.glove = new Primrose.Output.HapticGlove( {
-      hands: 2,
-      fingers: 5,
-      joints: 1,
-      port: 9080
-    });
-    this.scene = null;
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
       alpha: true,
       canvas: this.ctrls.frontBuffer
     } );
+    
     this.renderer.setClearColor( this.options.backgroundColor );
-    this.buttonFactory = new Primrose.ButtonFactory( buttonModel,
-        buttonOptions );
+    
+    if(this.options.button){
+      this.buttonFactory = new Primrose.ButtonFactory( 
+        this.options.button.model,
+        this.options.button.options );
+    }
+    else{
+      this.buttonFactory = new Primrose.ButtonFactory( 
+        brick(0xff0000, 1, 1, 1), {
+            maxThrow: 0.1,
+            minDeflection: 10,
+            colorUnpressed: 0x7f0000,
+            colorPressed: 0x007f00,
+            toggle: true
+          } );
+    }
 
     this.buttons = [ ];
 
@@ -277,8 +289,8 @@ Primrose.VRApplication = ( function () {
 
     function waitForResources ( t ) {
       this.lt = t;
-      if ( this.camera && this.scene && this.currentUser &&
-          this.buttonFactory.template ) {
+      
+      if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
         this.setSize( );
 
         if ( this.passthrough ) {
@@ -286,16 +298,18 @@ Primrose.VRApplication = ( function () {
         }
 
         this.animate = this.animate.bind( this );
-        this.glove.setEnvironment({
-          scene: this.scene,
-          camera: this.camera,
-          world: this.world
-        });
+        if(this.glove){
+          this.glove.setEnvironment({
+            scene: this.scene,
+            camera: this.camera,
+            world: this.world
+          });
 
-        for ( var i = 0; i < this.glove.numJoints; ++i ) {
-          var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
-          this.scene.add( s );
-          this.glove.tips.push( makeBall.call( this, s ) );
+          for ( var i = 0; i < this.glove.numJoints; ++i ) {
+            var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
+            this.scene.add( s );
+            this.glove.tips.push( makeBall.call( this, s ) );
+          }
         }
 
         this.fire( "ready" );
@@ -310,32 +324,28 @@ Primrose.VRApplication = ( function () {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
 
-    Primrose.ModelLoader.loadScene( sceneModel, function ( sceneGraph ) {
-      this.scene = sceneGraph;
-      this.scene.traverse( function ( obj ) {
-        if ( obj.isSolid ) {
-          if ( obj.name === "Terrain" || obj.name.startsWith( "Plane" ) ) {
-            makePlane.call( this, obj );
+    if(!this.options.sceneModel){
+      this.scene = new THREE.Scene();
+      this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
+    }
+    else {
+      Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
+        this.scene = sceneGraph;
+        this.scene.traverse( function ( obj ) {
+          if ( obj.isSolid ) {
+            if ( obj.name === "Terrain" || obj.name.indexOf( "Plane" ) === 0 ) {
+              makePlane.call( this, obj );
+            }
+            else {
+              makeBall.call( this, obj, 1 );
+            }
           }
-          else {
-            makeBall.call( this, obj, 1 );
-          }
-        }
+        }.bind( this ) );
+        this.camera = this.scene.Camera;
       }.bind( this ) );
-      this.camera = this.scene.Camera;
-    }.bind( this ) );
+    }
 
     window.addEventListener( "resize", this.setSize.bind( this ), false );
-
-    this.fullScreen = function () {
-      if ( this.ctrls.frontBuffer.webkitRequestFullscreen ) {
-        this.ctrls.frontBuffer.webkitRequestFullscreen(  );
-      }
-      else if ( this.ctrls.frontBuffer.mozRequestFullScreen ) {
-        this.ctrls.frontBuffer.mozRequestFullScreen(  );
-      }
-    };
-
 
     this.renderScene = function ( s, rt, fc ) {
       if ( this.inVR ) {
@@ -351,27 +361,33 @@ Primrose.VRApplication = ( function () {
     this.currentUser = new THREE.Object3D();
     this.currentUser.velocity = new THREE.Vector3();
 
-    this.ctrls.goRegular.addEventListener( "click", function () {
-      requestFullScreen( this.ctrls.frontBuffer );
-      this.setSize();
-    }.bind( this ) );
-
-    this.ctrls.goVR.addEventListener( "click", function ( ) {
-      requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
-      this.inVR = true;
-      this.setSize();
-    }.bind( this ) );
+    if(this.ctrls.goRegular){
+      this.ctrls.goRegular.addEventListener( "click", function () {
+        requestFullScreen( this.ctrls.frontBuffer );
+        this.setSize();
+      }.bind( this ) );
+    }
+    
+    if(this.ctrls.goVR){
+      this.ctrls.goVR.addEventListener( "click", function ( ) {
+        requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
+        this.inVR = true;
+        this.setSize();
+      }.bind( this ) );
+    }
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
 
   VRApplication.DEFAULTS = {
+    useLeap: false,
+    avatarHeight: 1.75,
+    walkSpeed: 3,
     gravity: 9.8, // the acceleration applied to falling objects
-    backgroundColor: 0x000000,
-    // the color that WebGL clears the background with before drawing
+    backgroundColor: 0x000000, // the color that WebGL clears the background with before drawing    
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
-    dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to teh server
+    dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
 
   VRApplication.prototype.addEventListener = function ( event, thunk ) {
@@ -395,8 +411,7 @@ Primrose.VRApplication = ( function () {
     row.appendChild( cell );
   }
 
-  VRApplication.prototype.setupModuleEvents = function ( container, module,
-      name ) {
+  VRApplication.prototype.setupModuleEvents = function ( container, module, name ) {
     var eID = name + "Enable",
         tID = name + "Transmit",
         rID = name + "Receive",
@@ -574,7 +589,10 @@ Primrose.VRApplication = ( function () {
 
     this.currentUser.position.add(this.currentUser.velocity);
 
-    this.glove.readContacts( this.world.contacts );
+    if(this.glove){
+      this.glove.readContacts( this.world.contacts );
+    }
+    
     for ( j = 0; j < this.buttons.length; ++j ) {
       this.buttons[j].readContacts( this.world.contacts );
     }
