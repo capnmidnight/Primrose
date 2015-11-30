@@ -1,5 +1,5 @@
 /*
-  Primrose v0.16.3 2015-11-29
+  Primrose v0.16.2 2015-11-29
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -263,14 +263,9 @@ Primrose.ButtonFactory = ( function () {
 
   function ButtonFactory ( templateFile, options ) {
     this.options = options;
-    if(typeof templateFile === "string"){
-      Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
-        this.template = obj;
-      }.bind( this ) );
-    }
-    else{
-      this.template = templateFile;
-    }
+    Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
+      this.template = obj;
+    }.bind( this ) );
   }
 
 
@@ -796,19 +791,19 @@ Primrose.VRApplication = ( function () {
 
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
-   `avatarModel` - the model to use for players in the game, in THREE JOSON format
+   `sceneModel` - the scene to present to the user, in COLLADA format
+   `buttonModel` - the model to use to make buttons, in COLLADA format
+   `buttonOptions` - configuration parameters for buttons
+   | `maxThrow` - the distance the button may move
+   | `minDeflection` - the angle boundary in which to do hit tests on the button
+   | `colorUnpressed` - the color of the button when it is not depressed
+   | `colorPressed` - the color of the button when it is depressed
+   `avatarModel` - the model to use for players in the game, in COLLADA format
+   `avatarHeight` - the offset from the ground at which to place the camera
+   `walkSpeed` - how quickly the avatar moves across the ground
    `clickSound` - the sound that plays when the user types
    `ambientSound` - background hum or music
    `options` - optional values to override defaults
-   | `avatarHeight` - the offset from the ground at which to place the camera
-   | `walkSpeed` - how quickly the avatar moves across the ground
-   | `button`
-      | `model` - the model to use to make buttons, in THREE JSON format
-      | `options` - configuration parameters for buttons
-        | `maxThrow` - the distance the button may move
-        | `minDeflection` - the angle boundary in which to do hit tests on the button
-        | `colorUnpressed` - the color of the button when it is not depressed
-        | `colorPressed` - the color of the button when it is depressed
    | `gravity` - the acceleration applied to falling objects (default: 9.8)
    | `useLeap` - use the Leap Motion device
    | `backgroundColor` - the color that WebGL clears the background with before
@@ -822,12 +817,14 @@ Primrose.VRApplication = ( function () {
   var RIGHT = new THREE.Vector3( 1, 0, 0 ),
       UP = new THREE.Vector3( 0, 1, 0 ),
       FORWARD = new THREE.Vector3( 0, 0, 1 );
-  function VRApplication ( name, options ) {
+  function VRApplication ( name, sceneModel, buttonModel,
+      buttonOptions, avatarHeight, walkSpeed,
+      options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = { ready: [ ], update: [ ] };
-    this.avatarHeight = this.options.avatarHeight;
-    this.walkSpeed = this.options.walkSpeed;
+    this.avatarHeight = avatarHeight;
+    this.walkSpeed = walkSpeed;
     this.qRoll = new THREE.Quaternion( );
     this.qPitch = new THREE.Quaternion( );
     this.qRift = new THREE.Quaternion( );
@@ -847,29 +844,40 @@ Primrose.VRApplication = ( function () {
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
     this.music = new Primrose.Output.Music(this.audio.context);
-    this.pointer = pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true );
 
     //
     // keyboard input
     //
     this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
-      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A, -Primrose.Input.Keyboard.LEFTARROW ] },
-      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D, Primrose.Input.Keyboard.RIGHTARROW ] },
-      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W, -Primrose.Input.Keyboard.UPARROW ] },
-      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S, Primrose.Input.Keyboard.DOWNARROW ] },
-      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ], commandDown: this.zero.bind( this ), dt: 1 },
-      { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ], commandUp: this.resetPosition.bind( this ) }
+      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
+          -Primrose.Input.Keyboard.LEFTARROW ] },
+      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
+          Primrose.Input.Keyboard.RIGHTARROW ]
+      },
+      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
+          -Primrose.Input.Keyboard.UPARROW ] },
+      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
+          Primrose.Input.Keyboard.DOWNARROW
+        ] },
+      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ],
+        commandDown: this.zero.bind( this ), dt: 1 },
+      { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
+        commandDown: this.jump.bind( this ), dt: 0.5 },
+      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ],
+        commandUp: this.resetPosition.bind( this ) }
     ] );
 
     //
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", window, [
-      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
+      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
+      },
       { name: "heading", commands: [ "dx" ], integrate: true },
-      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
-      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
+      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
+      },
+      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
+            0.5, max: Math.PI * 0.5 }
     ] );
 
     var DEBUG_VR = false,
@@ -949,7 +957,7 @@ Primrose.VRApplication = ( function () {
       setSetting( this.formStateKey, state );
     }.bind( this ), false );
     
-    if(window.Leap && this.options.useLeap){
+    if(window.Leap && options.useLeap){
       this.glove = new Primrose.Output.HapticGlove( {
         hands: 2,
         fingers: 5,
@@ -961,29 +969,15 @@ Primrose.VRApplication = ( function () {
     //
     // Setup THREE.js
     //
+    this.scene = null;
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
       alpha: true,
       canvas: this.ctrls.frontBuffer
     } );
-    
     this.renderer.setClearColor( this.options.backgroundColor );
-    
-    if(this.options.button){
-      this.buttonFactory = new Primrose.ButtonFactory( 
-        this.options.button.model,
-        this.options.button.options );
-    }
-    else{
-      this.buttonFactory = new Primrose.ButtonFactory( 
-        brick(0xff0000, 1, 1, 1), {
-            maxThrow: 0.1,
-            minDeflection: 10,
-            colorUnpressed: 0x7f0000,
-            colorPressed: 0x007f00,
-            toggle: true
-          } );
-    }
+    this.buttonFactory = new Primrose.ButtonFactory( buttonModel,
+        buttonOptions );
 
     this.buttons = [ ];
 
@@ -1077,8 +1071,8 @@ Primrose.VRApplication = ( function () {
 
     function waitForResources ( t ) {
       this.lt = t;
-      
-      if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
+      if ( this.camera && this.scene && this.currentUser &&
+          this.buttonFactory.template ) {
         this.setSize( );
 
         if ( this.passthrough ) {
@@ -1112,26 +1106,20 @@ Primrose.VRApplication = ( function () {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
 
-    if(!this.options.sceneModel){
-      this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
-    }
-    else {
-      Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
-        this.scene = sceneGraph;
-        this.scene.traverse( function ( obj ) {
-          if ( obj.isSolid ) {
-            if ( obj.name === "Terrain" || obj.name.indexOf( "Plane" ) === 0 ) {
-              makePlane.call( this, obj );
-            }
-            else {
-              makeBall.call( this, obj, 1 );
-            }
+    Primrose.ModelLoader.loadScene( sceneModel, function ( sceneGraph ) {
+      this.scene = sceneGraph;
+      this.scene.traverse( function ( obj ) {
+        if ( obj.isSolid ) {
+          if ( obj.name === "Terrain" || obj.name.indexOf( "Plane" ) === 0 ) {
+            makePlane.call( this, obj );
           }
-        }.bind( this ) );
-        this.camera = this.scene.Camera;
+          else {
+            makeBall.call( this, obj, 1 );
+          }
+        }
       }.bind( this ) );
-    }
+      this.camera = this.scene.Camera;
+    }.bind( this ) );
 
     window.addEventListener( "resize", this.setSize.bind( this ), false );
 
@@ -1169,13 +1157,11 @@ Primrose.VRApplication = ( function () {
 
   VRApplication.DEFAULTS = {
     useLeap: false,
-    avatarHeight: 1.75,
-    walkSpeed: 3,
     gravity: 9.8, // the acceleration applied to falling objects
     backgroundColor: 0x000000, // the color that WebGL clears the background with before drawing    
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
-    dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
+    dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to teh server
   };
 
   VRApplication.prototype.addEventListener = function ( event, thunk ) {
@@ -9861,5 +9847,5 @@ Primrose.Text.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.16.3";
-console.log("Using Primrose v0.16.3. Find out more at http://www.primroseeditor.com");
+Primrose.VERSION = "v0.16.2";
+console.log("Using Primrose v0.16.2. Find out more at http://www.primroseeditor.com");
