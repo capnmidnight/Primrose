@@ -4,10 +4,6 @@ Primrose.Output.Audio3D = ( function () {
 
   function Audio3D () {
 
-    function piano ( n ) {
-      return 440 * Math.pow( base, n - 49 );
-    }
-
     try {
       this.context = new AudioContext();
       this.sampleRate = this.context.sampleRate;
@@ -21,53 +17,16 @@ Primrose.Output.Audio3D = ( function () {
       this.setOrientation = this.context.listener.setOrientation.bind(
           this.context.listener );
       this.isAvailable = true;
-
-
-      var base = Math.pow( 2, 1 / 12 );
-
-      this.oscillators = [ ];
-
-      for ( var i = 0; i < 88; ++i ) {
-        var gn = this.context.createGain();
-        gn.gain.value = 0;
-        var osc = this.context.createOscillator();
-        osc.frequency.value = piano( i + 1 );
-        osc.type = "square";
-        osc.start();
-        osc.connect( gn );
-        gn.connect( this.mainVolume );
-        this.oscillators.push( gn );
-      }
     }
     catch ( exp ) {
       this.isAvailable = false;
-      this.setPosition = function () {
-      };
-      this.setVelocity = function () {
-      };
-      this.setOrientation = function () {
-      };
+      this.setPosition = function () { };
+      this.setVelocity = function () { };
+      this.setOrientation = function () { };
       this.error = exp;
       console.error( "AudioContext not available. Reason: ", exp.message );
     }
   }
-
-  Audio3D.prototype.sawtooth = function ( i, volume, duration ) {
-    if ( this.isAvailable ) {
-      var osc = this.oscillators[i];
-      if ( osc ) {
-        if ( osc.timeout ) {
-          clearTimeout( osc.timeout );
-          osc.timeout = null;
-        }
-        osc.gain.value = volume;
-        osc.timeout = setTimeout( function () {
-          osc.gain.value = 0;
-          osc.timeout = null;
-        }, duration * 1000 );
-      }
-    }
-  };
 
   Audio3D.prototype.loadBuffer = function ( src, progress, success ) {
     if ( !success ) {
@@ -164,8 +123,7 @@ Primrose.Output.Audio3D = ( function () {
           frameCount + ", but was " + pcmData[1].length );
     }
 
-    var buffer = this.context.createBuffer( pcmData.length, frameCount,
-        this.sampleRate );
+    var buffer = this.context.createBuffer( pcmData.length, frameCount, this.sampleRate );
     for ( var c = 0; c < pcmData.length; ++c ) {
       var channel = buffer.getChannelData( c );
       for ( var i = 0; i < frameCount; ++i ) {
@@ -199,38 +157,32 @@ Primrose.Output.Audio3D = ( function () {
     success( snd );
   };
 
-  Audio3D.prototype.loadSound = function ( src, loop, progress,
-      success ) {
+  Audio3D.prototype.loadSound = function ( src, loop, progress, success ) {
     this.loadBuffer( src, progress, this.createSound.bind( this, loop,
         success ) );
   };
 
-  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
-      progress, success ) {
+  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop, progress, success ) {
     this.loadBufferCascadeSrcList( srcs, progress, this.createSound.bind( this,
         loop, success ) );
   };
 
-  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z,
-      progress, success ) {
+  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z, progress, success ) {
     this.loadSound( src, loop, progress, this.create3DSound.bind( this, x, y,
         z, success ) );
   };
 
-  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
-      y, z, progress, success ) {
+  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x, y, z, progress, success ) {
     this.loadSoundCascadeSrcList()( srcs, loop, progress,
         this.create3DSound.bind( this, x, y, z, success ) );
   };
 
-  Audio3D.prototype.loadFixedSound = function ( src, loop, progress,
-      success ) {
+  Audio3D.prototype.loadFixedSound = function ( src, loop, progress, success ) {
     this.loadSound( src, loop, progress, this.createFixedSound.bind( this,
         success ) );
   };
 
-  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
-      progress, success ) {
+  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop, progress, success ) {
     this.loadSoundCascadeSrcList( srcs, loop, progress,
         this.createFixedSound.bind( this, success ) );
   };

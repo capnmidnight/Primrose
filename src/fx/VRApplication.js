@@ -59,40 +59,30 @@ Primrose.VRApplication = ( function () {
     this.world.gravity.set( 0, -this.options.gravity, 0 );
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
+    this.music = new Primrose.Output.Music(this.audio.context);
+    this.pointer = pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true );
 
     //
     // keyboard input
     //
     this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
-      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
-          -Primrose.Input.Keyboard.LEFTARROW ] },
-      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
-          Primrose.Input.Keyboard.RIGHTARROW ]
-      },
-      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
-          -Primrose.Input.Keyboard.UPARROW ] },
-      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
-          Primrose.Input.Keyboard.DOWNARROW
-        ] },
-      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ],
-        commandDown: this.zero.bind( this ), dt: 1 },
-      { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
-        commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ],
-        commandUp: this.resetPosition.bind( this ) }
+      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A, -Primrose.Input.Keyboard.LEFTARROW ] },
+      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D, Primrose.Input.Keyboard.RIGHTARROW ] },
+      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W, -Primrose.Input.Keyboard.UPARROW ] },
+      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S, Primrose.Input.Keyboard.DOWNARROW ] },
+      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ], commandDown: this.zero.bind( this ), dt: 1 },
+      { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5 },
+      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ], commandUp: this.resetPosition.bind( this ) }
     ] );
 
     //
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", window, [
-      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
-      },
+      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
       { name: "heading", commands: [ "dx" ], integrate: true },
-      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
-      },
-      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
-            0.5, max: Math.PI * 0.5 }
+      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
+      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
     ] );
 
     var DEBUG_VR = false,
