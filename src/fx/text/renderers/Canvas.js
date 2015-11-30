@@ -23,8 +23,10 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         strictSize = options.size,
         rowCache = {},
         lastLines = null,
-        lastMaxLineWidth = null,
-        lastScrollY = -1;
+        lastScrollY = -1,
+        lastScrollX = -1,
+        lastFrontCursorI = -1,
+        lastBackCursorI = -1;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -121,8 +123,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           h * self.character.height + 1 );
     }
 
-    function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
-        gridBounds, scroll, focused ) {
+    function renderCanvasBackground ( tokenRows, lines, gridBounds, scroll, frontCursor, backCursor, focused ) {
       var minCursor = Primrose.Text.Cursor.min( frontCursor, backCursor ),
           maxCursor = Primrose.Text.Cursor.max( frontCursor, backCursor ),
           tokenFront = new Primrose.Text.Cursor(),
@@ -196,94 +197,95 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
-          maxLineWidth = 0,
-          good = scroll.y === lastScrollY && lastLines !== null && lastLines.length === lines.length,
           lineOffsetY = Math.ceil( self.character.height * 0.2 ),
-          i,
-          wasGood = good;
+          i;
 
-      for ( i = 0; i < lines.length && good; ++i ) {
-        good = lastLines[i] === lines[i];
-      }
+      fgfx.clearRect( 0, 0, canvas.width, canvas.height );
+      fgfx.save();
+      fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
+      for ( var y = 0; y < tokenRows.length; ++y ) {
+        // draw the tokens on this row
+        var line = lines[y],
+            row = tokenRows[y],
+            drawn = false,
+            textY = ( y + 1 - scroll.y ) * self.character.height,
+            imageY = ( y - scroll.y ) * self.character.height + lineOffsetY;
 
-      if ( !good ) {
-        fgfx.clearRect( 0, 0, canvas.width, canvas.height );
-        fgfx.save();
-        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
-        for ( var y = 0; y < tokenRows.length; ++y ) {
-          // draw the tokens on this row
-          var line = lines[y],
-              row = tokenRows[y],
-              drawn = false,
-              textY = (y + 1 - scroll.y) * self.character.height,
-              imageY = (y - scroll.y) * self.character.height + lineOffsetY;
+        for ( i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
 
-          for ( i = 0; i < row.length; ++i ) {
-            var t = row[i];
-            tokenBack.x += t.value.length;
-            tokenBack.i += t.value.length;
+          // skip drawing tokens that aren't in view
+          if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
+              scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
+              gridBounds.width ) {
 
-            // skip drawing tokens that aren't in view
-            if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
-                scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-                gridBounds.width ) {
-
-              // draw the text
-              if ( rowCache[line] !== undefined ) {
-                if ( i === 0 ) {
-                  fgfx.putImageData( rowCache[line], 0, imageY );
-                }
-              }
-              else {
-                var style = theme[t.type] || {};
-                var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
-                    " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
-                    " " + self.character.height + "px " + theme.fontFamily;
-                fgfx.font = font.trim();
-                fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                fgfx.fillText(
-                    t.value,
-                    tokenFront.x * self.character.width,
-                    textY );
-                drawn = true;
+            // draw the text
+            if ( rowCache[line] !== undefined ) {
+              if ( i === 0 ) {
+                fgfx.putImageData( rowCache[line], 0, imageY );
               }
             }
-
-            tokenFront.copy( tokenBack );
+            else {
+              var style = theme[t.type] || {};
+              var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
+                  " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
+                  " " + self.character.height + "px " + theme.fontFamily;
+              fgfx.font = font.trim();
+              fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+              fgfx.fillText(
+                  t.value,
+                  tokenFront.x * self.character.width,
+                  textY );
+              drawn = true;
+            }
           }
 
-          maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
-          tokenFront.x = 0;
-          ++tokenFront.y;
-          tokenBack.copy( tokenFront );
-          if ( drawn && rowCache[line] === undefined ) {
-            rowCache[line] = fgfx.getImageData(
-                0, 
-                imageY,
-                fgCanvas.width, 
-                self.character.height );
-          }
+          tokenFront.copy( tokenBack );
         }
-        fgfx.restore();
-        lastMaxLineWidth = maxLineWidth;
-        lastLines = lines;
-        lastScrollY = scroll.y;
-        return maxLineWidth;
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+        if ( drawn && rowCache[line] === undefined ) {
+          rowCache[line] = fgfx.getImageData(
+              0,
+              imageY,
+              fgCanvas.width,
+              self.character.height );
+        }
       }
-      else {
-        return lastMaxLineWidth;
-      }
+      fgfx.restore();
     }
 
-    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
-        showScrollBars, wordWrap, lineCountWidth, maxLineWidth ) {
+    function renderCanvasTrim ( tokenRows, lines, gridBounds, scroll, showLineNumbers,
+        showScrollBars, wordWrap, lineCountWidth ) {
+
+      var tokenFront = new Primrose.Text.Cursor(),
+          tokenBack = new Primrose.Text.Cursor(),
+          maxLineWidth = 0,
+          i;
+
       tgfx.clearRect( 0, 0, canvas.width, canvas.height );
       tgfx.save();
       tgfx.translate( 0, -scroll.y * self.character.height );
-      if ( showLineNumbers ) {
-        for ( var y = scroll.y,
-            lastLine = -1; y < scroll.y + gridBounds.height && y <
-            tokenRows.length; ++y ) {
+      for ( var y = 0, lastLine = -1; y < tokenRows.length; ++y ) {
+        var row = tokenRows[y];
+
+        for ( i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy( tokenBack );
+        }
+
+        maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+
+        if ( showLineNumbers && scroll.y <= y && y < scroll.y + gridBounds.height ) {
           // draw the tokens on this row
           var row = tokenRows[y];
           // be able to draw brand-new rows that don't have any tokens yet
@@ -354,21 +356,38 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         focused, showLineNumbers, showScrollBars, wordWrap,
         lineCountWidth ) {
       if ( theme ) {
-        var maxLineWidth = 0;
+        var textUnchanged = scroll.y === lastScrollY &&
+            scroll.x === lastScrollX &&
+            lastLines !== null &&
+            lastLines.length === lines.length,
+            cursorUnchanged = frontCursor.i === lastFrontCursorI && lastBackCursorI === backCursor.i;
+        for ( var i = 0; i < lines.length && textUnchanged; ++i ) {
+          textUnchanged = lastLines[i] === lines[i];
+        }
+        
+        if ( !textUnchanged || !cursorUnchanged ) {
+          renderCanvasBackground( tokenRows, lines, gridBounds, scroll, frontCursor, backCursor, focused );
+          
+          if(!textUnchanged){
+            renderCanvasForeground( tokenRows, lines, gridBounds, scroll );
+            renderCanvasTrim( tokenRows, lines, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth );
+          }
 
-        renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
-            scroll, focused );
-        maxLineWidth = renderCanvasForeground( tokenRows, lines, gridBounds, scroll );
-        renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
-            showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
-
-        gfx.clearRect( 0, 0, canvas.width, canvas.height );
-        gfx.drawImage( bgCanvas, 0, 0 );
-        gfx.drawImage( fgCanvas, 0, 0 );
-        gfx.drawImage( trimCanvas, 0, 0 );
-
-        if ( texture ) {
-          texture.needsUpdate = true;
+          gfx.clearRect( 0, 0, canvas.width, canvas.height );
+          gfx.drawImage( bgCanvas, 0, 0 );
+          gfx.drawImage( fgCanvas, 0, 0 );
+          gfx.drawImage( trimCanvas, 0, 0 );
+          
+          if ( texture ) {
+            console.log("updated texture");
+            texture.needsUpdate = true;
+          }
+          
+          lastLines = lines;
+          lastScrollY = scroll.y;
+          lastScrollX = scroll.x;
+          lastFrontCursorI = frontCursor.i;
+          lastBackCursorI = backCursor.i;
         }
       }
     };
