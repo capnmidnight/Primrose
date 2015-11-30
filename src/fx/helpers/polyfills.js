@@ -1,64 +1,80 @@
-navigator.vibrate = navigator.vibrate ||
-    navigator.webkitVibrate ||
-    navigator.mozVibrate ||
+/* global Document, Screen, Navigator, Element, Window */
+
+Navigator.prototype.vibrate = 
+    Navigator.prototype.vibrate ||
+    Navigator.prototype.webkitVibrate ||
+    Navigator.prototype.mozVibrate ||
     function () {
     };
 
-navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia ||
-    navigator.oGetUserMedia ||
+Navigator.prototype.getUserMedia = 
+    Navigator.prototype.getUserMedia ||
+    Navigator.prototype.webkitGetUserMedia ||
+    Navigator.prototype.mozGetUserMedia ||
+    Navigator.prototype.msGetUserMedia ||
+    Navigator.prototype.oGetUserMedia ||
     function () {
     };
 
-window.AudioContext = window.AudioContext ||
-    window.webkitAudioContext ||
-    function(){
-    };
-
-window.RTCPeerConnection = window.RTCPeerConnection ||
-    window.webkitRTCPeerConnection ||
-    window.mozRTCPeerConnection ||
+Window.prototype.AudioContext = 
+    Window.prototype.AudioContext ||
+    Window.prototype.webkitAudioContext ||
     function () {
     };
 
-window.RTCIceCandidate = window.RTCIceCandidate ||
-    window.mozRTCIceCandidate ||
+Window.prototype.RTCPeerConnection = 
+    Window.prototype.RTCPeerConnection ||
+    Window.prototype.webkitRTCPeerConnection ||
+    Window.prototype.mozRTCPeerConnection ||
     function () {
     };
 
-window.RTCSessionDescription = window.RTCSessionDescription ||
-    window.mozRTCSessionDescription ||
+Window.prototype.RTCIceCandidate = 
+    Window.prototype.RTCIceCandidate ||
+    Window.prototype.mozRTCIceCandidate ||
     function () {
     };
 
-window.Element.prototype.requestPointerLock =
-    window.Element.prototype.requestPointerLock ||
-    window.Element.prototype.webkitRequestPointerLock ||
-    window.Element.prototype.mozRequestPointerLock ||
+Window.prototype.RTCSessionDescription = 
+    Window.prototype.RTCSessionDescription ||
+    Window.prototype.mozRTCSessionDescription ||
     function () {
     };
 
-window.Element.prototype.requestFullscreen =
-    window.Element.prototype.requestFullscreen ||
-    window.Element.prototype.webkitRequestFullscreen ||
-    window.Element.prototype.mozRequestFullScreen ||
-    window.Element.prototype.msRequestFullscreen ||
+Element.prototype.requestPointerLock =
+    Element.prototype.requestPointerLock ||
+    Element.prototype.webkitRequestPointerLock ||
+    Element.prototype.mozRequestPointerLock ||
     function () {
     };
 
-window.Document.prototype.exitFullscreen =
-    window.Document.prototype.exitFullscreen ||
-    window.Document.prototype.webkitExitFullscreen ||
-    window.Document.prototype.mozCancelFullScreen ||
-    window.Document.prototype.msExitFullscreen ||
+Element.prototype.requestFullscreen =
+    Element.prototype.requestFullscreen ||
+    Element.prototype.webkitRequestFullscreen ||
+    Element.prototype.mozRequestFullScreen ||
+    Element.prototype.msRequestFullscreen ||
+    function () {
+    };
+
+Document.prototype.exitPointerLock =
+    Document.prototype.exitPointerLock ||
+    Document.prototype.webkitExitPointerLock ||
+    Document.prototype.mozExitPointerLock ||
+    function () {
+    };
+
+Document.prototype.exitFullscreen =
+    Document.prototype.exitFullscreen ||
+    Document.prototype.webkitExitFullscreen ||
+    Document.prototype.mozCancelFullScreen ||
+    Document.prototype.msExitFullscreen ||
     function () {
     };
 
 // this doesn't seem to actually work
-screen.lockOrientation = screen.lockOrientation ||
-    screen.mozLockOrientation ||
-    screen.msLockOrientation ||
+Screen.prototype.lockOrientation = 
+    Screen.prototype.lockOrientation ||
+    Screen.prototype.mozLockOrientation ||
+    Screen.prototype.msLockOrientation ||
     function () {
     };
