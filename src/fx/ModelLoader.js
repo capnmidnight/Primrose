@@ -110,7 +110,7 @@ Primrose.ModelLoader = ( function () {
       }
     };
 
-    if ( src.endsWith( ".dae" ) ) {
+    if ( /\.dae$/.test(src) ) {
       if ( !COLLADA || true ) {
         console.error( "COLLADA seems to be broken right now" );
       }
@@ -120,11 +120,12 @@ Primrose.ModelLoader = ( function () {
         } );
       }
     }
-    else if ( src.endsWith( ".json" ) ) {
+    else if ( /\.json$/.test(src) ) {
       if ( !JSON ) {
         console.error( "JSON seems to be broken right now" );
       }
       else {
+        JSON.setCrossOrigin(THREE.ImageUtils.crossOrigin);
         JSON.load( src, function ( json ) {
           done( fixJSONScene( json ) );
         } );

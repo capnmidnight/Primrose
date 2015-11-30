@@ -804,6 +804,7 @@ Primrose.VRApplication = ( function () {
    `ambientSound` - background hum or music
    `options` - optional values to override defaults
    | `gravity` - the acceleration applied to falling objects (default: 9.8)
+   | `useLeap` - use the Leap Motion device
    | `backgroundColor` - the color that WebGL clears the background with before
    drawing (default: 0x000000)
    | `drawDistance` - the far plane of the camera (default: 500)
@@ -841,6 +842,7 @@ Primrose.VRApplication = ( function () {
     this.world.gravity.set( 0, -this.options.gravity, 0 );
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
+    this.music = new Primrose.Output.Music(this.audio.context);
 
     //
     // keyboard input
@@ -908,18 +910,14 @@ Primrose.VRApplication = ( function () {
           else {
             this.vrParams = {
               left: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect(
-                    "left" ),
+                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("left" ),
                 eyeTranslation: this.vrDisplay.getEyeTranslation( "left" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView(
-                    "left" )
+                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("left" )
               },
               right: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect(
-                    "right" ),
+                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("right" ),
                 eyeTranslation: this.vrDisplay.getEyeTranslation( "right" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView(
-                    "right" )
+                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("right" )
               }
             };
           }
@@ -932,7 +930,9 @@ Primrose.VRApplication = ( function () {
       }.bind( this ) );
     }
 
-    checkForVR.call( this );
+    if(this.ctrls.goVR){
+      checkForVR.call( this );
+    }
 
     //
     // gamepad input
@@ -940,14 +940,12 @@ Primrose.VRApplication = ( function () {
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
       { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
       { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
-      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
-      },
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true },
       { name: "dheading", commands: [ "heading" ], delta: true },
       { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ] );
 
-    this.gamepad.addEventListener( "gamepadconnected",
-        this.connectGamepad.bind( this ), false );
+    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
 
     //
     // restoring the options the user selected
@@ -957,16 +955,19 @@ Primrose.VRApplication = ( function () {
       var state = readForm( this.ctrls );
       setSetting( this.formStateKey, state );
     }.bind( this ), false );
+    
+    if(window.Leap && options.useLeap){
+      this.glove = new Primrose.Output.HapticGlove( {
+        hands: 2,
+        fingers: 5,
+        joints: 1,
+        port: 9080
+      });
+    }
 
     //
     // Setup THREE.js
     //
-    this.glove = new Primrose.Output.HapticGlove( {
-      hands: 2,
-      fingers: 5,
-      joints: 1,
-      port: 9080
-    });
     this.scene = null;
     this.renderer = new THREE.WebGLRenderer( {
       antialias: true,
@@ -1078,16 +1079,18 @@ Primrose.VRApplication = ( function () {
         }
 
         this.animate = this.animate.bind( this );
-        this.glove.setEnvironment({
-          scene: this.scene,
-          camera: this.camera,
-          world: this.world
-        });
+        if(this.glove){
+          this.glove.setEnvironment({
+            scene: this.scene,
+            camera: this.camera,
+            world: this.world
+          });
 
-        for ( var i = 0; i < this.glove.numJoints; ++i ) {
-          var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
-          this.scene.add( s );
-          this.glove.tips.push( makeBall.call( this, s ) );
+          for ( var i = 0; i < this.glove.numJoints; ++i ) {
+            var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
+            this.scene.add( s );
+            this.glove.tips.push( makeBall.call( this, s ) );
+          }
         }
 
         this.fire( "ready" );
@@ -1119,16 +1122,6 @@ Primrose.VRApplication = ( function () {
 
     window.addEventListener( "resize", this.setSize.bind( this ), false );
 
-    this.fullScreen = function () {
-      if ( this.ctrls.frontBuffer.webkitRequestFullscreen ) {
-        this.ctrls.frontBuffer.webkitRequestFullscreen(  );
-      }
-      else if ( this.ctrls.frontBuffer.mozRequestFullScreen ) {
-        this.ctrls.frontBuffer.mozRequestFullScreen(  );
-      }
-    };
-
-
     this.renderScene = function ( s, rt, fc ) {
       if ( this.inVR ) {
         this.renderer.renderStereo( s, this.camera, rt, fc,
@@ -1143,24 +1136,28 @@ Primrose.VRApplication = ( function () {
     this.currentUser = new THREE.Object3D();
     this.currentUser.velocity = new THREE.Vector3();
 
-    this.ctrls.goRegular.addEventListener( "click", function () {
-      requestFullScreen( this.ctrls.frontBuffer );
-      this.setSize();
-    }.bind( this ) );
-
-    this.ctrls.goVR.addEventListener( "click", function ( ) {
-      requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
-      this.inVR = true;
-      this.setSize();
-    }.bind( this ) );
+    if(this.ctrls.goRegular){
+      this.ctrls.goRegular.addEventListener( "click", function () {
+        requestFullScreen( this.ctrls.frontBuffer );
+        this.setSize();
+      }.bind( this ) );
+    }
+    
+    if(this.ctrls.goVR){
+      this.ctrls.goVR.addEventListener( "click", function ( ) {
+        requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
+        this.inVR = true;
+        this.setSize();
+      }.bind( this ) );
+    }
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
 
   VRApplication.DEFAULTS = {
+    useLeap: false,
     gravity: 9.8, // the acceleration applied to falling objects
-    backgroundColor: 0x000000,
-    // the color that WebGL clears the background with before drawing
+    backgroundColor: 0x000000, // the color that WebGL clears the background with before drawing    
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to teh server
@@ -1187,8 +1184,7 @@ Primrose.VRApplication = ( function () {
     row.appendChild( cell );
   }
 
-  VRApplication.prototype.setupModuleEvents = function ( container, module,
-      name ) {
+  VRApplication.prototype.setupModuleEvents = function ( container, module, name ) {
     var eID = name + "Enable",
         tID = name + "Transmit",
         rID = name + "Receive",
@@ -1366,7 +1362,10 @@ Primrose.VRApplication = ( function () {
 
     this.currentUser.position.add(this.currentUser.velocity);
 
-    this.glove.readContacts( this.world.contacts );
+    if(this.glove){
+      this.glove.readContacts( this.world.contacts );
+    }
+    
     for ( j = 0; j < this.buttons.length; ++j ) {
       this.buttons[j].readContacts( this.world.contacts );
     }
@@ -2153,11 +2152,10 @@ function isFullScreenMode () {
       document.msFullscreenElement );
 }
 
-var USE_VR_DISPLAY_PARAMETER = false;
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( ( !isMobile || USE_VR_DISPLAY_PARAMETER ) && vrDisplay ) {
+  if ( vrDisplay ) {
     fullScreenParam = {vrDisplay: vrDisplay};
   }
 
@@ -4783,10 +4781,6 @@ Primrose.Output.Audio3D = ( function () {
 
   function Audio3D () {
 
-    function piano ( n ) {
-      return 440 * Math.pow( base, n - 49 );
-    }
-
     try {
       this.context = new AudioContext();
       this.sampleRate = this.context.sampleRate;
@@ -4800,53 +4794,16 @@ Primrose.Output.Audio3D = ( function () {
       this.setOrientation = this.context.listener.setOrientation.bind(
           this.context.listener );
       this.isAvailable = true;
-
-
-      var base = Math.pow( 2, 1 / 12 );
-
-      this.oscillators = [ ];
-
-      for ( var i = 0; i < 88; ++i ) {
-        var gn = this.context.createGain();
-        gn.gain.value = 0;
-        var osc = this.context.createOscillator();
-        osc.frequency.value = piano( i + 1 );
-        osc.type = "square";
-        osc.start();
-        osc.connect( gn );
-        gn.connect( this.mainVolume );
-        this.oscillators.push( gn );
-      }
     }
     catch ( exp ) {
       this.isAvailable = false;
-      this.setPosition = function () {
-      };
-      this.setVelocity = function () {
-      };
-      this.setOrientation = function () {
-      };
+      this.setPosition = function () { };
+      this.setVelocity = function () { };
+      this.setOrientation = function () { };
       this.error = exp;
       console.error( "AudioContext not available. Reason: ", exp.message );
     }
   }
-
-  Audio3D.prototype.sawtooth = function ( i, volume, duration ) {
-    if ( this.isAvailable ) {
-      var osc = this.oscillators[i];
-      if ( osc ) {
-        if ( osc.timeout ) {
-          clearTimeout( osc.timeout );
-          osc.timeout = null;
-        }
-        osc.gain.value = volume;
-        osc.timeout = setTimeout( function () {
-          osc.gain.value = 0;
-          osc.timeout = null;
-        }, duration * 1000 );
-      }
-    }
-  };
 
   Audio3D.prototype.loadBuffer = function ( src, progress, success ) {
     if ( !success ) {
@@ -4943,8 +4900,7 @@ Primrose.Output.Audio3D = ( function () {
           frameCount + ", but was " + pcmData[1].length );
     }
 
-    var buffer = this.context.createBuffer( pcmData.length, frameCount,
-        this.sampleRate );
+    var buffer = this.context.createBuffer( pcmData.length, frameCount, this.sampleRate );
     for ( var c = 0; c < pcmData.length; ++c ) {
       var channel = buffer.getChannelData( c );
       for ( var i = 0; i < frameCount; ++i ) {
@@ -4978,38 +4934,32 @@ Primrose.Output.Audio3D = ( function () {
     success( snd );
   };
 
-  Audio3D.prototype.loadSound = function ( src, loop, progress,
-      success ) {
+  Audio3D.prototype.loadSound = function ( src, loop, progress, success ) {
     this.loadBuffer( src, progress, this.createSound.bind( this, loop,
         success ) );
   };
 
-  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop,
-      progress, success ) {
+  Audio3D.prototype.loadSoundCascadeSrcList = function ( srcs, loop, progress, success ) {
     this.loadBufferCascadeSrcList( srcs, progress, this.createSound.bind( this,
         loop, success ) );
   };
 
-  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z,
-      progress, success ) {
+  Audio3D.prototype.load3DSound = function ( src, loop, x, y, z, progress, success ) {
     this.loadSound( src, loop, progress, this.create3DSound.bind( this, x, y,
         z, success ) );
   };
 
-  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x,
-      y, z, progress, success ) {
+  Audio3D.prototype.load3DSoundCascadeSrcList = function ( srcs, loop, x, y, z, progress, success ) {
     this.loadSoundCascadeSrcList()( srcs, loop, progress,
         this.create3DSound.bind( this, x, y, z, success ) );
   };
 
-  Audio3D.prototype.loadFixedSound = function ( src, loop, progress,
-      success ) {
+  Audio3D.prototype.loadFixedSound = function ( src, loop, progress, success ) {
     this.loadSound( src, loop, progress, this.createFixedSound.bind( this,
         success ) );
   };
 
-  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop,
-      progress, success ) {
+  Audio3D.prototype.loadFixedSoundCascadeSrcList = function ( srcs, loop, progress, success ) {
     this.loadSoundCascadeSrcList( srcs, loop, progress,
         this.createFixedSound.bind( this, success ) );
   };
@@ -5153,8 +5103,8 @@ Primrose.Output.Music = ( function () {
     return 440 * Math.pow( PIANO_BASE, n - 49 );
   }
 
-  function Music ( numNotes, type ) {
-    this.audio = new AudioContext();
+  function Music ( context, type, numNotes ) {
+    this.audio = context || new AudioContext();
     if ( this.audio && this.audio.createGain ) {
       if ( numNotes === undefined ) {
         numNotes = MAX_NOTE_COUNT;
