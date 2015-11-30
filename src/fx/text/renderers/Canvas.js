@@ -123,7 +123,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           h * self.character.height + 1 );
     }
 
-    function renderCanvasBackground ( tokenRows, lines, gridBounds, scroll, frontCursor, backCursor, focused ) {
+    function renderCanvasBackground ( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused ) {
       var minCursor = Primrose.Text.Cursor.min( frontCursor, backCursor ),
           maxCursor = Primrose.Text.Cursor.max( frontCursor, backCursor ),
           tokenFront = new Primrose.Text.Cursor(),
@@ -194,7 +194,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       bgfx.restore();
     }
 
-    function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
+    function renderCanvasForeground ( tokenRows, gridBounds, scroll, lines ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
           lineOffsetY = Math.ceil( self.character.height * 0.2 ),
@@ -259,7 +259,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       fgfx.restore();
     }
 
-    function renderCanvasTrim ( tokenRows, lines, gridBounds, scroll, showLineNumbers,
+    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
         showScrollBars, wordWrap, lineCountWidth ) {
 
       var tokenFront = new Primrose.Text.Cursor(),
@@ -287,7 +287,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
         if ( showLineNumbers && scroll.y <= y && y < scroll.y + gridBounds.height ) {
           // draw the tokens on this row
-          var row = tokenRows[y];
           // be able to draw brand-new rows that don't have any tokens yet
           var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
           // draw the left gutter
@@ -366,11 +365,11 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         }
         
         if ( !textUnchanged || !cursorUnchanged ) {
-          renderCanvasBackground( tokenRows, lines, gridBounds, scroll, frontCursor, backCursor, focused );
+          renderCanvasBackground( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused );
           
           if(!textUnchanged){
-            renderCanvasForeground( tokenRows, lines, gridBounds, scroll );
-            renderCanvasTrim( tokenRows, lines, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth );
+            renderCanvasForeground( tokenRows, gridBounds, scroll, lines );
+            renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth );
           }
 
           gfx.clearRect( 0, 0, canvas.width, canvas.height );
