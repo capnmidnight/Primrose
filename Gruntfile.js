@@ -30,16 +30,6 @@ var fs = require( "fs" ),
 
 copyFiles.push( {
   src: "bin/Primrose.js",
-  dest: "bin/Primrose-<%= pkg.version %>.js"
-} );
-
-copyFiles.push( {
-  src: "bin/Primrose.min.js",
-  dest: "bin/Primrose-<%= pkg.version %>.min.js"
-} );
-
-copyFiles.push( {
-  src: "bin/Primrose.js",
   dest: "archive/Primrose-<%= pkg.version %>.js"
 } );
 

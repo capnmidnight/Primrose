@@ -1,5 +1,5 @@
 /*
-  Primrose v0.16.3 2015-11-29
+  Primrose v0.16.4 2015-11-30
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   https://www.primroseeditor.com
@@ -830,6 +830,7 @@ Primrose.VRApplication = ( function () {
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
     this.qPitch = new THREE.Quaternion( );
+    this.qHeading = new THREE.Quaternion( );
     this.qRift = new THREE.Quaternion( );
     this.pRift = new THREE.Vector3( );
     this.onground = true;
@@ -838,8 +839,6 @@ Primrose.VRApplication = ( function () {
     this.enableMousePitch = true;
     this.currentUser = null;
     this.vrParams = null;
-    this.vrDisplay = null;
-    this.vrSensor = null;
     this.inVR = false;
     this.world = new CANNON.World();
     this.world.defaultContactMaterial.friction = 0.2;
@@ -847,7 +846,6 @@ Primrose.VRApplication = ( function () {
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
     this.music = new Primrose.Output.Music(this.audio.context);
-    this.pointer = pointer = textured( sphere( 0.01, 4, 2 ), 0xff0000, true );
 
     //
     // keyboard input
@@ -857,9 +855,8 @@ Primrose.VRApplication = ( function () {
       { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D, Primrose.Input.Keyboard.RIGHTARROW ] },
       { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W, -Primrose.Input.Keyboard.UPARROW ] },
       { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S, Primrose.Input.Keyboard.DOWNARROW ] },
-      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ], commandDown: this.zero.bind( this ), dt: 1 },
       { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ], commandUp: this.resetPosition.bind( this ) }
+      { name: "zero", buttons: [ Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this ) }
     ] );
 
     //
@@ -871,61 +868,6 @@ Primrose.VRApplication = ( function () {
       { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
       { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
     ] );
-
-    var DEBUG_VR = false,
-        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-        viewports = [ ];
-
-    function setTrans ( m, t ) {
-      m.makeTranslation( t.x, t.y, t.z );
-    }
-
-    function checkForVR () {
-      findVR( function ( display, sensor ) {
-        if ( display && ( display.deviceName !== "Mockulus Rift" ||
-            DEBUG_VR ) ) {
-          this.vrDisplay = display;
-          this.vrSensor = sensor;
-        }
-
-        if ( !this.vrDisplay ) {
-          this.ctrls.goVR.style.display = "none";
-          setTimeout( checkForVR.bind( this ), 5000 );
-        }
-        else {
-          this.ctrls.goVR.style.display = "inline-block";
-          if ( this.vrDisplay.getEyeParameters ) {
-            this.vrParams = {
-              left: this.vrDisplay.getEyeParameters( "left" ),
-              right: this.vrDisplay.getEyeParameters( "right" )
-            };
-          }
-          else {
-            this.vrParams = {
-              left: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("left" ),
-                eyeTranslation: this.vrDisplay.getEyeTranslation( "left" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("left" )
-              },
-              right: {
-                renderRect: this.vrDisplay.getRecommendedEyeRenderRect("right" ),
-                eyeTranslation: this.vrDisplay.getEyeTranslation( "right" ),
-                recommendedFieldOfView: this.vrDisplay.getRecommendedEyeFieldOfView("right" )
-              }
-            };
-          }
-
-          setTrans( translations[0], this.vrParams.left.eyeTranslation );
-          setTrans( translations[1], this.vrParams.right.eyeTranslation );
-          viewports[0] = this.vrParams.left.renderRect;
-          viewports[1] = this.vrParams.right.renderRect;
-        }
-      }.bind( this ) );
-    }
-
-    if(this.ctrls.goVR){
-      checkForVR.call( this );
-    }
 
     //
     // gamepad input
@@ -939,6 +881,41 @@ Primrose.VRApplication = ( function () {
     ] );
 
     this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
+    
+    //
+    // VR input
+    //
+    this.vr = new Primrose.Input.VR( "vr" );
+
+    var DEBUG_VR = false,
+        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
+        viewports = [ ];
+
+    function setTrans ( m, t ) {
+      m.makeTranslation( t.x, t.y, t.z );
+    }
+
+    function checkForVR () {
+      var deviceIDs = Object.keys(this.vr.devices);
+      if(deviceIDs.length > 0){
+        this.ctrls.goVR.style.display = "inline-block";
+        this.vr.connect(deviceIDs[0]);
+        this.vrParams = this.vr.getParams();
+
+        setTrans( translations[0], this.vrParams.left.eyeTranslation );
+        setTrans( translations[1], this.vrParams.right.eyeTranslation );
+        viewports[0] = this.vrParams.left.renderRect;
+        viewports[1] = this.vrParams.right.renderRect;
+      }
+      else{
+        this.ctrls.goVR.style.display = "none";
+        setTimeout( checkForVR.bind( this ), 1000 );
+      }
+    }
+
+    if(this.ctrls.goVR){
+      checkForVR.call( this );
+    }
 
     //
     // restoring the options the user selected
@@ -1079,6 +1056,8 @@ Primrose.VRApplication = ( function () {
       this.lt = t;
       
       if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
+        this.pointer = makeBall.call(this, textured( sphere( 0.02, 4, 2 ), 0xff0000, true ), 1, 0.002);
+        this.camera.add(this.pointer.graphics);
         this.setSize( );
 
         if ( this.passthrough ) {
@@ -1158,7 +1137,7 @@ Primrose.VRApplication = ( function () {
     
     if(this.ctrls.goVR){
       this.ctrls.goVR.addEventListener( "click", function ( ) {
-        requestFullScreen( this.ctrls.frontBuffer, this.vrDisplay );
+        requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
         this.inVR = true;
         this.setSize();
       }.bind( this ) );
@@ -1300,25 +1279,23 @@ Primrose.VRApplication = ( function () {
     }
   };
 
-  VRApplication.prototype.resetPosition = function () {
+  VRApplication.prototype.zero = function () {
     this.currentUser.position.set( 0, 1, 0 );
     this.currentUser.velocity.set( 0, 0, 0 );
-  };
-
-  VRApplication.prototype.zero = function () {
-    if ( this.vrSensor ) {
-      this.vrSensor.resetSensor();
+    if(this.inVR){
+      this.vr.sensor.resetSensor();
     }
   };
 
   VRApplication.prototype.jump = function () {
     if ( this.onground ) {
-      this.currentUser.velocity.y += 10;
+      this.currentUser.velocity.y += 1;
       this.onground = false;
     }
   };
 
   var heading = 0,
+      pitch = 0,
       strafe,
       drive;
 
@@ -1334,15 +1311,24 @@ Primrose.VRApplication = ( function () {
     this.mouse.update( dt );
     this.gamepad.update( dt );
 
+    if(!this.inVR) {
+      pitch = this.gamepad.getValue("pitch") + 
+          this.mouse.getValue("pitch");
+    }
+
     if ( this.onground ) {
+      
+      heading = this.gamepad.getValue("heading") +
+          this.mouse.getValue("heading");
 
       strafe = this.keyboard.getValue( "strafeRight" ) +
           this.keyboard.getValue( "strafeLeft" ) +
           this.gamepad.getValue( "strafe" );
+      
       drive = this.keyboard.getValue( "driveBack" ) +
           this.keyboard.getValue( "driveForward" ) +
           this.gamepad.getValue( "drive" );
-
+      
       if ( strafe || drive ) {
         len = this.walkSpeed * Math.min( 1, 1 / Math.sqrt( drive * drive +
             strafe * strafe ) );
@@ -1356,12 +1342,24 @@ Primrose.VRApplication = ( function () {
       len = strafe * Math.cos( heading ) + drive * Math.sin( heading );
       drive = (drive * Math.cos( heading ) - strafe * Math.sin( heading )) * dt;
       strafe = len * dt;
-      this.currentUser.velocity.x = this.currentUser.velocity.x * 0.9 +
-          strafe * 0.1;
-      this.currentUser.velocity.z = this.currentUser.velocity.z * 0.9 +
-          drive * 0.1;
+      this.qPitch.setFromAxisAngle( RIGHT, pitch );
+      this.currentUser.velocity.x = strafe;
+      this.currentUser.velocity.z = drive;
       this.currentUser.quaternion.setFromAxisAngle( UP, heading );
+      this.currentUser.quaternion.multiply(this.qPitch);
     }
+    else{
+      this.currentUser.velocity.y -= this.options.gravity * dt;
+    }
+    
+    this.currentUser.position.add(this.currentUser.velocity);
+    if(!this.onground && this.currentUser.position.y < 0){
+      this.onground = true;
+      this.currentUser.position.y = 0;
+      this.currentUser.velocity.y = 0;
+    }
+    this.pointer.position.set(0, 0, -1);
+    this.pointer.velocity.set(0, 0, 0);
 
     //
     // do collision detection
@@ -1374,19 +1372,13 @@ Primrose.VRApplication = ( function () {
         obj.graphics.quaternion.copy( obj.quaternion );
       }
     }
-
-    this.currentUser.position.add(this.currentUser.velocity);
-
-    if(this.glove){
-      this.glove.readContacts( this.world.contacts );
-    }
     
     for ( j = 0; j < this.buttons.length; ++j ) {
       this.buttons[j].readContacts( this.world.contacts );
     }
 
-    if ( this.dragging ) {
-      this.pick( "move" );
+    if(this.glove){
+      this.glove.readContacts( this.world.contacts );
     }
 
     this.fire( "update", dt );
@@ -1398,7 +1390,7 @@ Primrose.VRApplication = ( function () {
     this.camera.position.copy( this.currentUser.position );
 
     if ( this.inVR ) {
-      var state = this.vrSensor.getState();
+      var state = this.vr.sensor.getState();
 
       if ( state.orientation ) {
         this.qRift.copy( state.orientation );
@@ -2938,8 +2930,7 @@ var reverse = ( function ( ) {
 ;/* global Primrose */
 
 Primrose.Input.ButtonAndAxis = ( function () {
-  function ButtonAndAxisInput ( name, commands, socket, oscope, offset,
-      axes ) {
+  function ButtonAndAxisInput ( name, commands, socket, oscope, offset, axes ) {
     this.offset = offset || 0;
     Primrose.NetworkedInput.call( this, name, commands, socket, oscope );
     this.inputState.axes = [ ];
@@ -4327,9 +4318,14 @@ Primrose.Input.Mouse = ( function () {
 
     this.readEvent = function ( event ) {
       if ( MouseInput.isPointerLocked() ) {
-        this.setMovement(
-            event.movementX || event.webkitMovementX || event.mozMovementX || 0,
-            event.movementY || event.webkitMovementY || event.mozMovementY || 0 );
+        var mx = event.movementX,
+            my = event.movementY;
+        
+        if(mx === undefined){
+          mx = event.webkitMovementX || event.mozMovementX || 0;
+          my = event.webkitMovementY || event.mozMovementY || 0;
+        }
+        this.setMovement(mx, my);
       }
       else {
         this.setLocation( event.clientX, event.clientY );
@@ -4706,19 +4702,22 @@ Primrose.Input.Touch = ( function () {
 ;/* global Primrose, HMDVRDevice, PositionSensorVRDevice */
 Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, elem, selectedID ) {
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null,
-        1,
-        VRInput.AXES );
-    this.devices = { };
+    if ( commands === undefined || commands === null ) {
+      commands = VRInput.AXES.map( function ( a ) {
+        return {
+          name: a,
+          axes: [ Primrose.Input.VR[a] ]
+        };
+      } );
+    }
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null, 1, VRInput.AXES );
+    this.devices = {};
     this.sensor = null;
     this.display = null;
     if ( navigator.getVRDevices ) {
-      navigator.getVRDevices()
-          .then( this.enumerateVRDevices.bind( this, elem,
-              selectedID ) );
+      navigator.getVRDevices().then( this.enumerateVRDevices.bind( this, elem, selectedID ) );
     } else if ( navigator.mozGetVRDevices ) {
-      navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem,
-          selectedID ) );
+      navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem, selectedID ) );
     }
   }
 
@@ -4735,35 +4734,48 @@ Primrose.Input.VR = ( function () {
   VRInput.prototype.update = function ( dt ) {
     if ( this.sensor ) {
       var state = this.sensor.getState();
+      
       if ( state.position ) {
         this.setAxis( "X", state.position.x );
         this.setAxis( "Y", state.position.y );
         this.setAxis( "Z", state.position.z );
       }
-      this.setAxis( "VX", state.linearVelocity.x );
-      this.setAxis( "VY", state.linearVelocity.y );
-      this.setAxis( "VZ", state.linearVelocity.z );
-      this.setAxis( "AX", state.linearAcceleration.x );
-      this.setAxis( "AY", state.linearAcceleration.y );
-      this.setAxis( "AZ", state.linearAcceleration.z );
+      
+      if(state.linearVelocity){
+        this.setAxis( "VX", state.linearVelocity.x );
+        this.setAxis( "VY", state.linearVelocity.y );
+        this.setAxis( "VZ", state.linearVelocity.z );
+      }
+      
+      if(state.linearAcceleration){
+        this.setAxis( "AX", state.linearAcceleration.x );
+        this.setAxis( "AY", state.linearAcceleration.y );
+        this.setAxis( "AZ", state.linearAcceleration.z );
+      }
+      
       if ( state.orientation ) {
         this.setAxis( "RX", state.orientation.x );
         this.setAxis( "RY", state.orientation.y );
         this.setAxis( "RZ", state.orientation.z );
         this.setAxis( "RW", state.orientation.w );
       }
-      this.setAxis( "RVX", state.angularVelocity.x );
-      this.setAxis( "RVY", state.angularVelocity.y );
-      this.setAxis( "RVZ", state.angularVelocity.z );
-      this.setAxis( "RAX", state.angularAcceleration.x );
-      this.setAxis( "RAY", state.angularAcceleration.y );
-      this.setAxis( "RAZ", state.angularAcceleration.z );
+      
+      if(state.angularVelocity){
+        this.setAxis( "RVX", state.angularVelocity.x );
+        this.setAxis( "RVY", state.angularVelocity.y );
+        this.setAxis( "RVZ", state.angularVelocity.z );
+      }
+      
+      if(state.angularAcceleration){
+        this.setAxis( "RAX", state.angularAcceleration.x );
+        this.setAxis( "RAY", state.angularAcceleration.y );
+        this.setAxis( "RAZ", state.angularAcceleration.z );
+      }
     }
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
   };
 
-  VRInput.prototype.enumerateVRDevices = function ( elem, selectedID,
-      devices ) {
+  VRInput.prototype.enumerateVRDevices = function ( elem, selectedID, devices ) {
     var id;
     for ( var i = 0; i < devices.length; ++i ) {
       var device = devices[i];
@@ -4783,12 +4795,14 @@ Primrose.Input.VR = ( function () {
       }
     }
 
-    for ( id in this.devices ) {
-      var option = document.createElement( "option" );
-      option.value = id;
-      option.innerHTML = this.devices[id].sensor.deviceName;
-      option.selected = ( selectedID === id );
-      elem.appendChild( option );
+    if ( elem ) {
+      for ( id in this.devices ) {
+        var option = document.createElement( "option" );
+        option.value = id;
+        option.innerHTML = this.devices[id].sensor.deviceName;
+        option.selected = ( selectedID === id );
+        elem.appendChild( option );
+      }
     }
 
     this.connect( selectedID );
@@ -4799,6 +4813,33 @@ Primrose.Input.VR = ( function () {
     if ( device ) {
       this.sensor = device.sensor;
       this.display = device.display;
+    }
+  };
+
+  VRInput.prototype.getParams = function () {
+    if ( this.display ) {
+      var params = null;
+      if ( this.display.getEyeParameters ) {
+        params = {
+          left: this.display.getEyeParameters( "left" ),
+          right: this.display.getEyeParameters( "right" )
+        };
+      }
+      else {
+        params = {
+          left: {
+            renderRect: this.display.getRecommendedEyeRenderRect( "left" ),
+            eyeTranslation: this.display.getEyeTranslation( "left" ),
+            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "left" )
+          },
+          right: {
+            renderRect: this.display.getRecommendedEyeRenderRect( "right" ),
+            eyeTranslation: this.display.getEyeTranslation( "right" ),
+            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "right" )
+          }
+        };
+      }
+      return params;
     }
   };
 
@@ -8926,8 +8967,10 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         strictSize = options.size,
         rowCache = {},
         lastLines = null,
-        lastMaxLineWidth = null,
-        lastScrollY = -1;
+        lastScrollY = -1,
+        lastScrollX = -1,
+        lastFrontCursorI = -1,
+        lastBackCursorI = -1;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -9024,8 +9067,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           h * self.character.height + 1 );
     }
 
-    function renderCanvasBackground ( tokenRows, frontCursor, backCursor,
-        gridBounds, scroll, focused ) {
+    function renderCanvasBackground ( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused ) {
       var minCursor = Primrose.Text.Cursor.min( frontCursor, backCursor ),
           maxCursor = Primrose.Text.Cursor.max( frontCursor, backCursor ),
           tokenFront = new Primrose.Text.Cursor(),
@@ -9096,99 +9138,99 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       bgfx.restore();
     }
 
-    function renderCanvasForeground ( tokenRows, lines, gridBounds, scroll ) {
+    function renderCanvasForeground ( tokenRows, gridBounds, scroll, lines ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
-          maxLineWidth = 0,
-          good = scroll.y === lastScrollY && lastLines !== null && lastLines.length === lines.length,
           lineOffsetY = Math.ceil( self.character.height * 0.2 ),
-          i,
-          wasGood = good;
+          i;
 
-      for ( i = 0; i < lines.length && good; ++i ) {
-        good = lastLines[i] === lines[i];
-      }
+      fgfx.clearRect( 0, 0, canvas.width, canvas.height );
+      fgfx.save();
+      fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
+      for ( var y = 0; y < tokenRows.length; ++y ) {
+        // draw the tokens on this row
+        var line = lines[y],
+            row = tokenRows[y],
+            drawn = false,
+            textY = ( y + 1 - scroll.y ) * self.character.height,
+            imageY = ( y - scroll.y ) * self.character.height + lineOffsetY;
 
-      if ( !good ) {
-        fgfx.clearRect( 0, 0, canvas.width, canvas.height );
-        fgfx.save();
-        fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
-        for ( var y = 0; y < tokenRows.length; ++y ) {
-          // draw the tokens on this row
-          var line = lines[y],
-              row = tokenRows[y],
-              drawn = false,
-              textY = (y + 1 - scroll.y) * self.character.height,
-              imageY = (y - scroll.y) * self.character.height + lineOffsetY;
+        for ( i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
 
-          for ( i = 0; i < row.length; ++i ) {
-            var t = row[i];
-            tokenBack.x += t.value.length;
-            tokenBack.i += t.value.length;
+          // skip drawing tokens that aren't in view
+          if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
+              scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
+              gridBounds.width ) {
 
-            // skip drawing tokens that aren't in view
-            if ( scroll.y <= y && y < scroll.y + gridBounds.height &&
-                scroll.x <= tokenBack.x && tokenFront.x < scroll.x +
-                gridBounds.width ) {
-
-              // draw the text
-              if ( rowCache[line] !== undefined ) {
-                if ( i === 0 ) {
-                  fgfx.putImageData( rowCache[line], 0, imageY );
-                }
-              }
-              else {
-                var style = theme[t.type] || {};
-                var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
-                    " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
-                    " " + self.character.height + "px " + theme.fontFamily;
-                fgfx.font = font.trim();
-                fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
-                fgfx.fillText(
-                    t.value,
-                    tokenFront.x * self.character.width,
-                    textY );
-                drawn = true;
+            // draw the text
+            if ( rowCache[line] !== undefined ) {
+              if ( i === 0 ) {
+                fgfx.putImageData( rowCache[line], 0, imageY );
               }
             }
-
-            tokenFront.copy( tokenBack );
+            else {
+              var style = theme[t.type] || {};
+              var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
+                  " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
+                  " " + self.character.height + "px " + theme.fontFamily;
+              fgfx.font = font.trim();
+              fgfx.fillStyle = style.foreColor || theme.regular.foreColor;
+              fgfx.fillText(
+                  t.value,
+                  tokenFront.x * self.character.width,
+                  textY );
+              drawn = true;
+            }
           }
 
-          maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
-          tokenFront.x = 0;
-          ++tokenFront.y;
-          tokenBack.copy( tokenFront );
-          if ( drawn && rowCache[line] === undefined ) {
-            rowCache[line] = fgfx.getImageData(
-                0, 
-                imageY,
-                fgCanvas.width, 
-                self.character.height );
-          }
+          tokenFront.copy( tokenBack );
         }
-        fgfx.restore();
-        lastMaxLineWidth = maxLineWidth;
-        lastLines = lines;
-        lastScrollY = scroll.y;
-        return maxLineWidth;
+
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+        if ( drawn && rowCache[line] === undefined ) {
+          rowCache[line] = fgfx.getImageData(
+              0,
+              imageY,
+              fgCanvas.width,
+              self.character.height );
+        }
       }
-      else {
-        return lastMaxLineWidth;
-      }
+      fgfx.restore();
     }
 
     function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
-        showScrollBars, wordWrap, lineCountWidth, maxLineWidth ) {
+        showScrollBars, wordWrap, lineCountWidth ) {
+
+      var tokenFront = new Primrose.Text.Cursor(),
+          tokenBack = new Primrose.Text.Cursor(),
+          maxLineWidth = 0,
+          i;
+
       tgfx.clearRect( 0, 0, canvas.width, canvas.height );
       tgfx.save();
       tgfx.translate( 0, -scroll.y * self.character.height );
-      if ( showLineNumbers ) {
-        for ( var y = scroll.y,
-            lastLine = -1; y < scroll.y + gridBounds.height && y <
-            tokenRows.length; ++y ) {
+      for ( var y = 0, lastLine = -1; y < tokenRows.length; ++y ) {
+        var row = tokenRows[y];
+
+        for ( i = 0; i < row.length; ++i ) {
+          var t = row[i];
+          tokenBack.x += t.value.length;
+          tokenBack.i += t.value.length;
+          tokenFront.copy( tokenBack );
+        }
+
+        maxLineWidth = Math.max( maxLineWidth, tokenBack.x );
+        tokenFront.x = 0;
+        ++tokenFront.y;
+        tokenBack.copy( tokenFront );
+
+        if ( showLineNumbers && scroll.y <= y && y < scroll.y + gridBounds.height ) {
           // draw the tokens on this row
-          var row = tokenRows[y];
           // be able to draw brand-new rows that don't have any tokens yet
           var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
           // draw the left gutter
@@ -9257,21 +9299,37 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         focused, showLineNumbers, showScrollBars, wordWrap,
         lineCountWidth ) {
       if ( theme ) {
-        var maxLineWidth = 0;
+        var textUnchanged = scroll.y === lastScrollY &&
+            scroll.x === lastScrollX &&
+            lastLines !== null &&
+            lastLines.length === lines.length,
+            cursorUnchanged = frontCursor.i === lastFrontCursorI && lastBackCursorI === backCursor.i;
+        for ( var i = 0; i < lines.length && textUnchanged; ++i ) {
+          textUnchanged = lastLines[i] === lines[i];
+        }
+        
+        if ( !textUnchanged || !cursorUnchanged ) {
+          renderCanvasBackground( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused );
+          
+          if(!textUnchanged){
+            renderCanvasForeground( tokenRows, gridBounds, scroll, lines );
+            renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth );
+          }
 
-        renderCanvasBackground( tokenRows, frontCursor, backCursor, gridBounds,
-            scroll, focused );
-        maxLineWidth = renderCanvasForeground( tokenRows, lines, gridBounds, scroll );
-        renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers,
-            showScrollBars, wordWrap, lineCountWidth, maxLineWidth );
-
-        gfx.clearRect( 0, 0, canvas.width, canvas.height );
-        gfx.drawImage( bgCanvas, 0, 0 );
-        gfx.drawImage( fgCanvas, 0, 0 );
-        gfx.drawImage( trimCanvas, 0, 0 );
-
-        if ( texture ) {
-          texture.needsUpdate = true;
+          gfx.clearRect( 0, 0, canvas.width, canvas.height );
+          gfx.drawImage( bgCanvas, 0, 0 );
+          gfx.drawImage( fgCanvas, 0, 0 );
+          gfx.drawImage( trimCanvas, 0, 0 );
+          
+          if ( texture ) {
+            texture.needsUpdate = true;
+          }
+          
+          lastLines = lines;
+          lastScrollY = scroll.y;
+          lastScrollX = scroll.x;
+          lastFrontCursorI = frontCursor.i;
+          lastBackCursorI = backCursor.i;
         }
       }
     };
@@ -9861,5 +9919,5 @@ Primrose.Text.Themes.Default = ( function ( ) {
     }
   };
 } )();
-Primrose.VERSION = "v0.16.3";
-console.log("Using Primrose v0.16.3. Find out more at http://www.primroseeditor.com");
+Primrose.VERSION = "v0.16.4";
+console.log("Using Primrose v0.16.4. Find out more at http://www.primroseeditor.com");
