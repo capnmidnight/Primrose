@@ -379,7 +379,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           gfx.drawImage( trimCanvas, 0, 0 );
           
           if ( texture ) {
-            console.log("updated texture");
             texture.needsUpdate = true;
           }
           
