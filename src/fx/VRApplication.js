@@ -67,9 +67,8 @@ Primrose.VRApplication = ( function () {
       { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D, Primrose.Input.Keyboard.RIGHTARROW ] },
       { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W, -Primrose.Input.Keyboard.UPARROW ] },
       { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S, Primrose.Input.Keyboard.DOWNARROW ] },
-      { name: "zeroSensor", buttons: [ Primrose.Input.Keyboard.Z ], commandDown: this.zero.bind( this ), dt: 1 },
       { name: "jump", buttons: [ Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5 },
-      { name: "resetPosition", buttons: [ Primrose.Input.Keyboard.P ], commandUp: this.resetPosition.bind( this ) }
+      { name: "zero", buttons: [ Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this ) }
     ] );
 
     //
@@ -492,13 +491,10 @@ Primrose.VRApplication = ( function () {
     }
   };
 
-  VRApplication.prototype.resetPosition = function () {
+  VRApplication.prototype.zero = function () {
     this.currentUser.position.set( 0, 1, 0 );
     this.currentUser.velocity.set( 0, 0, 0 );
-  };
-
-  VRApplication.prototype.zero = function () {
-    if ( this.vr.sensor ) {
+    if(this.inVR){
       this.vr.sensor.resetSensor();
     }
   };
