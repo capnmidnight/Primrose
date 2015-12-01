@@ -306,13 +306,15 @@ Primrose.VRApplication = ( function () {
     if(!this.options.sceneModel){
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
+      this.scene.add(this.camera);
     }
     else {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         this.scene = sceneGraph;
         this.scene.traverse( function ( obj ) {
+          console.log(obj.name, obj.isSolid, obj.isGround);
           if ( obj.isSolid ) {
-            if ( obj.name === "Terrain" || obj.name.indexOf( "Plane" ) === 0 ) {
+            if ( obj.isGround ) {
               makePlane.call( this, obj );
             }
             else {
@@ -362,8 +364,9 @@ Primrose.VRApplication = ( function () {
     useLeap: false,
     avatarHeight: 1.75,
     walkSpeed: 3,
-    gravity: 9.8, // the acceleration applied to falling objects
-    backgroundColor: 0x000000, // the color that WebGL clears the background with before drawing    
+    gravity: 0.98, // the acceleration applied to falling objects
+    jumpHeight: 0.25,
+    backgroundColor: 0xafbfff, // the color that WebGL clears the background with before drawing    
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
@@ -501,21 +504,20 @@ Primrose.VRApplication = ( function () {
 
   VRApplication.prototype.jump = function () {
     if ( this.onground ) {
-      this.currentUser.velocity.y += 1;
+      this.currentUser.velocity.y += this.options.jumpHeight;
       this.onground = false;
     }
   };
-
-  var heading = 0,
-      pitch = 0,
-      strafe,
-      drive;
 
   VRApplication.prototype.animate = function ( t ) {
     requestAnimationFrame( this.animate );
     var dt = ( t - this.lt ) * 0.001;
     this.lt = t;
-    var len,
+    var heading = 0,
+        pitch = 0,
+        strafe,
+        drive,
+        len,
         j,
         c;
 

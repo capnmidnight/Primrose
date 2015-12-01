@@ -5,19 +5,10 @@ Primrose.ModelLoader = ( function () {
     return function () {
     };
   }
-  var COLLADA, JSON;
-  
-  if ( THREE.ColladaLoader ) {
-    COLLADA = new THREE.ColladaLoader();
-    COLLADA.options.convertUpAxis = true;
-  }
+  var JSON;
 
   if ( THREE.ObjectLoader ) {
     JSON = new THREE.ObjectLoader();
-  }
-
-  function fixColladaScene ( collada ) {
-    return collada.scene;
   }
 
   function fixJSONScene ( json ) {
@@ -48,16 +39,20 @@ Primrose.ModelLoader = ( function () {
 
   var propertyTests = {
     isButton: function ( obj ) {
-      return ( obj.material && obj.material.name.match( /^button\d+$/ ) );
+      return obj.material && obj.material.name.match( /^button\d+$/ );
     },
     isSolid: function ( obj ) {
       return !obj.name.match( /^(water|sky)/ );
+    },
+    isGround: function ( obj ) {
+      return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
     }
   };
 
   function setProperties ( object ) {
     object.traverse( function ( obj ) {
       if ( obj instanceof THREE.Mesh ) {
+        console.log(obj);
         for ( var prop in propertyTests ) {
           obj[prop] = obj[prop] || propertyTests[prop]( obj );
         }
@@ -110,17 +105,7 @@ Primrose.ModelLoader = ( function () {
       }
     };
 
-    if ( /\.dae$/.test(src) ) {
-      if ( !COLLADA || true ) {
-        console.error( "COLLADA seems to be broken right now" );
-      }
-      else {
-        COLLADA.load( src, function ( collada ) {
-          done( fixColladaScene( collada ) );
-        } );
-      }
-    }
-    else if ( /\.json$/.test(src) ) {
+    if ( /\.json$/.test(src) ) {
       if ( !JSON ) {
         console.error( "JSON seems to be broken right now" );
       }

@@ -5,8 +5,7 @@ function StartDemo () {
   var app = new Primrose.VRApplication(
       "music demo",
       {
-        backgroundColor: 0xafbfff,
-        sceneModel: "../models/scene2.json",
+        sceneModel: "../models/scene3.json",
         button: {
           model: "../models/smallbutton.json",
           options: {
@@ -26,14 +25,13 @@ function StartDemo () {
   var noteDown = [ ];
   var btns = [ ];
   app.addEventListener( "ready", function () {
-    document.body.style.fontFamily = Primrose.SYS_FONTS;
     var n = 8;
     var d = ( n - 1 ) / 2;
     for ( var i = 0; i < n; ++i ) {
       noteDown[i] = false;
       btns.push( app.makeButton() );
       var x = ( i - d ) * 0.25;
-      btns[i].moveBy( x, 0.5, -1.5 * Math.cos( x ) + 1 );
+      btns[i].moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
       btns[i].addEventListener( "click", play.bind( this, i ) );
     }
   }.bind( this ) );
