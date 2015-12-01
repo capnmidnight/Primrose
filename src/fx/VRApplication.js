@@ -299,26 +299,27 @@ Primrose.VRApplication = ( function () {
     if(!this.options.sceneModel){
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
+      this.scene.Camera = this.camera;
       this.scene.add(this.camera);
     }
     else {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         this.scene = sceneGraph;
-        this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
-        this.scene.add(this.camera);
-        this.currentUser.isSolid = true;
-        this.currentUser.geometry.computeBoundingSphere();
-        this.scene.add(this.currentUser);
-        this.scene.traverse( function ( obj ) {
-          if ( obj.isSolid ) {
-            if ( obj.isGround ) {
-              makePlane.call( this, obj );
+        this.camera = this.scene.Camera;
+        this.currentUser.position.copy(this.camera.position);
+        this.currentUser.position.y -= this.options.avatarHeight;
+        if(!this.options.disablePhysics){
+          this.scene.traverse( function ( obj ) {
+            if ( obj.isSolid ) {
+              if ( obj.isGround ) {
+                makePlane.call( this, obj );
+              }
+              else {
+                makeBall.call( this, obj, 1 );
+              }
             }
-            else {
-              makeBall.call( this, obj, 1 );
-            }
-          }
-        }.bind( this ) );
+          }.bind( this ) );
+        }
       }.bind( this ) );
     }
 
@@ -457,6 +458,7 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.setSize = function ( ) {
+    console.log("setting size");
     var styleWidth = this.ctrls.outputContainer.clientWidth,
         styleHeight = this.ctrls.outputContainer.clientHeight,
         ratio = window.devicePixelRatio || 1,
@@ -524,7 +526,7 @@ Primrose.VRApplication = ( function () {
 
     if(!this.inVR) {
       pitch = this.gamepad.getValue("pitch") + 
-          this.mouse.getValue("pitch");
+          this.mouse.getValue("pitch") ;
     }
 
     if ( this.onground ) {
