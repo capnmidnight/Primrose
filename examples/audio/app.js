@@ -1,8 +1,8 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
+var app;
 function StartDemo () {
 
-  THREE.ImageUtils.crossOrigin = "anonymous";
-  var app = new Primrose.VRApplication(
+  app = new Primrose.VRApplication(
       "music demo",
       {
         sceneModel: "../models/scene3.json",
