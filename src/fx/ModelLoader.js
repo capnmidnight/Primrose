@@ -52,7 +52,6 @@ Primrose.ModelLoader = ( function () {
   function setProperties ( object ) {
     object.traverse( function ( obj ) {
       if ( obj instanceof THREE.Mesh ) {
-        console.log(obj);
         for ( var prop in propertyTests ) {
           obj[prop] = obj[prop] || propertyTests[prop]( obj );
         }
