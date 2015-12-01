@@ -110,10 +110,10 @@ Primrose.Input.Gamepad = ( function () {
     };
 
     this.addEventListener = function ( event, handler, bubbles ) {
+      if ( listeners[event] ) {
+        listeners[event].push( handler );
+      }
       if ( event === "gamepadconnected" ) {
-        if ( listeners[event] ) {
-          add( listeners[event], handler );
-        }
         connectedGamepads.forEach( onConnected );
       }
     };
@@ -123,7 +123,6 @@ Primrose.Input.Gamepad = ( function () {
         remove( listeners[event], handler );
       }
     };
-
 
     try {
       this.update( 0 );
