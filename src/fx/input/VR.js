@@ -9,15 +9,104 @@ Primrose.Input.VR = ( function () {
         };
       } );
     }
+
     Primrose.Input.ButtonAndAxis.call( this, name, commands, null, null, 1, VRInput.AXES );
+
+    var listeners = {
+      vrdeviceconnected: [ ],
+      vrdevicelost: [ ]
+    };
+
+
+    this.addEventListener = function ( event, handler, bubbles ) {
+      if ( listeners[event] ) {
+        listeners[event].push( handler );
+      }
+      if ( event === "vrdeviceconnected" ) {
+        Object.keys( this.devices ).forEach( handler );
+      }
+    };
+
+    function sendAll ( arr, id ) {
+      for ( var i = 0; i < arr.length; ++i ) {
+        arr[i]( id );
+      }
+    }
+
+    function onConnected ( id ) {
+      sendAll( listeners.vrdeviceconnected, id );
+    }
+
+    function onDisconnected ( id ) {
+      sendAll( listeners.vrdevicelost, id );
+    }
+
+    this.removeEventListener = function ( event, handler, bubbles ) {
+      if ( listeners[event] ) {
+        remove( listeners[event], handler );
+      }
+    };
+
     this.devices = {};
     this.sensor = null;
     this.display = null;
-    if ( navigator.getVRDevices ) {
-      navigator.getVRDevices().then( this.enumerateVRDevices.bind( this, elem, selectedID ) );
-    } else if ( navigator.mozGetVRDevices ) {
-      navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem, selectedID ) );
+    function checkForVRDevices () {
+      if ( navigator.getVRDevices ) {
+        navigator.getVRDevices().then( this.enumerateVRDevices.bind( this, elem, selectedID ) );
+      } else if ( navigator.mozGetVRDevices ) {
+        navigator.mozGetVRDevices( this.enumerateVRDevices.bind( this, elem, selectedID ) );
+      }
+      else{
+        console.log("Your browser doesn't have WebVR capability. Check out http://mozvr.com/");
+      }
     }
+
+    this.enumerateVRDevices = function ( elem, selectedID, devices ) {
+      var id,
+          newDevices = [],
+          lostDevices = Object.keys(this.devices);
+      
+      for ( var i = 0; i < devices.length; ++i ) {
+        var device = devices[i];
+        id = device.hardwareUnitId;
+        if ( !this.devices[id] ) {
+          newDevices.push(id);
+          var j = lostDevices.indexOf(id);
+          if(j >= 0){
+            lostDevices.splice(j, 1);
+          }
+          this.devices[id] = {
+            display: null,
+            sensor: null
+          };
+        }
+        var vr = this.devices[id];
+        if ( device instanceof HMDVRDevice ) {
+          vr.display = device;
+        }
+        else if ( devices[i] instanceof PositionSensorVRDevice ) {
+          vr.sensor = device;
+        }
+      }
+      
+      newDevices.forEach(onConnected);
+      lostDevices.forEach(onDisconnected);
+
+      if ( elem ) {
+        elem.innerHTML = "";
+        for ( id in this.devices ) {
+          var option = document.createElement( "option" );
+          option.value = id;
+          option.innerHTML = this.devices[id].sensor.deviceName;
+          option.selected = ( selectedID === id );
+          elem.appendChild( option );
+        }
+      }
+
+      this.connect( selectedID );
+    };
+    
+    checkForVRDevices.call(this);
   }
 
   VRInput.AXES = [
@@ -33,78 +122,45 @@ Primrose.Input.VR = ( function () {
   VRInput.prototype.update = function ( dt ) {
     if ( this.sensor ) {
       var state = this.sensor.getState();
-      
+
       if ( state.position ) {
         this.setAxis( "X", state.position.x );
         this.setAxis( "Y", state.position.y );
         this.setAxis( "Z", state.position.z );
       }
-      
-      if(state.linearVelocity){
+
+      if ( state.linearVelocity ) {
         this.setAxis( "VX", state.linearVelocity.x );
         this.setAxis( "VY", state.linearVelocity.y );
         this.setAxis( "VZ", state.linearVelocity.z );
       }
-      
-      if(state.linearAcceleration){
+
+      if ( state.linearAcceleration ) {
         this.setAxis( "AX", state.linearAcceleration.x );
         this.setAxis( "AY", state.linearAcceleration.y );
         this.setAxis( "AZ", state.linearAcceleration.z );
       }
-      
+
       if ( state.orientation ) {
         this.setAxis( "RX", state.orientation.x );
         this.setAxis( "RY", state.orientation.y );
         this.setAxis( "RZ", state.orientation.z );
         this.setAxis( "RW", state.orientation.w );
       }
-      
-      if(state.angularVelocity){
+
+      if ( state.angularVelocity ) {
         this.setAxis( "RVX", state.angularVelocity.x );
         this.setAxis( "RVY", state.angularVelocity.y );
         this.setAxis( "RVZ", state.angularVelocity.z );
       }
-      
-      if(state.angularAcceleration){
+
+      if ( state.angularAcceleration ) {
         this.setAxis( "RAX", state.angularAcceleration.x );
         this.setAxis( "RAY", state.angularAcceleration.y );
         this.setAxis( "RAZ", state.angularAcceleration.z );
       }
     }
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
-  };
-
-  VRInput.prototype.enumerateVRDevices = function ( elem, selectedID, devices ) {
-    var id;
-    for ( var i = 0; i < devices.length; ++i ) {
-      var device = devices[i];
-      id = device.hardwareUnitId;
-      if ( !this.devices[id] ) {
-        this.devices[id] = {
-          display: null,
-          sensor: null
-        };
-      }
-      var vr = this.devices[id];
-      if ( device instanceof HMDVRDevice ) {
-        vr.display = device;
-      }
-      else if ( devices[i] instanceof PositionSensorVRDevice ) {
-        vr.sensor = device;
-      }
-    }
-
-    if ( elem ) {
-      for ( id in this.devices ) {
-        var option = document.createElement( "option" );
-        option.value = id;
-        option.innerHTML = this.devices[id].sensor.deviceName;
-        option.selected = ( selectedID === id );
-        elem.appendChild( option );
-      }
-    }
-
-    this.connect( selectedID );
   };
 
   VRInput.prototype.connect = function ( selectedID ) {

@@ -8,9 +8,6 @@ Primrose.VRApplication = ( function () {
 
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
-   `avatarModel` - the model to use for players in the game, in THREE JOSON format
-   `clickSound` - the sound that plays when the user types
-   `ambientSound` - background hum or music
    `options` - optional values to override defaults
    | `avatarHeight` - the offset from the ground at which to place the camera
    | `walkSpeed` - how quickly the avatar moves across the ground
@@ -58,6 +55,7 @@ Primrose.VRApplication = ( function () {
     this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D();
     this.music = new Primrose.Output.Music(this.audio.context);
+    this.temp = new THREE.Matrix4();
 
     //
     // keyboard input
@@ -91,23 +89,12 @@ Primrose.VRApplication = ( function () {
       { name: "dheading", commands: [ "heading" ], delta: true },
       { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ] );
-
     this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
     
     //
     // VR input
     //
-    this.vr = new Primrose.Input.VR( "vr" );
-
-    var DEBUG_VR = false,
-        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-        viewports = [ ];
-
-    function setTrans ( m, t ) {
-      m.makeTranslation( t.x, t.y, t.z );
-    }
-
-    function checkForVR () {
+    this.connectVR = function(id){
       var deviceIDs = Object.keys(this.vr.devices);
       if(deviceIDs.length > 0){
         this.ctrls.goVR.style.display = "inline-block";
@@ -121,12 +108,18 @@ Primrose.VRApplication = ( function () {
       }
       else{
         this.ctrls.goVR.style.display = "none";
-        setTimeout( checkForVR.bind( this ), 1000 );
       }
-    }
+    };
+    this.vr = new Primrose.Input.VR( "vr" );
+    this.vr.addEventListener("vrdeviceconnected", this.connectVR.bind(this), false);
+    this.vr.addEventListener("vrdevicelost", this.connectVR.bind(this), false);
 
-    if(this.ctrls.goVR){
-      checkForVR.call( this );
+    var DEBUG_VR = false,
+        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
+        viewports = [ ];
+
+    function setTrans ( m, t ) {
+      m.makeTranslation( t.x, t.y, t.z );
     }
 
     //
@@ -269,14 +262,13 @@ Primrose.VRApplication = ( function () {
       
       if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
         this.pointer = makeBall.call(this, textured( sphere( 0.02, 4, 2 ), 0xff0000, true ), 1, 0.002);
-        this.camera.add(this.pointer.graphics);
+        this.scene.add(this.pointer.graphics);
         this.setSize( );
 
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
-
-        this.animate = this.animate.bind( this );
+        
         if(this.glove){
           this.glove.setEnvironment({
             scene: this.scene,
@@ -292,6 +284,7 @@ Primrose.VRApplication = ( function () {
         }
 
         this.fire( "ready" );
+        this.animate = this.animate.bind( this );
         requestAnimationFrame( this.animate );
       }
       else {
@@ -311,8 +304,12 @@ Primrose.VRApplication = ( function () {
     else {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         this.scene = sceneGraph;
+        this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, this.options.drawDistance);
+        this.scene.add(this.camera);
+        this.currentUser.isSolid = true;
+        this.currentUser.geometry.computeBoundingSphere();
+        this.scene.add(this.currentUser);
         this.scene.traverse( function ( obj ) {
-          console.log(obj.name, obj.isSolid, obj.isGround);
           if ( obj.isSolid ) {
             if ( obj.isGround ) {
               makePlane.call( this, obj );
@@ -322,7 +319,6 @@ Primrose.VRApplication = ( function () {
             }
           }
         }.bind( this ) );
-        this.camera = this.scene.Camera;
       }.bind( this ) );
     }
 
@@ -495,7 +491,7 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.zero = function () {
-    this.currentUser.position.set( 0, 1, 0 );
+    this.currentUser.position.set( 0, 0, 0 );
     this.currentUser.velocity.set( 0, 0, 0 );
     if(this.inVR){
       this.vr.sensor.resetSensor();
@@ -524,6 +520,7 @@ Primrose.VRApplication = ( function () {
     this.keyboard.update( dt );
     this.mouse.update( dt );
     this.gamepad.update( dt );
+    this.vr.update( dt );
 
     if(!this.inVR) {
       pitch = this.gamepad.getValue("pitch") + 
@@ -572,7 +569,15 @@ Primrose.VRApplication = ( function () {
       this.currentUser.position.y = 0;
       this.currentUser.velocity.y = 0;
     }
-    this.pointer.position.set(0, 0, -1);
+    this.pointer.matrixAutoUpdate = false;
+    this.pointer.graphics.matrix.identity();
+    this.temp.makeRotationY(this.heading);
+    this.pointer.graphics.matrix.multiply(this.temp);
+    this.temp.makeRotationZ(this.pitch);
+    this.pointer.graphics.matrix.multiply(this.temp);
+    this.temp.makeTranslation(0, 0, -1);
+    this.pointer.graphics.matrix.multiply(this.temp);
+    
     this.pointer.velocity.set(0, 0, 0);
 
     //
