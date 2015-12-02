@@ -34,15 +34,15 @@
   text-shadow: 1px 1px 5px rgb(13, 54, 74);
 }
 
-#menu > .button{
+#menu > ul > li > a.button{
   text-align: left;
 }
 
-#menu > .selected.button{
+#menu > ul > li > a.selected.button{
   background-color: #B3C2D7;
 }
 
-#menu > .button::after{
+#menu > ul > li > a.button::after{
   content: " ";
   float: right;
   width: 16px;
@@ -50,7 +50,7 @@
   background-color: #53698B;
 }
 
-#menu > .selected.button::after{
+#menu > ul > li > a.selected.button::after{
   background-color: #ffffff;
   box-shadow: 2px 2px 5px #24344C;
   margin-right: 3px;

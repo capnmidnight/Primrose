@@ -236,7 +236,6 @@ function PrimroseDemo () {
         editor = makeEditor( scene, pickingScene, "textEditor",
             1, 1, 0, 0, 6, 0, 0, 0,
             {
-              keyEventSource: window,
               tokenizer: Primrose.Text.Grammars.JavaScript,
               file: src
             } );
@@ -256,7 +255,7 @@ function PrimroseDemo () {
     back.generateMipMaps = false;
 
     light.position.set( 5, 5, 5 );
-    position.set( 0, 0, 8 );
+    position.set( 0, 0, 7 );
 
     scene.add( sky );
     scene.add( light );
