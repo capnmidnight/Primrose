@@ -3,60 +3,31 @@ function StartDemo () {
   app = new Primrose.VRApplication(
       "Codevember", {
         disablePhysics: true,
-        sceneModel: "../models/scene4.json",
-        avatarHeight: 0
+        sceneModel: "../models/scene.json"
       }
   );
 
   app.addEventListener( "ready", function () {
-    with(app.scene){
-      Light1.intensity *= 2;
-      Light2.intensity *= 2;
-      Light3.intensity *= 2;
-      Light1.distance *= 2;
-      Light2.distance *= 2;
-      Light3.distance *= 2;
-      Text.material.emissive.setRGB(1, 1, 1);
-      remove(app.pointer.graphics);
-    }
+//    app.scene.Light1.intensity *= 2;
+//    app.scene.Light1.distance *= 2;
+//    app.scene.Light2.intensity *= 2;
+//    app.scene.Light2.distance *= 2;
+//    app.scene.Light3.intensity *= 2;
+//    app.scene.Light3.distance *= 2;
+//    app.scene.Ground.material.shading = THREE.FlatShading;
+//    app.scene.Ground.material.needsUpdate = true;
+//    app.scene.Text.material.emissive.setRGB(1, 1, 1);
+//    app.scene.remove(app.pointer.graphics);
+app.currentUser.position.x = 4;
+app.currentUser.position.y = 0;
+app.currentUser.position.z = 7;
   }.bind( this ) );
 
   var t = 0;
   app.addEventListener( "update", function ( dt ) {
     t += dt * 0.001;
-    app.scene.Ground.rotation.x = t * 100;
+    //app.scene.Ground.rotation.x = t * 100;
   }.bind( this ) );
 
   app.start();
-
-  function isFullScreenMode () {
-    var value = ( document.fullscreenElement ||
-        document.mozFullScreenElement ||
-        document.webkitFullscreenElement ||
-        document.msFullscreenElement );
-    return value;
-  }
-
-  function nothing () {
-  }
-
-  document.getElementById( "frontBuffer" )
-      .addEventListener( "mousedown", function () {
-        if ( !isFullScreenMode() ) {
-          if ( this.webkitRequestFullscreen ) {
-            this.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
-          } else {
-            ( this.requestFullscreen ||
-                this.mozRequestFullScreen ||
-                this.msRequestFullscreen ||
-                nothing )();
-          }
-
-          ( window.requestPointerLock ||
-              window.webkitRequestPointerLock ||
-              window.mozRequestPointerLock ||
-              nothing )();
-        }
-      }, false );
-
 }

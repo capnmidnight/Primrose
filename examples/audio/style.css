@@ -127,12 +127,15 @@ a:visited{
   color: rgb(255, 204, 110);
 }
 
-#outputContainer, #frontBuffer{
+#frontBuffer{
   position: fixed;
-  top: 0;
-  box-sizing: border-box;
-  height: 100%;
   width: 100%;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 canvas{
