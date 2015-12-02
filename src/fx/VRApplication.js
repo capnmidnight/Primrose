@@ -1,4 +1,4 @@
-/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen */
+/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode */
 Primrose.VRApplication = ( function () {
   if(typeof(THREE) === "undefined"){
     return function(){};
@@ -339,19 +339,17 @@ Primrose.VRApplication = ( function () {
     this.currentUser = new THREE.Object3D();
     this.currentUser.velocity = new THREE.Vector3();
 
-    if(this.ctrls.goRegular){
-      this.ctrls.goRegular.addEventListener( "click", function () {
-        requestFullScreen( this.ctrls.frontBuffer );
-        this.setSize();
-      }.bind( this ) );
+    if(this.options.disableAutoFullScreen){
+      if(this.ctrls.goRegular){
+        this.ctrls.goRegular.addEventListener( "click", this.goFullScreen.bind( this ), false );
+      }
+
+      if(this.ctrls.goVR){
+        this.ctrls.goVR.addEventListener( "click", this.goFullScreen.bind( this ), false );
+      }
     }
-    
-    if(this.ctrls.goVR){
-      this.ctrls.goVR.addEventListener( "click", function ( ) {
-        requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
-        this.inVR = true;
-        this.setSize();
-      }.bind( this ) );
+    else{
+      window.addEventListener("mousedown", this.goFullScreen.bind(this), false);
     }
   }
 
@@ -367,6 +365,18 @@ Primrose.VRApplication = ( function () {
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
+  };
+  
+  VRApplication.prototype.goFullScreen = function(){
+    if(!isFullScreenMode()){
+      if(this.vr.display){
+        requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
+        this.inVR = true;      
+      }
+      else{      
+        requestFullScreen( this.ctrls.frontBuffer );
+      }
+    }
   };
 
   VRApplication.prototype.addEventListener = function ( event, thunk ) {
@@ -458,14 +468,15 @@ Primrose.VRApplication = ( function () {
   };
 
   VRApplication.prototype.setSize = function ( ) {
-    console.log("setting size");
-    var styleWidth = this.ctrls.outputContainer.clientWidth,
-        styleHeight = this.ctrls.outputContainer.clientHeight,
+    var bounds = this.ctrls.frontBuffer.getBoundingClientRect(),
+        styleWidth = bounds.width,
+        styleHeight = bounds.height,
         ratio = window.devicePixelRatio || 1,
         fieldOfView = 75,
         canvasWidth = styleWidth * ratio,
         canvasHeight = styleHeight * ratio,
         aspectWidth = canvasWidth;
+    
     if ( this.inVR ) {
       canvasWidth = this.vrParams.left.renderRect.width +
           this.vrParams.right.renderRect.width;
@@ -475,8 +486,6 @@ Primrose.VRApplication = ( function () {
       fieldOfView = ( this.vrParams.left.recommendedFieldOfView.leftDegrees +
           this.vrParams.left.recommendedFieldOfView.rightDegrees );
     }
-    this.renderer.domElement.style.width = px( styleWidth );
-    this.renderer.domElement.style.height = px( styleHeight );
     this.renderer.domElement.width = canvasWidth;
     this.renderer.domElement.height = canvasHeight;
     this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
