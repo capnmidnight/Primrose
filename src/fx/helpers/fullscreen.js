@@ -29,16 +29,6 @@ function requestFullScreen ( elem, vrDisplay ) {
   else if ( elem.msRequestFullscreen ) {
     elem.msRequestFullscreen();
   }
-
-  if ( elem.requestPointerLock ) {
-    elem.requestPointerLock();
-  }
-  else if ( elem.webkitRequestPointerLock ) {
-    elem.webkitRequestPointerLock();
-  }
-  else if ( elem.mozRequestPointerLock ) {
-    elem.mozRequestPointerLock();
-  }
 }
 
 function exitFullScreen () {
@@ -96,7 +86,17 @@ function isPointerLocked () {
       document.mozPointerLockElement );
 }
 
-var requestPointerLock = ( document.documentElement.requestPointerLock ||
-    document.documentElement.webkitRequestPointerLock ||
-    document.documentElement.mozRequestPointerLock || function () {
-    } ).bind( document.documentElement );
+function requestPointerLock ( elem ) {
+  if ( !elem ) {
+    elem = document.documentElement;
+  }
+  if ( elem.requestPointerLock ) {
+    elem.requestPointerLock();
+  }
+  else if ( elem.webkitRequestPointerLock ) {
+    elem.webkitRequestPointerLock();
+  }
+  else if ( elem.mozRequestPointerLock ) {
+    elem.mozRequestPointerLock();
+  }
+}

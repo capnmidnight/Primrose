@@ -56,6 +56,7 @@ Primrose.VRApplication = ( function () {
     this.audio = new Primrose.Output.Audio3D();
     this.music = new Primrose.Output.Music(this.audio.context);
     this.temp = new THREE.Matrix4();
+    this.pickingScene = new THREE.Scene();
 
     //
     // keyboard input
@@ -97,7 +98,9 @@ Primrose.VRApplication = ( function () {
     this.connectVR = function(id){
       var deviceIDs = Object.keys(this.vr.devices);
       if(deviceIDs.length > 0){
-        this.ctrls.goVR.style.display = "inline-block";
+        if(this.options.vrFullScreenButton){
+          this.options.vrFullScreenButton.style.display = "inline-block";
+        }
         this.vr.connect(deviceIDs[0]);
         this.vrParams = this.vr.getParams();
 
@@ -106,8 +109,8 @@ Primrose.VRApplication = ( function () {
         viewports[0] = this.vrParams.left.renderRect;
         viewports[1] = this.vrParams.right.renderRect;
       }
-      else{
-        this.ctrls.goVR.style.display = "none";
+      else if(this.options.vrFullScreenButton){
+        this.options.vrFullScreenButton.style.display = "none";
       }
     };
     this.vr = new Primrose.Input.VR( "vr" );
@@ -261,8 +264,8 @@ Primrose.VRApplication = ( function () {
       this.lt = t;
       
       if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
-        this.pointer = makeBall.call(this, textured( sphere( 0.02, 4, 2 ), 0xff0000, true ), 1, 0.002);
-        this.scene.add(this.pointer.graphics);
+        this.pointer = textured( sphere( 0.02, 4, 2 ), 0xff0000, true );
+        this.scene.add(this.pointer);
         this.setSize( );
 
         if ( this.passthrough ) {
@@ -340,12 +343,12 @@ Primrose.VRApplication = ( function () {
     this.currentUser.velocity = new THREE.Vector3();
 
     if(this.options.disableAutoFullScreen){
-      if(this.ctrls.goRegular){
-        this.ctrls.goRegular.addEventListener( "click", this.goFullScreen.bind( this ), false );
+      if(this.options.regularFullScreenButton){
+        this.options.regularFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
       }
 
-      if(this.ctrls.goVR){
-        this.ctrls.goVR.addEventListener( "click", this.goFullScreen.bind( this ), false );
+      if(this.options.vrFullScreenButton){
+        this.options.vrFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
       }
     }
     else{
@@ -376,6 +379,9 @@ Primrose.VRApplication = ( function () {
       else{      
         requestFullScreen( this.ctrls.frontBuffer );
       }
+    }
+    if(!isPointerLocked()){
+      requestPointerLock( this.ctrls.frontBuffer );
     }
   };
 
@@ -489,9 +495,11 @@ Primrose.VRApplication = ( function () {
     this.renderer.domElement.width = canvasWidth;
     this.renderer.domElement.height = canvasHeight;
     this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-    this.camera.fov = fieldOfView;
-    this.camera.aspect = aspectWidth / canvasHeight;
-    this.camera.updateProjectionMatrix( );
+    if(this.camera){
+      this.camera.fov = fieldOfView;
+      this.camera.aspect = aspectWidth / canvasHeight;
+      this.camera.updateProjectionMatrix( );
+    }
   };
 
   VRApplication.prototype.connectGamepad = function ( id ) {
@@ -580,38 +588,6 @@ Primrose.VRApplication = ( function () {
       this.currentUser.position.y = 0;
       this.currentUser.velocity.y = 0;
     }
-    this.pointer.matrixAutoUpdate = false;
-    this.pointer.graphics.matrix.identity();
-    this.temp.makeRotationY(this.heading);
-    this.pointer.graphics.matrix.multiply(this.temp);
-    this.temp.makeRotationZ(this.pitch);
-    this.pointer.graphics.matrix.multiply(this.temp);
-    this.temp.makeTranslation(0, 0, -1);
-    this.pointer.graphics.matrix.multiply(this.temp);
-    
-    this.pointer.velocity.set(0, 0, 0);
-
-    //
-    // do collision detection
-    //
-    this.world.step( dt );
-    for ( j = 0; j < this.world.bodies.length; ++j ) {
-      var obj = this.world.bodies[j];
-      if ( obj.graphics ) {
-        obj.graphics.position.copy( obj.position );
-        obj.graphics.quaternion.copy( obj.quaternion );
-      }
-    }
-    
-    for ( j = 0; j < this.buttons.length; ++j ) {
-      this.buttons[j].readContacts( this.world.contacts );
-    }
-
-    if(this.glove){
-      this.glove.readContacts( this.world.contacts );
-    }
-
-    this.fire( "update", dt );
 
     //
     // update the camera
@@ -634,6 +610,33 @@ Primrose.VRApplication = ( function () {
     }
 
     this.camera.position.y += this.avatarHeight;
+    
+    FORWARD.set(0, 0, -1);
+    FORWARD.applyQuaternion(this.camera.quaternion);
+    this.pointer.position.copy(this.camera.position);
+    this.pointer.position.add(FORWARD);
+
+    //
+    // do collision detection
+    //
+    this.world.step( dt );
+    for ( j = 0; j < this.world.bodies.length; ++j ) {
+      var obj = this.world.bodies[j];
+      if ( obj.graphics ) {
+        obj.graphics.position.copy( obj.position );
+        obj.graphics.quaternion.copy( obj.quaternion );
+      }
+    }
+    
+    for ( j = 0; j < this.buttons.length; ++j ) {
+      this.buttons[j].readContacts( this.world.contacts );
+    }
+
+    if(this.glove){
+      this.glove.readContacts( this.world.contacts );
+    }
+
+    this.fire( "update", dt );
 
     this.renderScene( this.scene );
   };

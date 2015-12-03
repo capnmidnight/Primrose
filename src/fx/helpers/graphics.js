@@ -41,7 +41,7 @@ function InsideSphereGeometry ( radius, widthSegments, heightSegments,
 
   THREE.Geometry.call( this );
 
-  this.type = 'SphereGeometry';
+  this.type = 'InsideSphereGeometry';
 
   this.parameters = {
     radius: radius,
@@ -160,13 +160,15 @@ if ( typeof window.THREE !== "undefined" ) {
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
 
-
 function axis ( length, width ) {
-  return obj3(
-      box( length, width, width, 0xff0000 ),
-      box( width, width, length, 0x00ff00 ),
-      box( width, length, width, 0x0000ff )
-      );
+  var center = hub();
+  put( brick( 0xff0000, length, width, width ) )
+      .on( center );
+  put( brick( 0x00ff00, width, width, length ) )
+      .on( center );
+  put( brick( 0x0000ff, width, length, width ) )
+      .on( center );
+  return center;
 }
 
 function box ( w, h, l ) {
@@ -212,17 +214,6 @@ function put ( object ) {
       };
     }
   };
-}
-
-function axis ( length, width ) {
-  var center = hub();
-  put( brick( 0xff0000, length, width, width ) )
-      .on( center );
-  put( brick( 0x00ff00, width, width, length ) )
-      .on( center );
-  put( brick( 0x0000ff, width, length, width ) )
-      .on( center );
-  return center;
 }
 
 function textured ( geometry, txt, unshaded, o, s, t ) {
@@ -330,7 +321,8 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, option
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, 10, 10 ) : quad.bind( this, w, h ),
+      scale = Math.round(1024 / options.fontSize),
+      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, scale, scale ) : quad.bind( this, w, h ),
       o = textured( makeGeom(), t, true, options.opacity ),
       p = textured( makeGeom(), t.getRenderer( )
           .getPickingTexture( ), true );
