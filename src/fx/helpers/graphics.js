@@ -187,7 +187,7 @@ function v3 ( x, y, z ) {
   return new THREE.Vector3( x, y, z );
 }
 
-function quad ( w, h ) {
+function quad ( w, h, s, t ) {
   if ( h === undefined ) {
     h = w;
   }
@@ -321,8 +321,9 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, option
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      scale = Math.round(1024 / options.fontSize),
-      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, scale, scale ) : quad.bind( this, w, h ),
+      cellWidth = Math.round(1024 * w / options.fontSize),
+      cellHeight = Math.round(1024 * h / options.fontSize),
+      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, cellWidth, cellHeight ) : quad.bind( this, w, h, cellWidth, cellHeight ),
       o = textured( makeGeom(), t, true, options.opacity ),
       p = textured( makeGeom(), t.getRenderer( )
           .getPickingTexture( ), true );

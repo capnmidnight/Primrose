@@ -26,7 +26,7 @@ function StartDemo () {
         0, 0, 2.5,
         0, 0, 0, {
           tokenizer: Primrose.Text.Grammars.JavaScript,
-          fontSize: 10
+          fontSize: 20
         } );
     ed.editor.value = StartDemo.toString();
     ed.editor.focus();
