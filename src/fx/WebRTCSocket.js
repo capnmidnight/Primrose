@@ -92,7 +92,7 @@ Primrose.WebRTCSocket = ( function () {
     };
 
     this.emit = function () {
-      var data = JSON.stringify( arr( arguments ) );
+      var data = JSON.stringify( Array.prototype.slice.call( arguments ) );
       for ( var i = 0; i < channels.length; ++i ) {
         var channel = channels[i];
         if ( channel && channel.readyState === "open" ) {
