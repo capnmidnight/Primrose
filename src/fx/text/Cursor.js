@@ -2,6 +2,28 @@
 Primrose.Text.Cursor = ( function ( ) {
   "use strict";
 
+  // unicode-aware string reverse
+  var reverse = ( function ( ) {
+    var combiningMarks =
+        /(<%= allExceptCombiningMarks %>)(<%= combiningMarks %>+)/g,
+        surrogatePair = /(<%= highSurrogates %>)(<%= lowSurrogates %>)/g;
+
+    function reverse ( str ) {
+      str = str.replace( combiningMarks, function ( match, capture1,
+          capture2 ) {
+        return reverse( capture2 ) + capture1;
+      } )
+          .replace( surrogatePair, "$2$1" );
+      var res = "";
+      for ( var i = str.length - 1; i >= 0; --i ) {
+        res += str[i];
+      }
+      return res;
+    }
+    return reverse;
+  }
+  )( );
+
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;
@@ -216,7 +238,7 @@ Primrose.Text.Cursor = ( function ( ) {
 
   Cursor.prototype.setI = function ( i, tokenRows ) {
     this.i = i;
-    this.fixCursor(tokenRows);
+    this.fixCursor( tokenRows );
     this.moved = true;
   };
 
