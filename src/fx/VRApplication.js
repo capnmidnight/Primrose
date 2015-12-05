@@ -57,6 +57,8 @@ Primrose.VRApplication = ( function () {
     this.music = new Primrose.Output.Music(this.audio.context);
     this.temp = new THREE.Matrix4();
     this.pickingScene = new THREE.Scene();
+    this.currentUser = new THREE.Object3D();
+    this.currentUser.velocity = new THREE.Vector3();
 
     //
     // keyboard input
@@ -95,7 +97,7 @@ Primrose.VRApplication = ( function () {
     //
     // VR input
     //
-    this.connectVR = function(id){
+    function connectVR(id){
       var deviceIDs = Object.keys(this.vr.devices);
       if(deviceIDs.length > 0){
         if(this.options.vrFullScreenButton){
@@ -114,8 +116,8 @@ Primrose.VRApplication = ( function () {
       }
     };
     this.vr = new Primrose.Input.VR( "vr" );
-    this.vr.addEventListener("vrdeviceconnected", this.connectVR.bind(this), false);
-    this.vr.addEventListener("vrdevicelost", this.connectVR.bind(this), false);
+    this.vr.addEventListener("vrdeviceconnected", connectVR.bind(this), false);
+    this.vr.addEventListener("vrdevicelost", connectVR.bind(this), false);
 
     var DEBUG_VR = false,
         translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
@@ -339,9 +341,6 @@ Primrose.VRApplication = ( function () {
       }
     };
 
-    this.currentUser = new THREE.Object3D();
-    this.currentUser.velocity = new THREE.Vector3();
-
     if(this.options.disableAutoFullScreen){
       if(this.options.regularFullScreenButton){
         this.options.regularFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
@@ -354,6 +353,16 @@ Primrose.VRApplication = ( function () {
     else{
       window.addEventListener("mousedown", this.goFullScreen.bind(this), false);
     }
+    
+    function setVRMode(evt){
+      if(this.vr.display){
+        this.inVR = isFullScreenMode();
+      }
+      this.setSize();
+    }
+    window.addEventListener( "fullscreenchange", setVRMode.bind(this), false);
+    window.addEventListener( "webkitfullscreenchange", setVRMode.bind(this), false);
+    window.addEventListener( "mozfullscreenchange", setVRMode.bind(this), false);
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
@@ -371,17 +380,16 @@ Primrose.VRApplication = ( function () {
   };
   
   VRApplication.prototype.goFullScreen = function(){
+    if(!isPointerLocked()){
+      requestPointerLock( this.ctrls.frontBuffer );
+    }
     if(!isFullScreenMode()){
       if(this.vr.display){
         requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
-        this.inVR = true;      
       }
       else{      
         requestFullScreen( this.ctrls.frontBuffer );
       }
-    }
-    if(!isPointerLocked()){
-      requestPointerLock( this.ctrls.frontBuffer );
     }
   };
 
