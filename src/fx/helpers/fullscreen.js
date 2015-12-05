@@ -20,11 +20,11 @@ function requestFullScreen ( elem, vrDisplay ) {
   else if ( elem.webkitRequestFullscreen && !fullScreenParam ) {
     elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
   }
+  else if ( elem.mozRequestFullScreen ) {
+    elem.mozRequestFullScreen( fullScreenParam );
+  }
   else if ( elem.requestFullscreen ) {
     elem.requestFullscreen();
-  }
-  else if ( elem.mozRequestFullScreen ) {
-    elem.mozRequestFullScreen();
   }
   else if ( elem.msRequestFullscreen ) {
     elem.msRequestFullscreen();
