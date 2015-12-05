@@ -1,6 +1,17 @@
-/* global Primrose, MediaStreamTrack, THREE */
+/* global Primrose, MediaStreamTrack, THREE, Navigator */
 
 Primrose.Input.Camera = ( function () {
+
+  /* polyfill */
+  Navigator.prototype.getUserMedia =
+      Navigator.prototype.getUserMedia ||
+      Navigator.prototype.webkitGetUserMedia ||
+      Navigator.prototype.mozGetUserMedia ||
+      Navigator.prototype.msGetUserMedia ||
+      Navigator.prototype.oGetUserMedia ||
+      function () {
+      };
+
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getSources( function ( infos ) {
       var option = document.createElement( "option" );
@@ -47,7 +58,7 @@ Primrose.Input.Camera = ( function () {
     this.streaming = false;
     this.videoElement.autoplay = 1;
     var getUserMediaFallthrough = function ( vidOpt, success, err ) {
-      navigator.getUserMedia( { video: vidOpt }, function ( stream ) {
+      navigator.getUserMedia( {video: vidOpt}, function ( stream ) {
         streamURL = window.URL.createObjectURL( stream );
         this.videoElement.src = streamURL;
         success();
@@ -58,7 +69,7 @@ Primrose.Input.Camera = ( function () {
       i = i || 0;
       if ( this.options.videoModes && i < this.options.videoModes.length ) {
         var mode = this.options.videoModes[i];
-        var opt = { optional: [ { sourceId: source } ] };
+        var opt = {optional: [ {sourceId: source} ]};
         if ( mode !== "default" ) {
           opt.mandatory = {
             minWidth: mode.w,
@@ -124,8 +135,8 @@ Primrose.Input.Camera = ( function () {
 
   CameraInput.DEFAULTS = {
     videoModes: [
-      { w: 320, h: 240 },
-      { w: 640, h: 480 },
+      {w: 320, h: 240},
+      {w: 640, h: 480},
       "default"
     ]
   };

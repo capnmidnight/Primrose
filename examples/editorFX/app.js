@@ -109,7 +109,7 @@ function StartDemo () {
         } );
     for ( var i = 0; i < fs.length; ++i ) {
       var f = fs[i];
-      var dist = vs[f.a].distanceToSquared( p );
+      var dist = vs[f.b].distanceToSquared( p );
       if ( dist < minDist ) {
         minDist = dist;
         minFace = i;

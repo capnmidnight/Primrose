@@ -1,9 +1,16 @@
-/* global Primrose */
+/* global Primrose, Window */
 
 Primrose.Output.Music = ( function () {
 
+  /* polyfill */
+  Window.prototype.AudioContext =
+      Window.prototype.AudioContext ||
+      Window.prototype.webkitAudioContext ||
+      function () {
+      };
+
   var PIANO_BASE = Math.pow( 2, 1 / 12 ),
-      MAX_NOTE_COUNT = (navigator.maxTouchPoints || 10) + 1;
+      MAX_NOTE_COUNT = ( navigator.maxTouchPoints || 10 ) + 1;
 
   function piano ( n ) {
     return 440 * Math.pow( PIANO_BASE, n - 49 );
@@ -51,7 +58,7 @@ Primrose.Output.Music = ( function () {
       }
       var o = this.oscillators[n % this.numNotes],
           f = piano( parseFloat( i ) + 1 );
-      
+
       o.gn.gain.value = volume;
       o.osc.frequency.setValueAtTime( f, 0 );
       return o;

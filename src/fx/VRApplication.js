@@ -380,9 +380,7 @@ Primrose.VRApplication = ( function () {
   };
   
   VRApplication.prototype.goFullScreen = function(){
-    if(!isPointerLocked()){
-      requestPointerLock( this.ctrls.frontBuffer );
-    }
+    this.mouse.requestPointerLock( );
     if(!isFullScreenMode()){
       if(this.vr.display){
         requestFullScreen( this.ctrls.frontBuffer, this.vr.display );

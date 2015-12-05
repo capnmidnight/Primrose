@@ -74,29 +74,3 @@ function addFullScreenShim ( elems ) {
     } );
   } );
 }
-
-var exitPointerLock = ( document.exitPointerLock ||
-    document.webkitExitPointerLock || document.mozExitPointerLock ||
-    function () {
-    } ).bind( document );
-
-function isPointerLocked () {
-  return !!( document.pointerLockElement ||
-      document.webkitPointerLockElement ||
-      document.mozPointerLockElement );
-}
-
-function requestPointerLock ( elem ) {
-  if ( !elem ) {
-    elem = document.documentElement;
-  }
-  if ( elem.requestPointerLock ) {
-    elem.requestPointerLock();
-  }
-  else if ( elem.webkitRequestPointerLock ) {
-    elem.webkitRequestPointerLock();
-  }
-  else if ( elem.mozRequestPointerLock ) {
-    elem.mozRequestPointerLock();
-  }
-}
