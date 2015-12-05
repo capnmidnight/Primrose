@@ -5,98 +5,99 @@ var GRASS = "/images/grass.png",
     WATER = "/images/water.png",
     DECK = "/images/deck.png";
 
-function CannonDemo ( vrDisplay, vrSensor ) {
+function CannonDemo () {
   "use strict";
+  findVR( function ( vrDisplay, vrSensor ) {
 
-  var ctrls = findEverything(),
-      renderer = new THREE.WebGLRenderer( {
-        canvas: ctrls.output,
-        alpha: true,
-        antialias: true
-      } ),
-      scene = new THREE.Scene( ),
-      world = new CANNON.World(),
-      camera = put( new THREE.PerspectiveCamera( 50, ctrls.output.width /
-          ctrls.output.height, 0.1, 1000 ) )
+    var ctrls = findEverything(),
+        renderer = new THREE.WebGLRenderer( {
+          canvas: ctrls.output,
+          alpha: true,
+          antialias: true
+        } ),
+        scene = new THREE.Scene( ),
+        world = new CANNON.World(),
+        camera = put( new THREE.PerspectiveCamera( 50, ctrls.output.width /
+            ctrls.output.height, 0.1, 1000 ) )
         .on( scene )
         .at( 0, 2, 10 ),
-      sky = put( textured(
-        shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-        "/images/bg2.jpg",
-        true ) )
+        sky = put( textured(
+            shell( 50, 8, 4, Math.PI * 2, Math.PI ),
+            "/images/bg2.jpg",
+            true ) )
         .on( scene )
         .at( 0, 0, 0 ),
-      lt,
-      mass = 1,
-      radius = 1,
-      ball = put( textured( sphere( radius, 10, 20 ), ROCK, true, 1, mass ) )
+        lt,
+        mass = 1,
+        radius = 1,
+        ball = put( textured( sphere( radius, 10, 20 ), ROCK, true, 1, mass ) )
         .on( scene, world )
         .at( -5, 5, 0 ),
-      ground = put( textured( box( 10, 1, 10 ), DECK, true, 1, 0, 10, 10 ) )
+        ground = put( textured( box( 10, 1, 10 ), DECK, true, 1, 0, 10, 10 ) )
         .on( scene, world )
         .at( 0, -1, 0 ),
-      frictionMaterial = new CANNON.ContactMaterial(
-        ball.physics.material,
-        ground.physics.material,
-        {
-          friction: 0.4,
-          restitution: 0.3,
-          contactEquationStiffness: 1e8,
-          contactEquationRelaxation: 3,
-          frictionEquationStiffness: 1e8,
-          frictionEquationRegularizationTime: 3
-        });
+        frictionMaterial = new CANNON.ContactMaterial(
+            ball.physics.material,
+            ground.physics.material,
+            {
+              friction: 0.4,
+              restitution: 0.3,
+              contactEquationStiffness: 1e8,
+              contactEquationRelaxation: 3,
+              frictionEquationStiffness: 1e8,
+              frictionEquationRegularizationTime: 3
+            } );
 
-  world.defaultContactMaterial.friction = 0.2;
-  world.gravity.set( 0, -9.82, 0 );
-  world.broadphase = new CANNON.SAPBroadphase(world);
-  world.addContactMaterial(frictionMaterial);
+    world.defaultContactMaterial.friction = 0.2;
+    world.gravity.set( 0, -9.82, 0 );
+    world.broadphase = new CANNON.SAPBroadphase( world );
+    world.addContactMaterial( frictionMaterial );
 
-  ball.physics.velocity.set(4, 0, 0);
+    ball.physics.velocity.set( 4, 0, 0 );
 
-  window.addEventListener( "resize", refreshSize );
-  refreshSize( );
+    window.addEventListener( "resize", refreshSize );
+    refreshSize( );
 
-  requestAnimationFrame( render );
-
-  function refreshSize ( ) {
-    var styleWidth = ctrls.outputContainer.clientWidth,
-        styleHeight = ctrls.outputContainer.clientHeight,
-        ratio = window.devicePixelRatio || 1,
-        canvasWidth = styleWidth * ratio,
-        canvasHeight = styleHeight * ratio,
-        aspectWidth = canvasWidth;
-
-    renderer.domElement.style.width = px( styleWidth );
-    renderer.domElement.style.height = px( styleHeight );
-    renderer.domElement.width = canvasWidth;
-    renderer.domElement.height = canvasHeight;
-    renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-    camera.aspect = aspectWidth / canvasHeight;
-    camera.updateProjectionMatrix( );
-  }
-
-  function render ( t ) {
-    t = t * 0.001;
     requestAnimationFrame( render );
-    if ( lt ) {
-      update( t - lt );
-    }
-    renderer.render( scene, camera );
-    lt = t;
-  }
 
-  function update ( dt ) {
-    sky.rotation.set( 0, lt * 0.001, 0 );
-    world.step( dt );
-    for(var i = 0; i < world.bodies.length; ++i){
-      var obj = world.bodies[i];
-      obj.graphics.position.copy(obj.position);
-      obj.graphics.quaternion.copy(obj.quaternion);
+    function refreshSize ( ) {
+      var styleWidth = ctrls.outputContainer.clientWidth,
+          styleHeight = ctrls.outputContainer.clientHeight,
+          ratio = window.devicePixelRatio || 1,
+          canvasWidth = styleWidth * ratio,
+          canvasHeight = styleHeight * ratio,
+          aspectWidth = canvasWidth;
+
+      renderer.domElement.style.width = px( styleWidth );
+      renderer.domElement.style.height = px( styleHeight );
+      renderer.domElement.width = canvasWidth;
+      renderer.domElement.height = canvasHeight;
+      renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+      camera.aspect = aspectWidth / canvasHeight;
+      camera.updateProjectionMatrix( );
     }
-  }
+
+    function render ( t ) {
+      t = t * 0.001;
+      requestAnimationFrame( render );
+      if ( lt ) {
+        update( t - lt );
+      }
+      renderer.render( scene, camera );
+      lt = t;
+    }
+
+    function update ( dt ) {
+      sky.rotation.set( 0, lt * 0.001, 0 );
+      world.step( dt );
+      for ( var i = 0; i < world.bodies.length; ++i ) {
+        var obj = world.bodies[i];
+        obj.graphics.position.copy( obj.position );
+        obj.graphics.quaternion.copy( obj.quaternion );
+      }
+    }
+  });
 }
-
 function put ( object ) {
   return {
     on: function ( s, w ) {
@@ -107,8 +108,8 @@ function put ( object ) {
       return {
         at: function ( x, y, z ) {
           object.position.set( x, y, z );
-          if(object.physics){
-            object.physics.position.set(x, y, z);
+          if ( object.physics ) {
+            object.physics.position.set( x, y, z );
           }
           return object;
         }
@@ -184,9 +185,9 @@ function textured ( geometry, txt, unshaded, o, mass, s, t ) {
     obj = geometry;
   }
 
-  if(obj && geometry.physicsShape){
-    var body = new CANNON.Body({mass: mass, material: new CANNON.Material()});
-    body.addShape(geometry.physicsShape);
+  if ( obj && geometry.physicsShape ) {
+    var body = new CANNON.Body( {mass: mass, material: new CANNON.Material()} );
+    body.addShape( geometry.physicsShape );
     body.linearDamping = body.angularDamping = 0.5;
     obj.physics = body;
     body.graphics = obj;
@@ -243,7 +244,7 @@ function box ( w, h, l ) {
     l = w;
   }
   var geom = new THREE.BoxGeometry( w, h, l );
-  geom.physicsShape = new CANNON.Box(new CANNON.Vec3(w/2, h/2, l/2));
+  geom.physicsShape = new CANNON.Box( new CANNON.Vec3( w / 2, h / 2, l / 2 ) );
   return geom;
 }
 
@@ -253,7 +254,7 @@ function hub ( ) {
 
 function sphere ( r, slices, rings ) {
   var geom = new THREE.SphereGeometry( r, slices, rings );
-  geom.physicsShape = new CANNON.Sphere(r);
+  geom.physicsShape = new CANNON.Sphere( r );
   return geom;
 }
 

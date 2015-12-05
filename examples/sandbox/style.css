@@ -137,7 +137,3 @@ a:visited{
   margin: 0;
   border: 0;
 }
-
-canvas{
-  pointer-events: none;
-}

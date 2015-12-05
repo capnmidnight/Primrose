@@ -75,7 +75,7 @@ Primrose.VRApplication = ( function () {
     //
     // mouse input
     //
-    this.mouse = new Primrose.Input.Mouse( "mouse", window, [
+    this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
       { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
       { name: "heading", commands: [ "dx" ], integrate: true },
       { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
@@ -114,7 +114,8 @@ Primrose.VRApplication = ( function () {
       else if(this.options.vrFullScreenButton){
         this.options.vrFullScreenButton.style.display = "none";
       }
-    };
+    }
+    
     this.vr = new Primrose.Input.VR( "vr" );
     this.vr.addEventListener("vrdeviceconnected", connectVR.bind(this), false);
     this.vr.addEventListener("vrdevicelost", connectVR.bind(this), false);
