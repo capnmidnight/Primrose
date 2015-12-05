@@ -121,6 +121,7 @@ function PrimroseDemo () {
         light = new THREE.PointLight( 0xffffff ),
         UP = new THREE.Vector3( 0, 1, 0 ),
         RIGHT = new THREE.Vector3( 1, 0, 0 ),
+        FORWARD = new THREE.Vector3(0, 0, 1),
         qPitch = new THREE.Quaternion( ),
         qRift = new THREE.Quaternion( ),
         position = new THREE.Vector3( ),
@@ -598,7 +599,7 @@ function PrimroseDemo () {
       position.z = Math.min( 12.5, Math.max( -12.5, position.z ) );
       camera.quaternion.setFromAxisAngle( UP, heading );
       if ( !inVR ) {
-        qPitch.setFromAxisAngle( RIGHT, pitch );
+        qPitch.setFromAxisAngle( FORWARD, pitch );
         camera.quaternion.multiply( qPitch );
       }
 
