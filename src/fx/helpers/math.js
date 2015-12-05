@@ -15,3 +15,7 @@ function randomInt(min, max) {
 function randomSteps(min, max, steps) {
   return min + randomInt(0, (1 + max - min) / steps) * steps;
 }
+
+function isNumber ( str ) {
+  return !isNaN( str );
+}
