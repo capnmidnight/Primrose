@@ -63,8 +63,7 @@ function PrimroseDemo () {
     if ( err ) {
       console.error( err );
     }
-    var vrParams,
-        lastMouseX,
+    var lastMouseX,
         lastMouseY,
         lastTouchX,
         lastTouchY,
@@ -84,7 +83,6 @@ function PrimroseDemo () {
         heading = 0,
         pitch = 0,
         SPEED = 0.005,
-        inVR = false,
         dragging = false,
         keyState = {},
         modA = isOSX ? "metaKey" : "ctrlKey",
@@ -126,11 +124,31 @@ function PrimroseDemo () {
         qRift = new THREE.Quaternion( ),
         position = new THREE.Vector3( ),
         src = getSetting( "code", testDemo.toString( ) ),
-        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-        viewports = [ ];
+        inVR = false,
+        vrParams,
+        stereoSettings = [ {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: new THREE.Box2()
+          }, {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: null
+          } ];
 
-    function setTrans ( m, t ) {
-      m.makeTranslation( t.x, t.y, t.z );
+    function setStereoSettings ( vrParams ) {
+      setStereoSetting( stereoSettings[0], vrParams.left );
+      setStereoSetting( stereoSettings[1], vrParams.right );
+    }
+
+    function setStereoSetting ( s, eye ) {
+      setTrans( s.transform, eye.eyeTranslation, 1 );
+      setTrans( s.inverseTransform, eye.eyeTranslation, -1 );
+      s.viewport = eye.renderRect;
+    }
+
+    function setTrans ( m, t, i ) {
+      m.makeTranslation( i * t.x, i * t.y, i * t.z );
     }
 
     if ( vrDisplay ) {
@@ -157,10 +175,7 @@ function PrimroseDemo () {
         };
       }
 
-      setTrans( translations[0], vrParams.left.eyeTranslation );
-      setTrans( translations[1], vrParams.right.eyeTranslation );
-      viewports[0] = vrParams.left.renderRect;
-      viewports[1] = vrParams.right.renderRect;
+      setStereoSettings(vrParams);
     }
 
     if ( src === testDemo.toString( ) ) {
@@ -329,7 +344,7 @@ function PrimroseDemo () {
           canvasWidth = styleWidth * ratio,
           canvasHeight = styleHeight * ratio,
           aspectWidth = canvasWidth;
-      if ( inVR ) {
+      if ( inVR && vrParams ) {
         canvasWidth = vrParams.left.renderRect.width +
             vrParams.right.renderRect.width;
         canvasHeight = Math.max( vrParams.left.renderRect.height,
@@ -557,7 +572,28 @@ function PrimroseDemo () {
 
     function renderScene ( s, rt, fc ) {
       if ( inVR ) {
-        renderer.renderStereo( s, camera, rt, fc, translations, viewports );
+        if ( renderer.renderStereo ) {
+          console.log("rendering with stereo shim");
+          renderer.renderStereo( s, camera, stereoSettings, rt, fc );
+        }
+        else {
+
+          renderer.enableScissorTest( true );
+          for ( var i = 0; i < stereoSettings.length; ++i ) {
+            var st = stereoSettings[i],
+                m = st.transform,
+                mI = st.inverseTransform,
+                v = st.viewport;
+
+            renderer.setViewport( v.left, v.top, v.width, v.height );
+            renderer.setScissor( v.left, v.top, v.width, v.height );
+            camera.matrixWorld.multiply( m );
+            renderer.render( s, camera, rt, fc );
+            camera.matrixWorld.multiply( mI );
+          }
+
+          renderer.enableScissorTest( false );
+        }
       }
       else {
         renderer.render( s, camera, rt, fc );

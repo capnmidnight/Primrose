@@ -1,5 +1,5 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
-
+console.clear();
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
@@ -25,8 +25,7 @@ function PrimroseDemo () {
     if ( err ) {
       console.error( err );
     }
-    var vrParams,
-        lastMouseX,
+    var lastMouseX,
         lastMouseY,
         lastTouchX,
         lastTouchY,
@@ -41,7 +40,6 @@ function PrimroseDemo () {
         heading = 0,
         pitch = 0,
         SPEED = 0.0005,
-        inVR = false,
         dragging = false,
         keyState = {},
         modA = isOSX ? "metaKey" : "ctrlKey",
@@ -72,7 +70,6 @@ function PrimroseDemo () {
           alpha: true,
           antialias: true
         } ),
-        inVR = false,
         gl = renderer.getContext(),
         skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
         sky = textured( skyGeom, "../images/bg2.jpg" ),
@@ -92,16 +89,31 @@ function PrimroseDemo () {
         qPitch = new THREE.Quaternion(),
         qRift = new THREE.Quaternion(),
         position = new THREE.Vector3(),
-        translations = [ new THREE.Matrix4(), new THREE.Matrix4() ],
-        viewports = [ new THREE.Box2(), new THREE.Box2() ];
+        inVR = false,
+        vrParams,
+        stereoSettings = [ {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: new THREE.Box2()
+          }, {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: null
+          } ];
 
-    function setTrans ( m, t ) {
-      m.makeTranslation( t.x, t.y, t.z );
+    function setStereoSettings ( vrParams ) {
+      setStereoSetting( stereoSettings[0], vrParams.left );
+      setStereoSetting( stereoSettings[1], vrParams.right );
     }
 
-    function setView ( b, r ) {
-      b.min.set( r.x, r.y );
-      b.max.set( r.x + r.width, r.y + r.height );
+    function setStereoSetting ( s, eye ) {
+      setTrans( s.transform, eye.eyeTranslation, 1 );
+      setTrans( s.inverseTransform, eye.eyeTranslation, -1 );
+      s.viewport = eye.renderRect;
+    }
+
+    function setTrans ( m, t, i ) {
+      m.makeTranslation( i * t.x, i * t.y, i * t.z );
     }
 
     if ( vrDisplay ) {
@@ -131,10 +143,7 @@ function PrimroseDemo () {
         console.error( "Couldn't figure out how to process the VR Display object", vrDisplay );
       }
 
-      setTrans( translations[0], vrParams.left.eyeTranslation );
-      setTrans( translations[1], vrParams.right.eyeTranslation );
-      setView( viewports[0], vrParams.left.renderRect );
-      setView( viewports[1], vrParams.right.renderRect );
+      setStereoSettings( vrParams );
     }
 
     back.generateMipMaps = false;
@@ -204,13 +213,13 @@ function PrimroseDemo () {
     requestAnimationFrame( render );
 
     function refreshSize ( ) {
-      var styleWidth = ctrls.outputContainer.clientWidth,
-          styleHeight = ctrls.outputContainer.clientHeight,
+      var styleWidth = ctrls.output.clientWidth,
+          styleHeight = ctrls.output.clientHeight,
           ratio = window.devicePixelRatio || 1,
           canvasWidth = styleWidth * ratio,
           canvasHeight = styleHeight * ratio,
           aspectWidth = canvasWidth;
-      if ( inVR ) {
+      if ( inVR && vrParams ) {
         canvasWidth = vrParams.left.renderRect.width +
             vrParams.right.renderRect.width;
         canvasHeight = Math.max( vrParams.left.renderRect.height,
@@ -496,8 +505,28 @@ function PrimroseDemo () {
     }
 
     function renderScene ( s, rt, fc ) {
-      if ( inVR ) {
-        renderer.renderStereo( s, camera, rt, fc, translations, viewports );
+      if ( inVR && vrParams ) {
+        if ( renderer.renderStereo ) {
+          renderer.renderStereo( s, camera, stereoSettings, rt, fc );
+        }
+        else {
+
+          renderer.enableScissorTest( true );
+          for ( var i = 0; i < stereoSettings.length; ++i ) {
+            var st = stereoSettings[i],
+                m = st.transform,
+                mI = st.inverseTransform,
+                v = st.viewport;
+
+            renderer.setViewport( v.left, v.top, v.width, v.height );
+            renderer.setScissor( v.left, v.top, v.width, v.height );
+            camera.matrixWorld.multiply( m );
+            renderer.render( s, camera, rt, fc );
+            camera.matrixWorld.multiply( mI );
+          }
+
+          renderer.enableScissorTest( false );
+        }
       }
       else {
         renderer.render( s, camera, rt, fc );

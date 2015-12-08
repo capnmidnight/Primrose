@@ -47,8 +47,6 @@ Primrose.VRApplication = ( function () {
     this.frame = 0;
     this.enableMousePitch = true;
     this.currentUser = null;
-    this.vrParams = null;
-    this.inVR = false;
     this.world = new CANNON.World();
     this.world.defaultContactMaterial.friction = 0.2;
     this.world.gravity.set( 0, -this.options.gravity, 0 );
@@ -59,6 +57,32 @@ Primrose.VRApplication = ( function () {
     this.pickingScene = new THREE.Scene();
     this.currentUser = new THREE.Object3D();
     this.currentUser.velocity = new THREE.Vector3();
+    this.vrParams = null;
+    this.inVR = false;
+    this.stereoSettings = [ {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: new THREE.Box2()
+          }, {
+            transform: new THREE.Matrix4(),
+            inverseTransform: new THREE.Matrix4(),
+            viewport: null
+          } ];
+
+    function setStereoSettings ( vrParams ) {
+      setStereoSetting(this.stereoSettings[0], vrParams.left );
+      setStereoSetting(this.stereoSettings[1], vrParams.right );
+    }
+
+    function setStereoSetting ( s, eye ) {
+      setTrans(s.transform, eye.eyeTranslation, 1 );
+      setTrans(s.inverseTransform, eye.eyeTranslation, -1 );
+      s.viewport = eye.renderRect;
+    }
+
+    function setTrans ( m, t, i ) {
+      m.makeTranslation( i * t.x, i * t.y, i * t.z );
+    }
 
     //
     // keyboard input
@@ -105,11 +129,7 @@ Primrose.VRApplication = ( function () {
         }
         this.vr.connect(deviceIDs[0]);
         this.vrParams = this.vr.getParams();
-
-        setTrans( translations[0], this.vrParams.left.eyeTranslation );
-        setTrans( translations[1], this.vrParams.right.eyeTranslation );
-        viewports[0] = this.vrParams.left.renderRect;
-        viewports[1] = this.vrParams.right.renderRect;
+        setStereoSettings.call(this, this.vrParams);
       }
       else if(this.options.vrFullScreenButton){
         this.options.vrFullScreenButton.style.display = "none";
@@ -332,10 +352,25 @@ Primrose.VRApplication = ( function () {
     window.addEventListener( "resize", this.setSize.bind( this ), false );
 
     this.renderScene = function ( s, rt, fc ) {
-      if ( this.inVR ) {
-        this.renderer.renderStereo( s, this.camera, rt, fc,
-            translations,
-            viewports );
+      if ( this.inVR && this.vrParams ) {
+        if ( this.renderer.renderStereo ) {
+          this.renderer.renderStereo( s, this.camera, this.stereoSettings, rt, fc );
+        }
+        else {
+          this.renderer.enableScissorTest( true );
+          for ( var i = 0; i < this.stereoSettings.length; ++i ) {
+            var st = this.stereoSettings[i],
+                m = st.transform,
+                mI = st.inverseTransform,
+                v = st.viewport;
+
+            this.renderer.setViewport( v.left, v.top, v.width, v.height );
+            this.renderer.setScissor( v.left, v.top, v.width, v.height );
+            this.camera.matrixWorld.multiply( m );
+            this.renderer.render( s, this.camera, rt, fc );
+            this.camera.matrixWorld.multiply( mI );
+          }
+        }
       }
       else {
         this.renderer.render( s, this.camera, rt, fc );
