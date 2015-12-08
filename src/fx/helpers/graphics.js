@@ -295,7 +295,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
 }
 
 function sphere ( r, slices, rings ) {
-  return new THREE.SphereGeometry( r, slices, rings );
+  return new THREE.SphereBufferGeometry( r, slices, rings );
 }
 
 function shell ( r, slices, rings, phi, theta ) {
