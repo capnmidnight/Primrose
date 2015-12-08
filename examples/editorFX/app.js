@@ -93,9 +93,11 @@ function StartDemo () {
     if ( ps.length === 3 ) {
       setPointer( ps[1].point, ps[0].point, ps[2].point, p );
       app.pointer.material.color.setRGB( 0, 1, 0 );
+      app.pointer.material.emissive.setRGB(0, 0.25, 0);
     }
     else {
       app.pointer.material.color.setRGB( 1, 0, 0 );
+      app.pointer.material.emissive.setRGB(0.25, 0, 0);
     }
   }
 
@@ -124,9 +126,11 @@ function StartDemo () {
       ed.editor.startPointer(x, y);
       ed.editor.endPointer();
       app.pointer.material.color.setRGB( 0, 1, 0 );
+      app.pointer.material.emissive.setRGB(0, 0.25, 0);
     }
     else {
       app.pointer.material.color.setRGB( 1, 0, 0 );
+      app.pointer.material.emissive.setRGB(0.25, 0, 0);
     }
   }
 var maxX = Number.MIN_VALUE, minX = Number.MAX_VALUE, maxY = Number.MIN_VALUE, minY = Number.MAX_VALUE;

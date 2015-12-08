@@ -288,6 +288,7 @@ Primrose.VRApplication = ( function () {
       
       if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
         this.pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
+        this.pointer.material.emissive.setRGB(0.25, 0, 0);
         this.scene.add(this.pointer);
         this.setSize( );
 
