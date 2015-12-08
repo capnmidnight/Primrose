@@ -1,4 +1,4 @@
-/* global isMobile, help */
+/* global isMobile, help, HMDVRDevice */
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
@@ -10,18 +10,21 @@ function isFullScreenMode () {
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( vrDisplay ) {
+  if ( window.HMDVRDevice && vrDisplay && vrDisplay instanceof HMDVRDevice) {
     fullScreenParam = {vrDisplay: vrDisplay};
   }
-
+  
   if ( elem.webkitRequestFullscreen && fullScreenParam ) {
     elem.webkitRequestFullscreen( fullScreenParam );
   }
   else if ( elem.webkitRequestFullscreen && !fullScreenParam ) {
     elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
   }
-  else if ( elem.mozRequestFullScreen ) {
+  else if ( elem.mozRequestFullScreen && fullScreenParam ) {
     elem.mozRequestFullScreen( fullScreenParam );
+  }
+  else if ( elem.mozRequestFullScreen && !fullScreenParam ) {
+    elem.mozRequestFullScreen( );
   }
   else if ( elem.requestFullscreen ) {
     elem.requestFullscreen();
