@@ -46,7 +46,6 @@ Primrose.VRApplication = ( function () {
     this.lt = 0;
     this.frame = 0;
     this.enableMousePitch = true;
-    this.currentUser = null;
     this.world = new CANNON.World();
     this.world.defaultContactMaterial.friction = 0.2;
     this.world.gravity.set( 0, -this.options.gravity, 0 );
@@ -286,7 +285,7 @@ Primrose.VRApplication = ( function () {
     function waitForResources ( t ) {
       this.lt = t;
       
-      if ( this.camera && this.scene && this.currentUser && this.buttonFactory && this.buttonFactory.template ) {
+      if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
         this.pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
         this.pointer.material.emissive.setRGB(0.25, 0, 0);
         this.scene.add(this.pointer);
@@ -653,11 +652,6 @@ Primrose.VRApplication = ( function () {
     }
 
     this.camera.position.y += this.avatarHeight;
-    
-    FORWARD.set(0, 0, -1);
-    FORWARD.applyQuaternion(this.camera.quaternion);
-    this.pointer.position.copy(this.camera.position);
-    this.pointer.position.add(FORWARD);
 
     //
     // do collision detection
