@@ -47,7 +47,7 @@ function StartDemo () {
         .set( 0, 0, -1 )
         .applyQuaternion( app.camera.quaternion )
         .add( app.camera.position );
-    if ( projectPointer( pointer.position, ed ) ) {
+    if ( projectPointer( pointer.position, app.camera.position, ed ) ) {
       pointer.material.color.setRGB( 0, 1, 0 );
       pointer.material.emissive.setRGB( 0, 0.25, 0 );
     }
@@ -59,7 +59,7 @@ function StartDemo () {
 
 
 // this currently only works for objects that are roughly aligned to face down the Z axis.
-  function projectPointer ( p, obj ) {
+  function projectPointer ( p, from, obj ) {
     var fs = obj.geometry.faces,
         // We have to transform the vertices of the geometry into world-space
         // coordinations, because the object they are on could be rotated or
@@ -78,8 +78,8 @@ function StartDemo () {
       var f = fs[i],
           odd = ( i % 2 ) === 1,
           v0 = verts[odd ? f.b : f.a],
-          a = new THREE.Vector3().subVectors( v0, app.camera.position ).normalize(),
-          b = new THREE.Vector3().subVectors( p, app.camera.position ).normalize(),
+          a = new THREE.Vector3().subVectors( v0, from ).normalize(),
+          b = new THREE.Vector3().subVectors( p, from ).normalize(),
           angle = Math.acos( a.dot( b ) );
       if ( angle < minAngle ) {
         minAngle = angle;
