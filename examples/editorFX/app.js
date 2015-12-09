@@ -1,6 +1,6 @@
 /* global THREE, Primrose */
 
-var app, ed, pointer;
+var app, ed, ed2, pointer;
 function StartDemo () {
   app = new Primrose.VRApplication(
       "Codevember", {
@@ -29,7 +29,16 @@ function StartDemo () {
           fontSize: 20
         } );
     ed.editor.value = StartDemo.toString();
-    ed.editor.focus();
+    
+    ed2 = makeEditor(
+        app.scene, null, "textEditor2",
+        1, 1,
+        0, 0, 3,
+        0, 0, 0, {
+          tokenizer: Primrose.Text.Grammars.JavaScript,
+          fontSize: 20
+        } );
+    ed2.editor.value = StartDemo.toString();
 
     pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
     pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -47,7 +56,7 @@ function StartDemo () {
         .set( 0, 0, -1 )
         .applyQuaternion( app.camera.quaternion )
         .add( app.camera.position );
-    if ( projectPointer( pointer.position, app.camera.position, ed ) ) {
+    if ( projectPointer( pointer.position, app.camera.position, [ ed,ed2 ] ) ) {
       pointer.material.color.setRGB( 0, 1, 0 );
       pointer.material.emissive.setRGB( 0, 0.25, 0 );
     }
@@ -59,46 +68,64 @@ function StartDemo () {
 
 
 // this currently only works for objects that are roughly aligned to face down the Z axis.
-  function projectPointer ( p, from, obj ) {
-    var fs = obj.geometry.faces,
-        // We have to transform the vertices of the geometry into world-space
-        // coordinations, because the object they are on could be rotated or
-        // positioned somewhere else.
-        verts = obj.geometry.vertices.map( function ( v ) {
-          return v.clone()
-              .applyMatrix4( obj.matrix );
-        } ),
+  function projectPointer ( p, from, objs ) {
+    if ( !( objs instanceof Array ) ) {
+      objs = [ objs ];
+    }
+    var minObj = null,
         // There is currently no selected face
-        faceIndex = null,
+        minFaceIndex = null,
         // We set minAngle to a low value to require the pointer to get close to
         // the object before we project onto it.
-        minAngle = 0.1;
-    // Find the face that is closest to the pointer
-    for ( var i = 0; i < fs.length; ++i ) {
-      var f = fs[i],
-          odd = ( i % 2 ) === 1,
-          v0 = verts[odd ? f.b : f.a],
-          a = new THREE.Vector3().subVectors( v0, from ).normalize(),
-          b = new THREE.Vector3().subVectors( p, from ).normalize(),
-          angle = Math.acos( a.dot( b ) );
-      if ( angle < minAngle ) {
-        minAngle = angle;
-        faceIndex = i;
+        minAngle = 0.1,
+        // We set minDist to a high value to make sure we capture everything.
+        minDist = Number.MAX_VALUE,
+        minVerts = null;
+    for ( var j = 0; j < objs.length; ++j ) {
+      var obj = objs[j];
+      if ( obj.geometry.vertices ) {
+        var faces = obj.geometry.faces,
+            // We have to transform the vertices of the geometry into world-space
+            // coordinations, because the object they are on could be rotated or
+            // positioned somewhere else.
+            verts = obj.geometry.vertices.map( function ( v ) {
+              return v.clone()
+                  .applyMatrix4( obj.matrix );
+            } );
+        // Find the face that is closest to the pointer
+        for ( var i = 0; i < faces.length; ++i ) {
+          var face = faces[i],
+              odd = ( i % 2 ) === 1,
+              v0 = verts[odd ? face.b : face.a],
+              a = new THREE.Vector3().subVectors( v0, from ).normalize(),
+              b = new THREE.Vector3().subVectors( p, from ).normalize(),
+              dist = p.distanceToSquared(v0),
+              angle = Math.acos( a.dot( b ) );
+          if ( angle < minAngle && dist < minDist ) {
+            minObj = obj;
+            minDist = dist;
+            minAngle = angle;
+            minFaceIndex = i;
+            minVerts = verts;
+          }
+        }
       }
     }
-    if ( faceIndex !== null ) {
-      var f = fs[faceIndex],
+
+    if ( minObj !== null && minFaceIndex !== null ) {
+      var faces = minObj.geometry.faces,
+          face = faces[minFaceIndex],
           // We need to know the arity of the face because we will be building
           // a pair of axis vectors and we need to know which one is the "middle"
           // vertex.
-          odd = ( faceIndex % 2 ) === 1,
+          odd = ( minFaceIndex % 2 ) === 1,
           // I had to determine this order by trial and error, but now it looks
           // like it's a basic rotation, where the last two points of the previou
           // polygon are used as the first two points of the next polygon, what
           // is called a "Triangle Strip".
-          v0 = verts[odd ? f.b : f.a],
-          v1 = verts[odd ? f.c : f.b],
-          v2 = verts[odd ? f.a : f.c],
+          v0 = minVerts[odd ? face.b : face.a],
+          v1 = minVerts[odd ? face.c : face.b],
+          v2 = minVerts[odd ? face.a : face.c],
           // Two vectors define the axes of a plane, i.e. our polygon face
           axis0 = new THREE.Vector3().subVectors( v1, v0 ).normalize(),
           axis1 = new THREE.Vector3().subVectors( v2, v0 ).normalize(),
@@ -139,7 +166,7 @@ function StartDemo () {
         // Now, construct a new plane based on the UV coordinates for the face.
         // We want to figure out where in the texture lies a coordinate that is
         // similar to how the pointer currently relates to the face.
-        var uvs = obj.geometry.faceVertexUvs[0][faceIndex],
+        var uvs = minObj.geometry.faceVertexUvs[0][minFaceIndex],
             uv0 = uvs[odd ? 1 : 0],
             uv1 = uvs[odd ? 2 : 1],
             uv2 = uvs[odd ? 0 : 2];
@@ -166,15 +193,17 @@ function StartDemo () {
         q.y /= dy;
         q.add( uv0 );
 
-        if ( obj.editor ) {
+        if ( minObj.editor ) {
+          minObj.editor.focus();
           // At this point, the UV coord is scaled to a proporitional value, on
           // the range [0, 1] for the dimensions of the image used as the texture.
           // So we have to rescale it back out again. Also, the y coordinate is
           // flipped.
-          var textureU = Math.floor( obj.material.map.image.width * q.x ),
-              textureV = Math.floor( obj.material.map.image.height * ( 1 - q.y ) );
-          obj.editor.startPointer( textureU, textureV );
-          obj.editor.endPointer();
+          var txt = minObj.material.map.image,
+              textureU = Math.floor( txt.width * q.x ),
+              textureV = Math.floor( txt.height * ( 1 - q.y ) );
+          minObj.editor.startPointer( textureU, textureV );
+          minObj.editor.endPointer();
         }
 
         return true;

@@ -191,7 +191,7 @@ function quad ( w, h, s, t ) {
   if ( h === undefined ) {
     h = w;
   }
-  return new THREE.PlaneBufferGeometry( w, h );
+  return new THREE.PlaneGeometry( w, h, s, t );
 }
 
 function hub ( ) {
