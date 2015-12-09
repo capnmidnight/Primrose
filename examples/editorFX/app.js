@@ -29,7 +29,7 @@ function StartDemo () {
           fontSize: 20
         } );
     ed.editor.value = StartDemo.toString();
-    
+
     ed2 = makeEditor(
         app.scene, null, "textEditor2",
         1, 1,
@@ -56,8 +56,25 @@ function StartDemo () {
         .set( 0, 0, -1 )
         .applyQuaternion( app.camera.quaternion )
         .add( app.camera.position );
-    
-    if ( projectPointer( pointer.position, app.camera.position, [ ed,ed2 ] ) ) {
+
+    var hit = projectPointer( pointer.position, app.camera.position, [ ed, ed2 ] );
+    if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
+      if ( hit.object.editor ) {
+        // At this point, the UV coord is scaled to a proporitional value, on
+        // the range [0, 1] for the dimensions of the image used as the texture.
+        // So we have to rescale it back out again. Also, the y coordinate is
+        // flipped.
+        var txt = hit.object.material.map.image,
+            textureU = Math.floor( txt.width * hit.point.x ),
+            textureV = Math.floor( txt.height * ( 1 - hit.point.y ) );
+        hit.object.editor.focus();
+        hit.object.editor.startPointer( textureU, textureV );
+        hit.object.editor.endPointer();
+      }
+
+      // move the demo pointer into place on the surface of the face
+      pointer.position.sub( hit.axis.clone().multiplyScalar( hit.distance ) )
+          .add( hit.axis.multiplyScalar( 0.01 ) );
       pointer.material.color.setRGB( 0, 1, 0 );
       pointer.material.emissive.setRGB( 0, 0.25, 0 );
     }
@@ -66,7 +83,6 @@ function StartDemo () {
       pointer.material.emissive.setRGB( 0.25, 0, 0 );
     }
   } );
-
   function projectPointer ( p, from, objs ) {
     if ( !( objs instanceof Array ) ) {
       objs = [ objs ];
@@ -95,21 +111,21 @@ function StartDemo () {
         for ( var i = 0; i < faces.length; ++i ) {
           var face = faces[i],
               odd = ( i % 2 ) === 1,
-          v0 = verts[odd ? face.b : face.a],
-          v1 = verts[odd ? face.c : face.b],
-          v2 = verts[odd ? face.a : face.c],
+              v0 = verts[odd ? face.b : face.a],
+              v1 = verts[odd ? face.c : face.b],
+              v2 = verts[odd ? face.a : face.c],
               a = new THREE.Vector3().subVectors( v0, from ).normalize(),
               b = new THREE.Vector3().subVectors( v1, from ).normalize(),
               c = new THREE.Vector3().subVectors( v2, from ).normalize(),
               d = new THREE.Vector3().subVectors( p, from ).normalize(),
               dist = Math.min(
-                p.distanceToSquared(v0),
-                p.distanceToSquared(v1),
-                p.distanceToSquared(v2)),
+                  p.distanceToSquared( v0 ),
+                  p.distanceToSquared( v1 ),
+                  p.distanceToSquared( v2 ) ),
               angle = Math.min(
-                Math.acos( a.dot( d ) ),
-                Math.acos( b.dot( d ) ),
-                Math.acos( c.dot( d ) ));
+                  Math.acos( a.dot( d ) ),
+                  Math.acos( b.dot( d ) ),
+                  Math.acos( c.dot( d ) ) );
           if ( angle < minAngle && dist < minDist ) {
             minObj = obj;
             minDist = dist;
@@ -163,10 +179,6 @@ function StartDemo () {
             // determine how far away from the plane the point lies
             dist = axis2.dot( q );
 
-        // move the demo pointer into place on the surface of the face
-        p.sub( axis2.clone().multiplyScalar( dist ) )
-            .add( axis2.multiplyScalar( 0.01 ) );
-
         // inverting the plane matrix will then let us apply it to the vector in
         // question to figure out the coordinates the point has in that plane.
         m.getInverse( m );
@@ -196,29 +208,20 @@ function StartDemo () {
         var dx = Math.max( Math.abs( axis0.x ), Math.abs( axis1.x ) ),
             dy = Math.max( Math.abs( axis0.y ), Math.abs( axis1.y ) );
 
-        // This is it, we've got our point now! We're almost done.
+        // This is it, we've got our point now!
         q.applyMatrix4( m );
         q.x /= dx;
         q.y /= dy;
         q.add( uv0 );
 
-        if ( minObj.editor ) {
-          minObj.editor.focus();
-          // At this point, the UV coord is scaled to a proporitional value, on
-          // the range [0, 1] for the dimensions of the image used as the texture.
-          // So we have to rescale it back out again. Also, the y coordinate is
-          // flipped.
-          var txt = minObj.material.map.image,
-              textureU = Math.floor( txt.width * q.x ),
-              textureV = Math.floor( txt.height * ( 1 - q.y ) );
-          minObj.editor.startPointer( textureU, textureV );
-          minObj.editor.endPointer();
-        }
-
-        return true;
+        return {
+          object: minObj,
+          point: q,
+          distance: dist,
+          axis: axis2
+        };
       }
     }
-    return false;
   }
 
   app.start();
