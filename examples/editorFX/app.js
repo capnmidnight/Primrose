@@ -73,26 +73,26 @@ function StartDemo () {
     if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
       if ( hit.object.editor ) {
         var editor = hit.object.editor,
-        // At this point, the UV coord is scaled to a proporitional value, on
-        // the range [0, 1] for the dimensions of the image used as the texture.
-        // So we have to rescale it back out again. Also, the y coordinate is
-        // flipped.
+            // At this point, the UV coord is scaled to a proporitional value, on
+            // the range [0, 1] for the dimensions of the image used as the texture.
+            // So we have to rescale it back out again. Also, the y coordinate is
+            // flipped.
             txt = hit.object.material.map.image,
             textureU = Math.floor( txt.width * hit.point.x ),
             textureV = Math.floor( txt.height * ( 1 - hit.point.y ) );
         if ( buttons > 0 ) {
-          if(lastButtons === 0){
-            if(!editor.focused){
+          if ( lastButtons === 0 ) {
+            if ( !editor.focused ) {
               editor.focus();
               lastEditor = editor;
             }
             editor.startPointer( textureU, textureV );
           }
-          else{
+          else {
             editor.movePointer( textureU, textureV );
           }
         }
-        else if(lastButtons > 0) {
+        else if ( lastButtons > 0 ) {
           editor.endPointer();
         }
       }
