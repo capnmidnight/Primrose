@@ -39,6 +39,7 @@ function StartDemo () {
           fontSize: 20
         } );
     ed2.editor.value = StartDemo.toString();
+    ed2.rotation.y = Math.PI / 2;
 
     pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
     pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -51,11 +52,11 @@ function StartDemo () {
     t += dt * 0.001;
     app.scene.Ground.rotation.x = t * 100;
 
-
     pointer.position
         .set( 0, 0, -1 )
         .applyQuaternion( app.camera.quaternion )
         .add( app.camera.position );
+    
     if ( projectPointer( pointer.position, app.camera.position, [ ed,ed2 ] ) ) {
       pointer.material.color.setRGB( 0, 1, 0 );
       pointer.material.emissive.setRGB( 0, 0.25, 0 );
@@ -66,8 +67,6 @@ function StartDemo () {
     }
   } );
 
-
-// this currently only works for objects that are roughly aligned to face down the Z axis.
   function projectPointer ( p, from, objs ) {
     if ( !( objs instanceof Array ) ) {
       objs = [ objs ];
