@@ -95,11 +95,21 @@ function StartDemo () {
         for ( var i = 0; i < faces.length; ++i ) {
           var face = faces[i],
               odd = ( i % 2 ) === 1,
-              v0 = verts[odd ? face.b : face.a],
+          v0 = verts[odd ? face.b : face.a],
+          v1 = verts[odd ? face.c : face.b],
+          v2 = verts[odd ? face.a : face.c],
               a = new THREE.Vector3().subVectors( v0, from ).normalize(),
-              b = new THREE.Vector3().subVectors( p, from ).normalize(),
-              dist = p.distanceToSquared(v0),
-              angle = Math.acos( a.dot( b ) );
+              b = new THREE.Vector3().subVectors( v1, from ).normalize(),
+              c = new THREE.Vector3().subVectors( v2, from ).normalize(),
+              d = new THREE.Vector3().subVectors( p, from ).normalize(),
+              dist = Math.min(
+                p.distanceToSquared(v0),
+                p.distanceToSquared(v1),
+                p.distanceToSquared(v2)),
+              angle = Math.min(
+                Math.acos( a.dot( d ) ),
+                Math.acos( b.dot( d ) ),
+                Math.acos( c.dot( d ) ));
           if ( angle < minAngle && dist < minDist ) {
             minObj = obj;
             minDist = dist;
