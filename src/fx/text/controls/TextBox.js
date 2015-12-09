@@ -87,7 +87,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     }
 
     function setCursorXY ( cursor, x, y ) {
-      self.changed = true;
       pointer.set( x, y );
       renderer.pixel2cell( pointer, self.scroll, gridBounds );
       var gx = pointer.x - self.scroll.x;
@@ -213,7 +212,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     function makeCursorCommand ( name ) {
       var method = name.toLowerCase();
       self["cursor" + name] = function ( tokenRows, cursor ) {
-        self.changed = true;
         cursor[method]( tokenRows );
         self.scrollIntoView( cursor );
       };
@@ -382,13 +380,11 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.cursorPageUp = function ( tokenRows, cursor ) {
-      this.changed = true;
       cursor.incY( -gridBounds.height, tokenRows );
       this.scrollIntoView( cursor );
     };
 
     this.cursorPageDown = function ( tokenRows, cursor ) {
-      this.changed = true;
       cursor.incY( gridBounds.height, tokenRows );
       this.scrollIntoView( cursor );
     };
@@ -411,7 +407,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setWordWrap = function ( v ) {
       wordWrap = v || false;
-      this.forceUpdate();
     };
 
     this.getWordWrap = function () {
@@ -420,7 +415,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setShowLineNumbers = function ( v ) {
       showLineNumbers = v;
-      this.forceUpdate();
     };
 
     this.getShowLineNumbers = function () {
@@ -429,7 +423,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setShowScrollBars = function ( v ) {
       showScrollBars = v;
-      this.forceUpdate();
     };
 
     this.getShowScrollBars = function () {
@@ -440,7 +433,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       theme = t || Primrose.Text.Themes.Default;
       renderer.setTheme( theme );
       renderer.resize();
-      this.changed = true;
       this.update();
     };
 
@@ -449,12 +441,10 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.setDeadKeyState = function ( st ) {
-      this.changed = true;
       deadKeyState = st || "";
     };
 
     this.setOperatingSystem = function ( os ) {
-      this.changed = true;
       operatingSystem = os || ( isOSX ? Primrose.Text.OperatingSystems.OSX :
           Primrose.Text.OperatingSystems.Windows );
       refreshCommandPack();
@@ -465,13 +455,12 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.setCommandSystem = function ( cmd ) {
-      this.changed = true;
       CommandSystem = cmd || Primrose.Text.CommandPacks.TextEditor;
       refreshCommandPack();
     };
 
     this.setSize = function ( w, h ) {
-      this.changed = renderer.setSize( w, h );
+      renderer.setSize( w, h );
     };
 
     this.getWidth = function () {
@@ -483,7 +472,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.setCodePage = function ( cp ) {
-      this.changed = true;
       var key,
           code,
           char,
@@ -550,7 +538,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.setTokenizer = function ( tk ) {
-      this.changed = true;
       tokenizer = tk || Primrose.Text.Grammars.JavaScript;
       if ( history && history.length > 0 ) {
         refreshTokens();
@@ -615,11 +602,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       history.push( lines );
       historyFrame = history.length - 1;
       refreshTokens();
-      this.forceUpdate();
     };
 
     this.redo = function () {
-      this.changed = true;
       if ( historyFrame < history.length - 1 ) {
         ++historyFrame;
       }
@@ -628,7 +613,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.undo = function () {
-      this.changed = true;
       if ( historyFrame > 0 ) {
         --historyFrame;
       }
@@ -664,19 +648,19 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.increaseFontSize = function () {
       ++theme.fontSize;
-      this.changed = renderer.resize();
+      renderer.resize();
     };
 
     this.decreaseFontSize = function () {
       if ( theme.fontSize > 1 ) {
         --theme.fontSize;
-        this.changed = renderer.resize();
+        renderer.resize();
       }
     };
 
     this.setFontSize = function ( v ) {
       theme.fontSize = v;
-      this.changed = renderer.resize();
+      renderer.resize();
     };
 
     this.cell2i = function ( x, y ) {
@@ -712,7 +696,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
       clampScroll();
       evt.preventDefault();
-      this.forceUpdate();
     };
 
     this.startPicking = function ( gl, x, y ) {
@@ -903,10 +886,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.update = function () {
       if ( renderer.hasResized() ) {
-        this.changed = renderer.resize();
+        renderer.resize();
       }
-
-      Primrose.Text.Control.prototype.update.call( this );
     };
 
     this.render = function () {
@@ -921,8 +902,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             this.scroll,
             this.focused, showLineNumbers, showScrollBars, wordWrap,
             lineCountWidth );
-
-        Primrose.Text.Control.prototype.render.call( this );
       }
     };
 
