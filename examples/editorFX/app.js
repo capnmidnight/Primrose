@@ -78,9 +78,9 @@ function StartDemo () {
       var f = fs[i],
           odd = ( i % 2 ) === 1,
           v0 = verts[odd ? f.b : f.a],
-          a = new THREE.Vector3().subVectors( v0, app.camera.position ),
-          b = new THREE.Vector3().subVectors( p, app.camera.position ),
-          angle = Math.acos( a.dot( b ) / a.length() );
+          a = new THREE.Vector3().subVectors( v0, app.camera.position ).normalize(),
+          b = new THREE.Vector3().subVectors( p, app.camera.position ).normalize(),
+          angle = Math.acos( a.dot( b ) );
       if ( angle < minAngle ) {
         minAngle = angle;
         faceIndex = i;
