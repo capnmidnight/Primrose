@@ -76,7 +76,7 @@ function StartDemo () {
         minFaceIndex = null,
         // We set minAngle to a low value to require the pointer to get close to
         // the object before we project onto it.
-        minAngle = 0.1,
+        minAngle = Number.MAX_VALUE,
         // We set minDist to a high value to make sure we capture everything.
         minDist = Number.MAX_VALUE,
         minVerts = null;
