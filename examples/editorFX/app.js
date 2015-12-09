@@ -83,9 +83,6 @@ function StartDemo () {
         if ( buttons > 0 ) {
           if(lastButtons === 0){
             if(!editor.focused){
-              if(lastEditor){
-                lastEditor.blur();
-              }
               editor.focus();
               lastEditor = editor;
             }
