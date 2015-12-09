@@ -23,6 +23,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         strictSize = options.size,
         rowCache = {},
         lastLines = null,
+        lastFocused = false,
         lastScrollY = -1,
         lastScrollX = -1,
         lastFrontCursorI = -1,
@@ -364,7 +365,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           textUnchanged = lastLines[i] === lines[i];
         }
         
-        if ( !textUnchanged || !cursorUnchanged ) {
+        if ( !textUnchanged || !cursorUnchanged || focused !== lastFocused ) {
           renderCanvasBackground( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused );
           
           if(!textUnchanged){
@@ -386,6 +387,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           lastScrollX = scroll.x;
           lastFrontCursorI = frontCursor.i;
           lastBackCursorI = backCursor.i;
+          lastFocused = focused;
         }
       }
     };

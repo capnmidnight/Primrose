@@ -397,9 +397,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       return renderer.getDOMElement();
     };
 
-    this.focus = Primrose.Text.Control.prototype.focus.bind( this );
-    this.blur = Primrose.Text.Control.prototype.blur.bind( this );
-
     this.getRenderer = function () {
       return renderer;
     };

@@ -9,6 +9,10 @@ function StartDemo () {
       }
   );
 
+  var buttons = 0,
+      lastButtons = 0,
+      lastEditor = null;
+
   app.addEventListener( "ready", function () {
     app.scene.Light1.intensity *= 2;
     app.scene.Light1.distance *= 2;
@@ -19,6 +23,14 @@ function StartDemo () {
     app.scene.Ground.material.shading = THREE.FlatShading;
     app.scene.Ground.material.needsUpdate = true;
     app.scene.Text.material.emissive.setRGB( 1, 1, 1 );
+
+    app.renderer.domElement.addEventListener( "mousedown", function ( evt ) {
+      buttons = evt.buttons;
+    } );
+
+    app.renderer.domElement.addEventListener( "mouseup", function ( evt ) {
+      buttons = evt.buttons;
+    } );
 
     ed = makeEditor(
         app.scene, null, "textEditor",
@@ -60,16 +72,32 @@ function StartDemo () {
     var hit = projectPointer( pointer.position, app.camera.position, [ ed, ed2 ] );
     if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
       if ( hit.object.editor ) {
+        var editor = hit.object.editor,
         // At this point, the UV coord is scaled to a proporitional value, on
         // the range [0, 1] for the dimensions of the image used as the texture.
         // So we have to rescale it back out again. Also, the y coordinate is
         // flipped.
-        var txt = hit.object.material.map.image,
+            txt = hit.object.material.map.image,
             textureU = Math.floor( txt.width * hit.point.x ),
             textureV = Math.floor( txt.height * ( 1 - hit.point.y ) );
-        hit.object.editor.focus();
-        hit.object.editor.startPointer( textureU, textureV );
-        hit.object.editor.endPointer();
+        if ( buttons > 0 ) {
+          if(lastButtons === 0){
+            if(!editor.focused){
+              if(lastEditor){
+                lastEditor.blur();
+              }
+              editor.focus();
+              lastEditor = editor;
+            }
+            editor.startPointer( textureU, textureV );
+          }
+          else{
+            editor.movePointer( textureU, textureV );
+          }
+        }
+        else if(lastButtons > 0) {
+          editor.endPointer();
+        }
       }
 
       // move the demo pointer into place on the surface of the face
@@ -82,6 +110,7 @@ function StartDemo () {
       pointer.material.color.setRGB( 1, 0, 0 );
       pointer.material.emissive.setRGB( 0.25, 0, 0 );
     }
+    lastButtons = buttons;
   } );
   function projectPointer ( p, from, objs ) {
     if ( !( objs instanceof Array ) ) {
@@ -103,10 +132,12 @@ function StartDemo () {
             // We have to transform the vertices of the geometry into world-space
             // coordinations, because the object they are on could be rotated or
             // positioned somewhere else.
+            // We should maybe cache this data at some point.
             verts = obj.geometry.vertices.map( function ( v ) {
               return v.clone()
                   .applyMatrix4( obj.matrix );
             } );
+
         // Find the face that is closest to the pointer
         for ( var i = 0; i < faces.length; ++i ) {
           var face = faces[i],
@@ -114,14 +145,22 @@ function StartDemo () {
               v0 = verts[odd ? face.b : face.a],
               v1 = verts[odd ? face.c : face.b],
               v2 = verts[odd ? face.a : face.c],
+              // Shoot a vector from the camera to each of the three corners 
+              // of the mesh face
               a = new THREE.Vector3().subVectors( v0, from ).normalize(),
               b = new THREE.Vector3().subVectors( v1, from ).normalize(),
               c = new THREE.Vector3().subVectors( v2, from ).normalize(),
-              d = new THREE.Vector3().subVectors( p, from ).normalize(),
+              // Shoot a vector to the selector point
+              d = new THREE.Vector3().subVectors( p, from ),
+              // Find the distance to the closest point in the polygon
               dist = Math.min(
                   p.distanceToSquared( v0 ),
                   p.distanceToSquared( v1 ),
                   p.distanceToSquared( v2 ) ),
+              // Find the minimal displacement angle between each of the
+              // vectors to the corners and the vector to the pointer. Basically,
+              // how "far" does the user have to look to get from the pointer
+              // to each of the corners.
               angle = Math.min(
                   Math.acos( a.dot( d ) ),
                   Math.acos( b.dot( d ) ),
