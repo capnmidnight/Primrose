@@ -36,7 +36,6 @@ function init () {
   function toEnd (  ) {
     editor.selectionStart = editor.selectionEnd = editor.value.length;
     editor.scrollIntoView( editor.frontCursor );
-    editor.forceUpdate();
   }
 
   function done () {
@@ -122,6 +121,9 @@ function init () {
     }
   } );
 
-  var container = document.getElementById( "editorContainer" );
-  container.appendChild( editor.getDOMElement() );
+  document.body.appendChild( editor.getDOMElement() );
+
+  
+  setInterval(editor.render.bind(editor), 25);
+  //editor.render();
 }
