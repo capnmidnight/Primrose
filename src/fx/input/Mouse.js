@@ -132,60 +132,70 @@ Primrose.Input.Mouse = ( function () {
   MouseInput.AXES = [ "X", "Y", "Z", "BUTTONS" ];
   Primrose.Input.ButtonAndAxis.inherit( MouseInput );
 
+  function transform ( matrix, v ) {
+    return v.clone()
+        .applyMatrix4( matrix );
+  }
+
   MouseInput.projectPointer = function ( p, from, objs ) {
     if ( !( objs instanceof Array ) ) {
       objs = [ objs ];
     }
-    var minObj = null,
-        // There is currently no selected face
-        minFaceIndex = null,
-        // We set minAngle to a low value to require the pointer to get close to
+    var // We set minAngle to a low value to require the pointer to get close to
         // the object before we project onto it.
         minAngle = Number.MAX_VALUE,
         // We set minDist to a high value to make sure we capture everything.
         minDist = Number.MAX_VALUE,
-        minVerts = null;
+        minObj,
+        // There is currently no selected face
+        minFaceIndex,
+        minVerts,
+        faces,
+        mesh,
+        face,
+        odd,
+        v0,
+        v1,
+        v2,
+        dist;
     for ( var j = 0; j < objs.length; ++j ) {
       var obj = objs[j];
-          mesh = obj.mesh || obj;
+      mesh = obj.mesh || obj;
       if ( mesh.visible && mesh.geometry.vertices ) {
-        var faces = mesh.geometry.faces,
-            // We have to transform the vertices of the geometry into world-space
-            // coordinations, because the object they are on could be rotated or
-            // positioned somewhere else.
-            // We should maybe cache this data at some point.
-            verts = mesh.geometry.vertices.map( function ( v ) {
-              return v.clone()
-                  .applyMatrix4( mesh.matrix );
-            } );
+        faces = mesh.geometry.faces;
+        // We have to transform the vertices of the geometry into world-space
+        // coordinations, because the object they are on could be rotated or
+        // positioned somewhere else.
+        // We should maybe cache this data at some point.
+        var verts = mesh.geometry.vertices.map( transform.bind( this, mesh.matrix ) );
 
         // Find the face that is closest to the pointer
         for ( var i = 0; i < faces.length; ++i ) {
-          var face = faces[i],
-              odd = ( i % 2 ) === 1,
-              v0 = verts[odd ? face.b : face.a],
-              v1 = verts[odd ? face.c : face.b],
-              v2 = verts[odd ? face.a : face.c],
-              // Shoot a vector from the camera to each of the three corners 
-              // of the mesh face
-              a = new THREE.Vector3().subVectors( v0, from ).normalize(),
+          face = faces[i];
+          odd = ( i % 2 ) === 1;
+          v0 = verts[odd ? face.b : face.a];
+          v1 = verts[odd ? face.c : face.b];
+          v2 = verts[odd ? face.a : face.c];
+          // Shoot a vector from the camera to each of the three corners 
+          // of the mesh face
+          var a = new THREE.Vector3().subVectors( v0, from ).normalize(),
               b = new THREE.Vector3().subVectors( v1, from ).normalize(),
               c = new THREE.Vector3().subVectors( v2, from ).normalize(),
               // Shoot a vector to the selector point
-              d = new THREE.Vector3().subVectors( p, from ),
-              // Find the distance to the closest point in the polygon
-              dist = Math.min(
-                  p.distanceToSquared( v0 ),
-                  p.distanceToSquared( v1 ),
-                  p.distanceToSquared( v2 ) ),
-              // Find the minimal displacement angle between each of the
-              // vectors to the corners and the vector to the pointer. Basically,
-              // how "far" does the user have to look to get from the pointer
-              // to each of the corners.
-              angle = Math.min(
-                  Math.acos( a.dot( d ) ),
-                  Math.acos( b.dot( d ) ),
-                  Math.acos( c.dot( d ) ) );
+              d = new THREE.Vector3().subVectors( p, from );
+          // Find the distance to the closest point in the polygon
+          dist = Math.min(
+              p.distanceToSquared( v0 ),
+              p.distanceToSquared( v1 ),
+              p.distanceToSquared( v2 ) );
+          // Find the minimal displacement angle between each of the
+          // vectors to the corners and the vector to the pointer. Basically,
+          // how "far" does the user have to look to get from the pointer
+          // to each of the corners.
+          var angle = Math.min(
+              Math.acos( a.dot( d ) ),
+              Math.acos( b.dot( d ) ),
+              Math.acos( c.dot( d ) ) );
           if ( angle < minAngle && dist < minDist ) {
             minObj = obj;
             minDist = dist;
@@ -198,22 +208,22 @@ Primrose.Input.Mouse = ( function () {
     }
 
     if ( minObj !== null && minFaceIndex !== null ) {
-      var mesh = minObj.mesh || minObj,
-          faces = mesh.geometry.faces,
-          face = faces[minFaceIndex],
-          // We need to know the arity of the face because we will be building
-          // a pair of axis vectors and we need to know which one is the "middle"
-          // vertex.
-          odd = ( minFaceIndex % 2 ) === 1,
-          // I had to determine this order by trial and error, but now it looks
-          // like it's a basic rotation, where the last two points of the previou
-          // polygon are used as the first two points of the next polygon, what
-          // is called a "Triangle Strip".
-          v0 = minVerts[odd ? face.b : face.a],
-          v1 = minVerts[odd ? face.c : face.b],
-          v2 = minVerts[odd ? face.a : face.c],
-          // Two vectors define the axes of a plane, i.e. our polygon face
-          axis0 = new THREE.Vector3().subVectors( v1, v0 ).normalize(),
+      mesh = minObj.mesh || minObj;
+      faces = mesh.geometry.faces;
+      face = faces[minFaceIndex];
+      // We need to know the arity of the face because we will be building
+      // a pair of axis vectors and we need to know which one is the "middle"
+      // vertex.
+      odd = ( minFaceIndex % 2 ) === 1;
+      // I had to determine this order by trial and error, but now it looks
+      // like it's a basic rotation, where the last two points of the previou
+      // polygon are used as the first two points of the next polygon, what
+      // is called a "Triangle Strip".
+      v0 = minVerts[odd ? face.b : face.a];
+      v1 = minVerts[odd ? face.c : face.b];
+      v2 = minVerts[odd ? face.a : face.c];
+      // Two vectors define the axes of a plane, i.e. our polygon face
+      var axis0 = new THREE.Vector3().subVectors( v1, v0 ).normalize(),
           axis1 = new THREE.Vector3().subVectors( v2, v0 ).normalize(),
           // The cross product of two non-parallel vectors is a new vector that
           // is perpendicular to both of the original vectors, AKA the face
@@ -236,9 +246,9 @@ Primrose.Input.Mouse = ( function () {
         // translate the point of interest into the reference frame of the
         // plane. We don't have to do any rotations because we are treating this
         // object as an infinitely small point.
-        var q = new THREE.Vector3().subVectors( p, v0 ),
-            // determine how far away from the plane the point lies
-            dist = axis2.dot( q );
+        var q = new THREE.Vector3().subVectors( p, v0 );
+        // determine how far away from the plane the point lies
+        dist = axis2.dot( q );
 
         // inverting the plane matrix will then let us apply it to the vector in
         // question to figure out the coordinates the point has in that plane.

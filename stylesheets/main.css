@@ -68,7 +68,7 @@ a:visited{
   color: rgb(255, 255, 255);
 }
 
-#outputContainer, #output, #infoContainer{
+#frontBuffer, #infoContainer{
   position: absolute;
   top: 0;
   left:0;
@@ -106,10 +106,6 @@ a:visited{
 
   footer, footer a, footer a:visited{
     color: #fff;
-  }
-
-  #outputContainer{
-    overflow-y: scroll;
   }
 }
 

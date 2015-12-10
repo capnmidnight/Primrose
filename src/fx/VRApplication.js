@@ -254,6 +254,7 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
     };
+    
     if ( this.options.disableAutoFullScreen ) {
       if ( this.options.regularFullScreenButton ) {
         this.options.regularFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
