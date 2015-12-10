@@ -36,9 +36,9 @@ Primrose.VRApplication = ( function ( ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = {ready: [ ], update: [ ]};
-    this.pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
+    this.pointer = textured( sphere( 0.01, 10, 10 ), 0xff0000 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
-    this.pointer.material.opacity = 0.5;
+    this.pointer.material.opacity = 0.75;
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
@@ -187,8 +187,8 @@ Primrose.VRApplication = ( function ( ) {
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
-        
-        this.camera.add(light(0xffffff, 1, 2, 0.5));
+
+        this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
 
         this.fire( "ready" );
         this.animate = this.animate.bind( this );
