@@ -90,7 +90,6 @@ function PrimroseDemo () {
         cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
         scene = new THREE.Scene( ),
         subScene = new THREE.Object3D( ),
-        pickingScene = new THREE.Scene( ),
         ctrls = findEverything( ),
         camera = new THREE.PerspectiveCamera( 50, ctrls.output.width /
             ctrls.output.height, 0.1, 1000 ),
@@ -175,7 +174,7 @@ function PrimroseDemo () {
         };
       }
 
-      setStereoSettings(vrParams);
+      setStereoSettings( vrParams );
     }
 
     if ( src === testDemo.toString( ) ) {
@@ -189,13 +188,13 @@ function PrimroseDemo () {
       src = lines.join( "\n" );
     }
 
-    var output = makeEditor( scene, pickingScene, "outputBox",
+    var output = makeEditor( scene, "outputBox",
         1, 0.25, 0, -0.59, 6.09, -Math.PI / 4, 0, 0,
         {
           readOnly: true,
           hideLineNumbers: true
         } ),
-        documentation = makeEditor( scene, pickingScene, "docBox",
+        documentation = makeEditor( scene, "docBox",
             1, 1, 0.85, 0, 6.35, 0, -Math.PI / 4, 0,
             {
               readOnly: true,
@@ -249,7 +248,7 @@ function PrimroseDemo () {
     txtRepeatS: texture repeat in S direction (default 1).\n\
     txtRepeat: texture repeat in T direction (default 1)"
             } ),
-        editor = makeEditor( scene, pickingScene, "textEditor",
+        editor = makeEditor( scene, "textEditor",
             1, 1, 0, 0, 6, 0, 0, 0,
             {
               tokenizer: Primrose.Text.Grammars.JavaScript,
@@ -310,6 +309,7 @@ function PrimroseDemo () {
     setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
 
     function onFullScreen ( elem, vrDisplay ) {
+      elem.requestPointerLock();
       requestFullScreen( elem, vrDisplay );
       history.pushState( null, "Primrose > full screen", "#fullscreen" );
     }
@@ -572,7 +572,7 @@ function PrimroseDemo () {
     function renderScene ( s, rt, fc ) {
       if ( inVR ) {
         if ( renderer.renderStereo ) {
-          console.log("rendering with stereo shim");
+          console.log( "rendering with stereo shim" );
           renderer.renderStereo( s, camera, stereoSettings, rt, fc );
         }
         else {
@@ -601,9 +601,14 @@ function PrimroseDemo () {
 
     function pick ( op ) {
       if ( lastEditor && lastEditor.focused ) {
-        renderScene( pickingScene, back, true );
-        lastEditor[op + "Picking"]( gl, pointerX, ctrls.output.height -
-            pointerY );
+        var hit = Primrose.Input.Mouse.projectPointer( pointer.position, camera.position, lastEditor );
+        if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
+          var editor = hit.object,
+              txt = editor.mesh.material.map.image,
+              textureU = Math.floor( txt.width * hit.point.x ),
+              textureV = Math.floor( txt.height * ( 1 - hit.point.y ) );
+          lastEditor[op + "Pointer"]( textureU, textureV );
+        }
       }
     }
 
@@ -676,7 +681,9 @@ function PrimroseDemo () {
       if ( lt ) {
         update( t - lt );
       }
-
+      output.render();
+      editor.render();
+      documentation.render();
       renderScene( scene );
       lt = t;
     }
