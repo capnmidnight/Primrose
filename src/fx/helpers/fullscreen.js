@@ -14,11 +14,8 @@ function requestFullScreen ( elem, vrDisplay ) {
     fullScreenParam = {vrDisplay: vrDisplay};
   }
   
-  if ( elem.webkitRequestFullscreen && fullScreenParam ) {
-    elem.webkitRequestFullscreen( fullScreenParam );
-  }
-  else if ( elem.webkitRequestFullscreen && !fullScreenParam ) {
-    elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
+  if ( elem.webkitRequestFullscreen ) {
+    elem.webkitRequestFullscreen( fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT );
   }
   else if ( elem.mozRequestFullScreen && fullScreenParam ) {
     elem.mozRequestFullScreen( fullScreenParam );
@@ -36,7 +33,21 @@ function requestFullScreen ( elem, vrDisplay ) {
 
 function exitFullScreen () {
   if ( isFullScreenMode() ) {
-    document.exitFullscreen();
+    if(document.exitFullscreen){
+      document.exitFullscreen();
+    }
+    else if(document.webkitExitFullscreen){
+      document.webkitExitFullscreen();
+    }
+    else if(document.webkitCancelFullScreen){
+      document.webkitCancelFullScreen();
+    }
+    else if(document.mozCancelFullScreen){
+      document.mozCancelFullScreen();
+    }
+    else if(document.msExitFullscreen){
+      document.msExitFullscreen();
+    }
   }
 }
 

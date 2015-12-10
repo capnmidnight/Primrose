@@ -143,6 +143,13 @@ Primrose.VRApplication = ( function ( ) {
     this.vr.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
     this.vr.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
 
+    window.addEventListener( "popstate", function ( evt ) {
+      if ( isFullScreenMode() ) {
+        exitFullScreen();
+        evt.preventDefault();        
+      }
+    }, true );
+
     //
     // restoring the options the user selected
     //
@@ -255,7 +262,10 @@ Primrose.VRApplication = ( function ( ) {
 
     function setVRMode ( evt ) {
       if ( this.vr.display ) {
-        this.inVR = isFullScreenMode( );
+        this.inVR = !!isFullScreenMode( );
+      }
+      if(!isFullScreenMode() && location.hash === "#fullscreen"){
+        location.hash = "";
       }
       this.setSize( );
     }
@@ -286,6 +296,7 @@ Primrose.VRApplication = ( function ( ) {
       else {
         requestFullScreen( this.ctrls.frontBuffer );
       }
+      history.pushState(null, document.title, "#fullscreen");
     }
   };
 
