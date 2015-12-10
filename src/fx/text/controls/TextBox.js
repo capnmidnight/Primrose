@@ -693,13 +693,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.readWheel = function ( evt ) {
-      this.wheel( evt.deltaY );
-      evt.preventDefault();
-    };
-
-    this.wheel = function ( z ) {
-      this.scroll.y += Math.floor( z / wheelScrollSpeed );
+      this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
       clampScroll();
+      evt.preventDefault();
     };
 
     this.startPointer = function ( x, y ) {

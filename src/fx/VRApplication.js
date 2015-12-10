@@ -95,6 +95,11 @@ Primrose.VRApplication = ( function ( ) {
       {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5},
       {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
+    window.addEventListener( "keydown", function ( evt ) {
+      if ( this.lastEditor ) {
+        this.lastEditor.keyDown( evt );
+      }
+    }.bind( this ), false );
     //
     // mouse input
     //
@@ -105,6 +110,11 @@ Primrose.VRApplication = ( function ( ) {
       {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5},
       {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5}
     ] );
+    window.addEventListener( "mousewheel", function ( evt ) {
+      if ( this.lastEditor ) {
+        this.lastEditor.readWheel( evt );
+      }
+    }.bind( this ), false );
     //
     // gamepad input
     //
@@ -269,6 +279,7 @@ Primrose.VRApplication = ( function ( ) {
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
+
   VRApplication.prototype.goFullScreen = function ( ) {
     this.mouse.requestPointerLock( );
     if ( !isFullScreenMode( ) ) {
@@ -280,16 +291,19 @@ Primrose.VRApplication = ( function ( ) {
       }
     }
   };
+
   VRApplication.prototype.addEventListener = function ( event, thunk ) {
     if ( this.listeners[event] ) {
       this.listeners[event].push( thunk );
     }
   };
+
   VRApplication.prototype.fire = function ( name, arg1, arg2, arg3, arg4 ) {
     for ( var i = 0; i < this.listeners[name].length; ++i ) {
       this.listeners[name][i]( arg1, arg2, arg3, arg4 );
     }
   };
+
   function addCell ( row, elem ) {
     if ( typeof elem === "string" ) {
       elem = document.createTextNode( elem );
@@ -357,6 +371,7 @@ Primrose.VRApplication = ( function ( ) {
       t.checked = false;
     }
   };
+
   VRApplication.prototype.setSize = function ( ) {
     var bounds = this.ctrls.frontBuffer.getBoundingClientRect( ),
         styleWidth = bounds.width,
@@ -384,22 +399,26 @@ Primrose.VRApplication = ( function ( ) {
       this.camera.updateProjectionMatrix( );
     }
   };
+
   VRApplication.prototype.connectGamepad = function ( id ) {
     if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
         "Would you like to use this gamepad? \"$1\"", id ) ) ) {
       this.gamepad.setGamepad( id );
     }
   };
+
   VRApplication.prototype.zero = function ( ) {
-    this.currentUser.position.set( 0, 0, 0 );
-    this.currentUser.velocity.set( 0, 0, 0 );
+    if ( !this.lastEditor ) {
+      this.currentUser.position.set( 0, 0, 0 );
+      this.currentUser.velocity.set( 0, 0, 0 );
+    }
     if ( this.inVR ) {
       this.vr.sensor.resetSensor( );
     }
   };
 
   VRApplication.prototype.jump = function ( ) {
-    if ( this.onground ) {
+    if ( this.onground && !this.lastEditor ) {
       this.currentUser.velocity.y += this.options.jumpHeight;
       this.onground = false;
     }
@@ -413,8 +432,7 @@ Primrose.VRApplication = ( function ( ) {
           0, 0, 0,
           0, 0, 0, {
             tokenizer: Primrose.Text.Grammars.JavaScript,
-            fontSize: 20,
-            keyEventSource: window
+            fontSize: 20
           } );
       this.editors.push( ed );
       return ed;
@@ -449,12 +467,15 @@ Primrose.VRApplication = ( function ( ) {
 
       heading = this.gamepad.getValue( "heading" ) +
           this.mouse.getValue( "heading" );
-      strafe = this.keyboard.getValue( "strafeRight" ) +
-          this.keyboard.getValue( "strafeLeft" ) +
-          this.gamepad.getValue( "strafe" );
-      drive = this.keyboard.getValue( "driveBack" ) +
-          this.keyboard.getValue( "driveForward" ) +
-          this.gamepad.getValue( "drive" );
+      strafe = this.gamepad.getValue( "strafe" );
+      drive = this.gamepad.getValue( "drive" );
+
+      if ( !this.lastEditor ) {
+        strafe += this.keyboard.getValue( "strafeRight" ) +
+            this.keyboard.getValue( "strafeLeft" );
+        drive += this.keyboard.getValue( "driveBack" ) +
+            this.keyboard.getValue( "driveForward" );
+      }
 
       if ( strafe || drive ) {
         len = drive * drive + strafe * strafe;
@@ -515,6 +536,7 @@ Primrose.VRApplication = ( function ( ) {
     if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y || hit.point.y > 1 ) {
       if ( this.lastEditor && lastButtons !== 0 ) {
         this.lastEditor.blur();
+        this.lastEditor = null;
       }
       this.pointer.material.color.setRGB( 1, 0, 0 );
       this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -531,15 +553,17 @@ Primrose.VRApplication = ( function ( ) {
           buttons = this.mouse.getValue( "BUTTONS" );
 
       if ( buttons > 0 ) {
+        if ( this.lastEditor && this.lastEditor !== editor ) {
+          this.lastEditor.blur();
+          this.lastEditor = null;
+        }
         if ( lastButtons !== buttons ) {
           editor.movePointer( textureU, textureV );
         }
         else {
           if ( !editor.focused ) {
-            if ( this.lastEditor ) {
-              this.lastEditor.blur();
-            }
             editor.focus();
+            this.lastEditor = editor;
           }
           editor.startPointer( textureU, textureV );
         }
@@ -547,7 +571,6 @@ Primrose.VRApplication = ( function ( ) {
       else if ( lastButtons !== 0 ) {
         editor.endPointer();
       }
-      this.lastEditor = editor;
 
 
       // move the demo pointer into place on the surface of the face
