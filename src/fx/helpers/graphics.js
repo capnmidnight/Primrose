@@ -150,6 +150,14 @@ function InsideSphereGeometry ( radius, widthSegments, heightSegments,
   }
 
   this.computeFaceNormals();
+  
+  for(var i = 0; i < this.faces.length; ++i){
+    var f = this.faces[i];
+    f.normal.multiplyScalar(-1);
+    for(var j = 0; j < f.vertexNormals.length; ++j){
+      f.vertexNormals[j].multiplyScalar(-1);
+    }
+  }
 
   this.boundingSphere = new THREE.Sphere( new THREE.Vector3(), radius );
 
@@ -323,7 +331,7 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
         shell.bind( this, 1, cellWidth, cellHeight ) :
         quad.bind( this, w, h, cellWidth, cellHeight );
 
-  t.mesh = textured( makeGeom(), t, true, options.opacity );
+  t.mesh = textured( makeGeom(), t, false, options.opacity );
   t.mesh.position.set( x, y, z );
   t.mesh.rotation.set( rx, ry, rz );
   scene.add( t.mesh );

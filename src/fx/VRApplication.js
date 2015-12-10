@@ -187,6 +187,8 @@ Primrose.VRApplication = ( function ( ) {
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
+        
+        this.camera.add(light(0xffffff, 1, 2, 0.5));
 
         this.fire( "ready" );
         this.animate = this.animate.bind( this );

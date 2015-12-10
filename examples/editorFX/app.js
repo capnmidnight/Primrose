@@ -73,7 +73,6 @@ function StartDemo () {
   log = function (  ) {
     if ( output ) {
       var msg = Array.prototype.join.call( arguments, ", " );
-      console.log(output);
       output.value += msg + "\n";
       output.selectionStart = output.selectionEnd = output.value.length;
       output.scrollIntoView( output.frontCursor );
