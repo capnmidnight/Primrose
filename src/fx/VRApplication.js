@@ -424,10 +424,10 @@ Primrose.VRApplication = ( function ( ) {
     }
   };
 
-  VRApplication.prototype.createElement = function ( elem ) {
+  VRApplication.prototype.createElement = function ( elem, id ) {
     if ( elem === "textarea" ) {
       var ed = makeEditor(
-          this.scene, "textEditor",
+          this.scene, id,
           1, 1,
           0, 0, 0,
           0, 0, 0, {
@@ -534,7 +534,7 @@ Primrose.VRApplication = ( function ( ) {
     var hit = Primrose.Input.Mouse.projectPointer( this.pointer.position, this.camera.position, this.editors ),
         lastButtons = this.mouse.getValue( "dButtons" );
     if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y || hit.point.y > 1 ) {
-      if ( this.lastEditor && lastButtons !== 0 ) {
+      if ( this.lastEditor && lastButtons > 0 ) {
         this.lastEditor.blur();
         this.lastEditor = null;
       }
@@ -568,7 +568,7 @@ Primrose.VRApplication = ( function ( ) {
           editor.startPointer( textureU, textureV );
         }
       }
-      else if ( lastButtons !== 0 ) {
+      else if ( lastButtons < 0 ) {
         editor.endPointer();
       }
 
