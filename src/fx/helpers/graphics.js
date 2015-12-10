@@ -287,10 +287,6 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     obj = geometry;
   }
 
-  if ( txt instanceof Primrose.Text.Controls.TextBox ) {
-    obj.editor = txt;
-  }
-
   return obj;
 }
 
@@ -312,7 +308,7 @@ function shell ( r, slices, rings, phi, theta ) {
   return geom;
 }
 
-function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, options ) {
+function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
   options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
   options.fontSize = options.fontSize || 30;
   options.theme = options.theme || Primrose.Text.Themes.Dark;
@@ -323,18 +319,14 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, option
   var t = new Primrose.Text.Controls.TextBox( id, options ),
       cellWidth = Math.round( 1024 * w / options.fontSize ),
       cellHeight = Math.round( 1024 * h / options.fontSize ),
-      makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, cellWidth, cellHeight ) : quad.bind( this, w, h, cellWidth, cellHeight ),
-      o = textured( makeGeom(), t, true, options.opacity );
+      makeGeom = ( id.indexOf( "textEditor" ) === 0 ) ?
+        shell.bind( this, 1, cellWidth, cellHeight ) :
+        quad.bind( this, w, h, cellWidth, cellHeight );
 
-  o.position.set( x, y, z );
-  o.rotation.set( rx, ry, rz );
-  scene.add( o );
-  if ( pickingScene ) {
-    var p = textured( makeGeom(), t.getRenderer( )
-        .getPickingTexture( ), true );
-    p.position.set( x, y, z );
-    p.rotation.set( rx, ry, rz );
-    pickingScene.add( p );
-  }
-  return o;
+  t.mesh = textured( makeGeom(), t, true, options.opacity );
+  t.mesh.position.set( x, y, z );
+  t.mesh.rotation.set( rx, ry, rz );
+  scene.add( t.mesh );
+
+  return t;
 }

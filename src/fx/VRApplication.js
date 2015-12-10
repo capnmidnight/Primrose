@@ -52,7 +52,6 @@ Primrose.VRApplication = ( function ( ) {
     this.audio = new Primrose.Output.Audio3D( );
     this.music = new Primrose.Output.Music( this.audio.context );
     this.temp = new THREE.Matrix4( );
-    this.pickingScene = new THREE.Scene( );
     this.currentUser = new THREE.Object3D( );
     this.currentUser.velocity = new THREE.Vector3( );
     this.vrParams = null;

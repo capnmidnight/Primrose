@@ -24,34 +24,34 @@ function StartDemo () {
     app.scene.Ground.material.needsUpdate = true;
     app.scene.Text.material.emissive.setRGB( 1, 1, 1 );
 
-    app.renderer.domElement.addEventListener( "mousedown", function ( evt ) {
+    window.addEventListener( "mousedown", function ( evt ) {
       buttons = evt.buttons;
-    } );
+    }, false );
 
-    app.renderer.domElement.addEventListener( "mouseup", function ( evt ) {
+    window.addEventListener( "mouseup", function ( evt ) {
       buttons = evt.buttons;
-    } );
+    }, false );
 
     ed = makeEditor(
-        app.scene, null, "textEditor",
+        app.scene, "textEditor",
         1, 1,
         0, 0, 2.5,
         0, 0, 0, {
           tokenizer: Primrose.Text.Grammars.JavaScript,
           fontSize: 20
         } );
-    ed.editor.value = StartDemo.toString();
+    ed.value = StartDemo.toString();
 
     ed2 = makeEditor(
-        app.scene, null, "textEditor2",
+        app.scene, "bleh",
         1, 1,
         0, 0, 3,
         0, 0, 0, {
           tokenizer: Primrose.Text.Grammars.JavaScript,
           fontSize: 20
         } );
-    ed2.editor.value = StartDemo.toString();
-    ed2.rotation.y = Math.PI / 2;
+    ed2.value = StartDemo.toString();
+    ed2.mesh.rotation.y = Math.PI / 2;
   } );
 
   var t = 0;
@@ -61,13 +61,13 @@ function StartDemo () {
 
     var hit = projectPointer( app.pointer.position, app.camera.position, [ ed, ed2 ] );
     if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
-      if ( hit.object.editor ) {
-        var editor = hit.object.editor,
+      if ( hit.object ) {
+        var editor = hit.object,
             // At this point, the UV coord is scaled to a proporitional value, on
             // the range [0, 1] for the dimensions of the image used as the texture.
             // So we have to rescale it back out again. Also, the y coordinate is
             // flipped.
-            txt = hit.object.material.map.image,
+            txt = hit.object.mesh.material.map.image,
             textureU = Math.floor( txt.width * hit.point.x ),
             textureV = Math.floor( txt.height * ( 1 - hit.point.y ) );
         if ( buttons > 0 ) {
@@ -113,16 +113,17 @@ function StartDemo () {
         minDist = Number.MAX_VALUE,
         minVerts = null;
     for ( var j = 0; j < objs.length; ++j ) {
-      var obj = objs[j];
-      if ( obj.geometry.vertices ) {
-        var faces = obj.geometry.faces,
+      var obj = objs[j],
+          mesh = obj.mesh || obj;
+      if ( mesh.geometry.vertices ) {
+        var faces = mesh.geometry.faces,
             // We have to transform the vertices of the geometry into world-space
             // coordinations, because the object they are on could be rotated or
             // positioned somewhere else.
             // We should maybe cache this data at some point.
-            verts = obj.geometry.vertices.map( function ( v ) {
+            verts = mesh.geometry.vertices.map( function ( v ) {
               return v.clone()
-                  .applyMatrix4( obj.matrix );
+                  .applyMatrix4( mesh.matrix );
             } );
 
         // Find the face that is closest to the pointer
@@ -164,7 +165,8 @@ function StartDemo () {
     }
 
     if ( minObj !== null && minFaceIndex !== null ) {
-      var faces = minObj.geometry.faces,
+      var mesh = minObj.mesh || minObj,
+          faces = mesh.geometry.faces,
           face = faces[minFaceIndex],
           // We need to know the arity of the face because we will be building
           // a pair of axis vectors and we need to know which one is the "middle"
@@ -213,7 +215,7 @@ function StartDemo () {
         // Now, construct a new plane based on the UV coordinates for the face.
         // We want to figure out where in the texture lies a coordinate that is
         // similar to how the pointer currently relates to the face.
-        var uvs = minObj.geometry.faceVertexUvs[0][minFaceIndex],
+        var uvs = mesh.geometry.faceVertexUvs[0][minFaceIndex],
             uv0 = uvs[odd ? 1 : 0],
             uv1 = uvs[odd ? 2 : 1],
             uv2 = uvs[odd ? 0 : 2];
