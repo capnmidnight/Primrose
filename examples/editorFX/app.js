@@ -70,7 +70,22 @@ function StartDemo () {
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
       cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
+      src = getSetting( "code", testDemo.toString( ) ),
       editorSphereY = 1.5;
+
+
+
+  if ( src === testDemo.toString( ) ) {
+    var lines = src.replace( "\r\n", "\n" )
+        .split( "\n" );
+    lines.pop( );
+    lines.shift( );
+    for ( var i = 0; i < lines.length; ++i ) {
+      lines[i] = lines[i].substring( 2 );
+    }
+    src = lines.join( "\n" );
+  }
+
   log = function (  ) {
     if ( output ) {
       var msg = Array.prototype.join.call( arguments, ", " );
