@@ -63,17 +63,19 @@ function StartDemo () {
   app.addEventListener( "keydown", function ( evt ) {
     var mod = evt[modA] && evt[modB];
     if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
-      documentation.visible = output.visible = editor.visible = !editor.visible;
-      if ( !editor.visible && app.currentEditor && app.currentEditor.focused ) {
+      documentation.mesh.visible = output.mesh.visible = editor.mesh.visible = !editor.mesh.visible;
+      if ( !editor.mesh.visible && app.currentEditor && app.currentEditor.focused ) {
         app.currentEditor.blur( );
         app.currentEditor = null;
       }
     }
-    else if ( mod && evt.keyCode === Primrose.Text.Keys.UPARROW ) {
-      app.currentEditor.increaseFontSize( );
-    }
-    else if ( mod && evt.keyCode === Primrose.Text.Keys.DOWNARROW ) {
-      app.currentEditor.decreaseFontSize( );
+    else if ( app.currentEditor ) {
+      if ( mod && evt.keyCode === Primrose.Text.Keys.UPARROW ) {
+        app.currentEditor.increaseFontSize( );
+      }
+      else if ( mod && evt.keyCode === Primrose.Text.Keys.DOWNARROW ) {
+        app.currentEditor.decreaseFontSize( );
+      }
     }
 
     if ( scriptUpdateTimeout ) {
@@ -81,7 +83,7 @@ function StartDemo () {
       scriptUpdateTimeout = null;
     }
   } );
-  
+
   window.addEventListener( "unload", function ( ) {
     var script = editor.value;
     if ( script.length > 0 ) {

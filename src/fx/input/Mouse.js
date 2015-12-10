@@ -146,9 +146,9 @@ Primrose.Input.Mouse = ( function () {
         minDist = Number.MAX_VALUE,
         minVerts = null;
     for ( var j = 0; j < objs.length; ++j ) {
-      var obj = objs[j],
+      var obj = objs[j];
           mesh = obj.mesh || obj;
-      if ( mesh.geometry.vertices ) {
+      if ( mesh.visible && mesh.geometry.vertices ) {
         var faces = mesh.geometry.faces,
             // We have to transform the vertices of the geometry into world-space
             // coordinations, because the object they are on could be rotated or
