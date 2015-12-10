@@ -602,8 +602,7 @@ Primrose.VRApplication = ( function ( ) {
 
 
       // move the demo pointer into place on the surface of the face
-      this.pointer.position.sub( hit.axis.clone().multiplyScalar( hit.distance ) )
-          .add( hit.axis.multiplyScalar( 0.01 ) );
+      this.pointer.position.sub( hit.axis.multiplyScalar( hit.distance - 0.01 ) );
       this.pointer.material.color.setRGB( 0, 1, 0 );
       this.pointer.material.emissive.setRGB( 0, 0.25, 0 );
     }
