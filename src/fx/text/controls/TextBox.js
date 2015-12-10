@@ -8,12 +8,12 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
 
-    options = options || { };
+    options = options || {};
     if ( typeof options === "string" ) {
-      options = { file: options };
+      options = {file: options};
     }
 
-    if(options.readOnly){
+    if ( options.readOnly ) {
       options.disableClipboard = true;
     }
 
@@ -220,7 +220,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     function performLayout () {
       var lineCountWidth;
       if ( showLineNumbers ) {
-        lineCountWidth = Math.max( 1, Math.ceil( Math.log(self.getLineCount() ) / Math.LN10 ) );
+        lineCountWidth = Math.max( 1, Math.ceil( Math.log( self.getLineCount() ) / Math.LN10 ) );
         topLeftGutter.width = 1;
       }
       else {
@@ -254,7 +254,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
-      lines = [""];
+      lines = [ "" ];
       var currentRowWidth = 0;
       var tokenQueue = tokens.slice();
       for ( var i = 0; i < tokenQueue.length; ++i ) {
@@ -270,13 +270,13 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
         if ( t.value.length > 0 ) {
           tokenRows[tokenRows.length - 1].push( t );
-          lines[lines.length - 1] += JSON.stringify(t);
+          lines[lines.length - 1] += JSON.stringify( t );
           currentRowWidth += t.value.length;
         }
 
         if ( breakLine ) {
           tokenRows.push( [ ] );
-          lines.push("");
+          lines.push( "" );
           currentRowWidth = 0;
         }
       }
@@ -508,7 +508,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         }
       }
 
-      keyboardSystem = { };
+      keyboardSystem = {};
       for ( var type in codePage ) {
         var codes = codePage[type];
         if ( typeof ( codes ) === "object" ) {
@@ -684,7 +684,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           rowWidth += tokenRow[x].value.length;
         }
         if ( i <= rowWidth ) {
-          return { x: i, y: y };
+          return {x: i, y: y};
         }
         else {
           i -= rowWidth - 1;
@@ -693,19 +693,13 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.readWheel = function ( evt ) {
-      this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
-      clampScroll();
+      this.wheel( evt.deltaY );
       evt.preventDefault();
     };
 
-    this.startPicking = function ( gl, x, y ) {
-      var p = renderer.getPixelIndex( gl, x, y );
-      this.startPointer( p.x, p.y );
-    };
-
-    this.movePicking = function ( gl, x, y ) {
-      var p = renderer.getPixelIndex( gl, x, y );
-      this.movePointer( p.x, p.y );
+    this.wheel = function ( z ) {
+      this.scroll.y += Math.floor( z / wheelScrollSpeed );
+      clampScroll();
     };
 
     this.startPointer = function ( x, y ) {
@@ -729,7 +723,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.bindEvents = function ( k, p, w, enableClipboard ) {
 
       if ( p ) {
-        p.addEventListener( "wheel", this.readWheel.bind( this ), false );
+        if ( !w ) {
+          p.addEventListener( "wheel", this.readWheel.bind( this ), false );
+        }
         p.addEventListener( "mousedown", mouseButtonDown, false );
         p.addEventListener( "mousemove", mouseMove, false );
         p.addEventListener( "mouseup", mouseButtonUp, false );
@@ -747,7 +743,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         if ( k instanceof HTMLCanvasElement && !k.tabindex ) {
           k.tabindex = 0;
         }
-          
+
         if ( enableClipboard ) {
           //
           // the `surrogate` textarea makes clipboard events possible
@@ -772,7 +768,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           surrogate.addEventListener( "beforecut", setFalse, false );
           surrogate.addEventListener( "cut", this.cutSelectedText.bind( this ), false );
         }
-        
+
         k.addEventListener( "keydown", this.keyDown.bind( this ), false );
       }
     };
@@ -926,7 +922,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     browser = isChrome ? "CHROMIUM" : ( isFirefox ? "FIREFOX" : ( isIE ? "IE" : ( isOpera ? "OPERA" : ( isSafari ? "SAFARI" : "UNKNOWN" ) ) ) );
 
     this.readOnly = !!options.readOnly;
-    
+
     if ( options.autoBindEvents || renderer.autoBindEvents ) {
       if ( !options.readOnly && options.keyEventSource === undefined ) {
         options.keyEventSource = renderer.getDOMElement();

@@ -74,7 +74,8 @@ Primrose.Input.ButtonAndAxis = ( function () {
         i > -1 &&
         !this.commands[i].disabled &&
         this.commandState[name] &&
-        this.commandState[name].value ) || 0;
+        this.commandState[name].value ) ||
+        this.getAxis(name) || 0;
   };
 
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
