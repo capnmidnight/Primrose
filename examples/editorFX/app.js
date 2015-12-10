@@ -23,6 +23,10 @@ function StartDemo () {
       scriptAnimate = null;
 
   app.addEventListener( "ready", function () {
+    var skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
+        sky = textured( skyGeom, "../images/bg2.jpg", true );
+
+    app.scene.add( sky );
     app.scene.add( subScene );
 
     editor = app.createElement( "textarea", "textEditor" );
@@ -227,3 +231,20 @@ function getDocumentation () {
       "    txtRepeatS: texture repeat in S direction (default 1).\n" +
       "    txtRepeat: texture repeat in T direction (default 1)";
 }
+
+
+/*
+ * TODO: 
+ * 
+ *     var cmdLabels = document.querySelectorAll( ".cmdLabel" );
+    for ( var i = 0; i < cmdLabels.length; ++i ) {
+      cmdLabels[i].innerHTML = cmdPre;
+    }
+
+    var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
+    ];
+    setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );
+    setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
+    setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
+    setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
+ */
