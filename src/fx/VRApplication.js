@@ -67,7 +67,7 @@ Primrose.VRApplication = ( function ( ) {
         viewport: null
       } ];
     this.editors = [ ];
-    this.lastEditor = null;
+    this.currentEditor = null;
 
     function setStereoSettings ( vrParams ) {
       setStereoSetting( this.stereoSettings[0], vrParams.left );
@@ -106,8 +106,8 @@ Primrose.VRApplication = ( function ( ) {
       {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5}
     ] );
     window.addEventListener( "mousewheel", function ( evt ) {
-      if ( this.lastEditor ) {
-        this.lastEditor.readWheel( evt );
+      if ( this.currentEditor ) {
+        this.currentEditor.readWheel( evt );
       }
     }.bind( this ), false );
     //
@@ -416,7 +416,7 @@ Primrose.VRApplication = ( function ( ) {
   };
 
   VRApplication.prototype.zero = function ( ) {
-    if ( !this.lastEditor ) {
+    if ( !this.currentEditor ) {
       this.currentUser.position.set( 0, 0, 0 );
       this.currentUser.velocity.set( 0, 0, 0 );
     }
@@ -426,7 +426,7 @@ Primrose.VRApplication = ( function ( ) {
   };
 
   VRApplication.prototype.jump = function ( ) {
-    if ( this.onground && !this.lastEditor ) {
+    if ( this.onground && !this.currentEditor ) {
       this.currentUser.velocity.y += this.options.jumpHeight;
       this.onground = false;
     }
@@ -479,7 +479,7 @@ Primrose.VRApplication = ( function ( ) {
       strafe = this.gamepad.getValue( "strafe" );
       drive = this.gamepad.getValue( "drive" );
 
-      if ( !this.lastEditor ) {
+      if ( !this.currentEditor ) {
         strafe += this.keyboard.getValue( "strafeRight" ) +
             this.keyboard.getValue( "strafeLeft" );
         drive += this.keyboard.getValue( "driveBack" ) +
@@ -543,9 +543,9 @@ Primrose.VRApplication = ( function ( ) {
     var hit = Primrose.Input.Mouse.projectPointer( this.pointer.position, this.camera.position, this.editors ),
         lastButtons = this.mouse.getValue( "dButtons" );
     if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y || hit.point.y > 1 ) {
-      if ( this.lastEditor && lastButtons > 0 ) {
-        this.lastEditor.blur();
-        this.lastEditor = null;
+      if ( this.currentEditor && lastButtons > 0 ) {
+        this.currentEditor.blur();
+        this.currentEditor = null;
       }
       this.pointer.material.color.setRGB( 1, 0, 0 );
       this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -562,9 +562,9 @@ Primrose.VRApplication = ( function ( ) {
           buttons = this.mouse.getValue( "BUTTONS" );
 
       if ( buttons > 0 ) {
-        if ( this.lastEditor && this.lastEditor !== editor ) {
-          this.lastEditor.blur();
-          this.lastEditor = null;
+        if ( this.currentEditor && this.currentEditor !== editor ) {
+          this.currentEditor.blur();
+          this.currentEditor = null;
         }
         if ( lastButtons !== buttons ) {
           editor.movePointer( textureU, textureV );
@@ -572,7 +572,7 @@ Primrose.VRApplication = ( function ( ) {
         else {
           if ( !editor.focused ) {
             editor.focus();
-            this.lastEditor = editor;
+            this.currentEditor = editor;
           }
           editor.startPointer( textureU, textureV );
         }

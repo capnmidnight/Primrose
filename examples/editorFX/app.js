@@ -95,20 +95,13 @@ function StartDemo () {
     }
   };
 
-  var lastEditor = null, hub = new THREE.Object3D();
+  var hub = new THREE.Object3D();
 
   app.addEventListener( "ready", function () {
-    window.addEventListener( "mousedown", function ( evt ) {
-      if ( lastEditor ) {
-        lastEditor.blur();
-      }
-      lastEditor = null;
-    }, false );
-
     app.scene.add( hub );
 
     editor = app.createElement( "textarea", "textEditor" );
-    editor.value = testDemo.toString();
+    editor.value = src;
     editor.mesh.position.y = editorSphereY;
     testDemo( hub );
 
@@ -168,7 +161,7 @@ function StartDemo () {
     output.mesh.position.y = editorSphereY;
     output.mesh.rotation.y = -Math.PI / 2;
     output.render();
-    
+
     log( fmt( "$1+E to show/hide editor", cmdPre ) );
   } );
 
