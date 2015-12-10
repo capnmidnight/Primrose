@@ -1,6 +1,6 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
 
-var app, ed, ed2, ed3,
+var app, editor,
     log = null,
     GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
@@ -50,6 +50,10 @@ function testDemo ( scene ) {
   sunBit( 0, 0, 1 );
   sunBit( 0, 0, -1 );
 
+  put( light( 0xffffff, 1, 100, 1 ) )
+      .on( sun )
+      .at( 0, 0, 0 );
+
   var t = 0;
   function update ( dt ) {
     t += dt * 0.0005;
@@ -61,8 +65,22 @@ function testDemo ( scene ) {
 
 function StartDemo () {
   app = new Primrose.VRApplication( "Codevember" );
+  var output = null,
+      documentation = null,
+      modA = isOSX ? "metaKey" : "ctrlKey",
+      modB = isOSX ? "altKey" : "shiftKey",
+      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT";
+  log = function (  ) {
+    if ( output ) {
+      var msg = Array.prototype.join.call( arguments, ", " );
+      console.log(output);
+      output.value += msg + "\n";
+      output.selectionStart = output.selectionEnd = output.value.length;
+      output.scrollIntoView( output.frontCursor );
+    }
+  };
 
-  var lastEditor = null;
+  var lastEditor = null, hub = new THREE.Object3D();
 
   app.addEventListener( "ready", function () {
     window.addEventListener( "mousedown", function ( evt ) {
@@ -72,13 +90,16 @@ function StartDemo () {
       lastEditor = null;
     }, false );
 
-    ed = app.createElement( "textarea", "textEditor" );
-    ed.value = StartDemo.toString();
-    ed.mesh.position.y = 1.75;
+    app.scene.add( hub );
 
-    ed2 = app.createElement( "textarea", "textEditor2" );
-    ed2.setTokenizer(Primrose.Text.Grammars.PlainText);
-    ed2.value = "functions:\n\
+    editor = app.createElement( "textarea", "textEditor" );
+    editor.value = testDemo.toString();
+    editor.mesh.position.y = 1.75;
+    testDemo( hub );
+
+    documentation = app.createElement( "textarea", "textEditor2" );
+    documentation.setTokenizer( Primrose.Text.Grammars.PlainText );
+    documentation.value = "functions:\n\
   log( msg );\n\
     print a message to the window below the editor.\n\
 \n\
@@ -125,13 +146,15 @@ function StartDemo () {
     opacity: 1 - opaque, 0 - transparent (default 1).\n\
     txtRepeatS: texture repeat in S direction (default 1).\n\
     txtRepeat: texture repeat in T direction (default 1)";
-    ed2.mesh.position.y = 1.75;
-    ed2.mesh.rotation.y = Math.PI / 2;
+    documentation.mesh.position.y = 1.75;
+    documentation.mesh.rotation.y = Math.PI / 2;
 
-    ed3 = app.createElement( "textarea", "textEditor3" );
-    ed3.value = StartDemo.toString();
-    ed3.mesh.position.y = 1.75;
-    ed3.mesh.rotation.y = -Math.PI / 2;
+    output = app.createElement( "textarea", "textEditor3" );
+    output.mesh.position.y = 1.75;
+    output.mesh.rotation.y = -Math.PI / 2;
+    output.render();
+    
+    log( fmt( "$1+E to show/hide editor", cmdPre ) );
   } );
 
   app.start();

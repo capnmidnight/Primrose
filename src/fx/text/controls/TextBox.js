@@ -792,36 +792,42 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.copySelectedText = function ( evt ) {
-      evt.returnValue = false;
-      if ( this.frontCursor.i !== this.backCursor.i ) {
-        var minCursor = Primrose.Text.Cursor.min( this.frontCursor,
-            this.backCursor ),
-            maxCursor = Primrose.Text.Cursor.max( this.frontCursor,
-                this.backCursor ),
-            text = this.value,
-            str = text.substring( minCursor.i, maxCursor.i );
-        var clipboard = evt.clipboardData || window.clipboardData;
-        clipboard.setData( window.clipboardData ? "Text" : "text/plain",
-            str );
+      if ( this.focused ) {
+        evt.returnValue = false;
+        if ( this.frontCursor.i !== this.backCursor.i ) {
+          var minCursor = Primrose.Text.Cursor.min( this.frontCursor,
+              this.backCursor ),
+              maxCursor = Primrose.Text.Cursor.max( this.frontCursor,
+                  this.backCursor ),
+              text = this.value,
+              str = text.substring( minCursor.i, maxCursor.i );
+          var clipboard = evt.clipboardData || window.clipboardData;
+          clipboard.setData( window.clipboardData ? "Text" : "text/plain",
+              str );
+        }
+        evt.preventDefault();
+        surrogate.style.display = "none";
+        options.keyEventSource.focus();
       }
-      evt.preventDefault();
-      surrogate.style.display = "none";
-      options.keyEventSource.focus();
     };
 
     this.cutSelectedText = function ( evt ) {
-      this.copySelectedText( evt );
-      this.overwriteText();
-      this.update();
+      if ( this.focused ) {
+        this.copySelectedText( evt );
+        this.overwriteText();
+        this.update();
+      }
     };
 
     this.readClipboard = function ( evt ) {
-      evt.returnValue = false;
-      var clipboard = evt.clipboardData || window.clipboardData,
-          str = clipboard.getData( window.clipboardData ? "Text" :
-              "text/plain" );
-      if ( str ) {
-        this.overwriteText( str );
+      if ( this.focused ) {
+        evt.returnValue = false;
+        var clipboard = evt.clipboardData || window.clipboardData,
+            str = clipboard.getData( window.clipboardData ? "Text" :
+                "text/plain" );
+        if ( str ) {
+          this.overwriteText( str );
+        }
       }
     };
 

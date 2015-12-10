@@ -95,11 +95,6 @@ Primrose.VRApplication = ( function ( ) {
       {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5},
       {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
-    window.addEventListener( "keydown", function ( evt ) {
-      if ( this.lastEditor ) {
-        this.lastEditor.keyDown( evt );
-      }
-    }.bind( this ), false );
     //
     // mouse input
     //
@@ -432,7 +427,8 @@ Primrose.VRApplication = ( function ( ) {
           0, 0, 0,
           0, 0, 0, {
             tokenizer: Primrose.Text.Grammars.JavaScript,
-            fontSize: 20
+            fontSize: 20,
+            keyEventSource: window
           } );
       this.editors.push( ed );
       return ed;
@@ -547,7 +543,7 @@ Primrose.VRApplication = ( function ( ) {
           // the range [0, 1] for the dimensions of the image used as the texture.
           // So we have to rescale it back out again. Also, the y coordinate is
           // flipped.
-          txt = hit.object.mesh.material.map.image,
+          txt = editor.mesh.material.map.image,
           textureU = Math.floor( txt.width * hit.point.x ),
           textureV = Math.floor( txt.height * ( 1 - hit.point.y ) ),
           buttons = this.mouse.getValue( "BUTTONS" );
