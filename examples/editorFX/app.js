@@ -52,11 +52,6 @@ function StartDemo () {
         } );
     ed2.editor.value = StartDemo.toString();
     ed2.rotation.y = Math.PI / 2;
-
-    pointer = textured( sphere( 0.02, 16, 8 ), 0xff6633 );
-    pointer.material.emissive.setRGB( 0.25, 0, 0 );
-    app.scene.add( pointer );
-
   } );
 
   var t = 0;
@@ -64,12 +59,7 @@ function StartDemo () {
     t += dt * 0.001;
     app.scene.Ground.rotation.x = t * 100;
 
-    pointer.position
-        .set( 0, 0, -1 )
-        .applyQuaternion( app.camera.quaternion )
-        .add( app.camera.position );
-
-    var hit = projectPointer( pointer.position, app.camera.position, [ ed, ed2 ] );
+    var hit = projectPointer( app.pointer.position, app.camera.position, [ ed, ed2 ] );
     if ( hit && 0 <= hit.point.x && hit.point.x <= 1 && 0 <= hit.point.y && hit.point.y <= 1 ) {
       if ( hit.object.editor ) {
         var editor = hit.object.editor,
@@ -98,14 +88,14 @@ function StartDemo () {
       }
 
       // move the demo pointer into place on the surface of the face
-      pointer.position.sub( hit.axis.clone().multiplyScalar( hit.distance ) )
+      app.pointer.position.sub( hit.axis.clone().multiplyScalar( hit.distance ) )
           .add( hit.axis.multiplyScalar( 0.01 ) );
-      pointer.material.color.setRGB( 0, 1, 0 );
-      pointer.material.emissive.setRGB( 0, 0.25, 0 );
+      app.pointer.material.color.setRGB( 0, 1, 0 );
+      app.pointer.material.emissive.setRGB( 0, 0.25, 0 );
     }
     else {
-      pointer.material.color.setRGB( 1, 0, 0 );
-      pointer.material.emissive.setRGB( 0.25, 0, 0 );
+      app.pointer.material.color.setRGB( 1, 0, 0 );
+      app.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     }
     lastButtons = buttons;
   } );
