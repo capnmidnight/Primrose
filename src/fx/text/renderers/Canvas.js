@@ -252,7 +252,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     }
 
     function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
-        showScrollBars, wordWrap, lineCountWidth ) {
+        showScrollBars, wordWrap, lineCountWidth, focused ) {
 
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
@@ -338,6 +338,11 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
               Math.max( self.character.height, scrollBarHeight ) );
         }
       }
+      
+      if(!focused){
+        tgfx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        tgfx.fillRect(0, 0, canvas.width, canvas.height);
+      }
     }
 
     this.render = function ( tokenRows, lines,
@@ -348,30 +353,32 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         lineCountWidth ) {
       if ( theme ) {
         var textChanged = scroll.y !== lastScrollY ||
-              scroll.x !== lastScrollX ||
-              lastLines === null ||
-              lastLines.length !== lines.length,
+            scroll.x !== lastScrollX ||
+            lastLines === null ||
+            lastLines.length !== lines.length,
             cursorChanged = frontCursor.i !== lastFrontCursorI || lastBackCursorI !== backCursor.i,
             characterWidthChanged = this.character.width !== lastCharacterWidth,
             characterHeightChanged = this.character.height !== lastCharacterHeight,
             widthChanged = canvas.width !== lastWidth,
-            heightChanged = canvas.height !== lastHeight,           
+            heightChanged = canvas.height !== lastHeight,
             fontChanged = gfx.font !== lastFont,
             focusChanged = focused !== lastFocused;
-        
+
         for ( var i = 0; i < lines.length && !textChanged; ++i ) {
           textChanged = lastLines[i] !== lines[i];
         }
-        
+
         var foregroundChanged = textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged || fontChanged,
             backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
 
         if ( foregroundChanged || backgroundChanged ) {
           renderCanvasBackground( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused );
 
-          if ( foregroundChanged ) {
-            renderCanvasForeground( tokenRows, gridBounds, scroll, lines );
-            renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth );
+          if ( foregroundChanged || focusChanged ) {
+            if ( foregroundChanged ) {
+              renderCanvasForeground( tokenRows, gridBounds, scroll, lines );
+            }
+            renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused );
           }
 
           gfx.clearRect( 0, 0, canvas.width, canvas.height );
