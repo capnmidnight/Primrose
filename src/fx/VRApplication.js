@@ -295,9 +295,20 @@ Primrose.VRApplication = ( function ( ) {
     }
   };
 
-  VRApplication.prototype.fire = function ( name, arg1, arg2, arg3, arg4 ) {
+  ( function () {
+    var _bind = Function.prototype.bind;
+    Function.prototype.bind = function () {
+      var thunk = _bind.apply( this, arguments );
+      thunk.executionContext = arguments[0];
+      return thunk;
+    };
+  } )();
+
+  VRApplication.prototype.fire = function ( name ) {
+    var args = Array.prototype.slice.call( arguments, 1 );
     for ( var i = 0; i < this.listeners[name].length; ++i ) {
-      this.listeners[name][i]( arg1, arg2, arg3, arg4 );
+      var thunk = this.listeners[name][i];
+      thunk.apply( thunk.executionContext || this, args );
     }
   };
 
