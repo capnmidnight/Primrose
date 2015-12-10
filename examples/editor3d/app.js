@@ -262,7 +262,6 @@ function PrimroseDemo () {
         output.editor.value += msg + "\n";
         output.editor.selectionStart = output.editor.selectionEnd = output.editor.value.length;
         output.editor.scrollIntoView( output.editor.frontCursor );
-        output.editor.forceUpdate( );
       }
     };
 

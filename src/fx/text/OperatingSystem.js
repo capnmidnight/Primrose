@@ -21,7 +21,6 @@ Primrose.Text.OperatingSystem = ( function ( ) {
     this[pre1 + "_a"] = function ( prim, tokenRows ) {
       prim.frontCursor.fullhome( tokenRows );
       prim.backCursor.fullend( tokenRows );
-      prim.forceUpdate();
     };
 
     this[redo] = function ( prim, tokenRows ) {
@@ -38,14 +37,12 @@ Primrose.Text.OperatingSystem = ( function ( ) {
       if ( prim.scroll.y < tokenRows.length ) {
         ++prim.scroll.y;
       }
-      prim.forceUpdate();
     };
 
     this[pre1 + "_UPARROW"] = function ( prim, tokenRows ) {
       if ( prim.scroll.y > 0 ) {
         --prim.scroll.y;
       }
-      prim.forceUpdate();
     };
   
     this.isClipboardReadingEvent = function(evt){

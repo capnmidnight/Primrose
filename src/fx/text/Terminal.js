@@ -20,7 +20,6 @@ Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
   function toEnd ( editor ) {
     editor.selectionStart = editor.selectionEnd = editor.value.length;
     editor.scrollIntoView( editor.frontCursor );
-    editor.forceUpdate();
   }
 
   function done () {
