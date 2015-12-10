@@ -412,50 +412,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       return texture;
     };
 
-    this.getPickingTexture = function () {
-      if ( !pickingTexture ) {
-        var c = document.createElement( "canvas" ),
-            w = this.getWidth(),
-            h = this.getHeight();
-        c.width = w;
-        c.height = h;
-
-        var gfx = c.getContext( "2d" ),
-            pixels = gfx.createImageData( w, h );
-
-        for ( var i = 0,
-            p = 0,
-            l = w * h; i < l; ++i, p += 4 ) {
-          pixels.data[p] = ( 0xff0000 & i ) >> 16;
-          pixels.data[p + 1] = ( 0x00ff00 & i ) >> 8;
-          pixels.data[p + 2] = ( 0x0000ff & i ) >> 0;
-          pixels.data[p + 3] = 0xff;
-        }
-        gfx.putImageData( pixels, 0, 0 );
-        pickingTexture = new THREE.Texture( c, THREE.UVMapping,
-            THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter,
-            THREE.NearestMipMapNearestFilter, THREE.RGBAFormat,
-            THREE.UnsignedByteType, 0 );
-        pickingTexture.needsUpdate = true;
-      }
-      return pickingTexture;
-    };
-
-    this.getPixelIndex = function ( gl, x, y ) {
-      if ( !pickingPixelBuffer ) {
-        pickingPixelBuffer = new Uint8Array( 4 );
-      }
-
-      gl.readPixels( x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE,
-          pickingPixelBuffer );
-
-      var i = ( pickingPixelBuffer[0] << 16 ) |
-          ( pickingPixelBuffer[1] << 8 ) |
-          ( pickingPixelBuffer[2] << 0 );
-      return {x: i % canvas.clientWidth, y: i / canvas.clientWidth};
-    };
-
-
     if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
         strictSize ) {
       canvas.style.position = "absolute";
