@@ -49,10 +49,6 @@ Primrose.VRApplication = ( function ( ) {
     this.lt = 0;
     this.frame = 0;
     this.enableMousePitch = true;
-    this.world = new CANNON.World( );
-    this.world.defaultContactMaterial.friction = 0.2;
-    this.world.gravity.set( 0, -this.options.gravity, 0 );
-    this.world.broadphase = new CANNON.SAPBroadphase( this.world );
     this.audio = new Primrose.Output.Audio3D( );
     this.music = new Primrose.Output.Music( this.audio.context );
     this.temp = new THREE.Matrix4( );
@@ -146,15 +142,7 @@ Primrose.VRApplication = ( function ( ) {
       var state = readForm( this.ctrls );
       setSetting( this.formStateKey, state );
     }.bind( this ), false );
-    if ( window.Leap && this.options.useLeap ) {
-      this.glove = new Primrose.Output.HapticGlove( {
-        hands: 2,
-        fingers: 5,
-        joints: 1,
-        port: 9080
-      } );
-    }
-
+    
     //
     // Setup THREE.js
     //
@@ -181,92 +169,7 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     this.buttons = [ ];
-    this.groundMaterial = new CANNON.Material( "groundMaterial" );
-    this.bodyMaterial = new CANNON.Material( "bodyMaterial" );
-    this.bodyGroundContact = new CANNON.ContactMaterial(
-        this.bodyMaterial,
-        this.groundMaterial,
-        {
-          friction: 0.025,
-          restitution: 0.3,
-          contactEquationStiffness: 1e8,
-          contactEquationRelaxation: 3,
-          frictionEquationStiffness: 1e8,
-          frictionEquationRegularizationTime: 3
-        } );
-    this.bodyBodyContact = new CANNON.ContactMaterial(
-        this.bodyMaterial,
-        this.bodyMaterial,
-        {
-          friction: 0.4,
-          restitution: 0.3,
-          contactEquationStiffness: 1e8,
-          contactEquationRelaxation: 3,
-          frictionEquationStiffness: 1e8,
-          frictionEquationRegularizationTime: 3
-        } );
-    this.world.addContactMaterial( this.bodyGroundContact );
-    this.world.addContactMaterial( this.bodyBodyContact );
-    function addPhysicsBody ( obj, body, shape, radius, skipObj ) {
-      body.addShape( shape );
-      body.linearDamping = body.angularDamping = 0.5;
-      if ( skipObj ) {
-        body.position.set( obj.x, obj.y + radius / 2, obj.z );
-      }
-      else {
-        obj.physics = body;
-        body.graphics = obj;
-        body.position.copy( obj.position );
-        body.quaternion.copy( obj.quaternion );
-      }
-      this.world.add( body );
-      return body;
-    }
-
-    function makePlane ( obj ) {
-      var shape = new CANNON.Plane( );
-      var body = new CANNON.Body( {mass: 0, material: this.groundMaterial} );
-      return addPhysicsBody.call( this, obj, body, shape );
-    }
-
-    function makeCube ( obj ) {
-      var body = new CANNON.Body( {
-        mass: 1,
-        material: this.bodyMaterial,
-        fixedRotation: true,
-        type: CANNON.Body.STATIC
-      } );
-      var b = obj.geometry.boundingBox,
-          dx = b.max.x - b.min.x,
-          dy = b.max.y - b.min.y,
-          dz = b.max.z - b.min.z;
-      var shape = new CANNON.Box( new CANNON.Vec3( dx / 2, dy / 2, dz / 2 ) );
-      return addPhysicsBody.call( this, obj, body, shape );
-    }
-
-    function makeBall ( obj, mass, radius, skipObj ) {
-      if ( mass === undefined ) {
-        mass = 1;
-      }
-      var body = new CANNON.Body( {
-        mass: mass,
-        material: this.bodyMaterial,
-        fixedRotation: true
-      } );
-      var shape = new CANNON.Sphere(
-          ( radius || obj.geometry.boundingSphere.radius ) );
-      return addPhysicsBody.call( this, obj, body, shape, radius, skipObj );
-    }
-
-    this.makeButton = function ( toggle ) {
-      var btn = this.buttonFactory.create( toggle );
-      this.buttons.push( btn );
-      this.scene[btn.name] = btn;
-      this.scene.add( btn.base );
-      this.scene.add( btn.cap );
-      makeCube.call( this, btn.cap );
-      return btn;
-    };
+    
     function waitForResources ( t ) {
       this.lt = t;
       if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
@@ -275,20 +178,7 @@ Primrose.VRApplication = ( function ( ) {
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
-
-        if ( this.glove ) {
-          this.glove.setEnvironment( {
-            scene: this.scene,
-            camera: this.camera,
-            world: this.world
-          } );
-          for ( var i = 0; i < this.glove.numJoints; ++i ) {
-            var s = textured( sphere( 0.01, 8, 8 ), 0xff0000 >> i );
-            this.scene.add( s );
-            this.glove.tips.push( makeBall.call( this, s ) );
-          }
-        }
-
+        
         this.fire( "ready" );
         this.animate = this.animate.bind( this );
         requestAnimationFrame( this.animate );
@@ -313,18 +203,6 @@ Primrose.VRApplication = ( function ( ) {
         this.camera = this.scene.Camera;
         this.currentUser.position.copy( this.camera.position );
         this.currentUser.position.y -= this.options.avatarHeight;
-        if ( !this.options.disablePhysics ) {
-          this.scene.traverse( function ( obj ) {
-            if ( obj.isSolid ) {
-              if ( obj.isGround ) {
-                makePlane.call( this, obj );
-              }
-              else {
-                makeBall.call( this, obj, 1 );
-              }
-            }
-          }.bind( this ) );
-        }
       }.bind( this ) );
     }
 
@@ -601,25 +479,6 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     this.camera.position.y += this.avatarHeight;
-    //
-    // do collision detection
-    //
-    this.world.step( dt );
-    for ( j = 0; j < this.world.bodies.length; ++j ) {
-      var obj = this.world.bodies[j];
-      if ( obj.graphics ) {
-        obj.graphics.position.copy( obj.position );
-        obj.graphics.quaternion.copy( obj.quaternion );
-      }
-    }
-
-    for ( j = 0; j < this.buttons.length; ++j ) {
-      this.buttons[j].readContacts( this.world.contacts );
-    }
-
-    if ( this.glove ) {
-      this.glove.readContacts( this.world.contacts );
-    }
 
     this.pointer.position
         .set( 0, 0, -1 )
