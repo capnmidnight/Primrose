@@ -35,7 +35,12 @@ Primrose.VRApplication = ( function ( ) {
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
-    this.listeners = {ready: [ ], update: [ ]};
+    this.listeners = {
+      ready: [ ],
+      update: [ ],
+      keydown: [ ],
+      keyup: [ ]
+    };
     this.pointer = textured( sphere( 0.01, 10, 10 ), 0xff0000 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
@@ -95,6 +100,8 @@ Primrose.VRApplication = ( function ( ) {
       {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5},
       {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
+    window.addEventListener( "keydown", this.fire.bind( this, "keydown" ), false );
+    window.addEventListener( "keyup", this.fire.bind( this, "keyup" ), false );
     //
     // mouse input
     //
@@ -146,7 +153,7 @@ Primrose.VRApplication = ( function ( ) {
     window.addEventListener( "popstate", function ( evt ) {
       if ( isFullScreenMode() ) {
         exitFullScreen();
-        evt.preventDefault();        
+        evt.preventDefault();
       }
     }, true );
 
@@ -264,7 +271,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.vr.display ) {
         this.inVR = !!isFullScreenMode( );
       }
-      if(!isFullScreenMode() && location.hash === "#fullscreen"){
+      if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
         location.hash = "";
       }
       this.setSize( );
@@ -296,7 +303,7 @@ Primrose.VRApplication = ( function ( ) {
       else {
         requestFullScreen( this.ctrls.frontBuffer );
       }
-      history.pushState(null, document.title, "#fullscreen");
+      history.pushState( null, document.title, "#fullscreen" );
     }
   };
 
