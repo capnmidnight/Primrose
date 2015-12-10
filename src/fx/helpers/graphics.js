@@ -224,6 +224,23 @@ function put ( object ) {
   };
 }
 
+function fill ( txt, w, h, l ) {
+  if ( h === undefined ) {
+    h = 1;
+    if ( l === undefined ) {
+      l = 1;
+      if ( w === undefined ) {
+        w = 1;
+      }
+    }
+  }
+  var point = hub();
+  put( brick( txt, w, h, l ) )
+      .on( point )
+      .at( w / 2, h / 2, l / 2 );
+  return point;
+}
+
 function textured ( geometry, txt, unshaded, o, s, t ) {
   var material;
   if ( o === undefined ) {
