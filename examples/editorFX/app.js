@@ -69,7 +69,8 @@ function StartDemo () {
       documentation = null,
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
-      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT";
+      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
+      editorSphereY = 1.5;
   log = function (  ) {
     if ( output ) {
       var msg = Array.prototype.join.call( arguments, ", " );
@@ -93,7 +94,7 @@ function StartDemo () {
 
     editor = app.createElement( "textarea", "textEditor" );
     editor.value = testDemo.toString();
-    editor.mesh.position.y = 1.75;
+    editor.mesh.position.y = editorSphereY;
     testDemo( hub );
 
     documentation = app.createElement( "textarea", "textEditor2" );
@@ -145,11 +146,11 @@ function StartDemo () {
     opacity: 1 - opaque, 0 - transparent (default 1).\n\
     txtRepeatS: texture repeat in S direction (default 1).\n\
     txtRepeat: texture repeat in T direction (default 1)";
-    documentation.mesh.position.y = 1.75;
+    documentation.mesh.position.y = editorSphereY;
     documentation.mesh.rotation.y = Math.PI / 2;
 
     output = app.createElement( "textarea", "textEditor3" );
-    output.mesh.position.y = 1.75;
+    output.mesh.position.y = editorSphereY;
     output.mesh.rotation.y = -Math.PI / 2;
     output.render();
     
