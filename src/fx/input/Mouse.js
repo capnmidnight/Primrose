@@ -21,26 +21,26 @@ Primrose.Input.Mouse = ( function () {
       if ( MouseInput.isPointerLocked() ) {
         var mx = event.movementX,
             my = event.movementY;
-
+        
         if ( mx === undefined ) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
-        }
+        } 
         this.setMovement( mx, my );
       }
       else {
-        this.setLocation( event.clientX, event.clientY );
+        this.setLocation( event.layerX, event.layerY );
       }
     };
 
     DOMElement.addEventListener( "mousedown", function ( event ) {
       this.setButton( event.button, true );
-      this.readEvent( event );
+      this.setAxis( "BUTTONS", event.buttons );
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mouseup", function ( event ) {
       this.setButton( event.button, false );
-      this.readEvent( event );
+      this.setAxis( "BUTTONS", event.buttons );
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mousemove", this.readEvent.bind( this ), false );

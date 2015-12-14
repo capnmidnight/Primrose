@@ -11,9 +11,13 @@ Primrose.Projector = ( function () {
     this.m = new THREE.Matrix4();
   }
 
-  function transform ( matrix, v ) {
-    return v.clone()
-        .applyMatrix4( matrix );
+  function transform ( obj, v ) {
+    var p = v.clone();
+    while(obj !== null){
+      p.applyMatrix4(obj.matrix);
+      obj = obj.parent;
+    }
+    return p;
   }
 
   // We have to transform the vertices of the geometry into world-space
@@ -26,22 +30,24 @@ Primrose.Projector = ( function () {
       this.vertCache[obj.uuid] = trans;
       var verts = obj.geometry.vertices;
       for ( var i = 0; i < verts.length; ++i ) {
-        trans[i] = transform( obj.matrix, verts[i] );
+        trans[i] = transform( obj, verts[i] );
       }
       this.transformCache[obj.uuid] = key;
       obj.geometry.computeBoundingSphere();
       var bounds = obj.geometry.boundingSphere;
-      bounds.realCenter = transform( obj.matrix, bounds.center );
+      bounds.realCenter = transform( obj, bounds.center );
       bounds.radiusSq = bounds.radius * bounds.radius * 1.20;
     }
     return this.vertCache[obj.uuid];
   }
 
-  Projector.prototype.projectPointer = function ( p, from, objs ) {
+  Projector.prototype.projectPointer = function ( pointer, camera, objs ) {
     if ( !( objs instanceof Array ) ) {
       objs = [ objs ];
     }
-    var // We set minAngle to a low value to require the pointer to get close to
+    var p = transform(pointer.parent, pointer.position),
+        from = transform(camera.parent, camera.position),
+        // We set minAngle to a low value to require the pointer to get close to
         // the object before we project onto it.
         minAngle = Number.MAX_VALUE,
         // We set minDist to a high value to make sure we capture everything.
@@ -58,6 +64,7 @@ Primrose.Projector = ( function () {
         v2 = null,
         dist = null,
         angle = null;
+    
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
     for ( var j = 0; j < objs.length; ++j ) {
