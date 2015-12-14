@@ -73,6 +73,7 @@ Primrose.VRApplication = ( function ( ) {
       } ];
     this.editors = [ ];
     this.currentEditor = null;
+    this.projector = new Primrose.Projector();
 
     function setStereoSettings ( vrParams ) {
       setStereoSetting( this.stereoSettings[0], vrParams.left );
@@ -483,7 +484,7 @@ Primrose.VRApplication = ( function ( ) {
     this.gamepad.update( dt );
     this.vr.update( dt );
     for ( j = 0; j < this.editors.length; ++j ) {
-      this.editors[j].render();
+      this.editors[j].textarea.render();
     }
 
     if ( !this.inVR ) {
@@ -559,7 +560,7 @@ Primrose.VRApplication = ( function ( ) {
         .applyQuaternion( this.camera.quaternion )
         .add( this.camera.position );
 
-    var hit = Primrose.Input.Mouse.projectPointer( this.pointer.position, this.camera.position, this.editors ),
+    var hit = this.projector.projectPointer( this.pointer.position, this.camera.position, this.editors ),
         lastButtons = this.mouse.getValue( "dButtons" );
     if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y || hit.point.y > 1 ) {
       if ( this.currentEditor && lastButtons > 0 ) {
@@ -569,13 +570,13 @@ Primrose.VRApplication = ( function ( ) {
       this.pointer.material.color.setRGB( 1, 0, 0 );
       this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     }
-    else if ( hit.object ) {
-      var editor = hit.object,
+    else if ( hit.object && hit.object.textarea ) {
+      var editor = hit.object.textarea,
           // At this point, the UV coord is scaled to a proporitional value, on
           // the range [0, 1] for the dimensions of the image used as the texture.
           // So we have to rescale it back out again. Also, the y coordinate is
           // flipped.
-          txt = editor.mesh.material.map.image,
+          txt = hit.object.material.map.image,
           textureU = Math.floor( txt.width * hit.point.x ),
           textureV = Math.floor( txt.height * ( 1 - hit.point.y ) ),
           buttons = this.mouse.getValue( "BUTTONS" );
@@ -600,8 +601,6 @@ Primrose.VRApplication = ( function ( ) {
         editor.endPointer();
       }
 
-
-      // move the demo pointer into place on the surface of the face
       this.pointer.position.sub( hit.axis.multiplyScalar( hit.distance - 0.01 ) );
       this.pointer.material.color.setRGB( 0, 1, 0 );
       this.pointer.material.emissive.setRGB( 0, 0.25, 0 );

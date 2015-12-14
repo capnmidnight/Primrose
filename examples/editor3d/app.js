@@ -35,19 +35,19 @@ function StartDemo ( isHomeScreen ) {
     app.scene.add( subScene );
 
     editor = app.createElement( "textarea", "textEditor" );
-    editor.value = getSourceCode();
-    editor.mesh.position.y = editorSphereY;
+    editor.textarea.value = getSourceCode();
+    editor.position.y = editorSphereY;
 
     documentation = app.createElement( "textarea", "textEditor2" );
-    documentation.setTokenizer( Primrose.Text.Grammars.PlainText );
-    documentation.value = getDocumentation();
-    documentation.mesh.position.y = editorSphereY;
-    documentation.mesh.rotation.y = Math.PI / 2;
+    documentation.textarea.setTokenizer( Primrose.Text.Grammars.PlainText );
+    documentation.textarea.value = getDocumentation();
+    documentation.position.y = editorSphereY;
+    documentation.rotation.y = Math.PI / 2;
 
     output = app.createElement( "textarea", "textEditor3" );
-    output.mesh.position.y = editorSphereY;
-    output.mesh.rotation.y = -Math.PI / 2;
-    output.render();
+    output.position.y = editorSphereY;
+    output.rotation.y = -Math.PI / 2;
+    output.textarea.render();
 
     log( fmt( "$1+E to show/hide editor", cmdPre ) );
   } );
@@ -72,8 +72,8 @@ function StartDemo ( isHomeScreen ) {
   app.addEventListener( "keydown", function ( evt ) {
     var mod = evt[modA] && evt[modB];
     if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
-      documentation.mesh.visible = output.mesh.visible = editor.mesh.visible = !editor.mesh.visible;
-      if ( !editor.mesh.visible && app.currentEditor && app.currentEditor.focused ) {
+      documentation.visible = output.visible = editor.visible = !editor.visible;
+      if ( !editor.visible && app.currentEditor && app.currentEditor.focused ) {
         app.currentEditor.blur( );
         app.currentEditor = null;
       }
@@ -94,14 +94,14 @@ function StartDemo ( isHomeScreen ) {
   } );
 
   window.addEventListener( "unload", function ( ) {
-    var script = editor.value;
+    var script = editor.textarea.value;
     if ( script.length > 0 ) {
       setSetting( "code", script );
     }
   } );
 
   function updateScript ( ) {
-    var newScript = editor.value,
+    var newScript = editor.textarea.value,
         exp;
     if ( newScript !== lastScript ) {
       try {
@@ -124,10 +124,11 @@ function StartDemo ( isHomeScreen ) {
 
   log = function (  ) {
     if ( output ) {
-      var msg = Array.prototype.join.call( arguments, ", " );
-      output.value += msg + "\n";
-      output.selectionStart = output.selectionEnd = output.value.length;
-      output.scrollIntoView( output.frontCursor );
+      var msg = Array.prototype.join.call( arguments, ", " ),
+          t = output.textarea;
+      t.value += msg + "\n";
+      t.selectionStart = t.selectionEnd = t.value.length;
+      t.scrollIntoView( t.frontCursor );
     }
   };
   

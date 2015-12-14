@@ -346,12 +346,14 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
       cellHeight = Math.round( 1024 * h / options.fontSize ),
       makeGeom = ( id.indexOf( "textEditor" ) === 0 ) ?
         shell.bind( this, 1, cellWidth, cellHeight ) :
-        quad.bind( this, w, h, cellWidth, cellHeight );
+        quad.bind( this, w, h, cellWidth, cellHeight ),
+      mesh = textured( makeGeom(), t, false, options.opacity );
 
-  t.mesh = textured( makeGeom(), t, false, options.opacity );
-  t.mesh.position.set( x, y, z );
-  t.mesh.rotation.set( rx, ry, rz );
-  scene.add( t.mesh );
+  mesh.position.set( x, y, z );
+  mesh.rotation.set( rx, ry, rz );
+  scene.add( mesh );
+  
+  mesh.textarea = t;
 
-  return t;
+  return mesh;
 }
