@@ -72,8 +72,10 @@ function StartDemo ( isHomeScreen ) {
   app.addEventListener( "keydown", function ( evt ) {
     var mod = evt[modA] && evt[modB];
     if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
-      documentation.visible = output.visible = editor.visible = !editor.visible;
-      if ( !editor.visible && app.currentEditor && app.currentEditor.focused ) {
+      documentation.visible = output.visible = editor.visible =
+          !editor.visible;
+      if ( !editor.visible && app.currentEditor &&
+          app.currentEditor.focused ) {
         app.currentEditor.blur( );
         app.currentEditor = null;
       }
@@ -165,12 +167,18 @@ function testDemo ( scene ) {
   sunBit( 0, 0, 1 );
   sunBit( 0, 0, -1 );
 
-  put( light( 0xffffff, 1, 100 ) ).on( sun );
+  put( light( 0xffffff, 1, 100 ) )
+      .on( sun );
 
-  var t = 0;
+  var t = 0,
+      n =
+      0;
   function update ( dt ) {
     t += dt * 0.5;
     sun.rotation.set( t, t / 2, t / 5 );
+    if ( n % 100 === 0 )
+      log( 1 / dt );
+    ++n;
   }
   log( "ok" );
   return update;
@@ -245,10 +253,10 @@ function getDocumentation () {
 
 
 /*
- * TODO: 
- * 
+ * TODO:
  *
- 
+ *
+
  var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
  ];
  setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );
