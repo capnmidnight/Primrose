@@ -21,14 +21,18 @@ Primrose.Projector = ( function () {
   // positioned somewhere else.
   function getVerts ( obj ) {
     var key = obj.matrix.elements.join( "," );
-    if ( key !== this.transformCache[obj.uuid]) {
-      var trans = [];
+    if ( key !== this.transformCache[obj.uuid] ) {
+      var trans = [ ];
       this.vertCache[obj.uuid] = trans;
       var verts = obj.geometry.vertices;
-      for(var i = 0; i < verts.length; ++i){
-        trans[i] = transform(obj.matrix, verts[i]);
+      for ( var i = 0; i < verts.length; ++i ) {
+        trans[i] = transform( obj.matrix, verts[i] );
       }
       this.transformCache[obj.uuid] = key;
+      obj.geometry.computeBoundingSphere();
+      var bounds = obj.geometry.boundingSphere;
+      bounds.realCenter = transform( obj.matrix, bounds.center );
+      bounds.radiusSq = bounds.radius * bounds.radius * 1.20;
     }
     return this.vertCache[obj.uuid];
   }
@@ -42,57 +46,66 @@ Primrose.Projector = ( function () {
         minAngle = Number.MAX_VALUE,
         // We set minDist to a high value to make sure we capture everything.
         minDist = Number.MAX_VALUE,
-        minObj,
+        minObj = null,
         // There is currently no selected face
-        minFaceIndex,
-        minVerts,
-        faces,
-        face,
-        odd,
-        v0,
-        v1,
-        v2,
-        dist;
+        minFaceIndex = null,
+        minVerts = null,
+        faces = null,
+        face = null,
+        odd = null,
+        v0 = null,
+        v1 = null,
+        v2 = null,
+        dist = null,
+        angle = null;
+    // Shoot this.a vector to the selector point
+    this.d.subVectors( p, from );
     for ( var j = 0; j < objs.length; ++j ) {
       var obj = objs[j];
       if ( obj.visible && obj.geometry.vertices ) {
         faces = obj.geometry.faces;
 
-        var verts = getVerts.call( this, obj );
+        var verts = getVerts.call( this, obj ),
+            // determine if we're even roughly pointing at an object
+            bounds = obj.geometry.boundingSphere;
+        this.a.subVectors( bounds.realCenter, p );
 
-        // Find the face that is closest to the pointer
-        for ( var i = 0; i < faces.length; ++i ) {
-          face = faces[i];
-          odd = ( i % 2 ) === 1;
-          v0 = verts[odd ? face.b : face.a];
-          v1 = verts[odd ? face.c : face.b];
-          v2 = verts[odd ? face.a : face.c];
-          // Shoot a vector from the camera to each of the three corners 
-          // of the mesh face
-          this.a.subVectors( v0, from ).normalize(),
-              this.b.subVectors( v1, from ).normalize(),
-              this.c.subVectors( v2, from ).normalize(),
-              // Shoot this.a vector to the selector point
-              this.d.subVectors( p, from );
-          // Find the distance to the closest point in the polygon
-          dist = Math.min(
-              p.distanceToSquared( v0 ),
-              p.distanceToSquared( v1 ),
-              p.distanceToSquared( v2 ) );
-          // Find the minimal displacement angle between each of the
-          // vectors to the corners and the vector to the pointer. Basically,
-          // how "far" does the user have to look to get from the pointer
-          // to each of the corners.
-          var angle = Math.min(
-              Math.acos( this.a.dot( this.d ) ),
-              Math.acos( this.b.dot( this.d ) ),
-              Math.acos( this.c.dot( this.d ) ) );
-          if ( angle < minAngle && dist < minDist ) {
-            minObj = obj;
-            minDist = dist;
-            minAngle = angle;
-            minFaceIndex = i;
-            minVerts = verts;
+        if ( this.a.lengthSq() <= bounds.radiusSq ) {
+          // Find the face that is closest to the pointer
+          for ( var i = 0; i < faces.length; ++i ) {
+            face = faces[i];
+            odd = ( i % 2 ) === 1;
+            v0 = verts[odd ? face.b : face.a];
+            v1 = verts[odd ? face.c : face.b];
+            v2 = verts[odd ? face.a : face.c];
+            // Shoot a vector from the camera to each of the three corners 
+            // of the mesh face
+            this.a.subVectors( v0, from ).normalize();
+            this.b.subVectors( v1, from ).normalize();
+            this.c.subVectors( v2, from ).normalize();
+            // Find the distance to the closest point in the polygon
+            dist = Math.min(
+                p.distanceToSquared( v0 ),
+                p.distanceToSquared( v1 ),
+                p.distanceToSquared( v2 ) );
+            // Find the minimal displacement angle between each of the
+            // vectors to the corners and the vector to the pointer. Basically,
+            // how "far" does the user have to look to get from the pointer
+            // to each of the corners.
+            var d1 = this.a.dot( this.d ),
+                d2 = this.b.dot( this.d ),
+                d3 = this.c.dot( this.d );
+            angle = Math.min(
+                Math.acos( d1 ),
+                Math.acos( d2 ),
+                Math.acos( d3 ) );
+            if ( angle < minAngle && dist < minDist ) {
+              minObj = obj;
+              minDist = dist;
+              minAngle = angle;
+              minFaceIndex = i;
+              minVerts = verts;
+            }
           }
         }
       }
@@ -113,17 +126,17 @@ Primrose.Projector = ( function () {
       v1 = minVerts[odd ? face.c : face.b];
       v2 = minVerts[odd ? face.a : face.c];
       // Two vectors define the axes of a plane, i.e. our polygon face
-      this.a.subVectors( v1, v0 ).normalize(),
-      this.b.subVectors( v2, v0 ).normalize(),
-          // The cross product of two non-parallel vectors is a new vector that
-          // is perpendicular to both of the original vectors, AKA the face
-          // "normal" vector. It sticks straight up out of the face, pointing 
-          // roughly in the direction of our pointer ball.
-      this.c.crossVectors( this.a, this.b ),
-          // This matrix is a succinct way to define our plane. We'll use it
-          // later to figure out how to express the location of the pointer ball
-          // in corrodinates local to the plane.
-          this.m.set(
+      this.a.subVectors( v1, v0 ).normalize();
+      this.b.subVectors( v2, v0 ).normalize();
+      // The cross product of two non-parallel vectors is a new vector that
+      // is perpendicular to both of the original vectors, AKA the face
+      // "normal" vector. It sticks straight up out of the face, pointing 
+      // roughly in the direction of our pointer ball.
+      this.c.crossVectors( this.a, this.b );
+      // This matrix is a succinct way to define our plane. We'll use it
+      // later to figure out how to express the location of the pointer ball
+      // in corrodinates local to the plane.
+      this.m.set(
           this.a.x, this.b.x, this.c.x, 0,
           this.a.y, this.b.y, this.c.y, 0,
           this.a.z, this.b.z, this.c.z, 0,

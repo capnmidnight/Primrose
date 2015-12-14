@@ -34,15 +34,15 @@ function StartDemo ( isHomeScreen ) {
     app.scene.add( sky );
     app.scene.add( subScene );
 
-    editor = app.createElement( "textarea", "textEditor" );
-    editor.textarea.value = getSourceCode();
-    editor.position.y = editorSphereY;
-
     documentation = app.createElement( "textarea", "textEditor2" );
     documentation.textarea.setTokenizer( Primrose.Text.Grammars.PlainText );
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
     documentation.rotation.y = Math.PI / 2;
+
+    editor = app.createElement( "textarea", "textEditor" );
+    editor.textarea.value = getSourceCode();
+    editor.position.y = editorSphereY;
 
     output = app.createElement( "textarea", "textEditor3" );
     output.position.y = editorSphereY;
