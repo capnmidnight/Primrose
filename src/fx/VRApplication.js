@@ -41,6 +41,7 @@ Primrose.VRApplication = ( function ( ) {
       keydown: [ ],
       keyup: [ ]
     };
+    
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
@@ -74,16 +75,6 @@ Primrose.VRApplication = ( function ( ) {
     this.editors = [ ];
     this.currentEditor = null;
     this.projector = new Primrose.Projector();
-
-    function setStereoSettings ( vrParams ) {
-      setStereoSetting( this.stereoSettings[0], vrParams.left );
-      setStereoSetting( this.stereoSettings[1], vrParams.right );
-    }
-
-    function setStereoSetting ( s, eye ) {
-      s.transform.makeTranslation( eye.eyeTranslation.x, eye.eyeTranslation.y, eye.eyeTranslation.z );
-      s.viewport = eye.renderRect;
-    }
 
     //
     // keyboard input
@@ -129,6 +120,16 @@ Primrose.VRApplication = ( function ( ) {
     //
     // VR input
     //
+    function setStereoSettings ( vrParams ) {
+      setStereoSetting( this.stereoSettings[0], vrParams.left );
+      setStereoSetting( this.stereoSettings[1], vrParams.right );
+    }
+
+    function setStereoSetting ( s, eye ) {
+      s.transform.makeTranslation( eye.eyeTranslation.x, eye.eyeTranslation.y, eye.eyeTranslation.z );
+      s.viewport = eye.renderRect;
+    }
+    
     function connectVR ( id ) {
       var deviceIDs = Object.keys( this.vr.devices );
       if ( deviceIDs.length > 0 ) {
@@ -399,7 +400,7 @@ Primrose.VRApplication = ( function ( ) {
   };
 
   VRApplication.prototype.setSize = function ( ) {
-    var bounds = this.ctrls.frontBuffer.getBoundingClientRect( ),
+    var bounds = this.renderer.domElement.getBoundingClientRect( ),
         styleWidth = bounds.width,
         styleHeight = bounds.height,
         ratio = window.devicePixelRatio || 1,
