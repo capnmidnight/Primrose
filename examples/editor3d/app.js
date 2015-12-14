@@ -133,12 +133,12 @@ function StartDemo ( isHomeScreen ) {
       t.scrollIntoView( t.frontCursor );
     }
   };
-  
+
   var cmdLabels = document.querySelectorAll( ".cmdLabel" );
   for ( var i = 0; i < cmdLabels.length; ++i ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
-  
+
   app.start();
 }
 
@@ -176,9 +176,9 @@ function testDemo ( scene ) {
   function update ( dt ) {
     t += dt * 0.5;
     sun.rotation.set( t, t / 2, t / 5 );
-    if ( n % 100 === 0 )
-      log( 1 / dt );
-    ++n;
+    if ( n === 0 )
+      log( Math.round( 1 / dt ) );
+    n = ( n + 1 ) % 100;
   }
   log( "ok" );
   return update;
