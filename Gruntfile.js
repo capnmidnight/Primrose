@@ -55,7 +55,7 @@ module.exports = function ( grunt ) {
 */\n",
         separator: ";",
         footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
-            "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at http://www.primroseeditor.com\");"
+            "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
       },
       default: {
         files: buildFiles

@@ -2,7 +2,7 @@
   Primrose v0.17.0 2015-12-15
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
-  https://www.primrosevr.com
+  http://www.primrosevr.com
   https://github.com/capnmidnight/Primrose.git
 */
 /*
@@ -719,7 +719,7 @@ Primrose.NetworkedInput = ( function () {
   };
   return NetworkedInput;
 } )();
-;/* global Primrose, THREE, self */
+;/* global Primrose, THREE, Function, self */
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
     if ( isWorker && !self.THREE ) {
@@ -12743,4 +12743,4 @@ Primrose.Text.Themes.Default = ( function ( ) {
   };
 } )();
 Primrose.VERSION = "v0.17.0";
-console.log("Using Primrose v0.17.0. Find out more at http://www.primroseeditor.com");
+console.log("Using Primrose v0.17.0. Find out more at http://www.primrosevr.com");
