@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
+/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put, exp */
 
 var app,
     log = null,

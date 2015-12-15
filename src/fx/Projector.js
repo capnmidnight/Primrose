@@ -2823,37 +2823,45 @@ Primrose.Projector = ( function ( ) {
     }
 
     if ( minObj !== null && minFaceIndex !== null ) {
+      faces = minObj.geometry.faces;
+      face = faces[minFaceIndex];
+      // We need to know the arity of the face because we will be building
+      // a pair of axis vectors and we need to know which one is the "middle"
+      // vertex.
+      odd = ( minFaceIndex % 2 ) === 1;
+      // I had to determine this order by trial and error, but now it looks
+      // like it's a basic rotation, where the last two points of the previou
+      // polygon are used as the first two points of the next polygon, what
+      // is called a "Triangle Strip".
+      v0 = minVerts[odd ? face[1] : face[0]];
+      v1 = minVerts[odd ? face[2] : face[1]];
+      v2 = minVerts[odd ? face[0] : face[2]];
+      // Two vectors define the axes of a plane, i.e. our polygon face
+      this.a.subVectors( v1, v0 )
+          .normalize( );
+      this.b.subVectors( v2, v0 )
+          .normalize( );
+      // The cross product of two non-parallel vectors is a new vector that
+      // is perpendicular to both of the original vectors, AKA the face
+      // "normal" vector. It sticks straight up out of the face, pointing
+      // roughly in the direction of our pointer ball.
+      this.c.crossVectors( this.a, this.b );
+      // This matrix is a succinct way to define our plane. We'll use it
+      // later to figure out how to express the location of the pointer ball
+      // in corrodinates local to the plane.
+
+      // translate the point of interest into the reference frame of the
+      // plane. We don't have to do any rotations because we are treating this
+      // object as an infinitely small point.
+      this.d.addVectors( v0, v1 ).add( v2 ).divideScalar( 3 ).sub( p );
 
       value = {
-        objectID: minObj.uuid
+        objectID: minObj.uuid,
+        // determine how far away from the plane the point lies
+        distance: this.c.dot( this.d )
       };
+
       if ( minObj.pickUV ) {
-        faces = minObj.geometry.faces;
-        face = faces[minFaceIndex];
-        // We need to know the arity of the face because we will be building
-        // a pair of axis vectors and we need to know which one is the "middle"
-        // vertex.
-        odd = ( minFaceIndex % 2 ) === 1;
-        // I had to determine this order by trial and error, but now it looks
-        // like it's a basic rotation, where the last two points of the previou
-        // polygon are used as the first two points of the next polygon, what
-        // is called a "Triangle Strip".
-        v0 = minVerts[odd ? face[1] : face[0]];
-        v1 = minVerts[odd ? face[2] : face[1]];
-        v2 = minVerts[odd ? face[0] : face[2]];
-        // Two vectors define the axes of a plane, i.e. our polygon face
-        this.a.subVectors( v1, v0 )
-            .normalize( );
-        this.b.subVectors( v2, v0 )
-            .normalize( );
-        // The cross product of two non-parallel vectors is a new vector that
-        // is perpendicular to both of the original vectors, AKA the face
-        // "normal" vector. It sticks straight up out of the face, pointing
-        // roughly in the direction of our pointer ball.
-        this.c.crossVectors( this.a, this.b );
-        // This matrix is a succinct way to define our plane. We'll use it
-        // later to figure out how to express the location of the pointer ball
-        // in corrodinates local to the plane.
         this.m.set(
             this.a.x, this.b.x, this.c.x, 0,
             this.a.y, this.b.y, this.c.y, 0,
@@ -2862,17 +2870,15 @@ Primrose.Projector = ( function ( ) {
         // A value of 0 will tell us that there is no solvable solution, so we
         // want to avoid that.
         if ( this.m.determinant( ) !== 0 ) {
+          // inverting the plane matrix will then let us apply it to the vector in
+          // question to figure out the coordinates the point has in that plane.
+          this.m.getInverse( this.m );
 
           // translate the point of interest into the reference frame of the
           // plane. We don't have to do any rotations because we are treating this
           // object as an infinitely small point.
-          this.d.subVectors( p, v0 );
-          // determine how far away from the plane the point lies
-          dist = this.c.dot( this.d );
-          // inverting the plane matrix will then let us apply it to the vector in
-          // question to figure out the coordinates the point has in that plane.
-          this.m.getInverse( this.m );
-          this.d.applyMatrix4( this.m );
+          this.d.subVectors( p, v0 )
+              .applyMatrix4( this.m );
           // Now, construct a new plane based on the UV coordinates for the face.
           // We want to figure out where in the texture lies a coordinate that is
           // similar to how the pointer currently relates to the face.
@@ -2900,7 +2906,6 @@ Primrose.Projector = ( function ( ) {
           this.d.x += uv0[0];
           this.d.y += uv0[1];
           value.point = [ this.d.x, this.d.y ];
-          value.distance = dist;
         }
       }
     }
