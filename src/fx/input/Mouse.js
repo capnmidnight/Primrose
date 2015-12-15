@@ -56,7 +56,6 @@ Primrose.Input.Mouse = ( function () {
       else {
         this.setAxis( "Z", this.getAxis( "Z" ) + event.deltaY );
       }
-      this.readEvent( event );
       event.preventDefault();
     }.bind( this ), false );
 
