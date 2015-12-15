@@ -104,6 +104,7 @@ function StartDemo ( isHomeScreen ) {
         exp;
     if ( newScript !== lastScript ) {
       try {
+        log("----- loading new script -----");
         var scriptUpdate = new Function( "scene",
             newScript );
         for ( var i = subScene.children.length - 1; i >= 0; --i ) {
