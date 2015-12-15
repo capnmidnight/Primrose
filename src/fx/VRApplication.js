@@ -39,7 +39,8 @@ Primrose.VRApplication = ( function ( ) {
       ready: [ ],
       update: [ ],
       keydown: [ ],
-      keyup: [ ]
+      keyup: [ ],
+      wheel: [ ]
     };
 
     this.avatarHeight = this.options.avatarHeight;
@@ -74,27 +75,35 @@ Primrose.VRApplication = ( function ( ) {
     this.buttons = [ ];
     this.editors = [ ];
     this.currentEditor = null;
-    this.projector = new Primrose.Workerize(Primrose.Projector);
+    this.projector = new Primrose.Workerize( Primrose.Projector );
     this.projector.ready = true;
 
     //
     // keyboard input
     //
     this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
-      {name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
+      {name: "strafeLeft", buttons: [
+          -Primrose.Input.Keyboard.A,
           -Primrose.Input.Keyboard.LEFTARROW ]},
-      {name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
+      {name: "strafeRight", buttons: [
+          Primrose.Input.Keyboard.D,
           Primrose.Input.Keyboard.RIGHTARROW ]},
-      {name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
+      {name: "driveForward", buttons: [
+          -Primrose.Input.Keyboard.W,
           -Primrose.Input.Keyboard.UPARROW ]},
-      {name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
+      {name: "driveBack", buttons: [
+          Primrose.Input.Keyboard.S,
           Primrose.Input.Keyboard.DOWNARROW ]},
-      {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL,
-          -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
-          Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind(
-            this ), dt: 0.5},
-      {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL,
-          -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
+      {name: "jump", buttons: [
+          -Primrose.Input.Keyboard.CTRL,
+          -Primrose.Input.Keyboard.ALT,
+          -Primrose.Input.Keyboard.SHIFT,
+          Primrose.Input.Keyboard.SPACEBAR ],
+        commandDown: this.jump.bind( this ), dt: 0.5},
+      {name: "zero", buttons: [
+          -Primrose.Input.Keyboard.CTRL,
+          -Primrose.Input.Keyboard.ALT,
+          -Primrose.Input.Keyboard.SHIFT,
           Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
     window.addEventListener( "keydown", this.fire.bind( this, "keydown" ),
@@ -118,11 +127,8 @@ Primrose.VRApplication = ( function ( ) {
       {name: "pointerPitch", commands: [ "dy" ], integrate: true,
         min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
-    window.addEventListener( "mousewheel", function ( evt ) {
-      if ( this.currentEditor ) {
-        this.currentEditor.readWheel( evt );
-      }
-    }.bind( this ), false );
+
+    window.addEventListener( "wheel", this.fire.bind( this, "wheel" ), false );
     //
     // gamepad input
     //
@@ -315,8 +321,8 @@ Primrose.VRApplication = ( function ( ) {
     function setPointer ( hit ) {
       this.projector.ready = true;
       var lastButtons = this.mouse.getValue( "dButtons" );
-      if ( !hit || (hit.point && (0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
-          hit.point.y > 1 )) || Math.abs(hit.distance) > 0.5) {
+      if ( !hit || ( hit.point && ( 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
+          hit.point.y > 1 ) ) || Math.abs( hit.distance ) > 0.5 ) {
         if ( this.currentEditor && lastButtons > 0 ) {
           this.currentEditor.blur();
           this.currentEditor = null;
@@ -557,6 +563,7 @@ Primrose.VRApplication = ( function ( ) {
             tokenizer: tokenizer,
             useShell: true,
             keyEventSource: window,
+            wheelEventSource: this.renderer.domElement,
             theme: Primrose.Text.Themes.Default,
             hideLineNumbers: elem === "pre",
             readOnly: elem === "pre"
@@ -591,7 +598,7 @@ Primrose.VRApplication = ( function ( ) {
     var obj = element;
     while ( obj !== null ) {
       obj.updateMatrix();
-      bag.matrix = obj.matrix.elements.subarray(0, obj.matrix.elements.length);
+      bag.matrix = obj.matrix.elements.subarray( 0, obj.matrix.elements.length );
       bag.parent = obj.parent ? {} : null;
       bag = bag.parent;
       obj = obj.parent;

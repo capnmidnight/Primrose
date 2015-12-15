@@ -689,9 +689,12 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.readWheel = function ( evt ) {
-      this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
-      clampScroll();
-      evt.preventDefault();
+      if ( this.focused ) {
+        this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
+        this.setFontSize(theme.fontSize + evt.deltaX / 100);
+        clampScroll();
+        evt.preventDefault();
+      }
     };
 
     this.startPointer = function ( x, y ) {
@@ -847,7 +850,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
                 key === Primrose.Text.Keys.PAGEUP ||
                 key === Primrose.Text.Keys.PAGEDOWN ||
                 key === Primrose.Text.Keys.END ||
-                key === Primrose.Text.Keys.HOME  ) ) {
+                key === Primrose.Text.Keys.HOME ) ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -869,7 +872,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           }
 
           commandName += "_" + keyNames[key];
-          
+
           var func = commandPack[browser + "_" + commandName] ||
               commandPack[commandName];
           if ( func ) {

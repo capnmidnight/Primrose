@@ -85,14 +85,6 @@ function StartDemo ( isHomeScreen ) {
         app.currentEditor = null;
       }
     }
-    else if ( app.currentEditor ) {
-      if ( mod && evt.keyCode === Primrose.Text.Keys.UPARROW ) {
-        app.currentEditor.increaseFontSize( );
-      }
-      else if ( mod && evt.keyCode === Primrose.Text.Keys.DOWNARROW ) {
-        app.currentEditor.decreaseFontSize( );
-      }
-    }
 
     if ( scriptUpdateTimeout ) {
       clearTimeout( scriptUpdateTimeout );
