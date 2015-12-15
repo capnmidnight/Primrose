@@ -26,11 +26,12 @@ function StartDemo ( isHomeScreen ) {
       subScene = new THREE.Object3D(),
       scriptUpdateTimeout,
       lastScript = null,
-      scriptAnimate = null;
+      scriptAnimate = null,
+      sky = null;
 
   app.addEventListener( "ready", function () {
-    var skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-        sky = textured( skyGeom, "../images/bg2.jpg", true );
+    var skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI );
+    sky = textured( skyGeom, "../images/bg2.jpg", true );
 
     app.scene.add( sky );
     app.scene.add( subScene );
@@ -56,6 +57,7 @@ function StartDemo ( isHomeScreen ) {
   } );
 
   app.addEventListener( "update", function ( dt ) {
+    sky.position.copy(app.currentUser.position);
     if ( !scriptUpdateTimeout ) {
       scriptUpdateTimeout = setTimeout( updateScript, 500 );
     }
@@ -153,30 +155,24 @@ function testDemo ( scene ) {
       .on( scene )
       .at( -12, -3, -12 );
 
-  put( fill( GRASS, 25, 1, 58 ) )
+  put( fill( GRASS, 25, 1, 50 ) )
       .on( start )
       .at( -0.5, -0.5, -0.5 );
-
-  start = put( hub() )
-      .on( scene )
-      .at( 12, -3, 12 );
-
-  start.rotation.y = Math.PI;
 
   for ( var y = 0; y < 10; ++y ) {
     for ( var x = 0; x < 10; ++x ) {
       put( brick( ROCK ) )
           .on( start )
-          .at( x, 10 - Math.max( x, y ), y );
+          .at( x, 10 - Math.max( x, y ), 30 - y );
       put( brick( WATER ) )
           .on( start )
-          .at( 24, y + 1, x );
+          .at( 24 - x, y + 1, 25 );
     }
   }
 
   var sun = put( hub() )
       .on( start )
-      .at( 10, 10, -3 );
+      .at( 5, 15, 20 );
 
   function sunBit ( x, y, z ) {
     put( textured( box( 1 ), 0xffff00, true, 0.125 ) )
