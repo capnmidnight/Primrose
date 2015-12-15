@@ -49,7 +49,9 @@ function StartDemo ( isHomeScreen ) {
     output = app.createElement( "pre", "outputView" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
+    output.textarea.setTheme( Primrose.Text.Themes.Dark );
     output.textarea.render();
+
     app.registerForPicking( output );
 
     log( fmt( "$1+E to show/hide editor", cmdPre ) );
