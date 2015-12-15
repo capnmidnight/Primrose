@@ -845,7 +845,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
                 key === Primrose.Text.Keys.LEFTARROW ||
                 key === Primrose.Text.Keys.RIGHTARROW ||
                 key === Primrose.Text.Keys.PAGEUP ||
-                key === Primrose.Text.Keys.PAGEDOWN ) ) {
+                key === Primrose.Text.Keys.PAGEDOWN ||
+                key === Primrose.Text.Keys.END ||
+                key === Primrose.Text.Keys.HOME  ) ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -867,7 +869,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           }
 
           commandName += "_" + keyNames[key];
-          console.log( commandName );
+          
           var func = commandPack[browser + "_" + commandName] ||
               commandPack[commandName];
           if ( func ) {
