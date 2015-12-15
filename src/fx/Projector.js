@@ -2643,12 +2643,7 @@ Primrose.Projector = ( function ( ) {
     } );
   };
   Projector.prototype._transform = function ( obj, v ) {
-    var p = v.clone( );
-    while ( obj !== null ) {
-      p.applyMatrix4( obj.matrix );
-      obj = obj.parent;
-    }
-    return p;
+    return v.clone( ).applyMatrix4( obj.matrix );
   };
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
@@ -2699,6 +2694,7 @@ Primrose.Projector = ( function ( ) {
     }
     return this.vertCache[obj.uuid];
   };
+
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
       this.objectIDs.push( obj.uuid );
@@ -2711,18 +2707,22 @@ Primrose.Projector = ( function ( ) {
       this.setProperty( obj.uuid, "geometry.faceVertexUvs", obj.geometry.faceVertexUvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
+    this.setObjectTransforms( obj );
+  };
+
+  Projector.prototype.setObjectTransforms = function ( obj ) {
     var head = obj,
-        toSet = {},
-        path = "";
+        a = new THREE.Matrix4(),
+        b = new THREE.Matrix4().identity();
     while ( head !== null ) {
-      toSet[path + "matrix"] = head.matrix;
-      path += "parent.";
+      a.fromArray( head.matrix );
+      b.multiply( a );
       head = head.parent;
     }
-    for ( var k in toSet ) {
-      this.setProperty( obj.uuid, k, toSet[k] );
-    }
+    this.setProperty( obj.uuid, "matrix", b );
+    delete obj.parent;
   };
+
   Projector.prototype.setProperty = function ( objID, propName, value ) {
     var obj = this.objects[objID],
         parts = propName.split( "." );
@@ -2739,9 +2739,6 @@ Primrose.Projector = ( function ( ) {
         value = value.map( function ( v ) {
           return new THREE.Vector3( ).fromArray( v );
         } );
-      }
-      else if ( propName === "matrix" ) {
-        value = new THREE.Matrix4( ).fromArray( value );
       }
       obj[parts[0]] = value;
     }
