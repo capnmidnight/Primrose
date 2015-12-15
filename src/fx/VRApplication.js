@@ -1,4 +1,4 @@
-/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function */
+/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function, isMobile */
 Primrose.VRApplication = ( function ( ) {
   if ( typeof ( THREE ) === "undefined" ) {
     return function ( ) {
@@ -60,7 +60,6 @@ Primrose.VRApplication = ( function ( ) {
     this.pointer = textured( sphere( 0.02, 10, 10 ), 0xff0000 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.25;
-    this.currentUser.add( this.pointer );
     this.currentUser.position.set( 0, this.avatarHeight, 0 );
     this.vrParams = null;
     this.inVR = false;
@@ -123,8 +122,6 @@ Primrose.VRApplication = ( function ( ) {
       },
       {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
             0.5, max: Math.PI * 0.5},
-      {name: "pointerHeading", commands: [ "dx" ], integrate: true,
-        min: -Math.PI * 0.25, max: Math.PI * 0.25},
       {name: "pointerPitch", commands: [ "dy" ], integrate: true,
         min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
@@ -228,6 +225,7 @@ Primrose.VRApplication = ( function ( ) {
         this.setSize( );
         this.scene.add( this.currentUser );
         this.currentUser.add( this.camera );
+        this.camera.add( this.pointer );
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
@@ -527,7 +525,6 @@ Primrose.VRApplication = ( function ( ) {
   };
 
   VRApplication.prototype.registerPickableObject = function ( obj ) {
-    console.log( obj );
     var bag = createWorkerObject( obj );
     bag.pickUV = true;
     bag.geometry = {
@@ -595,7 +592,7 @@ Primrose.VRApplication = ( function ( ) {
     this.vr.update( dt );
 
     heading = this.gamepad.getValue( "heading" ) +
-        this.mouse.getValue( "heading" );
+        isMobile ? 0 : this.mouse.getValue( "heading" );
     strafe = this.gamepad.getValue( "strafe" ) +
         this.keyboard.getValue( "strafeRight" ) +
         this.keyboard.getValue( "strafeLeft" );
