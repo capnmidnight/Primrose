@@ -18,8 +18,8 @@ Primrose.Projector = ( function () {
     };
   }
 
-  Projector.prototype.addObject = function(obj){
-    this.objects.push(obj);
+  Projector.prototype.addObject = function ( obj ) {
+    this.objects.push( obj );
   };
 
   Projector.prototype.fire = function () {
@@ -49,7 +49,7 @@ Primrose.Projector = ( function () {
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
   // positioned somewhere else.
-  function getVerts ( obj ) {
+  Projector.prototype.getVerts = function ( obj ) {
     var key = obj.matrix.elements.join( "," );
     if ( key !== this.transformCache[obj.uuid] ) {
       var trans = [ ];
@@ -97,7 +97,7 @@ Primrose.Projector = ( function () {
       faces[5] = [ bounds[1], bounds[5], bounds[6], bounds[2] ];
     }
     return this.vertCache[obj.uuid];
-  }
+  };
 
   Projector.prototype.projectPointer = function ( p, from ) {
     var // We set minDist to a high value to make sure we capture everything.
@@ -123,7 +123,7 @@ Primrose.Projector = ( function () {
     for ( j = 0; j < this.objects.length; ++j ) {
       var obj = this.objects[j];
       if ( obj.visible && obj.geometry.vertices ) {
-        var verts = getVerts.call( this, obj ),
+        var verts = this.getVerts( obj ),
             // determine if we're even roughly pointing at an object
             pointingAtCube = false;
 
@@ -259,10 +259,9 @@ Primrose.Projector = ( function () {
         this.d.add( uv0 );
 
         value = {
-          object: minObj,
+          objectID: minObj.uuid,
           point: this.d,
-          distance: dist,
-          axis: this.c
+          distance: dist
         };
       }
     }

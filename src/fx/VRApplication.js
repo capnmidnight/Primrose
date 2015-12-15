@@ -75,6 +75,7 @@ Primrose.VRApplication = ( function ( ) {
     this.editors = [ ];
     this.currentEditor = null;
     this.projector = new Primrose.Projector();
+    this.projector.ready = true;
 
     //
     // keyboard input
@@ -104,12 +105,12 @@ Primrose.VRApplication = ( function ( ) {
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
       { name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true
-        },
+      },
       { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
-        },
+      },
       { name: "heading", commands: [ "dx" ], integrate: true },
       { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
-        },
+      },
       { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
             0.5, max: Math.PI * 0.5 },
       { name: "pointerHeading", commands: [ "dx" ], integrate: true,
@@ -129,7 +130,7 @@ Primrose.VRApplication = ( function ( ) {
       { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
       { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
       { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
-        },
+      },
       { name: "dheading", commands: [ "heading" ], delta: true },
       { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ] );
@@ -312,6 +313,7 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     function setPointer ( hit ) {
+      this.projector.ready = true;
       var lastButtons = this.mouse.getValue( "dButtons" );
       if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
           hit.point.y > 1 ) {
@@ -322,13 +324,14 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.material.color.setRGB( 1, 0, 0 );
         this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
       }
-      else if ( hit.object && hit.object.textarea ) {
-        var editor = hit.object.textarea,
+      else if ( hit.objectID ) {
+        var object = this.editors.find(function(e){ return e.uuid === hit.objectID; }),
+            editor = object.textarea,
             // At this point, the UV coord is scaled to a proporitional value, on
             // the range [0, 1] for the dimensions of the image used as the texture.
             // So we have to rescale it back out again. Also, the y coordinate is
             // flipped.
-            txt = hit.object.material.map.image,
+            txt = object.material.map.image,
             textureU = Math.floor( txt.width * hit.point.x ),
             textureV = Math.floor( txt.height * ( 1 - hit.point.y ) ),
             buttons = this.mouse.getValue( "BUTTONS" );
@@ -644,9 +647,12 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.quaternion.multiply( this.qPitch );
     }
 
-    this.projector.projectPointer( transform( this.pointer ), transform(
-        this.currentUser ), this.editors );
-
+    if ( this.projector.ready ) {
+      this.projector.ready = false;
+      this.projector.projectPointer(
+          transform( this.pointer ),
+          transform( this.currentUser ) );
+    }
 
     this.fire( "update", dt );
 
