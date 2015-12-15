@@ -2745,7 +2745,7 @@ Primrose.Projector = ( function ( ) {
   };
   Projector.prototype.projectPointer = function ( p, from ) {
     var // We set minDist to a high value to make sure we capture everything.
-        minDist = 0.5,
+        minDist = Number.MAX_VALUE,
         minObj = null,
         // There is currently no selected face
         minFaceIndex = null,

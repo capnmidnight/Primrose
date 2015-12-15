@@ -2,6 +2,7 @@
 
 var app,
     log = null,
+    clrscr = null,
     GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
@@ -61,7 +62,7 @@ function StartDemo ( isHomeScreen ) {
 
     if ( scriptAnimate ) {
       try {
-        scriptAnimate( dt );
+        scriptAnimate.call(app, dt );
       }
       catch ( exp ) {
         console.error( exp );
@@ -107,7 +108,7 @@ function StartDemo ( isHomeScreen ) {
         for ( var i = subScene.children.length - 1; i >= 0; --i ) {
           subScene.remove( subScene.children[i] );
         }
-        scriptAnimate = scriptUpdate( subScene );
+        scriptAnimate = scriptUpdate.call(app, subScene );
         log("----- script loaded -----");
       }
       catch ( exp ) {
@@ -128,6 +129,15 @@ function StartDemo ( isHomeScreen ) {
       t.selectionStart = t.selectionEnd = t.value.length;
       t.scrollIntoView( t.frontCursor );
     }
+  };
+  
+  clrscr = function (){
+    if ( output ) {
+      var t = output.textarea;
+      t.value = "";
+      t.selectionStart = t.selectionEnd = t.value.length;
+      t.scrollIntoView( t.frontCursor );
+    }  
   };
 
   var cmdLabels = document.querySelectorAll( ".cmdLabel" );
