@@ -80,26 +80,42 @@ Primrose.VRApplication = ( function ( ) {
     // keyboard input
     //
     this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
-      {name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A, -Primrose.Input.Keyboard.LEFTARROW ]},
-      {name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D, Primrose.Input.Keyboard.RIGHTARROW ]},
-      {name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W, -Primrose.Input.Keyboard.UPARROW ]},
-      {name: "driveBack", buttons: [ Primrose.Input.Keyboard.S, Primrose.Input.Keyboard.DOWNARROW ]},
-      {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind( this ), dt: 0.5},
-      {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL, -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT, Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
+      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
+          -Primrose.Input.Keyboard.LEFTARROW ] },
+      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
+          Primrose.Input.Keyboard.RIGHTARROW ] },
+      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
+          -Primrose.Input.Keyboard.UPARROW ] },
+      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
+          Primrose.Input.Keyboard.DOWNARROW ] },
+      { name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL,
+          -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
+          Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind(
+            this ), dt: 0.5 },
+      { name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL,
+          -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
+          Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this ) }
     ] );
-    window.addEventListener( "keydown", this.fire.bind( this, "keydown" ), false );
+    window.addEventListener( "keydown", this.fire.bind( this, "keydown" ),
+        false );
     window.addEventListener( "keyup", this.fire.bind( this, "keyup" ), false );
     //
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
-      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
-      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5},
-      {name: "heading", commands: [ "dx" ], integrate: true},
-      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5},
-      {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
-      {name: "pointerHeading", commands: [ "dx" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25},
-      {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
+      { name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true
+        },
+      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
+        },
+      { name: "heading", commands: [ "dx" ], integrate: true },
+      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
+        },
+      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
+            0.5, max: Math.PI * 0.5 },
+      { name: "pointerHeading", commands: [ "dx" ], integrate: true,
+        min: -Math.PI * 0.25, max: Math.PI * 0.25 },
+      { name: "pointerPitch", commands: [ "dy" ], integrate: true,
+        min: -Math.PI * 0.25, max: Math.PI * 0.25 }
     ] );
     window.addEventListener( "mousewheel", function ( evt ) {
       if ( this.currentEditor ) {
@@ -110,13 +126,15 @@ Primrose.VRApplication = ( function ( ) {
     // gamepad input
     //
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
-      {name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ]},
-      {name: "drive", axes: [ Primrose.Input.Gamepad.LSY ]},
-      {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true},
-      {name: "dheading", commands: [ "heading" ], delta: true},
-      {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
+      { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
+      { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
+      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
+        },
+      { name: "dheading", commands: [ "heading" ], delta: true },
+      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
     ] );
-    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
+    this.gamepad.addEventListener( "gamepadconnected",
+        this.connectGamepad.bind( this ), false );
     //
     // VR input
     //
@@ -126,7 +144,8 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     function setStereoSetting ( s, eye ) {
-      s.transform.makeTranslation( eye.eyeTranslation.x, eye.eyeTranslation.y, eye.eyeTranslation.z );
+      s.transform.makeTranslation( eye.eyeTranslation.x, eye.eyeTranslation.y,
+          eye.eyeTranslation.z );
       s.viewport = eye.renderRect;
     }
 
@@ -146,7 +165,8 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     this.vr = new Primrose.Input.VR( "vr" );
-    this.vr.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
+    this.vr.addEventListener( "vrdeviceconnected", connectVR.bind( this ),
+        false );
     this.vr.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
 
     window.addEventListener( "popstate", function ( evt ) {
@@ -195,7 +215,8 @@ Primrose.VRApplication = ( function ( ) {
 
     function waitForResources ( t ) {
       this.lt = t;
-      if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
+      if ( this.camera && this.scene && this.buttonFactory &&
+          this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
         this.currentUser.add( this.camera );
@@ -219,11 +240,13 @@ Primrose.VRApplication = ( function ( ) {
     };
     if ( !this.options.sceneModel ) {
       this.scene = new THREE.Scene( );
-      this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, this.options.drawDistance );
+      this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1,
+          this.options.drawDistance );
       this.scene.Camera = this.camera;
     }
     else {
-      Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
+      Primrose.ModelLoader.loadScene( this.options.sceneModel, function (
+          sceneGraph ) {
         this.scene = sceneGraph;
         this.camera = this.scene.Camera;
       }.bind( this ) );
@@ -264,15 +287,18 @@ Primrose.VRApplication = ( function ( ) {
 
     if ( this.options.disableAutoFullScreen ) {
       if ( this.options.regularFullScreenButton ) {
-        this.options.regularFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
+        this.options.regularFullScreenButton.addEventListener( "click",
+            this.goFullScreen.bind( this ), false );
       }
 
       if ( this.options.vrFullScreenButton ) {
-        this.options.vrFullScreenButton.addEventListener( "click", this.goFullScreen.bind( this ), false );
+        this.options.vrFullScreenButton.addEventListener( "click",
+            this.goFullScreen.bind( this ), false );
       }
     }
     else {
-      window.addEventListener( "mousedown", this.goFullScreen.bind( this ), false );
+      window.addEventListener( "mousedown", this.goFullScreen.bind( this ),
+          false );
     }
 
     function setVRMode ( evt ) {
@@ -287,7 +313,8 @@ Primrose.VRApplication = ( function ( ) {
 
     function setPointer ( hit ) {
       var lastButtons = this.mouse.getValue( "dButtons" );
-      if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y || hit.point.y > 1 ) {
+      if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
+          hit.point.y > 1 ) {
         if ( this.currentEditor && lastButtons > 0 ) {
           this.currentEditor.blur();
           this.currentEditor = null;
@@ -332,9 +359,12 @@ Primrose.VRApplication = ( function ( ) {
       }
     }
 
-    window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "fullscreenchange", setVRMode.bind( this ),
+        false );
+    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ),
+        false );
+    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ),
+        false );
     window.addEventListener( "resize", this.setSize.bind( this ), false );
     this.projector.addEventListener( "hit", setPointer.bind( this ) );
   }
@@ -346,7 +376,8 @@ Primrose.VRApplication = ( function ( ) {
     walkSpeed: 3,
     gravity: 0.98, // the acceleration applied to falling objects
     jumpHeight: 0.25,
-    backgroundColor: 0xafbfff, // the color that WebGL clears the background with before drawing
+    backgroundColor: 0xafbfff,
+    // the color that WebGL clears the background with before drawing
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
@@ -397,7 +428,8 @@ Primrose.VRApplication = ( function ( ) {
     row.appendChild( cell );
   }
 
-  VRApplication.prototype.setupModuleEvents = function ( container, module, name ) {
+  VRApplication.prototype.setupModuleEvents = function ( container, module,
+      name ) {
     var eID = name + "Enable",
         tID = name + "Transmit",
         rID = name + "Receive",
@@ -521,12 +553,13 @@ Primrose.VRApplication = ( function ( ) {
             keyEventSource: window
           } );
       this.editors.push( ed );
+      this.projector.addObject( ed );
       return ed;
     }
   };
 
-  VRApplication.prototype.stop = function(){
-    cancelAnimationFrame(this.timer);
+  VRApplication.prototype.stop = function () {
+    cancelAnimationFrame( this.timer );
   };
 
   VRApplication.prototype.animate = function ( t ) {
@@ -611,7 +644,8 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.quaternion.multiply( this.qPitch );
     }
 
-    this.projector.projectPointer( this.pointer, this.currentUser, this.editors );
+    this.projector.projectPointer( transform( this.pointer ), transform(
+        this.currentUser ), this.editors );
 
 
     this.fire( "update", dt );
@@ -623,6 +657,17 @@ Primrose.VRApplication = ( function ( ) {
     }
     this.renderScene( this.scene );
   };
+
+
+  function transform ( obj ) {
+    var p = obj.position.clone();
+    obj = obj.parent;
+    while ( obj !== null ) {
+      p.applyMatrix4( obj.matrix );
+      obj = obj.parent;
+    }
+    return p;
+  }
 
   return VRApplication;
 } )( );

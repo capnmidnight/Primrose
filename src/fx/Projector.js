@@ -18,6 +18,10 @@ Primrose.Projector = ( function () {
     };
   }
 
+  Projector.prototype.addObject = function(obj){
+    this.objects.push(obj);
+  };
+
   Projector.prototype.fire = function () {
     var args = Array.prototype.slice.call( arguments ),
         evt = args.shift();
@@ -56,7 +60,7 @@ Primrose.Projector = ( function () {
       }
       this.transformCache[obj.uuid] = key;
       var bounds = [ ],
-          faces = [],
+          faces = [ ],
           minX = Number.MAX_VALUE,
           minY = Number.MAX_VALUE,
           minZ = Number.MAX_VALUE,
@@ -85,23 +89,18 @@ Primrose.Projector = ( function () {
       bounds[6] = new THREE.Vector3( maxX, minY, maxZ );
       bounds[7] = new THREE.Vector3( minX, minY, maxZ );
 
-      faces[0] = [bounds[0], bounds[1], bounds[2], bounds[3]];
-      faces[1] = [bounds[4], bounds[5], bounds[6], bounds[7]];
-      faces[2] = [bounds[0], bounds[1], bounds[5], bounds[4]];
-      faces[3] = [bounds[2], bounds[3], bounds[7], bounds[6]];
-      faces[4] = [bounds[0], bounds[4], bounds[7], bounds[3]];
-      faces[5] = [bounds[1], bounds[5], bounds[6], bounds[2]];
+      faces[0] = [ bounds[0], bounds[1], bounds[2], bounds[3] ];
+      faces[1] = [ bounds[4], bounds[5], bounds[6], bounds[7] ];
+      faces[2] = [ bounds[0], bounds[1], bounds[5], bounds[4] ];
+      faces[3] = [ bounds[2], bounds[3], bounds[7], bounds[6] ];
+      faces[4] = [ bounds[0], bounds[4], bounds[7], bounds[3] ];
+      faces[5] = [ bounds[1], bounds[5], bounds[6], bounds[2] ];
     }
     return this.vertCache[obj.uuid];
   }
 
-  Projector.prototype.projectPointer = function ( pointer, camera, objs ) {
-    if ( !( objs instanceof Array ) ) {
-      objs = [ objs ];
-    }
-    var p = this.transform( pointer.parent, pointer.position ),
-        from = this.transform( camera.parent, camera.position ),
-        // We set minDist to a high value to make sure we capture everything.
+  Projector.prototype.projectPointer = function ( p, from ) {
+    var // We set minDist to a high value to make sure we capture everything.
         minDist = Number.MAX_VALUE,
         minObj = null,
         // There is currently no selected face
@@ -115,12 +114,14 @@ Primrose.Projector = ( function () {
         v2 = null,
         dist = null,
         value = null,
-        i, j,k;
+        i,
+        j,
+        k;
 
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
-    for ( j = 0; j < objs.length; ++j ) {
-      var obj = objs[j];
+    for ( j = 0; j < this.objects.length; ++j ) {
+      var obj = this.objects[j];
       if ( obj.visible && obj.geometry.vertices ) {
         var verts = getVerts.call( this, obj ),
             // determine if we're even roughly pointing at an object
@@ -131,9 +132,9 @@ Primrose.Projector = ( function () {
         for ( i = 0; i < faces.length && !pointingAtCube; ++i ) {
           var bounds = faces[i],
               insideFace = true;
-          for( k = 0; k < bounds.length && insideFace; ++k){
-            this.a.subVectors(bounds[k], from);
-            insideFace &= this.a.dot(this.d) >= 0;
+          for ( k = 0; k < bounds.length && insideFace; ++k ) {
+            this.a.subVectors( bounds[k], from );
+            insideFace &= this.a.dot( this.d ) >= 0;
           }
           pointingAtCube |= insideFace;
         }
