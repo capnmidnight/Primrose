@@ -41,7 +41,7 @@ Primrose.VRApplication = ( function ( ) {
       keydown: [ ],
       keyup: [ ]
     };
-    
+
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
@@ -129,7 +129,7 @@ Primrose.VRApplication = ( function ( ) {
       s.transform.makeTranslation( eye.eyeTranslation.x, eye.eyeTranslation.y, eye.eyeTranslation.z );
       s.viewport = eye.renderRect;
     }
-    
+
     function connectVR ( id ) {
       var deviceIDs = Object.keys( this.vr.devices );
       if ( deviceIDs.length > 0 ) {
@@ -242,11 +242,17 @@ Primrose.VRApplication = ( function ( ) {
           if ( state.position ) {
             this.camera.position.copy( state.position );
           }
+          else{
+            this.camera.position.set(0, 0, 0);
+          }
           this.camera.position.applyMatrix4( m );
 
           if ( state.orientation ) {
             this.camera.quaternion.copy( state.orientation );
             this.camera.position.applyQuaternion( this.camera.quaternion );
+          }
+          else{
+            this.camera.quaternion.set(0, 0, 0, 1);
           }
           this.renderer.setViewport( v.left, v.top, v.width, v.height );
           this.renderer.setScissor( v.left, v.top, v.width, v.height );
@@ -598,7 +604,9 @@ Primrose.VRApplication = ( function ( ) {
     this.fire( "update", dt );
 
     for ( j = 0; j < this.editors.length; ++j ) {
-      this.editors[j].textarea.render();
+      if ( this.editors[j].textarea ) {
+        this.editors[j].textarea.render();
+      }
     }
     this.renderScene( this.scene );
   };
