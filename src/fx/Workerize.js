@@ -11,7 +11,8 @@ Primrose.Workerize = ( function () {
         // strip out the name in a way that Internet Explorer also undrestands 
         // (IE doesn't have the Function.name property supported by Chrome and
         // Firefox)
-        name = script.match( /function (\w+)\(/ )[1],
+        matches = script.match( /function\s+(\w+)\s*\(/ ),
+        name = matches[1],
         k;
 
     // then rebuild the member methods

@@ -591,7 +591,7 @@ Primrose.VRApplication = ( function ( ) {
     var obj = element;
     while ( obj !== null ) {
       obj.updateMatrix();
-      bag.matrix = obj.matrix.elements.slice();
+      bag.matrix = obj.matrix.elements.subarray(0, obj.matrix.elements.length);
       bag.parent = obj.parent ? {} : null;
       bag = bag.parent;
       obj = obj.parent;
