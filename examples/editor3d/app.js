@@ -39,15 +39,18 @@ function StartDemo ( isHomeScreen ) {
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
     documentation.rotation.y = Math.PI / 2;
+    app.registerForPicking( documentation );
 
     editor = app.createElement( "textarea", "textEditor" );
     editor.textarea.value = getSourceCode();
     editor.position.y = editorSphereY;
+    app.registerForPicking( editor );
 
     output = app.createElement( "textarea", "textEditor3" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
     output.textarea.render();
+    app.registerForPicking( output );
 
     log( fmt( "$1+E to show/hide editor", cmdPre ) );
   } );
@@ -256,7 +259,7 @@ function getDocumentation () {
  * TODO:
  *
  *
-
+ 
  var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
  ];
  setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );

@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-
+   
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -81,21 +81,21 @@ Primrose.VRApplication = ( function ( ) {
     // keyboard input
     //
     this.keyboard = new Primrose.Input.Keyboard( "keyboard", window, [
-      { name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
-          -Primrose.Input.Keyboard.LEFTARROW ] },
-      { name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
-          Primrose.Input.Keyboard.RIGHTARROW ] },
-      { name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
-          -Primrose.Input.Keyboard.UPARROW ] },
-      { name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
-          Primrose.Input.Keyboard.DOWNARROW ] },
-      { name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL,
+      {name: "strafeLeft", buttons: [ -Primrose.Input.Keyboard.A,
+          -Primrose.Input.Keyboard.LEFTARROW ]},
+      {name: "strafeRight", buttons: [ Primrose.Input.Keyboard.D,
+          Primrose.Input.Keyboard.RIGHTARROW ]},
+      {name: "driveForward", buttons: [ -Primrose.Input.Keyboard.W,
+          -Primrose.Input.Keyboard.UPARROW ]},
+      {name: "driveBack", buttons: [ Primrose.Input.Keyboard.S,
+          Primrose.Input.Keyboard.DOWNARROW ]},
+      {name: "jump", buttons: [ -Primrose.Input.Keyboard.CTRL,
           -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
           Primrose.Input.Keyboard.SPACEBAR ], commandDown: this.jump.bind(
-            this ), dt: 0.5 },
-      { name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL,
+            this ), dt: 0.5},
+      {name: "zero", buttons: [ -Primrose.Input.Keyboard.CTRL,
           -Primrose.Input.Keyboard.ALT, -Primrose.Input.Keyboard.SHIFT,
-          Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this ) }
+          Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
     window.addEventListener( "keydown", this.fire.bind( this, "keydown" ),
         false );
@@ -104,19 +104,19 @@ Primrose.VRApplication = ( function ( ) {
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
-      { name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true
+      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true
       },
-      { name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
+      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
       },
-      { name: "heading", commands: [ "dx" ], integrate: true },
-      { name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
+      {name: "heading", commands: [ "dx" ], integrate: true},
+      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
       },
-      { name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
-            0.5, max: Math.PI * 0.5 },
-      { name: "pointerHeading", commands: [ "dx" ], integrate: true,
-        min: -Math.PI * 0.25, max: Math.PI * 0.25 },
-      { name: "pointerPitch", commands: [ "dy" ], integrate: true,
-        min: -Math.PI * 0.25, max: Math.PI * 0.25 }
+      {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
+            0.5, max: Math.PI * 0.5},
+      {name: "pointerHeading", commands: [ "dx" ], integrate: true,
+        min: -Math.PI * 0.25, max: Math.PI * 0.25},
+      {name: "pointerPitch", commands: [ "dy" ], integrate: true,
+        min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
     window.addEventListener( "mousewheel", function ( evt ) {
       if ( this.currentEditor ) {
@@ -127,12 +127,12 @@ Primrose.VRApplication = ( function ( ) {
     // gamepad input
     //
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
-      { name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ] },
-      { name: "drive", axes: [ Primrose.Input.Gamepad.LSY ] },
-      { name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
+      {name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ]},
+      {name: "drive", axes: [ Primrose.Input.Gamepad.LSY ]},
+      {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
       },
-      { name: "dheading", commands: [ "heading" ], delta: true },
-      { name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true }
+      {name: "dheading", commands: [ "heading" ], delta: true},
+      {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
     ] );
     this.gamepad.addEventListener( "gamepadconnected",
         this.connectGamepad.bind( this ), false );
@@ -315,8 +315,8 @@ Primrose.VRApplication = ( function ( ) {
     function setPointer ( hit ) {
       this.projector.ready = true;
       var lastButtons = this.mouse.getValue( "dButtons" );
-      if ( !hit || 0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
-          hit.point.y > 1 ) {
+      if ( !hit || (hit.point && (0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
+          hit.point.y > 1 ))) {
         if ( this.currentEditor && lastButtons > 0 ) {
           this.currentEditor.blur();
           this.currentEditor = null;
@@ -324,16 +324,18 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.material.color.setRGB( 1, 0, 0 );
         this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
       }
-      else if ( hit.objectID ) {
-        var object = this.editors.find(function(e){ return e.uuid === hit.objectID; }),
+      else if ( hit.point ) {
+        var object = this.editors.find( function ( e ) {
+          return e.uuid === hit.objectID;
+        } ),
             editor = object.textarea,
             // At this point, the UV coord is scaled to a proporitional value, on
             // the range [0, 1] for the dimensions of the image used as the texture.
             // So we have to rescale it back out again. Also, the y coordinate is
             // flipped.
             txt = object.material.map.image,
-            textureU = Math.floor( txt.width * hit.point.x ),
-            textureV = Math.floor( txt.height * ( 1 - hit.point.y ) ),
+            textureU = Math.floor( txt.width * hit.point[0] ),
+            textureV = Math.floor( txt.height * ( 1 - hit.point[1] ) ),
             buttons = this.mouse.getValue( "BUTTONS" );
 
         if ( buttons > 0 ) {
@@ -556,9 +558,42 @@ Primrose.VRApplication = ( function ( ) {
             keyEventSource: window
           } );
       this.editors.push( ed );
-      this.projector.addObject( ed );
       return ed;
     }
+  };
+
+  VRApplication.prototype.registerForPicking = function ( element ) {
+    var bag = {
+      uuid: element.uuid,
+      pickUV: true,
+      visible: element.visible,
+      geometry: {
+        vertices: element.geometry.vertices.map( function ( v ) {
+          return v.toArray();
+        } ),
+        faces: element.geometry.faces.map( function ( f ) {
+          return [ f.a, f.b, f.c ];
+        } ),
+        faceVertexUvs: element.geometry.faceVertexUvs.map( function ( face ) {
+          return face.map( function ( uvs ) {
+            return uvs.map( function ( uv ) {
+              return uv.toArray();
+            } );
+          } );
+        } )
+      }
+    };
+    var originalBag = bag;
+    var obj = element;
+    while ( obj !== null ) {
+      obj.updateMatrix();
+      bag.matrix = obj.matrix.elements.slice();
+      bag.parent = obj.parent ? {} : null;
+      bag = bag.parent;
+      obj = obj.parent;
+    }
+
+    this.projector.setObject( originalBag );
   };
 
   VRApplication.prototype.stop = function () {

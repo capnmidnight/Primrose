@@ -4,10 +4,11 @@ Primrose.Projector = ( function () {
     if ( isWorker ) {
       importScripts( "~/bin/three.min.js" );
     }
-    this.objects = [ ];
-    this.transformCache = { };
-    this.boundsCache = { };
-    this.vertCache = { };
+    this.objectIDs = [ ];
+    this.objects = {};
+    this.transformCache = {};
+    this.boundsCache = {};
+    this.vertCache = {};
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
@@ -18,8 +19,53 @@ Primrose.Projector = ( function () {
     };
   }
 
-  Projector.prototype.addObject = function ( obj ) {
-    this.objects.push( obj );
+  Projector.prototype.setObject = function ( obj ) {
+    if ( !this.objects[obj.uuid] ) {
+      this.objectIDs.push( obj.uuid );
+      this.objects[obj.uuid] = obj;
+    }
+    else {
+      this.setProperty( obj.uuid, "pickUV", obj.pickUV );
+      this.setProperty( obj.uuid, "visible", obj.visible );
+      this.setProperty( obj.uuid, "geometry.faces", obj.geometry.faces );
+      this.setProperty( obj.uuid, "geometry.faceVertexUvs", obj.geometry.faceVertexUvs );
+    }
+    this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
+    var head = obj,
+        toSet = {},
+        path = "";
+    while ( head !== null ) {
+      toSet[path + "matrix"] = head.matrix;
+      path += "parent.";
+      head = head.parent;
+    }
+    for ( var k in toSet ) {
+      this.setProperty( obj.uuid, k, toSet[k] );
+    }
+  };
+
+  Projector.prototype.setProperty = function ( objID, propName, value ) {
+    var obj = this.objects[objID],
+        parts = propName.split( "." );
+    while ( parts.length > 1 ) {
+      propName = parts.shift();
+      if ( !obj[propName] ) {
+        obj[propName] = {};
+      }
+      obj = obj[propName];
+    }
+    if ( parts.length === 1 ) {
+      propName = parts[0];
+      if ( propName === "vertices" ) {
+        value = value.map( function ( v ) {
+          return new THREE.Vector3().fromArray( v );
+        } );
+      }
+      else if ( propName === "matrix" ) {
+        value = new THREE.Matrix4().fromArray( value );
+      }
+      obj[parts[0]] = value;
+    }
   };
 
   Projector.prototype.fire = function () {
@@ -120,8 +166,9 @@ Primrose.Projector = ( function () {
 
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
-    for ( j = 0; j < this.objects.length; ++j ) {
-      var obj = this.objects[j];
+    for ( j = 0; j < this.objectIDs.length; ++j ) {
+      var objID = this.objectIDs[j],
+          obj = this.objects[objID];
       if ( obj.visible && obj.geometry.vertices ) {
         var verts = this.getVerts( obj ),
             // determine if we're even roughly pointing at an object
@@ -145,9 +192,9 @@ Primrose.Projector = ( function () {
           for ( i = 0; i < faces.length; ++i ) {
             face = faces[i];
             odd = ( i % 2 ) === 1;
-            v0 = verts[odd ? face.b : face.a];
-            v1 = verts[odd ? face.c : face.b];
-            v2 = verts[odd ? face.a : face.c];
+            v0 = verts[odd ? face[1] : face[0]];
+            v1 = verts[odd ? face[2] : face[1]];
+            v2 = verts[odd ? face[0] : face[2]];
             // Shoot a vector from the camera to each of the three corners
             // of the mesh face
             this.a.subVectors( v0, from )
@@ -156,23 +203,24 @@ Primrose.Projector = ( function () {
                 .normalize();
             this.c.subVectors( v2, from )
                 .normalize();
-            // Find the distance to the closest point in the polygon
-            dist = Math.min(
-                p.distanceToSquared( v0 ),
-                p.distanceToSquared( v1 ),
-                p.distanceToSquared( v2 ) );
-            // Find the minimal displacement angle between each of the
-            // vectors to the corners and the vector to the pointer. Basically,
-            // how "far" does the user have to look to get from the pointer
-            // to each of the corners.
+            // Find whether or not the point is inside the triangle defined
+            // by the face vertices. It will point inside the triangle when
+            // all of the vector dot products are positive.
             var d1 = this.a.dot( this.d ),
                 d2 = this.b.dot( this.d ),
                 d3 = this.c.dot( this.d );
-            if ( d1 > 0 && d2 > 0 && d3 > 0 && dist < minDist ) {
-              minObj = obj;
-              minDist = dist;
-              minFaceIndex = i;
-              minVerts = verts;
+            if ( d1 > 0 && d2 > 0 && d3 > 0 ) {
+              // Find the distance to the closest point in the polygon
+              dist = Math.min(
+                  p.distanceToSquared( v0 ),
+                  p.distanceToSquared( v1 ),
+                  p.distanceToSquared( v2 ) );
+              if ( dist < minDist ) {
+                minObj = obj;
+                minDist = dist;
+                minFaceIndex = i;
+                minVerts = verts;
+              }
             }
           }
         }
@@ -180,89 +228,94 @@ Primrose.Projector = ( function () {
     }
 
     if ( minObj !== null && minFaceIndex !== null ) {
-      faces = minObj.geometry.faces;
-      face = faces[minFaceIndex];
-      // We need to know the arity of the face because we will be building
-      // a pair of axis vectors and we need to know which one is the "middle"
-      // vertex.
-      odd = ( minFaceIndex % 2 ) === 1;
-      // I had to determine this order by trial and error, but now it looks
-      // like it's a basic rotation, where the last two points of the previou
-      // polygon are used as the first two points of the next polygon, what
-      // is called a "Triangle Strip".
-      v0 = minVerts[odd ? face.b : face.a];
-      v1 = minVerts[odd ? face.c : face.b];
-      v2 = minVerts[odd ? face.a : face.c];
-      // Two vectors define the axes of a plane, i.e. our polygon face
-      this.a.subVectors( v1, v0 )
-          .normalize();
-      this.b.subVectors( v2, v0 )
-          .normalize();
-      // The cross product of two non-parallel vectors is a new vector that
-      // is perpendicular to both of the original vectors, AKA the face
-      // "normal" vector. It sticks straight up out of the face, pointing
-      // roughly in the direction of our pointer ball.
-      this.c.crossVectors( this.a, this.b );
-      // This matrix is a succinct way to define our plane. We'll use it
-      // later to figure out how to express the location of the pointer ball
-      // in corrodinates local to the plane.
-      this.m.set(
-          this.a.x, this.b.x, this.c.x, 0,
-          this.a.y, this.b.y, this.c.y, 0,
-          this.a.z, this.b.z, this.c.z, 0,
-          0, 0, 0, 1 );
 
-      // A value of 0 will tell us that there is no solvable solution, so we
-      // want to avoid that.
-      if ( this.m.determinant() !== 0 ) {
+      value = {
+        objectID: minObj.uuid,
+        distance: minDist
+      };
 
-        // translate the point of interest into the reference frame of the
-        // plane. We don't have to do any rotations because we are treating this
-        // object as an infinitely small point.
-        this.d.subVectors( p, v0 );
-        // determine how far away from the plane the point lies
-        dist = this.c.dot( this.d );
-
-        // inverting the plane matrix will then let us apply it to the vector in
-        // question to figure out the coordinates the point has in that plane.
-        this.m.getInverse( this.m );
-        this.d.applyMatrix4( this.m );
-
-        // Now, construct a new plane based on the UV coordinates for the face.
-        // We want to figure out where in the texture lies a coordinate that is
-        // similar to how the pointer currently relates to the face.
-        var uvs = minObj.geometry.faceVertexUvs[0][minFaceIndex],
-            uv0 = uvs[odd ? 1 : 0],
-            uv1 = uvs[odd ? 2 : 1],
-            uv2 = uvs[odd ? 0 : 2];
-
-        // I'm reusing the this.a and this.b vectors here to save memory, these
-        // are a wholey new set of axes defining a new plane.
-        this.a.set( uv1.x - uv0.x, uv1.y - uv0.y, 0 );
-        this.b.set( uv2.x - uv0.x, uv2.y - uv0.y, 0 );
-
-        // The normal for the texture is always straight out in the Z axis, so
-        // there is no need to do any sort of calculations.
+      if ( minObj.pickUV ) {
+        faces = minObj.geometry.faces;
+        face = faces[minFaceIndex];
+        // We need to know the arity of the face because we will be building
+        // a pair of axis vectors and we need to know which one is the "middle"
+        // vertex.
+        odd = ( minFaceIndex % 2 ) === 1;
+        // I had to determine this order by trial and error, but now it looks
+        // like it's a basic rotation, where the last two points of the previou
+        // polygon are used as the first two points of the next polygon, what
+        // is called a "Triangle Strip".
+        v0 = minVerts[odd ? face[1] : face[0]];
+        v1 = minVerts[odd ? face[2] : face[1]];
+        v2 = minVerts[odd ? face[0] : face[2]];
+        // Two vectors define the axes of a plane, i.e. our polygon face
+        this.a.subVectors( v1, v0 )
+            .normalize();
+        this.b.subVectors( v2, v0 )
+            .normalize();
+        // The cross product of two non-parallel vectors is a new vector that
+        // is perpendicular to both of the original vectors, AKA the face
+        // "normal" vector. It sticks straight up out of the face, pointing
+        // roughly in the direction of our pointer ball.
+        this.c.crossVectors( this.a, this.b );
+        // This matrix is a succinct way to define our plane. We'll use it
+        // later to figure out how to express the location of the pointer ball
+        // in corrodinates local to the plane.
         this.m.set(
-            this.a.x, this.b.x, 0, 0,
-            this.a.y, this.b.y, 0, 0,
-            this.a.z, this.b.z, 1, 0,
+            this.a.x, this.b.x, this.c.x, 0,
+            this.a.y, this.b.y, this.c.y, 0,
+            this.a.z, this.b.z, this.c.z, 0,
             0, 0, 0, 1 );
 
-        var dx = Math.max( Math.abs( this.a.x ), Math.abs( this.b.x ) ),
-            dy = Math.max( Math.abs( this.a.y ), Math.abs( this.b.y ) );
+        // A value of 0 will tell us that there is no solvable solution, so we
+        // want to avoid that.
+        if ( this.m.determinant() !== 0 ) {
 
-        // This is it, we've got our point now!
-        this.d.applyMatrix4( this.m );
-        this.d.x /= dx;
-        this.d.y /= dy;
-        this.d.add( uv0 );
+          // translate the point of interest into the reference frame of the
+          // plane. We don't have to do any rotations because we are treating this
+          // object as an infinitely small point.
+          this.d.subVectors( p, v0 );
+          // determine how far away from the plane the point lies
+          dist = this.c.dot( this.d );
 
-        value = {
-          objectID: minObj.uuid,
-          point: this.d,
-          distance: dist
-        };
+          // inverting the plane matrix will then let us apply it to the vector in
+          // question to figure out the coordinates the point has in that plane.
+          this.m.getInverse( this.m );
+          this.d.applyMatrix4( this.m );
+
+          // Now, construct a new plane based on the UV coordinates for the face.
+          // We want to figure out where in the texture lies a coordinate that is
+          // similar to how the pointer currently relates to the face.
+          var uvs = minObj.geometry.faceVertexUvs[0][minFaceIndex],
+              uv0 = uvs[odd ? 1 : 0],
+              uv1 = uvs[odd ? 2 : 1],
+              uv2 = uvs[odd ? 0 : 2];
+
+          // I'm reusing the this.a and this.b vectors here to save memory, these
+          // are a wholey new set of axes defining a new plane.
+          this.a.set( uv1[0] - uv0[0], uv1[1] - uv0[1], 0 );
+          this.b.set( uv2[0] - uv0[0], uv2[1] - uv0[1], 0 );
+
+          // The normal for the texture is always straight out in the Z axis, so
+          // there is no need to do any sort of calculations.
+          this.m.set(
+              this.a.x, this.b.x, 0, 0,
+              this.a.y, this.b.y, 0, 0,
+              this.a.z, this.b.z, 1, 0,
+              0, 0, 0, 1 );
+
+          var dx = Math.max( Math.abs( this.a.x ), Math.abs( this.b.x ) ),
+              dy = Math.max( Math.abs( this.a.y ), Math.abs( this.b.y ) );
+
+          // This is it, we've got our point now!
+          this.d.applyMatrix4( this.m );
+          this.d.x /= dx;
+          this.d.y /= dy;
+          this.d.x += uv0[0];
+          this.d.y += uv0[1];
+          value.point = [ this.d.x, this.d.y ];
+          value.distance = dist;
+        }
       }
     }
 
