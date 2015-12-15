@@ -41,12 +41,6 @@ Primrose.Input.VR = ( function () {
       sendAll( listeners.vrdevicelost, id );
     }
 
-    this.removeEventListener = function ( event, handler, bubbles ) {
-      if ( listeners[event] ) {
-        remove( listeners[event], handler );
-      }
-    };
-
     this.devices = {};
     this.sensor = null;
     this.display = null;

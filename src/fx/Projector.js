@@ -1,7 +1,9 @@
 /* global Primrose, THREE */
-
 Primrose.Projector = ( function () {
-  function Projector () {
+  function Projector (isWorker) {
+    if(isWorker){
+      importScripts("~/bin/three.min.js");
+    }
     this.transformCache = {};
     this.vertCache = {};
     this.a = new THREE.Vector3();
@@ -9,16 +11,34 @@ Primrose.Projector = ( function () {
     this.c = new THREE.Vector3();
     this.d = new THREE.Vector3();
     this.m = new THREE.Matrix4();
+    this.listeners = {
+      hit: [ ]
+    };
   }
+  
+  Projector.prototype.fire = function(){
+    var args = Array.prototype.slice.call(arguments),
+        evt = args.shift();
+    this.listeners[evt].forEach(function(t){
+      t.apply(t.executionContext, args);
+    });
+  };
 
-  function transform ( obj, v ) {
+  Projector.prototype.addEventListener = function ( evt, handler ) {
+    if ( !this.listeners[evt] ) {
+      this.listeners[evt] = [ ];
+    }
+    this.listeners[evt].push( handler );
+  };
+
+  Projector.prototype.transform = function ( obj, v ) {
     var p = v.clone();
-    while(obj !== null){
-      p.applyMatrix4(obj.matrix);
+    while ( obj !== null ) {
+      p.applyMatrix4( obj.matrix );
       obj = obj.parent;
     }
     return p;
-  }
+  };
 
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
@@ -30,12 +50,12 @@ Primrose.Projector = ( function () {
       this.vertCache[obj.uuid] = trans;
       var verts = obj.geometry.vertices;
       for ( var i = 0; i < verts.length; ++i ) {
-        trans[i] = transform( obj, verts[i] );
+        trans[i] = this.transform( obj, verts[i] );
       }
       this.transformCache[obj.uuid] = key;
       obj.geometry.computeBoundingSphere();
       var bounds = obj.geometry.boundingSphere;
-      bounds.realCenter = transform( obj, bounds.center );
+      bounds.realCenter = this.transform( obj, bounds.center );
       bounds.radiusSq = bounds.radius * bounds.radius * 1.20;
     }
     return this.vertCache[obj.uuid];
@@ -45,8 +65,8 @@ Primrose.Projector = ( function () {
     if ( !( objs instanceof Array ) ) {
       objs = [ objs ];
     }
-    var p = transform(pointer.parent, pointer.position),
-        from = transform(camera.parent, camera.position),
+    var p = this.transform( pointer.parent, pointer.position ),
+        from = this.transform( camera.parent, camera.position ),
         // We set minAngle to a low value to require the pointer to get close to
         // the object before we project onto it.
         minAngle = Number.MAX_VALUE,
@@ -64,7 +84,7 @@ Primrose.Projector = ( function () {
         v2 = null,
         dist = null,
         angle = null;
-    
+
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
     for ( var j = 0; j < objs.length; ++j ) {
@@ -195,12 +215,12 @@ Primrose.Projector = ( function () {
         this.d.y /= dy;
         this.d.add( uv0 );
 
-        return {
+        this.fire("hit", {
           object: minObj,
           point: this.d,
           distance: dist,
           axis: this.c
-        };
+        });
       }
     }
   };

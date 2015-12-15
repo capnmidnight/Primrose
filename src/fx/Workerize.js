@@ -24,7 +24,7 @@ Primrose.Workerize = ( function () {
 
     // Automatically instantiate an object out of the class inside the worker,
     // in such a way that the user-defined function won't be able to get to it.
-    script += "\n\n(function(){\n  var instance = new " + name + "();";
+    script += "\n\n(function(){\n  var instance = new " + name + "(true);";
 
     // Create a mapper from the events that the class defines to the worker-side
     // postMessage method, to send message to the UI thread that one of the
