@@ -101,9 +101,6 @@ Primrose.Projector = ( function () {
     }
     var p = this.transform( pointer.parent, pointer.position ),
         from = this.transform( camera.parent, camera.position ),
-        // We set minAngle to a low value to require the pointer to get close to
-        // the object before we project onto it.
-        minAngle = Number.MAX_VALUE,
         // We set minDist to a high value to make sure we capture everything.
         minDist = Number.MAX_VALUE,
         minObj = null,
@@ -117,34 +114,34 @@ Primrose.Projector = ( function () {
         v1 = null,
         v2 = null,
         dist = null,
-        angle = null,
-        value = null;
+        value = null,
+        i, j,k;
 
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
-    for ( var j = 0; j < objs.length; ++j ) {
+    for ( j = 0; j < objs.length; ++j ) {
       var obj = objs[j];
       if ( obj.visible && obj.geometry.vertices ) {
         var verts = getVerts.call( this, obj ),
             // determine if we're even roughly pointing at an object
-            good = false;
+            pointingAtCube = false;
 
         faces = this.boundsCache[obj.uuid];
 
-        for ( var i = 0; i < faces.length && !good; ++i ) {
-          var bounds = faces[i];
-          var faceGood = true;
-          for(var k = 0; k < bounds.length && faceGood; ++k){
+        for ( i = 0; i < faces.length && !pointingAtCube; ++i ) {
+          var bounds = faces[i],
+              insideFace = true;
+          for( k = 0; k < bounds.length && insideFace; ++k){
             this.a.subVectors(bounds[k], from);
-            faceGood &= this.a.dot(this.d) >= 0;
+            insideFace &= this.a.dot(this.d) >= 0;
           }
-          good |= faceGood;
+          pointingAtCube |= insideFace;
         }
 
-        if ( good ) {
+        if ( pointingAtCube ) {
           faces = obj.geometry.faces;
           // Find the face that is closest to the pointer
-          for ( var i = 0; i < faces.length; ++i ) {
+          for ( i = 0; i < faces.length; ++i ) {
             face = faces[i];
             odd = ( i % 2 ) === 1;
             v0 = verts[odd ? face.b : face.a];
@@ -170,14 +167,9 @@ Primrose.Projector = ( function () {
             var d1 = this.a.dot( this.d ),
                 d2 = this.b.dot( this.d ),
                 d3 = this.c.dot( this.d );
-            angle = Math.min(
-                Math.acos( d1 ),
-                Math.acos( d2 ),
-                Math.acos( d3 ) );
-            if ( angle < minAngle && dist < minDist ) {
+            if ( d1 > 0 && d2 > 0 && d3 > 0 && dist < minDist ) {
               minObj = obj;
               minDist = dist;
-              minAngle = angle;
               minFaceIndex = i;
               minVerts = verts;
             }
