@@ -1,4 +1,4 @@
-/* global THREE, Primrose */
+/* global THREE, Primrose, isMobile */
 var findVR = ( function () {
   "use strict";
 
@@ -335,6 +335,7 @@ function shell ( r, slices, rings, phi, theta ) {
 }
 
 function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
+  var SCALE = isMobile ? 0.25 : 1;
   options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
   options.fontSize = options.fontSize || 25;
   options.theme = options.theme || Primrose.Text.Themes.Dark;
@@ -343,8 +344,8 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      cellWidth = Math.round( 256 * w / options.fontSize ),
-      cellHeight = Math.round( 256 * h / options.fontSize ),
+      cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
+      cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
       makeGeom = options.useShell ?
         shell.bind( this, 1, cellWidth, cellHeight ) :
         quad.bind( this, w, h, cellWidth, cellHeight ),
