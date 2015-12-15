@@ -1,4 +1,4 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, isChrome */
 
 Primrose.Input.Mouse = ( function () {
   function MouseInput ( name, DOMElement, commands, socket, oscope ) {
@@ -21,11 +21,11 @@ Primrose.Input.Mouse = ( function () {
       if ( MouseInput.isPointerLocked() ) {
         var mx = event.movementX,
             my = event.movementY;
-        
+
         if ( mx === undefined ) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
-        } 
+        }
         this.setMovement( mx, my );
       }
       else {
@@ -45,9 +45,19 @@ Primrose.Input.Mouse = ( function () {
 
     DOMElement.addEventListener( "mousemove", this.readEvent.bind( this ), false );
 
-    DOMElement.addEventListener( "mousewheel", function ( event ) {
-      this.setAxis( "Z", this.getAxis( "Z" ) + event.wheelDelta );
+    DOMElement.addEventListener( "wheel", function ( event ) {
+      if ( isChrome ) {
+        this.setAxis( "W", this.getAxis( "W" ) + event.deltaX );
+        this.setAxis( "Z", this.getAxis( "Z" ) + event.deltaY );
+      }
+      else if ( event.shiftKey ) {
+        this.setAxis( "W", this.getAxis( "W" ) + event.deltaY );
+      }
+      else {
+        this.setAxis( "Z", this.getAxis( "Z" ) + event.deltaY );
+      }
       this.readEvent( event );
+      event.preventDefault();
     }.bind( this ), false );
 
     this.addEventListener = function ( event, handler, bubbles ) {
@@ -129,7 +139,7 @@ Primrose.Input.Mouse = ( function () {
         document.webkitPointerLockElement ||
         document.mozPointerLockElement );
   };
-  MouseInput.AXES = [ "X", "Y", "Z", "BUTTONS" ];
+  MouseInput.AXES = [ "X", "Y", "Z", "W", "BUTTONS" ];
   Primrose.Input.ButtonAndAxis.inherit( MouseInput );
 
   return MouseInput;

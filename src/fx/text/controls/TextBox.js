@@ -2,6 +2,8 @@
 Primrose.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
+  var SCROLL_SCALE = isFirefox ? 3 : 100;
+
   function TextBox ( renderToElementOrID, options ) {
     var self = this;
     //////////////////////////////////////////////////////////////////////////
@@ -394,7 +396,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.setWheelScrollSpeed = function ( v ) {
-      wheelScrollSpeed = v || 25;
+      wheelScrollSpeed = v || 4;
     };
 
     this.getWheelScrollSpeed = function () {
@@ -689,9 +691,18 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.readWheel = function ( evt ) {
+
       if ( this.focused ) {
-        this.scroll.y += Math.floor( evt.deltaY / wheelScrollSpeed );
-        this.setFontSize(theme.fontSize + evt.deltaX / 100);
+        if ( isChrome ) {
+          this.scroll.y += Math.floor( evt.deltaY * wheelScrollSpeed / SCROLL_SCALE );
+          this.setFontSize( theme.fontSize + evt.deltaX / SCROLL_SCALE );
+        }
+        else if ( evt.shiftKey ) {
+          this.setFontSize( theme.fontSize + evt.deltaY / SCROLL_SCALE );
+        }
+        else {
+          this.scroll.y += Math.floor( evt.deltaY * wheelScrollSpeed / SCROLL_SCALE );
+        }
         clampScroll();
         evt.preventDefault();
       }
