@@ -1,7 +1,7 @@
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
 /* global Primrose */
-Primrose.Text.CommandPacks.TextEditor = ( function () {
+Primrose.Text.CommandPacks.TestViewer = ( function () {
   "use strict";
 
   return {
