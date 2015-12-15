@@ -641,7 +641,7 @@ Primrose.VRApplication = ( function ( ) {
     if ( !this.onground ) {
       this.currentUser.velocity.y -= this.options.gravity * dt;
     }
-    else if ( !this.currentEditor ) {
+    else if ( !this.currentEditor || this.currentEditor.readOnly ) {
 
       if ( strafe || drive ) {
         len = drive * drive + strafe * strafe;
