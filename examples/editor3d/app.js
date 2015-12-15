@@ -155,6 +155,14 @@ function testDemo ( scene ) {
   put( fill( GRASS, 25, 1, 25 ) )
       .on( start );
 
+  for ( var y = 0; y < 10; ++y ) {
+    for ( var x = 0; x < 10; ++x ) {
+      put( brick( ROCK ) )
+          .on( start )
+          .at( x, 10 - Math.max( x, y ), y );
+    }
+  }
+
   var sun = put( hub() )
       .on( start )
       .at( 10, 10, -3 );
@@ -176,14 +184,18 @@ function testDemo ( scene ) {
       .on( sun );
 
   var t = 0,
-      n =
-      0;
+      n = 1,
+      nt = 0;
   function update ( dt ) {
-    t += dt * 0.5;
+    t += dt;
+    nt += dt;
+    ++n;
     sun.rotation.set( t, t / 2, t / 5 );
-    if ( n === 0 )
-      log( Math.round( 1 / dt ) );
-    n = ( n + 1 ) % 100;
+    if ( nt > 10 ) {
+      log( Math.round( n / nt ) );
+      nt = 0;
+      n = 1;
+    }
   }
   log( "ok" );
   return update;
@@ -191,9 +203,11 @@ function testDemo ( scene ) {
 
 function getSourceCode () {
   var src = getSetting( "code", testDemo.toString( ) );
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
   if ( src === testDemo.toString( ) ) {
-    var lines = src.replace( "\r\n", "\n" )
-        .split( "\n" );
+    var lines = src.replace( "\r\n", "\n" ).split( "\n" );
     lines.pop( );
     lines.shift( );
     for ( var i = 0; i < lines.length; ++i ) {
@@ -201,7 +215,7 @@ function getSourceCode () {
     }
     src = lines.join( "\n" );
   }
-  return src;
+  return src.trim();
 }
 
 // This is a function to just push it out of the way, uncluttering
