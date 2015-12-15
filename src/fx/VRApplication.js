@@ -325,9 +325,9 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
       }
       else if ( hit.point ) {
-        var object = this.editors.find( function ( e ) {
+        var object = this.editors.filter( function ( e ) {
           return e.uuid === hit.objectID;
-        } ),
+        } )[0],
             editor = object.textarea,
             // At this point, the UV coord is scaled to a proporitional value, on
             // the range [0, 1] for the dimensions of the image used as the texture.
