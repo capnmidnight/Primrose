@@ -1,10 +1,10 @@
 {
   "name": "Primrose",
-  "description": "Primrose is a lightweight text editor control for Web browsers. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.",
-  "version": "0.16.11",
+  "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
+  "version": "0.17.0",
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
-  "homepage": "https://www.primroseeditor.com",
+  "homepage": "https://www.primrosevr.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/capnmidnight/Primrose.git"
@@ -18,6 +18,9 @@
     "lib/"
   ],
   "keywords": [
+    "virtual reality",
+    "VR",
+    "framework",
     "text",
     "editor",
     "HTML5",
