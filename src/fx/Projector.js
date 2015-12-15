@@ -1,8 +1,13 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, self */
 Primrose.Projector = ( function () {
   function Projector ( isWorker ) {
     if ( isWorker ) {
-      importScripts( "~/bin/three.min.js" );
+      try {
+        importScripts( self.location.origin + "/bin/math.min.js" );
+      }
+      catch ( exp ) {
+        console.error( exp );
+      }
     }
     this.objectIDs = [ ];
     this.objects = {};
@@ -18,6 +23,83 @@ Primrose.Projector = ( function () {
       hit: [ ]
     };
   }
+
+  Projector.prototype.addEventListener = function ( evt, handler ) {
+    if ( !this.listeners[evt] ) {
+      this.listeners[evt] = [ ];
+    }
+    this.listeners[evt].push( handler );
+  };
+
+  Projector.prototype._fire = function () {
+    var args = Array.prototype.slice.call( arguments ),
+        evt = args.shift();
+    this.listeners[evt].forEach( function ( t ) {
+      t.apply( t.executionContext, args );
+    } );
+  };
+
+  Projector.prototype._transform = function ( obj, v ) {
+    var p = v.clone();
+    while ( obj !== null ) {
+      p.applyMatrix4( obj.matrix );
+      obj = obj.parent;
+    }
+    return p;
+  };
+
+  // We have to transform the vertices of the geometry into world-space
+  // coordinations, because the object they are on could be rotated or
+  // positioned somewhere else.
+  Projector.prototype._getVerts = function ( obj ) {
+    var key = obj.matrix.elements.join( "," );
+    if ( key !== this.transformCache[obj.uuid] ) {
+      var trans = [ ];
+      this.vertCache[obj.uuid] = trans;
+      var verts = obj.geometry.vertices;
+      for ( var i = 0; i < verts.length; ++i ) {
+        trans[i] = this._transform( obj, verts[i] );
+      }
+      this.transformCache[obj.uuid] = key;
+      var bounds = [ ],
+          faces = [ ],
+          minX = Number.MAX_VALUE,
+          minY = Number.MAX_VALUE,
+          minZ = Number.MAX_VALUE,
+          maxX = Number.MIN_VALUE,
+          maxY = Number.MIN_VALUE,
+          maxZ = Number.MIN_VALUE;
+
+      this.boundsCache[obj.uuid] = faces;
+
+      for ( i = 0; i < trans.length; ++i ) {
+        var v = trans[i];
+        minX = Math.min( minX, v.x );
+        minY = Math.min( minY, v.y );
+        minZ = Math.min( minZ, v.z );
+        maxX = Math.max( maxX, v.x );
+        maxY = Math.max( maxY, v.y );
+        maxZ = Math.max( maxZ, v.z );
+      }
+
+      bounds[0] = new THREE.Vector3( minX, maxY, minZ );
+      bounds[1] = new THREE.Vector3( maxX, maxY, minZ );
+      bounds[2] = new THREE.Vector3( maxX, minY, minZ );
+      bounds[3] = new THREE.Vector3( minX, minY, minZ );
+      bounds[4] = new THREE.Vector3( minX, maxY, maxZ );
+      bounds[5] = new THREE.Vector3( maxX, maxY, maxZ );
+      bounds[6] = new THREE.Vector3( maxX, minY, maxZ );
+      bounds[7] = new THREE.Vector3( minX, minY, maxZ );
+
+      faces[0] = [ bounds[0], bounds[1], bounds[2], bounds[3] ];
+      faces[1] = [ bounds[4], bounds[5], bounds[6], bounds[7] ];
+      faces[2] = [ bounds[0], bounds[1], bounds[5], bounds[4] ];
+      faces[3] = [ bounds[2], bounds[3], bounds[7], bounds[6] ];
+      faces[4] = [ bounds[0], bounds[4], bounds[7], bounds[3] ];
+      faces[5] = [ bounds[1], bounds[5], bounds[6], bounds[2] ];
+    }
+    return this.vertCache[obj.uuid];
+  };
 
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
@@ -68,86 +150,9 @@ Primrose.Projector = ( function () {
     }
   };
 
-  Projector.prototype.fire = function () {
-    var args = Array.prototype.slice.call( arguments ),
-        evt = args.shift();
-    this.listeners[evt].forEach( function ( t ) {
-      t.apply( t.executionContext, args );
-    } );
-  };
-
-  Projector.prototype.addEventListener = function ( evt, handler ) {
-    if ( !this.listeners[evt] ) {
-      this.listeners[evt] = [ ];
-    }
-    this.listeners[evt].push( handler );
-  };
-
-  Projector.prototype.transform = function ( obj, v ) {
-    var p = v.clone();
-    while ( obj !== null ) {
-      p.applyMatrix4( obj.matrix );
-      obj = obj.parent;
-    }
-    return p;
-  };
-
-  // We have to transform the vertices of the geometry into world-space
-  // coordinations, because the object they are on could be rotated or
-  // positioned somewhere else.
-  Projector.prototype.getVerts = function ( obj ) {
-    var key = obj.matrix.elements.join( "," );
-    if ( key !== this.transformCache[obj.uuid] ) {
-      var trans = [ ];
-      this.vertCache[obj.uuid] = trans;
-      var verts = obj.geometry.vertices;
-      for ( var i = 0; i < verts.length; ++i ) {
-        trans[i] = this.transform( obj, verts[i] );
-      }
-      this.transformCache[obj.uuid] = key;
-      var bounds = [ ],
-          faces = [ ],
-          minX = Number.MAX_VALUE,
-          minY = Number.MAX_VALUE,
-          minZ = Number.MAX_VALUE,
-          maxX = Number.MIN_VALUE,
-          maxY = Number.MIN_VALUE,
-          maxZ = Number.MIN_VALUE;
-
-      this.boundsCache[obj.uuid] = faces;
-
-      for ( i = 0; i < trans.length; ++i ) {
-        var v = trans[i];
-        minX = Math.min( minX, v.x );
-        minY = Math.min( minY, v.y );
-        minZ = Math.min( minZ, v.z );
-        maxX = Math.max( maxX, v.x );
-        maxY = Math.max( maxY, v.y );
-        maxZ = Math.max( maxZ, v.z );
-      }
-
-      bounds[0] = new THREE.Vector3( minX, maxY, minZ );
-      bounds[1] = new THREE.Vector3( maxX, maxY, minZ );
-      bounds[2] = new THREE.Vector3( maxX, minY, minZ );
-      bounds[3] = new THREE.Vector3( minX, minY, minZ );
-      bounds[4] = new THREE.Vector3( minX, maxY, maxZ );
-      bounds[5] = new THREE.Vector3( maxX, maxY, maxZ );
-      bounds[6] = new THREE.Vector3( maxX, minY, maxZ );
-      bounds[7] = new THREE.Vector3( minX, minY, maxZ );
-
-      faces[0] = [ bounds[0], bounds[1], bounds[2], bounds[3] ];
-      faces[1] = [ bounds[4], bounds[5], bounds[6], bounds[7] ];
-      faces[2] = [ bounds[0], bounds[1], bounds[5], bounds[4] ];
-      faces[3] = [ bounds[2], bounds[3], bounds[7], bounds[6] ];
-      faces[4] = [ bounds[0], bounds[4], bounds[7], bounds[3] ];
-      faces[5] = [ bounds[1], bounds[5], bounds[6], bounds[2] ];
-    }
-    return this.vertCache[obj.uuid];
-  };
-
   Projector.prototype.projectPointer = function ( p, from ) {
     var // We set minDist to a high value to make sure we capture everything.
-        minDist = Number.MAX_VALUE,
+        minDist = 0.5,
         minObj = null,
         // There is currently no selected face
         minFaceIndex = null,
@@ -164,13 +169,16 @@ Primrose.Projector = ( function () {
         j,
         k;
 
+    p = new THREE.Vector3().fromArray( p );
+    from = new THREE.Vector3().fromArray( from );
+
     // Shoot this.a vector to the selector point
-    this.d.subVectors( p, from );
+    this.d.subVectors( p, from ).normalize();
     for ( j = 0; j < this.objectIDs.length; ++j ) {
       var objID = this.objectIDs[j],
           obj = this.objects[objID];
       if ( obj.visible && obj.geometry.vertices ) {
-        var verts = this.getVerts( obj ),
+        var verts = this._getVerts( obj ),
             // determine if we're even roughly pointing at an object
             pointingAtCube = false;
 
@@ -209,18 +217,16 @@ Primrose.Projector = ( function () {
             var d1 = this.a.dot( this.d ),
                 d2 = this.b.dot( this.d ),
                 d3 = this.c.dot( this.d );
-            if ( d1 > 0 && d2 > 0 && d3 > 0 ) {
-              // Find the distance to the closest point in the polygon
-              dist = Math.min(
-                  p.distanceToSquared( v0 ),
-                  p.distanceToSquared( v1 ),
-                  p.distanceToSquared( v2 ) );
-              if ( dist < minDist ) {
-                minObj = obj;
-                minDist = dist;
-                minFaceIndex = i;
-                minVerts = verts;
-              }
+            // Find the distance to the closest point in the polygon
+            dist = Math.min(
+                p.distanceToSquared( v0 ),
+                p.distanceToSquared( v1 ),
+                p.distanceToSquared( v2 ) );
+            if ( d1 > 0 && d2 > 0 && d3 > 0 && dist < minDist ) {
+              minObj = obj;
+              minDist = dist;
+              minFaceIndex = i;
+              minVerts = verts;
             }
           }
         }
@@ -230,8 +236,7 @@ Primrose.Projector = ( function () {
     if ( minObj !== null && minFaceIndex !== null ) {
 
       value = {
-        objectID: minObj.uuid,
-        distance: minDist
+        objectID: minObj.uuid
       };
 
       if ( minObj.pickUV ) {
@@ -319,7 +324,7 @@ Primrose.Projector = ( function () {
       }
     }
 
-    this.fire( "hit", value );
+    this._fire( "hit", value );
   };
 
   return Projector;

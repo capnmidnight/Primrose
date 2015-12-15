@@ -71,7 +71,7 @@ Primrose.Workerize = ( function () {
     for ( k in func.prototype ) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
-      if ( k !== "addEventListener" ) {
+      if ( k !== "addEventListener" && k[0] !== '_' ) {
         // make the name of the function the first argument, no matter what.
         this[k] = this.methodShim.bind( this, k );
       }

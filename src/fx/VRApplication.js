@@ -74,7 +74,7 @@ Primrose.VRApplication = ( function ( ) {
     this.buttons = [ ];
     this.editors = [ ];
     this.currentEditor = null;
-    this.projector = new Primrose.Projector();
+    this.projector = new Primrose.Workerize(Primrose.Projector);
     this.projector.ready = true;
 
     //
@@ -316,7 +316,7 @@ Primrose.VRApplication = ( function ( ) {
       this.projector.ready = true;
       var lastButtons = this.mouse.getValue( "dButtons" );
       if ( !hit || (hit.point && (0 > hit.point.x || hit.point.x > 1 || 0 > hit.point.y ||
-          hit.point.y > 1 ))) {
+          hit.point.y > 1 )) || Math.abs(hit.distance) > 0.5) {
         if ( this.currentEditor && lastButtons > 0 ) {
           this.currentEditor.blur();
           this.currentEditor = null;
@@ -554,8 +554,8 @@ Primrose.VRApplication = ( function ( ) {
           0, 0, 0,
           0, 0, 0, {
             tokenizer: Primrose.Text.Grammars.JavaScript,
-            fontSize: 20,
-            keyEventSource: window
+            keyEventSource: window,
+            theme: Primrose.Text.Themes.Default
           } );
       this.editors.push( ed );
       return ed;
@@ -685,8 +685,8 @@ Primrose.VRApplication = ( function ( ) {
     if ( this.projector.ready ) {
       this.projector.ready = false;
       this.projector.projectPointer(
-          transform( this.pointer ),
-          transform( this.currentUser ) );
+          transformForPicking( this.pointer ),
+          transformForPicking( this.currentUser ) );
     }
 
     this.fire( "update", dt );
@@ -700,14 +700,14 @@ Primrose.VRApplication = ( function ( ) {
   };
 
 
-  function transform ( obj ) {
+  function transformForPicking ( obj ) {
     var p = obj.position.clone();
     obj = obj.parent;
     while ( obj !== null ) {
       p.applyMatrix4( obj.matrix );
       obj = obj.parent;
     }
-    return p;
+    return p.toArray();
   }
 
   return VRApplication;

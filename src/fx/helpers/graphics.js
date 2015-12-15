@@ -320,13 +320,14 @@ function sphere ( r, slices, rings ) {
 }
 
 function shell ( r, slices, rings, phi, theta ) {
+  var SLICE = 0.45;
   if ( phi === undefined ) {
-    phi = Math.PI * 0.5;
+    phi = Math.PI * SLICE;
   }
   if ( theta === undefined ) {
-    theta = Math.PI * 0.5;
+    theta = Math.PI * SLICE;
   }
-  var phiStart = Math.PI + phi * 0.5,
+  var phiStart = 1.5 * Math.PI - phi * 0.5,
       thetaStart = ( Math.PI - theta ) * 0.5,
       geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
           thetaStart, theta, true );
