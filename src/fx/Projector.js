@@ -1,11 +1,13 @@
 /* global Primrose, THREE */
 Primrose.Projector = ( function () {
-  function Projector (isWorker) {
-    if(isWorker){
-      importScripts("~/bin/three.min.js");
+  function Projector ( isWorker ) {
+    if ( isWorker ) {
+      importScripts( "~/bin/three.min.js" );
     }
-    this.transformCache = {};
-    this.vertCache = {};
+    this.objects = [ ];
+    this.transformCache = { };
+    this.boundsCache = { };
+    this.vertCache = { };
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
@@ -15,13 +17,13 @@ Primrose.Projector = ( function () {
       hit: [ ]
     };
   }
-  
-  Projector.prototype.fire = function(){
-    var args = Array.prototype.slice.call(arguments),
+
+  Projector.prototype.fire = function () {
+    var args = Array.prototype.slice.call( arguments ),
         evt = args.shift();
-    this.listeners[evt].forEach(function(t){
-      t.apply(t.executionContext, args);
-    });
+    this.listeners[evt].forEach( function ( t ) {
+      t.apply( t.executionContext, args );
+    } );
   };
 
   Projector.prototype.addEventListener = function ( evt, handler ) {
@@ -53,10 +55,42 @@ Primrose.Projector = ( function () {
         trans[i] = this.transform( obj, verts[i] );
       }
       this.transformCache[obj.uuid] = key;
-      obj.geometry.computeBoundingSphere();
-      var bounds = obj.geometry.boundingSphere;
-      bounds.realCenter = this.transform( obj, bounds.center );
-      bounds.radiusSq = bounds.radius * bounds.radius * 1.20;
+      var bounds = [ ],
+          faces = [],
+          minX = Number.MAX_VALUE,
+          minY = Number.MAX_VALUE,
+          minZ = Number.MAX_VALUE,
+          maxX = Number.MIN_VALUE,
+          maxY = Number.MIN_VALUE,
+          maxZ = Number.MIN_VALUE;
+
+      this.boundsCache[obj.uuid] = faces;
+
+      for ( i = 0; i < trans.length; ++i ) {
+        var v = trans[i];
+        minX = Math.min( minX, v.x );
+        minY = Math.min( minY, v.y );
+        minZ = Math.min( minZ, v.z );
+        maxX = Math.max( maxX, v.x );
+        maxY = Math.max( maxY, v.y );
+        maxZ = Math.max( maxZ, v.z );
+      }
+
+      bounds[0] = new THREE.Vector3( minX, maxY, minZ );
+      bounds[1] = new THREE.Vector3( maxX, maxY, minZ );
+      bounds[2] = new THREE.Vector3( maxX, minY, minZ );
+      bounds[3] = new THREE.Vector3( minX, minY, minZ );
+      bounds[4] = new THREE.Vector3( minX, maxY, maxZ );
+      bounds[5] = new THREE.Vector3( maxX, maxY, maxZ );
+      bounds[6] = new THREE.Vector3( maxX, minY, maxZ );
+      bounds[7] = new THREE.Vector3( minX, minY, maxZ );
+
+      faces[0] = [bounds[0], bounds[1], bounds[2], bounds[3]];
+      faces[1] = [bounds[4], bounds[5], bounds[6], bounds[7]];
+      faces[2] = [bounds[0], bounds[1], bounds[5], bounds[4]];
+      faces[3] = [bounds[2], bounds[3], bounds[7], bounds[6]];
+      faces[4] = [bounds[0], bounds[4], bounds[7], bounds[3]];
+      faces[5] = [bounds[1], bounds[5], bounds[6], bounds[2]];
     }
     return this.vertCache[obj.uuid];
   }
@@ -83,21 +117,32 @@ Primrose.Projector = ( function () {
         v1 = null,
         v2 = null,
         dist = null,
-        angle = null;
+        angle = null,
+        value = null;
 
     // Shoot this.a vector to the selector point
     this.d.subVectors( p, from );
     for ( var j = 0; j < objs.length; ++j ) {
       var obj = objs[j];
       if ( obj.visible && obj.geometry.vertices ) {
-        faces = obj.geometry.faces;
-
         var verts = getVerts.call( this, obj ),
             // determine if we're even roughly pointing at an object
-            bounds = obj.geometry.boundingSphere;
-        this.a.subVectors( bounds.realCenter, p );
+            good = false;
 
-        if ( this.a.lengthSq() <= bounds.radiusSq ) {
+        faces = this.boundsCache[obj.uuid];
+
+        for ( var i = 0; i < faces.length && !good; ++i ) {
+          var bounds = faces[i];
+          var faceGood = true;
+          for(var k = 0; k < bounds.length && faceGood; ++k){
+            this.a.subVectors(bounds[k], from);
+            faceGood &= this.a.dot(this.d) >= 0;
+          }
+          good |= faceGood;
+        }
+
+        if ( good ) {
+          faces = obj.geometry.faces;
           // Find the face that is closest to the pointer
           for ( var i = 0; i < faces.length; ++i ) {
             face = faces[i];
@@ -105,11 +150,14 @@ Primrose.Projector = ( function () {
             v0 = verts[odd ? face.b : face.a];
             v1 = verts[odd ? face.c : face.b];
             v2 = verts[odd ? face.a : face.c];
-            // Shoot a vector from the camera to each of the three corners 
+            // Shoot a vector from the camera to each of the three corners
             // of the mesh face
-            this.a.subVectors( v0, from ).normalize();
-            this.b.subVectors( v1, from ).normalize();
-            this.c.subVectors( v2, from ).normalize();
+            this.a.subVectors( v0, from )
+                .normalize();
+            this.b.subVectors( v1, from )
+                .normalize();
+            this.c.subVectors( v2, from )
+                .normalize();
             // Find the distance to the closest point in the polygon
             dist = Math.min(
                 p.distanceToSquared( v0 ),
@@ -153,11 +201,13 @@ Primrose.Projector = ( function () {
       v1 = minVerts[odd ? face.c : face.b];
       v2 = minVerts[odd ? face.a : face.c];
       // Two vectors define the axes of a plane, i.e. our polygon face
-      this.a.subVectors( v1, v0 ).normalize();
-      this.b.subVectors( v2, v0 ).normalize();
+      this.a.subVectors( v1, v0 )
+          .normalize();
+      this.b.subVectors( v2, v0 )
+          .normalize();
       // The cross product of two non-parallel vectors is a new vector that
       // is perpendicular to both of the original vectors, AKA the face
-      // "normal" vector. It sticks straight up out of the face, pointing 
+      // "normal" vector. It sticks straight up out of the face, pointing
       // roughly in the direction of our pointer ball.
       this.c.crossVectors( this.a, this.b );
       // This matrix is a succinct way to define our plane. We'll use it
@@ -215,14 +265,16 @@ Primrose.Projector = ( function () {
         this.d.y /= dy;
         this.d.add( uv0 );
 
-        this.fire("hit", {
+        value = {
           object: minObj,
           point: this.d,
           distance: dist,
           axis: this.c
-        });
+        };
       }
     }
+
+    this.fire( "hit", value );
   };
 
   return Projector;

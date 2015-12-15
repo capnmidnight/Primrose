@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-   
+
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -346,7 +346,7 @@ Primrose.VRApplication = ( function ( ) {
     walkSpeed: 3,
     gravity: 0.98, // the acceleration applied to falling objects
     jumpHeight: 0.25,
-    backgroundColor: 0xafbfff, // the color that WebGL clears the background with before drawing    
+    backgroundColor: 0xafbfff, // the color that WebGL clears the background with before drawing
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
@@ -525,8 +525,12 @@ Primrose.VRApplication = ( function ( ) {
     }
   };
 
+  VRApplication.prototype.stop = function(){
+    cancelAnimationFrame(this.timer);
+  };
+
   VRApplication.prototype.animate = function ( t ) {
-    requestAnimationFrame( this.animate );
+    this.timer = requestAnimationFrame( this.animate );
     var dt = ( t - this.lt ) * 0.001,
         heading = 0,
         pitch = 0,
@@ -607,7 +611,7 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.quaternion.multiply( this.qPitch );
     }
 
-    this.projector.projectPointer( this.pointer, this.camera, this.editors );
+    this.projector.projectPointer( this.pointer, this.currentUser, this.editors );
 
 
     this.fire( "update", dt );
