@@ -308,11 +308,11 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
       // draw the scrollbars
       if ( showScrollBars ) {
-        var drawWidth = gridBounds.width * self.character.width;
-        var drawHeight = gridBounds.height * self.character.height;
-        var scrollX = ( scroll.x * drawWidth ) / maxLineWidth + gridBounds.x *
-            self.character.width;
-        var scrollY = ( scroll.y * drawHeight ) / tokenRows.length +
+        var drawWidth = gridBounds.width * self.character.width,
+            drawHeight = gridBounds.height * self.character.height,
+            scrollX = ( scroll.x * drawWidth ) / maxLineWidth + gridBounds.x *
+            self.character.width,
+            scrollY = ( scroll.y * drawHeight ) / tokenRows.length +
             gridBounds.y * self.character.height;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
@@ -338,9 +338,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
               Math.max( self.character.height, scrollBarHeight ) );
         }
       }
-      
+
       if(!focused){
-        tgfx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        tgfx.fillStyle = theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
         tgfx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }

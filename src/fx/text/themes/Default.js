@@ -10,7 +10,8 @@ Primrose.Text.Themes.Default = ( function ( ) {
       backColor: "white",
       foreColor: "black",
       currentRowBackColor: "#f0f0f0",
-      selectedBackColor: "#c0c0c0"
+      selectedBackColor: "#c0c0c0",
+      unfocused: "rgba(255, 255, 255, 0.75)"
     },
     strings: {
       foreColor: "#aa9900",
