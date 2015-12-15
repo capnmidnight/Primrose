@@ -145,7 +145,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       if ( focused ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
             Primrose.Text.Themes.Default.regular.currentRowBackColor,
-            0, minCursor.y + 0.2,
+            0, minCursor.y,
             gridBounds.width, maxCursor.y - minCursor.y + 1 );
       }
 
@@ -172,7 +172,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
               var cw = selectionBack.i - selectionFront.i;
               fillRect( bgfx, theme.regular.selectedBackColor ||
                   Primrose.Text.Themes.Default.regular.selectedBackColor,
-                  selectionFront.x, selectionFront.y + 0.2,
+                  selectionFront.x, selectionFront.y,
                   cw, 1 );
             }
           }

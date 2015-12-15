@@ -62,7 +62,7 @@ function StartDemo ( isHomeScreen ) {
 
     if ( scriptAnimate ) {
       try {
-        scriptAnimate.call(app, dt );
+        scriptAnimate.call( app, dt );
       }
       catch ( exp ) {
         console.error( exp );
@@ -102,14 +102,14 @@ function StartDemo ( isHomeScreen ) {
         exp;
     if ( newScript !== lastScript ) {
       try {
-        log("----- loading new script -----");
+        log( "----- loading new script -----" );
         var scriptUpdate = new Function( "scene",
             newScript );
         for ( var i = subScene.children.length - 1; i >= 0; --i ) {
           subScene.remove( subScene.children[i] );
         }
-        scriptAnimate = scriptUpdate.call(app, subScene );
-        log("----- script loaded -----");
+        scriptAnimate = scriptUpdate.call( app, subScene );
+        log( "----- script loaded -----" );
       }
       catch ( exp ) {
         console.error( exp );
@@ -130,14 +130,14 @@ function StartDemo ( isHomeScreen ) {
       t.scrollIntoView( t.frontCursor );
     }
   };
-  
-  clrscr = function (){
+
+  clrscr = function () {
     if ( output ) {
       var t = output.textarea;
       t.value = "";
       t.selectionStart = t.selectionEnd = t.value.length;
       t.scrollIntoView( t.frontCursor );
-    }  
+    }
   };
 
   var cmdLabels = document.querySelectorAll( ".cmdLabel" );
@@ -153,14 +153,24 @@ function testDemo ( scene ) {
       .on( scene )
       .at( -12, -3, -12 );
 
-  put( fill( GRASS, 25, 1, 25 ) )
-      .on( start );
+  put( fill( GRASS, 25, 1, 58 ) )
+      .on( start )
+      .at( -0.5, -0.5, -0.5 );
+
+  start = put( hub() )
+      .on( scene )
+      .at( 12, -3, 12 );
+
+  start.rotation.y = Math.PI;
 
   for ( var y = 0; y < 10; ++y ) {
     for ( var x = 0; x < 10; ++x ) {
       put( brick( ROCK ) )
           .on( start )
           .at( x, 10 - Math.max( x, y ), y );
+      put( brick( WATER ) )
+          .on( start )
+          .at( 24, y + 1, x );
     }
   }
 
@@ -185,7 +195,7 @@ function testDemo ( scene ) {
       .on( sun );
 
   var t = 0,
-      n = 0,
+      n = 1,
       nt = 0;
   function update ( dt ) {
     t += dt;
@@ -195,7 +205,7 @@ function testDemo ( scene ) {
     if ( nt > 10 ) {
       log( Math.round( n / nt ) );
       nt = 0;
-      n = 0;
+      n = 1;
     }
   }
   return update;
