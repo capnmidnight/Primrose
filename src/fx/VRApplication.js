@@ -547,15 +547,19 @@ Primrose.VRApplication = ( function ( ) {
   };
 
   VRApplication.prototype.createElement = function ( elem, id ) {
-    if ( elem === "textarea" ) {
+    if ( elem === "textarea" || elem === "pre" ) {
+      var tokenizer = elem === "textarea" ? Primrose.Text.Grammars.JavaScript : Primrose.Text.Grammars.PlainText;
       var ed = makeEditor(
           this.scene, id,
           1, 1,
           0, 0, 0,
           0, 0, 0, {
-            tokenizer: Primrose.Text.Grammars.JavaScript,
+            tokenizer: tokenizer,
+            useShell: true,
             keyEventSource: window,
-            theme: Primrose.Text.Themes.Default
+            theme: Primrose.Text.Themes.Default,
+            hideLineNumbers: elem === "pre",
+            readOnly: elem === "pre"
           } );
       this.editors.push( ed );
       return ed;

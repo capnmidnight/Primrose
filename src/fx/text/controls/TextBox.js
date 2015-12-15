@@ -13,10 +13,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       options = {file: options};
     }
 
-    if ( options.readOnly ) {
-      options.disableClipboard = true;
-    }
-
     Primrose.Text.Control.call( this );
 
     //////////////////////////////////////////////////////////////////////////
@@ -814,13 +810,15 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.cutSelectedText = function ( evt ) {
       if ( this.focused ) {
         this.copySelectedText( evt );
-        this.overwriteText();
-        this.update();
+        if ( !this.readOnly ) {
+          this.overwriteText();
+          this.update();
+        }
       }
     };
 
     this.readClipboard = function ( evt ) {
-      if ( this.focused ) {
+      if ( this.focused && !this.readOnly ) {
         evt.returnValue = false;
         var clipboard = evt.clipboardData || window.clipboardData,
             str = clipboard.getData( window.clipboardData ? "Text" :
@@ -836,9 +834,18 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Primrose.Text.Keys.CTRL && key !== Primrose.Text.Keys.ALT && key !==
-            Primrose.Text.Keys.META_L &&
-            key !== Primrose.Text.Keys.META_R && key !== Primrose.Text.Keys.SHIFT ) {
+        if ( key !== Primrose.Text.Keys.CTRL &&
+            key !== Primrose.Text.Keys.ALT &&
+            key !== Primrose.Text.Keys.META_L &&
+            key !== Primrose.Text.Keys.META_R &&
+            key !== Primrose.Text.Keys.SHIFT &&
+            ( !this.readOnly ||
+                key === Primrose.Text.Keys.UPARROW ||
+                key === Primrose.Text.Keys.DOWNARROW ||
+                key === Primrose.Text.Keys.LEFTARROW ||
+                key === Primrose.Text.Keys.RIGHTARROW ||
+                key === Primrose.Text.Keys.PAGEUP ||
+                key === Primrose.Text.Keys.PAGEDOWN ) ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
@@ -860,7 +867,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           }
 
           commandName += "_" + keyNames[key];
-
+          console.log( commandName );
           var func = commandPack[browser + "_" + commandName] ||
               commandPack[commandName];
           if ( func ) {

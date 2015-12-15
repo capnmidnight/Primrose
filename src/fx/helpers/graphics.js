@@ -343,9 +343,9 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      cellWidth = Math.round( 1024 * w / options.fontSize ),
-      cellHeight = Math.round( 1024 * h / options.fontSize ),
-      makeGeom = ( id.indexOf( "textEditor" ) === 0 ) ?
+      cellWidth = Math.round( 256 * w / options.fontSize ),
+      cellHeight = Math.round( 256 * h / options.fontSize ),
+      makeGeom = options.useShell ?
         shell.bind( this, 1, cellWidth, cellHeight ) :
         quad.bind( this, w, h, cellWidth, cellHeight ),
       mesh = textured( makeGeom(), t, false, options.opacity );

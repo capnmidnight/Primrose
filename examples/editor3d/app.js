@@ -34,7 +34,7 @@ function StartDemo ( isHomeScreen ) {
     app.scene.add( sky );
     app.scene.add( subScene );
 
-    documentation = app.createElement( "textarea", "textEditor2" );
+    documentation = app.createElement( "pre", "docView" );
     documentation.textarea.setTokenizer( Primrose.Text.Grammars.PlainText );
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
@@ -46,7 +46,7 @@ function StartDemo ( isHomeScreen ) {
     editor.position.y = editorSphereY;
     app.registerForPicking( editor );
 
-    output = app.createElement( "textarea", "textEditor3" );
+    output = app.createElement( "pre", "outputView" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
     output.textarea.render();
