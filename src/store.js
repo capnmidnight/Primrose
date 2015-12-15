@@ -34,6 +34,9 @@ function showSection ( id, skipPush ) {
     }
     tab.className = "selected";
     tab.scrollTop = 0;
+    setTimeout( function ( tab ) {
+      document.documentElement.scrollTop = tab.offsetTop;
+    }.bind( window, tab ), 10 );
   }
 
   if ( !isMobile || lastTab !== id ) {
@@ -54,7 +57,7 @@ function showSection ( id, skipPush ) {
         t.className = "primary button";
       }
     }
-    
+
     var url = "#" + ( lastTab || "" );
     if ( !skipPush ) {
       history.pushState( null, "Primrose" + ( lastTab ? " > " + lastTab : "" ),
@@ -75,28 +78,28 @@ window.addEventListener( "popstate", function ( evt ) {
 
 function initStore ( ) {
   ctrls = findEverything();
-  
-  function byClass(c, t){
-    Array.prototype.forEach.call(document.getElementsByClassName(c), t);
+
+  function byClass ( c, t ) {
+    Array.prototype.forEach.call( document.getElementsByClassName( c ), t );
   }
-  
-  byClass( 
-    "version-label",
-    function(l){
-      l.innerHTML = Primrose.VERSION;
-    });
-  var pre = "bin/Primrose-" + Primrose.VERSION.substring(1);
+
   byClass(
-    "download-link",
-    function(l){
-      l.href = pre + ".js";
-    });
+      "version-label",
+      function ( l ) {
+        l.innerHTML = Primrose.VERSION;
+      } );
+  var pre = "bin/Primrose-" + Primrose.VERSION.substring( 1 );
   byClass(
-    "download-minified-link",
-    function(l){
-      l.href = pre + ".min.js";
-    });
-  
+      "download-link",
+      function ( l ) {
+        l.href = pre + ".js";
+      } );
+  byClass(
+      "download-minified-link",
+      function ( l ) {
+        l.href = pre + ".min.js";
+      } );
+
   var hash = location.hash.substring( 1 );
   if ( hash.length > 0 && hash !== lastTab ) {
     showSection( hash, true );
