@@ -39,20 +39,17 @@ function StartDemo ( isHomeScreen ) {
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
     documentation.rotation.y = Math.PI / 2;
-    app.registerForPicking( documentation );
 
     editor = app.createElement( "textarea", "textEditor" );
     editor.textarea.value = getSourceCode();
     editor.position.y = editorSphereY;
-    app.registerForPicking( editor );
 
     output = app.createElement( "pre", "outputView" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
     output.textarea.setTheme( Primrose.Text.Themes.Dark );
+    output.textarea.setFontSize( 40 );
     output.textarea.render();
-
-    app.registerForPicking( output );
 
     log( fmt( "$1+E to show/hide editor", cmdPre ) );
   } );
@@ -178,7 +175,7 @@ function testDemo ( scene ) {
       .on( sun );
 
   var t = 0,
-      n = 1,
+      n = 0,
       nt = 0;
   function update ( dt ) {
     t += dt;
@@ -188,7 +185,7 @@ function testDemo ( scene ) {
     if ( nt > 10 ) {
       log( Math.round( n / nt ) );
       nt = 0;
-      n = 1;
+      n = 0;
     }
   }
   return update;

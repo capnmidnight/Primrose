@@ -569,43 +569,45 @@ Primrose.VRApplication = ( function ( ) {
             readOnly: elem === "pre"
           } );
       this.editors.push( ed );
-      return ed;
-    }
-  };
-
-  VRApplication.prototype.registerForPicking = function ( element ) {
-    var bag = {
-      uuid: element.uuid,
-      pickUV: true,
-      visible: element.visible,
-      geometry: {
-        vertices: element.geometry.vertices.map( function ( v ) {
+      var bag = createWorkerObject( ed );
+      bag.pickUV = true;
+      bag.geometry = {
+        vertices: ed.geometry.vertices.map( function ( v ) {
           return v.toArray();
         } ),
-        faces: element.geometry.faces.map( function ( f ) {
+        faces: ed.geometry.faces.map( function ( f ) {
           return [ f.a, f.b, f.c ];
         } ),
-        faceVertexUvs: element.geometry.faceVertexUvs.map( function ( face ) {
+        faceVertexUvs: ed.geometry.faceVertexUvs.map( function ( face ) {
           return face.map( function ( uvs ) {
             return uvs.map( function ( uv ) {
               return uv.toArray();
             } );
           } );
         } )
-      }
-    };
-    var originalBag = bag;
-    var obj = element;
-    while ( obj !== null ) {
-      obj.updateMatrix();
-      bag.matrix = obj.matrix.elements.subarray( 0, obj.matrix.elements.length );
-      bag.parent = obj.parent ? {} : null;
-      bag = bag.parent;
-      obj = obj.parent;
-    }
+      };
 
-    this.projector.setObject( originalBag );
+      this.projector.setObject( bag );
+      return ed;
+    }
   };
+
+  function createWorkerObject ( element ) {
+    var bag = {
+      uuid: element.uuid,
+      visible: element.visible
+    };
+    var originalBag = bag,
+        head = element;
+    while ( head !== null ) {
+      head.updateMatrix();
+      bag.matrix = head.matrix.elements.subarray( 0, head.matrix.elements.length );
+      bag.parent = head.parent ? {} : null;
+      bag = bag.parent;
+      head = head.parent;
+    }
+    return originalBag;
+  }
 
   VRApplication.prototype.stop = function () {
     cancelAnimationFrame( this.timer );
@@ -695,6 +697,9 @@ Primrose.VRApplication = ( function ( ) {
 
     if ( this.projector.ready ) {
       this.projector.ready = false;
+      for ( var i = 0; i < this.editors.length; ++i ) {
+        this.projector.updateObject( createWorkerObject( this.editors[i] ) );
+      }
       this.projector.projectPointer(
           transformForPicking( this.pointer ),
           transformForPicking( this.currentUser ) );

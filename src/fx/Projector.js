@@ -2707,10 +2707,10 @@ Primrose.Projector = ( function ( ) {
       this.setProperty( obj.uuid, "geometry.faceVertexUvs", obj.geometry.faceVertexUvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
-    this.setObjectTransforms( obj );
+    this.updateObject( obj );
   };
 
-  Projector.prototype.setObjectTransforms = function ( obj ) {
+  Projector.prototype.updateObject = function ( obj ) {
     var head = obj,
         a = new THREE.Matrix4(),
         b = new THREE.Matrix4().identity();
