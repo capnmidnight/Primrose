@@ -209,8 +209,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         var line = lines[y],
             row = tokenRows[y],
             drawn = false,
-            textY = ( y + 1 - scroll.y ) * self.character.height,
-            imageY = ( y - scroll.y ) * self.character.height + lineOffsetY;
+            textY = ( y + 0.8 - scroll.y ) * self.character.height,
+            imageY = ( y - scroll.y - 0.2 ) * self.character.height + lineOffsetY;
 
         for ( i = 0; i < row.length; ++i ) {
           var t = row[i];
@@ -299,7 +299,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           fillRect( tgfx,
               theme.regular.selectedBackColor ||
               Primrose.Text.Themes.Default.regular.selectedBackColor,
-              0, y + 0.2,
+              0, y,
               gridBounds.x, 1 );
           tgfx.font = "bold " + self.character.height + "px " +
               theme.fontFamily;
@@ -308,7 +308,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             tgfx.fillStyle = theme.regular.foreColor;
             tgfx.fillText(
                 lineNumber,
-                0, ( y + 1 ) * self.character.height );
+                0, ( y + 0.8 ) * self.character.height );
           }
           lastLine = currentLine;
         }
@@ -320,7 +320,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         strokeRect( tgfx,
             theme.regular.foreColor ||
             Primrose.Text.Themes.Default.regular.foreColor,
-            0, 0.2,
+            0, 0,
             gridBounds.x, gridBounds.height );
       }
 
@@ -361,7 +361,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           theme.regular.foreColor ||
           Primrose.Text.Themes.Default.regular.foreColor,
           gridBounds.x,
-          0.2,
+          0,
           gridBounds.width,
           gridBounds.height );
       tgfx.strokeRect( 0, 0, canvas.width, canvas.height );
