@@ -118,6 +118,7 @@ function StartDemo ( isHomeScreen ) {
           subScene.remove( subScene.children[i] );
         }
         scriptAnimate = scriptUpdate( subScene );
+        log("----- script loaded -----");
       }
       catch ( exp ) {
         console.error( exp );
@@ -197,7 +198,6 @@ function testDemo ( scene ) {
       n = 1;
     }
   }
-  log( "ok" );
   return update;
 }
 
