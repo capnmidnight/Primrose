@@ -31,7 +31,8 @@ Primrose.VRApplication = ( function ( ) {
    */
   var RIGHT = new THREE.Vector3( 1, 0, 0 ),
       UP = new THREE.Vector3( 0, 1, 0 ),
-      FORWARD = new THREE.Vector3( 0, 0, -1 );
+      FORWARD = new THREE.Vector3( 0, 0, -1 ),
+      POINTER_RADIUS = 0.02;
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
@@ -57,9 +58,9 @@ Primrose.VRApplication = ( function ( ) {
     this.temp = new THREE.Matrix4( );
     this.currentUser = new THREE.Object3D( );
     this.currentUser.velocity = new THREE.Vector3( );
-    this.pointer = textured( sphere( 0.02, 10, 10 ), 0xff0000 );
+    this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
-    this.pointer.material.opacity = 0.25;
+    this.pointer.material.opacity = 0.75;
     this.currentUser.position.set( 0, this.avatarHeight, 0 );
     this.vrParams = null;
     this.inVR = false;
@@ -540,37 +541,42 @@ Primrose.VRApplication = ( function ( ) {
     } );
     textured( obj, editor );
     obj.textarea = editor;
-    this.editors.push( obj );
     this.registerPickableObject( obj );
     return obj;
   };
 
   VRApplication.prototype.registerPickableObject = function ( obj ) {
-    var bag = createWorkerObject( obj );
-    bag.pickUV = true;
-    bag.geometry = {
-      vertices: obj.geometry.vertices.map( function ( v ) {
-        return v.toArray();
-      } ),
-      faces: obj.geometry.faces.map( function ( f ) {
-        return [ f.a, f.b, f.c ];
-      } ),
-      faceVertexUvs: obj.geometry.faceVertexUvs.map( function ( face ) {
-        return face.map( function ( uvs ) {
-          return uvs.map( function ( uv ) {
-            return uv.toArray();
+    if ( obj.type === "Object3D" ) {
+      obj.children[0].name = obj.children[0].name || obj.name;
+      obj = obj.children[0];
+    }
+    if ( obj ) {
+      var bag = createWorkerObject( obj );
+      bag.geometry = {
+        vertices: obj.geometry.vertices.map( function ( v ) {
+          return v.toArray();
+        } ),
+        faces: obj.geometry.faces.map( function ( f ) {
+          return [ f.a, f.b, f.c ];
+        } ),
+        faceVertexUvs: obj.geometry.faceVertexUvs.map( function ( face ) {
+          return face.map( function ( uvs ) {
+            return uvs.map( function ( uv ) {
+              return uv.toArray();
+            } );
           } );
-        } );
-      } )
-    };
-
-    this.projector.setObject( bag );
+        } )
+      };
+      this.editors.push( obj );
+      this.projector.setObject( bag );
+    }
   };
 
   function createWorkerObject ( obj ) {
     var bag = {
       uuid: obj.uuid,
-      visible: obj.visible
+      visible: obj.visible,
+      name: obj.name
     };
     var originalBag = bag,
         head = obj;
@@ -658,7 +664,13 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.velocity.y = 0;
     }
 
-    this.camera.add( this.pointer );
+    if ( this.currentEditor ) {
+      this.currentUser.add( this.pointer );
+    }
+    else {
+      this.camera.add( this.pointer );
+    }
+    
     this.pointer.position.copy( FORWARD );
 
     if ( this.inVR ) {
@@ -689,57 +701,67 @@ Primrose.VRApplication = ( function ( ) {
           transformForPicking( this.pointer ),
           transformForPicking( this.currentUser ) );
     }
-    var lastButtons = this.mouse.getValue( "dButtons" );
 
-    if ( !this.currentHit ||
-        !this.currentHit.point ||
-        this.currentHit.point[0] < 0 ||
-        this.currentHit.point[0] > 1 ||
-        this.currentHit.point[1] < 0 ||
-        this.currentHit.point[1] > 1 ) {
+    var lastButtons = this.mouse.getValue( "dButtons" ),
+        hit = this.currentHit;
+
+    if ( !hit ||
+        !hit.point ) {
       if ( this.currentEditor && lastButtons > 0 ) {
         this.currentEditor.blur();
         this.currentEditor = null;
       }
       this.pointer.material.color.setRGB( 1, 0, 0 );
       this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
+      this.pointer.scale.set( 1, 1, 1 );
     }
     else {
       this.scene.add( this.pointer );
-      this.pointer.position.fromArray( this.currentHit.facePoint );
-      this.pointer.material.color.setRGB( 0, 1, 0 );
-      this.pointer.material.emissive.setRGB( 0, 0.25, 0 );
 
-      var object = this.findObject( this.currentHit.objectID );
+      var fp = hit.facePoint, fn = hit.faceNormal;
+      this.pointer.position.set( fp[0] + fn[0] * POINTER_RADIUS, fp[1] + fn[1] * POINTER_RADIUS, fp[2] + fn[2] * POINTER_RADIUS );
+      this.pointer.material.color.setRGB( 1, 1, 1 );
+      this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
+      var object = hit && this.findObject( hit.objectID );
       if ( object ) {
-        var editor = object.textarea,
-            // At this point, the UV coord is scaled to a proporitional value, on
-            // the range [0, 1] for the dimensions of the image used as the texture.
-            // So we have to rescale it back out again. Also, the y coordinate is
-            // flipped.
-            txt = object.material.map.image,
-            textureU = Math.floor( txt.width * this.currentHit.point[0] ),
-            textureV = Math.floor( txt.height * ( 1 - this.currentHit.point[1] ) ),
-            buttons = this.mouse.getValue( "BUTTONS" );
+        var buttons = this.mouse.getValue( "BUTTONS" ),
+            clickChanged = lastButtons > 0,
+            editor = object.textarea;
 
-        if ( buttons > 0 ) {
-          if ( this.currentEditor && this.currentEditor !== editor ) {
-            this.currentEditor.blur();
-            this.currentEditor = null;
+        if ( editor ) {
+          this.pointer.scale.set( 1, 1, 1 );
+        }
+        else {
+          this.pointer.scale.set( 10, 10, 10 );
+        }
+
+        if ( clickChanged && buttons === 1 && this.currentEditor && this.currentEditor !== editor ) {
+          this.currentEditor.blur();
+          this.currentEditor = null;
+        }
+
+        if ( editor && !this.currentEditor && clickChanged && buttons > 0 ) {
+          editor.focus();
+          this.currentEditor = editor;
+        }
+
+        if ( this.currentEditor ) {
+          var // At this point, the UV coord is scaled to a proporitional value, on
+              // the range [0, 1] for the dimensions of the image used as the texture.
+              // So we have to rescale it back out again. Also, the y coordinate is
+              // flipped.
+              txt = object.material.map.image,
+              textureU = Math.floor( txt.width * hit.point[0] ),
+              textureV = Math.floor( txt.height * ( 1 - hit.point[1] ) );
+          if ( !clickChanged && buttons > 0 ) {
+            this.currentEditor.movePointer( textureU, textureV );
           }
-          if ( lastButtons !== buttons ) {
-            editor.movePointer( textureU, textureV );
+          else if ( clickChanged && buttons > 0 ) {
+            this.currentEditor.startPointer( textureU, textureV );
           }
           else {
-            if ( !editor.focused ) {
-              editor.focus();
-              this.currentEditor = editor;
-            }
-            editor.startPointer( textureU, textureV );
+            this.currentEditor.endPointer();
           }
-        }
-        else if ( lastButtons < 0 ) {
-          editor.endPointer();
         }
       }
     }
