@@ -675,7 +675,7 @@ Primrose.VRApplication = ( function ( ) {
 
     if ( this.inVR ) {
       var dHeading = heading - this.currentHeading;
-      if ( Math.abs( dHeading ) > Math.PI / 5 ) {
+      if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
         var dh = Math.sign( dHeading ) * Math.PI / 100;
         this.currentHeading += dh;
         heading -= dh;
