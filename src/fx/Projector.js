@@ -51,8 +51,12 @@ Primrose.Projector = ( function ( ) {
        * @author alteredq / http://alteredqualia.com/
        * @author WestLangley / http://github.com/WestLangley
        * @author bhouston / http://exocortex.com
+       * 
+       * @param {Number} x
+       * @param {Number} y
+       * @param {Number} z
+       * @param {Number} w
        */
-
       THREE.Quaternion = function ( x, y, z, w ) {
 
         this._x = x || 0;
@@ -326,7 +330,7 @@ Primrose.Projector = ( function ( ) {
 
             return this;
 
-          }
+          };
 
         }(),
         inverse: function () {
@@ -552,8 +556,11 @@ Primrose.Projector = ( function ( ) {
        * @author mikael emtinger / http://gomo.se/
        * @author egraether / http://egraether.com/
        * @author WestLangley / http://github.com/WestLangley
+       * 
+       * @param {Number} x
+       * @param {Number} y
+       * @param {Number} z
        */
-
       THREE.Vector3 = function ( x, y, z ) {
 
         this.x = x || 0;
@@ -1207,7 +1214,7 @@ Primrose.Projector = ( function ( ) {
 
             return this.sub( v1 );
 
-          }
+          };
 
         }(),
         reflect: function () {
@@ -1224,7 +1231,7 @@ Primrose.Projector = ( function ( ) {
 
             return this.sub( v1.copy( normal ).multiplyScalar( 2 * this.dot( normal ) ) );
 
-          }
+          };
 
         }(),
         angleTo: function ( v ) {
@@ -2623,6 +2630,10 @@ Primrose.Projector = ( function ( ) {
     this.b = new THREE.Vector3( );
     this.c = new THREE.Vector3( );
     this.d = new THREE.Vector3( );
+    this.e = new THREE.Vector3( );
+    this.f = new THREE.Vector3( );
+    this.g = new THREE.Vector3( );
+    this.p = new THREE.Vector3( );
     this.m = new THREE.Matrix4( );
     this.listeners = {
       hit: [ ]
@@ -2744,10 +2755,8 @@ Primrose.Projector = ( function ( ) {
     }
   };
   Projector.prototype.projectPointer = function ( p, from ) {
-    var // We set minDist to a high value to make sure we capture everything.
-        minDist = Number.MAX_VALUE,
+    var maxCosAngle = Number.MIN_VALUE,
         minObj = null,
-        // There is currently no selected face
         minFaceIndex = null,
         minVerts = null,
         faces = null,
@@ -2756,15 +2765,14 @@ Primrose.Projector = ( function ( ) {
         v0 = null,
         v1 = null,
         v2 = null,
-        dist = null,
         value = null,
         i,
         j,
         k;
-    p = new THREE.Vector3( ).fromArray( p );
-    from = new THREE.Vector3( ).fromArray( from );
-    // Shoot this.a vector to the selector point
-    this.d.subVectors( p, from ).normalize( );
+    this.p.fromArray( p );
+    this.f.fromArray( from );
+    // Shoot a vector to the selector point
+    this.d.subVectors( this.p, this.f ).normalize( );
     for ( j = 0; j < this.objectIDs.length; ++j ) {
       var objID = this.objectIDs[j],
           obj = this.objects[objID];
@@ -2777,7 +2785,7 @@ Primrose.Projector = ( function ( ) {
           var bounds = faces[i],
               insideFace = true;
           for ( k = 0; k < bounds.length && insideFace; ++k ) {
-            this.a.subVectors( bounds[k], from );
+            this.a.subVectors( bounds[k], this.f );
             insideFace &= this.a.dot( this.d ) >= 0;
           }
           pointingAtCube |= insideFace;
@@ -2794,27 +2802,21 @@ Primrose.Projector = ( function ( ) {
             v2 = verts[odd ? face[0] : face[2]];
             // Shoot a vector from the camera to each of the three corners
             // of the mesh face
-            this.a.subVectors( v0, from )
-                .normalize( );
-            this.b.subVectors( v1, from )
-                .normalize( );
-            this.c.subVectors( v2, from )
-                .normalize( );
+            this.a.subVectors( v0, this.f ).normalize( );
+            this.b.subVectors( v1, this.f ).normalize( );
+            this.c.subVectors( v2, this.f ).normalize( );
             // Find whether or not the point is inside the triangle defined
             // by the face vertices. It will point inside the triangle when
             // all of the vector dot products are positive.
             var d1 = this.a.dot( this.d ),
                 d2 = this.b.dot( this.d ),
-                d3 = this.c.dot( this.d );
-            // Find the distance to the closest point in the polygon
-            dist = Math.min(
-                p.distanceToSquared( v0 ),
-                p.distanceToSquared( v1 ),
-                p.distanceToSquared( v2 ) );
-            if ( d1 > 0 && d2 > 0 && d3 > 0 && dist < minDist ) {
-              minObj = obj;
-              minDist = dist;
+                d3 = this.c.dot( this.d ),
+                d = Math.max( d1, d2, d3 );
+            if ( d > maxCosAngle ) {
+              maxCosAngle = d;
               minFaceIndex = i;
+              minObj = obj;
+              // We save these just so we don't have to look them up again later.
               minVerts = verts;
             }
           }
@@ -2830,55 +2832,46 @@ Primrose.Projector = ( function ( ) {
       // vertex.
       odd = ( minFaceIndex % 2 ) === 1;
       // I had to determine this order by trial and error, but now it looks
-      // like it's a basic rotation, where the last two points of the previou
+      // like it's a basic rotation, where the last two points of the previous
       // polygon are used as the first two points of the next polygon, what
       // is called a "Triangle Strip".
       v0 = minVerts[odd ? face[1] : face[0]];
       v1 = minVerts[odd ? face[2] : face[1]];
       v2 = minVerts[odd ? face[0] : face[2]];
       // Two vectors define the axes of a plane, i.e. our polygon face
-      this.a.subVectors( v1, v0 )
-          .normalize( );
-      this.b.subVectors( v2, v0 )
-          .normalize( );
-      // The cross product of two non-parallel vectors is a new vector that
-      // is perpendicular to both of the original vectors, AKA the face
-      // "normal" vector. It sticks straight up out of the face, pointing
-      // roughly in the direction of our pointer ball.
-      this.c.crossVectors( this.a, this.b );
+      this.a.subVectors( v1, v0 );
+      this.b.subVectors( v2, v0 );
+      this.c.subVectors( this.p, this.f );
       // This matrix is a succinct way to define our plane. We'll use it
       // later to figure out how to express the location of the pointer ball
       // in corrodinates local to the plane.
+      this.m.set(
+          this.a.x, this.b.x, -this.c.x, 0,
+          this.a.y, this.b.y, -this.c.y, 0,
+          this.a.z, this.b.z, -this.c.z, 0,
+          0, 0, 0, 1 );
+      // A value of 0 will tell us that there is no solvable solution, so we
+      // want to avoid that.
+      if ( this.m.determinant( ) !== 0 ) {
+        // inverting the plane matrix will then let us apply it to the vector in
+        // question to figure out the coordinates the point has in that plane.
+        this.m.getInverse( this.m );
 
-      // translate the point of interest into the reference frame of the
-      // plane. We don't have to do any rotations because we are treating this
-      // object as an infinitely small point.
-      this.d.addVectors( v0, v1 ).add( v2 ).divideScalar( 3 ).sub( p );
+        // translate the point of interest into the reference frame of the
+        // plane. We don't have to do any rotations because we are treating this
+        // object as an infinitely small point.
+        this.d.subVectors( this.f, v0 );
+        this.e.copy(this.d).applyMatrix4( this.m );
+        this.g.copy(this.c).multiplyScalar(this.e.z).add(this.f);
 
-      value = {
-        objectID: minObj.uuid,
-        // determine how far away from the plane the point lies
-        distance: this.c.dot( this.d )
-      };
+        value = {
+          objectID: minObj.uuid,
+          faceIndex: minFaceIndex,
+          distance: Math.sign(this.e.z) * this.p.distanceTo(this.g),
+          facePoint: this.g.toArray()
+        };
 
-      if ( minObj.pickUV ) {
-        this.m.set(
-            this.a.x, this.b.x, this.c.x, 0,
-            this.a.y, this.b.y, this.c.y, 0,
-            this.a.z, this.b.z, this.c.z, 0,
-            0, 0, 0, 1 );
-        // A value of 0 will tell us that there is no solvable solution, so we
-        // want to avoid that.
-        if ( this.m.determinant( ) !== 0 ) {
-          // inverting the plane matrix will then let us apply it to the vector in
-          // question to figure out the coordinates the point has in that plane.
-          this.m.getInverse( this.m );
-
-          // translate the point of interest into the reference frame of the
-          // plane. We don't have to do any rotations because we are treating this
-          // object as an infinitely small point.
-          this.d.subVectors( p, v0 )
-              .applyMatrix4( this.m );
+        if ( minObj.pickUV ) {
           // Now, construct a new plane based on the UV coordinates for the face.
           // We want to figure out where in the texture lies a coordinate that is
           // similar to how the pointer currently relates to the face.
@@ -2897,20 +2890,20 @@ Primrose.Projector = ( function ( ) {
               this.a.y, this.b.y, 0, 0,
               this.a.z, this.b.z, 1, 0,
               0, 0, 0, 1 );
-          var dx = Math.max( Math.abs( this.a.x ), Math.abs( this.b.x ) ),
-              dy = Math.max( Math.abs( this.a.y ), Math.abs( this.b.y ) );
-          // This is it, we've got our point now!
-          this.d.applyMatrix4( this.m );
-          this.d.x /= dx;
-          this.d.y /= dy;
-          this.d.x += uv0[0];
-          this.d.y += uv0[1];
-          value.point = [ this.d.x, this.d.y ];
+          this.e.applyMatrix4(this.m);
+          this.e.x += uv0[0];
+          this.e.y += uv0[1];
+          value.point = [ this.e.x, this.e.y ];
         }
       }
     }
 
     this._fire( "hit", value );
+  };
+  
+  Projector.prototype._displayVector = function(v, n){
+    n = n || 3;
+    return v.toArray().map(function(c){return parseFloat(c.toFixed(n));});
   };
   return Projector;
 } )( );

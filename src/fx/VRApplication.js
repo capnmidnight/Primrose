@@ -658,6 +658,7 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.velocity.y = 0;
     }
 
+    this.camera.add( this.pointer );
     this.pointer.position.copy( FORWARD );
 
     if ( this.inVR ) {
@@ -689,13 +690,13 @@ Primrose.VRApplication = ( function ( ) {
           transformForPicking( this.currentUser ) );
     }
     var lastButtons = this.mouse.getValue( "dButtons" );
+
     if ( !this.currentHit ||
-        ( this.currentHit.point && ( 0 > this.currentHit.point.x ||
-            this.currentHit.point.x > 1 ||
-            0 > this.currentHit.point.y ||
-            this.currentHit.point.y > 1 ) ) ||
-        this.currentHit.distance > 1 ||
-        this.currentHit.distance < -0.5 ) {
+        !this.currentHit.point ||
+        this.currentHit.point[0] < 0 ||
+        this.currentHit.point[0] > 1 ||
+        this.currentHit.point[1] < 0 ||
+        this.currentHit.point[1] > 1 ) {
       if ( this.currentEditor && lastButtons > 0 ) {
         this.currentEditor.blur();
         this.currentEditor = null;
@@ -703,8 +704,9 @@ Primrose.VRApplication = ( function ( ) {
       this.pointer.material.color.setRGB( 1, 0, 0 );
       this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     }
-    else if ( this.currentHit ) {
-      this.pointer.position.z += this.currentHit.distance + 0.03;
+    else {
+      this.scene.add( this.pointer );
+      this.pointer.position.fromArray( this.currentHit.facePoint );
       this.pointer.material.color.setRGB( 0, 1, 0 );
       this.pointer.material.emissive.setRGB( 0, 0.25, 0 );
 
