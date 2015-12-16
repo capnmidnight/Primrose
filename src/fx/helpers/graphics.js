@@ -343,19 +343,19 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
   if ( options.opacity === undefined ) {
     options.opacity = 1;
   }
-  var t = new Primrose.Text.Controls.TextBox( id, options ),
+  var text = new Primrose.Text.Controls.TextBox( id, options ),
       cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
       cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
       makeGeom = options.useShell ?
         shell.bind( this, 1, cellWidth, cellHeight ) :
         quad.bind( this, w, h, cellWidth, cellHeight ),
-      mesh = textured( makeGeom(), t, false, options.opacity );
-
+      mesh = textured( makeGeom(), text, false, options.opacity );
+  
   mesh.position.set( x, y, z );
   mesh.rotation.set( rx, ry, rz );
   scene.add( mesh );
   
-  mesh.textarea = t;
+  mesh.textarea = text;
 
   return mesh;
 }

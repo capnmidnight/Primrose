@@ -1,74 +1,68 @@
-/* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
+/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
 console.clear();
 
 var app;
 function PrimroseDemo () {
-  app = new Primrose.VRApplication( "Commodore", {
-    regularFullScreenButton: document.getElementById( "goRegular" ),
-    vrFullScreenButton: document.getElementById( "goVR" )
+  var keyState = {},
+      modA = isOSX ? "metaKey" : "ctrlKey",
+      modB = isOSX ? "altKey" : "shiftKey",
+      execKey = isOSX ? "E" : "SPACE",
+      skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
+      sky = textured( skyGeom, "../images/bg2.jpg", true ),
+      floor = textured( box( 25, 1, 25 ), "../images/deck.png", false, 1, 25, 25 ),
+      terminal = null,
+      app = new Primrose.VRApplication( "Commodore", {
+        sceneModel: "commodore_pet.json",
+        regularFullScreenButton: document.getElementById( "goRegular" ),
+        vrFullScreenButton: document.getElementById( "goVR" )
+      } );
+
+  window.addEventListener( "keydown", keyDown.bind( this ) );
+  window.addEventListener( "keyup", function ( evt ) {
+    keyState[evt.keyCode] = false;
   } );
+
+  function keyDown ( evt ) {
+    if ( !this.currentEditor ||
+        !this.currentEditor.focused ) {
+      keyState[evt.keyCode] = true;
+    }
+    else if ( terminal.running &&
+        terminal.waitingForInput &&
+        evt.keyCode === Primrose.Text.Keys.ENTER ) {
+      terminal.sendInput( evt );
+    }
+    else if ( !terminal.running &&
+        isExecuteCommand( evt ) ) {
+      terminal.execute();
+    }
+  }
+
+  function isExecuteCommand ( evt ) {
+    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Text.Keys[execKey];
+  }
 
   app.addEventListener( "ready", function () {
-    console.log("ready");
-    var keyState = {},
-        modA = isOSX ? "metaKey" : "ctrlKey",
-        modB = isOSX ? "altKey" : "shiftKey",
-        execKey = isOSX ? "E" : "SPACE",
-        skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-        sky = textured( skyGeom, "../images/bg2.jpg" ),
-        floor = textured( box( 25, 1, 25 ), "../images/deck.png", 25, 25 ),
-        loader = new THREE.ObjectLoader(),
-        editor = new Primrose.Text.Controls.TextBox( "textEditor", {
-          size: new Primrose.Text.Size( 1024, 1024 ),
-          fontSize: 30,
-          tokenizer: Primrose.Text.Grammars.Basic,
-          theme: Primrose.Text.Themes.Dark,
-          hideLineNumbers: true,
-          hideScrollBars: true
-        } ),
-        terminal = new Primrose.Text.Terminal( editor );
 
-    loader.load( "commodore_pet.json", function ( f ) {
-      app.scene.add( f );
-      f.position.set( -0.1, -0.1, 0 );
-      f.traverse( function ( obj ) {
-        if ( obj.material && obj.material.name === "ScreenMaterial" ) {
-          textured( obj, editor );
-        }
-      } );
-    } );
+    this.scene.traverse( function ( obj ) {
+      if ( obj.name && obj.parent && obj.parent.uuid === this.scene.uuid ) {
+        obj.position.y += this.avatarHeight * 0.9;
+        obj.position.z -= 1;
+      }
+    }.bind( this ) );
 
-    app.scene.add( sky );
-    app.scene.add( floor );
+    put( light( 0xffffff ) ).on( this.scene ).at( 0, 20, 0 );
+    put( sky ).on( this.scene ).at( 0, 0, 0 );
+    put( floor ).on( this.scene ).at( 0, 0, 0 );
 
-    window.addEventListener( "keydown", keyDown );
-    window.addEventListener( "keyup", function ( evt ) {
-      keyState[evt.keyCode] = false;
-    } );
-
+    this.convertToEditor( this.scene.Screen );
+    terminal = new Primrose.Text.Terminal( this.scene.Screen.textarea );
     terminal.loadFile( "../oregon.bas" );
-
-    function keyDown ( evt ) {
-      if ( !app.currentEditor ||
-          !app.currentEditor.focused ) {
-        keyState[evt.keyCode] = true;
-      }
-      else if ( terminal.running &&
-          terminal.waitingForInput &&
-          evt.keyCode === Primrose.Text.Keys.ENTER ) {
-        terminal.sendInput( evt );
-      }
-      else if ( !terminal.running &&
-          isExecuteCommand( evt ) ) {
-        terminal.execute();
-      }
-    }
-
-    function isExecuteCommand ( evt ) {
-      return evt[modA] && evt[modB] && evt.keyCode === Primrose.Text.Keys[execKey];
-    }
-
   } );
-  
+
+  app.addEventListener( "update", function ( ) {
+    sky.position.copy( this.currentUser.position );
+  } );
+
   app.start();
 }

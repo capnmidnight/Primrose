@@ -244,17 +244,21 @@ Primrose.VRApplication = ( function ( ) {
     this.start = function ( ) {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
+    function defaultCamera () {
+      return new THREE.PerspectiveCamera( 45, 1, 0.1,
+          this.options.drawDistance );
+    }
     if ( !this.options.sceneModel ) {
       this.scene = new THREE.Scene( );
-      this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1,
-          this.options.drawDistance );
+      this.camera = defaultCamera.call( this );
       this.scene.Camera = this.camera;
     }
     else {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function (
           sceneGraph ) {
         this.scene = sceneGraph;
-        this.camera = this.scene.Camera;
+        this.camera = this.scene.Camera || defaultCamera.call( this );
+        this.scene.Camera = this.camera;
       }.bind( this ) );
     }
 
@@ -524,6 +528,23 @@ Primrose.VRApplication = ( function ( ) {
     }
   };
 
+  VRApplication.prototype.convertToEditor = function ( obj ) {
+    var editor = new Primrose.Text.Controls.TextBox( "textEditor", {
+      size: new Primrose.Text.Size( 1024, 1024 ),
+      fontSize: 30,
+      tokenizer: Primrose.Text.Grammars.Basic,
+      theme: Primrose.Text.Themes.Dark,
+      keyEventSource: window,
+      wheelEventSource: this.renderer.domElement,
+      hideLineNumbers: true
+    } );
+    textured( obj, editor );
+    obj.textarea = editor;
+    this.editors.push( obj );
+    this.registerPickableObject( obj );
+    return obj;
+  };
+
   VRApplication.prototype.registerPickableObject = function ( obj ) {
     var bag = createWorkerObject( obj );
     bag.pickUV = true;
@@ -673,7 +694,7 @@ Primrose.VRApplication = ( function ( ) {
             this.currentHit.point.x > 1 ||
             0 > this.currentHit.point.y ||
             this.currentHit.point.y > 1 ) ) ||
-        this.currentHit.distance > 0.1 ||
+        this.currentHit.distance > 1 ||
         this.currentHit.distance < -0.5 ) {
       if ( this.currentEditor && lastButtons > 0 ) {
         this.currentEditor.blur();
