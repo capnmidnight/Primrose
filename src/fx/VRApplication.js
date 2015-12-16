@@ -670,21 +670,25 @@ Primrose.VRApplication = ( function ( ) {
     else {
       this.camera.add( this.pointer );
     }
-    
+
     this.pointer.position.copy( FORWARD );
 
     if ( this.inVR ) {
-      var dHeading = heading - this.currentHeading;
-      if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
-        var dh = Math.sign( dHeading ) * Math.PI / 100;
-        this.currentHeading += dh;
-        heading -= dh;
-        dHeading = heading - this.currentHeading;
+      if ( !isMobile ) {
+        var dHeading = heading - this.currentHeading;
+        if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
+          var dh = Math.sign( dHeading ) * Math.PI / 100;
+          this.currentHeading += dh;
+          heading -= dh;
+          dHeading = heading - this.currentHeading;
+        }
       }
       this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
-      this.qHeading.setFromAxisAngle( UP, dHeading )
-          .multiply( this.qPitch );
-      this.pointer.position.applyQuaternion( this.qHeading );
+      if ( !isMobile ) {
+        this.qHeading.setFromAxisAngle( UP, dHeading )
+            .multiply( this.qPitch );
+        this.pointer.position.applyQuaternion( this.qHeading );
+      }
     }
     else {
       this.currentHeading = heading;
@@ -719,7 +723,10 @@ Primrose.VRApplication = ( function ( ) {
       this.scene.add( this.pointer );
 
       var fp = hit.facePoint, fn = hit.faceNormal;
-      this.pointer.position.set( fp[0] + fn[0] * POINTER_RADIUS, fp[1] + fn[1] * POINTER_RADIUS, fp[2] + fn[2] * POINTER_RADIUS );
+      this.pointer.position.set(
+          fp[0] + fn[0] * POINTER_RADIUS,
+          fp[1] + fn[1] * POINTER_RADIUS,
+          fp[2] + fn[2] * POINTER_RADIUS );
       this.pointer.material.color.setRGB( 1, 1, 1 );
       this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
       var object = hit && this.findObject( hit.objectID );
