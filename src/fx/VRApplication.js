@@ -664,7 +664,7 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.velocity.y = 0;
     }
 
-    if ( this.currentEditor ) {
+    if ( this.currentEditor && !isMobile ) {
       this.currentUser.add( this.pointer );
     }
     else {
