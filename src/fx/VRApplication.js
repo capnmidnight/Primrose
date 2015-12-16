@@ -266,14 +266,16 @@ Primrose.VRApplication = ( function ( ) {
     this.renderScene = function ( s, rt, fc ) {
 
       if ( !this.inVR || !this.vrParams ) {
+        this.camera.position.set( 0, 0, 0 );
+        this.camera.quaternion.set( 0, 0, 0, 1 );
         this.renderer.render( s, this.camera, rt, fc );
       }
       else {
+        var state = this.vr.sensor.getState( );
         for ( var i = 0; i < this.stereoSettings.length; ++i ) {
           var st = this.stereoSettings[i],
               m = st.transform,
               v = st.viewport;
-          var state = this.vr.sensor.getState( );
           if ( state.position ) {
             this.camera.position.copy( state.position );
           }
@@ -673,27 +675,25 @@ Primrose.VRApplication = ( function ( ) {
 
     this.pointer.position.copy( FORWARD );
 
-    if ( this.inVR ) {
-      if ( !isMobile ) {
-        var dHeading = heading - this.currentHeading;
-        if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
-          var dh = Math.sign( dHeading ) * Math.PI / 100;
-          this.currentHeading += dh;
-          heading -= dh;
-          dHeading = heading - this.currentHeading;
-        }
-      }
+    if ( !this.inVR || isMobile ) {
+      this.currentHeading = heading;
       this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
       if ( !isMobile ) {
-        this.qHeading.setFromAxisAngle( UP, dHeading )
-            .multiply( this.qPitch );
-        this.pointer.position.applyQuaternion( this.qHeading );
+        this.currentUser.quaternion.multiply( this.qPitch );
       }
     }
     else {
-      this.currentHeading = heading;
+      var dHeading = heading - this.currentHeading;
+      if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
+        var dh = Math.sign( dHeading ) * Math.PI / 100;
+        this.currentHeading += dh;
+        heading -= dh;
+        dHeading = heading - this.currentHeading;
+      }
       this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
-      this.currentUser.quaternion.multiply( this.qPitch );
+      this.qHeading.setFromAxisAngle( UP, dHeading )
+          .multiply( this.qPitch );
+      this.pointer.position.applyQuaternion( this.qHeading );
     }
 
     if ( this.projector.ready ) {
