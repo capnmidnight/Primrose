@@ -78,6 +78,7 @@ Primrose.VRApplication = ( function ( ) {
     this.projector = new Primrose.Workerize( Primrose.Projector );
     this.projector.ready = true;
     this.currentHit = null;
+    this.vrRequested = false;
 
     //
     // keyboard input
@@ -301,23 +302,21 @@ Primrose.VRApplication = ( function ( ) {
     if ( this.options.disableAutoFullScreen ) {
       if ( this.options.regularFullScreenButton ) {
         this.options.regularFullScreenButton.addEventListener( "click",
-            this.goFullScreen.bind( this ), false );
+            this.goFullScreen.bind( this, false ), false );
       }
 
       if ( this.options.vrFullScreenButton ) {
         this.options.vrFullScreenButton.addEventListener( "click",
-            this.goFullScreen.bind( this ), false );
+            this.goFullScreen.bind( this, true ), false );
       }
     }
     else {
-      window.addEventListener( "mousedown", this.goFullScreen.bind( this ),
-          false );
+      window.addEventListener( "mousedown",
+          this.goFullScreen.bind( this, true ), false );
     }
 
     function setVRMode ( ) {
-      if ( this.vr.display ) {
-        this.inVR = !!isFullScreenMode( );
-      }
+      this.inVR = isFullScreenMode( ) && this.vrRequested && this.vr.display;
       if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
         location.hash = "";
       }
@@ -351,10 +350,11 @@ Primrose.VRApplication = ( function ( ) {
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
 
-  VRApplication.prototype.goFullScreen = function ( ) {
+  VRApplication.prototype.goFullScreen = function ( useVR ) {
     this.mouse.requestPointerLock( );
     if ( !isFullScreenMode( ) ) {
-      if ( this.vr.display ) {
+      this.vrRequested = useVR;
+      if ( useVR && this.vr.display ) {
         requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
       }
       else {
