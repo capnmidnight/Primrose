@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-   
+
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -39,10 +39,17 @@ Primrose.VRApplication = ( function ( ) {
     this.listeners = {
       ready: [ ],
       update: [ ],
-      keydown: [ ],
-      keyup: [ ],
-      wheel: [ ]
     };
+    
+    var forwardedEvents = [
+      "keydown", "keyup", "keypress",
+      "mousedown", "mouseup", "mousemove", "wheel",
+      "touchstart", "touchend", "touchmove" ];
+
+    forwardedEvents.forEach(function(e){
+      this.listeners[e] = [];
+      window.addEventListener(e, this.fire.bind(this, e), false);
+    }.bind(this));
 
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
@@ -108,9 +115,6 @@ Primrose.VRApplication = ( function ( ) {
           -Primrose.Input.Keyboard.SHIFT,
           Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
     ] );
-    window.addEventListener( "keydown", this.fire.bind( this, "keydown" ),
-        false );
-    window.addEventListener( "keyup", this.fire.bind( this, "keyup" ), false );
     //
     // mouse input
     //
@@ -128,7 +132,13 @@ Primrose.VRApplication = ( function ( ) {
         min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
 
-    window.addEventListener( "wheel", this.fire.bind( this, "wheel" ), false );
+    //
+    // touch input
+    //
+    this.touch = new Primrose.Input.Touche("touch" ,this.ctrls.frontBuffer, [
+    ]);
+
+
     //
     // gamepad input
     //
