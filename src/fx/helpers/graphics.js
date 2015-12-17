@@ -150,12 +150,12 @@ function InsideSphereGeometry ( radius, widthSegments, heightSegments,
   }
 
   this.computeFaceNormals();
-  
-  for(var i = 0; i < this.faces.length; ++i){
+
+  for ( var i = 0; i < this.faces.length; ++i ) {
     var f = this.faces[i];
-    f.normal.multiplyScalar(-1);
-    for(var j = 0; j < f.vertexNormals.length; ++j){
-      f.vertexNormals[j].multiplyScalar(-1);
+    f.normal.multiplyScalar( -1 );
+    for ( var j = 0; j < f.vertexNormals.length; ++j ) {
+      f.vertexNormals[j].multiplyScalar( -1 );
     }
   }
 
@@ -334,6 +334,29 @@ function shell ( r, slices, rings, phi, theta ) {
   return geom;
 }
 
+function range ( n, m, s, t ) {
+  var n2 = s && n || 0,
+      m2 = s && m || n,
+      s2 = t && s || 1,
+      t2 = t || s || m;
+  for ( var i = n2; i < m2; i += s2 ) {
+    t2( i );
+  }
+}
+
+function cloud ( n, w, h, l, c, s ) {
+  var geom = new THREE.Geometry();
+  for ( var i = 0; i < n; ++i ) {
+    geom.vertices.push( new THREE.Vector3(
+        randomRange( -0.5 * w, 0.5 * w ),
+        randomRange( -0.5 * h, 0.5 * h ),
+        randomRange( -0.5 * l, 0.5 * l ) ) );
+  }
+
+  var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
+  return new THREE.PointCloud( geom, mat );
+}
+
 function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
   var SCALE = isMobile ? 0.25 : 1;
   options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
@@ -347,14 +370,14 @@ function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
       cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
       cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
       makeGeom = options.useShell ?
-        shell.bind( this, 1, cellWidth, cellHeight ) :
-        quad.bind( this, w, h, cellWidth, cellHeight ),
+      shell.bind( this, 1, cellWidth, cellHeight ) :
+      quad.bind( this, w, h, cellWidth, cellHeight ),
       mesh = textured( makeGeom(), text, false, options.opacity );
-  
+
   mesh.position.set( x, y, z );
   mesh.rotation.set( rx, ry, rz );
   scene.add( mesh );
-  
+
   mesh.textarea = text;
 
   return mesh;

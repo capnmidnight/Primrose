@@ -13,7 +13,8 @@ function StartDemo ( isHomeScreen ) {
   app = new Primrose.VRApplication( "Codevember", {
     disableAutoFullScreen: isHomeScreen,
     regularFullScreenButton: isHomeScreen && document.getElementById( "goRegular" ),
-    vrFullScreenButton: isHomeScreen && document.getElementById( "goVR" )
+    vrFullScreenButton: isHomeScreen && document.getElementById( "goVR" ),
+    useFog: true
   } );
 
   var editor = null,
@@ -57,7 +58,7 @@ function StartDemo ( isHomeScreen ) {
   } );
 
   app.addEventListener( "update", function ( dt ) {
-    sky.position.copy(app.currentUser.position);
+    sky.position.copy( app.currentUser.position );
     if ( !scriptUpdateTimeout ) {
       scriptUpdateTimeout = setTimeout( updateScript, 500 );
     }
@@ -103,10 +104,14 @@ function StartDemo ( isHomeScreen ) {
     var newScript = editor.textarea.value,
         exp;
     if ( newScript !== lastScript ) {
+      lastScript = newScript;
+      if ( newScript.indexOf( "function update" ) >= 0 &&
+          newScript.indexOf( "return update" ) < 0 ) {
+        newScript += "\nreturn update;";
+      }
       try {
         log( "----- loading new script -----" );
-        var scriptUpdate = new Function( "scene",
-            newScript );
+        var scriptUpdate = new Function( "scene", newScript );
         for ( var i = subScene.children.length - 1; i >= 0; --i ) {
           subScene.remove( subScene.children[i] );
         }
@@ -118,7 +123,6 @@ function StartDemo ( isHomeScreen ) {
         log( "ERR: " + exp.message );
         scriptAnimate = null;
       }
-      lastScript = newScript;
     }
     scriptUpdateTimeout = null;
   }
@@ -151,28 +155,28 @@ function StartDemo ( isHomeScreen ) {
 }
 
 function testDemo ( scene ) {
-  var start = put( hub() )
-      .on( scene )
-      .at( -12, -3, -12 );
+  var WIDTH = 100,
+      HEIGHT = 6,
+      DEPTH = 100,
+      MIDX = WIDTH / 2,
+      MIDY = HEIGHT / 2,
+      MIDZ = DEPTH / 2,
+      start = put( hub() ).on( scene ).at( -MIDX, -MIDY, -MIDZ );
 
-  put( fill( GRASS, 25, 1, 50 ) )
-      .on( start )
-      .at( -0.5, -0.5, -0.5 );
-
+  put( cloud( 1000, WIDTH, HEIGHT, DEPTH, 0x6699ff, 0.05 ) ).on( start );
+  put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
   for ( var y = 0; y < 10; ++y ) {
     for ( var x = 0; x < 10; ++x ) {
-      put( brick( ROCK ) )
-          .on( start )
-          .at( x, 10 - Math.max( x, y ), 30 - y );
       put( brick( WATER ) )
           .on( start )
-          .at( 24 - x, y + 1, 25 );
+          .at( MIDX - x + 20, 10 - Math.max( x, y ), MIDZ - y + 20 );
+      put( brick( WATER ) )
+          .on( start )
+          .at( MIDX + x + 20, 10 - Math.max( x, y ), MIDZ + y + 20 );
     }
   }
-
-  var sun = put( hub() )
-      .on( start )
-      .at( 5, 15, 20 );
+  
+  var sun = put( hub() ).on( start ).at( MIDX + 5, 15, MIDZ + 20 );
 
   function sunBit ( x, y, z ) {
     put( textured( box( 1 ), 0xffff00, true, 0.125 ) )
@@ -187,24 +191,33 @@ function testDemo ( scene ) {
   sunBit( 0, 0, 1 );
   sunBit( 0, 0, -1 );
 
-  put( light( 0xffffff, 1, 100 ) )
-      .on( sun );
+  put( light( 0xffffff, 1, 500 ) ).on( sun );
+  var ball = put( brick( ROCK ) ).on( start ).at( 0, MIDY + 1, 0 ),
+      t = 0,
+      dx = 7,
+      dy = 2.5,
+      dz = 4;
 
-  var t = 0,
-      n = 1,
-      nt = 0;
   function update ( dt ) {
     t += dt;
-    nt += dt;
-    ++n;
-    sun.rotation.set( t, t / 2, t / 5 );
-    if ( nt > 10 ) {
-      log( Math.round( n / nt ) );
-      nt = 0;
-      n = 1;
+
+    ball.position.x += dx * dt;
+    ball.position.y += dy * dt;
+    ball.position.z += dz * dt;
+    if ( ball.position.x < 0 && dx < 0
+        || WIDTH <= ball.position.x && dx > 0 ) {
+      dx *= -1;
     }
+    if ( ball.position.y < 1 && dy < 0
+        || HEIGHT <= ball.position.y && dy > 0 ) {
+      dy *= -1;
+    }
+    if ( ball.position.z < 0 && dz < 0
+        || DEPTH <= ball.position.z && dz > 0 ) {
+      dz *= -1;
+    }
+    sun.rotation.set( t, t / 2, t / 5 );
   }
-  return update;
 }
 
 function getSourceCode () {
