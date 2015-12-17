@@ -41,16 +41,6 @@ Primrose.VRApplication = ( function ( ) {
       update: [ ]
     };
 
-    var forwardedEvents = [
-      "keydown", "keyup", "keypress",
-      "mousedown", "mouseup", "mousemove", "wheel",
-      "touchstart", "touchend", "touchmove" ];
-
-    forwardedEvents.forEach(function(e){
-      this.listeners[e] = [];
-      window.addEventListener(e, this.fire.bind(this, e), false);
-    }.bind(this));
-
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
     this.qRoll = new THREE.Quaternion( );
@@ -371,10 +361,18 @@ Primrose.VRApplication = ( function ( ) {
       history.pushState( null, document.title, "#fullscreen" );
     }
   };
+  
+  var FORWARDED_EVENTS = [
+      "keydown", "keyup", "keypress",
+      "mousedown", "mouseup", "mousemove", "wheel",
+      "touchstart", "touchend", "touchmove" ];
 
-  VRApplication.prototype.addEventListener = function ( event, thunk ) {
+  VRApplication.prototype.addEventListener = function ( event, thunk, bubbles ) {
     if ( this.listeners[event] ) {
       this.listeners[event].push( thunk );
+    }
+    else if(FORWARDED_EVENTS.indexOf(event) >= 0){
+      window.addEventListener(event, thunk, bubbles);
     }
   };
 
@@ -630,8 +628,7 @@ Primrose.VRApplication = ( function ( ) {
     this.vr.update( dt );
 
     heading = this.gamepad.getValue( "heading" ) +
-        (isMobile ? 0 : this.mouse.getValue( "heading" )) +
-        this.touch.getValue("heading");
+        (isMobile ? 0 : this.mouse.getValue( "heading" ));
     strafe = this.gamepad.getValue( "strafe" ) +
         this.keyboard.getValue( "strafeRight" ) +
         this.keyboard.getValue( "strafeLeft" );
@@ -644,8 +641,7 @@ Primrose.VRApplication = ( function ( ) {
       pitch += this.mouse.getValue( "pointerPitch" );
     }
     else {
-      pitch += this.mouse.getValue( "pitch" ) +
-        this.touch.getValue( "pitch" );
+      pitch += this.mouse.getValue( "pitch" );
     }
     this.qPitch.setFromAxisAngle( RIGHT, pitch );
 
@@ -717,7 +713,8 @@ Primrose.VRApplication = ( function ( ) {
           transformForPicking( this.currentUser ) );
     }
 
-    var lastButtons = this.mouse.getValue( "dButtons" ) | this.touch.getValue("dFingers"),
+    var lastButtons = this.mouse.getValue( "dButtons" ) |
+        this.touch.getValue("dFingers"),
         hit = this.currentHit;
     if ( !hit ||
         !hit.point ) {
