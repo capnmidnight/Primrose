@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-
+   
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -32,7 +32,8 @@ Primrose.VRApplication = ( function ( ) {
   var RIGHT = new THREE.Vector3( 1, 0, 0 ),
       UP = new THREE.Vector3( 0, 1, 0 ),
       FORWARD = new THREE.Vector3( 0, 0, -1 ),
-      POINTER_RADIUS = 0.02;
+      POINTER_RADIUS = 0.01,
+      POINTER_RESCALE = 20;
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
     Primrose.ChatApplication.call( this, name, this.options );
@@ -109,10 +110,10 @@ Primrose.VRApplication = ( function ( ) {
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
-      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true },
-      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
+      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
+      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5},
       {name: "heading", commands: [ "dx" ], integrate: true},
-      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
+      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5},
       {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
       {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
@@ -120,9 +121,9 @@ Primrose.VRApplication = ( function ( ) {
     //
     // touch input
     //
-    this.touch = new Primrose.Input.Touch("touch", this.ctrls.frontBuffer, [
-      {name: "dFingers", axes: [ Primrose.Input.Touch.FINGERS ], delta: true }
-    ]);
+    this.touch = new Primrose.Input.Touch( "touch", this.ctrls.frontBuffer, [
+      {name: "dFingers", axes: [ Primrose.Input.Touch.FINGERS ], delta: true}
+    ] );
 
 
     //
@@ -222,8 +223,8 @@ Primrose.VRApplication = ( function ( ) {
           this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
+        this.scene.add( this.pointer );
         this.currentUser.add( this.camera );
-        this.camera.add( this.pointer );
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
@@ -242,10 +243,12 @@ Primrose.VRApplication = ( function ( ) {
     this.start = function ( ) {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
+
     function defaultCamera () {
       return new THREE.PerspectiveCamera( 45, 1, 0.1,
           this.options.drawDistance );
     }
+
     if ( !this.options.sceneModel ) {
       this.scene = new THREE.Scene( );
       this.camera = defaultCamera.call( this );
@@ -341,8 +344,8 @@ Primrose.VRApplication = ( function ( ) {
     walkSpeed: 3,
     gravity: 0.98, // the acceleration applied to falling objects
     jumpHeight: 0.25,
-    backgroundColor: 0xafbfff,
     // the color that WebGL clears the background with before drawing
+    backgroundColor: 0xafbfff,
     drawDistance: 500, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
@@ -361,18 +364,18 @@ Primrose.VRApplication = ( function ( ) {
       history.pushState( null, document.title, "#fullscreen" );
     }
   };
-  
+
   var FORWARDED_EVENTS = [
-      "keydown", "keyup", "keypress",
-      "mousedown", "mouseup", "mousemove", "wheel",
-      "touchstart", "touchend", "touchmove" ];
+    "keydown", "keyup", "keypress",
+    "mousedown", "mouseup", "mousemove", "wheel",
+    "touchstart", "touchend", "touchmove" ];
 
   VRApplication.prototype.addEventListener = function ( event, thunk, bubbles ) {
     if ( this.listeners[event] ) {
       this.listeners[event].push( thunk );
     }
-    else if(FORWARDED_EVENTS.indexOf(event) >= 0){
-      window.addEventListener(event, thunk, bubbles);
+    else if ( FORWARDED_EVENTS.indexOf( event ) >= 0 ) {
+      window.addEventListener( event, thunk, bubbles );
     }
   };
 
@@ -628,7 +631,7 @@ Primrose.VRApplication = ( function ( ) {
     this.vr.update( dt );
 
     heading = this.gamepad.getValue( "heading" ) +
-        (isMobile ? 0 : this.mouse.getValue( "heading" ));
+        ( isMobile ? 0 : this.mouse.getValue( "heading" ) );
     strafe = this.gamepad.getValue( "strafe" ) +
         this.keyboard.getValue( "strafeRight" ) +
         this.keyboard.getValue( "strafeLeft" );
@@ -673,14 +676,6 @@ Primrose.VRApplication = ( function ( ) {
       this.currentUser.velocity.y = 0;
     }
 
-    if ( this.currentEditor && !isMobile ) {
-      this.currentUser.add( this.pointer );
-    }
-    else {
-      this.camera.add( this.pointer );
-    }
-
-    this.pointer.position.copy( FORWARD );
 
     if ( !this.inVR || isMobile ) {
       this.currentHeading = heading;
@@ -698,26 +693,35 @@ Primrose.VRApplication = ( function ( ) {
         dHeading = heading - this.currentHeading;
       }
       this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
-      this.qHeading.setFromAxisAngle( UP, dHeading )
-          .multiply( this.qPitch );
-      this.pointer.position.applyQuaternion( this.qHeading );
+      this.qHeading.setFromAxisAngle( UP, dHeading ).multiply( this.qPitch );
     }
 
     if ( this.projector.ready ) {
       this.projector.ready = false;
+
+      this.pointer.position.copy( FORWARD );
+      if ( this.inVR && !isMobile ) {
+        this.pointer.position.applyQuaternion( this.qHeading );
+      }
+      if ( !this.currentEditor || isMobile ) {
+        this.pointer.position.add( this.camera.position );
+        this.pointer.position.applyQuaternion( this.camera.quaternion );
+      }
+      this.pointer.position.applyQuaternion( this.currentUser.quaternion );
+      this.pointer.position.add( this.currentUser.position );
+      
       for ( var i = 0; i < this.editors.length; ++i ) {
         this.projector.updateObject( createWorkerObject( this.editors[i] ) );
       }
       this.projector.projectPointer(
-          transformForPicking( this.pointer ),
+          this.pointer.position.toArray(),
           transformForPicking( this.currentUser ) );
     }
 
     var lastButtons = this.mouse.getValue( "dButtons" ) |
-        this.touch.getValue("dFingers"),
+        this.touch.getValue( "dFingers" ),
         hit = this.currentHit;
-    if ( !hit ||
-        !hit.point ) {
+    if ( !hit || !hit.point ) {
       if ( this.currentEditor && lastButtons > 0 ) {
         this.currentEditor.blur();
         this.currentEditor = null;
@@ -727,8 +731,6 @@ Primrose.VRApplication = ( function ( ) {
       this.pointer.scale.set( 1, 1, 1 );
     }
     else {
-      this.scene.add( this.pointer );
-
       var fp = hit.facePoint, fn = hit.faceNormal;
       this.pointer.position.set(
           fp[0] + fn[0] * POINTER_RADIUS,
@@ -738,7 +740,7 @@ Primrose.VRApplication = ( function ( ) {
       this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
       var object = hit && this.findObject( hit.objectID );
       if ( object ) {
-        var buttons = this.mouse.getValue( "BUTTONS" ) | this.touch.getValue("FINGERS"),
+        var buttons = this.mouse.getValue( "BUTTONS" ) | this.touch.getValue( "FINGERS" ),
             clickChanged = lastButtons > 0,
             editor = object.textarea;
 
@@ -746,10 +748,10 @@ Primrose.VRApplication = ( function ( ) {
           this.pointer.scale.set( 1, 1, 1 );
         }
         else {
-          this.pointer.scale.set( 10, 10, 10 );
+          this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
         }
 
-        if ( clickChanged && buttons === 1 && this.currentEditor && this.currentEditor !== editor ) {
+        if ( clickChanged && buttons > 0 && this.currentEditor && this.currentEditor !== editor ) {
           this.currentEditor.blur();
           this.currentEditor = null;
         }
