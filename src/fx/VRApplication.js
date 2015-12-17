@@ -227,7 +227,7 @@ Primrose.VRApplication = ( function ( ) {
           this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
-        if(this.options.useFog){
+        if ( this.options.useFog ) {
           this.scene.fog = new THREE.Fog( this.options.backgroundColor, 1, 50 );
         }
         this.scene.add( this.pointer );
@@ -283,12 +283,6 @@ Primrose.VRApplication = ( function ( ) {
           var st = this.stereoSettings[i],
               m = st.transform,
               v = st.viewport;
-          if ( state.position ) {
-            this.camera.position.copy( state.position );
-          }
-          else {
-            this.camera.position.set( 0, 0, 0 );
-          }
           this.camera.position.applyMatrix4( m );
 
           if ( state.orientation ) {
@@ -297,6 +291,9 @@ Primrose.VRApplication = ( function ( ) {
           }
           else {
             this.camera.quaternion.set( 0, 0, 0, 1 );
+          }
+          if ( state.position ) {
+            this.camera.position.add( state.position );
           }
           this.renderer.setViewport( v.left, v.top, v.width, v.height );
           this.renderer.setScissor( v.left, v.top, v.width, v.height );
