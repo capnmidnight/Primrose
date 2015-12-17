@@ -360,7 +360,7 @@ function cloud ( n, w, h, l, c, s ) {
 function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
   var SCALE = isMobile ? 0.25 : 1;
   options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
-  options.fontSize = options.fontSize || 25;
+  options.fontSize = options.fontSize || 32;
   options.theme = options.theme || Primrose.Text.Themes.Dark;
   options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
   if ( options.opacity === undefined ) {

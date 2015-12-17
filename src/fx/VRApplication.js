@@ -512,7 +512,7 @@ Primrose.VRApplication = ( function ( ) {
     this.convertToEditor = function ( obj ) {
       var editor = new Primrose.Text.Controls.TextBox( "textEditor", {
         size: new Primrose.Text.Size( 1024, 1024 ),
-        fontSize: 30,
+        fontSize: 32,
         tokenizer: Primrose.Text.Grammars.Basic,
         theme: Primrose.Text.Themes.Dark,
         keyEventSource: window,

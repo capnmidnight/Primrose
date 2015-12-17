@@ -5,7 +5,7 @@ Primrose.Text.Themes.Dark = ( function ( ) {
     name: "Dark",
     fontFamily: "monospace",
     cursorColor: "white",
-    fontSize: 14,
+    fontSize: 16,
     lineNumbers: {
       foreColor: "white"
     },

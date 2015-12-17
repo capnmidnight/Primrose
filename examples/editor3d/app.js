@@ -46,14 +46,14 @@ function StartDemo ( isHomeScreen ) {
     documentation.rotation.y = Math.PI / 2;
 
     editor = app.createElement( "textarea", "textEditor" );
-    editor.textarea.value = getSourceCode();
+    editor.textarea.value = getSourceCode( isHomeScreen );
     editor.position.y = editorSphereY;
 
     output = app.createElement( "pre", "outputView" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
     output.textarea.setTheme( Primrose.Text.Themes.Dark );
-    output.textarea.setFontSize( 40 );
+    output.textarea.setFontSize( 32 );
     output.textarea.render();
 
     log( cmdPre + "+E to show/hide editor" );
@@ -88,6 +88,9 @@ function StartDemo ( isHomeScreen ) {
         app.currentEditor = null;
       }
     }
+    else if ( mod && evt.keyCode === Primrose.Text.Keys.X ) {
+      editor.textarea.value = getSourceCode( true );
+    }
 
     if ( scriptUpdateTimeout ) {
       clearTimeout( scriptUpdateTimeout );
@@ -96,11 +99,9 @@ function StartDemo ( isHomeScreen ) {
   } );
 
   window.addEventListener( "unload", function ( ) {
-    if ( !isHomeScreen ) {
-      var script = editor.textarea.value;
-      if ( script.length > 0 ) {
-        setSetting( "code", script );
-      }
+    var script = editor.textarea.value;
+    if ( script.length > 0 ) {
+      setSetting( "code", script );
     }
   } );
 
@@ -155,25 +156,25 @@ function StartDemo ( isHomeScreen ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  function getSourceCode () {
-    var defaultDemo = testDemo.toString(),
-        src = isHomeScreen && defaultDemo || getSetting( "code", defaultDemo );
-    // If there was no source code stored in local storage,
-    // we use the script from a saved function and assume
-    // it has been formatted with 2 spaces per-line.
-    if ( src === defaultDemo ) {
-      var lines = src.replace( "\r\n", "\n" ).split( "\n" );
-      lines.pop( );
-      lines.shift( );
-      for ( var i = 0; i < lines.length; ++i ) {
-        lines[i] = lines[i].substring( 2 );
-      }
-      src = lines.join( "\n" );
-    }
-    return src.trim();
-  }
-
   app.start();
+}
+
+function getSourceCode ( skipReload ) {
+  var defaultDemo = testDemo.toString(),
+      src = skipReload && defaultDemo || getSetting( "code", defaultDemo );
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if ( src === defaultDemo ) {
+    var lines = src.replace( "\r\n", "\n" ).split( "\n" );
+    lines.pop( );
+    lines.shift( );
+    for ( var i = 0; i < lines.length; ++i ) {
+      lines[i] = lines[i].substring( 2 );
+    }
+    src = lines.join( "\n" );
+  }
+  return src.trim();
 }
 
 function testDemo ( scene ) {

@@ -964,7 +964,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.setShowScrollBars( !options.hideScrollBars );
     this.setTabWidth( options.tabWidth );
     this.setTheme( options.theme );
-    this.setFontSize( options.fontSize || 14 );
+    this.setFontSize( options.fontSize || 16 );
     this.setTokenizer( options.tokenizer );
     this.setCodePage( options.codePage );
     this.setOperatingSystem( options.os );

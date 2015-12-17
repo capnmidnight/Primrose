@@ -5,7 +5,7 @@ Primrose.Text.Themes.Default = ( function ( ) {
     name: "Light",
     fontFamily: "monospace",
     cursorColor: "black",
-    fontSize: 14,
+    fontSize: 16,
     regular: {
       backColor: "white",
       foreColor: "black",
