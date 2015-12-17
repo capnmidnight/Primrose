@@ -22,7 +22,9 @@ function StartDemo ( isHomeScreen ) {
       documentation = null,
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
-      cmdPre = isOSX ? "CMD+OPT" : "CTRL+SHIFT",
+      cmdA = isOSX ? "CMD" : "CTRL",
+      cmdB = isOSX ? "OPT" : "SHIFT",
+      cmdPre = cmdA + "+" + cmdB,
       editorSphereY = 1.5,
       subScene = new THREE.Object3D(),
       scriptUpdateTimeout,
@@ -54,7 +56,7 @@ function StartDemo ( isHomeScreen ) {
     output.textarea.setFontSize( 40 );
     output.textarea.render();
 
-    log( fmt( "$1+E to show/hide editor", cmdPre ) );
+    log( cmdPre + "+E to show/hide editor" );
   } );
 
   app.addEventListener( "update", function ( dt ) {
@@ -94,9 +96,11 @@ function StartDemo ( isHomeScreen ) {
   } );
 
   window.addEventListener( "unload", function ( ) {
-    var script = editor.textarea.value;
-    if ( script.length > 0 ) {
-      setSetting( "code", script );
+    if ( !isHomeScreen ) {
+      var script = editor.textarea.value;
+      if ( script.length > 0 ) {
+        setSetting( "code", script );
+      }
     }
   } );
 
@@ -151,6 +155,24 @@ function StartDemo ( isHomeScreen ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
+  function getSourceCode () {
+    var defaultDemo = testDemo.toString(),
+        src = isHomeScreen && defaultDemo || getSetting( "code", defaultDemo );
+    // If there was no source code stored in local storage,
+    // we use the script from a saved function and assume
+    // it has been formatted with 2 spaces per-line.
+    if ( src === defaultDemo ) {
+      var lines = src.replace( "\r\n", "\n" ).split( "\n" );
+      lines.pop( );
+      lines.shift( );
+      for ( var i = 0; i < lines.length; ++i ) {
+        lines[i] = lines[i].substring( 2 );
+      }
+      src = lines.join( "\n" );
+    }
+    return src.trim();
+  }
+
   app.start();
 }
 
@@ -172,35 +194,17 @@ function testDemo ( scene ) {
       .at( MIDX, MIDY, MIDZ );
 
   put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
-  for ( var y = 0; y < 10; ++y ) {
-    for ( var x = 0; x < 10; ++x ) {
-      put( brick( WATER ) )
-          .on( start )
-          .at( MIDX - x + 20, 10 - Math.max( x, y ), MIDZ - y + 20 );
-      put( brick( WATER ) )
-          .on( start )
-          .at( MIDX + x + 20, 10 - Math.max( x, y ), MIDZ + y + 20 );
-    }
+  for ( var i = 0; i < 100; ++i ) {
+    put( fill( ROCK, 1, randomInt( MIDY, HEIGHT ), 1 ) )
+        .on( start )
+        .at( randomInt( WIDTH ), 1, randomInt( DEPTH ) );
   }
 
-  var sun = put( hub() ).on( start ).at( MIDX + 5, 15, MIDZ + 20 );
+  put( light( 0xffffff, 1, 500 ) )
+      .on( start )
+      .at( MIDX + 5, 15, MIDZ + 20 );
 
-  function sunBit ( x, y, z ) {
-    put( textured( box( 1 ), 0xffff00, true, 0.125 ) )
-        .on( sun )
-        .at( x, y, z );
-  }
-
-  sunBit( 1, 0, 0 );
-  sunBit( -1, 0, 0 );
-  sunBit( 0, 1, 0 );
-  sunBit( 0, -1, 0 );
-  sunBit( 0, 0, 1 );
-  sunBit( 0, 0, -1 );
-
-  put( light( 0xffffff, 1, 500 ) ).on( sun );
-
-  var ball = put( brick( ROCK ) ).on( start ).at( 0, 0, 0 ),
+  var ball = put( brick( WATER ) ).on( start ).at( 0, 0, 0 ),
       t = 0,
       dx = 7,
       dy = 2.5,
@@ -224,25 +228,7 @@ function testDemo ( scene ) {
         || DEPTH <= ball.position.z && dz > 0 ) {
       dz *= -1;
     }
-    sun.rotation.set( t, t / 2, t / 5 );
   }
-}
-
-function getSourceCode () {
-  var src = getSetting( "code", testDemo.toString( ) );
-  // If there was no source code stored in local storage,
-  // we use the script from a saved function and assume
-  // it has been formatted with 2 spaces per-line.
-  if ( src === testDemo.toString( ) ) {
-    var lines = src.replace( "\r\n", "\n" ).split( "\n" );
-    lines.pop( );
-    lines.shift( );
-    for ( var i = 0; i < lines.length; ++i ) {
-      lines[i] = lines[i].substring( 2 );
-    }
-    src = lines.join( "\n" );
-  }
-  return src.trim();
 }
 
 // This is a function to just push it out of the way, uncluttering
