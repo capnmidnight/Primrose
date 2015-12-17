@@ -100,12 +100,17 @@ Primrose.VRApplication = ( function ( ) {
           -Primrose.Input.Keyboard.ALT,
           -Primrose.Input.Keyboard.SHIFT,
           Primrose.Input.Keyboard.SPACEBAR ],
-        commandDown: this.jump.bind( this ), dt: 0.5},
+        commandDown: function () {
+          this.jump();
+        }.bind( this ), dt: 0.5},
       {name: "zero", buttons: [
           -Primrose.Input.Keyboard.CTRL,
           -Primrose.Input.Keyboard.ALT,
           -Primrose.Input.Keyboard.SHIFT,
-          Primrose.Input.Keyboard.Z ], commandUp: this.zero.bind( this )}
+          Primrose.Input.Keyboard.Z ],
+        commandUp: function () {
+          this.zero();
+        }.bind( this )}
     ] );
     //
     // mouse input
@@ -138,8 +143,6 @@ Primrose.VRApplication = ( function ( ) {
       {name: "dheading", commands: [ "heading" ], delta: true},
       {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
     ] );
-    this.gamepad.addEventListener( "gamepadconnected",
-        this.connectGamepad.bind( this ), false );
     //
     // VR input
     //
@@ -299,6 +302,475 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
+
+    function setVRMode ( ) {
+      this.inVR = isFullScreenMode( ) && this.vrRequested && this.vr.display;
+      if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
+        location.hash = "";
+      }
+      this.setSize( );
+    }
+
+    this.projector.addEventListener( "hit", function ( hit ) {
+      this.projector.ready = true;
+      this.currentHit = hit;
+    }.bind( this ) );
+
+
+    this.goFullScreen = function ( useVR ) {
+      this.mouse.requestPointerLock( );
+      if ( !isFullScreenMode( ) ) {
+        this.vrRequested = useVR;
+        if ( useVR && this.vr.display ) {
+          requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
+        }
+        else {
+          requestFullScreen( this.ctrls.frontBuffer );
+        }
+        history.pushState( null, document.title, "#fullscreen" );
+      }
+    };
+
+    var FORWARDED_EVENTS = [
+      "keydown", "keyup", "keypress",
+      "mousedown", "mouseup", "mousemove", "wheel",
+      "touchstart", "touchend", "touchmove" ];
+
+    this.addEventListener = function ( event, thunk, bubbles ) {
+      if ( this.listeners[event] ) {
+        this.listeners[event].push( thunk );
+      }
+      else if ( FORWARDED_EVENTS.indexOf( event ) >= 0 ) {
+        window.addEventListener( event, thunk, bubbles );
+      }
+    };
+
+    ( function () {
+      var _bind = Function.prototype.bind;
+      Function.prototype.bind = function () {
+        var thunk = _bind.apply( this, arguments );
+        thunk.executionContext = arguments[0];
+        return thunk;
+      };
+    } )();
+
+    this.fire = function ( name ) {
+      var args = Array.prototype.slice.call( arguments, 1 );
+      for ( var i = 0; i < this.listeners[name].length; ++i ) {
+        var thunk = this.listeners[name][i];
+        thunk.apply( thunk.executionContext || this, args );
+      }
+    };
+
+    function addCell ( row, elem ) {
+      if ( typeof elem === "string" ) {
+        elem = document.createTextNode( elem );
+      }
+      var cell = document.createElement( "td" );
+      cell.appendChild( elem );
+      row.appendChild( cell );
+    }
+
+    this.setupModuleEvents = function ( container, module,
+        name ) {
+      var eID = name + "Enable",
+          tID = name + "Transmit",
+          rID = name + "Receive",
+          e = document.createElement( "input" ),
+          t = document.createElement( "input" ),
+          r = document.createElement( "input" ),
+          row = document.createElement( "tr" );
+      this.ctrls[eID] = e;
+      this.ctrls[tID] = t;
+      this.ctrls[rID] = r;
+      e.id = eID;
+      t.id = tID;
+      r.id = rID;
+      e.type = t.type = r.type = "checkbox";
+      e.checked = this.formState[eID];
+      t.checked = this.formState[tID];
+      r.checked = this.formState[rID];
+      e.addEventListener( "change", function ( ) {
+        module.enable( e.checked );
+        t.disabled = !e.checked;
+        if ( t.checked && t.disabled ) {
+          t.checked = false;
+        }
+      } );
+      t.addEventListener( "change", function ( ) {
+        module.transmit( t.checked );
+      } );
+      r.addEventListener( "change", function ( ) {
+        module.receive( r.checked );
+      } );
+      container.appendChild( row );
+      addCell( row, name );
+      addCell( row, e );
+      addCell( row, t );
+      addCell( row, r );
+      if ( module.zeroAxes ) {
+        var zID = name + "Zero",
+            z = document.createElement( "input" );
+        this.ctrls[zID] = z;
+        z.id = zID;
+        z.type = "checkbox";
+        z.checked = this.formState[zID];
+        z.addEventListener( "click", module.zeroAxes.bind( module ), false );
+        addCell( row, z );
+      }
+      else {
+        r.colspan = 2;
+      }
+
+      module.enable( e.checked );
+      module.transmit( t.checked );
+      module.receive( r.checked );
+      t.disabled = !e.checked;
+      if ( t.checked && t.disabled ) {
+        t.checked = false;
+      }
+    };
+
+    this.setSize = function ( ) {
+      var bounds = this.renderer.domElement.getBoundingClientRect( ),
+          styleWidth = bounds.width,
+          styleHeight = bounds.height,
+          ratio = window.devicePixelRatio || 1,
+          fieldOfView = 75,
+          canvasWidth = styleWidth * ratio,
+          canvasHeight = styleHeight * ratio,
+          aspectWidth = canvasWidth;
+      if ( this.inVR ) {
+        canvasWidth = this.vrParams.left.renderRect.width +
+            this.vrParams.right.renderRect.width;
+        canvasHeight = Math.max( this.vrParams.left.renderRect.height,
+            this.vrParams.right.renderRect.height );
+        aspectWidth = canvasWidth / 2;
+        fieldOfView = ( this.vrParams.left.recommendedFieldOfView.leftDegrees +
+            this.vrParams.left.recommendedFieldOfView.rightDegrees );
+      }
+      this.renderer.domElement.width = canvasWidth;
+      this.renderer.domElement.height = canvasHeight;
+      this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+      this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
+      if ( this.camera ) {
+        this.camera.fov = fieldOfView;
+        this.camera.aspect = aspectWidth / canvasHeight;
+        this.camera.updateProjectionMatrix( );
+      }
+    };
+
+    this.connectGamepad = function ( id ) {
+      if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
+          "Would you like to use this gamepad? \"$1\"", id ) ) ) {
+        this.gamepad.setGamepad( id );
+      }
+    };
+
+    this.zero = function ( ) {
+      if ( !this.currentEditor ) {
+        this.currentUser.position.set( 0, this.avatarHeight, 0 );
+        this.currentUser.velocity.set( 0, 0, 0 );
+      }
+      if ( this.inVR ) {
+        this.vr.sensor.resetSensor( );
+      }
+    };
+
+    this.jump = function ( ) {
+      if ( this.onground && !this.currentEditor ) {
+        this.currentUser.velocity.y += this.options.jumpHeight;
+        this.onground = false;
+      }
+    };
+
+    this.createElement = function ( elem, id ) {
+      if ( elem === "textarea" || elem === "pre" ) {
+        var tokenizer = elem === "textarea" ? Primrose.Text.Grammars.JavaScript : Primrose.Text.Grammars.PlainText;
+        var ed = makeEditor(
+            this.scene, id,
+            1, 1,
+            0, 0, 0,
+            0, 0, 0, {
+              tokenizer: tokenizer,
+              useShell: true,
+              keyEventSource: window,
+              wheelEventSource: this.renderer.domElement,
+              theme: Primrose.Text.Themes.Default,
+              hideLineNumbers: elem === "pre",
+              readOnly: elem === "pre"
+            } );
+        this.editors.push( ed );
+        this.registerPickableObject( ed );
+        return ed;
+      }
+    };
+
+    this.convertToEditor = function ( obj ) {
+      var editor = new Primrose.Text.Controls.TextBox( "textEditor", {
+        size: new Primrose.Text.Size( 1024, 1024 ),
+        fontSize: 30,
+        tokenizer: Primrose.Text.Grammars.Basic,
+        theme: Primrose.Text.Themes.Dark,
+        keyEventSource: window,
+        wheelEventSource: this.renderer.domElement,
+        hideLineNumbers: true
+      } );
+      textured( obj, editor );
+      obj.textarea = editor;
+      this.registerPickableObject( obj );
+      return obj;
+    };
+
+    this.registerPickableObject = function ( obj ) {
+      if ( obj.type === "Object3D" ) {
+        obj.children[0].name = obj.children[0].name || obj.name;
+        obj = obj.children[0];
+      }
+      if ( obj ) {
+        var bag = createWorkerObject( obj );
+        bag.geometry = {
+          vertices: obj.geometry.vertices.map( function ( v ) {
+            return v.toArray();
+          } ),
+          faces: obj.geometry.faces.map( function ( f ) {
+            return [ f.a, f.b, f.c ];
+          } ),
+          faceVertexUvs: obj.geometry.faceVertexUvs.map( function ( face ) {
+            return face.map( function ( uvs ) {
+              return uvs.map( function ( uv ) {
+                return uv.toArray();
+              } );
+            } );
+          } )
+        };
+        this.editors.push( obj );
+        this.projector.setObject( bag );
+      }
+    };
+
+    function createWorkerObject ( obj ) {
+      var bag = {
+        uuid: obj.uuid,
+        visible: obj.visible,
+        name: obj.name
+      };
+      var originalBag = bag,
+          head = obj;
+      while ( head !== null ) {
+        head.updateMatrix();
+        bag.matrix = head.matrix.elements.subarray( 0, head.matrix.elements.length );
+        bag.parent = head.parent ? {} : null;
+        bag = bag.parent;
+        head = head.parent;
+      }
+      return originalBag;
+    }
+
+    this.stop = function () {
+      cancelAnimationFrame( this.timer );
+    };
+
+    this.findObject = function ( id ) {
+      for ( var i = 0; i < this.editors.length; ++i ) {
+        if ( this.editors[i].uuid === id ) {
+          return this.editors[i];
+        }
+      }
+    };
+
+    this.animate = function ( t ) {
+      this.timer = requestAnimationFrame( this.animate );
+      var dt = ( t - this.lt ) * 0.001,
+          heading = 0,
+          pitch = 0,
+          strafe = 0,
+          drive = 0,
+          len,
+          j;
+
+      this.lt = t;
+      this.keyboard.update( dt );
+      this.mouse.update( dt );
+      this.touch.update( dt );
+      this.gamepad.update( dt );
+      this.vr.update( dt );
+
+      heading = this.gamepad.getValue( "heading" ) +
+          ( isMobile ? 0 : this.mouse.getValue( "heading" ) );
+      strafe = this.gamepad.getValue( "strafe" ) +
+          this.keyboard.getValue( "strafeRight" ) +
+          this.keyboard.getValue( "strafeLeft" );
+      drive = this.gamepad.getValue( "drive" ) +
+          this.keyboard.getValue( "driveBack" ) +
+          this.keyboard.getValue( "driveForward" );
+
+      pitch = this.gamepad.getValue( "pitch" );
+      if ( this.inVR ) {
+        pitch += this.mouse.getValue( "pointerPitch" );
+      }
+      else {
+        pitch += this.mouse.getValue( "pitch" );
+      }
+      this.qPitch.setFromAxisAngle( RIGHT, pitch );
+
+      if ( !this.onground ) {
+        this.currentUser.velocity.y -= this.options.gravity * dt;
+      }
+      else if ( !this.currentEditor || this.currentEditor.readOnly ) {
+
+        if ( strafe || drive ) {
+          len = drive * drive + strafe * strafe;
+          len = this.walkSpeed / Math.max( 1, Math.sqrt( len ) );
+        }
+        else {
+          len = 0;
+        }
+
+        strafe *= len * dt;
+        drive *= len * dt;
+
+        this.qHeading.setFromAxisAngle( UP, this.currentHeading );
+        this.currentUser.velocity.set( strafe, 0, drive );
+        this.currentUser.velocity.applyQuaternion( this.qHeading );
+      }
+
+      this.currentUser.position.add( this.currentUser.velocity );
+      if ( !this.onground && this.currentUser.position.y < this.avatarHeight ) {
+        this.onground = true;
+        this.currentUser.position.y = this.avatarHeight;
+        this.currentUser.velocity.y = 0;
+      }
+
+
+      if ( !this.inVR || isMobile ) {
+        this.currentHeading = heading;
+        this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
+        if ( !isMobile ) {
+          this.currentUser.quaternion.multiply( this.qPitch );
+        }
+      }
+      else {
+        var dHeading = heading - this.currentHeading;
+        if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
+          var dh = Math.sign( dHeading ) * Math.PI / 100;
+          this.currentHeading += dh;
+          heading -= dh;
+          dHeading = heading - this.currentHeading;
+        }
+        this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
+        this.qHeading.setFromAxisAngle( UP, dHeading ).multiply( this.qPitch );
+      }
+
+      if ( this.projector.ready ) {
+        this.projector.ready = false;
+        this.pointer.targetPosition.copy( FORWARD );
+        if ( this.inVR && !isMobile ) {
+          this.pointer.targetPosition.applyQuaternion( this.qHeading );
+        }
+        if ( !this.currentEditor || isMobile ) {
+          this.pointer.targetPosition.add( this.camera.position );
+          this.pointer.targetPosition.applyQuaternion( this.camera.quaternion );
+        }
+        this.pointer.targetPosition.applyQuaternion( this.currentUser.quaternion );
+        this.pointer.targetPosition.add( this.currentUser.position );
+
+        for ( var i = 0; i < this.editors.length; ++i ) {
+          this.projector.updateObject( createWorkerObject( this.editors[i] ) );
+        }
+        this.projector.projectPointer(
+            this.pointer.targetPosition.toArray(),
+            transformForPicking( this.currentUser ) );
+      }
+
+      var lastButtons = this.mouse.getValue( "dButtons" ) |
+          this.touch.getValue( "dFingers" ),
+          hit = this.currentHit;
+      if ( !hit || !hit.point ) {
+        if ( this.currentEditor && lastButtons > 0 ) {
+          this.currentEditor.blur();
+          this.currentEditor = null;
+        }
+        this.pointer.material.color.setRGB( 1, 0, 0 );
+        this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
+        this.pointer.scale.set( 1, 1, 1 );
+      }
+      else {
+        var fp = hit.facePoint, fn = hit.faceNormal;
+        this.pointer.targetPosition.set(
+            fp[0] + fn[0] * POINTER_RADIUS,
+            fp[1] + fn[1] * POINTER_RADIUS,
+            fp[2] + fn[2] * POINTER_RADIUS );
+        this.pointer.material.color.setRGB( 1, 1, 1 );
+        this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
+        var object = hit && this.findObject( hit.objectID );
+        if ( object ) {
+          var buttons = this.mouse.getValue( "BUTTONS" ) | this.touch.getValue( "FINGERS" ),
+              clickChanged = lastButtons > 0,
+              editor = object.textarea;
+
+          if ( editor ) {
+            this.pointer.scale.set( 1, 1, 1 );
+          }
+          else {
+            this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
+          }
+
+          if ( clickChanged && buttons > 0 && this.currentEditor && this.currentEditor !== editor ) {
+            this.currentEditor.blur();
+            this.currentEditor = null;
+          }
+
+          if ( editor && !this.currentEditor && clickChanged && buttons > 0 ) {
+            editor.focus();
+            this.currentEditor = editor;
+          }
+
+          if ( this.currentEditor ) {
+            var // At this point, the UV coord is scaled to a proporitional value, on
+                // the range [0, 1] for the dimensions of the image used as the texture.
+                // So we have to rescale it back out again. Also, the y coordinate is
+                // flipped.
+                txt = object.material.map.image,
+                textureU = Math.floor( txt.width * hit.point[0] ),
+                textureV = Math.floor( txt.height * ( 1 - hit.point[1] ) );
+            if ( !clickChanged && buttons > 0 ) {
+              this.currentEditor.movePointer( textureU, textureV );
+            }
+            else if ( clickChanged && buttons > 0 ) {
+              this.currentEditor.startPointer( textureU, textureV );
+            }
+            else {
+              this.currentEditor.endPointer();
+            }
+          }
+        }
+      }
+
+      this.pointer.position.add( this.pointer.targetPosition ).multiplyScalar( 0.5 );
+
+      this.fire( "update", dt );
+
+      for ( j = 0; j < this.editors.length; ++j ) {
+        if ( this.editors[j].textarea ) {
+          this.editors[j].textarea.render();
+        }
+      }
+      this.renderScene( this.scene );
+    };
+
+
+    function transformForPicking ( obj ) {
+      var p = obj.position.clone();
+      obj = obj.parent;
+      while ( obj !== null ) {
+        p.applyMatrix4( obj.matrix );
+        obj = obj.parent;
+      }
+      return p.toArray();
+    }
+
+
     if ( this.options.disableAutoFullScreen ) {
       if ( this.options.regularFullScreenButton ) {
         this.options.regularFullScreenButton.addEventListener( "click",
@@ -311,31 +783,16 @@ Primrose.VRApplication = ( function ( ) {
       }
     }
     else {
-      window.addEventListener( "mousedown",
-          this.goFullScreen.bind( this, true ), false );
-      window.addEventListener( "touchstart",
-          this.goFullScreen.bind( this, true ), false );
+      window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
+      window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
 
-    function setVRMode ( ) {
-      this.inVR = isFullScreenMode( ) && this.vrRequested && this.vr.display;
-      if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
-        location.hash = "";
-      }
-      this.setSize( );
-    }
+    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
 
-    window.addEventListener( "fullscreenchange",
-        setVRMode.bind( this ), false );
-    window.addEventListener( "webkitfullscreenchange",
-        setVRMode.bind( this ), false );
-    window.addEventListener( "mozfullscreenchange",
-        setVRMode.bind( this ), false );
+    window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
     window.addEventListener( "resize", this.setSize.bind( this ), false );
-    this.projector.addEventListener( "hit", function ( hit ) {
-      this.projector.ready = true;
-      this.currentHit = hit;
-    }.bind( this ) );
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
@@ -351,459 +808,6 @@ Primrose.VRApplication = ( function ( ) {
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
-
-  VRApplication.prototype.goFullScreen = function ( useVR ) {
-    this.mouse.requestPointerLock( );
-    if ( !isFullScreenMode( ) ) {
-      this.vrRequested = useVR;
-      if ( useVR && this.vr.display ) {
-        requestFullScreen( this.ctrls.frontBuffer, this.vr.display );
-      }
-      else {
-        requestFullScreen( this.ctrls.frontBuffer );
-      }
-      history.pushState( null, document.title, "#fullscreen" );
-    }
-  };
-
-  var FORWARDED_EVENTS = [
-    "keydown", "keyup", "keypress",
-    "mousedown", "mouseup", "mousemove", "wheel",
-    "touchstart", "touchend", "touchmove" ];
-
-  VRApplication.prototype.addEventListener = function ( event, thunk, bubbles ) {
-    if ( this.listeners[event] ) {
-      this.listeners[event].push( thunk );
-    }
-    else if ( FORWARDED_EVENTS.indexOf( event ) >= 0 ) {
-      window.addEventListener( event, thunk, bubbles );
-    }
-  };
-
-  ( function () {
-    var _bind = Function.prototype.bind;
-    Function.prototype.bind = function () {
-      var thunk = _bind.apply( this, arguments );
-      thunk.executionContext = arguments[0];
-      return thunk;
-    };
-  } )();
-
-  VRApplication.prototype.fire = function ( name ) {
-    var args = Array.prototype.slice.call( arguments, 1 );
-    for ( var i = 0; i < this.listeners[name].length; ++i ) {
-      var thunk = this.listeners[name][i];
-      thunk.apply( thunk.executionContext || this, args );
-    }
-  };
-
-  function addCell ( row, elem ) {
-    if ( typeof elem === "string" ) {
-      elem = document.createTextNode( elem );
-    }
-    var cell = document.createElement( "td" );
-    cell.appendChild( elem );
-    row.appendChild( cell );
-  }
-
-  VRApplication.prototype.setupModuleEvents = function ( container, module,
-      name ) {
-    var eID = name + "Enable",
-        tID = name + "Transmit",
-        rID = name + "Receive",
-        e = document.createElement( "input" ),
-        t = document.createElement( "input" ),
-        r = document.createElement( "input" ),
-        row = document.createElement( "tr" );
-    this.ctrls[eID] = e;
-    this.ctrls[tID] = t;
-    this.ctrls[rID] = r;
-    e.id = eID;
-    t.id = tID;
-    r.id = rID;
-    e.type = t.type = r.type = "checkbox";
-    e.checked = this.formState[eID];
-    t.checked = this.formState[tID];
-    r.checked = this.formState[rID];
-    e.addEventListener( "change", function ( ) {
-      module.enable( e.checked );
-      t.disabled = !e.checked;
-      if ( t.checked && t.disabled ) {
-        t.checked = false;
-      }
-    } );
-    t.addEventListener( "change", function ( ) {
-      module.transmit( t.checked );
-    } );
-    r.addEventListener( "change", function ( ) {
-      module.receive( r.checked );
-    } );
-    container.appendChild( row );
-    addCell( row, name );
-    addCell( row, e );
-    addCell( row, t );
-    addCell( row, r );
-    if ( module.zeroAxes ) {
-      var zID = name + "Zero",
-          z = document.createElement( "input" );
-      this.ctrls[zID] = z;
-      z.id = zID;
-      z.type = "checkbox";
-      z.checked = this.formState[zID];
-      z.addEventListener( "click", module.zeroAxes.bind( module ), false );
-      addCell( row, z );
-    }
-    else {
-      r.colspan = 2;
-    }
-
-    module.enable( e.checked );
-    module.transmit( t.checked );
-    module.receive( r.checked );
-    t.disabled = !e.checked;
-    if ( t.checked && t.disabled ) {
-      t.checked = false;
-    }
-  };
-
-  VRApplication.prototype.setSize = function ( ) {
-    var bounds = this.renderer.domElement.getBoundingClientRect( ),
-        styleWidth = bounds.width,
-        styleHeight = bounds.height,
-        ratio = window.devicePixelRatio || 1,
-        fieldOfView = 75,
-        canvasWidth = styleWidth * ratio,
-        canvasHeight = styleHeight * ratio,
-        aspectWidth = canvasWidth;
-    if ( this.inVR ) {
-      canvasWidth = this.vrParams.left.renderRect.width +
-          this.vrParams.right.renderRect.width;
-      canvasHeight = Math.max( this.vrParams.left.renderRect.height,
-          this.vrParams.right.renderRect.height );
-      aspectWidth = canvasWidth / 2;
-      fieldOfView = ( this.vrParams.left.recommendedFieldOfView.leftDegrees +
-          this.vrParams.left.recommendedFieldOfView.rightDegrees );
-    }
-    this.renderer.domElement.width = canvasWidth;
-    this.renderer.domElement.height = canvasHeight;
-    this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-    this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
-    if ( this.camera ) {
-      this.camera.fov = fieldOfView;
-      this.camera.aspect = aspectWidth / canvasHeight;
-      this.camera.updateProjectionMatrix( );
-    }
-  };
-
-  VRApplication.prototype.connectGamepad = function ( id ) {
-    if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
-        "Would you like to use this gamepad? \"$1\"", id ) ) ) {
-      this.gamepad.setGamepad( id );
-    }
-  };
-
-  VRApplication.prototype.zero = function ( ) {
-    if ( !this.currentEditor ) {
-      this.currentUser.position.set( 0, this.avatarHeight, 0 );
-      this.currentUser.velocity.set( 0, 0, 0 );
-    }
-    if ( this.inVR ) {
-      this.vr.sensor.resetSensor( );
-    }
-  };
-
-  VRApplication.prototype.jump = function ( ) {
-    if ( this.onground && !this.currentEditor ) {
-      this.currentUser.velocity.y += this.options.jumpHeight;
-      this.onground = false;
-    }
-  };
-
-  VRApplication.prototype.createElement = function ( elem, id ) {
-    if ( elem === "textarea" || elem === "pre" ) {
-      var tokenizer = elem === "textarea" ? Primrose.Text.Grammars.JavaScript : Primrose.Text.Grammars.PlainText;
-      var ed = makeEditor(
-          this.scene, id,
-          1, 1,
-          0, 0, 0,
-          0, 0, 0, {
-            tokenizer: tokenizer,
-            useShell: true,
-            keyEventSource: window,
-            wheelEventSource: this.renderer.domElement,
-            theme: Primrose.Text.Themes.Default,
-            hideLineNumbers: elem === "pre",
-            readOnly: elem === "pre"
-          } );
-      this.editors.push( ed );
-      this.registerPickableObject( ed );
-      return ed;
-    }
-  };
-
-  VRApplication.prototype.convertToEditor = function ( obj ) {
-    var editor = new Primrose.Text.Controls.TextBox( "textEditor", {
-      size: new Primrose.Text.Size( 1024, 1024 ),
-      fontSize: 30,
-      tokenizer: Primrose.Text.Grammars.Basic,
-      theme: Primrose.Text.Themes.Dark,
-      keyEventSource: window,
-      wheelEventSource: this.renderer.domElement,
-      hideLineNumbers: true
-    } );
-    textured( obj, editor );
-    obj.textarea = editor;
-    this.registerPickableObject( obj );
-    return obj;
-  };
-
-  VRApplication.prototype.registerPickableObject = function ( obj ) {
-    if ( obj.type === "Object3D" ) {
-      obj.children[0].name = obj.children[0].name || obj.name;
-      obj = obj.children[0];
-    }
-    if ( obj ) {
-      var bag = createWorkerObject( obj );
-      bag.geometry = {
-        vertices: obj.geometry.vertices.map( function ( v ) {
-          return v.toArray();
-        } ),
-        faces: obj.geometry.faces.map( function ( f ) {
-          return [ f.a, f.b, f.c ];
-        } ),
-        faceVertexUvs: obj.geometry.faceVertexUvs.map( function ( face ) {
-          return face.map( function ( uvs ) {
-            return uvs.map( function ( uv ) {
-              return uv.toArray();
-            } );
-          } );
-        } )
-      };
-      this.editors.push( obj );
-      this.projector.setObject( bag );
-    }
-  };
-
-  function createWorkerObject ( obj ) {
-    var bag = {
-      uuid: obj.uuid,
-      visible: obj.visible,
-      name: obj.name
-    };
-    var originalBag = bag,
-        head = obj;
-    while ( head !== null ) {
-      head.updateMatrix();
-      bag.matrix = head.matrix.elements.subarray( 0, head.matrix.elements.length );
-      bag.parent = head.parent ? {} : null;
-      bag = bag.parent;
-      head = head.parent;
-    }
-    return originalBag;
-  }
-
-  VRApplication.prototype.stop = function () {
-    cancelAnimationFrame( this.timer );
-  };
-
-  VRApplication.prototype.findObject = function ( id ) {
-    for ( var i = 0; i < this.editors.length; ++i ) {
-      if ( this.editors[i].uuid === id ) {
-        return this.editors[i];
-      }
-    }
-  };
-
-  VRApplication.prototype.animate = function ( t ) {
-    this.timer = requestAnimationFrame( this.animate );
-    var dt = ( t - this.lt ) * 0.001,
-        heading = 0,
-        pitch = 0,
-        strafe = 0,
-        drive = 0,
-        len,
-        j;
-
-    this.lt = t;
-    this.keyboard.update( dt );
-    this.mouse.update( dt );
-    this.touch.update( dt );
-    this.gamepad.update( dt );
-    this.vr.update( dt );
-
-    heading = this.gamepad.getValue( "heading" ) +
-        ( isMobile ? 0 : this.mouse.getValue( "heading" ) );
-    strafe = this.gamepad.getValue( "strafe" ) +
-        this.keyboard.getValue( "strafeRight" ) +
-        this.keyboard.getValue( "strafeLeft" );
-    drive = this.gamepad.getValue( "drive" ) +
-        this.keyboard.getValue( "driveBack" ) +
-        this.keyboard.getValue( "driveForward" );
-
-    pitch = this.gamepad.getValue( "pitch" );
-    if ( this.inVR ) {
-      pitch += this.mouse.getValue( "pointerPitch" );
-    }
-    else {
-      pitch += this.mouse.getValue( "pitch" );
-    }
-    this.qPitch.setFromAxisAngle( RIGHT, pitch );
-
-    if ( !this.onground ) {
-      this.currentUser.velocity.y -= this.options.gravity * dt;
-    }
-    else if ( !this.currentEditor || this.currentEditor.readOnly ) {
-
-      if ( strafe || drive ) {
-        len = drive * drive + strafe * strafe;
-        len = this.walkSpeed / Math.max( 1, Math.sqrt( len ) );
-      }
-      else {
-        len = 0;
-      }
-
-      strafe *= len * dt;
-      drive *= len * dt;
-
-      this.qHeading.setFromAxisAngle( UP, this.currentHeading );
-      this.currentUser.velocity.set( strafe, 0, drive );
-      this.currentUser.velocity.applyQuaternion( this.qHeading );
-    }
-
-    this.currentUser.position.add( this.currentUser.velocity );
-    if ( !this.onground && this.currentUser.position.y < this.avatarHeight ) {
-      this.onground = true;
-      this.currentUser.position.y = this.avatarHeight;
-      this.currentUser.velocity.y = 0;
-    }
-
-
-    if ( !this.inVR || isMobile ) {
-      this.currentHeading = heading;
-      this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
-      if ( !isMobile ) {
-        this.currentUser.quaternion.multiply( this.qPitch );
-      }
-    }
-    else {
-      var dHeading = heading - this.currentHeading;
-      if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
-        var dh = Math.sign( dHeading ) * Math.PI / 100;
-        this.currentHeading += dh;
-        heading -= dh;
-        dHeading = heading - this.currentHeading;
-      }
-      this.currentUser.quaternion.setFromAxisAngle( UP, this.currentHeading );
-      this.qHeading.setFromAxisAngle( UP, dHeading ).multiply( this.qPitch );
-    }
-
-    if ( this.projector.ready ) {
-      this.projector.ready = false;
-      this.pointer.targetPosition.copy( FORWARD );
-      if ( this.inVR && !isMobile ) {
-        this.pointer.targetPosition.applyQuaternion( this.qHeading );
-      }
-      if ( !this.currentEditor || isMobile ) {
-        this.pointer.targetPosition.add( this.camera.position );
-        this.pointer.targetPosition.applyQuaternion( this.camera.quaternion );
-      }
-      this.pointer.targetPosition.applyQuaternion( this.currentUser.quaternion );
-      this.pointer.targetPosition.add( this.currentUser.position );
-
-      for ( var i = 0; i < this.editors.length; ++i ) {
-        this.projector.updateObject( createWorkerObject( this.editors[i] ) );
-      }
-      this.projector.projectPointer(
-          this.pointer.targetPosition.toArray(),
-          transformForPicking( this.currentUser ) );
-    }
-
-    var lastButtons = this.mouse.getValue( "dButtons" ) |
-        this.touch.getValue( "dFingers" ),
-        hit = this.currentHit;
-    if ( !hit || !hit.point ) {
-      if ( this.currentEditor && lastButtons > 0 ) {
-        this.currentEditor.blur();
-        this.currentEditor = null;
-      }
-      this.pointer.material.color.setRGB( 1, 0, 0 );
-      this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
-      this.pointer.scale.set( 1, 1, 1 );
-    }
-    else {
-      var fp = hit.facePoint, fn = hit.faceNormal;
-      this.pointer.targetPosition.set(
-          fp[0] + fn[0] * POINTER_RADIUS,
-          fp[1] + fn[1] * POINTER_RADIUS,
-          fp[2] + fn[2] * POINTER_RADIUS );
-      this.pointer.material.color.setRGB( 1, 1, 1 );
-      this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
-      var object = hit && this.findObject( hit.objectID );
-      if ( object ) {
-        var buttons = this.mouse.getValue( "BUTTONS" ) | this.touch.getValue( "FINGERS" ),
-            clickChanged = lastButtons > 0,
-            editor = object.textarea;
-
-        if ( editor ) {
-          this.pointer.scale.set( 1, 1, 1 );
-        }
-        else {
-          this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
-        }
-
-        if ( clickChanged && buttons > 0 && this.currentEditor && this.currentEditor !== editor ) {
-          this.currentEditor.blur();
-          this.currentEditor = null;
-        }
-
-        if ( editor && !this.currentEditor && clickChanged && buttons > 0 ) {
-          editor.focus();
-          this.currentEditor = editor;
-        }
-
-        if ( this.currentEditor ) {
-          var // At this point, the UV coord is scaled to a proporitional value, on
-              // the range [0, 1] for the dimensions of the image used as the texture.
-              // So we have to rescale it back out again. Also, the y coordinate is
-              // flipped.
-              txt = object.material.map.image,
-              textureU = Math.floor( txt.width * hit.point[0] ),
-              textureV = Math.floor( txt.height * ( 1 - hit.point[1] ) );
-          if ( !clickChanged && buttons > 0 ) {
-            this.currentEditor.movePointer( textureU, textureV );
-          }
-          else if ( clickChanged && buttons > 0 ) {
-            this.currentEditor.startPointer( textureU, textureV );
-          }
-          else {
-            this.currentEditor.endPointer();
-          }
-        }
-      }
-    }
-
-    this.pointer.position.add( this.pointer.targetPosition ).multiplyScalar( 0.5 );
-
-    this.fire( "update", dt );
-
-    for ( j = 0; j < this.editors.length; ++j ) {
-      if ( this.editors[j].textarea ) {
-        this.editors[j].textarea.render();
-      }
-    }
-    this.renderScene( this.scene );
-  };
-
-
-  function transformForPicking ( obj ) {
-    var p = obj.position.clone();
-    obj = obj.parent;
-    while ( obj !== null ) {
-      p.applyMatrix4( obj.matrix );
-      obj = obj.parent;
-    }
-    return p.toArray();
-  }
 
   return VRApplication;
 } )( );
