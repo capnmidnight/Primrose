@@ -215,39 +215,35 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       };
     }
 
-    function performLayout () {
-      var lineCountWidth;
+    function setGutter () {
       if ( showLineNumbers ) {
-        lineCountWidth = Math.max( 1, Math.ceil( Math.log( self.getLineCount() ) / Math.LN10 ) );
         topLeftGutter.width = 1;
       }
       else {
-        lineCountWidth = 0;
         topLeftGutter.width = 0;
       }
 
-      if ( showScrollBars ) {
-        if ( wordWrap ) {
-          bottomRightGutter.set( renderer.VSCROLL_WIDTH, 0 );
-        }
-        else {
-          bottomRightGutter.set( renderer.VSCROLL_WIDTH, 1 );
-        }
+      if ( !showScrollBars ) {
+        bottomRightGutter.set( 0, 0 );
+      }
+      else if ( wordWrap ) {
+        bottomRightGutter.set( renderer.VSCROLL_WIDTH, 0 );
       }
       else {
-        bottomRightGutter.set( 0, 0 );
+        bottomRightGutter.set( renderer.VSCROLL_WIDTH, 1 );
+      }
+    }
+
+    function performLayout () {
+      var lineCountWidth = 0;
+      if ( showLineNumbers ) {
+        lineCountWidth = Math.max( 1, Math.ceil( Math.log( self.getLineCount() ) / Math.LN10 ) );
       }
 
       var x = topLeftGutter.width + lineCountWidth,
           y = 0,
-          w = Math.floor( self.getWidth() /
-              renderer.character.width ) -
-          x -
-          bottomRightGutter.width,
-          h = Math.floor( self.getHeight() /
-              renderer.character.height ) -
-          y -
-          bottomRightGutter.height;
+          w = Math.floor( self.getWidth() / renderer.character.width ) - x - bottomRightGutter.width,
+          h = Math.floor( self.getHeight() / renderer.character.height ) - y - bottomRightGutter.height;
       gridBounds.set( x + 2, y, w - 2, h - 2 );
 
       // group the tokens into rows
@@ -258,8 +254,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       for ( var i = 0; i < tokenQueue.length; ++i ) {
         var t = tokenQueue[i].clone();
         var widthLeft = gridBounds.width - currentRowWidth;
-        var wrap = wordWrap && t.type !== "newlines" && t.value.length >
-            widthLeft;
+        var wrap = wordWrap && t.type !== "newlines" && t.value.length > widthLeft;
         var breakLine = t.type === "newlines" || wrap;
         if ( wrap ) {
           var split = t.value.length > gridBounds.width ? widthLeft : 0;
@@ -405,6 +400,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setWordWrap = function ( v ) {
       wordWrap = v || false;
+      setGutter();
     };
 
     this.getWordWrap = function () {
@@ -413,6 +409,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setShowLineNumbers = function ( v ) {
       showLineNumbers = v;
+      setGutter();
     };
 
     this.getShowLineNumbers = function () {
@@ -421,6 +418,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     this.setShowScrollBars = function ( v ) {
       showScrollBars = v;
+      setGutter();
     };
 
     this.getShowScrollBars = function () {
@@ -911,9 +909,29 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     };
 
+    var lastText,
+        lastCharacterWidth,
+        lastCharacterHeight,
+        lastWidth,
+        lastHeight,
+        lineCountWidth;
     this.render = function () {
       if ( tokens ) {
-        var lineCountWidth = performLayout();
+
+        var textChanged = lastText !== this.value,
+            characterWidthChanged = renderer.character.width !== lastCharacterWidth,
+            characterHeightChanged = renderer.character.height !== lastCharacterHeight,
+            widthChanged = renderer.getWidth() !== lastWidth,
+            heightChanged = renderer.getHeight() !== lastHeight;
+        lastText = this.value;
+        lastCharacterWidth = renderer.character.width;
+        lastCharacterHeight = renderer.character.height;
+        lastWidth = renderer.getWidth();
+        lastHeight = renderer.getHeight();
+
+        if ( textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged ) {
+          lineCountWidth = performLayout();
+        }
 
         renderer.render(
             tokenRows,
