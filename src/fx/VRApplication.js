@@ -227,6 +227,9 @@ Primrose.VRApplication = ( function ( ) {
           this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
+        if(this.options.useFog){
+          this.scene.fog = new THREE.Fog( this.options.backgroundColor, 1, 50 );
+        }
         this.scene.add( this.pointer );
         this.currentUser.add( this.camera );
         if ( this.passthrough ) {
@@ -798,6 +801,7 @@ Primrose.VRApplication = ( function ( ) {
   inherit( VRApplication, Primrose.ChatApplication );
   VRApplication.DEFAULTS = {
     useLeap: false,
+    useFog: false,
     avatarHeight: 1.75,
     walkSpeed: 3,
     gravity: 0.98, // the acceleration applied to falling objects
