@@ -336,11 +336,11 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         tgfx.fillStyle = theme.regular.selectedBackColor ||
             Primrose.Text.Themes.Default.regular.selectedBackColor;
         // horizontal
+        var bw;
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth ),
-              by = ( gridBounds.height + 0.25 ) * self.character.height,
-              bw = Math.max( self.character.width, scrollBarWidth );
-
+              by = ( gridBounds.height + 0.25 ) * self.character.height;
+          bw = Math.max( self.character.width, scrollBarWidth );
           tgfx.fillRect( scrollX, by, bw, self.character.height );
           tgfx.strokeRect( scrollX, by, bw, self.character.height );
         }
@@ -350,13 +350,13 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           var scrollBarHeight = drawHeight * ( gridBounds.height /
               tokenRows.length ),
               bx = canvas.width - self.VSCROLL_WIDTH * self.character.width,
-              bw = self.VSCROLL_WIDTH * self.character.width,
               bh = Math.max( self.character.height, scrollBarHeight );
+          bw = self.VSCROLL_WIDTH * self.character.width;
           tgfx.fillRect( bx, scrollY, bw, bh );
           tgfx.strokeRect( bx, scrollY, bw, bh );
         }
       }
-      
+
       strokeRect( tgfx,
           theme.regular.foreColor ||
           Primrose.Text.Themes.Default.regular.foreColor,
