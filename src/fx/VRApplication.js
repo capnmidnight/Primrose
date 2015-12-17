@@ -38,9 +38,9 @@ Primrose.VRApplication = ( function ( ) {
     Primrose.ChatApplication.call( this, name, this.options );
     this.listeners = {
       ready: [ ],
-      update: [ ],
+      update: [ ]
     };
-    
+
     var forwardedEvents = [
       "keydown", "keyup", "keypress",
       "mousedown", "mouseup", "mousemove", "wheel",
@@ -119,23 +119,19 @@ Primrose.VRApplication = ( function ( ) {
     // mouse input
     //
     this.mouse = new Primrose.Input.Mouse( "mouse", this.ctrls.frontBuffer, [
-      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true
-      },
-      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5
-      },
+      {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true },
+      {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5 },
       {name: "heading", commands: [ "dx" ], integrate: true},
-      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5
-      },
-      {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI *
-            0.5, max: Math.PI * 0.5},
-      {name: "pointerPitch", commands: [ "dy" ], integrate: true,
-        min: -Math.PI * 0.25, max: Math.PI * 0.25}
+      {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5 },
+      {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
+      {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
     ] );
 
     //
     // touch input
     //
-    this.touch = new Primrose.Input.Touche("touch" ,this.ctrls.frontBuffer, [
+    this.touch = new Primrose.Input.Touch("touch", this.ctrls.frontBuffer, [
+      {name: "dFingers", axes: [ Primrose.Input.Touch.FINGERS ], delta: true }
     ]);
 
 
@@ -322,6 +318,8 @@ Primrose.VRApplication = ( function ( ) {
     }
     else {
       window.addEventListener( "mousedown",
+          this.goFullScreen.bind( this, true ), false );
+      window.addEventListener( "touchstart",
           this.goFullScreen.bind( this, true ), false );
     }
 
@@ -627,11 +625,13 @@ Primrose.VRApplication = ( function ( ) {
     this.lt = t;
     this.keyboard.update( dt );
     this.mouse.update( dt );
+    this.touch.update( dt );
     this.gamepad.update( dt );
     this.vr.update( dt );
 
     heading = this.gamepad.getValue( "heading" ) +
-        isMobile ? 0 : this.mouse.getValue( "heading" );
+        (isMobile ? 0 : this.mouse.getValue( "heading" )) +
+        this.touch.getValue("heading");
     strafe = this.gamepad.getValue( "strafe" ) +
         this.keyboard.getValue( "strafeRight" ) +
         this.keyboard.getValue( "strafeLeft" );
@@ -644,7 +644,8 @@ Primrose.VRApplication = ( function ( ) {
       pitch += this.mouse.getValue( "pointerPitch" );
     }
     else {
-      pitch += this.mouse.getValue( "pitch" );
+      pitch += this.mouse.getValue( "pitch" ) +
+        this.touch.getValue( "pitch" );
     }
     this.qPitch.setFromAxisAngle( RIGHT, pitch );
 
@@ -716,9 +717,8 @@ Primrose.VRApplication = ( function ( ) {
           transformForPicking( this.currentUser ) );
     }
 
-    var lastButtons = this.mouse.getValue( "dButtons" ),
+    var lastButtons = this.mouse.getValue( "dButtons" ) | this.touch.getValue("dFingers"),
         hit = this.currentHit;
-
     if ( !hit ||
         !hit.point ) {
       if ( this.currentEditor && lastButtons > 0 ) {
@@ -741,7 +741,7 @@ Primrose.VRApplication = ( function ( ) {
       this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
       var object = hit && this.findObject( hit.objectID );
       if ( object ) {
-        var buttons = this.mouse.getValue( "BUTTONS" ),
+        var buttons = this.mouse.getValue( "BUTTONS" ) | this.touch.getValue("FINGERS"),
             clickChanged = lastButtons > 0,
             editor = object.textarea;
 

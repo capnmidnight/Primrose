@@ -17,7 +17,7 @@ Primrose.Input.Mouse = ( function () {
     };
 
     this.readEvent = function ( event ) {
-      this.setAxis( "BUTTONS", event.buttons );
+      this.setAxis( "BUTTONS", event.buttons << 10);
       if ( MouseInput.isPointerLocked() ) {
         var mx = event.movementX,
             my = event.movementY;
@@ -35,12 +35,12 @@ Primrose.Input.Mouse = ( function () {
 
     DOMElement.addEventListener( "mousedown", function ( event ) {
       this.setButton( event.button, true );
-      this.setAxis( "BUTTONS", event.buttons );
+      this.setAxis( "BUTTONS", event.buttons << 10 );
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mouseup", function ( event ) {
       this.setButton( event.button, false );
-      this.setAxis( "BUTTONS", event.buttons );
+      this.setAxis( "BUTTONS", event.buttons << 10 );
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mousemove", this.readEvent.bind( this ), false );
