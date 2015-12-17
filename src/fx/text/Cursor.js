@@ -67,7 +67,7 @@ Primrose.Text.Cursor = ( function ( ) {
     this.i = 0;
     var lastLength = 0;
     for ( var y = 0; y < lines.length; ++y ) {
-      var line = line[y];
+      var line = lines[y];
       lastLength = line.length;
       this.i += lastLength;
     }
