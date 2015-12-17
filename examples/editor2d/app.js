@@ -15,42 +15,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global rosetta_24_game, Assert, Primrose */
-
+/* global Primrose, isOSX */
+var ed;
 function init () {
   "use strict";
-//  addFullScreenShim(window);
-
-  var editor = new Primrose.Text.Controls.TextBox( "editor", {
+  ed = new Primrose.Text.Controls.TextBox( "editor", {
     autoBindEvents: true,
     keyEventSource: window,
     tokenizer: Primrose.Text.Grammars.Basic,
     theme: Primrose.Text.Themes.Dark,
     hideLineNumbers: true
-  } ),
-      running = false,
+  } );
+  var running = false,
       inputCallback = null,
       currentEditIndex = 0,
       currentProgram = null;
 
   function toEnd (  ) {
-    editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView( editor.frontCursor );
+    ed.selectionStart = ed.selectionEnd = ed.value.length;
+    ed.scrollIntoView( ed.frontCursor );
   }
 
   function done () {
     if ( running ) {
       flush( );
       running = false;
-      editor.setTokenizer( Primrose.Text.Grammars.Basic );
-      editor.value = currentProgram;
+      ed.setTokenizer( Primrose.Text.Grammars.Basic );
+      ed.value = currentProgram;
       toEnd( );
     }
   }
 
   function clearScreen () {
-    editor.selectionStart = editor.selectionEnd = 0;
-    editor.value = "";
+    ed.selectionStart = ed.selectionEnd = 0;
+    ed.value = "";
     return true;
   }
 
@@ -59,7 +57,7 @@ function init () {
       if ( isOSX ) {
         file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
       }
-      editor.value = currentProgram = file;
+      ed.value = currentProgram = file;
       if ( callback ) {
         callback();
       }
@@ -70,7 +68,7 @@ function init () {
 
   function flush () {
     if ( buffer.length > 0 ) {
-      editor.value += buffer;
+      ed.value += buffer;
       buffer = "";
     }
   }
@@ -79,7 +77,7 @@ function init () {
     flush();
     inputCallback = callback;
     toEnd( );
-    currentEditIndex = editor.selectionStart;
+    currentEditIndex = ed.selectionStart;
   }
 
   var buffer = "";
@@ -88,9 +86,9 @@ function init () {
     toEnd( );
   }
 
-  editor.addEventListener( "keydown", function ( evt ) {
+  ed.addEventListener( "keydown", function ( evt ) {
     if ( running && inputCallback && evt.keyCode === Primrose.Text.Keys.ENTER ) {
-      var str = editor.value.substring( currentEditIndex );
+      var str = ed.value.substring( currentEditIndex );
       str = str.substring( 0, str.length - 1 );
       inputCallback( str );
       inputCallback = null;
@@ -112,18 +110,17 @@ function init () {
         }
       };
 
-      currentProgram = editor.value;
+      currentProgram = ed.value;
       var looper = Primrose.Text.Grammars.Basic.interpret( currentProgram, input,
           stdout, stdout, next, clearScreen, loadFile, done );
-      editor.setTokenizer( Primrose.Text.Grammars.PlainText );
+      ed.setTokenizer( Primrose.Text.Grammars.PlainText );
       clearScreen();
       next();
     }
   } );
 
-  document.body.appendChild( editor.getDOMElement() );
+  document.body.appendChild( ed.getDOMElement() );
 
-  
-  setInterval(editor.render.bind(editor), 25);
-  //editor.render();
+
+  setInterval( ed.render.bind( ed ), 15 );
 }

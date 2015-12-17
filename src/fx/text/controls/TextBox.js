@@ -229,8 +229,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         bottomRightGutter.set( renderer.VSCROLL_WIDTH, 1 );
       }
     }
-
-    function performLayout () {
+    
+    function refreshGridBounds(){      
       var lineCountWidth = 0;
       if ( showLineNumbers ) {
         lineCountWidth = Math.max( 1, Math.ceil( Math.log( self.getLineCount() ) / Math.LN10 ) );
@@ -240,7 +240,11 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           y = 0,
           w = Math.floor( self.getWidth() / renderer.character.width ) - x - bottomRightGutter.width,
           h = Math.floor( self.getHeight() / renderer.character.height ) - y - bottomRightGutter.height;
-      gridBounds.set( x + 2, y, w - 2, h - 2 );
+      gridBounds.set( x, y, w, h );
+      gridBounds.lineCountWidth = lineCountWidth;
+    }
+
+    function performLayout () {
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
@@ -272,7 +276,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           currentRowWidth = 0;
         }
       }
-      return lineCountWidth;
     }
 
     function setFalse ( evt ) {
@@ -783,6 +786,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             right = text.substring( maxCursor.i );
         this.value = left + str + right;
         refreshTokens();
+        refreshGridBounds();
         performLayout();
         minCursor.advanceN( lines, Math.max( 0, str.length ) );
         this.scrollIntoView( maxCursor );
@@ -907,16 +911,18 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         lastCharacterHeight,
         lastWidth,
         lastHeight,
-        lineCountWidth;
+        lastGridBounds;
     this.render = function () {
       if ( tokens ) {
-
-        var textChanged = lastText !== this.value,
+        refreshGridBounds();
+        var boundsChanged = gridBounds.toString() !== lastGridBounds,
+            textChanged = lastText !== this.value,
             characterWidthChanged = renderer.character.width !== lastCharacterWidth,
             characterHeightChanged = renderer.character.height !== lastCharacterHeight,
             widthChanged = renderer.getWidth() !== lastWidth,
             heightChanged = renderer.getHeight() !== lastHeight,
-            layoutChanged = textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged;
+            layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged;
+        lastGridBounds = gridBounds.toString();
         lastText = this.value;
         lastCharacterWidth = renderer.character.width;
         lastCharacterHeight = renderer.character.height;
@@ -924,7 +930,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         lastHeight = renderer.getHeight();
 
         if ( layoutChanged ) {
-          lineCountWidth = performLayout();
+          performLayout(gridBounds);
         }
 
         renderer.render(
@@ -934,7 +940,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             gridBounds,
             this.scroll,
             this.focused, showLineNumbers, showScrollBars, wordWrap,
-            lineCountWidth,
+            gridBounds.lineCountWidth,
             layoutChanged);
       }
     };
