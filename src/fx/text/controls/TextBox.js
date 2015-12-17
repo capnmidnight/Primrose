@@ -661,27 +661,6 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       renderer.resize();
     };
 
-    this.cell2i = function ( x, y ) {
-      var i = 0;
-      for ( var dy = 0; dy < y; ++dy ) {
-        i += line[dy].length + 1;
-      }
-      i += x;
-      return i;
-    };
-
-    this.i2cell = function ( i ) {
-      for ( var y = 0; y < lines.length; ++y ) {
-        var rowWidth = lines[y].length;
-        if ( i <= rowWidth ) {
-          return {x: i, y: y};
-        }
-        else {
-          i -= rowWidth - 1;
-        }
-      }
-    };
-
     this.readWheel = function ( evt ) {
 
       if ( this.focused ) {
