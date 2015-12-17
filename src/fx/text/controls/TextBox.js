@@ -30,6 +30,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         tokenizer,
         tokens,
         tokenRows,
+        tokenHashes,
         lines,
         theme,
         pointer = new Primrose.Text.Point(),
@@ -78,7 +79,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
       else {
         while ( 0 < self.scroll.y &&
-            self.scroll.y > tokenRows.length - gridBounds.height ) {
+            self.scroll.y > lines.length - gridBounds.height ) {
           --self.scroll.y;
         }
       }
@@ -93,12 +94,12 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       var onLeft = gx < 0;
       var onRight = pointer.x >= gridBounds.width;
       if ( !scrolling && !onBottom && !onLeft && !onRight ) {
-        cursor.setXY( pointer.x, pointer.y, tokenRows );
+        cursor.setXY( pointer.x, pointer.y, lines );
         self.backCursor.copy( cursor );
       }
       else if ( scrolling || onRight && !onBottom ) {
         scrolling = true;
-        var scrollHeight = tokenRows.length - gridBounds.height;
+        var scrollHeight = lines.length - gridBounds.height;
         if ( gy >= 0 && scrollHeight >= 0 ) {
           var sy = gy * scrollHeight / gridBounds.height;
           self.scroll.y = Math.floor( sy );
@@ -106,13 +107,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
       else if ( onBottom && !onLeft ) {
         var maxWidth = 0;
-        for ( var dy = 0; dy < tokenRows.length; ++dy ) {
-          var tokenRow = tokenRows[dy];
-          var width = 0;
-          for ( var dx = 0; dx < tokenRow.length; ++dx ) {
-            width += tokenRow[dx].value.length;
-          }
-          maxWidth = Math.max( maxWidth, width );
+        for ( var dy = 0; dy < lines.length; ++dy ) {
+          maxWidth = Math.max( maxWidth, lines[dy].length );
         }
         var scrollWidth = maxWidth - gridBounds.width;
         if ( gx >= 0 && scrollWidth >= 0 ) {
@@ -130,8 +126,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     }
 
     function fixCursor () {
-      var moved = self.frontCursor.fixCursor( tokenRows ) ||
-          self.backCursor.fixCursor( tokenRows );
+      var moved = self.frontCursor.fixCursor( lines ) ||
+          self.backCursor.fixCursor( lines );
       if ( moved ) {
         self.render();
       }
@@ -209,8 +205,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
     function makeCursorCommand ( name ) {
       var method = name.toLowerCase();
-      self["cursor" + name] = function ( tokenRows, cursor ) {
-        cursor[method]( tokenRows );
+      self["cursor" + name] = function ( lines, cursor ) {
+        cursor[method]( lines );
         self.scrollIntoView( cursor );
       };
     }
@@ -248,6 +244,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
       // group the tokens into rows
       tokenRows = [ [ ] ];
+      tokenHashes = [ "" ];
       lines = [ "" ];
       var currentRowWidth = 0;
       var tokenQueue = tokens.slice();
@@ -263,13 +260,15 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
         if ( t.value.length > 0 ) {
           tokenRows[tokenRows.length - 1].push( t );
-          lines[lines.length - 1] += JSON.stringify( t );
+          tokenHashes[tokenHashes.length - 1] += JSON.stringify( t );
+          lines[lines.length - 1] += t.value;
           currentRowWidth += t.value.length;
         }
 
         if ( breakLine ) {
           tokenRows.push( [ ] );
-          lines.push( "" );
+          tokenHashes.push( "" );
+          lines.push("");
           currentRowWidth = 0;
         }
       }
@@ -372,13 +371,13 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     };
 
-    this.cursorPageUp = function ( tokenRows, cursor ) {
-      cursor.incY( -gridBounds.height, tokenRows );
+    this.cursorPageUp = function ( lines, cursor ) {
+      cursor.incY( -gridBounds.height, lines );
       this.scrollIntoView( cursor );
     };
 
-    this.cursorPageDown = function ( tokenRows, cursor ) {
-      cursor.incY( gridBounds.height, tokenRows );
+    this.cursorPageDown = function ( lines, cursor ) {
+      cursor.incY( gridBounds.height, lines );
       this.scrollIntoView( cursor );
     };
 
@@ -572,7 +571,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           return this.frontCursor.i;
         },
         set: function ( i ) {
-          this.frontCursor.setI( i, tokenRows );
+          this.frontCursor.setI( i, lines );
         }
       },
       selectionEnd: {
@@ -580,7 +579,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           return this.backCursor.i;
         },
         set: function ( i ) {
-          this.backCursor.setI( i, tokenRows );
+          this.backCursor.setI( i, lines );
         }
       },
       selectionDirection: {
@@ -662,23 +661,15 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.cell2i = function ( x, y ) {
       var i = 0;
       for ( var dy = 0; dy < y; ++dy ) {
-        var tokenRow = tokenRows[dy];
-        for ( var dx = 0; dx < tokenRow.length; ++dx ) {
-          i += tokenRow[dx].value.length;
-        }
-        ++i;
+        i += line[dy].length + 1;
       }
       i += x;
       return i;
     };
 
     this.i2cell = function ( i ) {
-      for ( var y = 0; y < tokenRows.length; ++y ) {
-        var tokenRow = tokenRows[y];
-        var rowWidth = 0;
-        for ( var x = 0; x < tokenRow.length; ++x ) {
-          rowWidth += tokenRow[x].value.length;
-        }
+      for ( var y = 0; y < lines.length; ++y ) {
+        var rowWidth = lines[y].length;
         if ( i <= rowWidth ) {
           return {x: i, y: y};
         }
@@ -791,7 +782,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             left = text.substring( 0, minCursor.i ),
             right = text.substring( maxCursor.i );
         this.value = left + str + right;
-        minCursor.advanceN( tokenRows, Math.max( 0, str.length ) );
+        refreshTokens();
+        performLayout();
+        minCursor.advanceN( lines, Math.max( 0, str.length ) );
         this.scrollIntoView( maxCursor );
         clampScroll();
         maxCursor.copy( minCursor );
@@ -887,7 +880,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           if ( func ) {
             this.frontCursor.moved = false;
             this.backCursor.moved = false;
-            func( self, tokenRows );
+            func( self, lines );
             if ( this.frontCursor.moved && !this.backCursor.moved ) {
               this.backCursor.copy( this.frontCursor );
             }
@@ -936,7 +929,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
         renderer.render(
             tokenRows,
-            lines,
+            tokenHashes,
             this.frontCursor, this.backCursor,
             gridBounds,
             this.scroll,
