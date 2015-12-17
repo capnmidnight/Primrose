@@ -163,7 +163,14 @@ function testDemo ( scene ) {
       MIDZ = DEPTH / 2,
       start = put( hub() ).on( scene ).at( -MIDX, -MIDY, -MIDZ );
 
-  put( cloud( 1000, WIDTH, HEIGHT, DEPTH, 0x6699ff, 0.05 ) ).on( start );
+  put( cloud(
+      2000,
+      WIDTH, HEIGHT, DEPTH,
+      this.options.backgroundColor,
+      0.05 ) )
+      .on( start )
+      .at( MIDX, MIDY, MIDZ );
+
   put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
   for ( var y = 0; y < 10; ++y ) {
     for ( var x = 0; x < 10; ++x ) {
@@ -175,7 +182,7 @@ function testDemo ( scene ) {
           .at( MIDX + x + 20, 10 - Math.max( x, y ), MIDZ + y + 20 );
     }
   }
-  
+
   var sun = put( hub() ).on( start ).at( MIDX + 5, 15, MIDZ + 20 );
 
   function sunBit ( x, y, z ) {
@@ -192,7 +199,8 @@ function testDemo ( scene ) {
   sunBit( 0, 0, -1 );
 
   put( light( 0xffffff, 1, 500 ) ).on( sun );
-  var ball = put( brick( ROCK ) ).on( start ).at( 0, MIDY + 1, 0 ),
+
+  var ball = put( brick( ROCK ) ).on( start ).at( 0, 0, 0 ),
       t = 0,
       dx = 7,
       dy = 2.5,
