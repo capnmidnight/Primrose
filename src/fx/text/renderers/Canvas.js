@@ -20,16 +20,13 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         texture = null,
         strictSize = options.size,
         rowCache = {},
-        lastLines = null,
         lastFocused = false,
-        lastScrollY = -1,
-        lastScrollX = -1,
         lastFrontCursorI = -1,
         lastBackCursorI = -1,
-        lastCharacterWidth = -1,
-        lastCharacterHeight = -1,
         lastWidth = -1,
         lastHeight = -1,
+        lastScrollX = -1,
+        lastScrollY = -1,
         lastFont = null;
 
     this.VSCROLL_WIDTH = 2;
@@ -71,20 +68,14 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
             100;
 
-        if ( lastCharacterWidth !== this.character.width ||
-            lastCharacterHeight !== this.character.height ||
-            lastFont !== gfx.font ||
-            lastWidth !== newWidth ||
-            lastHeight !== newHeight ) {
-          rowCache = {};
-        }
-
         if ( ( lastWidth !== newWidth || lastHeight !== newHeight ) && newWidth > 0 && newHeight > 0 ) {
-          bgCanvas.width =
+          lastWidth =
+              bgCanvas.width =
               fgCanvas.width =
               trimCanvas.width =
               canvas.width = newWidth;
-          bgCanvas.height =
+          lastHeight =
+              bgCanvas.height =
               fgCanvas.height =
               trimCanvas.height =
               canvas.height = newHeight;
@@ -377,25 +368,26 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         gridBounds,
         scroll,
         focused, showLineNumbers, showScrollBars, wordWrap,
-        lineCountWidth ) {
+        lineCountWidth,
+        layoutChanged ) {
       if ( theme ) {
-        var textChanged = scroll.y !== lastScrollY ||
-            scroll.x !== lastScrollX ||
-            lastLines === null ||
-            lastLines.length !== lines.length,
-            cursorChanged = frontCursor.i !== lastFrontCursorI || lastBackCursorI !== backCursor.i,
-            characterWidthChanged = this.character.width !== lastCharacterWidth,
-            characterHeightChanged = this.character.height !== lastCharacterHeight,
-            widthChanged = canvas.width !== lastWidth,
-            heightChanged = canvas.height !== lastHeight,
+        var cursorChanged = frontCursor.i !== lastFrontCursorI || lastBackCursorI !== backCursor.i,
+            scrollChanged = scroll.x !== lastScrollX || scroll.y !== lastScrollY,
             fontChanged = gfx.font !== lastFont,
             focusChanged = focused !== lastFocused;
 
-        for ( var i = 0; i < lines.length && !textChanged; ++i ) {
-          textChanged = lastLines[i] !== lines[i];
+        lastFrontCursorI = frontCursor.i;
+        lastBackCursorI = backCursor.i;
+        lastFocused = focused;
+        lastFont = gfx.font;
+        lastScrollX = scroll.x;
+        lastScrollY = scroll.y;
+
+        if ( layoutChanged ) {
+          rowCache = {};
         }
 
-        var foregroundChanged = textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged || fontChanged,
+        var foregroundChanged = layoutChanged || fontChanged || scrollChanged,
             backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
 
         if ( foregroundChanged || backgroundChanged ) {
@@ -416,18 +408,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           if ( texture ) {
             texture.needsUpdate = true;
           }
-
-          lastLines = lines;
-          lastScrollY = scroll.y;
-          lastScrollX = scroll.x;
-          lastFrontCursorI = frontCursor.i;
-          lastBackCursorI = backCursor.i;
-          lastFocused = focused;
-          lastCharacterWidth = this.character.width;
-          lastCharacterHeight = this.character.height;
-          lastWidth = canvas.width;
-          lastHeight = canvas.height;
-          lastFont = gfx.font;
         }
       }
     };

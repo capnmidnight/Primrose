@@ -922,14 +922,15 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             characterWidthChanged = renderer.character.width !== lastCharacterWidth,
             characterHeightChanged = renderer.character.height !== lastCharacterHeight,
             widthChanged = renderer.getWidth() !== lastWidth,
-            heightChanged = renderer.getHeight() !== lastHeight;
+            heightChanged = renderer.getHeight() !== lastHeight,
+            layoutChanged = textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged;
         lastText = this.value;
         lastCharacterWidth = renderer.character.width;
         lastCharacterHeight = renderer.character.height;
         lastWidth = renderer.getWidth();
         lastHeight = renderer.getHeight();
 
-        if ( textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged ) {
+        if ( layoutChanged ) {
           lineCountWidth = performLayout();
         }
 
@@ -940,7 +941,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             gridBounds,
             this.scroll,
             this.focused, showLineNumbers, showScrollBars, wordWrap,
-            lineCountWidth );
+            lineCountWidth,
+            layoutChanged);
       }
     };
 
