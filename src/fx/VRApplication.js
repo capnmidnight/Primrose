@@ -57,6 +57,7 @@ Primrose.VRApplication = ( function ( ) {
     this.currentUser = new THREE.Object3D( );
     this.currentUser.velocity = new THREE.Vector3( );
     this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
+    this.pointer.targetPosition = new THREE.Vector3();
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
     this.currentUser.position.set( 0, this.avatarHeight, 0 );
@@ -698,23 +699,22 @@ Primrose.VRApplication = ( function ( ) {
 
     if ( this.projector.ready ) {
       this.projector.ready = false;
-
-      this.pointer.position.copy( FORWARD );
+      this.pointer.targetPosition.copy( FORWARD );
       if ( this.inVR && !isMobile ) {
-        this.pointer.position.applyQuaternion( this.qHeading );
+        this.pointer.targetPosition.applyQuaternion( this.qHeading );
       }
       if ( !this.currentEditor || isMobile ) {
-        this.pointer.position.add( this.camera.position );
-        this.pointer.position.applyQuaternion( this.camera.quaternion );
+        this.pointer.targetPosition.add( this.camera.position );
+        this.pointer.targetPosition.applyQuaternion( this.camera.quaternion );
       }
-      this.pointer.position.applyQuaternion( this.currentUser.quaternion );
-      this.pointer.position.add( this.currentUser.position );
-      
+      this.pointer.targetPosition.applyQuaternion( this.currentUser.quaternion );
+      this.pointer.targetPosition.add( this.currentUser.position );
+
       for ( var i = 0; i < this.editors.length; ++i ) {
         this.projector.updateObject( createWorkerObject( this.editors[i] ) );
       }
       this.projector.projectPointer(
-          this.pointer.position.toArray(),
+          this.pointer.targetPosition.toArray(),
           transformForPicking( this.currentUser ) );
     }
 
@@ -732,7 +732,7 @@ Primrose.VRApplication = ( function ( ) {
     }
     else {
       var fp = hit.facePoint, fn = hit.faceNormal;
-      this.pointer.position.set(
+      this.pointer.targetPosition.set(
           fp[0] + fn[0] * POINTER_RADIUS,
           fp[1] + fn[1] * POINTER_RADIUS,
           fp[2] + fn[2] * POINTER_RADIUS );
@@ -781,6 +781,8 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
     }
+
+    this.pointer.position.add( this.pointer.targetPosition ).multiplyScalar( 0.5 );
 
     this.fire( "update", dt );
 
