@@ -23,6 +23,9 @@ function StartDemo ( ) {
     noteDown[i] = true;
   }
 
+  app.ctrls.addEventListener( "click", app.goFullScreen.bind( this, false ), false );
+  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( this, true ), false );
+
   var noteDown = [ ];
   var btns = [ ];
   app.addEventListener( "ready", function () {

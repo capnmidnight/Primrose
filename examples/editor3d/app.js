@@ -12,8 +12,6 @@ var app,
 function StartDemo ( isHomeScreen ) {
   app = new Primrose.VRApplication( "Codevember", {
     disableAutoFullScreen: isHomeScreen,
-    regularFullScreenButton: isHomeScreen && document.getElementById( "goRegular" ),
-    vrFullScreenButton: isHomeScreen && document.getElementById( "goVR" ),
     useFog: true
   } );
 
@@ -154,6 +152,11 @@ function StartDemo ( isHomeScreen ) {
   var cmdLabels = document.querySelectorAll( ".cmdLabel" );
   for ( var i = 0; i < cmdLabels.length; ++i ) {
     cmdLabels[i].innerHTML = cmdPre;
+  }
+
+  if ( isHomeScreen ) {
+    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( this, false ), false );
+    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( this, true ), false );
   }
 
   app.start();

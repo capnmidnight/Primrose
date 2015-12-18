@@ -12,11 +12,12 @@ function PrimroseDemo () {
       floor = textured( box( 25, 1, 25 ), "../images/deck.png", false, 1, 25, 25 ),
       terminal = null,
       app = new Primrose.VRApplication( "Commodore", {
-        sceneModel: "commodore_pet.json",
-        regularFullScreenButton: document.getElementById( "goRegular" ),
-        vrFullScreenButton: document.getElementById( "goVR" )
+        sceneModel: "commodore_pet.json"
       } );
 
+
+  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( this, false ), false );
+  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( this, true ), false );
   window.addEventListener( "keydown", keyDown.bind( this ) );
   window.addEventListener( "keyup", function ( evt ) {
     keyState[evt.keyCode] = false;

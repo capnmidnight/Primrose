@@ -581,11 +581,13 @@ Primrose.VRApplication = ( function ( ) {
     // Setup THREE.js
     //
     this.renderer = new THREE.WebGLRenderer( {
-      antialias: true,
-      alpha: true,
       canvas: this.ctrls.frontBuffer,
+      antialias: !isMobile,
+      alpha: !isMobile,
       logarithmicDepthBuffer: !isMobile
     } );
+    
+    this.renderer.autoSortObjects = !isMobile;
 
     this.renderer.enableScissorTest( true );
     this.renderer.setClearColor( this.options.backgroundColor );
@@ -606,18 +608,7 @@ Primrose.VRApplication = ( function ( ) {
       } );
     }
 
-    if ( this.options.disableAutoFullScreen ) {
-      if ( this.options.regularFullScreenButton ) {
-        this.options.regularFullScreenButton.addEventListener( "click",
-            this.goFullScreen.bind( this, false ), false );
-      }
-
-      if ( this.options.vrFullScreenButton ) {
-        this.options.vrFullScreenButton.addEventListener( "click",
-            this.goFullScreen.bind( this, true ), false );
-      }
-    }
-    else {
+    if ( !this.options.disableAutoFullScreen ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
