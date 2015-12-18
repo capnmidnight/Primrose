@@ -1,39 +1,51 @@
 /* global Primrose, THREE */
 
 Primrose.Input.FPSInput = ( function ( ) {
+
+  function fireAll () {
+    var args = Array.prototype.slice.call( arguments ),
+        evt = args.shift(),
+        handlers = this.listeners[evt];
+    for ( var i = 0; i < handlers.length; ++i ) {
+      var thunk = handlers[i];
+      thunk.apply( thunk.executionContext || this, args );
+    }
+  }
+
   function FPSInput ( DOMElement ) {
     DOMElement = DOMElement || window;
+    this.listeners = {
+      jump: [ ],
+      zero: [ ]
+    };
     this.managers = [
       // keyboard should always run on the window
       new Primrose.Input.Keyboard( "keyboard", window, [
-        {name: "strafeLeft", buttons: [
+        {name: "strafeLeft",
+          buttons: [
             -Primrose.Input.Keyboard.A,
             -Primrose.Input.Keyboard.LEFTARROW ]},
-        {name: "strafeRight", buttons: [
+        {name: "strafeRight",
+          buttons: [
             Primrose.Input.Keyboard.D,
             Primrose.Input.Keyboard.RIGHTARROW ]},
         {name: "strafe", commands: [ "strafeLeft", "strafeRight" ]},
-        {name: "driveForward", buttons: [
+        {name: "driveForward",
+          buttons: [
             -Primrose.Input.Keyboard.W,
             -Primrose.Input.Keyboard.UPARROW ]},
-        {name: "driveBack", buttons: [
+        {name: "driveBack",
+          buttons: [
             Primrose.Input.Keyboard.S,
             Primrose.Input.Keyboard.DOWNARROW ]},
         {name: "drive", commands: [ "driveForward", "driveBack" ]},
-        {name: "jump", buttons: [
-            Primrose.Input.Keyboard.SPACEBAR ],
-          metaKeys: [
-            -Primrose.Input.Keyboard.SHIFT ],
-          commandDown: function ( ) {
-            this.jump( );
-          }.bind( this ), dt: 0.5},
-        {name: "zero", buttons: [
-            Primrose.Input.Keyboard.Z ],
-          metaKeys: [
-            Primrose.Input.Keyboard.SHIFT ],
-          commandUp: function ( ) {
-            this.zero( );
-          }.bind( this )}
+        {name: "jump",
+          buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
+          metaKeys: [ -Primrose.Input.Keyboard.SHIFT ],
+          commandDown: fireAll.bind( this, "jump" ), dt: 0.5},
+        {name: "zero",
+          buttons: [ Primrose.Input.Keyboard.Z ],
+          commandUp: fireAll.bind( this, "zero" )}
       ] ),
       new Primrose.Input.Mouse( "mouse", DOMElement, [
         {name: "buttons", axes: [ Primrose.Input.Mouse.BUTTONS ]},
@@ -74,12 +86,18 @@ Primrose.Input.FPSInput = ( function ( ) {
       this.managers[i].update( dt );
     }
   };
+
   FPSInput.prototype.addEventListener = function ( evt, thunk, bubbles ) {
-    this.managers.forEach( function ( mgr ) {
-      if ( mgr.addEventListener ) {
-        mgr.addEventListener( evt, thunk, bubbles );
-      }
-    } );
+    if ( this.listeners[evt] ) {
+      this.listeners[evt].push( thunk );
+    }
+    else {
+      this.managers.forEach( function ( mgr ) {
+        if ( mgr.addEventListener ) {
+          mgr.addEventListener( evt, thunk, bubbles );
+        }
+      } );
+    }
   };
   FPSInput.prototype.getValue = function ( name ) {
     var value = 0;

@@ -77,22 +77,6 @@ Primrose.VRApplication = ( function ( ) {
     this.vrRequested = false;
     this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
 
-
-    function connectVR ( ) {
-      var deviceIDs = Object.keys( this.input.vr.devices );
-      if ( deviceIDs.length > 0 ) {
-        if ( this.options.vrFullScreenButton ) {
-          this.options.vrFullScreenButton.style.display = "inline-block";
-        }
-      }
-      else if ( this.options.vrFullScreenButton ) {
-        this.options.vrFullScreenButton.style.display = "none";
-      }
-    }
-
-    this.input.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
-    this.input.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
-
     function waitForResources ( t ) {
       this.lt = t;
       if ( this.camera && this.scene && this.buttonFactory &&
@@ -645,6 +629,24 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
+
+
+    function connectVR ( ) {
+      var deviceIDs = Object.keys( this.input.vr.devices );
+      if ( deviceIDs.length > 0 ) {
+        if ( this.options.vrFullScreenButton ) {
+          this.options.vrFullScreenButton.style.display = "inline-block";
+        }
+      }
+      else if ( this.options.vrFullScreenButton ) {
+        this.options.vrFullScreenButton.style.display = "none";
+      }
+    }
+
+    this.input.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
+    this.input.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
+    this.input.addEventListener( "jump", this.jump.bind( this ), false );
+    this.input.addEventListener( "zero", this.zero.bind( this ), false );
 
     //
     // restoring the options the user selected
