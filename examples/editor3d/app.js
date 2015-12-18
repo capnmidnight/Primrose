@@ -187,7 +187,7 @@ function testDemo ( scene ) {
       start = put( hub() ).on( scene ).at( -MIDX, -MIDY, -MIDZ );
 
   put( cloud(
-      2000,
+      500,
       WIDTH, HEIGHT, DEPTH,
       this.options.backgroundColor,
       0.05 ) )
@@ -195,10 +195,15 @@ function testDemo ( scene ) {
       .at( MIDX, MIDY, MIDZ );
 
   put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
-  for ( var i = 0; i < 100; ++i ) {
-    put( fill( ROCK, 1, randomInt( MIDY, HEIGHT ), 1 ) )
+  for ( var i = 0; i < 300; ++i ) {
+    var x = 0, z = 0, h = randomInt( HEIGHT, 2 * HEIGHT );
+    while( x + z < 4){
+      x = randomInt( WIDTH );
+      z = randomInt( DEPTH );
+    }
+    put( fill( ROCK, 1, h, 1 ) )
         .on( start )
-        .at( randomInt( WIDTH ), 1, randomInt( DEPTH ) );
+        .at( x, 1, z );
   }
 
   put( light( 0xffffff, 1, 500 ) )

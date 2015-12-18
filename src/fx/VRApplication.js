@@ -61,6 +61,11 @@ Primrose.VRApplication = ( function ( ) {
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
     this.currentUser.position.set( 0, this.avatarHeight, 0 );
+    var skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
+        skinCode = parseInt( skin.substring( 1 ), 16 );
+    this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
+    this.nose.name = "Nose";
+    this.nose.scale.set( 0.5, 1, 1 );
     this.vrParams = null;
     this.inVR = false;
     this.currentHeading = 0;
@@ -112,6 +117,7 @@ Primrose.VRApplication = ( function ( ) {
           this.zero();
         }.bind( this )}
     ] );
+
     //
     // mouse input
     //
@@ -131,18 +137,25 @@ Primrose.VRApplication = ( function ( ) {
       {name: "dFingers", axes: [ Primrose.Input.Touch.FINGERS ], delta: true}
     ] );
 
-
     //
     // gamepad input
     //
     this.gamepad = new Primrose.Input.Gamepad( "gamepad", [
       {name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ]},
       {name: "drive", axes: [ Primrose.Input.Gamepad.LSY ]},
-      {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true
-      },
+      {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true},
       {name: "dheading", commands: [ "heading" ], delta: true},
       {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
     ] );
+
+    this.connectGamepad = function ( id ) {
+      if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
+          "Would you like to use this gamepad? \"$1\"", id ) ) ) {
+        this.gamepad.setGamepad( id );
+      }
+    };
+    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
+
     //
     // VR input
     //
@@ -173,53 +186,8 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     this.vr = new Primrose.Input.VR( "vr" );
-    this.vr.addEventListener( "vrdeviceconnected", connectVR.bind( this ),
-        false );
+    this.vr.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
     this.vr.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
-
-    window.addEventListener( "popstate", function ( evt ) {
-      if ( isFullScreenMode() ) {
-        exitFullScreen();
-        evt.preventDefault();
-      }
-    }, true );
-
-    //
-    // restoring the options the user selected
-    //
-    writeForm( this.ctrls, this.formState );
-    window.addEventListener( "beforeunload", function ( ) {
-      var state = readForm( this.ctrls );
-      setSetting( this.formStateKey, state );
-    }.bind( this ), false );
-
-    //
-    // Setup THREE.js
-    //
-    this.renderer = new THREE.WebGLRenderer( {
-      antialias: true,
-      alpha: true,
-      canvas: this.ctrls.frontBuffer
-    } );
-
-    this.renderer.enableScissorTest( true );
-    this.renderer.setClearColor( this.options.backgroundColor );
-
-    if ( this.options.button ) {
-      this.buttonFactory = new Primrose.ButtonFactory(
-          this.options.button.model,
-          this.options.button.options );
-    }
-    else {
-      this.buttonFactory = new Primrose.ButtonFactory(
-          brick( 0xff0000, 1, 1, 1 ), {
-        maxThrow: 0.1,
-        minDeflection: 10,
-        colorUnpressed: 0x7f0000,
-        colorPressed: 0x007f00,
-        toggle: true
-      } );
-    }
 
     function waitForResources ( t ) {
       this.lt = t;
@@ -227,11 +195,16 @@ Primrose.VRApplication = ( function ( ) {
           this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
-        if(this.options.useFog){
+        if ( this.options.useFog ) {
           this.scene.fog = new THREE.Fog( this.options.backgroundColor, 1, 50 );
         }
         this.scene.add( this.pointer );
         this.currentUser.add( this.camera );
+        this.camera.add( this.nose );
+        this.camera.near = 0.01;
+        this.scene.traverse( function ( v ) {
+          console.log( v );
+        } );
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
@@ -251,44 +224,30 @@ Primrose.VRApplication = ( function ( ) {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
 
-    function defaultCamera () {
-      return new THREE.PerspectiveCamera( 45, 1, 0.1,
-          this.options.drawDistance );
-    }
-
-    if ( !this.options.sceneModel ) {
-      this.scene = new THREE.Scene( );
-      this.camera = defaultCamera.call( this );
-      this.scene.Camera = this.camera;
-    }
-    else {
-      Primrose.ModelLoader.loadScene( this.options.sceneModel, function (
-          sceneGraph ) {
-        this.scene = sceneGraph;
-        this.camera = this.scene.Camera || defaultCamera.call( this );
-        this.scene.Camera = this.camera;
-      }.bind( this ) );
-    }
-
     this.renderScene = function ( s, rt, fc ) {
 
       if ( !this.inVR || !this.vrParams ) {
+        this.nose.visible = false;
+        this.nose.position.set( 0, -0.1, -0.15 );
         this.camera.position.set( 0, 0, 0 );
         this.camera.quaternion.set( 0, 0, 0, 1 );
         this.renderer.render( s, this.camera, rt, fc );
       }
       else {
+        this.nose.visible = true;
         var state = this.vr.sensor.getState( );
         for ( var i = 0; i < this.stereoSettings.length; ++i ) {
           var st = this.stereoSettings[i],
               m = st.transform,
-              v = st.viewport;
+              v = st.viewport,
+              side = (2 * i) - 1;
           if ( state.position ) {
             this.camera.position.copy( state.position );
           }
           else {
             this.camera.position.set( 0, 0, 0 );
           }
+
           this.camera.position.applyMatrix4( m );
 
           if ( state.orientation ) {
@@ -298,13 +257,14 @@ Primrose.VRApplication = ( function ( ) {
           else {
             this.camera.quaternion.set( 0, 0, 0, 1 );
           }
+          this.nose.position.set( side * -0.1, -0.11, -0.15 );
+          this.nose.rotation.z = side * 0.7;
           this.renderer.setViewport( v.left, v.top, v.width, v.height );
           this.renderer.setScissor( v.left, v.top, v.width, v.height );
           this.renderer.render( s, this.camera, rt, fc );
         }
       }
     };
-
 
     function setVRMode ( ) {
       this.inVR = isFullScreenMode( ) && this.vrRequested && this.vr.display;
@@ -313,12 +273,6 @@ Primrose.VRApplication = ( function ( ) {
       }
       this.setSize( );
     }
-
-    this.projector.addEventListener( "hit", function ( hit ) {
-      this.projector.ready = true;
-      this.currentHit = hit;
-    }.bind( this ) );
-
 
     this.goFullScreen = function ( useVR ) {
       this.mouse.requestPointerLock( );
@@ -460,13 +414,6 @@ Primrose.VRApplication = ( function ( ) {
         this.camera.fov = fieldOfView;
         this.camera.aspect = aspectWidth / canvasHeight;
         this.camera.updateProjectionMatrix( );
-      }
-    };
-
-    this.connectGamepad = function ( id ) {
-      if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
-          "Would you like to use this gamepad? \"$1\"", id ) ) ) {
-        this.gamepad.setGamepad( id );
       }
     };
 
@@ -773,6 +720,52 @@ Primrose.VRApplication = ( function ( ) {
       return p.toArray();
     }
 
+    function defaultCamera () {
+      return new THREE.PerspectiveCamera( 45, 1, 0.1,
+          this.options.drawDistance );
+    }
+
+    if ( !this.options.sceneModel ) {
+      this.scene = new THREE.Scene( );
+      this.camera = defaultCamera.call( this );
+      this.scene.Camera = this.camera;
+    }
+    else {
+      Primrose.ModelLoader.loadScene( this.options.sceneModel, function (
+          sceneGraph ) {
+        this.scene = sceneGraph;
+        this.camera = this.scene.Camera || defaultCamera.call( this );
+        this.scene.Camera = this.camera;
+      }.bind( this ) );
+    }
+
+    //
+    // Setup THREE.js
+    //
+    this.renderer = new THREE.WebGLRenderer( {
+      antialias: true,
+      alpha: true,
+      canvas: this.ctrls.frontBuffer
+    } );
+
+    this.renderer.enableScissorTest( true );
+    this.renderer.setClearColor( this.options.backgroundColor );
+
+    if ( this.options.button ) {
+      this.buttonFactory = new Primrose.ButtonFactory(
+          this.options.button.model,
+          this.options.button.options );
+    }
+    else {
+      this.buttonFactory = new Primrose.ButtonFactory(
+          brick( 0xff0000, 1, 1, 1 ), {
+        maxThrow: 0.1,
+        minDeflection: 10,
+        colorUnpressed: 0x7f0000,
+        colorPressed: 0x007f00,
+        toggle: true
+      } );
+    }
 
     if ( this.options.disableAutoFullScreen ) {
       if ( this.options.regularFullScreenButton ) {
@@ -790,12 +783,31 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
 
-    this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
+    //
+    // restoring the options the user selected
+    //
+    writeForm( this.ctrls, this.formState );
+    window.addEventListener( "beforeunload", function ( ) {
+      var state = readForm( this.ctrls );
+      setSetting( this.formStateKey, state );
+    }.bind( this ), false );
+
+    this.projector.addEventListener( "hit", function ( hit ) {
+      this.projector.ready = true;
+      this.currentHit = hit;
+    }.bind( this ) );
 
     window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
     window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
     window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
     window.addEventListener( "resize", this.setSize.bind( this ), false );
+
+    window.addEventListener( "popstate", function ( evt ) {
+      if ( isFullScreenMode() ) {
+        exitFullScreen();
+        evt.preventDefault();
+      }
+    }, true );
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
