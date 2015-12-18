@@ -178,9 +178,9 @@ function getSourceCode ( skipReload ) {
 }
 
 function testDemo ( scene ) {
-  var WIDTH = 100,
+  var WIDTH = 50,
       HEIGHT = 6,
-      DEPTH = 100,
+      DEPTH = 50,
       MIDX = WIDTH / 2,
       MIDY = HEIGHT / 2,
       MIDZ = DEPTH / 2,
@@ -195,9 +195,9 @@ function testDemo ( scene ) {
       .at( MIDX, MIDY, MIDZ );
 
   put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
-  for ( var i = 0; i < 300; ++i ) {
+  for ( var i = 0; i < 100; ++i ) {
     var x = 0, z = 0, h = randomInt( HEIGHT, 2 * HEIGHT );
-    while( x + z < 4){
+    while( x + z < 2){
       x = randomInt( WIDTH );
       z = randomInt( DEPTH );
     }

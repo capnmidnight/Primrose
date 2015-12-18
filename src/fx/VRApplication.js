@@ -240,7 +240,7 @@ Primrose.VRApplication = ( function ( ) {
           var st = this.stereoSettings[i],
               m = st.transform,
               v = st.viewport,
-              side = (2 * i) - 1;
+              side = ( 2 * i ) - 1;
           if ( state.position ) {
             this.camera.position.copy( state.position );
           }
@@ -257,7 +257,7 @@ Primrose.VRApplication = ( function ( ) {
           else {
             this.camera.quaternion.set( 0, 0, 0, 1 );
           }
-          this.nose.position.set( side * -0.1, -0.11, -0.15 );
+          this.nose.position.set( side * -0.12, -0.10, -0.15 );
           this.nose.rotation.z = side * 0.7;
           this.renderer.setViewport( v.left, v.top, v.width, v.height );
           this.renderer.setScissor( v.left, v.top, v.width, v.height );

@@ -319,6 +319,10 @@ function sphere ( r, slices, rings ) {
   return new THREE.SphereBufferGeometry( r, slices, rings );
 }
 
+function cylinder ( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd ) {
+  return new THREE.CylinderGeometry( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd );
+}
+
 function shell ( r, slices, rings, phi, theta ) {
   var SLICE = 0.45;
   if ( phi === undefined ) {
