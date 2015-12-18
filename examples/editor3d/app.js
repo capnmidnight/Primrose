@@ -194,7 +194,7 @@ function testDemo ( scene ) {
       .on( start )
       .at( MIDX, MIDY, MIDZ );
 
-  put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start );
+  var ground = put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start ).on(0, 0, 0);
   for ( var i = 0; i < 100; ++i ) {
     var x = 0, z = 0, h = randomInt( HEIGHT, 2 * HEIGHT );
     while( x + z < 2){
@@ -218,6 +218,10 @@ function testDemo ( scene ) {
 
   function update ( dt ) {
     t += dt;
+    
+    var p = app.currentUser.position;
+    ground.x = Math.floor(p.x);
+    ground.z = Math.floor(p.z);
 
     ball.position.x += dx * dt;
     ball.position.y += dy * dt;

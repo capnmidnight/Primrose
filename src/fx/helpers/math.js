@@ -4,12 +4,15 @@ function randomRange(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-function randomInt(min, max) {
+function randomInt(min, max, power) {
+  power = power || 1;
   if(max === undefined){
     max = min;
     min = 0;
   }
-  return Math.floor(randomRange(min, max));
+  var delta = max - min,
+      n = Math.pow(Math.random(), power);
+  return Math.floor(min + n * delta);
 }
 
 function randomSteps(min, max, steps) {
