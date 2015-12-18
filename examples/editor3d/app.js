@@ -54,7 +54,11 @@ function StartDemo ( isHomeScreen ) {
     output.textarea.setFontSize( 32 );
     output.textarea.render();
 
-    log( cmdPre + "+E to show/hide editor" );
+    log("INSTRUCTIONS:");
+    log( " - " + cmdPre + "+E to show/hide editor" );
+    log( " - " + cmdPre + "+X to reload original demo code" );
+    log( " - Z to reset position/sensor" );
+    log();
   } );
 
   app.addEventListener( "update", function ( dt ) {
