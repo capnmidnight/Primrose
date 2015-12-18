@@ -2097,7 +2097,6 @@ Primrose.Projector = ( function ( ) {
     this.objectIDs = [ ];
     this.objects = {};
     this.transformCache = {};
-    this.boundsCache = {};
     this.vertCache = {};
     this.a = new THREE.Vector3( );
     this.b = new THREE.Vector3( );
@@ -2105,7 +2104,6 @@ Primrose.Projector = ( function ( ) {
     this.d = new THREE.Vector3( );
     this.e = new THREE.Vector3( );
     this.f = new THREE.Vector3( );
-    this.g = new THREE.Vector3( );
     this.p = new THREE.Vector3( );
     this.m = new THREE.Matrix4( );
     this.listeners = {
@@ -2119,6 +2117,7 @@ Primrose.Projector = ( function ( ) {
     }
     this.listeners[evt].push( handler );
   };
+
   Projector.prototype._fire = function ( ) {
     var args = Array.prototype.slice.call( arguments ),
         evt = args.shift( );
@@ -2126,9 +2125,11 @@ Primrose.Projector = ( function ( ) {
       t.apply( t.executionContext, args );
     } );
   };
+
   Projector.prototype._transform = function ( obj, v ) {
     return v.clone( ).applyMatrix4( obj.matrix );
   };
+
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
   // positioned somewhere else.
@@ -2142,42 +2143,10 @@ Primrose.Projector = ( function ( ) {
         trans[i] = this._transform( obj, verts[i] );
       }
       this.transformCache[obj.uuid] = key;
-      var bounds = [ ],
-          faces = [ ],
-          minX = Number.MAX_VALUE,
-          minY = Number.MAX_VALUE,
-          minZ = Number.MAX_VALUE,
-          maxX = Number.MIN_VALUE,
-          maxY = Number.MIN_VALUE,
-          maxZ = Number.MIN_VALUE;
-      this.boundsCache[obj.uuid] = faces;
-      for ( i = 0; i < trans.length; ++i ) {
-        var v = trans[i];
-        minX = Math.min( minX, v.x );
-        minY = Math.min( minY, v.y );
-        minZ = Math.min( minZ, v.z );
-        maxX = Math.max( maxX, v.x );
-        maxY = Math.max( maxY, v.y );
-        maxZ = Math.max( maxZ, v.z );
-      }
-
-      bounds[0] = new THREE.Vector3( minX, maxY, minZ );
-      bounds[1] = new THREE.Vector3( maxX, maxY, minZ );
-      bounds[2] = new THREE.Vector3( maxX, minY, minZ );
-      bounds[3] = new THREE.Vector3( minX, minY, minZ );
-      bounds[4] = new THREE.Vector3( minX, maxY, maxZ );
-      bounds[5] = new THREE.Vector3( maxX, maxY, maxZ );
-      bounds[6] = new THREE.Vector3( maxX, minY, maxZ );
-      bounds[7] = new THREE.Vector3( minX, minY, maxZ );
-      faces[0] = [ bounds[0], bounds[1], bounds[2], bounds[3] ];
-      faces[1] = [ bounds[4], bounds[5], bounds[6], bounds[7] ];
-      faces[2] = [ bounds[0], bounds[1], bounds[5], bounds[4] ];
-      faces[3] = [ bounds[2], bounds[3], bounds[7], bounds[6] ];
-      faces[4] = [ bounds[0], bounds[4], bounds[7], bounds[3] ];
-      faces[5] = [ bounds[1], bounds[5], bounds[6], bounds[2] ];
     }
     return this.vertCache[obj.uuid];
   };
+
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
       this.objectIDs.push( obj.uuid );
@@ -2191,6 +2160,7 @@ Primrose.Projector = ( function ( ) {
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
     this.updateObject( obj );
   };
+
   Projector.prototype.updateObject = function ( obj ) {
     var head = obj,
         a = new THREE.Matrix4( ),
@@ -2203,6 +2173,7 @@ Primrose.Projector = ( function ( ) {
     this.setProperty( obj.uuid, "matrix", b );
     delete obj.parent;
   };
+
   Projector.prototype.setProperty = function ( objID, propName, value ) {
     var obj = this.objects[objID],
         parts = propName.split( "." );
@@ -2223,12 +2194,11 @@ Primrose.Projector = ( function ( ) {
       obj[parts[0]] = value;
     }
   };
+
   Projector.prototype.projectPointer = function ( p, from ) {
     var value = null;
     this.p.fromArray( p );
     this.f.fromArray( from );
-    // Shoot a vector to the selector point
-    this.d.subVectors( this.p, this.f ).normalize( );
     for ( var i = 0; i < this.objectIDs.length && !value; ++i ) {
       var objID = this.objectIDs[i],
           obj = this.objects[objID];
@@ -2266,12 +2236,12 @@ Primrose.Projector = ( function ( ) {
             this.d.subVectors( this.f, v0 );
             this.e.copy( this.d ).applyMatrix4( this.m );
             if ( this.e.x >= 0 && this.e.x <= 1 && this.e.y >= 0 && this.e.y <= 1 && this.e.z > 0 ) {
-              this.g.copy( this.c ).multiplyScalar( this.e.z ).add( this.f );
+              this.c.multiplyScalar( this.e.z ).add( this.f );
               this.d.crossVectors( this.a.normalize(), this.b.normalize() );
               value = {
                 objectID: obj.uuid,
-                distance: Math.sign( this.e.z ) * this.p.distanceTo( this.g ),
-                facePoint: this.g.toArray( ),
+                distance: Math.sign( this.e.z ) * this.p.distanceTo( this.c ),
+                facePoint: this.c.toArray( ),
                 faceNormal: this.d.toArray( )
               };
               // Now, construct a new plane based on the UV coordinates for the face.
@@ -2291,7 +2261,7 @@ Primrose.Projector = ( function ( ) {
                   this.a.x, this.b.x, 0, 0,
                   this.a.y, this.b.y, 0, 0,
                   this.a.z, this.b.z, 1, 0,
-                  0, 0, 0, 1 );
+                         0,        0, 0, 1 );
               this.e.applyMatrix4( this.m );
               this.e.x += uv0[0];
               this.e.y += uv0[1];

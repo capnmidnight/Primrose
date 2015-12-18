@@ -1,8 +1,8 @@
 /* global Primrose */
 
 Primrose.Input.Gamepad = ( function () {
-  function GamepadInput ( name, commands, socket, oscope, gpid ) {
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
+  function GamepadInput ( name, commands, socket, gpid ) {
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, 1,
         GamepadInput.AXES, true );
     var connectedGamepads = [ ],
         listeners = {

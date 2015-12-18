@@ -1,12 +1,11 @@
 /* global Primrose */
 
 Primrose.NetworkedInput = ( function () {
-  function NetworkedInput ( name, commands, socket, oscope ) {
+  function NetworkedInput ( name, commands, socket ) {
     this.name = name;
-    this.commandState = { };
+    this.commandState = {};
     this.commands = [ ];
     this.socket = socket;
-    this.oscope = oscope;
     this.enabled = true;
     this.paused = false;
     this.ready = true;
@@ -14,12 +13,12 @@ Primrose.NetworkedInput = ( function () {
     this.receiving = true;
     this.socketReady = false;
     this.inPhysicalUse = true;
-    this.inputState = { };
+    this.inputState = {};
     this.lastState = "";
 
     function readMetaKeys ( event ) {
-      for ( var i = 0; i < NetworkedInput.META_KEYS.length; ++i ) {
-        var m = NetworkedInput.META_KEYS[i];
+      for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
+        var m = Primrose.Keys.MODIFIER_KEYS[i];
         this.inputState[m] = event[m + "Key"];
       }
     }
@@ -49,15 +48,10 @@ Primrose.NetworkedInput = ( function () {
       this.addCommand( commands[i] );
     }
 
-    for ( i = 0; i < NetworkedInput.META_KEYS.length; ++i ) {
-      this.inputState[NetworkedInput.META_KEYS[i]] = false;
+    for ( i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
+      this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
   }
-
-  NetworkedInput.META_KEYS = [ "ctrl", "shift", "alt", "meta" ];
-  NetworkedInput.META_KEYS.forEach( function ( key, index ) {
-    NetworkedInput[key.toLocaleUpperCase()] = index + 1;
-  } );
 
   NetworkedInput.prototype.addCommand = function ( cmd ) {
     cmd = this.cloneCommand( cmd );
@@ -75,8 +69,7 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.cloneCommand = function ( cmd ) {
-    throw new Error(
-        "cloneCommand function must be defined in subclass" );
+    throw new Error( "cloneCommand function must be defined in subclass" );
   };
 
   NetworkedInput.prototype.update = function ( dt ) {
@@ -93,10 +86,10 @@ Primrose.NetworkedInput = ( function () {
             for ( var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n ) {
               var m = cmd.metaKeys[n];
               metaKeysSet = metaKeysSet &&
-                  ( this.inputState[NetworkedInput.META_KEYS[m.index]] &&
-                      m.toggle ||
-                      !this.inputState[NetworkedInput.META_KEYS[m.index]] &&
-                      !m.toggle );
+                  ( this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                      !m.toggle ||
+                      !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
+                      m.toggle );
             }
           }
 

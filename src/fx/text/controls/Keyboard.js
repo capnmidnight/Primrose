@@ -187,8 +187,8 @@ Primrose.Text.Controls.Keyboard = ( function () {
       }
 
       keyNames = [ ];
-      for ( key in Primrose.Text.Keys ) {
-        code = Primrose.Text.Keys[key];
+      for ( key in Primrose.Keys ) {
+        code = Primrose.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -259,9 +259,9 @@ Primrose.Text.Controls.Keyboard = ( function () {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Primrose.Text.Keys.CTRL && key !== Primrose.Text.Keys.ALT && key !==
-            Primrose.Text.Keys.META_L &&
-            key !== Primrose.Text.Keys.META_R && key !== Primrose.Text.Keys.SHIFT ) {
+        if ( key !== Primrose.Keys.CTRL && key !== Primrose.Keys.ALT && key !==
+            Primrose.Keys.META_L &&
+            key !== Primrose.Keys.META_R && key !== Primrose.Keys.SHIFT ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;

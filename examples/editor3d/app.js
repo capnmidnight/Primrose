@@ -79,7 +79,7 @@ function StartDemo ( isHomeScreen ) {
 
   app.addEventListener( "keydown", function ( evt ) {
     var mod = evt[modA] && evt[modB];
-    if ( mod && evt.keyCode === Primrose.Text.Keys.E ) {
+    if ( mod && evt.keyCode === Primrose.Keys.E ) {
       documentation.visible = output.visible = editor.visible =
           !editor.visible;
       if ( !editor.visible && app.currentEditor &&
@@ -88,7 +88,7 @@ function StartDemo ( isHomeScreen ) {
         app.currentEditor = null;
       }
     }
-    else if ( mod && evt.keyCode === Primrose.Text.Keys.X ) {
+    else if ( mod && evt.keyCode === Primrose.Keys.X ) {
       editor.textarea.value = getSourceCode( true );
     }
 
@@ -194,13 +194,11 @@ function testDemo ( scene ) {
       .on( start )
       .at( MIDX, MIDY, MIDZ );
 
-  var ground = put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start ).on(0, 0, 0);
+  var ground = put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start ).at( 0, -0.5, 0 );
   for ( var i = 0; i < 100; ++i ) {
-    var x = 0, z = 0, h = randomInt( HEIGHT, 2 * HEIGHT );
-    while( x + z < 2){
-      x = randomInt( WIDTH );
-      z = randomInt( DEPTH );
-    }
+    var h = randomInt( HEIGHT, 2 * HEIGHT ),
+        x = randomInt( WIDTH ),
+        z = randomInt( DEPTH );
     put( fill( ROCK, 1, h, 1 ) )
         .on( start )
         .at( x, 1, z );
@@ -218,10 +216,10 @@ function testDemo ( scene ) {
 
   function update ( dt ) {
     t += dt;
-    
+
     var p = app.currentUser.position;
-    ground.x = Math.floor(p.x);
-    ground.z = Math.floor(p.z);
+    ground.x = Math.floor( p.x );
+    ground.z = Math.floor( p.z );
 
     ball.position.x += dx * dt;
     ball.position.y += dy * dt;

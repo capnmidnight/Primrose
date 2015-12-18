@@ -87,7 +87,7 @@ function init () {
   }
 
   ed.addEventListener( "keydown", function ( evt ) {
-    if ( running && inputCallback && evt.keyCode === Primrose.Text.Keys.ENTER ) {
+    if ( running && inputCallback && evt.keyCode === Primrose.Keys.ENTER ) {
       var str = ed.value.substring( currentEditIndex );
       str = str.substring( 0, str.length - 1 );
       inputCallback( str );
@@ -96,11 +96,11 @@ function init () {
     else if ( !running &&
         ( !isOSX &&
             evt.ctrlKey &&
-            evt.keyCode === Primrose.Text.Keys.ENTER ) ||
+            evt.keyCode === Primrose.Keys.ENTER ) ||
         ( isOSX &&
             evt.metaKey &&
             evt.altKey &&
-            evt.keyCode === Primrose.Text.Keys.E ) ) {
+            evt.keyCode === Primrose.Keys.E ) ) {
 
       running = true;
 

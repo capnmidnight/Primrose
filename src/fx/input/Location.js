@@ -1,9 +1,8 @@
 /* global Primrose */
 Primrose.Input.Location = ( function () {
-  function LocationInput ( name, commands, socket, options, oscope ) {
+  function LocationInput ( name, commands, socket, options ) {
     this.options = combineDefaults( options, LocationInput );
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
-        LocationInput.AXES );
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, LocationInput.AXES );
     this.available = !!navigator.geolocation;
     if ( this.available ) {
       navigator.geolocation.watchPosition(

@@ -2,7 +2,7 @@
 
 Primrose.Input.Keyboard = ( function () {
 
-  function KeyboardInput ( name, DOMElement, commands, socket, oscope ) {
+  function KeyboardInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;
 
     for ( var i = 0; i < commands.length; ++i ) {
@@ -12,8 +12,7 @@ Primrose.Input.Keyboard = ( function () {
       }
     }
 
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
-        oscope, 0, 0 );
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket );
 
     var textEntry = false,
         onTextEntry = null,

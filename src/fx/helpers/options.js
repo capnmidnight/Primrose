@@ -7,7 +7,7 @@ function clearKeyOption ( evt ) {
 
 function setKeyOption ( outElem, elemArr, evt ) {
   this.dataset.keycode = evt.keyCode;
-  this.value = this.value || Primrose.Text.Keys[evt.keyCode];
+  this.value = this.value || Primrose.Keys[evt.keyCode];
   this.value = this.value.toLocaleLowerCase()
       .replace( "arrow", "" );
   this.blur( );

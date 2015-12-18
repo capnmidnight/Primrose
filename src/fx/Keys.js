@@ -1,14 +1,15 @@
 /* global Primrose */
-Primrose.Text.Keys = ( function ( ) {
+Primrose.Keys = ( function ( ) {
   "use strict";
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
-    MODIFIER_KEYS: [ "CTRL", "ALT", "META", "SHIFT" ],
+    MODIFIER_KEYS: [ "ctrl", "shift", "alt", "meta", "meta_l", "meta_r" ],
     SHIFT: 16,
     CTRL: 17,
     ALT: 18,
+    META: 91,
     META_L: 91,
     META_R: 92,
     ///////////////////////////////////////////////////////////////////////////

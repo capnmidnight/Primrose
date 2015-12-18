@@ -7,11 +7,9 @@ Primrose.Input.LeapMotion = ( function () {
     } );
   }
 
-  function LeapMotionInput ( name, commands, socket, oscope ) {
+  function LeapMotionInput ( name, commands, socket ) {
     this.isStreaming = false;
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
-        oscope, 1,
-        LeapMotionInput.AXES );
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, LeapMotionInput.AXES );
     this.controller = new Leap.Controller( { enableGestures: true } );
   }
 

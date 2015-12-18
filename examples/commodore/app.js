@@ -29,7 +29,7 @@ function PrimroseDemo () {
     }
     else if ( terminal.running &&
         terminal.waitingForInput &&
-        evt.keyCode === Primrose.Text.Keys.ENTER ) {
+        evt.keyCode === Primrose.Keys.ENTER ) {
       terminal.sendInput( evt );
     }
     else if ( !terminal.running &&
@@ -39,7 +39,7 @@ function PrimroseDemo () {
   }
 
   function isExecuteCommand ( evt ) {
-    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Text.Keys[execKey];
+    return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
   }
 
   app.addEventListener( "ready", function () {

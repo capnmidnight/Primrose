@@ -1,11 +1,9 @@
 /* global Primrose, THREE, isChrome */
 
 Primrose.Input.Mouse = ( function () {
-  function MouseInput ( name, DOMElement, commands, socket, oscope ) {
+  function MouseInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
-        oscope, 1, MouseInput.AXES );
-
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MouseInput.AXES );
     this.setLocation = function ( x, y ) {
       this.setAxis( "X", x );
       this.setAxis( "Y", y );

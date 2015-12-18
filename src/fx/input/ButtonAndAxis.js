@@ -1,9 +1,8 @@
-/* global Primrose */
+/* global Primrose, THREE */
 
 Primrose.Input.ButtonAndAxis = ( function () {
-  function ButtonAndAxisInput ( name, commands, socket, oscope, offset, axes ) {
-    this.offset = offset || 0;
-    Primrose.NetworkedInput.call( this, name, commands, socket, oscope );
+  function ButtonAndAxisInput ( name, commands, socket, axes ) {
+    Primrose.NetworkedInput.call( this, name, commands, socket );
     this.inputState.axes = [ ];
     this.inputState.buttons = [ ];
     this.axisNames = axes || [ ];
@@ -20,7 +19,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     this.setDT = this.setProperty.bind( this, "dt" );
     this.setMin = this.setProperty.bind( this, "min" );
     this.setMax = this.setProperty.bind( this, "max" );
-    this.setOffset = this.setProperty.bind( this, "offset" );
 
     this.addMetaKey = this.addToArray.bind( this, "metaKeys" );
     this.addAxis = this.addToArray.bind( this, "axes" );
@@ -75,7 +73,32 @@ Primrose.Input.ButtonAndAxis = ( function () {
         !this.commands[i].disabled &&
         this.commandState[name] &&
         this.commandState[name].value ) ||
-        this.getAxis(name) || 0;
+        0;
+  };
+
+  ButtonAndAxisInput.prototype.getVector3 = function ( x, y, z, value ) {
+    value = value || new THREE.Vector3();
+    value.set(
+        this.getValue( x ),
+        this.getValue( y ),
+        this.getValue( z ) );
+    return value;
+  };
+
+  ButtonAndAxisInput.prototype.addVector3 = function ( x, y, z, value ) {
+    value.x += this.getValue( x );
+    value.y += this.getValue( y );
+    value.z += this.getValue( z );
+    return value;
+  };
+
+  ButtonAndAxisInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
+    value = value || new THREE.Quaternion();
+    value.set( this.getValue( x ),
+        this.getValue( y ),
+        this.getValue( z ),
+        this.getValue( w ) );
+    return value;
   };
 
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
@@ -101,7 +124,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
     if ( arr ) {
       for ( var i = 0; i < arr.length; ++i ) {
         output[i] = {
-          index: Math.abs( arr[i] ) - this.offset,
+          index: Math.abs( arr[i] ) - 1,
           toggle: arr[i] < 0,
           sign: ( arr[i] < 0 ) ? -1 : 1
         };
@@ -127,14 +150,20 @@ Primrose.Input.ButtonAndAxis = ( function () {
       axes: this.maybeClone( cmd.axes ),
       commands: cmd.commands && cmd.commands.slice() || [ ],
       buttons: this.maybeClone( cmd.buttons ),
-      metaKeys: this.maybeClone( cmd.metaKeys ),
+      metaKeys: this.maybeClone( cmd.metaKeys && cmd.metaKeys.map( function ( k ) {
+        for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
+          var m = Primrose.Keys.MODIFIER_KEYS[i];
+          if ( Math.abs( k ) === Primrose.Keys[m.toLocaleUpperCase()] ) {
+            return Math.sign( k ) * ( i + 1 );
+          }
+        }
+      }.bind( this ) ) ),
       commandDown: cmd.commandDown,
       commandUp: cmd.commandUp
     };
   };
 
-  ButtonAndAxisInput.prototype.evalCommand = function ( cmd, cmdState,
-      metaKeysSet, dt ) {
+  ButtonAndAxisInput.prototype.evalCommand = function ( cmd, cmdState, metaKeysSet, dt ) {
     if ( metaKeysSet ) {
       var pressed = true,
           value = 0,
@@ -143,7 +172,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
       if ( cmd.buttons ) {
         for ( n = 0; n < cmd.buttons.length; ++n ) {
           var b = cmd.buttons[n];
-          var p = !!this.inputState.buttons[b.index];
+          var p = !!this.inputState.buttons[b.index + 1];
           v = p ? b.sign : 0;
           pressed = pressed && ( p && !b.toggle || !p && b.toggle );
           if ( Math.abs( v ) > Math.abs( value ) ) {
@@ -162,12 +191,10 @@ Primrose.Input.ButtonAndAxis = ( function () {
         }
       }
 
-      if ( cmd.commands ) {
-        for ( n = 0; n < cmd.commands.length; ++n ) {
-          v = this.getValue( cmd.commands[n] );
-          if ( Math.abs( v ) > Math.abs( value ) ) {
-            value = v;
-          }
+      for ( n = 0; n < cmd.commands.length; ++n ) {
+        v = this.getValue( cmd.commands[n] );
+        if ( Math.abs( v ) > Math.abs( value ) ) {
+          value = v;
         }
       }
 

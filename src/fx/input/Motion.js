@@ -350,9 +350,8 @@ Primrose.Input.Motion = ( function () {
   MotionCorrector.BROWSER_IS_GOOGLE_CHROME = !!window.chrome &&
       !window.opera && navigator.userAgent.indexOf( ' OPR/' ) < 0;
 
-  function MotionInput ( name, commands, socket, oscope ) {
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket,
-        oscope, 1, MotionInput.AXES );
+  function MotionInput ( name, commands, socket ) {
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MotionInput.AXES );
 
     var corrector = new MotionCorrector(
         MotionCorrector.BROWSER_IS_GOOGLE_CHROME );

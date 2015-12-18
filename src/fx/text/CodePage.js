@@ -68,15 +68,15 @@ Primrose.Text.CodePage = ( function ( ) {
     copyObject( this, options );
 
     for ( var i = 0; i <= 9; ++i ) {
-      var code = Primrose.Text.Keys["NUMPAD" + i];
+      var code = Primrose.Keys["NUMPAD" + i];
       this.NORMAL[code] = i.toString();
     }
 
-    this.NORMAL[Primrose.Text.Keys.MULTIPLY] = "*";
-    this.NORMAL[Primrose.Text.Keys.ADD] = "+";
-    this.NORMAL[Primrose.Text.Keys.SUBTRACT] = "-";
-    this.NORMAL[Primrose.Text.Keys.DECIMALPOINT] = ".";
-    this.NORMAL[Primrose.Text.Keys.DIVIDE] = "/";
+    this.NORMAL[Primrose.Keys.MULTIPLY] = "*";
+    this.NORMAL[Primrose.Keys.ADD] = "+";
+    this.NORMAL[Primrose.Keys.SUBTRACT] = "-";
+    this.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
+    this.NORMAL[Primrose.Keys.DIVIDE] = "/";
   }
 
   CodePage.DEAD = function ( key ) {

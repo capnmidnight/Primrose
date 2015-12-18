@@ -1,12 +1,10 @@
 /* global Primrose */
 
 Primrose.Input.Touch = ( function () {
-  function TouchInput ( name, DOMElement, commands, socket,
-      oscope ) {
+  function TouchInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;
 
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, oscope, 1,
-        TouchInput.AXES );
+    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, TouchInput.AXES );
 
     function setState ( stateChange, setAxis, event ) {
       var touches = event.changedTouches;

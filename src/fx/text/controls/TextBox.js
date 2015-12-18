@@ -499,8 +499,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
 
       keyNames = [ ];
-      for ( key in Primrose.Text.Keys ) {
-        code = Primrose.Text.Keys[key];
+      for ( key in Primrose.Keys ) {
+        code = Primrose.Keys[key];
         if ( !isNaN( code ) ) {
           keyNames[code] = key;
         }
@@ -822,20 +822,20 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         evt = evt || event;
 
         var key = evt.keyCode;
-        if ( key !== Primrose.Text.Keys.CTRL &&
-            key !== Primrose.Text.Keys.ALT &&
-            key !== Primrose.Text.Keys.META_L &&
-            key !== Primrose.Text.Keys.META_R &&
-            key !== Primrose.Text.Keys.SHIFT &&
+        if ( key !== Primrose.Keys.CTRL &&
+            key !== Primrose.Keys.ALT &&
+            key !== Primrose.Keys.META_L &&
+            key !== Primrose.Keys.META_R &&
+            key !== Primrose.Keys.SHIFT &&
             ( !this.readOnly ||
-                key === Primrose.Text.Keys.UPARROW ||
-                key === Primrose.Text.Keys.DOWNARROW ||
-                key === Primrose.Text.Keys.LEFTARROW ||
-                key === Primrose.Text.Keys.RIGHTARROW ||
-                key === Primrose.Text.Keys.PAGEUP ||
-                key === Primrose.Text.Keys.PAGEDOWN ||
-                key === Primrose.Text.Keys.END ||
-                key === Primrose.Text.Keys.HOME ) ) {
+                key === Primrose.Keys.UPARROW ||
+                key === Primrose.Keys.DOWNARROW ||
+                key === Primrose.Keys.LEFTARROW ||
+                key === Primrose.Keys.RIGHTARROW ||
+                key === Primrose.Keys.PAGEUP ||
+                key === Primrose.Keys.PAGEDOWN ||
+                key === Primrose.Keys.END ||
+                key === Primrose.Keys.HOME ) ) {
           var oldDeadKeyState = deadKeyState;
 
           var commandName = deadKeyState;
