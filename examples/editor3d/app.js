@@ -195,9 +195,9 @@ function getSourceCode ( skipReload ) {
 }
 
 function testDemo ( scene ) {
-  var WIDTH = 50,
+  var WIDTH = 100,
       HEIGHT = 6,
-      DEPTH = 50,
+      DEPTH = 100,
       MIDX = WIDTH / 2,
       MIDY = HEIGHT / 2,
       MIDZ = DEPTH / 2,
@@ -211,19 +211,30 @@ function testDemo ( scene ) {
       .on( start )
       .at( MIDX, MIDY, MIDZ );
 
+  function column ( a, b, h ) {
+    return textured( cylinder( a, b, h, 6, 1 ), ROCK );
+  }
+  app.scene.fog.far = 30;
   var ground = put( fill( DECK, WIDTH, 1, DEPTH ) ).on( start ).at( 0, -0.5, 0 );
   for ( var i = 0; i < 100; ++i ) {
-    var h = randomInt( HEIGHT, 2 * HEIGHT ),
-        x = randomInt( WIDTH ),
+    var x = randomInt( WIDTH ),
         z = randomInt( DEPTH );
-    put( fill( ROCK, 1, h, 1 ) )
+    put( column( 0.5, 1, 1 ) )
         .on( start )
         .at( x, 1, z );
+    put( column( 0.5, 0.5, 10 ) )
+        .on( start )
+        .at( x, 6, z );
+    put( column( 2, 0.5, 1 ) )
+        .on( start )
+        .at( x, 11, z );
   }
+
+  put( fill( ROCK, WIDTH, 1, DEPTH ) ).on( start ).at( 0, 11.5, 0 );
 
   put( light( 0xffffff, 1, 500 ) )
       .on( start )
-      .at( MIDX + 5, 15, MIDZ + 20 );
+      .at( MIDX + 5, 8, MIDZ + 20 );
 
   var ball = put( brick( WATER ) ).on( start ).at( 0, 0, 0 ),
       t = 0,
@@ -235,8 +246,8 @@ function testDemo ( scene ) {
     t += dt;
 
     var p = app.currentUser.position;
-    ground.x = Math.floor( p.x );
-    ground.z = Math.floor( p.z );
+    ground.position.x = Math.floor( p.x );
+    ground.position.z = Math.floor( p.z );
 
     ball.position.x += dx * dt;
     ball.position.y += dy * dt;
