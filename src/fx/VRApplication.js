@@ -1,6 +1,6 @@
 /* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function, isMobile */
 Primrose.VRApplication = ( function ( ) {
-  if ( typeof ( THREE ) === "undefined" ) {
+  if ( typeof THREE === "undefined" ) {
     return function ( ) {
     };
   }
@@ -136,15 +136,15 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         this.nose.visible = true;
-        for ( var i = 0; i < this.stereoSettings.length; ++i ) {
-          var st = this.stereoSettings[i],
+        for ( var i = 0; i < this.input.vr.transforms.length; ++i ) {
+          var st = this.input.vr.transforms[i],
               m = st.transform,
               v = st.viewport,
               side = ( 2 * i ) - 1;
 
           this.input.getVector3( "headX", "headY", "headZ", this.camera.position );
           this.camera.position.applyMatrix4( m );
-          this.input.getQuaternion( "headRX", "headRY", "headRZ", this.camera.quaternion );
+          this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", this.camera.quaternion );
           this.camera.position.applyQuaternion( this.camera.quaternion );
           this.nose.position.set( side * -0.12, -0.10, -0.15 );
           this.nose.rotation.z = side * 0.7;

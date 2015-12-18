@@ -1,7 +1,7 @@
 /* global Primrose, THREE, Function, self */
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
-    if ( isWorker && !self.THREE ) {
+    if ( isWorker && typeof THREE === "undefined" ) {
       /* jshint ignore:start */
 // File:src/Three.js
 

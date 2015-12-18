@@ -1,4 +1,4 @@
-/* global Primrose, HMDVRDevice, PositionSensorVRDevice */
+/* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice */
 Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, socket, elem, selectedID ) {
     if ( commands === undefined || commands === null ) {
@@ -9,8 +9,9 @@ Primrose.Input.VR = ( function () {
         };
       } );
     }
-
+    
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, VRInput.AXES );
+    this.setAxis("headRW", 1);
 
     var listeners = {
       vrdeviceconnected: [ ],
@@ -42,12 +43,13 @@ Primrose.Input.VR = ( function () {
     }
 
     this.devices = {};
+    this.deviceIDs = null;
     this.sensor = null;
     this.display = null;
     this.params = null;
     this.transforms = null;
 
-    function enumerateVRDevices ( elem, selectedID, devices ) {
+    function enumerateVRDevices ( elem, devices ) {
       var id,
           newDevices = [ ],
           lostDevices = Object.keys( this.devices );
@@ -75,6 +77,20 @@ Primrose.Input.VR = ( function () {
         }
       }
 
+      this.deviceIDs = Object.keys( this.devices );
+      this.deviceIDs.forEach( function ( id ) {
+        var d = this.devices[id],
+            a = d.display.deviceName,
+            b = d.sensor.deviceName;
+        d.name = "";
+        for ( var i = 0; i < a.length && i < b.length && a[i] === b[i]; ++i ) {
+          d.name += a[i];
+        }
+        while ( d.name.length > 0 && !/\w/.test( d.name[d.name.length - 1] ) ) {
+          d.name = d.name.substring( 0, d.name.length - 1 );
+        }
+      }.bind( this ) );
+
       newDevices.forEach( onConnected );
       lostDevices.forEach( onDisconnected );
 
@@ -89,14 +105,17 @@ Primrose.Input.VR = ( function () {
         }
       }
 
-      this.connect( selectedID );
+      selectedID = selectedID || this.deviceIDs.length === 1 && this.deviceIDs[0];
+      if ( selectedID ) {
+        this.connect( selectedID );
+      }
     }
 
     function checkForVRDevices () {
       if ( navigator.getVRDevices ) {
-        navigator.getVRDevices().then( enumerateVRDevices.bind( this, elem, selectedID ) );
+        navigator.getVRDevices().then( enumerateVRDevices.bind( this, elem ) ).catch( console.error.bind( console, "Could not find VR devices" ) );
       } else if ( navigator.mozGetVRDevices ) {
-        navigator.mozGetVRDevices( enumerateVRDevices.bind( this, elem, selectedID ) );
+        navigator.mozGetVRDevices( enumerateVRDevices.bind( this, elem ) );
       }
       else {
         console.log( "Your browser doesn't have WebVR capability. Check out http://mozvr.com/" );
@@ -105,7 +124,7 @@ Primrose.Input.VR = ( function () {
 
     checkForVRDevices.call( this );
   }
-  
+
   VRInput.AXES = [
     "headX", "headY", "headZ",
     "headVX", "headVY", "headVZ",
@@ -162,6 +181,15 @@ Primrose.Input.VR = ( function () {
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
   };
 
+  VRInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
+    value = value || new THREE.Quaternion();
+    value.set( this.getValue( x ),
+        this.getValue( y ),
+        this.getValue( z ),
+        this.getValue( w ) );
+    return value;
+  };
+
   function getParams () {
     if ( this.display ) {
       var params = null;
@@ -201,7 +229,11 @@ Primrose.Input.VR = ( function () {
       this.sensor = device.sensor;
       this.display = device.display;
       this.params = getParams.call( this );
-      this.transforms = new Array( 2 );
+      this.transforms = [ {
+          transform: new THREE.Matrix4()
+        }, {
+          transform: new THREE.Matrix4()
+        } ];
       makeTransform( this.transforms[0], this.params.left );
       makeTransform( this.transforms[1], this.params.right );
     }

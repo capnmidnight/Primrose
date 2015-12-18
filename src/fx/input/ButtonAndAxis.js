@@ -73,7 +73,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
         !this.commands[i].disabled &&
         this.commandState[name] &&
         this.commandState[name].value ) ||
-        0;
+        this.getAxis(name) || 0;
   };
 
   ButtonAndAxisInput.prototype.getVector3 = function ( x, y, z, value ) {
@@ -89,15 +89,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     value.x += this.getValue( x );
     value.y += this.getValue( y );
     value.z += this.getValue( z );
-    return value;
-  };
-
-  ButtonAndAxisInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
-    value = value || new THREE.Quaternion();
-    value.set( this.getValue( x ),
-        this.getValue( y ),
-        this.getValue( z ),
-        this.getValue( w ) );
     return value;
   };
 

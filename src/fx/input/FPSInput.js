@@ -103,16 +103,20 @@ Primrose.Input.FPSInput = ( function ( ) {
     }
     return values;
   };
-  FPSInput.prototype.getQuaternion = ( function ( ) {
-    var temp = new THREE.Quaternion( );
-    return function ( x, y, z, w, value ) {
-      value = value || new THREE.Quaternion( );
-      value.set( 0, 0, 0, 1 );
-      for ( var i = 0; i < this.managers.length; ++i ) {
-        value.multiply( this.managers[i].getQuaternion( x, y, z, w, temp ) );
+
+  var temp = new THREE.Quaternion( );
+  FPSInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
+    value = value || new THREE.Quaternion( );
+    value.set( 0, 0, 0, 1 );
+    for ( var i = 0; i < this.managers.length; ++i ) {
+      var mgr = this.managers[i];
+      if ( mgr.getQuaternion ) {
+        mgr.getQuaternion( x, y, z, w, temp );
+        value.multiply( temp );
       }
-      return value;
-    };
-  } )( );
+    }
+    return value;
+  };
+
   return FPSInput;
 } )( );
