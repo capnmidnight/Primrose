@@ -159,8 +159,8 @@ function StartDemo ( isHomeScreen ) {
   }
 
   if ( isHomeScreen ) {
-    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( this, false ), false );
-    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( this, true ), false );
+    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
+    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
 
     function connectVR ( ) {
       if ( app.input.vr.deviceIDs.length > 0 ) {
