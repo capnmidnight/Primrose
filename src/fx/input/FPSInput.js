@@ -1,16 +1,6 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, fireAll */
 
 Primrose.Input.FPSInput = ( function ( ) {
-
-  function fireAll () {
-    var args = Array.prototype.slice.call( arguments ),
-        evt = args.shift(),
-        handlers = this.listeners[evt];
-    for ( var i = 0; i < handlers.length; ++i ) {
-      var thunk = handlers[i];
-      thunk.apply( thunk.executionContext || this, args );
-    }
-  }
 
   function FPSInput ( DOMElement ) {
     DOMElement = DOMElement || window;

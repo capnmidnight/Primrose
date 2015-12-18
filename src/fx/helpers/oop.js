@@ -36,3 +36,13 @@ function inherit ( classType, parentType ) {
     return thunk;
   };
 } )();
+
+function fireAll () {
+  var args = Array.prototype.slice.call( arguments ),
+      evt = args.shift(),
+      handlers = this.listeners[evt];
+  for ( var i = 0; i < handlers.length; ++i ) {
+    var thunk = handlers[i];
+    thunk.apply( thunk.executionContext || this, args );
+  }
+}

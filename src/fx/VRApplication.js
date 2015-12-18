@@ -1,4 +1,4 @@
-/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function, isMobile */
+/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function, fireAll, isMobile */
 Primrose.VRApplication = ( function ( ) {
   if ( typeof THREE === "undefined" ) {
     return function ( ) {
@@ -96,7 +96,7 @@ Primrose.VRApplication = ( function ( ) {
 
         this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
 
-        this.fire( "ready" );
+        fireAll.call( this, "ready" );
         this.animate = this.animate.bind( this );
         requestAnimationFrame( this.animate );
       }
@@ -175,14 +175,6 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
-    this.fire = function ( name ) {
-      var args = Array.prototype.slice.call( arguments, 1 );
-      for ( var i = 0; i < this.listeners[name].length; ++i ) {
-        var thunk = this.listeners[name][i];
-        thunk.apply( thunk.executionContext || this, args );
-      }
-    };
-
     function addCell ( row, elem ) {
       if ( typeof elem === "string" ) {
         elem = document.createTextNode( elem );
@@ -210,19 +202,19 @@ Primrose.VRApplication = ( function ( ) {
       e.checked = this.formState[eID];
       t.checked = this.formState[tID];
       r.checked = this.formState[rID];
-      e.addEventListener( "change", function ( ) {
-        module.enable( e.checked );
-        t.disabled = !e.checked;
+      e.addEventListener( "change", function ( t, module ) {
+        module.enable( this.checked );
+        t.disabled = !this.checked;
         if ( t.checked && t.disabled ) {
           t.checked = false;
         }
-      } );
-      t.addEventListener( "change", function ( ) {
-        module.transmit( t.checked );
-      } );
-      r.addEventListener( "change", function ( ) {
-        module.receive( r.checked );
-      } );
+      }.bind( e, t, module ) );
+      t.addEventListener( "change", function ( module ) {
+        module.transmit( this.checked );
+      }.bind( t, module ) );
+      r.addEventListener( "change", function ( module ) {
+        module.receive( this.checked );
+      }.bind( r, module ) );
       container.appendChild( row );
       addCell( row, name );
       addCell( row, e );
@@ -545,7 +537,7 @@ Primrose.VRApplication = ( function ( ) {
 
       this.pointer.position.add( this.pointer.targetPosition ).multiplyScalar( 0.5 );
 
-      this.fire( "update", dt );
+      fireAll.call( this, "update", dt );
 
       for ( j = 0; j < this.editors.length; ++j ) {
         if ( this.editors[j].textarea ) {

@@ -1,4 +1,4 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, fireAll */
 
 Primrose.Button = ( function () {
   function Button ( model, name, options ) {
@@ -37,12 +37,6 @@ Primrose.Button = ( function () {
     }
   };
 
-  Button.prototype.fire = function () {
-    for ( var i = 0; i < this.listeners.click.length; ++i ) {
-      this.listeners.click[i].call( this );
-    }
-  };
-
   Button.prototype.moveBy = function(x, y, z){
     this.base.position.x += x;
     this.base.position.y += y;
@@ -65,7 +59,7 @@ Primrose.Button = ( function () {
     }
 
     if ( this.pressed ) {
-      this.fire();
+      fireAll.call(this);
       this.color.copy( this.options.colorPressed );
     }
     else {

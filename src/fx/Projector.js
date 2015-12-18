@@ -1,4 +1,4 @@
-/* global Primrose, THREE, Function, self */
+/* global Primrose, THREE, Function, fireAll, self */
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
     if ( isWorker && typeof THREE === "undefined" ) {
@@ -2118,13 +2118,7 @@ Primrose.Projector = ( function ( ) {
     this.listeners[evt].push( handler );
   };
 
-  Projector.prototype._fire = function ( ) {
-    var args = Array.prototype.slice.call( arguments ),
-        evt = args.shift( );
-    this.listeners[evt].forEach( function ( t ) {
-      t.apply( t.executionContext, args );
-    } );
-  };
+  Projector.prototype._fire = fireAll;
 
   Projector.prototype._transform = function ( obj, v ) {
     return v.clone( ).applyMatrix4( obj.matrix );
