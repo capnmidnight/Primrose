@@ -79,8 +79,7 @@ Primrose.VRApplication = ( function ( ) {
 
     function waitForResources ( t ) {
       this.lt = t;
-      if ( this.camera && this.scene && this.buttonFactory &&
-          this.buttonFactory.template ) {
+      if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
         this.setSize( );
         this.scene.add( this.currentUser );
         if ( this.options.useFog ) {
@@ -138,14 +137,6 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
     };
-
-    function setVRMode ( ) {
-      this.inVR = isFullScreenMode( ) && this.vrRequested && this.input.vr.display;
-      if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
-        location.hash = "";
-      }
-      this.setSize( );
-    }
 
     this.goFullScreen = function ( useVR ) {
       this.input.mouse.requestPointerLock( );
@@ -558,6 +549,20 @@ Primrose.VRApplication = ( function ( ) {
       return p.toArray();
     }
 
+    //
+    // Setup THREE.js
+    //
+    this.renderer = new THREE.WebGLRenderer( {
+      canvas: this.ctrls.frontBuffer,
+      antialias: !isMobile,
+      alpha: !isMobile,
+      logarithmicDepthBuffer: !isMobile
+    } );
+
+    this.renderer.autoSortObjects = !isMobile;
+    this.renderer.enableScissorTest( true );
+    this.renderer.setClearColor( this.options.backgroundColor );
+
     function defaultCamera () {
       return new THREE.PerspectiveCamera( 45, 1, 0.1,
           this.options.drawDistance );
@@ -578,20 +583,8 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     //
-    // Setup THREE.js
+    // setup button objects
     //
-    this.renderer = new THREE.WebGLRenderer( {
-      canvas: this.ctrls.frontBuffer,
-      antialias: !isMobile,
-      alpha: !isMobile,
-      logarithmicDepthBuffer: !isMobile
-    } );
-    
-    this.renderer.autoSortObjects = !isMobile;
-
-    this.renderer.enableScissorTest( true );
-    this.renderer.setClearColor( this.options.backgroundColor );
-
     if ( this.options.button ) {
       this.buttonFactory = new Primrose.ButtonFactory(
           this.options.button.model,
@@ -608,28 +601,15 @@ Primrose.VRApplication = ( function ( ) {
       } );
     }
 
-    if ( !this.options.disableAutoFullScreen ) {
-      window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
-      window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
-    }
-
-
-    function connectVR ( ) {
-      var deviceIDs = Object.keys( this.input.vr.devices );
-      if ( deviceIDs.length > 0 ) {
-        if ( this.options.vrFullScreenButton ) {
-          this.options.vrFullScreenButton.style.display = "inline-block";
-        }
-      }
-      else if ( this.options.vrFullScreenButton ) {
-        this.options.vrFullScreenButton.style.display = "none";
-      }
-    }
-
-    this.input.addEventListener( "vrdeviceconnected", connectVR.bind( this ), false );
-    this.input.addEventListener( "vrdevicelost", connectVR.bind( this ), false );
+    //
+    // bind non-signal processed user commands
+    //
     this.input.addEventListener( "jump", this.jump.bind( this ), false );
     this.input.addEventListener( "zero", this.zero.bind( this ), false );
+    this.projector.addEventListener( "hit", function ( hit ) {
+      this.projector.ready = true;
+      this.currentHit = hit;
+    }.bind( this ) );
 
     //
     // restoring the options the user selected
@@ -640,15 +620,16 @@ Primrose.VRApplication = ( function ( ) {
       setSetting( this.formStateKey, state );
     }.bind( this ), false );
 
-    this.projector.addEventListener( "hit", function ( hit ) {
-      this.projector.ready = true;
-      this.currentHit = hit;
-    }.bind( this ) );
-
-    window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "resize", this.setSize.bind( this ), false );
+    //
+    // Manage full-screen state
+    //
+    function setVRMode ( ) {
+      this.inVR = isFullScreenMode( ) && this.vrRequested && this.input.vr.display;
+      if ( !isFullScreenMode() && location.hash === "#fullscreen" ) {
+        location.hash = "";
+      }
+      this.setSize( );
+    }
 
     window.addEventListener( "popstate", function ( evt ) {
       if ( isFullScreenMode() ) {
@@ -656,6 +637,16 @@ Primrose.VRApplication = ( function ( ) {
         evt.preventDefault();
       }
     }, true );
+    
+    window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
+    window.addEventListener( "resize", this.setSize.bind( this ), false );
+
+    if ( !this.options.disableAutoFullScreen ) {
+      window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
+      window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
+    }
   }
 
   inherit( VRApplication, Primrose.ChatApplication );

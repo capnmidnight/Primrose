@@ -18,6 +18,21 @@ function PrimroseDemo () {
 
   app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( this, false ), false );
   app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( this, true ), false );
+
+  function connectVR ( ) {
+    if ( app.input.vr.deviceIDs.length > 0 ) {
+      if ( app.ctrls.goVR ) {
+        app.ctrls.goVR.style.display = "inline-block";
+      }
+    }
+    else if ( app.ctrls.goVR ) {
+      app.ctrls.goVR.style.display = "none";
+    }
+  }
+
+  app.input.addEventListener( "vrdeviceconnected", connectVR, false );
+  app.input.addEventListener( "vrdevicelost", connectVR, false );
+
   window.addEventListener( "keydown", keyDown.bind( this ) );
   window.addEventListener( "keyup", function ( evt ) {
     keyState[evt.keyCode] = false;
