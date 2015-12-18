@@ -454,13 +454,13 @@ Primrose.VRApplication = ( function ( ) {
           dHeading = heading - currentHeading;
         }
         this.currentUser.quaternion.setFromAxisAngle( UP, currentHeading );
+        qHeading.setFromAxisAngle( UP, dHeading ).multiply( qPitch );
       }
 
       if ( this.projector.ready ) {
         this.projector.ready = false;
         this.pointer.targetPosition.copy( FORWARD );
         if ( this.inVR && !isMobile ) {
-          qHeading.setFromAxisAngle( UP, dHeading ).multiply( qPitch );
           this.pointer.targetPosition.applyQuaternion( qHeading );
         }
         if ( !this.currentEditor || isMobile ) {
@@ -551,7 +551,7 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
       renderScene.call( this );
-    }.bind(this);
+    }.bind( this );
     //
     // Setup THREE.js
     //
