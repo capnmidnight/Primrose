@@ -55,6 +55,7 @@ Primrose.VRApplication = ( function ( ) {
         currentHeading = 0,
         qPitch = new THREE.Quaternion( ),
         qHeading = new THREE.Quaternion( ),
+        qHead = new THREE.Quaternion( ),
         skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
         skinCode = parseInt( skin.substring( 1 ), 16 );
 
@@ -81,7 +82,6 @@ Primrose.VRApplication = ( function ( ) {
     //
     this.currentUser.velocity = new THREE.Vector3( );
     this.currentUser.position.set( 0, this.avatarHeight, 0 );
-    this.pointer.targetPosition = new THREE.Vector3();
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
     this.nose.name = "Nose";
@@ -140,36 +140,6 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         requestAnimationFrame( waitForResources.bind( this ) );
-      }
-    }
-
-    function renderScene ( ) {
-
-      if ( !this.inVR || !this.input.vr.params ) {
-        this.nose.visible = false;
-        this.nose.position.set( 0, -0.1, -0.15 );
-        this.camera.position.set( 0, 0, 0 );
-        this.camera.quaternion.set( 0, 0, 0, 1 );
-        this.renderer.render( this.scene, this.camera );
-      }
-      else {
-        this.nose.visible = true;
-        for ( var i = 0; i < this.input.vr.transforms.length; ++i ) {
-          var st = this.input.vr.transforms[i],
-              m = st.transform,
-              v = st.viewport,
-              side = ( 2 * i ) - 1;
-
-          this.input.getVector3( "headX", "headY", "headZ", this.camera.position );
-          this.camera.position.applyMatrix4( m );
-          this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", this.camera.quaternion );
-          this.camera.position.applyQuaternion( this.camera.quaternion );
-          this.nose.position.set( side * -0.12, -0.10, -0.15 );
-          this.nose.rotation.z = side * 0.7;
-          this.renderer.setViewport( v.left, v.top, v.width, v.height );
-          this.renderer.setScissor( v.left, v.top, v.width, v.height );
-          this.renderer.render( this.scene, this.camera );
-        }
       }
     }
 
@@ -407,7 +377,10 @@ Primrose.VRApplication = ( function ( ) {
       strafe = this.input.getValue( "strafe" );
       drive = this.input.getValue( "drive" );
       pitch = this.input.getValue( "pitch" );
+      this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
       qPitch.setFromAxisAngle( RIGHT, pitch );
+
+      this.nose.visible = this.inVR && !isMobile;
 
       if ( !this.onground ) {
         this.currentUser.velocity.y -= this.options.gravity * dt;
@@ -427,16 +400,20 @@ Primrose.VRApplication = ( function ( ) {
 
         qHeading.setFromAxisAngle( UP, currentHeading );
         this.currentUser.velocity.set( strafe, 0, drive );
+        if ( isMobile ) {
+          this.currentUser.velocity.applyQuaternion( qHead );
+          this.currentUser.velocity.y = 0;
+        }
         this.currentUser.velocity.applyQuaternion( qHeading );
       }
 
       this.currentUser.position.add( this.currentUser.velocity );
+
       if ( !this.onground && this.currentUser.position.y < this.avatarHeight ) {
         this.onground = true;
         this.currentUser.position.y = this.avatarHeight;
         this.currentUser.velocity.y = 0;
       }
-
 
       if ( !this.inVR || isMobile ) {
         currentHeading = heading;
@@ -457,30 +434,31 @@ Primrose.VRApplication = ( function ( ) {
         qHeading.setFromAxisAngle( UP, dHeading ).multiply( qPitch );
       }
 
+      this.pointer.position.copy( FORWARD );
+      if ( this.inVR && !isMobile ) {
+        this.pointer.position.applyQuaternion( qHeading );
+      }
+      if ( !this.currentEditor || isMobile ) {
+        this.pointer.position.add( this.camera.position );
+        this.pointer.position.applyQuaternion( this.camera.quaternion );
+      }
+      this.pointer.position.applyQuaternion( this.currentUser.quaternion );
+      this.pointer.position.add( this.currentUser.position );
+
       if ( this.projector.ready ) {
         this.projector.ready = false;
-        this.pointer.targetPosition.copy( FORWARD );
-        if ( this.inVR && !isMobile ) {
-          this.pointer.targetPosition.applyQuaternion( qHeading );
-        }
-        if ( !this.currentEditor || isMobile ) {
-          this.pointer.targetPosition.add( this.camera.position );
-          this.pointer.targetPosition.applyQuaternion( this.camera.quaternion );
-        }
-        this.pointer.targetPosition.applyQuaternion( this.currentUser.quaternion );
-        this.pointer.targetPosition.add( this.currentUser.position );
 
         for ( var i = 0; i < this.editors.length; ++i ) {
           this.projector.updateObject( createPickableObject( this.editors[i] ) );
         }
         this.projector.projectPointer(
-            this.pointer.targetPosition.toArray(),
+            this.pointer.position.toArray(),
             transformForPicking( this.currentUser ) );
       }
 
-      var lastButtons = this.input.getValue( "dButtons" ),
-          hit = currentHit;
-      if ( !hit || !hit.point ) {
+      var lastButtons = this.input.getValue( "dButtons" );
+
+      if ( !currentHit || !currentHit.point ) {
         if ( this.currentEditor && lastButtons > 0 ) {
           this.currentEditor.blur();
           this.currentEditor = null;
@@ -490,14 +468,14 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.scale.set( 1, 1, 1 );
       }
       else {
-        var fp = hit.facePoint, fn = hit.faceNormal;
-        this.pointer.targetPosition.set(
+        var fp = currentHit.facePoint, fn = currentHit.faceNormal;
+        this.pointer.position.set(
             fp[0] + fn[0] * POINTER_RADIUS,
             fp[1] + fn[1] * POINTER_RADIUS,
             fp[2] + fn[2] * POINTER_RADIUS );
         this.pointer.material.color.setRGB( 1, 1, 1 );
         this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
-        var object = hit && this.findObject( hit.objectID );
+        var object = currentHit && this.findObject( currentHit.objectID );
         if ( object ) {
           var buttons = this.input.getValue( "buttons" ),
               clickChanged = lastButtons > 0,
@@ -526,8 +504,8 @@ Primrose.VRApplication = ( function ( ) {
                 // So we have to rescale it back out again. Also, the y coordinate is
                 // flipped.
                 txt = object.material.map.image,
-                textureU = Math.floor( txt.width * hit.point[0] ),
-                textureV = Math.floor( txt.height * ( 1 - hit.point[1] ) );
+                textureU = Math.floor( txt.width * currentHit.point[0] ),
+                textureV = Math.floor( txt.height * ( 1 - currentHit.point[1] ) );
             if ( !clickChanged && buttons > 0 ) {
               this.currentEditor.movePointer( textureU, textureV );
             }
@@ -541,8 +519,6 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
 
-      this.pointer.position.add( this.pointer.targetPosition ).multiplyScalar( 0.5 );
-
       fireAll.call( this, "update", dt );
 
       for ( j = 0; j < this.editors.length; ++j ) {
@@ -550,7 +526,29 @@ Primrose.VRApplication = ( function ( ) {
           this.editors[j].textarea.render();
         }
       }
-      renderScene.call( this );
+
+      if ( !this.inVR || !this.input.vr.params ) {
+        this.camera.position.set( 0, 0, 0 );
+        this.camera.quaternion.set( 0, 0, 0, 1 );
+        this.renderer.render( this.scene, this.camera );
+      }
+      else {
+        for ( i = 0; i < this.input.vr.transforms.length; ++i ) {
+          var st = this.input.vr.transforms[i],
+              m = st.transform,
+              v = st.viewport,
+              side = ( 2 * i ) - 1;
+          this.input.getVector3( "headX", "headY", "headZ", this.camera.position );
+          this.camera.position.applyMatrix4( m );
+          this.camera.quaternion.copy( qHead );
+          this.camera.position.applyQuaternion( this.camera.quaternion );
+          this.nose.position.set( side * -0.12, -0.12, -0.15 );
+          this.nose.rotation.z = side * 0.7;
+          this.renderer.setViewport( v.left, v.top, v.width, v.height );
+          this.renderer.setScissor( v.left, v.top, v.width, v.height );
+          this.renderer.render( this.scene, this.camera );
+        }
+      }
     }.bind( this );
     //
     // Setup THREE.js
@@ -609,9 +607,9 @@ Primrose.VRApplication = ( function ( ) {
     //
     this.input.addEventListener( "jump", this.jump.bind( this ), false );
     this.input.addEventListener( "zero", this.zero.bind( this ), false );
-    this.projector.addEventListener( "hit", function ( hit ) {
+    this.projector.addEventListener( "hit", function ( h ) {
       this.projector.ready = true;
-      currentHit = hit;
+      currentHit = h;
     }.bind( this ) );
 
     //
