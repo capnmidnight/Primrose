@@ -1,39 +1,4 @@
 /* global THREE, Primrose, isMobile */
-var findVR = ( function () {
-  "use strict";
-
-  function gotVRDevices ( thunk, devices ) {
-    var vrDisplay,
-        vrSensor;
-    for ( var i = 0; i < devices.length; ++i ) {
-      var device = devices[i];
-      if ( device instanceof window.HMDVRDevice ) {
-        vrDisplay = device;
-      }
-      else if ( device instanceof window.PositionSensorVRDevice ) {
-        vrSensor = device;
-      }
-      if ( vrSensor && vrDisplay ) {
-        break;
-      }
-    }
-    thunk( vrDisplay, vrSensor );
-  }
-
-  function findVR ( thunk ) {
-    if ( navigator.getVRDevices ) {
-      navigator.getVRDevices()
-          .then( gotVRDevices.bind( window, thunk ) )
-          .catch( thunk );
-    } else if ( navigator.mozGetVRDevices ) {
-      navigator.mozGetVRDevices( gotVRDevices.bind( window, thunk ) );
-    }
-    else {
-      thunk();
-    }
-  }
-  return findVR;
-} )();
 
 function InsideSphereGeometry ( radius, widthSegments, heightSegments,
     phiStart, phiLength, thetaStart, thetaLength ) {
@@ -270,8 +235,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       texture = THREE.ImageUtils.loadTexture( txt );
     }
     else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
-      texture = txt.getRenderer( )
-          .getTexture( );
+      texture = txt.getRenderer( ).getTexture( );
     }
     else {
       texture = txt;

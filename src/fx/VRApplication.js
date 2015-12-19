@@ -122,18 +122,43 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
         setSize.call( this );
         this.scene.add( this.currentUser );
-        if ( this.options.useFog ) {
-          this.scene.fog = new THREE.Fog( this.options.backgroundColor, 1, 50 );
-        }
         this.scene.add( this.pointer );
         this.currentUser.add( this.camera );
+        this.camera.near = 0.01;
+        this.camera.far = this.options.drawDistance * 2;
         this.camera.add( this.nose );
-        this.camera.near = 0.001;
+        this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
+
+        if ( this.options.useFog ) {
+          this.scene.fog = new THREE.FogExp2( this.options.backgroundColor, 2 / this.options.drawDistance );
+        }
+
+        if ( this.options.skyTexture ) {
+          this.sky = textured(
+              shell(
+                  this.options.drawDistance,
+                  18,
+                  9,
+                  Math.PI * 2,
+                  Math.PI ),
+              this.options.skyTexture,
+              true );
+          this.sky.name = "Sky";
+          this.scene.add( this.sky );
+        }
+
+        if ( this.options.groundTexture ) {
+          var dim = 2 * this.options.drawDistance,
+              gm = new THREE.PlaneGeometry( dim, dim, dim, dim );
+          this.ground = textured( gm, this.options.groundTexture, false, 1, dim, dim );
+          this.ground.rotation.x = Math.PI / 2;
+          this.ground.name = "Ground";
+          this.scene.add( this.ground );
+        }
+
         if ( this.passthrough ) {
           this.camera.add( this.passthrough.mesh );
         }
-
-        this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
 
         fireAll.call( this, "ready" );
         requestAnimationFrame( animate );
@@ -415,6 +440,18 @@ Primrose.VRApplication = ( function ( ) {
         this.currentUser.velocity.y = 0;
       }
 
+      if ( this.sky ) {
+        this.sky.position.copy( this.currentUser.position );
+      }
+
+      if ( this.ground ) {
+        this.ground.position.set(
+            Math.floor( this.currentUser.position.x ),
+            0.5,
+            Math.floor( this.currentUser.position.z ) );
+        this.ground.material.needsUpdate = true;
+      }
+
       if ( !this.inVR || isMobile ) {
         currentHeading = heading;
         this.currentUser.quaternion.setFromAxisAngle( UP, currentHeading );
@@ -660,7 +697,7 @@ Primrose.VRApplication = ( function ( ) {
     jumpHeight: 0.25,
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
-    drawDistance: 500, // the far plane of the camera
+    drawDistance: 50, // the far plane of the camera
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
