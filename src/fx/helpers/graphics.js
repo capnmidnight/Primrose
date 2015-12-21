@@ -310,17 +310,11 @@ function range ( n, m, s, t ) {
   for ( var i = n2; i < m2; i += s2 ) {
     t2( i );
   }
-}
+} 
 
-function cloud ( n, w, h, l, c, s ) {
+function cloud ( verts, c, s ) {
   var geom = new THREE.Geometry();
-  for ( var i = 0; i < n; ++i ) {
-    geom.vertices.push( new THREE.Vector3(
-        randomRange( -0.5 * w, 0.5 * w ),
-        randomRange( -0.5 * h, 0.5 * h ),
-        randomRange( -0.5 * l, 0.5 * l ) ) );
-  }
-
+  geom.vertices.splice.bind(geom.vertices, 0, 0).apply(geom.vertices, verts);
   var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
   return new THREE.PointCloud( geom, mat );
 }

@@ -202,16 +202,40 @@ function testDemo ( scene ) {
       MIDY = HEIGHT / 2,
       MIDZ = DEPTH / 2,
       start = put( hub() )
-        .on( scene )
-        .at( -MIDX, 0, -MIDZ );
+      .on( scene )
+      .at( -MIDX, 0, -MIDZ ),
+      verts = [ ];
 
-  put( cloud(
-      5000,
-      WIDTH, HEIGHT, DEPTH,
-      this.options.backgroundColor,
-      0.05 ) )
-        .on( start )
-        .at( MIDX, MIDY, MIDZ );
+  for ( var i = 0; i < 5000; ++i ) {
+    verts.push( v3(
+        randomRange( -0.5 * WIDTH, 0.5 * WIDTH ),
+        randomRange( -0.5 * HEIGHT, 0.5 * HEIGHT ),
+        randomRange( -0.5 * DEPTH, 0.5 * DEPTH ) ) );
+  }
+  put( cloud( verts, this.options.backgroundColor, 0.05 ) )
+      .on( start )
+      .at( MIDX, MIDY, MIDZ );
+
+
+  function makeSphere ( r, p ) {
+    verts.splice( 0 );
+    var rr = r * r;
+    for ( var x = -r; x <= r; x += p ) {
+      var dx = x * x;
+      for ( var y = -r; y <= r; y += p ) {
+        var dy = y * y;
+        if ( ( dx + dy ) < rr ) {
+          var z = Math.sqrt( rr - dx - dy );
+          verts.push( v3( x, z, y ) );
+          verts.push( v3( x, -z, y ) );
+        }
+      }
+    }
+
+    put( cloud( verts, 0xff0000, p * Math.sqrt( 2 ) ) ).on( start ).at( MIDX - r, r, MIDZ - r );
+  }
+
+  makeSphere( 10, 0.1 );
 
   function column ( a, b, h ) {
     var c = textured( cylinder( a, b, h, 6, 1 ), ROCK );
