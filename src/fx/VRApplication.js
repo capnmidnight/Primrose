@@ -73,7 +73,7 @@ Primrose.VRApplication = ( function ( ) {
     this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
     this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
     this.buttons = [ ];
-    this.editors = [ ];
+    this.pickableObjects = [ ];
     this.projector = new Primrose.Workerize( Primrose.Projector );
     this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
 
@@ -329,7 +329,6 @@ Primrose.VRApplication = ( function ( ) {
               hideLineNumbers: elem === "pre",
               readOnly: elem === "pre"
             } );
-        this.editors.push( ed );
         this.registerPickableObject( ed );
         return ed;
       }
@@ -373,15 +372,15 @@ Primrose.VRApplication = ( function ( ) {
             } );
           } )
         };
-        this.editors.push( obj );
+        this.pickableObjects.push( obj );
         this.projector.setObject( bag );
       }
     };
 
     this.findObject = function ( id ) {
-      for ( var i = 0; i < this.editors.length; ++i ) {
-        if ( this.editors[i].uuid === id ) {
-          return this.editors[i];
+      for ( var i = 0; i < this.pickableObjects.length; ++i ) {
+        if ( this.pickableObjects[i].uuid === id ) {
+          return this.pickableObjects[i];
         }
       }
     };
@@ -486,12 +485,10 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.projector.ready ) {
         this.projector.ready = false;
 
-        for ( var i = 0; i < this.editors.length; ++i ) {
-          this.projector.updateObject( createPickableObject( this.editors[i] ) );
+        for ( var i = 0; i < this.pickableObjects.length; ++i ) {
+          this.projector.updateObject( createPickableObject( this.pickableObjects[i] ) );
         }
-        if ( this.ground ) {
-          this.projector.updateObject( createPickableObject( this.ground ) );
-        }
+        
         this.projector.projectPointer(
             this.pointer.position.toArray(),
             transformForPicking( this.currentUser ) );
@@ -562,9 +559,9 @@ Primrose.VRApplication = ( function ( ) {
 
       fireAll.call( this, "update", dt );
 
-      for ( j = 0; j < this.editors.length; ++j ) {
-        if ( this.editors[j].textarea ) {
-          this.editors[j].textarea.render();
+      for ( j = 0; j < this.pickableObjects.length; ++j ) {
+        if ( this.pickableObjects[j].textarea ) {
+          this.pickableObjects[j].textarea.render();
         }
       }
 
