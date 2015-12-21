@@ -393,7 +393,7 @@ Primrose.VRApplication = ( function ( ) {
           strafe = 0,
           drive = 0,
           len,
-          j;
+          i, j;
 
       lt = t;
       this.input.update( dt );
@@ -485,7 +485,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.projector.ready ) {
         this.projector.ready = false;
 
-        for ( var i = 0; i < this.pickableObjects.length; ++i ) {
+        for ( i = 0; i < this.pickableObjects.length; ++i ) {
           this.projector.updateObject( createPickableObject( this.pickableObjects[i] ) );
         }
 
