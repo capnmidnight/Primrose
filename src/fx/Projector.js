@@ -2102,7 +2102,6 @@ Primrose.Projector = ( function ( ) {
     this.b = new THREE.Vector3( );
     this.c = new THREE.Vector3( );
     this.d = new THREE.Vector3( );
-    this.e = new THREE.Vector3( );
     this.f = new THREE.Vector3( );
     this.p = new THREE.Vector3( );
     this.m = new THREE.Matrix4( );
@@ -2117,13 +2116,10 @@ Primrose.Projector = ( function ( ) {
     }
     this.listeners[evt].push( handler );
   };
-
   Projector.prototype._fire = fireAll;
-
   Projector.prototype._transform = function ( obj, v ) {
     return v.clone( ).applyMatrix4( obj.matrix );
   };
-
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
   // positioned somewhere else.
@@ -2140,21 +2136,18 @@ Primrose.Projector = ( function ( ) {
     }
     return this.vertCache[obj.uuid];
   };
-
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
       this.objectIDs.push( obj.uuid );
       this.objects[obj.uuid] = obj;
     }
     else {
-      this.setProperty( obj.uuid, "visible", obj.visible );
       this.setProperty( obj.uuid, "geometry.faces", obj.geometry.faces );
       this.setProperty( obj.uuid, "geometry.faceVertexUvs", obj.geometry.faceVertexUvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
     this.updateObject( obj );
   };
-
   Projector.prototype.updateObject = function ( obj ) {
     var head = obj,
         a = new THREE.Matrix4( ),
@@ -2165,9 +2158,9 @@ Primrose.Projector = ( function ( ) {
       head = head.parent;
     }
     this.setProperty( obj.uuid, "matrix", b );
+    this.setProperty( obj.uuid, "visible", obj.visible );
     delete obj.parent;
   };
-
   Projector.prototype.setProperty = function ( objID, propName, value ) {
     var obj = this.objects[objID],
         parts = propName.split( "." );
@@ -2188,78 +2181,53 @@ Primrose.Projector = ( function ( ) {
       obj[parts[0]] = value;
     }
   };
-
   Projector.prototype.projectPointer = function ( p, from ) {
     var value = null;
     this.p.fromArray( p );
     this.f.fromArray( from );
-    for ( var i = 0; i < this.objectIDs.length && !value; ++i ) {
+    for ( var i = 0; i < this.objectIDs.length; ++i ) {
       var objID = this.objectIDs[i],
           obj = this.objects[objID];
       if ( obj.visible ) {
         var verts = this._getVerts( obj ),
             faces = obj.geometry.faces;
-        // Find the face that is closest to the pointer
-        for ( var j = 0; j < faces.length && !value; ++j ) {
+        for ( var j = 0; j < faces.length; ++j ) {
           var face = faces[j],
               odd = ( j % 2 ) === 1,
               v0 = verts[odd ? face[1] : face[0]],
               v1 = verts[odd ? face[2] : face[1]],
               v2 = verts[odd ? face[0] : face[2]];
-          // Two vectors define the axes of a plane, i.e. our polygon face
           this.a.subVectors( v1, v0 );
           this.b.subVectors( v2, v0 );
           this.c.subVectors( this.p, this.f );
-          // This matrix is a succinct way to define our plane. We'll use it
-          // later to figure out how to express the location of the pointer ball
-          // in corrodinates local to the plane.
           this.m.set(
               this.a.x, this.b.x, -this.c.x, 0,
               this.a.y, this.b.y, -this.c.y, 0,
               this.a.z, this.b.z, -this.c.z, 0,
               0, 0, 0, 1 );
-          // A value of 0 will tell us that there is no solvable solution, so we
-          // want to avoid that.
           if ( this.m.determinant( ) !== 0 ) {
-            // inverting the plane matrix will then let us apply it to the vector in
-            // question to figure out the coordinates the point has in that plane.
             this.m.getInverse( this.m );
-            // translate the point of interest into the reference frame of the
-            // plane. We don't have to do any rotations because we are treating this
-            // object as an infinitely small point.
-            this.d.subVectors( this.f, v0 );
-            this.e.copy( this.d ).applyMatrix4( this.m );
-            if ( this.e.x >= 0 && this.e.x <= 1 && this.e.y >= 0 && this.e.y <= 1 && this.e.z > 0 ) {
-              this.c.multiplyScalar( this.e.z ).add( this.f );
-              this.d.crossVectors( this.a.normalize(), this.b.normalize() );
-              value = {
-                objectID: obj.uuid,
-                distance: Math.sign( this.e.z ) * this.p.distanceTo( this.c ),
-                facePoint: this.c.toArray( ),
-                faceNormal: this.d.toArray( )
-              };
-              // Now, construct a new plane based on the UV coordinates for the face.
-              // We want to figure out where in the texture lies a coordinate that is
-              // similar to how the pointer currently relates to the face.
-              var uvs = obj.geometry.faceVertexUvs[0][j],
-                  uv0 = uvs[odd ? 1 : 0],
-                  uv1 = uvs[odd ? 2 : 1],
-                  uv2 = uvs[odd ? 0 : 2];
-              // I'm reusing the this.a and this.b vectors here to save memory, these
-              // are a wholey new set of axes defining a new plane.
-              this.a.set( uv1[0] - uv0[0], uv1[1] - uv0[1], 0 );
-              this.b.set( uv2[0] - uv0[0], uv2[1] - uv0[1], 0 );
-              // The normal for the texture is always straight out in the Z axis, so
-              // there is no need to do any sort of calculations.
-              this.m.set(
-                  this.a.x, this.b.x, 0, 0,
-                  this.a.y, this.b.y, 0, 0,
-                  this.a.z, this.b.z, 1, 0,
-                         0,        0, 0, 1 );
-              this.e.applyMatrix4( this.m );
-              this.e.x += uv0[0];
-              this.e.y += uv0[1];
-              value.point = [ this.e.x, this.e.y ];
+            this.d.subVectors( this.f, v0 ).applyMatrix4( this.m );
+            if ( this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <= 1 && this.d.z > 0 ) {
+              this.c.multiplyScalar( this.d.z ).add( this.f );
+              var dist = Math.sign( this.d.z ) * this.p.distanceTo( this.c );
+              if ( !value || dist < value.distance ) {
+                var uvs = obj.geometry.faceVertexUvs[0][j];
+                v0 = uvs[odd ? 1 : 0];
+                v1 = uvs[odd ? 2 : 1];
+                v2 = uvs[odd ? 0 : 2];
+                var uv = [
+                  this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) + v0[0],
+                  this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) + v0[1]];
+                this.d.crossVectors( this.a.normalize( ), this.b.normalize( ) );
+                value = {
+                  objectID: objID,
+                  distance: dist,
+                  facePoint: this.c.toArray( ),
+                  faceNormal: this.d.toArray( ),
+                  point: uv
+                };
+              }
             }
           }
         }
@@ -2267,7 +2235,6 @@ Primrose.Projector = ( function ( ) {
     }
     this._fire( "hit", value );
   };
-
   Projector.prototype._displayVector = function ( v, n ) {
     n = n || 3;
     return v.toArray( ).map( function ( c ) {

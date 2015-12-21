@@ -154,6 +154,7 @@ Primrose.VRApplication = ( function ( ) {
           this.ground.rotation.x = Math.PI / 2;
           this.ground.name = "Ground";
           this.scene.add( this.ground );
+          this.registerPickableObject( this.ground );
         }
 
         if ( this.passthrough ) {
@@ -487,6 +488,9 @@ Primrose.VRApplication = ( function ( ) {
 
         for ( var i = 0; i < this.editors.length; ++i ) {
           this.projector.updateObject( createPickableObject( this.editors[i] ) );
+        }
+        if ( this.ground ) {
+          this.projector.updateObject( createPickableObject( this.ground ) );
         }
         this.projector.projectPointer(
             this.pointer.position.toArray(),
