@@ -488,7 +488,7 @@ Primrose.VRApplication = ( function ( ) {
         for ( var i = 0; i < this.pickableObjects.length; ++i ) {
           this.projector.updateObject( createPickableObject( this.pickableObjects[i] ) );
         }
-        
+
         this.projector.projectPointer(
             this.pointer.position.toArray(),
             transformForPicking( this.currentUser ) );
@@ -496,16 +496,7 @@ Primrose.VRApplication = ( function ( ) {
 
       var lastButtons = this.input.getValue( "dButtons" );
 
-      if ( !currentHit || !currentHit.point ) {
-        if ( this.currentEditor && lastButtons > 0 ) {
-          this.currentEditor.blur();
-          this.currentEditor = null;
-        }
-        this.pointer.material.color.setRGB( 1, 0, 0 );
-        this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
-        this.pointer.scale.set( 1, 1, 1 );
-      }
-      else {
+      if ( currentHit ) {
         var fp = currentHit.facePoint, fn = currentHit.faceNormal;
         this.pointer.position.set(
             fp[0] + fn[0] * POINTER_RADIUS,
@@ -513,7 +504,7 @@ Primrose.VRApplication = ( function ( ) {
             fp[2] + fn[2] * POINTER_RADIUS );
         this.pointer.material.color.setRGB( 1, 1, 1 );
         this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
-        var object = currentHit && this.findObject( currentHit.objectID );
+        var object = this.findObject( currentHit.objectID );
         if ( object ) {
           var buttons = this.input.getValue( "buttons" ),
               clickChanged = lastButtons > 0,
@@ -526,14 +517,16 @@ Primrose.VRApplication = ( function ( ) {
             this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
           }
 
-          if ( clickChanged && buttons > 0 && this.currentEditor && this.currentEditor !== editor ) {
-            this.currentEditor.blur();
-            this.currentEditor = null;
-          }
+          if ( clickChanged && buttons > 0 ) {
+            if ( this.currentEditor && this.currentEditor !== editor ) {
+              this.currentEditor.blur();
+              this.currentEditor = null;
+            }
 
-          if ( editor && !this.currentEditor && clickChanged && buttons > 0 ) {
-            editor.focus();
-            this.currentEditor = editor;
+            if ( !this.currentEditor && editor ) {
+              this.currentEditor = editor;
+              this.currentEditor.focus();
+            }
           }
 
           if ( this.currentEditor ) {
@@ -555,6 +548,15 @@ Primrose.VRApplication = ( function ( ) {
             }
           }
         }
+      }
+      else {
+        if ( this.currentEditor && lastButtons > 0 ) {
+          this.currentEditor.blur();
+          this.currentEditor = null;
+        }
+        this.pointer.material.color.setRGB( 1, 0, 0 );
+        this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
+        this.pointer.scale.set( 1, 1, 1 );
       }
 
       fireAll.call( this, "update", dt );
