@@ -8,11 +8,11 @@ Primrose.Projector = ( function ( ) {
       /**
        * This is just the THREE.Matrix4 and THREE.Vector3 classes from THREE.js, to
        * be loaded into a WebWorker so the worker can do math. - STM
-       * 
+       *
        * @author mrdoob / http://mrdoob.com/
        */
 
-      self.THREE = {REVISION: '72dev'};
+      self.THREE = { REVISION: '72dev' };
 // polyfills
 
       if ( Math.sign === undefined ) {
@@ -25,7 +25,8 @@ Primrose.Projector = ( function ( ) {
         };
       }
 
-      if ( Function.prototype.name === undefined && Object.defineProperty !== undefined ) {
+      if ( Function.prototype.name === undefined && Object.defineProperty !==
+          undefined ) {
 
 // Missing in IE9-11.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
@@ -33,7 +34,8 @@ Primrose.Projector = ( function ( ) {
         Object.defineProperty( Function.prototype, 'name', {
           get: function ( ) {
 
-            return this.toString( ).match( /^\s*function\s*(\S*)\s*\(/ )[ 1 ];
+            return this.toString( )
+                .match( /^\s*function\s*(\S*)\s*\(/ )[ 1 ];
           }
 
         } );
@@ -46,7 +48,7 @@ Primrose.Projector = ( function ( ) {
        * @author alteredq / http://alteredqualia.com/
        * @author WestLangley / http://github.com/WestLangley
        * @author bhouston / http://exocortex.com
-       * 
+       *
        * @param {Number} x
        * @param {Number} y
        * @param {Number} z
@@ -123,7 +125,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( euler instanceof THREE.Euler === false ) {
 
-            throw new Error( 'THREE.Quaternion: .setFromEuler() now expects a Euler rotation rather than a Vector3 and order.' );
+            throw new Error(
+                'THREE.Quaternion: .setFromEuler() now expects a Euler rotation rather than a Vector3 and order.' );
           }
 
           // http://www.mathworks.com/matlabcentral/fileexchange/
@@ -184,7 +187,9 @@ Primrose.Projector = ( function ( ) {
 
           // assumes axis is normalized
 
-          var halfAngle = angle / 2, s = Math.sin( halfAngle );
+          var halfAngle = angle / 2,
+              s = Math.sin(
+              halfAngle );
           this._x = axis.x * s;
           this._y = axis.y * s;
           this._z = axis.z * s;
@@ -199,9 +204,21 @@ Primrose.Projector = ( function ( ) {
           // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
           var te = m.elements,
-              m11 = te[ 0 ], m12 = te[ 4 ], m13 = te[ 8 ],
-              m21 = te[ 1 ], m22 = te[ 5 ], m23 = te[ 9 ],
-              m31 = te[ 2 ], m32 = te[ 6 ], m33 = te[ 10 ],
+              m11 = te[ 0 ],
+              m12 =
+              te[ 4 ],
+              m13 =
+              te[ 8 ],
+              m21 = te[ 1 ],
+              m22 =
+              te[ 5 ],
+              m23 =
+              te[ 9 ],
+              m31 = te[ 2 ],
+              m32 =
+              te[ 6 ],
+              m33 =
+              te[ 10 ],
               trace = m11 + m22 + m33,
               s;
           if ( trace > 0 ) {
@@ -243,7 +260,8 @@ Primrose.Projector = ( function ( ) {
 
           // assumes direction vectors vFrom and vTo are normalized
 
-          var v1, r;
+          var v1,
+              r;
           var EPS = 0.000001;
           return function ( vFrom, vTo ) {
 
@@ -276,7 +294,8 @@ Primrose.Projector = ( function ( ) {
         }( ),
         inverse: function ( ) {
 
-          this.conjugate( ).normalize( );
+          this.conjugate( )
+              .normalize( );
           return this;
         },
         conjugate: function ( ) {
@@ -289,15 +308,18 @@ Primrose.Projector = ( function ( ) {
         },
         dot: function ( v ) {
 
-          return this._x * v._x + this._y * v._y + this._z * v._z + this._w * v._w;
+          return this._x * v._x + this._y * v._y + this._z * v._z + this._w *
+              v._w;
         },
         lengthSq: function ( ) {
 
-          return this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w;
+          return this._x * this._x + this._y * this._y + this._z * this._z +
+              this._w * this._w;
         },
         length: function ( ) {
 
-          return Math.sqrt( this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w );
+          return Math.sqrt( this._x * this._x + this._y * this._y + this._z *
+              this._z + this._w * this._w );
         },
         normalize: function ( ) {
 
@@ -324,7 +346,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( p !== undefined ) {
 
-            console.warn( 'THREE.Quaternion: .multiply() now only accepts one argument. Use .multiplyQuaternions( a, b ) instead.' );
+            console.warn(
+                'THREE.Quaternion: .multiply() now only accepts one argument. Use .multiplyQuaternions( a, b ) instead.' );
             return this.multiplyQuaternions( q, p );
           }
 
@@ -334,8 +357,20 @@ Primrose.Projector = ( function ( ) {
 
           // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
 
-          var qax = a._x, qay = a._y, qaz = a._z, qaw = a._w;
-          var qbx = b._x, qby = b._y, qbz = b._z, qbw = b._w;
+          var qax = a._x,
+              qay =
+              a._y,
+              qaz =
+              a._z,
+              qaw =
+              a._w;
+          var qbx = b._x,
+              qby =
+              b._y,
+              qbz =
+              b._z,
+              qbw =
+              b._w;
           this._x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
           this._y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
           this._z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
@@ -345,7 +380,8 @@ Primrose.Projector = ( function ( ) {
         },
         multiplyVector3: function ( vector ) {
 
-          console.warn( 'THREE.Quaternion: .multiplyVector3() has been removed. Use is now vector.applyQuaternion( quaternion ) instead.' );
+          console.warn(
+              'THREE.Quaternion: .multiplyVector3() has been removed. Use is now vector.applyQuaternion( quaternion ) instead.' );
           return vector.applyQuaternion( this );
         },
         slerp: function ( qb, t ) {
@@ -354,7 +390,13 @@ Primrose.Projector = ( function ( ) {
             return this;
           if ( t === 1 )
             return this.copy( qb );
-          var x = this._x, y = this._y, z = this._z, w = this._w;
+          var x = this._x,
+              y =
+              this._y,
+              z =
+              this._z,
+              w =
+              this._w;
           // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
 
           var cosHalfTheta = w * qb._w + x * qb._x + y * qb._y + z * qb._z;
@@ -401,7 +443,9 @@ Primrose.Projector = ( function ( ) {
         },
         equals: function ( quaternion ) {
 
-          return ( quaternion._x === this._x ) && ( quaternion._y === this._y ) && ( quaternion._z === this._z ) && ( quaternion._w === this._w );
+          return ( quaternion._x === this._x ) && ( quaternion._y ===
+              this._y ) && ( quaternion._z === this._z ) && ( quaternion._w ===
+              this._w );
         },
         fromArray: function ( array, offset ) {
 
@@ -437,7 +481,10 @@ Primrose.Projector = ( function ( ) {
       };
       THREE.Quaternion.slerp = function ( qa, qb, qm, t ) {
 
-        return qm.copy( qa ).slerp( qb, t );
+        return qm.copy( qa )
+            .slerp(
+                qb,
+                t );
       };
 // File:src/math/Vector3.js
 
@@ -448,7 +495,7 @@ Primrose.Projector = ( function ( ) {
        * @author mikael emtinger / http://gomo.se/
        * @author egraether / http://egraether.com/
        * @author WestLangley / http://github.com/WestLangley
-       * 
+       *
        * @param {Number} x
        * @param {Number} y
        * @param {Number} z
@@ -531,7 +578,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( w !== undefined ) {
 
-            console.warn( 'THREE.Vector3: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
+            console.warn(
+                'THREE.Vector3: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
             return this.addVectors( v, w );
           }
 
@@ -565,7 +613,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( w !== undefined ) {
 
-            console.warn( 'THREE.Vector3: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.' );
+            console.warn(
+                'THREE.Vector3: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.' );
             return this.subVectors( v, w );
           }
 
@@ -592,7 +641,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( w !== undefined ) {
 
-            console.warn( 'THREE.Vector3: .multiply() now only accepts one argument. Use .multiplyVectors( a, b ) instead.' );
+            console.warn(
+                'THREE.Vector3: .multiply() now only accepts one argument. Use .multiplyVectors( a, b ) instead.' );
             return this.multiplyVectors( v, w );
           }
 
@@ -622,7 +672,8 @@ Primrose.Projector = ( function ( ) {
 
             if ( euler instanceof THREE.Euler === false ) {
 
-              console.error( 'THREE.Vector3: .applyEuler() now expects a Euler rotation rather than a Vector3 and order.' );
+              console.error(
+                  'THREE.Vector3: .applyEuler() now expects a Euler rotation rather than a Vector3 and order.' );
             }
 
             if ( quaternion === undefined )
@@ -657,7 +708,11 @@ Primrose.Projector = ( function ( ) {
 
           // input: THREE.Matrix4 affine matrix
 
-          var x = this.x, y = this.y, z = this.z;
+          var x = this.x,
+              y =
+              this.y,
+              z =
+              this.z;
           var e = m.elements;
           this.x = e[ 0 ] * x + e[ 4 ] * y + e[ 8 ] * z + e[ 12 ];
           this.y = e[ 1 ] * x + e[ 5 ] * y + e[ 9 ] * z + e[ 13 ];
@@ -668,9 +723,14 @@ Primrose.Projector = ( function ( ) {
 
           // input: THREE.Matrix4 projection matrix
 
-          var x = this.x, y = this.y, z = this.z;
+          var x = this.x,
+              y =
+              this.y,
+              z =
+              this.z;
           var e = m.elements;
-          var d = 1 / ( e[ 3 ] * x + e[ 7 ] * y + e[ 11 ] * z + e[ 15 ] ); // perspective divide
+          var d = 1 / ( e[ 3 ] * x + e[ 7 ] * y + e[ 11 ] * z +
+              e[ 15 ] ); // perspective divide
 
           this.x = ( e[ 0 ] * x + e[ 4 ] * y + e[ 8 ] * z + e[ 12 ] ) * d;
           this.y = ( e[ 1 ] * x + e[ 5 ] * y + e[ 9 ] * z + e[ 13 ] ) * d;
@@ -706,7 +766,8 @@ Primrose.Projector = ( function ( ) {
 
             if ( matrix === undefined )
               matrix = new THREE.Matrix4( );
-            matrix.multiplyMatrices( camera.projectionMatrix, matrix.getInverse( camera.matrixWorld ) );
+            matrix.multiplyMatrices( camera.projectionMatrix,
+                matrix.getInverse( camera.matrixWorld ) );
             return this.applyProjection( matrix );
           };
         }( ),
@@ -717,7 +778,8 @@ Primrose.Projector = ( function ( ) {
 
             if ( matrix === undefined )
               matrix = new THREE.Matrix4( );
-            matrix.multiplyMatrices( camera.matrixWorld, matrix.getInverse( camera.projectionMatrix ) );
+            matrix.multiplyMatrices( camera.matrixWorld, matrix.getInverse(
+                camera.projectionMatrix ) );
             return this.applyProjection( matrix );
           };
         }( ),
@@ -726,7 +788,11 @@ Primrose.Projector = ( function ( ) {
           // input: THREE.Matrix4 affine matrix
           // vector interpreted as a direction
 
-          var x = this.x, y = this.y, z = this.z;
+          var x = this.x,
+              y =
+              this.y,
+              z =
+              this.z;
           var e = m.elements;
           this.x = e[ 0 ] * x + e[ 4 ] * y + e[ 8 ] * z;
           this.y = e[ 1 ] * x + e[ 5 ] * y + e[ 9 ] * z;
@@ -828,7 +894,8 @@ Primrose.Projector = ( function ( ) {
         },
         clampScalar: function ( ) {
 
-          var min, max;
+          var min,
+              max;
           return function clampScalar ( minVal, maxVal ) {
 
             if ( min === undefined ) {
@@ -887,7 +954,8 @@ Primrose.Projector = ( function ( ) {
         },
         length: function ( ) {
 
-          return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
+          return Math.sqrt( this.x * this.x + this.y * this.y + this.z *
+              this.z );
         },
         lengthManhattan: function ( ) {
 
@@ -916,18 +984,27 @@ Primrose.Projector = ( function ( ) {
         },
         lerpVectors: function ( v1, v2, alpha ) {
 
-          this.subVectors( v2, v1 ).multiplyScalar( alpha ).add( v1 );
+          this.subVectors( v2, v1 )
+              .multiplyScalar(
+                  alpha )
+              .add(
+                  v1 );
           return this;
         },
         cross: function ( v, w ) {
 
           if ( w !== undefined ) {
 
-            console.warn( 'THREE.Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.' );
+            console.warn(
+                'THREE.Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.' );
             return this.crossVectors( v, w );
           }
 
-          var x = this.x, y = this.y, z = this.z;
+          var x = this.x,
+              y =
+              this.y,
+              z =
+              this.z;
           this.x = y * v.z - z * v.y;
           this.y = z * v.x - x * v.z;
           this.z = x * v.y - y * v.x;
@@ -935,8 +1012,16 @@ Primrose.Projector = ( function ( ) {
         },
         crossVectors: function ( a, b ) {
 
-          var ax = a.x, ay = a.y, az = a.z;
-          var bx = b.x, by = b.y, bz = b.z;
+          var ax = a.x,
+              ay =
+              a.y,
+              az =
+              a.z;
+          var bx = b.x,
+              by =
+              b.y,
+              bz =
+              b.z;
           this.x = ay * bz - az * by;
           this.y = az * bx - ax * bz;
           this.z = ax * by - ay * bx;
@@ -944,14 +1029,18 @@ Primrose.Projector = ( function ( ) {
         },
         projectOnVector: function ( ) {
 
-          var v1, dot;
+          var v1,
+              dot;
           return function projectOnVector ( vector ) {
 
             if ( v1 === undefined )
               v1 = new THREE.Vector3( );
-            v1.copy( vector ).normalize( );
+            v1.copy( vector )
+                .normalize( );
             dot = this.dot( v1 );
-            return this.copy( v1 ).multiplyScalar( dot );
+            return this.copy( v1 )
+                .multiplyScalar(
+                    dot );
           };
         }( ),
         projectOnPlane: function ( ) {
@@ -961,7 +1050,9 @@ Primrose.Projector = ( function ( ) {
 
             if ( v1 === undefined )
               v1 = new THREE.Vector3( );
-            v1.copy( this ).projectOnVector( planeNormal );
+            v1.copy( this )
+                .projectOnVector(
+                    planeNormal );
             return this.sub( v1 );
           };
         }( ),
@@ -975,7 +1066,11 @@ Primrose.Projector = ( function ( ) {
 
             if ( v1 === undefined )
               v1 = new THREE.Vector3( );
-            return this.sub( v1.copy( normal ).multiplyScalar( 2 * this.dot( normal ) ) );
+            return this.sub( v1.copy( normal )
+                .multiplyScalar(
+                    2 *
+                    this.dot(
+                        normal ) ) );
           };
         }( ),
         angleTo: function ( v ) {
@@ -998,25 +1093,30 @@ Primrose.Projector = ( function ( ) {
         },
         setEulerFromRotationMatrix: function ( m, order ) {
 
-          console.error( 'THREE.Vector3: .setEulerFromRotationMatrix() has been removed. Use Euler.setFromRotationMatrix() instead.' );
+          console.error(
+              'THREE.Vector3: .setEulerFromRotationMatrix() has been removed. Use Euler.setFromRotationMatrix() instead.' );
         },
         setEulerFromQuaternion: function ( q, order ) {
 
-          console.error( 'THREE.Vector3: .setEulerFromQuaternion() has been removed. Use Euler.setFromQuaternion() instead.' );
+          console.error(
+              'THREE.Vector3: .setEulerFromQuaternion() has been removed. Use Euler.setFromQuaternion() instead.' );
         },
         getPositionFromMatrix: function ( m ) {
 
-          console.warn( 'THREE.Vector3: .getPositionFromMatrix() has been renamed to .setFromMatrixPosition().' );
+          console.warn(
+              'THREE.Vector3: .getPositionFromMatrix() has been renamed to .setFromMatrixPosition().' );
           return this.setFromMatrixPosition( m );
         },
         getScaleFromMatrix: function ( m ) {
 
-          console.warn( 'THREE.Vector3: .getScaleFromMatrix() has been renamed to .setFromMatrixScale().' );
+          console.warn(
+              'THREE.Vector3: .getScaleFromMatrix() has been renamed to .setFromMatrixScale().' );
           return this.setFromMatrixScale( m );
         },
         getColumnFromMatrix: function ( index, matrix ) {
 
-          console.warn( 'THREE.Vector3: .getColumnFromMatrix() has been renamed to .setFromMatrixColumn().' );
+          console.warn(
+              'THREE.Vector3: .getColumnFromMatrix() has been renamed to .setFromMatrixColumn().' );
           return this.setFromMatrixColumn( index, matrix );
         },
         setFromMatrixPosition: function ( m ) {
@@ -1028,9 +1128,15 @@ Primrose.Projector = ( function ( ) {
         },
         setFromMatrixScale: function ( m ) {
 
-          var sx = this.set( m.elements[ 0 ], m.elements[ 1 ], m.elements[ 2 ] ).length( );
-          var sy = this.set( m.elements[ 4 ], m.elements[ 5 ], m.elements[ 6 ] ).length( );
-          var sz = this.set( m.elements[ 8 ], m.elements[ 9 ], m.elements[ 10 ] ).length( );
+          var sx = this.set( m.elements[ 0 ], m.elements[ 1 ],
+              m.elements[ 2 ] )
+              .length( );
+          var sy = this.set( m.elements[ 4 ], m.elements[ 5 ],
+              m.elements[ 6 ] )
+              .length( );
+          var sz = this.set( m.elements[ 8 ], m.elements[ 9 ],
+              m.elements[ 10 ] )
+              .length( );
           this.x = sx;
           this.y = sy;
           this.z = sz;
@@ -1047,7 +1153,8 @@ Primrose.Projector = ( function ( ) {
         },
         equals: function ( v ) {
 
-          return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) );
+          return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z ===
+              this.z ) );
         },
         fromArray: function ( array, offset ) {
 
@@ -1107,13 +1214,15 @@ Primrose.Projector = ( function ( ) {
         ] );
         if ( arguments.length > 0 ) {
 
-          console.error( 'THREE.Matrix4: the constructor no longer reads arguments. use .set() instead.' );
+          console.error(
+              'THREE.Matrix4: the constructor no longer reads arguments. use .set() instead.' );
         }
 
       };
       THREE.Matrix4.prototype = {
         constructor: THREE.Matrix4,
-        set: function ( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
+        set: function ( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33,
+            n34, n41, n42, n43, n44 ) {
 
           var te = this.elements;
           te[ 0 ] = n11;
@@ -1156,7 +1265,8 @@ Primrose.Projector = ( function ( ) {
         },
         extractPosition: function ( m ) {
 
-          console.warn( 'THREE.Matrix4: .extractPosition() has been renamed to .copyPosition().' );
+          console.warn(
+              'THREE.Matrix4: .extractPosition() has been renamed to .copyPosition().' );
           return this.copyPosition( m );
         },
         copyPosition: function ( m ) {
@@ -1195,9 +1305,12 @@ Primrose.Projector = ( function ( ) {
               v1 = new THREE.Vector3( );
             var te = this.elements;
             var me = m.elements;
-            var scaleX = 1 / v1.set( me[ 0 ], me[ 1 ], me[ 2 ] ).length( );
-            var scaleY = 1 / v1.set( me[ 4 ], me[ 5 ], me[ 6 ] ).length( );
-            var scaleZ = 1 / v1.set( me[ 8 ], me[ 9 ], me[ 10 ] ).length( );
+            var scaleX = 1 / v1.set( me[ 0 ], me[ 1 ], me[ 2 ] )
+                .length( );
+            var scaleY = 1 / v1.set( me[ 4 ], me[ 5 ], me[ 6 ] )
+                .length( );
+            var scaleZ = 1 / v1.set( me[ 8 ], me[ 9 ], me[ 10 ] )
+                .length( );
             te[ 0 ] = me[ 0 ] * scaleX;
             te[ 1 ] = me[ 1 ] * scaleX;
             te[ 2 ] = me[ 2 ] * scaleX;
@@ -1214,17 +1327,40 @@ Primrose.Projector = ( function ( ) {
 
           if ( euler instanceof THREE.Euler === false ) {
 
-            console.error( 'THREE.Matrix: .makeRotationFromEuler() now expects a Euler rotation rather than a Vector3 and order.' );
+            console.error(
+                'THREE.Matrix: .makeRotationFromEuler() now expects a Euler rotation rather than a Vector3 and order.' );
           }
 
           var te = this.elements;
-          var x = euler.x, y = euler.y, z = euler.z;
-          var a = Math.cos( x ), b = Math.sin( x );
-          var c = Math.cos( y ), d = Math.sin( y );
-          var e = Math.cos( z ), f = Math.sin( z );
+          var x = euler.x,
+              y =
+              euler.y,
+              z =
+              euler.z;
+          var a = Math.cos( x ),
+              b =
+              Math.sin(
+                  x );
+          var c = Math.cos( y ),
+              d =
+              Math.sin(
+                  y );
+          var e = Math.cos( z ),
+              f =
+              Math.sin(
+                  z );
           if ( euler.order === 'XYZ' ) {
 
-            var ae = a * e, af = a * f, be = b * e, bf = b * f;
+            var ae = a * e,
+                af =
+                a *
+                f,
+                be =
+                b *
+                e,
+                bf =
+                b *
+                f;
             te[ 0 ] = c * e;
             te[ 4 ] = -c * f;
             te[ 8 ] = d;
@@ -1236,7 +1372,16 @@ Primrose.Projector = ( function ( ) {
             te[ 10 ] = a * c;
           } else if ( euler.order === 'YXZ' ) {
 
-            var ce = c * e, cf = c * f, de = d * e, df = d * f;
+            var ce = c * e,
+                cf =
+                c *
+                f,
+                de =
+                d *
+                e,
+                df =
+                d *
+                f;
             te[ 0 ] = ce + df * b;
             te[ 4 ] = de * b - cf;
             te[ 8 ] = a * d;
@@ -1248,7 +1393,16 @@ Primrose.Projector = ( function ( ) {
             te[ 10 ] = a * c;
           } else if ( euler.order === 'ZXY' ) {
 
-            var ce = c * e, cf = c * f, de = d * e, df = d * f;
+            var ce = c * e,
+                cf =
+                c *
+                f,
+                de =
+                d *
+                e,
+                df =
+                d *
+                f;
             te[ 0 ] = ce - df * b;
             te[ 4 ] = -a * f;
             te[ 8 ] = de + cf * b;
@@ -1260,7 +1414,16 @@ Primrose.Projector = ( function ( ) {
             te[ 10 ] = a * c;
           } else if ( euler.order === 'ZYX' ) {
 
-            var ae = a * e, af = a * f, be = b * e, bf = b * f;
+            var ae = a * e,
+                af =
+                a *
+                f,
+                be =
+                b *
+                e,
+                bf =
+                b *
+                f;
             te[ 0 ] = c * e;
             te[ 4 ] = be * d - af;
             te[ 8 ] = ae * d + bf;
@@ -1272,7 +1435,16 @@ Primrose.Projector = ( function ( ) {
             te[ 10 ] = a * c;
           } else if ( euler.order === 'YZX' ) {
 
-            var ac = a * c, ad = a * d, bc = b * c, bd = b * d;
+            var ac = a * c,
+                ad =
+                a *
+                d,
+                bc =
+                b *
+                c,
+                bd =
+                b *
+                d;
             te[ 0 ] = c * e;
             te[ 4 ] = bd - ac * f;
             te[ 8 ] = bc * f + ad;
@@ -1284,7 +1456,16 @@ Primrose.Projector = ( function ( ) {
             te[ 10 ] = ac - bd * f;
           } else if ( euler.order === 'XZY' ) {
 
-            var ac = a * c, ad = a * d, bc = b * c, bd = b * d;
+            var ac = a * c,
+                ad =
+                a *
+                d,
+                bc =
+                b *
+                c,
+                bd =
+                b *
+                d;
             te[ 0 ] = c * e;
             te[ 4 ] = -f;
             te[ 8 ] = d * e;
@@ -1309,17 +1490,48 @@ Primrose.Projector = ( function ( ) {
         },
         setRotationFromQuaternion: function ( q ) {
 
-          console.warn( 'THREE.Matrix4: .setRotationFromQuaternion() has been renamed to .makeRotationFromQuaternion().' );
+          console.warn(
+              'THREE.Matrix4: .setRotationFromQuaternion() has been renamed to .makeRotationFromQuaternion().' );
           return this.makeRotationFromQuaternion( q );
         },
         makeRotationFromQuaternion: function ( q ) {
 
           var te = this.elements;
-          var x = q.x, y = q.y, z = q.z, w = q.w;
-          var x2 = x + x, y2 = y + y, z2 = z + z;
-          var xx = x * x2, xy = x * y2, xz = x * z2;
-          var yy = y * y2, yz = y * z2, zz = z * z2;
-          var wx = w * x2, wy = w * y2, wz = w * z2;
+          var x = q.x,
+              y =
+              q.y,
+              z =
+              q.z,
+              w =
+              q.w;
+          var x2 = x + x,
+              y2 =
+              y +
+              y,
+              z2 =
+              z +
+              z;
+          var xx = x * x2,
+              xy =
+              x *
+              y2,
+              xz =
+              x *
+              z2;
+          var yy = y * y2,
+              yz =
+              y *
+              z2,
+              zz =
+              z *
+              z2;
+          var wx = w * x2,
+              wy =
+              w *
+              y2,
+              wz =
+              w *
+              z2;
           te[ 0 ] = 1 - ( yy + zz );
           te[ 4 ] = xy - wz;
           te[ 8 ] = xz + wy;
@@ -1342,7 +1554,9 @@ Primrose.Projector = ( function ( ) {
         },
         lookAt: function ( ) {
 
-          var x, y, z;
+          var x,
+              y,
+              z;
           return function ( eye, target, up ) {
 
             if ( x === undefined )
@@ -1352,17 +1566,20 @@ Primrose.Projector = ( function ( ) {
             if ( z === undefined )
               z = new THREE.Vector3( );
             var te = this.elements;
-            z.subVectors( eye, target ).normalize( );
+            z.subVectors( eye, target )
+                .normalize( );
             if ( z.length( ) === 0 ) {
 
               z.z = 1;
             }
 
-            x.crossVectors( up, z ).normalize( );
+            x.crossVectors( up, z )
+                .normalize( );
             if ( x.length( ) === 0 ) {
 
               z.x += 0.0001;
-              x.crossVectors( up, z ).normalize( );
+              x.crossVectors( up, z )
+                  .normalize( );
             }
 
             y.crossVectors( z, x );
@@ -1382,7 +1599,8 @@ Primrose.Projector = ( function ( ) {
 
           if ( n !== undefined ) {
 
-            console.warn( 'THREE.Matrix4: .multiply() now only accepts one argument. Use .multiplyMatrices( a, b ) instead.' );
+            console.warn(
+                'THREE.Matrix4: .multiply() now only accepts one argument. Use .multiplyMatrices( a, b ) instead.' );
             return this.multiplyMatrices( m, n );
           }
 
@@ -1393,14 +1611,62 @@ Primrose.Projector = ( function ( ) {
           var ae = a.elements;
           var be = b.elements;
           var te = this.elements;
-          var a11 = ae[ 0 ], a12 = ae[ 4 ], a13 = ae[ 8 ], a14 = ae[ 12 ];
-          var a21 = ae[ 1 ], a22 = ae[ 5 ], a23 = ae[ 9 ], a24 = ae[ 13 ];
-          var a31 = ae[ 2 ], a32 = ae[ 6 ], a33 = ae[ 10 ], a34 = ae[ 14 ];
-          var a41 = ae[ 3 ], a42 = ae[ 7 ], a43 = ae[ 11 ], a44 = ae[ 15 ];
-          var b11 = be[ 0 ], b12 = be[ 4 ], b13 = be[ 8 ], b14 = be[ 12 ];
-          var b21 = be[ 1 ], b22 = be[ 5 ], b23 = be[ 9 ], b24 = be[ 13 ];
-          var b31 = be[ 2 ], b32 = be[ 6 ], b33 = be[ 10 ], b34 = be[ 14 ];
-          var b41 = be[ 3 ], b42 = be[ 7 ], b43 = be[ 11 ], b44 = be[ 15 ];
+          var a11 = ae[ 0 ],
+              a12 =
+              ae[ 4 ],
+              a13 =
+              ae[ 8 ],
+              a14 =
+              ae[ 12 ];
+          var a21 = ae[ 1 ],
+              a22 =
+              ae[ 5 ],
+              a23 =
+              ae[ 9 ],
+              a24 =
+              ae[ 13 ];
+          var a31 = ae[ 2 ],
+              a32 =
+              ae[ 6 ],
+              a33 =
+              ae[ 10 ],
+              a34 =
+              ae[ 14 ];
+          var a41 = ae[ 3 ],
+              a42 =
+              ae[ 7 ],
+              a43 =
+              ae[ 11 ],
+              a44 =
+              ae[ 15 ];
+          var b11 = be[ 0 ],
+              b12 =
+              be[ 4 ],
+              b13 =
+              be[ 8 ],
+              b14 =
+              be[ 12 ];
+          var b21 = be[ 1 ],
+              b22 =
+              be[ 5 ],
+              b23 =
+              be[ 9 ],
+              b24 =
+              be[ 13 ];
+          var b31 = be[ 2 ],
+              b32 =
+              be[ 6 ],
+              b33 =
+              be[ 10 ],
+              b34 =
+              be[ 14 ];
+          var b41 = be[ 3 ],
+              b42 =
+              be[ 7 ],
+              b43 =
+              be[ 11 ],
+              b44 =
+              be[ 15 ];
           te[ 0 ] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
           te[ 4 ] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
           te[ 8 ] = a11 * b13 + a12 * b23 + a13 * b33 + a14 * b43;
@@ -1464,17 +1730,20 @@ Primrose.Projector = ( function ( ) {
         },
         multiplyVector3: function ( vector ) {
 
-          console.warn( 'THREE.Matrix4: .multiplyVector3() has been removed. Use vector.applyMatrix4( matrix ) or vector.applyProjection( matrix ) instead.' );
+          console.warn(
+              'THREE.Matrix4: .multiplyVector3() has been removed. Use vector.applyMatrix4( matrix ) or vector.applyProjection( matrix ) instead.' );
           return vector.applyProjection( this );
         },
         multiplyVector4: function ( vector ) {
 
-          console.warn( 'THREE.Matrix4: .multiplyVector4() has been removed. Use vector.applyMatrix4( matrix ) instead.' );
+          console.warn(
+              'THREE.Matrix4: .multiplyVector4() has been removed. Use vector.applyMatrix4( matrix ) instead.' );
           return vector.applyMatrix4( this );
         },
         multiplyVector3Array: function ( a ) {
 
-          console.warn( 'THREE.Matrix4: .multiplyVector3Array() has been renamed. Use matrix.applyToVector3Array( array ) instead.' );
+          console.warn(
+              'THREE.Matrix4: .multiplyVector3Array() has been renamed. Use matrix.applyToVector3Array( array ) instead.' );
           return this.applyToVector3Array( a );
         },
         applyToVector3Array: function ( ) {
@@ -1488,7 +1757,14 @@ Primrose.Projector = ( function ( ) {
               offset = 0;
             if ( length === undefined )
               length = array.length;
-            for ( var i = 0, j = offset; i < length; i += 3, j += 3 ) {
+            for ( var i = 0,
+                j =
+                offset;
+                i <
+                length;
+                i +=
+                3, j +=
+                3 ) {
 
               v1.fromArray( array, j );
               v1.applyMatrix4( this );
@@ -1509,7 +1785,12 @@ Primrose.Projector = ( function ( ) {
               offset = 0;
             if ( length === undefined )
               length = buffer.length / buffer.itemSize;
-            for ( var i = 0, j = offset; i < length; i++, j++ ) {
+            for ( var i = 0,
+                j =
+                offset;
+                i <
+                length;
+                i++, j++ ) {
 
               v1.x = buffer.getX( j );
               v1.y = buffer.getY( j );
@@ -1523,21 +1804,47 @@ Primrose.Projector = ( function ( ) {
         }( ),
         rotateAxis: function ( v ) {
 
-          console.warn( 'THREE.Matrix4: .rotateAxis() has been removed. Use Vector3.transformDirection( matrix ) instead.' );
+          console.warn(
+              'THREE.Matrix4: .rotateAxis() has been removed. Use Vector3.transformDirection( matrix ) instead.' );
           v.transformDirection( this );
         },
         crossVector: function ( vector ) {
 
-          console.warn( 'THREE.Matrix4: .crossVector() has been removed. Use vector.applyMatrix4( matrix ) instead.' );
+          console.warn(
+              'THREE.Matrix4: .crossVector() has been removed. Use vector.applyMatrix4( matrix ) instead.' );
           return vector.applyMatrix4( this );
         },
         determinant: function ( ) {
 
           var te = this.elements;
-          var n11 = te[ 0 ], n12 = te[ 4 ], n13 = te[ 8 ], n14 = te[ 12 ];
-          var n21 = te[ 1 ], n22 = te[ 5 ], n23 = te[ 9 ], n24 = te[ 13 ];
-          var n31 = te[ 2 ], n32 = te[ 6 ], n33 = te[ 10 ], n34 = te[ 14 ];
-          var n41 = te[ 3 ], n42 = te[ 7 ], n43 = te[ 11 ], n44 = te[ 15 ];
+          var n11 = te[ 0 ],
+              n12 =
+              te[ 4 ],
+              n13 =
+              te[ 8 ],
+              n14 =
+              te[ 12 ];
+          var n21 = te[ 1 ],
+              n22 =
+              te[ 5 ],
+              n23 =
+              te[ 9 ],
+              n24 =
+              te[ 13 ];
+          var n31 = te[ 2 ],
+              n32 =
+              te[ 6 ],
+              n33 =
+              te[ 10 ],
+              n34 =
+              te[ 14 ];
+          var n41 = te[ 3 ],
+              n42 =
+              te[ 7 ],
+              n43 =
+              te[ 11 ],
+              n44 =
+              te[ 15 ];
           //TODO: make this more efficient
           //( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
@@ -1629,7 +1936,8 @@ Primrose.Projector = ( function ( ) {
 
             if ( v1 === undefined )
               v1 = new THREE.Vector3( );
-            console.warn( 'THREE.Matrix4: .getPosition() has been removed. Use Vector3.setFromMatrixPosition( matrix ) instead.' );
+            console.warn(
+                'THREE.Matrix4: .getPosition() has been removed. Use Vector3.setFromMatrixPosition( matrix ) instead.' );
             var te = this.elements;
             return v1.set( te[ 12 ], te[ 13 ], te[ 14 ] );
           };
@@ -1647,30 +1955,72 @@ Primrose.Projector = ( function ( ) {
           // based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
           var te = this.elements;
           var me = m.elements;
-          var n11 = me[ 0 ], n12 = me[ 4 ], n13 = me[ 8 ], n14 = me[ 12 ];
-          var n21 = me[ 1 ], n22 = me[ 5 ], n23 = me[ 9 ], n24 = me[ 13 ];
-          var n31 = me[ 2 ], n32 = me[ 6 ], n33 = me[ 10 ], n34 = me[ 14 ];
-          var n41 = me[ 3 ], n42 = me[ 7 ], n43 = me[ 11 ], n44 = me[ 15 ];
-          te[ 0 ] = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
-          te[ 4 ] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
-          te[ 8 ] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
-          te[ 12 ] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
-          te[ 1 ] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
-          te[ 5 ] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
-          te[ 9 ] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
-          te[ 13 ] = n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34;
-          te[ 2 ] = n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44;
-          te[ 6 ] = n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44;
-          te[ 10 ] = n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44;
-          te[ 14 ] = n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34;
-          te[ 3 ] = n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43;
-          te[ 7 ] = n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43;
-          te[ 11 ] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
-          te[ 15 ] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
-          var det = n11 * te[ 0 ] + n21 * te[ 4 ] + n31 * te[ 8 ] + n41 * te[ 12 ];
+          var n11 = me[ 0 ],
+              n12 =
+              me[ 4 ],
+              n13 =
+              me[ 8 ],
+              n14 =
+              me[ 12 ];
+          var n21 = me[ 1 ],
+              n22 =
+              me[ 5 ],
+              n23 =
+              me[ 9 ],
+              n24 =
+              me[ 13 ];
+          var n31 = me[ 2 ],
+              n32 =
+              me[ 6 ],
+              n33 =
+              me[ 10 ],
+              n34 =
+              me[ 14 ];
+          var n41 = me[ 3 ],
+              n42 =
+              me[ 7 ],
+              n43 =
+              me[ 11 ],
+              n44 =
+              me[ 15 ];
+          te[ 0 ] = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 *
+              n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
+          te[ 4 ] = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 *
+              n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
+          te[ 8 ] = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 *
+              n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
+          te[ 12 ] = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 +
+              n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+          te[ 1 ] = n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 *
+              n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44;
+          te[ 5 ] = n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 *
+              n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44;
+          te[ 9 ] = n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 *
+              n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44;
+          te[ 13 ] = n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 -
+              n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34;
+          te[ 2 ] = n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 *
+              n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44;
+          te[ 6 ] = n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 *
+              n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44;
+          te[ 10 ] = n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 -
+              n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44;
+          te[ 14 ] = n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 +
+              n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34;
+          te[ 3 ] = n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 *
+              n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43;
+          te[ 7 ] = n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 *
+              n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43;
+          te[ 11 ] = n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 +
+              n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43;
+          te[ 15 ] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 -
+              n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
+          var det = n11 * te[ 0 ] + n21 * te[ 4 ] + n31 * te[ 8 ] + n41 *
+              te[ 12 ];
           if ( det === 0 ) {
 
-            var msg = "THREE.Matrix4.getInverse(): can't invert matrix, determinant is 0";
+            var msg =
+                "THREE.Matrix4.getInverse(): can't invert matrix, determinant is 0";
             if ( throwOnInvertible || false ) {
 
               throw new Error( msg );
@@ -1709,7 +2059,11 @@ Primrose.Projector = ( function ( ) {
         scale: function ( v ) {
 
           var te = this.elements;
-          var x = v.x, y = v.y, z = v.z;
+          var x = v.x,
+              y =
+              v.y,
+              z =
+              v.z;
           te[ 0 ] *= x;
           te[ 4 ] *= y;
           te[ 8 ] *= z;
@@ -1727,10 +2081,14 @@ Primrose.Projector = ( function ( ) {
         getMaxScaleOnAxis: function ( ) {
 
           var te = this.elements;
-          var scaleXSq = te[ 0 ] * te[ 0 ] + te[ 1 ] * te[ 1 ] + te[ 2 ] * te[ 2 ];
-          var scaleYSq = te[ 4 ] * te[ 4 ] + te[ 5 ] * te[ 5 ] + te[ 6 ] * te[ 6 ];
-          var scaleZSq = te[ 8 ] * te[ 8 ] + te[ 9 ] * te[ 9 ] + te[ 10 ] * te[ 10 ];
-          return Math.sqrt( Math.max( scaleXSq, Math.max( scaleYSq, scaleZSq ) ) );
+          var scaleXSq = te[ 0 ] * te[ 0 ] + te[ 1 ] * te[ 1 ] + te[ 2 ] *
+              te[ 2 ];
+          var scaleYSq = te[ 4 ] * te[ 4 ] + te[ 5 ] * te[ 5 ] + te[ 6 ] *
+              te[ 6 ];
+          var scaleZSq = te[ 8 ] * te[ 8 ] + te[ 9 ] * te[ 9 ] + te[ 10 ] *
+              te[ 10 ];
+          return Math.sqrt( Math.max( scaleXSq, Math.max( scaleYSq,
+              scaleZSq ) ) );
         },
         makeTranslation: function ( x, y, z ) {
 
@@ -1745,7 +2103,10 @@ Primrose.Projector = ( function ( ) {
         },
         makeRotationX: function ( theta ) {
 
-          var c = Math.cos( theta ), s = Math.sin( theta );
+          var c = Math.cos( theta ),
+              s =
+              Math.sin(
+                  theta );
           this.set(
               1, 0, 0, 0,
               0, c, -s, 0,
@@ -1757,7 +2118,10 @@ Primrose.Projector = ( function ( ) {
         },
         makeRotationY: function ( theta ) {
 
-          var c = Math.cos( theta ), s = Math.sin( theta );
+          var c = Math.cos( theta ),
+              s =
+              Math.sin(
+                  theta );
           this.set(
               c, 0, s, 0,
               0, 1, 0, 0,
@@ -1769,7 +2133,10 @@ Primrose.Projector = ( function ( ) {
         },
         makeRotationZ: function ( theta ) {
 
-          var c = Math.cos( theta ), s = Math.sin( theta );
+          var c = Math.cos( theta ),
+              s =
+              Math.sin(
+                  theta );
           this.set(
               c, -s, 0, 0,
               s, c, 0, 0,
@@ -1786,8 +2153,15 @@ Primrose.Projector = ( function ( ) {
           var c = Math.cos( angle );
           var s = Math.sin( angle );
           var t = 1 - c;
-          var x = axis.x, y = axis.y, z = axis.z;
-          var tx = t * x, ty = t * y;
+          var x = axis.x,
+              y =
+              axis.y,
+              z =
+              axis.z;
+          var tx = t * x,
+              ty =
+              t *
+              y;
           this.set(
               tx * x + c, tx * y - s * z, tx * z + s * y, 0,
               tx * y + s * z, ty * y + c, ty * z - s * x, 0,
@@ -1817,7 +2191,8 @@ Primrose.Projector = ( function ( ) {
         },
         decompose: function ( ) {
 
-          var vector, matrix;
+          var vector,
+              matrix;
           return function ( position, quaternion, scale ) {
 
             if ( vector === undefined )
@@ -1825,9 +2200,12 @@ Primrose.Projector = ( function ( ) {
             if ( matrix === undefined )
               matrix = new THREE.Matrix4( );
             var te = this.elements;
-            var sx = vector.set( te[ 0 ], te[ 1 ], te[ 2 ] ).length( );
-            var sy = vector.set( te[ 4 ], te[ 5 ], te[ 6 ] ).length( );
-            var sz = vector.set( te[ 8 ], te[ 9 ], te[ 10 ] ).length( );
+            var sx = vector.set( te[ 0 ], te[ 1 ], te[ 2 ] )
+                .length( );
+            var sy = vector.set( te[ 4 ], te[ 5 ], te[ 6 ] )
+                .length( );
+            var sz = vector.set( te[ 8 ], te[ 9 ], te[ 10 ] )
+                .length( );
             // if determine is negative, we need to invert one scale
             var det = this.determinant( );
             if ( det < 0 ) {
@@ -1840,7 +2218,8 @@ Primrose.Projector = ( function ( ) {
             position.z = te[ 14 ];
             // scale the rotation part
 
-            matrix.elements.set( this.elements ); // at this point matrix is incomplete so we can't use .copy()
+            matrix.elements.set(
+                this.elements ); // at this point matrix is incomplete so we can't use .copy()
 
             var invSX = 1 / sx;
             var invSY = 1 / sy;
@@ -1962,9 +2341,12 @@ Primrose.Projector = ( function ( ) {
 
           // http://www.broofa.com/Tools/Math.uuid.htm
 
-          var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split( '' );
+          var chars =
+              '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
+              '' );
           var uuid = new Array( 36 );
-          var rnd = 0, r;
+          var rnd = 0,
+              r;
           return function ( ) {
 
             for ( var i = 0; i < 36; i++ ) {
@@ -2095,9 +2477,9 @@ Primrose.Projector = ( function ( ) {
       /* jshint ignore:end */
     }
     this.objectIDs = [ ];
-    this.objects = {};
-    this.transformCache = {};
-    this.vertCache = {};
+    this.objects = { };
+    this.transformCache = { };
+    this.vertCache = { };
     this.a = new THREE.Vector3( );
     this.b = new THREE.Vector3( );
     this.c = new THREE.Vector3( );
@@ -2118,7 +2500,9 @@ Primrose.Projector = ( function ( ) {
   };
   Projector.prototype._fire = fireAll;
   Projector.prototype._transform = function ( obj, v ) {
-    return v.clone( ).applyMatrix4( obj.matrix );
+    return v.clone( )
+        .applyMatrix4(
+            obj.matrix );
   };
   // We have to transform the vertices of the geometry into world-space
   // coordinations, because the object they are on could be rotated or
@@ -2143,23 +2527,27 @@ Primrose.Projector = ( function ( ) {
     }
     else {
       this.setProperty( obj.uuid, "geometry.faces", obj.geometry.faces );
-      this.setProperty( obj.uuid, "geometry.faceVertexUvs", obj.geometry.faceVertexUvs );
+      this.setProperty( obj.uuid, "geometry.faceVertexUvs",
+          obj.geometry.faceVertexUvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
-    this.updateObject( obj );
+    this.updateObjects( [obj] );
   };
-  Projector.prototype.updateObject = function ( obj ) {
-    var head = obj,
-        a = new THREE.Matrix4( ),
-        b = new THREE.Matrix4( ).identity( );
-    while ( head !== null ) {
-      a.fromArray( head.matrix );
-      b.multiply( a );
-      head = head.parent;
+  Projector.prototype.updateObjects = function ( objs ) {
+    for ( var i = 0; i < objs.length; ++i ) {
+      var obj = objs[i],
+          head = obj,
+          a = new THREE.Matrix4( ),
+          b = new THREE.Matrix4( ).identity( );
+      while ( head !== null ) {
+        a.fromArray( head.matrix );
+        b.multiply( a );
+        head = head.parent;
+      }
+      this.setProperty( obj.uuid, "matrix", b );
+      this.setProperty( obj.uuid, "visible", obj.visible );
+      delete obj.parent;
     }
-    this.setProperty( obj.uuid, "matrix", b );
-    this.setProperty( obj.uuid, "visible", obj.visible );
-    delete obj.parent;
   };
   Projector.prototype.setProperty = function ( objID, propName, value ) {
     var obj = this.objects[objID],
@@ -2167,7 +2555,7 @@ Primrose.Projector = ( function ( ) {
     while ( parts.length > 1 ) {
       propName = parts.shift( );
       if ( !obj[propName] ) {
-        obj[propName] = {};
+        obj[propName] = { };
       }
       obj = obj[propName];
     }
@@ -2207,9 +2595,14 @@ Primrose.Projector = ( function ( ) {
               0, 0, 0, 1 );
           if ( this.m.determinant( ) !== 0 ) {
             this.m.getInverse( this.m );
-            this.d.subVectors( this.f, v0 ).applyMatrix4( this.m );
-            if ( this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <= 1 && this.d.z > 0 ) {
-              this.c.multiplyScalar( this.d.z ).add( this.f );
+            this.d.subVectors( this.f, v0 )
+                .applyMatrix4(
+                    this.m );
+            if ( this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <=
+                1 && this.d.z > 0 ) {
+              this.c.multiplyScalar( this.d.z )
+                  .add(
+                      this.f );
               var dist = Math.sign( this.d.z ) * this.p.distanceTo( this.c );
               if ( !value || dist < value.distance ) {
                 var uvs = obj.geometry.faceVertexUvs[0][j];
@@ -2217,9 +2610,12 @@ Primrose.Projector = ( function ( ) {
                 v1 = uvs[odd ? 2 : 1];
                 v2 = uvs[odd ? 0 : 2];
                 var uv = [
-                  this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) + v0[0],
-                  this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) + v0[1]];
-                this.d.crossVectors( this.a.normalize( ), this.b.normalize( ) );
+                  this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) +
+                      v0[0],
+                  this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) +
+                      v0[1] ];
+                this.d.crossVectors( this.a.normalize( ),
+                    this.b.normalize( ) );
                 value = {
                   objectID: objID,
                   distance: dist,
@@ -2237,9 +2633,12 @@ Primrose.Projector = ( function ( ) {
   };
   Projector.prototype._displayVector = function ( v, n ) {
     n = n || 3;
-    return v.toArray( ).map( function ( c ) {
-      return parseFloat( c.toFixed( n ) );
-    } );
+    return v.toArray( )
+        .map(
+            function (
+                c ) {
+              return parseFloat( c.toFixed( n ) );
+            } );
   };
   return Projector;
 } )( );

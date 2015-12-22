@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-   
+
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -485,9 +485,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.projector.ready ) {
         this.projector.ready = false;
 
-        for ( i = 0; i < this.pickableObjects.length; ++i ) {
-          this.projector.updateObject( createPickableObject( this.pickableObjects[i] ) );
-        }
+        this.projector.updateObjects(this.pickableObjects.map(createPickableObject));
 
         this.projector.projectPointer(
             this.pointer.position.toArray(),
