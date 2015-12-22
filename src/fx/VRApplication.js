@@ -527,6 +527,14 @@ Primrose.VRApplication = ( function ( ) {
               this.currentEditor = editor;
               this.currentEditor.focus();
             }
+            else if ( object === this.ground ) {
+              this.currentUser.position.set(
+                  fp[0] + fn[0] * this.avatarHeight,
+                  fp[1] + fn[1] * this.avatarHeight,
+                  fp[2] + fn[2] * this.avatarHeight );
+              this.currentUser.position.y = this.avatarHeight;
+              this.onground = false;
+            }
           }
 
           if ( this.currentEditor ) {
