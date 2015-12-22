@@ -2498,7 +2498,7 @@ Primrose.Projector = ( function ( ) {
     }
     this.listeners[evt].push( handler );
   };
-  Projector.prototype._fire = fireAll;
+  Projector.prototype._fireAll = fireAll;
   Projector.prototype._transform = function ( obj, v ) {
     return v.clone( )
         .applyMatrix4(
@@ -2631,7 +2631,7 @@ Primrose.Projector = ( function ( ) {
         }
       }
     }
-    this._fire( "hit", value );
+    this._fireAll( "hit", value );
   };
   return Projector;
 } )( );

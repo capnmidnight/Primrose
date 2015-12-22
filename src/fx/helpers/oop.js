@@ -37,12 +37,10 @@ function inherit ( classType, parentType ) {
   };
 } )();
 
-function fireAll () {
-  var args = Array.prototype.slice.call( arguments ),
-      evt = args.shift(),
-      handlers = this.listeners[evt];
+function fireAll (evt, args) {
+  var handlers = this.listeners[evt];
   for ( var i = 0; i < handlers.length; ++i ) {
     var thunk = handlers[i];
-    thunk.apply( thunk.executionContext || this, args );
+    thunk.call( thunk.executionContext || this, args );
   }
 }
