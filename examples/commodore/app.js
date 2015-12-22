@@ -77,7 +77,7 @@ function PrimroseDemo () {
   } );
 
   app.addEventListener( "update", function ( ) {
-    sky.position.copy( this.currentUser.position );
+    sky.position.copy( this.player.position );
   } );
 
   app.start();

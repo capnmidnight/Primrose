@@ -1,5 +1,3 @@
-/* global Function */
-
 function copyObject ( dest, source ) {
   var stack = [ {dest: dest, source: source} ];
   while ( stack.length > 0 ) {

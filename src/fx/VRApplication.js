@@ -69,7 +69,7 @@ Primrose.VRApplication = ( function ( ) {
     this.walkSpeed = this.options.walkSpeed;
     this.audio = new Primrose.Output.Audio3D( );
     this.music = new Primrose.Output.Music( this.audio.context );
-    this.currentUser = new THREE.Object3D( );
+    this.player = new THREE.Object3D( );
     this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
     this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
     this.buttons = [ ];
@@ -80,8 +80,8 @@ Primrose.VRApplication = ( function ( ) {
     //
     // Setup base state
     //
-    this.currentUser.velocity = new THREE.Vector3( );
-    this.currentUser.position.set( 0, this.avatarHeight, 0 );
+    this.player.velocity = new THREE.Vector3( );
+    this.player.position.set( 0, this.avatarHeight, 0 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
     this.nose.name = "Nose";
@@ -121,9 +121,9 @@ Primrose.VRApplication = ( function ( ) {
       lt = t;
       if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
         setSize.call( this );
-        this.scene.add( this.currentUser );
+        this.scene.add( this.player );
         this.scene.add( this.pointer );
-        this.currentUser.add( this.camera );
+        this.player.add( this.camera );
         this.camera.near = 0.01;
         this.camera.far = this.options.drawDistance * 2;
         this.camera.add( this.nose );
@@ -298,8 +298,8 @@ Primrose.VRApplication = ( function ( ) {
 
     this.zero = function ( ) {
       if ( !this.currentEditor ) {
-        this.currentUser.position.set( 0, this.avatarHeight, 0 );
-        this.currentUser.velocity.set( 0, 0, 0 );
+        this.player.position.set( 0, this.avatarHeight, 0 );
+        this.player.velocity.set( 0, 0, 0 );
       }
       if ( this.inVR ) {
         this.input.vr.sensor.resetSensor( );
@@ -308,7 +308,7 @@ Primrose.VRApplication = ( function ( ) {
 
     this.jump = function ( ) {
       if ( this.onground && !this.currentEditor ) {
-        this.currentUser.velocity.y += this.options.jumpHeight;
+        this.player.velocity.y += this.options.jumpHeight;
         this.onground = false;
       }
     };
@@ -408,7 +408,7 @@ Primrose.VRApplication = ( function ( ) {
       this.nose.visible = this.inVR && !isMobile;
 
       if ( !this.onground ) {
-        this.currentUser.velocity.y -= this.options.gravity * dt;
+        this.player.velocity.y -= this.options.gravity * dt;
       }
       else if ( !this.currentEditor || this.currentEditor.readOnly ) {
 
@@ -424,39 +424,39 @@ Primrose.VRApplication = ( function ( ) {
         drive *= len * dt;
 
         qHeading.setFromAxisAngle( UP, currentHeading );
-        this.currentUser.velocity.set( strafe, 0, drive );
+        this.player.velocity.set( strafe, 0, drive );
         if ( isMobile ) {
-          this.currentUser.velocity.applyQuaternion( qHead );
-          this.currentUser.velocity.y = 0;
+          this.player.velocity.applyQuaternion( qHead );
+          this.player.velocity.y = 0;
         }
-        this.currentUser.velocity.applyQuaternion( qHeading );
+        this.player.velocity.applyQuaternion( qHeading );
       }
 
-      this.currentUser.position.add( this.currentUser.velocity );
+      this.player.position.add( this.player.velocity );
 
-      if ( !this.onground && this.currentUser.position.y < this.avatarHeight ) {
+      if ( !this.onground && this.player.position.y < this.avatarHeight ) {
         this.onground = true;
-        this.currentUser.position.y = this.avatarHeight;
-        this.currentUser.velocity.y = 0;
+        this.player.position.y = this.avatarHeight;
+        this.player.velocity.y = 0;
       }
 
       if ( this.sky ) {
-        this.sky.position.copy( this.currentUser.position );
+        this.sky.position.copy( this.player.position );
       }
 
       if ( this.ground ) {
         this.ground.position.set(
-            Math.floor( this.currentUser.position.x ),
+            Math.floor( this.player.position.x ),
             0.5,
-            Math.floor( this.currentUser.position.z ) );
+            Math.floor( this.player.position.z ) );
         this.ground.material.needsUpdate = true;
       }
 
       if ( !this.inVR || isMobile ) {
         currentHeading = heading;
-        this.currentUser.quaternion.setFromAxisAngle( UP, currentHeading );
+        this.player.quaternion.setFromAxisAngle( UP, currentHeading );
         if ( !isMobile ) {
-          this.currentUser.quaternion.multiply( qPitch );
+          this.player.quaternion.multiply( qPitch );
         }
       }
       else {
@@ -467,7 +467,7 @@ Primrose.VRApplication = ( function ( ) {
           heading -= dh;
           dHeading = heading - currentHeading;
         }
-        this.currentUser.quaternion.setFromAxisAngle( UP, currentHeading );
+        this.player.quaternion.setFromAxisAngle( UP, currentHeading );
         qHeading.setFromAxisAngle( UP, dHeading ).multiply( qPitch );
       }
 
@@ -479,8 +479,8 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.position.add( this.camera.position );
         this.pointer.position.applyQuaternion( this.camera.quaternion );
       }
-      this.pointer.position.applyQuaternion( this.currentUser.quaternion );
-      this.pointer.position.add( this.currentUser.position );
+      this.pointer.position.applyQuaternion( this.player.quaternion );
+      this.pointer.position.add( this.player.position );
 
       if ( this.projector.ready ) {
         this.projector.ready = false;
@@ -489,7 +489,7 @@ Primrose.VRApplication = ( function ( ) {
 
         this.projector.projectPointer( [
           this.pointer.position.toArray(),
-          transformForPicking( this.currentUser ) ] );
+          transformForPicking( this.player ) ] );
       }
 
       var lastButtons = this.input.getValue( "dButtons" );
@@ -526,11 +526,11 @@ Primrose.VRApplication = ( function ( ) {
               this.currentEditor.focus();
             }
             else if ( object === this.ground ) {
-              this.currentUser.position.set(
+              this.player.position.set(
                   fp[0] + fn[0] * this.avatarHeight,
                   fp[1] + fn[1] * this.avatarHeight,
                   fp[2] + fn[2] * this.avatarHeight );
-              this.currentUser.position.y = this.avatarHeight;
+              this.player.position.y = this.avatarHeight;
               this.onground = false;
             }
           }
