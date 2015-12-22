@@ -21,10 +21,10 @@ function sigfig ( x, y ) {
  is the template itself. However, you cannot reference the first position,
  as zero digit characters are used to indicate the width of number to
  pad values out to.
-
+ 
  Numerical precision padding is indicated with a period and trailing
  zeros.
-
+ 
  examples:
  fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
  fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
@@ -53,8 +53,7 @@ var fmt = ( function () {
     if ( typeof template !== "string" ) {
       template = template.toString();
     }
-    return template.replace( paramRegex, function ( m, pad, index,
-        precision ) {
+    return template.replace( paramRegex, function ( m, pad, index, precision ) {
       index = parseInt( index, 10 );
       if ( 0 <= index && index < args.length ) {
         var val = args[index];
@@ -110,7 +109,7 @@ var fmt = ( function () {
 var px = fmt.bind( this, "$1px" ),
     pct = fmt.bind( this, "$1%" ),
     ems = fmt.bind( this, "$1em" ),
-    rgb = fmt.bind(this, "rgb($1, $2, $3)"),
-    rgba = fmt.bind(this, "rgba($1, $2, $3, $4)"),
-    hsl = fmt.bind(this, "hsl($1, $2, $3)"),
-    hsla = fmt.bind(this, "hsla($1, $2, $3, $4)");
+    rgb = fmt.bind( this, "rgb($1, $2, $3)" ),
+    rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" ),
+    hsl = fmt.bind( this, "hsl($1, $2, $3)" ),
+    hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );

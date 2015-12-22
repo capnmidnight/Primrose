@@ -27,16 +27,6 @@ function inherit ( classType, parentType ) {
   classType.prototype.constructor = classType;
 }
 
-
-( function () {
-  var _bind = Function.prototype.bind;
-  Function.prototype.bind = function () {
-    var thunk = _bind.apply( this, arguments );
-    thunk.executionContext = arguments[0];
-    return thunk;
-  };
-} )();
-
 function fireAll (evt, args) {
   var handlers = this.listeners[evt];
   for ( var i = 0; i < handlers.length; ++i ) {

@@ -97,9 +97,7 @@ Primrose.Workerize = ( function () {
     this.listeners[evt].push( thunk );
   };
 
-  Workerize.createWorker = function ( script ) {
-    var stripFunc = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
+  Workerize.createWorker = function ( script, stripFunc ) {
     if ( typeof script === "function" ) {
       script = script.toString();
     }

@@ -9,7 +9,7 @@ Primrose.WebRTCSocket = ( function () {
       Window.prototype.mozRTCPeerConnection ||
       function () {
       };
-  
+
   Window.prototype.RTCIceCandidate =
       Window.prototype.RTCIceCandidate ||
       Window.prototype.mozRTCIceCandidate ||
@@ -112,8 +112,8 @@ Primrose.WebRTCSocket = ( function () {
       listeners[evt].push( thunk );
     };
 
-    this.emit = function () {
-      var data = JSON.stringify( Array.prototype.slice.call( arguments ) );
+    this.emit = function ( args ) {
+      var data = JSON.stringify( args );
       for ( var i = 0; i < channels.length; ++i ) {
         var channel = channels[i];
         if ( channel && channel.readyState === "open" ) {

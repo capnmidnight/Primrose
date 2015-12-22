@@ -1204,7 +1204,6 @@ Primrose.Projector = ( function ( ) {
        */
 
       THREE.Matrix4 = function ( ) {
-
         this.elements = new Float32Array( [
           1, 0, 0, 0,
           0, 1, 0, 0,
@@ -1212,12 +1211,6 @@ Primrose.Projector = ( function ( ) {
           0, 0, 0, 1
 
         ] );
-        if ( arguments.length > 0 ) {
-
-          console.error(
-              'THREE.Matrix4: the constructor no longer reads arguments. use .set() instead.' );
-        }
-
       };
       THREE.Matrix4.prototype = {
         constructor: THREE.Matrix4,
