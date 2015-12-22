@@ -1,4 +1,4 @@
-/* global Primrose, CANNON, THREE, io, CryptoJS, fmt, Notification, requestFullScreen, isFullScreenMode, Function, fireAll, isMobile */
+/* global Primrose, CANNON, THREE, io, CryptoJS, Notification, requestFullScreen, isFullScreenMode, Function, fireAll, isMobile */
 Primrose.VRApplication = ( function ( ) {
   if ( typeof THREE === "undefined" ) {
     return function ( ) {
@@ -6,7 +6,7 @@ Primrose.VRApplication = ( function ( ) {
   }
   /*
    Create a new VR Application!
-
+   
    `name` - name the application, for use with saving settings separately from
    other applications on the same domain
    `options` - optional values to override defaults
@@ -485,11 +485,11 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.projector.ready ) {
         this.projector.ready = false;
 
-        this.projector.updateObjects(this.pickableObjects.map(createPickableObject));
+        this.projector.updateObjects( this.pickableObjects.map( createPickableObject ) );
 
-        this.projector.projectPointer(
-            this.pointer.position.toArray(),
-            transformForPicking( this.currentUser ) );
+        this.projector.projectPointer( [
+          this.pointer.position.toArray(),
+          transformForPicking( this.currentUser ) ] );
       }
 
       var lastButtons = this.input.getValue( "dButtons" );

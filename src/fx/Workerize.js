@@ -31,10 +31,12 @@ Primrose.Workerize = ( function () {
     // postMessage method, to send message to the UI thread that one of the
     // events occured.
     script += "\n  if(instance.addEventListener){\n" +
+        "    self.args = [null, null];\n" +
         "    for(var k in instance.listeners) {\n" +
-        "      instance.addEventListener(k, function(){\n" +
-        "        var args = Array.prototype.slice.call(arguments);\n" +
-        "        postMessage(args);\n" +
+        "      instance.addEventListener(k, function(eventName, args){\n" +
+        "        self.args[0] = eventName;\n" +
+        "        self.args[1] = args;\n" +
+        "        postMessage(self.args);\n" +
         "      }.bind(this, k));\n" +
         "    }\n" +
         "  }";
@@ -42,27 +44,28 @@ Primrose.Workerize = ( function () {
     // Create a mapper from the worker-side onmessage event, to receive messages
     // from the UI thread that methods were called on the object.
     script += "\n\n  onmessage = function(evt){\n" +
-        "    var f = evt.data.shift();\n" +
-        "    if(instance[f]){\n" +
-        "      instance[f].apply(instance, evt.data);\n" +
+        "    var f = evt.data[0],\n" +
+        "        t = instance[f];\n" +
+        "    if(t){\n" +
+        "      t.call(instance, evt.data[1]);\n" +
         "    }\n" +
-        "  }\n\n" +
+        "  };\n\n" +
         "})();";
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
     this.worker = Workerize.createWorker( script, false );
+    this.args = [ null, null ];
 
     // create a mapper from the UI-thread side onmessage event, to receive
     // messages from the worker thread that events occured and pass them on to
     // the UI thread.
     this.listeners = {};
     this.worker.onmessage = function ( e ) {
-      var f = e.data.shift();
-      if ( this.listeners[f] ) {
-        this.listeners[f].forEach( function ( g ) {
-          return g.apply( this, e.data );
-        } );
+      var f = e.data[0],
+          t = this.listeners[f];
+      for ( var i = 0; t && i < t.length; ++t ) {
+        t[i].call(this, e.data[1] );
       }
     }.bind( this );
 
@@ -79,10 +82,10 @@ Primrose.Workerize = ( function () {
     }
   }
 
-  Workerize.prototype.methodShim = function () {
-    // convert the varargs array to a real array
-    var args = Array.prototype.slice.call( arguments );
-    this.worker.postMessage( args );
+  Workerize.prototype.methodShim = function ( eventName, args ) {
+    this.args[0] = eventName;
+    this.args[1] = args;
+    this.worker.postMessage( this.args );
   };
 
   // Adding an event listener just registers a function as being ready to

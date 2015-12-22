@@ -19,7 +19,7 @@ Primrose.Text.Token = ( function () {
   };
 
   Token.prototype.toString = function(){
-    return fmt("[$1: $2]", this.type, this.value);
+    return "[" + this.type + ": " + this.value + "]";
   };
 
   return Token;

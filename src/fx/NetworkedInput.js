@@ -145,13 +145,10 @@ Primrose.NetworkedInput = ( function () {
       var cmd = this.commands[i];
       var cmdState = this.commandState[cmd.name];
       if ( cmdState ) {
-        state += fmt(
-            "$1:$2",
-            ( i << 2 )
+        state += ( i << 2 )
             | ( cmdState.pressed ? 0x1 : 0 )
-            | ( cmdState.fireAgain ? 0x2 : 0 ),
-            cmdState.value
-            );
+            | ( cmdState.fireAgain ? 0x2 : 0 ) + ":" +
+            cmdState.value;
         if ( i < this.commands.length - 1 ) {
           state += "|";
         }

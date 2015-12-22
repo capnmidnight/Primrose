@@ -12,7 +12,7 @@ Primrose.Projector = ( function ( ) {
        * @author mrdoob / http://mrdoob.com/
        */
 
-      self.THREE = { REVISION: '72dev' };
+      self.THREE = {REVISION: '72dev'};
 // polyfills
 
       if ( Math.sign === undefined ) {
@@ -189,7 +189,7 @@ Primrose.Projector = ( function ( ) {
 
           var halfAngle = angle / 2,
               s = Math.sin(
-              halfAngle );
+                  halfAngle );
           this._x = axis.x * s;
           this._y = axis.y * s;
           this._z = axis.z * s;
@@ -2343,7 +2343,7 @@ Primrose.Projector = ( function ( ) {
 
           var chars =
               '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
-              '' );
+                  '' );
           var uuid = new Array( 36 );
           var rnd = 0,
               r;
@@ -2477,9 +2477,9 @@ Primrose.Projector = ( function ( ) {
       /* jshint ignore:end */
     }
     this.objectIDs = [ ];
-    this.objects = { };
-    this.transformCache = { };
-    this.vertCache = { };
+    this.objects = {};
+    this.transformCache = {};
+    this.vertCache = {};
     this.a = new THREE.Vector3( );
     this.b = new THREE.Vector3( );
     this.c = new THREE.Vector3( );
@@ -2531,7 +2531,7 @@ Primrose.Projector = ( function ( ) {
           obj.geometry.faceVertexUvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
-    this.updateObjects( [obj] );
+    this.updateObjects( [ obj ] );
   };
   Projector.prototype.updateObjects = function ( objs ) {
     for ( var i = 0; i < objs.length; ++i ) {
@@ -2555,7 +2555,7 @@ Primrose.Projector = ( function ( ) {
     while ( parts.length > 1 ) {
       propName = parts.shift( );
       if ( !obj[propName] ) {
-        obj[propName] = { };
+        obj[propName] = {};
       }
       obj = obj[propName];
     }
@@ -2569,8 +2569,10 @@ Primrose.Projector = ( function ( ) {
       obj[parts[0]] = value;
     }
   };
-  Projector.prototype.projectPointer = function ( p, from ) {
-    var value = null;
+  Projector.prototype.projectPointer = function ( args ) {
+    var p = args[0],
+        from = args[1],
+        value = null;
     this.p.fromArray( p );
     this.f.fromArray( from );
     for ( var i = 0; i < this.objectIDs.length; ++i ) {
@@ -2630,15 +2632,6 @@ Primrose.Projector = ( function ( ) {
       }
     }
     this._fire( "hit", value );
-  };
-  Projector.prototype._displayVector = function ( v, n ) {
-    n = n || 3;
-    return v.toArray( )
-        .map(
-            function (
-                c ) {
-              return parseFloat( c.toFixed( n ) );
-            } );
   };
   return Projector;
 } )( );
