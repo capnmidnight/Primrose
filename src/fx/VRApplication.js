@@ -62,7 +62,6 @@ Primrose.VRApplication = ( function ( ) {
     //
     // Initialize public properties
     //
-    this.onground = true;
     this.inVR = false;
     this.currentEditor = null;
     this.avatarHeight = this.options.avatarHeight;
@@ -72,7 +71,6 @@ Primrose.VRApplication = ( function ( ) {
     this.player = new THREE.Object3D( );
     this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
     this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
-    this.buttons = [ ];
     this.pickableObjects = [ ];
     this.projector = new Primrose.Workerize( Primrose.Projector );
     this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
@@ -82,6 +80,7 @@ Primrose.VRApplication = ( function ( ) {
     //
     this.player.velocity = new THREE.Vector3( );
     this.player.position.set( 0, this.avatarHeight, 0 );
+    this.player.isOnGround = true;
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
     this.nose.name = "Nose";
@@ -307,9 +306,9 @@ Primrose.VRApplication = ( function ( ) {
     };
 
     this.jump = function ( ) {
-      if ( this.onground && !this.currentEditor ) {
+      if ( this.player.isOnGround && !this.currentEditor ) {
         this.player.velocity.y += this.options.jumpHeight;
-        this.onground = false;
+        this.player.isOnGround = false;
       }
     };
 
@@ -407,7 +406,7 @@ Primrose.VRApplication = ( function ( ) {
 
       this.nose.visible = this.inVR && !isMobile;
 
-      if ( !this.onground ) {
+      if ( !this.player.isOnGround ) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
       else if ( !this.currentEditor || this.currentEditor.readOnly ) {
@@ -434,8 +433,8 @@ Primrose.VRApplication = ( function ( ) {
 
       this.player.position.add( this.player.velocity );
 
-      if ( !this.onground && this.player.position.y < this.avatarHeight ) {
-        this.onground = true;
+      if ( !this.player.isOnGround && this.player.position.y < this.avatarHeight ) {
+        this.player.isOnGround = true;
         this.player.position.y = this.avatarHeight;
         this.player.velocity.y = 0;
       }
@@ -531,7 +530,7 @@ Primrose.VRApplication = ( function ( ) {
                   fp[1] + fn[1] * this.avatarHeight,
                   fp[2] + fn[2] * this.avatarHeight );
               this.player.position.y = this.avatarHeight;
-              this.onground = false;
+              this.player.isOnGround = false;
             }
           }
 
