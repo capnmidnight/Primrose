@@ -46,7 +46,7 @@ Primrose.Text.Cursor = ( function ( ) {
   };
 
   Cursor.prototype.toString = function () {
-    return fmt( "[i:$1 x:$2 y:$3]", this.i, this.x, this.y );
+    return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
   };
 
   Cursor.prototype.copy = function ( cursor ) {

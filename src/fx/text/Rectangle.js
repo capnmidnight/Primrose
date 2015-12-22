@@ -92,7 +92,7 @@ Primrose.Text.Rectangle = ( function ( ) {
   };
 
   Rectangle.prototype.toString = function () {
-    return fmt( "[$1 x $2]", this.point.toString(), this.size.toString() );
+    return "[" + this.point.toString() + " x " + this.size.toString() + "]";
   };
 
   return Rectangle;

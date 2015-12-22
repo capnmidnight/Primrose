@@ -23,7 +23,7 @@ Primrose.Text.Point = ( function ( ) {
   };
 
   Point.prototype.toString = function () {
-    return fmt( "(x:$1, y:$2)", this.x, this.y );
+    return "(x:" + this.x + ", y:" + this.y + ")";
   };
 
   return Point;

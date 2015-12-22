@@ -23,7 +23,7 @@ Primrose.Text.Size = (function ( ) {
   };
 
   Size.prototype.toString = function () {
-    return fmt( "<w:$1, h:$2>", this.width, this.height );
+    return "<w:" + this.width + ", h:" + this.height + ">";
   };
 
   return Size;
