@@ -362,7 +362,6 @@ Primrose.VRApplication = ( function ( ) {
 
     function makeButton ( ) {
       var btn = this.buttonFactory.create( false );
-      console.log( btn );
       this.scene.add( btn.base );
       this.scene.add( btn.cap );
       this.registerPickableObject( btn.cap );

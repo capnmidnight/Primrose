@@ -19,9 +19,7 @@ function StartDemo () {
       } );
 
   function play ( i ) {
-    console.log( "play " + i );
     noteDown[i] = true;
-    console.log( noteDown.join() );
   }
 
   var noteDown = [ ];
