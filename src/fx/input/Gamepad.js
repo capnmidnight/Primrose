@@ -138,3 +138,22 @@ Primrose.Input.Gamepad = ( function () {
   Primrose.Input.ButtonAndAxis.inherit( GamepadInput );
   return GamepadInput;
 } )();
+
+Primrose.Input.Gamepad.XBOX_BUTTONS = {
+    'A': 1,
+    'B': 2,
+    'X': 3,
+    'Y': 4,
+    'leftBumper': 5,
+    'rightBumper': 6,
+    'leftTrigger': 7,
+    'rightTrigger': 8,
+    'back': 9,
+    'start': 10,
+    'leftStick': 11,
+    'rightStick': 12,
+    'up': 13,
+    'down': 14,
+    'left': 15,
+    'right': 16
+};
