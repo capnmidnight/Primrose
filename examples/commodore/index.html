@@ -6,15 +6,13 @@
     <title>Primrose: Canvas-based text editor</title>
     <link type="text/css" rel="stylesheet" href="style.css">
     <script type="text/javascript" src="../../bin/ga.min.js"></script>
-    <script type="text/javascript" src="../../bin/three.min.js"></script>
+    <script type="text/javascript" src="../../bin/three.js"></script>
     <script type="text/javascript" src="../../bin/cannon.min.js"></script>
-    <script type="text/javascript" src="../../bin/Primrose.min.js"></script>
+    <script type="text/javascript" src="../../bin/Primrose.js"></script>
     <script type="text/javascript" src="app.js"></script>
   </head>
-  <body onload="ga('send', 'pageview');findVR(PrimroseDemo);">
-    <div id="outputContainer">
-      <canvas id="output"></canvas>
-    </div>
+  <body onload="PrimroseDemo();">
+    <canvas id="output"></canvas>
 
     <article id="main">
       <a class="primary button" id="goVR" style="display:none">

@@ -78,3 +78,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 start.py
+examples/ovrdesk/
+*.blend1

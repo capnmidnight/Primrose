@@ -1,6 +1,13 @@
-/* global Primrose */
+/* global Primrose, Window */
 
 Primrose.Output.Audio3D = ( function () {
+
+  /* polyfill */
+  Window.prototype.AudioContext =
+      Window.prototype.AudioContext ||
+      Window.prototype.webkitAudioContext ||
+      function () {
+      };
 
   function Audio3D () {
 
@@ -20,9 +27,12 @@ Primrose.Output.Audio3D = ( function () {
     }
     catch ( exp ) {
       this.isAvailable = false;
-      this.setPosition = function () { };
-      this.setVelocity = function () { };
-      this.setOrientation = function () { };
+      this.setPosition = function () {
+      };
+      this.setVelocity = function () {
+      };
+      this.setOrientation = function () {
+      };
       this.error = exp;
       console.error( "AudioContext not available. Reason: ", exp.message );
     }

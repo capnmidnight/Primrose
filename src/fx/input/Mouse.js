@@ -20,12 +20,12 @@ Primrose.Input.Mouse = ( function () {
       if ( MouseInput.isPointerLocked() ) {
         var mx = event.movementX,
             my = event.movementY;
-        
-        if(mx === undefined){
+
+        if ( mx === undefined ) {
           mx = event.webkitMovementX || event.mozMovementX || 0;
           my = event.webkitMovementY || event.mozMovementY || 0;
         }
-        this.setMovement(mx, my);
+        this.setMovement( mx, my );
       }
       else {
         this.setLocation( event.clientX, event.clientY );
@@ -108,7 +108,11 @@ Primrose.Input.Mouse = ( function () {
       }
     };
 
-    this.exitPointerLock = document.exitPointerLock.bind( document );
+    this.exitPointerLock = ( document.webkitExitPointerLock ||
+        document.mozExitPointerLock ||
+        document.exitPointerLock ||
+        function () {
+        } ).bind( document );
 
     this.togglePointerLock = function () {
       if ( MouseInput.isPointerLocked() ) {

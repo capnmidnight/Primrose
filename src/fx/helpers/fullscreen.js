@@ -1,4 +1,4 @@
-/* global isMobile, help */
+/* global isMobile, help, HMDVRDevice */
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||
@@ -10,21 +10,24 @@ function isFullScreenMode () {
 function requestFullScreen ( elem, vrDisplay ) {
   var fullScreenParam;
 
-  if ( vrDisplay ) {
+  if ( window.HMDVRDevice && vrDisplay && vrDisplay instanceof HMDVRDevice) {
     fullScreenParam = {vrDisplay: vrDisplay};
   }
-
+  
   if ( elem.webkitRequestFullscreen && fullScreenParam ) {
     elem.webkitRequestFullscreen( fullScreenParam );
   }
   else if ( elem.webkitRequestFullscreen && !fullScreenParam ) {
     elem.webkitRequestFullscreen( window.Element.ALLOW_KEYBOARD_INPUT );
   }
+  else if ( elem.mozRequestFullScreen && fullScreenParam ) {
+    elem.mozRequestFullScreen( fullScreenParam );
+  }
+  else if ( elem.mozRequestFullScreen && !fullScreenParam ) {
+    elem.mozRequestFullScreen( );
+  }
   else if ( elem.requestFullscreen ) {
     elem.requestFullscreen();
-  }
-  else if ( elem.mozRequestFullScreen ) {
-    elem.mozRequestFullScreen();
   }
   else if ( elem.msRequestFullscreen ) {
     elem.msRequestFullscreen();
@@ -73,30 +76,4 @@ function addFullScreenShim ( elems ) {
       }
     } );
   } );
-}
-
-var exitPointerLock = ( document.exitPointerLock ||
-    document.webkitExitPointerLock || document.mozExitPointerLock ||
-    function () {
-    } ).bind( document );
-
-function isPointerLocked () {
-  return !!( document.pointerLockElement ||
-      document.webkitPointerLockElement ||
-      document.mozPointerLockElement );
-}
-
-function requestPointerLock ( elem ) {
-  if ( !elem ) {
-    elem = document.documentElement;
-  }
-  if ( elem.requestPointerLock ) {
-    elem.requestPointerLock();
-  }
-  else if ( elem.webkitRequestPointerLock ) {
-    elem.webkitRequestPointerLock();
-  }
-  else if ( elem.mozRequestPointerLock ) {
-    elem.mozRequestPointerLock();
-  }
 }

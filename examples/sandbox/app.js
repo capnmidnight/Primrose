@@ -3,7 +3,7 @@ var app;
 function StartDemo () {
 
   app = new Primrose.VRApplication(
-      "music demo",
+      "sandbox",
       {
         sceneModel: "../models/scene3.json",
         button: {

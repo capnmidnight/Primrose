@@ -191,7 +191,7 @@ function quad ( w, h, s, t ) {
   if ( h === undefined ) {
     h = w;
   }
-  return new THREE.PlaneBufferGeometry( w, h );
+  return new THREE.PlaneGeometry( w, h, s, t );
 }
 
 function hub ( ) {
@@ -295,7 +295,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
 }
 
 function sphere ( r, slices, rings ) {
-  return new THREE.SphereGeometry( r, slices, rings );
+  return new THREE.SphereBufferGeometry( r, slices, rings );
 }
 
 function shell ( r, slices, rings, phi, theta ) {
@@ -321,17 +321,20 @@ function makeEditor ( scene, pickingScene, id, w, h, x, y, z, rx, ry, rz, option
     options.opacity = 1;
   }
   var t = new Primrose.Text.Controls.TextBox( id, options ),
-      cellWidth = Math.round(1024 * w / options.fontSize),
-      cellHeight = Math.round(1024 * h / options.fontSize),
+      cellWidth = Math.round( 1024 * w / options.fontSize ),
+      cellHeight = Math.round( 1024 * h / options.fontSize ),
       makeGeom = ( id === "textEditor" ) ? shell.bind( this, 1, cellWidth, cellHeight ) : quad.bind( this, w, h, cellWidth, cellHeight ),
-      o = textured( makeGeom(), t, true, options.opacity ),
-      p = textured( makeGeom(), t.getRenderer( )
-          .getPickingTexture( ), true );
+      o = textured( makeGeom(), t, true, options.opacity );
+
   o.position.set( x, y, z );
   o.rotation.set( rx, ry, rz );
-  p.position.set( x, y, z );
-  p.rotation.set( rx, ry, rz );
   scene.add( o );
-  pickingScene.add( p );
+  if ( pickingScene ) {
+    var p = textured( makeGeom(), t.getRenderer( )
+        .getPickingTexture( ), true );
+    p.position.set( x, y, z );
+    p.rotation.set( rx, ry, rz );
+    pickingScene.add( p );
+  }
   return o;
 }

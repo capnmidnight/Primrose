@@ -1,11 +1,32 @@
-/* global Primrose, io */
+/* global Primrose, io, Window */
 
 Primrose.WebRTCSocket = ( function () {
+
+  /* polyfills */
+  Window.prototype.RTCPeerConnection =
+      Window.prototype.RTCPeerConnection ||
+      Window.prototype.webkitRTCPeerConnection ||
+      Window.prototype.mozRTCPeerConnection ||
+      function () {
+      };
+  
+  Window.prototype.RTCIceCandidate =
+      Window.prototype.RTCIceCandidate ||
+      Window.prototype.mozRTCIceCandidate ||
+      function () {
+      };
+
+  Window.prototype.RTCSessionDescription =
+      Window.prototype.RTCSessionDescription ||
+      Window.prototype.mozRTCSessionDescription ||
+      function () {
+      };
+
   function WebRTCSocket ( proxyServer, isStarHub ) {
     var socket,
         peers = [ ],
         channels = [ ],
-        listeners = { },
+        listeners = {},
         myIndex = null;
 
     function descriptionCreated ( myIndex, theirIndex, description ) {
@@ -92,7 +113,7 @@ Primrose.WebRTCSocket = ( function () {
     };
 
     this.emit = function () {
-      var data = JSON.stringify( arr( arguments ) );
+      var data = JSON.stringify( Array.prototype.slice.call( arguments ) );
       for ( var i = 0; i < channels.length; ++i ) {
         var channel = channels[i];
         if ( channel && channel.readyState === "open" ) {
@@ -140,7 +161,7 @@ Primrose.WebRTCSocket = ( function () {
               "stun3.l.google.com:19302",
               "stun4.l.google.com:19302"
             ].map( function ( o ) {
-              return { url: "stun:" + o };
+              return {url: "stun:" + o};
             } )
           } );
 
