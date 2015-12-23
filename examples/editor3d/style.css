@@ -31,44 +31,6 @@ html, body{
   margin: 0;
 }
 
-.button
-{
-  cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  padding: 10px;
-  font-weight: bold;
-  width: 100%;
-}
-
-.button > small{
-  font-weight: normal;
-  opacity: 0.85;
-}
-
-.button:hover{
-  box-shadow: 0px 0px 15px #bbb;
-}
-
-.primary.button{
-  box-shadow: 3px 3px 10px #71767C;
-  background-color: rgb(252, 255, 142);
-  background-image: linear-gradient(1deg, rgb(242, 194, 5), rgb(245, 250, 50), rgb(254, 255, 216));
-  color: #3B3D13;
-  text-shadow: 1px 1px 5px rgb(134, 134, 40);
-}
-
-.disabled.button{
-  background-color: #ddd;
-  color: #fff;
-  cursor: not-allowed;
-}
-
-.disabled.button:hover{
-  box-shadow: none;
-}
-
 article{
   color: rgb(255, 255, 255);
   background-image: linear-gradient(1deg, rgba(25, 35, 53, 1), rgba(31, 56, 92, 0.89), rgba(67, 128, 194, 0.95));
@@ -101,32 +63,15 @@ body{
   background-attachment: fixed;
   font-family: 'Trebuchet MS', sans-serif;
 }
-
-#nightly{
-  font-style: italic;
-  margin: 1em;
-  padding: 1em;
-  border: dashed 5px rgb(239, 255, 0);
-  background-color: rgb(15, 19, 37);
+#goVR{
+  display:block;
+  position:absolute;
+  width:100%;
+  bottom:0;
+  background-color: transparent;
+  border:0;
+  cursor:pointer
 }
-
-#settings>thead>tr>th{
-  text-align: left;
-}
-
-#settings>tbody>tr>td{
-  vertical-align: top;
-  padding-right:1em;
-}
-
-a{
-  color: rgb(249, 255, 0);
-}
-
-a:visited{
-  color: rgb(255, 204, 110);
-}
-
 #frontBuffer{
   position: fixed;
   width: 100%;
