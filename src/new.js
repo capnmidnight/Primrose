@@ -23,11 +23,6 @@ window.ftypes = [ 'email', 'text', 'text' ];
 function initStore ( ) {
   ga( 'send', 'pageview' );
   
-  if ( !navigator.getVRDevices ) {
-    document.getElementById( "nightly" ).style.display = "block";
-  }
-
-
   function byClass ( c, t ) {
     Array.prototype.forEach.call( document.getElementsByClassName( c ), t );
   }

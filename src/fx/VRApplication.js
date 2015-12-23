@@ -550,20 +550,21 @@ Primrose.VRApplication = ( function ( ) {
 
       var lastButtons = this.input.getValue( "dButtons" );
       if ( currentHit ) {
-        var fp = currentHit.facePoint, fn = currentHit.faceNormal;
+        var fp = currentHit.facePoint, fn = currentHit.faceNormal,
+            object = this.findObject( currentHit.objectID );
         this.pointer.position.set(
             fp[0] + fn[0] * POINTER_RADIUS,
             fp[1] + fn[1] * POINTER_RADIUS,
             fp[2] + fn[2] * POINTER_RADIUS );
+            
         if ( object === this.ground ) {
-          this.pointer.scale.set( 1, 1, 1 );
+          this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
         }
         else {
-          this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
+          this.pointer.scale.set( 1, 1, 1 );
         }
         this.pointer.material.color.setRGB( 1, 1, 1 );
         this.pointer.material.emissive.setRGB( 0.25, 0.25, 0.25 );
-        var object = this.findObject( currentHit.objectID );
         if ( object ) {
           var buttons = this.input.getValue( "buttons" ),
               clickChanged = lastButtons !== 0,

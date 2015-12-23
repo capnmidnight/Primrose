@@ -22,105 +22,18 @@ function init () {
   ed = new Primrose.Text.Controls.TextBox( "editor", {
     autoBindEvents: true,
     keyEventSource: window,
-    tokenizer: Primrose.Text.Grammars.Basic,
-    theme: Primrose.Text.Themes.Dark,
-    hideLineNumbers: true
+    tokenizer: Primrose.Text.Grammars.JavaScript,
+    theme: Primrose.Text.Themes.Default
   } );
-  var running = false,
-      inputCallback = null,
-      currentEditIndex = 0,
-      currentProgram = null;
 
-  function toEnd (  ) {
-    ed.selectionStart = ed.selectionEnd = ed.value.length;
-    ed.scrollIntoView( ed.frontCursor );
-  }
-
-  function done () {
-    if ( running ) {
-      flush( );
-      running = false;
-      ed.setTokenizer( Primrose.Text.Grammars.Basic );
-      ed.value = currentProgram;
-      toEnd( );
-    }
-  }
-
-  function clearScreen () {
-    ed.selectionStart = ed.selectionEnd = 0;
-    ed.value = "";
-    return true;
-  }
-
-  function loadFile ( fileName, callback ) {
-    GET( fileName.toLowerCase(), "text", function ( file ) {
-      if ( isOSX ) {
-        file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
-      }
-      ed.value = currentProgram = file;
-      if ( callback ) {
-        callback();
-      }
+  function loadFile ( fileName ) {
+    GET( fileName, "text", function ( file ) {
+      ed.value = file;
+      ed.focus();
     } );
   }
 
-  loadFile( "../oregon.bas" );
-
-  function flush () {
-    if ( buffer.length > 0 ) {
-      ed.value += buffer;
-      buffer = "";
-    }
-  }
-
-  function input ( callback ) {
-    flush();
-    inputCallback = callback;
-    toEnd( );
-    currentEditIndex = ed.selectionStart;
-  }
-
-  var buffer = "";
-  function stdout ( str ) {
-    buffer += str;
-    toEnd( );
-  }
-
-  ed.addEventListener( "keydown", function ( evt ) {
-    if ( running && inputCallback && evt.keyCode === Primrose.Keys.ENTER ) {
-      var str = ed.value.substring( currentEditIndex );
-      str = str.substring( 0, str.length - 1 );
-      inputCallback( str );
-      inputCallback = null;
-    }
-    else if ( !running &&
-        ( !isOSX &&
-            evt.ctrlKey &&
-            evt.keyCode === Primrose.Keys.ENTER ) ||
-        ( isOSX &&
-            evt.metaKey &&
-            evt.altKey &&
-            evt.keyCode === Primrose.Keys.E ) ) {
-
-      running = true;
-
-      var next = function () {
-        if ( running ) {
-          setTimeout( looper, 1 );
-        }
-      };
-
-      currentProgram = ed.value;
-      var looper = Primrose.Text.Grammars.Basic.interpret( currentProgram, input,
-          stdout, stdout, next, clearScreen, loadFile, done );
-      ed.setTokenizer( Primrose.Text.Grammars.PlainText );
-      clearScreen();
-      next();
-    }
-  } );
-
+  loadFile( "../sandbox/app.js" );
   document.body.appendChild( ed.getDOMElement() );
-
-
   setInterval( ed.render.bind( ed ), 15 );
 }

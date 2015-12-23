@@ -26,10 +26,15 @@ ul {
   width: 100%;
   height: 40vw;
 }
-#frontBuffer {
+iframe {
   border: none;
   width: 100%;
+}
+#frontBuffer {
   height: 100%;
+}
+#example{
+  height: 20em;
 }
 #overlay{
   box-sizing: border-box;
@@ -104,36 +109,36 @@ main p {
   margin: 0 0 1em 0;
 }
 
-#introduction {
+main > section:nth-child(1), main > section:nth-child(5){
   background-color: white;
 }
-
-#nightly{
-  padding: 1em;
-  border: dashed 5px red;
-  background-color: #ddd;        
+main > section:nth-child(1), main > section:nth-child(1) a,
+main > section:nth-child(5), main > section:nth-child(5) a{
+  color: black;
 }
-#nightly h3{
-  text-align: center;
-  color: red;
-  text-transform: uppercase;
-  margin-bottom: 1em;
-  margin-top: 0;
-}      
-#nightly ul {
-  margin-left: 1em;
-}      
-#nightly li {
-  padding-left: 1em;
+main > section:nth-child(2), main > section:nth-child(6){
+  background-color: #E1CFF6;
 }
-
-#examples {
+main > section:nth-child(2), main > section:nth-child(2) a,
+main > section:nth-child(6), main > section:nth-child(6) a{
+  color: black;
+}
+main > section:nth-child(3), main > section:nth-child(7){
   background-color: #333;
+}
+main > section:nth-child(3), main > section:nth-child(3) a,
+main > section:nth-child(7), main > section:nth-child(7) a{
   color: white;
 }
-#examples div {
-  margin-bottom: 1em;
+main > section:nth-child(4), main > section:nth-child(4){
+  background-color: #7FDCDF;
 }
+main > section:nth-child(4), main > section:nth-child(4) a,
+main > section:nth-child(8), main > section:nth-child(8) a{
+  color: black;
+}
+
+
 #examples div img {
   width: 100%;
 }
@@ -149,13 +154,6 @@ main p {
   font-style: italic;
 }
 
-#about {
-  background-color: #E1CFF6;
-}
-
-#team {
-  background-color: #7FDCDF;
-}
 #team > article > div > img{
   display: block;
   width: 100%;
@@ -200,7 +198,7 @@ footer > * {
   header{
     display:block;
   }
-  #introduction p:nth-child(2), 
+  #introduction div:nth-child(2), 
   #about > article > div:nth-child(2){
     -webkit-column-count: 2;
     -moz-column-count: 2;

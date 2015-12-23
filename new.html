@@ -35,8 +35,8 @@
       <nav role="navigation">
         <ul>
           <li><a href="#introduction">intro/</a></li>
+          <li><a href="#webvr">webvr/</a></li>
           <li><a href="#examples">demos/</a></li>
-          <li><a href="#about">about/</a></li>
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
         </ul>
       </nav>
@@ -46,14 +46,28 @@
       <section id="introduction">
         <article>
           <h2>Make VR Apps for your browser</h2>
-          <p>
-            Primrose is a cross-browser, multi-device framework for building productivity tools
-            in WebGL applications. It includes a suite of GUI controls&mdash;like buttons and a
-            syntax-highlighting code editor control&mdash;to simplify the process of building
-            VR applications that emphasize interactive, productive work. Use it to experiment 
-            with new ideas on productivity UIs in virtual spaces.
-          </p>
+          <div>
+            <img src="images/new/logo128.png" alt="logo" title="Primrose" style="float:left;">
+            <p>
+              Primrose is a cross-browser, multi-device framework for building productivity tools
+              in <a href="#webvr">WebVR</a> applications. Developers model their scenes in
+              <a href="http://www.blender.org">Blender</a> (or some other 3D modeling package),
+              create a web page using Primrose to load the scene, then manipulate
+              objects within the scene using interfaces similar to the standard DOM
+              functions with which they are already familiar.
+            </p>
+            <p>
+              It includes a suite of GUI controls&mdash;like buttons and a
+              syntax-highlighting code editor control&mdash;to simplify the process of building
+              VR applications that emphasize interactive, productive work. Use it to experiment 
+              with new ideas on productivity UIs in virtual spaces.
+            </p>
 
+            <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be
+              used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
+          </div>
+          <h3>Basic example:</h3>
+          <iframe id="example" src="examples/editor2d/index.html"></iframe>
           <p>
             <a href="bin/Primrose.min.js" class="primary button download-minified-link" target="_blank">
               Primrose.min.js, 
@@ -70,27 +84,43 @@
             </a>
           </p>
 
-          <p style="text-align:right"><a href="archive/">Archive of past versions</a></p>
+          <p>
+            <em>NOTE: This is still an early alpha release, with bugs of both the known
+              and unknown variety. In particular, I have no way of testing whether
+              or not the international keyboard support is correct. I'll also be making
+              major breaking changes over the near future as I build new features, delete
+              old ideas, and move code around to whatever place makes the best sense. If
+              you have built something that relies on a particular version of Primrose,
+              please see <a href="archive/">the archive directory</a>.</em>
+          </p>
+        </article>
+      </section>
 
-          <aside id="nightly" style="display:none">
-            <h3>Whoops!</h3>
-            It looks like your browser does not have WebVR available. WebVR is a
-            growing web standard! Check out these links for more information.<br><br>
-            <ul>
-              <li>
-                <a href="http://mozvr.com/" target="_blank">MozVR.com</a>:
-                The latest in WebVR news.
-              </li>
-              <li>
-                <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chromium WebVR</a>:
-                With WebVR sauce!
-              </li>
-              <li>
-                <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a>:
-                Also with WebVR sauce!
-              </li>
-            </ul>
-          </aside>
+      <section id="webvr">
+        <article>
+          <h2>WebVR</h2>
+          <p>
+            WebVR brings virtual reality devices like the Oculus Rift,
+            or smartphones with Google Cardboard, to the web browser. With WebVR,
+            developers can create immersive virtual reality experiences that run
+            on any WebGL-enabled browser.
+          </p>
+          <ul>
+            <li>
+              <a href="http://webvr.info/" target="_blank">WebVR.info</a>: WebVR standard information.
+            </li>
+            <li>
+              <a href="http://mozvr.com/" target="_blank">MozVR.com</a>: Mozilla's WebVR team.
+            </li>
+            <li>
+              <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a>:
+              With WebVR sauce!
+            </li>
+            <li>
+              <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chromium WebVR</a>:
+              Also with WebVR sauce!
+            </li>
+          </ul>
         </article>
       </section>
 
@@ -111,40 +141,13 @@
               <small>Cutting edge 1977 technology!</small>
             </a>
           </div>
-        </article>
-      </section>
-
-      <section id="about">
-        <article>
-          <h2>About Primrose <span class="version-label"></span></h2>
           <div>
-            <img src="images/new/logo128.png" alt="logo" title="Primrose" style="float:left;">
-            <p>
-              Primrose is a cross-browser, multi-device framework for building productivity tools
-              in WebGL applications. It includes a suite of GUI controls&mdash;like buttons and a
-              syntax-highlighting code editor control&mdash;to simplify the process of building
-              VR applications that emphasize interactive, productive work.
-            </p>
-
-            <p>
-              Primrose includes a lightweight text editor control with syntax highlighting
-              and keyboard shortcuts. It draws directly to an HTML Canvas element.
-              The resulting image can easily be used as a texture on a 3D object in a WebGL context.
-            </p>
-
-            <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be
-              used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
+            <a href="examples/sandbox/index.html" target="_blank">
+              <img src="examples/sandbox/screenshot.jpg" alt="screenshot" title="Commodore PET"><br>
+              Sandbox<br>
+              <small>stuff!</small>
+            </a>
           </div>
-
-          <p>
-            <em>NOTE: This is still an early alpha release, with bugs of both the known
-              and unknown variety. In particular, I have no way of testing whether
-              or not the international keyboard support is correct. I'll also be making
-              major breaking changes over the near future as I build new features, delete
-              old ideas, and move code around to whatever place makes the best sense. If
-              you have built something that relies on a particular version of Primrose,
-              please see <a href="archive/">the archive directory</a>.</em>
-          </p>
         </article>
       </section>
 
@@ -287,6 +290,6 @@
 
     <script type="text/javascript" src="bin/mailchimp.min.js" async></script>
     <script type="text/javascript" src="bin/ga.min.js"></script>
-    <script type="text/javascript" src="bin/new.min.js"></script>
+    <script type="text/javascript" src="src/new.js"></script>
   </body>
 </html>
