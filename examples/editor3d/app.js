@@ -9,15 +9,16 @@ var app,
     WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
     DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" );
 
-function StartDemo ( isHomeScreen ) {
+function StartDemo ( ) {
   app = new Primrose.VRApplication( "Codevember", {
-    disableAutoFullScreen: isHomeScreen,
+    disableAutoFullScreen: true,
     useFog: true,
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/deck.png"
   } );
 
-  var editor = null,
+  var isHomeScreen = window.self !== window.top,
+      editor = null,
       output = null,
       documentation = null,
       modA = isOSX ? "metaKey" : "ctrlKey",
@@ -30,6 +31,7 @@ function StartDemo ( isHomeScreen ) {
       scriptUpdateTimeout,
       lastScript = null,
       scriptAnimate = null;
+
 
   app.addEventListener( "ready", function () {
     app.scene.add( subScene );
@@ -154,10 +156,9 @@ function StartDemo ( isHomeScreen ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  if ( isHomeScreen ) {
-    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
 
+  if ( isHomeScreen ) {
     function connectVR ( ) {
       if ( app.input.vr.deviceIDs.length > 0 ) {
         if ( app.ctrls.goVR ) {

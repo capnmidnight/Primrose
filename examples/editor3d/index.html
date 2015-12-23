@@ -83,12 +83,16 @@
     <script src="../../src/fx/text/renderers/DOM.js" type="text/javascript"></script>
     <script src="../../src/fx/text/themes/Dark.js" type="text/javascript"></script>
     <script src="../../src/fx/text/themes/Default.js" type="text/javascript"></script>
-<!-- -->
+    <!-- -->
     <script src="app.js" type="text/javascript"></script>
 
     <link type="text/css" rel="stylesheet" href="style.css">
   </head>
-  <body onload="StartDemo(false);">
+  <body onload="StartDemo( false );">
     <canvas id="frontBuffer"></canvas>
+    <button id="goVR" style="display:block;width:100%;position:absolute;bottom:0;background-color: transparent;border:0">
+      <img src="../../images/cardboard128.png" alt="icon" title="Go Fullscreen" 
+           style="cursor:pointer">
+    </button>
   </body>
 </html>

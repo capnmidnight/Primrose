@@ -1,6 +1,7 @@
 # RewriteEngine On
 # RewriteCond %{HTTPS} !=on
 # RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+Options -Indexes
 AddType text/cache-manifest .appcache
 ExpiresByType text/cache-manifest "access plus 0 seconds"
 #Gzip

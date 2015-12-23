@@ -24,13 +24,12 @@ ul {
 
 #demo{
   width: 100%;
-  height: 50vw;
+  height: 40vw;
 }
 #frontBuffer {
   border: none;
   width: 100%;
   height: 100%;
-  pointer-events: none;
 }
 #overlay{
   box-sizing: border-box;
@@ -43,6 +42,7 @@ ul {
   text-align: center;
   color: white;
   text-shadow: 0 0 5px purple;
+  pointer-events: none;
 }
 #overlay > img {
   max-width: 50%;
@@ -90,7 +90,6 @@ header a {
 
 a {
   color: black;
-  text-decoration: none;
 }
 
 
@@ -104,17 +103,9 @@ main article {
 main p {
   margin: 0 0 1em 0;
 }
-main a {
-  display: inline-block;
-  border-bottom: solid 1px black;
-  height: calc(1em + 5px);
-}
 
 #introduction {
   background-color: white;
-}
-#introduction a{
-  text-shadow: -3px 0 white, -2px 0 white, -1px 0 white, 0 0 white, 1px 0 white, 2px 0 white, 3px 0 white;
 }
 
 #nightly{
@@ -128,9 +119,6 @@ main a {
   text-transform: uppercase;
   margin-bottom: 1em;
   margin-top: 0;
-}
-#nightly a {
-  text-shadow: -3px 0 #ddd, -2px 0 #ddd, -1px 0 #ddd, 0 0 #ddd, 1px 0 #ddd, 2px 0 #ddd, 3px 0 #ddd;
 }      
 #nightly ul {
   margin-left: 1em;
@@ -153,6 +141,7 @@ main a {
   color: white;
   font-size: 125%;
   font-weight: bold;
+  text-decoration: none;
 }
 #examples div a small {
   color: #ccc;
@@ -163,15 +152,9 @@ main a {
 #about {
   background-color: #E1CFF6;
 }
-#about a{
-  text-shadow: -3px 0 #E1CFF6, -2px 0 #E1CFF6, -1px 0 #E1CFF6, 0 0 #E1CFF6, 1px 0 #E1CFF6, 2px 0 #E1CFF6, 3px 0 #E1CFF6;
-}
 
 #team {
   background-color: #7FDCDF;
-}
-#team a{
-  text-shadow: -3px 0 #7FDCDF, -2px 0 #7FDCDF, -1px 0 #7FDCDF, 0 0 #7FDCDF, 1px 0 #7FDCDF, 2px 0 #7FDCDF, 3px 0 #7FDCDF;
 }
 #team > article > div > img{
   display: block;
@@ -180,14 +163,15 @@ main a {
   border-radius:50%;
 }
 
-.button, #introduction .button {
+.button {
+  display: block;
   width: 100%;
   text-align: center;
   border: solid 1px black;
   height: auto;
   padding: 0.5em;
-  text-shadow: none;
   margin: 0.5em 0;
+  text-decoration: none;
 }
 
 .primary.button{
@@ -241,11 +225,6 @@ footer > * {
   }
   #team > article > div {
     padding: 2em;
-  }
-  footer{
-    position:fixed;
-    bottom:0;
-    padding:.5em;
   }
   main > section:last-child{
     margin-bottom: 3em;
