@@ -19,7 +19,9 @@ function StartDemo () {
       } );
 
   function play ( i ) {
+    console.log( "play " + i );
     noteDown[i] = true;
+    console.log( noteDown.join() );
   }
 
   var noteDown = [ ];
@@ -29,7 +31,7 @@ function StartDemo () {
     var d = ( n - 1 ) / 2;
     for ( var i = 0; i < n; ++i ) {
       noteDown[i] = false;
-      btns.push( app.makeButton() );
+      btns.push( app.createElement( "button" ) );
       var x = ( i - d ) * 0.25;
       btns[i].moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
       btns[i].addEventListener( "click", play.bind( this, i ) );
@@ -39,17 +41,11 @@ function StartDemo () {
   var t = 0;
   app.addEventListener( "update", function ( dt ) {
     t += dt;
-    var j = Math.floor( t * 10 ) % noteDown.length;
-    var i = Math.floor( t * 40 ) % noteDown.length;
-
-    if ( noteDown[i] ) {
-      app.music.play( 35 + i * 5, 0.30, 0.03 );
-    }
-    if ( j === 0 ) {
-      //app.music.play( 10, 0.50, 0.03 );
-    }
-    for ( i = 0; i < noteDown.length; ++i ) {
-      noteDown[i] = false;
+    for ( var i = 0; i < noteDown.length; ++i ) {
+      if ( noteDown[i] ) {
+        app.music.play( 35 + i * 5, 0.30, 0.1 );
+        noteDown[i] = false;
+      }
     }
   }.bind( this ) );
 

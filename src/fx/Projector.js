@@ -2576,10 +2576,9 @@ Primrose.Projector = ( function ( ) {
             faces = obj.geometry.faces;
         for ( var j = 0; j < faces.length; ++j ) {
           var face = faces[j],
-              odd = ( j % 2 ) === 1,
-              v0 = verts[odd ? face[1] : face[0]],
-              v1 = verts[odd ? face[2] : face[1]],
-              v2 = verts[odd ? face[0] : face[2]];
+              v0 = verts[face[0]],
+              v1 = verts[face[1]],
+              v2 = verts[face[2]];
           this.a.subVectors( v1, v0 );
           this.b.subVectors( v2, v0 );
           this.c.subVectors( this.p, this.f );
@@ -2600,24 +2599,26 @@ Primrose.Projector = ( function ( ) {
                       this.f );
               var dist = Math.sign( this.d.z ) * this.p.distanceTo( this.c );
               if ( !value || dist < value.distance ) {
-                var uvs = obj.geometry.faceVertexUvs[0][j];
-                v0 = uvs[odd ? 1 : 0];
-                v1 = uvs[odd ? 2 : 1];
-                v2 = uvs[odd ? 0 : 2];
-                var uv = [
-                  this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) +
-                      v0[0],
-                  this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) +
-                      v0[1] ];
-                this.d.crossVectors( this.a.normalize( ),
-                    this.b.normalize( ) );
                 value = {
                   objectID: objID,
                   distance: dist,
                   facePoint: this.c.toArray( ),
-                  faceNormal: this.d.toArray( ),
-                  point: uv
+                  faceNormal: this.d.toArray( )
                 };
+
+                if ( obj.geometry.faceVertexUvs ) {
+                  var uvs = obj.geometry.faceVertexUvs[0][j];
+                  v0 = uvs[0];
+                  v1 = uvs[1];
+                  v2 = uvs[2];
+                  value.point = [
+                    this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) +
+                        v0[0],
+                    this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) +
+                        v0[1] ];
+                  this.d.crossVectors( this.a.normalize( ),
+                      this.b.normalize( ) );
+                }
               }
             }
           }

@@ -20,8 +20,7 @@ Primrose.ButtonFactory = ( function () {
   ButtonFactory.prototype.create = function ( toggle ) {
     var name = "button" + ( ++buttonCount );
     var obj = this.template.clone();
-    var btn = new Primrose.Button( obj, name, this.options );
-    btn.toggle = toggle;
+    var btn = new Primrose.Button( obj, name, this.options, toggle );
     return btn;
   };
 

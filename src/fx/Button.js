@@ -1,22 +1,22 @@
 /* global Primrose, THREE, fireAll */
 
 Primrose.Button = ( function () {
-  function Button ( model, name, options ) {
+  function Button ( model, name, options, toggle ) {
     this.options = combineDefaults( options, Button );
     this.options.minDeflection = Math.cos( this.options.minDeflection );
-    this.options.colorUnpressed = new THREE.Color(
-        this.options.colorUnpressed );
+    this.options.colorUnpressed = new THREE.Color( this.options.colorUnpressed );
     this.options.colorPressed = new THREE.Color( this.options.colorPressed );
 
-    this.listeners = { click: [ ] };
+    this.listeners = {click: [ ]};
+    this.base = model.children[1];
     this.cap = model.children[0];
     this.cap.name = name;
-    this.cap.isSolid = true;
     this.cap.material = this.cap.material.clone();
+    this.cap.button = this;
+    this.cap.base = this.base;
     this.color = this.cap.material.color;
-    this.base = model.children[1];
     this.name = name;
-    this.toggle = false;
+    this.toggle = toggle;
     this.value = false;
     this.pressed = false;
     this.wasPressed = false;
@@ -37,29 +37,21 @@ Primrose.Button = ( function () {
     }
   };
 
-  Button.prototype.moveBy = function(x, y, z){
+  Button.prototype.moveBy = function ( x, y, z ) {
     this.base.position.x += x;
     this.base.position.y += y;
     this.base.position.z += z;
-    this.cap.physics.position.x += x;
-    this.cap.physics.position.y += y;
-    this.cap.physics.position.z += z;
+    this.cap.position.x += x;
+    this.cap.position.y += y;
+    this.cap.position.z += z;
   };
 
-  Button.prototype.readContacts = function ( contacts ) {
+  Button.prototype.activate = function ( press ) {
     this.wasPressed = this.pressed;
-    this.pressed = false;
-
-    for ( var i = 0; i < contacts.length; ++i ) {
-      var contact = contacts[i];
-      if ( contact.bi.graphics === this.cap || contact.bj.graphics === this.cap) {
-        this.pressed = true;
-        break;
-      }
-    }
-
+    this.pressed = press;
+    
     if ( this.pressed ) {
-      fireAll.call(this);
+      fireAll.call( this, "click" );
       this.color.copy( this.options.colorPressed );
     }
     else {

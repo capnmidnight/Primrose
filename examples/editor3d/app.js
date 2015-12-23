@@ -36,17 +36,17 @@ function StartDemo ( ) {
   app.addEventListener( "ready", function () {
     app.scene.add( subScene );
 
-    documentation = app.createElement( "pre", "docView" );
+    documentation = app.createElement( "pre" );
     documentation.textarea.setTokenizer( Primrose.Text.Grammars.PlainText );
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
     documentation.rotation.y = Math.PI / 2;
 
-    editor = app.createElement( "textarea", "textEditor" );
+    editor = app.createElement( "textarea" );
     editor.textarea.value = getSourceCode( isHomeScreen );
     editor.position.y = editorSphereY;
 
-    output = app.createElement( "pre", "outputView" );
+    output = app.createElement( "pre" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
     output.textarea.setTheme( Primrose.Text.Themes.Dark );
@@ -156,18 +156,16 @@ function StartDemo ( ) {
     cmdLabels[i].innerHTML = cmdPre;
   }
 
-  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+  if ( app.ctrls.goVR ) {
+    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+  }
+  if ( app.ctrls.goRegular ) {
+    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
+  }
 
   if ( isHomeScreen ) {
     function connectVR ( ) {
-      if ( app.input.vr.deviceIDs.length > 0 ) {
-        if ( app.ctrls.goVR ) {
-          app.ctrls.goVR.style.display = "inline-block";
-        }
-      }
-      else if ( app.ctrls.goVR ) {
-        app.ctrls.goVR.style.display = "none";
-      }
+      app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 && app.ctrls.goVR ? "inline-block" : "none";
     }
 
     app.input.addEventListener( "vrdeviceconnected", connectVR, false );

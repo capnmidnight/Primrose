@@ -127,6 +127,16 @@ a:visited{
   color: rgb(255, 204, 110);
 }
 
+#goVR{
+  display:block;
+  position:absolute;
+  width:100%;
+  bottom:0;
+  background-color: transparent;
+  border:0;
+  cursor:pointer
+}
+
 #frontBuffer{
   position: fixed;
   width: 100%;
