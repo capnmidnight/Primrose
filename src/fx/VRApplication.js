@@ -45,7 +45,7 @@ Primrose.VRApplication = ( function ( ) {
 
     Primrose.ChatApplication.call( this, name, this.options );
 
-    function setSize ( ) {
+    var setSize = function ( ) {
       var bounds = this.renderer.domElement.getBoundingClientRect( ),
           styleWidth = bounds.width,
           styleHeight = bounds.height,
@@ -72,56 +72,21 @@ Primrose.VRApplication = ( function ( ) {
         this.camera.aspect = aspectWidth / canvasHeight;
         this.camera.updateProjectionMatrix( );
       }
-    }
+    }.bind( this );
+
+    var fire = fireAll.bind( this );
 
     var waitForResources = function ( t ) {
       lt = t;
       if ( sceneLoaded && buttonLoaded ) {
-        setSize.call( this );
-        fireAll.call( this, "ready" );
+        setSize( );
+        fire( "ready" );
         requestAnimationFrame( animate );
       }
       else {
         requestAnimationFrame( waitForResources );
       }
     }.bind( this );
-
-    function createPickableObject ( obj ) {
-      var bag = {
-        uuid: obj.uuid,
-        visible: obj.visible,
-        name: obj.name
-      };
-      var originalBag = bag,
-          head = obj;
-      while ( head !== null ) {
-        head.updateMatrix( );
-        bag.matrix = head.matrix.elements.subarray( 0, head.matrix.elements.length );
-        bag.parent = head.parent ? {} : null;
-        bag = bag.parent;
-        head = head.parent;
-      }
-      return originalBag;
-    }
-
-    function transformForPicking ( obj ) {
-      var p = obj.position.clone( );
-      obj = obj.parent;
-      while ( obj !== null ) {
-        p.applyMatrix4( obj.matrix );
-        obj = obj.parent;
-      }
-      return p.toArray( );
-    }
-
-    function addCell ( row, elem ) {
-      if ( typeof elem === "string" ) {
-        elem = document.createTextNode( elem );
-      }
-      var cell = document.createElement( "td" );
-      cell.appendChild( elem );
-      row.appendChild( cell );
-    }
 
     this.setupModuleEvents = function ( container, module, name ) {
       var eID = name + "Enable",
@@ -181,15 +146,15 @@ Primrose.VRApplication = ( function ( ) {
         t.checked = false;
       }
     };
-    
+
     this.start = function ( ) {
-      requestAnimationFrame( waitForResources.bind( this ) );
+      requestAnimationFrame( waitForResources );
     };
-    
+
     this.stop = function ( ) {
       cancelAnimationFrame( this.timer );
     };
-    
+
     this.goFullScreen = function ( useVR ) {
       this.input.mouse.requestPointerLock( );
       if ( !isFullScreenMode( ) ) {
@@ -203,7 +168,7 @@ Primrose.VRApplication = ( function ( ) {
         history.pushState( null, document.title, "#fullscreen" );
       }
     };
-    
+
     this.addEventListener = function ( event, thunk, bubbles ) {
       if ( this.listeners[event] ) {
         this.listeners[event].push( thunk );
@@ -212,7 +177,7 @@ Primrose.VRApplication = ( function ( ) {
         window.addEventListener( event, thunk, bubbles );
       }
     };
-    
+
     this.zero = function ( ) {
       if ( !this.currentEditor ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
@@ -222,7 +187,7 @@ Primrose.VRApplication = ( function ( ) {
         this.input.vr.sensor.resetSensor( );
       }
     };
-    
+
     this.jump = function ( ) {
       if ( this.player.isOnGround && !this.currentEditor ) {
         this.player.velocity.y += this.options.jumpHeight;
@@ -230,7 +195,7 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
-    function makeTextArea (  ) {
+    var makeTextArea = function (  ) {
       var tokenizer = Primrose.Text.Grammars.JavaScript;
       var ed = makeEditor(
           this.scene, "textEditor" + this.pickableObjects.length,
@@ -245,9 +210,9 @@ Primrose.VRApplication = ( function ( ) {
           } );
       this.registerPickableObject( ed );
       return ed;
-    }
+    }.bind( this );
 
-    function makePre ( ) {
+    var makePre = function ( ) {
       var tokenizer = Primrose.Text.Grammars.PlainText;
       var ed = makeEditor(
           this.scene, "textEditor" + this.pickableObjects.length,
@@ -264,15 +229,15 @@ Primrose.VRApplication = ( function ( ) {
           } );
       this.registerPickableObject( ed );
       return ed;
-    }
+    }.bind( this );
 
-    function makeButton ( ) {
+    var makeButton = function ( ) {
       var btn = this.buttonFactory.create( false );
       this.scene.add( btn.base );
       this.scene.add( btn.cap );
       this.registerPickableObject( btn.cap );
       return btn;
-    }
+    }.bind( this );
 
     var elementConstructors = {
       textarea: makeTextArea,
@@ -282,7 +247,7 @@ Primrose.VRApplication = ( function ( ) {
 
     this.createElement = function ( elem ) {
       if ( elementConstructors[elem] ) {
-        return elementConstructors[elem].call( this );
+        return elementConstructors[elem]( );
       }
     };
 
@@ -530,7 +495,7 @@ Primrose.VRApplication = ( function ( ) {
         this.pointer.scale.set( 1, 1, 1 );
       }
 
-      fireAll.call( this, "update", dt );
+      fire( "update", dt );
       for ( j = 0; j < this.pickableObjects.length; ++j ) {
         if ( this.pickableObjects[j].textarea ) {
           this.pickableObjects[j].textarea.render( );
@@ -576,8 +541,8 @@ Primrose.VRApplication = ( function ( ) {
         skinCode = parseInt( skin.substring( 1 ), 16 ),
         sceneLoaded = !this.options.sceneModel,
         buttonLoaded = !this.options.button;
+
     //
-//
     // Initialize public properties
     //
     this.inVR = false;
@@ -593,10 +558,17 @@ Primrose.VRApplication = ( function ( ) {
 
     this.music = new Primrose.Output.Music( this.audio.context );
 
+    this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
+
     this.pickableObjects = [ ];
 
     this.projector = new Primrose.Workerize( Primrose.Projector );
     this.projector.ready = true;
+
+    this.player = new THREE.Object3D( );
+    this.player.velocity = new THREE.Vector3( );
+    this.player.position.set( 0, this.avatarHeight, 0 );
+    this.player.isOnGround = true;
 
     this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -605,16 +577,6 @@ Primrose.VRApplication = ( function ( ) {
     this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
     this.nose.name = "Nose";
     this.nose.scale.set( 0.5, 1, 1 );
-
-    this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, this.options.drawDistance );
-    this.camera.add( this.nose );
-    this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
-    
-    this.player = new THREE.Object3D( );
-    this.player.velocity = new THREE.Vector3( );
-    this.player.position.set( 0, this.avatarHeight, 0 );
-    this.player.isOnGround = true;
-    this.player.add( this.camera );
 
     this.renderer = new THREE.WebGLRenderer( {
       canvas: this.ctrls.frontBuffer,
@@ -627,11 +589,11 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.setClearColor( this.options.backgroundColor );
 
     this.scene = new THREE.Scene( );
-    this.scene.add( this.player );
-    this.scene.add( this.pointer );
     if ( this.options.useFog ) {
       this.scene.fog = new THREE.FogExp2( this.options.backgroundColor, 2 / this.options.drawDistance );
     }
+
+    this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, this.options.drawDistance );
 
     if ( this.options.skyTexture ) {
       this.sky = textured(
@@ -657,6 +619,12 @@ Primrose.VRApplication = ( function ( ) {
       this.registerPickableObject( this.ground );
     }
 
+    this.camera.add( this.nose );
+    this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
+    this.player.add( this.camera );
+    this.scene.add( this.player );
+    this.scene.add( this.pointer );
+
     if ( this.passthrough ) {
       this.camera.add( this.passthrough.mesh );
     }
@@ -671,8 +639,6 @@ Primrose.VRApplication = ( function ( ) {
         }
       }.bind( this ) );
     }
-
-    this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
 
     if ( this.options.button ) {
       this.buttonFactory = new Primrose.ButtonFactory(
@@ -717,7 +683,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( !isFullScreenMode( ) && location.hash === "#fullscreen" ) {
         location.hash = "";
       }
-      setSize.call( this );
+      setSize( );
     }
 
     window.addEventListener( "popstate", function ( evt ) {
@@ -726,10 +692,10 @@ Primrose.VRApplication = ( function ( ) {
         evt.preventDefault( );
       }
     }, true );
-    window.addEventListener( "fullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "webkitfullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "mozfullscreenchange", setVRMode.bind( this ), false );
-    window.addEventListener( "resize", setSize.bind( this ), false );
+    window.addEventListener( "fullscreenchange", setVRMode, false );
+    window.addEventListener( "webkitfullscreenchange", setVRMode, false );
+    window.addEventListener( "mozfullscreenchange", setVRMode, false );
+    window.addEventListener( "resize", setSize, false );
     if ( !this.options.disableAutoFullScreen ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
@@ -750,5 +716,43 @@ Primrose.VRApplication = ( function ( ) {
     chatTextSize: 0.25, // the size of a single line of text, in world units
     dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
   };
+
+  function createPickableObject ( obj ) {
+    var bag = {
+      uuid: obj.uuid,
+      visible: obj.visible,
+      name: obj.name
+    };
+    var originalBag = bag,
+        head = obj;
+    while ( head !== null ) {
+      head.updateMatrix( );
+      bag.matrix = head.matrix.elements.subarray( 0, head.matrix.elements.length );
+      bag.parent = head.parent ? {} : null;
+      bag = bag.parent;
+      head = head.parent;
+    }
+    return originalBag;
+  }
+
+  function transformForPicking ( obj ) {
+    var p = obj.position.clone( );
+    obj = obj.parent;
+    while ( obj !== null ) {
+      p.applyMatrix4( obj.matrix );
+      obj = obj.parent;
+    }
+    return p.toArray( );
+  }
+
+  function addCell ( row, elem ) {
+    if ( typeof elem === "string" ) {
+      elem = document.createTextNode( elem );
+    }
+    var cell = document.createElement( "td" );
+    cell.appendChild( elem );
+    row.appendChild( cell );
+  }
+
   return VRApplication;
 } )( );
