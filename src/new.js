@@ -23,23 +23,13 @@ window.ftypes = [ 'email', 'text', 'text' ];
 function initStore ( ) {
   ga( 'send', 'pageview' );
   
-  function byClass ( c, t ) {
-    Array.prototype.forEach.call( document.getElementsByClassName( c ), t );
-  }
-
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
     var v = this.response.version;
     if ( xhr.status < 400 ) {
-      byClass( "version-label", function ( l ) {
+      var elems = document.getElementsByClassName( "version-label" );
+      Array.prototype.forEach.call( elems, function ( l ) {
         l.innerHTML = "v" + v;
-      } );
-      var pre = "archive/Primrose-" + v;
-      byClass( "download-link", function ( l ) {
-        l.href = pre + ".js";
-      } );
-      byClass( "download-minified-link", function ( l ) {
-        l.href = pre + ".min.js";
       } );
     }
   };

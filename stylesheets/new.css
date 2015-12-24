@@ -170,6 +170,9 @@ main > section:nth-child(8), main > section:nth-child(8) a{
   padding: 0.5em;
   margin: 0.5em 0;
   text-decoration: none;
+  cursor: pointer;
+  line-height: 1.5;
+  font-size: 110%;
 }
 
 .primary.button{

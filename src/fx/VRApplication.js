@@ -39,7 +39,8 @@ Primrose.VRApplication = ( function ( ) {
       FORWARDED_EVENTS = [
         "keydown", "keyup", "keypress",
         "mousedown", "mouseup", "mousemove", "wheel",
-        "touchstart", "touchend", "touchmove" ];
+        "touchstart", "touchend", "touchmove" ],
+      RESOLUTION_SCALE = 0.5;
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
 
@@ -51,15 +52,15 @@ Primrose.VRApplication = ( function ( ) {
           styleHeight = bounds.height,
           ratio = window.devicePixelRatio || 1,
           fieldOfView = 75,
-          canvasWidth = styleWidth * ratio,
-          canvasHeight = styleHeight * ratio,
+          canvasWidth = Math.floor( styleWidth * ratio * RESOLUTION_SCALE ),
+          canvasHeight = Math.floor( styleHeight * ratio * RESOLUTION_SCALE ),
           aspectWidth = canvasWidth;
       if ( this.inVR ) {
         var p = this.input.vr.params,
             l = p.left,
             r = p.right;
-        canvasWidth = l.renderRect.width + r.renderRect.width;
-        canvasHeight = Math.max( l.renderRect.height, r.renderRect.height );
+        canvasWidth = Math.floor( ( l.renderRect.width + r.renderRect.width ) * RESOLUTION_SCALE );
+        canvasHeight = Math.floor( Math.max( l.renderRect.height, r.renderRect.height ) * RESOLUTION_SCALE );
         aspectWidth = canvasWidth / 2;
         fieldOfView = ( l.recommendedFieldOfView.leftDegrees + l.recommendedFieldOfView.rightDegrees );
       }
@@ -158,7 +159,7 @@ Primrose.VRApplication = ( function ( ) {
     this.goFullScreen = function ( useVR ) {
       this.input.mouse.requestPointerLock( );
       if ( !isFullScreenMode( ) ) {
-        vrRequest = useVR;
+        vrRequested = useVR;
         if ( useVR && this.input.vr.display ) {
           requestFullScreen( this.ctrls.frontBuffer, this.input.vr.display );
         }
@@ -178,8 +179,12 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
+    this.lockedToEditor = function () {
+      return this.currentControl && !this.currentControl.readOnly;
+    };
+
     this.zero = function ( ) {
-      if ( !this.currentEditor ) {
+      if ( !this.lockedToEditor() ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
         this.player.velocity.set( 0, 0, 0 );
       }
@@ -189,7 +194,7 @@ Primrose.VRApplication = ( function ( ) {
     };
 
     this.jump = function ( ) {
-      if ( this.player.isOnGround && !this.currentEditor ) {
+      if ( this.player.isOnGround && !this.lockedToEditor() ) {
         this.player.velocity.y += this.options.jumpHeight;
         this.player.isOnGround = false;
       }
@@ -324,6 +329,7 @@ Primrose.VRApplication = ( function ( ) {
 
     var animate = function ( t ) {
       this.timer = requestAnimationFrame( animate );
+
       var dt = ( t - lt ) * 0.001,
           heading = 0,
           pitch = 0,
@@ -332,6 +338,7 @@ Primrose.VRApplication = ( function ( ) {
           len,
           i, j;
       lt = t;
+
       this.input.update( dt );
       heading = this.input.getValue( "heading" );
       strafe = this.input.getValue( "strafe" );
@@ -343,7 +350,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( !this.player.isOnGround ) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
-      else if ( !this.currentEditor || this.currentEditor.readOnly ) {
+      else if ( !this.lockedToEditor() ) {
 
         if ( strafe || drive ) {
           len = drive * drive + strafe * strafe;
@@ -392,7 +399,7 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         var dHeading = heading - currentHeading;
-        if ( !this.currentEditor && Math.abs( dHeading ) > Math.PI / 5 ) {
+        if ( !this.lockedToEditor() && Math.abs( dHeading ) > Math.PI / 5 ) {
           var dh = Math.sign( dHeading ) * Math.PI / 100;
           currentHeading += dh;
           heading -= dh;
@@ -406,7 +413,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.inVR && !isMobile ) {
         this.pointer.position.applyQuaternion( qHeading );
       }
-      if ( !this.currentEditor || isMobile ) {
+      if ( !this.lockedToEditor() || isMobile ) {
         this.pointer.position.add( this.camera.position );
         this.pointer.position.applyQuaternion( this.camera.quaternion );
       }
@@ -448,14 +455,14 @@ Primrose.VRApplication = ( function ( ) {
               btn.focus( buttons > 0 );
             }
             else if ( buttons > 0 ) {
-              if ( this.currentEditor && this.currentEditor !== editor ) {
-                this.currentEditor.blur( );
-                this.currentEditor = null;
+              if ( this.currentControl && this.currentControl !== editor ) {
+                this.currentControl.blur( );
+                this.currentControl = null;
               }
 
-              if ( !this.currentEditor && editor ) {
-                this.currentEditor = editor;
-                this.currentEditor.focus( );
+              if ( !this.currentControl && editor ) {
+                this.currentControl = editor;
+                this.currentControl.focus( );
               }
               else if ( object === this.ground ) {
                 this.player.position.copy( this.pointer.position );
@@ -465,30 +472,26 @@ Primrose.VRApplication = ( function ( ) {
             }
           }
 
-          if ( this.currentEditor ) {
-            var // At this point, the UV coord is scaled to a proporitional value, on
-                // the range [0, 1] for the dimensions of the image used as the texture.
-                // So we have to rescale it back out again. Also, the y coordinate is
-                // flipped.
-                txt = object.material.map.image,
+          if ( currentHit.point && this.currentControl && this.currentControl.movePointer ) {
+            var txt = object.material.map.image,
                 textureU = Math.floor( txt.width * currentHit.point[0] ),
                 textureV = Math.floor( txt.height * ( 1 - currentHit.point[1] ) );
             if ( !clickChanged && buttons > 0 ) {
-              this.currentEditor.movePointer( textureU, textureV );
+              this.currentControl.movePointer( textureU, textureV );
             }
             else if ( clickChanged && buttons > 0 ) {
-              this.currentEditor.startPointer( textureU, textureV );
+              this.currentControl.startPointer( textureU, textureV );
             }
             else {
-              this.currentEditor.endPointer( );
+              this.currentControl.endPointer( );
             }
           }
         }
       }
       else {
-        if ( this.currentEditor && lastButtons > 0 ) {
-          this.currentEditor.blur( );
-          this.currentEditor = null;
+        if ( this.currentControl && lastButtons > 0 ) {
+          this.currentControl.blur( );
+          this.currentControl = null;
         }
         this.pointer.material.color.setRGB( 1, 0, 0 );
         this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
@@ -519,8 +522,8 @@ Primrose.VRApplication = ( function ( ) {
           this.camera.position.applyQuaternion( this.camera.quaternion );
           this.nose.position.set( side * -0.12, -0.12, -0.15 );
           this.nose.rotation.z = side * 0.7;
-          this.renderer.setViewport( v.left, v.top, v.width, v.height );
-          this.renderer.setScissor( v.left, v.top, v.width, v.height );
+          this.renderer.setViewport( v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE );
+          this.renderer.setScissor( v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE );
           this.renderer.render( this.scene, this.camera );
         }
       }
@@ -531,7 +534,7 @@ Primrose.VRApplication = ( function ( ) {
     // Initialize local variables
     //
     var lt = 0,
-        vrRequest = false,
+        vrRequested = false,
         currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion( ),
@@ -546,7 +549,7 @@ Primrose.VRApplication = ( function ( ) {
     // Initialize public properties
     //
     this.inVR = false;
-    this.currentEditor = null;
+    this.currentControl = null;
     this.avatarHeight = this.options.avatarHeight;
     this.walkSpeed = this.options.walkSpeed;
     this.listeners = {
@@ -593,7 +596,7 @@ Primrose.VRApplication = ( function ( ) {
       this.scene.fog = new THREE.FogExp2( this.options.backgroundColor, 2 / this.options.drawDistance );
     }
 
-    this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, this.options.drawDistance );
+    this.camera = new THREE.PerspectiveCamera( 75, 1, 0.1, this.options.drawDistance );
 
     if ( this.options.skyTexture ) {
       this.sky = textured(
@@ -678,13 +681,13 @@ Primrose.VRApplication = ( function ( ) {
     //
     // Manage full-screen state
     //
-    function setVRMode ( ) {
-      this.inVR = isFullScreenMode( ) && vrRequest && this.input.vr.display;
+    var setVRMode = function ( ) {
+      this.inVR = isFullScreenMode( ) && vrRequested && this.input.vr.display;
       if ( !isFullScreenMode( ) && location.hash === "#fullscreen" ) {
         location.hash = "";
       }
       setSize( );
-    }
+    }.bind( this );
 
     window.addEventListener( "popstate", function ( evt ) {
       if ( isFullScreenMode( ) ) {

@@ -63,15 +63,21 @@ body{
   background-attachment: fixed;
   font-family: 'Trebuchet MS', sans-serif;
 }
-#goVR{
+#goVR, #goRegular{
   display:block;
   position:absolute;
-  width:100%;
-  bottom:0;
+  right: 0;
   background-color: transparent;
   border:0;
   cursor:pointer
 }
+#goVR {
+  top:0;
+}
+#goRegular{
+  top: 64px;
+}
+
 #frontBuffer{
   position: fixed;
   width: 100%;

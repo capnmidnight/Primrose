@@ -32,7 +32,6 @@ function StartDemo ( ) {
       lastScript = null,
       scriptAnimate = null;
 
-
   app.addEventListener( "ready", function () {
     app.scene.add( subScene );
 
@@ -163,14 +162,14 @@ function StartDemo ( ) {
     app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
   }
 
-  if ( isHomeScreen ) {
-    function connectVR ( ) {
-      app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 && app.ctrls.goVR ? "inline-block" : "none";
+  function connectVR ( ) {
+    if(app.ctrls.goVR){
+      app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
     }
-
-    app.input.addEventListener( "vrdeviceconnected", connectVR, false );
-    app.input.addEventListener( "vrdevicelost", connectVR, false );
   }
+
+  app.input.addEventListener( "vrdeviceconnected", connectVR, false );
+  app.input.addEventListener( "vrdevicelost", connectVR, false );
 
   app.start();
 }
@@ -198,22 +197,18 @@ function testDemo ( scene ) {
       HEIGHT = 11,
       DEPTH = 100,
       MIDX = WIDTH / 2,
-      MIDY = HEIGHT / 2,
-      MIDZ = DEPTH / 2,
+      MIDY = HEIGHT / 2, MIDZ = DEPTH / 2,
       start = put( hub() )
       .on( scene )
       .at( -MIDX, 0, -MIDZ ),
       verts = [ ];
-
   for ( var i = 0; i < 5000; ++i ) {
-    verts.push( v3(
-        randomRange( -0.5 * WIDTH, 0.5 * WIDTH ),
+    verts.push( v3( randomRange( -0.5 * WIDTH, 0.5 * WIDTH ),
         randomRange( -0.5 * HEIGHT, 0.5 * HEIGHT ),
         randomRange( -0.5 * DEPTH, 0.5 * DEPTH ) ) );
   }
   put( cloud( verts, this.options.backgroundColor, 0.05 ) )
-      .on( start )
-      .at( MIDX, MIDY, MIDZ );
+      .on( start ).at( MIDX, MIDY, MIDZ );
 
 
   function makeSphere ( r, p ) {
@@ -230,7 +225,6 @@ function testDemo ( scene ) {
         }
       }
     }
-
     put( cloud( verts, 0xff0000, p * Math.sqrt( 2 ) ) ).on( start ).at( MIDX - r, r, MIDZ - r );
   }
 
@@ -248,8 +242,7 @@ function testDemo ( scene ) {
         .on( start )
         .at( x, 1, z );
     put( column( 0.5, 0.5, 10 ) )
-        .on( start )
-        .at( x, 6.5, z );
+        .on( start ).at( x, 6.5, z );
     put( column( 2, 0.5, 1 ) )
         .on( start )
         .at( x, 12, z );
@@ -257,8 +250,7 @@ function testDemo ( scene ) {
 
   put( fill( ROCK, WIDTH, 1, DEPTH ) ).on( start ).at( 0, 12.5, 0 );
 
-  put( light( 0xffffff, 1, 500 ) )
-      .on( start )
+  put( light( 0xffffff, 1, 500 ) ).on( start )
       .at( MIDX + 5, 8, MIDZ + 20 );
 
   var ball = put( brick( WATER ) ).on( start ).at( 0, 0, 0 ),
@@ -291,9 +283,7 @@ function testDemo ( scene ) {
 // This is a function to just push it out of the way, uncluttering
 // the code above.
 function getDocumentation () {
-  return "functions:\n" +
-      "  log( msg );\n" +
-      "    print a message to the window below the editor.\n" +
+  return "functions:\n" + "  log( msg );\n" + "    print a message to the window below the editor.\n" +
       "\n" +
       "  put( objectA ).on( objectB )[.at( x, y, z )];\n" +
       "    objectA: a THREE.Object3D to be added to another,\n" +
