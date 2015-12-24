@@ -42,69 +42,9 @@ Primrose.VRApplication = ( function ( ) {
         "touchstart", "touchend", "touchmove" ];
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
+
     Primrose.ChatApplication.call( this, name, this.options );
-    this.listeners = {
-      ready: [ ],
-      update: [ ]
-    };
-    //
-    // Initialize local variables
-    //
-    var lt = 0,
-        vrRequest = false,
-        currentHit = null,
-        currentHeading = 0,
-        qPitch = new THREE.Quaternion( ),
-        qHeading = new THREE.Quaternion( ),
-        qHead = new THREE.Quaternion( ),
-        skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
-        skinCode = parseInt( skin.substring( 1 ), 16 );
-    //
-    // Initialize public properties
-    //
-    this.inVR = false;
-    this.currentEditor = null;
-    this.avatarHeight = this.options.avatarHeight;
-    this.walkSpeed = this.options.walkSpeed;
-    this.audio = new Primrose.Output.Audio3D( );
-    this.music = new Primrose.Output.Music( this.audio.context );
-    this.player = new THREE.Object3D( );
-    this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
-    this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
-    this.pickableObjects = [ ];
-    this.projector = new Primrose.Workerize( Primrose.Projector );
-    this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
 
-    //
-    // setup button objects
-    //
-    if ( this.options.button ) {
-      this.buttonFactory = new Primrose.ButtonFactory(
-          this.options.button.model,
-          this.options.button.options );
-    }
-    else {
-      this.buttonFactory = new Primrose.ButtonFactory(
-          brick( 0xff0000, 1, 1, 1 ), {
-        maxThrow: 0.1,
-        minDeflection: 10,
-        colorUnpressed: 0x7f0000,
-        colorPressed: 0x007f00,
-        toggle: true
-      } );
-    }
-
-    //
-    // Setup base state
-    //
-    this.player.velocity = new THREE.Vector3( );
-    this.player.position.set( 0, this.avatarHeight, 0 );
-    this.player.isOnGround = true;
-    this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
-    this.pointer.material.opacity = 0.75;
-    this.nose.name = "Nose";
-    this.nose.scale.set( 0.5, 1, 1 );
-    this.projector.ready = true;
     function setSize ( ) {
       var bounds = this.renderer.domElement.getBoundingClientRect( ),
           styleWidth = bounds.width,
@@ -134,56 +74,17 @@ Primrose.VRApplication = ( function ( ) {
       }
     }
 
-    function waitForResources ( t ) {
+    var waitForResources = function ( t ) {
       lt = t;
-      if ( this.camera && this.scene && this.buttonFactory && this.buttonFactory.template ) {
+      if ( sceneLoaded && buttonLoaded ) {
         setSize.call( this );
-        this.scene.add( this.player );
-        this.scene.add( this.pointer );
-        this.player.add( this.camera );
-        this.camera.near = 0.01;
-        this.camera.far = this.options.drawDistance * 2;
-        this.camera.add( this.nose );
-        this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
-        if ( this.options.useFog ) {
-          this.scene.fog = new THREE.FogExp2( this.options.backgroundColor, 2 / this.options.drawDistance );
-        }
-
-        if ( this.options.skyTexture ) {
-          this.sky = textured(
-              shell(
-                  this.options.drawDistance,
-                  18,
-                  9,
-                  Math.PI * 2,
-                  Math.PI ),
-              this.options.skyTexture,
-              true );
-          this.sky.name = "Sky";
-          this.scene.add( this.sky );
-        }
-
-        if ( this.options.groundTexture ) {
-          var dim = 2 * this.options.drawDistance,
-              gm = new THREE.PlaneGeometry( dim, dim, dim, dim );
-          this.ground = textured( gm, this.options.groundTexture, false, 1, dim, dim );
-          this.ground.rotation.x = Math.PI / 2;
-          this.ground.name = "Ground";
-          this.scene.add( this.ground );
-          this.registerPickableObject( this.ground );
-        }
-
-        if ( this.passthrough ) {
-          this.camera.add( this.passthrough.mesh );
-        }
-
         fireAll.call( this, "ready" );
         requestAnimationFrame( animate );
       }
       else {
-        requestAnimationFrame( waitForResources.bind( this ) );
+        requestAnimationFrame( waitForResources );
       }
-    }
+    }.bind( this );
 
     function createPickableObject ( obj ) {
       var bag = {
@@ -280,12 +181,15 @@ Primrose.VRApplication = ( function ( ) {
         t.checked = false;
       }
     };
+    
     this.start = function ( ) {
       requestAnimationFrame( waitForResources.bind( this ) );
     };
+    
     this.stop = function ( ) {
       cancelAnimationFrame( this.timer );
     };
+    
     this.goFullScreen = function ( useVR ) {
       this.input.mouse.requestPointerLock( );
       if ( !isFullScreenMode( ) ) {
@@ -299,6 +203,7 @@ Primrose.VRApplication = ( function ( ) {
         history.pushState( null, document.title, "#fullscreen" );
       }
     };
+    
     this.addEventListener = function ( event, thunk, bubbles ) {
       if ( this.listeners[event] ) {
         this.listeners[event].push( thunk );
@@ -307,6 +212,7 @@ Primrose.VRApplication = ( function ( ) {
         window.addEventListener( event, thunk, bubbles );
       }
     };
+    
     this.zero = function ( ) {
       if ( !this.currentEditor ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
@@ -316,13 +222,13 @@ Primrose.VRApplication = ( function ( ) {
         this.input.vr.sensor.resetSensor( );
       }
     };
+    
     this.jump = function ( ) {
       if ( this.player.isOnGround && !this.currentEditor ) {
         this.player.velocity.y += this.options.jumpHeight;
         this.player.isOnGround = false;
       }
     };
-
 
     function makeTextArea (  ) {
       var tokenizer = Primrose.Text.Grammars.JavaScript;
@@ -379,7 +285,6 @@ Primrose.VRApplication = ( function ( ) {
         return elementConstructors[elem].call( this );
       }
     };
-
 
     this.convertToEditor = function ( obj ) {
       var editor = new Primrose.Text.Controls.TextBox( "textEditor", {
@@ -443,6 +348,7 @@ Primrose.VRApplication = ( function ( ) {
         this.projector.setObject( bag );
       }
     };
+
     this.findObject = function ( id ) {
       for ( var i = 0; i < this.pickableObjects.length; ++i ) {
         if ( this.pickableObjects[i].uuid === id ) {
@@ -450,6 +356,7 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
     };
+
     var animate = function ( t ) {
       this.timer = requestAnimationFrame( animate );
       var dt = ( t - lt ) * 0.001,
@@ -556,7 +463,7 @@ Primrose.VRApplication = ( function ( ) {
             fp[0] + fn[0] * POINTER_RADIUS,
             fp[1] + fn[1] * POINTER_RADIUS,
             fp[2] + fn[2] * POINTER_RADIUS );
-            
+
         if ( object === this.ground ) {
           this.pointer.scale.set( POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE );
         }
@@ -570,7 +477,7 @@ Primrose.VRApplication = ( function ( ) {
               clickChanged = lastButtons !== 0,
               editor = object.textarea,
               btn = object.button;
-          
+
           if ( clickChanged ) {
             if ( btn ) {
               btn.activate( buttons > 0 );
@@ -653,9 +560,62 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
     }.bind( this );
+
+
     //
-    // Setup THREE.js
+    // Initialize local variables
     //
+    var lt = 0,
+        vrRequest = false,
+        currentHit = null,
+        currentHeading = 0,
+        qPitch = new THREE.Quaternion( ),
+        qHeading = new THREE.Quaternion( ),
+        qHead = new THREE.Quaternion( ),
+        skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
+        skinCode = parseInt( skin.substring( 1 ), 16 ),
+        sceneLoaded = !this.options.sceneModel,
+        buttonLoaded = !this.options.button;
+    //
+//
+    // Initialize public properties
+    //
+    this.inVR = false;
+    this.currentEditor = null;
+    this.avatarHeight = this.options.avatarHeight;
+    this.walkSpeed = this.options.walkSpeed;
+    this.listeners = {
+      ready: [ ],
+      update: [ ]
+    };
+
+    this.audio = new Primrose.Output.Audio3D( );
+
+    this.music = new Primrose.Output.Music( this.audio.context );
+
+    this.pickableObjects = [ ];
+
+    this.projector = new Primrose.Workerize( Primrose.Projector );
+    this.projector.ready = true;
+
+    this.pointer = textured( sphere( POINTER_RADIUS, 10, 10 ), 0xff0000 );
+    this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
+    this.pointer.material.opacity = 0.75;
+
+    this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
+    this.nose.name = "Nose";
+    this.nose.scale.set( 0.5, 1, 1 );
+
+    this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, this.options.drawDistance );
+    this.camera.add( this.nose );
+    this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
+    
+    this.player = new THREE.Object3D( );
+    this.player.velocity = new THREE.Vector3( );
+    this.player.position.set( 0, this.avatarHeight, 0 );
+    this.player.isOnGround = true;
+    this.player.add( this.camera );
+
     this.renderer = new THREE.WebGLRenderer( {
       canvas: this.ctrls.frontBuffer,
       antialias: !isMobile,
@@ -665,25 +625,73 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.autoSortObjects = !isMobile;
     this.renderer.enableScissorTest( true );
     this.renderer.setClearColor( this.options.backgroundColor );
-    function defaultCamera ( ) {
-      return new THREE.PerspectiveCamera( 45, 1, 0.1,
-          this.options.drawDistance );
+
+    this.scene = new THREE.Scene( );
+    this.scene.add( this.player );
+    this.scene.add( this.pointer );
+    if ( this.options.useFog ) {
+      this.scene.fog = new THREE.FogExp2( this.options.backgroundColor, 2 / this.options.drawDistance );
     }
 
-    if ( !this.options.sceneModel ) {
-      this.scene = new THREE.Scene( );
-      this.camera = defaultCamera.call( this );
-      this.scene.Camera = this.camera;
+    if ( this.options.skyTexture ) {
+      this.sky = textured(
+          shell(
+              this.options.drawDistance,
+              18,
+              9,
+              Math.PI * 2,
+              Math.PI ),
+          this.options.skyTexture,
+          true );
+      this.sky.name = "Sky";
+      this.scene.add( this.sky );
     }
-    else {
-      Primrose.ModelLoader.loadScene( this.options.sceneModel, function (
-          sceneGraph ) {
-        this.scene = sceneGraph;
-        this.camera = this.scene.Camera || defaultCamera.call( this );
-        this.scene.Camera = this.camera;
+
+    if ( this.options.groundTexture ) {
+      var dim = 2 * this.options.drawDistance,
+          gm = new THREE.PlaneGeometry( dim, dim, dim, dim );
+      this.ground = textured( gm, this.options.groundTexture, false, 1, dim, dim );
+      this.ground.rotation.x = Math.PI / 2;
+      this.ground.name = "Ground";
+      this.scene.add( this.ground );
+      this.registerPickableObject( this.ground );
+    }
+
+    if ( this.passthrough ) {
+      this.camera.add( this.passthrough.mesh );
+    }
+
+    if ( this.options.sceneModel ) {
+      Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
+        sceneLoaded = true;
+        sceneGraph.children.forEach( this.scene.add.bind( this.scene ) );
+        if ( sceneGraph.Camera ) {
+          this.camera.position.copy( sceneGraph.Camera.position );
+          this.camera.quaternion.copy( sceneGraph.Camera.quaternion );
+        }
       }.bind( this ) );
     }
 
+    this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
+
+    if ( this.options.button ) {
+      this.buttonFactory = new Primrose.ButtonFactory(
+          this.options.button.model,
+          this.options.button.options,
+          function () {
+            buttonLoaded = true;
+          } );
+    }
+    else {
+      this.buttonFactory = new Primrose.ButtonFactory(
+          brick( 0xff0000, 1, 1, 1 ), {
+        maxThrow: 0.1,
+        minDeflection: 10,
+        colorUnpressed: 0x7f0000,
+        colorPressed: 0x007f00,
+        toggle: true
+      } );
+    }
     //
     // bind non-signal processed user commands
     //
