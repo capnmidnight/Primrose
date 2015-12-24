@@ -180,7 +180,7 @@ Primrose.VRApplication = ( function ( ) {
     };
 
     this.lockedToEditor = function () {
-      return this.currentControl && !this.currentControl.readOnly;
+      return this.currentControl && this.currentControl.readOnly === false;
     };
 
     this.zero = function ( ) {
@@ -447,35 +447,35 @@ Primrose.VRApplication = ( function ( ) {
         if ( object ) {
           var buttons = this.input.getValue( "buttons" ),
               clickChanged = lastButtons !== 0,
-              editor = object.textarea,
-              btn = object.button;
+              control = object.textarea || object.button;
 
-          if ( clickChanged ) {
-            if ( btn ) {
-              btn.focus( buttons > 0 );
+          if ( clickChanged && buttons > 0 ) {
+            if ( this.currentControl && this.currentControl !== control ) {
+              this.currentControl.blur( );
+              this.currentControl = null;
             }
-            else if ( buttons > 0 ) {
-              if ( this.currentControl && this.currentControl !== editor ) {
-                this.currentControl.blur( );
-                this.currentControl = null;
-              }
 
-              if ( !this.currentControl && editor ) {
-                this.currentControl = editor;
-                this.currentControl.focus( );
-              }
-              else if ( object === this.ground ) {
-                this.player.position.copy( this.pointer.position );
-                this.player.position.y = this.avatarHeight;
-                this.player.isOnGround = false;
-              }
+            if ( !this.currentControl && control ) {
+              this.currentControl = control;
+              this.currentControl.focus( );
+            }
+            else if ( object === this.ground ) {
+              this.player.position.copy( this.pointer.position );
+              this.player.position.y = this.avatarHeight;
+              this.player.isOnGround = false;
             }
           }
 
-          if ( currentHit.point && this.currentControl && this.currentControl.movePointer ) {
-            var txt = object.material.map.image,
-                textureU = Math.floor( txt.width * currentHit.point[0] ),
-                textureV = Math.floor( txt.height * ( 1 - currentHit.point[1] ) );
+          if ( this.currentControl ) {
+            var textureU = 0,
+                textureV = 0;
+
+            if ( currentHit.point ) {
+              var txt = object.material.map.image;                
+              textureU = Math.floor( txt.width * currentHit.point[0] );
+              textureV = Math.floor( txt.height * ( 1 - currentHit.point[1] ) );
+            }
+
             if ( !clickChanged && buttons > 0 ) {
               this.currentControl.movePointer( textureU, textureV );
             }

@@ -7,7 +7,7 @@ Primrose.Button = ( function () {
     this.options.colorUnpressed = new THREE.Color( this.options.colorUnpressed );
     this.options.colorPressed = new THREE.Color( this.options.colorPressed );
 
-    this.listeners = {click: [ ]};
+    this.listeners = {click: [ ], release: [ ]};
     this.base = model.children[1];
     this.cap = model.children[0];
     this.cap.name = name;
@@ -16,10 +16,6 @@ Primrose.Button = ( function () {
     this.cap.base = this.base;
     this.color = this.cap.material.color;
     this.name = name;
-    this.toggle = toggle;
-    this.value = false;
-    this.pressed = false;
-    this.wasPressed = false;
   }
 
   Button.DEFAULTS = {
@@ -46,17 +42,26 @@ Primrose.Button = ( function () {
     this.cap.position.z += z;
   };
 
-  Button.prototype.focus = function ( press ) {
-    this.wasPressed = this.pressed;
-    this.pressed = press;
-    
-    if ( this.pressed ) {
-      fireAll.call( this, "click" );
-      this.color.copy( this.options.colorPressed );
-    }
-    else {
-      this.color.copy( this.options.colorUnpressed );
-    }
+  Button.prototype.focus = function ( ) {
+    this.focused = true;
+    this.color.copy( this.options.colorPressed );
+  };
+
+  Button.prototype.blur = function ( ) {
+    this.focused = false;
+    this.color.copy( this.options.colorUnpressed );
+  };
+
+  Button.prototype.startPointer = function () {
+    fireAll.call( this, "click" );
+  };
+
+  Button.prototype.movePointer = function () {
+
+  };
+
+  Button.prototype.endPointer = function () {
+    fireAll.call( this, "release" );
   };
 
   return Button;
