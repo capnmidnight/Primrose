@@ -46,7 +46,7 @@ Primrose.Button = ( function () {
     this.cap.position.z += z;
   };
 
-  Button.prototype.activate = function ( press ) {
+  Button.prototype.focus = function ( press ) {
     this.wasPressed = this.pressed;
     this.pressed = press;
     

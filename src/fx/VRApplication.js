@@ -445,7 +445,7 @@ Primrose.VRApplication = ( function ( ) {
 
           if ( clickChanged ) {
             if ( btn ) {
-              btn.activate( buttons > 0 );
+              btn.focus( buttons > 0 );
             }
             else if ( buttons > 0 ) {
               if ( this.currentEditor && this.currentEditor !== editor ) {

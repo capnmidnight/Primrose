@@ -4,14 +4,17 @@ Primrose.ButtonFactory = ( function () {
 
   var buttonCount = 0;
 
-  function ButtonFactory ( templateFile, options ) {
+  function ButtonFactory ( templateFile, options, complete ) {
     this.options = options;
-    if(typeof templateFile === "string"){
+    if ( typeof templateFile === "string" ) {
       Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
         this.template = obj;
+        if ( complete ) {
+          complete();
+        }
       }.bind( this ) );
     }
-    else{
+    else {
       this.template = templateFile;
     }
   }
