@@ -25,10 +25,9 @@ function inherit ( classType, parentType ) {
   classType.prototype.constructor = classType;
 }
 
-function fireAll (evt, args) {
+function fireAll ( evt, args ) {
   var handlers = this.listeners[evt];
   for ( var i = 0; i < handlers.length; ++i ) {
-    var thunk = handlers[i];
-    thunk.call( thunk.executionContext || this, args );
+    handlers[i]( args );
   }
 }
