@@ -12,7 +12,6 @@
     <meta property="og:image" content="https://www.primroseeditor.com/images/screenshot3.jpg" />
     <meta property="og:description" content="A WebVR application framework."/>
     <title>Primrose VR: WebVR Application Framework</title>
-    <link href="stylesheets/mailchimp.min.css" type="text/css" rel="stylesheet">
     <link href="stylesheets/new.css" type="text/css" rel="stylesheet">
   </head>
   <body onload="initStore();">
@@ -37,6 +36,7 @@
           <li><a href="#introduction">intro/</a></li>
           <li><a href="#webvr">webvr/</a></li>
           <li><a href="#examples">demos/</a></li>
+          <li><a href="#team">team/</a></li>
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
         </ul>
       </nav>
@@ -66,12 +66,12 @@
             <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be
               used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
           </div>
-          
+
           <h3>Basic example:</h3>
           <iframe id="example" src="examples/editor2d/index.html"></iframe>
-          
+
           <p>
-            <button type="button" onclick="window.open('bin/Primrose.min.js')" class="primary button">
+            <button type="button" onclick="window.open( 'bin/Primrose.min.js' )" class="primary button">
               Primrose.min.js, 
               <span class="version-label"><small>(waiting for version number)</small></span><br>
               <small>168KB, 50KB gzipped</small>
@@ -79,7 +79,7 @@
           </p>
 
           <p>
-            <button type="button" onclick="window.open('bin/Primrose.js')" class="secondary button">
+            <button type="button" onclick="window.open( 'bin/Primrose.js' )" class="secondary button">
               Primrose.js, 
               <span class="version-label"><small>(waiting for version number)</small></span><br>
               <small>372KB, useful for debugging</small>
@@ -263,17 +263,21 @@
                   <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
                 </div>
                 <div class="mc-field-group input-group">
-                  <strong>Email Format </strong>
-                  <ul><li><input type="radio" value="html" name="EMAILTYPE" id="mce-EMAILTYPE-0"><label for="mce-EMAILTYPE-0">html</label></li>
+                  <h3>Email Format </h3>
+                  <ul>
+                    <li><input type="radio" value="html" name="EMAILTYPE" id="mce-EMAILTYPE-0"><label for="mce-EMAILTYPE-0">html</label></li>
                     <li><input type="radio" value="text" name="EMAILTYPE" id="mce-EMAILTYPE-1"><label for="mce-EMAILTYPE-1">text</label></li>
                   </ul>
                 </div>
-                <div id="mce-responses" class="clear">
+                <div id="mce-responses">
                   <div class="response" id="mce-error-response" style="display:none"></div>
                   <div class="response" id="mce-success-response" style="display:none"></div>
-                </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                </div>
+                <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups -->
                 <div style="position: absolute; left: -5000px;"><input type="text" name="b_81af61e5ed1771efc26829263_14fb0203a4" tabindex="-1" value=""></div>
-                <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="primary button" style="border-radius:0;width:100%;color: #3B3D13;"></div>
+                <button type="submit" name="subscribe" id="mc-embedded-subscribe" class="primary button" style="border-radius:0;width:100%;color: #3B3D13;">
+                  Subscribe
+                </button>
               </div>
             </form>
           </div>
