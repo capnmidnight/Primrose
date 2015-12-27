@@ -58,7 +58,6 @@ Primrose.Output.Music = ( function () {
       }
       var o = this.oscillators[n % this.numNotes],
           f = piano( parseFloat( i ) + 1 );
-
       o.gn.gain.value = volume;
       o.osc.frequency.setValueAtTime( f, 0 );
       return o;
@@ -77,7 +76,7 @@ Primrose.Output.Music = ( function () {
 
   Music.prototype.play = function ( i, volume, duration, n ) {
     if ( this.available ) {
-      if ( n === undefined ) {
+      if ( typeof n !== "number" ) {
         n = 0;
       }
       var o = this.noteOn( volume, i, n );
