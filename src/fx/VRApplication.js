@@ -195,7 +195,7 @@ Primrose.VRApplication = ( function ( ) {
 
     this.jump = function ( ) {
       if ( this.player.isOnGround && !lockedToEditor() ) {
-        this.player.velocity.y += this.options.jumpHeight;
+        this.player.velocity.y += this.options.jumpSpeed;
         this.player.isOnGround = false;
       }
     };
@@ -626,7 +626,7 @@ Primrose.VRApplication = ( function ( ) {
     if ( this.options.sceneModel ) {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         sceneLoaded = true;
-        this.scene.add.apply(this.scene, sceneGraph.children);
+        this.scene.add.apply( this.scene, sceneGraph.children );
         if ( sceneGraph.Camera ) {
           this.camera.position.copy( sceneGraph.Camera.position );
           this.camera.quaternion.copy( sceneGraph.Camera.quaternion );
@@ -694,6 +694,8 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
+    
+    this.start();
   }
 
   inherit( VRApplication, Primrose.ChatApplication );
@@ -702,13 +704,17 @@ Primrose.VRApplication = ( function ( ) {
     useFog: false,
     avatarHeight: 1.75,
     walkSpeed: 3,
-    gravity: 0.98, // the acceleration applied to falling objects
-    jumpHeight: 0.25,
+    // the acceleration applied to falling objects
+    gravity: 0.98,
+    jumpSpeed: 0.25,
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
-    drawDistance: 50, // the far plane of the camera
-    chatTextSize: 0.25, // the size of a single line of text, in world units
-    dtNetworkUpdate: 0.125 // the amount of time to allow to elapse between sending state to the server
+    // the far plane of the camera
+    drawDistance: 50,
+    // the size of a single line of text, in world units
+    chatTextSize: 0.25,
+    // the amount of time to allow to elapse between sending state to the server
+    dtNetworkUpdate: 0.125
   };
 
   function createPickableObject ( obj ) {
