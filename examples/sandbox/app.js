@@ -18,7 +18,7 @@ function StartDemo () {
       } );
 
   function play ( i ) {
-    app.music.play( 35 + i * 5, 0.30, 0.1 );
+    app.music.play( 35 + i * 4, 0.30, 0.2 );
   }
 
   app.addEventListener( "ready", function () {

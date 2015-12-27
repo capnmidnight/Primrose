@@ -626,7 +626,7 @@ Primrose.VRApplication = ( function ( ) {
     if ( this.options.sceneModel ) {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         sceneLoaded = true;
-        sceneGraph.children.forEach( this.scene.add.bind( this.scene ) );
+        this.scene.add.apply(this.scene, sceneGraph.children);
         if ( sceneGraph.Camera ) {
           this.camera.position.copy( sceneGraph.Camera.position );
           this.camera.quaternion.copy( sceneGraph.Camera.quaternion );
