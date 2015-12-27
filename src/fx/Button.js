@@ -1,7 +1,7 @@
 /* global Primrose, THREE, fireAll */
 
 Primrose.Button = ( function () {
-  function Button ( model, name, options, toggle ) {
+  function Button ( model, name, options ) {
     this.options = combineDefaults( options, Button );
     this.options.minDeflection = Math.cos( this.options.minDeflection );
     this.options.colorUnpressed = new THREE.Color( this.options.colorUnpressed );
@@ -14,8 +14,12 @@ Primrose.Button = ( function () {
     this.cap.material = this.cap.material.clone();
     this.cap.button = this;
     this.cap.base = this.base;
+    this.container = new THREE.Object3D();
+    this.container.add( this.base );
+    this.container.add( this.cap );
     this.color = this.cap.material.color;
     this.name = name;
+    this.element = null;
   }
 
   Button.DEFAULTS = {
@@ -33,15 +37,6 @@ Primrose.Button = ( function () {
     }
   };
 
-  Button.prototype.moveBy = function ( x, y, z ) {
-    this.base.position.x += x;
-    this.base.position.y += y;
-    this.base.position.z += z;
-    this.cap.position.x += x;
-    this.cap.position.y += y;
-    this.cap.position.z += z;
-  };
-
   Button.prototype.focus = function ( ) {
     this.focused = true;
   };
@@ -52,7 +47,12 @@ Primrose.Button = ( function () {
 
   Button.prototype.startPointer = function () {
     this.color.copy( this.options.colorPressed );
-    fireAll.call( this, "click" );
+    if ( this.element ) {
+      this.element.click();
+    }
+    else {
+      fireAll.call( this, "click" );
+    }
   };
 
   Button.prototype.movePointer = function () {
@@ -63,6 +63,32 @@ Primrose.Button = ( function () {
     this.color.copy( this.options.colorUnpressed );
     fireAll.call( this, "release" );
   };
+
+  var NUMBER_PATTERN = "\\s*([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))(?:em|px)?\\s*",
+      TRANSLATE_PATTERN = new RegExp( "translate3d\\s*\\(" +
+          NUMBER_PATTERN + "," +
+          NUMBER_PATTERN + "," +
+          NUMBER_PATTERN + "\\)", "i" );
+
+  Button.prototype.copyElement = function ( elem ) {
+    this.element = elem;
+    if ( elem.style.transform ) {
+      var transMatch = elem.style.transform.match( TRANSLATE_PATTERN );
+      if ( transMatch ) {
+        this.position.set(
+            parseFloat( transMatch[1] ),
+            parseFloat( transMatch[2] ),
+            parseFloat( transMatch[3] ) );
+      }
+    }
+  };
+
+  Object.defineProperties( Button.prototype, {
+    position: {
+      get: function () {
+        return this.container.position;
+      }
+    }} );
 
   return Button;
 } )();

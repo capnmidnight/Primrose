@@ -31,13 +31,20 @@ app.addEventListener( "ready", function () {
       middle = ( numButtons - 1 ) / 2;
   for ( var i = 0; i < numButtons; ++i ) {
 
-    // Creating a button is done similarly to how one would create
-    // a DOM element button.
-    var btn = app.createElement( "button" );
+    // Primrose uses an object model that is layered on top of
+    // DOM, to get users up to speed quickly and to integrate
+    // easily with other tools.
+    var btn = document.createElement( "button" );
+    btn.type = "button";
 
     // Spacing the buttons out in a rough arc around the origin.
-    var x = ( i - middle ) * 0.25;
-    btn.moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
+    var x = ( i - middle ) * 0.25,
+        z = -1.5 * Math.cos( x ) + 1;
+
+    // Though this is the CSS transform syntax, the only units that
+    // are supported at this time are Ems, and they are treated as
+    // meters.
+    btn.style.transform = "translate3d(" + x + "em, 0, " + z + "em)";
 
     // We can wire up event handlers on the button just like it was
     // a DOM element.
@@ -56,5 +63,8 @@ app.addEventListener( "ready", function () {
             0.30,
             // Duration to play, in seconds.
             0.2 ) );
+
+    // Put the element into the scene
+    app.appendChild( btn );
   }
 } );

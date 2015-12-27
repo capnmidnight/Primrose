@@ -238,8 +238,7 @@ Primrose.VRApplication = ( function ( ) {
 
     var makeButton = function ( ) {
       var btn = this.buttonFactory.create( false );
-      this.scene.add( btn.base );
-      this.scene.add( btn.cap );
+      this.scene.add( btn.container );
       this.registerPickableObject( btn.cap );
       return btn;
     }.bind( this );
@@ -250,9 +249,17 @@ Primrose.VRApplication = ( function ( ) {
       button: makeButton
     };
 
-    this.createElement = function ( elem ) {
-      if ( elementConstructors[elem] ) {
-        return elementConstructors[elem]( );
+    this.createElement = function ( type ) {
+      if ( elementConstructors[type] ) {
+        return elementConstructors[type]( );
+      }
+    };
+
+    this.appendChild = function ( elem ) {
+      var type = elem.tagName.toLocaleLowerCase(),
+          obj = this.createElement( type );
+      if ( obj ) {
+        obj.copyElement( elem );
       }
     };
 
@@ -694,7 +701,7 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
-    
+
     this.start();
   }
 
