@@ -2513,6 +2513,7 @@ Primrose.Projector = ( function ( ) {
     }
     return this.vertCache[obj.uuid];
   };
+  
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
       this.objectIDs.push( obj.uuid );
@@ -2526,15 +2527,20 @@ Primrose.Projector = ( function ( ) {
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
     this.updateObjects( [ obj ] );
   };
+  
   Projector.prototype.updateObjects = function ( objs ) {
     for ( var i = 0; i < objs.length; ++i ) {
       var obj = objs[i],
           head = obj,
           a = new THREE.Matrix4( ),
-          b = new THREE.Matrix4( ).identity( );
+          b = new THREE.Matrix4( ).identity( ),
+          c = null;
       while ( head !== null ) {
         a.fromArray( head.matrix );
-        b.multiply( a );
+        a.multiply( b );
+        c = a;
+        a = b;
+        b = c;
         head = head.parent;
       }
       this.setProperty( obj.uuid, "matrix", b );
