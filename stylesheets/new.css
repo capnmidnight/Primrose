@@ -284,6 +284,9 @@ footer > * {
   position: relative;
   display: block;
 }
+#mc_embed_signup .mc-field-group li label {
+  display: inline-block;
+}
 
 #mc_embed_signup .indicates-required {
   text-align:right;
