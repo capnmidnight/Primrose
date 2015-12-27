@@ -40,7 +40,7 @@ Primrose.VRApplication = ( function ( ) {
         "keydown", "keyup", "keypress",
         "mousedown", "mouseup", "mousemove", "wheel",
         "touchstart", "touchend", "touchmove" ],
-      RESOLUTION_SCALE = 0.5;
+      RESOLUTION_SCALE = 1;
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
 
@@ -82,10 +82,10 @@ Primrose.VRApplication = ( function ( ) {
       if ( sceneLoaded && buttonLoaded ) {
         setSize( );
         fire( "ready" );
-        requestAnimationFrame( animate );
+        this.timer = requestAnimationFrame( animate );
       }
       else {
-        requestAnimationFrame( waitForResources );
+        this.timer = requestAnimationFrame( waitForResources );
       }
     }.bind( this );
 
@@ -149,7 +149,7 @@ Primrose.VRApplication = ( function ( ) {
     };
 
     this.start = function ( ) {
-      requestAnimationFrame( waitForResources );
+      this.timer = requestAnimationFrame( waitForResources );
     };
 
     this.stop = function ( ) {
@@ -179,12 +179,12 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
-    this.lockedToEditor = function () {
+    var lockedToEditor = function () {
       return this.currentControl && this.currentControl.readOnly === false;
-    };
+    }.bind( this );
 
     this.zero = function ( ) {
-      if ( !this.lockedToEditor() ) {
+      if ( !lockedToEditor() ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
         this.player.velocity.set( 0, 0, 0 );
       }
@@ -194,7 +194,7 @@ Primrose.VRApplication = ( function ( ) {
     };
 
     this.jump = function ( ) {
-      if ( this.player.isOnGround && !this.lockedToEditor() ) {
+      if ( this.player.isOnGround && !lockedToEditor() ) {
         this.player.velocity.y += this.options.jumpHeight;
         this.player.isOnGround = false;
       }
@@ -350,7 +350,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( !this.player.isOnGround ) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
-      else if ( !this.lockedToEditor() ) {
+      else if ( !lockedToEditor() ) {
 
         if ( strafe || drive ) {
           len = drive * drive + strafe * strafe;
@@ -399,7 +399,7 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         var dHeading = heading - currentHeading;
-        if ( !this.lockedToEditor() && Math.abs( dHeading ) > Math.PI / 5 ) {
+        if ( !lockedToEditor() && Math.abs( dHeading ) > Math.PI / 5 ) {
           var dh = Math.sign( dHeading ) * Math.PI / 100;
           currentHeading += dh;
           heading -= dh;
@@ -413,7 +413,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.inVR && !isMobile ) {
         this.pointer.position.applyQuaternion( qHeading );
       }
-      if ( !this.lockedToEditor() || isMobile ) {
+      if ( !lockedToEditor() || isMobile ) {
         this.pointer.position.add( this.camera.position );
         this.pointer.position.applyQuaternion( this.camera.quaternion );
       }
