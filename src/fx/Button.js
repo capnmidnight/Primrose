@@ -45,7 +45,7 @@ Primrose.Button = ( function () {
     this.focused = false;
   };
 
-  Button.prototype.startPointer = function () {
+  Button.prototype.startUV = function () {
     this.color.copy( this.options.colorPressed );
     if ( this.element ) {
       this.element.click();
@@ -55,7 +55,7 @@ Primrose.Button = ( function () {
     }
   };
 
-  Button.prototype.movePointer = function () {
+  Button.prototype.moveUV = function () {
 
   };
 

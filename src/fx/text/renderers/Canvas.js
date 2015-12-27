@@ -394,6 +394,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
         if ( layoutChanged ) {
           rowCache = {};
+          if ( this.hasResized() ) {
+            this.resize();
+          }
         }
 
         var foregroundChanged = layoutChanged || fontChanged || scrollChanged,

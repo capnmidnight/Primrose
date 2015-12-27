@@ -15,15 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global Primrose, isOSX */
-var ed;
+/* global Primrose */
 function init () {
   "use strict";
-  ed = new Primrose.Text.Controls.TextBox( "editor", {
+  var ed = new Primrose.Text.Controls.TextBox( "editor", {
     autoBindEvents: true,
-    keyEventSource: window,
-    tokenizer: Primrose.Text.Grammars.JavaScript,
-    theme: Primrose.Text.Themes.Default
+    keyEventSource: window
   } );
 
   function loadFile ( fileName ) {
@@ -35,5 +32,9 @@ function init () {
 
   loadFile( "../sandbox/app.js" );
   document.body.appendChild( ed.getDOMElement() );
-  setInterval( ed.render.bind( ed ), 15 );
+  var anim = function () {
+    requestAnimationFrame( anim );
+    ed.render();
+  };
+  requestAnimationFrame( anim );
 }

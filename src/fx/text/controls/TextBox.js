@@ -136,16 +136,14 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     function pointerStart ( x, y ) {
       if ( options.pointerEventSource ) {
         self.focus();
-        var bounds =
-            options.pointerEventSource.getBoundingClientRect();
+        var bounds = options.pointerEventSource.getBoundingClientRect();
         self.startPointer( x - bounds.left, y - bounds.top );
       }
     }
 
     function pointerMove ( x, y ) {
       if ( options.pointerEventSource ) {
-        var bounds =
-            options.pointerEventSource.getBoundingClientRect();
+        var bounds = options.pointerEventSource.getBoundingClientRect();
         self.movePointer( x - bounds.left, y - bounds.top );
       }
     }
@@ -679,20 +677,30 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     };
 
-    this.startPointer = function ( point ) {
+    this.startPointer = function ( x, y ) {
+      setCursorXY( this.frontCursor, x, y );
+      dragging = true;
+      this.update();
+    };
+
+    this.startUV = function ( point ) {
       if ( point ) {
         var p = renderer.mapUV( point );
-        setCursorXY( this.frontCursor, p.x, p.y );
-        dragging = true;
+        this.startPointer( p.x, p.y );
+      }
+    };
+
+    this.movePointer = function ( x, y ) {
+      if ( dragging ) {
+        setCursorXY( this.backCursor, x, y );
         this.update();
       }
     };
 
-    this.movePointer = function ( point ) {
-      if ( dragging && point ) {
+    this.moveUV = function ( point ) {
+      if ( point ) {
         var p = renderer.mapUV( point );
-        setCursorXY( this.backCursor, p.x, p.y );
-        this.update();
+        this.movePointer( p.x, p.y );
       }
     };
 
@@ -895,7 +903,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         lastWidth,
         lastHeight,
         lastGridBounds;
-    
+
     this.render = function () {
       if ( tokens ) {
         refreshGridBounds();
@@ -903,9 +911,11 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             textChanged = lastText !== this.value,
             characterWidthChanged = renderer.character.width !== lastCharacterWidth,
             characterHeightChanged = renderer.character.height !== lastCharacterHeight,
-            widthChanged = renderer.getWidth() !== lastWidth,
-            heightChanged = renderer.getHeight() !== lastHeight,
-            layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || widthChanged || heightChanged;
+            // widthChanged = renderer.getWidth() !== lastWidth,
+            // heightChanged = renderer.getHeight() !== lastHeight,
+            sizeChanged = renderer.hasResized(), //widthChanged || heightChanged,
+            layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || sizeChanged;
+
         lastGridBounds = gridBounds.toString();
         lastText = this.value;
         lastCharacterWidth = renderer.character.width;
