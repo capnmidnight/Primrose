@@ -8,11 +8,8 @@ function StartDemo () {
         button: {
           model: "../models/smallbutton.json",
           options: {
-            maxThrow: 0.1,
-            minDeflection: 10,
             colorUnpressed: 0x7f0000,
-            colorPressed: 0x007f00,
-            toggle: true
+            colorPressed: 0x007f00
           }
         }
       } );
