@@ -911,9 +911,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             textChanged = lastText !== this.value,
             characterWidthChanged = renderer.character.width !== lastCharacterWidth,
             characterHeightChanged = renderer.character.height !== lastCharacterHeight,
-            // widthChanged = renderer.getWidth() !== lastWidth,
-            // heightChanged = renderer.getHeight() !== lastHeight,
-            sizeChanged = renderer.hasResized(), //widthChanged || heightChanged,
+            sizeChanged = renderer.hasResized(),
             layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || sizeChanged;
 
         lastGridBounds = gridBounds.toString();

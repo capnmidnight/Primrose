@@ -474,14 +474,16 @@ Primrose.VRApplication = ( function ( ) {
           }
 
           if ( this.currentControl ) {
-            if ( !clickChanged && buttons > 0 ) {
+            if ( clickChanged ) {
+              if ( buttons > 0 ) {
+                this.currentControl.startUV( currentHit.point );
+              }
+              else {
+                this.currentControl.endPointer( );
+              }
+            }
+            else if ( !clickChanged && buttons > 0 ) {
               this.currentControl.moveUV( currentHit.point );
-            }
-            else if ( clickChanged && buttons > 0 ) {
-              this.currentControl.startUV( currentHit.point );
-            }
-            else {
-              this.currentControl.endPointer( );
             }
           }
         }
