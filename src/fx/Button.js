@@ -44,15 +44,14 @@ Primrose.Button = ( function () {
 
   Button.prototype.focus = function ( ) {
     this.focused = true;
-    this.color.copy( this.options.colorPressed );
   };
 
   Button.prototype.blur = function ( ) {
     this.focused = false;
-    this.color.copy( this.options.colorUnpressed );
   };
 
   Button.prototype.startPointer = function () {
+    this.color.copy( this.options.colorPressed );
     fireAll.call( this, "click" );
   };
 
@@ -61,6 +60,7 @@ Primrose.Button = ( function () {
   };
 
   Button.prototype.endPointer = function () {
+    this.color.copy( this.options.colorUnpressed );
     fireAll.call( this, "release" );
   };
 

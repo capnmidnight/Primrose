@@ -1,8 +1,7 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen */
-var app;
 function StartDemo () {
 
-  app = new Primrose.VRApplication(
+  var app = new Primrose.VRApplication(
       "sandbox",
       {
         sceneModel: "../models/scene3.json",
@@ -19,31 +18,17 @@ function StartDemo () {
       } );
 
   function play ( i ) {
-    noteDown[i] = true;
+    app.music.play( 35 + i * 5, 0.30, 0.1 );
   }
 
-  var noteDown = [ ];
-  var btns = [ ];
   app.addEventListener( "ready", function () {
     var n = 8;
     var d = ( n - 1 ) / 2;
     for ( var i = 0; i < n; ++i ) {
-      noteDown[i] = false;
-      btns.push( app.createElement( "button" ) );
+      var btn = app.createElement( "button" );
       var x = ( i - d ) * 0.25;
-      btns[i].moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
-      btns[i].addEventListener( "click", play.bind( this, i ) );
-    }
-  }.bind( this ) );
-
-  var t = 0;
-  app.addEventListener( "update", function ( dt ) {
-    t += dt;
-    for ( var i = 0; i < noteDown.length; ++i ) {
-      if ( noteDown[i] ) {
-        app.music.play( 35 + i * 5, 0.30, 0.1 );
-        noteDown[i] = false;
-      }
+      btn.moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
+      btn.addEventListener( "click", play.bind( this, i ) );
     }
   }.bind( this ) );
 
