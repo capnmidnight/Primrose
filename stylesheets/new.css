@@ -97,7 +97,6 @@ a {
   color: black;
 }
 
-
 main article {
   margin: 0 auto;
   padding-bottom: 1em;
@@ -152,6 +151,11 @@ main > section:nth-child(8), main > section:nth-child(8) a{
   color: #ccc;
   font-weight: normal;
   font-style: italic;
+}
+
+#examples > article > div,
+#team > article > div {
+  margin-bottom: 2em;
 }
 
 #team > article > div > img{
@@ -227,7 +231,6 @@ footer > * {
     margin-bottom: 3em;
   }
 }
-
 
 /* MailChimp Form Embed Code - Classic - 08/17/2011 */
 #mc_embed_signup input:focus {
