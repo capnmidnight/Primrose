@@ -467,20 +467,11 @@ Primrose.VRApplication = ( function ( ) {
           }
 
           if ( this.currentControl ) {
-            var textureU = 0,
-                textureV = 0;
-
-            if ( currentHit.point ) {
-              var txt = object.material.map.image;                
-              textureU = Math.floor( txt.width * currentHit.point[0] );
-              textureV = Math.floor( txt.height * ( 1 - currentHit.point[1] ) );
-            }
-
             if ( !clickChanged && buttons > 0 ) {
-              this.currentControl.movePointer( textureU, textureV );
+              this.currentControl.movePointer( currentHit.point );
             }
             else if ( clickChanged && buttons > 0 ) {
-              this.currentControl.startPointer( textureU, textureV );
+              this.currentControl.startPointer( currentHit.point );
             }
             else {
               this.currentControl.endPointer( );

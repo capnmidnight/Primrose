@@ -97,6 +97,15 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       return canvas.height;
     };
 
+    this.mapUV = function ( point ) {
+      if ( point ) {
+        return {
+          x: Math.floor( canvas.width * point[0] ),
+          y: Math.floor( canvas.height * ( 1 - point[1] ) )
+        };
+      }
+    };
+
     function fillRect ( gfx, fill, x, y, w, h ) {
       gfx.fillStyle = fill;
       gfx.fillRect(

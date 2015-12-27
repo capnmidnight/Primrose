@@ -8,9 +8,9 @@ Primrose.Text.Controls.Keyboard = ( function () {
     // normalize input parameters
     //////////////////////////////////////////////////////////////////////////
 
-    options = options || { };
+    options = options || {};
     if ( typeof options === "string" ) {
-      options = { file: options };
+      options = {file: options};
     }
 
     Primrose.Text.Control.call( this );
@@ -24,8 +24,8 @@ Primrose.Text.Controls.Keyboard = ( function () {
         keyboardSystem,
         commandPack,
         currentTouchID,
-        events = { keydown: [ ] },
-        deadKeyState = "",
+        events = {keydown: [ ]},
+    deadKeyState = "",
         keyNames = [ ],
         dragging = false,
         DOMElement = null;
@@ -99,14 +99,14 @@ Primrose.Text.Controls.Keyboard = ( function () {
 
     function refreshCommandPack () {
       if ( keyboardSystem && operatingSystem ) {
-        commandPack = { };
+        commandPack = {};
         var commands = {
           NORMAL_SPACE: " ",
           SHIFT_SPACE: " ",
           NORMAL_TAB: "\t"
         };
 
-        var allCommands = { };
+        var allCommands = {};
 
         copyObject( allCommands, codePage );
         copyObject( allCommands, operatingSystem );
@@ -194,7 +194,7 @@ Primrose.Text.Controls.Keyboard = ( function () {
         }
       }
 
-      keyboardSystem = { };
+      keyboardSystem = {};
       for ( var type in codePage ) {
         var codes = codePage[type];
         if ( typeof ( codes ) === "object" ) {
@@ -223,16 +223,10 @@ Primrose.Text.Controls.Keyboard = ( function () {
       return codePage;
     };
 
-    this.startPicking = function ( gl, x, y ) {
+    this.startPointer = function ( point ) {
     };
 
-    this.movePicking = function ( gl, x, y ) {
-    };
-
-    this.startPointer = function ( x, y ) {
-    };
-
-    this.movePointer = function ( x, y ) {
+    this.movePointer = function ( point ) {
     };
 
     this.endPointer = function () {

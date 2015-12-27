@@ -229,8 +229,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         bottomRightGutter.set( renderer.VSCROLL_WIDTH, 1 );
       }
     }
-    
-    function refreshGridBounds(){      
+
+    function refreshGridBounds () {
       var lineCountWidth = 0;
       if ( showLineNumbers ) {
         lineCountWidth = Math.max( 1, Math.ceil( Math.log( self.getLineCount() ) / Math.LN10 ) );
@@ -272,7 +272,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         if ( breakLine ) {
           tokenRows.push( [ ] );
           tokenHashes.push( "" );
-          lines.push("");
+          lines.push( "" );
           currentRowWidth = 0;
         }
       }
@@ -679,15 +679,19 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     };
 
-    this.startPointer = function ( x, y ) {
-      setCursorXY( this.frontCursor, x, y );
-      dragging = true;
-      this.update();
+    this.startPointer = function ( point ) {
+      if ( point ) {
+        var p = renderer.mapUV( point );
+        setCursorXY( this.frontCursor, p.x, p.y );
+        dragging = true;
+        this.update();
+      }
     };
 
-    this.movePointer = function ( x, y ) {
-      if ( dragging ) {
-        setCursorXY( this.backCursor, x, y );
+    this.movePointer = function ( point ) {
+      if ( dragging && point ) {
+        var p = renderer.mapUV( point );
+        setCursorXY( this.backCursor, p.x, p.y );
         this.update();
       }
     };
@@ -891,6 +895,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         lastWidth,
         lastHeight,
         lastGridBounds;
+    
     this.render = function () {
       if ( tokens ) {
         refreshGridBounds();
@@ -909,7 +914,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         lastHeight = renderer.getHeight();
 
         if ( layoutChanged ) {
-          performLayout(gridBounds);
+          performLayout( gridBounds );
         }
 
         renderer.render(
@@ -920,7 +925,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             this.scroll,
             this.focused, showLineNumbers, showScrollBars, wordWrap,
             gridBounds.lineCountWidth,
-            layoutChanged);
+            layoutChanged );
       }
     };
 
