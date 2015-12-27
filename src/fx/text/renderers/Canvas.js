@@ -37,6 +37,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
     this.setTheme = function ( t ) {
       theme = t;
+      this.resize();
     };
 
     this.pixel2cell = function ( point, scroll, gridBounds ) {

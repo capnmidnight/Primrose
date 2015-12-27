@@ -36,7 +36,7 @@ function StartDemo ( ) {
     app.scene.add( subScene );
 
     documentation = app.createElement( "pre" );
-    documentation.textarea.setTokenizer( Primrose.Text.Grammars.PlainText );
+    documentation.textarea.tokenizer = Primrose.Text.Grammars.PlainText;
     documentation.textarea.value = getDocumentation();
     documentation.position.y = editorSphereY;
     documentation.rotation.y = Math.PI / 2;
@@ -48,8 +48,8 @@ function StartDemo ( ) {
     output = app.createElement( "pre" );
     output.position.y = editorSphereY;
     output.rotation.y = -Math.PI / 2;
-    output.textarea.setTheme( Primrose.Text.Themes.Dark );
-    output.textarea.setFontSize( 32 );
+    output.textarea.theme = Primrose.Text.Themes.Dark;
+    output.textarea.fontSize = 32;
     output.textarea.render();
 
     log( "INSTRUCTIONS:" );

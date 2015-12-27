@@ -31,7 +31,7 @@ function init () {
   }
 
   loadFile( "../sandbox/app.js" );
-  document.body.appendChild( ed.getDOMElement() );
+  document.body.appendChild( ed.DOMElement );
   var anim = function () {
     requestAnimationFrame( anim );
     ed.render();

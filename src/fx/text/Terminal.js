@@ -27,7 +27,7 @@ Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
       flush( );
       self.running = false;
       if ( restoreInput ) {
-        inputEditor.setTokenizer( originalGrammar );
+        inputEditor.tokenizer = originalGrammar;
         inputEditor.value = currentProgram;
       }
       toEnd( inputEditor );
@@ -78,7 +78,7 @@ Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
 
   this.execute = function ( inVR ) {
     pageSize = inVR ? 10 : 40;
-    originalGrammar = inputEditor.getTokenizer();
+    originalGrammar = inputEditor.tokenizer;
     if ( originalGrammar && originalGrammar.interpret ) {
       this.running = true;
       var looper,
@@ -91,7 +91,7 @@ Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
       currentProgram = inputEditor.value;
       looper = originalGrammar.interpret( currentProgram, input, stdout,
           stdout, next, clearScreen, this.loadFile.bind( this ), done );
-      outputEditor.setTokenizer( Primrose.Text.Grammars.PlainText );
+      outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
       clearScreen();
       next();
     }
