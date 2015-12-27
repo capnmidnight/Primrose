@@ -17,10 +17,6 @@ function StartDemo () {
         }
       } );
 
-  function play ( i ) {
-    app.music.play( 35 + i * 4, 0.30, 0.2 );
-  }
-
   app.addEventListener( "ready", function () {
     var n = 8;
     var d = ( n - 1 ) / 2;
@@ -28,7 +24,13 @@ function StartDemo () {
       var btn = app.createElement( "button" );
       var x = ( i - d ) * 0.25;
       btn.moveBy( x, 0, -1.5 * Math.cos( x ) + 1 );
-      btn.addEventListener( "click", play.bind( this, i ) );
+      btn.addEventListener(
+          "click",
+          app.music.play.bind(
+              app.music,
+              35 + i * 4,
+              0.30,
+              0.2 ) );
     }
   }.bind( this ) );
 
