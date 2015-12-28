@@ -1,18 +1,15 @@
 /* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put, exp */
 
-var app,
-    log = null,
-    clrscr = null,
-    GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
+var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
     WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
-    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" );
-app = new Primrose.VRApplication( "Codevember", {
+    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" ),
+    app = new Primrose.VRApplication( "Codevember", {
   disableAutoFullScreen: true,
   useFog: true,
   skyTexture: "../images/bg2.jpg",
-  groundTexture: "../images/deck.png"
+  groundTexture: ROCK
 } );
 
 var WIDTH = 100,
@@ -28,7 +25,7 @@ var WIDTH = 100,
 
 
 function column ( a, b, h ) {
-  return textured( cylinder( a, b, h, 6, 1 ), ROCK );
+  return textured( cylinder( a, b, h, 6, 1 ), SAND );
 }
 
 app.addEventListener( "ready", function () {
