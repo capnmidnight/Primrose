@@ -11,9 +11,12 @@ var keyState = {},
       groundTexture: "../images/deck.png"
     } );
 
-
-app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+if ( app.ctrls.goVR ) {
+  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+}
+if ( app.ctrls.goRegular ) {
+  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
+}
 
 function connectVR ( ) {
   if ( app.input.vr.deviceIDs.length > 0 ) {

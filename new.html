@@ -33,17 +33,19 @@
 
       <nav role="navigation">
         <ul>
-          <li><a href="#introduction">intro/</a></li>
+          <li><a href="#intro">intro/</a></li>
           <li><a href="#webvr">webvr/</a></li>
-          <li><a href="#examples">demos/</a></li>
+          <li><a href="#dev">download/</a></li>
           <li><a href="#team">team/</a></li>
+          <li><a href="#mail">contact/</a></li>
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
         </ul>
       </nav>
     </header>
 
     <main>
-      <section id="introduction">
+
+      <section id="intro">
         <article>
           <h2>Make VR Apps for your browser</h2>
           <div>
@@ -66,8 +68,107 @@
             <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be
               used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
           </div>
+          <h3>Examples</h3>
+          <ul>
+            <li>
+              <a href="examples/editor3d/index.html" target="_blank">
+                <img src="examples/editor3d/screenshot.jpg" alt="screenshot" title="3D Live Programming">
+                3D Live Programming<br>
+                <small>Edit objects on the fly!</small>
+              </a>
+            </li>
+            <li>
+              <a href="examples/temple/index.html" target="_blank">
+                <img src="examples/temple/screenshot.jpg" alt="screenshot" title="Ancient Temple">
+                Ancient Temple<br>
+                <small>Randomly generated columns and dust!</small>
+              </a>
+            </li>
+            <li>
+              <a href="examples/music/index.html" target="_blank">
+                <img src="examples/music/screenshot.jpg" alt="screenshot" title="Commodore PET">
+                Music<br>
+                <small>A little synthesizer keyboard you can play!</small>
+              </a>
+            </li>
+            <li>
+              <a href="examples/commodore/index.html" target="_blank">
+                <img src="examples/commodore/screenshot.jpg" alt="screenshot" title="Commodore PET">
+                Commodore PET<br>
+                <small>Cutting edge 1977 technology!</small>
+              </a>
+            </li>
+          </ul>
+        </article>
+      </section>
 
-          <h3>Basic example:</h3>
+      <section id="webvr">
+        <article>
+          <h2>What is WebVR?</h2>
+          <p>
+            WebVR enables web browsers to display content on virtual reality devices
+            like the Oculus Rift, HTC Vive, or smartphones with Google Cardboard. 
+            With WebVR, developers can create immersive virtual reality experiences
+            that run in any WebGL-enabled browser.
+          </p>
+          <h3>Additional Resources</h3>
+          <ul>
+            <li>
+              <a href="http://webvr.info/" target="_blank">
+                <img src="images/webvr.info.png" alt="logo" title="WebVR.info">
+                WebVR.info<br>
+                <small>WebVR standard information.</small>
+              </a>
+            </li>
+            <li>
+              <a href="http://mozvr.com/" target="_blank">
+                <img src="images/mozvr.com.png" alt="logo" title="MozVR.com">
+                MozVR.com<br>
+                <small>Mozilla's WebVR team.</small>              
+              </a>
+            </li>
+            <li>
+              <a href="http://mozvr.com/downloads/" target="_blank">
+                <img src="images/nightly.mozilla.org.png" alt="logo" title="Firefox Nightly">
+                Firefox Nightly<br>
+                <small>With WebVR sauce!</small>
+              </a>
+            </li>
+            <li>
+              <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">
+                <img src="images/chromium.webvr.png" alt="screenshot" title="Chromium WebVR">
+                Chromium WebVR<br>
+                <small>Also with WebVR sauce!</small>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.reddit.com/r/webvr" target="_blank">
+                <img src="images/reddit.webvr.png" alt="screenshot" title="Reddit WebVR">
+                WebVR Subreddit<br>
+                <small>Links and discussion on VR for the Web, from around the Web.</small>
+              </a>
+            </li>            
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">
+                <img src="images/mdn.webvr.png" alt="screenshot" title="Mozilla Developer Network: WebVR API">
+                Mozilla Developer Network: WebVR API<br>
+                <small>Documentation on the WebVR APIs as they are currently implemented.</small>
+              </a>
+            </li>            
+          </ul>
+        </article>
+      </section>
+
+      <section id="dev">
+        <article>
+          <h2>Get started using Primrose WebVR Framework 
+            <span class="version-label"></span></h2>
+
+          <p>
+            Getting up and running with Primrose  is quick and easy. Check out
+            the example code below.
+          </p>
+
           <iframe id="example" src="examples/editor2d/index.html"></iframe>
 
           <p>
@@ -98,144 +199,91 @@
         </article>
       </section>
 
-      <section id="webvr">
-        <article>
-          <h2>WebVR</h2>
-          <p>
-            WebVR brings virtual reality devices like the Oculus Rift,
-            or smartphones with Google Cardboard, to the web browser. With WebVR,
-            developers can create immersive virtual reality experiences that run
-            on any WebGL-enabled browser.
-          </p>
-          <ul>
-            <li>
-              <a href="http://webvr.info/" target="_blank">WebVR.info</a>: WebVR standard information.
-            </li>
-            <li>
-              <a href="http://mozvr.com/" target="_blank">MozVR.com</a>: Mozilla's WebVR team.
-            </li>
-            <li>
-              <a href="http://mozvr.com/downloads/" target="_blank">Firefox Nightly</a>:
-              With WebVR sauce!
-            </li>
-            <li>
-              <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">Chromium WebVR</a>:
-              Also with WebVR sauce!
-            </li>
-          </ul>
-        </article>
-      </section>
-
-      <section id="examples">
-        <article>
-          <h2>Try Primrose now!</h2>
-          <div>
-            <a href="examples/editor3d/index.html" target="_blank">
-              <img src="examples/editor3d/screenshot.jpg" alt="screenshot" title="3D Live Programming"><br>
-              3D Live Programming<br>
-              <small>Edit objects on the fly!</small>
-            </a>
-          </div>
-          <div>
-            <a href="examples/commodore/index.html" target="_blank">
-              <img src="examples/commodore/screenshot.jpg" alt="screenshot" title="Commodore PET"><br>
-              Commodore PET<br>
-              <small>Cutting edge 1977 technology!</small>
-            </a>
-          </div>
-          <div>
-            <a href="examples/music/index.html" target="_blank">
-              <img src="examples/music/screenshot.jpg" alt="screenshot" title="Commodore PET"><br>
-              Music<br>
-              <small>A little synthesizer keyboard you can play!</small>
-            </a>
-          </div>
-        </article>
-      </section>
-
       <section id="team">
         <article>
           <h2>Who makes Primrose?</h2>
+          <ul>
+            <li>
+              <img alt="portrait" title="Sean T. McBeth" src="images/stm-2015-05.jpg">
+              <div>
+                <h4>Sean T. McBeth</h4>
 
-          <div>
-            <img alt="portrait" title="Sean T. McBeth" src="images/stm-2015-05.jpg">
-            <div>
-              <h4>Sean T. McBeth</h4>
+                <p>
+                  He who is named Destroyer of Bug Lists, Holder of The Accursed 
+                  Scepter of JavaScript, Lord of The Desk, First of His Name.
+                </p>
 
-              <p>
-                He who is named Destroyer of Bug Lists, Holder of The Accursed 
-                Scepter of JavaScript, Lord of The Desk, First of His Name.
-              </p>
+                <p>
+                  Sean studied Computer Science and Computer Graphics at Shippensburg
+                  University and has put those skills to great use over his 10 years 
+                  of professional experience in software engineering. He has
+                  successfully bootstrapped and deployed multiple simulation and 
+                  database applications for desktop, Web, and mobile Web.
+                </p>
 
-              <p>
-                Sean has over 10 years of professional experience in software
-                engineering, having successfully bootstrapped and deployed multiple
-                OLTP and simulation applications for desktop, Web, and mobile Web.
-              </p>
+                <ul>
+                  <li>
+                    <a href="https://www.seanmcbeth.com/" target="_blank">
+                      Sean's personal site
+                    </a>
+                  </li>
+                  <li>
+                    Sean is CTO at <a href="http://www.highlandfrs.com/" target="_blank">Highland FRS</a>
+                  </li>
+                  <li>
+                    <a href="https://twitter.com/Sean_McBeth" target="_blank">
+                      <span title="twitter logo" class="icon-twitter"></span>
+                      Follow @Sean_McBeth on Twitter
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.linkedin.com/pub/sean-mcbeth/6/727/378" target="_blank">
+                      <span title="linkedin logo" class="icon-linkedin"></span>
+                      View Sean's profile on LinkedIn
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/capnmidnight" target="_blank">
+                      <span title="github logo" class="icon-github"></span>
+                      View Sean's profile on GitHub
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
 
-              <ul>
-                <li>
-                  <a href="https://www.seanmcbeth.com/" target="_blank">
-                    Sean's personal site
-                  </a>
-                </li>
-                <li>
-                  Sean is CTO at <a href="http://www.highlandfrs.com/" target="_blank">Highland FRS</a>
-                </li>
-                <li>
-                  <a href="https://twitter.com/Sean_McBeth" target="_blank">
-                    <span title="twitter logo" class="icon-twitter"></span>
-                    Follow @Sean_McBeth on Twitter
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.linkedin.com/pub/sean-mcbeth/6/727/378" target="_blank">
-                    <span title="linkedin logo" class="icon-linkedin"></span>
-                    View Sean's profile on LinkedIn
-                  </a>
-                </li>
-                <li>
-                  <a href="https://github.com/capnmidnight" target="_blank">
-                    <span title="github logo" class="icon-github"></span>
-                    View Sean's profile on GitHub
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
+            <li>
+              <img alt="portrait" title="You?" src="images/q.png">
+              <div>
+                <h4>You?</h4>
 
-          <div>
-            <img alt="portrait" title="You?" src="images/q.png">
-            <div>
-              <h4>You?</h4>
+                <p>
+                  Are you a designer, programmer, system administrator, writer, artist,
+                  marketer, or just a person who likes making things? Would you like to work
+                  on an exciting technology project? I'm looking for collaborators on Primrose.
+                </p>
 
-              <p>
-                Are you a designer, programmer, system administrator, writer, artist,
-                marketer, or just a person who likes making things? Would you like to work
-                on an exciting technology project? I'm looking for collaborators on Primrose.
-              </p>
+                <p>
+                  There's room for anyone of any background on Primrose, even if
+                  you are not sure exactly how you might contribute. If you'd like
+                  to join the project:
+                </p>
 
-              <p>
-                There's room for anyone of any background on Primrose, even if
-                you are not sure exactly how you might contribute. If you'd like
-                to join the project:
-              </p>
-
-              <ul>
-                <li>
-                  <a href="mailto:sean@seanmcbeth.com">Email me directly</a>!
-                </li>
-                <li>
-                  <a href="#mail">Sign up for the mailing list</a>.
-                </li>
-                <li>
-                  <a href="https://github.com/capnmidnight/Primrose" target="_blank">Check out the repository</a>.
-                  Fork the project, change the code or add documentation and submit pull requests. Submit issues. Poke around and have fun!
-                </li>
-              </ul>
-            </div>
-          </div>
-
+                <ul>
+                  <li>
+                    <a href="mailto:sean@seanmcbeth.com">Email me directly</a>!
+                  </li>
+                  <li>
+                    <a href="#mail">Sign up for the mailing list</a>.
+                  </li>
+                  <li>
+                    <a href="https://github.com/capnmidnight/Primrose" target="_blank">Check out the repository</a>.
+                    Fork the project, change the code or add documentation and submit pull requests. Submit issues. Poke around and have fun!
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
         </article>
       </section>
 

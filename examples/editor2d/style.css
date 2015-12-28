@@ -45,3 +45,25 @@ html, body{
   height:100%;
   cursor:text;
 }
+
+#loading, #progressBar {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  font-size: 100px;
+  padding: 50px;
+}
+
+#loading{
+  background-color: black;
+  color: white;
+  width: 100%;
+}
+
+#progressBar{
+  background-color: white;
+  color: black;
+  width: 0;
+  overflow: hidden;
+}

@@ -29,6 +29,8 @@ Primrose.Input.FPSInput = ( function ( ) {
               Primrose.Input.Keyboard.S,
               Primrose.Input.Keyboard.DOWNARROW ]},
           {name: "drive", commands: [ "driveForward", "driveBack" ]},
+          {name: "select", buttons: [ Primrose.Input.Keyboard.ENTER ]},
+          {name: "dSelect", buttons: [ Primrose.Input.Keyboard.ENTER ], delta: true},
           {name: "jump",
             buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
             metaKeys: [ -Primrose.Input.Keyboard.SHIFT ],
@@ -40,9 +42,9 @@ Primrose.Input.FPSInput = ( function ( ) {
         new Primrose.Input.Mouse( "mouse", DOMElement, [
           {name: "buttons", axes: [ Primrose.Input.Mouse.BUTTONS ]},
           {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
-          {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5},
+          {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5, min: -5, max: 5},
           {name: "heading", commands: [ "dx" ], integrate: true},
-          {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5},
+          {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5, min: -5, max: 5},
           {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
           {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
         ] ),
@@ -89,7 +91,7 @@ Primrose.Input.FPSInput = ( function ( ) {
         } );
       }
     };
-    
+
     FPSInput.prototype.getValue = function ( name ) {
       var value = 0;
       for ( var i = 0; i < this.managers.length; ++i ) {
@@ -97,7 +99,7 @@ Primrose.Input.FPSInput = ( function ( ) {
       }
       return value;
     };
-    
+
     FPSInput.prototype.getVector3 = function ( x, y, z, value ) {
       value = value || new THREE.Vector3( );
       value.set( 0, 0, 0 );
@@ -106,7 +108,7 @@ Primrose.Input.FPSInput = ( function ( ) {
       }
       return value;
     };
-    
+
     FPSInput.prototype.getVector3s = function ( x, y, z, values ) {
       values = values || [ ];
       for ( var i = 0; i < this.managers.length; ++i ) {

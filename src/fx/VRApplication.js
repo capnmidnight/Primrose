@@ -207,7 +207,7 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
-    var makeEditor = function( scene, id, w, h, options ) {
+    var makeEditor = function ( scene, id, w, h, options ) {
       var SCALE = isMobile ? 0.25 : 0.5;
       options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
       options.fontSize = options.fontSize || 32;
@@ -229,7 +229,7 @@ Primrose.VRApplication = ( function ( ) {
 
       this.registerPickableObject( mesh );
       return text;
-    }.bind(this);
+    }.bind( this );
 
     var makeTextArea = function (  ) {
       return makeEditor(
@@ -473,6 +473,11 @@ Primrose.VRApplication = ( function ( ) {
           var buttons = this.input.getValue( "buttons" ),
               clickChanged = lastButtons !== 0,
               control = object.textarea || object.button;
+
+          if ( !lockedToEditor() ) {
+            buttons |= this.input.keyboard.getValue( "select" );
+            clickChanged = clickChanged || this.input.keyboard.getValue( "dSelect" ) !== 0;
+          }
 
           if ( clickChanged && buttons > 0 ) {
             if ( this.currentControl && this.currentControl !== control ) {

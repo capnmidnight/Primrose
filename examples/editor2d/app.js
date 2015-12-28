@@ -16,25 +16,23 @@
  */
 
 /* global Primrose */
-function init () {
-  "use strict";
-  var ed = new Primrose.Text.Controls.TextBox( "editor", {
-    autoBindEvents: true,
-    keyEventSource: window
+"use strict";
+var ed = new Primrose.Text.Controls.TextBox( "editor", {
+  autoBindEvents: true,
+  keyEventSource: window
+} );
+
+function loadFile ( fileName ) {
+  GET( fileName, "text", function ( file ) {
+    ed.value = file;
+    ed.focus();
   } );
-
-  function loadFile ( fileName ) {
-    GET( fileName, "text", function ( file ) {
-      ed.value = file;
-      ed.focus();
-    } );
-  }
-
-  loadFile( "../sandbox/app.js" );
-  document.body.appendChild( ed.DOMElement );
-  var anim = function () {
-    requestAnimationFrame( anim );
-    ed.render();
-  };
-  requestAnimationFrame( anim );
 }
+
+loadFile( "../music/app.js" );
+document.body.appendChild( ed.DOMElement );
+var anim = function () {
+  requestAnimationFrame( anim );
+  ed.render();
+};
+requestAnimationFrame( anim );

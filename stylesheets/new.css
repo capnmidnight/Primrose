@@ -108,60 +108,97 @@ main p {
   margin: 0 0 1em 0;
 }
 
-main > section:nth-child(1), main > section:nth-child(5){
+main > section:nth-child(1), 
+main > section:nth-child(5){
   background-color: white;
 }
-main > section:nth-child(1), main > section:nth-child(1) a,
-main > section:nth-child(5), main > section:nth-child(5) a{
+main > section:nth-child(1) li:hover,
+main > section:nth-child(5) li:hover{
+  background-color: rgba(0, 0, 0, 0.125);
+}
+main > section:nth-child(1), 
+main > section:nth-child(1) a,
+main > section:nth-child(5), 
+main > section:nth-child(5) a{
   color: black;
 }
-main > section:nth-child(2), main > section:nth-child(6){
+
+main > section:nth-child(2), 
+main > section:nth-child(6){
   background-color: #E1CFF6;
 }
-main > section:nth-child(2), main > section:nth-child(2) a,
-main > section:nth-child(6), main > section:nth-child(6) a{
+main > section:nth-child(2) li:hover,
+main > section:nth-child(6) li:hover{
+  background-color: rgba(255, 0, 0, 0.125);
+}
+main > section:nth-child(2), 
+main > section:nth-child(2) a,
+main > section:nth-child(6), 
+main > section:nth-child(6) a{
   color: black;
 }
-main > section:nth-child(3), main > section:nth-child(7){
+
+main > section:nth-child(3), 
+main > section:nth-child(7){
   background-color: #333;
 }
-main > section:nth-child(3), main > section:nth-child(3) a,
-main > section:nth-child(7), main > section:nth-child(7) a{
+main > section:nth-child(3) li:hover,
+main > section:nth-child(7) li:hover{
+  background-color: rgba(255, 255, 255, 0.125);
+}
+main > section:nth-child(3), 
+main > section:nth-child(3) a,
+main > section:nth-child(7), 
+main > section:nth-child(7) a{
   color: white;
 }
-main > section:nth-child(4), main > section:nth-child(4){
+
+main > section:nth-child(4), 
+main > section:nth-child(8){
   background-color: #7FDCDF;
 }
-main > section:nth-child(4), main > section:nth-child(4) a,
-main > section:nth-child(8), main > section:nth-child(8) a{
+main > section:nth-child(4) li:hover,
+main > section:nth-child(8) li:hover{
+  background-color: transparent;
+}
+main > section:nth-child(4), 
+main > section:nth-child(4) a,
+main > section:nth-child(8), 
+main > section:nth-child(8) a{
   color: black;
 }
 
-
-#examples div img {
-  width: 100%;
-}
-#examples div a {
-  color: white;
-  font-size: 125%;
-  font-weight: bold;
-  text-decoration: none;
-}
-#examples div a small {
-  color: #ccc;
+section li a small {
   font-weight: normal;
   font-style: italic;
 }
 
-#examples > article > div,
-#team > article > div {
-  margin-bottom: 2em;
+section > article > ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+section > article > ul > li {
+  display: block;
+  padding: 0;
+  margin: 0;
+  padding: 1em;
 }
 
-#team > article > div > img{
+section > article > ul > li > a {
+  display: block;
+  font-size: 125%;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+section > article > ul > li img{
   display: block;
   width: 100%;
   margin: 0 auto;
+}
+
+#team img{
   border-radius:50%;
 }
 
@@ -201,31 +238,18 @@ footer > * {
   header{
     display:block;
   }
-  #introduction div:nth-child(2), 
-  #about > article > div:nth-child(2){
+  #intro div:nth-child(2){
     -webkit-column-count: 2;
     -moz-column-count: 2;
     -o-column-count: 2;
     -ms-column-count: 2;
     column-count: 2;
   }
-  #nightly{
-    padding: 3em;
-  }
-  #nightly ul {
-    margin-left: 3em;
-  } 
-  #about > article > div:nth-child(2){
-    margin-bottom: 1em;
-  }
-  #examples > article > div,
-  #team > article > div {
+  section > article > ul > li{
     display: inline-block;
     vertical-align: top;
     width: calc(50% - 10px);
-  }
-  #team > article > div {
-    padding: 2em;
+    list-style: none;
   }
   main > section:last-child{
     margin-bottom: 3em;
@@ -286,6 +310,12 @@ footer > * {
 #mc_embed_signup .mc-field-group label {
   position: relative;
   display: block;
+}
+#mc_embed_signup ul{
+  display: block;
+}
+#mc_embed_signup li{
+  display: list-item;
 }
 #mc_embed_signup .mc-field-group li label {
   display: inline-block;

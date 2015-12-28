@@ -36,8 +36,8 @@ html, body{
   height: 100%;
   top: 0;
   left: 0;
-  font-size: 100px;
-  padding: 50px;
+  font-size: 12vw;
+  padding: 7vw;
 }
 
 #loading{
@@ -85,10 +85,13 @@ body{
   background-attachment: fixed;
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
-#goVR, #goRegular{
-  display:block;
+#controls {
   position:absolute;
   right: 0;
+  bottom: 0;
+}
+#goVR, #goRegular{
+  display:block;
   background-color: transparent;
   border:0;
   cursor:pointer
