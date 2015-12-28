@@ -3,9 +3,9 @@ window.addEventListener( "load", function () {
       progressBar = document.getElementById( "progressBar" ),
       scripts = [
         "../../bin/three.min.js",
-        /* */
-        "../../bin/Primrose.min.js",
         /*
+        "../../bin/Primrose.min.js",
+        /* */
          "../../src/core.js",
          "../../src/fx/helpers/DOM.js",
          "../../src/fx/helpers/flags.js",
