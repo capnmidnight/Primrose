@@ -314,7 +314,9 @@ function range ( n, m, s, t ) {
 
 function cloud ( verts, c, s ) {
   var geom = new THREE.Geometry();
-  geom.vertices.splice.bind(geom.vertices, 0, 0).apply(geom.vertices, verts);
+  for(var i = 0; i < verts.length; ++i){
+    geom.vertices.push(verts[i]);
+  }
   var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
   return new THREE.PointCloud( geom, mat );
 }
