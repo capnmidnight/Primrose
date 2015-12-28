@@ -170,8 +170,6 @@ function StartDemo ( ) {
 
   app.input.addEventListener( "vrdeviceconnected", connectVR, false );
   app.input.addEventListener( "vrdevicelost", connectVR, false );
-
-  app.start();
 }
 
 function getSourceCode ( skipReload ) {

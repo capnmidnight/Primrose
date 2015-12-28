@@ -7,8 +7,11 @@ function StartDemo ( ) {
   app = new Primrose.VRApplication(
       "glove demo", {
         sceneModel: "../models/scene5.json",
-        backgroundColor: 0xafbfff,
-        button: {model: "../models/smallbutton.json", options: {
+        skyTexture: "../images/bg2.jpg",
+        groundTexture: "../images/deck.png",
+        button: {
+          model: "../models/smallbutton.json",
+          options: {
             maxThrow: 0.1,
             minDeflection: 10,
             colorUnpressed: 0x7f0000,
@@ -23,7 +26,7 @@ function StartDemo ( ) {
     noteDown[i] = true;
   }
 
-  app.ctrls.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
+  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
   app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
 
   var noteDown = [ ];
@@ -56,7 +59,5 @@ function StartDemo ( ) {
       noteDown[i] = false;
     }
   }.bind( this ) );
-
-  app.start();
 
 }

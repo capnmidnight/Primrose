@@ -7,12 +7,11 @@ function PrimroseDemo () {
       modA = isOSX ? "metaKey" : "ctrlKey",
       modB = isOSX ? "altKey" : "shiftKey",
       execKey = isOSX ? "E" : "SPACE",
-      skyGeom = shell( 50, 8, 4, Math.PI * 2, Math.PI ),
-      sky = textured( skyGeom, "../images/bg2.jpg", true ),
-      floor = textured( box( 25, 1, 25 ), "../images/deck.png", false, 1, 25, 25 ),
       terminal = null,
       app = new Primrose.VRApplication( "Commodore", {
-        sceneModel: "commodore_pet.json"
+        sceneModel: "commodore_pet.json",
+        skyTexture: "../images/bg2.jpg",
+        groundTexture: "../images/deck.png"
       } );
 
 
@@ -68,17 +67,9 @@ function PrimroseDemo () {
     }.bind( this ) );
 
     put( light( 0xffffff ) ).on( this.scene ).at( 0, 20, 0 );
-    put( sky ).on( this.scene ).at( 0, 0, 0 );
-    put( floor ).on( this.scene ).at( 0, 0, 0 );
 
     this.convertToEditor( this.scene.Screen );
     terminal = new Primrose.Text.Terminal( this.scene.Screen.textarea );
     terminal.loadFile( "../oregon.bas" );
-  } );
-
-  app.addEventListener( "update", function ( ) {
-    sky.position.copy( this.player.position );
-  } );
-
-  app.start();
+  }.bind( app ) );
 }

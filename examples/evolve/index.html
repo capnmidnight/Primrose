@@ -183,15 +183,19 @@
           ctrls.store.appendChild( opt );
         }
         load( ctrls.store );
-        
-        var editors = [fitnessScriptSource, mutateScriptSource, breedScriptSource];
-        setInterval(function(){
-          editors.forEach(function(e){ e.render(); });
-        }, 15);
-        window.addEventListener("mousedown", function(){
-          editors.forEach(function(e){ e.blur(); });
-        }, true);
-        
+
+        var editors = [ fitnessScriptSource, mutateScriptSource, breedScriptSource ];
+        setInterval( function () {
+          editors.forEach( function ( e ) {
+            e.render();
+          } );
+        }, 15 );
+        window.addEventListener( "mousedown", function () {
+          editors.forEach( function ( e ) {
+            e.blur();
+          } );
+        }, true );
+
         function reset ( ) {
           var i,
               j;
@@ -383,9 +387,9 @@
         <label for="crossoverRate">Crossover rate (1 in Y):</label> <input type="number" id="crossoverRate" value="1" min="1" max="10000"><br>
         <br>
         <button id="btnStart" type="button">Start</button>
-        <button id="btnReset" type="button" onclick="reset( )">Reset</button>
-        <button id="btnEdit" type="button" onclick="edit( )">Edit</button>
-        <button id="btnAbout" type="button" onclick="about( )">About</button>
+        <button id="btnReset" type="button">Reset</button>
+        <button id="btnEdit" type="button">Edit</button>
+        <button id="btnAbout" type="button">About</button>
         <button type="button" onclick="document.location = '/'">Exit</button>
       </div>
     </div>
