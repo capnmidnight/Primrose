@@ -3,7 +3,7 @@ Primrose.Text.Themes.Default = ( function ( ) {
   "use strict";
   return {
     name: "Light",
-    fontFamily: "monospace",
+    fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
     cursorColor: "black",
     fontSize: 16,
     regular: {
