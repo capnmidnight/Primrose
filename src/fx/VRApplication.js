@@ -77,18 +77,6 @@ Primrose.VRApplication = ( function ( ) {
 
     var fire = fireAll.bind( this );
 
-    var waitForResources = function ( t ) {
-      lt = t;
-      if ( sceneLoaded && buttonLoaded ) {
-        setSize( );
-        fire( "ready" );
-        this.timer = requestAnimationFrame( animate );
-      }
-      else {
-        this.timer = requestAnimationFrame( waitForResources );
-      }
-    }.bind( this );
-
     this.setupModuleEvents = function ( container, module, name ) {
       var eID = name + "Enable",
           tID = name + "Transmit",
@@ -148,12 +136,30 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
+    var waitForResources = function ( t ) {
+      lt = t;
+      if ( sceneLoaded && buttonLoaded ) {
+        if ( !readyFired ) {
+          readyFired = true;
+          setSize( );
+          fire( "ready" );
+        }
+        this.timer = requestAnimationFrame( animate );
+      }
+      else {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
+    }.bind( this );
+
     this.start = function ( ) {
-      this.timer = requestAnimationFrame( waitForResources );
+      if ( !this.timer ) {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
     };
 
     this.stop = function ( ) {
       cancelAnimationFrame( this.timer );
+      this.timer = null;
     };
 
     this.goFullScreen = function ( useVR ) {
@@ -545,7 +551,8 @@ Primrose.VRApplication = ( function ( ) {
         skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
         skinCode = parseInt( skin.substring( 1 ), 16 ),
         sceneLoaded = !this.options.sceneModel,
-        buttonLoaded = !this.options.button;
+        buttonLoaded = !this.options.button,
+        readyFired = false;
 
     //
     // Initialize public properties
@@ -638,11 +645,11 @@ Primrose.VRApplication = ( function ( ) {
       Primrose.ModelLoader.loadScene( this.options.sceneModel, function ( sceneGraph ) {
         sceneLoaded = true;
         this.scene.add.apply( this.scene, sceneGraph.children );
-        this.scene.traverse(function(obj){
-          if(obj.name){
+        this.scene.traverse( function ( obj ) {
+          if ( obj.name ) {
             this.scene[obj.name] = obj;
           }
-        }.bind(this));
+        }.bind( this ) );
         if ( sceneGraph.Camera ) {
           this.camera.position.copy( sceneGraph.Camera.position );
           this.camera.quaternion.copy( sceneGraph.Camera.quaternion );
