@@ -80,8 +80,8 @@ select > option{
 
 body{
   background-color: #eee;
-  background-size: 100%;
-  background-attachment: fixed;
+  background-repeat:no-repeat;
+  background-size:cover;
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
 #controls {
