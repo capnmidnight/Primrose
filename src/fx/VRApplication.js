@@ -500,7 +500,8 @@ Primrose.VRApplication = ( function ( ) {
 
       fire( "update", dt );
       for ( j = 0; j < this.pickableObjects.length; ++j ) {
-        var txt = this.pickableObjects[j].textarea;
+        var obj = this.pickableObjects[j],
+            txt = obj.textarea;
         if ( txt ) {
           txt.render( );
         }
