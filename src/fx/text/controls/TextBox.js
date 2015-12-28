@@ -403,12 +403,12 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       },
       width: {
         get: function () {
-          return renderer.getWidth();
+          return renderer.width;
         }
       },
       height: {
         get: function () {
-          return renderer.getHeight();
+          return renderer.height;
         }
       },
       wordWrap: {
@@ -441,7 +441,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       theme: {
         set: function ( t ) {
           theme = t || Primrose.Text.Themes.Default;
-          renderer.setTheme( theme );
+          renderer.theme = theme;
           this.update();
         },
         get: function () {
@@ -471,7 +471,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       },
       DOMElement: {
         get: function () {
-          return renderer.getDOMElement();
+          return renderer.DOMElement;
         }
       },
       selectionStart: {
@@ -591,6 +591,32 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           if ( 0 < v ) {
             theme.fontSize = v;
             renderer.resize();
+          }
+        }
+      },
+      selectedText: {
+        set: function ( str ) {
+          str = str || "";
+          str = str.replace( /\r\n/g, "\n" );
+
+          if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
+            var minCursor = Primrose.Text.Cursor.min( this.frontCursor,
+                this.backCursor ),
+                maxCursor = Primrose.Text.Cursor.max( this.frontCursor,
+                    this.backCursor ),
+                // TODO: don't recalc the string first.
+                text = this.value,
+                left = text.substring( 0, minCursor.i ),
+                right = text.substring( maxCursor.i );
+            this.value = left + str + right;
+            refreshTokens();
+            refreshGridBounds();
+            performLayout();
+            minCursor.advanceN( lines, Math.max( 0, str.length ) );
+            this.scrollIntoView( maxCursor );
+            clampScroll();
+            maxCursor.copy( minCursor );
+            this.render();
           }
         }
       }
@@ -734,44 +760,20 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       }
     };
 
-    this.overwriteText = function ( str ) {
-      str = str || "";
-      str = str.replace( /\r\n/g, "\n" );
-
-      if ( this.frontCursor.i !== this.backCursor.i || str.length > 0 ) {
-        var minCursor = Primrose.Text.Cursor.min( this.frontCursor,
-            this.backCursor ),
-            maxCursor = Primrose.Text.Cursor.max( this.frontCursor,
-                this.backCursor ),
-            // TODO: don't recalc the string first.
-            text = this.value,
-            left = text.substring( 0, minCursor.i ),
-            right = text.substring( maxCursor.i );
-        this.value = left + str + right;
-        refreshTokens();
-        refreshGridBounds();
-        performLayout();
-        minCursor.advanceN( lines, Math.max( 0, str.length ) );
-        this.scrollIntoView( maxCursor );
-        clampScroll();
-        maxCursor.copy( minCursor );
-        this.render();
-      }
+    this.getSelectedText = function () {
+      var minCursor = Primrose.Text.Cursor.min( this.frontCursor, this.backCursor ),
+          maxCursor = Primrose.Text.Cursor.max( this.frontCursor, this.backCursor );
+      return this.value.substring( minCursor.i, maxCursor.i );
     };
 
     this.copySelectedText = function ( evt ) {
       if ( this.focused ) {
         evt.returnValue = false;
         if ( this.frontCursor.i !== this.backCursor.i ) {
-          var minCursor = Primrose.Text.Cursor.min( this.frontCursor,
-              this.backCursor ),
-              maxCursor = Primrose.Text.Cursor.max( this.frontCursor,
-                  this.backCursor ),
-              text = this.value,
-              str = text.substring( minCursor.i, maxCursor.i );
           var clipboard = evt.clipboardData || window.clipboardData;
-          clipboard.setData( window.clipboardData ? "Text" : "text/plain",
-              str );
+          clipboard.setData(
+              window.clipboardData ? "Text" : "text/plain",
+              this.getSelectedText() );
         }
         evt.preventDefault();
         surrogate.style.display = "none";
@@ -783,7 +785,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       if ( this.focused ) {
         this.copySelectedText( evt );
         if ( !this.readOnly ) {
-          this.overwriteText();
+          this.selectedText = "";
           this.update();
         }
       }
@@ -793,10 +795,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       if ( this.focused && !this.readOnly ) {
         evt.returnValue = false;
         var clipboard = evt.clipboardData || window.clipboardData,
-            str = clipboard.getData( window.clipboardData ? "Text" :
-                "text/plain" );
+            str = clipboard.getData( window.clipboardData ? "Text" : "text/plain" );
         if ( str ) {
-          this.overwriteText( str );
+          this.selectedText = str;
         }
       }
     };
@@ -864,7 +865,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     };
 
     this.update = function () {
-      if ( renderer.hasResized() ) {
+      if ( renderer.resized ) {
         renderer.resize();
       }
     };
@@ -883,8 +884,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             textChanged = lastText !== this.value,
             characterWidthChanged = renderer.character.width !== lastCharacterWidth,
             characterHeightChanged = renderer.character.height !== lastCharacterHeight,
-            sizeChanged = renderer.hasResized(),
-            layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || sizeChanged;
+            layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || renderer.resized;
 
         lastGridBounds = gridBounds.toString();
         lastText = this.value;
@@ -900,10 +900,14 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         renderer.render(
             tokenRows,
             tokenHashes,
-            this.frontCursor, this.backCursor,
+            this.frontCursor,
+            this.backCursor,
             gridBounds,
             this.scroll,
-            this.focused, showLineNumbers, showScrollBars, wordWrap,
+            this.focused,
+            showLineNumbers,
+            showScrollBars,
+            wordWrap,
             gridBounds.lineCountWidth,
             layoutChanged );
       }

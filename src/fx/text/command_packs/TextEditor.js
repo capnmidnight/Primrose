@@ -13,7 +13,7 @@ Primrose.Text.CommandPacks.TextEditor = ( function () {
         if ( prim.frontCursor.i === prim.backCursor.i ) {
           prim.frontCursor.left( tokenRows );
         }
-        prim.overwriteText();
+        prim.selectedText = "";
         prim.scrollIntoView( prim.frontCursor );
       },
       NORMAL_ENTER: function ( prim, tokenRows, currentToken ) {
@@ -22,14 +22,14 @@ Primrose.Text.CommandPacks.TextEditor = ( function () {
         if ( tokenRow.length > 0 && tokenRow[0].type === "whitespace" ) {
           indent = tokenRow[0].value;
         }
-        prim.overwriteText( "\n" + indent );
+        prim.selectedText = "\n" + indent;
         prim.scrollIntoView( prim.frontCursor );
       },
       NORMAL_DELETE: function ( prim, tokenRows ) {
         if ( prim.frontCursor.i === prim.backCursor.i ) {
           prim.backCursor.right( tokenRows );
         }
-        prim.overwriteText();
+        prim.selectedText = "";
         prim.scrollIntoView( prim.frontCursor );
       },
       SHIFT_DELETE: function ( prim, tokenRows ) {
@@ -37,26 +37,28 @@ Primrose.Text.CommandPacks.TextEditor = ( function () {
           prim.frontCursor.home( tokenRows );
           prim.backCursor.end( tokenRows );
         }
-        prim.overwriteText();
+        prim.selectedText = "";
         prim.scrollIntoView( prim.frontCursor );
       },
       NORMAL_TAB: function ( prim, tokenRows ) {
         var ts = prim.getTabString();
-        prim.overwriteText( ts );
+        prim.selectedText = prim.getTabString();
       }
     };
 
-    var allCommands = { };
+    var allCommands = {};
 
     copyObject( allCommands, codePage );
     copyObject( allCommands, operatingSystem );
     copyObject( allCommands, commands );
-
+    function overwriteText ( txt ) {
+      this.selectedText = txt;
+    }
     for ( var key in allCommands ) {
       if ( allCommands.hasOwnProperty( key ) ) {
         var func = allCommands[key];
         if ( typeof func !== "function" ) {
-          func = editor.overwriteText.bind( editor, func );
+          func = overwriteText.bind( editor, func );
         }
         allCommands[key] = func;
       }

@@ -235,7 +235,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       texture = THREE.ImageUtils.loadTexture( txt );
     }
     else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
-      texture = txt.renderer.getTexture( );
+      texture = txt.renderer.texture;
     }
     else {
       texture = txt;

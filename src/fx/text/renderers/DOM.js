@@ -12,16 +12,16 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
     this.fillStyle = null;
     var translate = [ new Point() ];
 
-    function setFont(elem){
+    function setFont ( elem ) {
       elem.style.font = self.font;
-      elem.style.lineHeight = px(parseInt(self.font, 10));
+      elem.style.lineHeight = px( parseInt( self.font, 10 ) );
       elem.style.padding = "0";
       elem.style.margin = "0";
     }
 
     this.measureText = function ( txt ) {
       var tester = document.createElement( "div" );
-      setFont(tester);
+      setFont( tester );
       tester.style.position = "absolute";
       tester.style.visibility = "hidden";
       tester.innerHTML = txt;
@@ -31,23 +31,23 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       return size;
     };
 
-    this.clearRect = function(){
-        target.innerHTML = "";
+    this.clearRect = function () {
+      target.innerHTML = "";
     };
 
-    this.drawImage = function(img, x, y){
+    this.drawImage = function ( img, x, y ) {
       var top = translate[translate.length - 1];
       img.style.position = "absolute";
-      img.style.left = px(x + top.x);
-      img.style.top = px(y + top.y);
-      target.appendChild(img);
+      img.style.left = px( x + top.x );
+      img.style.top = px( y + top.y );
+      target.appendChild( img );
     };
 
     this.fillRect = function ( x, y, w, h ) {
       var top = translate[translate.length - 1];
       var box = document.createElement( "div" );
       box.style.position = "absolute";
-      box.style.left = px( x + top.x);
+      box.style.left = px( x + top.x );
       box.style.top = px( y + top.y );
       box.style.width = px( w );
       box.style.height = px( h );
@@ -55,29 +55,29 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       target.appendChild( box );
     };
 
-    this.fillText = function(str, x, y){
+    this.fillText = function ( str, x, y ) {
       var top = translate[translate.length - 1];
       var box = document.createElement( "span" );
       box.style.position = "absolute";
       box.style.left = px( x + top.x );
       box.style.top = px( y + top.y );
       box.style.whiteSpace = "pre";
-      setFont(box);
+      setFont( box );
       box.style.color = this.fillStyle;
-      box.appendChild(document.createTextNode(str));
+      box.appendChild( document.createTextNode( str ) );
       target.appendChild( box );
     };
 
     this.save = function () {
       var top = translate[translate.length - 1];
-      translate.push(top.clone());
+      translate.push( top.clone() );
     };
 
-    this.restore = function(){
+    this.restore = function () {
       translate.pop();
     };
 
-    this.translate = function(x, y){
+    this.translate = function ( x, y ) {
       var top = translate[translate.length - 1];
       top.x += x;
       top.y += y;
@@ -88,8 +88,8 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
     if ( type !== "2d" ) {
       throw new Exception( "type parameter needs to be '2d'." );
     }
-    this.style.width = pct(100);
-    this.style.height = pct(100);
+    this.style.width = pct( 100 );
+    this.style.height = pct( 100 );
     return new FakeContext( this );
   };
 
@@ -117,22 +117,12 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
     this.id = div.id;
     this.autoBindEvents = true;
 
-    this.setTheme = function ( t ) {
-      theme = t;
-    };
-
     this.pixel2cell = function ( point, scroll, gridBounds ) {
       point.set(
           Math.round( point.x / this.character.width ) + scroll.x -
           gridBounds.x,
           Math.floor( ( point.y / this.character.height ) - 0.25 ) +
           scroll.y );
-    };
-
-    this.hasResized = function () {
-      var newWidth = div.clientWidth,
-          newHeight = div.clientHeight;
-      return oldWidth !== newWidth || oldHeight !== newHeight;
     };
 
     this.resize = function () {
@@ -181,13 +171,36 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       return this.resize();
     };
 
-    this.getWidth = function () {
-      return oldWidth;
-    };
-
-    this.getHeight = function () {
-      return oldHeight;
-    };
+    Object.defineProperties( {
+      width: {
+        get: function () {
+          return oldWidth;
+        }
+      },
+      height: {
+        get: function () {
+          return oldHeight;
+        }
+      },
+      resized: {
+        get: function () {
+          var newWidth = div.clientWidth,
+              newHeight = div.clientHeight;
+          return oldWidth !== newWidth || oldHeight !== newHeight;
+        }
+      },
+      theme: {
+        set: function ( t ) {
+          theme = t;
+          this.resize();
+        }
+      },
+      DOMElement: {
+        get: function () {
+          return div;
+        }
+      }
+    } );
 
     function fillRect ( gfx, fill, x, y, w, h ) {
       gfx.fillStyle = fill;
@@ -263,8 +276,8 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       if ( focused ) {
         var cc = theme.cursorColor || "black";
         var w = 1 / self.character.width;
-        fillRect(bgfx, cc, minCursor.x, minCursor.y, w, 1);
-        fillRect(bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+        fillRect( bgfx, cc, minCursor.x, minCursor.y, w, 1 );
+        fillRect( bgfx, cc, maxCursor.x, maxCursor.y, w, 1 );
       }
       bgfx.restore();
     }
@@ -292,7 +305,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
               gridBounds.width ) {
 
             // draw the text
-            var style = theme[t.type] || { };
+            var style = theme[t.type] || {};
             var font = ( style.fontWeight || theme.regular.fontWeight || "" ) +
                 " " + ( style.fontStyle || theme.regular.fontStyle || "" ) +
                 " " + self.character.height + "px " + theme.fontFamily;
@@ -406,10 +419,6 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
       gfx.drawImage( bgDiv, 0, 0 );
       gfx.drawImage( fgDiv, 0, 0 );
       gfx.drawImage( trimDiv, 0, 0 );
-    };
-
-    this.getDOMElement = function () {
-      return div;
     };
 
     if ( !( domElementOrID instanceof window.HTMLDivElement ) &&

@@ -17,7 +17,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         bgfx = bgCanvas.getContext( "2d" ),
         tgfx = trimCanvas.getContext( "2d" ),
         theme = null,
-        texture = null,
+        txt = null,
         strictSize = options.size,
         rowCache = {},
         lastFocused = false,
@@ -35,25 +35,12 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     this.id = canvas.id;
     this.autoBindEvents = true;
 
-    this.setTheme = function ( t ) {
-      theme = t;
-      this.resize();
-    };
-
     this.pixel2cell = function ( point, scroll, gridBounds ) {
       var x = point.x * canvas.width / canvas.clientWidth;
       var y = point.y * canvas.height / canvas.clientHeight;
       point.set(
           Math.round( x / this.character.width ) + scroll.x - gridBounds.x,
           Math.floor( ( y / this.character.height ) - 0.25 ) + scroll.y );
-    };
-
-    this.hasResized = function () {
-      var oldWidth = canvas.width,
-          oldHeight = canvas.height,
-          newWidth = canvas.clientWidth,
-          newHeight = canvas.clientHeight;
-      return oldWidth !== newWidth || oldHeight !== newHeight;
     };
 
     this.resize = function () {
@@ -90,13 +77,47 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       return this.resize();
     };
 
-    this.getWidth = function () {
-      return canvas.width;
-    };
-
-    this.getHeight = function () {
-      return canvas.height;
-    };
+    Object.defineProperties( this, {
+      width: {
+        get: function () {
+          return canvas.width;
+        }
+      },
+      height: {
+        get: function () {
+          return canvas.height;
+        }
+      },
+      resized: {
+        get: function () {
+          var oldWidth = canvas.width,
+              oldHeight = canvas.height,
+              newWidth = canvas.clientWidth,
+              newHeight = canvas.clientHeight;
+          return oldWidth !== newWidth || oldHeight !== newHeight;
+        }
+      },
+      theme: {
+        set: function ( t ) {
+          theme = t;
+          this.resize();
+        }
+      },
+      DOMElement: {
+        get: function () {
+          return canvas;
+        }
+      },
+      texture: {
+        get: function (  ) {
+          if ( typeof window.THREE !== "undefined" && !txt ) {
+            txt = new THREE.Texture( canvas );
+            txt.needsUpdate = true;
+          }
+          return txt;
+        }
+      }
+    } );
 
     this.mapUV = function ( point ) {
       if ( point ) {
@@ -261,8 +282,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       fgfx.restore();
     }
 
-    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers,
-        showScrollBars, wordWrap, lineCountWidth, focused ) {
+    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused ) {
 
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
@@ -395,7 +415,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
         if ( layoutChanged ) {
           rowCache = {};
-          if ( this.hasResized() ) {
+          if ( this.resized ) {
             this.resize();
           }
         }
@@ -418,27 +438,14 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           gfx.drawImage( fgCanvas, 0, 0 );
           gfx.drawImage( trimCanvas, 0, 0 );
 
-          if ( texture ) {
-            texture.needsUpdate = true;
+          if ( txt ) {
+            txt.needsUpdate = true;
           }
         }
       }
     };
 
-    this.getDOMElement = function () {
-      return canvas;
-    };
-
-    this.getTexture = function (  ) {
-      if ( typeof window.THREE !== "undefined" && !texture ) {
-        texture = new THREE.Texture( canvas );
-        texture.needsUpdate = true;
-      }
-      return texture;
-    };
-
-    if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) &&
-        strictSize ) {
+    if ( !( canvasElementOrID instanceof window.HTMLCanvasElement ) && strictSize ) {
       canvas.style.position = "absolute";
       canvas.style.width = strictSize.width;
       canvas.style.height = strictSize.height;
