@@ -31,6 +31,28 @@ html, body{
   margin: 0;
 }
 
+#loading, #progressBar {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  font-size: 100px;
+  padding: 50px;
+}
+
+#loading{
+  background-color: black;
+  color: white;
+  width: 100%;
+}
+
+#progressBar{
+  background-color: white;
+  color: black;
+  width: 0;
+  overflow: hidden;
+}
+
 article{
   color: rgb(255, 255, 255);
   background-image: linear-gradient(1deg, rgba(25, 35, 53, 1), rgba(31, 56, 92, 0.89), rgba(67, 128, 194, 0.95));
@@ -61,7 +83,7 @@ body{
   background-color: #eee;
   background-size: 100%;
   background-attachment: fixed;
-  font-family: 'Trebuchet MS', sans-serif;
+  font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
 #goVR, #goRegular{
   display:block;

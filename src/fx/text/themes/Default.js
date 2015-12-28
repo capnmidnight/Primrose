@@ -6,12 +6,15 @@ Primrose.Text.Themes.Default = ( function ( ) {
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
     cursorColor: "black",
     fontSize: 16,
+    lineNumbers: {
+      foreColor: "black"
+    },
     regular: {
       backColor: "white",
       foreColor: "black",
       currentRowBackColor: "#f0f0f0",
       selectedBackColor: "#c0c0c0",
-      unfocused: "rgba(255, 255, 255, 0.75)"
+      unfocused: "rgba(0, 0, 255, 0.25)"
     },
     strings: {
       foreColor: "#aa9900",

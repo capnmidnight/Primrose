@@ -207,12 +207,10 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
-    function makeEditor ( scene, id, w, h, options ) {
+    var makeEditor = function( scene, id, w, h, options ) {
       var SCALE = isMobile ? 0.25 : 0.5;
       options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
       options.fontSize = options.fontSize || 32;
-      options.theme = options.theme || Primrose.Text.Themes.Dark;
-      options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
       if ( options.opacity === undefined ) {
         options.opacity = 1;
       }
@@ -220,8 +218,8 @@ Primrose.VRApplication = ( function ( ) {
           cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
           cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
           makeGeom = options.useShell ?
-          shell.bind( this, 1, cellWidth, cellHeight ) :
-          quad.bind( this, w, h, cellWidth, cellHeight ),
+          shell.bind( null, 1, cellWidth, cellHeight ) :
+          quad.bind( null, w, h, cellWidth, cellHeight ),
           mesh = textured( makeGeom(), text, false, options.opacity );
 
       scene.add( mesh );
@@ -231,7 +229,7 @@ Primrose.VRApplication = ( function ( ) {
 
       this.registerPickableObject( mesh );
       return text;
-    }
+    }.bind(this);
 
     var makeTextArea = function (  ) {
       return makeEditor(

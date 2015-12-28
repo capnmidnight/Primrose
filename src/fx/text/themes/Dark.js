@@ -14,7 +14,7 @@ Primrose.Text.Themes.Dark = ( function ( ) {
       foreColor: "#c0c0c0",
       currentRowBackColor: "#202020",
       selectedBackColor: "#404040",
-      unfocused: "rgba(0, 0, 0, 0.5)"
+      unfocused: "rgba(0, 0, 255, 0.25)"
     },
     strings: {
       foreColor: "#aa9900",

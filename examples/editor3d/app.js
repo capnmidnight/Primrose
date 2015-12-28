@@ -8,172 +8,169 @@ var app,
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
     WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
     DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" );
+app = new Primrose.VRApplication( "Codevember", {
+  disableAutoFullScreen: true,
+  useFog: true,
+  skyTexture: "../images/bg2.jpg",
+  groundTexture: "../images/deck.png"
+} );
 
-function StartDemo ( ) {
-  app = new Primrose.VRApplication( "Codevember", {
-    disableAutoFullScreen: true,
-    useFog: true,
-    skyTexture: "../images/bg2.jpg",
-    groundTexture: "../images/deck.png"
-  } );
+var isHomeScreen = window.self !== window.top,
+    editor = null,
+    output = null,
+    documentation = null,
+    modA = isOSX ? "metaKey" : "ctrlKey",
+    modB = isOSX ? "altKey" : "shiftKey",
+    cmdA = isOSX ? "CMD" : "CTRL",
+    cmdB = isOSX ? "OPT" : "SHIFT",
+    cmdPre = cmdA + "+" + cmdB,
+    editorSphereY = 1.5,
+    subScene = new THREE.Object3D(),
+    scriptUpdateTimeout,
+    lastScript = null,
+    scriptAnimate = null;
 
-  var isHomeScreen = window.self !== window.top,
-      editor = null,
-      output = null,
-      documentation = null,
-      modA = isOSX ? "metaKey" : "ctrlKey",
-      modB = isOSX ? "altKey" : "shiftKey",
-      cmdA = isOSX ? "CMD" : "CTRL",
-      cmdB = isOSX ? "OPT" : "SHIFT",
-      cmdPre = cmdA + "+" + cmdB,
-      editorSphereY = 1.5,
-      subScene = new THREE.Object3D(),
-      scriptUpdateTimeout,
-      lastScript = null,
+app.addEventListener( "ready", function () {
+  app.scene.add( subScene );
+
+  documentation = document.createElement( "pre" );
+  documentation.innerHTML = getDocumentation();
+  documentation.style.transform = "rotate3d(0, 1, 0, " +
+      Math.PI / 2 + "rad) translate3d(0, " +
+      editorSphereY + "em, 0)";
+  documentation = app.appendChild( documentation );
+
+  editor = document.createElement( "textarea" );
+  editor.value = getSourceCode( isHomeScreen );
+  editor.style.transform = "translate3d(0, " + editorSphereY + "em, 0)";
+  editor = app.appendChild( editor );
+
+  output = document.createElement( "pre" );
+  output.style.transform = "rotate3d(0, 1, 0, " +
+      Math.PI / -2 + "rad) translate3d(0, " +
+      editorSphereY + "em, 0)";
+  output = app.appendChild( output );
+  output.theme = Primrose.Text.Themes.Dark;
+  output.fontSize = 32;
+
+  log( "INSTRUCTIONS:" );
+  log( " - " + cmdPre + "+E to show/hide editor" );
+  log( " - " + cmdPre + "+X to reload original demo code" );
+  log( " - Z to reset position/sensor" );
+  log();
+} );
+
+app.addEventListener( "update", function ( dt ) {
+  if ( !scriptUpdateTimeout ) {
+    scriptUpdateTimeout = setTimeout( updateScript, 500 );
+  }
+
+  if ( scriptAnimate ) {
+    try {
+      scriptAnimate.call( app, dt );
+    }
+    catch ( exp ) {
+      console.error( exp );
+      log( "ERR: " + exp.message );
       scriptAnimate = null;
-
-  app.addEventListener( "ready", function () {
-    app.scene.add( subScene );
-
-    documentation = document.createElement( "pre" );
-    documentation.innerHTML = getDocumentation();
-    documentation.style.transform = "rotate3d(0, 1, 0, " +
-        Math.PI / 2 + "rad) translate3d(0, " +
-        editorSphereY + "em, 0)";
-    documentation = app.appendChild( documentation );
-
-    editor = document.createElement( "textarea" );
-    editor.value = getSourceCode( isHomeScreen );
-    editor.style.transform = "translate3d(0, " + editorSphereY + "em, 0)";
-    editor = app.appendChild( editor );
-
-    output = document.createElement( "pre" );
-    output.style.transform = "rotate3d(0, 1, 0, " +
-        Math.PI / -2 + "rad) translate3d(0, " +
-        editorSphereY + "em, 0)";
-    output = app.appendChild( output );
-    output.theme = Primrose.Text.Themes.Dark;
-    output.fontSize = 32;
-
-    log( "INSTRUCTIONS:" );
-    log( " - " + cmdPre + "+E to show/hide editor" );
-    log( " - " + cmdPre + "+X to reload original demo code" );
-    log( " - Z to reset position/sensor" );
-    log();
-  } );
-
-  app.addEventListener( "update", function ( dt ) {
-    if ( !scriptUpdateTimeout ) {
-      scriptUpdateTimeout = setTimeout( updateScript, 500 );
     }
+  }
+} );
 
-    if ( scriptAnimate ) {
-      try {
-        scriptAnimate.call( app, dt );
-      }
-      catch ( exp ) {
-        console.error( exp );
-        log( "ERR: " + exp.message );
-        scriptAnimate = null;
-      }
+app.addEventListener( "keydown", function ( evt ) {
+  var mod = evt[modA] && evt[modB];
+  if ( mod && evt.keyCode === Primrose.Keys.E ) {
+    documentation.visible = output.visible = editor.visible =
+        !editor.visible;
+    if ( !editor.visible && app.currentEditor &&
+        app.currentEditor.focused ) {
+      app.currentEditor.blur( );
+      app.currentEditor = null;
     }
-  } );
+  }
+  else if ( mod && evt.keyCode === Primrose.Keys.X ) {
+    editor.value = getSourceCode( true );
+  }
 
-  app.addEventListener( "keydown", function ( evt ) {
-    var mod = evt[modA] && evt[modB];
-    if ( mod && evt.keyCode === Primrose.Keys.E ) {
-      documentation.visible = output.visible = editor.visible =
-          !editor.visible;
-      if ( !editor.visible && app.currentEditor &&
-          app.currentEditor.focused ) {
-        app.currentEditor.blur( );
-        app.currentEditor = null;
-      }
-    }
-    else if ( mod && evt.keyCode === Primrose.Keys.X ) {
-      editor.value = getSourceCode( true );
-    }
-
-    if ( scriptUpdateTimeout ) {
-      clearTimeout( scriptUpdateTimeout );
-      scriptUpdateTimeout = null;
-    }
-  } );
-
-  window.addEventListener( "unload", function ( ) {
-    var script = editor.value;
-    if ( script.length > 0 ) {
-      setSetting( "code", script );
-    }
-  } );
-
-  function updateScript ( ) {
-    var newScript = editor.value,
-        exp;
-    if ( newScript !== lastScript ) {
-      lastScript = newScript;
-      if ( newScript.indexOf( "function update" ) >= 0 &&
-          newScript.indexOf( "return update" ) < 0 ) {
-        newScript += "\nreturn update;";
-      }
-      try {
-        log( "----- loading new script -----" );
-        var scriptUpdate = new Function( "scene", newScript );
-        for ( var i = subScene.children.length - 1; i >= 0; --i ) {
-          subScene.remove( subScene.children[i] );
-        }
-        scriptAnimate = scriptUpdate.call( app, subScene );
-        log( "----- script loaded -----" );
-      }
-      catch ( exp ) {
-        console.error( exp );
-        log( "ERR: " + exp.message );
-        scriptAnimate = null;
-      }
-    }
+  if ( scriptUpdateTimeout ) {
+    clearTimeout( scriptUpdateTimeout );
     scriptUpdateTimeout = null;
   }
+} );
 
-  log = function (  ) {
-    if ( output ) {
-      var msg = Array.prototype.join.call( arguments, ", " ),
-          t = output;
-      t.value += msg + "\n";
-      t.selectionStart = t.selectionEnd = t.value.length;
-      t.scrollIntoView( t.frontCursor );
+window.addEventListener( "unload", function ( ) {
+  var script = editor.value;
+  if ( script.length > 0 ) {
+    setSetting( "code", script );
+  }
+} );
+
+function updateScript ( ) {
+  var newScript = editor.value,
+      exp;
+  if ( newScript !== lastScript ) {
+    lastScript = newScript;
+    if ( newScript.indexOf( "function update" ) >= 0 &&
+        newScript.indexOf( "return update" ) < 0 ) {
+      newScript += "\nreturn update;";
     }
-  };
-
-  clrscr = function () {
-    if ( output ) {
-      var t = output;
-      t.value = "";
-      t.selectionStart = t.selectionEnd = t.value.length;
-      t.scrollIntoView( t.frontCursor );
+    try {
+      log( "----- loading new script -----" );
+      var scriptUpdate = new Function( "scene", newScript );
+      for ( var i = subScene.children.length - 1; i >= 0; --i ) {
+        subScene.remove( subScene.children[i] );
+      }
+      scriptAnimate = scriptUpdate.call( app, subScene );
+      log( "----- script loaded -----" );
     }
-  };
-
-  var cmdLabels = document.querySelectorAll( ".cmdLabel" );
-  for ( var i = 0; i < cmdLabels.length; ++i ) {
-    cmdLabels[i].innerHTML = cmdPre;
-  }
-
-  if ( app.ctrls.goVR ) {
-    app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
-  }
-  if ( app.ctrls.goRegular ) {
-    app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-  }
-
-  function connectVR ( ) {
-    if ( app.ctrls.goVR ) {
-      app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
+    catch ( exp ) {
+      console.error( exp );
+      log( "ERR: " + exp.message );
+      scriptAnimate = null;
     }
   }
-
-  app.input.addEventListener( "vrdeviceconnected", connectVR, false );
-  app.input.addEventListener( "vrdevicelost", connectVR, false );
+  scriptUpdateTimeout = null;
 }
+
+log = function (  ) {
+  if ( output ) {
+    var msg = Array.prototype.join.call( arguments, ", " ),
+        t = output;
+    t.value += msg + "\n";
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView( t.frontCursor );
+  }
+};
+
+clrscr = function () {
+  if ( output ) {
+    var t = output;
+    t.value = "";
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView( t.frontCursor );
+  }
+};
+
+var cmdLabels = document.querySelectorAll( ".cmdLabel" );
+for ( var i = 0; i < cmdLabels.length; ++i ) {
+  cmdLabels[i].innerHTML = cmdPre;
+}
+
+if ( app.ctrls.goVR ) {
+  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
+}
+if ( app.ctrls.goRegular ) {
+  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
+}
+
+function connectVR ( ) {
+  if ( app.ctrls.goVR ) {
+    app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
+  }
+}
+
+app.input.addEventListener( "vrdeviceconnected", connectVR, false );
+app.input.addEventListener( "vrdevicelost", connectVR, false );
 
 function getSourceCode ( skipReload ) {
   var defaultDemo = testDemo.toString(),
