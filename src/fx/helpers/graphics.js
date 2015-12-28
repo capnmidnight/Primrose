@@ -318,29 +318,3 @@ function cloud ( verts, c, s ) {
   var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
   return new THREE.PointCloud( geom, mat );
 }
-
-function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
-  var SCALE = isMobile ? 0.25 : 0.5;
-  options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
-  options.fontSize = options.fontSize || 32;
-  options.theme = options.theme || Primrose.Text.Themes.Dark;
-  options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
-  if ( options.opacity === undefined ) {
-    options.opacity = 1;
-  }
-  var text = new Primrose.Text.Controls.TextBox( id, options ),
-      cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
-      cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
-      makeGeom = options.useShell ?
-      shell.bind( this, 1, cellWidth, cellHeight ) :
-      quad.bind( this, w, h, cellWidth, cellHeight ),
-      mesh = textured( makeGeom(), text, false, options.opacity );
-
-  mesh.position.set( x, y, z );
-  mesh.rotation.set( rx, ry, rz );
-  scene.add( mesh );
-
-  mesh.textarea = text;
-
-  return mesh;
-}

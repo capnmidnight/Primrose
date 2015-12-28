@@ -1,4 +1,5 @@
-/* global Primrose, CANNON, THREE, io, CryptoJS, Notification, requestFullScreen, isFullScreenMode, Function, fireAll, isMobile */
+/* global Primrose, THREE, io, CryptoJS, Notification, requestFullScreen, 
+ * isFullScreenMode, Function, fireAll, isMobile, shell, quad */
 Primrose.VRApplication = ( function ( ) {
   "use strict";
 
@@ -206,6 +207,33 @@ Primrose.VRApplication = ( function ( ) {
       }
     };
 
+    function makeEditor ( scene, id, w, h, x, y, z, rx, ry, rz, options ) {
+      var SCALE = isMobile ? 0.25 : 0.5;
+      options.size = options.size || new Primrose.Text.Size( 1024 * w, 1024 * h );
+      options.fontSize = options.fontSize || 32;
+      options.theme = options.theme || Primrose.Text.Themes.Dark;
+      options.tokenizer = options.tokenizer || Primrose.Text.Grammars.PlainText;
+      if ( options.opacity === undefined ) {
+        options.opacity = 1;
+      }
+      var text = new Primrose.Text.Controls.TextBox( id, options ),
+          cellWidth = Math.round( SCALE * 1024 * w / options.fontSize ),
+          cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
+          makeGeom = options.useShell ?
+          shell.bind( this, 1, cellWidth, cellHeight ) :
+          quad.bind( this, w, h, cellWidth, cellHeight ),
+          mesh = textured( makeGeom(), text, false, options.opacity );
+
+      mesh.position.set( x, y, z );
+      mesh.rotation.set( rx, ry, rz );
+      scene.add( mesh );
+
+      text.mesh = mesh;
+      mesh.textarea = text;
+
+      return text;
+    }
+
     var makeTextArea = function (  ) {
       var tokenizer = Primrose.Text.Grammars.JavaScript;
       var ed = makeEditor(
@@ -219,7 +247,7 @@ Primrose.VRApplication = ( function ( ) {
             wheelEventSource: this.renderer.domElement,
             theme: Primrose.Text.Themes.Default
           } );
-      this.registerPickableObject( ed );
+      this.registerPickableObject( ed.mesh );
       return ed;
     }.bind( this );
 
@@ -238,7 +266,7 @@ Primrose.VRApplication = ( function ( ) {
             hideLineNumbers: true,
             readOnly: true
           } );
-      this.registerPickableObject( ed );
+      this.registerPickableObject( ed.mesh );
       return ed;
     }.bind( this );
 
@@ -255,18 +283,16 @@ Primrose.VRApplication = ( function ( ) {
       button: makeButton
     };
 
-    this.createElement = function ( type ) {
-      if ( elementConstructors[type] ) {
-        return elementConstructors[type]( );
-      }
-    };
-
     this.appendChild = function ( elem ) {
       var type = elem.tagName.toLocaleLowerCase(),
-          obj = this.createElement( type );
-      if ( obj ) {
+          obj = null;
+      
+      if ( elementConstructors[type] ) {
+        obj = elementConstructors[type]( );
         obj.copyElement( elem );
       }
+      
+      return obj;
     };
 
     this.convertToEditor = function ( obj ) {
@@ -280,9 +306,10 @@ Primrose.VRApplication = ( function ( ) {
         hideLineNumbers: true
       } );
       textured( obj, editor );
+      editor.mesh = obj;
       obj.textarea = editor;
       this.registerPickableObject( obj );
-      return obj;
+      return editor;
     };
 
     this.registerPickableObject = function ( obj ) {

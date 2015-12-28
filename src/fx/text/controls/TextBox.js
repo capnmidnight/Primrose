@@ -15,7 +15,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       options = {file: options};
     }
 
-    Primrose.Text.Control.call( this );
+    Primrose.BaseControl.call( this );
 
     //////////////////////////////////////////////////////////////////////////
     // private fields
@@ -591,6 +591,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
           if ( 0 < v ) {
             theme.fontSize = v;
             renderer.resize();
+            this.render();
           }
         }
       },
@@ -619,8 +620,23 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
             this.render();
           }
         }
+      },
+      position: {
+        get: function () {
+          return this.mesh.position;
+        }
+      },
+      quaternion: {
+        get: function () {
+          return this.mesh.quaternion;
+        }
       }
     } );
+
+    this.copyElement = function ( elem ) {
+      Primrose.BaseControl.prototype.copyElement.call( this, elem );
+      this.value = elem.value || elem.innerHTML;
+    };
 
     this.pushUndo = function ( lines ) {
       if ( historyFrame < history.length - 1 ) {
@@ -993,7 +1009,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         "Shortcut style", Primrose.Text.OperatingSystem );
   }
 
-  inherit( TextBox, Primrose.Text.Control );
+  inherit( TextBox, Primrose.BaseControl );
 
   return TextBox;
 } )();

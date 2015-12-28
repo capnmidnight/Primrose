@@ -3,6 +3,7 @@
 Primrose.Button = ( function () {
   function Button ( model, name, options ) {
     this.options = combineDefaults( options, Button );
+    Primrose.BaseControl.call( this );
     this.options.minDeflection = Math.cos( this.options.minDeflection );
     this.options.colorUnpressed = new THREE.Color( this.options.colorUnpressed );
     this.options.colorPressed = new THREE.Color( this.options.colorPressed );
@@ -21,6 +22,8 @@ Primrose.Button = ( function () {
     this.name = name;
     this.element = null;
   }
+
+  inherit( Button, Primrose.BaseControl );
 
   Button.DEFAULTS = {
     maxThrow: 0.1,
@@ -62,25 +65,6 @@ Primrose.Button = ( function () {
   Button.prototype.endPointer = function () {
     this.color.copy( this.options.colorUnpressed );
     fireAll.call( this, "release" );
-  };
-
-  var NUMBER_PATTERN = "\\s*([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))(?:em|px)?\\s*",
-      TRANSLATE_PATTERN = new RegExp( "translate3d\\s*\\(" +
-          NUMBER_PATTERN + "," +
-          NUMBER_PATTERN + "," +
-          NUMBER_PATTERN + "\\)", "i" );
-
-  Button.prototype.copyElement = function ( elem ) {
-    this.element = elem;
-    if ( elem.style.transform ) {
-      var transMatch = elem.style.transform.match( TRANSLATE_PATTERN );
-      if ( transMatch ) {
-        this.position.set(
-            parseFloat( transMatch[1] ),
-            parseFloat( transMatch[2] ),
-            parseFloat( transMatch[3] ) );
-      }
-    }
   };
 
   Object.defineProperties( Button.prototype, {

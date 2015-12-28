@@ -35,22 +35,25 @@ function StartDemo ( ) {
   app.addEventListener( "ready", function () {
     app.scene.add( subScene );
 
-    documentation = app.createElement( "pre" );
-    documentation.textarea.tokenizer = Primrose.Text.Grammars.PlainText;
-    documentation.textarea.value = getDocumentation();
-    documentation.position.y = editorSphereY;
-    documentation.rotation.y = Math.PI / 2;
+    documentation = document.createElement( "pre" );
+    documentation.innerHTML = getDocumentation();
+    documentation.style.transform = "rotate3d(0, 1, 0, " +
+        Math.PI / 2 + "rad) translate3d(0, " +
+        editorSphereY + "em, 0)";
+    documentation = app.appendChild( documentation );
 
-    editor = app.createElement( "textarea" );
-    editor.textarea.value = getSourceCode( isHomeScreen );
-    editor.position.y = editorSphereY;
+    editor = document.createElement( "textarea" );
+    editor.value = getSourceCode( isHomeScreen );
+    editor.style.transform = "translate3d(0, " + editorSphereY + "em, 0)";
+    editor = app.appendChild( editor );
 
-    output = app.createElement( "pre" );
-    output.position.y = editorSphereY;
-    output.rotation.y = -Math.PI / 2;
-    output.textarea.theme = Primrose.Text.Themes.Dark;
-    output.textarea.fontSize = 32;
-    output.textarea.render();
+    output = document.createElement( "pre" );
+    output.style.transform = "rotate3d(0, 1, 0, " +
+        Math.PI / -2 + "rad) translate3d(0, " +
+        editorSphereY + "em, 0)";
+    output = app.appendChild( output );
+    output.theme = Primrose.Text.Themes.Dark;
+    output.fontSize = 32;
 
     log( "INSTRUCTIONS:" );
     log( " - " + cmdPre + "+E to show/hide editor" );
@@ -88,7 +91,7 @@ function StartDemo ( ) {
       }
     }
     else if ( mod && evt.keyCode === Primrose.Keys.X ) {
-      editor.textarea.value = getSourceCode( true );
+      editor.value = getSourceCode( true );
     }
 
     if ( scriptUpdateTimeout ) {
@@ -98,14 +101,14 @@ function StartDemo ( ) {
   } );
 
   window.addEventListener( "unload", function ( ) {
-    var script = editor.textarea.value;
+    var script = editor.value;
     if ( script.length > 0 ) {
       setSetting( "code", script );
     }
   } );
 
   function updateScript ( ) {
-    var newScript = editor.textarea.value,
+    var newScript = editor.value,
         exp;
     if ( newScript !== lastScript ) {
       lastScript = newScript;
@@ -134,7 +137,7 @@ function StartDemo ( ) {
   log = function (  ) {
     if ( output ) {
       var msg = Array.prototype.join.call( arguments, ", " ),
-          t = output.textarea;
+          t = output;
       t.value += msg + "\n";
       t.selectionStart = t.selectionEnd = t.value.length;
       t.scrollIntoView( t.frontCursor );
@@ -143,7 +146,7 @@ function StartDemo ( ) {
 
   clrscr = function () {
     if ( output ) {
-      var t = output.textarea;
+      var t = output;
       t.value = "";
       t.selectionStart = t.selectionEnd = t.value.length;
       t.scrollIntoView( t.frontCursor );
@@ -163,7 +166,7 @@ function StartDemo ( ) {
   }
 
   function connectVR ( ) {
-    if(app.ctrls.goVR){
+    if ( app.ctrls.goVR ) {
       app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
     }
   }
