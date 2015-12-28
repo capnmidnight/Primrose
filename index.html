@@ -12,303 +12,338 @@
     <meta property="og:image" content="https://www.primroseeditor.com/images/screenshot3.jpg" />
     <meta property="og:description" content="A WebVR application framework."/>
     <title>Primrose VR: WebVR Application Framework</title>
-    <style type="text/css">*{box-sizing:border-box}html,body{position:absolute;width:100%;height:100%;padding:0;margin:0}input,select{background-color:rgba(255,255,255,0.25);color:white;border:0;padding:.25em;margin:.25em;text-align:center}select>option{color:black}body{background-color:#eee;background-size:100%;background-attachment:fixed;font-family:'Trebuchet MS',sans-serif}#nightly{font-style:italic;margin:1em;padding:1em;border:dashed 5px #efff00;background-color:#0f1325}#settings>thead>tr>th{text-align:left}#settings>tbody>tr>td{vertical-align:top;padding-right:1em}a{color:#f9ff00}a:visited{color:#ffcc6e}#menu>ul{list-style:none;padding:0}#menu>ul>li>a.button{font-size:75%}#menu>ul>li>a.button,#content>article,#nightly{color:#fff}#frontBuffer,#infoContainer{position:absolute;top:0;left:0;height:100%;width:100%}@media(max-width:640px){header,footer,article,#menu{background-color:#779ac0}header,footer,#description,#menu{width:100%;padding:0;margin:0}header>img{max-width:100%}#content>article{padding:2em}#content>article{display:none}#content>article.selected{display:block}footer,footer a,footer a:visited{color:#fff}}@media(min-width:641px){header{position:absolute}#description{position:absolute;top:64px;bottom:0}#menu>ul>li>a.button,#content>article{background-color:rgba(31,56,92,0.89);background-image:linear-gradient(1deg,rgba(25,35,53,1),rgba(31,56,92,0.89),rgba(67,128,194,0.95));box-shadow:0 0 10px #8392a9;text-shadow:1px 1px 1px #020e1f}#menu{width:7em;float:left}#content>article{position:absolute;transition:left .5s;transition-timing-function:ease-in-out;left:-2000px;top:0;max-height:95%;overflow-y:scroll}#content>article.selected{left:9em}#download,#mail,#screenshots,#about,#demos{width:40em;padding:3em}#faq,#home{width:50em;padding:3em}footer{position:fixed;bottom:0;padding:.5em;color:#999}footer a,footer a:visited{color:#999}}footer{width:100%;text-align:center;font-weight:bold}
-      .button{cursor:pointer;display:inline-block;text-align:center;text-decoration:none;padding:10px;font-weight:bold;width:100%}.button>small{font-weight:normal;opacity:.85}.button:hover{box-shadow:0 0 15px #bbb}.primary.button{box-shadow:3px 3px 10px #71767c;background-color:#f5fa32;background-image:linear-gradient(1deg,#f2c205,#f5fa32,#feffd8);color:#3b3d13;text-shadow:1px 1px 5px #868628}.secondary.button{box-shadow:3px 3px 10px #71767c;background-color:#276789;background-image:linear-gradient(1deg,#2c7398,#276789,#1e98d5);color:#fff;text-shadow:1px 1px 5px #0d364a}#menu>ul>li>a.button{text-align:left}#menu>ul>li>a.selected.button{background-color:#b3c2d7}#menu>ul>li>a.button::after{content:" ";float:right;width:16px;height:16px;background-color:#53698b}#menu>ul>li>a.selected.button::after{background-color:#fff;box-shadow:2px 2px 5px #24344c;margin-right:3px}.disabled.button{background-color:#ddd;color:#fff;cursor:not-allowed}.disabled.button:hover{box-shadow:none}
-      #mc_embed_signup form{display:block;position:relative;text-align:left;padding:10px 0 10px 3%}#mc_embed_signup h2{font-weight:bold;padding:0;margin:15px 0;font-size:1.4em}#mc_embed_signup input{border:1px solid #999;-webkit-appearance:none}#mc_embed_signup input[type=checkbox]{-webkit-appearance:checkbox}#mc_embed_signup input[type=radio]{-webkit-appearance:radio}#mc_embed_signup input:focus{border-color:#333}#mc_embed_signup .button{clear:both;background-color:#aaa;border:0 none;border-radius:4px;color:#fff;cursor:pointer;display:inline-block;font-size:15px;font-weight:bold;height:32px;line-height:32px;margin:0 5px 10px 0;padding:0 22px;text-align:center;text-decoration:none;vertical-align:top;white-space:nowrap;width:auto}#mc_embed_signup .button:hover{background-color:#777}#mc_embed_signup .small-meta{font-size:11px}#mc_embed_signup .nowrap{white-space:nowrap}#mc_embed_signup .mc-field-group{clear:left;position:relative;width:96%;padding-bottom:3%;min-height:50px}#mc_embed_signup .size1of2{clear:none;float:left;display:inline-block;width:46%;margin-right:4%}* html #mc_embed_signup .size1of2{margin-right:2%}#mc_embed_signup .mc-field-group label{display:block;margin-bottom:3px}#mc_embed_signup .mc-field-group input{display:block;width:100%;padding:8px 0;text-indent:2%}#mc_embed_signup .mc-field-group select{display:inline-block;width:99%;padding:5px 0;margin-bottom:2px}#mc_embed_signup .datefield,#mc_embed_signup .phonefield-us{padding:5px 0}#mc_embed_signup .datefield input,#mc_embed_signup .phonefield-us input{display:inline;width:60px;margin:0 2px;letter-spacing:1px;text-align:center;padding:5px 0 2px 0}#mc_embed_signup .phonefield-us .phonearea input,#mc_embed_signup .phonefield-us .phonedetail1 input{width:40px}#mc_embed_signup .datefield .monthfield input,#mc_embed_signup .datefield .dayfield input{width:30px}#mc_embed_signup .datefield label,#mc_embed_signup .phonefield-us label{display:none}#mc_embed_signup .indicates-required{text-align:right;font-size:11px;margin-right:4%}#mc_embed_signup .asterisk{color:#c60;font-size:200%}#mc_embed_signup .mc-field-group .asterisk{position:absolute;top:25px;right:10px}#mc_embed_signup .clear{clear:both}#mc_embed_signup .mc-field-group.input-group ul{margin:0;padding:5px 0;list-style:none}#mc_embed_signup .mc-field-group.input-group ul li{display:block;padding:3px 0;margin:0}#mc_embed_signup .mc-field-group.input-group label{display:inline}#mc_embed_signup .mc-field-group.input-group input{display:inline;width:auto;border:0}#mc_embed_signup div#mce-responses{float:left;top:-1.4em;padding:0 .5em 0 .5em;overflow:hidden;width:90%;margin:0 5%;clear:both}#mc_embed_signup div.response{margin:1em 0;padding:1em .5em .5em 0;font-weight:bold;float:left;top:-1.5em;z-index:1;width:80%}#mc_embed_signup #mce-error-response{display:none}#mc_embed_signup #mce-success-response{color:#529214;display:none}#mc_embed_signup label.error{display:block;float:none;width:auto;margin-left:1.05em;text-align:left;padding:.5em 0}#mc-embedded-subscribe{clear:both;width:auto;display:block;margin:1em 0 1em 5%}#mc_embed_signup #num-subscribers{font-size:1.1em}#mc_embed_signup #num-subscribers span{padding:.5em;border:1px solid #ccc;margin-right:.5em;font-weight:bold}</style>
+    <link href="stylesheets/main.min.css" type="text/css" rel="stylesheet">
   </head>
-  <body onload="initStore();if(!isMobile){StartDemo( true );}">
-    <canvas id="frontBuffer"></canvas>
-    <div id="infoContainer">
-      <header><img src="images/primrose64.png" alt="logo" title="Primrose logo"></header>
+  <body onload="initStore();">
+    <section id="demo">
+      <iframe id="frontBuffer" src="examples/editor3d/index.html" allowfullscreen></iframe>
 
-      <div id="description">
+      <div id="overlay">
+        <img src="images/new/primrose64.png" title="Primrose WebVR Framework" alt="Primrose Banner">
+        <p>
+          Virtual Reality for Web applications
+        </p>
+      </div>
+    </section>
 
-        <nav role="navigation" id="menu">
+    <header>
+      <a href="index.html" id="logo">
+        <img src="images/new/primrose32.png" alt="logo" title="Primrose logo">
+      </a>
+
+      <nav role="navigation">
+        <ul>
+          <li><a href="#intro">intro/</a></li>
+          <li><a href="#webvr">webvr/</a></li>
+          <li><a href="#dev">download/</a></li>
+          <li><a href="#team">team/</a></li>
+          <li><a href="#mail">contact/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+
+      <section id="intro">
+        <article>
+          <h2>Make VR Apps for your browser</h2>
+          <div>
+            <img src="images/new/logo128.png" alt="logo" title="Primrose" style="float:left;">
+            <p>
+              Primrose is a cross-browser, multi-device framework for building productivity tools
+              in <a href="#webvr">WebVR</a> applications. Developers model their scenes in
+              <a href="http://www.blender.org">Blender</a> (or some other 3D modeling package),
+              create a web page using Primrose to load the scene, then manipulate
+              objects within the scene using interfaces similar to the standard DOM
+              functions with which they are already familiar.
+            </p>
+            <p>
+              It includes a suite of GUI controls&mdash;like buttons and a
+              syntax-highlighting code editor control&mdash;to simplify the process of building
+              VR applications that emphasize interactive, productive work. Use it to experiment 
+              with new ideas on productivity UIs in virtual spaces.
+            </p>
+
+            <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be
+              used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
+          </div>
+          <h3>Examples</h3>
           <ul>
-            <li><a href="javascript:showSection('home');" class="primary button selected">Home</a></li>
-            <li><a href="javascript:showSection('download');" class="primary button">Download</a></li>
-            <li><a href="javascript:showSection('screenshots');" class="primary button">Screenshots</a></li>
-            <li><a href="javascript:showSection('demos');" class="primary button">Demos</a></li>
-            <li><a href="javascript:showSection('about');" class="primary button">About</a></li>
-            <li><a href="javascript:showSection('faq');" class="primary button">FAQ</a></li>
-            <li><a href="javascript:showSection('mail');" class="primary button">Contact</a></li>
-            <li><a href="https://github.com/capnmidnight/Primrose" target="_blank" class="primary button" onclick="ga( 'send', 'pageview', 'github' );">Github</a></li>
-          </ul>
-        </nav>
-
-        <section id="content">
-
-          <article id="home" class="selected">
-            <h2>Try Primrose <span class="version-label"></span> now!</h2>
-            <p>Primrose is a framework for WebGL/WebVR projects, with a set of GUI controls designed
-              for building applications in VR. Use it to experiment with new ideas on productivity
-              UIs in virtual spaces. A live-demo of Primrose is running on the background of this page.
-              Follow the instructions below to use it.</p>
-            <a class="primary button" id="goVR" style="display:none">
-              <div id="fullScreenMsg">Go VR!</div>
-              <small>hit ESC to exit.</small>
-            </a>
-            <a class="primary button" id="goRegular">
-              Go full-screen<br>
-              <small>hit ESC to exit.</small>
-            </a>
-
-            <p id="nightly">
-              WebVR is a growing web standard! Check out these links for more information.<br><br>
-              <a class="secondary button" href="http://mozvr.com/" target="_blank">
-                MozVR.com<br>
-                <small>The latest in WebVR news.</small>
+            <li>
+              <a href="examples/editor3d/index.html" target="_blank">
+                <img src="examples/editor3d/screenshot.jpg" alt="screenshot" title="3D Live Programming">
+                3D Live Programming<br>
+                <small>Edit objects on the fly!</small>
               </a>
-              <a class="secondary button" href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">
-                Chromium WebVR<br>
+            </li>
+            <li>
+              <a href="examples/temple/index.html" target="_blank">
+                <img src="examples/temple/screenshot.jpg" alt="screenshot" title="Ancient Temple">
+                Ancient Temple<br>
+                <small>Randomly generated columns and dust!</small>
+              </a>
+            </li>
+            <li>
+              <a href="examples/music/index.html" target="_blank">
+                <img src="examples/music/screenshot.jpg" alt="screenshot" title="Commodore PET">
+                Music<br>
+                <small>A little synthesizer keyboard you can play!</small>
+              </a>
+            </li>
+            <li>
+              <a href="examples/commodore/index.html" target="_blank">
+                <img src="examples/commodore/screenshot.jpg" alt="screenshot" title="Commodore PET">
+                Commodore PET<br>
+                <small>Cutting edge 1977 technology!</small>
+              </a>
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="webvr">
+        <article>
+          <h2>What is WebVR?</h2>
+          <p>
+            WebVR enables web browsers to display content on virtual reality devices
+            like the Oculus Rift, HTC Vive, or smartphones with Google Cardboard. 
+            With WebVR, developers can create immersive virtual reality experiences
+            that run in any WebGL-enabled browser.
+          </p>
+          <h3>Additional Resources</h3>
+          <ul>
+            <li>
+              <a href="http://webvr.info/" target="_blank">
+                <img src="images/webvr.info.png" alt="logo" title="WebVR.info">
+                WebVR.info<br>
+                <small>WebVR standard information.</small>
+              </a>
+            </li>
+            <li>
+              <a href="http://mozvr.com/" target="_blank">
+                <img src="images/mozvr.com.png" alt="logo" title="MozVR.com">
+                MozVR.com<br>
+                <small>Mozilla's WebVR team.</small>              
+              </a>
+            </li>
+            <li>
+              <a href="http://mozvr.com/downloads/" target="_blank">
+                <img src="images/nightly.mozilla.org.png" alt="logo" title="Firefox Nightly">
+                Firefox Nightly<br>
                 <small>With WebVR sauce!</small>
               </a>
-              <a class="secondary button" href="http://mozvr.com/downloads/" target="_blank">
-                Firefox Nightly<br>
+            </li>
+            <li>
+              <a href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html" target="_blank">
+                <img src="images/chromium.webvr.png" alt="screenshot" title="Chromium WebVR">
+                Chromium WebVR<br>
                 <small>Also with WebVR sauce!</small>
               </a>
-            </p>
-
-            <h2>Instructions:</h2>
-            <ul>
-              <li>Click on an editor window to give it focus and start using mouse and keyboard commands to write JavaScript code to create THREE.js objects.</li>
-              <li>Code executes automatically after 500ms.</li>
-              <li>Click off from an editor object to exit editing, or hit <kbd><span class="cmdLabel">+E</kbd> to show/hide editor.</li>
-              <li><kbd>WASD</kbd> to move around when not focused on an editor.</li>
-              <li><kbd>Z</kbd> to zero HMD sensor and return to starting point.</li>
-              <li><kbd>SHIFT+Mouse Wheel Forward</kbd> to decrease font size.</li>
-              <li><kbd>SHIFT+Mouse Wheel Back</kbd> to increase font size.</li>
-            </ul>
-          </article>
-
-          <article id="download">
-            <h2>Primrose <span class="version-label"></span>: the application framework for WebVR</h2>
-            <p>
-              Primrose is a cross-browser, multi-device framework for building productivity tools
-              in WebGL applications. It includes a suite of GUI controls&mdash;like buttons and a
-              syntax-highlighting code editor control&mdash;to simplify the process of building
-              VR applications that emphasize interactive, productive work.
-            </p>
-
-            <p>
-              <a href="bin/Primrose.min.js" class="primary button download-minified-link">Primrose <span class="version-label"></span>, Minified, GPL v3 license<br>
-                <small>135 KB minified, GZIPs to 41 KB. Free for open-source projects.</small>
+            </li>
+            <li>
+              <a href="https://www.reddit.com/r/webvr" target="_blank">
+                <img src="images/reddit.webvr.png" alt="screenshot" title="Reddit WebVR">
+                WebVR Subreddit<br>
+                <small>Links and discussion on VR for the Web, from around the Web.</small>
               </a>
-            </p>
-
-            <p>
-              <a href="bin/Primrose.js" class="secondary button download-link">Primrose <span class="version-label"></span>, Unminified, GPL v3 license<br>
-                <small>293 KB unminified, useful for debugging. Free for open-source projects.</small>
+            </li>            
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">
+                <img src="images/mdn.webvr.png" alt="screenshot" title="Mozilla Developer Network: WebVR API">
+                Mozilla Developer Network: WebVR API<br>
+                <small>Documentation on the WebVR APIs as they are currently implemented.</small>
               </a>
-            </p>
+            </li>            
+          </ul>
+        </article>
+      </section>
 
-            <p><a href="archive/">Archive of past versions</a></p>
+      <section id="dev">
+        <article>
+          <h2>Get started using Primrose WebVR Framework 
+            <span class="version-label"></span></h2>
 
-          </article>
+          <p>
+            Getting up and running with Primrose  is quick and easy. Check out
+            the example code below.
+          </p>
 
-          <article id="about">
-            <h2>About Primrose <span class="version-label"></span></h2>
+          <iframe id="example" src="examples/editor2d/index.html"></iframe>
 
-            <img src="images/logo128.png" alt="logo" title="Primrose" style="float:left;">
-            <p>
-              Primrose is a cross-browser, multi-device framework for building productivity tools
-              in WebGL applications. It includes a suite of GUI controls&mdash;like buttons and a
-              syntax-highlighting code editor control&mdash;to simplify the process of building
-              VR applications that emphasize interactive, productive work.
-            </p>
+          <p>
+            <button type="button" onclick="window.open( 'bin/Primrose.min.js' )" class="primary button">
+              Primrose.min.js, 
+              <span class="version-label"><small>(waiting for version number)</small></span><br>
+              <small>168KB, 50KB gzipped</small>
+            </button>
+          </p>
 
-            <p>
-              Primrose includes a lightweight text editor control with syntax highlighting
-              and keyboard shortcuts. It draws directly to an HTML Canvas element.
-              The resulting image can easily be used as a texture on a 3D object in a WebGL context.
-            </p>
+          <p>
+            <button type="button" onclick="window.open( 'bin/Primrose.js' )" class="secondary button">
+              Primrose.js, 
+              <span class="version-label"><small>(waiting for version number)</small></span><br>
+              <small>372KB, useful for debugging</small>
+            </button>
+          </p>
 
-            <p>
-              Primrose's text editor is extensible, providing a framework to support any number of
-              programming languages, themes, and editing styles.
-            </p>
+          <p>
+            <em>NOTE: This is still an early alpha release, with bugs of both the known
+              and unknown variety. In particular, I have no way of testing whether
+              or not the international keyboard support is correct. I'll also be making
+              major breaking changes over the near future as I build new features, delete
+              old ideas, and move code around to whatever place makes the best sense. If
+              you have built something that relies on a particular version of Primrose,
+              please see <a href="archive/">the archive directory</a>.</em>
+          </p>
+        </article>
+      </section>
 
-            <p>
-              <em>NOTE: This is still an early alpha release, with bugs of both the known
-                and unknown variety. In particular, I have no way of testing whether
-                or not the international keyboard support is correct. I'll also be making
-                major breaking changes over the near future as I build new features, delete
-                old ideas, and move code around to whatever place makes the best sense. If
-                you have built something that relies on a particular version of Primrose,
-                please see <a href="archive/">the archive directory</a>.</em>
-            </p>
-            <p>Primrose is made by <a href="https://www.seanmcbeth.com/" target="_blank">Sean T. McBeth</a></p>
-            <img alt="portrait" title="Sean T. McBeth" src="images/stm-2015-05.jpg" style="width:100%">
+      <section id="team">
+        <article>
+          <h2>Who makes Primrose?</h2>
+          <ul>
+            <li>
+              <img alt="portrait" title="Sean T. McBeth" src="images/stm-2015-05.jpg">
+              <div>
+                <h4>Sean T. McBeth</h4>
 
-          </article>
+                <p>
+                  He who is named Destroyer of Bug Lists, Holder of The Accursed 
+                  Scepter of JavaScript, Lord of The Desk, First of His Name.
+                </p>
 
-          <article id="screenshots">
-            <h2>Screen shots</h2>
-            <iframe src="https://www.youtube.com/embed/-oOK6dDr74I" frameborder="0" allowfullscreen></iframe>
-            <p>
-              <a href="images/screenshot5.jpg" target="_blank">
-                <img src="images/screenshot5.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
-            <p>
-              <a href="images/screenshot3.jpg" target="_blank">
-                <img src="images/screenshot3.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
-            <p>
-              <a href="images/screenshot4.jpg" target="_blank">
-                <img src="images/screenshot4.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
-            <p>
-              <a href="images/screenshot0.jpg" target="_blank">
-                <img src="images/screenshot0.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
-            <p>
-              <a href="images/screenshot1.jpg" target="_blank">
-                <img src="images/screenshot1.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
-            <p>
-              <a href="images/screenshot2.jpg" target="_blank">
-                <img src="images/screenshot2.jpg" alt="screenshot" title="Primrose in action" style="width:100%">
-              </a>
-            </p>
+                <p>
+                  Sean studied Computer Science and Computer Graphics at Shippensburg
+                  University and has put those skills to great use over his 10 years 
+                  of professional experience in software engineering. He has
+                  successfully bootstrapped and deployed multiple simulation and 
+                  database applications for desktop, Web, and mobile Web.
+                </p>
 
-          </article>
+                <ul>
+                  <li>
+                    <a href="https://www.seanmcbeth.com/" target="_blank">
+                      Sean's personal site
+                    </a>
+                  </li>
+                  <li>
+                    Sean is CTO at <a href="http://www.highlandfrs.com/" target="_blank">Highland FRS</a>
+                  </li>
+                  <li>
+                    <a href="https://twitter.com/Sean_McBeth" target="_blank">
+                      <span title="twitter logo" class="icon-twitter"></span>
+                      Follow @Sean_McBeth on Twitter
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.linkedin.com/pub/sean-mcbeth/6/727/378" target="_blank">
+                      <span title="linkedin logo" class="icon-linkedin"></span>
+                      View Sean's profile on LinkedIn
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/capnmidnight" target="_blank">
+                      <span title="github logo" class="icon-github"></span>
+                      View Sean's profile on GitHub
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
 
-          <article id="demos">
-            <h2>Try Primrose <span class="version-label"></span> now!</h2>
-            <p>Primrose is a cross-browser, multi-device framework for building productivity tools
-              in WebGL applications. It includes a suite of GUI controls&mdash;like buttons and a
-              syntax-highlighting code editor control&mdash;to simplify the process of building
-              VR applications that emphasize interactive, productive work. Here are some other
-              demonstrations of its capabilities.</p>
-            <h2>Primrose in 3D</h2>
-            <a class="primary button" href="examples/editor3d/index.html" target="_blank">
-              3D Live Programming<br>
-              <small>Edit objects on the fly!</small>
-            </a>
-            <a class="primary button" href="examples/commodore/index.html" target="_blank">
-              Commodore PET<br>
-              <small>Cutting edge 1977 technology!</small>
-            </a>
-            <a class="primary button" href="examples/sandbox/index.html" target="_blank">
-              WIP Sandbox<br>
-              <small>Just whatever work-in-progress I have going.</small>
-            </a>
-            <h2>Primrose in 2D</h2>
-            <a class="primary button" href="examples/editor2d/index.html" target="_blank">
-              BASIC programming<br>
-              <small>Playing THE OREGON TRAIL from 1978!</small>
-            </a>
-            <a class="primary button" href="examples/evolve/index.html" target="_blank">
-              Live-code genetic algorithms.<br>
-              <small>Evolve pictures of abstract art!</small>
-            </a>
-          </article>
+            <li>
+              <img alt="portrait" title="You?" src="images/q.png">
+              <div>
+                <h4>You?</h4>
 
-          <article id="faq">
-            <h2>FAQ</h2>
+                <p>
+                  Are you a designer, programmer, system administrator, writer, artist,
+                  marketer, or just a person who likes making things? Would you like to work
+                  on an exciting technology project? I'm looking for collaborators on Primrose.
+                </p>
 
-            <h3>"What License does Primrose use?"</h3>
-            <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may readily be
-              used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
+                <p>
+                  There's room for anyone of any background on Primrose, even if
+                  you are not sure exactly how you might contribute. If you'd like
+                  to join the project:
+                </p>
 
-            <h3>"How do I contribute to Primrose?"</h3>
-            <p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email
-              address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request.
-              This will serve as your copyright assignment.</p>
+                <ul>
+                  <li>
+                    <a href="mailto:sean@seanmcbeth.com">Email me directly</a>!
+                  </li>
+                  <li>
+                    <a href="#mail">Sign up for the mailing list</a>.
+                  </li>
+                  <li>
+                    <a href="https://github.com/capnmidnight/Primrose" target="_blank">Check out the repository</a>.
+                    Fork the project, change the code or add documentation and submit pull requests. Submit issues. Poke around and have fun!
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </article>
+      </section>
 
-            <h3>"But didn't Mozilla abandon Canvas for <a href="https://mozillalabs.com/en-US/skywriter/" target="_blank">Bespin/SkyWriter</a>?"</h3>
-            <p>Mozilla abandoned Bespin as a project, choosing to adopt Ace for convenience and time-cost purposes. Also, their requirements had no
-              need for the text to be an image. I specifically need an image to use as a texture on 3D objects. Primrose fulfills a different
-              purpose than Bespin.</p>
-            <p>That said, <a href="https://github.com/mattdesl/fontpath" target="_blank">Fontpath</a> does exist and may help overcome certain scaling issues
-              present with the HTML5 Text API. Content-Editable DOM elements are not the correct solution.</p>
+      <section id="mail">
+        <article>
+          <h2>Stay in Contact</h2>
+          <p>Join the mailing list to receive weekly updates on Primrose and other projects around the Web related to computer graphics, virtual reality, and software development.</p>
+          <!-- Begin MailChimp Signup Form -->
+          <div id="mc_embed_signup">
+            <form action="//coworksupernova.us8.list-manage.com/subscribe/post?u=81af61e5ed1771efc26829263&amp;id=14fb0203a4" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+              <div id="mc_embed_signup_scroll">
 
-            <h3>"Why not <a href="http://ace.c9.io/#nav=about" target="_blank">Ace</a>/<a href="https://codemirror.net/" target="_blank">CodeMirror</a>?"</h3>
-            <p>There are a few browser-based source code editor projects that render to DOM elements, with Ace and CodeMirror probably being the most popular.
-              All solutions involving overlaying of HTML elements on top of a base Canvas element do not composite well in WebGL contexts. This may work fine in 2D, where
-              elements are built in layers, but in 3D the HTML Element is not a part the scene and does not participate in depth buffering. The text will always
-              be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene.</p>
-
-            <h3>"Why not <a href="https://github.com/danielearwicker/carota" target="_blank">Carota</a>?"</h3>
-            <p>Carota is a fine project, but it is intended for rich-text editing. I don't want the user to be in control of the styling of a document, unless
-              they are specifically changing the styling of a theme to apply to the syntax-highlighted text.</p>
-
-            <h3>"Why not <a href="http://kra.hn/projects/live-programming-with-three-and-webvr" target="_blank">CodeChisel3D</a>
-              or <a href="http://www.lutzroeder.com/html5/textor/" target="_blank">Textor</a>?"</h3>
-            <p>I didn't know about CodeChisel3D or Textor at the time that I started this project. CodeChisel3D is based on an adapted version of Ace called
-              <a href="https://github.com/rksm/three-codeeditor" target="_blank">Three-CodeEditor</a>. Textor is another from-scratch text editor, written
-              in TypeScript, that draws directly to Canvas. They both look like a fine projects. Primrose is meant to be more than just a text editor. It's
-              a general-purpose application framework for building productivity apps.</p>
-
-            <h3>"But the resolution on the Oculus Rift DK2 is awful!"</h3>
-            <p>This is certainly a problem, but there isn't much I can do about it, and I believe it will not be a problem in the near future. I'm developing
-              Primrose to be able to develop other products to be ready at that time.</p>
-
-          </article>
-
-          <article id="mail">
-            <h2>Primrose mailing list</h2>
-            <p>Join the mailing list to receive weekly updates on Primrose and other projects around the Web related to computer graphics, virtual reality, and software development.</p>
-            <!-- Begin MailChimp Signup Form -->
-            <div id="mc_embed_signup">
-              <form action="//coworksupernova.us8.list-manage.com/subscribe/post?u=81af61e5ed1771efc26829263&amp;id=14fb0203a4" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-                <div id="mc_embed_signup_scroll">
-
-                  <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
-                  <div class="mc-field-group">
-                    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
-                    </label>
-                    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
-                  </div>
-                  <div class="mc-field-group">
-                    <label for="mce-FNAME">First Name </label>
-                    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
-                  </div>
-                  <div class="mc-field-group">
-                    <label for="mce-LNAME">Last Name </label>
-                    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
-                  </div>
-                  <div class="mc-field-group input-group">
-                    <strong>Email Format </strong>
-                    <ul><li><input type="radio" value="html" name="EMAILTYPE" id="mce-EMAILTYPE-0"><label for="mce-EMAILTYPE-0">html</label></li>
-                      <li><input type="radio" value="text" name="EMAILTYPE" id="mce-EMAILTYPE-1"><label for="mce-EMAILTYPE-1">text</label></li>
-                    </ul>
-                  </div>
-                  <div id="mce-responses" class="clear">
-                    <div class="response" id="mce-error-response" style="display:none"></div>
-                    <div class="response" id="mce-success-response" style="display:none"></div>
-                  </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                  <div style="position: absolute; left: -5000px;"><input type="text" name="b_81af61e5ed1771efc26829263_14fb0203a4" tabindex="-1" value=""></div>
-                  <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="primary button" style="border-radius:0;width:100%;color: #3B3D13;"></div>
+                <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+                <div class="mc-field-group">
+                  <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+                  </label>
+                  <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
                 </div>
-              </form>
-            </div>
-            <!--End mc_embed_signup-->
-          </article>
+                <div class="mc-field-group">
+                  <label for="mce-FNAME">First Name </label>
+                  <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+                </div>
+                <div class="mc-field-group">
+                  <label for="mce-LNAME">Last Name </label>
+                  <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+                </div>
+                <div class="mc-field-group input-group">
+                  <h3>Email Format </h3>
+                  <ul>
+                    <li><input type="radio" value="html" name="EMAILTYPE" id="mce-EMAILTYPE-0"><label for="mce-EMAILTYPE-0">html</label></li>
+                    <li><input type="radio" value="text" name="EMAILTYPE" id="mce-EMAILTYPE-1"><label for="mce-EMAILTYPE-1">text</label></li>
+                  </ul>
+                </div>
+                <div id="mce-responses">
+                  <div class="response" id="mce-error-response" style="display:none"></div>
+                  <div class="response" id="mce-success-response" style="display:none"></div>
+                </div>
+                <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups -->
+                <div style="position: absolute; left: -5000px;"><input type="text" name="b_81af61e5ed1771efc26829263_14fb0203a4" tabindex="-1" value=""></div>
+                <button type="submit" name="subscribe" id="mc-embedded-subscribe" class="primary button" style="border-radius:0;width:100%;color: #3B3D13;">
+                  Subscribe
+                </button>
+              </div>
+            </form>
+          </div>
+          <!--End mc_embed_signup-->
+        </article>
+      </section>
+    </main>
 
-          <footer>
-            <a href="https://www.seanmcbeth.com" target="_blank"><img src="images/stm.png" alt="logo" title="Sean T. McBeth" style="height:32px"></a>
-            <a href="https://github.com/capnmidnight" target="_blank"><img src="images/github.png" alt="logo" title="GitHub profile" style="height:32px"></a>
-            <a href="https://github.com/voodootikigod/logo.js" target="_blank"><img src="images/js.png" alt="logo" title="JavaScript" style="height:32px"></a>
-            <a href="https://www.w3.org/html/" target="_blank"><img src="images/html5.png" alt="logo" title="HTML5"></a>
-            <a href="https://www.gnu.org/licenses/gpl.html" target="_blank"><img src="images/gplv3.png" alt="logo" title="GPLv3"></a>
-            <small>Copyright &copy; <a href="https://www.seanmcbeth.com">Sean T. McBeth</a>, 2015.</small>
-          </footer>
-        </section>
-      </div>
-    </div>
-    <a href="https://github.com/capnmidnight/Primrose/" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+    <footer>
+      <a href="https://www.seanmcbeth.com" target="_blank"><img src="images/stm.png" alt="logo" title="Sean T. McBeth" style="height:32px"></a>
+      <a href="https://github.com/voodootikigod/logo.js" target="_blank"><img src="images/js.png" alt="logo" title="JavaScript" style="height:32px"></a>
+      <a href="https://www.w3.org/html/" target="_blank"><img src="images/html5.png" alt="logo" title="HTML5"></a>
+      <a href="https://www.gnu.org/licenses/gpl.html" target="_blank"><img src="images/gplv3.png" alt="logo" title="GPLv3"></a>
+      <small>Copyright &copy; <a href="https://www.seanmcbeth.com" target="_blank">Sean T. McBeth</a>, 2015.</small>
+    </footer>
+
     <script type="text/javascript" src="bin/mailchimp.min.js" async></script>
     <script type="text/javascript" src="bin/ga.min.js"></script>
     <script type="text/javascript" src="bin/store.min.js"></script>
-    <script type="text/javascript" src="bin/three.min.js"></script>
-    <script type="text/javascript" src="bin/cannon.min.js"></script>
-    <script type="text/javascript" src="bin/Primrose.min.js"></script>
-    <script type="text/javascript" src="examples/editor3d/app.js"></script>
   </body>
 </html>

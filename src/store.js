@@ -20,88 +20,21 @@
 window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
 window.ftypes = [ 'email', 'text', 'text' ];
 
-var ctrls,
-    lastTab = "home";
-
-function showSection ( id, skipPush ) {
-  var tab;
-  if ( id ) {
-    tab = document.getElementById( id );
-    if ( !tab ) {
-      // in case someone tries to type in their own hash
-      tab = document.getElementsByTagName( "article" )[0];
-      id = tab.id;
-    }
-    tab.className = "selected";
-    tab.scrollTop = 0;
-    setTimeout( function ( tab ) {
-      document.documentElement.scrollTop = tab.offsetTop;
-    }.bind( window, tab ), 10 );
-  }
-
-  if ( !isMobile || lastTab !== id ) {
-    if ( lastTab ) {
-      tab = document.getElementById( lastTab );
-      tab.className = "";
-    }
-    lastTab = lastTab === id ? null : id;
-    tabs = document.querySelectorAll( "#menu > ul > li > a" );
-    var r = new RegExp( fmt( "^javascript:showSection\\('($1)?'\\);$",
-        lastTab ) );
-    for ( i = 0; i < tabs.length; ++i ) {
-      t = tabs[i];
-      if ( r.test( t.href ) ) {
-        t.className = "primary selected button";
-      }
-      else {
-        t.className = "primary button";
-      }
-    }
-
-    var url = "#" + ( lastTab || "" );
-    if ( !skipPush ) {
-      history.pushState( null, "Primrose" + ( lastTab ? " > " + lastTab : "" ),
-          url );
-    }
-
-    //ga( "send", "pageview", url );
-  }
-}
-
-window.addEventListener( "popstate", function ( evt ) {
-  var nextTab = location.hash;
-  if ( nextTab.length > 0 ) {
-    nextTab = nextTab.substring( 1 );
-    showSection( nextTab, true );
-  }
-} );
-
 function initStore ( ) {
-  ctrls = findEverything();
-
-  function byClass ( c, t ) {
-    Array.prototype.forEach.call( document.getElementsByClassName( c ), t );
-  }
-
-  byClass(
-      "version-label",
-      function ( l ) {
-        l.innerHTML = Primrose.VERSION;
+  ga( 'send', 'pageview' );
+  
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function () {
+    var v = this.response.version;
+    if ( xhr.status < 400 ) {
+      var elems = document.getElementsByClassName( "version-label" );
+      Array.prototype.forEach.call( elems, function ( l ) {
+        l.innerHTML = "v" + v;
       } );
-  var pre = "bin/Primrose-" + Primrose.VERSION.substring( 1 );
-  byClass(
-      "download-link",
-      function ( l ) {
-        l.href = pre + ".js";
-      } );
-  byClass(
-      "download-minified-link",
-      function ( l ) {
-        l.href = pre + ".min.js";
-      } );
+    }
+  };
 
-  var hash = location.hash.substring( 1 );
-  if ( hash.length > 0 && hash !== lastTab ) {
-    showSection( hash, true );
-  }
+  xhr.open( "GET", "package.json" );
+  xhr.responseType = "json";
+  xhr.send();
 }

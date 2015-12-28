@@ -40,14 +40,13 @@ html, body{
   padding: 7vw;
 }
 
-#loading{
-  background-color: black;
+#loading{  
   color: white;
   width: 100%;
 }
 
 #progressBar{
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.75);
   color: black;
   width: 0;
   overflow: hidden;

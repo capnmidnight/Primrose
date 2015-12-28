@@ -51,14 +51,14 @@ Primrose.Text.CommandPacks.TextEditor = ( function () {
     copyObject( allCommands, codePage );
     copyObject( allCommands, operatingSystem );
     copyObject( allCommands, commands );
-    function overwriteText ( txt ) {
-      this.selectedText = txt;
+    function overwriteText ( ed, txt ) {
+      ed.selectedText = txt;
     }
     for ( var key in allCommands ) {
       if ( allCommands.hasOwnProperty( key ) ) {
         var func = allCommands[key];
         if ( typeof func !== "function" ) {
-          func = overwriteText.bind( editor, func );
+          func = overwriteText.bind( null, editor, func );
         }
         allCommands[key] = func;
       }

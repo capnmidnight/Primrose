@@ -3,7 +3,6 @@
 var fs = require( "fs" ),
     files = [
       "src/store.js",
-      "src/new.js",
       "obj/Primrose.js",
       "lib/analytics.js",
       "lib/ga.js",
