@@ -26,7 +26,7 @@ Primrose emulates common features found in text editor controls, drawing directl
 
 ## Licensing
 
-Primrose is free, open source software and may be readily used with other FOSS. You may purchase a license for use in closed source projects at: https://www.primroseeditor.com/#download
+Primrose is free, open source software and may be readily used with other FOSS.
 
 ## Contributions
 
