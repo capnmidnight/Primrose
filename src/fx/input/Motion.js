@@ -1,7 +1,6 @@
 /* global Primrose, THREE, isChrome, devicePixelRatio */
 
 Primrose.Input.Motion = ( function ( ) {
-
   /*
    Class: MotionCorrector
    
@@ -159,7 +158,7 @@ Primrose.Input.Motion = ( function ( ) {
         }
       }
     } );
-    
+
     this.zeroAxes = function ( ) {
       if ( acceleration ) {
         dAccel.x = acceleration.x;
@@ -243,10 +242,6 @@ Primrose.Input.Motion = ( function ( ) {
   MotionCorrector.ZERO_VECTOR = {x: -9.80665, y: 0, z: 0};
   MotionCorrector.ZERO_EULER = {gamma: 90, alpha: 270, beta: 0};
 
-  var RIGHT = new THREE.Vector3( 1, 0, 0 ),
-      UP = new THREE.Vector3( 0, 1, 0 ),
-      FORWARD = new THREE.Vector3( 0, 0, -1 );
-
   function makeTransform ( s, eye ) {
     var w = Math.floor( window.innerWidth * devicePixelRatio / 2 ),
         h = window.innerHeight * devicePixelRatio,
@@ -269,7 +264,10 @@ Primrose.Input.Motion = ( function ( ) {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MotionInput.AXES );
     var corrector = new MotionCorrector( ),
         a = new THREE.Quaternion( ),
-        b = new THREE.Quaternion( );
+        b = new THREE.Quaternion( ),
+        RIGHT = new THREE.Vector3( 1, 0, 0 ),
+        UP = new THREE.Vector3( 0, 1, 0 ),
+        FORWARD = new THREE.Vector3( 0, 0, -1 );
     corrector.addEventListener( "deviceorientation", function ( evt ) {
       for ( var i = 0; i < MotionInput.AXES.length; ++i ) {
         var k = MotionInput.AXES[i];
@@ -308,6 +306,5 @@ Primrose.Input.Motion = ( function ( ) {
         this.getValue( w ) );
     return value;
   };
-  
   return MotionInput;
 } )( );
