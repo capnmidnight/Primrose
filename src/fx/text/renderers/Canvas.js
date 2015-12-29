@@ -146,7 +146,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           h * self.character.height + 1 );
     }
 
-    function renderCanvasBackground ( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused ) {
+    function renderCanvasBackground ( tokenRows, gridBounds, padding, scroll, frontCursor, backCursor, focused ) {
       var minCursor = Primrose.Text.Cursor.min( frontCursor, backCursor ),
           maxCursor = Primrose.Text.Cursor.max( frontCursor, backCursor ),
           tokenFront = new Primrose.Text.Cursor(),
@@ -159,8 +159,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
       bgfx[clearFunc]( 0, 0, canvas.width, canvas.height );
       bgfx.save();
-      bgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width,
-          -scroll.y * self.character.height );
+      bgfx.translate(
+          ( gridBounds.x - scroll.x ) * self.character.width + padding,
+          -scroll.y * self.character.height + padding );
 
 
       // draw the current row highlighter
@@ -168,7 +169,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         fillRect( bgfx, theme.regular.currentRowBackColor ||
             Primrose.Text.Themes.Default.regular.currentRowBackColor,
             0, minCursor.y,
-            gridBounds.width, maxCursor.y - minCursor.y + 1 );
+            gridBounds.width,
+            maxCursor.y - minCursor.y + 1 );
       }
 
       for ( var y = 0; y < tokenRows.length; ++y ) {
@@ -217,7 +219,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       bgfx.restore();
     }
 
-    function renderCanvasForeground ( tokenRows, gridBounds, scroll, lines ) {
+    function renderCanvasForeground ( tokenRows, gridBounds, padding, scroll, lines ) {
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
           lineOffsetY = Math.ceil( self.character.height * 0.2 ),
@@ -225,10 +227,12 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
       fgfx.clearRect( 0, 0, canvas.width, canvas.height );
       fgfx.save();
-      fgfx.translate( ( gridBounds.x - scroll.x ) * self.character.width, 0 );
+      fgfx.translate(
+          ( gridBounds.x - scroll.x ) * self.character.width + padding,
+          padding );
       for ( var y = 0; y < tokenRows.length; ++y ) {
         // draw the tokens on this row
-        var line = lines[y],
+        var line = lines[y] + padding,
             row = tokenRows[y],
             drawn = false,
             textY = ( y + 0.8 - scroll.y ) * self.character.height,
@@ -247,7 +251,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             // draw the text
             if ( rowCache[line] !== undefined ) {
               if ( i === 0 ) {
-                fgfx.putImageData( rowCache[line], 0, imageY );
+                fgfx.putImageData( rowCache[line], padding, imageY + padding );
               }
             }
             else {
@@ -273,16 +277,16 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         tokenBack.copy( tokenFront );
         if ( drawn && rowCache[line] === undefined ) {
           rowCache[line] = fgfx.getImageData(
-              0,
-              imageY,
-              fgCanvas.width,
+              padding,
+              imageY + padding,
+              fgCanvas.width - 2 * padding,
               self.character.height );
         }
       }
       fgfx.restore();
     }
 
-    function renderCanvasTrim ( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused ) {
+    function renderCanvasTrim ( tokenRows, gridBounds, padding, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused ) {
 
       var tokenFront = new Primrose.Text.Cursor(),
           tokenBack = new Primrose.Text.Cursor(),
@@ -290,6 +294,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           i;
 
       tgfx.clearRect( 0, 0, canvas.width, canvas.height );
+      tgfx.save();
+      tgfx.translate( padding, padding );
       tgfx.save();
       tgfx.lineWidth = 2;
       tgfx.translate( 0, -scroll.y * self.character.height );
@@ -347,12 +353,10 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
       // draw the scrollbars
       if ( showScrollBars ) {
-        var drawWidth = gridBounds.width * self.character.width,
+        var drawWidth = gridBounds.width * self.character.width - padding,
             drawHeight = gridBounds.height * self.character.height,
-            scrollX = ( scroll.x * drawWidth ) / maxLineWidth + gridBounds.x *
-            self.character.width,
-            scrollY = ( scroll.y * drawHeight ) / tokenRows.length +
-            gridBounds.y * self.character.height;
+            scrollX = ( scroll.x * drawWidth ) / maxLineWidth + gridBounds.x * self.character.width,
+            scrollY = ( scroll.y * drawHeight ) / tokenRows.length;
 
         tgfx.fillStyle = theme.regular.selectedBackColor ||
             Primrose.Text.Themes.Default.regular.selectedBackColor;
@@ -360,7 +364,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         var bw;
         if ( !wordWrap && maxLineWidth > gridBounds.width ) {
           var scrollBarWidth = drawWidth * ( gridBounds.width / maxLineWidth ),
-              by = ( gridBounds.height + 0.25 ) * self.character.height;
+              by = gridBounds.height * self.character.height;
           bw = Math.max( self.character.width, scrollBarWidth );
           tgfx.fillRect( scrollX, by, bw, self.character.height );
           tgfx.strokeRect( scrollX, by, bw, self.character.height );
@@ -368,9 +372,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
         //vertical
         if ( tokenRows.length > gridBounds.height ) {
-          var scrollBarHeight = drawHeight * ( gridBounds.height /
-              tokenRows.length ),
-              bx = canvas.width - self.VSCROLL_WIDTH * self.character.width,
+          var scrollBarHeight = drawHeight * ( gridBounds.height / tokenRows.length ),
+              bx = canvas.width - self.VSCROLL_WIDTH * self.character.width - 2 * padding,
               bh = Math.max( self.character.height, scrollBarHeight );
           bw = self.VSCROLL_WIDTH * self.character.width;
           tgfx.fillRect( bx, scrollY, bw, bh );
@@ -385,8 +388,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           0,
           gridBounds.width,
           gridBounds.height );
-      tgfx.strokeRect( 0, 0, canvas.width, canvas.height );
-
+      tgfx.strokeRect( 0, 0, canvas.width - 2 * padding, canvas.height - 2 * padding );
+      tgfx.restore();
       if ( !focused ) {
         tgfx.fillStyle = theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
         tgfx.fillRect( 0, 0, canvas.width, canvas.height );
@@ -399,6 +402,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         scroll,
         focused, showLineNumbers, showScrollBars, wordWrap,
         lineCountWidth,
+        padding,
         layoutChanged ) {
       if ( theme ) {
         var cursorChanged = frontCursor.i !== lastFrontCursorI || lastBackCursorI !== backCursor.i,
@@ -424,13 +428,13 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
 
         if ( foregroundChanged || backgroundChanged ) {
-          renderCanvasBackground( tokenRows, gridBounds, scroll, frontCursor, backCursor, focused );
+          renderCanvasBackground( tokenRows, gridBounds, padding, scroll, frontCursor, backCursor, focused );
 
           if ( foregroundChanged || focusChanged ) {
             if ( foregroundChanged ) {
-              renderCanvasForeground( tokenRows, gridBounds, scroll, lines );
+              renderCanvasForeground( tokenRows, gridBounds, padding, scroll, lines );
             }
-            renderCanvasTrim( tokenRows, gridBounds, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused );
+            renderCanvasTrim( tokenRows, gridBounds, padding, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused );
           }
 
           gfx.clearRect( 0, 0, canvas.width, canvas.height );

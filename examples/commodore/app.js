@@ -68,7 +68,8 @@ app.addEventListener( "ready", function () {
 
   put( light( 0xffffff ) ).on( this.scene ).at( 0, 20, 0 );
 
-  this.convertToEditor( this.scene.Screen );
+  var editor = this.convertToEditor( this.scene.Screen );
+  editor.padding = 10;
   terminal = new Primrose.Text.Terminal( this.scene.Screen.textarea );
   terminal.loadFile( "../oregon.bas" );
 }.bind( app ) );
