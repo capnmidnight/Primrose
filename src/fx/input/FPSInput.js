@@ -58,7 +58,15 @@ Primrose.Input.FPSInput = ( function ( ) {
         {name: "dheading", commands: [ "heading" ], delta: true},
         {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       ] ),
-      new Primrose.Input.VR( "vr" ) ];
+      new Primrose.Input.VR( "vr" ),
+      new Primrose.Input.Motion( "motion", [
+        {name: "headVX", axes: [ Primrose.Input.Motion.headAX ], integrate: true},
+        {name: "headVY", axes: [ Primrose.Input.Motion.headAY ], integrate: true},
+        {name: "headVZ", axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
+        {name: "headX", axes: [ Primrose.Input.Motion.headVX ], integrate: true},
+        {name: "headY", axes: [ Primrose.Input.Motion.headVY ], integrate: true},
+        {name: "headZ", axes: [ Primrose.Input.Motion.headVZ ], integrate: true}
+      ] ) ];
     this.managers.reduce( function ( inst, mgr ) {
       inst[mgr.name] = mgr;
       return inst;
@@ -74,7 +82,10 @@ Primrose.Input.FPSInput = ( function ( ) {
 
   FPSInput.prototype.update = function ( dt ) {
     for ( var i = 0; i < this.managers.length; ++i ) {
-      this.managers[i].update( dt );
+      var mgr = this.managers[i];
+      if ( mgr.enabled ) {
+        mgr.update( dt );
+      }
     }
   };
 
@@ -94,7 +105,10 @@ Primrose.Input.FPSInput = ( function ( ) {
   FPSInput.prototype.getValue = function ( name ) {
     var value = 0;
     for ( var i = 0; i < this.managers.length; ++i ) {
-      value += this.managers[i].getValue( name );
+      var mgr = this.managers[i];
+      if ( mgr.enabled ) {
+        value += mgr.getValue( name );
+      }
     }
     return value;
   };
@@ -104,7 +118,10 @@ Primrose.Input.FPSInput = ( function ( ) {
       value = value || new THREE.Vector3( );
       value.set( 0, 0, 0 );
       for ( var i = 0; i < this.managers.length; ++i ) {
-        this.managers[i].addVector3( x, y, z, value );
+        var mgr = this.managers[i];
+        if ( mgr.enabled ) {
+          mgr.addVector3( x, y, z, value );
+        }
       }
       return value;
     };
@@ -112,20 +129,26 @@ Primrose.Input.FPSInput = ( function ( ) {
     FPSInput.prototype.getVector3s = function ( x, y, z, values ) {
       values = values || [ ];
       for ( var i = 0; i < this.managers.length; ++i ) {
-        values[i] = this.managers[i].getVector3( x, y, z, values[i] );
+        var mgr = this.managers[i];
+        if ( mgr.enabled ) {
+          values[i] = mgr.getVector3( x, y, z, values[i] );
+        }
       }
       return values;
     };
 
     var temp = new THREE.Quaternion( );
-    FPSInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
+    FPSInput.prototype.getQuaternion = function ( x, y, z, w, value, accumulate ) {
       value = value || new THREE.Quaternion( );
       value.set( 0, 0, 0, 1 );
       for ( var i = 0; i < this.managers.length; ++i ) {
         var mgr = this.managers[i];
-        if ( mgr.getQuaternion ) {
+        if ( mgr.enabled && mgr.getQuaternion ) {
           mgr.getQuaternion( x, y, z, w, temp );
           value.multiply( temp );
+          if ( !accumulate ) {
+            break;
+          }
         }
       }
       return value;

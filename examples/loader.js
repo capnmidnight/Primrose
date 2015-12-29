@@ -18,6 +18,7 @@ window.addEventListener( "load", function () {
          "../../src/fx/helpers/oop.js",
          "../../src/fx/helpers/options.js",
          "../../src/fx/helpers/requests.js",
+         "../../src/fx/Angle.js",
          "../../src/fx/Application.js",
          "../../src/fx/BaseControl.js",
          "../../src/fx/Button.js",

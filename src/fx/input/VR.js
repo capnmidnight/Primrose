@@ -9,9 +9,9 @@ Primrose.Input.VR = ( function () {
         };
       } );
     }
-    
+
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, VRInput.AXES );
-    this.setAxis("headRW", 1);
+    this.enabled = false;
 
     var listeners = {
       vrdeviceconnected: [ ],
@@ -219,23 +219,21 @@ Primrose.Input.VR = ( function () {
 
   function makeTransform ( s, eye ) {
     var t = eye.eyeTranslation;
-    s.transform.makeTranslation( t.x, t.y, t.z );
+    s.transform = new THREE.Matrix4().makeTranslation( t.x, t.y, t.z );
     s.viewport = eye.renderRect;
+    s.fov = eye.recommendedFieldOfView.leftDegrees + eye.recommendedFieldOfView.rightDegrees;
   }
 
   VRInput.prototype.connect = function ( selectedID ) {
+    this.enabled = true;
     var device = this.devices[selectedID];
     if ( device ) {
       this.sensor = device.sensor;
       this.display = device.display;
-      this.params = getParams.call( this );
-      this.transforms = [ {
-          transform: new THREE.Matrix4()
-        }, {
-          transform: new THREE.Matrix4()
-        } ];
-      makeTransform( this.transforms[0], this.params.left );
-      makeTransform( this.transforms[1], this.params.right );
+      var params = getParams.call( this );
+      this.transforms = [ {}, {} ];
+      makeTransform( this.transforms[0], params.left );
+      makeTransform( this.transforms[1], params.right );
     }
   };
 

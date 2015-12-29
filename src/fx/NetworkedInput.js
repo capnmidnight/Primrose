@@ -44,7 +44,7 @@ Primrose.NetworkedInput = ( function () {
       }.bind( this ) );
     }
 
-    for ( var i = 0; i < commands.length; ++i ) {
+    for ( var i = 0; commands && i < commands.length; ++i ) {
       this.addCommand( commands[i] );
     }
 

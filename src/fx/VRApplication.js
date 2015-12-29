@@ -57,23 +57,23 @@ Primrose.VRApplication = ( function ( ) {
           canvasHeight = Math.floor( styleHeight * ratio * RESOLUTION_SCALE ),
           aspectWidth = canvasWidth;
       if ( this.inVR ) {
-        var p = this.input.vr.params,
-            l = p.left,
-            r = p.right;
-        canvasWidth = Math.floor( ( l.renderRect.width + r.renderRect.width ) * RESOLUTION_SCALE );
-        canvasHeight = Math.floor( Math.max( l.renderRect.height, r.renderRect.height ) * RESOLUTION_SCALE );
+        var p = this.input.vr.transforms || this.input.motion.transforms,
+            l = p[0],
+            r = p[1];
+        canvasWidth = Math.floor( ( l.viewport.width + r.viewport.width ) * RESOLUTION_SCALE );
+        canvasHeight = Math.floor( Math.max( l.viewport.height, r.viewport.height ) * RESOLUTION_SCALE );
+        fieldOfView = l.fov;
         aspectWidth = canvasWidth / 2;
-        fieldOfView = ( l.recommendedFieldOfView.leftDegrees + l.recommendedFieldOfView.rightDegrees );
+      }
+      else {
+        this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
+        this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
       }
       this.renderer.domElement.width = canvasWidth;
       this.renderer.domElement.height = canvasHeight;
-      this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
-      this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
-      if ( this.camera ) {
-        this.camera.fov = fieldOfView;
-        this.camera.aspect = aspectWidth / canvasHeight;
-        this.camera.updateProjectionMatrix( );
-      }
+      this.camera.fov = fieldOfView;
+      this.camera.aspect = aspectWidth / canvasHeight;
+      this.camera.updateProjectionMatrix( );
     }.bind( this );
 
     var fire = fireAll.bind( this );
@@ -198,6 +198,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.inVR ) {
         this.input.vr.sensor.resetSensor( );
       }
+      this.input.motion.zeroAxes();
     };
 
     this.jump = function ( ) {
@@ -371,7 +372,7 @@ Primrose.VRApplication = ( function ( ) {
       pitch = this.input.getValue( "pitch" );
       this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
       qPitch.setFromAxisAngle( RIGHT, pitch );
-      this.nose.visible = this.inVR && !isMobile;
+      this.nose.visible = this.inVR;
       if ( !this.player.isOnGround ) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
@@ -415,14 +416,7 @@ Primrose.VRApplication = ( function ( ) {
         this.ground.material.needsUpdate = true;
       }
 
-      if ( !this.inVR || isMobile ) {
-        currentHeading = heading;
-        this.player.quaternion.setFromAxisAngle( UP, currentHeading );
-        if ( !isMobile ) {
-          this.player.quaternion.multiply( qPitch );
-        }
-      }
-      else {
+      if ( this.inVR ) {
         var dHeading = heading - currentHeading;
         if ( !lockedToEditor() && Math.abs( dHeading ) > Math.PI / 5 ) {
           var dh = Math.sign( dHeading ) * Math.PI / 100;
@@ -432,6 +426,11 @@ Primrose.VRApplication = ( function ( ) {
         }
         this.player.quaternion.setFromAxisAngle( UP, currentHeading );
         qHeading.setFromAxisAngle( UP, dHeading ).multiply( qPitch );
+      }
+      else {
+        currentHeading = heading;
+        this.player.quaternion.setFromAxisAngle( UP, currentHeading );
+        this.player.quaternion.multiply( qPitch );
       }
 
       this.pointer.position.copy( FORWARD );
@@ -530,14 +529,10 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
 
-      if ( !this.inVR || !this.input.vr.params ) {
-        this.camera.position.set( 0, 0, 0 );
-        this.camera.quaternion.set( 0, 0, 0, 1 );
-        this.renderer.render( this.scene, this.camera );
-      }
-      else {
-        for ( i = 0; i < this.input.vr.transforms.length; ++i ) {
-          var st = this.input.vr.transforms[i],
+      if ( this.inVR ) {
+        var transforms = this.input.vr.transforms || this.input.motion.transforms;
+        for ( i = 0; i < transforms.length; ++i ) {
+          var st = transforms[i],
               m = st.transform,
               v = st.viewport,
               side = ( 2 * i ) - 1;
@@ -551,6 +546,11 @@ Primrose.VRApplication = ( function ( ) {
           this.renderer.setScissor( v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE );
           this.renderer.render( this.scene, this.camera );
         }
+      }
+      else {
+        this.camera.position.set( 0, 0, 0 );
+        this.camera.quaternion.set( 0, 0, 0, 1 );
+        this.renderer.render( this.scene, this.camera );
       }
     }.bind( this );
 
@@ -713,7 +713,7 @@ Primrose.VRApplication = ( function ( ) {
     // Manage full-screen state
     //
     var setVRMode = function ( ) {
-      this.inVR = isFullScreenMode( ) && vrRequested && this.input.vr.display;
+      this.inVR = isFullScreenMode( ) && vrRequested && ( this.input.vr.display || isMobile );
       if ( !isFullScreenMode( ) && location.hash === "#fullscreen" ) {
         location.hash = "";
       }
