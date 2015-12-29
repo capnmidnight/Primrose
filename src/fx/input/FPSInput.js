@@ -67,10 +67,17 @@ Primrose.Input.FPSInput = ( function ( ) {
         {name: "headY", axes: [ Primrose.Input.Motion.headVY ], integrate: true},
         {name: "headZ", axes: [ Primrose.Input.Motion.headVZ ], integrate: true}
       ] ) ];
+
     this.managers.reduce( function ( inst, mgr ) {
       inst[mgr.name] = mgr;
       return inst;
     }, this );
+
+    this.vr.enabled = false;
+    this.vr.addEventListener( "vrdeviceconnected", function () {
+      this.vr.enabled = true;
+    }.bind( this ) );
+
     this.connectGamepad = function ( id ) {
       if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
           "Would you like to use this gamepad? \"$1\"", id ) ) ) {

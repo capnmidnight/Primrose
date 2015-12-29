@@ -11,7 +11,6 @@ Primrose.Input.VR = ( function () {
     }
 
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, VRInput.AXES );
-    this.enabled = false;
 
     var listeners = {
       vrdeviceconnected: [ ],
@@ -225,9 +224,9 @@ Primrose.Input.VR = ( function () {
   }
 
   VRInput.prototype.connect = function ( selectedID ) {
-    this.enabled = true;
     var device = this.devices[selectedID];
     if ( device ) {
+      this.enabled = true;
       this.sensor = device.sensor;
       this.display = device.display;
       var params = getParams.call( this );

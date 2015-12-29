@@ -390,10 +390,8 @@ Primrose.VRApplication = ( function ( ) {
         drive *= len * dt;
         qHeading.setFromAxisAngle( UP, currentHeading );
         this.player.velocity.set( strafe, 0, drive );
-        if ( isMobile ) {
-          this.player.velocity.applyQuaternion( qHead );
-          this.player.velocity.y = 0;
-        }
+        this.player.velocity.applyQuaternion( qHead );
+        this.player.velocity.y = 0;
         this.player.velocity.applyQuaternion( qHeading );
       }
 
@@ -549,7 +547,7 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         this.camera.position.set( 0, 0, 0 );
-        this.camera.quaternion.set( 0, 0, 0, 1 );
+        this.camera.quaternion.copy( qHead );
         this.renderer.render( this.scene, this.camera );
       }
     }.bind( this );
