@@ -1,4 +1,4 @@
-/* global Primrose, THREE, fireAll */
+/* global Primrose, THREE, fireAll, isMobile */
 
 Primrose.Input.FPSInput = ( function ( ) {
   function FPSInput ( DOMElement ) {
@@ -58,15 +58,18 @@ Primrose.Input.FPSInput = ( function ( ) {
         {name: "dheading", commands: [ "heading" ], delta: true},
         {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       ] ),
-      new Primrose.Input.VR( "vr" ),
-      new Primrose.Input.Motion( "motion", [
-        {name: "headVX", axes: [ Primrose.Input.Motion.headAX ], integrate: true},
-        {name: "headVY", axes: [ Primrose.Input.Motion.headAY ], integrate: true},
-        {name: "headVZ", axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
-        {name: "headX", axes: [ Primrose.Input.Motion.headVX ], integrate: true},
-        {name: "headY", axes: [ Primrose.Input.Motion.headVY ], integrate: true},
-        {name: "headZ", axes: [ Primrose.Input.Motion.headVZ ], integrate: true}
-      ] ) ];
+      new Primrose.Input.VR( "vr" ) ];
+    if ( isMobile ) {
+      this.managers.push(
+          new Primrose.Input.Motion( "motion", [
+            {name: "headVX", axes: [ Primrose.Input.Motion.headAX ], integrate: true},
+            {name: "headVY", axes: [ Primrose.Input.Motion.headAY ], integrate: true},
+            {name: "headVZ", axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
+            {name: "headX", axes: [ Primrose.Input.Motion.headVX ], integrate: true},
+            {name: "headY", axes: [ Primrose.Input.Motion.headVY ], integrate: true},
+            {name: "headZ", axes: [ Primrose.Input.Motion.headVZ ], integrate: true}
+          ] ) );
+    }
 
     this.managers.reduce( function ( inst, mgr ) {
       inst[mgr.name] = mgr;
