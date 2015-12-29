@@ -1,7 +1,7 @@
 {
   "name": "Primrose",
   "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
-  "version": "0.18.3",
+  "version": "0.19.0",
   "author": "Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)",
   "license": "GPL-3.0",
   "homepage": "http://www.primrosevr.com",
