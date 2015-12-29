@@ -78,18 +78,20 @@ app.addEventListener( "update", function ( dt ) {
 } );
 
 app.addEventListener( "keydown", function ( evt ) {
-  var mod = evt[modA] && evt[modB];
-  if ( mod && evt.keyCode === Primrose.Keys.E ) {
-    documentation.visible = output.visible = editor.visible =
-        !editor.visible;
-    if ( !editor.visible && app.currentEditor &&
-        app.currentEditor.focused ) {
-      app.currentEditor.blur( );
-      app.currentEditor = null;
+  if ( evt[modA] && evt[modB] ) {
+    if ( evt.keyCode === Primrose.Keys.E ) {
+      console.log(editor.mesh.visible);
+      documentation.mesh.visible = output.mesh.visible = editor.mesh.visible = !editor.mesh.visible;
+      console.log(editor.mesh.visible);
+      if ( !editor.mesh.visible && app.currentEditor &&
+          app.currentEditor.focused ) {
+        app.currentEditor.blur( );
+        app.currentEditor = null;
+      }
     }
-  }
-  else if ( mod && evt.keyCode === Primrose.Keys.X ) {
-    editor.value = getSourceCode( true );
+    else if ( evt.keyCode === Primrose.Keys.X ) {
+      editor.value = getSourceCode( true );
+    }
   }
 
   if ( scriptUpdateTimeout ) {
