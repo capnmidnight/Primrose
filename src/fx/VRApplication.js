@@ -195,10 +195,6 @@ Primrose.VRApplication = ( function ( ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
         this.player.velocity.set( 0, 0, 0 );
       }
-      if ( this.inVR ) {
-        this.input.vr.sensor.resetSensor( );
-      }
-      this.input.motion.zeroAxes();
     };
 
     this.jump = function ( ) {

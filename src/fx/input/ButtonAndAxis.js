@@ -73,7 +73,18 @@ Primrose.Input.ButtonAndAxis = ( function () {
         !this.commands[i].disabled &&
         this.commandState[name] &&
         this.commandState[name].value ) ||
-        this.getAxis(name) || 0;
+        this.getAxis( name ) || 0;
+  };
+
+  ButtonAndAxisInput.prototype.setValue = function ( name, value ) {
+    var i = this.commandNames.indexOf( name ),
+        j = this.axisNames.indexOf( name );
+    if ( i === -1 && j > -1) {
+      this.setAxis( name, value );
+    }
+    else if ( i > -1 && !this.commands[i].disabled ) {
+      this.commandState[name].value = value;
+    }
   };
 
   ButtonAndAxisInput.prototype.getVector3 = function ( x, y, z, value ) {

@@ -87,6 +87,24 @@ Primrose.Input.FPSInput = ( function ( ) {
     this.gamepad.addEventListener( "gamepadconnected", this.connectGamepad.bind( this ), false );
   }
 
+  var SETTINGS_TO_ZERO = [ "heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ" ];
+
+  FPSInput.prototype.zero = function () {
+    if ( this.vr ) {
+      this.vr.sensor.resetSensor( );
+    }
+    if ( this.motion ) {
+      this.motion.zeroAxes();
+    }
+    for ( var i = 0; i < this.managers.length; ++i ) {
+      var mgr = this.managers[i];
+      for ( var j = 0; mgr.enabled && j < SETTINGS_TO_ZERO.length; ++j ) {
+        mgr.setValue( SETTINGS_TO_ZERO[j], 0 );
+      }
+    }
+    fireAll.call( this, "zero" );
+  };
+
   FPSInput.prototype.update = function ( dt ) {
     for ( var i = 0; i < this.managers.length; ++i ) {
       var mgr = this.managers[i];
