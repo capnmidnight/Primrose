@@ -56,8 +56,8 @@ Primrose.VRApplication = ( function ( ) {
           canvasWidth = Math.floor( styleWidth * ratio * RESOLUTION_SCALE ),
           canvasHeight = Math.floor( styleHeight * ratio * RESOLUTION_SCALE ),
           aspectWidth = canvasWidth;
-      if ( this.inVR ) {
-        var p = this.input.vr.transforms || this.input.motion.transforms,
+      if ( this.inVR && this.input.transforms ) {
+        var p = this.input.transforms,
             l = p[0],
             r = p[1];
         canvasWidth = Math.floor( ( l.viewport.width + r.viewport.width ) * RESOLUTION_SCALE );
@@ -167,7 +167,7 @@ Primrose.VRApplication = ( function ( ) {
       this.input.mouse.requestPointerLock( );
       if ( !isFullScreenMode( ) ) {
         vrRequested = useVR;
-        if ( useVR && this.input.vr.display ) {
+        if ( useVR && this.input.vr && this.input.vr.display ) {
           requestFullScreen( this.ctrls.frontBuffer, this.input.vr.display );
         }
         else {
@@ -527,10 +527,9 @@ Primrose.VRApplication = ( function ( ) {
         }
       }
 
-      if ( this.inVR ) {
-        var transforms = this.input.vr.transforms || this.input.motion.transforms;
-        for ( i = 0; i < transforms.length; ++i ) {
-          var st = transforms[i],
+      if ( this.inVR && this.input.transforms ) {
+        for ( i = 0; i < this.input.transforms.length; ++i ) {
+          var st = this.input.transforms[i],
               m = st.transform,
               v = st.viewport,
               side = ( 2 * i ) - 1;
@@ -711,7 +710,7 @@ Primrose.VRApplication = ( function ( ) {
     // Manage full-screen state
     //
     var setVRMode = function ( ) {
-      this.inVR = isFullScreenMode( ) && vrRequested && ( this.input.vr.display || isMobile );
+      this.inVR = isFullScreenMode( ) && vrRequested && ( this.input.vr && this.input.vr.display || this.input.motion );
       if ( !isFullScreenMode( ) && location.hash === "#fullscreen" ) {
         location.hash = "";
       }

@@ -36,7 +36,7 @@ Primrose.Input.FPSInput = ( function ( ) {
           commandDown: fireAll.bind( this, "jump" ), dt: 0.5},
         {name: "zero",
           buttons: [ Primrose.Input.Keyboard.Z ],
-          commandUp: fireAll.bind( this, "zero" )}
+          commandUp: this.zero.bind( this )}
       ] ),
       new Primrose.Input.Mouse( "mouse", DOMElement, [
         {name: "buttons", axes: [ Primrose.Input.Mouse.BUTTONS ]},
@@ -57,9 +57,11 @@ Primrose.Input.FPSInput = ( function ( ) {
         {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true},
         {name: "dheading", commands: [ "heading" ], delta: true},
         {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
-      ] ),
-      new Primrose.Input.VR( "vr" ) ];
-    if ( isMobile ) {
+      ] ) ];
+    if ( navigator.getVRDevices ) {
+      this.managers.push( new Primrose.Input.VR( "vr" ) );
+    }
+    else if ( isMobile ) {
       this.managers.push(
           new Primrose.Input.Motion( "motion", [
             {name: "headVX", axes: [ Primrose.Input.Motion.headAX ], integrate: true},
@@ -75,11 +77,6 @@ Primrose.Input.FPSInput = ( function ( ) {
       inst[mgr.name] = mgr;
       return inst;
     }, this );
-
-    this.vr.enabled = false;
-    this.vr.addEventListener( "vrdeviceconnected", function () {
-      this.vr.enabled = true;
-    }.bind( this ) );
 
     this.connectGamepad = function ( id ) {
       if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
@@ -163,6 +160,19 @@ Primrose.Input.FPSInput = ( function ( ) {
       }
       return value;
     };
+
+    Object.defineProperties( FPSInput.prototype, {
+      transforms: {
+        get: function () {
+          if ( this.vr ) {
+            return this.vr.transforms;
+          }
+          else if ( this.motion ) {
+            return this.motion.transforms;
+          }
+        }
+      }
+    } );
 
     return FPSInput;
   }
