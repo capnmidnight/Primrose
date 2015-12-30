@@ -301,26 +301,38 @@ Primrose.VRApplication = ( function ( ) {
       }
       if ( obj ) {
         var bag = createPickableObject( obj ),
-            verts, faces, uvs;
+            verts, faces, uvs, i;
 
+        // it would be nice to do this the other way around, to have everything
+        // stored in ArrayBuffers, instead of regular arrays, to pass to the
+        // Worker thread. Maybe later.
         if ( obj.geometry instanceof THREE.BufferGeometry ) {
-          var pos = obj.geometry.attributes.position,
-              uv = obj.geometry.attributes.uv;
+          var attr = obj.geometry.attributes,
+              pos = attr.position,
+              uv = attr.uv,
+              idx = attr.index;
+
           verts = [ ];
           faces = [ ];
           if ( uv ) {
             uvs = [ ];
           }
-          for ( var i = 0; i < pos.count; ++i ) {
+          for ( i = 0; i < pos.count; ++i ) {
             verts.push( [ pos.getX( i ), pos.getY( i ), pos.getZ( i ) ] );
             if ( uv ) {
               uvs.push( [ uv.getX( i ), uv.getY( i ) ] );
             }
-            if ( i < pos.count - 2 ) {
+          }
+          if ( idx ) {
+            for ( i = 0; i < idx.count - 2; ++i ) {
+              faces.push( [ idx.getX( i ), idx.getX( i + 1 ), idx.getX( i + 2 ) ] );
+            }
+          }
+          else {
+            for ( i = 0; i < pos.count; i += 3 ) {
               faces.push( [ i, i + 1, i + 2 ] );
             }
           }
-            console.log(verts, uvs, faces);
         }
         else {
           verts = obj.geometry.vertices.map( function ( v ) {
@@ -329,7 +341,7 @@ Primrose.VRApplication = ( function ( ) {
           faces = [ ];
           uvs = [ ];
           // IDK why, but non-buffered geometry has an additional array layer
-          for ( var i = 0; i < obj.geometry.faces.length; ++i ) {
+          for ( i = 0; i < obj.geometry.faces.length; ++i ) {
             var f = obj.geometry.faces[i],
                 faceUVs = obj.geometry.faceVertexUvs[0][i];
             faces.push( [ f.a, f.b, f.c ] );
