@@ -35,23 +35,24 @@ app.addEventListener( "ready", function () {
 
   documentation = document.createElement( "pre" );
   documentation.innerHTML = getDocumentation();
+  // Primrose will read the 3D transform from your CSS
   documentation.style.transform = "rotate3d(0, 1, 0, " +
-      Math.PI / 2 + "rad) translate3d(-0.5em, " +
-      editorSphereY + "em, 0)";
+      Math.PI / 4 + "rad) translate3d(-1em, " +
+      editorSphereY + "em, -0.25em)";
   documentation = app.appendChild( documentation );
+
+  output = document.createElement( "pre" );
+  output = app.appendChild( output );
+  // or you can set the transforms directly on the THREE.js object
+  output.mesh.position.set(1, editorSphereY, -0.25);
+  output.mesh.rotation.set(0, -Math.PI / 4, 0);
+  output.theme = Primrose.Text.Themes.Dark;
+  output.fontSize = 32;
 
   editor = document.createElement( "textarea" );
   editor.value = getSourceCode( isHomeScreen );
   editor.style.transform = "translate3d(0, " + editorSphereY + "em, 0)";
   editor = app.appendChild( editor );
-
-  output = document.createElement( "pre" );
-  output.style.transform = "rotate3d(0, 1, 0, " +
-      Math.PI / -2 + "rad) translate3d(0.5em, " +
-      editorSphereY + "em, 0)";
-  output = app.appendChild( output );
-  output.theme = Primrose.Text.Themes.Dark;
-  output.fontSize = 32;
 
   log( "INSTRUCTIONS:" );
   log( " - " + cmdPre + "+E to show/hide editor" );

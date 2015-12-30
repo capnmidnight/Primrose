@@ -216,7 +216,7 @@ Primrose.VRApplication = ( function ( ) {
           cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
           makeGeom = options.useShell ?
           shell.bind( null, 1, cellWidth, cellHeight ) :
-          quad.bind( null, w, h, 3, 3 ),
+          quad.bind( null, w, h, 1, 1 ),
           mesh = textured( makeGeom(), text, false, options.opacity );
 
       scene.add( mesh );
