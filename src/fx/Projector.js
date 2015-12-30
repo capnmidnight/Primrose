@@ -2513,7 +2513,7 @@ Primrose.Projector = ( function ( ) {
     }
     return this.vertCache[obj.uuid];
   };
-  
+
   Projector.prototype.setObject = function ( obj ) {
     if ( !this.objects[obj.uuid] ) {
       this.objectIDs.push( obj.uuid );
@@ -2521,13 +2521,12 @@ Primrose.Projector = ( function ( ) {
     }
     else {
       this.setProperty( obj.uuid, "geometry.faces", obj.geometry.faces );
-      this.setProperty( obj.uuid, "geometry.faceVertexUvs",
-          obj.geometry.faceVertexUvs );
+      this.setProperty( obj.uuid, "geometry.uvs", obj.geometry.uvs );
     }
     this.setProperty( obj.uuid, "geometry.vertices", obj.geometry.vertices );
     this.updateObjects( [ obj ] );
   };
-  
+
   Projector.prototype.updateObjects = function ( objs ) {
     for ( var i = 0; i < objs.length; ++i ) {
       var obj = objs[i],
@@ -2579,7 +2578,8 @@ Primrose.Projector = ( function ( ) {
           obj = this.objects[objID];
       if ( obj.visible ) {
         var verts = this._getVerts( obj ),
-            faces = obj.geometry.faces;
+            faces = obj.geometry.faces,
+            uvs = obj.geometry.uvs;
         for ( var j = 0; j < faces.length; ++j ) {
           var face = faces[j],
               v0 = verts[face[0]],
@@ -2595,35 +2595,26 @@ Primrose.Projector = ( function ( ) {
               0, 0, 0, 1 );
           if ( this.m.determinant( ) !== 0 ) {
             this.m.getInverse( this.m );
-            this.d.subVectors( this.f, v0 )
-                .applyMatrix4(
-                    this.m );
-            if ( this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <=
-                1 && this.d.z > 0 ) {
-              this.c.multiplyScalar( this.d.z )
-                  .add(
-                      this.f );
+            this.d.subVectors( this.f, v0 ).applyMatrix4(this.m );
+            if ( this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <= 1 && this.d.z > 0 ) {
+              this.c.multiplyScalar( this.d.z ).add( this.f );
               var dist = Math.sign( this.d.z ) * this.p.distanceTo( this.c );
               if ( !value || dist < value.distance ) {
                 value = {
                   objectID: objID,
                   distance: dist,
+                  faceIndex: j,
                   facePoint: this.c.toArray( ),
                   faceNormal: this.d.toArray( )
                 };
 
-                if ( obj.geometry.faceVertexUvs ) {
-                  var uvs = obj.geometry.faceVertexUvs[0][j];
-                  v0 = uvs[0];
-                  v1 = uvs[1];
-                  v2 = uvs[2];
+                if ( uvs ) {
+                  v0 = uvs[face[0]];
+                  v1 = uvs[face[1]];
+                  v2 = uvs[face[2]];
                   value.point = [
-                    this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) +
-                        v0[0],
-                    this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) +
-                        v0[1] ];
-                  this.d.crossVectors( this.a.normalize( ),
-                      this.b.normalize( ) );
+                    this.d.x * ( v1[0] - v0[0] ) + this.d.y * ( v2[0] - v0[0] ) + v0[0],
+                    this.d.x * ( v1[1] - v0[1] ) + this.d.y * ( v2[1] - v0[1] ) + v0[1] ];
                 }
               }
             }

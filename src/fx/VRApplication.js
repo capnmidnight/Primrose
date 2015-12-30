@@ -216,7 +216,7 @@ Primrose.VRApplication = ( function ( ) {
           cellHeight = Math.round( SCALE * 1024 * h / options.fontSize ),
           makeGeom = options.useShell ?
           shell.bind( null, 1, cellWidth, cellHeight ) :
-          quad.bind( null, w, h, cellWidth, cellHeight ),
+          quad.bind( null, w, h, 3, 3 ),
           mesh = textured( makeGeom(), text, false, options.opacity );
 
       scene.add( mesh );
@@ -244,7 +244,7 @@ Primrose.VRApplication = ( function ( ) {
           this.scene, "textEditor" + this.pickableObjects.length,
           1, 1, {
             tokenizer: Primrose.Text.Grammars.PlainText,
-            useShell: true,
+            useShell: false,
             keyEventSource: window,
             wheelEventSource: this.renderer.domElement,
             hideLineNumbers: true,
@@ -304,36 +304,45 @@ Primrose.VRApplication = ( function ( ) {
             verts, faces, uvs;
 
         if ( obj.geometry instanceof THREE.BufferGeometry ) {
-          var pos = obj.geometry.attributes.position;
+          var pos = obj.geometry.attributes.position,
+              uv = obj.geometry.attributes.uv;
           verts = [ ];
           faces = [ ];
+          if ( uv ) {
+            uvs = [ ];
+          }
           for ( var i = 0; i < pos.count; ++i ) {
             verts.push( [ pos.getX( i ), pos.getY( i ), pos.getZ( i ) ] );
+            if ( uv ) {
+              uvs.push( [ uv.getX( i ), uv.getY( i ) ] );
+            }
             if ( i < pos.count - 2 ) {
               faces.push( [ i, i + 1, i + 2 ] );
             }
           }
+            console.log(verts, uvs, faces);
         }
         else {
           verts = obj.geometry.vertices.map( function ( v ) {
             return v.toArray( );
           } );
-          faces = obj.geometry.faces.map( function ( f ) {
-            return [ f.a, f.b, f.c ];
-          } );
-          uvs = obj.geometry.faceVertexUvs.map( function ( face ) {
-            return face.map( function ( uvs ) {
-              return uvs.map( function ( uv ) {
-                return uv.toArray( );
-              } );
-            } );
-          } );
+          faces = [ ];
+          uvs = [ ];
+          // IDK why, but non-buffered geometry has an additional array layer
+          for ( var i = 0; i < obj.geometry.faces.length; ++i ) {
+            var f = obj.geometry.faces[i],
+                faceUVs = obj.geometry.faceVertexUvs[0][i];
+            faces.push( [ f.a, f.b, f.c ] );
+            uvs[f.a] = [ faceUVs[0].x, faceUVs[0].y ];
+            uvs[f.b] = [ faceUVs[1].x, faceUVs[1].y ];
+            uvs[f.c] = [ faceUVs[2].x, faceUVs[2].y ];
+          }
         }
 
         bag.geometry = {
           vertices: verts,
           faces: faces,
-          faceVertexUvs: uvs
+          uvs: uvs
         };
 
         this.pickableObjects.push( obj );

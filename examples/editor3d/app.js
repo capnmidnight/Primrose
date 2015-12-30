@@ -36,7 +36,7 @@ app.addEventListener( "ready", function () {
   documentation = document.createElement( "pre" );
   documentation.innerHTML = getDocumentation();
   documentation.style.transform = "rotate3d(0, 1, 0, " +
-      Math.PI / 2 + "rad) translate3d(0, " +
+      Math.PI / 2 + "rad) translate3d(-0.5em, " +
       editorSphereY + "em, 0)";
   documentation = app.appendChild( documentation );
 
@@ -47,7 +47,7 @@ app.addEventListener( "ready", function () {
 
   output = document.createElement( "pre" );
   output.style.transform = "rotate3d(0, 1, 0, " +
-      Math.PI / -2 + "rad) translate3d(0, " +
+      Math.PI / -2 + "rad) translate3d(0.5em, " +
       editorSphereY + "em, 0)";
   output = app.appendChild( output );
   output.theme = Primrose.Text.Themes.Dark;
