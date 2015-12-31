@@ -1,4 +1,4 @@
-/*global THREE, qp, Primrose */
+/*global THREE, qp, Primrose,  devicePixelRatio */
 Primrose.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
@@ -45,8 +45,6 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
     this.resize = function () {
       if ( theme ) {
-        var newWidth = ( strictSize && strictSize.width ) || canvas.clientWidth,
-            newHeight = ( strictSize && strictSize.height ) || canvas.clientHeight;
         this.character.height = theme.fontSize;
         gfx.font = this.character.height + "px " + theme.fontFamily;
         // measure 100 letter M's, then divide by 100, to get the width of an M
@@ -56,17 +54,17 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" ).width /
             100;
 
-        if ( ( lastWidth !== newWidth || lastHeight !== newHeight ) && newWidth > 0 && newHeight > 0 ) {
+        if ( ( lastWidth !== this.elementWidth || lastHeight !== this.elementHeight ) && this.elementWidth > 0 && this.elementHeight > 0 ) {
           lastWidth =
               bgCanvas.width =
               fgCanvas.width =
               trimCanvas.width =
-              canvas.width = newWidth;
+              canvas.width = this.elementWidth;
           lastHeight =
               bgCanvas.height =
               fgCanvas.height =
               trimCanvas.height =
-              canvas.height = newHeight;
+              canvas.height = this.elementHeight;
         }
       }
     };
@@ -78,6 +76,16 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     };
 
     Object.defineProperties( this, {
+      elementWidth: {
+        get: function () {
+          return ( strictSize && strictSize.width ) || ( canvas.clientWidth * devicePixelRatio );
+        }
+      },
+      elementHeight: {
+        get: function () {
+          return ( strictSize && strictSize.height ) || ( canvas.clientHeight * devicePixelRatio );
+        }
+      },
       width: {
         get: function () {
           return canvas.width;
@@ -90,11 +98,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
       },
       resized: {
         get: function () {
-          var oldWidth = canvas.width,
-              oldHeight = canvas.height,
-              newWidth = canvas.clientWidth,
-              newHeight = canvas.clientHeight;
-          return oldWidth !== newWidth || oldHeight !== newHeight;
+          return this.width !== this.elementWidth || this.height !== this.elementHeight;
         }
       },
       theme: {

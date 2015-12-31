@@ -1,4 +1,5 @@
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, HTMLCanvasElement */
+/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, 
+ * devicePixelRatio, HTMLCanvasElement */
 Primrose.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
@@ -983,7 +984,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     this.showScrollBars = !options.hideScrollBars;
     this.tabWidth = options.tabWidth;
     this.theme = options.theme;
-    this.fontSize = options.fontSize || 16;
+    this.fontSize = options.fontSize || 16 * devicePixelRatio;
     this.tokenizer = options.tokenizer;
     this.codePage = options.codePage;
     this.operatingSystem = options.os;
