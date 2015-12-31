@@ -589,7 +589,8 @@ Primrose.VRApplication = ( function ( ) {
       canvas: cascadeElement( this.options.canvasElement, "canvas", HTMLCanvasElement ),
       antialias: !isMobile,
       alpha: !isMobile,
-      logarithmicDepthBuffer: !isMobile
+      logarithmicDepthBuffer: !isMobile,
+      DEBUG_WEBGL: this.options.DEBUG_WEBGL
     } );
     this.renderer.autoSortObjects = !isMobile;
     this.renderer.enableScissorTest( true );
@@ -794,6 +795,10 @@ Primrose.VRApplication = ( function ( ) {
     // the amount of time to allow to elapse between sending state to the server
     dtNetworkUpdate: 0.125,
     canvasElement: "frontBuffer"
+//    ,DEBUG_WEBGL: {
+//      errorHandler: undefined,
+//      logger: undefined
+//    }
   };
 
   function createPickableObject ( obj ) {

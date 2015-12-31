@@ -19784,6 +19784,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			}
 
 		}
+        
+        if(parameters.DEBUG_WEBGL){
+          console.warn("Using Khronos debug WebGL context. Performance degredation expected.");
+          _gl = WebGLDebugUtils.makeDebugContext(_gl, parameters.DEBUG_WEBGL.errorHandler, parameters.DEBUG_WEBGL.logger);
+        }
 
 		_canvas.addEventListener( 'webglcontextlost', onContextLost, false );
 

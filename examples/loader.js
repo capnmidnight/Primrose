@@ -7,7 +7,9 @@ window.addEventListener( "load", function ( d, f ) {
        "../../bin/Primrose.min.js",
        "app.js" ],
        /* */
-      s = [ "../../bin/three.js",
+      s = [ 
+        "../../lib/webgl-debug.js",
+        "../../bin/three.js",
         "../../src/core.js",
         "../../src/fx/helpers/DOM.js",
         "../../src/fx/helpers/flags.js",
