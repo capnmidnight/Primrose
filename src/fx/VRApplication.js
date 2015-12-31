@@ -1,5 +1,5 @@
 /* global Primrose, THREE, io, CryptoJS, Notification, requestFullScreen, 
- * isFullScreenMode, Function, fireAll, isMobile, isVR, isiOS, shell, quad */
+ * isFullScreenMode, Function, fireAll, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
 Primrose.VRApplication = ( function ( ) {
   "use strict";
 
@@ -74,91 +74,6 @@ Primrose.VRApplication = ( function ( ) {
     }.bind( this );
 
     var fire = fireAll.bind( this );
-
-    this.setupModuleEvents = function ( container, module, name ) {
-      var eID = name + "Enable",
-          tID = name + "Transmit",
-          rID = name + "Receive",
-          e = document.createElement( "input" ),
-          t = document.createElement( "input" ),
-          r = document.createElement( "input" ),
-          row = document.createElement( "tr" );
-      this.ctrls[eID] = e;
-      this.ctrls[tID] = t;
-      this.ctrls[rID] = r;
-      e.id = eID;
-      t.id = tID;
-      r.id = rID;
-      e.type = t.type = r.type = "checkbox";
-      e.checked = this.formState[eID];
-      t.checked = this.formState[tID];
-      r.checked = this.formState[rID];
-      e.addEventListener( "change", function ( t, module ) {
-        module.enable( this.checked );
-        t.disabled = !this.checked;
-        if ( t.checked && t.disabled ) {
-          t.checked = false;
-        }
-      }.bind( e, t, module ) );
-      t.addEventListener( "change", function ( module ) {
-        module.transmit( this.checked );
-      }.bind( t, module ) );
-      r.addEventListener( "change", function ( module ) {
-        module.receive( this.checked );
-      }.bind( r, module ) );
-      container.appendChild( row );
-      addCell( row, name );
-      addCell( row, e );
-      addCell( row, t );
-      addCell( row, r );
-      if ( module.zeroAxes ) {
-        var zID = name + "Zero",
-            z = document.createElement( "input" );
-        this.ctrls[zID] = z;
-        z.id = zID;
-        z.type = "checkbox";
-        z.checked = this.formState[zID];
-        z.addEventListener( "click", module.zeroAxes.bind( module ), false );
-        addCell( row, z );
-      }
-      else {
-        r.colspan = 2;
-      }
-
-      module.enable( e.checked );
-      module.transmit( t.checked );
-      module.receive( r.checked );
-      t.disabled = !e.checked;
-      if ( t.checked && t.disabled ) {
-        t.checked = false;
-      }
-    };
-
-    var waitForResources = function ( t ) {
-      lt = t;
-      if ( sceneLoaded && buttonLoaded ) {
-        if ( !readyFired ) {
-          readyFired = true;
-          setSize( );
-          fire( "ready" );
-        }
-        this.timer = requestAnimationFrame( animate );
-      }
-      else {
-        this.timer = requestAnimationFrame( waitForResources );
-      }
-    }.bind( this );
-
-    this.start = function ( ) {
-      if ( !this.timer ) {
-        this.timer = requestAnimationFrame( waitForResources );
-      }
-    };
-
-    this.stop = function ( ) {
-      cancelAnimationFrame( this.timer );
-      this.timer = null;
-    };
 
     this.addEventListener = function ( event, thunk, bubbles ) {
       if ( this.listeners[event] ) {
@@ -552,6 +467,75 @@ Primrose.VRApplication = ( function ( ) {
     }.bind( this );
 
 
+
+    //
+    // restoring the options the user selected
+    //
+    this.ctrls = findEverything();
+    writeForm( this.ctrls, this.formState );
+    window.addEventListener( "beforeunload", function ( ) {
+      var state = readForm( this.ctrls );
+      setSetting( this.formStateKey, state );
+    }.bind( this ), false );
+
+    this.setupModuleEvents = function ( container, module, name ) {
+      var eID = name + "Enable",
+          tID = name + "Transmit",
+          rID = name + "Receive",
+          e = document.createElement( "input" ),
+          t = document.createElement( "input" ),
+          r = document.createElement( "input" ),
+          row = document.createElement( "tr" );
+      this.ctrls[eID] = e;
+      this.ctrls[tID] = t;
+      this.ctrls[rID] = r;
+      e.id = eID;
+      t.id = tID;
+      r.id = rID;
+      e.type = t.type = r.type = "checkbox";
+      e.checked = this.formState[eID];
+      t.checked = this.formState[tID];
+      r.checked = this.formState[rID];
+      e.addEventListener( "change", function ( t, module ) {
+        module.enable( this.checked );
+        t.disabled = !this.checked;
+        if ( t.checked && t.disabled ) {
+          t.checked = false;
+        }
+      }.bind( e, t, module ) );
+      t.addEventListener( "change", function ( module ) {
+        module.transmit( this.checked );
+      }.bind( t, module ) );
+      r.addEventListener( "change", function ( module ) {
+        module.receive( this.checked );
+      }.bind( r, module ) );
+      container.appendChild( row );
+      addCell( row, name );
+      addCell( row, e );
+      addCell( row, t );
+      addCell( row, r );
+      if ( module.zeroAxes ) {
+        var zID = name + "Zero",
+            z = document.createElement( "input" );
+        this.ctrls[zID] = z;
+        z.id = zID;
+        z.type = "checkbox";
+        z.checked = this.formState[zID];
+        z.addEventListener( "click", module.zeroAxes.bind( module ), false );
+        addCell( row, z );
+      }
+      else {
+        r.colspan = 2;
+      }
+
+      module.enable( e.checked );
+      module.transmit( t.checked );
+      module.receive( r.checked );
+      t.disabled = !e.checked;
+      if ( t.checked && t.disabled ) {
+        t.checked = false;
+      }
+    };
     //
     // Initialize local variables
     //
@@ -583,8 +567,6 @@ Primrose.VRApplication = ( function ( ) {
 
     this.music = new Primrose.Output.Music( this.audio.context );
 
-    this.input = new Primrose.Input.FPSInput( this.ctrls.frontBuffer );
-
     this.pickableObjects = [ ];
 
     this.projector = new Primrose.Workerize( Primrose.Projector );
@@ -604,7 +586,7 @@ Primrose.VRApplication = ( function ( ) {
     this.nose.scale.set( 0.5, 1, 1 );
 
     this.renderer = new THREE.WebGLRenderer( {
-      canvas: this.ctrls.frontBuffer,
+      canvas: cascadeElement( this.options.canvasElement, "canvas", HTMLCanvasElement ),
       antialias: !isMobile,
       alpha: !isMobile,
       logarithmicDepthBuffer: !isMobile
@@ -612,6 +594,11 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.autoSortObjects = !isMobile;
     this.renderer.enableScissorTest( true );
     this.renderer.setClearColor( this.options.backgroundColor );
+    if ( !this.renderer.domElement.parentElement ) {
+      document.body.appendChild( this.renderer.domElement );
+    }
+
+    this.input = new Primrose.Input.FPSInput( this.renderer.domElement );
 
     this.scene = new THREE.Scene( );
     if ( this.options.useFog ) {
@@ -698,14 +685,6 @@ Primrose.VRApplication = ( function ( ) {
       currentHit = h;
     }.bind( this ) );
     //
-    // restoring the options the user selected
-    //
-    writeForm( this.ctrls, this.formState );
-    window.addEventListener( "beforeunload", function ( ) {
-      var state = readForm( this.ctrls );
-      setSetting( this.formStateKey, state );
-    }.bind( this ), false );
-    //
     // Manage full-screen state
     //
 
@@ -714,10 +693,10 @@ Primrose.VRApplication = ( function ( ) {
       if ( !isFullScreenMode( ) ) {
         this.inVR = useVR;
         if ( useVR && this.input.vr && this.input.vr.display ) {
-          requestFullScreen( this.ctrls.frontBuffer, this.input.vr.display );
+          requestFullScreen( this.renderer.domElement, this.input.vr.display );
         }
         else {
-          requestFullScreen( this.ctrls.frontBuffer );
+          requestFullScreen( this.renderer.domElement );
         }
         history.pushState( null, document.title, "#fullscreen" );
       }
@@ -764,6 +743,36 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
 
+
+    var waitForResources = function ( t ) {
+      lt = t;
+      if ( sceneLoaded && buttonLoaded ) {
+        if ( !readyFired ) {
+          readyFired = true;
+          setSize( );
+          fire( "ready" );
+        }
+        this.timer = requestAnimationFrame( animate );
+      }
+      else {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
+    }.bind( this );
+
+    this.start = function ( ) {
+      if ( !this.timer ) {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
+    }.bind(this);
+
+    this.stop = function ( ) {
+      cancelAnimationFrame( this.timer );
+      this.timer = null;
+    }.bind(this);
+    window.addEventListener("blur", this.stop, false);
+    window.addEventListener("focus", this.start, false);
+    this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
+    this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
     this.start();
   }
 
@@ -783,7 +792,8 @@ Primrose.VRApplication = ( function ( ) {
     // the size of a single line of text, in world units
     chatTextSize: 0.25,
     // the amount of time to allow to elapse between sending state to the server
-    dtNetworkUpdate: 0.125
+    dtNetworkUpdate: 0.125,
+    canvasElement: "frontBuffer"
   };
 
   function createPickableObject ( obj ) {
