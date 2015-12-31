@@ -89,6 +89,9 @@ body{
   right: 0;
   bottom: 0;
 }
+#controls > button{
+  display: none;
+}
 #goVR, #goRegular{
   display:block;
   background-color: transparent;

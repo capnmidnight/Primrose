@@ -5,12 +5,12 @@ var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
     WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
     DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" ),
-    app = new Primrose.VRApplication( "Codevember", {
-  disableAutoFullScreen: true,
-  useFog: true,
-  skyTexture: "../images/bg2.jpg",
-  groundTexture: ROCK
-} );
+    app = new Primrose.VRApplication( "AncientTemple", {
+      disableAutoFullScreen: true,
+      useFog: true,
+      skyTexture: "../images/bg2.jpg",
+      groundTexture: ROCK
+    } );
 
 var WIDTH = 100,
     HEIGHT = 11,
@@ -23,6 +23,8 @@ var WIDTH = 100,
     dy = 2.5,
     dz = 4;
 
+app.setFullScreenButton( "goVR", "click", true );
+app.setFullScreenButton( "goRegular", "click", false );
 
 function column ( a, b, h ) {
   return textured( cylinder( a, b, h, 6, 1 ), SAND );
@@ -102,19 +104,3 @@ app.addEventListener( "update", function ( dt ) {
     dz *= -1;
   }
 } );
-
-if ( app.ctrls.goVR ) {
-  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
-}
-if ( app.ctrls.goRegular ) {
-  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-}
-
-function connectVR ( ) {
-  if ( app.ctrls.goVR ) {
-    app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
-  }
-}
-
-app.input.addEventListener( "vrdeviceconnected", connectVR, false );
-app.input.addEventListener( "vrdevicelost", connectVR, false );

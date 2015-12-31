@@ -7,6 +7,9 @@ var app = new Primrose.VRApplication(
       // which the user will walk around, on which we can 
       // create additional objects.
       sceneModel: "../models/holodeck.json",
+      // We're going to use HTML buttons on the screen to
+      // control fullscreen view.
+      disableAutoFullScreen: true,
       // One of our GUI controls is configured here.
       button: {
         // This file references another THREE.js JSON-formatted
@@ -20,6 +23,10 @@ var app = new Primrose.VRApplication(
         }
       }
     } );
+
+// we setup the event handlers for going full-screen
+app.setFullScreenButton( "goVR", "click", true );
+app.setFullScreenButton( "goRegular", "click", false );
 
 // Once Primrose has setup the WebGL context, setup THREE.js, 
 // downloaded and validated all of model files, and constructed

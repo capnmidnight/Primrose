@@ -1,5 +1,5 @@
 /* global Primrose, THREE, io, CryptoJS, Notification, requestFullScreen, 
- * isFullScreenMode, Function, fireAll, isMobile, shell, quad */
+ * isFullScreenMode, Function, fireAll, isMobile, isVR, isiOS, shell, quad */
 Primrose.VRApplication = ( function ( ) {
   "use strict";
 
@@ -24,13 +24,10 @@ Primrose.VRApplication = ( function ( ) {
    | `colorPressed` - the color of the button when it is depressed
    | `gravity` - the acceleration applied to falling objects (default: 9.8)
    | `useLeap` - use the Leap Motion device
-   | `backgroundColor` - the color that WebGL clears the background with before
-   drawing (default: 0x000000)
+   | `backgroundColor` - the color that WebGL clears the background with before drawing (default: 0x000000)
    | `drawDistance` - the far plane of the camera (default: 500)
-   | `chatTextSize` - the size of a single line of text, in world units
-   (default: 0.25)
-   | `dtNetworkUpdate` - the amount of time to allow to elapse between sending
-   state to teh server (default: 0.125)
+   | `chatTextSize` - the size of a single line of text, in world units (default: 0.25)
+   | `dtNetworkUpdate` - the amount of time to allow to elapse between sending state to teh server (default: 0.125)
    */
   var RIGHT = new THREE.Vector3( 1, 0, 0 ),
       UP = new THREE.Vector3( 0, 1, 0 ),
@@ -161,20 +158,6 @@ Primrose.VRApplication = ( function ( ) {
     this.stop = function ( ) {
       cancelAnimationFrame( this.timer );
       this.timer = null;
-    };
-
-    this.goFullScreen = function ( useVR ) {
-      this.input.mouse.requestPointerLock( );
-      if ( !isFullScreenMode( ) ) {
-        vrRequested = useVR;
-        if ( useVR && this.input.vr && this.input.vr.display ) {
-          requestFullScreen( this.ctrls.frontBuffer, this.input.vr.display );
-        }
-        else {
-          requestFullScreen( this.ctrls.frontBuffer );
-        }
-        history.pushState( null, document.title, "#fullscreen" );
-      }
     };
 
     this.addEventListener = function ( event, thunk, bubbles ) {
@@ -573,7 +556,6 @@ Primrose.VRApplication = ( function ( ) {
     // Initialize local variables
     //
     var lt = 0,
-        vrRequested = false,
         currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion( ),
@@ -726,12 +708,45 @@ Primrose.VRApplication = ( function ( ) {
     //
     // Manage full-screen state
     //
-    var setVRMode = function ( ) {
-      this.inVR = isFullScreenMode( ) && vrRequested && ( this.input.vr && this.input.vr.display || this.input.motion );
-      if ( !isFullScreenMode( ) && location.hash === "#fullscreen" ) {
-        location.hash = "";
+
+    this.goFullScreen = function ( useVR ) {
+      this.input.mouse.requestPointerLock( );
+      if ( !isFullScreenMode( ) ) {
+        this.inVR = useVR;
+        if ( useVR && this.input.vr && this.input.vr.display ) {
+          requestFullScreen( this.ctrls.frontBuffer, this.input.vr.display );
+        }
+        else {
+          requestFullScreen( this.ctrls.frontBuffer );
+        }
+        history.pushState( null, document.title, "#fullscreen" );
+      }
+    };
+
+    this.setFullScreenButton = function ( id, event, useVR ) {
+      var elem = document.getElementById( id );
+      if ( elem ) {
+        elem.addEventListener( event, this.goFullScreen.bind( this, useVR ), false );
+        elem.style.display = ( useVR && ( isVR || isMobile ) || !useVR && !isiOS ) ? "block" : "none";
+        if ( useVR ) {
+          var connectVR = function ( e ) {
+            e.style.display = this.input.vr.deviceIDs.length > 0 ? "block" : "none";
+          }.bind( this, elem );
+          this.input.addEventListener( "vrdeviceconnected", connectVR, false );
+          this.input.addEventListener( "vrdevicelost", connectVR, false );
+        }
+      }
+    };
+
+    var setVRMode = function ( evt ) {
+      if ( !isFullScreenMode( ) ) {
+        this.inVR = false;
+        if ( location.hash === "#fullscreen" ) {
+          location.hash = "";
+        }
       }
       setSize( );
+      evt.preventDefault();
     }.bind( this );
 
     window.addEventListener( "popstate", function ( evt ) {
@@ -764,7 +779,7 @@ Primrose.VRApplication = ( function ( ) {
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
     // the far plane of the camera
-    drawDistance: 50,
+    drawDistance: 100,
     // the size of a single line of text, in world units
     chatTextSize: 0.25,
     // the amount of time to allow to elapse between sending state to the server

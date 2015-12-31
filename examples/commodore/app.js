@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put */
+/* global isOSX, Primrose, THREE, requestFullScreen, put */
 
 var keyState = {},
     modA = isOSX ? "metaKey" : "ctrlKey",
@@ -6,38 +6,24 @@ var keyState = {},
     execKey = isOSX ? "E" : "SPACE",
     terminal = null,
     app = new Primrose.VRApplication( "Commodore", {
+      disableAutoFullScreen: true,
       sceneModel: "commodore_pet.json",
       skyTexture: "../images/bg2.jpg",
       groundTexture: "../images/deck.png"
     } );
 
-if ( app.ctrls.goVR ) {
-  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
-}
-if ( app.ctrls.goRegular ) {
-  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-}
+app.setFullScreenButton( "goVR", "click", true );
+app.setFullScreenButton( "goRegular", "click", false );
 
-function connectVR ( ) {
-  if ( app.input.vr.deviceIDs.length > 0 ) {
-    if ( app.ctrls.goVR ) {
-      app.ctrls.goVR.style.display = "inline-block";
-    }
-  }
-  else if ( app.ctrls.goVR ) {
-    app.ctrls.goVR.style.display = "none";
-  }
-}
-
-app.input.addEventListener( "vrdeviceconnected", connectVR, false );
-app.input.addEventListener( "vrdevicelost", connectVR, false );
-
-window.addEventListener( "keydown", keyDown.bind( this ) );
 window.addEventListener( "keyup", function ( evt ) {
   keyState[evt.keyCode] = false;
 } );
 
-function keyDown ( evt ) {
+function isExecuteCommand ( evt ) {
+  return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
+}
+
+window.addEventListener( "keydown", function ( evt ) {
   if ( !this.currentEditor ||
       !this.currentEditor.focused ) {
     keyState[evt.keyCode] = true;
@@ -51,11 +37,7 @@ function keyDown ( evt ) {
       isExecuteCommand( evt ) ) {
     terminal.execute();
   }
-}
-
-function isExecuteCommand ( evt ) {
-  return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
-}
+}.bind( this ) );
 
 app.addEventListener( "ready", function () {
 

@@ -1,14 +1,10 @@
-/* global isOSX, Primrose, THREE, isMobile, requestFullScreen, put, exp */
-
-var app,
-    log = null,
-    clrscr = null,
-    GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
+/* global isOSX, Primrose, THREE, isVR, isMobile, requestFullScreen, put, exp */
+var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
     WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
-    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" );
-app = new Primrose.VRApplication( "Codevember", {
+    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" ),
+    app = new Primrose.VRApplication( "Editor3D", {
   disableAutoFullScreen: true,
   useFog: false,
   skyTexture: "../images/bg2.jpg",
@@ -132,7 +128,7 @@ function updateScript ( ) {
   scriptUpdateTimeout = null;
 }
 
-log = function (  ) {
+function log(  ) {
   if ( output ) {
     var msg = Array.prototype.join.call( arguments, ", " ),
         t = output;
@@ -142,7 +138,7 @@ log = function (  ) {
   }
 };
 
-clrscr = function () {
+function clrscr() {
   if ( output ) {
     var t = output;
     t.value = "";
@@ -156,21 +152,8 @@ for ( var i = 0; i < cmdLabels.length; ++i ) {
   cmdLabels[i].innerHTML = cmdPre;
 }
 
-if ( app.ctrls.goVR ) {
-  app.ctrls.goVR.addEventListener( "click", app.goFullScreen.bind( app, true ), false );
-}
-if ( app.ctrls.goRegular ) {
-  app.ctrls.goRegular.addEventListener( "click", app.goFullScreen.bind( app, false ), false );
-}
-
-function connectVR ( ) {
-  if ( app.ctrls.goVR ) {
-    app.ctrls.goVR.style.display = app.input.vr.deviceIDs.length > 0 ? "inline-block" : "none";
-  }
-}
-
-app.input.addEventListener( "vrdeviceconnected", connectVR, false );
-app.input.addEventListener( "vrdevicelost", connectVR, false );
+app.setFullScreenButton("goVR", "click", true);
+app.setFullScreenButton("goRegular", "click", false);
 
 function getSourceCode ( skipReload ) {
   var defaultDemo = testDemo.toString(),
