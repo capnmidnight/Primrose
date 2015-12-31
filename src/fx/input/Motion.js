@@ -1,4 +1,4 @@
-/* global Primrose, THREE, isChrome, devicePixelRatio */
+/* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio */
 
 Primrose.Input.Motion = ( function ( ) {
   /*
@@ -64,26 +64,35 @@ Primrose.Input.Motion = ( function ( ) {
           isPrimary = osy === 1;
         }
 
-        isAboveHorizon = isChrome ?
+        isAboveHorizon = isWebKit ?
             ( isPrimary ?
                 orientation.gamma > 0 :
                 orientation.gamma < 0 ) :
             osz === 1;
-        deltaAlpha = ( isChrome && ( isAboveHorizon ^ !isPrimary ) || !isChrome && isPrimary ) ? 270 : 90;
+        deltaAlpha = ( isWebKit && ( isAboveHorizon ^ !isPrimary ) || !isWebKit && isPrimary ) ? 270 : 90;
         if ( isPrimary ) {
           if ( isAboveHorizon ) {
+            if ( isiOS ) {
+              deltaGamma = 90;
+            }
+            else {
+              deltaGamma = -90;
+            }
             signGamma = 1;
-            deltaGamma = -90;
             signBeta = -1;
             deltaBeta = 0;
           }
           else {
-            if ( isChrome ) {
+            if ( isWebKit ) {
               signGamma = 1;
-              deltaGamma = 90;
             }
             else {
               signGamma = -1;
+            }
+            if ( isiOS ) {
+              deltaGamma = -90;
+            }
+            else {
               deltaGamma = 90;
             }
             signBeta = 1;
@@ -92,18 +101,27 @@ Primrose.Input.Motion = ( function ( ) {
         }
         else {
           if ( isAboveHorizon ) {
+            if ( isiOS ) {
+              deltaGamma = 90;
+            }
+            else {
+              deltaGamma = -90;
+            }
             signGamma = -1;
-            deltaGamma = -90;
             signBeta = 1;
             deltaBeta = 0;
           }
           else {
-            if ( isChrome ) {
+            if ( isWebKit ) {
               signGamma = -1;
-              deltaGamma = 90;
             }
             else {
               signGamma = 1;
+            }
+            if ( isiOS ) {
+              deltaGamma = -90;
+            }
+            else {
               deltaGamma = 90;
             }
             signBeta = -1;
