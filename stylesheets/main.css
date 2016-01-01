@@ -203,13 +203,25 @@ section > article > ul > li img{
 }
 
 .button {
+  display: block;
   width: 100%;
-  border: solid 1px black;
+  text-align: center;
+  text-decoration: none;
+  border: solid 2px black;
   padding: 0.5em;
   margin: 0.5em 0;
   cursor: pointer;
   line-height: 1.5;
-  font-size: 110%;
+  font-weight: bold;
+}
+
+.button small {
+  font-weight: normal;
+  font-style: italic;
+}
+
+.button:hover{
+  border-color: white;
 }
 
 .primary.button{
