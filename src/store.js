@@ -20,7 +20,7 @@
 window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
 window.ftypes = [ 'email', 'text', 'text' ];
 
-function initStore ( ) {
+window.addEventListener("load", function ( ) {
   ga( 'send', 'pageview' );
   
   var xhr = new XMLHttpRequest();
@@ -37,4 +37,4 @@ function initStore ( ) {
   xhr.open( "GET", "package.json" );
   xhr.responseType = "json";
   xhr.send();
-}
+}, false);
