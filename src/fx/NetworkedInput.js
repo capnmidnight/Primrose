@@ -3,8 +3,8 @@
 Primrose.NetworkedInput = ( function () {
   function NetworkedInput ( name, commands, socket ) {
     this.name = name;
-    this.commandState = {};
-    this.commands = [ ];
+    this.commands = {};
+    this.commandNames = [ ];
     this.socket = socket;
     this.enabled = true;
     this.paused = false;
@@ -44,20 +44,20 @@ Primrose.NetworkedInput = ( function () {
       }.bind( this ) );
     }
 
-    for ( var i = 0; commands && i < commands.length; ++i ) {
-      this.addCommand( commands[i] );
+    for ( var name in commands ) {
+      this.addCommand( name, commands[name] );
     }
 
-    for ( i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
+    for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
   }
 
-  NetworkedInput.prototype.addCommand = function ( cmd ) {
+  NetworkedInput.prototype.addCommand = function ( name, cmd ) {
     cmd = this.cloneCommand( cmd );
     cmd.repetitions = cmd.repetitions || 1;
-    this.commands.push( cmd );
-    this.commandState[cmd.name] = {
+    cmd.name = name;
+    cmd.state = {
       value: null,
       pressed: false,
       wasPressed: false,
@@ -66,6 +66,8 @@ Primrose.NetworkedInput = ( function () {
       ct: 0,
       repeatCount: 0
     };
+    this.commands[name] = cmd;
+    this.commandNames.push( name );
   };
 
   NetworkedInput.prototype.cloneCommand = function ( cmd ) {
@@ -74,11 +76,10 @@ Primrose.NetworkedInput = ( function () {
 
   NetworkedInput.prototype.update = function ( dt ) {
     if ( this.ready && this.enabled && this.inPhysicalUse && !this.paused ) {
-      for ( var c = 0; c < this.commands.length; ++c ) {
-        var cmd = this.commands[c];
-        var cmdState = this.commandState[cmd.name];
-        cmdState.wasPressed = cmdState.pressed;
-        cmdState.pressed = false;
+      for ( var name in this.commands ) {
+        var cmd = this.commands[name];
+        cmd.state.wasPressed = cmd.state.pressed;
+        cmd.state.pressed = false;
         if ( !cmd.disabled ) {
           var metaKeysSet = true;
 
@@ -93,20 +94,20 @@ Primrose.NetworkedInput = ( function () {
             }
           }
 
-          this.evalCommand( cmd, cmdState, metaKeysSet, dt );
+          this.evalCommand( cmd, metaKeysSet, dt );
 
-          cmdState.lt += dt;
-          if ( cmdState.lt >= cmd.dt ) {
-            cmdState.repeatCount++;
+          cmd.state.lt += dt;
+          if ( cmd.state.lt >= cmd.dt ) {
+            cmd.state.repeatCount++;
           }
 
-          cmdState.fireAgain = cmdState.pressed &&
-              cmdState.lt >= cmd.dt &&
-              cmdState.repeatCount >= cmd.repetitions;
+          cmd.state.fireAgain = cmd.state.pressed &&
+              cmd.state.lt >= cmd.dt &&
+              cmd.state.repeatCount >= cmd.repetitions;
 
-          if ( cmdState.fireAgain ) {
-            cmdState.lt = 0;
-            cmdState.repeatCount = 0;
+          if ( cmd.state.fireAgain ) {
+            cmd.state.lt = 0;
+            cmd.state.repeatCount = 0;
           }
         }
       }
@@ -125,14 +126,13 @@ Primrose.NetworkedInput = ( function () {
 
   NetworkedInput.prototype.fireCommands = function () {
     if ( this.ready && !this.paused ) {
-      for ( var i = 0; i < this.commands.length; ++i ) {
-        var cmd = this.commands[i];
-        var cmdState = this.commandState[cmd.name];
-        if ( cmdState.fireAgain && cmd.commandDown ) {
+      for ( var name in this.commands ) {
+        var cmd = this.commands[name];
+        if ( cmd.state.fireAgain && cmd.commandDown ) {
           cmd.commandDown();
         }
 
-        if ( !cmdState.pressed && cmdState.wasPressed && cmd.commandUp ) {
+        if ( !cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp ) {
           cmd.commandUp();
         }
       }
@@ -140,41 +140,41 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.makeStateSnapshot = function () {
-    var state = "";
-    for ( var i = 0; i < this.commands.length; ++i ) {
-      var cmd = this.commands[i];
-      var cmdState = this.commandState[cmd.name];
-      if ( cmdState ) {
+    var state = "", i = 0, l = Object.keys( this.commands ).length;
+    for ( var name in this.commands ) {
+      var cmd = this.commands[name];
+      if ( cmd.state ) {
         state += ( i << 2 )
-            | ( cmdState.pressed ? 0x1 : 0 )
-            | ( cmdState.fireAgain ? 0x2 : 0 ) + ":" +
-            cmdState.value;
-        if ( i < this.commands.length - 1 ) {
+            | ( cmd.state.pressed ? 0x1 : 0 )
+            | ( cmd.state.fireAgain ? 0x2 : 0 ) + ":" +
+            cmd.state.value;
+        if ( i < l - 1 ) {
           state += "|";
         }
       }
+      ++i;
     }
     return state;
   };
 
   NetworkedInput.prototype.decodeStateSnapshot = function ( snapshot ) {
     var cmd;
-    for ( var c = 0; c < this.commands.length; ++c ) {
-      cmd = this.commands[c];
-      var cmdState = this.commandState[cmd.name];
-      cmdState.wasPressed = cmdState.pressed;
+    for ( var name in this.commands ) {
+      cmd = this.commands[name];
+      cmd.state.wasPressed = cmd.state.pressed;
     }
     var records = snapshot.split( "|" );
     for ( var i = 0; i < records.length; ++i ) {
       var record = records[i];
       var parts = record.split( ":" );
       var cmdIndex = parseInt( parts[0], 10 );
+      var name = this.commandNames( cmdIndex );
       var pressed = ( cmdIndex & 0x1 ) !== 0;
       var fireAgain = ( flags & 0x2 ) !== 0;
       cmdIndex >>= 2;
-      cmd = this.commands[cmdIndex];
+      cmd = this.commands[name];
       var flags = parseInt( parts[2], 10 );
-      this.commandState[cmd.name] = {
+      cmd.state = {
         value: parseFloat( parts[1] ),
         pressed: pressed,
         fireAgain: fireAgain
@@ -183,45 +183,33 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.setProperty = function ( key, name, value ) {
-    for ( var i = 0; i < this.commands.length; ++i ) {
-      if ( this.commands[i].name === name ) {
-        this.commands[i][key] = value;
-        break;
-      }
+    if ( this.commands[name] ) {
+      this.commands[name][key] = value;
     }
   };
 
   NetworkedInput.prototype.addToArray = function ( key, name, value ) {
-    for ( var i = 0; i < this.commands.length; ++i ) {
-      if ( this.commands[i].name === name ) {
-        this.commands[i][key].push( value );
-        break;
-      }
+    if ( this.commands[name] && this.commands[name][key] ) {
+      this.commands[name][key].push( value );
     }
   };
 
   NetworkedInput.prototype.removeFromArray = function ( key, name, value ) {
-    var n = -1;
-    for ( var i = 0; i < this.commands.length; ++i ) {
-      var cmd = this.commands[i];
-      var arr = cmd[key];
-      n = arr.indexOf( value );
-      if ( cmd.name === name && n > -1 ) {
+    if ( this.commands[name] && this.commands[name][key] ) {
+      var arr = this.commands[name][key],
+          n = arr.indexOf( value );
+      if ( n > -1 ) {
         arr.splice( n, 1 );
-        break;
       }
     }
   };
 
   NetworkedInput.prototype.invertInArray = function ( key, name, value ) {
-    var n = -1;
-    for ( var i = 0; i < this.commands.length; ++i ) {
-      var cmd = this.commands[i];
-      var arr = cmd[key];
-      n = arr.indexOf( value );
-      if ( cmd.name === name && n > -1 ) {
+    if ( this.commands[name] && this.commands[name][key] ) {
+      var arr = this.commands[name][key];
+      var n = arr.indexOf( value );
+      if ( n > -1 ) {
         arr[n] *= -1;
-        break;
       }
     }
   };
@@ -248,18 +236,8 @@ Primrose.NetworkedInput = ( function () {
     }
   };
 
-  NetworkedInput.prototype.isEnabled = function ( k ) {
-    if ( k ) {
-      for ( var i = 0; i < this.commands.length; ++i ) {
-        if ( this.commands[i].name === k ) {
-          return !this.commands[i].disabled;
-        }
-      }
-      return false;
-    }
-    else {
-      return this.enabled;
-    }
+  NetworkedInput.prototype.isEnabled = function ( name ) {
+    return name && this.commands[name] && !this.commands[name].disabled;
   };
 
   NetworkedInput.prototype.transmit = function ( v ) {

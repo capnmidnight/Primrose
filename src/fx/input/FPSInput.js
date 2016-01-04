@@ -9,68 +9,68 @@ Primrose.Input.FPSInput = ( function ( ) {
     };
     this.managers = [
       // keyboard should always run on the window
-      new Primrose.Input.Keyboard( "keyboard", window, [
-        {name: "strafeLeft",
+      new Primrose.Input.Keyboard( "keyboard", window, {
+        strafeLeft: {
           buttons: [
             -Primrose.Input.Keyboard.A,
             -Primrose.Input.Keyboard.LEFTARROW ]},
-        {name: "strafeRight",
+        strafeRight: {
           buttons: [
             Primrose.Input.Keyboard.D,
             Primrose.Input.Keyboard.RIGHTARROW ]},
-        {name: "strafe", commands: [ "strafeLeft", "strafeRight" ]},
-        {name: "driveForward",
+        strafe: {commands: [ "strafeLeft", "strafeRight" ]},
+        driveForward: {
           buttons: [
             -Primrose.Input.Keyboard.W,
             -Primrose.Input.Keyboard.UPARROW ]},
-        {name: "driveBack",
+        driveBack: {
           buttons: [
             Primrose.Input.Keyboard.S,
             Primrose.Input.Keyboard.DOWNARROW ]},
-        {name: "drive", commands: [ "driveForward", "driveBack" ]},
-        {name: "select", buttons: [ Primrose.Input.Keyboard.ENTER ]},
-        {name: "dSelect", buttons: [ Primrose.Input.Keyboard.ENTER ], delta: true},
-        {name: "jump",
+        drive: {commands: [ "driveForward", "driveBack" ]},
+        select: {buttons: [ Primrose.Input.Keyboard.ENTER ]},
+        dSelect: {buttons: [ Primrose.Input.Keyboard.ENTER ], delta: true},
+        jump: {
           buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
           metaKeys: [ -Primrose.Input.Keyboard.SHIFT ],
           commandDown: fireAll.bind( this, "jump" ), dt: 0.5},
-        {name: "zero",
+        zero: {
           buttons: [ Primrose.Input.Keyboard.Z ],
           commandUp: this.zero.bind( this )}
-      ] ),
-      new Primrose.Input.Mouse( "mouse", DOMElement, [
-        {name: "buttons", axes: [ Primrose.Input.Mouse.BUTTONS ]},
-        {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
-        {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.25, min: -5, max: 5},
-        {name: "heading", commands: [ "dx" ], integrate: true},
-        {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.25, min: -5, max: 5},
-        {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
-        {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
-      ] ),
-      new Primrose.Input.Touch( "touch", DOMElement, [
-        {name: "buttons", axes: [ Primrose.Input.Touch.FINGERS ]},
-        {name: "dButtons", axes: [ Primrose.Input.Touch.FINGERS ], delta: true}
-      ] ),
-      new Primrose.Input.Gamepad( "gamepad", [
-        {name: "strafe", axes: [ Primrose.Input.Gamepad.LSX ]},
-        {name: "drive", axes: [ Primrose.Input.Gamepad.LSY ]},
-        {name: "heading", axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true},
-        {name: "dheading", commands: [ "heading" ], delta: true},
-        {name: "pitch", axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
-      ] ) ];
+      } ),
+      new Primrose.Input.Mouse( "mouse", DOMElement, {
+        buttons: {axes: [ Primrose.Input.Mouse.BUTTONS ]},
+        dButtons: {axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
+        dx: {axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.005, min: -5, max: 5},
+        heading: {commands: [ "dx" ], integrate: true},
+        dy: {axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.005, min: -5, max: 5},
+        pitch: {commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
+        pointerPitch: {commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
+      } ),
+      new Primrose.Input.Touch( "touch", DOMElement, {
+        buttons: {axes: [ Primrose.Input.Touch.FINGERS ]},
+        dButtons: {axes: [ Primrose.Input.Touch.FINGERS ], delta: true}
+      } ),
+      new Primrose.Input.Gamepad( "gamepad", {
+        strafe: {axes: [ Primrose.Input.Gamepad.LSX ]},
+        drive: {axes: [ Primrose.Input.Gamepad.LSY ]},
+        heading: {axes: [ -Primrose.Input.Gamepad.RSX ], integrate: true},
+        dheading: {commands: [ "heading" ], delta: true},
+        pitch: {axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
+      } ) ];
     if ( navigator.getVRDevices ) {
       this.managers.push( new Primrose.Input.VR( "vr" ) );
     }
     else if ( isMobile ) {
       this.managers.push(
-          new Primrose.Input.Motion( "motion", [
-            {name: "headVX", axes: [ Primrose.Input.Motion.headAX ], integrate: true},
-            {name: "headVY", axes: [ Primrose.Input.Motion.headAY ], integrate: true},
-            {name: "headVZ", axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
-            {name: "headX", axes: [ Primrose.Input.Motion.headVX ], integrate: true},
-            {name: "headY", axes: [ Primrose.Input.Motion.headVY ], integrate: true},
-            {name: "headZ", axes: [ Primrose.Input.Motion.headVZ ], integrate: true}
-          ] ) );
+          new Primrose.Input.Motion( "motion", {
+            headVX: {axes: [ Primrose.Input.Motion.headAX ], integrate: true},
+            headVY: {axes: [ Primrose.Input.Motion.headAY ], integrate: true},
+            headVZ: {axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
+            headX: {commands: [ Primrose.Input.Motion.headVX ], integrate: true},
+            headY: {commands: [ Primrose.Input.Motion.headVY ], integrate: true},
+            headZ: {commands: [ Primrose.Input.Motion.headVZ ], integrate: true}
+          } ) );
     }
 
     this.managers.reduce( function ( inst, mgr ) {

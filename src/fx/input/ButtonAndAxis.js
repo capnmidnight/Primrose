@@ -6,9 +6,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     this.inputState.axes = [ ];
     this.inputState.buttons = [ ];
     this.axisNames = axes || [ ];
-    this.commandNames = this.commands.map( function ( c ) {
-      return c.name;
-    } );
 
     for ( var i = 0; i < this.axisNames.length; ++i ) {
       this.inputState.axes[i] = 0;
@@ -75,23 +72,19 @@ Primrose.Input.ButtonAndAxis = ( function () {
   };
 
   ButtonAndAxisInput.prototype.getValue = function ( name ) {
-    var i = this.commandNames.indexOf( name );
     return ( ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        i > -1 &&
-        !this.commands[i].disabled &&
-        this.commandState[name] &&
-        this.commandState[name].value ) ||
+        this.isEnabled(name) &&
+        this.commands[name].state.value ) ||
         this.getAxis( name ) || 0;
   };
 
   ButtonAndAxisInput.prototype.setValue = function ( name, value ) {
-    var i = this.commandNames.indexOf( name ),
-        j = this.axisNames.indexOf( name );
-    if ( i === -1 && j > -1 ) {
+    var j = this.axisNames.indexOf( name );
+    if ( !this.commands[name] && j > -1 ) {
       this.setAxis( name, value );
     }
-    else if ( i > -1 && !this.commands[i].disabled ) {
-      this.commandState[name].value = value;
+    else if ( this.commands[name] && !this.commands[name].disabled ) {
+      this.commands[name].state.value = value;
     }
   };
 
@@ -112,21 +105,15 @@ Primrose.Input.ButtonAndAxis = ( function () {
   };
 
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
-    var i = this.commandNames.indexOf( name );
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        i > -1 &&
-        !this.commands[i].disabled &&
-        this.commandState[name] &&
-        this.commandState[name].pressed;
+        this.isEnabled(name) &&
+        this.commands[name].state.pressed;
   };
 
   ButtonAndAxisInput.prototype.isUp = function ( name ) {
-    var i = this.commandNames.indexOf( name );
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        i > -1 &&
-        !this.commands[i].disabled &&
-        this.commandState[name] &&
-        !this.commandState[name].pressed;
+        this.isEnabled(name) &&
+        this.commands[name].state.pressed;
   };
 
   ButtonAndAxisInput.prototype.maybeClone = function ( arr ) {
@@ -173,7 +160,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
     };
   };
 
-  ButtonAndAxisInput.prototype.evalCommand = function ( cmd, cmdState, metaKeysSet, dt ) {
+  ButtonAndAxisInput.prototype.evalCommand = function ( cmd, metaKeysSet, dt ) {
     if ( metaKeysSet ) {
       var pressed = true,
           value = 0,
@@ -225,10 +212,10 @@ Primrose.Input.ButtonAndAxis = ( function () {
       }
       else if ( cmd.delta ) {
         var ov = value;
-        if ( cmdState.lv !== undefined ) {
-          value = value - cmdState.lv;
+        if ( cmd.state.lv !== undefined ) {
+          value = ( value - cmd.state.lv ) / dt;
         }
-        cmdState.lv = ov;
+        cmd.state.lv = ov;
       }
 
       if ( cmd.min !== undefined ) {
@@ -243,8 +230,8 @@ Primrose.Input.ButtonAndAxis = ( function () {
         pressed = pressed && ( value > cmd.threshold );
       }
 
-      cmdState.pressed = pressed;
-      cmdState.value = value;
+      cmd.state.pressed = pressed;
+      cmd.state.value = value;
     }
   };
 
