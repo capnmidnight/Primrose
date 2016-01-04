@@ -451,7 +451,6 @@ Primrose.VRApplication = ( function ( ) {
           this.input.getVector3( "headX", "headY", "headZ", this.camera.position );
           this.camera.position.applyMatrix4( m );
           this.camera.quaternion.copy( qHead );
-          this.camera.position.applyQuaternion( this.camera.quaternion );
           this.nose.position.set( side * -0.12, -0.12, -0.15 );
           this.nose.rotation.z = side * 0.7;
           this.renderer.setViewport( v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE );
