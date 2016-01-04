@@ -41,9 +41,9 @@ Primrose.Input.FPSInput = ( function ( ) {
       new Primrose.Input.Mouse( "mouse", DOMElement, [
         {name: "buttons", axes: [ Primrose.Input.Mouse.BUTTONS ]},
         {name: "dButtons", axes: [ Primrose.Input.Mouse.BUTTONS ], delta: true},
-        {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.5, min: -5, max: 5},
+        {name: "dx", axes: [ -Primrose.Input.Mouse.X ], delta: true, scale: 0.25, min: -5, max: 5},
         {name: "heading", commands: [ "dx" ], integrate: true},
-        {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.5, min: -5, max: 5},
+        {name: "dy", axes: [ -Primrose.Input.Mouse.Y ], delta: true, scale: 0.25, min: -5, max: 5},
         {name: "pitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5},
         {name: "pointerPitch", commands: [ "dy" ], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25}
       ] ),
