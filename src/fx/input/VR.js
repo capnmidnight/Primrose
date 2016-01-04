@@ -139,42 +139,42 @@ Primrose.Input.VR = ( function () {
       var state = this.sensor.getState();
 
       if ( state.position ) {
-        this.setAxis( "headX", state.position.x );
-        this.setAxis( "headY", state.position.y );
-        this.setAxis( "headZ", state.position.z );
+        this.headX = state.position.x;
+        this.headY = state.position.y ;
+        this.headZ = state.position.z ;
       }
 
       if ( state.linearVelocity ) {
-        this.setAxis( "headVX", state.linearVelocity.x );
-        this.setAxis( "headVY", state.linearVelocity.y );
-        this.setAxis( "headVZ", state.linearVelocity.z );
+        this.headVX = state.linearVelocity.x ;
+        this.headVY = state.linearVelocity.y ;
+        this.headVZ = state.linearVelocity.z ;
       }
 
       if ( state.linearAcceleration ) {
-        this.setAxis( "headAX", state.linearAcceleration.x );
-        this.setAxis( "headAY", state.linearAcceleration.y );
-        this.setAxis( "headAZ", state.linearAcceleration.z );
+        this.headAX = state.linearAcceleration.x ;
+        this.headAY = state.linearAcceleration.y ;
+        this.headAZ = state.linearAcceleration.z ;
       }
 
       if ( state.orientation ) {
-        this.setAxis( "headRX", state.orientation.x );
-        this.setAxis( "headRY", state.orientation.y );
-        this.setAxis( "headRZ", state.orientation.z );
-        this.setAxis( "headRW", state.orientation.w );
+        this.headRX = state.orientation.x ;
+        this.headRY = state.orientation.y ;
+        this.headRZ = state.orientation.z ;
+        this.headRW = state.orientation.w ;
       }
 
       if ( state.angularVelocity ) {
-        this.setAxis( "headRVX", state.angularVelocity.x );
-        this.setAxis( "headRVY", state.angularVelocity.y );
-        this.setAxis( "headRVZ", state.angularVelocity.z );
-        this.setAxis( "headRVW", state.angularVelocity.w );
+        this.headRVX = state.angularVelocity.x ;
+        this.headRVY = state.angularVelocity.y ;
+        this.headRVZ = state.angularVelocity.z ;
+        this.headRVW = state.angularVelocity.w ;
       }
 
       if ( state.angularAcceleration ) {
-        this.setAxis( "headRAX", state.angularAcceleration.x );
-        this.setAxis( "headRAY", state.angularAcceleration.y );
-        this.setAxis( "headRAZ", state.angularAcceleration.z );
-        this.setAxis( "headRAW", state.angularAcceleration.w );
+        this.headRAX = state.angularAcceleration.x ;
+        this.headRAY = state.angularAcceleration.y ;
+        this.headRAZ = state.angularAcceleration.z ;
+        this.headRAW = state.angularAcceleration.w ;
       }
     }
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );

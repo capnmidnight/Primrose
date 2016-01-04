@@ -40,6 +40,14 @@ Primrose.Input.ButtonAndAxis = ( function () {
     if ( classFunc.AXES ) {
       classFunc.AXES.forEach( function ( name, i ) {
         classFunc[name] = i + 1;
+        Object.defineProperty( classFunc.prototype, name, {
+          get: function () {
+            return this.getAxis( name );
+          },
+          set: function ( v ) {
+            this.setAxis( name, v );
+          }
+        } );
       } );
     }
   };
@@ -79,7 +87,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
   ButtonAndAxisInput.prototype.setValue = function ( name, value ) {
     var i = this.commandNames.indexOf( name ),
         j = this.axisNames.indexOf( name );
-    if ( i === -1 && j > -1) {
+    if ( i === -1 && j > -1 ) {
       this.setAxis( name, value );
     }
     else if ( i > -1 && !this.commands[i].disabled ) {

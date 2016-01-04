@@ -20,16 +20,13 @@ Primrose.Input.Touch = ( function () {
           this.setAxis( "LY" + t.identifier, t.pageY );
         }
 
-        var mask = 1 << t.identifier,
-            value;
-        if(stateChange){
-          value = this.getValue("FINGERS") | mask;
-          this.setAxis("FINGERS", value);
+        var mask = 1 << t.identifier;
+        if ( stateChange ) {
+          this.FINGERS |= mask;
         }
-        else{
+        else {
           mask = ~mask;
-          value = this.getValue("FINGERS") & mask;
-          this.setAxis("FINGERS", value);
+          this.FINGERS &= mask;
         }
       }
       event.preventDefault();

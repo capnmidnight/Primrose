@@ -5,17 +5,17 @@ Primrose.Input.Mouse = ( function () {
     DOMElement = DOMElement || window;
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MouseInput.AXES );
     this.setLocation = function ( x, y ) {
-      this.setAxis( "X", x );
-      this.setAxis( "Y", y );
+      this.X = x;
+      this.Y = y;
     };
 
     this.setMovement = function ( dx, dy ) {
-      this.setAxis( "X", dx + this.getAxis( "X" ) );
-      this.setAxis( "Y", dy + this.getAxis( "Y" ) );
+      this.X += dx;
+      this.Y += dy;
     };
 
     this.readEvent = function ( event ) {
-      this.setAxis( "BUTTONS", event.buttons << 10);
+      this.BUTTONS = event.buttons << 10;
       if ( MouseInput.isPointerLocked() ) {
         var mx = event.movementX,
             my = event.movementY;
@@ -33,26 +33,26 @@ Primrose.Input.Mouse = ( function () {
 
     DOMElement.addEventListener( "mousedown", function ( event ) {
       this.setButton( event.button, true );
-      this.setAxis( "BUTTONS", event.buttons << 10 );
+      this.BUTTONS = event.buttons << 10;
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mouseup", function ( event ) {
       this.setButton( event.button, false );
-      this.setAxis( "BUTTONS", event.buttons << 10 );
+      this.BUTTONS = event.buttons << 10;
     }.bind( this ), false );
 
     DOMElement.addEventListener( "mousemove", this.readEvent.bind( this ), false );
 
     DOMElement.addEventListener( "wheel", function ( event ) {
       if ( isChrome ) {
-        this.setAxis( "W", this.getAxis( "W" ) + event.deltaX );
-        this.setAxis( "Z", this.getAxis( "Z" ) + event.deltaY );
+        this.W += event.deltaX;
+        this.Z += event.deltaY;
       }
       else if ( event.shiftKey ) {
-        this.setAxis( "W", this.getAxis( "W" ) + event.deltaY );
+        this.W += event.deltaY;
       }
       else {
-        this.setAxis( "Z", this.getAxis( "Z" ) + event.deltaY );
+        this.Z += event.deltaY;
       }
       event.preventDefault();
     }.bind( this ), false );

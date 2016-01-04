@@ -290,18 +290,15 @@ Primrose.Input.Motion = ( function ( ) {
       for ( var i = 0; i < MotionInput.AXES.length; ++i ) {
         var k = MotionInput.AXES[i];
         this.setAxis( k, evt[k] );
-        a.set( 0, 0, 0, 1 );
-        b.setFromAxisAngle( UP, evt.HEADING );
-        a.multiply( b );
-        b.setFromAxisAngle( RIGHT, evt.PITCH );
-        a.multiply( b );
-        b.setFromAxisAngle( FORWARD, evt.ROLL );
-        a.multiply( b );
-        this.setAxis( "headRX", a.x );
-        this.setAxis( "headRY", a.y );
-        this.setAxis( "headRZ", a.z );
-        this.setAxis( "headRW", a.w );
       }
+      a.set( 0, 0, 0, 1 )
+          .multiply( b.setFromAxisAngle( UP, evt.HEADING ) )
+          .multiply( b.setFromAxisAngle( RIGHT, evt.PITCH ) )
+          .multiply( b.setFromAxisAngle( FORWARD, evt.ROLL ) );
+      this.headRX = a.x;
+      this.headRY = a.y;
+      this.headRZ = a.z;
+      this.headRW = a.w;
     }.bind( this ) );
     this.zeroAxes = corrector.zeroAxes.bind( corrector );
     this.transforms = [ {}, {} ];
