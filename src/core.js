@@ -38,6 +38,7 @@ if ( typeof window.pliny === "undefined" ) {
 }
 
 pliny.the.elder.namespace( "Primrose", {description: "Primrose is a framework for making applications in WebVR."} );
+pliny.the.elder.namespace( "Primrose.Input", {description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."} );
 
 var Primrose = {
   Input: {},
