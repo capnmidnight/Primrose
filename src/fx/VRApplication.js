@@ -292,25 +292,17 @@ Primrose.VRApplication = ( function ( ) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
       else if ( !lockedToEditor() ) {
+        this.player.velocity.set( strafe, 0, drive )
+            .normalize()
+            .multiplyScalar( this.walkSpeed );
 
-        if ( strafe || drive ) {
-          len = drive * drive + strafe * strafe;
-          len = this.walkSpeed / Math.max( 1, Math.sqrt( len ) );
-        }
-        else {
-          len = 0;
-        }
-
-        strafe *= len * dt;
-        drive *= len * dt;
         qHeading.setFromAxisAngle( UP, currentHeading );
-        this.player.velocity.set( strafe, 0, drive );
         this.player.velocity.applyQuaternion( qHead );
         this.player.velocity.y = 0;
         this.player.velocity.applyQuaternion( qHeading );
       }
 
-      this.player.position.add( this.player.velocity );
+      this.player.position.add( vTemp.copy( this.player.velocity ).multiplyScalar( dt ) );
       if ( !this.player.isOnGround && this.player.position.y < this.avatarHeight ) {
         this.player.isOnGround = true;
         this.player.position.y = this.avatarHeight;
