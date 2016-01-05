@@ -35,3 +35,24 @@ var Primrose = {
     "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
     "#5B0001", "#302E2E" ]
 };
+
+if ( typeof window.pliny === "undefined" ) {
+  // shim out the documentation generator so it doesn't contribute
+  // to overhead in release build.
+  var pliny = ( function () {
+    var identity = function () {
+    };
+    var pliniuses = {
+      younger: identity,
+      elder: {
+        namespace: identity,
+        class: identity,
+        function: identity,
+        method: identity,
+        note: identity
+      }
+    };
+    pliniuses.younger.get = identity;
+    return {the: pliniuses};
+  } )();
+}
