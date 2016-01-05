@@ -33,4 +33,4 @@ function animate ( t ) {
 requestAnimationFrame( animate );
 
 
-pliny.the.younger( "animate" );
+pliny.the.younger( "Primrose.BaseControl" );
