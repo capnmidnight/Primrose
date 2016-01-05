@@ -1,8 +1,8 @@
 /* global module */
 
 var fs = require( "fs" ),
+    pathX = /.*\/(.*).js/,
     files = [
-      "src/store.js",
       "obj/Primrose.js",
       "lib/analytics.js",
       "lib/ga.js",
@@ -19,13 +19,13 @@ var fs = require( "fs" ),
     uglifyFiles = files.map( function ( s ) {
       return{
         src: s,
-        dest: s.replace( /.*\/(.*).js/, "bin/$1.min.js" )
+        dest: s.replace( pathX, "bin/$1.min.js" )
       };
     } ),
     copyFiles = files.map( function ( s ) {
       return {
         src: s,
-        dest: s.replace( /.*\/(.*).js/, "bin/$1.js" )
+        dest: s.replace( pathX, "bin/$1.js" )
       };
     } );
 
