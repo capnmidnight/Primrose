@@ -5,30 +5,36 @@ var WIDTH = 100,
     MIDX = WIDTH / 2,
     MIDY = HEIGHT / 2,
     MIDZ = DEPTH / 2,
-    GRAVITY = 9.8,
     t = 0,
-    bodies = [ ],
+    jabs = {},
     app = new Primrose.VRApplication( "Editor3D", {
       disableAutoFullScreen: true,
       skyTexture: "../images/bg2.jpg",
       groundTexture: "../images/grass.png"
     } );
-
 // we setup the event handlers for going full-screen
 app.setFullScreenButton( "goVR", "click", true );
 app.setFullScreenButton( "goRegular", "click", false );
 
+// and clicking on the objects in the scene
+function makeJabJump ( evt ) {
+  if ( jabs[evt.objectID] ) {
+    jabs[evt.objectID].jump();
+  }
+}
+app.addEventListener( "gazecomplete", makeJabJump );
+app.addEventListener( "pointerend", makeJabJump );
 
 function eye ( side, body ) {
   var ball = put( textured( sphere( 0.05, 18, 10 ), 0xffffff ) )
-      .on( body ).at( side * 0.07, 0.05, 0.16 ),
-      pupil = put( textured( sphere( 0.01 ), 0 ) )
+      .on( body ).at( side * 0.07, 0.05, 0.16 );
+  put( textured( sphere( 0.01 ), 0 ) )
       .on( ball )
       .at( 0, 0, 0.045 );
   return ball;
 }
 
-function jabber ( w, h, s ) {
+function Jabber ( w, h, s ) {
   var obj = hub(),
       skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
       si = parseInt( "0x" + skin.substring( 1 ), 16 ),
@@ -36,19 +42,21 @@ function jabber ( w, h, s ) {
       randomRange( -w, w ),
       1,
       randomRange( -h, h ) ),
-      leftEye = eye( -1, body ),
-      rightEye = eye( 1, body ),
       velocity = v3(
           randomRange( -s, s ),
           0,
           randomRange( -s, s ) ),
       v = v3( 0, 0, 0 );
 
+  eye( -1, body );
+  eye( 1, body );
+
+  obj.body = body;
+
   body.rotation.y = Math.PI;
   obj.update = function ( dt ) {
-    velocity.y -= GRAVITY * dt;
+    velocity.y -= app.options.gravity * dt;
     body.position.add( v.copy( velocity ).multiplyScalar( dt ) );
-    body.lookAt( app.player.position );
     if ( velocity.x > 0 && body.position.x >= w ||
         velocity.x < 0 && body.position.x <= -w ) {
       velocity.x *= -1;
@@ -63,17 +71,18 @@ function jabber ( w, h, s ) {
     }
     var d = body.position.distanceTo( app.player.position );
     if ( d < 3 ) {
+      body.lookAt( app.player.position );
       obj.position.set(
           randomRange( -0.01, 0.01 ),
           randomRange( -0.01, 0.01 ),
           randomRange( -0.01, 0.01 ) );
     }
-    if ( body.position.y === 1 && randomInt( 0, 100 ) < 1 ) {
-      this.jump();
+    else {
+      body.lookAt( v.add( body.position ) );
     }
   };
   obj.jump = function () {
-    velocity.y = GRAVITY;
+    velocity.y = app.options.gravity / 2;
   };
   return obj;
 }
@@ -85,15 +94,16 @@ function jabber ( w, h, s ) {
 app.addEventListener( "ready", function () {
   put( light( 0xffffff ) ).on( app.scene ).at( 0, 10, 0 );
   for ( var i = 0; i < 25; ++i ) {
-    var body = put( jabber(
+    var jab = put( Jabber(
         MIDX / 5,
         MIDZ / 5, 1 ) ).on( app.scene ).at( 0, 0, 0 );
-    bodies.push( body );
+    jabs[jab.body.uuid] = jab;
+    app.registerPickableObject( jab.body );
   }
 } );
 
 app.addEventListener( "update", function ( dt ) {
-  for ( var i = 0; i < bodies.length; ++i ) {
-    bodies[i].update( dt );
+  for ( var id in jabs ) {
+    jabs[id].update( dt );
   }
 } );

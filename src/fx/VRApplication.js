@@ -270,8 +270,8 @@ Primrose.VRApplication = ( function ( ) {
 
     var animate = function ( t ) {
       this.timer = requestAnimationFrame( animate );
-
-      var dt = ( t - lt ) * 0.001,
+      t *= 0.001;
+      var dt = t - lt,
           heading = 0,
           pitch = 0,
           strafe = 0,
@@ -389,6 +389,17 @@ Primrose.VRApplication = ( function ( ) {
           if ( !lockedToEditor() ) {
             buttons |= this.input.keyboard.getValue( "select" );
             clickChanged = clickChanged || this.input.keyboard.getValue( "dSelect" ) !== 0;
+          }
+          if ( lastHit && currentHit && lastHit.objectID === currentHit.objectID && !clickChanged && buttons > 0 ) {
+            fire( "pointermove", currentHit );
+          }
+          else {
+            if ( lastHit && clickChanged && buttons === 0 ) {
+              fire( "pointerend", lastHit );
+            }
+            if ( currentHit && clickChanged && buttons > 0 ) {
+              fire( "pointerstart", currentHit );
+            }
           }
 
           if ( clickChanged && buttons > 0 ) {
@@ -539,11 +550,13 @@ Primrose.VRApplication = ( function ( ) {
     // Initialize local variables
     //
     var lt = 0,
+        lastHit = null,
         currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion( ),
         qHeading = new THREE.Quaternion( ),
         qHead = new THREE.Quaternion( ),
+        vTemp = new THREE.Vector3(),
         skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
         skinCode = parseInt( skin.substring( 1 ), 16 ),
         sceneLoaded = !this.options.sceneModel,
@@ -559,7 +572,13 @@ Primrose.VRApplication = ( function ( ) {
     this.walkSpeed = this.options.walkSpeed;
     this.listeners = {
       ready: [ ],
-      update: [ ]
+      update: [ ],
+      gazestart: [ ],
+      gazecomplete: [ ],
+      gazecancel: [ ],
+      pointerstart: [ ],
+      pointermove: [ ],
+      pointerend: [ ]
     };
 
     this.audio = new Primrose.Output.Audio3D( );
@@ -681,8 +700,32 @@ Primrose.VRApplication = ( function ( ) {
     this.input.addEventListener( "jump", this.jump.bind( this ), false );
     this.input.addEventListener( "zero", this.zero.bind( this ), false );
     this.projector.addEventListener( "hit", function ( h ) {
+      var dt;
       this.projector.ready = true;
+      lastHit = currentHit;
       currentHit = h;
+      if ( lastHit && currentHit && lastHit.objectID === currentHit.objectID ) {
+        currentHit.startTime = lastHit.startTime;
+        currentHit.gazeFired = lastHit.gazeFired;
+        dt = lt - currentHit.startTime;
+        if ( dt >= this.options.gazeLength && !currentHit.gazeFired ) {
+          currentHit.gazeFired = true;
+          fire( "gazecomplete", currentHit );
+        }
+      }
+      else {
+        if ( lastHit ) {
+          dt = lt - lastHit.startTime;
+          if ( dt < this.options.gazeLength ) {
+            fire( "gazecancel", lastHit );
+          }
+        }
+        if ( currentHit ) {
+          currentHit.startTime = lt;
+          currentHit.gazeFired = false;
+          fire( "gazestart", currentHit );
+        }
+      }
     }.bind( this ) );
     //
     // Manage full-screen state
@@ -745,7 +788,7 @@ Primrose.VRApplication = ( function ( ) {
 
 
     var waitForResources = function ( t ) {
-      lt = t;
+      lt = t * 0.001;
       if ( sceneLoaded && buttonLoaded ) {
         if ( !readyFired ) {
           readyFired = true;
@@ -763,14 +806,14 @@ Primrose.VRApplication = ( function ( ) {
       if ( !this.timer ) {
         this.timer = requestAnimationFrame( waitForResources );
       }
-    }.bind(this);
+    }.bind( this );
 
     this.stop = function ( ) {
       cancelAnimationFrame( this.timer );
       this.timer = null;
-    }.bind(this);
-    window.addEventListener("blur", this.stop, false);
-    window.addEventListener("focus", this.start, false);
+    }.bind( this );
+    window.addEventListener( "blur", this.stop, false );
+    window.addEventListener( "focus", this.start, false );
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
     this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
     this.start();
@@ -781,10 +824,10 @@ Primrose.VRApplication = ( function ( ) {
     useLeap: false,
     useFog: false,
     avatarHeight: 1.75,
-    walkSpeed: 3,
+    walkSpeed: 1.3,
     // the acceleration applied to falling objects
-    gravity: 0.98,
-    jumpSpeed: 0.25,
+    gravity: 9.8,
+    jumpSpeed: 3.13,
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
     // the far plane of the camera
@@ -793,7 +836,8 @@ Primrose.VRApplication = ( function ( ) {
     chatTextSize: 0.25,
     // the amount of time to allow to elapse between sending state to the server
     dtNetworkUpdate: 0.125,
-    canvasElement: "frontBuffer"
+    canvasElement: "frontBuffer",
+    gazeLength: 1
 //    ,DEBUG_WEBGL: {
 //      errorHandler: undefined,
 //      logger: undefined
