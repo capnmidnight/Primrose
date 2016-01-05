@@ -8,6 +8,7 @@ window.addEventListener( "load", function ( d, f ) {
        "app.js" ],
        /* */
       s = [ 
+        "../../src/pliny.js",
         "../../lib/webgl-debug.js",
         "../../bin/three.js",
         "../../src/core.js",
