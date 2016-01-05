@@ -20,20 +20,20 @@ if ( typeof window.pliny === "undefined" ) {
   // shim out the documentation generator so it doesn't contribute
   // to overhead in release build.
   var pliny = ( function () {
-    var identity = function () {
+    var nil = function () {
     };
     var pliniuses = {
-      younger: identity,
+      younger: nil,
       elder: {
-        namespace: identity,
-        class: identity,
-        function: identity,
-        method: identity,
-        note: identity,
-        value: identity
+        namespace: nil,
+        class: nil,
+        function: nil,
+        method: nil,
+        note: nil,
+        value: nil
       }
     };
-    pliniuses.younger.get = identity;
+    pliniuses.younger.get = nil;
     return {the: pliniuses};
   } )();
 }
