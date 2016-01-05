@@ -1,14 +1,21 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, pliny */
 Primrose.BaseControl = ( function () {
   "use strict";
 
   var ID = 1;
 
+  pliny.the.elder.class("Primrose.BaseControl", {
+    description: "The BaseControl class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format.",
+    author: "Sean T. McBeth"
+  });
   function BaseControl () {
     this.controlID = ID++;
     this.focused = false;
   }
 
+  pliny.the.elder.method("Primrose.BaseControl.prototype.focus", {
+    author: "Sean T. McBeth"
+  });
   BaseControl.prototype.focus = function () {
     this.focused = true;
   };
