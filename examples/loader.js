@@ -4,11 +4,12 @@ window.addEventListener( "load", function ( d, f ) {
       /*
        s = [
        "../../bin/three.min.js",
+       "../../bin/pliny.min.js",
        "../../bin/Primrose.min.js",
        "app.js" ],
        /* */
       s = [ 
-        "../../src/pliny.js",
+        "../../lib/pliny.js",
         "../../lib/webgl-debug.js",
         "../../bin/three.js",
         "../../src/core.js",

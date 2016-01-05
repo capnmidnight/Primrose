@@ -44,8 +44,8 @@ Primrose.NetworkedInput = ( function () {
       }.bind( this ) );
     }
 
-    for ( var name in commands ) {
-      this.addCommand( name, commands[name] );
+    for ( var cmdName in commands ) {
+      this.addCommand( cmdName, commands[name] );
     }
 
     for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
@@ -158,22 +158,22 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.decodeStateSnapshot = function ( snapshot ) {
-    var cmd;
-    for ( var name in this.commands ) {
+    var cmd, name;
+    for ( name in this.commands ) {
       cmd = this.commands[name];
       cmd.state.wasPressed = cmd.state.pressed;
     }
     var records = snapshot.split( "|" );
     for ( var i = 0; i < records.length; ++i ) {
-      var record = records[i];
-      var parts = record.split( ":" );
-      var cmdIndex = parseInt( parts[0], 10 );
-      var name = this.commandNames( cmdIndex );
-      var pressed = ( cmdIndex & 0x1 ) !== 0;
-      var fireAgain = ( flags & 0x2 ) !== 0;
+      var record = records[i],
+          parts = record.split( ":" ),
+          cmdIndex = parseInt( parts[0], 10 ),
+          pressed = ( cmdIndex & 0x1 ) !== 0,
+          fireAgain = ( flags & 0x2 ) !== 0,
+          flags = parseInt( parts[2], 10 );
       cmdIndex >>= 2;
+      name = this.commandNames( cmdIndex );
       cmd = this.commands[name];
-      var flags = parseInt( parts[2], 10 );
       cmd.state = {
         value: parseFloat( parts[1] ),
         pressed: pressed,
@@ -206,8 +206,8 @@ Primrose.NetworkedInput = ( function () {
 
   NetworkedInput.prototype.invertInArray = function ( key, name, value ) {
     if ( this.commands[name] && this.commands[name][key] ) {
-      var arr = this.commands[name][key];
-      var n = arr.indexOf( value );
+      var arr = this.commands[name][key],
+          n = arr.indexOf( value );
       if ( n > -1 ) {
         arr[n] *= -1;
       }
