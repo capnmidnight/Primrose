@@ -816,7 +816,7 @@ Primrose.VRApplication = ( function ( ) {
     useLeap: false,
     useFog: false,
     avatarHeight: 1.75,
-    walkSpeed: 1.3,
+    walkSpeed: 2,
     // the acceleration applied to falling objects
     gravity: 9.8,
     jumpSpeed: 3.13,
