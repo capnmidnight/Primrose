@@ -226,8 +226,8 @@ Primrose.Input.Motion = ( function ( ) {
             HEADING: heading.radians,
             PITCH: pitch.radians,
             ROLL: roll.radians,
-            headAX: a.x - dAccel.x,
-            headAY: a.y - dAccel.y,
+            headAX: a.y - dAccel.y,
+            headAY: a.x - dAccel.x,
             headAZ: a.z - dAccel.z
           } );
         }
@@ -238,14 +238,15 @@ Primrose.Input.Motion = ( function ( ) {
       };
       this.checkMotion = function ( event ) {
         if ( event && event.accelerationIncludingGravity &&
-            event.accelerationIncludingGravity.x ) {
+            event.accelerationIncludingGravity.x !== null ) {
           this.acceleration = event.accelerationIncludingGravity;
+          this.onChange( );
         }
-        else if ( event && event.acceleration && event.acceleration.x ) {
+        else if ( event && event.acceleration && event.acceleration.x !== null ) {
           this.acceleration = event.acceleration;
+          this.onChange( );
         }
 
-        this.onChange( );
       };
       this.acceleration = MotionCorrector.ZERO_VECTOR;
       this.orientation = MotionCorrector.ZERO_EULER;
