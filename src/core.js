@@ -29,7 +29,8 @@ if ( typeof window.pliny === "undefined" ) {
         class: identity,
         function: identity,
         method: identity,
-        note: identity
+        note: identity,
+        value: identity
       }
     };
     pliniuses.younger.get = identity;
