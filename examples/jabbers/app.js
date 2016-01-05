@@ -69,16 +69,20 @@ function Jabber ( w, h, s ) {
       velocity.y = 0;
       body.position.y = 1;
     }
-    var d = body.position.distanceTo( app.player.position );
+    v.copy( body.position ).sub( app.player.position );
+    var d = v.length();
     if ( d < 3 ) {
       body.lookAt( app.player.position );
       obj.position.set(
           randomRange( -0.01, 0.01 ),
           randomRange( -0.01, 0.01 ),
           randomRange( -0.01, 0.01 ) );
+      v.divideScalar( d );
+      v.y = 0;
+      velocity.add( v.multiplyScalar( ( 3 - d ) / 100 ) );
     }
     else {
-      body.lookAt( v.add( body.position ) );
+      body.lookAt( v.copy( velocity ).add( body.position ) );
     }
   };
   obj.jump = function () {
