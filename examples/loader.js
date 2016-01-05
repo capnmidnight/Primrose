@@ -4,7 +4,6 @@ window.addEventListener( "load", function ( d, f ) {
       /*
        s = [
        "../../bin/three.min.js",
-       "../../bin/pliny.min.js",
        "../../bin/Primrose.min.js",
        "app.js" ],
        /* */
