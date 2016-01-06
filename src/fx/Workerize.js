@@ -1,6 +1,11 @@
-/* global Primrose, URL */
+/* global Primrose, URL, pliny */
 
 Primrose.Workerize = ( function () {
+  pliny.theElder.class( "Primrose", {
+    name: "Workerize",
+    description: "Builds a WebWorker out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses",
+    author: "Sean T. McBeth"
+  } );
   function Workerize ( func ) {
     // First, rebuild the script that defines the class. Since we're dealing
     // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
@@ -55,6 +60,7 @@ Primrose.Workerize = ( function () {
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
     this.worker = Workerize.createWorker( script, false );
+
     this.args = [ null, null ];
 
     // create a mapper from the UI-thread side onmessage event, to receive
@@ -65,7 +71,7 @@ Primrose.Workerize = ( function () {
       var f = e.data[0],
           t = this.listeners[f];
       for ( var i = 0; t && i < t.length; ++t ) {
-        t[i].call(this, e.data[1] );
+        t[i].call( this, e.data[1] );
       }
     }.bind( this );
 
@@ -81,6 +87,7 @@ Primrose.Workerize = ( function () {
       }
     }
   }
+
 
   Workerize.prototype.methodShim = function ( eventName, args ) {
     this.args[0] = eventName;
