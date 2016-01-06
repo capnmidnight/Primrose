@@ -24,7 +24,9 @@
     <script type="text/javascript">
       window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
       window.ftypes = [ 'email', 'text', 'text' ];
-      window.addEventListener( "load", ga.bind( window, 'send', 'pageview' ) );
+      window.addEventListener( "load", function () {
+        ga( 'send', 'pageview' );
+      } );
       window.addEventListener( "load", function ( ) {
         var xhr = new XMLHttpRequest();
         xhr.onload = function () {
