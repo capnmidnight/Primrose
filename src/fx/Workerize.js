@@ -3,7 +3,8 @@
 Primrose.Workerize = ( function () {
   pliny.theElder.class( "Primrose", {
     name: "Workerize",
-    description: "Builds a WebWorker out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses",
+    description: ["Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.",
+    "Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits."],
     author: "Sean T. McBeth"
   } );
   function Workerize ( func ) {
@@ -95,6 +96,11 @@ Primrose.Workerize = ( function () {
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
+    pliny.theElder.property( {
+      name: "<mappings for each method in the original class>",
+      type: "Function",
+      description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
+    } );
     for ( k in func.prototype ) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
@@ -107,10 +113,10 @@ Primrose.Workerize = ( function () {
 
   pliny.theElder.method( "Primrose.Workerize", {
     name: "methodShim",
-    description: "Whatever",
+    description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
     parameters: [
-      {name: "eventName", type: "String", description: "blah"},
-      {name: "args", type: "Array", description: "args"}
+      {name: "methodName", type: "String", description: "The method inside the worker context that we want to invoke."},
+      {name: "args", type: "Array", description: "The arguments that we want to pass to the method that we are calling in the worker context."}
     ]
   } );
   Workerize.prototype.methodShim = function ( eventName, args ) {
@@ -123,8 +129,8 @@ Primrose.Workerize = ( function () {
     name: "methodShim",
     description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
     parameters: [
-      {name: "evt", type: "String", description: "blah"},
-      {name: "thunk", type: "Function", description: "blah"}
+      {name: "evt", type: "String", description: "The name of the event for which we are listening."},
+      {name: "thunk", type: "Function", description: "The callback to fire when the event occurs."}
     ]
   } );  
   Workerize.prototype.addEventListener = function ( evt, thunk ) {
