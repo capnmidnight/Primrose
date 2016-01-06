@@ -24,7 +24,6 @@ window.addEventListener( "load", function ( d, f ) {
         "../../src/fx/helpers/options.js",
         "../../src/fx/helpers/requests.js",
         "../../src/fx/Angle.js",
-        "../../src/fx/Application.js",
         "../../src/fx/BaseControl.js",
         "../../src/fx/Button.js",
         "../../src/fx/ButtonFactory.js",
