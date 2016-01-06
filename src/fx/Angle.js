@@ -14,12 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* global Primrose */
+/* global Primrose, pliny */
 Primrose.Angle = ( function ( ) {
   pliny.theElder.class( "Primrose", {
     name: "Angle",
     author: "Sean T. McBeth",
-    description: "The Angle class smooths out the jump from 360 to 0 degrees. It keeps track of the previous state of angle values and keeps the change between angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for smoother opperation as rotating past 360 degrees will not reset to 0, but continue to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360 but continue to -1 and below.\n\nWhen instantiating, choose a value that is as close as you can guess will be your initial sensor readings.\n\nThis is particularly important for the 180 degrees, +- 10 degrees or so. If you expect values to run back and forth over 180 degrees, then initialAngleInDegrees should be set to 180. Otherwise, if your initial value is anything slightly larger than 180, the correction will rotate the angle into negative degrees, e.g.:\n\tinitialAngleInDegrees = 0\n\tfirst reading = 185\n\tupdated degrees value = -175\n\nIt also automatically performs degree-to-radian and radian-to-degree conversions.",
+    description: [ "The Angle class smooths out the jump from 360 to 0 degrees. It keeps track of the previous state of angle values and keeps the change between angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for smoother opperation as rotating past 360 degrees will not reset to 0, but continue to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360 but continue to -1 and below.",
+      "When instantiating, choose a value that is as close as you can guess will be your initial sensor readings.",
+      "This is particularly important for the 180 degrees, +- 10 degrees or so. If you expect values to run back and forth over 180 degrees, then initialAngleInDegrees should be set to 180. Otherwise, if your initial value is anything slightly larger than 180, the correction will rotate the angle into negative degrees, e.g.:\n\tinitialAngleInDegrees = 0\n\tfirst reading = 185\n\tupdated degrees value = -175",
+      "It also automatically performs degree-to-radian and radian-to-degree conversions." ],
     parameters: [
       {name: "initialAngleInDegrees", type: "Number", description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."}
     ]
@@ -37,7 +40,7 @@ Primrose.Angle = ( function ( ) {
         d3,
         DEG2RAD = Math.PI / 180,
         RAD2DEG = 180 / Math.PI;
-    
+
     pliny.theElder.property( {name: "degrees", type: "Number", description: "get/set the current value of the angle in degrees."} );
     Object.defineProperty( this, "degrees", {
       set: function ( newValue ) {
@@ -62,7 +65,7 @@ Primrose.Angle = ( function ( ) {
         return value;
       }
     } );
-      
+
     pliny.theElder.property( {name: "radians", type: "Number", description: "get/set the current value of the angle in radians."} );
     Object.defineProperty( this, "radians", {
       get: function ( ) {
