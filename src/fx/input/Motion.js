@@ -213,19 +213,24 @@ Primrose.Input.Motion = ( function ( ) {
             "A function must be provided as a callback parameter. Callback parameter was: " +
             callback );
       }
-      var heading = new Primrose.Angle( 0 ),
-          pitch = new Primrose.Angle( 0 ),
-          roll = new Primrose.Angle( 0 );
+      var headingAngle = null, pitchAngle = null, rollAngle = null;
       this.onChange = function ( ) {
         var a = this.acceleration;
         if ( this.orientation && a ) {
-          heading.degrees = -this.heading;
-          pitch.degrees = this.pitch;
-          roll.degrees = this.roll;
+          if ( headingAngle !== null ) {
+            headingAngle.degrees = -this.heading;
+            pitchAngle.degrees = this.pitch;
+            rollAngle.degrees = this.roll;
+          }
+          else {
+            headingAngle = new Primrose.Angle( -this.heading );
+            pitchAngle = new Primrose.Angle( this.pitch );
+            rollAngle = new Primrose.Angle( this.roll );
+          }
           callback( {
-            HEADING: heading.radians,
-            PITCH: pitch.radians,
-            ROLL: roll.radians,
+            HEADING: headingAngle.radians,
+            PITCH: pitchAngle.radians,
+            ROLL: rollAngle.radians,
             headAX: a.y - dAccel.y,
             headAY: a.x - dAccel.x,
             headAZ: a.z - dAccel.z
