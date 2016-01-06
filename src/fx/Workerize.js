@@ -59,14 +59,31 @@ Primrose.Workerize = ( function () {
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
+    pliny.theElder.property( {
+      name: "worker",
+      type: "WebWorker",
+      description: "The worker thread containing our class."
+    } );
     this.worker = Workerize.createWorker( script, false );
 
+    pliny.theElder.property( {
+      name: "args",
+      type: "Array",
+      description: "Static allocation of an array to save on memory usage when piping commands to a worker."
+    } );
     this.args = [ null, null ];
 
     // create a mapper from the UI-thread side onmessage event, to receive
     // messages from the worker thread that events occured and pass them on to
     // the UI thread.
+    pliny.theElder.property( {
+      name: "listeners",
+      type: "Object",
+      description: "A bag of arrays of callbacks for each of the class' events."
+    } );
     this.listeners = {};
+
+
     this.worker.onmessage = function ( e ) {
       var f = e.data[0],
           t = this.listeners[f];
@@ -88,15 +105,28 @@ Primrose.Workerize = ( function () {
     }
   }
 
-
+  pliny.theElder.method( "Primrose.Workerize", {
+    name: "methodShim",
+    description: "Whatever",
+    parameters: [
+      {name: "eventName", type: "String", description: "blah"},
+      {name: "args", type: "Array", description: "args"}
+    ]
+  } );
   Workerize.prototype.methodShim = function ( eventName, args ) {
     this.args[0] = eventName;
     this.args[1] = args;
     this.worker.postMessage( this.args );
   };
 
-  // Adding an event listener just registers a function as being ready to
-  // receive events, it doesn't do anything with the worker thread yet.
+  pliny.theElder.method( "Primrose.Workerize", {
+    name: "methodShim",
+    description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
+    parameters: [
+      {name: "evt", type: "String", description: "blah"},
+      {name: "thunk", type: "Function", description: "blah"}
+    ]
+  } );  
   Workerize.prototype.addEventListener = function ( evt, thunk ) {
     if ( !this.listeners[evt] ) {
       this.listeners[evt] = [ ];
@@ -104,6 +134,16 @@ Primrose.Workerize = ( function () {
     this.listeners[evt].push( thunk );
   };
 
+
+  pliny.theElder.function( "Primrose.Workerize", {
+    name: "createWorker",
+    description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
+    parameters: [
+      {name: "script", type: "(String|Function)", description: "A String defining a script, or a Function that can be toString()'d to get it's script."},
+      {name: "stripFunc", type: "Boolean", description: "Set to true if you want the function to strip the surround function block scope from the script."}
+    ],
+    returns: "The WebWorker object."
+  } ); 
   Workerize.createWorker = function ( script, stripFunc ) {
     if ( typeof script === "function" ) {
       script = script.toString();
