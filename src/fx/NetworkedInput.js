@@ -45,7 +45,7 @@ Primrose.NetworkedInput = ( function () {
     }
 
     for ( var cmdName in commands ) {
-      this.addCommand( cmdName, commands[name] );
+      this.addCommand( cmdName, commands[cmdName] );
     }
 
     for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
@@ -54,9 +54,9 @@ Primrose.NetworkedInput = ( function () {
   }
 
   NetworkedInput.prototype.addCommand = function ( name, cmd ) {
+    cmd.name = name;
     cmd = this.cloneCommand( cmd );
     cmd.repetitions = cmd.repetitions || 1;
-    cmd.name = name;
     cmd.state = {
       value: null,
       pressed: false,
