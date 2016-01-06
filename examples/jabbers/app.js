@@ -19,7 +19,7 @@ app.setFullScreenButton( "goRegular", "click", false );
 // and clicking on the objects in the scene
 function makeJabJump ( evt ) {
   if ( jabs[evt.objectID] ) {
-    jabs[evt.objectID].jump();
+    jabs[evt.objectID].jump(evt.faceNormal);
   }
 }
 app.addEventListener( "gazecomplete", makeJabJump );
@@ -85,8 +85,10 @@ function Jabber ( w, h, s ) {
       body.lookAt( v.copy( velocity ).add( body.position ) );
     }
   };
-  obj.jump = function () {
-    velocity.y = app.options.gravity / 2;
+  obj.jump = function (normal) {
+    v.fromArray(normal);
+    v.y = app.options.gravity / 2;
+    velocity.add(v);
   };
   return obj;
 }
