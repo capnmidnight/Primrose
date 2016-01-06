@@ -26,11 +26,12 @@ if ( typeof window.pliny === "undefined" ) {
       younger: nil,
       elder: {
         namespace: nil,
-        class: nil,
+        event: nil,
         function: nil,
+        value: nil,
+        class: nil,
         method: nil,
-        note: nil,
-        value: nil
+        property: nil
       }
     };
     pliniuses.younger.get = nil;
