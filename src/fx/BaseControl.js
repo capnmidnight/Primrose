@@ -4,25 +4,32 @@ Primrose.BaseControl = ( function () {
 
   var ID = 1;
 
-  pliny.the.elder.class( "Primrose.BaseControl", {
+  pliny.the.elder.class( "Primrose", {
+    name: "BaseControl",
     description: "The BaseControl class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format.",
     author: "Sean T. McBeth"
   } );
   function BaseControl () {
-    pliny.the.elder.property( {name: "controlID", type: Number, description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."} );
+    pliny.the.elder.property( {name: "controlID", type: "Number", description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."} );
     this.controlID = ID++;
-    pliny.the.elder.property( {name: "focused", type: Boolean, description: "Flag indicating this control has received focuse. You should theoretically only read it."} );
+    pliny.the.elder.property( {name: "focused", type: "Boolean", description: "Flag indicating this control has received focuse. You should theoretically only read it."} );
     this.focused = false;
   }
 
-  pliny.the.elder.method( "Primrose.BaseControl.prototype.focus", {
-    description: "sets the focus property of the control, does not change the focus property of any other control",
+  pliny.the.elder.method( "Primrose.BaseControl", {
+    name: "focus",
+    description: "sets the focus property of the control, does not change the focus property of any other control.",
     author: "Sean T. McBeth"
   } );
   BaseControl.prototype.focus = function () {
     this.focused = true;
   };
 
+  pliny.the.elder.method( "Primrose.BaseControl", {
+    name: "blur",
+    description: "unsets the focus property of the control, does not change the focus property of any other control.",
+    author: "Sean T. McBeth"
+  } );
   BaseControl.prototype.blur = function () {
     this.focused = false;
   };
@@ -38,6 +45,15 @@ Primrose.BaseControl = ( function () {
           NUMBER_PATTERN + "\\s*,\\s*" +
           NUMBER_PATTERN + "rad\\s*\\)", "i" );
 
+
+  pliny.the.elder.method( "Primrose.BaseControl", {
+    name: "copyElement",
+    description: "Copies properties from a DOM element that the control is supposed to match.",
+    paramters: [
+      {name: "elem", type: "Element", description: "The element--e.g. a button or textarea--to copy."}
+    ],
+    author: "Sean T. McBeth"
+  } );
   BaseControl.prototype.copyElement = function ( elem ) {
     this.element = elem;
     if ( elem.style.transform ) {
