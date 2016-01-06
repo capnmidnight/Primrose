@@ -9,7 +9,7 @@ var m = new Primrose.Input.Motion( "motion" ),
     lt = 0,
     q = new THREE.Quaternion();
 
-pliny.the.elder.function( "", {
+pliny.theElder.function( "", {
   author: "Sean T. McBeth",
   name: "animate",
   description: "animation looper function, yeah!",

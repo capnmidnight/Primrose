@@ -23,8 +23,8 @@ if ( typeof window.pliny === "undefined" ) {
     var nil = function () {
     };
     var pliniuses = {
-      younger: nil,
-      elder: {
+      theYounger: nil,
+      theElder: {
         namespace: nil,
         event: nil,
         function: nil,
@@ -34,89 +34,88 @@ if ( typeof window.pliny === "undefined" ) {
         property: nil
       }
     };
-    pliniuses.younger.get = nil;
-    return {the: pliniuses};
+    return pliniuses;
   } )();
 }
 
-pliny.the.elder.namespace( "", {
+pliny.theElder.namespace( "", {
   name: "Primrose",
   description: "Primrose is a framework for making applications in WebVR. The top-level namespace contains classes for manipulating and viewing 3D environments."
 } );
 var Primrose = {};
 
 
-pliny.the.elder.namespace( "Primrose", {
+pliny.theElder.namespace( "Primrose", {
   name: "Input",
   description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
 } );
 Primrose.Input = {};
 
 
-pliny.the.elder.namespace( "Primrose", {
+pliny.theElder.namespace( "Primrose", {
   name: "Output",
   description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
 } );
 Primrose.Output = {};
 
 
-pliny.the.elder.namespace( "Primrose", {
+pliny.theElder.namespace( "Primrose", {
   name: "Text",
   description: "The Text namespace contains classes everything regarding the Primrose source code editor."
 } );
 Primrose.Text = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "CodePages",
   description: "The CodePages namespace contains international keyboard parameters."
 } );
 Primrose.Text.CodePages = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "CommandPacks",
   description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
 } );
 Primrose.Text.CommandPacks = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "Controls",
   description: "The Controls namespace contains different types of text-oriented controls."
 } );
 Primrose.Text.Controls = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "Grammars",
   description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
 } );
 Primrose.Text.Grammars = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "OperatingSystems",
   description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
 } );
 Primrose.Text.OperatingSystems = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "Renderers",
   description: "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon."
 } );
 Primrose.Text.Renderers = {};
 
 
-pliny.the.elder.namespace( "Primrose.Text", {
+pliny.theElder.namespace( "Primrose.Text", {
   name: "Themes",
   description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
 } );
 Primrose.Text.Themes = {};
 
 
-pliny.the.elder.value( "Primrose", {
+pliny.theElder.value( "Primrose", {
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
@@ -124,7 +123,7 @@ pliny.the.elder.value( "Primrose", {
 Primrose.SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
 
-pliny.the.elder.value( "Primrose", {
+pliny.theElder.value( "Primrose", {
   name: "SKINS",
   type: "Array of String",
   description: "A selection of color values that closely match skin colors of people."

@@ -16,7 +16,7 @@
  */
 /* global Primrose */
 Primrose.Angle = ( function ( ) {
-  pliny.the.elder.class( "Primrose", {
+  pliny.theElder.class( "Primrose", {
     name: "Angle",
     author: "Sean T. McBeth",
     description: "The Angle class smooths out the jump from 360 to 0 degrees. It keeps track of the previous state of angle values and keeps the change between angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for smoother opperation as rotating past 360 degrees will not reset to 0, but continue to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360 but continue to -1 and below.\n\nWhen instantiating, choose a value that is as close as you can guess will be your initial sensor readings.\n\nThis is particularly important for the 180 degrees, +- 10 degrees or so. If you expect values to run back and forth over 180 degrees, then initialAngleInDegrees should be set to 180. Otherwise, if your initial value is anything slightly larger than 180, the correction will rotate the angle into negative degrees, e.g.:\n\tinitialAngleInDegrees = 0\n\tfirst reading = 185\n\tupdated degrees value = -175\n\nIt also automatically performs degree-to-radian and radian-to-degree conversions.",
@@ -38,7 +38,7 @@ Primrose.Angle = ( function ( ) {
         DEG2RAD = Math.PI / 180,
         RAD2DEG = 180 / Math.PI;
     
-    pliny.the.elder.property( {name: "degrees", type: "Number", description: "get/set the current value of the angle in degrees."} );
+    pliny.theElder.property( {name: "degrees", type: "Number", description: "get/set the current value of the angle in degrees."} );
     Object.defineProperty( this, "degrees", {
       set: function ( newValue ) {
         do {
@@ -63,7 +63,7 @@ Primrose.Angle = ( function ( ) {
       }
     } );
       
-    pliny.the.elder.property( {name: "radians", type: "Number", description: "get/set the current value of the angle in radians."} );
+    pliny.theElder.property( {name: "radians", type: "Number", description: "get/set the current value of the angle in radians."} );
     Object.defineProperty( this, "radians", {
       get: function ( ) {
         return this.degrees * DEG2RAD;
