@@ -29,4 +29,4 @@ function animate ( t ) {
 requestAnimationFrame( animate );
 
 
-Primrose.Angle.help();
+Primrose.Button.help();

@@ -1,26 +1,92 @@
-/* global Primrose, THREE, fireAll */
+/* global Primrose, THREE, fireAll, pliny */
 
 Primrose.Button = ( function () {
+  pliny.theElder.class( "Primrose", {
+    name: "Button",
+    author: "Sean T. McBeth",
+    parameters: [
+      {name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button."},
+      {name: "name", type: "String", description: "A name for the button, to make it distinct from other buttons."},
+      {name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - the limit for how far the button can be depressed.\n\t\t\tminDeflection - the minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - the color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - the color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - true if deactivating the button should require a second click. False if the button should deactivate when it is released."}
+    ],
+    description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
+  } );
   function Button ( model, name, options ) {
-    this.options = combineDefaults( options, Button );
     Primrose.BaseControl.call( this );
-    this.options.minDeflection = Math.cos( this.options.minDeflection );
-    this.options.colorUnpressed = new THREE.Color( this.options.colorUnpressed );
-    this.options.colorPressed = new THREE.Color( this.options.colorPressed );
+    
+    options = combineDefaults( options, Button );
+    options.minDeflection = Math.cos( options.minDeflection );
+    options.colorUnpressed = new THREE.Color( options.colorUnpressed );
+    options.colorPressed = new THREE.Color( options.colorPressed );
 
-    this.listeners = {click: [ ], release: [ ]};
+    pliny.theElder.event( {
+      name: "click",
+      description: "Occurs when the button is activated."
+    } );
+    this.listeners.click = [ ];
+
+    pliny.theElder.event( {
+      name: "release",
+      description: "Occurs when the button is deactivated."
+    } );
+    this.listeners.release = [ ];
+
+    pliny.theElder.property( {
+      name: "base",
+      type: "THREE.Object3D",
+      description: "The stand the button cap sits on."
+    } );
     this.base = model.children[1];
+
+    pliny.theElder.property( {
+      name: "base",
+      type: "THREE.Object3D",
+      description: "The moveable part of the button, that triggers the click event."
+    } );
     this.cap = model.children[0];
     this.cap.name = name;
     this.cap.material = this.cap.material.clone();
     this.cap.button = this;
     this.cap.base = this.base;
+    
+    pliny.theElder.property( {
+      name: "container",
+      type: "THREE.Object3D",
+      description: "A grouping collection for the base and cap;."
+    } );
     this.container = new THREE.Object3D();
     this.container.add( this.base );
     this.container.add( this.cap );
+    
+    pliny.theElder.property( {
+      name: "color",
+      type: "Number",
+      description: "The current color of the button cap.."
+    } );
     this.color = this.cap.material.color;
     this.name = name;
     this.element = null;
+
+
+
+    this.startUV = function () {
+      this.color.copy( options.colorPressed );
+      if ( this.element ) {
+        this.element.click();
+      }
+      else {
+        fireAll.call( this, "click" );
+      }
+    };
+
+    this.moveUV = function () {
+
+    };
+
+    this.endPointer = function () {
+      this.color.copy( options.colorUnpressed );
+      fireAll.call( this, "release" );
+    };
   }
 
   inherit( Button, Primrose.BaseControl );
@@ -30,41 +96,7 @@ Primrose.Button = ( function () {
     minDeflection: 10,
     colorUnpressed: 0x7f0000,
     colorPressed: 0x007f00,
-    toggle: true,
-    minDistance: 2
-  };
-
-  Button.prototype.addEventListener = function ( event, func ) {
-    if ( this.listeners[event] ) {
-      this.listeners[event].push( func );
-    }
-  };
-
-  Button.prototype.focus = function ( ) {
-    this.focused = true;
-  };
-
-  Button.prototype.blur = function ( ) {
-    this.focused = false;
-  };
-
-  Button.prototype.startUV = function () {
-    this.color.copy( this.options.colorPressed );
-    if ( this.element ) {
-      this.element.click();
-    }
-    else {
-      fireAll.call( this, "click" );
-    }
-  };
-
-  Button.prototype.moveUV = function () {
-
-  };
-
-  Button.prototype.endPointer = function () {
-    this.color.copy( this.options.colorUnpressed );
-    fireAll.call( this, "release" );
+    toggle: true
   };
 
   Object.defineProperties( Button.prototype, {

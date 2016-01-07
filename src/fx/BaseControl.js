@@ -10,10 +10,26 @@ Primrose.BaseControl = ( function () {
     author: "Sean T. McBeth"
   } );
   function BaseControl () {
-    pliny.theElder.property( {name: "controlID", type: "Number", description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."} );
+    pliny.theElder.property( {
+      name: "controlID",
+      type: "Number",
+      description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
+    } );
     this.controlID = ID++;
-    pliny.theElder.property( {name: "focused", type: "Boolean", description: "Flag indicating this control has received focuse. You should theoretically only read it."} );
+
+    pliny.theElder.property( {
+      name: "focused",
+      type: "Boolean",
+      description: "Flag indicating this control has received focus. You should theoretically only read it."
+    } );
     this.focused = false;
+
+    pliny.theElder.property( {
+      name: "listeners",
+      type: "Object",
+      description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl will add such arrays to this object."
+    } );
+    this.listeners = {};
   }
 
   pliny.theElder.method( "Primrose.BaseControl", {
@@ -73,6 +89,20 @@ Primrose.BaseControl = ( function () {
             parseFloat( match[3] ) ),
             parseFloat( match[4] ) );
       }
+    }
+  };
+
+  pliny.theElder.method( "Primrose.BaseControl", {
+    name: "addEventListener",
+    description: "Adding an event listener registers a function as being ready to receive events.",
+    parameters: [
+      {name: "evt", type: "String", description: "The name of the event for which we are listening."},
+      {name: "thunk", type: "Function", description: "The callback to fire when the event occurs."}
+    ]
+  } );
+  BaseControl.prototype.addEventListener = function ( event, func ) {
+    if ( this.listeners[event] ) {
+      this.listeners[event].push( func );
     }
   };
 

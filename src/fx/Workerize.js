@@ -3,8 +3,11 @@
 Primrose.Workerize = ( function () {
   pliny.theElder.class( "Primrose", {
     name: "Workerize",
-    description: ["Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.",
-    "Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits."],
+    description: [ "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.",
+      "Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits." ],
+    parameters: [
+      {name: "func", type: "Function", description: "The class function to workerize"}
+    ],
     author: "Sean T. McBeth"
   } );
   function Workerize ( func ) {
@@ -126,13 +129,13 @@ Primrose.Workerize = ( function () {
   };
 
   pliny.theElder.method( "Primrose.Workerize", {
-    name: "methodShim",
+    name: "addEventListener",
     description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
     parameters: [
       {name: "evt", type: "String", description: "The name of the event for which we are listening."},
       {name: "thunk", type: "Function", description: "The callback to fire when the event occurs."}
     ]
-  } );  
+  } );
   Workerize.prototype.addEventListener = function ( evt, thunk ) {
     if ( !this.listeners[evt] ) {
       this.listeners[evt] = [ ];
@@ -149,7 +152,7 @@ Primrose.Workerize = ( function () {
       {name: "stripFunc", type: "Boolean", description: "Set to true if you want the function to strip the surround function block scope from the script."}
     ],
     returns: "The WebWorker object."
-  } ); 
+  } );
   Workerize.createWorker = function ( script, stripFunc ) {
     if ( typeof script === "function" ) {
       script = script.toString();
