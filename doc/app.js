@@ -1,7 +1,7 @@
 /*global pliny, Primrose*/
 var log = console.log.bind( console );
 console.log = function ( output ) {
-  document.body.innerHTML += "<pre>" + output + "</pre>";
+  document.body.innerHTML += "<div>" + output.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").split( "\n" ).join( "<br>" ) + "</div>";
 };
 
 function recurse ( name, obj, stack, subName ) {
