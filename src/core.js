@@ -38,80 +38,47 @@ if ( typeof window.pliny === "undefined" ) {
   } )();
 }
 
-pliny.theElder.namespace( "", {
-  name: "Primrose",
-  description: "Primrose is a framework for making applications in WebVR. The top-level namespace contains classes for manipulating and viewing 3D environments."
-} );
+pliny.theElder.namespace( "Primrose", "Primrose is a framework for making applications in WebVR. The top-level namespace contains classes for manipulating and viewing 3D environments.");
 var Primrose = {};
 
 
-pliny.theElder.namespace( "Primrose", {
-  name: "Input",
-  description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
-} );
+pliny.theElder.namespace( "Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment." );
 Primrose.Input = {};
 
 
-pliny.theElder.namespace( "Primrose", {
-  name: "Output",
-  description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
-} );
+pliny.theElder.namespace( "Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)." );
 Primrose.Output = {};
 
 
-pliny.theElder.namespace( "Primrose", {
-  name: "Text",
-  description: "The Text namespace contains classes everything regarding the Primrose source code editor."
-} );
+pliny.theElder.namespace( "Primrose.Text", "The Text namespace contains classes everything regarding the Primrose source code editor." );
 Primrose.Text = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "CodePages",
-  description: "The CodePages namespace contains international keyboard parameters."
-} );
+pliny.theElder.namespace( "Primrose.Text.CodePages", "The CodePages namespace contains international keyboard parameters." );
 Primrose.Text.CodePages = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "CommandPacks",
-  description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
-} );
+pliny.theElder.namespace( "Primrose.Text.CommandPacks", "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls." );
 Primrose.Text.CommandPacks = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "Controls",
-  description: "The Controls namespace contains different types of text-oriented controls."
-} );
+pliny.theElder.namespace( "Primrose.Text.Controls", "The Controls namespace contains different types of text-oriented controls." );
 Primrose.Text.Controls = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "Grammars",
-  description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
-} );
+pliny.theElder.namespace( "Primrose.Text.Grammars", "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting." );
 Primrose.Text.Grammars = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "OperatingSystems",
-  description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
-} );
+pliny.theElder.namespace( "Primrose.Text.OperatingSystems", "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems." );
 Primrose.Text.OperatingSystems = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "Renderers",
-  description: "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon."
-} );
+pliny.theElder.namespace( "Primrose.Text.Renderers", "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon." );
 Primrose.Text.Renderers = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", {
-  name: "Themes",
-  description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
-} );
+pliny.theElder.namespace( "Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar." );
 Primrose.Text.Themes = {};
 
 
