@@ -105,6 +105,12 @@ Primrose.Button = ( function () {
     toggle: true
   };
 
+
+  pliny.theElder.property( "Primrose.Button", {
+    name: "position",
+    type: "THREE.Vector3",
+    description: "The location of the button."
+  } );
   Object.defineProperty( Button.prototype, "position", {
     get: function () {
       return this.container.position;
