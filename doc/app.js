@@ -1,5 +1,5 @@
 /*global pliny, Primrose*/
-var oldConsole = console.log;
+var log = console.log.bind(console);
 console.log = function ( output ) {
   document.body.innerHTML += "<pre>" + output + "</pre>";
 };
