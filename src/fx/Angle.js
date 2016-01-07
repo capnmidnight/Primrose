@@ -41,7 +41,7 @@ Primrose.Angle = ( function ( ) {
         DEG2RAD = Math.PI / 180,
         RAD2DEG = 180 / Math.PI;
 
-    pliny.theElder.property( {name: "degrees", type: "Number", description: "get/set the current value of the angle in degrees."} );
+    pliny.theElder.property( {name: "degrees", type: "Number", description: "Get/set the current value of the angle in degrees."} );
     Object.defineProperty( this, "degrees", {
       set: function ( newValue ) {
         do {
@@ -66,7 +66,7 @@ Primrose.Angle = ( function ( ) {
       }
     } );
 
-    pliny.theElder.property( {name: "radians", type: "Number", description: "get/set the current value of the angle in radians."} );
+    pliny.theElder.property( {name: "radians", type: "Number", description: "Get/set the current value of the angle in radians."} );
     Object.defineProperty( this, "radians", {
       get: function ( ) {
         return this.degrees * DEG2RAD;

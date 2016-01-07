@@ -7,7 +7,7 @@ Primrose.Button = ( function () {
     parameters: [
       {name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button."},
       {name: "name", type: "String", description: "A name for the button, to make it distinct from other buttons."},
-      {name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - the limit for how far the button can be depressed.\n\t\t\tminDeflection - the minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - the color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - the color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - true if deactivating the button should require a second click. False if the button should deactivate when it is released."}
+      {name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released."}
     ],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
   } );

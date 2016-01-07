@@ -12,7 +12,7 @@ var m = new Primrose.Input.Motion( "motion" ),
 pliny.theElder.function( "", {
   author: "Sean T. McBeth",
   name: "animate",
-  description: "animation looper function, yeah!",
+  description: "Animation looper function, yeah!",
   parameters: [
     {name: "t", desciption: "a bit of time", type: Number}
   ]

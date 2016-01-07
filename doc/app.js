@@ -17,6 +17,6 @@ var stack = [ "Primrose" ];
 while ( stack.length > 0 ) {
   var name = stack.shift();
   pliny.theYounger( name );
-  [ "namespaces", "functions", "classes", "methods" ]
+  [ "namespaces", "functions", "classes", "methods", "values" ]
       .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
 }

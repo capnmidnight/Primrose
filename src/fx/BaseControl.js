@@ -34,7 +34,7 @@ Primrose.BaseControl = ( function () {
 
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "focus",
-    description: "sets the focus property of the control, does not change the focus property of any other control.",
+    description: "Sets the focus property of the control, does not change the focus property of any other control.",
     author: "Sean T. McBeth"
   } );
   BaseControl.prototype.focus = function () {
@@ -43,7 +43,7 @@ Primrose.BaseControl = ( function () {
 
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "blur",
-    description: "unsets the focus property of the control, does not change the focus property of any other control.",
+    description: "Unsets the focus property of the control, does not change the focus property of any other control.",
     author: "Sean T. McBeth"
   } );
   BaseControl.prototype.blur = function () {
