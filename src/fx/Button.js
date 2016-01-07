@@ -13,7 +13,7 @@ Primrose.Button = ( function () {
   } );
   function Button ( model, name, options ) {
     Primrose.BaseControl.call( this );
-    
+
     options = combineDefaults( options, Button );
     options.minDeflection = Math.cos( options.minDeflection );
     options.colorUnpressed = new THREE.Color( options.colorUnpressed );
@@ -48,7 +48,7 @@ Primrose.Button = ( function () {
     this.cap.material = this.cap.material.clone();
     this.cap.button = this;
     this.cap.base = this.base;
-    
+
     pliny.theElder.property( {
       name: "container",
       type: "THREE.Object3D",
@@ -57,7 +57,7 @@ Primrose.Button = ( function () {
     this.container = new THREE.Object3D();
     this.container.add( this.base );
     this.container.add( this.cap );
-    
+
     pliny.theElder.property( {
       name: "color",
       type: "Number",
@@ -91,6 +91,12 @@ Primrose.Button = ( function () {
 
   inherit( Button, Primrose.BaseControl );
 
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class." );
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "maxThrow", type: "Number", description: "The limit for how far the button can be depressed."} );
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "minDeflection", type: "Number", description: "The minimum distance the button must be depressed before it is activated."} );
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "colorUnpressed", type: "Number", description: "The color to change the button cap to when the button is deactivated."} );
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "colorPressed", type: "Number", description: "The color to change the button cap to when the button is activated."} );
+  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "toggle", type: "Boolean", description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."} );
   Button.DEFAULTS = {
     maxThrow: 0.1,
     minDeflection: 10,
@@ -99,12 +105,11 @@ Primrose.Button = ( function () {
     toggle: true
   };
 
-  Object.defineProperties( Button.prototype, {
-    position: {
-      get: function () {
-        return this.container.position;
-      }
-    }} );
+  Object.defineProperty( Button.prototype, "position", {
+    get: function () {
+      return this.container.position;
+    }
+  } );
 
   return Button;
 } )();
