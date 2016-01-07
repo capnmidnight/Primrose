@@ -1,5 +1,5 @@
 /*global pliny, Primrose*/
-var log = console.log.bind(console);
+var log = console.log.bind( console );
 console.log = function ( output ) {
   document.body.innerHTML += "<pre>" + output + "</pre>";
 };
@@ -13,14 +13,10 @@ function recurse ( name, obj, stack, subName ) {
   }
 }
 
-function walk ( name ) {
-  var stack = [ name ];
-  while ( stack.length > 0 ) {
-    name = stack.shift();
-    pliny.theYounger( name );
-    [ "namespaces", "functions", "classes", "methods" ]
-        .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
-  }
+var stack = [ "Primrose" ];
+while ( stack.length > 0 ) {
+  var name = stack.shift();
+  pliny.theYounger( name );
+  [ "namespaces", "functions", "classes", "methods" ]
+      .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
 }
-
-walk( "Primrose" );
