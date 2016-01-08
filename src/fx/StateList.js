@@ -1,21 +1,13 @@
-/* global Primrose, HTMLSelectElement */
+/* global Primrose, HTMLSelectElement, pliny */
 Primrose.StateList = ( function () {
-  /*
-   * The StateList is a set of objects that can be mapped to DOM elements
-   * in such a way to alter their state. The UI presents a drop down list
-   * and the select action changes the various controls as the state set
-   * dictates. It's a way of streamlining the altering of UI state by select
-   * list.
-   *
-   * States take the form of:
-   * { name: "A string for display", values: [
-   *      {
-   *          ctrlName1: {attributeName1: value1, attributeName2: value2 },
-   *          ctrlName2: {attributeName3: value3, attributeName4: value4 }
-   *      |]}
-   *
-   *  The states paramareter should be an array of such objects
-   */
+  pliny.theElder.class( "Primrose", {
+    name: "StateList",
+    author: "Sean T. McBeth",
+    description: [
+      "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.",
+      "The states paramareter should be an array of State objects that take the form of:\n{ name: \"A string for display\", values: {\n\tctrlName1: {attributeName1: value1, attributeName2: value2 },\n\tctrlName2: {attributeName3: value3, attributeName4: value4 }\n}\n}"
+    ]
+  } );
   function StateList ( id, ctrls, states, callback, parent ) {
     var select = cascadeElement( id, "select", HTMLSelectElement );
     for ( var i = 0; i < states.length; ++i ) {
@@ -41,6 +33,12 @@ Primrose.StateList = ( function () {
         }
       }
     }.bind( this ), false );
+
+    pliny.theElder.property( {
+      name: "DOMElement",
+      type: "HTMLSelectElement",
+      description: "The DOM element that should be put on the page to control the settings."
+    } );
     this.DOMElement = select;
     if ( parent ) {
       parent.appendChild( this.DOMElement );
