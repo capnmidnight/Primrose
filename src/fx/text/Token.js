@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.Token = ( function () {
   "use strict";
   function Token ( value, type, index, line ) {

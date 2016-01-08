@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Input.Location = ( function () {
   function LocationInput ( name, commands, socket, options ) {
     this.options = combineDefaults( options, LocationInput );

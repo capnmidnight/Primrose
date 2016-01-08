@@ -1,4 +1,5 @@
 /* global Primrose, HTMLSelectElement, pliny */
+
 Primrose.StateList = ( function () {
   pliny.theElder.class( "Primrose", {
     name: "StateList",

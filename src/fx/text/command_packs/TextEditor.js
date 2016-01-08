@@ -1,7 +1,10 @@
 /* global Primrose */
-// // For all of these commands, the "current" cursor is:
+ 
+//// 
+// For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
+//
 Primrose.Text.CommandPacks.TextEditor = ( function () {
   "use strict";
 

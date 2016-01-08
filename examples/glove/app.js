@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE, requestFullScreen */
+// global isOSX, Primrose, THREE, requestFullScreen */
 
 THREE.ImageLoader.crossOrigin = "anonymous";
 var DEBUG_VR = false,

@@ -1,21 +1,20 @@
 /* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio */
 
 Primrose.Input.Motion = ( function ( ) {
-  /*
-   Class: MotionCorrector
-   
-   The MotionCorrector class observes orientation and gravitational acceleration values
-   and determines a corrected set of orientation values that reset the orientation
-   origin to 0 degrees north, 0 degrees above the horizon, with 0 degrees of tilt
-   in the landscape orientation. This is useful for head-mounted displays (HMD).
-   
-   Constructor: new MotionCorrector( );
-   
-   Properties:
-   degrees: get/set the current value of the angle in degrees.
-   radians: get/set the current value of the angle in radians.
-   
-   */
+  ////
+  // Class: MotionCorrector
+  // 
+  // The MotionCorrector class observes orientation and gravitational acceleration values
+  // and determines a corrected set of orientation values that reset the orientation
+  // origin to 0 degrees north, 0 degrees above the horizon, with 0 degrees of tilt
+  // in the landscape orientation. This is useful for head-mounted displays (HMD).
+  // 
+  // Constructor: new MotionCorrector( );
+  // 
+  // Properties:
+  // degrees: get/set the current value of the angle in degrees.
+  // radians: get/set the current value of the angle in radians.
+  ///
   function MotionCorrector ( ) {
     var acceleration,
         orientation,

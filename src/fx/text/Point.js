@@ -1,4 +1,5 @@
 /* global qp, Primrose */
+
 Primrose.Text.Point = ( function ( ) {
   "use strict";
 

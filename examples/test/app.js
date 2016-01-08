@@ -1,4 +1,4 @@
-/*global fmt, pliny, THREE, Primrose*/
+//global fmt, pliny, THREE, Primrose*/
 var output = document.getElementById( "output" );
 function println () {
   output.appendChild( document.createTextNode( fmt.apply( this,

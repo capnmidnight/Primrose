@@ -1,4 +1,5 @@
 /* global Primrose, io, Leap */
+
 Primrose.Output.HapticGlove = ( function () {
   function HapticGlove ( options ) {
 

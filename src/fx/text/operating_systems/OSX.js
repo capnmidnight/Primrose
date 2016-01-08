@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.OperatingSystems.OSX = ( function () {
   "use strict";
 

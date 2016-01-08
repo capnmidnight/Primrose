@@ -1,4 +1,4 @@
-/* global Primrose, requestAnimationFrame, Leap */
+/* global Primrose, requestAnimationFrame, Leap, LeapMotionInput */
 
 Primrose.Input.LeapMotion = ( function () {
   function processFingerParts ( i ) {

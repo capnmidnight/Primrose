@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.CodePage = ( function ( ) {
   "use strict";
 

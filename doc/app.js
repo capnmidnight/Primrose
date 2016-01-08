@@ -1,4 +1,4 @@
-/*global pliny, Primrose*/
+/* global pliny, Primrose */
 var log = console.log.bind( console );
 console.log = function ( output ) {
   document.body.innerHTML += "<p>" + output.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").split( "\n" ).join( "<br>" ) + "</p>";

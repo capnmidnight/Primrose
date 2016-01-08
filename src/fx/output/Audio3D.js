@@ -2,7 +2,7 @@
 
 Primrose.Output.Audio3D = ( function () {
 
-  /* polyfill */
+  // polyfill
   Window.prototype.AudioContext =
       Window.prototype.AudioContext ||
       Window.prototype.webkitAudioContext ||

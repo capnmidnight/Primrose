@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE, requestFullScreen, put */
+// global isOSX, Primrose, THREE, requestFullScreen, put */
 
 var keyState = {},
     modA = isOSX ? "metaKey" : "ctrlKey",

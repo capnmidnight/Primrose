@@ -1,23 +1,19 @@
-function reloadPage () {
-  document.location = document.location.href;
-}
-
-/*
- * 1) If id is a string, tries to find the DOM element that has said ID
- *      a) if it exists, and it matches the expected tag type, returns the
- *          element, or throws an error if validation fails.
- *      b) if it doesn't exist, creates it and sets its ID to the provided
- *          id, then returns the new DOM element, not yet placed in the
- *          document anywhere.
- * 2) If id is a DOM element, validates that it is of the expected type,
- *      a) returning the DOM element back if it's good,
- *      b) or throwing an error if it is not
- * 3) If id is null, creates the DOM element to match the expected type.
- * @param {string|DOM element|null} id
- * @param {string} tag name
- * @param {function} DOMclass
- * @returns DOM element
- */
+////
+// 1) If id is a string, tries to find the DOM element that has said ID
+//      a) if it exists, and it matches the expected tag type, returns the
+//          element, or throws an error if validation fails.
+//      b) if it doesn't exist, creates it and sets its ID to the provided
+//          id, then returns the new DOM element, not yet placed in the
+//          document anywhere.
+// 2) If id is a DOM element, validates that it is of the expected type,
+//      a) returning the DOM element back if it's good,
+//      b) or throwing an error if it is not
+// 3) If id is null, creates the DOM element to match the expected type.
+// @param {string|DOM element|null} id
+// @param {string} tag name
+// @param {function} DOMclass
+// @returns DOM element
+///
 function cascadeElement ( id, tag, DOMClass ) {
   var elem = null;
   if ( id === null ) {
@@ -50,7 +46,7 @@ function cascadeElement ( id, tag, DOMClass ) {
 
 function findEverything ( elem, obj ) {
   elem = elem || document;
-  obj = obj || { };
+  obj = obj || {};
   var arr = elem.querySelectorAll( "*" );
   for ( var i = 0; i < arr.length; ++i ) {
     var e = arr[i];

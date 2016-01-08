@@ -1,6 +1,9 @@
+/* global Primrose */
+
+////
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
-/* global Primrose */
+///
 Primrose.Text.CommandPacks.TestViewer = ( function () {
   "use strict";
 

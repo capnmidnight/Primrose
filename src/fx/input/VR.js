@@ -1,4 +1,5 @@
 /* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice */
+
 Primrose.Input.VR = ( function () {
   function VRInput ( name, commands, socket, elem, selectedID ) {
     if ( commands === undefined || commands === null ) {

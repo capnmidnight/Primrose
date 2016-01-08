@@ -1,4 +1,5 @@
 /* global Primrose, isOSX */
+
 Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
   "use strict";
 

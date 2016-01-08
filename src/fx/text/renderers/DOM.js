@@ -1,4 +1,5 @@
 /*global THREE, qp, Primrose */
+
 Primrose.Text.Renderers.DOM = ( function ( ) {
   "use strict";
 

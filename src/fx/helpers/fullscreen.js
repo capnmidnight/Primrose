@@ -1,4 +1,5 @@
 /* global isMobile, help, HMDVRDevice */
+
 // fullscreen-isms
 function isFullScreenMode () {
   return ( document.fullscreenElement ||

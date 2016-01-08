@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.Grammars.Basic = ( function ( ) {
 
   var grammar = new Primrose.Text.Grammar( "BASIC", [

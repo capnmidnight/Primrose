@@ -1,4 +1,5 @@
 /* global qp, Primrose */
+
 Primrose.Text.Rectangle = ( function ( ) {
   "use strict";
 

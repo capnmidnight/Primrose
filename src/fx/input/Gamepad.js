@@ -1,6 +1,18 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Input.Gamepad = ( function () {
+
+  pliny.theElder.class( "Primrose.Input", {
+    name: "Gampad",
+    description: "Signal processor for gamepad input.",
+    author: "Sean T. McBeth",
+    parameters: [
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""}
+    ]
+  } );
   function GamepadInput ( name, commands, socket, gpid ) {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, GamepadInput.AXES, true );
     var connectedGamepads = [ ],
@@ -138,21 +150,26 @@ Primrose.Input.Gamepad = ( function () {
   return GamepadInput;
 } )();
 
+pliny.theElder.enumeration( "Primrose.Input.Gamepad", {
+  name: "XBOX_BUTTONS",
+  author: "Jeffrey Zitelli",
+  description: "Labeled names for each of the different control features of the Xbox 360 controller."
+} );
 Primrose.Input.Gamepad.XBOX_BUTTONS = {
-    'A': 1,
-    'B': 2,
-    'X': 3,
-    'Y': 4,
-    'leftBumper': 5,
-    'rightBumper': 6,
-    'leftTrigger': 7,
-    'rightTrigger': 8,
-    'back': 9,
-    'start': 10,
-    'leftStick': 11,
-    'rightStick': 12,
-    'up': 13,
-    'down': 14,
-    'left': 15,
-    'right': 16
+  A: 1,
+  B: 2,
+  X: 3,
+  Y: 4,
+  leftBumper: 5,
+  rightBumper: 6,
+  leftTrigger: 7,
+  rightTrigger: 8,
+  back: 9,
+  start: 10,
+  leftStick: 11,
+  rightStick: 12,
+  up: 13,
+  down: 14,
+  left: 15,
+  right: 16
 };

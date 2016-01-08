@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.Size = (function ( ) {
   "use strict";
 

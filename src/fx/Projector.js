@@ -1,4 +1,5 @@
 /* global Primrose, THREE, Function, fireAll, self */
+
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
     if ( isWorker && typeof THREE === "undefined" ) {

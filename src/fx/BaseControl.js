@@ -1,4 +1,5 @@
 /* global Primrose, THREE, pliny */
+
 Primrose.BaseControl = ( function () {
   "use strict";
 

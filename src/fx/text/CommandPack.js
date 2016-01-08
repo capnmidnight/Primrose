@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.CommandPack = ( function ( ) {
   "use strict";
 

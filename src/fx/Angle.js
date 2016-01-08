@@ -1,4 +1,5 @@
 /* global Primrose, pliny */
+
 Primrose.Angle = ( function ( ) {
   pliny.theElder.class( "Primrose", {
     name: "Angle",

@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.CodePages.EN_US = (function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;

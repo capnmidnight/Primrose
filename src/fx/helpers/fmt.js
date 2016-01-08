@@ -13,25 +13,25 @@ function sigfig ( x, y ) {
   return v;
 }
 
-/*
- Replace template place holders in a string with a positional value.
- Template place holders start with a dollar sign ($) and are followed
- by a digit that references the parameter position of the value to
- use in the text replacement. Note that the first position, position 0,
- is the template itself. However, you cannot reference the first position,
- as zero digit characters are used to indicate the width of number to
- pad values out to.
- 
- Numerical precision padding is indicated with a period and trailing
- zeros.
- 
- examples:
- fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
- fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
- fmt("$1.00 + $2.00 = $3.00", Math.sqrt(2), Math.PI, 9001)
- => "1.41 + 3.14 = 9001.00"
- fmt("$001.000", Math.PI) => 003.142
- */
+////
+// Replace template place holders in a string with a positional value.
+// Template place holders start with a dollar sign ($) and are followed
+// by a digit that references the parameter position of the value to
+// use in the text replacement. Note that the first position, position 0,
+// is the template itself. However, you cannot reference the first position,
+// as zero digit characters are used to indicate the width of number to
+// pad values out to.
+// 
+// Numerical precision padding is indicated with a period and trailing
+// zeros.
+// 
+// examples:
+// fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
+// fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
+// fmt("$1.00 + $2.00 = $3.00", Math.sqrt(2), Math.PI, 9001)
+// => "1.41 + 3.14 = 9001.00"
+// fmt("$001.000", Math.PI) => 003.142
+///
 var fmt = ( function () {
 
   function addMillis ( val, txt ) {

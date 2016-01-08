@@ -1,52 +1,54 @@
 /* global Primrose */
 
 Primrose.Input.Speech = ( function () {
-  /*
-   Class: SpeechInput
-
-   Connects to a the webkitSpeechRecognition API and manages callbacks based on
-   keyword sets related to the callbacks. Note that the webkitSpeechRecognition
-   API requires a network connection, as the processing is done on an external
-   server.
-
-   Constructor: new SpeechInput(name, commands, socket);
-
-   The `name` parameter is used when transmitting the commands through the command
-   proxy server.
-
-   The `commands` parameter specifies a collection of keywords tied to callbacks
-   that will be called when one of the keywords are heard. Each callback can
-   be associated with multiple keywords, to be able to increase the accuracy
-   of matches by combining words and phrases that sound similar.
-
-   Each command entry is a simple object following the pattern:
-
-   {
-   "keywords": ["phrase no. 1", "phrase no. 2", ...],
-   "command": <callbackFunction>
-   }
-
-   The `keywords` property is an array of strings for which SpeechInput will
-   listen. If any of the words or phrases in the array matches matches the heard
-   command, the associated callbackFunction will be executed.
-
-   The `command` property is the callback function that will be executed. It takes no
-   parameters.
-
-   The `socket` (optional) parameter is a WebSocket connecting back to the command
-   proxy server.
-
-   Methods:
-   `start()`: starts the command unrecognition, unless it's not available, in which
-   case it prints a message to the console error log. Returns true if the running
-   state changed. Returns false otherwise.
-
-   `stop()`: uhm... it's like start, but it's called stop.
-
-   `isAvailable()`: returns true if the setup process was successful.
-
-   `getErrorMessage()`: returns the Error object that occured when setup failed, or
-   null if setup was successful. */
+  
+////
+//   Class: SpeechInput
+//
+//   Connects to a the webkitSpeechRecognition API and manages callbacks based on
+//   keyword sets related to the callbacks. Note that the webkitSpeechRecognition
+//   API requires a network connection, as the processing is done on an external
+//   server.
+//
+//   Constructor: new SpeechInput(name, commands, socket);
+//
+//   The `name` parameter is used when transmitting the commands through the command
+//   proxy server.
+//
+//   The `commands` parameter specifies a collection of keywords tied to callbacks
+//   that will be called when one of the keywords are heard. Each callback can
+//   be associated with multiple keywords, to be able to increase the accuracy
+//   of matches by combining words and phrases that sound similar.
+//
+//   Each command entry is a simple object following the pattern:
+//
+//   {
+//   "keywords": ["phrase no. 1", "phrase no. 2", ...],
+//   "command": <callbackFunction>
+//   }
+//
+//   The `keywords` property is an array of strings for which SpeechInput will
+//   listen. If any of the words or phrases in the array matches matches the heard
+//   command, the associated callbackFunction will be executed.
+//
+//  The `command` property is the callback function that will be executed. It takes no
+//  parameters.
+//
+//  The `socket` (optional) parameter is a WebSocket connecting back to the command
+//  proxy server.
+//
+//  Methods:
+//  `start()`: starts the command unrecognition, unless it's not available, in which
+//  case it prints a message to the console error log. Returns true if the running
+//  state changed. Returns false otherwise.
+//
+//  `stop()`: uhm... it's like start, but it's called stop.
+//
+//  `isAvailable()`: returns true if the setup process was successful.
+//
+//  `getErrorMessage()`: returns the Error object that occured when setup failed, or
+//  null if setup was successful.
+///
   function SpeechInput ( name, commands, socket ) {
     Primrose.NetworkedInput.call( this, name, commands, socket );
     var running = false,
@@ -187,7 +189,7 @@ Primrose.Input.Speech = ( function () {
       for ( var i = 0; i < cmd.keywords.length; ++i ) {
         if ( this.inputState.text.indexOf( cmd.keywords[i] ) === 0 &&
             ( cmd.preamble || cmd.keywords[i].length ===
-            this.inputState.text.length ) ) {
+                this.inputState.text.length ) ) {
           cmdState.pressed = true;
           cmdState.value = this.inputState.text.substring(
               cmd.keywords[i].length )

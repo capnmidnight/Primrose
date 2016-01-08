@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.Themes.Default = ( function ( ) {
   "use strict";
   return {

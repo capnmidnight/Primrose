@@ -1,4 +1,5 @@
 /* global Primrose */
+
 Primrose.Text.Grammars.PlainText = (function () {
   "use strict";
 

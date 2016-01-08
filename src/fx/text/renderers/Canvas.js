@@ -1,4 +1,5 @@
 /*global THREE, qp, Primrose,  devicePixelRatio */
+
 Primrose.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
