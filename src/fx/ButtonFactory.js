@@ -1,9 +1,19 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.ButtonFactory = ( function () {
 
   var buttonCount = 0;
 
+  pliny.theElder.class( "Primrose", {
+    name: "ButtonFactory",
+    description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
+    author: "Sean T. McBeth",
+    parameters: [
+      {name: "templateFile", type: "String", description: "A THREE.js formatted JSON file that specifies a 3D model for a button, to be used as a template."},
+      {name: "options", type: "Object", description: "The options to apply to all buttons that get created by the factory."},
+      {name: "complete", type: "Function", description: "A callback function to indicate when the loading process has completed."}
+    ]
+  } );
   function ButtonFactory ( templateFile, options, complete ) {
     this.options = options;
     if ( typeof templateFile === "string" ) {
@@ -19,7 +29,15 @@ Primrose.ButtonFactory = ( function () {
     }
   }
 
-
+  pliny.theElder.method( "Primrose.ButtonFactory", {
+    name: "create",
+    description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
+    author: "Sean T. McBeth",
+    parameters: [
+      {name: "toggle", type: "Boolean", description: "True if the new button should be a toggle button (requiring additional clicks to deactivate) or a regular button (deactivating when the button is released, aka \"momentary\"."}
+    ],
+    return: "The cloned button that which we so desired."
+  } );
   ButtonFactory.prototype.create = function ( toggle ) {
     var name = "button" + ( ++buttonCount );
     var obj = this.template.clone();
