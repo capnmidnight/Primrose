@@ -1,6 +1,18 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, pliny */
 
 Primrose.Input.ButtonAndAxis = ( function () {
+
+  pliny.theElder.class( "Primrose.Input", {
+    name: "ButtonAndAxis",
+    author: "Sean T. McBeth",
+    description: "",
+    parameters: [
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""},
+      {name: "", type: "", description: ""}
+    ]
+  } );
   function ButtonAndAxisInput ( name, commands, socket, axes ) {
     Primrose.NetworkedInput.call( this, name, commands, socket );
     this.inputState.axes = [ ];
@@ -73,7 +85,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
 
   ButtonAndAxisInput.prototype.getValue = function ( name ) {
     return ( ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        this.isEnabled(name) &&
+        this.isEnabled( name ) &&
         this.commands[name].state.value ) ||
         this.getAxis( name ) || 0;
   };
@@ -106,13 +118,13 @@ Primrose.Input.ButtonAndAxis = ( function () {
 
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        this.isEnabled(name) &&
+        this.isEnabled( name ) &&
         this.commands[name].state.pressed;
   };
 
   ButtonAndAxisInput.prototype.isUp = function ( name ) {
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
-        this.isEnabled(name) &&
+        this.isEnabled( name ) &&
         this.commands[name].state.pressed;
   };
 
