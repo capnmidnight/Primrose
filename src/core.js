@@ -99,3 +99,12 @@ Primrose.SKINS = [ "#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDC
   "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836",
   "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
   "#5B0001", "#302E2E" ];
+
+pliny.theElder.value( "Primrose", {
+  name: "SKINS_VALUES",
+  type: "Array of Number",
+  description: "A selection of color values that closely match skin colors of people."
+} );
+Primrose.SKIN_VALUES = Primrose.SKINS.map(function(s){
+  return parseInt(s.substring(1), 16);
+});
