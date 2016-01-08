@@ -1,7 +1,7 @@
 /*global pliny, Primrose*/
 var log = console.log.bind( console );
 console.log = function ( output ) {
-  document.body.innerHTML += "<div>" + output.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").split( "\n" ).join( "<br>" ) + "</div>";
+  document.body.innerHTML += "<p>" + output.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").split( "\n" ).join( "<br>" ) + "</p>";
 };
 
 function recurse ( name, obj, stack, subName ) {
@@ -17,6 +17,6 @@ var stack = [ "Primrose" ];
 while ( stack.length > 0 ) {
   var name = stack.shift();
   pliny.theYounger( name );
-  [ "namespaces", "functions", "classes", "methods", "values" ]
+  [ "namespaces", "functions", "classes", "methods", "enumerations", "records" ]
       .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
 }

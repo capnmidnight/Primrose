@@ -91,7 +91,7 @@ Primrose.Button = ( function () {
 
   inherit( Button, Primrose.BaseControl );
 
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class." );
+  pliny.theElder.record( "Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class." );
   pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "maxThrow", type: "Number", description: "The limit for how far the button can be depressed."} );
   pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "minDeflection", type: "Number", description: "The minimum distance the button must be depressed before it is activated."} );
   pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "colorUnpressed", type: "Number", description: "The color to change the button cap to when the button is deactivated."} );
