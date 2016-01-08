@@ -1,5 +1,5 @@
-/* global Primrose, THREE, io, CryptoJS, Notification, requestFullScreen, 
- * isFullScreenMode, Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
+/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice,
+ * Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
 
 Primrose.VRApplication = ( function ( ) {
   "use strict";
@@ -476,12 +476,12 @@ Primrose.VRApplication = ( function ( ) {
     this.formStateKey = name + " - formState";
     this.formState = getSetting( this.formStateKey );
     this.fullscreenElement = document.documentElement;
-    this.users = { };
+    this.users = {};
     this.chatLines = [ ];
     this.userName = VRApplication.DEFAULT_USER_NAME;
     this.focused = true;
     this.wasFocused = false;
-  
+
     writeForm( this.ctrls, this.formState );
     window.addEventListener( "beforeunload", function ( ) {
       var state = readForm( this.ctrls );
@@ -557,7 +557,7 @@ Primrose.VRApplication = ( function ( ) {
         qHeading = new THREE.Quaternion( ),
         qHead = new THREE.Quaternion( ),
         vTemp = new THREE.Vector3(),
-        skin = Primrose.Random.item(Primrose.SKIN_VALUES),
+        skin = Primrose.Random.item( Primrose.SKIN_VALUES ),
         sceneLoaded = !this.options.sceneModel,
         buttonLoaded = !this.options.button,
         readyFired = false;
@@ -816,8 +816,8 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
     this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
     this.start();
-    
-    }
+
+  }
 
   VRApplication.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
 
@@ -880,6 +880,86 @@ Primrose.VRApplication = ( function ( ) {
     var cell = document.createElement( "td" );
     cell.appendChild( elem );
     row.appendChild( cell );
+  }
+
+  function isFullScreenMode () {
+    return ( document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement );
+  }
+
+  function requestFullScreen ( elem, vrDisplay ) {
+    var fullScreenParam;
+
+    if ( typeof HMDVRDevice !== "undefined" && vrDisplay && vrDisplay instanceof HMDVRDevice ) {
+      fullScreenParam = {vrDisplay: vrDisplay, vrDistortion: true};
+    }
+
+    if ( elem.webkitRequestFullscreen ) {
+      elem.webkitRequestFullscreen( fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT );
+    }
+    else if ( elem.mozRequestFullScreen && fullScreenParam ) {
+      elem.mozRequestFullScreen( fullScreenParam );
+    }
+    else if ( elem.mozRequestFullScreen && !fullScreenParam ) {
+      elem.mozRequestFullScreen( );
+    }
+    else if ( elem.requestFullscreen ) {
+      elem.requestFullscreen();
+    }
+    else if ( elem.msRequestFullscreen ) {
+      elem.msRequestFullscreen();
+    }
+  }
+
+  function exitFullScreen () {
+    if ( isFullScreenMode() ) {
+      if ( document.exitFullscreen ) {
+        document.exitFullscreen();
+      }
+      else if ( document.webkitExitFullscreen ) {
+        document.webkitExitFullscreen();
+      }
+      else if ( document.webkitCancelFullScreen ) {
+        document.webkitCancelFullScreen();
+      }
+      else if ( document.mozCancelFullScreen ) {
+        document.mozCancelFullScreen();
+      }
+      else if ( document.msExitFullscreen ) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+
+  function addFullScreenShim ( elems ) {
+    elems = elems.map( function ( e ) {
+      return {
+        elem: e,
+        events: help( e ).events
+      };
+    } );
+
+    function removeFullScreenShim () {
+      elems.forEach( function ( elem ) {
+        elem.events.forEach( function ( e ) {
+          elem.removeEventListener( e, fullScreenShim );
+        } );
+      } );
+    }
+
+    function fullScreenShim ( evt ) {
+      requestFullScreen( removeFullScreenShim );
+    }
+
+    elems.forEach( function ( elem ) {
+      elem.events.forEach( function ( e ) {
+        if ( e.indexOf( "fullscreenerror" ) < 0 ) {
+          elem.addEventListener( e, fullScreenShim, false );
+        }
+      } );
+    } );
   }
 
   return VRApplication;
