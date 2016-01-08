@@ -315,7 +315,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( this.ground ) {
         this.ground.position.set(
             Math.floor( this.player.position.x ),
-            0.5,
+            0,
             Math.floor( this.player.position.z ) );
         this.ground.material.needsUpdate = true;
       }
