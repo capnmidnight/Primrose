@@ -20,3 +20,6 @@ while ( stack.length > 0 ) {
   [ "namespaces", "functions", "classes", "methods", "enumerations", "records" ]
       .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
 }
+
+
+console.log = log;
