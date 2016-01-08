@@ -1,18 +1,14 @@
-/*global THREE, qp, Primrose,  devicePixelRatio */
+/*global THREE, qp, Primrose,  devicePixelRatio, HTMLCanvasElement */
 
 Primrose.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
   return function ( canvasElementOrID, options ) {
     var self = this,
-        canvas = cascadeElement( canvasElementOrID, "canvas",
-            window.HTMLCanvasElement ),
-        bgCanvas = cascadeElement( canvas.id + "-back", "canvas",
-            window.HTMLCanvasElement ),
-        fgCanvas = cascadeElement( canvas.id + "-front", "canvas",
-            window.HTMLCanvasElement ),
-        trimCanvas = cascadeElement( canvas.id + "-trim", "canvas",
-            window.HTMLCanvasElement ),
+        canvas = Primrose.DOM.cascadeElement( canvasElementOrID, "canvas", HTMLCanvasElement ),
+        bgCanvas = Primrose.DOM.cascadeElement( canvas.id + "-back", "canvas", HTMLCanvasElement ),
+        fgCanvas = Primrose.DOM.cascadeElement( canvas.id + "-front", "canvas", HTMLCanvasElement ),
+        trimCanvas = Primrose.DOM.cascadeElement( canvas.id + "-trim", "canvas", HTMLCanvasElement ),
         gfx = canvas.getContext( "2d" ),
         fgfx = fgCanvas.getContext( "2d" ),
         bgfx = bgCanvas.getContext( "2d" ),
@@ -462,7 +458,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
 
     if ( !canvas.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( makeHidingContainer(
+      document.body.appendChild( Primrose.DOM.makeHidingContainer(
           "primrose-container-" +
           canvas.id, canvas ) );
     }

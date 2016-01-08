@@ -472,7 +472,7 @@ Primrose.VRApplication = ( function ( ) {
     //
     // restoring the options the user selected
     //
-    this.ctrls = findEverything();
+    this.ctrls = Primrose.DOM.findEverything();
     this.formStateKey = name + " - formState";
     this.formState = getSetting( this.formStateKey );
     this.fullscreenElement = document.documentElement;
@@ -604,7 +604,7 @@ Primrose.VRApplication = ( function ( ) {
     this.nose.scale.set( 0.5, 1, 1 );
 
     this.renderer = new THREE.WebGLRenderer( {
-      canvas: cascadeElement( this.options.canvasElement, "canvas", HTMLCanvasElement ),
+      canvas: Primrose.DOM.cascadeElement( this.options.canvasElement, "canvas", HTMLCanvasElement ),
       antialias: !isMobile,
       alpha: !isMobile,
       logarithmicDepthBuffer: !isMobile,

@@ -1,4 +1,4 @@
-/*global THREE, qp, Primrose */
+/*global THREE, qp, Primrose, HTMLDivElement */
 
 Primrose.Text.Renderers.DOM = ( function ( ) {
   "use strict";
@@ -96,14 +96,10 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
 
   return function ( domElementOrID, options ) {
     var self = this,
-        div = cascadeElement( domElementOrID, "div",
-            window.HTMLDivElement ),
-        bgDiv = cascadeElement( div.id + "-back", "div",
-            window.HTMLDivElement ),
-        fgDiv = cascadeElement( div.id + "-front", "div",
-            window.HTMLDivElement ),
-        trimDiv = cascadeElement( div.id + "-trim", "div",
-            window.HTMLDivElement ),
+        div = Primrose.DOM.cascadeElement( domElementOrID, "div", HTMLDivElement ),
+        bgDiv = Primrose.DOM.cascadeElement( div.id + "-back", "div", HTMLDivElement ),
+        fgDiv = Primrose.DOM.cascadeElement( div.id + "-front", "div", HTMLDivElement ),
+        trimDiv = Primrose.DOM.cascadeElement( div.id + "-trim", "div", HTMLDivElement ),
         gfx = div.getContext( "2d" ),
         fgfx = fgDiv.getContext( "2d" ),
         bgfx = bgDiv.getContext( "2d" ),
@@ -431,7 +427,7 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
 
     if ( !div.parentElement ) {
       this.autoBindEvents = false;
-      document.body.appendChild( makeHidingContainer(
+      document.body.appendChild( Primrose.DOM.makeHidingContainer(
           "primrose-container-" +
           div.id, div ) );
     }

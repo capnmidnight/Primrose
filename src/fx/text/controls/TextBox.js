@@ -317,7 +317,7 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
     }
 
     function makeSelectorFromObj ( id, obj, def, target, prop, lbl, filter ) {
-      var elem = cascadeElement( id, "select", window.HTMLSelectElement );
+      var elem = Primrose.DOM.cascadeElement( id, "select", window.HTMLSelectElement );
       var items = [ ];
       for ( var key in obj ) {
         if ( obj.hasOwnProperty( key ) ) {
@@ -346,8 +346,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         } );
       }
 
-      var container = cascadeElement( "container -" + id, "div", window.HTMLDivElement ),
-          label = cascadeElement( "label-" + id, "span", window.HTMLSpanElement );
+      var container = Primrose.DOM.cascadeElement( "container -" + id, "div", window.HTMLDivElement ),
+          label = Primrose.DOM.cascadeElement( "label-" + id, "span", window.HTMLSpanElement );
       label.innerHTML = lbl + ": ";
       label.for = elem;
       elem.title = lbl;
@@ -763,8 +763,8 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         if ( enableClipboard ) {
           //
           // the `surrogate` textarea makes clipboard events possible
-          surrogate = cascadeElement( "primrose-surrogate-textarea-" + renderer.id, "textarea", window.HTMLTextAreaElement );
-          surrogateContainer = makeHidingContainer( "primrose-surrogate-textarea-container-" + renderer.id, surrogate );
+          surrogate = Primrose.DOM.cascadeElement( "primrose-surrogate-textarea-" + renderer.id, "textarea", window.HTMLTextAreaElement );
+          surrogateContainer = Primrose.DOM.makeHidingContainer( "primrose-surrogate-textarea-container-" + renderer.id, surrogate );
           surrogateContainer.style.position = "absolute";
           surrogateContainer.style.overflow = "hidden";
           surrogateContainer.style.width = 0;

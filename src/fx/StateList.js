@@ -10,7 +10,7 @@ Primrose.StateList = ( function () {
     ]
   } );
   function StateList ( id, ctrls, states, callback, parent ) {
-    var select = cascadeElement( id, "select", HTMLSelectElement );
+    var select = Primrose.DOM.cascadeElement( id, "select", HTMLSelectElement );
     for ( var i = 0; i < states.length; ++i ) {
       var opt = document.createElement( "option" );
       opt.appendChild( document.createTextNode( states[i].name ) );
