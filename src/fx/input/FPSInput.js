@@ -12,31 +12,39 @@ Primrose.Input.FPSInput = ( function ( ) {
       new Primrose.Input.Keyboard( "keyboard", window, {
         strafeLeft: {
           buttons: [
-            -Primrose.Input.Keyboard.A,
-            -Primrose.Input.Keyboard.LEFTARROW ]},
+            -Primrose.Keys.A,
+            -Primrose.Keys.LEFTARROW ]},
         strafeRight: {
           buttons: [
-            Primrose.Input.Keyboard.D,
-            Primrose.Input.Keyboard.RIGHTARROW ]},
+            Primrose.Keys.D,
+            Primrose.Keys.RIGHTARROW ]},
         strafe: {commands: [ "strafeLeft", "strafeRight" ]},
         driveForward: {
           buttons: [
-            -Primrose.Input.Keyboard.W,
-            -Primrose.Input.Keyboard.UPARROW ]},
+            -Primrose.Keys.W,
+            -Primrose.Keys.UPARROW ]},
         driveBack: {
           buttons: [
-            Primrose.Input.Keyboard.S,
-            Primrose.Input.Keyboard.DOWNARROW ]},
+            Primrose.Keys.S,
+            Primrose.Keys.DOWNARROW ]},
         drive: {commands: [ "driveForward", "driveBack" ]},
-        select: {buttons: [ Primrose.Input.Keyboard.ENTER ]},
-        dSelect: {buttons: [ Primrose.Input.Keyboard.ENTER ], delta: true},
+        select: {buttons: [ Primrose.Keys.ENTER ]},
+        dSelect: {buttons: [ Primrose.Keys.ENTER ], delta: true},
         jump: {
-          buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
-          metaKeys: [ -Primrose.Input.Keyboard.SHIFT ],
-          commandDown: emit.bind( this, "jump" ), dt: 0.5},
+          buttons: [ Primrose.Keys.SPACE ],
+          metaKeys: [ -Primrose.Keys.SHIFT ],
+          commandDown: emit.bind( this, "jump" ), dt: 0.5
+        },
         zero: {
-          buttons: [ Primrose.Input.Keyboard.Z ],
-          commandUp: this.zero.bind( this )}
+          buttons: [ Primrose.Keys.Z ],
+          metaKeys: [ 
+            -Primrose.Keys.CTRL, 
+            -Primrose.Keys.ALT, 
+            -Primrose.Keys.SHIFT,
+            -Primrose.Keys.META 
+          ],
+          commandUp: emit.bind( this, "zero" )
+        }
       } ),
       new Primrose.Input.Mouse( "mouse", DOMElement, {
         buttons: {axes: [ Primrose.Input.Mouse.BUTTONS ]},
@@ -102,7 +110,6 @@ Primrose.Input.FPSInput = ( function ( ) {
         mgr.setValue( SETTINGS_TO_ZERO[j], 0 );
       }
     }
-    emit.call( this, "zero" );
   };
 
   FPSInput.prototype.update = function ( dt ) {

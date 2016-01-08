@@ -91,6 +91,7 @@ Primrose.VRApplication = ( function ( ) {
       if ( !lockedToEditor() ) {
         this.player.position.set( 0, this.avatarHeight, 0 );
         this.player.velocity.set( 0, 0, 0 );
+        this.input.zero();
       }
     };
 
@@ -693,12 +694,41 @@ Primrose.VRApplication = ( function ( ) {
         toggle: true
       } );
     }
-    //
-    // bind non-signal processed user commands
-    //
-    this.input.addEventListener( "jump", this.jump.bind( this ), false );
-    this.input.addEventListener( "zero", this.zero.bind( this ), false );
-    this.projector.addEventListener( "hit", function ( h ) {
+
+
+    var waitForResources = function ( t ) {
+      lt = t * 0.001;
+      if ( sceneLoaded && buttonLoaded ) {
+        if ( !readyFired ) {
+          readyFired = true;
+          setSize( );
+          try {
+            fire( "ready" );
+          }
+          catch ( exp ) {
+            console.error( exp );
+            console.warn( "There was an error during setup, but we're going to continue anyway." );
+          }
+        }
+        this.timer = requestAnimationFrame( animate );
+      }
+      else {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
+    }.bind( this );
+
+    this.start = function ( ) {
+      if ( !this.timer ) {
+        this.timer = requestAnimationFrame( waitForResources );
+      }
+    }.bind( this );
+
+    this.stop = function ( ) {
+      cancelAnimationFrame( this.timer );
+      this.timer = null;
+    }.bind( this );
+
+    var handleHit = function ( h ) {
       var dt;
       this.projector.ready = true;
       lastHit = currentHit;
@@ -725,7 +755,13 @@ Primrose.VRApplication = ( function ( ) {
           fire( "gazestart", currentHit );
         }
       }
-    }.bind( this ) );
+    }.bind( this );
+
+    var basicKeyHandler = function ( evt ) {
+      if ( !lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F ) {
+        this.goFullScreen( true );
+      }
+    }.bind( this );
     //
     // Manage full-screen state
     //
@@ -784,39 +820,10 @@ Primrose.VRApplication = ( function ( ) {
       window.addEventListener( "mousedown", this.goFullScreen.bind( this, true ), false );
       window.addEventListener( "touchstart", this.goFullScreen.bind( this, true ), false );
     }
-
-
-    var waitForResources = function ( t ) {
-      lt = t * 0.001;
-      if ( sceneLoaded && buttonLoaded ) {
-        if ( !readyFired ) {
-          readyFired = true;
-          setSize( );
-          try {
-            fire( "ready" );
-          }
-          catch ( exp ) {
-            console.error( exp );
-            console.warn( "There was an error during setup, but we're going to continue anyway." );
-          }
-        }
-        this.timer = requestAnimationFrame( animate );
-      }
-      else {
-        this.timer = requestAnimationFrame( waitForResources );
-      }
-    }.bind( this );
-
-    this.start = function ( ) {
-      if ( !this.timer ) {
-        this.timer = requestAnimationFrame( waitForResources );
-      }
-    }.bind( this );
-
-    this.stop = function ( ) {
-      cancelAnimationFrame( this.timer );
-      this.timer = null;
-    }.bind( this );
+    window.addEventListener( "keydown", basicKeyHandler, false );
+    this.input.addEventListener( "jump", this.jump.bind( this ), false );
+    this.input.addEventListener( "zero", this.zero.bind( this ), false );
+    this.projector.addEventListener( "hit", handleHit, false );
     window.addEventListener( "blur", this.stop, false );
     window.addEventListener( "focus", this.start, false );
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
@@ -937,35 +944,6 @@ Primrose.VRApplication = ( function ( ) {
         document.msExitFullscreen();
       }
     }
-  }
-
-  function addFullScreenShim ( elems ) {
-    elems = elems.map( function ( e ) {
-      return {
-        elem: e,
-        events: help( e ).events
-      };
-    } );
-
-    function removeFullScreenShim () {
-      elems.forEach( function ( elem ) {
-        elem.events.forEach( function ( e ) {
-          elem.removeEventListener( e, fullScreenShim );
-        } );
-      } );
-    }
-
-    function fullScreenShim ( evt ) {
-      requestFullScreen( removeFullScreenShim );
-    }
-
-    elems.forEach( function ( elem ) {
-      elem.events.forEach( function ( e ) {
-        if ( e.indexOf( "fullscreenerror" ) < 0 ) {
-          elem.addEventListener( e, fullScreenShim, false );
-        }
-      } );
-    } );
   }
 
   return VRApplication;
