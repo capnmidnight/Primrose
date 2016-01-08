@@ -25,7 +25,7 @@ function inherit ( classType, parentType ) {
   classType.prototype.constructor = classType;
 }
 
-function fireAll ( evt, args ) {
+function emit ( evt, args ) {
   var handlers = this.listeners[evt];
   for ( var i = 0; i < handlers.length; ++i ) {
     handlers[i]( args );

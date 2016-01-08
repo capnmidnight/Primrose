@@ -1,5 +1,5 @@
 /* global Primrose, THREE, io, CryptoJS, Notification, requestFullScreen, 
- * isFullScreenMode, Function, fireAll, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
+ * isFullScreenMode, Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
 
 Primrose.VRApplication = ( function ( ) {
   "use strict";
@@ -72,7 +72,7 @@ Primrose.VRApplication = ( function ( ) {
       this.camera.updateProjectionMatrix( );
     }.bind( this );
 
-    var fire = fireAll.bind( this );
+    var fire = emit.bind( this );
 
     this.addEventListener = function ( event, thunk, bubbles ) {
       if ( this.listeners[event] ) {

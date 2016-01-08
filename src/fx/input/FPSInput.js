@@ -1,4 +1,4 @@
-/* global Primrose, THREE, fireAll, isMobile */
+/* global Primrose, THREE, emit, isMobile */
 
 Primrose.Input.FPSInput = ( function ( ) {
   function FPSInput ( DOMElement ) {
@@ -33,7 +33,7 @@ Primrose.Input.FPSInput = ( function ( ) {
         jump: {
           buttons: [ Primrose.Input.Keyboard.SPACEBAR ],
           metaKeys: [ -Primrose.Input.Keyboard.SHIFT ],
-          commandDown: fireAll.bind( this, "jump" ), dt: 0.5},
+          commandDown: emit.bind( this, "jump" ), dt: 0.5},
         zero: {
           buttons: [ Primrose.Input.Keyboard.Z ],
           commandUp: this.zero.bind( this )}
@@ -102,7 +102,7 @@ Primrose.Input.FPSInput = ( function ( ) {
         mgr.setValue( SETTINGS_TO_ZERO[j], 0 );
       }
     }
-    fireAll.call( this, "zero" );
+    emit.call( this, "zero" );
   };
 
   FPSInput.prototype.update = function ( dt ) {

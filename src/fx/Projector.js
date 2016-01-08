@@ -1,4 +1,4 @@
-/* global Primrose, THREE, Function, fireAll, self */
+/* global Primrose, THREE, Function, emit, self */
 
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
@@ -2492,7 +2492,7 @@ Primrose.Projector = ( function ( ) {
     }
     this.listeners[evt].push( handler );
   };
-  Projector.prototype._fireAll = fireAll;
+  Projector.prototype._emit = emit;
   Projector.prototype._transform = function ( obj, v ) {
     return v.clone( )
         .applyMatrix4(
@@ -2623,7 +2623,7 @@ Primrose.Projector = ( function ( ) {
         }
       }
     }
-    this._fireAll( "hit", value );
+    this._emit( "hit", value );
   };
   return Projector;
 } )( );

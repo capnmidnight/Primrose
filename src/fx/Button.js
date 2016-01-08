@@ -1,4 +1,4 @@
-/* global Primrose, THREE, fireAll, pliny */
+/* global Primrose, THREE, emit, pliny */
 
 Primrose.Button = ( function () {
   pliny.theElder.class( "Primrose", {
@@ -75,7 +75,7 @@ Primrose.Button = ( function () {
         this.element.click();
       }
       else {
-        fireAll.call( this, "click" );
+        emit.call( this, "click" );
       }
     };
 
@@ -85,7 +85,7 @@ Primrose.Button = ( function () {
 
     this.endPointer = function () {
       this.color.copy( options.colorUnpressed );
-      fireAll.call( this, "release" );
+      emit.call( this, "release" );
     };
   }
 
