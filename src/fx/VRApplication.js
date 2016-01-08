@@ -42,8 +42,6 @@ Primrose.VRApplication = ( function ( ) {
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
 
-    Primrose.ChatApplication.call( this, name, this.options );
-
     var setSize = function ( ) {
       var bounds = this.renderer.domElement.getBoundingClientRect( ),
           styleWidth = bounds.width,
@@ -474,6 +472,15 @@ Primrose.VRApplication = ( function ( ) {
     // restoring the options the user selected
     //
     this.ctrls = findEverything();
+    this.formStateKey = name + " - formState";
+    this.formState = getSetting( this.formStateKey );
+    this.fullscreenElement = document.documentElement;
+    this.users = { };
+    this.chatLines = [ ];
+    this.userName = VRApplication.DEFAULT_USER_NAME;
+    this.focused = true;
+    this.wasFocused = false;
+  
     writeForm( this.ctrls, this.formState );
     window.addEventListener( "beforeunload", function ( ) {
       var state = readForm( this.ctrls );
@@ -809,9 +816,11 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
     this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
     this.start();
-  }
+    
+    }
 
-  inherit( VRApplication, Primrose.ChatApplication );
+  VRApplication.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
+
   VRApplication.DEFAULTS = {
     useLeap: false,
     useFog: false,
