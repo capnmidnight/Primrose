@@ -212,6 +212,7 @@ Primrose.Input.Motion = ( function ( ) {
             "A function must be provided as a callback parameter. Callback parameter was: " +
             callback );
       }
+
       var headingAngle = null, pitchAngle = null, rollAngle = null;
       this.onChange = function ( ) {
         var a = this.acceleration;
@@ -236,10 +237,12 @@ Primrose.Input.Motion = ( function ( ) {
           } );
         }
       };
+
       this.checkOrientation = function ( event ) {
         this.orientation = event.alpha !== null && event;
         this.onChange( );
       };
+
       this.checkMotion = function ( event ) {
         if ( event && event.accelerationIncludingGravity &&
             event.accelerationIncludingGravity.x !== null ) {
@@ -252,6 +255,7 @@ Primrose.Input.Motion = ( function ( ) {
         }
 
       };
+
       this.acceleration = MotionCorrector.ZERO_VECTOR;
       this.orientation = MotionCorrector.ZERO_EULER;
       window.addEventListener( "deviceorientation", this.checkOrientation.bind( this ), bubbles );
@@ -264,24 +268,6 @@ Primrose.Input.Motion = ( function ( ) {
 // run in a static view on a sensorless device.
   MotionCorrector.ZERO_VECTOR = {x: -9.80665, y: 0, z: 0};
   MotionCorrector.ZERO_EULER = {gamma: 90, alpha: 270, beta: 0};
-
-  function makeTransform ( s, eye ) {
-    var w = Math.floor( window.innerWidth * devicePixelRatio / 2 ),
-        h = window.innerHeight * devicePixelRatio,
-        i = ( eye + 1 ) / 2;
-
-    s.transform = new THREE.Matrix4().makeTranslation( eye * 0.034, 0, 0 );
-    s.viewport = {
-      x: i * w,
-      y: 0,
-      width: w,
-      height: h,
-      top: 0,
-      right: ( i + 1 ) * w,
-      bottom: h,
-      left: i * w};
-    s.fov = 75;
-  }
 
   function MotionInput ( name, commands, socket ) {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MotionInput.AXES );
@@ -306,9 +292,6 @@ Primrose.Input.Motion = ( function ( ) {
       this.headRW = a.w;
     }.bind( this ) );
     this.zeroAxes = corrector.zeroAxes.bind( corrector );
-    this.transforms = [ {}, {} ];
-    makeTransform( this.transforms[0], -1 );
-    makeTransform( this.transforms[1], 1 );
   }
 
   MotionInput.AXES = [
@@ -317,6 +300,30 @@ Primrose.Input.Motion = ( function ( ) {
     "headAX", "headAY", "headAZ",
     "headRX", "headRY", "headRZ", "headRW" ];
   Primrose.Input.ButtonAndAxis.inherit( MotionInput );
+
+  function makeTransform ( s, eye ) {
+    var sw = Math.max(screen.width, screen.height),
+        sh = Math.min(screen.width, screen.height),
+        w = Math.floor( sw * devicePixelRatio / 2 ),
+        h = Math.floor( sh * devicePixelRatio ),
+        i = ( eye + 1 ) / 2;
+
+    s.transform = new THREE.Matrix4().makeTranslation( eye * 0.034, 0, 0 );
+    s.viewport = {
+      x: i * w,
+      y: 0,
+      width: w,
+      height: h,
+      top: 0,
+      right: ( i + 1 ) * w,
+      bottom: h,
+      left: i * w};
+    s.fov = 75;
+  }
+  
+  MotionInput.DEFAULT_TRANSFORMS = [ {}, {} ];
+  makeTransform( MotionInput.DEFAULT_TRANSFORMS[0], -1 );
+  makeTransform( MotionInput.DEFAULT_TRANSFORMS[1], 1 );
 
   MotionInput.prototype.getQuaternion = function ( x, y, z, w, value ) {
     value = value || new THREE.Quaternion();

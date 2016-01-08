@@ -189,11 +189,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     Object.defineProperties( FPSInput.prototype, {
       transforms: {
         get: function () {
-          if ( this.vr ) {
+          if ( this.vr && this.vr.transforms ) {
             return this.vr.transforms;
           }
-          else if ( this.motion ) {
-            return this.motion.transforms;
+          else {
+            return Primrose.Input.Motion.DEFAULT_TRANSFORMS;
           }
         }
       }
