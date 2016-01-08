@@ -1,7 +1,9 @@
-var TAU = 2 * Math.PI;
-
 function randomRange(min, max) {
   return Math.random() * (max - min) + min;
+}
+
+function randomElement(arr){
+  return arr[randomInt(arr.length)];
 }
 
 function randomInt(min, max, power) {
@@ -17,8 +19,4 @@ function randomInt(min, max, power) {
 
 function randomSteps(min, max, steps) {
   return min + randomInt(0, (1 + max - min) / steps) * steps;
-}
-
-function isNumber ( str ) {
-  return !isNaN( str );
 }

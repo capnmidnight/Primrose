@@ -131,7 +131,7 @@ Primrose.Text.Grammars.Basic = ( function ( ) {
           if ( commands.hasOwnProperty( op.value ) ) {
             return commands[op.value]( line );
           }
-          else if ( isNumber( op.value ) ) {
+          else if ( !isNaN( op.value ) ) {
             return setProgramCounter( [ op ] );
           }
           else if ( state[op.value] ||
@@ -386,7 +386,7 @@ Primrose.Text.Grammars.Basic = ( function ( ) {
       input( function ( str ) {
         str = str.toUpperCase();
         var valueToken = null;
-        if ( isNumber( str ) ) {
+        if ( !isNaN( str ) ) {
           valueToken = toNum( str );
         }
         else {
