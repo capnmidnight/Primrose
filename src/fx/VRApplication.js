@@ -792,7 +792,13 @@ Primrose.VRApplication = ( function ( ) {
         if ( !readyFired ) {
           readyFired = true;
           setSize( );
-          fire( "ready" );
+          try {
+            fire( "ready" );
+          }
+          catch ( exp ) {
+            console.error( exp );
+            console.warn( "There was an error during setup, but we're going to continue anyway." );
+          }
         }
         this.timer = requestAnimationFrame( animate );
       }
