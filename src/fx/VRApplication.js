@@ -557,8 +557,7 @@ Primrose.VRApplication = ( function ( ) {
         qHeading = new THREE.Quaternion( ),
         qHead = new THREE.Quaternion( ),
         vTemp = new THREE.Vector3(),
-        skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
-        skinCode = parseInt( skin.substring( 1 ), 16 ),
+        skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         sceneLoaded = !this.options.sceneModel,
         buttonLoaded = !this.options.button,
         readyFired = false;
@@ -599,7 +598,7 @@ Primrose.VRApplication = ( function ( ) {
     this.pointer.material.emissive.setRGB( 0.25, 0, 0 );
     this.pointer.material.opacity = 0.75;
 
-    this.nose = textured( sphere( 0.05, 10, 10 ), skinCode );
+    this.nose = textured( sphere( 0.05, 10, 10 ), skin );
     this.nose.name = "Nose";
     this.nose.scale.set( 0.5, 1, 1 );
 

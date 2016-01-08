@@ -1,22 +1,30 @@
-function randomRange(min, max) {
-  return Math.random() * (max - min) + min;
-}
+/* global Primrose, pliny */
 
-function randomElement(arr){
-  return arr[randomInt(arr.length)];
-}
+Primrose.Random = ( function () {
+  var Random = {};
 
-function randomInt(min, max, power) {
-  power = power || 1;
-  if(max === undefined){
-    max = min;
-    min = 0;
-  }
-  var delta = max - min,
-      n = Math.pow(Math.random(), power);
-  return Math.floor(min + n * delta);
-}
+  Random.number = function ( min, max ) {
+    return Math.random() * ( max - min ) + min;
+  };
 
-function randomSteps(min, max, steps) {
-  return min + randomInt(0, (1 + max - min) / steps) * steps;
-}
+  Random.int = function ( min, max, power ) {
+    power = power || 1;
+    if ( max === undefined ) {
+      max = min;
+      min = 0;
+    }
+    var delta = max - min,
+        n = Math.pow( Math.random(), power );
+    return Math.floor( min + n * delta );
+  };
+
+  Random.item = function ( arr ) {
+    return arr[Primrose.Random.int( arr.length )];
+  };
+
+  Random.steps = function ( min, max, steps ) {
+    return min + Primrose.Random.int( 0, ( 1 + max - min ) / steps ) * steps;
+  };
+
+  return Random;
+} )();

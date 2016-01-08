@@ -1,4 +1,4 @@
-// global Primrose, put */
+/* global Primrose, put */
 var WIDTH = 100,
     HEIGHT = 6,
     DEPTH = 100,
@@ -36,16 +36,15 @@ function eye ( side, body ) {
 
 function Jabber ( w, h, s ) {
   var obj = hub(),
-      skin = Primrose.SKINS[randomInt( Primrose.SKINS.length )],
-      si = parseInt( "0x" + skin.substring( 1 ), 16 ),
-      body = put( textured( sphere( 0.2, 18, 10 ), si ) ).on( obj ).at(
-      randomRange( -w, w ),
+      skin = Primrose.Random.item(Primrose.SKIN_VALUES),
+      body = put( textured( sphere( 0.2, 18, 10 ), skin ) ).on( obj ).at(
+      Primrose.Random.number( -w, w ),
       1,
-      randomRange( -h, h ) ),
+      Primrose.Random.number( -h, h ) ),
       velocity = v3(
-          randomRange( -s, s ),
+          Primrose.Random.number( -s, s ),
           0,
-          randomRange( -s, s ) ),
+          Primrose.Random.number( -s, s ) ),
       v = v3( 0, 0, 0 );
 
   eye( -1, body );
@@ -74,9 +73,9 @@ function Jabber ( w, h, s ) {
     if ( d < 3 ) {
       body.lookAt( app.player.position );
       obj.position.set(
-          randomRange( -0.01, 0.01 ),
-          randomRange( -0.01, 0.01 ),
-          randomRange( -0.01, 0.01 ) );
+          Primrose.Random.number( -0.01, 0.01 ),
+          Primrose.Random.number( -0.01, 0.01 ),
+          Primrose.Random.number( -0.01, 0.01 ) );
       v.divideScalar( d );
       v.y = 0;
       velocity.add( v.multiplyScalar( ( 3 - d ) / 100 ) );

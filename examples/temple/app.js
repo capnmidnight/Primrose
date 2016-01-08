@@ -39,9 +39,9 @@ app.addEventListener( "ready", function () {
   ball = put( brick( WATER ) ).on( start ).at( 0, 0, 0 );
 
   for ( var i = 0; i < 5000; ++i ) {
-    verts.push( v3( randomRange( -0.5 * WIDTH, 0.5 * WIDTH ),
-        randomRange( -0.5 * HEIGHT, 0.5 * HEIGHT ),
-        randomRange( -0.5 * DEPTH, 0.5 * DEPTH ) ) );
+    verts.push( v3( Primrose.Random.number( -0.5 * WIDTH, 0.5 * WIDTH ),
+        Primrose.Random.number( -0.5 * HEIGHT, 0.5 * HEIGHT ),
+        Primrose.Random.number( -0.5 * DEPTH, 0.5 * DEPTH ) ) );
   }
   put( cloud( verts, this.options.backgroundColor, 0.05 ) )
       .on( start ).at( MIDX, MIDY, MIDZ );
@@ -67,8 +67,8 @@ app.addEventListener( "ready", function () {
   makeSphere( 10, 0.1 );
 
   for ( var i = 0; i < 100; ++i ) {
-    var x = randomInt( WIDTH ),
-        z = randomInt( DEPTH );
+    var x = Primrose.Random.int( WIDTH ),
+        z = Primrose.Random.int( DEPTH );
     put( column( 0.5, 1, 1 ) )
         .on( start )
         .at( x, 1, z );

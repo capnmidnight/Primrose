@@ -1,4 +1,5 @@
-// global isOSX, Primrose, THREE, isVR, isMobile, requestFullScreen, put, exp */
+/* global isOSX, Primrose, THREE, isVR, isMobile, requestFullScreen, put, exp */
+
 var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
     SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
@@ -193,14 +194,14 @@ function testDemo ( scene ) {
   for ( var i = 0; i < 10; ++i ) {
     balls.push( put( brick( WATER ) )
         .on( start )
-        .at( randomInt( WIDTH ),
-            randomInt( HEIGHT ),
-            randomInt( DEPTH ) ) );
+        .at( Primrose.Random.int( WIDTH ),
+            Primrose.Random.int( HEIGHT ),
+            Primrose.Random.int( DEPTH ) ) );
 
     balls[i].velocity = v3(
-        randomRange( 0, WIDTH ),
-        randomRange( 0, HEIGHT ),
-        randomRange( 0, DEPTH ) );
+        Primrose.Random.number( 0, WIDTH ),
+        Primrose.Random.number( 0, HEIGHT ),
+        Primrose.Random.number( 0, DEPTH ) );
   }
 
   function update ( dt ) {
@@ -275,10 +276,10 @@ function getDocumentation () {
 }
 
 
-//
-// TODO:
-//
-//
+/*
+ TODO:
+
+
  
  var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
  ];
@@ -286,4 +287,4 @@ function getDocumentation () {
  setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
  setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
  setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
-///
+*/
