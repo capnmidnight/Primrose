@@ -56,24 +56,12 @@ Primrose.Output.Audio3D = ( function () {
 
     if ( this.isAvailable ) {
       progress( "loading", src );
-      var xhr = new XMLHttpRequest();
-      xhr.open( "GET", src );
-      xhr.responseType = "arraybuffer";
-      xhr.onerror = error;
-      xhr.onabort = error;
-      xhr.onprogress = function ( evt ) {
+      Primrose.HTTP.get( src, "arraybuffer", function ( evt ) {
         progress( "intermediate", src, evt.loaded );
-      };
-      xhr.onload = function () {
-        if ( xhr.status < 400 ) {
-          progress( "success", src );
-          this.context.decodeAudioData( xhr.response, success, error );
-        }
-        else {
-          error();
-        }
-      }.bind( this );
-      xhr.send();
+      }, error, function ( data ) {
+        progress( "success", src );
+        this.context.decodeAudioData( data, success, error );
+      } );
     }
     else {
       error();

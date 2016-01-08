@@ -23,7 +23,7 @@ var ed = new Primrose.Text.Controls.TextBox( "editor", {
 } );
 
 function loadFile ( fileName ) {
-  GET( fileName, "text", function ( file ) {
+  Primrose.HTTP.get( fileName, "text", function ( file ) {
     ed.value = file;
     ed.focus();
   } );
