@@ -302,8 +302,8 @@ Primrose.Input.Motion = ( function ( ) {
   Primrose.Input.ButtonAndAxis.inherit( MotionInput );
 
   function makeTransform ( s, eye ) {
-    var sw = Math.max(screen.width, screen.height),
-        sh = Math.min(screen.width, screen.height),
+    var sw = Math.max( screen.width, screen.height ),
+        sh = Math.min( screen.width, screen.height ),
         w = Math.floor( sw * devicePixelRatio / 2 ),
         h = Math.floor( sh * devicePixelRatio ),
         i = ( eye + 1 ) / 2;
@@ -320,7 +320,7 @@ Primrose.Input.Motion = ( function ( ) {
       left: i * w};
     s.fov = 75;
   }
-  
+
   MotionInput.DEFAULT_TRANSFORMS = [ {}, {} ];
   makeTransform( MotionInput.DEFAULT_TRANSFORMS[0], -1 );
   makeTransform( MotionInput.DEFAULT_TRANSFORMS[1], 1 );

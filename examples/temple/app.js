@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE, isMobile, put, exp */
+/* global Primrose, THREE, isMobile, put, exp */
 
 var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
     ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
