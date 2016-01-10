@@ -13,6 +13,7 @@
       h3, h4{
         text-transform: capitalize;
       }
+      
       ol.signatureParameters, ol.signatureParameters > li {
         display: inline;
         padding: 0;
@@ -30,6 +31,7 @@
       ol.signatureParameters > li:last-child::after{
         content: "";
       }
+      
       .type::before{
         content: "[";
       }
@@ -48,17 +50,58 @@
       dd::before{
         content: " - ";
       }
+      
       .enumeration .values > li{
         padding: 0;
       }
-
+      
+      
+      nav {
+        position: absolute;
+        background-color: white;
+        padding: 1em;
+        line-height: 1.5;
+      }
+      
+      nav a {
+        text-decoration: none;
+      }
+      
+      nav h2, nav h3{
+        font-size: 100%;
+        font-weight: normal;
+        text-align: left;
+        padding: 0;
+        margin: 0;
+      }
+      
+      nav h2, nav h2 > a{
+        color: #853B9E;
+      }
+      
+      nav h2 {
+        padding-top: 1.5em;
+      }
+      
+      nav h3{
+        color: #2b81af;
+      }
+      
+      nav ul{
+        list-style: none;
+      }
+      nav ul, nav li{        
+        padding: 0;
+        margin: 0;
+      }
+      
     </style>
   </head>
   <body>
-    <nav role="contents">
-    </nav>
+    <nav>
+      <h1>Primrose VR</h1>
+    </nav>    
     <main>
-
     </main>
   </body>
 </html>
