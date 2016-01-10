@@ -1,4 +1,4 @@
-/* global isOSX, Primrose, THREE */
+/* global Primrose, THREE */
 
 THREE.ImageLoader.crossOrigin = "anonymous";
 var DEBUG_VR = false,

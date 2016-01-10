@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 html, body{
   position: absolute;
   width: 100%;
-  height: 100%;
   padding: 0;
   margin: 0;
 }
@@ -89,9 +88,6 @@ body{
   right: 0;
   bottom: 0;
 }
-#controls > button{
-  display: none;
-}
 #goVR, #goRegular{
   display:block;
   background-color: transparent;
@@ -110,7 +106,6 @@ body{
   width: 100%;
   top: 0;
   left: 0;
-  height: 100%;
   padding: 0;
   margin: 0;
   border: 0;

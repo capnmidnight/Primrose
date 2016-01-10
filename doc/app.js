@@ -1,24 +1,29 @@
 /* global pliny, Primrose */
+
+"use strict";
+
 var log = console.log.bind( console );
 console.log = function ( output ) {
-  document.body.innerHTML += "<p>" + output.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").split( "\n" ).join( "<br>" ) + "</p>";
+  document.body.innerHTML += "<p>" + output.replace( /\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;" ).split( "\n" ).join( "<br>" ) + "</p><hr>";
 };
 
-function recurse ( name, obj, stack, subName ) {
-  var arr = obj[subName];
-  if ( arr && arr instanceof Array ) {
-    for ( var i = 0; i < arr.length; ++i ) {
-      stack.push( name + "." + arr[i].name );
+function recurse ( obj, stack, subName ) {
+  if ( obj ) {
+    var arr = obj[subName];
+    if ( arr && arr instanceof Array ) {
+      for ( var i = 0; i < arr.length; ++i ) {
+        stack.push( arr[i] );
+      }
     }
   }
 }
 
-var stack = [ "Primrose" ];
+var stack = [ pliny.database ];
 while ( stack.length > 0 ) {
-  var name = stack.shift();
-  pliny.theYounger( name );
+  var obj = stack.shift();
+  pliny.theYounger( obj );
   [ "namespaces", "functions", "classes", "methods", "enumerations", "records" ]
-      .forEach( recurse.bind( null, name, pliny.get( name ), stack ) );
+      .forEach( recurse.bind( null, obj, stack ) );
 }
 
 

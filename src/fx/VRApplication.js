@@ -1,4 +1,4 @@
-/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice,
+/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice, devicePixelRatio
  * Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
 
 Primrose.VRApplication = ( function ( ) {
@@ -44,15 +44,12 @@ Primrose.VRApplication = ( function ( ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
 
     var setSize = function ( ) {
-      var bounds = this.renderer.domElement.getBoundingClientRect( ),
-          styleWidth = bounds.width,
-          styleHeight = bounds.height,
-          ratio = window.devicePixelRatio || 1,
-          fieldOfView = 75,
-          canvasWidth = Math.floor( styleWidth * ratio * RESOLUTION_SCALE ),
-          canvasHeight = Math.floor( styleHeight * ratio * RESOLUTION_SCALE ),
-          aspectWidth = canvasWidth;
-      if ( this.inVR && this.input.transforms ) {
+      var canvasWidth,
+          canvasHeight,
+          fieldOfView,
+          aspectWidth;
+
+      if ( this.inVR ) {
         var p = this.input.transforms,
             l = p[0],
             r = p[1];
@@ -62,6 +59,19 @@ Primrose.VRApplication = ( function ( ) {
         aspectWidth = canvasWidth / 2;
       }
       else {
+        var bounds = this.renderer.domElement.getBoundingClientRect( ),
+            ratio = screen.width / screen.height,
+            elementWidth = bounds.width,
+            elementHeight = isiOS ? ( elementWidth * ratio ) : ( elementWidth / ratio ),
+            ratio = devicePixelRatio || 1;
+        canvasWidth = Math.floor( elementWidth * ratio * RESOLUTION_SCALE );
+        canvasHeight = Math.floor( elementHeight * ratio * RESOLUTION_SCALE );
+        fieldOfView = 75;
+        aspectWidth = canvasWidth;
+        if ( isiOS ) {
+          document.body.style.height = Math.max( document.body.clientHeight, elementHeight ) + "px";
+          document.documentElement.style.height = Math.max( document.documentElement.clientHeight, elementHeight ) + "px";
+        }
         this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
         this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
       }
@@ -762,10 +772,10 @@ Primrose.VRApplication = ( function ( ) {
         this.goFullScreen( true );
       }
     }.bind( this );
+
     //
     // Manage full-screen state
     //
-
     this.goFullScreen = function ( useVR ) {
       this.input.mouse.requestPointerLock( );
       if ( !isFullScreenMode( ) ) {
@@ -773,8 +783,11 @@ Primrose.VRApplication = ( function ( ) {
         if ( useVR && this.input.vr && this.input.vr.display ) {
           requestFullScreen( this.renderer.domElement, this.input.vr.display );
         }
-        else {
+        else if ( !isiOS ) {
           requestFullScreen( this.renderer.domElement );
+        }
+        else {
+          setSize();
         }
         history.pushState( null, document.title, "#fullscreen" );
       }
@@ -783,15 +796,10 @@ Primrose.VRApplication = ( function ( ) {
     this.setFullScreenButton = function ( id, event, useVR ) {
       var elem = document.getElementById( id );
       if ( elem ) {
+        var show = !useVR || isVR || isMobile;
+        elem.style.cursor = show ? "pointer" : "not-allowed";
+        elem.title = show ? ( useVR ? "Go Split-Screen" : "Go Fullscreen" ) : "VR is not available in your current browser.";
         elem.addEventListener( event, this.goFullScreen.bind( this, useVR ), false );
-        elem.style.display = ( useVR && ( isVR || isMobile ) || !useVR && !isiOS ) ? "block" : "none";
-        if ( useVR ) {
-          var connectVR = function ( e ) {
-            e.style.display = this.input.vr.deviceIDs.length > 0 ? "block" : "none";
-          }.bind( this, elem );
-          this.input.addEventListener( "vrdeviceconnected", connectVR, false );
-          this.input.addEventListener( "vrdevicelost", connectVR, false );
-        }
       }
     };
 
@@ -829,7 +837,6 @@ Primrose.VRApplication = ( function ( ) {
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
     this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
     this.start();
-
   }
 
   VRApplication.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
