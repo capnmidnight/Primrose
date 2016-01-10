@@ -2,9 +2,9 @@
 
 "use strict";
 
-var log = console.log.bind( console );
-console.log = function ( output ) {
-  document.body.innerHTML += "<p>" + output.replace( /\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;" ).split( "\n" ).join( "<br>" ) + "</p><hr>";
+function translate( output ) {
+  //return "<p>" + output.replace( /\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;" ).split( "\n" ).join( "<br>" ) + "</p><hr>";
+  return output + "<hr>";
 };
 
 function recurse ( obj, stack, subName ) {
@@ -21,10 +21,7 @@ function recurse ( obj, stack, subName ) {
 var stack = [ pliny.database ];
 while ( stack.length > 0 ) {
   var obj = stack.shift();
-  pliny.theYounger( obj );
+  document.body.innerHTML += translate(pliny.formats.html.format(obj));
   [ "namespaces", "functions", "classes", "methods", "enumerations", "records" ]
       .forEach( recurse.bind( null, obj, stack ) );
 }
-
-
-console.log = log;
