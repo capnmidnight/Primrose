@@ -3,7 +3,6 @@
 Primrose.StateList = ( function () {
   pliny.theElder.class( "Primrose", {
     name: "StateList",
-    author: "Sean T. McBeth",
     description: [
       "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.",
       "The states paramareter should be an array of State objects that take the form of:\n{ name: \"A string for display\", values: {\n\tctrlName1: {attributeName1: value1, attributeName2: value2 },\n\tctrlName2: {attributeName3: value3, attributeName4: value4 }\n}\n}"

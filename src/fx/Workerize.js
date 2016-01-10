@@ -7,8 +7,7 @@ Primrose.Workerize = ( function () {
       "Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits." ],
     parameters: [
       {name: "func", type: "Function", description: "The class function to workerize"}
-    ],
-    author: "Sean T. McBeth"
+    ]
   } );
   function Workerize ( func ) {
     // First, rebuild the script that defines the class. Since we're dealing

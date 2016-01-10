@@ -60,11 +60,14 @@ Primrose.HTTP = ( function () {
   var HTTP = {};
 
   pliny.theElder.function( "Primrose.HTTP", {
-    name: "",
-    description: "",
-    author: "Sean T. McBeth",
+    name: "get",
+    description: "Process an HTTP GET request.",
     parameters: [
-      {name: "", type: "", description: ""}
+      {name: "url", type: "String", description: ""},
+      {name: "type", type: "String", description: ""},
+      {name: "progress", type: "Function", description: ""},
+      {name: "error", type: "Function", description: ""},
+      {name: "success", type: "Function", description: ""}
     ]
   } );
   HTTP.get = function ( url, type, progress, error, success ) {
@@ -77,6 +80,17 @@ Primrose.HTTP = ( function () {
   };
 
 
+  pliny.theElder.function( "Primrose.HTTP", {
+    name: "put",
+    description: "Process an HTTP PUT request.",
+    parameters: [
+      {name: "url", type: "String", description: ""},
+      {name: "type", type: "String", description: ""},
+      {name: "progress", type: "Function", description: ""},
+      {name: "error", type: "Function", description: ""},
+      {name: "success", type: "Function", description: ""}
+    ]
+  } );
   HTTP.post = function ( url, data, type, progress, error, success ) {
     var progressThunk = success && error && progress,
         errorThunk = ( success && error ) || ( error && progress ),
@@ -85,6 +99,17 @@ Primrose.HTTP = ( function () {
   };
 
 
+
+  pliny.theElder.function( "Primrose.HTTP", {
+    name: "getObject",
+    description: "Get a JSON object from a server.",
+    parameters: [
+      {name: "url", type: "String", description: ""},
+      {name: "progress", type: "Function", description: ""},
+      {name: "error", type: "Function", description: ""},
+      {name: "success", type: "Function", description: ""}
+    ]
+  } );
   HTTP.getObject = function ( url, progress, error, success ) {
     var progressThunk = success && error && progress,
         errorThunk = ( success && error ) || ( error && progress ),
@@ -93,6 +118,18 @@ Primrose.HTTP = ( function () {
   };
 
 
+
+  pliny.theElder.function( "Primrose.HTTP", {
+    name: "sendObject",
+    description: "Send a JSON object to a server.",
+    parameters: [
+      {name: "url", type: "String", description: ""},
+      {name: "data", type: "Object", description: ""},
+      {name: "progress", type: "Function", description: ""},
+      {name: "error", type: "Function", description: ""},
+      {name: "success", type: "Function", description: ""}
+    ]
+  } );
   HTTP.sendObject = function ( url, data, progress, error, success ) {
     POST( url, data, "json",
         success && error && progress,

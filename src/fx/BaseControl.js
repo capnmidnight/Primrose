@@ -7,8 +7,7 @@ Primrose.BaseControl = ( function () {
 
   pliny.theElder.class( "Primrose", {
     name: "BaseControl",
-    description: "The BaseControl class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format.",
-    author: "Sean T. McBeth"
+    description: "The BaseControl class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
   } );
   function BaseControl () {
     pliny.theElder.property( {
@@ -35,8 +34,7 @@ Primrose.BaseControl = ( function () {
 
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "focus",
-    description: "Sets the focus property of the control, does not change the focus property of any other control.",
-    author: "Sean T. McBeth"
+    description: "Sets the focus property of the control, does not change the focus property of any other control."
   } );
   BaseControl.prototype.focus = function () {
     this.focused = true;
@@ -44,8 +42,7 @@ Primrose.BaseControl = ( function () {
 
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "blur",
-    description: "Unsets the focus property of the control, does not change the focus property of any other control.",
-    author: "Sean T. McBeth"
+    description: "Unsets the focus property of the control, does not change the focus property of any other control."
   } );
   BaseControl.prototype.blur = function () {
     this.focused = false;
@@ -66,10 +63,9 @@ Primrose.BaseControl = ( function () {
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "copyElement",
     description: "Copies properties from a DOM element that the control is supposed to match.",
-    paramters: [
+    parameters: [
       {name: "elem", type: "Element", description: "The element--e.g. a button or textarea--to copy."}
-    ],
-    author: "Sean T. McBeth"
+    ]
   } );
   BaseControl.prototype.copyElement = function ( elem ) {
     this.element = elem;

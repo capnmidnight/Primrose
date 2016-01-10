@@ -5,7 +5,6 @@ Primrose.Input.Gamepad = ( function () {
   pliny.theElder.class( "Primrose.Input", {
     name: "Gampad",
     description: "Signal processor for gamepad input.",
-    author: "Sean T. McBeth",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},
@@ -152,7 +151,6 @@ Primrose.Input.Gamepad = ( function () {
 
 pliny.theElder.enumeration( "Primrose.Input.Gamepad", {
   name: "XBOX_BUTTONS",
-  author: "Jeffrey Zitelli",
   description: "Labeled names for each of the different control features of the Xbox 360 controller."
 } );
 Primrose.Input.Gamepad.XBOX_BUTTONS = {

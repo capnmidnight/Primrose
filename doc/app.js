@@ -19,9 +19,10 @@ function recurse ( obj, stack, subName ) {
 }
 
 var stack = [ pliny.database ];
+//var stack = [ "Primrose.Angle" ];
 while ( stack.length > 0 ) {
   var obj = stack.shift();
   document.body.innerHTML += translate(pliny.formats.html.format(obj));
-  [ "namespaces", "functions", "classes", "methods", "enumerations", "records" ]
+  [ "namespaces", "functions", "classes", "properties", "examples", "methods", "enumerations", "records" ]
       .forEach( recurse.bind( null, obj, stack ) );
 }
