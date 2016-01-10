@@ -10,6 +10,9 @@ Primrose.Angle = ( function ( ) {
     parameters: [
       {name: "initialAngleInDegrees", type: "Number", description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."}
     ],
+    references: [
+      {name: "Radian - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/Radian"}
+    ],
     diagram: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif",
     examples: [ {
         name: "Basic usage",
@@ -74,10 +77,7 @@ Primrose.Angle = ( function ( ) {
     pliny.theElder.property( {
       name: "radians",
       type: "Number",
-      description: "Get/set the current value of the angle in radians.",
-      references: [
-        {name: "Radian - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/Radian"}
-      ]
+      description: "Get/set the current value of the angle in radians."
     } );
     Object.defineProperty( this, "radians", {
       get: function ( ) {
