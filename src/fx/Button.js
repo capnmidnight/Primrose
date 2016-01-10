@@ -51,7 +51,7 @@ Primrose.Button = ( function () {
     pliny.theElder.property( {
       name: "container",
       type: "THREE.Object3D",
-      description: "A grouping collection for the base and cap;."
+      description: "A grouping collection for the base and cap."
     } );
     this.container = new THREE.Object3D();
     this.container.add( this.base );
@@ -60,7 +60,7 @@ Primrose.Button = ( function () {
     pliny.theElder.property( {
       name: "color",
       type: "Number",
-      description: "The current color of the button cap.."
+      description: "The current color of the button cap."
     } );
     this.color = this.cap.material.color;
     this.name = name;

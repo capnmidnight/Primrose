@@ -4,8 +4,61 @@
     <title>TODO supply a title</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../stylesheets/main.css">
     <script type="text/javascript" src="/lib/loader.js" async defer></script>
+    <style type="text/css">
+      h2{
+        text-transform: none;
+      }
+      h3{
+        text-transform: capitalize;
+      }
+      ol.signatureParameters, ol.signatureParameters > li {
+        display: inline;
+        padding: 0;
+        margin: 0;
+      }
+      ol.signatureParameters::before{
+        content: "(";
+      }
+      ol.signatureParameters::after{
+        content: ")";
+      }
+      ol.signatureParameters > li::after{
+        content: ",";
+      }
+      ol.signatureParameters > li:last-child::after{
+        content: "";
+      }
+      .type::before{
+        content: "[";
+      }
+      .type::after{
+        content: "]";
+      }
+
+      dt, dd {
+        display: inline;
+        padding: 0;
+        margin: 0;
+      }
+      dl{
+        margin: 0;
+      }
+      dd::before{
+        content: " - ";
+      }
+      .enumeration .values > li{
+        padding: 0;
+      }
+
+    </style>
   </head>
   <body>
+    <nav role="contents">
+    </nav>
+    <main>
+
+    </main>
   </body>
 </html>

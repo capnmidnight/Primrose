@@ -108,63 +108,47 @@ main p {
   margin: 0 0 1em 0;
 }
 
-main > section:nth-child(1), 
-main > section:nth-child(5){
+main > section:nth-child(4n + 1){
   background-color: white;
 }
-main > section:nth-child(1) li:hover,
-main > section:nth-child(5) li:hover{
+main > section:nth-child(4n + 1) li:hover{
   background-color: rgba(0, 0, 0, 0.125);
 }
-main > section:nth-child(1), 
-main > section:nth-child(1) a,
-main > section:nth-child(5), 
-main > section:nth-child(5) a{
+main > section:nth-child(4n + 1), 
+main > section:nth-child(4n + 1) a{
   color: black;
 }
 
-main > section:nth-child(2), 
-main > section:nth-child(6){
+main > section:nth-child(4n + 2){
   background-color: #E1CFF6;
 }
-main > section:nth-child(2) li:hover,
-main > section:nth-child(6) li:hover{
+main > section:nth-child(4n + 2) li:hover{
   background-color: rgba(255, 0, 0, 0.125);
 }
-main > section:nth-child(2), 
-main > section:nth-child(2) a,
-main > section:nth-child(6), 
-main > section:nth-child(6) a{
+main > section:nth-child(4n + 2), 
+main > section:nth-child(4n + 2) a{
   color: black;
 }
 
-main > section:nth-child(3), 
-main > section:nth-child(7){
+main > section:nth-child(4n + 3){
   background-color: #333;
 }
-main > section:nth-child(3) li:hover,
-main > section:nth-child(7) li:hover{
+main > section:nth-child(4n + 3) li:hover{
   background-color: rgba(255, 255, 255, 0.125);
 }
-main > section:nth-child(3), 
-main > section:nth-child(3) a,
-main > section:nth-child(7), 
-main > section:nth-child(7) a{
+main > section:nth-child(4n + 3), 
+main > section:nth-child(4n + 3) a{
   color: white;
 }
 
-main > section:nth-child(4), 
-main > section:nth-child(8){
+main > section:nth-child(4n + 4){
   background-color: #7FDCDF;
 }
-main > section:nth-child(4) li:hover,
-main > section:nth-child(8) li:hover{
+main > section:nth-child(4n + 4) li:hover{
   background-color: transparent;
 }
-main > section:nth-child(4), 
-main > section:nth-child(4) a,
-main > section:nth-child(8), 
-main > section:nth-child(8) a{
+main > section:nth-child(4n + 4), 
+main > section:nth-child(4n + 4) a{
   color: black;
 }
 

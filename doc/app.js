@@ -2,11 +2,6 @@
 
 "use strict";
 
-function translate( output ) {
-  //return "<p>" + output.replace( /\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;" ).split( "\n" ).join( "<br>" ) + "</p><hr>";
-  return output + "<hr>";
-};
-
 function recurse ( obj, stack, subName ) {
   if ( obj ) {
     var arr = obj[subName];
@@ -18,11 +13,11 @@ function recurse ( obj, stack, subName ) {
   }
 }
 
-var stack = [ pliny.database ];
-//var stack = [ "Primrose.Angle" ];
+var stack = [ pliny.database ],
+    elem = document.querySelector("main");
 while ( stack.length > 0 ) {
   var obj = stack.shift();
-  document.body.innerHTML += translate(pliny.formats.html.format(obj));
+  elem.innerHTML += pliny.formats.html.format(obj);
   [ "namespaces", "functions", "classes", "properties", "examples", "methods", "enumerations", "records" ]
       .forEach( recurse.bind( null, obj, stack ) );
 }

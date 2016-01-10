@@ -10,11 +10,22 @@ Primrose.Angle = ( function ( ) {
     parameters: [
       {name: "initialAngleInDegrees", type: "Number", description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."}
     ],
+    diagram: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif",
     examples: [ {
         name: "Basic usage",
-        description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` or `radians` properties.",
-        code: "var a = new Primrose.Angle(356);\na.degrees += 5;\nconsole.log(a.degrees, a.radians);",
-        result: "361 6.300638599699529"
+        description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.",
+        code: "var a = new Primrose.Angle(356);\na.degrees += 5;\nconsole.log(a.degrees);",
+        result: "361"
+      }, {
+        name: "Convert degrees to radians",
+        description: "Create an instance of of Primrose.Angle, modify the `degrees` property, and read the `radians` property.",
+        code: "var a = new Primrose.Angle(10);\na.degrees += 355;\nconsole.log(a.radians);",
+        result: "0.08726646259971647"
+      }, {
+        name: "Convert radians to degress",
+        description: "Create an instance of of Primrose.Angle, modify the `radians` property, and read the `degrees` property.",
+        code: "var a = new Primrose.Angle(0);\na.radians += Math.PI / 2;\nconsole.log(a.degrees);",
+        result: "90"
       }
     ]
   } );
@@ -64,7 +75,9 @@ Primrose.Angle = ( function ( ) {
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians.",
-      references: [ "https://en.wikipedia.org/wiki/Radian" ]
+      references: [
+        {name: "Radian - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/Radian"}
+      ]
     } );
     Object.defineProperty( this, "radians", {
       get: function ( ) {
