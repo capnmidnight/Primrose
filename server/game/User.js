@@ -18,7 +18,7 @@ function User(info) {
   };
   
   this.salt = info.salt;
-  this.hash = info.hash;  
+  this.hash = info.hash;
   this.email = info.email;
 }
 
