@@ -69,7 +69,7 @@
 
 
   docSearch.addEventListener( "keyup", search, false );
-  docSearch.addEventListener( "change", search, false );
+  docSearch.addEventListener( "search", search, false );
   window.addEventListener( "hashchange", showHash, false );
 
   showHash();
