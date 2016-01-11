@@ -80,3 +80,6 @@ $RECYCLE.BIN/
 start.py
 examples/ovrdesk/
 *.blend1
+.vs/
+.ntvs_analysis.dat
+bin/Microsoft.NodejsTools.WebRole.dll
