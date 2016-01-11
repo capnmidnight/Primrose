@@ -25,6 +25,22 @@
       window.addEventListener( "load", function () {
         ga( 'send', 'pageview' );
       }, false );
+
+      function ready () {
+        var main = document.querySelector( "main" ),
+            header = document.querySelector( "header" );
+        if ( !main && !header ) {
+          setTimeout( ready );
+        }
+        else {
+          function resize () {
+            main.style.top = ( header.clientHeight + 1 ) + "px";
+          }
+          resize();
+          window.addEventListener( "resize", resize, false );
+        }
+      }
+      ready();
     </script>
     <script type="text/javascript" src="/bin/loader.min.js" async defer></script>
   </head>

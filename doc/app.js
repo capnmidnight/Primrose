@@ -3,10 +3,8 @@
   "use strict";
 
   var docSearch = document.getElementById( "docSearch" ),
-      main = document.querySelector( "main" ),
       nav = document.querySelector( "#contents nav > ul" ),
       doc = document.querySelector( "#documentation" ),
-      header = document.querySelector( "header" ),
       docoCache = {"": doc.innerHTML},
   groupings = {
     examples: [ ],
@@ -39,9 +37,6 @@
     }
   }
 
-  function resize () {
-    main.style.top = ( header.clientHeight + 1 ) + "px";
-  }
 
   var stack = [ pliny.database ];
   while ( stack.length > 0 ) {
@@ -75,9 +70,7 @@
 
   docSearch.addEventListener( "keyup", search, false );
   docSearch.addEventListener( "change", search, false );
-  window.addEventListener( "resize", resize, false );
   window.addEventListener( "hashchange", showHash, false );
 
-  resize();
   showHash();
 } )();
