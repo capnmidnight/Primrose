@@ -3,8 +3,11 @@
 }
 
 html, body{
+  position: absolute;
   margin:0;
   padding:0;
+  width: 100%;
+  height: 100%;
 }
 body{
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
@@ -19,14 +22,12 @@ ul {
 }
 
 header{
-  position: fixed;
+  position: relative;
   left: 0;
   top: 0;
   width: 100%;
   background-color: white;
   border-bottom: solid 1px #ccc;
-  opacity: 0.9;
-  z-index: 100;
 }
 
 #logo {
@@ -51,8 +52,9 @@ header a {
 
 
 main{
-  position: fixed;
-  top:calc(32px + 1em);
+  position: absolute;
+  display: inline-block;
+  top: 4em;
   width: 100%;
   bottom: 0;
   overflow-y: scroll;
@@ -125,6 +127,11 @@ body > div {
   right: 25%;
   max-width: 1000px;
   vertical-align: top;
+  padding: 1em;
+}
+
+#documentation img {
+  max-width: 100%;
 }
 
 
@@ -164,3 +171,13 @@ body > div {
 #docSearch{
   padding: 0.5em;
 }
+
+details > summary {
+  margin-top: 1em;
+  margin-bottom: -1em;  
+}
+
+details > summary:focus {
+  outline: none;
+}
+
