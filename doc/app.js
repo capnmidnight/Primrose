@@ -2,71 +2,71 @@
 
 "use strict";
 
-var t = document.getElementById( "docSearch" );
-t.addEventListener( "keyup", search, false );
-t.addEventListener( "change", search, false );
+var docSearch = document.getElementById( "docSearch" ),
+    nav = document.querySelector( "#contents > nav > ul" ),
+    main = document.querySelector( "#documentation" ),
+    groupings = {
+      examples: [ ],
+      namespaces: [ ],
+      classes: [ ],
+      functions: [ ],
+      enumerations: [ ],
+      records: [ ]
+    };
 
 function search () {
-  var elems = document.querySelectorAll("#contents li li"),
+  var elems = document.querySelectorAll( "#contents li li" ),
       search = this.value.toLocaleLowerCase();
-  for(var i = 0; i < elems.length; ++i){
+  for ( var i = 0; i < elems.length; ++i ) {
     var e = elems[i],
         b = e.dataset.name.toLocaleLowerCase();
-    console.log(b, search, b.indexOf(search));
-    e.style.display = (search.length === 0 || b.indexOf(search) > -1) ? "" : "none";
+    console.log( b, search, b.indexOf( search ) );
+    e.style.display = ( search.length === 0 || b.indexOf( search ) > -1 ) ? "" : "none";
   }
 }
 
-function recurse ( obj, stack, namespaces, subName ) {
-  if ( obj ) {
-    var arr = obj[subName];
-    if ( arr && arr instanceof Array ) {
-      for ( var i = 0; i < arr.length; ++i ) {
-        stack.push( arr[i] );
-        if ( subName === "namespaces" ) {
-          namespaces.push( arr[i] );
-        }
+function showHash ( evt ) {
+  if ( document.location.hash.length > 0 ) {
+    main.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
+    if ( evt ) {
+      main.parentElement.scrollTo( 0, 0 );
+    }
+  }
+}
+
+docSearch.addEventListener( "keyup", search, false );
+docSearch.addEventListener( "change", search, false );
+
+var stack = [ pliny.database ];
+while ( stack.length > 0 ) {
+  var obj = stack.shift();
+  for ( var key in obj ) {
+    if ( groupings[key] ) {
+      var collect = obj[key],
+          group = groupings[key];
+      for ( var i = 0; i < collect.length; ++i ) {
+        group.push( collect[i] );
+        stack.push( collect[i] );
       }
     }
   }
 }
 
-var stack = [ pliny.database ],
-    nav = document.querySelector( "#contents > nav > ul" ),
-    main = document.querySelector( "main" ),
-    namespaces = [ pliny.database ];
-
-while ( stack.length > 0 ) {
-  var obj = stack.shift();
-  main.innerHTML += pliny.formats.html.format( obj );
-
-  [ "namespaces",
-    "functions",
-    "classes",
-    "methods",
-    "enumerations",
-    "records" ]
-      .forEach( recurse.bind( null, obj, stack, namespaces ) );
+var output = "",
+    docoCache = {};
+for ( var g in groupings ) {
+  var group = groupings[g];
+  output += "<li><h2>" + g + "</h2><ul>";
+  for ( var i = 0; i < group.length; ++i ) {
+    var obj = group[i];
+    output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+    docoCache["#" + obj.id] = pliny.formats.html.format( obj );
+  }
+  output += "</ul></li>";
 }
 
-var output = "";
-for ( var i = 0; i < namespaces.length; ++i ) {
-  var ns = namespaces[i];
-  output += "<li><h2><a href=\"#" + ns.id + "\">" + ns.fullName + "</a></h2>";
-  [ "functions",
-    "classes",
-    "enumerations",
-    "records" ]
-      .forEach( function ( sub ) {
-        var arr = ns[sub];
-        if ( arr ) {
-          output += "<h3>" + sub + "</h3><ul>";
-          for ( var i = 0; i < arr.length; ++i ) {
-            output += "<li data-name=\"" + arr[i].fullName + "\"><a href=\"#" + arr[i].id + "\">" + arr[i].name + "</a></li>";
-          }
-          output += "</ul>";
-        }
-      } );
-  output += "</li>";
-}
 nav.innerHTML += output;
+
+window.addEventListener( "hashchange", showHash, false );
+
+showHash();
