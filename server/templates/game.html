@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html manifest="$1.appcache">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
+    <title>$2</title>
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/$1.css">
+    <link rel="author" href="https://plus.google.com/+SeanMcBeth/posts">
+    <meta property="og:locale" content="en_US">
+</head>
+<body>
+    <canvas id="frontBuffer"></canvas>
+    <div id="appCacheStatus">
+        <div class="progressBar" id="downloadProgress"></div>
+        <div id="appCacheMessage"></div>
+        <div id="appCacheReload" style="display:none;">
+            <a class="primary button" id="reloadAppButton"></a>
+            <a class="secondary button" id="dismissAppUpdateButton">Dismiss.</a>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var ctrls = [
+            "appCacheStatus",
+            "appCacheMessage",
+            "appCacheReload",
+            "reloadAppButton",
+            "dismissAppUpdateButton",
+            "downloadProgress"
+        ].map(document.getElementById.bind(document))
+        .reduce(function(a, e){ return a[e.id] = e, a; }, {});
+
+        function appCacheReady(msg, successfulLoad){
+            showAppCacheMessage(msg);
+            closeReloadMessage(successfulLoad);
+        }
+                
+        function loadLibs(libs, done, index){
+            index = index || 0;
+            if(index === libs.length){
+                done();
+            }
+            else{
+                var next = loadLibs.bind(window, libs, done, index + 1);
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.onload = next;
+                s.onerror = next;
+                s.onabort = next;
+                s.src = libs[index];
+                document.body.appendChild(s);
+            }
+        }
+        
+        
+        function get(url, type, done){
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+            xhr.responseType = type;
+            xhr.addEventListener("load", function(){
+                done(xhr.response);
+            }, false);
+            xhr.send();
+            return xhr;
+        }
+            
+        function closeReloadMessage(successfulLoad){
+            if(successfulLoad){
+                applicationCache.swapCache();
+            }
+            var a = get("templates/game.ui.html", "text", function(content){
+                var b = get("templates/$1.about.html", "text", function(about){
+                    ctrls.appCacheStatus.style.display = "none";
+                    document.body.innerHTML += content.replace("[ABOUT]", about);
+                    document.getElementById("gameTitle").innerHTML = "$2";
+                    var c = get("js/game.libs.json", "json", function(libs){
+                        if(typeof(libs) === "string"){
+                            libs = JSON.parse(libs);
+                        }
+                        libs.push("js/controllers/$1.js");
+                        loadLibs(libs, function(){
+                            TabSet.makeAll();
+                            $1();
+                        });
+                    });
+                });
+            });
+        }
+
+        function showReload(message, successfulLoad){
+            ctrls.appCacheMessage.style.display = "none";
+            ctrls.appCacheReload.style.display = "";
+            ctrls.reloadAppButton.innerHTML = message;
+            ctrls.reloadAppButton.addEventListener("click", document.location.reload.bind(document.location), false);                
+            ctrls.dismissAppUpdateButton.addEventListener("click", closeReloadMessage.bind(window, successfulLoad), false);
+        };
+
+        function showAppCacheMessage(msg){
+            ctrls.appCacheMessage.innerHTML = msg;
+        }
+
+        function showAppCacheProgress(evt){ 
+            var p = Math.floor(1000 * evt.loaded / evt.total) / 10 + "%";
+            ctrls.downloadProgress.style.width = p;
+            showAppCacheMessage("Checking for application update " + p + "... please wait");
+        }
+
+        applicationCache.addEventListener("checking", showAppCacheMessage.bind(window, "Checking for application update... please wait."), false);
+        applicationCache.addEventListener("downloading", showAppCacheMessage.bind(window, "Downloading update now... please wait."), false); 
+        applicationCache.addEventListener("progress", showAppCacheProgress.bind(window), false);
+        applicationCache.addEventListener("error", showReload.bind(window, "Error downloading update. Try again.", false), false);
+        applicationCache.addEventListener("updateready", appCacheReady.bind(window, "Download complete. Restart application.", true), false);           
+        applicationCache.addEventListener("noupdate", appCacheReady.bind(window, "No update found.", false), false);            
+        applicationCache.addEventListener("cached", appCacheReady.bind(window, "Application cached.", false), false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+(require("./requireDirectory"))("controllers", module);
