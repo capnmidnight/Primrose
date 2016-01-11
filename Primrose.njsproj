@@ -6,7 +6,7 @@
     <ProjectGuid>{d0b700f4-286a-45b3-92d6-42321bdb1027}</ProjectGuid>
     <ProjectHome />
     <ProjectView>ProjectFiles</ProjectView>
-    <StartupFile>server.js</StartupFile>
+    <StartupFile>server\server.js</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
@@ -89,8 +89,7 @@
     <Compile Include="lib\pliny.js" />
     <Compile Include="lib\sha512.js" />
     <Compile Include="lib\webgl-debug.js" />
-    <Content Include="nbproject\project.xml" />
-    <Compile Include="server.js" />
+    <Compile Include="server\server.js" />
     <Compile Include="server\controllers.js" />
     <Compile Include="server\controllers\bears.js" />
     <Compile Include="server\controllers\holodeck.js" />
@@ -195,7 +194,6 @@
     <Compile Include="examples\temple\app.js" />
     <Content Include="examples\test\index.html" />
     <Compile Include="examples\test\app.js" />
-    <Content Include="nbproject\private\private.xml" />
     <Compile Include="src\fx\Angle.js" />
     <Compile Include="src\fx\BaseControl.js" />
     <Compile Include="src\fx\Button.js" />
@@ -282,8 +280,6 @@
     <Folder Include="examples\test" />
     <Folder Include="images" />
     <Folder Include="lib" />
-    <Folder Include="nbproject" />
-    <Folder Include="nbproject\private" />
     <Folder Include="server\" />
     <Folder Include="server\controllers\" />
     <Folder Include="server\game\" />

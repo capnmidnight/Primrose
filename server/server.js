@@ -22,11 +22,11 @@ var format = require("util").format,
     http = require("http"),
     https = require("https"),
     socketio = require("socket.io"),
-    log = require("./server/core").log,
-    starter = require("./server/starter"),
-    webServer = require("./server/webServer").webServer,
-    webSocketServer = require("./server/webSocketServer"),
-    options = require("./server/options").parse(process.argv, {
+    log = require("./core").log,
+    starter = require("./starter"),
+    webServer = require("./webServer").webServer,
+    webSocketServer = require("./webSocketServer"),
+    options = require("./options").parse(process.argv, {
       v: "false",
       h: "localhost"
     }),
