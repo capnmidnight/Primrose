@@ -36,8 +36,9 @@
           function resize () {
             main.style.top = ( header.clientHeight + 1 ) + "px";
           }
-          resize();
           window.addEventListener( "resize", resize, false );
+          window.addEventListener( "load", resize, false );
+          resize();
         }
       }
       ready();
