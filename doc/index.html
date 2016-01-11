@@ -1,19 +1,92 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TODO supply a title</title>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../stylesheets/main.css">
+    <meta name="description" content="A WebVR application framework."/>
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Primrose VR"/>
+    <meta property="og:url" content="http://www.primrosevr.com/"/>
+    <meta property="og:title" content="Primrose VR"/>
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg" />
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@Sean_McBeth"/>
+    <meta name="twitter:title" content="Primrose VR"/>
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications"/>
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"/>
+    <title>Primrose VR: WebVR Application Framework Documentation</title>
+    <script type="text/javascript" src="/bin/ga.min.js" async defer></script>
+    <script type="text/javascript">
+      window.fnames = [ 'EMAIL', 'FNAME', 'LNAME' ];
+      window.ftypes = [ 'email', 'text', 'text' ];
+      window.addEventListener( "load", function () {
+        ga( 'send', 'pageview' );
+      }, false );
+    </script>
     <script type="text/javascript" src="/lib/loader.js" async defer></script>
     <style type="text/css">
+      *{
+        box-sizing: border-box;
+      }
+
+      html, body{
+        margin:0;
+        padding:0;
+      }
+      body{
+        font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+      }
+
+      a {
+        color: black;
+      }
+
+      ul {
+        list-style: circle;
+      }
+
+      header{
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background-color: white;
+        border-bottom: solid 1px #ccc;
+        opacity: 0.9;
+        z-index: 100;
+      }
+
+      #logo {
+        margin: 0.25em 1em;
+      }
+
+      header * {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        vertical-align: middle;
+      }      
+
+      header > nav > ul {
+        list-style: none;
+      }
+      header a {
+        border: none;
+        height: auto;
+        padding: 0.25em 1em;
+      }
+
+
+
       h2{
         text-transform: none;
       }
       h3, h4{
         text-transform: capitalize;
       }
-      
+
       ol.signatureParameters, ol.signatureParameters > li {
         display: inline;
         padding: 0;
@@ -31,7 +104,7 @@
       ol.signatureParameters > li:last-child::after{
         content: "";
       }
-      
+
       .type::before{
         content: "[";
       }
@@ -50,58 +123,105 @@
       dd::before{
         content: " - ";
       }
-      
+
       .enumeration .values > li{
         padding: 0;
       }
-      
-      
-      nav {
+
+      body > div {
         position: absolute;
+        top: 49px;
+      }
+
+      #contents {
+        position: relative;
+        display: inline-block;
         background-color: white;
         padding: 1em;
         line-height: 1.5;
+        width: 20em;
+        vertical-align: top;
       }
-      
-      nav a {
+
+      main {
+        position: relative;
+        display: inline-block;
+        left: 0em;
+        right: 25%;
+        max-width: 1000px;
+        vertical-align: top;
+      }
+
+
+      #contents a {
         text-decoration: none;
       }
-      
-      nav h2, nav h3{
+
+      #contents h2, #contents h3{
         font-size: 100%;
         font-weight: normal;
         text-align: left;
         padding: 0;
         margin: 0;
       }
-      
-      nav h2, nav h2 > a{
+
+      #contents h2, #contents h2 > a{
         color: #853B9E;
       }
-      
-      nav h2 {
+
+      #contents h2 {
         padding-top: 1.5em;
       }
-      
-      nav h3{
+
+      #contents h3{
         color: #2b81af;
       }
-      
-      nav ul{
+
+      #contents ul{
         list-style: none;
       }
-      nav ul, nav li{        
+
+      #contents ul, #contents li{        
         padding: 0;
         margin: 0;
       }
-      
+
+      #docSearch{
+        padding: 0.5em;
+      }
+
     </style>
   </head>
   <body>
-    <nav>
-      <h1>Primrose VR</h1>
-    </nav>    
-    <main>
-    </main>
+    <header role="banner">
+      <a href="/index.html" id="logo">
+        <img src="/images/primrose32.png" alt="logo" title="Primrose logo">
+      </a>
+
+      <nav role="navigation">
+        <ul>
+          <li><a href="/index.html/#intro">intro/</a></li>
+          <li><a href="/index.html/#webvr">webvr/</a></li>
+          <li><a href="/doc/">doc/</a></li>
+          <li><a href="/index.html/#dev">download/</a></li>
+          <li><a href="/index.html/#team">team/</a></li>
+          <li><a href="/index.html/#mail">contact/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header>
+    <div>
+      <div id="contents">
+        <h1>Primrose VR</h1>
+        <form>
+          <input type="text" id="docSearch" placeholder="search">
+        </form>
+        <nav>
+          <ul></ul>
+        </nav> 
+      </div>
+      <main>
+      </main>
+    </div>
   </body>
 </html>
