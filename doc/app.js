@@ -5,14 +5,15 @@
 var docSearch = document.getElementById( "docSearch" ),
     nav = document.querySelector( "#contents > nav > ul" ),
     main = document.querySelector( "#documentation" ),
-    groupings = {
-      examples: [ ],
-      namespaces: [ ],
-      classes: [ ],
-      functions: [ ],
-      enumerations: [ ],
-      records: [ ]
-    };
+    docoCache = {"": main.innerHTML},
+groupings = {
+  examples: [ ],
+  namespaces: [ ],
+  classes: [ ],
+  functions: [ ],
+  enumerations: [ ],
+  records: [ ]
+};
 
 function search () {
   var elems = document.querySelectorAll( "#contents li li" ),
@@ -26,11 +27,9 @@ function search () {
 }
 
 function showHash ( evt ) {
-  if ( document.location.hash.length > 0 ) {
-    main.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
-    if ( evt ) {
-      main.parentElement.scrollTo( 0, 0 );
-    }
+  main.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
+  if ( evt ) {
+    main.parentElement.scrollTo( 0, 0 );
   }
 }
 
@@ -52,8 +51,7 @@ while ( stack.length > 0 ) {
   }
 }
 
-var output = "",
-    docoCache = {};
+var output = "";
 for ( var g in groupings ) {
   var group = groupings[g];
   output += "<li><h2>" + g + "</h2><ul>";
