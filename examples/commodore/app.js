@@ -8,12 +8,17 @@ var keyState = {},
     app = new Primrose.VRApplication( "Commodore", {
       disableAutoFullScreen: true,
       sceneModel: "commodore_pet.json",
-      skyTexture: "../images/bg2.jpg",
-      groundTexture: "../images/deck.png"
+      skyTexture: "/images/bg2.jpg",
+      groundTexture: "/images/deck.png"
     } );
 
 app.setFullScreenButton( "goVR", "click", true );
 app.setFullScreenButton( "goRegular", "click", false );
+app.ctrls.viewSource.addEventListener("click", function () {
+  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
+  path = path.replace("index.html", "app.js");
+  window.open(path);
+}, false);
 
 window.addEventListener( "keyup", function ( evt ) {
   keyState[evt.keyCode] = false;

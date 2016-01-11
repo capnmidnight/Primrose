@@ -1,14 +1,14 @@
 /* global Primrose, THREE, isMobile, put, exp */
 
-var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
-    ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
-    SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
-    WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
-    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" ),
+var GRASS = THREE.ImageUtils.loadTexture( "/examples/images/grass.png" ),
+    ROCK = THREE.ImageUtils.loadTexture( "/examples/images/rock.png" ),
+    SAND = THREE.ImageUtils.loadTexture( "/examples/images/sand.png" ),
+    WATER = THREE.ImageUtils.loadTexture( "/examples/images/water.png" ),
+    DECK = THREE.ImageUtils.loadTexture( "/examples/images/deck.png" ),
     app = new Primrose.VRApplication( "AncientTemple", {
       disableAutoFullScreen: true,
       useFog: true,
-      skyTexture: "../images/bg2.jpg",
+      skyTexture: "/examples/images/bg2.jpg",
       groundTexture: ROCK
     } );
 
@@ -24,7 +24,12 @@ var WIDTH = 100,
     dz = 4;
 
 app.setFullScreenButton( "goVR", "click", true );
-app.setFullScreenButton( "goRegular", "click", false );
+app.setFullScreenButton("goRegular", "click", false);
+app.ctrls.viewSource.addEventListener("click", function () {
+  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
+  path = path.replace("index.html", "app.js");
+  window.open(path);
+}, false);
 
 function column ( a, b, h ) {
   return textured( cylinder( a, b, h, 6, 1 ), SAND );

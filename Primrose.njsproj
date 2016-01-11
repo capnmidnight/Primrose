@@ -177,18 +177,6 @@
     <Content Include="examples\music\index.html" />
     <Content Include="examples\music\screenshot.jpg" />
     <Compile Include="examples\music\app.js" />
-    <Content Include="examples\ovrdesk\index.html" />
-    <Content Include="examples\ovrdesk\ConfigUtilDeskScene.png" />
-    <Content Include="examples\ovrdesk\ConfigUtilDeskScene.json" />
-    <Compile Include="examples\ovrdesk\app.js" />
-    <Content Include="examples\sandbox\index.html" />
-    <Content Include="examples\sandbox\style.css" />
-    <Content Include="examples\sandbox\brick.PNG" />
-    <Content Include="examples\sandbox\grass.png" />
-    <Content Include="examples\sandbox\skybox.png" />
-    <Content Include="examples\sandbox\ocean.jpg" />
-    <Content Include="examples\sandbox\tree.jpg" />
-    <Compile Include="examples\sandbox\app.js" />
     <Content Include="examples\temple\index.html" />
     <Content Include="examples\temple\screenshot.jpg" />
     <Compile Include="examples\temple\app.js" />
@@ -274,8 +262,6 @@
     <Folder Include="examples\keycodeTesting" />
     <Folder Include="examples\models" />
     <Folder Include="examples\music" />
-    <Folder Include="examples\ovrdesk" />
-    <Folder Include="examples\sandbox" />
     <Folder Include="examples\temple" />
     <Folder Include="examples\test" />
     <Folder Include="images" />

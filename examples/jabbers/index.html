@@ -17,18 +17,21 @@
     <meta name="twitter:description" content="Jabberyabs, in Virtual Reality"/>
     <meta name="twitter:image" content="http://www.primrosevr.com/examples/jabbers/screenshot.jpg"/>
     <title>Jabberyabs</title>
-    <link type="text/css" rel="stylesheet" href="../style.min.css">
+    <link type="text/css" rel="stylesheet" href="/examples/style.min.css">
     <script type="text/javascript" src="/bin/loader.min.js" async defer></script>
   </head>
   <body style="background-image:url(screenshot.jpg);">
     <canvas id="frontBuffer"></canvas>
     <div id="controls">
-      <button id="goVR">
-        <img src="/images/cardboard64.png" alt="icon">
-      </button>
-      <button id="goRegular">
-        <img src="/images/fullscreen64.png" alt="icon">
-      </button>
+        <button type="button" id="viewSource">
+            View source
+        </button>
+        <button type="button" id="goVR">
+            <img src="/images/cardboard64.png" alt="icon">
+        </button>
+        <button type="button" id="goRegular">
+            <img src="/images/fullscreen64.png" alt="icon">
+        </button>
     </div>
     <div id="loading">
       Loading...

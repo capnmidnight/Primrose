@@ -9,12 +9,17 @@ var WIDTH = 100,
     jabs = {},
     app = new Primrose.VRApplication( "Editor3D", {
       disableAutoFullScreen: true,
-      skyTexture: "../images/bg2.jpg",
-      groundTexture: "../images/grass.png"
+      skyTexture: "/examples/images/bg2.jpg",
+      groundTexture: "/examples/images/grass.png"
     } );
 // we setup the event handlers for going full-screen
 app.setFullScreenButton( "goVR", "click", true );
 app.setFullScreenButton( "goRegular", "click", false );
+app.ctrls.viewSource.addEventListener("click", function () {
+  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
+  path = path.replace("index.html", "app.js");
+  window.open(path);
+}, false);
 
 // and clicking on the objects in the scene
 function makeJabJump ( evt ) {

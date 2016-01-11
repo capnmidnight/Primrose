@@ -1,15 +1,15 @@
 /* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
 
-var GRASS = THREE.ImageUtils.loadTexture( "../images/grass.png" ),
-    ROCK = THREE.ImageUtils.loadTexture( "../images/rock.png" ),
-    SAND = THREE.ImageUtils.loadTexture( "../images/sand.png" ),
-    WATER = THREE.ImageUtils.loadTexture( "../images/water.png" ),
-    DECK = THREE.ImageUtils.loadTexture( "../images/deck.png" ),
+var GRASS = THREE.ImageUtils.loadTexture( "/examples/images/grass.png" ),
+    ROCK = THREE.ImageUtils.loadTexture( "/examples/images/rock.png" ),
+    SAND = THREE.ImageUtils.loadTexture( "/examples/images/sand.png" ),
+    WATER = THREE.ImageUtils.loadTexture( "/examples/images/water.png" ),
+    DECK = THREE.ImageUtils.loadTexture( "/examples/images/deck.png" ),
     app = new Primrose.VRApplication( "Editor3D", {
   disableAutoFullScreen: true,
   useFog: false,
-  skyTexture: "../images/bg2.jpg",
-  groundTexture: "../images/deck.png"
+  skyTexture: "/examples/images/bg2.jpg",
+  groundTexture: "/examples/images/deck.png"
 } );
 
 var isHomeScreen = window.self !== window.top,
@@ -155,6 +155,11 @@ for ( var i = 0; i < cmdLabels.length; ++i ) {
 
 app.setFullScreenButton("goVR", "click", true);
 app.setFullScreenButton("goRegular", "click", false);
+app.ctrls.viewSource.addEventListener("click", function () {
+  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
+  path = path.replace("index.html", "app.js");
+  window.open(path);
+}, false);
 
 function getSourceCode ( skipReload ) {
   var defaultDemo = testDemo.toString(),
