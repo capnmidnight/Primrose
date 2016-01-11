@@ -60,12 +60,12 @@ Primrose.VRApplication = ( function ( ) {
       }
       else {
         var bounds = this.renderer.domElement.getBoundingClientRect( ),
-            ratio = screen.width / screen.height,
+            boundsRatio = screen.width / screen.height,
             elementWidth = bounds.width,
-            elementHeight = isiOS ? ( elementWidth * ratio ) : ( elementWidth / ratio ),
-            ratio = devicePixelRatio || 1;
-        canvasWidth = Math.floor( elementWidth * ratio * RESOLUTION_SCALE );
-        canvasHeight = Math.floor( elementHeight * ratio * RESOLUTION_SCALE );
+            elementHeight = isiOS ? ( elementWidth * boundsRatio ) : ( elementWidth / boundsRatio ),
+            pixelRatio = devicePixelRatio || 1;
+        canvasWidth = Math.floor( elementWidth * pixelRatio * RESOLUTION_SCALE );
+        canvasHeight = Math.floor( elementHeight * pixelRatio * RESOLUTION_SCALE );
         fieldOfView = 75;
         aspectWidth = canvasWidth;
         if ( isiOS ) {
