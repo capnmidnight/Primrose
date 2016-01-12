@@ -72,6 +72,25 @@
   for ( var g in groupings ) {
     var group = groupings[g];
     output += "<li><h2>" + g + "</h2><ul>";
+    group.sort( function ( a, b ) {
+      var c = a.fullName,
+          d = b.fullName;
+      if ( c === "[Global]" ) {
+        c = "A" + c;
+      }
+      if ( d === "[Global]" ) {
+        d = "A" + d;
+      }
+      if ( c > d ) {
+        return 1;
+      }
+      else if ( c < d ) {
+        return -1;
+      }
+      else {
+        return 0;
+      }
+    } );
     for ( var i = 0; i < group.length; ++i ) {
       var obj = group[i];
       output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
