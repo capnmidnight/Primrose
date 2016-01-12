@@ -6,7 +6,7 @@ var app = new Primrose.VRApplication(
       // file, which basically describes a room or level in 
       // which the user will walk around, on which we can 
       // create additional objects.
-      sceneModel: "/examples/models/holodeck.json",
+      sceneModel: "/models/holodeck.json",
       // We're going to use HTML buttons on the screen to
       // control fullscreen view.
       disableAutoFullScreen: true,
@@ -15,7 +15,7 @@ var app = new Primrose.VRApplication(
         // This file references another THREE.js JSON-formatted
         // model file, which will be cloned anytime a user
         // calls createElement("button").
-        model: "/examples/models/smallbutton.json",
+        model: "/models/smallbutton.json",
         // Display settings for different states of the button.
         options: {
           colorUnpressed: 0x7f0000,
