@@ -13,6 +13,28 @@ body{
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
 
+#loading, #progressBar {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  font-size: 12vw;
+  padding: 7vw;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+#loading {
+  color: white;
+  width: 100%;
+}
+
+#progressBar {
+  background-color: rgba(255, 255, 255, 0.75);
+  color: white;
+  width: 0;
+  overflow: hidden;
+}
+
 a {
   color: black;
 }

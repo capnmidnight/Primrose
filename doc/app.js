@@ -24,9 +24,11 @@
     var elems = document.querySelectorAll( "#contents li li" ),
         search = this.value.toLocaleLowerCase();
     for ( var i = 0; i < elems.length; ++i ) {
-      var e = elems[i],
-          b = e.dataset.name.toLocaleLowerCase();
-      e.style.display = ( search.length === 0 || b.indexOf( search ) > -1 ) ? "" : "none";
+      var e = elems[i];
+      if ( e && e.dataset && e.dataset.name ) {
+        var b = e.dataset.name.toLocaleLowerCase();
+        e.style.display = ( search.length === 0 || b.indexOf( search ) > -1 ) ? "" : "none";
+      }
     }
   }
 
@@ -65,7 +67,7 @@
 
   // Build the menu.
   delete groupings.methods;
-  delete groupings.examples;
+  groupings.examples = pliny.database.examples || [ ];
   var output = "";
   for ( var g in groupings ) {
     var group = groupings[g];
