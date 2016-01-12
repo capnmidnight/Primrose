@@ -5,11 +5,13 @@
   var docSearch = document.getElementById( "docSearch" ),
       nav = document.querySelector( "#contents nav > ul" ),
       doc = document.querySelector( "#documentation" ),
-      docoCache = {"": doc.innerHTML},
-  groupings = {
+      docoCache = {"": doc.innerHTML};
+
+  var groupings = {
     examples: [ ],
     namespaces: [ ],
     classes: [ ],
+    methods: [ ],
     functions: [ ],
     enumerations: [ ],
     records: [ ]
@@ -37,7 +39,7 @@
     }
   }
 
-
+  // Walk the documentation database, grouping different objects by type.
   var stack = [ pliny.database ];
   while ( stack.length > 0 ) {
     var obj = stack.shift();
@@ -46,28 +48,34 @@
         var collect = obj[key],
             group = groupings[key];
         for ( var i = 0; i < collect.length; ++i ) {
-          group.push( collect[i] );
-          stack.push( collect[i] );
+          var obj2 = collect[i];
+          docoCache["#" + obj2.id] = pliny.formats.html.format( obj2 ) + "<a class=\"return-to-top\" href=\"#top\">top</a>";
+          group.push( obj2 );
+          // This is called "trampolining", and is basically a way of performing
+          // recursion in languages that do not support automatic tail recursion.
+          // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
+          stack.push( obj2 );
         }
       }
     }
   }
 
+  // Build the menu.
   var output = "";
   for ( var g in groupings ) {
-    var group = groupings[g];
-    output += "<li><h2>" + g + "</h2><ul>";
-    for ( var i = 0; i < group.length; ++i ) {
-      var obj = group[i];
-      output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
-      docoCache["#" + obj.id] = pliny.formats.html.format( obj ) + "<a class=\"return-to-top\" href=\"#top\">top</a>";
+    if ( g !== "methods" ) {
+      var group = groupings[g];
+      output += "<li><h2>" + g + "</h2><ul>";
+      for ( var i = 0; i < group.length; ++i ) {
+        var obj = group[i];
+        output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+      }
+      output += "</ul></li>";
     }
-    output += "</ul></li>";
   }
-
   nav.innerHTML += output;
 
-
+  // Setup the navigation events
   docSearch.addEventListener( "keyup", search, false );
   docSearch.addEventListener( "search", search, false );
   window.addEventListener( "hashchange", showHash, false );

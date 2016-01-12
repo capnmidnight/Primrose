@@ -64,6 +64,10 @@ h2, h3, h4{
   text-transform: capitalize;
 }
 
+#documentation h2 {
+  text-transform: none;
+}
+
 ol.signatureParameters, ol.signatureParameters > li {
   display: inline;
   padding: 0;
@@ -76,7 +80,7 @@ ol.signatureParameters::after{
   content: ")";
 }
 ol.signatureParameters > li::after{
-  content: ",";
+  content: ", ";
 }
 ol.signatureParameters > li:last-child::after{
   content: "";
