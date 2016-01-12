@@ -5,11 +5,14 @@
   var docSearch = document.getElementById( "docSearch" ),
       nav = document.querySelector( "#contents nav > ul" ),
       doc = document.querySelector( "#documentation" ),
-      docoCache = {"": doc.innerHTML};
+      docoCache = {
+        "": doc.innerHTML,
+        "#Global": pliny.formats.html.format( pliny.database )
+      };
 
   var groupings = {
     examples: [ ],
-    namespaces: [ ],
+    namespaces: [ pliny.database ],
     classes: [ ],
     methods: [ ],
     functions: [ ],
@@ -61,17 +64,17 @@
   }
 
   // Build the menu.
+  delete groupings.methods;
+  delete groupings.examples;
   var output = "";
   for ( var g in groupings ) {
-    if ( g !== "methods" ) {
-      var group = groupings[g];
-      output += "<li><h2>" + g + "</h2><ul>";
-      for ( var i = 0; i < group.length; ++i ) {
-        var obj = group[i];
-        output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
-      }
-      output += "</ul></li>";
+    var group = groupings[g];
+    output += "<li><h2>" + g + "</h2><ul>";
+    for ( var i = 0; i < group.length; ++i ) {
+      var obj = group[i];
+      output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
     }
+    output += "</ul></li>";
   }
   nav.innerHTML += output;
 
