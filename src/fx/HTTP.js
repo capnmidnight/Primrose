@@ -2,20 +2,33 @@
 
 Primrose.HTTP = ( function () {
 
-  /////
-  // Wraps up the XMLHttpRequest object into a workflow that is easier for me to
-  // handle: a single function call. Can handle both GETs and POSTs, with or
-  // without a payload.
-  // 
-  // @param {String} url - the Universal Resource Locator to which we are sending the request.
-  // @param {String} method - the HTTP Verb being used for the request
-  // @param {String} type - the type of data we expect back: "text", "json", "arraybuffer". See here for more: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#Properties
-  // @param {Function} progress - the callback to issue whenever a progress event comes in.
-  // @param {Function} error - the callback to issue whenever an error occurs
-  // @param {Function} success - the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event.
-  // @param {Object} data - (Optional) data that we what to include in the request header payload, as a JSON object (application/json MIME type).
-  ///
-  function XHR ( url, method, type, progress, error, success, data ) {
+  pliny.theElder.namespace( "Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers." );
+  var HTTP = {};
+
+
+  pliny.theElder.function( "Primrose.HTTP", {
+    name: "XHR",
+    description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+    parameters: [
+      {name: "method", type: "String", description: "The HTTP Verb being used for the request."},
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "url", type: "String", description: "The resource to which the request is being sent."},
+      {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ],
+    examples: [ {
+        name: "Make a GET request.",
+        description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.",
+        code: "Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
+        result: "Object {field1: 1, field2: \"Field2\"}"}
+    ],
+    references: [
+      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
+    ]
+  } );
+  HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
     var xhr = new XMLHttpRequest();
     xhr.onerror = error;
     xhr.onabort = error;
@@ -47,36 +60,38 @@ Primrose.HTTP = ( function () {
       // We could do other data types, but in my case, I'm probably only ever
       // going to want JSON. No sense in overcomplicating the interface for
       // features I'm not going to use.
-      xhr.setRequestHeader( "Content-Type",
-          "application/json;charset=UTF-8" );
+      xhr.setRequestHeader( "Content-Type", "application/json;charset=UTF-8" );
       xhr.send( JSON.stringify( data ) );
     }
     else {
       xhr.send();
     }
-  }
+  };
 
-  pliny.theElder.namespace( "Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers." );
-  var HTTP = {};
+
 
   pliny.theElder.function( "Primrose.HTTP", {
     name: "get",
     description: "Process an HTTP GET request.",
     parameters: [
-      {name: "url", type: "String", description: ""},
-      {name: "type", type: "String", description: ""},
-      {name: "progress", type: "Function", description: ""},
-      {name: "error", type: "Function", description: ""},
-      {name: "success", type: "Function", description: ""}
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "url", type: "String", description: "The resource to which the request is being sent."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ],
+    examples: [ {
+        name: "Make a GET request.",
+        description: "GET requests are one of the simplest request types we can make.",
+        code: "Primrose.HTTP.get(\"json\", \"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
+        result: "Object {field1: 1, field2: \"Field2\"}"}
+    ],
+    references: [
+      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
-  HTTP.get = function ( url, type, progress, error, success ) {
-    type = type || "text";
-
-    var progressThunk = success && error && progress,
-        errorThunk = ( success && error ) || ( error && progress ),
-        successThunk = success || error || progress;
-    XHR( url, "GET", type, progressThunk, errorThunk, successThunk );
+  HTTP.get = function ( type, url, success, error, progress ) {
+    HTTP.XHR( "GET", type || "text", url, null, success, error, progress );
   };
 
 
@@ -84,18 +99,19 @@ Primrose.HTTP = ( function () {
     name: "put",
     description: "Process an HTTP PUT request.",
     parameters: [
-      {name: "url", type: "String", description: ""},
-      {name: "type", type: "String", description: ""},
-      {name: "progress", type: "Function", description: ""},
-      {name: "error", type: "Function", description: ""},
-      {name: "success", type: "Function", description: ""}
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "url", type: "String", description: "The resource to which the request is being sent."},
+      {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ],
+    references: [
+      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
-  HTTP.post = function ( url, data, type, progress, error, success ) {
-    var progressThunk = success && error && progress,
-        errorThunk = ( success && error ) || ( error && progress ),
-        successThunk = success || error || progress;
-    XHR( url, "POST", type, progressThunk, errorThunk, successThunk, data );
+  HTTP.post = function ( type, url, data, success, error, progress ) {
+    HTTP.XHR( "POST", type, url, data, success, error, progress );
   };
 
 
@@ -104,17 +120,23 @@ Primrose.HTTP = ( function () {
     name: "getObject",
     description: "Get a JSON object from a server.",
     parameters: [
-      {name: "url", type: "String", description: ""},
-      {name: "progress", type: "Function", description: ""},
-      {name: "error", type: "Function", description: ""},
-      {name: "success", type: "Function", description: ""}
+      {name: "url", type: "String", description: "The resource to which the request is being sent."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ],
+    examples: [ {
+        name: "Make a GET request for a JSON object.",
+        description: "The `getObject` function assumes we're requesting a JSON object. This is probably the type of request you will want to do most often.",
+        code: "Primrose.HTTP.getObject(\"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
+        result: "Object {field1: 1, field2: \"Field2\"}"}
+    ],
+    references: [
+      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
-  HTTP.getObject = function ( url, progress, error, success ) {
-    var progressThunk = success && error && progress,
-        errorThunk = ( success && error ) || ( error && progress ),
-        successThunk = success || error || progress;
-    GET( url, "json", progressThunk, errorThunk, successThunk );
+  HTTP.getObject = function ( url, success, error, progress ) {
+    HTTP.get( "json", url, success, error, progress );
   };
 
 
@@ -123,18 +145,19 @@ Primrose.HTTP = ( function () {
     name: "sendObject",
     description: "Send a JSON object to a server.",
     parameters: [
-      {name: "url", type: "String", description: ""},
-      {name: "data", type: "Object", description: ""},
-      {name: "progress", type: "Function", description: ""},
-      {name: "error", type: "Function", description: ""},
-      {name: "success", type: "Function", description: ""}
+      {name: "url", type: "String", description: "The resource to which the request is being sent."},
+      {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+
+    ],
+    references: [
+      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
-  HTTP.sendObject = function ( url, data, progress, error, success ) {
-    POST( url, data, "json",
-        success && error && progress,
-        ( success && error ) || ( error && progress ),
-        success || error || progress );
+  HTTP.sendObject = function ( url, data, success, error, progress ) {
+    HTTP.put( "json", url, data, success, error, progress );
   };
 
   return HTTP;

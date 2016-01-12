@@ -99,7 +99,7 @@ Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
   };
 
   this.loadFile = function ( fileName, callback ) {
-    Primrose.HTTP.get( fileName.toLowerCase(), "text", function ( file ) {
+    Primrose.HTTP.get( "text", fileName.toLowerCase(), function ( file ) {
       if ( isOSX ) {
         file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
       }

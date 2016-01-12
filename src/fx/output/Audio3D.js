@@ -56,7 +56,7 @@ Primrose.Output.Audio3D = ( function () {
 
     if ( this.isAvailable ) {
       progress( "loading", src );
-      Primrose.HTTP.get( src, "arraybuffer", function ( evt ) {
+      Primrose.HTTP.get( "arraybuffer", src, function ( evt ) {
         progress( "intermediate", src, evt.loaded );
       }, error, function ( data ) {
         progress( "success", src );
