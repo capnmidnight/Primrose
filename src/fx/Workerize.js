@@ -99,7 +99,7 @@ Primrose.Workerize = ( function () {
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
     pliny.theElder.property( {
-      name: "<mappings for each method in the original class>",
+      name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
     } );
