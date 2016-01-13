@@ -56,8 +56,8 @@ MyClass.prototype.update = function(dt){\n\
     this.listeners.complete[i](returnValue);\n\
   }\n\
 };``\n\
-Then we can create and use an automatically workerized version of it as follows.",
-        code: "var phys = new Primrose.Workerize(MyClass);\n\
+Then we can create and use an automatically workerized version of it as follows.\n\
+``var phys = new Primrose.Workerize(MyClass);\n\
 // we keep a local copy of the state so we can perform other operations on it.\n\
 var objects = [];\n\
 for(var i = 0; i < 10; ++i){\n\
@@ -105,8 +105,7 @@ function paint(t){\n\
     }\n\
   }\n\
 }\n\
-requestAnimationFrame(paint);",
-        result: "<no printable result>"}
+requestAnimationFrame(paint);``"}
     ]
   } );
   function Workerize ( func ) {

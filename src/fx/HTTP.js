@@ -20,9 +20,15 @@ Primrose.HTTP = ( function () {
     ],
     examples: [ {
         name: "Make a GET request.",
-        description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.",
-        code: "Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
-        result: "Object {field1: 1, field2: \"Field2\"}"}
+        description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+Code:\n\
+``Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
+  console.log.bind(console, \"done\"),\n\
+  console.error.bind(console),\n\
+  console.log.bind(console, \"progress\"));``\n\
+Results:\n\
+``Object {field1: 1, field2: \"Field2\"}``"}
     ],
     references: [
       {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
@@ -82,9 +88,15 @@ Primrose.HTTP = ( function () {
     ],
     examples: [ {
         name: "Make a GET request.",
-        description: "GET requests are one of the simplest request types we can make.",
-        code: "Primrose.HTTP.get(\"json\", \"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
-        result: "Object {field1: 1, field2: \"Field2\"}"}
+        description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+Code:\n\
+``Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
+  console.log.bind(console, \"done\"),\n\
+  console.error.bind(console),\n\
+  console.log.bind(console, \"progress\"));``\n\
+Results:\n\
+``Object {field1: 1, field2: \"Field2\"}``"}
     ],
     references: [
       {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
@@ -127,9 +139,15 @@ Primrose.HTTP = ( function () {
     ],
     examples: [ {
         name: "Make a GET request for a JSON object.",
-        description: "The `getObject` function assumes we're requesting a JSON object. This is probably the type of request you will want to do most often.",
-        code: "Primrose.HTTP.getObject(\"localFile.json\",\n\tconsole.log.bind(console, \"done\"),\n\tconsole.error.bind(console),\n\tconsole.log.bind(console, \"progress\"));",
-        result: "Object {field1: 1, field2: \"Field2\"}"}
+        description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+Code:\n\
+``Primrose.HTTP.getObject(\"localFile.json\",\n\
+  console.log.bind(console, \"done\"),\n\
+  console.error.bind(console),\n\
+  console.log.bind(console, \"progress\"));``\n\
+Results:\n\
+``Object {field1: 1, field2: \"Field2\"}``"}
     ],
     references: [
       {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}

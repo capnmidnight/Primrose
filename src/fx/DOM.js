@@ -4,8 +4,8 @@ Primrose.DOM = ( function () {
 
   pliny.theElder.namespace( "Primrose.DOM", "A few functions for manipulating DOM." );
   var DOM = {};
-  
-  
+
+
   pliny.theElder.function( "Primrose.DOM", {
     name: "cascadeElement",
     description: "1) If id is a string, tries to find the DOM element that has said ID\n      a) if it exists, and it matches the expected tag type, returns the\n          element, or throws an error if validation fails.\n      b) if it doesn't exist, creates it and sets its ID to the provided\n          id, then returns the new DOM element, not yet placed in the\n          document anywhere.\n2) If id is a DOM element, validates that it is of the expected type,\n      a) returning the DOM element back if it's good,\n      b) or throwing an error if it is not\n3) If id is null, creates the DOM element to match the expected type.",
@@ -56,9 +56,17 @@ Primrose.DOM = ( function () {
     ],
     returns: "An object full of element references, with fields named by the ID of the elements that were found.",
     references: [ {name: "CamelCase - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/CamelCase"} ],
-    examples: [ {name: "Get all child elements.", description: "Assuming the following HTML snippet:\n``<div>\n  <div id=\"First\">first element</div>\n  <section id=\"second-elem\">\n    Second element\n    <img id=\"img1\" src=\"img.png\">\n  </section>\n</div>``",
-        code: "var elems = Primrose.DOM.findEverything();\nconsole.log(elems.First.innerHTML);\nconsole.log(elems[\"second-elem\"].textContent);\nconsole.log(elems.img1.src);",
-        result: "first element\nSecond element\nimg.png"} ]
+    examples: [ {name: "Get all child elements.", description: "Assuming the following HTML snippet:\n``<div>\n  <div id=\"First\">first element</div>\n  <section id=\"second-elem\">\n    Second element\n    <img id=\"img1\" src=\"img.png\">\n  </section>\n</div>``\n\
+\n\
+Code:\n\
+``var elems = Primrose.DOM.findEverything();\n\
+console.log(elems.First.innerHTML);\n\
+console.log(elems[\"second-elem\"].textContent);\n\
+console.log(elems.img1.src);``\n\
+Results:\n\
+``first element\n\
+Second element\n\
+img.png``"} ]
   } );
   DOM.findEverything = function ( elem, obj ) {
     elem = elem || document;
