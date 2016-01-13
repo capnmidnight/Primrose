@@ -1,16 +1,21 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, pliny */
 
 Primrose.ModelLoader = ( function () {
+  // If THREE.js hasn't been loaded, then this module doesn't make sense and we
+  // can just return a shim to prevent errors from occuring. This is useful in
+  // cases where we want to use Primrose in a 2D context, or perhaps use it with
+  // a different 3D library, whatever that might be.
   if ( typeof ( THREE ) === "undefined" ) {
     return function () {
     };
   }
-  var JSON;
 
-  if ( THREE.ObjectLoader ) {
-    JSON = new THREE.ObjectLoader();
-  }
+  // The JSON format object loader is not always included in the THREE.js distribution,
+  // so we have to first check for it.
+  var JSON = THREE.ObjectLoader && new THREE.ObjectLoader();
 
+  // Sometimes, the properties that export out of Blender and into THREE.js don't
+  // come out correctly, so we need to do a correction.
   function fixJSONScene ( json ) {
     json.traverse( function ( obj ) {
       if ( obj.geometry ) {
@@ -21,22 +26,6 @@ Primrose.ModelLoader = ( function () {
     return json;
   }
 
-  function buildScene ( success, scene ) {
-    scene.buttons = [ ];
-    scene.traverse( function ( child ) {
-      if ( child.isButton ) {
-        scene.buttons.push(
-            new Primrose.Button( child.parent, child.name ) );
-      }
-      if ( child.name ) {
-        scene[child.name] = child;
-      }
-    } );
-    if ( success ) {
-      success( scene );
-    }
-  }
-
   var propertyTests = {
     isButton: function ( obj ) {
       return obj.material && obj.material.name.match( /^button\d+$/ );
@@ -45,7 +34,7 @@ Primrose.ModelLoader = ( function () {
       return !obj.name.match( /^(water|sky)/ );
     },
     isGround: function ( obj ) {
-      return obj.material && obj.material.name && obj.material.name.match(/\bground\b/);
+      return obj.material && obj.material.name && obj.material.name.match( /\bground\b/ );
     }
   };
 
@@ -59,18 +48,61 @@ Primrose.ModelLoader = ( function () {
     } );
   }
 
-  function ModelLoader ( src, success ) {
+  function buildScene ( success, error, progress, scene ) {
+    try {
+      scene.buttons = [ ];
+      scene.traverse( function ( child ) {
+        if ( child.isButton ) {
+          scene.buttons.push(
+              new Primrose.Button( child.parent, child.name ) );
+        }
+        if ( child.name ) {
+          scene[child.name] = child;
+        }
+      } );
+      if ( success ) {
+        success( scene );
+      }
+    }
+    catch ( exp ) {
+      if ( error ) {
+        error( exp );
+      }
+    }
+  }
+
+  pliny.theElder.class( "Primrose", {
+    name: "ModelLoader",
+    description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.",
+    parameters: [
+      {name: "src", type: "String", description: "The file from which to load."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ]
+  } );
+  function ModelLoader ( src, success, error, progress ) {
     if ( src ) {
       var done = function ( scene ) {
+        pliny.theElder.property( {
+          name: "template",
+          type: "THREE.Object3D",
+          description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
+        } );
         this.template = scene;
         if ( success ) {
           success( scene );
         }
       }.bind( this );
-      ModelLoader.loadObject( src, done );
+      ModelLoader.loadObject( src, done, error, progress );
     }
   }
 
+  pliny.theElder.method( "Primrose.ModelLoader", {
+    name: "clone",
+    description: "Creates a copy of the stored template model.",
+    returns: "A THREE.Object3D that is a copy of the stored template."
+  } );
   ModelLoader.prototype.clone = function () {
     var obj = this.template.clone();
 
@@ -90,13 +122,32 @@ Primrose.ModelLoader = ( function () {
     return obj;
   };
 
-
-  ModelLoader.loadScene = function ( src, success ) {
-    var done = buildScene.bind( window, success );
-    ModelLoader.loadObject( src, done );
+  pliny.theElder.function( "Primrose.ModelLoader", {
+    name: "loadScene",
+    description: "Loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it, but does not keep a reference of it for cloning.",
+    parameters: [
+      {name: "src", type: "String", description: "The file from which to load."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ]
+  } );
+  ModelLoader.loadScene = function ( src, success, error, progress ) {
+    var done = buildScene.bind( window, success, error, progress );
+    ModelLoader.loadObject( src, done, error, progress );
   };
 
-  ModelLoader.loadObject = function ( src, success ) {
+  pliny.theElder.function( "Primrose.ModelLoader", {
+    name: "loadObject",
+    description: "Loads a model intended to be used as an object in a scene. It processes the model for attributes, but does not keep a reference of it for cloning.",
+    parameters: [
+      {name: "src", type: "String", description: "The file from which to load."},
+      {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
+      {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+      {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+    ]
+  } );
+  ModelLoader.loadObject = function ( src, success, error, progress ) {
     var done = function ( scene ) {
       setProperties( scene );
       if ( success ) {
@@ -104,15 +155,22 @@ Primrose.ModelLoader = ( function () {
       }
     };
 
-    if ( /\.json$/.test(src) ) {
-      if ( !JSON ) {
-        console.error( "JSON seems to be broken right now" );
+    if ( !JSON ) {
+      if ( error ) {
+        error( "JSON seems to be broken right now" );
       }
-      else {
-        JSON.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+    }
+    else {
+      try {
+        JSON.setCrossOrigin( THREE.ImageUtils.crossOrigin );
         JSON.load( src, function ( json ) {
           done( fixJSONScene( json ) );
-        } );
+        }, progress, error );
+      }
+      catch ( exp ) {
+        if ( error ) {
+          error( exp );
+        }
       }
     }
   };
