@@ -2,13 +2,15 @@
 
 Primrose.DOM = ( function () {
 
-  pliny.theElder.namespace( "Primrose.DOM", "DOM manipulators" );
+  pliny.theElder.namespace( "Primrose.DOM", "A few functions for manipulating DOM." );
   var DOM = {};
+  
+  
   pliny.theElder.function( "Primrose.DOM", {
     name: "cascadeElement",
     description: "1) If id is a string, tries to find the DOM element that has said ID\n      a) if it exists, and it matches the expected tag type, returns the\n          element, or throws an error if validation fails.\n      b) if it doesn't exist, creates it and sets its ID to the provided\n          id, then returns the new DOM element, not yet placed in the\n          document anywhere.\n2) If id is a DOM element, validates that it is of the expected type,\n      a) returning the DOM element back if it's good,\n      b) or throwing an error if it is not\n3) If id is null, creates the DOM element to match the expected type.",
     parameters: [
-      {name: "id", type: "(String|DOM element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"},
+      {name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"},
       {name: "tag", type: "String", description: "The HTML tag name of the element we are finding/creating/validating."},
       {name: "DOMClass", type: "Class", description: "The class Function that is the type of element that we are frobnicating."}
     ],
@@ -74,6 +76,15 @@ Primrose.DOM = ( function () {
     return obj;
   };
 
+  pliny.theElder.function( "Primrose.DOM", {
+    name: "makeHidingContainer",
+    description: "Takes an element and shoves it into a containing element that is 0x0 pixels in size, with the overflow hidden. Sometimes, we need an element like a TextArea in the DOM to be able to receive key events, but we don't want the user to see it, so the makeHidingContainer function makes it easy to make it disappear.",
+    parameters: [
+      {name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"},
+      {name: "obj", type: "Element", description: "The child element to stow in the hiding container."}
+    ],
+    returns: "The hiding container element, not yet inserted into the DOM."
+  } );
   DOM.makeHidingContainer = function ( id, obj ) {
     var elem = DOM.cascadeElement( id, "div", window.HTMLDivElement );
     elem.style.position = "absolute";
