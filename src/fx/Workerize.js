@@ -7,6 +7,106 @@ Primrose.Workerize = ( function () {
       "Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits." ],
     parameters: [
       {name: "func", type: "Function", description: "The class function to workerize"}
+    ],
+    examples: [
+      {name: "Create a basic workerized class.",
+        description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
+1.) All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
+2.) All interaction with objects of the class must be through these publically accessible methods. This includes initialization.\n\
+3.) All methods should take at most a single arguemnt. If you need multiple arguments, pack them into an array.\n\
+4.) The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
+5.) The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often ommitted when programming against DOM.\n\
+\n\
+Assuming the following class:\n\
+``function MyClass(){\n\
+  this.listeners = {\n\
+    complete: []\n\
+  };\n\
+  this.objects = [];\n\
+}\n\
+\n\
+MyClass.prototype.addEventListener = function(evt, handler){\n\
+  if(this.listeners[evt]){\n\
+    this.listeners[evt].push(handler);\n\
+  }\n\
+};\n\
+\n\
+MyClass.prototype.addObject = function(obj){\n\
+  this.objects.push(obj);\n\
+};\n\
+\n\
+MyClass.prototype.update = function(dt){\n\
+  // we can make essentially arbitrarily small timeslice updates\n\
+  var SLICE = 0.1;\n\
+  for(var ddt = 0; ddt < dt; ddt += SLICE){\n\
+    for(var i = 0; i < this.objects.length; ++i){\n\
+      var o = this.objects[i];\n\
+      o.x += o.vx * SLICE;\n\
+      o.y += o.vy * SLICE;\n\
+      o.z += o.vz * SLICE;\n\
+    }\n\
+  }\n\
+  // prepare our return state for the UI thread.\n\
+  var returnValue = [];\n\
+  for(var i = 0; i < this.objects.length; ++i){\n\
+    returnValue.push([o.x, o.y, o.z]);\n\
+  }\n\
+  // and emit the event to all of the listeners.\n\
+  for(var i = 0; i < this.listeners.complete.length; ++i){\n\
+    this.listeners.complete[i](returnValue);\n\
+  }\n\
+};``\n\
+Then we can create and use an automatically workerized version of it as follows.",
+        code: "var phys = new Primrose.Workerize(MyClass);\n\
+// we keep a local copy of the state so we can perform other operations on it.\n\
+var objects = [];\n\
+for(var i = 0; i < 10; ++i){\n\
+  var obj = {\n\
+    // random values between -1 and 1\n\
+    x: 2 * Math.random() - 1,\n\
+    y: 2 * Math.random() - 1,\n\
+    z: 2 * Math.random() - 1,\n\
+    vx: 2 * Math.random() - 1,\n\
+    vy: 2 * Math.random() - 1,\n\
+    vz: 2 * Math.random() - 1\n\
+  };\n\
+  objects.push(obj);\n\
+  phys.addObject(obj);\n\
+}\n\
+\n\
+// this flag lets us keep track of whether or not we know that the worker is in the middle of an expensive operation.\n\
+phys.ready = true;\n\
+phys.addEventListener(\"complete\", function(newPositions){\n\
+  // We update the state in the UI thread with the expensively-computed values.\n\
+  for(var i = 0; i < newPositions.length; ++i){\n\
+    objects[i].x = newPositions[i][0];\n\
+    objects[i].y = newPositions[i][1];\n\
+    objects[i].z = newPositions[i][2];\n\
+  }\n\
+  phys.ready = true;\n\
+});\n\
+\n\
+var lt = null;\n\
+function paint(t){\n\
+  requestAnimationFrame(paint);\n\
+  if(lt === undefined || lt === null){\n\
+    lt = t;\n\
+  } else {\n\
+    var dt = t - lt;\n\
+    if(phys.ready){\n\
+      phys.ready = false;\n\
+      phys.update(dt);\n\
+      lt = t;\n\
+    }\n\
+    for(var i = 0; i < objects.length; ++i){\n\
+      var o = objects[i];\n\
+      // We can even perform a much cheaper position update to smooth over the blips in the expensive update on the worker thread.\n\
+      drawObjectAt(o.x + o.vx * dt, o.y + o.vy * dt, o.z + o.vz * dt);\n\
+    }\n\
+  }\n\
+}\n\
+requestAnimationFrame(paint);",
+        result: "<no printable result>"}
     ]
   } );
   function Workerize ( func ) {
