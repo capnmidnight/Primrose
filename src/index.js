@@ -37,7 +37,7 @@ if ( typeof window.pliny === "undefined" ) {
   } )();
 }
 
-pliny.theElder.namespace( "Primrose", "Primrose is a framework for making applications in WebVR. The top-level namespace contains classes for manipulating and viewing 3D environments." );
+pliny.theElder.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
 var Primrose = {};
 
 
