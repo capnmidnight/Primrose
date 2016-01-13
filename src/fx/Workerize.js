@@ -11,11 +11,11 @@ Primrose.Workerize = ( function () {
     examples: [
       {name: "Create a basic workerized class.",
         description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
-1.) All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
-2.) All interaction with objects of the class must be through these publically accessible methods. This includes initialization.\n\
-3.) All methods should take at most a single arguemnt. If you need multiple arguments, pack them into an array.\n\
-4.) The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
-5.) The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often ommitted when programming against DOM.\n\
+* All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
+* All interaction with objects of the class must be through these publically accessible methods. This includes initialization.\n\
+* All methods should take at most a single arguemnt. If you need multiple arguments, pack them into an array.\n\
+* The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
+* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often ommitted when programming against DOM.\n\
 \n\
 Assuming the following class:\n\
 ``function MyClass(){\n\
