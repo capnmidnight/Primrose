@@ -59,7 +59,7 @@
       }
     }
   }
-
+  Primrose.Text.Themes.Default.regular.unfocused = "transparent";
   function showHash ( evt ) {
     if ( document.location.hash !== "#top" ) {
       doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
