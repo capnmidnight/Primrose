@@ -21,13 +21,31 @@
   };
 
   function search () {
-    var elems = document.querySelectorAll( "#contents li li" ),
-        search = this.value.toLocaleLowerCase();
-    for ( var i = 0; i < elems.length; ++i ) {
-      var e = elems[i];
-      if ( e && e.dataset && e.dataset.name ) {
-        var b = e.dataset.name.toLocaleLowerCase();
-        e.style.display = ( search.length === 0 || b.indexOf( search ) > -1 ) ? "" : "none";
+    var lists = document.querySelectorAll( "#contents li ul" );
+    for ( var i = 0; i < lists.length; ++i ) {
+      var list = lists[i];
+      var elems = list.querySelectorAll( "li" ),
+          search = this.value.toLocaleLowerCase(),
+          visibleCount = 0;
+      for ( var j = 0; j < elems.length; ++j ) {
+        var e = elems[j];
+        if ( e && e.dataset && e.dataset.name ) {
+          var b = e.dataset.name.toLocaleLowerCase(),
+              visible = ( search.length === 0 || b.indexOf( search ) > -1 );
+          if ( visible ) {
+            ++visibleCount;
+            e.style.display = "";
+          }
+          else {
+            e.style.display = "none";
+          }
+        }
+      }
+      if ( visibleCount === 0 ) {
+        list.parentElement.style.display = "none";
+      }
+      else {
+        list.parentElement.style.display = "";
       }
     }
   }
@@ -78,7 +96,7 @@
     }
     output += "</ul></li>";
   }
-  nav.innerHTML += output;
+  nav.innerHTML = output;
 
   // Setup the navigation events
   docSearch.addEventListener( "keyup", search, false );
@@ -86,4 +104,5 @@
   window.addEventListener( "hashchange", showHash, false );
 
   showHash();
+  search.call(docSearch);
 } )();
