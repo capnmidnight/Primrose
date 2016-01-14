@@ -5,6 +5,7 @@
   var docSearch = document.getElementById( "docSearch" ),
       nav = document.querySelector( "#contents nav > ul" ),
       doc = document.querySelector( "#documentation" ),
+      main = document.querySelector( "main" ),
       docoCache = {
         "": doc.innerHTML,
         "#Global": pliny.formats.html.format( pliny.database )
@@ -97,8 +98,10 @@
     requestAnimationFrame( paint );
     for ( var i = 0; i < editors.length; ++i ) {
       var ed = editors[i];
-      ed.update();
-      ed.render();
+      if ( main.clientHeight + main.scrollTop > ed.DOMElement.offsetTop ) {
+        ed.update();
+        ed.render();
+      }
     }
   }
   requestAnimationFrame( paint );
