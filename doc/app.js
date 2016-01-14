@@ -75,7 +75,7 @@
       for ( var i = 0; i < codeBlocks.length; ++i ) {
         var ed = editors[i],
             b = codeBlocks[i];
-        ed.setSize( b.clientWidth, Math.min( b.clientHeight * 1.25, 400 ) );
+        ed.setSize( b.clientWidth, Math.min( b.clientHeight * 1.12, 400 ) );
         ed.value = b.textContent || b.innerText;
         ed.DOMElement.style.display = "block";
         ed.DOMElement.style.maxWidth = "100%";
