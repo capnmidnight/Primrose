@@ -48,8 +48,9 @@ Primrose.DOM = ( function () {
 
   pliny.theElder.function( "Primrose.DOM", {
     name: "findEverything",
-    description: [ "Searches an element for all sub elements that have a named ID, using that ID as the name of a field in a hashmap to store a reference to the element. Basically, a quick way to get at all the named elements in a page.",
-      "NOTE: You may name your IDs pretty much anything you want, but for ease of use, you should name them in a camalCase fashion. See ref#[1]." ],
+    description: "Searches an element for all sub elements that have a named ID, using that ID as the name of a field in a hashmap to store a reference to the element. Basically, a quick way to get at all the named elements in a page.\n\
+\n\
+NOTE: You may name your IDs pretty much anything you want, but for ease of use, you should name them in a camalCase fashion. See ref#[1].",
     parameters: [
       {name: "elem", type: "Element", description: "(Optional) the root element from which to search. Defaults to `document`."},
       {name: "obj", type: "Object", description: "(Optional) the object in which to store the element references. If no object is provided, one will be created."}
