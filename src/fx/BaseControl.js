@@ -1,4 +1,4 @@
-/* global Primrose, THREE, pliny */
+/* global Primrose, THREE, pliny, emit */
 
 Primrose.BaseControl = ( function () {
   "use strict";
@@ -27,10 +27,27 @@ Primrose.BaseControl = ( function () {
     pliny.theElder.property( {
       name: "listeners",
       type: "Object",
-      description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl will add such arrays to this object."
+      description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl may add such arrays to this object. By default, includes listeners for focus and blur events."
     } );
-    this.listeners = {};
+    this.listeners = {
+      focus: [ ],
+      blur: [ ]
+    };
   }
+
+  pliny.theElder.method( "Primrose.BaseControl", {
+    name: "addEventListener",
+    description: "Adding an event listener registers a function as being ready to receive events.",
+    parameters: [
+      {name: "evt", type: "String", description: "The name of the event for which we are listening."},
+      {name: "thunk", type: "Function", description: "The callback to fire when the event occurs."}
+    ]
+  } );
+  BaseControl.prototype.addEventListener = function ( event, func ) {
+    if ( this.listeners[event] ) {
+      this.listeners[event].push( func );
+    }
+  };
 
   pliny.theElder.method( "Primrose.BaseControl", {
     name: "focus",
@@ -38,6 +55,7 @@ Primrose.BaseControl = ( function () {
   } );
   BaseControl.prototype.focus = function () {
     this.focused = true;
+    emit.call( this, "focus", {target: this} );
   };
 
   pliny.theElder.method( "Primrose.BaseControl", {
@@ -46,6 +64,7 @@ Primrose.BaseControl = ( function () {
   } );
   BaseControl.prototype.blur = function () {
     this.focused = false;
+    emit.call( this, "blur", {target: this} );
   };
 
   var NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
@@ -86,20 +105,6 @@ Primrose.BaseControl = ( function () {
             parseFloat( match[3] ) ),
             parseFloat( match[4] ) );
       }
-    }
-  };
-
-  pliny.theElder.method( "Primrose.BaseControl", {
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [
-      {name: "evt", type: "String", description: "The name of the event for which we are listening."},
-      {name: "thunk", type: "Function", description: "The callback to fire when the event occurs."}
-    ]
-  } );
-  BaseControl.prototype.addEventListener = function ( event, func ) {
-    if ( this.listeners[event] ) {
-      this.listeners[event].push( func );
     }
   };
 

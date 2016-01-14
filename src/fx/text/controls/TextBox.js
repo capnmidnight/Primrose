@@ -371,6 +371,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
       if ( event === "keydown" ) {
         options.keyEventSource.addEventListener( event, thunk );
       }
+      else {
+        Primrose.BaseControl.prototype.addEventListener.call( this, event, thunk );
+      }
     };
 
     this.cursorPageUp = function ( lines, cursor ) {
