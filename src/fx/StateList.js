@@ -1,7 +1,7 @@
 /* global Primrose, HTMLSelectElement, pliny */
 
 Primrose.StateList = ( function () {
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "StateList",
     description: "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.\n\
 \n\
@@ -40,7 +40,7 @@ The states paramareter should be an array of State objects that take the form of
       }
     }.bind( this ), false );
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "DOMElement",
       type: "HTMLSelectElement",
       description: "The DOM element that should be put on the page to control the settings."

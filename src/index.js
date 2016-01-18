@@ -22,66 +22,63 @@ if ( typeof window.pliny === "undefined" ) {
     var nil = function () {
     };
     var pliniuses = {
-      theYounger: nil,
-      theElder: {
-        namespace: nil,
-        event: nil,
-        function: nil,
-        value: nil,
-        class: nil,
-        method: nil,
-        property: nil
-      }
+      namespace: nil,
+      event: nil,
+      function: nil,
+      value: nil,
+      class: nil,
+      method: nil,
+      property: nil
     };
     return pliniuses;
   } )();
 }
 
-pliny.theElder.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
+pliny.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
 var Primrose = {};
 
 
-pliny.theElder.namespace( "Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment." );
+pliny.namespace( "Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment." );
 Primrose.Input = {};
 
 
-pliny.theElder.namespace( "Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)." );
+pliny.namespace( "Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)." );
 Primrose.Output = {};
 
 
-pliny.theElder.namespace( "Primrose.Text", "The Text namespace contains classes everything regarding the Primrose source code editor." );
+pliny.namespace( "Primrose.Text", "The Text namespace contains classes everything regarding the Primrose source code editor." );
 Primrose.Text = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.CodePages", "The CodePages namespace contains international keyboard parameters." );
+pliny.namespace( "Primrose.Text.CodePages", "The CodePages namespace contains international keyboard parameters." );
 Primrose.Text.CodePages = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.CommandPacks", "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls." );
+pliny.namespace( "Primrose.Text.CommandPacks", "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls." );
 Primrose.Text.CommandPacks = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.Controls", "The Controls namespace contains different types of text-oriented controls." );
+pliny.namespace( "Primrose.Text.Controls", "The Controls namespace contains different types of text-oriented controls." );
 Primrose.Text.Controls = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.Grammars", "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting." );
+pliny.namespace( "Primrose.Text.Grammars", "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting." );
 Primrose.Text.Grammars = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.OperatingSystems", "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems." );
+pliny.namespace( "Primrose.Text.OperatingSystems", "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems." );
 Primrose.Text.OperatingSystems = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.Renderers", "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon." );
+pliny.namespace( "Primrose.Text.Renderers", "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon." );
 Primrose.Text.Renderers = {};
 
 
-pliny.theElder.namespace( "Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar." );
+pliny.namespace( "Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar." );
 Primrose.Text.Themes = {};
 
 
-pliny.theElder.value( "Primrose", {
+pliny.value( "Primrose", {
   name: "SYS_FONTS",
   type: "String",
   description: "A selection of fonts that will match whatever the user's operating system normally uses."
@@ -89,7 +86,7 @@ pliny.theElder.value( "Primrose", {
 Primrose.SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
 
-pliny.theElder.value( "Primrose", {
+pliny.value( "Primrose", {
   name: "SKINS",
   type: "Array of String",
   description: "A selection of color values that closely match skin colors of people."
@@ -100,7 +97,7 @@ Primrose.SKINS = [ "#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDC
   "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000",
   "#5B0001", "#302E2E" ];
 
-pliny.theElder.value( "Primrose", {
+pliny.value( "Primrose", {
   name: "SKINS_VALUES",
   type: "Array of Number",
   description: "A selection of color values that closely match skin colors of people."
@@ -110,7 +107,7 @@ Primrose.SKIN_VALUES = Primrose.SKINS.map( function ( s ) {
 } );
 
 // snagged and adapted from http://detectmobilebrowsers.com/
-pliny.theElder.value( "", {name: "isMobile", type: "Boolean", description: "Flag indicating the current system is a recognized \"mobile\" device, usually possessing a motion sensor."} );
+pliny.value( "", {name: "isMobile", type: "Boolean", description: "Flag indicating the current system is a recognized \"mobile\" device, usually possessing a motion sensor."} );
 var isMobile = ( function ( a ) {
   return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
       a ) ||
@@ -118,33 +115,33 @@ var isMobile = ( function ( a ) {
           a.substring( 0, 4 ) );
 } )( navigator.userAgent || navigator.vendor || window.opera );
 
-pliny.theElder.value( "", {name: "isiOS", type: "Boolean", description: "Flag indicating the current system is a device running the Apple iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code paths necessary to deal with deficiencies in Apple's implementation of web standards."} );
+pliny.value( "", {name: "isiOS", type: "Boolean", description: "Flag indicating the current system is a device running the Apple iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code paths necessary to deal with deficiencies in Apple's implementation of web standards."} );
 var isiOS = /iP(hone|od|ad)/.test( navigator.userAgent || "" );
 
 
-pliny.theElder.value( "", {name: "isOSX", type: "Boolean", description: "Flag indicating the current system is a computer running the Apple OSX operating system. Useful for changing keyboard shortcuts to support Apple's idiosynchratic, concensus-defying keyboard shortcuts."} );
+pliny.value( "", {name: "isOSX", type: "Boolean", description: "Flag indicating the current system is a computer running the Apple OSX operating system. Useful for changing keyboard shortcuts to support Apple's idiosynchratic, concensus-defying keyboard shortcuts."} );
 var isOSX = /Macintosh/.test( navigator.userAgent || "" );
 
-pliny.theElder.value( "", {name: "isWindows", type: "Boolean", description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems. We have not yet found a use for this flag."} );
+pliny.value( "", {name: "isWindows", type: "Boolean", description: "Flag indicating the current system is a computer running one of the Microsoft Windows operating systems. We have not yet found a use for this flag."} );
 var isWindows = /Windows/.test( navigator.userAgent || "" );
 
-pliny.theElder.value( "", {name: "isOpera", type: "Boolean", description: "Flag indicating the browser is currently calling itself Opera. Opera is a substandard browser that lags adoption of cutting edge web technologies, so you are not likely to need this flag if you are using Primrose, other than to cajole users into downloading a more advanced browser such as Mozilla Firefox or Google Chrome."} );
+pliny.value( "", {name: "isOpera", type: "Boolean", description: "Flag indicating the browser is currently calling itself Opera. Opera is a substandard browser that lags adoption of cutting edge web technologies, so you are not likely to need this flag if you are using Primrose, other than to cajole users into downloading a more advanced browser such as Mozilla Firefox or Google Chrome."} );
 var isOpera = !!window.opera || navigator.userAgent.indexOf( ' OPR/' ) >= 0;
 
-pliny.theElder.value( "", {name: "isSafari", type: "Boolean", description: "Flag indicating the browser is currently calling itself Safari. Safari is an overly opinionated browser that thinks users should be protected from themselves in such a way as to prevent users from gaining access to the latest in cutting-edge web technologies. Essentially, it was replaced Microsoft Internet Explorer as the Internet Explorer of the web."} );
+pliny.value( "", {name: "isSafari", type: "Boolean", description: "Flag indicating the browser is currently calling itself Safari. Safari is an overly opinionated browser that thinks users should be protected from themselves in such a way as to prevent users from gaining access to the latest in cutting-edge web technologies. Essentially, it was replaced Microsoft Internet Explorer as the Internet Explorer of the web."} );
 var isSafari = Object.prototype.toString.call( window.HTMLElement ).indexOf( 'Constructor' ) > 0;
 
-pliny.theElder.value( "", {name: "isChrome", type: "Boolean", description: "Flag indicating the browser is currently calling itself Chrome or Chromium. Chromium was one of the first browsers to implement virtual reality features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."} );
+pliny.value( "", {name: "isChrome", type: "Boolean", description: "Flag indicating the browser is currently calling itself Chrome or Chromium. Chromium was one of the first browsers to implement virtual reality features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."} );
 var isChrome = !!window.chrome && !isOpera;
 
-pliny.theElder.value( "", {name: "isFirefox", type: "Boolean", description: "Flag indicating the browser is currently calling itself Firefox. Firefox was one of the first browsers to implement virtual reality features directly in the browser, thanks to the work of the MozVR team."} );
+pliny.value( "", {name: "isFirefox", type: "Boolean", description: "Flag indicating the browser is currently calling itself Firefox. Firefox was one of the first browsers to implement virtual reality features directly in the browser, thanks to the work of the MozVR team."} );
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
 
-pliny.theElder.value( "", {name: "isWebKit", type: "Boolean", description: "Flag indicating the browser is one of Chrome, Safari, or Opera. WebKit browsers have certain issues in common that can be treated together, like a common basis for orientation events."} );
+pliny.value( "", {name: "isWebKit", type: "Boolean", description: "Flag indicating the browser is one of Chrome, Safari, or Opera. WebKit browsers have certain issues in common that can be treated together, like a common basis for orientation events."} );
 var isWebKit = isiOS || isOpera || isChrome;
 
-pliny.theElder.value( "", {name: "isIE", type: "Boolean", description: "Flag indicating the browser is currently calling itself Internet Explorer. Once the bane of every web developer's existence, it has since passed the torch on to Safari in all of its many useless incarnations."} );
+pliny.value( "", {name: "isIE", type: "Boolean", description: "Flag indicating the browser is currently calling itself Internet Explorer. Once the bane of every web developer's existence, it has since passed the torch on to Safari in all of its many useless incarnations."} );
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
-pliny.theElder.value( "", {name: "isVR", type: "Boolean", description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."} );
+pliny.value( "", {name: "isVR", type: "Boolean", description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."} );
 var isVR = !!navigator.getVRDevices;

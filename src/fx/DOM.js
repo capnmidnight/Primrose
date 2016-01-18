@@ -2,11 +2,11 @@
 
 Primrose.DOM = ( function () {
 
-  pliny.theElder.namespace( "Primrose.DOM", "A few functions for manipulating DOM." );
+  pliny.namespace( "Primrose.DOM", "A few functions for manipulating DOM." );
   var DOM = {};
 
 
-  pliny.theElder.function( "Primrose.DOM", {
+  pliny.function( "Primrose.DOM", {
     name: "cascadeElement",
     description: "1. If id is a string, tries to find the DOM element that has said ID\n\
 * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
@@ -43,7 +43,7 @@ Primrose.DOM = ( function () {
     }
 
     if ( elem === null ) {
-      pliny.theElder.error( {name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."} );
+      pliny.error( {name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."} );
       throw new Error( id + " does not refer to a valid " + tag + " element." );
     }
     else {
@@ -52,7 +52,7 @@ Primrose.DOM = ( function () {
     return elem;
   };
 
-  pliny.theElder.function( "Primrose.DOM", {
+  pliny.function( "Primrose.DOM", {
     name: "findEverything",
     description: "Searches an element for all sub elements that have a named ID, using that ID as the name of a field in a hashmap to store a reference to the element. Basically, a quick way to get at all the named elements in a page.\n\
 \n\
@@ -91,7 +91,7 @@ img.png``"} ]
     return obj;
   };
 
-  pliny.theElder.function( "Primrose.DOM", {
+  pliny.function( "Primrose.DOM", {
     name: "makeHidingContainer",
     description: "Takes an element and shoves it into a containing element that is 0x0 pixels in size, with the overflow hidden. Sometimes, we need an element like a TextArea in the DOM to be able to receive key events, but we don't want the user to see it, so the makeHidingContainer function makes it easy to make it disappear.",
     parameters: [

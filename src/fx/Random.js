@@ -2,10 +2,10 @@
 
 Primrose.Random = ( function () {
 
-  pliny.theElder.namespace( "Primrose.Random", "Functions for handling random numbers of different criteria, or selecting random elements of arrays." );
+  pliny.namespace( "Primrose.Random", "Functions for handling random numbers of different criteria, or selecting random elements of arrays." );
   var Random = {};
 
-  pliny.theElder.function( "Primrose.Random", {
+  pliny.function( "Primrose.Random", {
     name: "number",
     description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",
     parameters: [
@@ -37,7 +37,7 @@ Primrose.Random = ( function () {
     return Math.random() * ( max - min ) + min;
   };
 
-  pliny.theElder.function( "Primrose.Random", {
+  pliny.function( "Primrose.Random", {
     name: "int",
     description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another.",
     parameters: [
@@ -94,7 +94,7 @@ Primrose.Random = ( function () {
     return Math.floor( min + n * delta );
   };
 
-  pliny.theElder.function( "Primrose.Random", {
+  pliny.function( "Primrose.Random", {
     name: "item",
     description: "Returns a random element from an array.",
     parameters: [
@@ -132,7 +132,7 @@ two``"}
     return arr[Primrose.Random.int( arr.length )];
   };
 
-  pliny.theElder.function( "Primrose.Random", {
+  pliny.function( "Primrose.Random", {
     name: "steps",
     description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive, sticking to a number of steps in between. Useful for randomly generating music note values on pentatonic scales.",
     parameters: [

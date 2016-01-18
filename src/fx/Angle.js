@@ -1,7 +1,7 @@
 /* global Primrose, pliny */
 
 Primrose.Angle = ( function ( ) {
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "Angle",
     description: "The Angle class smooths out the jump from 360 to 0 degrees. It keeps track of the previous state of angle values and keeps the change between angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for smoother opperation as rotating past 360 degrees will not reset to 0, but continue to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360 but continue to -1 and below.\n\
 \n\
@@ -63,7 +63,7 @@ Results:\n\
         DEG2RAD = Math.PI / 180,
         RAD2DEG = 180 / Math.PI;
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
@@ -92,7 +92,7 @@ Results:\n\
       }
     } );
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "radians",
       type: "Number",
       description: "Get/set the current value of the angle in radians."

@@ -5,26 +5,26 @@ Primrose.BaseControl = ( function () {
 
   var ID = 1;
 
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "BaseControl",
     description: "The BaseControl class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
   } );
   function BaseControl () {
-    pliny.theElder.property( {
+    pliny.property( {
       name: "controlID",
       type: "Number",
       description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
     } );
     this.controlID = ID++;
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "focused",
       type: "Boolean",
       description: "Flag indicating this control has received focus. You should theoretically only read it."
     } );
     this.focused = false;
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "listeners",
       type: "Object",
       description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl may add such arrays to this object. By default, includes listeners for focus and blur events."
@@ -35,7 +35,7 @@ Primrose.BaseControl = ( function () {
     };
   }
 
-  pliny.theElder.method( "Primrose.BaseControl", {
+  pliny.method( "Primrose.BaseControl", {
     name: "addEventListener",
     description: "Adding an event listener registers a function as being ready to receive events.",
     parameters: [
@@ -49,7 +49,7 @@ Primrose.BaseControl = ( function () {
     }
   };
 
-  pliny.theElder.method( "Primrose.BaseControl", {
+  pliny.method( "Primrose.BaseControl", {
     name: "focus",
     description: "Sets the focus property of the control, does not change the focus property of any other control."
   } );
@@ -58,7 +58,7 @@ Primrose.BaseControl = ( function () {
     emit.call( this, "focus", {target: this} );
   };
 
-  pliny.theElder.method( "Primrose.BaseControl", {
+  pliny.method( "Primrose.BaseControl", {
     name: "blur",
     description: "Unsets the focus property of the control, does not change the focus property of any other control."
   } );
@@ -79,7 +79,7 @@ Primrose.BaseControl = ( function () {
           NUMBER_PATTERN + "rad\\s*\\)", "i" );
 
 
-  pliny.theElder.method( "Primrose.BaseControl", {
+  pliny.method( "Primrose.BaseControl", {
     name: "copyElement",
     description: "Copies properties from a DOM element that the control is supposed to match.",
     parameters: [

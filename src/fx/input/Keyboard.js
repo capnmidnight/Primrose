@@ -2,7 +2,7 @@
 
 Primrose.Input.Keyboard = ( function () {
 
-  pliny.theElder.class( "Primrose.Input", {
+  pliny.class( "Primrose.Input", {
     name: "Keyboard",
     baseClass: "Primrose.Input.ButtonAndAxis",
     description: "",

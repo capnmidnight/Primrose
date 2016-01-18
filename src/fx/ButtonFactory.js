@@ -4,7 +4,7 @@ Primrose.ButtonFactory = ( function () {
 
   var buttonCount = 0;
 
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "ButtonFactory",
     description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
     parameters: [
@@ -15,7 +15,7 @@ Primrose.ButtonFactory = ( function () {
   } );
   function ButtonFactory ( templateFile, options, complete ) {
     
-    pliny.theElder.property({
+    pliny.property({
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
@@ -31,7 +31,7 @@ Primrose.ButtonFactory = ( function () {
       }.bind( this ) );
     }
     else {
-      pliny.theElder.property({
+      pliny.property({
         name: "template",
         type: "THREE.Object3D",
         description: "The 3D model for the button, that will be cloned every time a new button is created."
@@ -40,7 +40,7 @@ Primrose.ButtonFactory = ( function () {
     }
   }
 
-  pliny.theElder.method( "Primrose.ButtonFactory", {
+  pliny.method( "Primrose.ButtonFactory", {
     name: "create",
     description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
     parameters: [

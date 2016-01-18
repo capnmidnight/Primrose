@@ -1,7 +1,7 @@
 /* global Primrose, THREE, emit, pliny */
 
 Primrose.Button = ( function () {
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "Button",
     parameters: [
       {name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button."},
@@ -18,26 +18,26 @@ Primrose.Button = ( function () {
     options.colorUnpressed = new THREE.Color( options.colorUnpressed );
     options.colorPressed = new THREE.Color( options.colorPressed );
 
-    pliny.theElder.event( {
+    pliny.event( {
       name: "click",
       description: "Occurs when the button is activated."
     } );
     this.listeners.click = [ ];
 
-    pliny.theElder.event( {
+    pliny.event( {
       name: "release",
       description: "Occurs when the button is deactivated."
     } );
     this.listeners.release = [ ];
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "base",
       type: "THREE.Object3D",
       description: "The stand the button cap sits on."
     } );
     this.base = model.children[1];
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "base",
       type: "THREE.Object3D",
       description: "The moveable part of the button, that triggers the click event."
@@ -48,7 +48,7 @@ Primrose.Button = ( function () {
     this.cap.button = this;
     this.cap.base = this.base;
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "container",
       type: "THREE.Object3D",
       description: "A grouping collection for the base and cap."
@@ -57,7 +57,7 @@ Primrose.Button = ( function () {
     this.container.add( this.base );
     this.container.add( this.cap );
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "color",
       type: "Number",
       description: "The current color of the button cap."
@@ -90,12 +90,12 @@ Primrose.Button = ( function () {
 
   inherit( Button, Primrose.BaseControl );
 
-  pliny.theElder.record( "Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class." );
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "maxThrow", type: "Number", description: "The limit for how far the button can be depressed."} );
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "minDeflection", type: "Number", description: "The minimum distance the button must be depressed before it is activated."} );
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "colorUnpressed", type: "Number", description: "The color to change the button cap to when the button is deactivated."} );
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "colorPressed", type: "Number", description: "The color to change the button cap to when the button is activated."} );
-  pliny.theElder.value( "Primrose.Button.DEFAULTS", {name: "toggle", type: "Boolean", description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."} );
+  pliny.record( "Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class." );
+  pliny.value( "Primrose.Button.DEFAULTS", {name: "maxThrow", type: "Number", description: "The limit for how far the button can be depressed."} );
+  pliny.value( "Primrose.Button.DEFAULTS", {name: "minDeflection", type: "Number", description: "The minimum distance the button must be depressed before it is activated."} );
+  pliny.value( "Primrose.Button.DEFAULTS", {name: "colorUnpressed", type: "Number", description: "The color to change the button cap to when the button is deactivated."} );
+  pliny.value( "Primrose.Button.DEFAULTS", {name: "colorPressed", type: "Number", description: "The color to change the button cap to when the button is activated."} );
+  pliny.value( "Primrose.Button.DEFAULTS", {name: "toggle", type: "Boolean", description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."} );
   Button.DEFAULTS = {
     maxThrow: 0.1,
     minDeflection: 10,
@@ -105,7 +105,7 @@ Primrose.Button = ( function () {
   };
 
 
-  pliny.theElder.property( "Primrose.Button", {
+  pliny.property( "Primrose.Button", {
     name: "position",
     type: "THREE.Vector3",
     description: "The location of the button."

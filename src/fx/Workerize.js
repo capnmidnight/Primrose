@@ -1,7 +1,7 @@
 /* global Primrose, URL, pliny */
 
 Primrose.Workerize = ( function () {
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "Workerize",
     description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
 \n\
@@ -162,14 +162,14 @@ requestAnimationFrame(paint);``"}
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
-    pliny.theElder.property( {
+    pliny.property( {
       name: "worker",
       type: "WebWorker",
       description: "The worker thread containing our class."
     } );
     this.worker = Workerize.createWorker( script, false );
 
-    pliny.theElder.property( {
+    pliny.property( {
       name: "args",
       type: "Array",
       description: "Static allocation of an array to save on memory usage when piping commands to a worker."
@@ -179,7 +179,7 @@ requestAnimationFrame(paint);``"}
     // create a mapper from the UI-thread side onmessage event, to receive
     // messages from the worker thread that events occured and pass them on to
     // the UI thread.
-    pliny.theElder.property( {
+    pliny.property( {
       name: "listeners",
       type: "Object",
       description: "A bag of arrays of callbacks for each of the class' events."
@@ -198,7 +198,7 @@ requestAnimationFrame(paint);``"}
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
-    pliny.theElder.property( {
+    pliny.property( {
       name: "&lt;mappings for each method in the original class&gt;",
       type: "Function",
       description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
@@ -213,7 +213,7 @@ requestAnimationFrame(paint);``"}
     }
   }
 
-  pliny.theElder.method( "Primrose.Workerize", {
+  pliny.method( "Primrose.Workerize", {
     name: "methodShim",
     description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
     parameters: [
@@ -227,7 +227,7 @@ requestAnimationFrame(paint);``"}
     this.worker.postMessage( this.args );
   };
 
-  pliny.theElder.method( "Primrose.Workerize", {
+  pliny.method( "Primrose.Workerize", {
     name: "addEventListener",
     description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
     parameters: [
@@ -243,7 +243,7 @@ requestAnimationFrame(paint);``"}
   };
 
 
-  pliny.theElder.function( "Primrose.Workerize", {
+  pliny.function( "Primrose.Workerize", {
     name: "createWorker",
     description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
     parameters: [

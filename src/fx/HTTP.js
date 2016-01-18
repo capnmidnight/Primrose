@@ -2,11 +2,11 @@
 
 Primrose.HTTP = ( function () {
 
-  pliny.theElder.namespace( "Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers." );
+  pliny.namespace( "Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers." );
   var HTTP = {};
 
 
-  pliny.theElder.function( "Primrose.HTTP", {
+  pliny.function( "Primrose.HTTP", {
     name: "XHR",
     description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
     parameters: [
@@ -76,7 +76,7 @@ Results:\n\
 
 
 
-  pliny.theElder.function( "Primrose.HTTP", {
+  pliny.function( "Primrose.HTTP", {
     name: "get",
     description: "Process an HTTP GET request.",
     parameters: [
@@ -107,7 +107,7 @@ Results:\n\
   };
 
 
-  pliny.theElder.function( "Primrose.HTTP", {
+  pliny.function( "Primrose.HTTP", {
     name: "put",
     description: "Process an HTTP PUT request.",
     parameters: [
@@ -128,7 +128,7 @@ Results:\n\
 
 
 
-  pliny.theElder.function( "Primrose.HTTP", {
+  pliny.function( "Primrose.HTTP", {
     name: "getObject",
     description: "Get a JSON object from a server.",
     parameters: [
@@ -159,7 +159,7 @@ Results:\n\
 
 
 
-  pliny.theElder.function( "Primrose.HTTP", {
+  pliny.function( "Primrose.HTTP", {
     name: "sendObject",
     description: "Send a JSON object to a server.",
     parameters: [

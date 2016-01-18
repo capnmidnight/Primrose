@@ -2,7 +2,7 @@
 
 Primrose.Input.ButtonAndAxis = ( function () {
 
-  pliny.theElder.class( "Primrose.Input", {
+  pliny.class( "Primrose.Input", {
     name: "ButtonAndAxis",
     description: "",
     parameters: [

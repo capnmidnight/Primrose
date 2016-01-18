@@ -3,7 +3,7 @@
 Primrose.Keys = ( function ( ) {
   "use strict";
 
-  pliny.theElder.enumeration( "Primrose.Keys", "Keycode values for system keys that are the same across all international standards" );
+  pliny.enumeration( "Primrose.Keys", "Keycode values for system keys that are the same across all international standards" );
   var Keys = {
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
@@ -125,7 +125,7 @@ Primrose.Keys = ( function ( ) {
   for ( var key in Keys ) {
     var val = Keys[key];
     if ( Keys.hasOwnProperty( key ) && typeof ( val ) === "number" ) {
-      pliny.theElder.value( "Primrose.Keys." + key, "Keycode: " + val + "." );
+      pliny.value( "Primrose.Keys." + key, "Keycode: " + val + "." );
       Keys[val] = key;
     }
   }

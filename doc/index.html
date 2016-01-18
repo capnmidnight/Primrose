@@ -96,7 +96,7 @@
         <h2>
           Example:
         </h2>
-        <pre>pliny.theElder.function( "Primrose.HTTP", {
+        <pre>pliny.function( "Primrose.HTTP", {
   name: "XHR",
   description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
   parameters: [
@@ -173,7 +173,7 @@ HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
           If you ever have a question about how a function works, you can pop open
           the console and type in a query to the documentation database with the
           object's full-qualified name. For example, to read back the documentation
-          specified above, we would type <kbd>pliny.theYounger("Primrose.HTTP.XHR")</kbd>.
+          specified above, we would type <kbd>pliny("Primrose.HTTP.XHR")</kbd>.
           Alternatively, many types of objects (namespaces, functions, classes, enumerations),
           have a convenience function added to them to display their own help file,
           e.g. <kbd>Primrose.HTTP.XHR.help()</kbd>.

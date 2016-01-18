@@ -71,7 +71,7 @@ Primrose.ModelLoader = ( function () {
     }
   }
 
-  pliny.theElder.class( "Primrose", {
+  pliny.class( "Primrose", {
     name: "ModelLoader",
     description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.",
     parameters: [
@@ -84,7 +84,7 @@ Primrose.ModelLoader = ( function () {
   function ModelLoader ( src, success, error, progress ) {
     if ( src ) {
       var done = function ( scene ) {
-        pliny.theElder.property( {
+        pliny.property( {
           name: "template",
           type: "THREE.Object3D",
           description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
@@ -98,7 +98,7 @@ Primrose.ModelLoader = ( function () {
     }
   }
 
-  pliny.theElder.method( "Primrose.ModelLoader", {
+  pliny.method( "Primrose.ModelLoader", {
     name: "clone",
     description: "Creates a copy of the stored template model.",
     returns: "A THREE.Object3D that is a copy of the stored template."
@@ -122,7 +122,7 @@ Primrose.ModelLoader = ( function () {
     return obj;
   };
 
-  pliny.theElder.function( "Primrose.ModelLoader", {
+  pliny.function( "Primrose.ModelLoader", {
     name: "loadScene",
     description: "Loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it, but does not keep a reference of it for cloning.",
     parameters: [
@@ -137,7 +137,7 @@ Primrose.ModelLoader = ( function () {
     ModelLoader.loadObject( src, done, error, progress );
   };
 
-  pliny.theElder.function( "Primrose.ModelLoader", {
+  pliny.function( "Primrose.ModelLoader", {
     name: "loadObject",
     description: "Loads a model intended to be used as an object in a scene. It processes the model for attributes, but does not keep a reference of it for cloning.",
     parameters: [
