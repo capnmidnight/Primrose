@@ -16,6 +16,7 @@ Primrose.Text.Grammars.JavaScript = ( function () {
       /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/
     ],
     [ "functions", /(\w+)(?:\s*\()/ ],
-    [ "members", /(?:(?:\w+\.)+)(\w+)/ ]
+    [ "members", /(\w+)\./ ],
+    [ "members", /((\w+\.)+)(\w+)/ ]
   ] );
 } )();
