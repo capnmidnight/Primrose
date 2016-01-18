@@ -2,7 +2,7 @@ window.addEventListener( "load", function ( d, f ) {
   var c = d[f]( "#loading" ),
       p = d[f]( "#progressBar" ),
       h = d[f]( "head" ),
-      /* */
+      /*  */
        s = [
        "/bin/three.min.js",
        "/bin/pliny.min.js",

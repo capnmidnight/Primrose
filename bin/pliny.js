@@ -41,8 +41,7 @@
   // The default storage location.
   var database = {
     fieldType: "database",
-    name: "Global",
-    fullName: "Global",
+    fullName: "[Global]",
     id: "Global",
     description: "These are the elements in the global namespace."
   };
@@ -182,6 +181,27 @@
 
         arr.push( info );
 
+        // Make sure everything stays in a nice order.
+        arr.sort( function ( a, b ) {
+          var c = a.fullName,
+              d = b.fullName;
+          if ( c === "[Global]" ) {
+            c = "A" + c;
+          }
+          if ( d === "[Global]" ) {
+            d = "A" + d;
+          }
+          if ( c > d ) {
+            return 1;
+          }
+          else if ( c < d ) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        } );
+
         // Handle other parent-child relationships.
         if ( info.fieldType === "class" && info.baseClass ) {
           pliny.theElder.subClass( info.baseClass, info );
@@ -235,7 +255,7 @@
                 // fields here.
                 output += "::";
               }
-              else if(this.fieldType === "example"){
+              else if ( this.fieldType === "example" ) {
                 output += ": ";
               }
               else {
@@ -255,10 +275,6 @@
             return this.fullName.replace( /(\.|:)/g, "_" ).replace( / /g, "" );
           }
         } );
-      }
-
-      if ( bag.fieldType === "example" ) {
-        bag.execute = new Function( bag.code );
       }
 
       // We try to see if the real object exists yet (whether the documentation
@@ -432,10 +448,11 @@
 
         // The array defines the order in which they will appear.
         output += "\n\n" + [
+          "parent",
           "description",
-          "diagram",
           "parameters",
           "returns",
+          "errors",
           "namespaces",
           "classes",
           "functions",
@@ -446,9 +463,7 @@
           "enumerations",
           "records",
           "references",
-          "examples",
-          "code",
-          "result" ].map( formatters.checkAndFormatField.bind( this, obj ) )
+          "examples" ].map( formatters.checkAndFormatField.bind( this, obj ) )
             // filter out any lines that returned undefined because they didn't exist
             .filter( identity )
             // concate them all together
@@ -482,19 +497,58 @@
       if ( o instanceof Array ) {
         output += this.formatArray( obj, p, o );
       }
+      else if ( p === "parent" ) {
+        output += "<p>Contained in <a href=\"#" + pliny.get( o ).id + "\">" + o + "</a></p>";
+      }
       else if ( p === "description" ) {
-        output += "<p>" + o + "</p>";
-      }
-      else if ( p === "code" || p === "result" ) {
-        output += "<h4>" + p + "</h4><pre>" + o + "</pre>";
-      }
-      else if ( p === "diagram" ) {
-        output += "<img src=\"" + o + "\">";
+        output += this.endocumate( o );
       }
       else {
         output += "<dl><dt>" + p + "</dt><dd>" + o + "</dd></dl>";
       }
       return output;
+    },
+    // This is a slightly rough version of Markdown that does not include the 
+    // full link/image sytnax, emphasis, underline, or bold, and uses its own 
+    // syntax for code blocks (double backticks instead of indenting).
+    endocumate: function ( str, depth ) {
+      if ( depth === undefined ) {
+        depth = 0;
+      }
+      if ( depth < 5 ) {
+        var pres = [ ];
+        return "<p>" + str
+            .replace( /(``?)([^`]+)\1/g, function ( str, group1, group2 ) {
+              var name = "&PRE_SNIP" + pres.length + ";",
+                  tag = group1 === "``" ? "pre" : "code",
+                  content = group2.replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+              pres.push( "<" + tag + ">" + content + "</" + tag + ">" );
+              return name;
+            } )
+            .replace( /&(?!\w+;)/g, "&amp;" )
+            .replace( /((\*|-)\s*){3,}\n/g, "<hr>" )
+            .replace( /^([^\n]+)\n=+\n/mg, "<h1>$1</h1>" )
+            .replace( /^([^\n]+)\n-+\n/mg, "<h2>$1</h2>" )
+            .replace( /(#{1,6})\s*([^#\n]+)\s*#*\n/g, function ( str, group1, group2 ) {
+              var h = group1.length;
+              return "<h" + h + ">" + group2 + "</h" + h + ">";
+            } )
+            .replace( /(^(\*|-|\+|\d+\.)\s+[^\n]+\n)+/mg, function ( str ) {
+              var tag = /\d/.test( str[0] ) ? "ol" : "ul";
+              return "<" + tag + ">" + str.replace( /(\*|-|\+|\d+\.)\s+([^\n]+)\n/g, "<li>$2</li>" ) + "</" + tag + ">";
+            } )
+            .replace( /(^> [^\n]+\n)+/mg, function ( str ) {
+              return "<blockquote>" + this.endocumate( str.replace( /^> /mg, "" ), depth + 1 ) + "</blockquote>";
+            }.bind(this) )
+            .replace( /!\[([^\]]+)\]\s*\(([^\)]+)\)/g, "<img title=\"$1\" alt=\"diagram\" src=\"$2\">" )
+            .replace( /\[([^\]]+)\]\s*\(([^\)]+)\)/g, "<a href=\"$2\">$1</a>" )
+            .replace( /<(?!\/|(a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|bgsound|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|command|content|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|element|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|link|main|map|mark|menu|menuitem|meta|meter|nav|nobr|noframes|noscript|object|ol|optgroup|option|output|p|param|picture|pre|progress|q|rp|rt|rtc|ruby|s|samp|script|section|select|shadow|small|source|span|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)\b)/g, "&lt;" )
+            .replace( /\n\s*\n/g, "</p><p>" )
+            .replace( /  \n/g, "<br>" )
+            .replace( /&PRE_SNIP(\d+);/g, function ( str, match ) {
+              return pres[match];
+            } ) + "</p>";
+      }
     },
     ////
     // Specific formatting function for Description fields when they are defined
@@ -515,11 +569,7 @@
       var output = "";
       for ( var i = 0; i < arr.length; ++i ) {
         var ex = arr[i];
-        output += "<div id=\"" + ex.id + "\"><h4>" + ex.name + "</h4><p>" +
-            ex.description.replace( /`([^`]+)`/g, function ( str, match ) {
-              return "<code>" + match + "</code>";
-            } ) + "</p><h5>Code</h5><pre class=\"source-code\">" + ex.code + "</pre><h5>Result</h5><pre>" +
-            ex.result + "</pre></div>";
+        output += "<div><h4><a href=\"#" + ex.id + "\">" + ex.name + "</a></h4>" + this.endocumate( ex.description ) + "</div>";
       }
       return output;
     },
@@ -603,11 +653,16 @@
     // @return {String} - the description of the documentation object.
     ///
     shortDescription: function ( topLevel, p ) {
-      // This is the basic description that all objects get.
       var output = "",
-          tag = topLevel ? "h2" : "span";
+          tag = topLevel ? "h2" : "span",
+          isFunction = p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event",
+          isContainer = isFunction || p.fieldType === "class" || p.fieldType === "namespace" || p.fieldType === "enumeration" || p.fieldType === "subClass" || p.fieldType === "record";
 
-      output += "<" + tag + "><code>" + ( topLevel && p.fieldType !== "example" ? p.fullName : p.name );
+      output += "<" + tag + ">";
+      if ( isContainer && !topLevel ) {
+        output += "<a href=\"#" + p.id + "\">";
+      }
+      output += "<code>" + ( topLevel && p.fieldType !== "example" ? p.fullName : p.name );
 
       if ( p.type ) {
         output += " <span class=\"type\">" + p.type + "</span>";
@@ -615,14 +670,19 @@
 
 
       // But functions and classes take parameters, so they get slightly more.
-      if ( p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event" ) {
+      if ( isFunction ) {
         output += "<ol class=\"signatureParameters\">";
         if ( p.parameters ) {
-          output += "<li>" + p.parameters.map( this.shortDescription.bind( this, false ) ).join( "</li><li>" ) + "</li>";
+          output += "<li>" + p.parameters.map( function ( p ) {
+            return p.name;
+          } ).join( "</li><li>" ) + "</li>";
         }
         output += "</ol>";
       }
 
+      if ( isContainer && !topLevel ) {
+        output += "</a>";
+      }
       return output + "</code></" + tag + ">";
     }
   };
@@ -759,7 +819,7 @@
   };
 
   // Just get the raw data
-  pliny.get = openBag.bind( null, pliny );
+  pliny.get = openBag.bind( null, pliny.database );
 
   // Create documentation functions for each of the supported types of code objects.
   [ "namespace",
@@ -773,7 +833,8 @@
     "record",
     "subClass",
     "example",
-    "reference" ].forEach( function ( k ) {
+    "reference",
+    "error" ].forEach( function ( k ) {
     pliny.theElder[k] = analyzeObject.bind( null, k );
   } );
 

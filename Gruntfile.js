@@ -17,12 +17,12 @@ var fs = require( "fs" ),
     buildFiles = {
       "obj/Primrose.js": [ "src/index.js", "src/fx/**/*.js" ]
     },
-    uglifyFiles = files.map( function ( s ) {
-      return{
-        src: s,
-        dest: s.replace( pathX, "bin/$1.min.js" )
-      };
-    } ),
+uglifyFiles = files.map( function ( s ) {
+  return{
+    src: s,
+    dest: s.replace( pathX, "bin/$1.min.js" )
+  };
+} ),
     copyFiles = files.map( function ( s ) {
       return {
         src: s,
@@ -44,7 +44,12 @@ copyFiles.push( {
 module.exports = function ( grunt ) {
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
-    jshint: {default: "src/**/*.js"},
+    jshint: {
+      default: "src/**/*.js",
+      options: {
+        multistr: true
+      }
+    },
     clean: [ "obj", "bin" ],
     concat: {
       options: {
