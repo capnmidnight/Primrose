@@ -45,16 +45,7 @@
       </nav>
     </header>
     <main>
-      <script type="text/javascript">!function ( d, q, w, a, m, h ) {
-        m = d[q]( "main" );
-        h = d[q]( "header" );
-        function r () {
-          m.style.top = h.clientHeight + 1 + "px";
-        }
-        w[a]( "resize", r, false );
-        w[a]( "load", r, false );
-        r();
-      }( document, "querySelector", this, "addEventListener" );</script>
+      <script type="text/javascript">!function(d,q,w,a,s,m,h){m=d[q]("main");h=d[q]("header");function r(t,y){try{t=h.clientHeight+1;y=w.innerHeight-t;if(w.innerHeight<s.height&&isMobile){y+=s.height-w.innerHeight-10*devicePixelRatio;}m.style.top=t+"px";m.style.height=y+"px";}catch(e){setTimeout(r);}}w[a]("resize",r,false);w[a]("load",r,false);r();}(document,"querySelector",this,"addEventListener",screen);</script>
       <div id="top"></div>
       <div id="contents">
         <h1><a href="/doc/">Primrose VR</a></h1>
