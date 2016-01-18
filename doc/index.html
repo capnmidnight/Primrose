@@ -45,7 +45,35 @@
       </nav>
     </header>
     <main>
-      <script type="text/javascript">!function(d,q,w,a,s,m,h){m=d[q]("main");h=d[q]("header");function r(t,y){try{t=h.clientHeight+1;y=w.innerHeight-t;if(w.innerHeight<s.height&&isMobile){y+=s.height-w.innerHeight-10*devicePixelRatio;}m.style.top=t+"px";m.style.height=y+"px";}catch(e){setTimeout(r);}}w[a]("resize",r,false);w[a]("load",r,false);r();}(document,"querySelector",this,"addEventListener",screen);</script>
+      <script type="text/javascript">!function ( ) {
+        var m = document.querySelector( "main" ),
+            h = document.querySelector( "header" );
+        function r ( ) {
+          try {
+            var t = h.clientHeight + 1,
+                y = window.innerHeight - t;
+            if ( window.innerHeight < screen.height && isMobile ) {
+              if ( !isiOS ) {
+                y += screen.height - window.innerHeight - 10 * devicePixelRatio;
+              }
+              else if ( window.orientation === 90 ) {
+                y += screen.availHeight - window.innerHeight;
+              }
+              else {
+                y += screen.availWidth - window.innerWidth;
+              }
+            }
+            m.style.top = t + "px";
+            m.style.height = y + "px";
+          }
+          catch ( e ) {
+            setTimeout( r );
+          }
+        }
+        window.addEventListener( "resize", r, false );
+        window.addEventListener( "load", r, false );
+        r();
+      }( );</script>
       <div id="top"></div>
       <div id="contents">
         <h1><a href="/doc/">Primrose VR</a></h1>
