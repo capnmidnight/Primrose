@@ -95,6 +95,13 @@
           its documentation database live. New code features and documentation for
           them are delivered in one cohesive package.
         </p>
+        <aside>
+          NOTE: documentation descriptions support a limited subset of 
+          Markdown. Specifically, none of the shortcuts for the link/image syntax
+          are supported, nor are bolding, underlining, or italicizing. However, HTML
+          is supported inline. It also supports double-back-ticks (<kbd>``example``</kbd>)
+          for specifying blocks of code, rather than using whitespace indenting rules.
+        </aside>
         <h2>
           Example:
         </h2>
@@ -172,13 +179,13 @@ HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
           s developer console.
         </p>
         <p>
-         If you ever have a question about how a function works, you can pop open
-         the console and type in a query to the documentation database with the
-         object's full-qualified name. For example, to read back the documentation
-         specified above, we would type <kbd>pliny.theYounger("Primrose.HTTP.XHR")</kbd>.
-         Alternatively, many types of objects (namespaces, functions, classes, enumerations),
-         have a convenience function added to them to display their own help file,
-         e.g. <kbd>Primrose.HTTP.XHR.help()</kbd>.
+          If you ever have a question about how a function works, you can pop open
+          the console and type in a query to the documentation database with the
+          object's full-qualified name. For example, to read back the documentation
+          specified above, we would type <kbd>pliny.theYounger("Primrose.HTTP.XHR")</kbd>.
+          Alternatively, many types of objects (namespaces, functions, classes, enumerations),
+          have a convenience function added to them to display their own help file,
+          e.g. <kbd>Primrose.HTTP.XHR.help()</kbd>.
         </p>
         <pre>[function] Primrose.HTTP.XHR([String] method, [String] type, [String] url, [Object] data, [Function] success, [Function] error, [Function] progress)
 
