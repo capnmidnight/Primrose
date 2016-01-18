@@ -1,4 +1,4 @@
-/* global pliny, Primrose */
+/* global pliny, Primrose, devicePixelRatio */
 ( function () {
   "use strict";
 
