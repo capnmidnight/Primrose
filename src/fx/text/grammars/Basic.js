@@ -5,7 +5,7 @@ Primrose.Text.Grammars.Basic = ( function ( ) {
   var grammar = new Primrose.Text.Grammar( "BASIC", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
     [ "lineNumbers", /^\d+\s+/ ],
-    [ "comments", /^REM.*$/ ],
+    [ "startLineComments", /^REM\s/ ],
     [ "strings", /"(?:\\"|[^"])*"/ ],
     [ "strings", /'(?:\\'|[^'])*'/ ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
