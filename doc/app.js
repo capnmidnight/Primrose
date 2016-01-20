@@ -61,31 +61,35 @@
     }
   }
 
+  function replacePreBlocks () {
+    var codeBlocks = doc.querySelectorAll( "pre" );
+    while ( editors.length < codeBlocks.length ) {
+      editors.push( new Primrose.Text.Controls.TextBox( "editor" + editors.length, {
+        autoBindEvents: true,
+        keyEventSource: window,
+        readOnly: true
+      } ) );
+      editors[editors.length - 1].addEventListener( "focus", editorFocused );
+    }
+    for ( var i = 0; i < codeBlocks.length; ++i ) {
+      var ed = editors[i],
+          b = codeBlocks[i];
+      ed.setSize( b.clientWidth, Math.min( b.clientHeight * ( 1.25 + devicePixelRatio * 0.05 ), 400 ) );
+      ed.value = b.textContent || b.innerText;
+      ed.DOMElement.style.display = "block";
+      ed.DOMElement.style.maxWidth = "100%";
+      b.parentElement.replaceChild( ed.DOMElement, b );
+    }
+    for ( var i = codeBlocks.length; i < editors.length; ++i ) {
+      var ed = editors[i];
+      ed.DOMElement.style.display = "none";
+    }
+  }
+
   function showHash ( evt ) {
     if ( document.location.hash !== "#top" ) {
       doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
-      var codeBlocks = doc.querySelectorAll( "pre" );
-      while ( editors.length < codeBlocks.length ) {
-        editors.push( new Primrose.Text.Controls.TextBox( "editor" + editors.length, {
-          autoBindEvents: true,
-          keyEventSource: window,
-          readOnly: true
-        } ) );
-        editors[editors.length - 1].addEventListener( "focus", editorFocused );
-      }
-      for ( var i = 0; i < codeBlocks.length; ++i ) {
-        var ed = editors[i],
-            b = codeBlocks[i];
-        ed.setSize( b.clientWidth, Math.min( b.clientHeight * (1.25 + devicePixelRatio * 0.05), 400 ) );
-        ed.value = b.textContent || b.innerText;
-        ed.DOMElement.style.display = "block";
-        ed.DOMElement.style.maxWidth = "100%";
-        b.parentElement.replaceChild( ed.DOMElement, b );
-      }
-      for ( var i = codeBlocks.length; i < editors.length; ++i ) {
-        var ed = editors[i];
-        ed.DOMElement.style.display = "none";
-      }
+      replacePreBlocks();
       if ( evt ) {
         doc.scrollIntoView( {
           block: "top",
