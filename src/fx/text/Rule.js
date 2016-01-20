@@ -16,15 +16,9 @@ Primrose.Text.Rule = ( function ( ) {
         // Only use the last group that matches the regex, to allow for more
         // complex regexes that can match in special contexts, but not make
         // the context part of the token.
-        var midx = res[res.length - 1];
-        var start = res.index;
-        // We skip the first record, because it's not a captured group, it's
-        // just the entire matched text.
-        for ( var k = 1; k < res.length - 1; ++k ) {
-          start += res[k].length;
-        }
-
-        var end = start + midx.length;
+        var midx = res[res.length - 1],
+            start = res.input.indexOf( midx ),
+            end = start + midx.length;
         if ( start === 0 ) {
           // the rule matches the start of the token
           token.type = this.name;

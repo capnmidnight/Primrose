@@ -21,6 +21,10 @@ Primrose.Text.Themes.Dark = ( function ( ) {
       foreColor: "#aa9900",
       fontStyle: "italic"
     },
+    regexes: {
+      foreColor: "#aa0099",
+      fontStyle: "italic"
+    },
     numbers: {
       foreColor: "green"
     },

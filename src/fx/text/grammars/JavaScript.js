@@ -7,6 +7,7 @@ Primrose.Text.Grammars.JavaScript = ( function () {
     [ "newlines", /(?:\r\n|\r|\n)/ ],
     [ "startBlockComments", /\/\*/ ],
     [ "endBlockComments", /\*\// ],
+    [ "regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/ ],
     [ "stringDelim", /("|')/ ],
     [ "startLineComments", /\/\/.*$/m ],
     [ "numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/ ],
