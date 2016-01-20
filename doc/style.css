@@ -86,7 +86,8 @@ h2, h3, h4{
   text-transform: capitalize;
 }
 
-#documentation h2 {
+#documentation article h1 {
+  font-size: 2em;
   text-transform: none;
 }
 
