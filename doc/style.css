@@ -91,6 +91,10 @@ h2, h3, h4{
   text-transform: none;
 }
 
+#documentation article div h1, #documentation article div h2, #documentation article div h3, #documentation article div h4, #documentation article div h5, #documentation article div h6 {
+  font-size: 80%;
+}
+
 ol.signatureParameters, ol.signatureParameters > li {
   display: inline;
   padding: 0;
