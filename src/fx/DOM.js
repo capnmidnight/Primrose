@@ -56,13 +56,12 @@ Primrose.DOM = ( function () {
     name: "findEverything",
     description: "Searches an element for all sub elements that have a named ID, using that ID as the name of a field in a hashmap to store a reference to the element. Basically, a quick way to get at all the named elements in a page.\n\
 \n\
-NOTE: You may name your IDs pretty much anything you want, but for ease of use, you should name them in a camalCase fashion. See ref#[1].",
+NOTE: You may name your IDs pretty much anything you want, but for ease of use, you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
     parameters: [
       {name: "elem", type: "Element", description: "(Optional) the root element from which to search. Defaults to `document`."},
       {name: "obj", type: "Object", description: "(Optional) the object in which to store the element references. If no object is provided, one will be created."}
     ],
     returns: "An object full of element references, with fields named by the ID of the elements that were found.",
-    references: [ {name: "CamelCase - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/CamelCase"} ],
     examples: [ {name: "Get all child elements.", description: "Assuming the following HTML snippet:\n``<div>\n  <div id=\"First\">first element</div>\n  <section id=\"second-elem\">\n    Second element\n    <img id=\"img1\" src=\"img.png\">\n  </section>\n</div>``\n\
 \n\
 Code:\n\

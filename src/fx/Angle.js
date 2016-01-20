@@ -9,13 +9,11 @@ When instantiating, choose a value that is as close as you can guess will be you
 \n\
 This is particularly important for the 180 degrees, +- 10 degrees or so. If you expect values to run back and forth over 180 degrees, then initialAngleInDegrees should be set to 180. Otherwise, if your initial value is anything slightly larger than 180, the correction will rotate the angle into negative degrees, e.g.:\n\tinitialAngleInDegrees = 0\n\tfirst reading = 185\n\tupdated degrees value = -175\n\
 \n\
-It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
+It also automatically performs degree-to-radian and radian-to-degree conversions. For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
+\n\
 ![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
     parameters: [
       {name: "initialAngleInDegrees", type: "Number", description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."}
-    ],
-    references: [
-      {name: "Radian - Wikipedia, the free encyclopedia.", description: "https://en.wikipedia.org/wiki/Radian"}
     ],
     examples: [ {
       name: "Basic usage",

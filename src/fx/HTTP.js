@@ -11,7 +11,7 @@ Primrose.HTTP = ( function () {
     description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
     parameters: [
       {name: "method", type: "String", description: "The HTTP Verb being used for the request."},
-      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype)."},
       {name: "url", type: "String", description: "The resource to which the request is being sent."},
       {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
@@ -29,9 +29,6 @@ Code:\n\
   console.log.bind(console, \"progress\"));``\n\
 Results:\n\
 ``Object {field1: 1, field2: \"Field2\"}``"}
-    ],
-    references: [
-      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
   HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
@@ -80,7 +77,7 @@ Results:\n\
     name: "get",
     description: "Process an HTTP GET request.",
     parameters: [
-      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype)."},
       {name: "url", type: "String", description: "The resource to which the request is being sent."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
       {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
@@ -97,9 +94,6 @@ Code:\n\
   console.log.bind(console, \"progress\"));``\n\
 Results:\n\
 ``Object {field1: 1, field2: \"Field2\"}``"}
-    ],
-    references: [
-      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
   HTTP.get = function ( type, url, success, error, progress ) {
@@ -111,15 +105,12 @@ Results:\n\
     name: "put",
     description: "Process an HTTP PUT request.",
     parameters: [
-      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+      {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype)."},
       {name: "url", type: "String", description: "The resource to which the request is being sent."},
       {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
       {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
       {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
-    ],
-    references: [
-      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
   HTTP.post = function ( type, url, data, success, error, progress ) {
@@ -148,9 +139,6 @@ Code:\n\
   console.log.bind(console, \"progress\"));``\n\
 Results:\n\
 ``Object {field1: 1, field2: \"Field2\"}``"}
-    ],
-    references: [
-      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
   HTTP.getObject = function ( url, success, error, progress ) {
@@ -168,10 +156,6 @@ Results:\n\
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
       {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
       {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
-
-    ],
-    references: [
-      {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
     ]
   } );
   HTTP.sendObject = function ( url, data, success, error, progress ) {
