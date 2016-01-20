@@ -13,9 +13,10 @@ Primrose.Text.Grammar = ( function ( ) {
     function crudeParsing ( tokens ) {
       var commentDelim = null,
           stringDelim = null,
-          line = 0;
-      for ( var i = 0; i < tokens.length; ++i ) {
-        var t = tokens[i];
+          line = 0,
+          i, t;
+      for ( i = 0; i < tokens.length; ++i ) {
+        t = tokens[i];
         t.line = line;
         if ( t.type === "newlines" ) {
           ++line;
@@ -45,6 +46,15 @@ Primrose.Text.Grammar = ( function ( ) {
         else if ( t.type === "startBlockComments" || t.type === "startLineComments" ) {
           commentDelim = t.type;
           t.type = "comments";
+        }
+      }
+      
+      for(i = tokens.length - 1; i > 0; --i){
+        var p = tokens[i - 1];
+        t = tokens[i];
+        if(p.type === t.type){
+          p.value += t.value;
+          tokens.splice(i, 1);
         }
       }
     }
