@@ -1,4 +1,5 @@
 /* global pliny, Primrose, devicePixelRatio */
+var toTop = null;
 ( function () {
   "use strict";
 
@@ -87,17 +88,20 @@
   }
 
   function showHash ( evt ) {
-    if ( document.location.hash !== "#top" ) {
-      doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
-      replacePreBlocks();
-      if ( evt ) {
-        doc.scrollIntoView( {
-          block: "top",
-          behavior: "smooth"
-        } );
-      }
+    doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
+    replacePreBlocks();
+    if ( evt ) {
+      toTop();
     }
   }
+
+  toTop = function () {
+    doc.scrollIntoView( {
+      block: "top",
+      behavior: "smooth"
+    } );
+  };
+
   function paint () {
     requestAnimationFrame( paint );
     for ( var i = 0; i < editors.length; ++i ) {
@@ -119,7 +123,7 @@
             group = groupings[key];
         for ( var i = 0; i < collect.length; ++i ) {
           var obj2 = collect[i];
-          docoCache["#" + obj2.id] = pliny.formats.html.format( obj2 ) + "<a class=\"return-to-top\" href=\"#top\">top</a>";
+          docoCache["#" + obj2.id] = pliny.formats.html.format( obj2 ) + "<a class=\"return-to-top\" href=\"javascript:toTop();\">top</a>";
           group.push( obj2 );
           // This is called "trampolining", and is basically a way of performing
           // recursion in languages that do not support automatic tail recursion.
