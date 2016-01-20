@@ -1,8 +1,57 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Grammar = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "Grammar",
+    parameters: [
+      {name: "name", type: "String", description: "A user-friendly name for the grammar, to be able to include it in an options listing."},
+      {name: "grammar", type: "Array", description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."}
+    ],
+    description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
+\n\
+As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
+\n\
+See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
+    examples: [
+      {name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+\n\
+# Code:\n\
+``var plainTextGrammar = new Primrose.Text.Grammar(\n\
+  // The name is for displaying in options views.\n\
+  \"Plain-text\", [\n\
+  // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+  [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
+] );``"},
+      {name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+\n\
+# Code:\n\
+``var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
+  // Grammar rules are applied in the order they are specified.\n\
+  [\n\
+    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+    [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
+    // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
+    [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
+    // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
+    [ \"startLineComments\", /^REM\\s/ ],\n\
+    // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
+    [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
+    [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
+    // Numbers are pretty easy.\n\
+    [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
+    [ \"keywords\",\n\
+      /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
+    ],\n\
+    [ \"keywords\", /^DEF FN/ ],\n\
+    [ \"operators\",\n\
+      /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
+    ],\n\
+    [ \"identifiers\", /\\w+\\$?/ ]\n\
+  ] );``"}
+    ]
+  } );
   function Grammar ( name, grammar ) {
     this.name = name;
     // clone the preprocessing grammar to start a new grammar
@@ -48,13 +97,13 @@ Primrose.Text.Grammar = ( function ( ) {
           t.type = "comments";
         }
       }
-      
-      for(i = tokens.length - 1; i > 0; --i){
+
+      for ( i = tokens.length - 1; i > 0; --i ) {
         var p = tokens[i - 1];
         t = tokens[i];
-        if(p.type === t.type){
+        if ( p.type === t.type ) {
           p.value += t.value;
-          tokens.splice(i, 1);
+          tokens.splice( i, 1 );
         }
       }
     }
