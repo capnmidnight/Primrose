@@ -126,13 +126,33 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     pliny.method( {
       name: "tokenize",
       parameters: [ {name: "text", type: "String", description: "The text to tokenize."} ],
-      returns: "Array",
+      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
       description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
       examples: [
         {name: "Tokenize some JavaScript", description: "Primrose comes with a grammar for JavaScript built in.\n\
 \n\
 ## Code:\n\
-``asdf``"}
+``var tokens = new Primrose.Text.Grammars.JavaScript\n\
+  .tokenize(\"var x = 3;\\n\\\n\
+var y = 2;\\n\\\n\
+console.log(x + y);\");\n\
+console.log(JSON.stringify(tokens));``\n\
+## Result:\n\
+``[ \n\
+  { \"value\": \"var\", \"type\": \"keywords\", \"index\": 0, \"line\": 0 },\n\
+  { \"value\": \" x = \", \"type\": \"regular\", \"index\": 3, \"line\": 0 },\n\
+  { \"value\": \"3\", \"type\": \"numbers\", \"index\": 8, \"line\": 0 },\n\
+  { \"value\": \";\", \"type\": \"regular\", \"index\": 9, \"line\": 0 },\n\
+  { \"value\": \"\\n\", \"type\": \"newlines\", \"index\": 10, \"line\": 0 },\n\
+  { \"value\": \" y = \", \"type\": \"regular\", \"index\": 11, \"line\": 1 },\n\
+  { \"value\": \"2\", \"type\": \"numbers\", \"index\": 16, \"line\": 1 },\n\
+  { \"value\": \";\", \"type\": \"regular\", \"index\": 17, \"line\": 1 },\n\
+  { \"value\": \"\\n\", \"type\": \"newlines\", \"index\": 18, \"line\": 1 },\n\
+  { \"value\": \"console\", \"type\": \"members\", \"index\": 19, \"line\": 2 },\n\
+  { \"value\": \".\", \"type\": \"regular\", \"index\": 26, \"line\": 2 },\n\
+  { \"value\": \"log\", \"type\": \"functions\", \"index\": 27, \"line\": 2 },\n\
+  { \"value\": \"(x + y);\", \"type\": \"regular\", \"index\": 30, \"line\": 2 }\n\
+]``"}
       ]
     } );
     this.tokenize = function ( text ) {
