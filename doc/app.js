@@ -19,7 +19,8 @@ var toTop = null;
     methods: [ ],
     functions: [ ],
     enumerations: [ ],
-    records: [ ]
+    records: [ ],
+    issues: [ ]
   };
 
   function search () {

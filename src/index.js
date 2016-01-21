@@ -145,3 +145,13 @@ var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 pliny.value( "", {name: "isVR", type: "Boolean", description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."} );
 var isVR = !!navigator.getVRDevices;
+
+pliny.issue( "", {
+  name: "document Workerize",
+  type: "open",
+  description: "Blah blah blah",
+  comments: [ {
+      name: "Lots of work to do - STM - 2016-01-21",
+      description: "I'm just making a mess"
+    }
+  ]} );
