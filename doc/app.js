@@ -114,6 +114,7 @@ var toTop = null;
     }
   }
   requestAnimationFrame( paint );
+
   // Walk the documentation database, grouping different objects by type.
   var stack = [ pliny.database ];
   while ( stack.length > 0 ) {
@@ -125,7 +126,9 @@ var toTop = null;
         for ( var i = 0; i < collect.length; ++i ) {
           var obj2 = collect[i];
           docoCache["#" + obj2.id] = pliny.formats.html.format( obj2 ) + "<a class=\"return-to-top\" href=\"javascript:toTop();\">top</a>";
-          group.push( obj2 );
+          if ( key !== "issues" || obj2.type === "open" ) {
+            group.push( obj2 );
+          }
           // This is called "trampolining", and is basically a way of performing
           // recursion in languages that do not support automatic tail recursion.
           // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
