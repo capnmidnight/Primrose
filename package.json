@@ -17,6 +17,9 @@
     "examples/",
     "lib/"
   ],
+  "scripts": {
+    "start": "node server/server.js -v:true"  
+  },
   "keywords": [
     "virtual reality",
     "VR",
@@ -29,8 +32,6 @@
     "highlighting"
   ],
   "dependencies": {
-    "cannon": "git://github.com/schteppe/cannon.js.git",
-    "leapjs": "^0.6.4",
     "mime": "^1.3.4",
     "socket.io": "^1.4.4",
     "socket.io-client": "^1.4.4",
