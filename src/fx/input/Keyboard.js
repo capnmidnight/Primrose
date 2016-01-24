@@ -29,3 +29,9 @@ Primrose.Input.Keyboard = ( function () {
   Primrose.Input.ButtonAndAxis.inherit( KeyboardInput );
   return KeyboardInput;
 } )();
+
+pliny.issue( "Primrose.Input.Keyboard", {
+  name: "document Keyboard",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Keyboard](#Primrose_Input_Keyboard) class in the input/ directory"
+} );

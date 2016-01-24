@@ -273,3 +273,9 @@ requestAnimationFrame(paint);``"}
 
   return Workerize;
 } )();
+
+pliny.issue( "Primrose.Workerize", {
+  name: "document Workerize",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Workerize](#Primrose_Workerize) class in the  directory"
+} );

@@ -81,3 +81,9 @@ Primrose.Text.CodePages.EN_UKX = (function () {
     }
   });
 })();
+
+pliny.issue( "Primrose.Text.CodePages.EN_UKX", {
+  name: "document EN_UKX",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.CodePages.EN_UKX](#Primrose_Text_CodePages_EN_UKX) class in the code_pages/ directory"
+} );

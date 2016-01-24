@@ -248,3 +248,9 @@ Primrose.Input.ButtonAndAxis = ( function () {
 
   return ButtonAndAxisInput;
 } )();
+
+pliny.issue( "Primrose.Input.ButtonAndAxis", {
+  name: "document ButtonAndAxis",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.ButtonAndAxis](#Primrose_Input_ButtonAndAxis) class in the input/ directory"
+} );

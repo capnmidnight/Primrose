@@ -1,3 +1,5 @@
+/* global pliny */
+
 function copyObject ( dest, source ) {
   var stack = [ {dest: dest, source: source} ];
   while ( stack.length > 0 ) {
@@ -31,3 +33,9 @@ function emit ( evt, args ) {
     handlers[i]( args );
   }
 }
+
+pliny.issue( "", {
+  name: "document helpers/oop",
+  type: "open",
+  description: "Finish writing the documentation for the [oop](#oop) class in the helpers/ directory"
+} );

@@ -56,3 +56,9 @@ Primrose.Text.CodePages.EN_US = (function () {
     }
   });
 })();
+
+pliny.issue( "Primrose.Text.CodePages.EN_US", {
+  name: "document EN_US",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.CodePages.EN_US](#Primrose_Text_CodePages_EN_US) class in the code_pages/ directory"
+} );

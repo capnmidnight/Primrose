@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Input.Location = ( function () {
   function LocationInput ( name, commands, socket, options ) {
@@ -34,3 +34,9 @@ Primrose.Input.Location = ( function () {
   };
   return LocationInput;
 } )();
+
+pliny.issue( "Primrose.Input.Location", {
+  name: "document Location",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Location](#Primrose_Input_Location) class in the input/ directory"
+} );

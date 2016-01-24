@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Input.Touch = ( function () {
   function TouchInput ( name, DOMElement, commands, socket ) {
@@ -45,3 +45,9 @@ Primrose.Input.Touch = ( function () {
   Primrose.Input.ButtonAndAxis.inherit( TouchInput );
   return TouchInput;
 } )();
+
+pliny.issue( "Primrose.Input.Touch", {
+  name: "document Touch",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Touch](#Primrose_Input_Touch) class in the input/ directory"
+} );

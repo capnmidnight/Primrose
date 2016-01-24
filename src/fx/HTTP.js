@@ -164,3 +164,9 @@ Results:\n\
 
   return HTTP;
 } )();
+
+pliny.issue( "Primrose.HTTP", {
+  name: "document HTTP",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.HTTP](#Primrose_HTTP) class in the  directory"
+} );

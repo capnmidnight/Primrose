@@ -25,3 +25,9 @@ Primrose.Text.Token = ( function () {
 
   return Token;
 } )();
+
+pliny.issue( "Primrose.Text.Token", {
+  name: "document Token",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Token](#Primrose_Text_Token) class in the text/ directory"
+} );

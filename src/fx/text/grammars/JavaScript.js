@@ -19,3 +19,9 @@ Primrose.Text.Grammars.JavaScript = ( function () {
     [ "members", /((\w+\.)+)(\w+)/ ]
   ] );
 } )();
+
+pliny.issue( "Primrose.Text.Grammars.JavaScript", {
+  name: "document JavaScript",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Grammars.JavaScript](#Primrose_Text_Grammars_JavaScript) class in the grammars/ directory"
+} );

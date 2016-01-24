@@ -107,3 +107,9 @@ Results:\n\
   
   return Angle;
 } )( );
+
+pliny.issue("Primrose.Angle", {
+  name: "document Angle", 
+  type: "closed", 
+  description: "Finish writing the documentation for the [Primrose.Angle](#Primrose_Angle) class in the  directory"
+});

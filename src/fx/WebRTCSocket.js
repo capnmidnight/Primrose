@@ -1,4 +1,4 @@
-/* global Primrose, io, Window */
+/* global Primrose, io, Window, pliny */
 
 Primrose.WebRTCSocket = ( function () {
 
@@ -232,3 +232,9 @@ Primrose.WebRTCSocket = ( function () {
   }
   return WebRTCSocket;
 } )();
+
+pliny.issue( "Primrose.WebRTCSocket", {
+  name: "document WebRTCSocket",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.WebRTCSocket](#Primrose_WebRTCSocket) class in the  directory"
+} );

@@ -171,3 +171,9 @@ Primrose.Input.Gamepad.XBOX_BUTTONS = {
   left: 15,
   right: 16
 };
+
+pliny.issue( "Primrose.Input.Gamepad", {
+  name: "document Gamepad",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
+} );

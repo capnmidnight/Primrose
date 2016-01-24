@@ -47,3 +47,9 @@ Primrose.Text.CommandPacks.TestViewer = ( function () {
     }
   };
 } )();
+
+pliny.issue( "Primrose.Text.CommandPacks.TestViewer", {
+  name: "document TestViewer",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.TestViewer](#Primrose_Text_CommandPacks_TestViewer) class in the command_packs/ directory"
+} );

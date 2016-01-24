@@ -110,3 +110,9 @@ Primrose.BaseControl = ( function () {
 
   return BaseControl;
 } )();
+
+pliny.issue( "Primrose.BaseControl", {
+  name: "document BaseControl",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.BaseControl](#Primrose_BaseControl) class in the  directory"
+} );

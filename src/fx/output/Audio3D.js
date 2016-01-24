@@ -1,4 +1,4 @@
-/* global Primrose, Window */
+/* global Primrose, Window, pliny */
 
 Primrose.Output.Audio3D = ( function () {
 
@@ -198,3 +198,10 @@ Primrose.Output.Audio3D = ( function () {
 
   return Audio3D;
 } )();
+
+pliny.issue( "Primrose.Output.Audio3D", {
+  name: "document Audio3D",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Output.Audio3D](#Primrose_Output_Audio3D) class in the output/ directory"
+} );
+

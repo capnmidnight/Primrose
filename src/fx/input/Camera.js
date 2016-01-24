@@ -147,3 +147,9 @@ Primrose.Input.Camera = ( function () {
   };
   return CameraInput;
 } )();
+
+pliny.issue( "Primrose.Input.Camera", {
+  name: "document Camera",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Camera](#Primrose_Input_Camera) class in the input/ directory"
+} );

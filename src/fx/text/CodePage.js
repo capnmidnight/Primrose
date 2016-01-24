@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.CodePage = ( function ( ) {
   "use strict";
@@ -88,3 +88,9 @@ Primrose.Text.CodePage = ( function ( ) {
 
   return CodePage;
 } ) ();
+
+pliny.issue( "Primrose.Text.CodePage", {
+  name: "document CodePage",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.CodePage](#Primrose_Text_CodePage) class in the text/ directory"
+} );

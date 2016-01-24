@@ -1,4 +1,4 @@
-/* global Primrose, THREE, isChrome */
+/* global Primrose, THREE, isChrome, pliny */
 
 Primrose.Input.Mouse = ( function () {
   function MouseInput ( name, DOMElement, commands, socket ) {
@@ -141,3 +141,9 @@ Primrose.Input.Mouse = ( function () {
 
   return MouseInput;
 } )();
+
+pliny.issue( "Primrose.Input.Mouse", {
+  name: "document Mouse",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Mouse](#Primrose_Input_Mouse) class in the input/ directory"
+} );

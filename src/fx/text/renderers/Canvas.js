@@ -464,3 +464,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     }
   };
 } )();
+
+pliny.issue( "Primrose.Text.Renderers.Canvas", {
+  name: "document Canvas",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Renderers.Canvas](#Primrose_Text_Renderers_Canvas) class in the renderers/ directory"
+} );

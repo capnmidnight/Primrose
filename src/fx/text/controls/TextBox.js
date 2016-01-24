@@ -1034,3 +1034,10 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 
   return TextBox;
 } )();
+
+pliny.issue( "Primrose.Text.Controls.TextBox", {
+  name: "document TextBox",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Controls.TextBox](#Primrose_Text_Controls_TextBox) class in the controls/ directory"
+} );
+

@@ -1,3 +1,5 @@
+/* global pliny */
+
 function getSetting ( name, defValue ) {
   if ( window.localStorage ) {
     var val = window.localStorage.getItem( name );
@@ -69,3 +71,9 @@ function writeForm ( ctrls, state ) {
     }
   }
 }
+
+pliny.issue( "", {
+  name: "document helpers/forms",
+  type: "open",
+  description: "Finish writing the documentation for the [forms](#forms) class in the helpers/ directory"
+} );

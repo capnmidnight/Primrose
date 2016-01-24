@@ -1,4 +1,4 @@
-/* global Primrose, THREE, emit, isMobile */
+/* global Primrose, THREE, emit, isMobile, pliny */
 
 Primrose.Input.FPSInput = ( function ( ) {
   function FPSInput ( DOMElement ) {
@@ -202,3 +202,9 @@ Primrose.Input.FPSInput = ( function ( ) {
     return FPSInput;
   }
 } )( );
+
+pliny.issue( "Primrose.Input.FPSInput", {
+  name: "document FPSInput",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.FPSInput](#Primrose_Input_FPSInput) class in the input/ directory"
+} );

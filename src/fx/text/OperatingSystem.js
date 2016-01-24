@@ -68,3 +68,9 @@ Primrose.Text.OperatingSystem = ( function ( ) {
 
   return OperatingSystem;
 } )();
+
+pliny.issue( "Primrose.Text.OperatingSystem", {
+  name: "document OperatingSystem",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.OperatingSystem](#Primrose_Text_OperatingSystem) class in the text/ directory"
+} );

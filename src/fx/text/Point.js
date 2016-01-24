@@ -29,3 +29,9 @@ Primrose.Text.Point = ( function ( ) {
 
   return Point;
 } )();
+
+pliny.issue( "Primrose.Text.Point", {
+  name: "document Point",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Point](#Primrose_Text_Point) class in the text/ directory"
+} );

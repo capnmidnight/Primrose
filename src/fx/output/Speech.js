@@ -1,4 +1,4 @@
-/* global Primrose, speechSynthesis */
+/* global Primrose, speechSynthesis, pliny */
 
 Primrose.Output.Speech = ( function ( ) {
   function pickRandomOption ( options, key, min, max ) {
@@ -47,3 +47,9 @@ Primrose.Output.Speech = ( function ( ) {
     };
   }
 } )( );
+
+pliny.issue( "Primrose.Output.Speech", {
+  name: "document Speech",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Output.Speech](#Primrose_Output_Speech) class in the output/ directory"
+} );

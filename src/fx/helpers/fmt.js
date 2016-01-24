@@ -1,3 +1,5 @@
+/* global pliny */
+
 function sigfig ( x, y ) {
   var p = Math.pow( 10, y );
   var v = ( Math.round( x * p ) / p ).toString();
@@ -113,3 +115,9 @@ var px = fmt.bind( this, "$1px" ),
     rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" ),
     hsl = fmt.bind( this, "hsl($1, $2, $3)" ),
     hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );
+
+pliny.issue( "", {
+  name: "document helpers/fmt",
+  type: "open",
+  description: "Finish writing the documentation for the [fmt](#fmt) class in the helpers/ directory"
+} );

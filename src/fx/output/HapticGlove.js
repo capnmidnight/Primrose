@@ -1,4 +1,4 @@
-/* global Primrose, io, Leap */
+/* global Primrose, io, Leap, pliny */
 
 Primrose.Output.HapticGlove = ( function () {
   function HapticGlove ( options ) {
@@ -114,3 +114,9 @@ Primrose.Output.HapticGlove = ( function () {
   HapticGlove.DEFAULT_HOST = document.location.hostname;
   return HapticGlove;
 } )();
+
+pliny.issue( "Primrose.Output.HapticGlove", {
+  name: "document HapticGlove",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Output.HapticGlove](#Primrose_Output_HapticGlove) class in the output/ directory"
+} );

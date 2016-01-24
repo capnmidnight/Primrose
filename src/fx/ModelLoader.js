@@ -177,3 +177,9 @@ Primrose.ModelLoader = ( function () {
 
   return ModelLoader;
 } )();
+
+pliny.issue( "Primrose.ModelLoader", {
+  name: "document ModelLoader",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.ModelLoader](#Primrose_ModelLoader) class in the  directory"
+} );

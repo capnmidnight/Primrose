@@ -14,14 +14,14 @@ Primrose.ButtonFactory = ( function () {
     ]
   } );
   function ButtonFactory ( templateFile, options, complete ) {
-    
-    pliny.property({
+
+    pliny.property( {
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
-    });
+    } );
     this.options = options;
-    
+
     if ( typeof templateFile === "string" ) {
       Primrose.ModelLoader.loadObject( templateFile, function ( obj ) {
         this.template = obj;
@@ -31,11 +31,11 @@ Primrose.ButtonFactory = ( function () {
       }.bind( this ) );
     }
     else {
-      pliny.property({
+      pliny.property( {
         name: "template",
         type: "THREE.Object3D",
         description: "The 3D model for the button, that will be cloned every time a new button is created."
-      });
+      } );
       this.template = templateFile;
     }
   }
@@ -57,3 +57,9 @@ Primrose.ButtonFactory = ( function () {
 
   return ButtonFactory;
 } )();
+
+pliny.issue( "Primrose.ButtonFactory", {
+  name: "document ButtonFactory",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.ButtonFactory](#Primrose_ButtonFactory) class in the  directory"
+} );

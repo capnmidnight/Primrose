@@ -246,3 +246,9 @@ Primrose.Text.Cursor = ( function ( ) {
 
   return Cursor;
 } )();
+
+pliny.issue( "Primrose.Text.Cursor", {
+  name: "document Cursor",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Cursor](#Primrose_Text_Cursor) class in the text/ directory"
+} );

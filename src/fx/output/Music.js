@@ -1,4 +1,4 @@
-/* global Primrose, Window */
+/* global Primrose, Window, pliny */
 
 Primrose.Output.Music = ( function () {
 
@@ -93,3 +93,9 @@ Primrose.Output.Music = ( function () {
 
   return Music;
 } )();
+
+pliny.issue( "Primrose.Output.Music", {
+  name: "document Music",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Output.Music](#Primrose_Output_Music) class in the output/ directory"
+} );

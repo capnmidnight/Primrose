@@ -16,3 +16,9 @@ Primrose.Text.Grammars.TestResults = (function () {
     ["strings", /        \w+/, true]
   ]);
 })();
+
+pliny.issue( "Primrose.Text.Grammars.TestResults", {
+  name: "document TestResults",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Grammars.TestResults](#Primrose_Text_Grammars_TestResults) class in the grammars/ directory"
+} );

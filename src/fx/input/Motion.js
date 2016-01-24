@@ -1,4 +1,4 @@
-/* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio */
+/* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio, pliny */
 
 Primrose.Input.Motion = ( function ( ) {
   ////
@@ -335,3 +335,9 @@ Primrose.Input.Motion = ( function ( ) {
   };
   return MotionInput;
 } )( );
+
+pliny.issue( "Primrose.Input.Motion", {
+  name: "document Motion",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.Motion](#Primrose_Input_Motion) class in the input/ directory"
+} );

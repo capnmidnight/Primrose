@@ -1,4 +1,4 @@
-/* global THREE, Primrose, isMobile */
+/* global THREE, Primrose, isMobile, pliny */
 
 function InsideSphereGeometry ( radius, widthSegments, heightSegments,
     phiStart, phiLength, thetaStart, thetaLength ) {
@@ -320,3 +320,9 @@ function cloud ( verts, c, s ) {
   var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
   return new THREE.PointCloud( geom, mat );
 }
+
+pliny.issue( "", {
+  name: "document helpers/graphics",
+  type: "open",
+  description: "Finish writing the documentation for the [graphics](#graphics) class in the helpers/ directory"
+} );

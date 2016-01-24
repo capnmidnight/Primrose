@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2016 sean
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div id="pliny">
+      <h2>Writing new documentation with Pliny</h2>
+      <p>
+        Documentation in Primrose is recorded via explicit function calls, rather
+        than the JavaDoc-style of parsing comment blocks. The documentation pages
+        are built loading the production Primrose library itself and querying 
+        its documentation database live. New code features and documentation for
+        them are delivered in one cohesive package.
+      </p>
+      <aside>
+        NOTE: documentation descriptions support a limited subset of 
+        Markdown. Specifically, none of the shortcuts for the link/image syntax
+        are supported, nor are bolding, underlining, or italicizing. However, HTML
+        is supported inline. It also supports double-back-ticks (<kbd>``example``</kbd>)
+        for specifying blocks of code, rather than using whitespace indenting rules.
+      </aside>
+      <h2>
+        Example:
+      </h2>
+      <pre>pliny.function( "Primrose.HTTP", {
+  name: "XHR",
+  description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+  parameters: [
+    {name: "method", type: "String", description: "The HTTP Verb being used for the request."},
+    {name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the ref#[1]."},
+    {name: "url", type: "String", description: "The resource to which the request is being sent."},
+    {name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request."},
+    {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event."},
+    {name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs."},
+    {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
+  ],
+  examples: [ {
+      name: "Make a GET request.",
+      description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+Code:\n\
+``Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
+console.log.bind(console, \"done\"),\n\
+console.error.bind(console),\n\
+console.log.bind(console, \"progress\"));``\n\
+Results:\n\
+``Object {field1: 1, field2: \"Field2\"}``"}
+  ],
+  references: [
+    {name: "MDN - XMLHttpRequest - responseType", description: "https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype"}
+  ]
+} );
+HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
+  var xhr = new XMLHttpRequest();
+  xhr.onerror = error;
+  xhr.onabort = error;
+  xhr.onprogress = progress;
+  xhr.onload = function () {
+    // The other error events are client-errors. If there was a server error,
+    // we'd find out about it during this event. We need to only respond to
+    // successful requests, i.e. those with HTTP status code in the 200 or 300
+    // range.
+    if ( xhr.status < 400 ) {
+      if ( success ) {
+        success( xhr.response );
+      }
+    }
+    else if ( error ) {
+      error();
+    }
+  };
+
+  // The order of these operations is very explicit. You have to call open
+  // first. It seems counter intuitive, but think of it more like you're opening
+  // an HTTP document to be able to write to it, and then you finish by sending
+  // the document. The "open" method does not refer to a network connection.
+  xhr.open( method, url );
+  if ( type ) {
+    xhr.responseType = type;
+  }
+  if ( data ) {
+    // We could do other data types, but in my case, I'm probably only ever
+    // going to want JSON. No sense in overcomplicating the interface for
+    // features I'm not going to use.
+    xhr.setRequestHeader( "Content-Type", "application/json;charset=UTF-8" );
+    xhr.send( JSON.stringify( data ) );
+  }
+  else {
+    xhr.send();
+  }
+};</pre>
+      <p>
+        With the documentation being built in to the Primrose library itself, 
+        the latest documentation is always accessible from code, even during
+        live-programming sessions, both in your scripts and in your browser'
+        s developer console.
+      </p>
+      <p>
+        If you ever have a question about how a function works, you can pop open
+        the console and type in a query to the documentation database with the
+        object's full-qualified name. For example, to read back the documentation
+        specified above, we would type <kbd>pliny("Primrose.HTTP.XHR")</kbd>.
+        Alternatively, many types of objects (namespaces, functions, classes, enumerations),
+        have a convenience function added to them to display their own help file,
+        e.g. <kbd>Primrose.HTTP.XHR.help()</kbd>.
+      </p>
+      <pre>[function] Primrose.HTTP.XHR([String] method, [String] type, [String] url, [Object] data, [Function] success, [Function] error, [Function] progress)
+
+	parent: Primrose.HTTP
+
+	Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.
+
+	parameters:
+		0: [String] method - The HTTP Verb being used for the request.
+		1: [String] type - How the response should be interpreted. Defaults to "text". "json", "arraybuffer", and other values are also available. See the ref#[1].
+		2: [String] url - The resource to which the request is being sent.
+		3: [Object] data - The data object to use as the request body payload, if this is a PUT request.
+		4: [Function] success - (Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event.
+		5: [Function] error - (Optional) the callback to issue whenever an error occurs.
+		6: [Function] progress - (Optional) A callback function to be called as the download from the server progresses.
+
+	references:
+		0: MDN - XMLHttpRequest - responseType - https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype
+
+	examples:
+		0: Make a GET request. - Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your need...</pre>
+    </div>
+  </body>
+</html>

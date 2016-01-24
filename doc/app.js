@@ -1,5 +1,4 @@
 /* global pliny, Primrose, devicePixelRatio */
-var toTop = null;
 ( function () {
   "use strict";
 
@@ -88,20 +87,21 @@ var toTop = null;
     }
   }
 
+  function toTop () {
+    doc.scrollIntoView( {
+      block: "top",
+      behavior: "smooth"
+    } );
+  }
+
   function showHash ( evt ) {
     doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
+    doc.querySelector( "#returnToTop" ).addEventListener( "click", toTop );
     replacePreBlocks();
     if ( evt ) {
       toTop();
     }
   }
-
-  toTop = function () {
-    doc.scrollIntoView( {
-      block: "top",
-      behavior: "smooth"
-    } );
-  };
 
   function paint () {
     requestAnimationFrame( paint );
@@ -116,28 +116,30 @@ var toTop = null;
   requestAnimationFrame( paint );
 
   // Walk the documentation database, grouping different objects by type.
-  var stack = [ pliny.database ];
-  while ( stack.length > 0 ) {
-    var obj = stack.shift();
-    for ( var key in obj ) {
-      if ( groupings[key] ) {
-        var collect = obj[key],
-            group = groupings[key];
-        for ( var i = 0; i < collect.length; ++i ) {
-          var obj2 = collect[i];
-          docoCache["#" + obj2.id] = pliny.formats.html.format( obj2 ) + "<a class=\"return-to-top\" href=\"javascript:toTop();\">top</a>";
-          if ( key !== "issues" || obj2.type === "open" ) {
-            group.push( obj2 );
+  function buildDocumentation () {
+    var stack = [ pliny.database ];
+    while ( stack.length > 0 ) {
+      var collections = stack.shift();
+      for ( var key in collections ) {
+        if ( groupings[key] ) {
+          var collection = collections[key],
+              group = groupings[key];
+          for ( var i = 0; i < collection.length; ++i ) {
+            var obj = collection[i];
+            docoCache["#" + obj.id] = pliny.formats.html.format( obj ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
+            group.push( obj );
+            // This is called "trampolining", and is basically a way of performing
+            // recursion in languages that do not support automatic tail recursion.
+            // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
+            stack.push( obj );
           }
-          // This is called "trampolining", and is basically a way of performing
-          // recursion in languages that do not support automatic tail recursion.
-          // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
-          stack.push( obj2 );
         }
       }
     }
   }
 
+
+  buildDocumentation();
   // Build the menu.
   delete groupings.methods;
   groupings.examples = pliny.database.examples || [ ];
@@ -147,7 +149,9 @@ var toTop = null;
     output += "<li><h2>" + g + "</h2><ul>";
     for ( var i = 0; i < group.length; ++i ) {
       var obj = group[i];
-      output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+      if ( g !== "issues" || obj.type === "open" ) {
+        output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+      }
     }
     output += "</ul></li>";
   }

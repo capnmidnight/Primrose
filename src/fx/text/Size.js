@@ -29,3 +29,9 @@ Primrose.Text.Size = (function ( ) {
 
   return Size;
 } )();
+
+pliny.issue( "Primrose.Text.Size", {
+  name: "document Size",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Size](#Primrose_Text_Size) class in the text/ directory"
+} );

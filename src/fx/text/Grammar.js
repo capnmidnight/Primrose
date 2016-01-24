@@ -173,3 +173,9 @@ console.log(JSON.stringify(tokens));``\n\
 
   return Grammar;
 } )();
+
+pliny.issue( "Primrose.Text.Grammar", {
+  name: "document Grammar",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Grammar](#Primrose_Text_Grammar) class in the text/ directory"
+} );

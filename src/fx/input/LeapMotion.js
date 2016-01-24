@@ -151,3 +151,9 @@ Primrose.Input.LeapMotion = ( function () {
   };
   return LeapMotionInput;
 } )();
+
+pliny.issue( "Primrose.Input.LeapMotion", {
+  name: "document LeapMotion",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Input.LeapMotion](#Primrose_Input_LeapMotion) class in the input/ directory"
+} );

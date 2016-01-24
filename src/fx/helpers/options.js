@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 function clearKeyOption ( evt ) {
   this.value = "";
@@ -41,3 +41,9 @@ function combineDefaults(a, b){
   }
   return c;
 }
+
+pliny.issue( "", {
+  name: "document helpers/options",
+  type: "open",
+  description: "Finish writing the documentation for the [options](#options) class in the helpers/ directory"
+} );

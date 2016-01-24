@@ -955,3 +955,9 @@ Primrose.VRApplication = ( function ( ) {
 
   return VRApplication;
 } )( );
+
+pliny.issue( "Primrose.VRApplication", {
+  name: "document VRApplication",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.VRApplication](#Primrose_VRApplication) class in the  directory"
+} );

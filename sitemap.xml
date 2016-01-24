@@ -2,39 +2,54 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://www.primroseeditor.com/#home</loc>
+    <loc>https://www.primrosevr.com/#home</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/#download</loc>
-  </url>
-  <url>
-    <loc>https://www.primroseeditor.com/#screenshots</loc>
+    <loc>https://www.primrosevr.com/#intro</loc>
     <image:image>
-      <image:loc>https://www.primroseeditor.com/images/screenshot0.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/examples/commodore/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primroseeditor.com/images/screenshot1.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/examples/editor3d/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primroseeditor.com/images/screenshot2.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/examples/jabbers/screenshot.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.primrosevr.com/examples/music/screenshot.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.primrosevr.com/examples/temple/screenshot.jpg</image:loc>
     </image:image>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/#demos</loc>
+    <loc>https://www.primrosevr.com/doc/</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/editor.html</loc>
+    <loc>https://www.primrosevr.com/#dev</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/ga.html</loc>
+    <loc>https://www.primrosevr.com/#team</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/#about</loc>
+    <loc>https://www.primrosevr.com/#mail</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/#faq</loc>
+    <loc>https://www.primrosevr.com/#about</loc>
   </url>
   <url>
-    <loc>https://www.primroseeditor.com/#mail</loc>
+    <loc>https://www.primrosevr.com/examples/commodore/index.html</loc>
+  </url>
+  <url>
+    <loc>https://www.primrosevr.com/examples/editor3d/index.html</loc>
+  </url>
+  <url>
+    <loc>https://www.primrosevr.com/examples/jabbers/index.html</loc>
+  </url>
+  <url>
+    <loc>https://www.primrosevr.com/examples/music/index.html</loc>
+  </url>
+  <url>
+    <loc>https://www.primrosevr.com/examples/temple/index.html</loc>
   </url>
 </urlset>

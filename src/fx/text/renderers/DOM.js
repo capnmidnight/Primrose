@@ -1,4 +1,4 @@
-/*global THREE, qp, Primrose, HTMLDivElement */
+/*global THREE, qp, Primrose, HTMLDivElement, pliny */
 
 Primrose.Text.Renderers.DOM = ( function ( ) {
   "use strict";
@@ -432,4 +432,16 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
           div.id, div ) );
     }
   };
+} );
+
+pliny.issue( "Primrose.Text.Renderers.DOM", {
+  name: "document DOM",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Text.Renderers.DOM](#Primrose_Text_Renderers_DOM) class in the renderers/ directory"
+} );
+
+pliny.issue( "Primrose.Text.Renderers.DOM", {
+  name: "fix DOM renderer",
+  type: "open",
+  description: "Trying to use this renderer causes an infinite loop somewhere that completely degrades system performance."
 } );

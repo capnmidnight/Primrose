@@ -1,4 +1,4 @@
-/* global Primrose, THREE, Function, emit, self */
+/* global Primrose, THREE, Function, emit, self, pliny */
 
 Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
@@ -2627,3 +2627,9 @@ Primrose.Projector = ( function ( ) {
   };
   return Projector;
 } )( );
+
+pliny.issue( "Primrose.Projector", {
+  name: "document Projector",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Projector](#Primrose_Projector) class in the  directory"
+} );

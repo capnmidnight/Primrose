@@ -132,3 +132,9 @@ Primrose.Keys = ( function ( ) {
 
   return Keys;
 } )();
+
+pliny.issue( "Primrose.Keys", {
+  name: "document Keys",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.Keys](#Primrose_Keys) class in the  directory"
+} );

@@ -114,3 +114,9 @@ img.png``"} ]
   return DOM;
 
 } )();
+
+pliny.issue( "Primrose.DOM", {
+  name: "document DOM",
+  type: "open",
+  description: "Finish writing the documentation for the [Primrose.DOM](#Primrose_DOM) class in the  directory"
+} );
