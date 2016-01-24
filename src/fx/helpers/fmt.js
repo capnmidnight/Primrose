@@ -121,3 +121,58 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [fmt](#fmt) class in the helpers/ directory"
 } );
+
+
+pliny.issue( "", {
+  name: "document sigfig function",
+  type: "open",
+  description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document fmt function",
+  type: "open",
+  description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document px function",
+  type: "open",
+  description: "Finish writing the documentation for the [px](#px) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document pct function",
+  type: "open",
+  description: "Finish writing the documentation for the [pct](#pct) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document ems function",
+  type: "open",
+  description: "Finish writing the documentation for the [ems](#ems) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document rgb function",
+  type: "open",
+  description: "Finish writing the documentation for the [rgb](#rgb) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document rgba function",
+  type: "open",
+  description: "Finish writing the documentation for the [rgba](#rgba) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document hsl function",
+  type: "open",
+  description: "Finish writing the documentation for the [hsl](#hsl) function in the helpers/fmt.js file."
+} );
+
+pliny.issue( "", {
+  name: "document hsla function",
+  type: "open",
+  description: "Finish writing the documentation for the [hsla](#hsla) function in the helpers/fmt.js file."
+} );
