@@ -201,8 +201,15 @@ var pct = fmt.bind( this, "$1%" );
 
 pliny.issue( "", {
   name: "document ems function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [ems](#ems) function in the helpers/fmt.js file."
+} );
+pliny.function( "", {
+  name: "ems",
+  description: "Appends the string \"em\" to the end of a number. Useful for specifying CSS units.",
+  parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS em-unit value."} ],
+  returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
+  examples: [ {name: "Basic usage", description: "``console.assert(ems(100.5) === \"100.5em\");``"} ]
 } );
 var ems = fmt.bind( this, "$1em" );
 
