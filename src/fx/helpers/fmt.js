@@ -35,25 +35,48 @@ function sigfig ( x, y ) {
   return v;
 }
 
-////
-// Replace template place holders in a string with a positional value.
-// Template place holders start with a dollar sign ($) and are followed
-// by a digit that references the parameter position of the value to
-// use in the text replacement. Note that the first position, position 0,
-// is the template itself. However, you cannot reference the first position,
-// as zero digit characters are used to indicate the width of number to
-// pad values out to.
-// 
-// Numerical precision padding is indicated with a period and trailing
-// zeros.
-// 
-// examples:
-// fmt("a: $1, b: $2", 123, "Sean") => "a: 123, b: Sean"
-// fmt("$001, $002, $003", 1, 23, 456) => "001, 023, 456"
-// fmt("$1.00 + $2.00 = $3.00", Math.sqrt(2), Math.PI, 9001)
-// => "1.41 + 3.14 = 9001.00"
-// fmt("$001.000", Math.PI) => 003.142
-///
+pliny.function( "", {
+  name: "fmt",
+  parameters: [
+    {name: "template", type: "String", description: "The template string containing dollar-sign delimited value references."},
+    {name: "varargs...", type: "Any", description: "The values to replace into the template. Generally speaking, the `toString()` method of the object will be called. However, dates have special handling. The precision count indicates the fields of the date to print.\n\
+* $1.0 - prints just the 4-digit year.\n\
+* $1.00 - prints the 2-digit month/4-digit year.\n\
+* $1.000 - prints the result of calling `toLocaleDateString()` on the date value.\n\
+* $1.0000 - prints the result of calling `toLocaleTimeString()` on the date value, plus additional milliseconds value.\n\
+* $1.00000 - same as...\n\
+* $1.000000 - prints the result of calling `toLocaleString()` on the date value.\n\
+* $1.0000000 - prints the result of calling `toLocaleString()` on the date value, plus additional milliseconds value.\n\
+"}
+  ],
+  returns: "A formatted string.",
+  description: "Replaces 1-indexed place holders in a string with the subsequent \n\
+parameters passed to the `fmt()` function, e.g. a \n\ template `\"X: $1, Y: $2\"`\n\
+expects to parameters following directly after the template.\n\
+\n\
+Template place holders start with a dollar sign ($) and are followed by a digit\n\
+that references the parameter position of the value to use in the text replacement.\n\
+Note that the first position, position 0, would be the template itself. However, you\n\
+cannot reference the first position, as zero digit characters are used to indicate\n\
+the width to which to pad values.\n\
+\n\
+Numerical precision, with zero-padding, is indicated with a period and trailing zeros.",
+  examples: [
+    {name: "Basic examples",
+      description: "``console.assert(fmt(\"a: $1, b: $2\", 123, \"Sean\") === \"a: 123, b: Sean\");\n\
+console.assert(fmt(\"$001, $002, $003\", 1, 23, 456) === \"001, 023, 456\");\n\
+console.assert(fmt(\"$1.000\", Math.PI) === \"3.142\");\n\
+console.assert(fmt(\"$1.0000\", Math.PI) === \"3.1416\");\n\
+console.assert(fmt(\"$1.00000\", Math.PI) === \"3.14159\");\n\
+console.assert(fmt(\"$1.00 + $2.00 = $3.00\", 0.1, 0.2, 0.1 + 0.2) === \"0.10 + 0.20 = 0.30\");\n\
+// Note that the following values were obtained evaluating the code in the US locale. They won't literally evaluate true.\n\
+console.assert(fmt(\"The current year is $1.0.\", new Date() ) === \"The current year is 2016.\");\n\
+console.assert(fmt(\"The current month and year is $1.00.\", new Date() ) === \"The current month and year is 1/2016.\");\n\
+console.assert(fmt(\"The current date is $1.000.\", new Date() ) === \"The current date is 1/25/2016.\");\n\
+console.assert(fmt(\"The current time is $1.0000.\", new Date() ) === \"The current time is 10:05:28.772 PM.\");\n\
+console.assert(fmt(\"The current date and time is $1.00000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:06 PM.\");\n\
+console.assert(fmt(\"The current date and time is $1.0000000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:55.667 PM.\");``"} ]
+} );
 var fmt = ( function () {
 
   function addMillis ( val, txt ) {
@@ -63,14 +86,15 @@ var fmt = ( function () {
     } );
   }
 
+  // - match a dollar sign ($) literally,
+  // - (optional) then zero or more zero digit (0) characters, greedily
+  // - then one or more digits (the previous rule would necessitate that
+  //      the first of these digits be at least one).
+  // - (optional) then a period (.) literally
+  // -            then one or more zero digit (0) characters
+  var paramRegex = /\$(0*)(\d+)(?:\.(0+))?/g;
+  
   function fmt ( template ) {
-    // - match a dollar sign ($) literally,
-    // - (optional) then zero or more zero digit (0) characters, greedily
-    // - then one or more digits (the previous rule would necessitate that
-    //      the first of these digits be at least one).
-    // - (optional) then a period (.) literally
-    // -            then one or more zero digit (0) characters
-    var paramRegex = /\$(0*)(\d+)(?:\.(0+))?/g;
     var args = arguments;
     if ( typeof template !== "string" ) {
       template = template.toString();
@@ -83,10 +107,10 @@ var fmt = ( function () {
           if ( val instanceof Date && precision ) {
             switch ( precision.length ) {
               case 1:
-                val = val.getYear();
+                val = ( val.getYear() + 1900 );
                 break;
               case 2:
-                val = ( val.getMonth() + 1 ) + "/" + val.getYear();
+                val = ( val.getMonth() + 1 ) + "/" + ( val.getYear() + 1900 );
                 break;
               case 3:
                 val = val.toLocaleDateString();
@@ -112,8 +136,7 @@ var fmt = ( function () {
               val = val.toString();
             }
             if ( pad && pad.length > 0 ) {
-              var paddingRegex = new RegExp( "^\\d{" + ( pad.length + 1 ) +
-                  "}(\\.\\d+)?" );
+              var paddingRegex = new RegExp( "^\\d{" + ( pad.length + 1 ) + "}(\\.\\d+)?" );
               while ( !paddingRegex.test( val ) ) {
                 val = "0" + val;
               }
@@ -137,9 +160,9 @@ var px = fmt.bind( this, "$1px" ),
     hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );
 
 pliny.issue( "", {
-  name: "document helpers/fmt",
+  name: "document helpers/fmt.js",
   type: "open",
-  description: "Finish writing the documentation for the [fmt](#fmt) class in the helpers/ directory"
+  description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
 } );
 
 
@@ -151,7 +174,7 @@ pliny.issue( "", {
 
 pliny.issue( "", {
   name: "document fmt function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
 } );
 
