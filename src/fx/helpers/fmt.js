@@ -1,5 +1,25 @@
 /* global pliny */
 
+pliny.function( "", {
+  name: "sigfig",
+  description: "Formats a decimal number to a certain length of decimal points.",
+  parameters: [
+    {name: "x", type: "Number", description: "The number to format."},
+    {name: "y", type: "Number", description: "The number of digits after the decimal point to show."}
+  ],
+  returns: "String",
+  examples: [ {
+      name: "A few examples.",
+      description: "``// Round a number to an integer.\n\
+console.assert(sigfig(12.345, 0) === \"12\");\n\
+ \n\
+// sigfig respects rounding rules.\n\
+console.assert(sigfig(123.4567, 2) === \"123.46\");\n\
+ \n\
+// sigfig will pad extra zeroes.\n\
+console.assert(sigfig(123.4, 3) === \"123.400\");``"}
+  ]
+} );
 function sigfig ( x, y ) {
   var p = Math.pow( 10, y );
   var v = ( Math.round( x * p ) / p ).toString();

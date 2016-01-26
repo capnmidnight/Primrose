@@ -1,5 +1,5 @@
 /* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice, devicePixelRatio
- * Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement */
+ * Function, emit, isMobile, isVR, isiOS, shell, quad, HTMLCanvasElement, pliny */
 
 Primrose.VRApplication = ( function ( ) {
   "use strict";
@@ -40,6 +40,11 @@ Primrose.VRApplication = ( function ( ) {
         "mousedown", "mouseup", "mousemove", "wheel",
         "touchstart", "touchend", "touchmove" ],
       RESOLUTION_SCALE = 1;
+
+  pliny.class( "Primrose", {
+    name: "VRApplication",
+    description: "Make a Virtual Reality app in your web browser!"
+  } );
   function VRApplication ( name, options ) {
     this.options = combineDefaults( options, VRApplication.DEFAULTS );
 
@@ -960,4 +965,10 @@ pliny.issue( "Primrose.VRApplication", {
   name: "document VRApplication",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.VRApplication](#Primrose_VRApplication) class in the  directory"
+} );
+
+pliny.issue( "Primrose.VRApplication", {
+  name: "scene FOV issues",
+  type: "open",
+  description: "Image appears \"zoomed in\" when in VR mode. See [VR mode seems \"zoomed in\" with DK2 · Issue #72 · capnmidnight/Primrose](https://github.com/capnmidnight/Primrose/issues/72) for more information."
 } );

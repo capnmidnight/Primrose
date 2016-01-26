@@ -145,3 +145,178 @@ var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
 pliny.value( "", {name: "isVR", type: "Boolean", description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."} );
 var isVR = !!navigator.getVRDevices;
+
+pliny.issue( "", {
+  name: "Make an intro.",
+  type: "open",
+  description: "Make an intro page that describes the layout of the documentation,\n\
+directing the user to useful pages for beginners."
+} );
+
+pliny.issue( "", {
+  name: "Make a getting started page.",
+  type: "open",
+  description: "Make a page that explains downloading the right dependencies,\n\
+making a simple page using a sample scene, making it VR capable, and adding\n\
+objects to it."
+} );
+
+pliny.issue( "", {
+  name: "Make a simple Blender tutorial.",
+  type: "open",
+  description: "Show where to download Blender and how to use it to make a smooth-shaded,\n\
+flat color, low-poly scene and make it VR ready."
+} );
+
+pliny.issue( "", {
+  name: "Make a more advanced Blender tutorial.",
+  type: "open",
+  description: "Show how to do texturing in Blender."
+} );
+
+pliny.issue( "", {
+  name: "Make a simple lighting tutorial.",
+  type: "open",
+  description: "Basic point and spot lights."
+} );
+
+pliny.issue( "", {
+  name: "Make a simple video tutorial.",
+  type: "open",
+  description: "Put a quad in the scene on which a movie can play. Make it look\n\
+like a drive-in to be really cool."
+} );
+
+pliny.issue( "", {
+  name: "Make a drum machine tutorial.",
+  type: "open",
+  description: "Show how to create elements and useful interactions with those elements."
+} );
+
+pliny.issue( "", {
+  name: "Make a 3D IDE tutorial.",
+  type: "open",
+  description: "Show how to build the 3D editor demo."
+} );
+
+pliny.issue( "", {
+  name: "Make a basic server tutorial.",
+  type: "open",
+  description: "Show how to setup a basic Node WebSockets server to be able to do\n\
+multiplayer chat."
+} );
+
+pliny.issue( "", {
+  name: "Make an adventure demo.",
+  type: "open",
+  description: "Make a small adventure game of locked treasure chests and mazes."
+} );
+
+pliny.issue( "", {
+  name: "Make an HMD overview page.",
+  type: "open",
+  description: "Go into what is available, what are the key components, and how\n\
+to build your own Google Cardboard."
+} );
+
+pliny.issue( "", {
+  name: "Make a tutorial on modeling a scene with Primrose and saving/exporting it.",
+  type: "open",
+  description: "Live program a scene and save it to an HTML file that can be put up\n\
+on a website and be ready to run in VR."
+} );
+
+pliny.issue( "", {
+  name: "Make a CHANGELOG",
+  type: "open",
+  description: "Document the changes between versions better."
+} );
+
+pliny.issue( "", {
+  name: "Make an HMD overview page.",
+  type: "open",
+  description: "Go into what is available, what are the key components, and how\n\
+to build your own Google Cardboard.."
+} );
+
+pliny.issue( "", {
+  name: "Make better icons for full-screen view.",
+  type: "open",
+  description: "The current icons don't match each other, and they are in a bad place on screen."
+} );
+
+pliny.issue( "", {
+  name: "Link examples to each other.",
+  type: "open",
+  description: "Make it so you can jump from one example to another, both in 2D and VR contexts."
+} );
+
+pliny.issue( "", {
+  name: "Make more examples on CodePen.",
+  type: "open",
+  description: "Demonstrate using Primrose with the different options available in CodePen."
+} );
+
+pliny.issue( "", {
+  name: "Update the README.",
+  type: "open",
+  description: "It's woefully out of date."
+} );
+
+pliny.issue( "", {
+  name: "Make Haptic Glove tutorial.",
+  type: "open",
+  description: "Offer the supplies for sale, and show how to build a haptic glove\n\
+that can be used with Primrose."
+} );
+
+pliny.issue( "", {
+  name: "Adopt ES6.",
+  type: "open",
+  description: "Classes and arrow functions are good. Rely on browser support for\n\
+development. Setup a transpiler for production builds."
+} );
+
+pliny.issue( "", {
+  name: "Figure out a better module system.",
+  type: "open",
+  description: "I still want Primrose to be an \"Include one JS file\" type of library\n\
+for working in browsers. But I also want the component parts to work well with Node\n\
+and other neuveau JS shenanigans."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with A-Frame.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with SceneVR.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with Vizor.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with X3D.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with JanusVR.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );
+
+pliny.issue( "", {
+  name: "Investigate compatability with AltspaceVR.",
+  type: "open",
+  description: "If it's easy, it won't hurt."
+} );

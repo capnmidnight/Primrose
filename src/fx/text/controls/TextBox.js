@@ -1,6 +1,14 @@
 /* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, 
- * devicePixelRatio, HTMLCanvasElement */
+ * devicePixelRatio, HTMLCanvasElement, pliny */
 
+pliny.class( "Primrose.Text.Controls", {
+  name: "TextBox",
+  description: "Syntax highlighting textbox control.",
+  parameters: [
+    {name: "renderToElementOrID", type: "String or Element", description: "Junk"},
+    {name: "options", type: "Object", description: "More junk."}
+  ]
+} );
 Primrose.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
@@ -1038,6 +1046,16 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
 pliny.issue( "Primrose.Text.Controls.TextBox", {
   name: "document TextBox",
   type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Controls.TextBox](#Primrose_Text_Controls_TextBox) class in the controls/ directory"
+  description: "Finish writing the documentation for the [Primrose.Text.Controls.TextBox](#Primrose_Text_Controls_TextBox)\n\
+class in the controls/ directory."
 } );
 
+pliny.issue( "Primrose.Text.Controls.TextBox", {
+  name: "TextBox does not render blank lines",
+  type: "open",
+  description: "If a line contains only a newline character, the line doesn't get\n\
+rendered at all. The next line gets rendered instead, with the line number it *would*\n\
+have had, had the blank line been rendered. Adding whitespace to the line causes\n\
+it to render. This seems to only happen for text that is loaded into the textbox,\n\
+not text that is entered by the keyboard."
+} );
