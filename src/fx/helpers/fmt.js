@@ -145,7 +145,7 @@ pliny.issue( "", {
 
 pliny.issue( "", {
   name: "document sigfig function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
 } );
 
