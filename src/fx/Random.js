@@ -170,6 +170,6 @@ two``"}
 
 pliny.issue( "Primrose.Random", {
   name: "document Random",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [Primrose.Random](#Primrose_Random) class in the  directory"
 } );

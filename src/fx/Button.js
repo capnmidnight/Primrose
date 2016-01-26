@@ -121,6 +121,6 @@ Primrose.Button = ( function () {
 
 pliny.issue( "Primrose.Button", {
   name: "document Button",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [Primrose.Button](#Primrose_Button) class in the  directory"
 } );

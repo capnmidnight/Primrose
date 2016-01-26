@@ -276,6 +276,6 @@ requestAnimationFrame(paint);``"}
 
 pliny.issue( "Primrose.Workerize", {
   name: "document Workerize",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [Primrose.Workerize](#Primrose_Workerize) class in the  directory"
 } );

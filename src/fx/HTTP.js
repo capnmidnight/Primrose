@@ -167,6 +167,6 @@ Results:\n\
 
 pliny.issue( "Primrose.HTTP", {
   name: "document HTTP",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [Primrose.HTTP](#Primrose_HTTP) class in the  directory"
 } );
