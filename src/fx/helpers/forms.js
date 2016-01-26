@@ -83,15 +83,23 @@ function setSetting ( name, val ) {
 
 pliny.issue( "", {
   name: "document deleteSetting",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the `deleteSetting()` function in the helpers/forms.js file."
 } );
 pliny.function( "", {
   name: "deleteSetting",
-  parameters: [ ],
-  returns: "Object",
-  description: "",
-  examples: [ ]
+  parameters: [
+    {name: " name", type: "string", description: "The name of the setting to delete."}
+  ],
+  description: "Removes an object from localStorage",
+  examples: [ {
+      name: "Basic usage",
+      description: "``console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
+setSetting(\"A\", \"modified-A\");\n\
+console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
+deleteSetting(\"A\");\n\
+console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");``"
+  }]
 } );
 function deleteSetting ( name ) {
   if ( window.localStorage ) {
