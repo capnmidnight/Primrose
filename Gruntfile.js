@@ -15,7 +15,7 @@ var fs = require( "fs" ),
       "node_modules/three.js/build/three.js"
     ],
     buildFiles = {
-      "obj/Primrose.js": [ "src/index.js", "src/fx/**/*.js" ]
+      "obj/Primrose.js": [ "lib/endocumate.js", "lib/pliny.js", "src/index.js", "src/fx/**/*.js" ]
     },
 uglifyFiles = files.map( function ( s ) {
   return{

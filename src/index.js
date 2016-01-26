@@ -15,24 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if ( typeof window.pliny === "undefined" ) {
-  // shim out the documentation generator so it doesn't contribute
-  // to overhead in release build.
-  var pliny = ( function () {
-    var nil = function () {
-    };
-    var pliniuses = {
-      namespace: nil,
-      event: nil,
-      function: nil,
-      value: nil,
-      class: nil,
-      method: nil,
-      property: nil
-    };
-    return pliniuses;
-  } )();
-}
+/* global pliny */
 
 pliny.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
 var Primrose = {};
