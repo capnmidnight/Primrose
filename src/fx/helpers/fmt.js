@@ -213,6 +213,24 @@ pliny.function( "", {
 } );
 var ems = fmt.bind( this, "$1em" );
 
+pliny.function( "", {
+  name: "rems",
+  description: "Appends the string \"rem\" to the end of a number. Useful for specifying CSS units.",
+  parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS rem-unit value."} ],
+  returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
+  examples: [ {name: "Basic usage", description: "``console.assert(rems(100.5) === \"100.5rem\");``"} ]
+} );
+var rems = fmt.bind( this, "$1rem" );
+
+pliny.function( "", {
+  name: "vws",
+  description: "Appends the string \"vw\" to the end of a number. Useful for specifying CSS units.",
+  parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS view-width-unit value."} ],
+  returns: "The number as a string, plus the text \"vw\", with no intermediate whitespace.",
+  examples: [ {name: "Basic usage", description: "``console.assert(vws(100.5) === \"100.5vw\");``"} ]
+} );
+var vws = fmt.bind( this, "$1vw" );
+
 pliny.issue( "", {
   name: "document rgb function",
   type: "open",
