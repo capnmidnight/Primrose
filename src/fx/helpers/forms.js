@@ -5,6 +5,13 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the `getSetting()` function in the helpers/forms.js file."
 } );
+pliny.function( "", {
+  name: "getSetting",
+  parameters: [ ],
+  returns: "Object",
+  description: "",
+  examples: [ ]
+} );
 function getSetting ( name, defValue ) {
   if ( window.localStorage ) {
     var val = window.localStorage.getItem( name );
@@ -25,6 +32,12 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the `setSetting()` function in the helpers/forms.js file."
 } );
+pliny.function( "", {
+  name: "setSetting",
+  parameters: [ ],
+  description: "",
+  examples: [ ]
+} );
 function setSetting ( name, val ) {
   if ( window.localStorage && val ) {
     try {
@@ -41,6 +54,13 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the `deleteSetting()` function in the helpers/forms.js file."
 } );
+pliny.function( "", {
+  name: "deleteSetting",
+  parameters: [ ],
+  returns: "Object",
+  description: "",
+  examples: [ ]
+} );
 function deleteSetting ( name ) {
   if ( window.localStorage ) {
     window.localStorage.removeItem( name );
@@ -52,8 +72,15 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the `readForm()` function in the helpers/forms.js file."
 } );
+pliny.function( "", {
+  name: "readForm",
+  parameters: [ ],
+  returns: "Object",
+  description: "",
+  examples: [ ]
+} );
 function readForm ( ctrls ) {
-  var state = { };
+  var state = {};
   if ( ctrls ) {
     for ( var name in ctrls ) {
       var c = ctrls[name];
@@ -77,6 +104,12 @@ pliny.issue( "", {
   name: "document writeForm",
   type: "open",
   description: "Finish writing the documentation for the `writeForm()` function in the helpers/forms.js file."
+} );
+pliny.function( "", {
+  name: "writeForm",
+  parameters: [ ],
+  description: "",
+  examples: [ ]
 } );
 function writeForm ( ctrls, state ) {
   if ( state ) {
