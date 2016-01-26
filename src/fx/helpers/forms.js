@@ -2,15 +2,28 @@
 
 pliny.issue( "", {
   name: "document getSetting",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the `getSetting()` function in the helpers/forms.js file."
 } );
 pliny.function( "", {
   name: "getSetting",
-  parameters: [ ],
-  returns: "Object",
-  description: "",
-  examples: [ ]
+  parameters: [
+    {name: " name", type: "string", description: "The name of the setting to read."},
+    {name: "defValue", type: "Object", description: "The default value to return, if the setting is not present in `localStorage`."}
+  ],
+  returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
+  description: "Retrieves named values out of `localStorage`. The values should be valid for passing to `JSON.parse()`. A default value can be specified in the function call that should be returned if the value does not exist, or causes an error in parsing. Typically, you'd call this function at page-load time after having called the [`setSetting()`](#setSetting) function during a previous page session.",
+  examples: [
+    {name: "Basic usage",
+      description: "Assuming a text input element with the id `text1`, the following\n\
+code should persist between reloads whatever the user writes in the text area:\n\
+``var text1 = document.getElementById(\"text1\");\n\
+document.addEventListener(\"unload\", function(){\n\
+  setSetting(\"text1-value\", text1.value);\n\
+}, false);\n\
+document.addEventListener(\"load\", function(){\n\
+  text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+}, false);``"} ]
 } );
 function getSetting ( name, defValue ) {
   if ( window.localStorage ) {
