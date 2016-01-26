@@ -213,7 +213,7 @@ function writeForm ( ctrls, state ) {
 }
 
 pliny.issue( "", {
-  name: "document helpers/forms",
+  name: "document helpers/forms.js",
   type: "closed",
-  description: "Finish writing the documentation for the [forms](#forms) class in the helpers/ directory."
+  description: "Finish writing the documentation for the [forms](#forms) file in the helpers/ directory."
 } );
