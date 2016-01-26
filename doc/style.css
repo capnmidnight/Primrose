@@ -155,7 +155,8 @@ body > div {
   position: relative;
   display: inline-block;
   left: 0em;
-  right: 25%;
+  width: calc(80% - 20em);
+  min-width:  360px;
   max-width: 1000px;
   vertical-align: top;
   padding: 1em;
