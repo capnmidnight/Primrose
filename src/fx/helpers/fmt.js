@@ -3,7 +3,7 @@
 
 pliny.issue( "", {
   name: "document helpers/fmt.js",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
 } );
 
@@ -240,9 +240,9 @@ pliny.function( "", {
   name: "rgb",
   description: "Builds a CSS `rbg()` color-value string from three parameters.",
   parameters: [
-    {name: "r", type: "Number", description: "The red component, on the range [0, 255]."},
-    {name: "g", type: "Number", description: "The green component, on the range [0, 255]."},
-    {name: "b", type: "Number", description: "The blue component, on the range [0, 255]."} ],
+    {name: "red", type: "Number", description: "The red component, on the range [0, 255]."},
+    {name: "green", type: "Number", description: "The green component, on the range [0, 255]."},
+    {name: "blue", type: "Number", description: "The blue component, on the range [0, 255]."} ],
   returns: "The color-value string, e.g. `rgb(120, 230, 64)`.",
   examples: [ {name: "Basic usage", description: "``console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");``"} ]
 } );
@@ -257,10 +257,10 @@ pliny.function( "", {
   name: "rgba",
   description: "Builds a CSS `rbga()` color-value string from three parameters.",
   parameters: [
-    {name: "r", type: "Number", description: "The red component, on the range [0, 255]."},
-    {name: "g", type: "Number", description: "The green component, on the range [0, 255]."},
-    {name: "b", type: "Number", description: "The blue component, on the range [0, 255]."},
-    {name: "a", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
+    {name: "red", type: "Number", description: "The red component, on the range [0, 255]."},
+    {name: "green", type: "Number", description: "The green component, on the range [0, 255]."},
+    {name: "blue", type: "Number", description: "The blue component, on the range [0, 255]."},
+    {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
   returns: "The color-value string, e.g. `rgba(120, 230, 64, 0.75)`.",
   examples: [ {name: "Basic usage", description: "``console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");``"} ]
 } );
@@ -268,14 +268,35 @@ var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
 
 pliny.issue( "", {
   name: "document hsl function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [hsl](#hsl) function in the helpers/fmt.js file."
 } );
-var hsl = fmt.bind( this, "hsl($1, $2, $3)" );
+pliny.function( "", {
+  name: "hsl",
+  description: "Builds a CSS `hsl()` color-value string from three parameters.",
+  parameters: [
+    {name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240."},
+    {name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]."},
+    {name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]."} ],
+  returns: "The color-value string, e.g. `hsl(120, 100, 50)`.",
+  examples: [ {name: "Basic usage", description: "``console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");``"} ]
+} );
+var hsl = fmt.bind( this, "hsl($1, $2%, $3%)" );
 
 pliny.issue( "", {
   name: "document hsla function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [hsla](#hsla) function in the helpers/fmt.js file."
 } );
-var hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );
+pliny.function( "", {
+  name: "hsla",
+  description: "Builds a CSS `hsla()` color-value string from three parameters.",
+  parameters: [
+    {name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240."},
+    {name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]."},
+    {name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]."},
+    {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
+  returns: "The color-value string, e.g. `hsla(120, 100, 50, 0.25)`.",
+  examples: [ {name: "Basic usage", description: "``console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");``"} ]
+} );
+var hsla = fmt.bind( this, "hsla($1, $2%, $3%, $4)" );
