@@ -187,8 +187,15 @@ var px = fmt.bind( this, "$1px" );
 
 pliny.issue( "", {
   name: "document pct function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [pct](#pct) function in the helpers/fmt.js file."
+} );
+pliny.function( "", {
+  name: "pct",
+  description: "Appends the string \"%\" to the end of a number. Useful for specifying CSS units.",
+  parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS percentage-unit value."} ],
+  returns: "The number as a string, plus the text \"%\", with no intermediate whitespace.",
+  examples: [ {name: "Basic usage", description: "``console.assert(pct(100.5) === \"100.5%\");``"} ]
 } );
 var pct = fmt.bind( this, "$1%" );
 
