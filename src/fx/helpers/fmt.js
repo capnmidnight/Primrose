@@ -1,5 +1,18 @@
 /* global pliny */
 
+
+pliny.issue( "", {
+  name: "document helpers/fmt.js",
+  type: "open",
+  description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
+} );
+
+
+pliny.issue( "", {
+  name: "document sigfig function",
+  type: "closed",
+  description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
+} );
 pliny.function( "", {
   name: "sigfig",
   description: "Formats a decimal number to a certain length of decimal points.",
@@ -35,6 +48,11 @@ function sigfig ( x, y ) {
   return v;
 }
 
+pliny.issue( "", {
+  name: "document fmt function",
+  type: "closed",
+  description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
+} );
 pliny.function( "", {
   name: "fmt",
   parameters: [
@@ -93,7 +111,7 @@ var fmt = ( function () {
   // - (optional) then a period (.) literally
   // -            then one or more zero digit (0) characters
   var paramRegex = /\$(0*)(\d+)(?:\.(0+))?/g;
-  
+
   function fmt ( template ) {
     var args = arguments;
     if ( typeof template !== "string" ) {
@@ -151,71 +169,60 @@ var fmt = ( function () {
   return fmt;
 } )();
 
-var px = fmt.bind( this, "$1px" ),
-    pct = fmt.bind( this, "$1%" ),
-    ems = fmt.bind( this, "$1em" ),
-    rgb = fmt.bind( this, "rgb($1, $2, $3)" ),
-    rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" ),
-    hsl = fmt.bind( this, "hsl($1, $2, $3)" ),
-    hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );
 
-pliny.issue( "", {
-  name: "document helpers/fmt.js",
-  type: "open",
-  description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
-} );
-
-
-pliny.issue( "", {
-  name: "document sigfig function",
-  type: "closed",
-  description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
-} );
-
-pliny.issue( "", {
-  name: "document fmt function",
-  type: "closed",
-  description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
-} );
 
 pliny.issue( "", {
   name: "document px function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [px](#px) function in the helpers/fmt.js file."
 } );
+pliny.function( "", {
+  name: "px",
+  description: "Appends the string \"px\" to the end of a number. Useful for specifying CSS units.",
+  parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS pixel-unit value."} ],
+  returns: "The number as a string, plus the text \"px\", with no intermediate whitespace.",
+  examples: [ {name: "Basic usage", description: "``console.assert(px(100.5) === \"100.5px\");``"} ]
+} );
+var px = fmt.bind( this, "$1px" );
 
 pliny.issue( "", {
   name: "document pct function",
   type: "open",
   description: "Finish writing the documentation for the [pct](#pct) function in the helpers/fmt.js file."
 } );
+var pct = fmt.bind( this, "$1%" );
 
 pliny.issue( "", {
   name: "document ems function",
   type: "open",
   description: "Finish writing the documentation for the [ems](#ems) function in the helpers/fmt.js file."
 } );
+var ems = fmt.bind( this, "$1em" );
 
 pliny.issue( "", {
   name: "document rgb function",
   type: "open",
   description: "Finish writing the documentation for the [rgb](#rgb) function in the helpers/fmt.js file."
 } );
+var rgb = fmt.bind( this, "rgb($1, $2, $3)" );
 
 pliny.issue( "", {
   name: "document rgba function",
   type: "open",
   description: "Finish writing the documentation for the [rgba](#rgba) function in the helpers/fmt.js file."
 } );
+var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
 
 pliny.issue( "", {
   name: "document hsl function",
   type: "open",
   description: "Finish writing the documentation for the [hsl](#hsl) function in the helpers/fmt.js file."
 } );
+var hsl = fmt.bind( this, "hsl($1, $2, $3)" );
 
 pliny.issue( "", {
   name: "document hsla function",
   type: "open",
   description: "Finish writing the documentation for the [hsla](#hsla) function in the helpers/fmt.js file."
 } );
+var hsla = fmt.bind( this, "hsla($1, $2, $3, $4)" );
