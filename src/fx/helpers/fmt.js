@@ -233,15 +233,36 @@ var vws = fmt.bind( this, "$1vw" );
 
 pliny.issue( "", {
   name: "document rgb function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [rgb](#rgb) function in the helpers/fmt.js file."
+} );
+pliny.function( "", {
+  name: "rgb",
+  description: "Builds a CSS `rbg()` color-value string from three parameters.",
+  parameters: [
+    {name: "r", type: "Number", description: "The red component, on the range [0, 255]."},
+    {name: "g", type: "Number", description: "The green component, on the range [0, 255]."},
+    {name: "b", type: "Number", description: "The blue component, on the range [0, 255]."} ],
+  returns: "The color-value string, e.g. `rgb(120, 230, 64)`.",
+  examples: [ {name: "Basic usage", description: "``console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");``"} ]
 } );
 var rgb = fmt.bind( this, "rgb($1, $2, $3)" );
 
 pliny.issue( "", {
   name: "document rgba function",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [rgba](#rgba) function in the helpers/fmt.js file."
+} );
+pliny.function( "", {
+  name: "rgba",
+  description: "Builds a CSS `rbga()` color-value string from three parameters.",
+  parameters: [
+    {name: "r", type: "Number", description: "The red component, on the range [0, 255]."},
+    {name: "g", type: "Number", description: "The green component, on the range [0, 255]."},
+    {name: "b", type: "Number", description: "The blue component, on the range [0, 255]."},
+    {name: "a", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
+  returns: "The color-value string, e.g. `rgba(120, 230, 64, 0.75)`.",
+  examples: [ {name: "Basic usage", description: "``console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");``"} ]
 } );
 var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
 
