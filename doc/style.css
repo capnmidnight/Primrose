@@ -213,3 +213,21 @@ details > summary:focus {
   outline: none;
 }
 
+table{
+  border: 0;
+  border-collapse:  collapse;
+}
+
+tr:nth-child(even){
+  background-color: rgba(204, 204, 204, 0.26);
+}
+
+td{
+  padding: 5px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+td:nth-child(2){
+  text-align: right;
+}
