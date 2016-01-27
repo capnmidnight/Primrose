@@ -1,10 +1,22 @@
 /* global Primrose, pliny */
 
+pliny.issue( "", {
+  name: "document clearKeyOption",
+  type: "open",
+  description: "Finish writing the documentation for the [`clearKeyOption`](#clearKeyOption) function\n\
+in the helpers/options.js file."
+} );
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
 }
 
+pliny.issue( "", {
+  name: "document setKeyOption",
+  type: "open",
+  description: "Finish writing the documentation for the [`setKeyOption`](#setKeyOption) function\n\
+in the helpers/options.js file."
+} );
 function setKeyOption ( outElem, elemArr, evt ) {
   this.dataset.keycode = evt.keyCode;
   this.value = this.value || Primrose.Keys[evt.keyCode];
@@ -21,6 +33,12 @@ function setKeyOption ( outElem, elemArr, evt ) {
   outElem.innerHTML = text;
 }
 
+pliny.issue( "", {
+  name: "document setupKeyOption",
+  type: "open",
+  description: "Finish writing the documentation for the [`setupKeyOption`](#setupKeyOption) function\n\
+in the helpers/options.js file."
+} );
 function setupKeyOption ( outElem, elemArr, index, char, code ) {
   var elem = elemArr[index];
   elem.value = char.toLocaleLowerCase( );
@@ -29,6 +47,12 @@ function setupKeyOption ( outElem, elemArr, index, char, code ) {
   elem.addEventListener( "keyup", setKeyOption.bind( elem, outElem, elemArr ) );
 }
 
+pliny.issue( "", {
+  name: "document combineDefaults",
+  type: "open",
+  description: "Finish writing the documentation for the [`combineDefaults`](#combineDefaults) function\n\
+in the helpers/options.js file."
+} );
 function combineDefaults(a, b){
   var c = {}, k;
   for(k in a){
