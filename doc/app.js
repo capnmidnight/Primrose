@@ -169,7 +169,14 @@
       }
     } );
 
-    output += "<li><h2>" + g + "</h2><ul>";
+    output += "<li><h2>";
+    if ( g === "issues" ) {
+      output += "Open Issues (" + group.length + ")";
+    }
+    else {
+      output += g;
+    }
+    output += "</h2><ul>";
     for ( var i = 0; i < group.length; ++i ) {
       var obj = group[i];
       if ( g !== "issues" || obj.type === "open" ) {
