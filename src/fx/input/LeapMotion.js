@@ -1,4 +1,4 @@
-/* global Primrose, requestAnimationFrame, Leap, LeapMotionInput */
+/* global Primrose, requestAnimationFrame, Leap, LeapMotionInput, pliny */
 
 Primrose.Input.LeapMotion = ( function () {
   function processFingerParts ( i ) {
@@ -7,16 +7,64 @@ Primrose.Input.LeapMotion = ( function () {
     } );
   }
 
+
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion",
+    type: "open",
+    description: "Finish writing the documentation for the [Primrose.Input.LeapMotion](#Primrose_Input_LeapMotion) class in the input/ directory"
+  } );
   function LeapMotionInput ( name, commands, socket ) {
+
+    pliny.issue( "Primrose.Input.LeapMotion", {
+      name: "document LeapMotion.isStreaming",
+      type: "open",
+      description: ""
+    } );
     this.isStreaming = false;
+
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, LeapMotionInput.AXES );
-    this.controller = new Leap.Controller( { enableGestures: true } );
+
+    pliny.issue( "Primrose.Input.LeapMotion", {
+      name: "document LeapMotion.controller",
+      type: "open",
+      description: ""
+    } );
+    this.controller = new Leap.Controller( {enableGestures: true} );
   }
 
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.COMPONENTS",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.COMPONENTS = [ "X", "Y", "Z" ];
+  
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.NUM_HANDS",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.NUM_HANDS = 2;
+  
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.NUM_FINGERS",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.NUM_FINGERS = 10;
+  
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.FINGER_PARTS",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.FINGER_PARTS = [ "tip", "dip", "pip", "mcp", "carp" ];
+  
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.AXES",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.AXES = [ "X0", "Y0", "Z0",
     "X1", "Y1", "Z1",
     "FINGER0TIPX", "FINGER0TIPY",
@@ -72,7 +120,18 @@ Primrose.Input.LeapMotion = ( function () {
 
   Primrose.Input.ButtonAndAxis.inherit( LeapMotionInput );
 
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.CONNECTION_TIMEOUT",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.CONNECTION_TIMEOUT = 5000;
+  
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.E",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.prototype.E = function ( e, f ) {
     if ( f ) {
       this.controller.on( e, f );
@@ -83,6 +142,11 @@ Primrose.Input.LeapMotion = ( function () {
     }
   };
 
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.start",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.prototype.start = function ( gameUpdateLoop ) {
     if ( this.isEnabled() ) {
       var canceller = null,
@@ -113,6 +177,11 @@ Primrose.Input.LeapMotion = ( function () {
     }
   };
 
+  pliny.issue( "Primrose.Input.LeapMotion", {
+    name: "document LeapMotion.setState",
+    type: "open",
+    description: ""
+  } );
   LeapMotionInput.prototype.setState = function ( gameUpdateLoop, frame ) {
     var prevFrame = this.controller.history.get( 1 ),
         i,
@@ -151,9 +220,3 @@ Primrose.Input.LeapMotion = ( function () {
   };
   return LeapMotionInput;
 } )();
-
-pliny.issue( "Primrose.Input.LeapMotion", {
-  name: "document LeapMotion",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.LeapMotion](#Primrose_Input_LeapMotion) class in the input/ directory"
-} );

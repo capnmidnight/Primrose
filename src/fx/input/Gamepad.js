@@ -2,8 +2,14 @@
 
 Primrose.Input.Gamepad = ( function () {
 
+
+  pliny.issue( "Primrose.Input.Gamepad", {
+    name: "document Gamepad",
+    type: "open",
+    description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
+  } );
   pliny.class( "Primrose.Input", {
-    name: "Gampad",
+    name: "Gamepad",
     description: "Signal processor for gamepad input.",
     parameters: [
       {name: "", type: "", description: ""},
@@ -20,8 +26,19 @@ Primrose.Input.Gamepad = ( function () {
           gamepaddisconnected: [ ]
         };
 
+
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.superUpdate",
+      type: "open",
+      description: ""
+    } );
     this.superUpdate = this.update;
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.checkDevice",
+      type: "open",
+      description: ""
+    } );
     this.checkDevice = function ( pad ) {
       var i;
       for ( i = 0; i < pad.buttons.length; ++i ) {
@@ -32,6 +49,11 @@ Primrose.Input.Gamepad = ( function () {
       }
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.update",
+      type: "open",
+      description: ""
+    } );
     this.update = function ( dt ) {
       var pads,
           currentPads = [ ],
@@ -97,28 +119,58 @@ Primrose.Input.Gamepad = ( function () {
       sendAll( listeners.gamepaddisconnected, id );
     }
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.getErrorMessage",
+      type: "open",
+      description: ""
+    } );
     this.getErrorMessage = function () {
       return errorMessage;
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.setGamepad",
+      type: "open",
+      description: ""
+    } );
     this.setGamepad = function ( id ) {
       gpid = id;
       this.inPhysicalUse = true;
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.clearGamepad",
+      type: "open",
+      description: ""
+    } );
     this.clearGamepad = function () {
       gpid = null;
       this.inPhysicalUse = false;
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.isGamepadSet",
+      type: "open",
+      description: ""
+    } );
     this.isGamepadSet = function () {
       return !!gpid;
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.getConnectedGamepads",
+      type: "open",
+      description: ""
+    } );
     this.getConnectedGamepads = function () {
       return connectedGamepads.slice();
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.addEventListener",
+      type: "open",
+      description: ""
+    } );
     this.addEventListener = function ( event, handler, bubbles ) {
       if ( listeners[event] ) {
         listeners[event].push( handler );
@@ -128,6 +180,11 @@ Primrose.Input.Gamepad = ( function () {
       }
     };
 
+    pliny.issue( "Primrose.Input.Gamepad", {
+      name: "document Gamepad.removeEventListener",
+      type: "open",
+      description: ""
+    } );
     this.removeEventListener = function ( event, handler, bubbles ) {
       if ( listeners[event] ) {
         remove( listeners[event], handler );
@@ -144,36 +201,35 @@ Primrose.Input.Gamepad = ( function () {
     }
   }
 
+  pliny.issue( "Primrose.Input.Gamepad", {
+    name: "document Gamepad.AXES",
+    type: "open",
+    description: ""
+  } );
   GamepadInput.AXES = [ "LSX", "LSY", "RSX", "RSY" ];
   Primrose.Input.ButtonAndAxis.inherit( GamepadInput );
   return GamepadInput;
 } )();
 
-pliny.enumeration( "Primrose.Input.Gamepad", {
+Primrose.Input.Gamepad.XBOX_BUTTONS = pliny.enumeration( "Primrose.Input.Gamepad", {
   name: "XBOX_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller."
-} );
-Primrose.Input.Gamepad.XBOX_BUTTONS = {
-  A: 1,
-  B: 2,
-  X: 3,
-  Y: 4,
-  leftBumper: 5,
-  rightBumper: 6,
-  leftTrigger: 7,
-  rightTrigger: 8,
-  back: 9,
-  start: 10,
-  leftStick: 11,
-  rightStick: 12,
-  up: 13,
-  down: 14,
-  left: 15,
-  right: 16
-};
-
-pliny.issue( "Primrose.Input.Gamepad", {
-  name: "document Gamepad",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
+  description: "Labeled names for each of the different control features of the Xbox 360 controller.",
+  value: {
+    A: 1,
+    B: 2,
+    X: 3,
+    Y: 4,
+    leftBumper: 5,
+    rightBumper: 6,
+    leftTrigger: 7,
+    rightTrigger: 8,
+    back: 9,
+    start: 10,
+    leftStick: 11,
+    rightStick: 12,
+    up: 13,
+    down: 14,
+    left: 15,
+    right: 16
+  }
 } );

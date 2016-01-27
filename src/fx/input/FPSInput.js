@@ -1,12 +1,29 @@
 /* global Primrose, THREE, emit, isMobile, pliny */
 
 Primrose.Input.FPSInput = ( function ( ) {
+  pliny.issue( "Primrose.Input.FPSInput", {
+    name: "document FPSInput",
+    type: "open",
+    description: "Finish writing the documentation for the [Primrose.Input.FPSInput](#Primrose_Input_FPSInput) class in the input/ directory"
+  } );
   function FPSInput ( DOMElement ) {
     DOMElement = DOMElement || window;
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.listeners",
+      type: "open",
+      description: ""
+    } );
     this.listeners = {
       jump: [ ],
       zero: [ ]
     };
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.managers",
+      type: "open",
+      description: ""
+    } );
     this.managers = [
       // keyboard should always run on the window
       new Primrose.Input.Keyboard( "keyboard", window, {
@@ -37,11 +54,11 @@ Primrose.Input.FPSInput = ( function ( ) {
         },
         zero: {
           buttons: [ Primrose.Keys.Z ],
-          metaKeys: [ 
-            -Primrose.Keys.CTRL, 
-            -Primrose.Keys.ALT, 
+          metaKeys: [
+            -Primrose.Keys.CTRL,
+            -Primrose.Keys.ALT,
             -Primrose.Keys.SHIFT,
-            -Primrose.Keys.META 
+            -Primrose.Keys.META
           ],
           commandUp: emit.bind( this, "zero" )
         }
@@ -66,6 +83,7 @@ Primrose.Input.FPSInput = ( function ( ) {
         dheading: {commands: [ "heading" ], delta: true},
         pitch: {axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       } ) ];
+    
     if ( navigator.getVRDevices ) {
       this.managers.push( new Primrose.Input.VR( "vr" ) );
     }
@@ -81,11 +99,52 @@ Primrose.Input.FPSInput = ( function ( ) {
           } ) );
     }
 
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.keyboard",
+      type: "open",
+      description: ""
+    } );
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.mouse",
+      type: "open",
+      description: ""
+    } );
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.touch",
+      type: "open",
+      description: ""
+    } );
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.gamepad",
+      type: "open",
+      description: ""
+    } );
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.vr",
+      type: "open",
+      description: ""
+    } );
+
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.motion",
+      type: "open",
+      description: ""
+    } );
+
     this.managers.reduce( function ( inst, mgr ) {
       inst[mgr.name] = mgr;
       return inst;
     }, this );
 
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.connectGamepad",
+      type: "open",
+      description: ""
+    } );
     this.connectGamepad = function ( id ) {
       if ( !this.gamepad.isGamepadSet( ) && confirm( fmt(
           "Would you like to use this gamepad? \"$1\"", id ) ) ) {
@@ -97,6 +156,11 @@ Primrose.Input.FPSInput = ( function ( ) {
 
   var SETTINGS_TO_ZERO = [ "heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ" ];
 
+  pliny.issue( "Primrose.Input.FPSInput", {
+    name: "document FPSInput.zero",
+    type: "open",
+    description: ""
+  } );
   FPSInput.prototype.zero = function () {
     if ( this.vr ) {
       this.vr.sensor.resetSensor( );
@@ -112,6 +176,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     }
   };
 
+  pliny.issue( "Primrose.Input.FPSInput", {
+    name: "document FPSInput.update",
+    type: "open",
+    description: ""
+  } );
   FPSInput.prototype.update = function ( dt ) {
     for ( var i = 0; i < this.managers.length; ++i ) {
       var mgr = this.managers[i];
@@ -121,6 +190,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     }
   };
 
+  pliny.issue( "Primrose.Input.FPSInput", {
+    name: "document FPSInput.addEventListener",
+    type: "open",
+    description: ""
+  } );
   FPSInput.prototype.addEventListener = function ( evt, thunk, bubbles ) {
     if ( this.listeners[evt] ) {
       this.listeners[evt].push( thunk );
@@ -134,6 +208,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     }
   };
 
+  pliny.issue( "Primrose.Input.FPSInput", {
+    name: "document FPSInput.getValue",
+    type: "open",
+    description: ""
+  } );
   FPSInput.prototype.getValue = function ( name ) {
     var value = 0;
     for ( var i = 0; i < this.managers.length; ++i ) {
@@ -146,6 +225,11 @@ Primrose.Input.FPSInput = ( function ( ) {
   };
 
   if ( window.THREE ) {
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.getVector3",
+      type: "open",
+      description: ""
+    } );
     FPSInput.prototype.getVector3 = function ( x, y, z, value ) {
       value = value || new THREE.Vector3( );
       value.set( 0, 0, 0 );
@@ -158,6 +242,11 @@ Primrose.Input.FPSInput = ( function ( ) {
       return value;
     };
 
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.getVector3s",
+      type: "open",
+      description: ""
+    } );
     FPSInput.prototype.getVector3s = function ( x, y, z, values ) {
       values = values || [ ];
       for ( var i = 0; i < this.managers.length; ++i ) {
@@ -170,6 +259,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     };
 
     var temp = new THREE.Quaternion( );
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.getQuaternion",
+      type: "open",
+      description: ""
+    } );
     FPSInput.prototype.getQuaternion = function ( x, y, z, w, value, accumulate ) {
       value = value || new THREE.Quaternion( );
       value.set( 0, 0, 0, 1 );
@@ -186,6 +280,11 @@ Primrose.Input.FPSInput = ( function ( ) {
       return value;
     };
 
+    pliny.issue( "Primrose.Input.FPSInput", {
+      name: "document FPSInput.transforms",
+      type: "open",
+      description: ""
+    } );
     Object.defineProperties( FPSInput.prototype, {
       transforms: {
         get: function () {
@@ -202,9 +301,3 @@ Primrose.Input.FPSInput = ( function ( ) {
     return FPSInput;
   }
 } )( );
-
-pliny.issue( "Primrose.Input.FPSInput", {
-  name: "document FPSInput",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.FPSInput](#Primrose_Input_FPSInput) class in the input/ directory"
-} );
