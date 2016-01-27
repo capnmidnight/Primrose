@@ -1,7 +1,12 @@
 /* global THREE, Primrose, isMobile, pliny */
 
-function InsideSphereGeometry ( radius, widthSegments, heightSegments,
-    phiStart, phiLength, thetaStart, thetaLength ) {
+pliny.issue( "", {
+  name: "document InsideSphereGeometry",
+  type: "open",
+  description: "Finish writing the documentation for the [`InsideSphereGeometry`](#InsideSphereGeometry) class\n\
+in the helpers/graphics.js file."
+} );
+function InsideSphereGeometry ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
   "use strict";
 
   THREE.Geometry.call( this );
@@ -93,13 +98,15 @@ function InsideSphereGeometry ( radius, widthSegments, heightSegments,
         this.faces.push( new THREE.Face3( v1, v3, v4, [ n1, n3, n4 ] ) );
         this.faceVertexUvs[ 0 ].push( [ uv1, uv3, uv4 ] );
 
-      } else if ( Math.abs( this.vertices[ v3 ].y ) === radius ) {
+      }
+      else if ( Math.abs( this.vertices[ v3 ].y ) === radius ) {
 
         uv3.x = ( uv3.x + uv4.x ) / 2;
         this.faces.push( new THREE.Face3( v1, v2, v3, [ n1, n2, n3 ] ) );
         this.faceVertexUvs[ 0 ].push( [ uv1, uv2, uv3 ] );
 
-      } else {
+      }
+      else {
 
         this.faces.push( new THREE.Face3( v1, v2, v4, [ n1, n2, n4 ] ) );
         this.faceVertexUvs[ 0 ].push( [ uv1, uv2, uv4 ] );
@@ -133,6 +140,12 @@ if ( typeof window.THREE !== "undefined" ) {
   InsideSphereGeometry.prototype.constructor = InsideSphereGeometry;
 }
 
+pliny.issue( "", {
+  name: "document axis",
+  type: "open",
+  description: "Finish writing the documentation for the [`axis`](#axis) function\n\
+in the helpers/graphics.js file."
+} );
 function axis ( length, width ) {
   var center = hub();
   put( brick( 0xff0000, length, width, width ) )
@@ -144,6 +157,12 @@ function axis ( length, width ) {
   return center;
 }
 
+pliny.issue( "", {
+  name: "document box",
+  type: "open",
+  description: "Finish writing the documentation for the [`box`](#box) function\n\
+in the helpers/graphics.js file."
+} );
 function box ( w, h, l ) {
   if ( h === undefined ) {
     h = w;
@@ -152,14 +171,32 @@ function box ( w, h, l ) {
   return new THREE.BoxGeometry( w, h, l );
 }
 
+pliny.issue( "", {
+  name: "document light",
+  type: "open",
+  description: "Finish writing the documentation for the [`light`](#light) function\n\
+in the helpers/graphics.js file."
+} );
 function light ( color, intensity, distance, decay ) {
   return new THREE.PointLight( color, intensity, distance, decay );
 }
 
+pliny.issue( "", {
+  name: "document v3",
+  type: "open",
+  description: "Finish writing the documentation for the [`v3`](#v3) function\n\
+in the helpers/graphics.js file."
+} );
 function v3 ( x, y, z ) {
   return new THREE.Vector3( x, y, z );
 }
 
+pliny.issue( "", {
+  name: "document quad",
+  type: "open",
+  description: "Finish writing the documentation for the [`quad`](#quad) function\n\
+in the helpers/graphics.js file."
+} );
 function quad ( w, h, s, t ) {
   if ( h === undefined ) {
     h = w;
@@ -167,14 +204,32 @@ function quad ( w, h, s, t ) {
   return new THREE.PlaneBufferGeometry( w, h, s, t );
 }
 
+pliny.issue( "", {
+  name: "document hub",
+  type: "open",
+  description: "Finish writing the documentation for the [`hub`](#hub) function\n\
+in the helpers/graphics.js file."
+} );
 function hub ( ) {
   return new THREE.Object3D( );
 }
 
+pliny.issue( "", {
+  name: "document brick",
+  type: "open",
+  description: "Finish writing the documentation for the [`brick`](#brick) function\n\
+in the helpers/graphics.js file."
+} );
 function brick ( txt, w, h, l ) {
   return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
 }
 
+pliny.issue( "", {
+  name: "document put",
+  type: "open",
+  description: "Finish writing the documentation for the [`put`](#put) function\n\
+in the helpers/graphics.js file."
+} );
 function put ( object ) {
   return {
     on: function ( s ) {
@@ -189,6 +244,12 @@ function put ( object ) {
   };
 }
 
+pliny.issue( "", {
+  name: "document fill",
+  type: "open",
+  description: "Finish writing the documentation for the [`fill`](#fill) function\n\
+in the helpers/graphics.js file."
+} );
 function fill ( txt, w, h, l ) {
   if ( h === undefined ) {
     h = 1;
@@ -206,6 +267,12 @@ function fill ( txt, w, h, l ) {
   return point;
 }
 
+pliny.issue( "", {
+  name: "document textured",
+  type: "open",
+  description: "Finish writing the documentation for the [`textured`](#textured) function\n\
+in the helpers/graphics.js file."
+} );
 function textured ( geometry, txt, unshaded, o, s, t ) {
   var material;
   if ( o === undefined ) {
@@ -279,14 +346,32 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
   return obj;
 }
 
+pliny.issue( "", {
+  name: "document sphere",
+  type: "open",
+  description: "Finish writing the documentation for the [`sphere`](#sphere) function\n\
+in the helpers/graphics.js file."
+} );
 function sphere ( r, slices, rings ) {
   return new THREE.SphereBufferGeometry( r, slices, rings );
 }
 
+pliny.issue( "", {
+  name: "document cylinder",
+  type: "open",
+  description: "Finish writing the documentation for the [`cylinder`](#cylinder) function\n\
+in the helpers/graphics.js file."
+} );
 function cylinder ( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd ) {
   return new THREE.CylinderGeometry( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd );
 }
 
+pliny.issue( "", {
+  name: "document shell",
+  type: "open",
+  description: "Finish writing the documentation for the [`shell`](#shell) function\n\
+in the helpers/graphics.js file."
+} );
 function shell ( r, slices, rings, phi, theta ) {
   var SLICE = 0.45;
   if ( phi === undefined ) {
@@ -302,6 +387,12 @@ function shell ( r, slices, rings, phi, theta ) {
   return geom;
 }
 
+pliny.issue( "", {
+  name: "document range",
+  type: "open",
+  description: "Finish writing the documentation for the [`range`](#range) function\n\
+in the helpers/graphics.js file."
+} );
 function range ( n, m, s, t ) {
   var n2 = s && n || 0,
       m2 = s && m || n,
@@ -310,12 +401,18 @@ function range ( n, m, s, t ) {
   for ( var i = n2; i < m2; i += s2 ) {
     t2( i );
   }
-} 
+}
 
+pliny.issue( "", {
+  name: "document cloud",
+  type: "open",
+  description: "Finish writing the documentation for the [`cloud`](#cloud) function\n\
+in the helpers/graphics.js file."
+} );
 function cloud ( verts, c, s ) {
   var geom = new THREE.Geometry();
-  for(var i = 0; i < verts.length; ++i){
-    geom.vertices.push(verts[i]);
+  for ( var i = 0; i < verts.length; ++i ) {
+    geom.vertices.push( verts[i] );
   }
   var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
   return new THREE.PointCloud( geom, mat );
