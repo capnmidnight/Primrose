@@ -1,5 +1,11 @@
 /* global pliny */
 
+pliny.issue( "", {
+  name: "document copyObject",
+  type: "open",
+  description: "Finish writing the documentation for the [`copyObject`](#copyObject) function\n\
+in the helpers/oop.js file."
+} );
 function copyObject ( dest, source ) {
   var stack = [ {dest: dest, source: source} ];
   while ( stack.length > 0 ) {
@@ -22,11 +28,33 @@ function copyObject ( dest, source ) {
   }
 }
 
+pliny.issue( "", {
+  name: "document inherit",
+  type: "open",
+  description: "Finish writing the documentation for the [`inherit`](#inherit) function\n\
+in the helpers/oop.js file."
+} );
 function inherit ( classType, parentType ) {
   classType.prototype = Object.create( parentType.prototype );
   classType.prototype.constructor = classType;
 }
 
+
+pliny.issue( "", {
+  name: "document emit",
+  type: "open",
+  description: "Finish writing the documentation for the [`emit`](#emit) function\n\
+in the helpers/oop.js file."
+} );
+function range ( n, m, s, t ) {
+  var n2 = s && n || 0,
+      m2 = s && m || n,
+      s2 = t && s || 1,
+      t2 = t || s || m;
+  for ( var i = n2; i < m2; i += s2 ) {
+    t2( i );
+  }
+}
 function emit ( evt, args ) {
   var handlers = this.listeners[evt];
   for ( var i = 0; i < handlers.length; ++i ) {
