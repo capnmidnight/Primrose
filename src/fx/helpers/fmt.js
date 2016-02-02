@@ -64,8 +64,7 @@ pliny.function( "", {
 * $1.0000 - prints the result of calling `toLocaleTimeString()` on the date value, plus additional milliseconds value.\n\
 * $1.00000 - same as...\n\
 * $1.000000 - prints the result of calling `toLocaleString()` on the date value.\n\
-* $1.0000000 - prints the result of calling `toLocaleString()` on the date value, plus additional milliseconds value.\n\
-"}
+* $1.0000000 - prints the result of calling `toLocaleString()` on the date value, plus additional milliseconds value."}
   ],
   returns: "A formatted string.",
   description: "Replaces 1-indexed place holders in a string with the subsequent \n\
