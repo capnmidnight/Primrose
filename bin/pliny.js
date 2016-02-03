@@ -29,8 +29,6 @@
 
 ( function ( module ) {
 
-
-
   //////////////////////////////////////////////////////////////////////////////
   // Pliny's author is not smart enough to figure out how to make it possible //
   // to use it to document itself, so here's a bunch of comments.             //
@@ -45,6 +43,20 @@
     id: "Global",
     description: "These are the elements in the global namespace."
   };
+
+  function hash ( buf ) {
+    var s1 = 1,
+        s2 = 0,
+        buffer = buf.split( "" ).map( function ( c ) {
+      return c.charCodeAt( 0 );
+    } );
+
+    for ( var n = 0; n < buffer.length; ++n ) {
+      s1 = ( s1 + buffer[n] ) % 32771;
+      s2 = ( s2 + s1 ) % 32771;
+    }
+    return ( s2 << 8 ) | s1;
+  }
 
   // Walks through dot-accessors to retrieve an object out of a root object.
   // 
@@ -169,52 +181,48 @@
 
       if ( !found ) {
         var subArrays = {};
-        for ( var k in info ) {
-          if ( k === "examples" ) {
+
+        [ "examples",
+          "issues",
+          "comments" ].forEach( function ( k ) {
+          if ( typeof info[k] !== "undefined" ) {
             subArrays[k] = info[k];
             delete info[k];
           }
-        }
+        } );
+
         // After we copy the metadata, we get back the documentation database object
         // that will store the fuller data we get from other objects.
         info = copyObjectMetadata( info );
 
         arr.push( info );
 
-        // Make sure everything stays in a nice order.
-        arr.sort( function ( a, b ) {
-          var c = a.fullName,
-              d = b.fullName;
-          if ( c === "[Global]" ) {
-            c = "A" + c;
-          }
-          if ( d === "[Global]" ) {
-            d = "A" + d;
-          }
-          if ( c > d ) {
-            return 1;
-          }
-          else if ( c < d ) {
-            return -1;
-          }
-          else {
-            return 0;
-          }
-        } );
-
         // Handle other parent-child relationships.
         if ( info.fieldType === "class" && info.baseClass ) {
-          pliny.theElder.subClass( info.baseClass, info );
+          pliny.subClass( info.baseClass, info );
+        }
+        else if ( info.fieldType === "enumeration" && info.value ) {
+          for ( var key in info.value ) {
+            var val = info.value[key];
+            if ( info.value.hasOwnProperty( key ) && typeof ( val ) === "number" ) {
+              pliny.value( info.fullName, {
+                name: key,
+                type: "Number",
+                description: val.toString()
+              } );
+            }
+          }
         }
 
         for ( var k in subArrays ) {
           var subArr = subArrays[k],
               type = k.substring( 0, k.length - 1 );
           for ( var i = 0; i < subArr.length; ++i ) {
-            pliny.theElder[type]( info.fullName, subArr[i] );
+            pliny[type]( info.fullName.replace( /::/g, "." ), subArr[i] );
           }
         }
       }
+      return info.value;
     }
   }
 
@@ -240,6 +248,13 @@
 
       // The fullName is used in titles on documentation articles.
       if ( !bag.fullName ) {
+        if ( bag.fieldType === "issue" ) {
+          Object.defineProperty( bag, "issueID", {
+            get: function () {
+              return hash( this.parent + "." + this.name );
+            }
+          } );
+        }
         Object.defineProperty( bag, "fullName", {
           get: function () {
             var output = "";
@@ -255,7 +270,7 @@
                 // fields here.
                 output += "::";
               }
-              else if ( this.fieldType === "example" ) {
+              else if ( this.fieldType === "example" || this.fieldType === "issue" ) {
                 output += ": ";
               }
               else {
@@ -291,7 +306,7 @@
     return bag;
   }
 
-  var scriptPattern = /\bpliny\s*\.\s*theElder\s*\.\s*(\w+)/gm;
+  var scriptPattern = /\bpliny\s*\.\s*(\w+)/gm;
   /////
   // Finds the actual object in the scope hierarchy, and:
   //  A) looks for contextual scripts that might be defined in this object
@@ -321,12 +336,12 @@
           }
 
           // And follow the normal documentation path.
-          pliny.theElder[fieldType].apply( null, parameters );
+          pliny[fieldType].apply( null, parameters );
         }
       }
 
       // Create the live-accessible documentation function
-      obj.help = pliny.theYounger.bind( null, name );
+      obj.help = pliny.bind( null, name );
     }
     return obj;
   }
@@ -407,15 +422,29 @@
   function parseParameter ( script ) {
     // Make sure all hash key labels are surrounded in quotation marks.
     var stringLiterals = [ ];
-    var param = script.replace( /"(\\"|[^"])+"/g, function ( str ) {
+    var litReplace = function ( str ) {
       var name = "&STRING_LIT" + stringLiterals.length + ";";
+      if(str[0] === "'"){
+        str = str.replace(/\\"/g, "&_DBLQUOTE_;")
+            .replace(/\\'/g, "&_SGLQUOTE_;")
+            .replace(/"/g, "\\\"")
+            .replace(/'/g, "\"")
+            .replace(/&_DBLQUOTE_;/g, "\\\"")
+            .replace(/&_SGLQUOTE_;/g, "\\'");
+      }
       stringLiterals.push( str );
       return name;
-    } )
+    };
+    var litReturn = function ( a, b ) {
+      return stringLiterals[b];
+    };
+    var param = script
+        .replace( /'(\\'|[^'])+'/g, litReplace )
+        .replace( /"(\\"|[^"])+"/g, litReplace )
         .replace( /\b(\w+)\b\s*:/g, "\"$1\":" )
-        .replace( /&STRING_LIT(\d+);/g, function ( a, b ) {
-          return stringLiterals[b];
-        } );
+        .replace( /&STRING_LIT(\d+);/g, litReturn )
+        .replace( /&STRING_LIT(\d+);/g, litReturn )
+        .replace( /\\\r?\n/g, "" );
 
     try {
       return JSON.parse( param );
@@ -462,8 +491,9 @@
           "methods",
           "enumerations",
           "records",
-          "references",
-          "examples" ].map( formatters.checkAndFormatField.bind( this, obj ) )
+          "examples",
+          "issues",
+          "comments" ].map( formatters.checkAndFormatField.bind( this, obj ) )
             // filter out any lines that returned undefined because they didn't exist
             .filter( identity )
             // concate them all together
@@ -494,71 +524,41 @@
     ///
     formatField: function ( obj, p, o ) {
       var output = "";
-      if ( o instanceof Array ) {
+      if ( obj.fieldType === "enumeration" && p === "values" ) {
+        output += this.formatEnumeration( obj, p, o );
+      }
+      else if ( o instanceof Array ) {
         output += this.formatArray( obj, p, o );
       }
       else if ( p === "parent" ) {
         output += "<p>Contained in <a href=\"#" + pliny.get( o ).id + "\">" + o + "</a></p>";
       }
       else if ( p === "description" ) {
-        output += this.endocumate( o );
+        output += endocumate( o );
+      }
+      else if ( p === "returns" ) {
+        output += "<h3>Return value</h3>" + endocumate( o );
       }
       else {
         output += "<dl><dt>" + p + "</dt><dd>" + o + "</dd></dl>";
       }
       return output;
     },
-    // This is a slightly rough version of Markdown that does not include the 
-    // full link/image sytnax, emphasis, underline, or bold, and uses its own 
-    // syntax for code blocks (double backticks instead of indenting).
-    endocumate: function ( str, depth ) {
-      if ( depth === undefined ) {
-        depth = 0;
-      }
-      if ( depth < 5 ) {
-        var pres = [ ];
-        return "<p>" + str
-            .replace( /(``?)([^`]+)\1/g, function ( str, group1, group2 ) {
-              var name = "&PRE_SNIP" + pres.length + ";",
-                  tag = group1 === "``" ? "pre" : "code",
-                  content = group2.replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-              pres.push( "<" + tag + ">" + content + "</" + tag + ">" );
-              return name;
-            } )
-            .replace( /&(?!\w+;)/g, "&amp;" )
-            .replace( /((\*|-)\s*){3,}\n/g, "<hr>" )
-            .replace( /^([^\n]+)\n=+\n/mg, "<h1>$1</h1>" )
-            .replace( /^([^\n]+)\n-+\n/mg, "<h2>$1</h2>" )
-            .replace( /(#{1,6})\s*([^#\n]+)\s*#*\n/g, function ( str, group1, group2 ) {
-              var h = group1.length;
-              return "<h" + h + ">" + group2 + "</h" + h + ">";
-            } )
-            .replace( /(^(\*|-|\+|\d+\.)\s+[^\n]+\n)+/mg, function ( str ) {
-              var tag = /\d/.test( str[0] ) ? "ol" : "ul";
-              return "<" + tag + ">" + str.replace( /(\*|-|\+|\d+\.)\s+([^\n]+)\n/g, "<li>$2</li>" ) + "</" + tag + ">";
-            } )
-            .replace( /(^> [^\n]+\n)+/mg, function ( str ) {
-              return "<blockquote>" + this.endocumate( str.replace( /^> /mg, "" ), depth + 1 ) + "</blockquote>";
-            }.bind(this) )
-            .replace( /!\[([^\]]+)\]\s*\(([^\)]+)\)/g, "<img title=\"$1\" alt=\"diagram\" src=\"$2\">" )
-            .replace( /\[([^\]]+)\]\s*\(([^\)]+)\)/g, "<a href=\"$2\">$1</a>" )
-            .replace( /<(?!\/|(a|abbr|address|area|article|aside|audio|b|base|bdi|bdo|bgsound|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|command|content|data|datalist|dd|del|details|dfn|dialog|div|dl|dt|element|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|label|legend|li|link|main|map|mark|menu|menuitem|meta|meter|nav|nobr|noframes|noscript|object|ol|optgroup|option|output|p|param|picture|pre|progress|q|rp|rt|rtc|ruby|s|samp|script|section|select|shadow|small|source|span|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|u|ul|var|video|wbr)\b)/g, "&lt;" )
-            .replace( /\n\s*\n/g, "</p><p>" )
-            .replace( /  \n/g, "<br>" )
-            .replace( /&PRE_SNIP(\d+);/g, function ( str, match ) {
-              return pres[match];
-            } ) + "</p>";
-      }
-    },
     ////
-    // Specific formatting function for Description fields when they are defined
-    // as arrays.
-    //
-    // @param {Array} arr - an array of strings that define a long description.
-    // @return {String} - a summary/details view of the description.
-    descriptionFormat: function ( obj, arr ) {
-      var temp = arr.slice();
-      return "<p>" + temp.join( "</p><p>" ) + "</p>";
+    // Specific fomratting function for Enumerations
+    // 
+    // @param {Object} obj - the documentation object from which to read an array.
+    // @param {String} arrName - the name of the array to read from the documentation object.
+    // @param {Array} arr - the array from which we're reading values.
+    // @return {String} - the formatted description of the array.
+    formatEnumeration: function ( obj, arrName, arr ) {
+      var output = "<table><thead><tr><th>Name</th><th>Value</th><tr><thead><tbody>";
+      for ( var i = 0; i < arr.length; ++i ) {
+        var e = arr[i];
+        output += "<tr><td>" + e.name + "</td><td>" + e.description + "</td></tr>";
+      }
+      output += "</tbody></table>";
+      return output;
     },
     ////
     // Specific formatting function for Code Example.
@@ -569,21 +569,41 @@
       var output = "";
       for ( var i = 0; i < arr.length; ++i ) {
         var ex = arr[i];
-        output += "<div><h4><a href=\"#" + ex.id + "\">" + ex.name + "</a></h4>" + this.endocumate( ex.description ) + "</div>";
+        output += "<div><h3><a href=\"#" + ex.id + "\">" + ex.name + "</a></h3>" + endocumate( ex.description ) + "</div>";
       }
       return output;
     },
     ////
-    // Specific formatting function for References section.
+    // Specific formatting function for Issues.
     //
-    // @param {Array} arr - an array of objects defining reference links, with name as link text and description as link URL.
-    // @return {String} - links as a list.
-    referencesFormat: function ( obj, arr ) {
-      var output = "<ol>";
+    // @param {Array} arr - an array of objects defining issues.
+    // @return {String} - a summary/details view of the issues.
+    issuesFormat: function ( obj, arr ) {
+      var parts = {open: "", closed: ""};
       for ( var i = 0; i < arr.length; ++i ) {
-        output += "<li><a href=\"" + arr[i].description + "\" target=\"_blank\">" + arr[i].name + "</a></li>";
+        var issue = arr[i],
+            str = "<div><h3><a href=\"#" + issue.id + "\">" + issue.issueID + ": " + issue.name +
+            " [" + issue.type + "]</a></h3>" + endocumate( issue.description ) + "</div>";
+        parts[issue.type] += str;
       }
-      return output + "</ol>";
+      return parts.open + "<h2>Closed Issues</h2>" + parts.closed;
+    },
+    ////
+    // Specific formatting function for Comments section of Issues.
+    //
+    // @param {Array} arr - an array of objects defining comments.
+    // @return {String} - a summary/details view of the comment.
+    commentsFormat: function ( obj, arr ) {
+      var output = "";
+      for ( var i = 0; i < arr.length; ++i ) {
+        var comment = arr[i];
+        output += "<aside><h3>" + comment.name + "</h3>" + endocumate( comment.description );
+        if ( typeof comment.comments !== "undefined" && comment.comments instanceof Array ) {
+          output += this.formatArray( comment, "comments", comment.comments );
+        }
+        output += "</aside>";
+      }
+      return output;
     },
     /////
     // Puts together lists of parameters for function signatures, as well as
@@ -591,10 +611,11 @@
     // 
     // @param {Object} obj - the documentation object from which to read an array.
     // @param {String} arrName - the name of the array to read from the documentation object.
+    // @param {Array} arr - the array from which we're reading values.
     // @return {String} - the formatted description of the array.
     ///
     formatArray: function ( obj, arrName, arr ) {
-      var output = "<h3>";
+      var output = "<h2>";
       if ( obj.fieldType === "class" ) {
         if ( arrName === "parameters" ) {
           output += "constructor ";
@@ -608,7 +629,7 @@
         output += arrName;
       }
 
-      output += "</h3>";
+      output += "</h2>";
 
       var formatterName = arrName + "Format";
       if ( this[formatterName] ) {
@@ -632,14 +653,8 @@
     formatArrayElement: function ( arrName, n ) {
       var s = "<li>";
       if ( n.description ) {
-        s += "<dl><dt>" + this.shortDescription( false, n ) + "</dt><dd>";
-        if ( n.description instanceof Array ) {
-          s += n.description[0];
-        }
-        else {
-          s += n.description;
-        }
-        s += "</dd></dl>";
+        s += "<dl><dt>" + this.shortDescription( false, n ) + "</dt><dd>" +
+            endocumate( n.description ) + "</dd></dl>";
       }
       else {
         s += this.shortDescription( false, n );
@@ -654,7 +669,7 @@
     ///
     shortDescription: function ( topLevel, p ) {
       var output = "",
-          tag = topLevel ? "h2" : "span",
+          tag = topLevel ? "h1" : "span",
           isFunction = p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event",
           isContainer = isFunction || p.fieldType === "class" || p.fieldType === "namespace" || p.fieldType === "enumeration" || p.fieldType === "subClass" || p.fieldType === "record";
 
@@ -736,9 +751,6 @@
         output += arrName + ":\n";
       }
 
-      if ( arrName === "description" && arr instanceof Array ) {
-        arr = arr.join( "\n\n\t" ) + "\n";
-      }
       if ( arr instanceof Array ) {
         output += arr.map( this.formatArrayElement.bind( this, arrName ) ).join( "" );
       }
@@ -761,13 +773,7 @@
     formatArrayElement: function ( arrName, n, i ) {
       var s = "\t\t" + i + ": " + this.shortDescription( false, n );
       if ( n.description ) {
-        s += " - ";
-        if ( n.description instanceof Array ) {
-          s += n.description[0];
-        }
-        else {
-          s += n.description;
-        }
+        s += " - " + n.description;
 
         if ( arrName !== "parameters" && arrName !== "properties" && arrName !== "methods" && s.length > 200 ) {
           s = s.substring( 0, 200 ) + "...";
@@ -804,20 +810,12 @@
   };
 
 
-
-
   // The namespacing object we're going to return to the importing script.
-  var pliny = {
-    // The bag of documentation functions.
-    theElder: {},
-    // The default formatter goes straight to the console.
-    theYounger: formatters.console.format,
-    // Give the user access to the database.
-    database: database,
-    // Give the user access to all of the formatters.
-    formats: formatters
-  };
-
+  var pliny = formatters.console.format;
+  // Give the user access to the database.
+  pliny.database = database;
+  // Give the user access to all of the formatters.
+  pliny.formats = formatters;
   // Just get the raw data
   pliny.get = openBag.bind( null, pliny.database );
 
@@ -833,9 +831,10 @@
     "record",
     "subClass",
     "example",
-    "reference",
-    "error" ].forEach( function ( k ) {
-    pliny.theElder[k] = analyzeObject.bind( null, k );
+    "error",
+    "issue",
+    "comment" ].forEach( function ( k ) {
+    pliny[k] = analyzeObject.bind( null, k );
   } );
 
   module.exports = pliny;
