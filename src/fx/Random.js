@@ -1,9 +1,7 @@
 /* global Primrose, pliny */
 
-Primrose.Random = ( function () {
-
+( function () {
   pliny.namespace( "Primrose.Random", "Functions for handling random numbers of different criteria, or selecting random elements of arrays." );
-  var Random = {};
 
   pliny.function( "Primrose.Random", {
     name: "number",
@@ -31,11 +29,11 @@ Primrose.Random = ( function () {
 -0.3644236018881202\n\
 0.4486056035384536\n\
 -0.9659552359953523``"}
-    ]
+    ],
+    value: function ( min, max ) {
+      return Math.random() * ( max - min ) + min;
+    }
   } );
-  Random.number = function ( min, max ) {
-    return Math.random() * ( max - min ) + min;
-  };
 
   pliny.function( "Primrose.Random", {
     name: "int",
@@ -81,18 +79,18 @@ Primrose.Random = ( function () {
 -100\n\
 -100\n\
 52``"}
-    ]
-  } );
-  Random.int = function ( min, max, power ) {
-    power = power || 1;
-    if ( max === undefined ) {
-      max = min;
-      min = 0;
+    ],
+    value: function ( min, max, power ) {
+      power = power || 1;
+      if ( max === undefined ) {
+        max = min;
+        min = 0;
+      }
+      var delta = max - min,
+          n = Math.pow( Math.random(), power );
+      return Math.floor( min + n * delta );
     }
-    var delta = max - min,
-        n = Math.pow( Math.random(), power );
-    return Math.floor( min + n * delta );
-  };
+  } );
 
   pliny.function( "Primrose.Random", {
     name: "item",
@@ -126,11 +124,11 @@ five\n\
 four\n\
 three\n\
 two``"}
-    ]
+    ],
+    value: function ( arr ) {
+      return arr[Primrose.Random.int( arr.length )];
+    }
   } );
-  Random.item = function ( arr ) {
-    return arr[Primrose.Random.int( arr.length )];
-  };
 
   pliny.function( "Primrose.Random", {
     name: "steps",
@@ -159,13 +157,11 @@ two``"}
 92\n\
 4\n\
 36``"}
-    ]
+    ],
+    value: function ( min, max, steps ) {
+      return min + Primrose.Random.int( 0, ( 1 + max - min ) / steps ) * steps;
+    }
   } );
-  Random.steps = function ( min, max, steps ) {
-    return min + Primrose.Random.int( 0, ( 1 + max - min ) / steps ) * steps;
-  };
-
-  return Random;
 } )();
 
 pliny.issue( "Primrose.Random", {
