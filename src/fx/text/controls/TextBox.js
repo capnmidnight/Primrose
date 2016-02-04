@@ -532,6 +532,9 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         }
       },
       codePage: {
+        get: function(){
+          return codePage;
+        },
         set: function ( cp ) {
           var key,
               code,
