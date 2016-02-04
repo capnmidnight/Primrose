@@ -1,19 +1,18 @@
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, 
- * devicePixelRatio, HTMLCanvasElement, pliny */
+/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
 
-pliny.class( "Primrose.Text.Controls", {
-  name: "TextBox",
-  description: "Syntax highlighting textbox control.",
-  parameters: [
-    {name: "renderToElementOrID", type: "String or Element", description: "Junk"},
-    {name: "options", type: "Object", description: "More junk."}
-  ]
-} );
 Primrose.Text.Controls.TextBox = ( function ( ) {
   "use strict";
 
   var SCROLL_SCALE = isFirefox ? 3 : 100;
 
+  pliny.class( "Primrose.Text.Controls", {
+    name: "TextBox",
+    description: "Syntax highlighting textbox control.",
+    parameters: [
+      {name: "renderToElementOrID", type: "String or Element", description: "Junk"},
+      {name: "options", type: "Object", description: "More junk."}
+    ]
+  } );
   function TextBox ( renderToElementOrID, options ) {
     var self = this;
     //////////////////////////////////////////////////////////////////////////
@@ -1018,22 +1017,22 @@ Primrose.Text.Controls.TextBox = ( function ( ) {
         renderer.id, !options.hideScrollBars, "Scroll bars",
         "showScrollBars" );
     this.themeSelect = makeSelectorFromObj( "primrose-theme-selector-" +
-        renderer.id, Primrose.Text.Themes, theme.name, self, "theme", "theme" );
+        renderer.id, Primrose.Text.Themes, this.theme.name, self, "theme", "theme" );
     this.commandSystemSelect = makeSelectorFromObj(
         "primrose-command-system-selector-" + renderer.id, Primrose.Text.Commands,
         CommandSystem.name, self, "commandSystem",
         "Command system" );
     this.tokenizerSelect = makeSelectorFromObj(
         "primrose-tokenizer-selector-" +
-        renderer.id, Primrose.Text.Grammars, tokenizer.name, self, "tokenizer",
+        renderer.id, Primrose.Text.Grammars, this.tokenizer.name, self, "tokenizer",
         "Language syntax", Primrose.Text.Grammar );
     this.keyboardSelect = makeSelectorFromObj(
         "primrose-keyboard-selector-" +
-        renderer.id, Primrose.Text.CodePages, codePage.name, self, "codePage",
+        renderer.id, Primrose.Text.CodePages, this.codePage.name, self, "codePage",
         "Localization", Primrose.Text.CodePage );
     this.operatingSystemSelect = makeSelectorFromObj(
         "primrose-operating-system-selector-" + renderer.id,
-        Primrose.Text.OperatingSystems, operatingSystem.name, self,
+        Primrose.Text.OperatingSystems, this.operatingSystem.name, self,
         "operatingSystem",
         "Shortcut style", Primrose.Text.OperatingSystem );
   }
@@ -1058,4 +1057,13 @@ rendered at all. The next line gets rendered instead, with the line number it *w
 have had, had the blank line been rendered. Adding whitespace to the line causes\n\
 it to render. This seems to only happen for text that is loaded into the textbox,\n\
 not text that is entered by the keyboard."
+} );
+
+pliny.issue( "Primrose.Text.Controls.TextBox", {
+  name: "TextBox should re-render only on updates, not require an animation loop.",
+  type: "open",
+  description: "Currently, the TextBox knows quite a bit about when it needs to\n\
+update, but it doesn't use this information to actually kick off a render. It first\n\
+requires us to ask it to render, and then it decides if it's time to render. Instead,\n\
+the invalidation that causes it to decide to render should just kick off a render."
 } );
