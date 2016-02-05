@@ -12,6 +12,7 @@
       };
 
   var groupings = {
+    pages: [ ],
     examples: [ ],
     namespaces: [ pliny.database ],
     classes: [ ],
@@ -141,51 +142,54 @@
     }
   }
 
+  function renderDocs () {
+    buildDocumentation();
+    // Build the menu.
+    delete groupings.methods;
+    groupings.examples = pliny.database.examples || [ ];
+    var output = "";
+    for ( var g in groupings ) {
+      var group = groupings[g];
+      group.sort( function ( a, b ) {
+        var c = a.fullName,
+            d = b.fullName;
+        if ( c === "[Global]" ) {
+          c = "A" + c;
+        }
+        if ( d === "[Global]" ) {
+          d = "A" + d;
+        }
+        if ( c > d ) {
+          return 1;
+        }
+        else if ( c < d ) {
+          return -1;
+        }
+        else {
+          return 0;
+        }
+      } );
 
-  buildDocumentation();
-  // Build the menu.
-  delete groupings.methods;
-  groupings.examples = pliny.database.examples || [ ];
-  var output = "";
-  for ( var g in groupings ) {
-    var group = groupings[g];
-    group.sort( function ( a, b ) {
-      var c = a.fullName,
-          d = b.fullName;
-      if ( c === "[Global]" ) {
-        c = "A" + c;
-      }
-      if ( d === "[Global]" ) {
-        d = "A" + d;
-      }
-      if ( c > d ) {
-        return 1;
-      }
-      else if ( c < d ) {
-        return -1;
+      output += "<li><h2>";
+      if ( g === "issues" ) {
+        output += "Open Issues (" + group.length + ")";
       }
       else {
-        return 0;
+        output += g;
       }
-    } );
-
-    output += "<li><h2>";
-    if ( g === "issues" ) {
-      output += "Open Issues (" + group.length + ")";
-    }
-    else {
-      output += g;
-    }
-    output += "</h2><ul>";
-    for ( var i = 0; i < group.length; ++i ) {
-      var obj = group[i];
-      if ( g !== "issues" || obj.type === "open" ) {
-        output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+      output += "</h2><ul>";
+      for ( var i = 0; i < group.length; ++i ) {
+        var obj = group[i];
+        if ( g !== "issues" || obj.type === "open" ) {
+          output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+        }
       }
+      output += "</ul></li>";
     }
-    output += "</ul></li>";
+    nav.innerHTML = output;
+    showHash();
+    search.call( docSearch );
   }
-  nav.innerHTML = output;
 
   // Setup the navigation events
   docSearch.addEventListener( "keyup", search, false );
@@ -193,6 +197,6 @@
   window.addEventListener( "hashchange", showHash, false );
 
   Primrose.Text.Themes.Default.regular.unfocused = "transparent";
-  showHash();
-  search.call( docSearch );
+
+  pliny.load( [ "pliny.md" ] ).then( renderDocs );
 } )();
