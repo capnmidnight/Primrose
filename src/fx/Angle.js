@@ -1,9 +1,8 @@
 /* global Primrose, pliny */
 
-( function ( ) {
+Primrose.Angle = ( function ( ) {
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;
-      
   pliny.class( "Primrose", {
     name: "Angle",
     description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
@@ -61,63 +60,66 @@ a.radians += Math.PI / 2;\n\
 console.log(a.degrees);``\n\
 Results:\n\
 ``90``"
-      } ],
-    value: function ( v ) {
-      if ( typeof ( v ) !== "number" ) {
-        throw new Error( "Angle must be initialized with a number. Initial value was: " + v );
-      }
-
-      var value = v,
-          delta = 0,
-          d1,
-          d2,
-          d3;
-
-      pliny.property( {
-        name: "degrees",
-        type: "Number",
-        description: "Get/set the current value of the angle in degrees."
-      } );
-      Object.defineProperty( this, "degrees", {
-        set: function ( newValue ) {
-          do {
-            // figure out if it is adding the raw value, or whole
-            // rotations of the value, that results in a smaller
-            // magnitude of change.
-            d1 = newValue + delta - value;
-            d2 = Math.abs( d1 + 360 );
-            d3 = Math.abs( d1 - 360 );
-            d1 = Math.abs( d1 );
-            if ( d2 < d1 && d2 < d3 ) {
-              delta += 360;
-            }
-            else if ( d3 < d1 ) {
-              delta -= 360;
-            }
-          } while ( d1 > d2 || d1 > d3 );
-          value = newValue + delta;
-        },
-        get: function ( ) {
-          return value;
-        }
-      } );
-    }
+      } ]
   } );
-  
-  pliny.property( "Primrose.Angle.prototype", {
+
+  function Angle ( v ) {
+    if ( typeof ( v ) !== "number" ) {
+      throw new Error( "Angle must be initialized with a number. Initial value was: " + v );
+    }
+
+    var value = v,
+        delta = 0,
+        d1,
+        d2,
+        d3;
+    pliny.property( {
+      name: "degrees",
+      type: "Number",
+      description: "Get/set the current value of the angle in degrees."
+    } );
+    Object.defineProperty( this, "degrees", {
+      set: function ( newValue ) {
+        do {
+          // figure out if it is adding the raw value, or whole
+          // rotations of the value, that results in a smaller
+          // magnitude of change.
+          d1 = newValue + delta - value;
+          d2 = Math.abs( d1 + 360 );
+          d3 = Math.abs( d1 - 360 );
+          d1 = Math.abs( d1 );
+          if ( d2 < d1 && d2 < d3 ) {
+            delta += 360;
+          }
+          else if ( d3 < d1 ) {
+            delta -= 360;
+          }
+        } while ( d1 > d2 || d1 > d3 );
+        value = newValue + delta;
+      },
+      get: function ( ) {
+        return value;
+      }
+    } );
+  }
+
+  pliny.property( "Primrose.Angle", {
     name: "radians",
     type: "Number",
-    description: "Get/set the current value of the angle in radians.",
-    value: {
-      get: function ( ) {
-        return this.degrees * DEG2RAD;
-      },
-      set: function ( val ) {
-        this.degrees = val * RAD2DEG;
-      }
+    description: "Get/set the current value of the angle in radians."
+  } );
+  Object.defineProperty( Angle.prototype, "radians", {
+    get: function ( ) {
+      return this.degrees * DEG2RAD;
+    },
+    set: function ( val ) {
+      this.degrees = val * RAD2DEG;
     }
   } );
+
+  return Angle;
 } )( );
+
 pliny.issue( "Primrose.Angle", {
   name: "document Angle",
   type: "closed",
