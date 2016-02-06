@@ -150,25 +150,27 @@
     var output = "";
     for ( var g in groupings ) {
       var group = groupings[g];
-      group.sort( function ( a, b ) {
-        var c = a.fullName,
-            d = b.fullName;
-        if ( c === "[Global]" ) {
-          c = "A" + c;
-        }
-        if ( d === "[Global]" ) {
-          d = "A" + d;
-        }
-        if ( c > d ) {
-          return 1;
-        }
-        else if ( c < d ) {
-          return -1;
-        }
-        else {
-          return 0;
-        }
-      } );
+      if ( g !== "pages" ) {
+        group.sort( function ( a, b ) {
+          var c = a.fullName,
+              d = b.fullName;
+          if ( c === "[Global]" ) {
+            c = "A" + c;
+          }
+          if ( d === "[Global]" ) {
+            d = "A" + d;
+          }
+          if ( c > d ) {
+            return 1;
+          }
+          else if ( c < d ) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        } );
+      }
 
       output += "<li><h2>";
       if ( g === "issues" ) {
@@ -198,5 +200,10 @@
 
   Primrose.Text.Themes.Default.regular.unfocused = "transparent";
 
-  pliny.load( [ "pliny.md" ] ).then( renderDocs );
+  pliny.load( [
+    "getStarted",
+    "pliny"
+  ].map( function ( f ) {
+    return f + ".md";
+  } ) ).then( renderDocs );
 } )();
