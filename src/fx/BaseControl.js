@@ -49,9 +49,9 @@ performs basic conversions from DOM elements to the internal Control format."
         name: "Add an event listener.",
         description: "The `addEventListener()` method operates nearly identically\n\
 to the method of the same name on DOM elements.\n\
-``var txt = new Primrose.Text.Controls.TextBox();\n\
-txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));``"
+    var txt = new Primrose.Text.Controls.TextBox();\n\
+    txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
+    txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
       } ]
   } );
   BaseControl.prototype.addEventListener = function ( event, func ) {
@@ -67,23 +67,23 @@ txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));``"
         name: "Focus on one control, blur all the rest",
         description: "When we have a list of controls and we are trying to track\n\
 focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-``var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-];\n\
+    var ctrls = [\n\
+      new Primrose.Text.Controls.TextBox(),\n\
+      new Primrose.Text.Controls.TextBox(),\n\
+      new Primrose.Text.Button()\n\
+    ];\n\
 \n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
-    }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}``"
+    function focusOn(id){\n\
+      for(var i = 0; i < ctrls.length; ++i){\n\
+        var c = ctrls[i];\n\
+        if(c.controlID === id){\n\
+          c.focus();\n\
+        }\n\
+        else{\n\
+          c.blur();\n\
+        }\n\
+      }\n\
+    }"
       } ]
   } );
   BaseControl.prototype.focus = function () {
@@ -98,23 +98,23 @@ function focusOn(id){\n\
         name: "Focus on one control, blur all the rest",
         description: "When we have a list of controls and we are trying to track\n\
 focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
-``var ctrls = [\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Controls.TextBox(),\n\
-  new Primrose.Text.Button()\n\
-];\n\
-\n\
-function focusOn(id){\n\
-  for(var i = 0; i < ctrls.length; ++i){\n\
-    var c = ctrls[i];\n\
-    if(c.controlID === id){\n\
-      c.focus();\n\
-    }\n\
-    else{\n\
-      c.blur();\n\
-    }\n\
-  }\n\
-}``"
+    var ctrls = [\n\
+      new Primrose.Text.Controls.TextBox(),\n\
+      new Primrose.Text.Controls.TextBox(),\n\
+      new Primrose.Text.Button()\n\
+    ];\n\
+    \n\
+    function focusOn(id){\n\
+      for(var i = 0; i < ctrls.length; ++i){\n\
+        var c = ctrls[i];\n\
+        if(c.controlID === id){\n\
+          c.focus();\n\
+        }\n\
+        else{\n\
+          c.blur();\n\
+        }\n\
+      }\n\
+    }"
       }
     ]
   } );
@@ -150,9 +150,9 @@ class that implements its functionality.\n\
 \n\
 The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
 to a 3D element on-the-fly.\n\
-``var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
-  my3DButton = new Primrose.Button();\n\
-my3DButton.copyElement(myDOMButton);``"
+    var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
+      my3DButton = new Primrose.Button();\n\
+    my3DButton.copyElement(myDOMButton);"
       }
     ]
   } );

@@ -9,11 +9,11 @@ Primrose.DOM = ( function () {
   pliny.function( "Primrose.DOM", {
     name: "cascadeElement",
     description: "* If id is a string, tries to find the DOM element that has said ID\n\
-* * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
-* * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
+** If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
+** If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
 * If id is a DOM element, validates that it is of the expected type,\n\
-* * returning the DOM element back if it's good,\n\
-* * or throwing an error if it is not\n\
+** returning the DOM element back if it's good,\n\
+** or throwing an error if it is not\n\
 * If id is null, creates the DOM element to match the expected type.",
     parameters: [
       {name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"},
@@ -22,41 +22,44 @@ Primrose.DOM = ( function () {
     ],
     returns: "DOM element",
     examples: [ { name: "Get an element by ID that already exists.", description: "Assuming the following HTML snippet:\n\
-``<div>\n\
-  <div id=\"First\">first element</div>\n\
-  <section id=\"second-elem\">\n\
-    Second element\n\
-    <img id=\"img1\" src=\"img.png\">\n\
-  </section>\n</div>``\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
-Code:\n\
-``var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-console.assert(elem.textContent === \"Second element\");``"},
+## Code:\n\
+    var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
+    console.assert(elem.textContent === \"Second element\");"},
     { name: "Validate the tag type.", description: "Assuming the following HTML snippet:\n\
-``<div>\n\
-  <div id=\"First\">first element</div>\n\
-  <section id=\"second-elem\">\n\
-    Second element\n\
-    <img id=\"img1\" src=\"img.png\">\n\
-  </section>\n</div>``\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
-Code:\n\
-``//The following line of code should cause a runtime error.\n\
-Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);``"},
+## Code:\n\
+    //The following line of code should cause a runtime error.\n\
+    Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"},
     { name: "Create an element.", description: "Assuming the following HTML snippet:\n\
-``<div>\n\
-  <div id=\"First\">first element</div>\n\
-  <section id=\"second-elem\">\n\
-    Second element\n\
-    <img id=\"img1\" src=\"img.png\">\n\
-  </section>\n</div>``\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
-Code:\n\
-``var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
-console.assert(elem.id === \"img2\");\n\
-console.assert(elem.parentElement === null);\n\
-document.body.appendChild(elem);\n\
-console.assert(elem.parentElement === document.body);``"}]
+## Code:\n\
+    var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
+    console.assert(elem.id === \"img2\");\n\
+    console.assert(elem.parentElement === null);\n\
+    document.body.appendChild(elem);\n\
+    console.assert(elem.parentElement === document.body);"}]
   } );
   DOM.cascadeElement = function ( id, tag, DOMClass ) {
     var elem = null;
@@ -102,22 +105,24 @@ you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the fre
     ],
     returns: "An object full of element references, with fields named by the ID of the elements that were found.",
     examples: [ {name: "Get all child elements.", description: "Assuming the following HTML snippet:\n\
-``<div>\n\
-  <div id=\"First\">first element</div>\n\
-  <section id=\"second-elem\">\n\
-    Second element\n\
-    <img id=\"img1\" src=\"img.png\">\n\
-  </section>\n</div>``\n\
+    <div>\n\
+      <div id=\"First\">first element</div>\n\
+      <section id=\"second-elem\">\n\
+        Second element\n\
+        <img id=\"img1\" src=\"img.png\">\n\
+      </section>\n\
+    </div>\n\
 \n\
-Code:\n\
-``var elems = Primrose.DOM.findEverything();\n\
-console.log(elems.First.innerHTML);\n\
-console.log(elems[\"second-elem\"].textContent);\n\
-console.log(elems.img1.src);``\n\
-Results:\n\
-``first element\n\
-Second element\n\
-img.png``"} ]
+## Code:\n\
+    var elems = Primrose.DOM.findEverything();\n\
+    console.log(elems.First.innerHTML);\n\
+    console.log(elems[\"second-elem\"].textContent);\n\
+    console.log(elems.img1.src);\n\
+\n\
+## Results:\n\
+    first element\n\
+    Second element\n\
+    img.png"} ]
   } );
   DOM.findEverything = function ( elem, obj ) {
     elem = elem || document;

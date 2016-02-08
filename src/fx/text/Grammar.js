@@ -18,42 +18,42 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       {name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
 \n\
 ## Code:\n\
-``var plainTextGrammar = new Primrose.Text.Grammar(\n\
-  // The name is for displaying in options views.\n\
-  \"Plain-text\", [\n\
-  // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-  [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
-] );``"},
+    var plainTextGrammar = new Primrose.Text.Grammar(\n\
+      // The name is for displaying in options views.\n\
+      \"Plain-text\", [\n\
+      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+      [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
+    ] );"},
       {name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
 \n\
 ## Code:\n\
-``var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
-  // Grammar rules are applied in the order they are specified.\n\
-  [\n\
-    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
-    [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
-    // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
-    [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
-    // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
-    [ \"startLineComments\", /^REM\\s/ ],\n\
-    // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
-    [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
-    [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
-    // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
-    [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
-    // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
-    [ \"keywords\",\n\
-      /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
-    ],\n\
-    // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
-    [ \"keywords\", /^DEF FN/ ],\n\
-    // These are all treated as mathematical operations.\n\
-    [ \"operators\",\n\
-      /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
-    ],\n\
-    // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
-    [ \"identifiers\", /\\w+\\$?/ ]\n\
-  ] );``"}
+    var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
+      // Grammar rules are applied in the order they are specified.\n\
+      [\n\
+        // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+        [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
+        // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
+        [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
+        // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
+        [ \"startLineComments\", /^REM\\s/ ],\n\
+        // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
+        [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
+        [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
+        // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
+        [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
+        // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
+        [ \"keywords\",\n\
+          /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
+        ],\n\
+        // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
+        [ \"keywords\", /^DEF FN/ ],\n\
+        // These are all treated as mathematical operations.\n\
+        [ \"operators\",\n\
+          /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
+        ],\n\
+        // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
+        [ \"identifiers\", /\\w+\\$?/ ]\n\
+      ] );"}
     ]
   } );
   function Grammar ( name, rules ) {
@@ -132,27 +132,28 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         {name: 'Tokenize some JavaScript', description: 'Primrose comes with a grammar for JavaScript built in.\n\
 \n\
 ## Code:\n\
-``var tokens = new Primrose.Text.Grammars.JavaScript\n\
-  .tokenize("var x = 3;\\n\\\n\
-var y = 2;\\n\\\n\
-console.log(x + y);");\n\
-console.log(JSON.stringify(tokens));``\n\
+    var tokens = new Primrose.Text.Grammars.JavaScript\n\
+      .tokenize("var x = 3;\\n\\\n\
+    var y = 2;\\n\\\n\
+    console.log(x + y);");\n\
+    console.log(JSON.stringify(tokens));\n\
+\n\
 ## Result:\n\
-``[ \n\
-  { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
-  { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
-  { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
-  { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
-  { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
-  { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
-  { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
-  { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
-  { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
-  { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
-  { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
-  { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
-  { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-]``'}
+    [ \n\
+      { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
+      { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
+      { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
+      { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
+      { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
+      { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
+      { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
+      { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
+      { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
+      { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
+      { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
+      { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
+      { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
+    ]'}
       ]
     } );
     this.tokenize = function ( text ) {

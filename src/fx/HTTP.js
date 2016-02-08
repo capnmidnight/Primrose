@@ -22,13 +22,14 @@ Primrose.HTTP = ( function () {
         name: "Make a GET request.",
         description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
 \n\
-Code:\n\
-``Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
-  console.log.bind(console, \"done\"),\n\
-  console.error.bind(console),\n\
-  console.log.bind(console, \"progress\"));``\n\
-Results:\n\
-``Object {field1: 1, field2: \"Field2\"}``"}
+## Code:\n\
+    Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
+      console.log.bind(console, \"done\"),\n\
+      console.error.bind(console),\n\
+      console.log.bind(console, \"progress\"));\n\
+\n\
+## Results:\n\
+    Object {field1: 1, field2: \"Field2\"}"}
     ]
   } );
   HTTP.XHR = function ( method, type, url, data, success, error, progress ) {
@@ -87,13 +88,14 @@ Results:\n\
         name: "Make a GET request.",
         description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
 \n\
-Code:\n\
-``Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
-  console.log.bind(console, \"done\"),\n\
-  console.error.bind(console),\n\
-  console.log.bind(console, \"progress\"));``\n\
-Results:\n\
-``Object {field1: 1, field2: \"Field2\"}``"}
+## Code:\n\
+    Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
+      console.log.bind(console, \"done\"),\n\
+      console.error.bind(console),\n\
+      console.log.bind(console, \"progress\"));\n\
+\n\
+## Results:\n\
+    Object {field1: 1, field2: \"Field2\"}"}
     ]
   } );
   HTTP.get = function ( type, url, success, error, progress ) {
@@ -132,13 +134,14 @@ Results:\n\
         name: "Make a GET request for a JSON object.",
         description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
 \n\
-Code:\n\
-``Primrose.HTTP.getObject(\"localFile.json\",\n\
-  console.log.bind(console, \"done\"),\n\
-  console.error.bind(console),\n\
-  console.log.bind(console, \"progress\"));``\n\
-Results:\n\
-``Object {field1: 1, field2: \"Field2\"}``"}
+## Code:\n\
+    Primrose.HTTP.getObject(\"localFile.json\",\n\
+      console.log.bind(console, \"done\"),\n\
+      console.error.bind(console),\n\
+      console.log.bind(console, \"progress\"));\n\
+\n\
+## Results:\n\
+    Object {field1: 1, field2: \"Field2\"}"}
     ]
   } );
   HTTP.getObject = function ( url, success, error, progress ) {
@@ -159,13 +162,14 @@ Results:\n\
         name: "Make a GET request for plain text.",
         description: "Use this to load arbitrary files and do whatever you want with them.\n\
 \n\
-Code:\n\
-``Primrose.HTTP.getText(\"localFile.json\",\n\
-  console.log.bind(console, \"done\"),\n\
-  console.error.bind(console),\n\
-  console.log.bind(console, \"progress\"));``\n\
-Results:\n\
-``\"Object {field1: 1, field2: \\\"Field2\\\"}\"``"}
+## Code:\n\
+    Primrose.HTTP.getText(\"localFile.json\",\n\
+      console.log.bind(console, \"done\"),\n\
+      console.error.bind(console),\n\
+      console.log.bind(console, \"progress\"));\n\
+\n\
+## Results:\n\
+    \"Object {field1: 1, field2: \\\"Field2\\\"}\""}
     ]
   } );
   HTTP.getText = function ( url, success, error, progress ) {
