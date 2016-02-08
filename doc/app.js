@@ -130,7 +130,7 @@
               group = groupings[key];
           for ( var i = 0; i < collection.length; ++i ) {
             var obj = collection[i];
-            docoCache["#" + obj.id] = pliny.formats.html.format( obj ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
+            docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
             group.push( obj );
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
