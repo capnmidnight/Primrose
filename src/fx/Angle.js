@@ -19,9 +19,9 @@ This is particularly important for the 180 degrees, +- 10 degrees or so. If you\
 expect values to run back and forth over 180 degrees, then initialAngleInDegrees\n\
 should be set to 180. Otherwise, if your initial value is anything slightly larger\n\
 than 180, the correction will rotate the angle into negative degrees, e.g.:\n\
-\tinitialAngleInDegrees = 0\n\
-\tfirst reading = 185\n\
-\tupdated degrees value = -175\n\
+* initialAngleInDegrees = 0\n\
+* first reading = 185\n\
+* updated degrees value = -175\n\
 \n\
 It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
 For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
@@ -34,32 +34,35 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
         name: "Basic usage",
         description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
 \n\
-Code:\n\
-``var a = new Primrose.Angle(356);\n\
-a.degrees += 5;\n\
-console.log(a.degrees);``\n\
-Results:\n\
-``361``"
+## Code:\n\
+    var a = new Primrose.Angle(356);\n\
+    a.degrees += 5;\n\
+    console.log(a.degrees);\n\
+\n\
+## Results:\n\
+    361"
       }, {
         name: "Convert degrees to radians",
         description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
 \n\
-Code:\n\
-``var a = new Primrose.Angle(10);\n\
-a.degrees += 355;\n\
-console.log(a.radians);``\n\
-Results:\n\
-``0.08726646259971647``"
+## Code:\n\
+    var a = new Primrose.Angle(10);\n\
+    a.degrees += 355;\n\
+    console.log(a.radians);\n\
+\n\
+## Results:\n\
+    0.08726646259971647"
       }, {
         name: "Convert radians to degress",
         description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
 \n\
-Code:\n\
-``var a = new Primrose.Angle(0);\n\
-a.radians += Math.PI / 2;\n\
-console.log(a.degrees);``\n\
-Results:\n\
-``90``"
+## Code:\n\
+    var a = new Primrose.Angle(0);\n\
+    a.radians += Math.PI / 2;\n\
+    console.log(a.degrees);\n\
+\n\
+## Results:\n\
+    90"
       } ]
   } );
 

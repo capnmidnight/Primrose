@@ -6,13 +6,13 @@ Primrose.StateList = ( function () {
     description: "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.\n\
 \n\
 The states paramareter should be an array of State objects that take the form of:\n\
-``{ \n\
-  name: \"A string for display\", \n\
-  values: {\n\
-    ctrlName1: {attributeName1: value1, attributeName2: value2 },\n\
-    ctrlName2: {attributeName3: value3, attributeName4: value4 }\n\
-  }\n\
-}``"
+    { \n\
+      name: \"A string for display\", \n\
+      values: {\n\
+        ctrlName1: {attributeName1: value1, attributeName2: value2 },\n\
+        ctrlName2: {attributeName3: value3, attributeName4: value4 }\n\
+      }\n\
+    }"
   } );
   function StateList ( id, ctrls, states, callback, parent ) {
     var select = Primrose.DOM.cascadeElement( id, "select", HTMLSelectElement );

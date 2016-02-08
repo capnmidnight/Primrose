@@ -21,13 +21,13 @@ called the [`setSetting()`](#setSetting) function during a previous page session
     {name: "Basic usage",
       description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
-``var text1 = document.getElementById(\"text1\");\n\
-document.addEventListener(\"unload\", function(){\n\
-  setSetting(\"text1-value\", text1.value);\n\
-}, false);\n\
-document.addEventListener(\"load\", function(){\n\
-  text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-}, false);``"} ]
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"} ]
 } );
 function getSetting ( name, defValue ) {
   if ( window.localStorage ) {
@@ -62,13 +62,13 @@ time, then call the [`getSetting()`](#getSetting) function during a subsequent p
     {name: "Basic usage",
       description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
-``var text1 = document.getElementById(\"text1\");\n\
-document.addEventListener(\"unload\", function(){\n\
-  setSetting(\"text1-value\", text1.value);\n\
-}, false);\n\
-document.addEventListener(\"load\", function(){\n\
-  text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-}, false);``"} ]
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"} ]
 } );
 function setSetting ( name, val ) {
   if ( window.localStorage && val ) {
@@ -94,11 +94,12 @@ pliny.function( "", {
   description: "Removes an object from localStorage",
   examples: [ {
       name: "Basic usage",
-      description: "``console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
-setSetting(\"A\", \"modified-A\");\n\
-console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
-deleteSetting(\"A\");\n\
-console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");``"
+      description: "\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
+    setSetting(\"A\", \"modified-A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
+    deleteSetting(\"A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
     } ]
 } );
 function deleteSetting ( name ) {
@@ -122,22 +123,23 @@ pliny.function( "", {
   examples: [ {
       name: "Basic usage",
       description: "Assuming the following HTML form:\n\
-``<form>\n\
-  <input type=\"text\" id=\"txt\" value=\"hello\">\n\
-  <input type=\"number\" id=\"num\" value=\"5\">\n\
-</form>``\n\
-Code:\n\
-``var ctrls = findEverything();\n\
-ctrls.txt.value = \"world\";\n\
-ctrls.num.value = \"6\"6;\n\
-var state = readForm(ctrls);\n\
-console.assert(state.txt === \"world\");\n\
-console.assert(state.num === \"6\");\n\
-state.txt = \"mars\";\n\
-state.num = 55;\n\
-writeForm(ctrls, state);\n\
-console.assert(ctrls.txt.value === \"mars\");\n\
-console.assert(ctrls.num.value === \"55\");``"
+    <form>\n\
+      <input type=\"text\" id=\"txt\" value=\"hello\">\n\
+      <input type=\"number\" id=\"num\" value=\"5\">\n\
+    </form>\n\
+\n\
+##Code:\n\
+    var ctrls = findEverything();\n\
+    ctrls.txt.value = \"world\";\n\
+    ctrls.num.value = \"6\"6;\n\
+    var state = readForm(ctrls);\n\
+    console.assert(state.txt === \"world\");\n\
+    console.assert(state.num === \"6\");\n\
+    state.txt = \"mars\";\n\
+    state.num = 55;\n\
+    writeForm(ctrls, state);\n\
+    console.assert(ctrls.txt.value === \"mars\");\n\
+    console.assert(ctrls.num.value === \"55\");"
     } ]
 } );
 function readForm ( ctrls ) {
@@ -175,22 +177,23 @@ pliny.function( "", {
   examples: [ {
       name: "Basic usage",
       description: "Assuming the following HTML form:\n\
-``<form>\n\
-  <input type=\"text\" id=\"txt\" value=\"hello\">\n\
-  <input type=\"number\" id=\"num\" value=\"5\">\n\
-</form>``\n\
-Code:\n\
-``var ctrls = findEverything();\n\
-ctrls.txt.value = \"world\";\n\
-ctrls.num.value = \"6\"6;\n\
-var state = readForm(ctrls);\n\
-console.assert(state.txt === \"world\");\n\
-console.assert(state.num === \"6\");\n\
-state.txt = \"mars\";\n\
-state.num = 55;\n\
-writeForm(ctrls, state);\n\
-console.assert(ctrls.txt.value === \"mars\");\n\
-console.assert(ctrls.num.value === \"55\");``"
+    <form>\n\
+      <input type=\"text\" id=\"txt\" value=\"hello\">\n\
+      <input type=\"number\" id=\"num\" value=\"5\">\n\
+    </form>\n\
+\n\
+## Code:\n\
+    var ctrls = findEverything();\n\
+    ctrls.txt.value = \"world\";\n\
+    ctrls.num.value = \"6\"6;\n\
+    var state = readForm(ctrls);\n\
+    console.assert(state.txt === \"world\");\n\
+    console.assert(state.num === \"6\");\n\
+    state.txt = \"mars\";\n\
+    state.num = 55;\n\
+    writeForm(ctrls, state);\n\
+    console.assert(ctrls.txt.value === \"mars\");\n\
+    console.assert(ctrls.num.value === \"55\");"
     } ]
 } );
 function writeForm ( ctrls, state ) {

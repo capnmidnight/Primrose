@@ -23,14 +23,15 @@ pliny.function( "", {
   returns: "String",
   examples: [ {
       name: "A few examples.",
-      description: "``// Round a number to an integer.\n\
-console.assert(sigfig(12.345, 0) === \"12\");\n\
- \n\
-// sigfig respects rounding rules.\n\
-console.assert(sigfig(123.4567, 2) === \"123.46\");\n\
- \n\
-// sigfig will pad extra zeroes.\n\
-console.assert(sigfig(123.4, 3) === \"123.400\");``"}
+      description: "\
+    // Round a number to an integer.\n\
+    console.assert(sigfig(12.345, 0) === \"12\");\n\
+     \n\
+    // sigfig respects rounding rules.\n\
+    console.assert(sigfig(123.4567, 2) === \"123.46\");\n\
+     \n\
+    // sigfig will pad extra zeroes.\n\
+    console.assert(sigfig(123.4, 3) === \"123.400\");"}
   ]
 } );
 function sigfig ( x, y ) {
@@ -80,19 +81,20 @@ the width to which to pad values.\n\
 Numerical precision, with zero-padding, is indicated with a period and trailing zeros.",
   examples: [
     {name: "Basic examples",
-      description: "``console.assert(fmt(\"a: $1, b: $2\", 123, \"Sean\") === \"a: 123, b: Sean\");\n\
-console.assert(fmt(\"$001, $002, $003\", 1, 23, 456) === \"001, 023, 456\");\n\
-console.assert(fmt(\"$1.000\", Math.PI) === \"3.142\");\n\
-console.assert(fmt(\"$1.0000\", Math.PI) === \"3.1416\");\n\
-console.assert(fmt(\"$1.00000\", Math.PI) === \"3.14159\");\n\
-console.assert(fmt(\"$1.00 + $2.00 = $3.00\", 0.1, 0.2, 0.1 + 0.2) === \"0.10 + 0.20 = 0.30\");\n\
-// Note that the following values were obtained evaluating the code in the US locale. They won't literally evaluate true.\n\
-console.assert(fmt(\"The current year is $1.0.\", new Date() ) === \"The current year is 2016.\");\n\
-console.assert(fmt(\"The current month and year is $1.00.\", new Date() ) === \"The current month and year is 1/2016.\");\n\
-console.assert(fmt(\"The current date is $1.000.\", new Date() ) === \"The current date is 1/25/2016.\");\n\
-console.assert(fmt(\"The current time is $1.0000.\", new Date() ) === \"The current time is 10:05:28.772 PM.\");\n\
-console.assert(fmt(\"The current date and time is $1.00000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:06 PM.\");\n\
-console.assert(fmt(\"The current date and time is $1.0000000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:55.667 PM.\");``"} ]
+      description: "\
+    console.assert(fmt(\"a: $1, b: $2\", 123, \"Sean\") === \"a: 123, b: Sean\");\n\
+    console.assert(fmt(\"$001, $002, $003\", 1, 23, 456) === \"001, 023, 456\");\n\
+    console.assert(fmt(\"$1.000\", Math.PI) === \"3.142\");\n\
+    console.assert(fmt(\"$1.0000\", Math.PI) === \"3.1416\");\n\
+    console.assert(fmt(\"$1.00000\", Math.PI) === \"3.14159\");\n\
+    console.assert(fmt(\"$1.00 + $2.00 = $3.00\", 0.1, 0.2, 0.1 + 0.2) === \"0.10 + 0.20 = 0.30\");\n\
+    // Note that the following values were obtained evaluating the code in the US locale. They won't literally evaluate true.\n\
+    console.assert(fmt(\"The current year is $1.0.\", new Date() ) === \"The current year is 2016.\");\n\
+    console.assert(fmt(\"The current month and year is $1.00.\", new Date() ) === \"The current month and year is 1/2016.\");\n\
+    console.assert(fmt(\"The current date is $1.000.\", new Date() ) === \"The current date is 1/25/2016.\");\n\
+    console.assert(fmt(\"The current time is $1.0000.\", new Date() ) === \"The current time is 10:05:28.772 PM.\");\n\
+    console.assert(fmt(\"The current date and time is $1.00000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:06 PM.\");\n\
+    console.assert(fmt(\"The current date and time is $1.0000000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:55.667 PM.\");"} ]
 } );
 var fmt = ( function () {
 
@@ -180,7 +182,7 @@ pliny.function( "", {
   description: "Appends the string \"px\" to the end of a number. Useful for specifying CSS units.",
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS pixel-unit value."} ],
   returns: "The number as a string, plus the text \"px\", with no intermediate whitespace.",
-  examples: [ {name: "Basic usage", description: "``console.assert(px(100.5) === \"100.5px\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(px(100.5) === \"100.5px\");"} ]
 } );
 var px = fmt.bind( this, "$1px" );
 
@@ -194,7 +196,7 @@ pliny.function( "", {
   description: "Appends the string \"%\" to the end of a number. Useful for specifying CSS units.",
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS percentage-unit value."} ],
   returns: "The number as a string, plus the text \"%\", with no intermediate whitespace.",
-  examples: [ {name: "Basic usage", description: "``console.assert(pct(100.5) === \"100.5%\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(pct(100.5) === \"100.5%\");"} ]
 } );
 var pct = fmt.bind( this, "$1%" );
 
@@ -208,7 +210,7 @@ pliny.function( "", {
   description: "Appends the string \"em\" to the end of a number. Useful for specifying CSS units.",
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS em-unit value."} ],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
-  examples: [ {name: "Basic usage", description: "``console.assert(ems(100.5) === \"100.5em\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(ems(100.5) === \"100.5em\");"} ]
 } );
 var ems = fmt.bind( this, "$1em" );
 
@@ -217,7 +219,7 @@ pliny.function( "", {
   description: "Appends the string \"rem\" to the end of a number. Useful for specifying CSS units.",
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS rem-unit value."} ],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
-  examples: [ {name: "Basic usage", description: "``console.assert(rems(100.5) === \"100.5rem\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(rems(100.5) === \"100.5rem\");"} ]
 } );
 var rems = fmt.bind( this, "$1rem" );
 
@@ -226,7 +228,7 @@ pliny.function( "", {
   description: "Appends the string \"vw\" to the end of a number. Useful for specifying CSS units.",
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS view-width-unit value."} ],
   returns: "The number as a string, plus the text \"vw\", with no intermediate whitespace.",
-  examples: [ {name: "Basic usage", description: "``console.assert(vws(100.5) === \"100.5vw\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(vws(100.5) === \"100.5vw\");"} ]
 } );
 var vws = fmt.bind( this, "$1vw" );
 
@@ -243,7 +245,7 @@ pliny.function( "", {
     {name: "green", type: "Number", description: "The green component, on the range [0, 255]."},
     {name: "blue", type: "Number", description: "The blue component, on the range [0, 255]."} ],
   returns: "The color-value string, e.g. `rgb(120, 230, 64)`.",
-  examples: [ {name: "Basic usage", description: "``console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");"} ]
 } );
 var rgb = fmt.bind( this, "rgb($1, $2, $3)" );
 
@@ -261,7 +263,7 @@ pliny.function( "", {
     {name: "blue", type: "Number", description: "The blue component, on the range [0, 255]."},
     {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
   returns: "The color-value string, e.g. `rgba(120, 230, 64, 0.75)`.",
-  examples: [ {name: "Basic usage", description: "``console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");"} ]
 } );
 var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
 
@@ -278,7 +280,7 @@ pliny.function( "", {
     {name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]."},
     {name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]."} ],
   returns: "The color-value string, e.g. `hsl(120, 100, 50)`.",
-  examples: [ {name: "Basic usage", description: "``console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");"} ]
 } );
 var hsl = fmt.bind( this, "hsl($1, $2%, $3%)" );
 
@@ -296,6 +298,6 @@ pliny.function( "", {
     {name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]."},
     {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
   returns: "The color-value string, e.g. `hsla(120, 100, 50, 0.25)`.",
-  examples: [ {name: "Basic usage", description: "``console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");``"} ]
+  examples: [ {name: "Basic usage", description: "    console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");"} ]
 } );
 var hsla = fmt.bind( this, "hsla($1, $2%, $3%, $4)" );
