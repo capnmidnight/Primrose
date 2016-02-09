@@ -1,9 +1,9 @@
-/*global THREE, qp, Primrose,  devicePixelRatio, HTMLCanvasElement */
+/*global THREE, qp, Primrose,  devicePixelRatio, HTMLCanvasElement, pliny */
 
 Primrose.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
-  return function ( canvasElementOrID, options ) {
+  function Canvas ( canvasElementOrID, options ) {
     var self = this,
         canvas = Primrose.DOM.cascadeElement( canvasElementOrID, "canvas", HTMLCanvasElement ),
         bgCanvas = Primrose.DOM.cascadeElement( canvas.id + "-back", "canvas", HTMLCanvasElement ),
@@ -25,6 +25,16 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
         lastScrollX = -1,
         lastScrollY = -1,
         lastFont = null;
+
+    canvas.style.imageRendering =
+        bgCanvas.style.imageRendering =
+        fgCanvas.style.imageRendering =
+        trimCanvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
+
+    gfx.imageSmoothingEnabled =
+        tgfx.imageSmoothingEnabled =
+        bgfx.imageSmoothingEnabled =
+        tgfx.imageSmoothingEnabled = false;
 
     this.VSCROLL_WIDTH = 2;
 
@@ -67,8 +77,8 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
     };
 
     this.setSize = function ( w, h ) {
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
+      canvas.style.width = Math.round(w) + "px";
+      canvas.style.height = Math.round(h) + "px";
       return this.resize();
     };
 
@@ -462,7 +472,9 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
           "primrose-container-" +
           canvas.id, canvas ) );
     }
-  };
+  }
+
+  return Canvas;
 } )();
 
 pliny.issue( "Primrose.Text.Renderers.Canvas", {

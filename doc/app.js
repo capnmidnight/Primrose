@@ -79,7 +79,7 @@
           fs = parseFloat( document.defaultView.getComputedStyle( b, null ).getPropertyValue( "font-size" ) );
       ed.setSize( b.clientWidth, Math.min( b.clientHeight * ( 1.25 + devicePixelRatio * 0.05 ), 400 ) );
       ed.targetSize = fs;
-      ed.fontSize = ed.targetSize * devicePixelRatio;
+      setFontSize( ed );
       ed.value = b.textContent || b.innerText;
       ed.DOMElement.style.display = "block";
       ed.DOMElement.style.maxWidth = "100%";
@@ -90,11 +90,11 @@
       ed.DOMElement.style.display = "none";
     }
   }
-
+  function setFontSize ( ed ) {
+    ed.fontSize = ed.targetSize * devicePixelRatio;
+  }
   window.addEventListener( "resize", function () {
-    editors.forEach( function ( ed ) {
-      ed.fontSize = ed.targetSize * devicePixelRatio;
-    } );
+    editors.forEach( setFontSize );
   } );
 
   function toTop () {
