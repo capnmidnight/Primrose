@@ -6,6 +6,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`InsideSphereGeometry`](#InsideSphereGeometry) class\n\
 in the helpers/graphics.js file."
 } );
+pliny.class( "", {
+  name: "InsideSphereGeometry",
+  description: "<under construction>"
+} );
 function InsideSphereGeometry ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
   "use strict";
 
@@ -146,6 +150,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`axis`](#axis) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "axis",
+  description: "<under construction>"
+} );
 function axis ( length, width ) {
   var center = hub();
   put( brick( 0xff0000, length, width, width ) )
@@ -163,6 +171,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`box`](#box) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "box",
+  description: "<under construction>"
+} );
 function box ( w, h, l ) {
   if ( h === undefined ) {
     h = w;
@@ -177,6 +189,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`light`](#light) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "light",
+  description: "<under construction>"
+} );
 function light ( color, intensity, distance, decay ) {
   return new THREE.PointLight( color, intensity, distance, decay );
 }
@@ -187,6 +203,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`v3`](#v3) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "v3",
+  description: "<under construction>"
+} );
 function v3 ( x, y, z ) {
   return new THREE.Vector3( x, y, z );
 }
@@ -196,6 +216,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`quad`](#quad) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "quad",
+  description: "<under construction>"
 } );
 function quad ( w, h, s, t ) {
   if ( h === undefined ) {
@@ -210,6 +234,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`hub`](#hub) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "hub",
+  description: "<under construction>"
+} );
 function hub ( ) {
   return new THREE.Object3D( );
 }
@@ -220,6 +248,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`brick`](#brick) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "brick",
+  description: "<under construction>"
+} );
 function brick ( txt, w, h, l ) {
   return textured( box( w || 1, h || 1, l || 1 ), txt, false, 1, w, l );
 }
@@ -229,6 +261,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`put`](#put) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "put",
+  description: "<under construction>"
 } );
 function put ( object ) {
   return {
@@ -249,6 +285,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`fill`](#fill) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "fill",
+  description: "<under construction>"
 } );
 function fill ( txt, w, h, l ) {
   if ( h === undefined ) {
@@ -272,6 +312,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`textured`](#textured) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "textured",
+  description: "<under construction>"
 } );
 function textured ( geometry, txt, unshaded, o, s, t ) {
   var material;
@@ -352,6 +396,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`sphere`](#sphere) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "sphere",
+  description: "<under construction>"
+} );
 function sphere ( r, slices, rings ) {
   return new THREE.SphereBufferGeometry( r, slices, rings );
 }
@@ -362,6 +410,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`cylinder`](#cylinder) function\n\
 in the helpers/graphics.js file."
 } );
+pliny.function( "", {
+  name: "cylinder",
+  description: "<under construction>"
+} );
 function cylinder ( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd ) {
   return new THREE.CylinderGeometry( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd );
 }
@@ -371,6 +423,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`shell`](#shell) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "shell",
+  description: "<under construction>"
 } );
 function shell ( r, slices, rings, phi, theta ) {
   var SLICE = 0.45;
@@ -392,6 +448,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`cloud`](#cloud) function\n\
 in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "cloud",
+  description: "<under construction>"
 } );
 function cloud ( verts, c, s ) {
   var geom = new THREE.Geometry();
