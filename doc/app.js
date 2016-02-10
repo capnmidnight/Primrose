@@ -227,19 +227,19 @@
 
   pliny.load( [
     "setup",
+    "faq",
+    "hmd",
+    "pliny",
+    "changelog",
+    "lighting", 
     "drum",
-    "lighting",
     "video",
     "export",
     "blenderBeginner",
     "blenderAdvanced",
     "ide3d",
     "adventure",
-    "server",
-    "faq",
-    "hmd",
-    "pliny",
-    "changelog"
+    "server"
   ].map( function ( f ) {
     return f + ".md";
   } ) ).then( renderDocs );
