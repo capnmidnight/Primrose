@@ -168,7 +168,7 @@
     for ( var g in groupings ) {
       if ( g !== "methods" && g !== "events" ) {
         var group = groupings[g];
-        if ( g !== "pages" ) {
+        if ( g !== "pages" && g !== "tutorials" ) {
           group.sort( function ( a, b ) {
             var c = a.fullName,
                 d = b.fullName;
