@@ -6,6 +6,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`clearKeyOption`](#clearKeyOption) function\n\
 in the helpers/options.js file."
 } );
+pliny.function( "", {
+  name: "clearKeyOption",
+  description: "<under construction>"
+} );
 function clearKeyOption ( evt ) {
   this.value = "";
   this.dataset.keycode = "";
@@ -16,6 +20,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`setKeyOption`](#setKeyOption) function\n\
 in the helpers/options.js file."
+} );
+pliny.function( "", {
+  name: "setKeyOption",
+  description: "<under construction>"
 } );
 function setKeyOption ( outElem, elemArr, evt ) {
   this.dataset.keycode = evt.keyCode;
@@ -39,6 +47,10 @@ pliny.issue( "", {
   description: "Finish writing the documentation for the [`setupKeyOption`](#setupKeyOption) function\n\
 in the helpers/options.js file."
 } );
+pliny.function( "", {
+  name: "setupKeyOption",
+  description: "<under construction>"
+} );
 function setupKeyOption ( outElem, elemArr, index, char, code ) {
   var elem = elemArr[index];
   elem.value = char.toLocaleLowerCase( );
@@ -52,6 +64,10 @@ pliny.issue( "", {
   type: "open",
   description: "Finish writing the documentation for the [`combineDefaults`](#combineDefaults) function\n\
 in the helpers/options.js file."
+} );
+pliny.function( "", {
+  name: "combineDefaults",
+  description: "<under construction>"
 } );
 function combineDefaults(a, b){
   var c = {}, k;
