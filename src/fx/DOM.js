@@ -8,7 +8,7 @@ Primrose.DOM = ( function () {
 
   pliny.function( "Primrose.DOM", {
     name: "cascadeElement",
-    description: "* If id is a string, tries to find the DOM element that has said ID\n\
+    description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
 ** If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
 ** If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
 * If id is a DOM element, validates that it is of the expected type,\n\
@@ -97,8 +97,8 @@ Primrose.DOM = ( function () {
 using that ID as the name of a field in a hashmap to store a reference to the element.\n\
 Basically, a quick way to get at all the named elements in a page.\n\
 \n\
-NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
-you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
+> NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
+> you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
     parameters: [
       {name: "elem", type: "Element", description: "(Optional) the root element from which to search. Defaults to `document`."},
       {name: "obj", type: "Object", description: "(Optional) the object in which to store the element references. If no object is provided, one will be created."}
