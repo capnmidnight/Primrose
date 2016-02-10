@@ -35,10 +35,6 @@ body{
   overflow: hidden;
 }
 
-a {
-  color: black;
-}
-
 ul {
   list-style: circle;
 }
@@ -70,6 +66,7 @@ header a {
   border: none;
   height: auto;
   padding: 0.25em 1em;
+  text-decoration: underline;
 }
 
 
@@ -84,6 +81,14 @@ main{
 
 h2, h3, h4{
   text-transform: capitalize;
+}
+
+#documentation a{
+  
+}
+
+#documentation a[target="_blank"]::after{
+  content: " ⇗";
 }
 
 #documentation article h1 {
@@ -166,6 +171,12 @@ body > div {
   max-width: 100%;
 }
 
+#documentation iframe {
+  width: 100%;
+  height: 20vw;
+  border: none;
+}
+
 article > blockquote {
   border: dashed 5px blue;
   color: blue;
@@ -176,8 +187,12 @@ article > blockquote {
   margin: 2em;
 }
 
-#contents a {
+a {
   text-decoration: none;
+}
+
+#contents a {
+  color: black;
 }
 
 #contents h2, #contents h3{
