@@ -13,6 +13,27 @@ body{
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
 
+code, header a {  
+  font-family: 'Consolas', 'Apple Menlo', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
+}
+
+code, kbd{
+  display: inline-block;
+  font-size: 75%;
+  vertical-align: bottom;
+  padding: 0.25em;
+}
+
+kbd{
+  color: #EEF6F8;
+  background-color: #853B9E;
+}
+
+code{
+  color: #853B9E;
+  background-color: #EEF6F8;
+}
+
 #loading, #progressBar {
   position: absolute;
   height: 100%;
@@ -91,6 +112,15 @@ h2, h3, h4{
   font-size: 2em;
   text-transform: none;
 }
+
+#documentation article h2 {
+  color: #2b81af;
+}
+
+#documentation article h3 {
+  color: #853B9E;
+}
+
 
 #documentation article div h1, #documentation article div h2, #documentation article div h3, #documentation article div h4, #documentation article div h5, #documentation article div h6 {
   font-size: 80%;
