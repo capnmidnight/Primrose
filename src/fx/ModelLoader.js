@@ -75,7 +75,9 @@ Primrose.ModelLoader = ( function () {
     name: "ModelLoader",
     description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.\n\
 \n\
-*NOTE: uses the same Cross-Origin Request policy as THREE.ImageUtils, meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin policy that Primrose uses for request.*",
+> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
+> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
+> policy that Primrose uses for requests.",
     parameters: [
       {name: "src", type: "String", description: "The file from which to load."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
