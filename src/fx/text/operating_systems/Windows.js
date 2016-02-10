@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 ////
 // cut, copy, and paste commands are events that the browser manages,
@@ -7,6 +7,10 @@
 Primrose.Text.OperatingSystems.Windows = (function () {
   "use strict";
 
+  pliny.value( "Primrose.Text.OperatingSystems", {
+    name: "OSX",
+    description: "<under construction>"
+  } );
   return new Primrose.Text.OperatingSystem(
       "Windows", "CTRL", "CTRL", "CTRL_y",
       "", "HOME", "END",

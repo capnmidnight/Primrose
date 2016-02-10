@@ -17,6 +17,11 @@ Primrose.Input.Camera = ( function () {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Camera](#Primrose_Input_Camera) class in the input/ directory"
   } );
+  
+  pliny.class("Primrose.Input", {
+    name: "Camera",
+    description: "<under construction>"
+  });
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getSources( function ( infos ) {
       var option = document.createElement( "option" );

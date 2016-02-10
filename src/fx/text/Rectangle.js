@@ -1,8 +1,12 @@
-/* global qp, Primrose */
+/* global qp, Primrose, pliny */
 
 Primrose.Text.Rectangle = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "Rectangle",
+    description: "<under construction>"
+  } );
   function Rectangle ( x, y, width, height ) {
     this.point = new Primrose.Text.Point( x, y );
     this.size = new Primrose.Text.Size( width, height );

@@ -1,7 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Themes.Dark = ( function ( ) {
   "use strict";
+  
+  pliny.record( "Primrose.Text.Themes", {
+    name: "Dark",
+    description: "<under construction>"
+  } );
   return {
     name: "Dark",
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",

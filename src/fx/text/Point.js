@@ -1,8 +1,12 @@
-/* global qp, Primrose */
+/* global qp, Primrose, pliny */
 
 Primrose.Text.Point = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "Point",
+    description: "<under construction>"
+  } );
   function Point ( x, y ) {
     this.set( x || 0, y || 0 );
   }

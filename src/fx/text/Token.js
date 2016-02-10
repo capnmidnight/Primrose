@@ -1,7 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Token = ( function () {
   "use strict";
+
+  pliny.class( "Primrose.Text", {
+    name: "Token",
+    description: "<under construction>"
+  } );
   function Token ( value, type, index, line ) {
     this.value = value;
     this.type = type;
@@ -19,7 +24,7 @@ Primrose.Text.Token = ( function () {
     return new Token( next, this.type, this.index + i, this.line );
   };
 
-  Token.prototype.toString = function(){
+  Token.prototype.toString = function () {
     return "[" + this.type + ": " + this.value + "]";
   };
 

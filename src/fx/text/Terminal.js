@@ -1,5 +1,10 @@
-/* global Primrose, isOSX */
+/* global Primrose, isOSX, pliny */
 
+
+pliny.class( "Primrose.Text", {
+  name: "Terminal",
+  description: "<under construction>"
+} );
 Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
   "use strict";
 

@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 ////
 // If SHIFT is not held, then "front.
@@ -7,6 +7,10 @@
 Primrose.Text.CommandPacks.TestViewer = ( function () {
   "use strict";
 
+  pliny.record( "Primrose.Text.CommandPacks", {
+    name: "TestViewer",
+    description: "<under construction>"
+  } );
   return {
     name: "Basic commands",
     NORMAL_SPACE: " ",

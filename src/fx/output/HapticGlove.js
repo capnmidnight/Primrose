@@ -1,6 +1,11 @@
 /* global Primrose, io, Leap, pliny */
 
 Primrose.Output.HapticGlove = ( function () {
+  
+  pliny.class( "Primrose.Output", {
+    name: "HapticGlove",
+    description: "<under construction>"
+  } );
   function HapticGlove ( options ) {
 
     options.port = options.port || HapticGlove.DEFAULT_PORT;

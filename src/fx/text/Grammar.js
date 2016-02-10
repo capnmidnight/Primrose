@@ -177,6 +177,6 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
 
 pliny.issue( "Primrose.Text.Grammar", {
   name: "document Grammar",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [Primrose.Text.Grammar](#Primrose_Text_Grammar) class in the text/ directory"
 } );

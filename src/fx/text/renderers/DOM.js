@@ -94,6 +94,10 @@ Primrose.Text.Renderers.DOM = ( function ( ) {
     return new FakeContext( this );
   };
 
+  pliny.class( "Primrose.Text.Renderers", {
+    name: "DOM",
+    description: "<under construction>"
+  } );
   return function ( domElementOrID, options ) {
     var self = this,
         div = Primrose.DOM.cascadeElement( domElementOrID, "div", HTMLDivElement ),

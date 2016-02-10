@@ -6,6 +6,11 @@ Primrose.Input.FPSInput = ( function ( ) {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.FPSInput](#Primrose_Input_FPSInput) class in the input/ directory"
   } );
+  
+  pliny.class("Primrose.Input", {
+    name: "FPSInput",
+    description: "<under construction>"
+  });
   function FPSInput ( DOMElement ) {
     DOMElement = DOMElement || window;
 

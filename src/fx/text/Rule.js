@@ -1,8 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Rule = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "Rule",
+    description: "<under construction>"
+  } );
   function Rule ( name, test ) {
     this.name = name;
     this.test = test;

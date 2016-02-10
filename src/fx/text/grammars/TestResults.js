@@ -1,8 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Grammars.TestResults = (function () {
   "use strict";
 
+  pliny.value( "Primrose.Text.Grammars", {
+    name: "TestResults",
+    description: "<under construction>"
+  } );
   return new Primrose.Text.Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/, true],
     ["numbers", /(\[)(o+)/, true],

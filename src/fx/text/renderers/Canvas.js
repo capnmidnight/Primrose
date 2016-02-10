@@ -3,6 +3,10 @@
 Primrose.Text.Renderers.Canvas = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text.Renderers", {
+    name: "Canvas",
+    description: "<under construction>"
+  } );
   function Canvas ( canvasElementOrID, options ) {
     var self = this,
         canvas = Primrose.DOM.cascadeElement( canvasElementOrID, "canvas", HTMLCanvasElement ),

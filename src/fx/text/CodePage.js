@@ -3,6 +3,10 @@
 Primrose.Text.CodePage = ( function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "CodePage",
+    description: "<under construction>"
+  } );
   function CodePage ( name, lang, options ) {
     this.name = name;
     this.language = lang;

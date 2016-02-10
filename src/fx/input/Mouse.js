@@ -1,6 +1,11 @@
 /* global Primrose, THREE, isChrome, pliny */
 
 Primrose.Input.Mouse = ( function () {
+  
+  pliny.class("Primrose.Input", {
+    name: "Mouse",
+    description: "<under construction>"
+  });
   function MouseInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MouseInput.AXES );

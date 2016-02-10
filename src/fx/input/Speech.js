@@ -49,6 +49,11 @@ Primrose.Input.Speech = ( function () {
 //  `getErrorMessage()`: returns the Error object that occured when setup failed, or
 //  null if setup was successful.
 ///
+
+  pliny.class("Primrose.Input", {
+    name: "Speech",
+    description: "<under construction>"
+  });
   function SpeechInput ( name, commands, socket ) {
     Primrose.NetworkedInput.call( this, name, commands, socket );
     var running = false,

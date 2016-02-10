@@ -1,7 +1,11 @@
-/* global Primrose, THREE */
+/* global Primrose, THREE, pliny */
 
 Primrose.Text.Controls.PlainText = ( function () {
 
+  pliny.class( "Primrose.Text.Controls", {
+    name: "PlainText",
+    description: "<under construction>"
+  } );
   function PlainText ( text, size, fgcolor, bgcolor, x, y, z, hAlign ) {
     text = text.replace( /\r\n/g, "\n" );
     var lines = text.split( "\n" );

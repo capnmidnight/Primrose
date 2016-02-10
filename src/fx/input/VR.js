@@ -1,6 +1,11 @@
 /* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny */
 
 Primrose.Input.VR = ( function () {
+  
+  pliny.class("Primrose.Input", {
+    name: "VR",
+    description: "<under construction>"
+  });
   function VRInput ( name, commands, socket, elem, selectedID ) {
     if ( commands === undefined || commands === null ) {
       commands = VRInput.AXES.map( function ( a ) {

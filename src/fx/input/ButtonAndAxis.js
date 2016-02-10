@@ -7,9 +7,10 @@ Primrose.Input.ButtonAndAxis = ( function () {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.ButtonAndAxis](#Primrose_Input_ButtonAndAxis) class in the input/ directory."
   } );
+  
   pliny.class( "Primrose.Input", {
     name: "ButtonAndAxis",
-    description: "",
+    description: "<under construction>",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},

@@ -8,9 +8,10 @@ Primrose.Input.Gamepad = ( function () {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
   } );
+  
   pliny.class( "Primrose.Input", {
     name: "Gamepad",
-    description: "Signal processor for gamepad input.",
+    description: "<under construction>",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},

@@ -1,4 +1,4 @@
-/* global qp, Primrose */
+/* global qp, Primrose, pliny */
 
 Primrose.Text.Cursor = ( function ( ) {
   "use strict";
@@ -25,6 +25,10 @@ Primrose.Text.Cursor = ( function ( ) {
   }
   )( );
 
+  pliny.class( "Primrose.Text", {
+    name: "Cursor",
+    description: "<under construction>"
+  } );
   function Cursor ( i, x, y ) {
     this.i = i || 0;
     this.x = x || 0;

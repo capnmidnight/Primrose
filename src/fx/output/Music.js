@@ -16,6 +16,10 @@ Primrose.Output.Music = ( function () {
     return 440 * Math.pow( PIANO_BASE, n - 49 );
   }
 
+  pliny.class( "Primrose.Output", {
+    name: "Music",
+    description: "<under construction>"
+  } );
   function Music ( context, type, numNotes ) {
     this.audio = context || new AudioContext();
     if ( this.audio && this.audio.createGain ) {

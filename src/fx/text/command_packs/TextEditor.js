@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
  
 //// 
 // For all of these commands, the "current" cursor is:
@@ -8,6 +8,10 @@
 Primrose.Text.CommandPacks.TextEditor = ( function () {
   "use strict";
 
+  pliny.record( "Primrose.Text.CommandPacks", {
+    name: "TextEditor",
+    description: "<under construction>"
+  } );
   function TextEditor ( operatingSystem, codePage, editor ) {
     var commands = {
       NORMAL_SPACE: " ",

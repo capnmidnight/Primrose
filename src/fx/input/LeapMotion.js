@@ -13,6 +13,11 @@ Primrose.Input.LeapMotion = ( function () {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.LeapMotion](#Primrose_Input_LeapMotion) class in the input/ directory"
   } );
+  
+  pliny.class("Primrose.Input", {
+    name: "LeapMotionInput",
+    description: "<under construction>"
+  });
   function LeapMotionInput ( name, commands, socket ) {
 
     pliny.issue( "Primrose.Input.LeapMotion", {

@@ -1,8 +1,13 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.CodePages.EN_UKX = (function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;
+  
+  pliny.record( "Primrose.Text.CodePages", {
+    name: "EN_UKX",
+    description: "<under construction>"
+  } );
   return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",

@@ -1,8 +1,13 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.CodePages.DE_QWERTZ = (function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;
+  
+  pliny.record( "Primrose.Text.CodePages", {
+    name: "DE_QWERTZ",
+    description: "<under construction>"
+  } );
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {

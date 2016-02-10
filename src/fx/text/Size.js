@@ -1,8 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Size = (function ( ) {
   "use strict";
 
+  pliny.class( "Primrose.Text", {
+    name: "Size",
+    description: "<under construction>"
+  } );
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );
   }

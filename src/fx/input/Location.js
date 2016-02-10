@@ -7,6 +7,11 @@ Primrose.Input.Location = ( function () {
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Location](#Primrose_Input_Location) class in the input/ directory"
   } );
+  
+  pliny.class("Primrose.Input", {
+    name: "Location",
+    description: "<under construction>"
+  });
   function LocationInput ( name, commands, socket, options ) {
 
     pliny.issue( "Primrose.Input.Location", {

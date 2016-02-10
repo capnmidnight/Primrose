@@ -1,4 +1,4 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.OperatingSystem = ( function ( ) {
   "use strict";
@@ -15,6 +15,10 @@ Primrose.Text.OperatingSystem = ( function ( ) {
     setCursorCommand( obj, baseMod + "SHIFT", key, func, "back" );
   }
 
+  pliny.class( "Primrose.Text", {
+    name: "OperatingSystem",
+    description: "<under construction>"
+  } );
   function OperatingSystem ( name, pre1, pre2, redo, pre3, home, end, pre4,
       fullHome, fullEnd ) {
     this.name = name;

@@ -269,6 +269,10 @@ Primrose.Input.Motion = ( function ( ) {
   MotionCorrector.ZERO_VECTOR = {x: -9.80665, y: 0, z: 0};
   MotionCorrector.ZERO_EULER = {gamma: 90, alpha: 270, beta: 0};
 
+  pliny.class("Primrose.Input", {
+    name: "Motion",
+    description: "<under construction>"
+  });
   function MotionInput ( name, commands, socket ) {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MotionInput.AXES );
     var corrector = new MotionCorrector( ),

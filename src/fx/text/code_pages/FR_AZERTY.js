@@ -1,8 +1,13 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.CodePages.FR_AZERTY = ( function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;
+  
+  pliny.record( "Primrose.Text.CodePages", {
+    name: "FR_AZERTY",
+    description: "<under construction>"
+  } );
   return new CodePage( "Français: AZERTY", "fr", {
     deadKeys: [ 221, 50, 55 ],
     NORMAL: {

@@ -1,8 +1,12 @@
-/* global Primrose */
+/* global Primrose, pliny */
 
 Primrose.Text.Grammars.JavaScript = ( function () {
   "use strict";
 
+  pliny.value( "Primrose.Text.Grammars", {
+    name: "JavaScript",
+    description: "<under construction>"
+  } );
   return new Primrose.Text.Grammar( "JavaScript", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],
     [ "startBlockComments", /\/\*/ ],

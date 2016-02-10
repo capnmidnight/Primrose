@@ -1,6 +1,11 @@
 /* global Primrose, THREE, Function, emit, self, pliny */
 
 Primrose.Projector = ( function ( ) {
+  
+  pliny.class( "Primrose", {
+    name: "Projector",
+    description: "<under construction>"
+  } );
   function Projector ( isWorker ) {
     if ( isWorker && typeof THREE === "undefined" ) {
       /* jshint ignore:start */
