@@ -214,6 +214,7 @@
 
   pliny.load( [
     "setup",
+    "drum",
     "faq",
     "pliny"
   ].map( function ( f ) {
