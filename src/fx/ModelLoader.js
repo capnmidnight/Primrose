@@ -172,7 +172,9 @@ Primrose.ModelLoader = ( function () {
     name: "loadScene",
     description: "Asynchronously loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It also translates objects marked as GUI elements into instances of their associated elements within the Primrose framework.\n\
 \n\
-*NOTE: uses the same Cross-Origin Request policy as THREE.ImageUtils, meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin policy that Primrose uses for request.*",
+> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
+> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
+> policy that Primrose uses for requests.",
     parameters: [
       {name: "src", type: "String", description: "The file from which to load."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
@@ -216,7 +218,9 @@ Primrose.ModelLoader = ( function () {
     name: "loadObject",
     description: "Asynchronously loads a JSON file as a JavaScript object. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It uses callbacks to tell you when loading progresses, when it's complete, or when an error occurred. Useful for one-time use models.\n\
 \n\
-*NOTE: uses the same Cross-Origin Request policy as THREE.ImageUtils, meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin policy that Primrose uses for request.*",
+> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
+> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
+> policy that Primrose uses for requests.",
     parameters: [
       {name: "src", type: "String", description: "The file from which to load."},
       {name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully."},
