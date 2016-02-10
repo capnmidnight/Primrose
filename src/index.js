@@ -196,7 +196,7 @@ directing the user to useful pages for beginners."
 
   pliny.issue( "", {
     name: "Make a getting started page.",
-    type: "open",
+    type: "closed",
     description: "Make a page that explains downloading the right dependencies,\n\
 making a simple page using a sample scene, making it VR capable, and adding\n\
 objects to it."
