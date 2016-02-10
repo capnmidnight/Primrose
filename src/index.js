@@ -72,11 +72,11 @@ window.Primrose = ( function () {
     "#5B0001", "#302E2E" ];
 
   pliny.value( "Primrose", {
-    name: "SKINS_VALUES",
+    name: "SKIN_VALUES",
     type: "Array of Number",
     description: "A selection of color values that closely match skin colors of people."
   } );
-  Primrose.SKINS_VALUES = Primrose.SKINS.map( function ( s ) {
+  Primrose.SKIN_VALUES = Primrose.SKINS.map( function ( s ) {
     return parseInt( s.substring( 1 ), 16 );
   } );
 
