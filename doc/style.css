@@ -83,10 +83,6 @@ h2, h3, h4{
   text-transform: capitalize;
 }
 
-#documentation a{
-  
-}
-
 #documentation a[target="_blank"]::after{
   content: " ⇗";
 }
@@ -193,6 +189,10 @@ a {
 
 #contents a {
   color: black;
+}
+
+#contents a.incomplete{
+  color: #c0c0c0;
 }
 
 #contents h2, #contents h3{

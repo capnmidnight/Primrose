@@ -188,13 +188,6 @@ the WebVR standard in some form."
   window.isVR = !!navigator.getVRDevices;
 
   pliny.issue( "", {
-    name: "Make an intro.",
-    type: "open",
-    description: "Make an intro page that describes the layout of the documentation,\n\
-directing the user to useful pages for beginners."
-  } );
-
-  pliny.issue( "", {
     name: "Make a getting started page.",
     type: "closed",
     description: "Make a page that explains downloading the right dependencies,\n\
@@ -271,13 +264,6 @@ on a website and be ready to run in VR."
     name: "Make a CHANGELOG",
     type: "open",
     description: "Document the changes between versions better."
-  } );
-
-  pliny.issue( "", {
-    name: "Make an HMD overview page.",
-    type: "open",
-    description: "Go into what is available, what are the key components, and how\n\
-to build your own Google Cardboard.."
   } );
 
   pliny.issue( "", {

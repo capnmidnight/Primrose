@@ -13,6 +13,7 @@
 
   var groupings = {
     pages: [ ],
+    tutorials: [ ],
     examples: [ ],
     namespaces: [ pliny.database ],
     classes: [ ],
@@ -140,8 +141,14 @@
               group = groupings[key];
           for ( var i = 0; i < collection.length; ++i ) {
             var obj = collection[i];
+            if ( key === "pages" && obj.fullName.indexOf( "Tutorial:" ) === 0 ) {
+              obj.name = obj.name.substring(10);
+              groupings.tutorials.push( obj );
+            }
+            else {
+              group.push( obj );
+            }
             docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
-            group.push( obj );
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
             // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
@@ -194,7 +201,13 @@
         for ( var i = 0; i < group.length; ++i ) {
           var obj = group[i];
           if ( g !== "issues" || obj.type === "open" ) {
-            output += "<li data-name=\"" + obj.fullName + "\"><a href=\"#" + obj.id + "\">" + obj.fullName + "</a></li>";
+            var id = "#" + obj.id.trim(),
+                doc = docoCache[id];
+            output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
+            if(doc && doc.indexOf("&lt;under construction>") > -1){
+              output += " class=\"incomplete\"";
+            }
+            output += ">" + obj.fullName + "</a></li>";
           }
         }
         output += "</ul></li>";
@@ -215,8 +228,18 @@
   pliny.load( [
     "setup",
     "drum",
+    "lighting",
+    "video",
+    "export",
+    "blenderBeginner",
+    "blenderAdvanced",
+    "ide3d",
+    "adventure",
+    "server",
     "faq",
-    "pliny"
+    "hmd",
+    "pliny",
+    "changelog"
   ].map( function ( f ) {
     return f + ".md";
   } ) ).then( renderDocs );
