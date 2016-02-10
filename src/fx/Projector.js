@@ -9,10 +9,10 @@ Primrose.Projector = ( function ( ) {
   function Projector ( isWorker ) {
     if ( isWorker && typeof THREE === "undefined" ) {
       /* jshint ignore:start */
-// File:src/Three.js
+// File:src/three.js
 
       /**
-       * This is just the THREE.Matrix4 and THREE.Vector3 classes from THREE.js, to
+       * This is just the THREE.Matrix4 and THREE.Vector3 classes from Three.js, to
        * be loaded into a WebWorker so the worker can do math. - STM
        *
        * @author mrdoob / http://mrdoob.com/

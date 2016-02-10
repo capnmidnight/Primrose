@@ -40,7 +40,7 @@ app.addEventListener( "ready", function () {
 
   output = document.createElement( "pre" );
   output = app.appendChild( output );
-  // or you can set the transforms directly on the THREE.js object
+  // or you can set the transforms directly on the Three.js object
   output.mesh.position.set(1, editorSphereY, -0.25);
   output.mesh.rotation.set(0, -Math.PI / 4, 0);
   output.theme = Primrose.Text.Themes.Dark;

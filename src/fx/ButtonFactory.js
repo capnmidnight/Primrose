@@ -8,7 +8,7 @@ Primrose.ButtonFactory = ( function () {
     name: "ButtonFactory",
     description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
     parameters: [
-      {name: "templateFile", type: "(String|THREE.Object3D}", description: "Either a path to a THREE.js formatted JSON file, or a THREE.Object3D, that specifies a 3D model for a button, to be used as a template."},
+      {name: "templateFile", type: "(String|THREE.Object3D}", description: "Either a path to a Three.js formatted JSON file, or a THREE.Object3D, that specifies a 3D model for a button, to be used as a template."},
       {name: "options", type: "Object", description: "The options to apply to all buttons that get created by the factory."},
       {name: "complete", type: "Function", description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."}
     ]

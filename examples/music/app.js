@@ -2,7 +2,7 @@ var app = new Primrose.VRApplication(
     // We give the application a name here, in case we ever
     // hook it up to the Multiplayer Server.
     "sandbox", {
-      // This file references a THREE.js JSON-formatted scene
+      // This file references a Three.js JSON-formatted scene
       // file, which basically describes a room or level in 
       // which the user will walk around, on which we can 
       // create additional objects.
@@ -12,7 +12,7 @@ var app = new Primrose.VRApplication(
       disableAutoFullScreen: true,
       // One of our GUI controls is configured here.
       button: {
-        // This file references another THREE.js JSON-formatted
+        // This file references another Three.js JSON-formatted
         // model file, which will be cloned anytime a user
         // calls createElement("button").
         model: "/models/smallbutton.json",
@@ -33,7 +33,7 @@ app.ctrls.viewSource.addEventListener("click", function () {
   window.open(path);
 }, false);
 
-// Once Primrose has setup the WebGL context, setup THREE.js, 
+// Once Primrose has setup the WebGL context, setup Three.js, 
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.

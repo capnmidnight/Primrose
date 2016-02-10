@@ -1,7 +1,7 @@
 /* global Primrose, THREE, pliny */
 
 Primrose.ModelLoader = ( function () {
-  // If THREE.js hasn't been loaded, then this module doesn't make sense and we
+  // If Three.js hasn't been loaded, then this module doesn't make sense and we
   // can just return a shim to prevent errors from occuring. This is useful in
   // cases where we want to use Primrose in a 2D context, or perhaps use it with
   // a different 3D library, whatever that might be.
@@ -10,11 +10,11 @@ Primrose.ModelLoader = ( function () {
     };
   }
 
-  // The JSON format object loader is not always included in the THREE.js distribution,
+  // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
   var JSON = THREE.ObjectLoader && new THREE.ObjectLoader();
 
-  // Sometimes, the properties that export out of Blender and into THREE.js don't
+  // Sometimes, the properties that export out of Blender and into Three.js don't
   // come out correctly, so we need to do a correction.
   function fixJSONScene ( json ) {
     json.traverse( function ( obj ) {
@@ -85,7 +85,7 @@ Primrose.ModelLoader = ( function () {
       {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
     ],
     examples: [
-      {name: "Load a basic model.", description: "When Blender exports the Three.JS JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+      {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
     // Create the scene where objects will go\n\
@@ -127,7 +127,7 @@ Primrose.ModelLoader = ( function () {
     description: "Creates a copy of the stored template model.",
     returns: "A THREE.Object3D that is a copy of the stored template.",
     examples: [
-      {name: "Load a basic model.", description: "When Blender exports the Three.JS JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+      {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
     // Create the scene where objects will go\n\
@@ -182,7 +182,7 @@ Primrose.ModelLoader = ( function () {
       {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
     ],
     examples: [
-      {name: "Load a basic model.", description: "When Blender exports the Three.JS JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+      {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
     // Create the scene where objects will go\n\
@@ -228,7 +228,7 @@ Primrose.ModelLoader = ( function () {
       {name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses."}
     ],
     examples: [
-      {name: "Load a basic model.", description: "When Blender exports the Three.JS JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+      {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
     // Create the scene where objects will go\n\
@@ -289,7 +289,7 @@ pliny.issue( "Primrose.ModelLoader", {
 } );
 
 pliny.issue( "Primrose.ModelLoader", {
-  name: "Move ModelLoader to a Three.JS specific namespace",
+  name: "Move ModelLoader to a Three.js specific namespace",
   type: "open",
-  description: "This class won't work outside of a Three.JS context. The bits of code that absolutely must have Three.js should be moved to their own namespace."
+  description: "This class won't work outside of a Three.js context. The bits of code that absolutely must have Three.js should be moved to their own namespace."
 } );

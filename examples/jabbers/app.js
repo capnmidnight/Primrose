@@ -97,7 +97,7 @@ function Jabber ( w, h, s ) {
   return obj;
 }
 
-// Once Primrose has setup the WebGL context, setup THREE.js, 
+// Once Primrose has setup the WebGL context, setup Three.js, 
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
