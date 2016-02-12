@@ -18,7 +18,7 @@ Primrose is all of these things.
 ## "What is not Primrose?"
 Primrose is not a fully-featured game development framework. The purpose of Primrose
 is to explore productivity applications. VR is very taxing on graphics resources,
-which can leave the business-need of the application starved. Thus, graphics fidellity
+which can leave the business-need of the application starved. Thus, graphics fidelity
 in Primrose is kept simple so as to ensure compatability with older devices.
 
 ## "But what do you do with it?"

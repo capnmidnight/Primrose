@@ -56,7 +56,7 @@ The latest version of Primrose will always reside at:
 > version of the file. If, on the other hand, you need more stability, read further
 > on this page to see how you can use a static version of the package.
 
-Link to the file by including a `&lt;script&gt;` tag in your page HTML:
+Link to the file by including a `<script>` tag in your page HTML:
 
     <!DOCTYPE html>
     <html>
@@ -105,11 +105,11 @@ to retrieve any historical version you may need.
 There are also a number of libraries on which Primrose depends.
 
 If you are only using Primrose as a client-side library, then there is only one
-external dependency that Primrose does not include automatically.
-* [Three.js](http://www.threejs.org) - an abstraction layer and scene graph 
-  implementation for WebGL. `three.js` is usually located at:
-** <http://www.threejs.org/build/three.js> - expanded version.
-** <http://www.threejs.org/build/three.min.js> - minified version.
+external dependency that Primrose does not include automatically. [Three.js](http://www.threejs.org)
+is an abstraction layer and scene graph implementation for WebGL. `three.js` is
+usually located at:
+* <http://www.threejs.org/build/three.js> - expanded version.
+* <http://www.threejs.org/build/three.min.js> - minified version.
 
 There are a few optional dependencies:
 * [WebGL-Debug.js](https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js) -

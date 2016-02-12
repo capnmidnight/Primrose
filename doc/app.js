@@ -110,7 +110,7 @@
     var links = doc.querySelectorAll("a");
     for(var i = 0; i < links.length; ++i){
       var link = links[i];
-      if(/https?:/.test(link.href)){
+      if(link.id !== "returnToTop" && /https?:/.test(link.href)){
         link.target = "_blank";
       }
     }
