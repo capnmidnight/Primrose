@@ -104,8 +104,8 @@ to retrieve any historical version you may need.
 ## Dependencies
 There are also a number of libraries on which Primrose depends.
 
-If you are only using Primrose as a client-side library, then there are only two
-external dependencies that Primrose does not include automatically.
+If you are only using Primrose as a client-side library, then there is only one
+external dependency that Primrose does not include automatically.
 * [Three.js](http://www.threejs.org) - an abstraction layer and scene graph 
   implementation for WebGL. `three.js` is usually located at:
 ** <http://www.threejs.org/build/three.js> - expanded version.
