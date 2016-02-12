@@ -19,8 +19,7 @@ Primrose.Text.OperatingSystem = ( function ( ) {
     name: "OperatingSystem",
     description: "<under construction>"
   } );
-  function OperatingSystem ( name, pre1, pre2, redo, pre3, home, end, pre4,
-      fullHome, fullEnd ) {
+  function OperatingSystem ( name, pre1, pre2, redo, pre3, home, end, pre4, fullHome, fullEnd ) {
     this.name = name;
 
     this[pre1 + "_a"] = function ( prim, tokenRows ) {
@@ -38,22 +37,26 @@ Primrose.Text.OperatingSystem = ( function ( ) {
       prim.scrollIntoView( prim.frontCursor );
     };
 
-    this[pre1 + "_DOWNARROW"] = function ( prim, tokenRows ) {
-      if ( prim.scroll.y < tokenRows.length ) {
-        ++prim.scroll.y;
-      }
-    };
+    if ( pre1 + "_DOWNARROW" !== pre4 + "_" + fullEnd ) {
+      this[pre1 + "_DOWNARROW"] = function ( prim, tokenRows ) {
+        if ( prim.scroll.y < tokenRows.length ) {
+          ++prim.scroll.y;
+        }
+      };
+    }
 
-    this[pre1 + "_UPARROW"] = function ( prim, tokenRows ) {
-      if ( prim.scroll.y > 0 ) {
-        --prim.scroll.y;
-      }
-    };
-  
-    this.isClipboardReadingEvent = function(evt){
+    if ( pre1 + "_UPARROW" !== pre4 + "_" + fullHome ) {
+      this[pre1 + "_UPARROW"] = function ( prim, tokenRows ) {
+        if ( prim.scroll.y > 0 ) {
+          --prim.scroll.y;
+        }
+      };
+    }
+
+    this.isClipboardReadingEvent = function ( evt ) {
       return evt[pre1.toLowerCase() + "Key"] && //meta or ctrl
-          (evt.keyCode === 67 || // C
-          evt.keyCode === 88); // X
+          ( evt.keyCode === 67 || // C
+              evt.keyCode === 88 ); // X
     };
 
     makeCursorCommand( this, "", "LEFTARROW", "Left" );

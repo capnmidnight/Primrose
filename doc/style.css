@@ -247,6 +247,13 @@ a {
   color: #c0c0c0;
 }
 
+#contents a.selected{
+  background-color: #F7DBEC;
+}
+#contents a.incomplete.selected{
+  background-color: #6D0444;
+}
+
 #contents h2, #contents h3{
   font-size: 100%;
   font-weight: normal;

@@ -105,13 +105,27 @@
       behavior: "smooth"
     } );
   }
-  
-  function fixLinks(){
-    var links = doc.querySelectorAll("a");
-    for(var i = 0; i < links.length; ++i){
-      var link = links[i];
-      if(link.id !== "returnToTop" && /https?:/.test(link.href)){
+
+  function fixLinks () {
+    var links = doc.querySelectorAll( "a" );
+    for ( var i = 0; i < links.length; ++i ) {
+      var link = links[i],
+          url = new URL( link.href );
+      if ( url.host !== document.location.host || url.pathname !== document.location.pathname ) {
         link.target = "_blank";
+      }
+    }
+    links = nav.querySelectorAll( "a" );
+    for ( var i = 0; i < links.length; ++i ) {
+      var link = links[i],
+          url = new URL( link.href );
+      if ( url.host === document.location.host && url.pathname === document.location.pathname ) {
+        if ( url.hash === document.location.hash && !link.classList.contains( "selected" ) ) {
+          link.classList.add( "selected" );
+        }
+        else if ( url.hash !== document.location.hash && link.classList.contains( "selected" ) ) {
+          link.classList.remove( "selected" );
+        }
       }
     }
   }
@@ -153,13 +167,13 @@
           for ( var i = 0; i < collection.length; ++i ) {
             var obj = collection[i];
             if ( key === "pages" && obj.fullName.indexOf( "Tutorial:" ) === 0 ) {
-              obj.name = obj.name.substring(10);
+              obj.name = obj.name.substring( 10 );
               groupings.tutorials.push( obj );
             }
             else {
               group.push( obj );
             }
-            docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
+            docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ).replace( /<under construction>/g, "&lt;under construction>" ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
             // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
@@ -215,7 +229,7 @@
             var id = "#" + obj.id.trim(),
                 doc = docoCache[id];
             output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
-            if(doc && doc.indexOf("<under construction>") > -1){
+            if ( doc && doc.indexOf( "&lt;under construction>" ) > -1 ) {
               output += " class=\"incomplete\"";
             }
             output += ">" + obj.fullName + "</a></li>";
@@ -243,7 +257,7 @@
     "hmd",
     "pliny",
     "changelog",
-    "lighting", 
+    "lighting",
     "drum",
     "video",
     "export",
