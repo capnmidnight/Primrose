@@ -105,10 +105,21 @@
       behavior: "smooth"
     } );
   }
+  
+  function fixLinks(){
+    var links = doc.querySelectorAll("a");
+    for(var i = 0; i < links.length; ++i){
+      var link = links[i];
+      if(/https?:/.test(link.href)){
+        link.target = "_blank";
+      }
+    }
+  }
 
   function showHash ( evt ) {
     doc.innerHTML = docoCache[document.location.hash] || ( "Not found: " + document.location.hash );
     replacePreBlocks();
+    fixLinks();
     if ( evt ) {
       toTop();
     }
@@ -204,7 +215,7 @@
             var id = "#" + obj.id.trim(),
                 doc = docoCache[id];
             output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
-            if(doc && doc.indexOf("&lt;under construction>") > -1){
+            if(doc && doc.indexOf("<under construction>") > -1){
               output += " class=\"incomplete\"";
             }
             output += ">" + obj.fullName + "</a></li>";
