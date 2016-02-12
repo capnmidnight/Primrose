@@ -238,6 +238,7 @@
 
   pliny.load( [
     "setup",
+    "ide3dmanual",
     "faq",
     "hmd",
     "pliny",

@@ -2,14 +2,15 @@ window.addEventListener( "load", function ( d, f ) {
   var c = d[f]( "#loading" ),
       p = d[f]( "#progressBar" ),
       h = d[f]( "head" ),
-      /* */
+      /*  */
        s = [
        "/bin/three.min.js",
+       "/bin/marked.min.js",
        "/bin/Primrose.min.js",
        "app.js" ],
-       /* 
+       /*
       s = [
-        "/lib/endocumate.js",
+        "/node_modules/marked/lib/marked.js",
         "/lib/pliny.js",
         "/lib/webgl-debug.js",
         "/node_modules/three.js/build/three.js",

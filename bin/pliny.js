@@ -15,10 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* global pliny, Primrose */
 
-// Pliny the (Elder|Younger) is a documentation construction system.
-// You create live documentation objects on code assets with Pliny (the Elder),
-// then you read back those documentation objects with Pliny (the Younger).
+// Pliny is a documentation construction system. You create live documentation
+// objects on code assets with pliny, then you read back those documentation objects
+// with pliny.
 // 
 // Pliny is also capable of generating HTML output for your documentation.
 // 
@@ -27,14 +28,14 @@
 // Vesuvius during the destruction of Pompeii. Also, his nephew Gaius Plinius Caecilius Secundus
 // (https://en.wikipedia.org/wiki/Pliny_the_Younger), through whom we know his uncle.
 
-( function ( module ) {
+( function ( module, require ) {
 
   //////////////////////////////////////////////////////////////////////////////
   // Pliny's author is not smart enough to figure out how to make it possible //
   // to use it to document itself, so here's a bunch of comments.             //
   //////////////////////////////////////////////////////////////////////////////
-
-
+  
+  var markdown = require("marked");
 
   // The default storage location.
   var database = {
@@ -95,35 +96,37 @@
   // accessible, in the documentation database.
   // 
   // @param {String} name - a period-delimited list of object accessors, naming the object we want to fill in.
+  // @param {Object} rootObject - the object on which to fill in values.
   // @returns {Object} - the leaf-level filled-in object.
   ///
   function fillBag ( name ) {
     // Start at the top level.
-    var bag = database,
-        // Break up the object path.
-        parts = name.split( "." ),
-        // We'll be rebuilding the path as we go, so we can name intermediate objects.
-        path = "";
-    // Walk through the object tree.
-    for ( var i = 0; i < parts.length; ++i ) {
-      // Fill in any missing objects.
-      if ( !bag[parts[i]] ) {
-        bag[parts[i]] = {};
-      }
+    var bag = database;
+    if ( typeof name !== "undefined" && name.length > 0 ) {
+      // Break up the object path.
+      var parts = name.split( "." ),
+          // We'll be rebuilding the path as we go, so we can name intermediate objects.
+          path = "",
+          // The first time we extend the path, it doesn't get a period seperator.
+          sep = "";
+      // Walk through the object tree.
+      for ( var i = 0; i < parts.length; ++i ) {
+        // Fill in any missing objects.
+        if ( typeof bag[parts[i]] === "undefined" ) {
+          bag[parts[i]] = {};
+        }
 
-      // The first time we extend the path, it doesn't get a period seperator.
-      if ( path.length > 0 ) {
-        path += ".";
-      }
-      path += parts[i];
+        path += sep + parts[i];
+        sep = ".";
 
-      // Drill down into the tree.
-      bag = bag[parts[i]];
+        // Drill down into the tree.
+        bag = bag[parts[i]];
 
-      // If we have a name, and the object hasn't already been named, then we
-      // give it a name.
-      if ( path.length > 0 && !bag.name ) {
-        bag.name = path;
+        // If we have a name, and the object hasn't already been named, then we
+        // give it a name.
+        if ( path.length > 0 && !bag.name ) {
+          bag.name = path;
+        }
       }
     }
     return bag;
@@ -142,10 +145,21 @@
     // the context when we parse any function-type objects that get documented.
     if ( info ) {
       if ( typeof info === "string" || info instanceof String ) {
-        var parts = parentName.split( "." );
-        info = {name: parts.pop(), description: info};
-        parentName = parts.join( "." );
+        var objectName = null;
+        // If the object type is a page, then just treat it as a very simple
+        // name/description pair that can get Markdown-formatted for display.
+        if ( fieldType === "page" ) {
+          objectName = parentName;
+          parentName = "";
+        }
+        else {
+          var parts = parentName.split( "." );
+          objectName = parts.pop();
+          parentName = parts.join( "." );
+        }
+        info = {name: objectName, description: info};
       }
+
       // If the user didn't supply a type for the metadata object, we infer it
       // from context.
       if ( typeof info.fieldType === 'undefined' ) {
@@ -158,10 +172,7 @@
       }
 
       // Find out where we're going to store the object in the metadata database.
-      var parentBag = database;
-      if ( parentName.length > 0 ) {
-        parentBag = fillBag( parentName );
-      }
+      var parentBag = fillBag( parentName );
 
       // Figure out where in the parent object we're going to store the documentation object.
       var pluralName = fieldType + "s";
@@ -201,18 +212,6 @@
         if ( info.fieldType === "class" && info.baseClass ) {
           pliny.subClass( info.baseClass, info );
         }
-        else if ( info.fieldType === "enumeration" && info.value ) {
-          for ( var key in info.value ) {
-            var val = info.value[key];
-            if ( info.value.hasOwnProperty( key ) && typeof ( val ) === "number" ) {
-              pliny.value( info.fullName, {
-                name: key,
-                type: "Number",
-                description: val.toString()
-              } );
-            }
-          }
-        }
 
         for ( var k in subArrays ) {
           var subArr = subArrays[k],
@@ -242,6 +241,10 @@
     if ( !bag.fieldType ) {
 
       // Copy all the fields! ALL THE FIELDS!
+      // TODO: don't copy metadata directly to bag object. The bag objects are used
+      // as the search path for finding code objects, and some of the metadata field
+      // names might clash with code object field names. Maybe have a new metadata
+      // table.
       for ( var k in info ) {
         bag[k] = info[k];
       }
@@ -424,13 +427,13 @@
     var stringLiterals = [ ];
     var litReplace = function ( str ) {
       var name = "&STRING_LIT" + stringLiterals.length + ";";
-      if(str[0] === "'"){
-        str = str.replace(/\\"/g, "&_DBLQUOTE_;")
-            .replace(/\\'/g, "&_SGLQUOTE_;")
-            .replace(/"/g, "\\\"")
-            .replace(/'/g, "\"")
-            .replace(/&_DBLQUOTE_;/g, "\\\"")
-            .replace(/&_SGLQUOTE_;/g, "\\'");
+      if ( str[0] === "'" ) {
+        str = str.replace( /\\"/g, "&_DBLQUOTE_;" )
+            .replace( /\\'/g, "&_SGLQUOTE_;" )
+            .replace( /"/g, "\\\"" )
+            .replace( /'/g, "\"" )
+            .replace( /&_DBLQUOTE_;/g, "\\\"" )
+            .replace( /&_SGLQUOTE_;/g, "\\'" );
       }
       stringLiterals.push( str );
       return name;
@@ -482,6 +485,7 @@
           "parameters",
           "returns",
           "errors",
+          "pages",
           "namespaces",
           "classes",
           "functions",
@@ -501,10 +505,10 @@
         return output;
       }
     },
-    checkAndFormatField: function ( obj, p, i ) {
-      var o = obj[p];
-      if ( o ) {
-        return this.formatField( obj, p, o, i );
+    checkAndFormatField: function ( obj, prop, i ) {
+      var obj2 = obj[prop];
+      if ( obj2 ) {
+        return this.formatField( obj, prop, obj2, i );
       }
     }
   };
@@ -522,25 +526,28 @@
     // @param {String} p - the name of the field we're retrieving out of the documentation object.
     // @return {String} - a description of the field.
     ///
-    formatField: function ( obj, p, o ) {
+    formatField: function ( obj, propertyName, value ) {
       var output = "";
-      if ( obj.fieldType === "enumeration" && p === "values" ) {
-        output += this.formatEnumeration( obj, p, o );
+      if ( obj.fieldType === "enumeration" && propertyName === "values" ) {
+        output += this.formatEnumeration( obj, propertyName, value );
       }
-      else if ( o instanceof Array ) {
-        output += this.formatArray( obj, p, o );
+      else if ( obj.fieldType === "page" && propertyName === "description" ) {
+        output += markdown( value );
       }
-      else if ( p === "parent" ) {
-        output += "<p>Contained in <a href=\"#" + pliny.get( o ).id + "\">" + o + "</a></p>";
+      else if ( value instanceof Array ) {
+        output += this.formatArray( obj, propertyName, value );
       }
-      else if ( p === "description" ) {
-        output += endocumate( o );
+      else if ( propertyName === "parent" ) {
+        output += "<p>Contained in <a href=\"#" + pliny.get( value ).id + "\">" + value + "</a></p>";
       }
-      else if ( p === "returns" ) {
-        output += "<h3>Return value</h3>" + endocumate( o );
+      else if ( propertyName === "description" ) {
+        output += markdown( value );
+      }
+      else if ( propertyName === "returns" ) {
+        output += "<h3>Return value</h3>" + markdown( value );
       }
       else {
-        output += "<dl><dt>" + p + "</dt><dd>" + o + "</dd></dl>";
+        output += "<dl><dt>" + propertyName + "</dt><dd>" + value + "</dd></dl>";
       }
       return output;
     },
@@ -569,7 +576,7 @@
       var output = "";
       for ( var i = 0; i < arr.length; ++i ) {
         var ex = arr[i];
-        output += "<div><h3><a href=\"#" + ex.id + "\">" + ex.name + "</a></h3>" + endocumate( ex.description ) + "</div>";
+        output += "<div><h3><a href=\"#" + ex.id + "\">" + ex.name + "</a></h3>" + markdown( ex.description ) + "</div>";
       }
       return output;
     },
@@ -583,7 +590,7 @@
       for ( var i = 0; i < arr.length; ++i ) {
         var issue = arr[i],
             str = "<div><h3><a href=\"#" + issue.id + "\">" + issue.issueID + ": " + issue.name +
-            " [" + issue.type + "]</a></h3>" + endocumate( issue.description ) + "</div>";
+            " [" + issue.type + "]</a></h3>" + markdown( issue.description ) + "</div>";
         parts[issue.type] += str;
       }
       return parts.open + "<h2>Closed Issues</h2>" + parts.closed;
@@ -597,7 +604,7 @@
       var output = "";
       for ( var i = 0; i < arr.length; ++i ) {
         var comment = arr[i];
-        output += "<aside><h3>" + comment.name + "</h3>" + endocumate( comment.description );
+        output += "<aside><h3>" + comment.name + "</h3>" + markdown( comment.description );
         if ( typeof comment.comments !== "undefined" && comment.comments instanceof Array ) {
           output += this.formatArray( comment, "comments", comment.comments );
         }
@@ -653,8 +660,15 @@
     formatArrayElement: function ( arrName, n ) {
       var s = "<li>";
       if ( n.description ) {
+        var desc = n.description.match(/^(([^\n](\n[^\n])?)+)\n\n/);
+        if(desc){
+          desc = desc[1] + "...";
+        }
+        else{
+          desc = n.description;
+        }
         s += "<dl><dt>" + this.shortDescription( false, n ) + "</dt><dd>" +
-            endocumate( n.description ) + "</dd></dl>";
+            markdown( desc ) + "</dd></dl>";
       }
       else {
         s += this.shortDescription( false, n );
@@ -677,8 +691,11 @@
       if ( isContainer && !topLevel ) {
         output += "<a href=\"#" + p.id + "\">";
       }
-      output += "<code>" + ( topLevel && p.fieldType !== "example" ? p.fullName : p.name );
-
+      if(p.fieldType !== "page"){
+        output += "<code>";
+      }
+      output += topLevel && p.fieldType !== "example" ? p.fullName : p.name;
+      
       if ( p.type ) {
         output += " <span class=\"type\">" + p.type + "</span>";
       }
@@ -698,16 +715,18 @@
       if ( isContainer && !topLevel ) {
         output += "</a>";
       }
-      return output + "</code></" + tag + ">";
+
+      if(p.fieldType !== "page"){
+        output += "</code>";
+      }
+      return output + "</" + tag + ">";
     }
   };
 
   // Output to the Developer console in the browser directly.
   formatters.console = {
     format: function ( name ) {
-      var output = formatters.format.call( formatters.console, name );
-      console.log( output );
-      return output;
+      return formatters.format.call( formatters.console, name );
     },
     /////
     // Puts together a string that describes a top-level field out of a documentation
@@ -717,15 +736,15 @@
     // @params {String} p - the name of the field we're retrieving out of the documentation object.
     // @return {String} - a description of the field.
     ///
-    formatField: function ( obj, p, o ) {
-      if ( o instanceof Array ) {
-        return this.formatArray( obj, p, o );
+    formatField: function ( obj, propertyName, value ) {
+      if ( value instanceof Array ) {
+        return this.formatArray( obj, propertyName, value );
       }
-      else if ( p === "description" ) {
-        return "\t" + o + "\n";
+      else if ( propertyName === "description" ) {
+        return "\t" + value + "\n";
       }
       else {
-        return "\t" + p + ": " + o + "\n";
+        return "\t" + propertyName + ": " + value + "\n";
       }
     },
     /////
@@ -809,6 +828,48 @@
     }
   };
 
+  function loadFiles ( files, success, failure ) {
+    if ( files && files.length > 0 ) {
+      if ( typeof success === "undefined" ) {
+        return new Promise( loadFiles.bind( null, files ) );
+      }
+      else {
+        var __loadFiles = function ( ) {
+          if ( files.length === 0) {
+            success();
+          }
+          else {
+            Primrose.HTTP.getText( files.shift(), function ( txt ) {
+              var name = "";
+              txt = txt.replace( /^#*\s+([^\n]+)\r?\n\s*/, function ( txt, group ) {
+                name = group;
+                return "";
+              } );
+              pliny.page( name, txt );
+              __loadFiles( );
+            }, failure );
+          }
+        };
+        __loadFiles( 0 );
+      }
+    }
+  }
+
+  // Dump the values of an enumeration into the documentation database to be able
+  // to report them in the documentation page.
+  function setEnumerationValues( enumName, enumeration ){
+    for ( var key in enumeration ) {
+      var val = enumeration[key];
+      if ( enumeration.hasOwnProperty( key ) && typeof ( val ) === "number" ) {
+        pliny.value( enumName, {
+          name: key,
+          type: "Number",
+          description: val.toString(),
+          value: val
+        } );
+      }
+    }
+  }
 
   // The namespacing object we're going to return to the importing script.
   var pliny = formatters.console.format;
@@ -818,6 +879,10 @@
   pliny.formats = formatters;
   // Just get the raw data
   pliny.get = openBag.bind( null, pliny.database );
+  // Load up Markdown or HTML files
+  pliny.load = loadFiles;
+
+  pliny.setEnumerationValues = setEnumerationValues;
 
   // Create documentation functions for each of the supported types of code objects.
   [ "namespace",
@@ -833,7 +898,8 @@
     "example",
     "error",
     "issue",
-    "comment" ].forEach( function ( k ) {
+    "comment",
+    "page" ].forEach( function ( k ) {
     pliny[k] = analyzeObject.bind( null, k );
   } );
 
@@ -850,4 +916,6 @@
     }
   } );
   return module;
-} )( "pliny" ) );
+} )( "pliny" ), function ( name ) {
+  return window[name];
+} );

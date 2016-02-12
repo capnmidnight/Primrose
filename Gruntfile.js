@@ -12,10 +12,11 @@ var fs = require( "fs" ),
       "node_modules/cannon/build/cannon.js",
       "node_modules/leapjs/leap-0.6.4.js",
       "node_modules/socket.io-client/socket.io.js",
-      "node_modules/three.js/build/three.js"
+      "node_modules/three.js/build/three.js",
+      "node_modules/marked/lib/marked.js"
     ],
     buildFiles = {
-      "obj/Primrose.js": [ "/node_modules/marked/lib/marked.js", "lib/pliny.js", "src/index.js", "src/fx/**/*.js" ]
+      "obj/Primrose.js": [ "lib/pliny.js", "src/index.js", "src/fx/**/*.js" ]
     },
 uglifyFiles = files.map( function ( s ) {
   return{
