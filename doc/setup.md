@@ -25,10 +25,10 @@ all dependencies and generate the necessary distribution package to use Primrose
 From your command line or terminal, start by changing directory to your favorite
 projects folder and then running the commands:
 
-<kbd>git clone https://github.com/capnmidnight/Primrose.git<br>
-cd Primrose<br>
-npm install<br>
-grunt</kbd>
+<tt>git clone https://github.com/capnmidnight/Primrose.git
+cd Primrose
+npm install
+grunt</tt>
 
 From there, you may copy the `Primrose.min.js` file out of the `bin/` directory
 into your private project directory, or run the command <kbd>npm start</kbd> to
@@ -92,7 +92,7 @@ a version number in its name, you can find the version number in the JavaScript
 Developer Console of your favorite browser with the library loaded. It will appear
 as:
 
-<kbd>Using Primrose v0.20.2. Find out more at http://www.primrosevr.com</kbd>
+<tt>Using Primrose v0.20.2. Find out more at http://www.primrosevr.com</tt>
 
 You can then copy that version number into a filename of the Archive directory
 to retrieve any historical version you may need.
@@ -104,8 +104,8 @@ to retrieve any historical version you may need.
 ## Dependencies
 There are also a number of libraries on which Primrose depends.
 
-If you are only using Primrose as a client-side library, then there is only one
-external dependency that Primrose does not include automatically.
+If you are only using Primrose as a client-side library, then there are only two
+external dependencies that Primrose does not include automatically.
 * [Three.js](http://www.threejs.org) - an abstraction layer and scene graph 
   implementation for WebGL. `three.js` is usually located at:
 ** <http://www.threejs.org/build/three.js> - expanded version.
@@ -114,8 +114,8 @@ external dependency that Primrose does not include automatically.
 There are a few optional dependencies:
 * [WebGL-Debug.js](https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js) -
   a wrapper for WebGL contexts that can help debug WebGL-specific issues.
-* [Endocumate](http://www.primrosevr.com/bin/endocumate.min.js) - a microlibrary
-  Markdown files into HTML. Required if Pliny is expected to generate HTML output.
+* [marked](https://github.com/chjj/marked) - a Markdown parser and compiler. Required 
+  if Pliny is expected to generate HTML output.
 * [Pliny](http://www.primrosevr.com/bin/pliny.min.js) - Pliny provides the documentation
   for all of the namespaces, classes, functions, etc., in an online database that
   is accessible during Primrose live-coding sessions.

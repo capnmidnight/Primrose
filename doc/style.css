@@ -19,14 +19,23 @@ code, header a {
 
 code, kbd{
   display: inline-block;
-  font-size: 75%;
-  vertical-align: bottom;
   padding: 0.25em;
 }
 
-kbd{
+kbd, tt{
   color: #EEF6F8;
   background-color: #853B9E;
+}
+
+
+tt{
+  display: block;
+  white-space: pre;
+  padding: 1em;
+}
+
+tt > a{
+  color: inherit;
 }
 
 code{
