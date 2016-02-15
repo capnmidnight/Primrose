@@ -1,4 +1,11 @@
 /* global pliny, Primrose, devicePixelRatio */
+function scroller ( id ) {
+  document.getElementById( id ).scrollIntoView( {
+    block: "top",
+    behavior: "smooth"
+  } );
+}
+
 ( function () {
   "use strict";
 
@@ -99,13 +106,6 @@
     editors.forEach( setFontSize );
   } );
 
-  function toTop () {
-    doc.scrollIntoView( {
-      block: "top",
-      behavior: "smooth"
-    } );
-  }
-
   function fixLinks () {
     var links = doc.querySelectorAll( "a" );
     for ( var i = 0; i < links.length; ++i ) {
@@ -132,7 +132,7 @@
 
   function createShortcuts () {
     var headers = doc.querySelectorAll( "h1, h2, h3, h4, h5, h6" );
-    
+
     // We want 3 or more headers because A) the first header is the page title,
     // and B) we don't want to handle the trivial situation of only one section.
     if ( headers.length > 2 ) {
@@ -140,12 +140,12 @@
           lists = [ ],
           root = document.createElement( "nav" ),
           elem = root;
-      
+
       // Start at 1 to skip the page title.
       for ( var i = 1; i < headers.length; ++i ) {
         var h = headers[i],
             level = parseFloat( h.tagName.match( /\d/ )[0] ) - 1;
-        
+
         if ( level > curLevel ) {
           var list = document.createElement( "ul" );
           elem.appendChild( list );
@@ -161,7 +161,7 @@
             link = document.createElement( "a" );
         elem = document.createElement( "li" );
         link.appendChild( document.createTextNode( h.innerText || h.textContent ) );
-        link.href = "javascript:document.getElementById(\"header" + i + "\").scrollIntoView()";
+        link.href = "javascript:scroller(\"header" + i + "\")";
         h.id = "header" + i;
         elem.appendChild( link );
         curList.appendChild( elem );
@@ -177,11 +177,7 @@
     fixLinks();
     createShortcuts();
     if ( evt ) {
-      toTop();
-    }
-    var top = document.getElementById( "returnToTop" );
-    if ( top ) {
-      top.addEventListener( "click", toTop );
+      scroller("documentation");
     }
   }
 
@@ -215,7 +211,7 @@
             else {
               group.push( obj );
             }
-            docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ).replace( /<under construction>/g, "&lt;under construction>" ) + "<a id=\"returnToTop\" href=\"#\">top</a>";
+            docoCache["#" + obj.id.trim()] = pliny.formats.html.format( obj ).replace( /<under construction>/g, "&lt;under construction>" ) + "<a href=\"javascript:scroller('top')\">top</a>";
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
             // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
