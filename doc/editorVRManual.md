@@ -250,19 +250,19 @@ To be able to listen for user input, you create event listeners attached to the
 script. To setup event listeners, in your script's setup header, call `this.addEventListener("<eventName>", callbackFunction)`.
 
 Currently, the available events are:
-* [`keydown`](#Primrose_VRApplication__keydown) - 
-* [`keyup`](#Primrose_VRApplication__keyup) - 
-* [`keypress`](#Primrose_VRApplication__keypress) - 
-* [`mousedown`](#Primrose_VRApplication__mousedown) - 
-* [`mouseup`](#Primrose_VRApplication__mouseup) - 
-* [`mousemove`](#Primrose_VRApplication__mousemove) - 
-* [`wheel`](#Primrose_VRApplication__wheel) - 
-* [`touchstart`](#Primrose_VRApplication__touchstart) - 
-* [`touchend`](#Primrose_VRApplication__touchend) - 
-* [`touchmove`](#Primrose_VRApplication__touchmove) - 
-* [`gazestart`](#Primrose_VRApplication__gazestart)
-* [`gazecomplete`](#Primrose_VRApplication__gazecomplete)
-* [`gazecancel`](#Primrose_VRApplication__gazecancel)
-* [`pointerstart`](#Primrose_VRApplication__pointerstart)
-* [`pointermove`](#Primrose_VRApplication__pointermove)
-* [`pointerend`](#Primrose_VRApplication__pointerend)
+* [`keydown`](#Primrose_VRApplication__keydown) - a key is depressed on the keyboard.
+* [`keyup`](#Primrose_VRApplication__keyup) - a depressed key is released on the keyboard.
+* [`keypress`](#Primrose_VRApplication__keypress) - a key is depressed and released on the keyboard.
+* [`wheel`](#Primrose_VRApplication__wheel) - the user rolls the mouse wheel.
+* [`mousedown`](#Primrose_VRApplication__mousedown) - a button is depressed on the mouse.
+* [`mouseup`](#Primrose_VRApplication__mouseup) - a depressed button is released on the mouse.
+* [`mousemove`](#Primrose_VRApplication__mousemove) - the mouse is moved.
+* [`touchstart`](#Primrose_VRApplication__touchstart) - a finger touches down on a touch screen.
+* [`touchend`](#Primrose_VRApplication__touchend) - a finger touching the touch screen is removed.
+* [`touchmove`](#Primrose_VRApplication__touchmove) - a finger is slid across the screen.
+* [`pointerstart`](#Primrose_VRApplication__pointerstart) - either a `touchstart` or a `mousedown` occurs.
+* [`pointermove`](#Primrose_VRApplication__pointermove) - either a `touchend` or `mouseup` occurs.
+* [`pointerend`](#Primrose_VRApplication__pointerend) - either a `touchmove` or `mousemove` occurs.
+* [`gazestart`](#Primrose_VRApplication__gazestart) - occurs when the central Selection Sphere hovers over an object, inferring the user started looking at that object.
+* [`gazecomplete`](#Primrose_VRApplication__gazecomplete) - occurs if the Selection Sphere does not leave the object it hit in `gazestart` before the [`gazeLength`](#Primrose_VRApplication_DEFAULTS_gazeLength) expires (default 1s).
+* [`gazecancel`](#Primrose_VRApplication__gazecancel) - occurs if the Selection Sphere leaves the object it hit in `gazestart` before the [`gazeLength`](#Primrose_VRApplication_DEFAULTS_gazeLength) expires (default 1s).
