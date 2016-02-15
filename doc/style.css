@@ -13,6 +13,20 @@ body{
   font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
 }
 
+#documentation nav {
+  border: dashed 3px #853B9E;
+}
+#documentation nav, #documentation nav a {
+  color: #853B9E;
+}
+
+#documentation nav > ul::before {
+  content: "In this document:";
+  font-size: 125%;
+  font-weight: bold;
+  margin-left: -1em;
+}
+
 code, header a {  
   font-family: 'Consolas', 'Apple Menlo', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
 }
