@@ -252,7 +252,7 @@
 
   pliny.load( [
     "setup",
-    "ide3dmanual",
+    "editorVRManual",
     "faq",
     "hmd",
     "pliny",
@@ -263,7 +263,7 @@
     "export",
     "blenderBeginner",
     "blenderAdvanced",
-    "ide3d",
+    "editorVRTutorial",
     "adventure",
     "server"
   ].map( function ( f ) {

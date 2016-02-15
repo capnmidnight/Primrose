@@ -156,12 +156,9 @@ pliny.function( "", {
 } );
 function axis ( length, width ) {
   var center = hub();
-  put( brick( 0xff0000, length, width, width ) )
-      .on( center );
-  put( brick( 0x00ff00, width, width, length ) )
-      .on( center );
-  put( brick( 0x0000ff, width, length, width ) )
-      .on( center );
+  put( brick( 0xff0000, length, width, width ) ).on( center );
+  put( brick( 0x00ff00, width, length, width ) ).on( center );
+  put( brick( 0x0000ff, width, width, length ) ).on( center );
   return center;
 }
 
@@ -278,33 +275,6 @@ function put ( object ) {
       };
     }
   };
-}
-
-pliny.issue( "", {
-  name: "document fill",
-  type: "open",
-  description: "Finish writing the documentation for the [`fill`](#fill) function\n\
-in the helpers/graphics.js file."
-} );
-pliny.function( "", {
-  name: "fill",
-  description: "<under construction>"
-} );
-function fill ( txt, w, h, l ) {
-  if ( h === undefined ) {
-    h = 1;
-    if ( l === undefined ) {
-      l = 1;
-      if ( w === undefined ) {
-        w = 1;
-      }
-    }
-  }
-  var point = hub();
-  put( brick( txt, w, h, l ) )
-      .on( point )
-      .at( w / 2, h / 2, l / 2 );
-  return point;
 }
 
 pliny.issue( "", {

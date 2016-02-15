@@ -133,20 +133,108 @@ activating the Selection Sphere will have no effect.
 
 ## Scripting
 
-<under construction>
+The Code Editor window will have a demo script loaded in it at first. When you edit
+code, Primrose will wait for you to stop typing for a second and then run your script
+automatically. In the background, Primrose is inserting the code you write inside
+of a function. That function provides a clean workspace for you to write your code,
+so that any variables you create won't clobber the values defined outside of your
+script. 
 
-* [`axis()`](#axis)
-* [`box()`](#box)
-* [`brick()`](#brick)
-* [`cloud()`](#cloud)
-* [`cylinder()`](#cylinder)
-* [`fill()`](#fill)
-* [`fmt()`](#fmt)
-* [`hub()`](#hub)
-* [`light()`](#light)
-* [`put()`](#put)
-* [`quad()`](#quad)
-* [`range()`](#range)
-* [`shell()`](#shell)
-* [`textured()`](#textured)
-* [`v3()`](#v3)
+The layout of your script is very simple. At the top level, you can create any variables
+you want. Use this section as your one-time setup for your script. Create whatever
+Three.js objects you want, and add them to your scene. 
+
+At the end, you return a function that Primrose can use to update and animate your
+scene. That function will receive a single parameter `dt`, which is the amount of
+time in milliseconds that has elapsed since the last time the update function ran.
+
+In other words:
+
+    // perform setup here
+    var myBlock = put( brick( ROCK ) )
+      .on( scene )
+      .at( 0, 0, 0 );
+      
+    // Then, return an update function so Primrose knows what to do for you
+    // every frame
+    var t = 0;
+    return function(dt){
+      t += dt;
+      myBlock.position.x = Math.cos( t );
+      myBlock.position.z = Math.sin( t );
+    }
+
+The code that is currently running in the example demo is:
+
+    var WIDTH = 5,
+        HEIGHT = 5,
+        DEPTH = 5
+        MIDX = WIDTH / 2,
+        MIDY = HEIGHT / 2, MIDZ = DEPTH / 2,
+        t = 0,
+        start = put( hub() )
+        .on( scene )
+        .at( -MIDX, 0, -DEPTH - 2 );
+        
+    put( light( 0xffffff, 1, 500 ) )
+        .on( start )
+        .at( MIDX + 5, 8, MIDZ + 20 );
+        
+    var balls = [ ];
+     
+    for ( var i = 0; i < 10; ++i ) {
+      balls.push( put( brick( WATER ) )
+          .on( start )
+          .at( Primrose.Random.int( WIDTH ),
+              Primrose.Random.int( HEIGHT ),
+              Primrose.Random.int( DEPTH ) ) );
+              
+      balls[i].velocity = v3(
+          Primrose.Random.number( 0, WIDTH ),
+          Primrose.Random.number( 0, HEIGHT ),
+          Primrose.Random.number( 0, DEPTH ) );
+    }
+     
+    function update ( dt ) {
+      t += dt;
+      for ( var i = 0; i < balls.length; ++i ) {
+        var ball = balls[i];
+        ball.position.add( ball.velocity.clone().multiplyScalar( dt ) );
+        if ( ball.position.x < 0 && ball.velocity.x < 0
+            || WIDTH <= ball.position.x && ball.velocity.x > 0 ) {
+          ball.velocity.x *= -1;
+        }
+        if ( ball.position.y < 1 && ball.velocity.y < 0
+            || HEIGHT <= ball.position.y && ball.velocity.y > 0 ) {
+          ball.velocity.y *= -1;
+        }
+        if ( ball.position.z < 0 && ball.velocity.z < 0
+            || DEPTH <= ball.position.z && ball.velocity.z > 0 ) {
+          ball.velocity.z *= -1;
+        }
+      }
+    }
+
+There are a few helper functions that are available while interactively building
+scripts. They are shortly-named functions for common operations to make them easy
+to type in the editor. The functions are grouped into a few separate purposes:
+
+* 3D Scene Objects. These objects can be added to a scene right away.
+  * [`axis(length, width)`](#axis) - create a set of axis bars, red for X, green for Y, blue for Z. Length is how long each bar should be in its own axis. Width is how large each bar should be in the other axes.
+  * [`brick(txt, w, h, l)`](#brick) - create a textured block of a certain size.
+  * [`cloud(verts, color, size)`](#cloud) - create a point-cloud
+  * [`hub()`](#hub) - create a node in the scene graph in which you can group other objects.
+  * [`light(color, [intensity, [distance, [decay]]])`](#light) - create a light
+* Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
+  * [`box(width, height, length)`](#box) - short-cut function for creating a THREE.BoxGeometry object.
+  * [`cylinder(radiusTop, radiusBottom, height, rS, hS, openEnded, thetaStart, thetaEnd)`](#cylinder) - short-cut function for creating a THREE.CylinderGeometry object.
+  * [`quad(width, height, s, t)`](#quad) - create a single rectangle.
+  * [`shell(r, slices, rings, phi, theta)`](#shell) - create a section of an inside-out sphere.
+  * [`sphere(r, slices, rings)`](#sphere) - short-cut function for creating a THREE.BufferedSphereGeometry object.
+* Other utility functions.
+  * [`fmt(template, arg1, arg2, ...)`](#fmt) - string formatting.
+  * [`log(str)`](#log) - write out debugging output to the console.
+  * [`put(obj).on(obj).at(x, y, z)`](#put) - combine objects and space them apart.
+  * [`range(min, max, step, thunk)`](#range) - call a function a certain number of times.
+  * [`textured(geometry, txt, unshaded, opacity, s, t)`](#textured) - apply a texture to a geometry.
+  * [`v3(x, y, z)`](#v3) - short-cut function for creating a THREE.Vector3 object.

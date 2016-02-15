@@ -9,11 +9,11 @@ Primrose.DOM = ( function () {
   pliny.function( "Primrose.DOM", {
     name: "cascadeElement",
     description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
-** If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
-** If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
+  * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
+  * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
 * If `id` is a DOM element, validates that it is of the expected type,\n\
-** returning the DOM element back if it's good,\n\
-** or throwing an error if it is not\n\
+  * returning the DOM element back if it's good,\n\
+  * or throwing an error if it is not\n\
 * If `id` is null, creates the DOM element to match the expected type.",
     parameters: [
       {name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"},
