@@ -4,11 +4,11 @@ Primrose is not just a web development framework. It also provides a virtual rea
 live-programming environment for rapid prototyping and exploratory programming.
 You can try out the [VR Editor](/examples/editor3d/index.html) now.
 
-**Keep in mind:** there are two separate interaction modes in the VR Editor. You
-switch between these modes by clicking on different objects in the environment:
-* Navigation Mode - mouse clicks and keyboard events move your body around the environment.
-* Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, 
-  but do not cause changes in your body's location.
+> NOTE: there are two separate interaction modes in the VR Editor. You
+> switch between these modes by clicking on different objects in the environment:
+> * Navigation Mode - mouse clicks and keyboard events move your body around the environment.
+> * Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, 
+>   but do not cause changes in your body's location.
 
 ## Dev Zone Layout
 
@@ -140,6 +140,8 @@ of a function. That function provides a clean workspace for you to write your co
 so that any variables you create won't clobber the values defined outside of your
 script. 
 
+### Setup and Animation
+
 The layout of your script is very simple. At the top level, you can create any variables
 you want. Use this section as your one-time setup for your script. Create whatever
 Three.js objects you want, and add them to your scene. 
@@ -215,6 +217,8 @@ The code that is currently running in the example demo is:
       }
     }
 
+### Scripting Functions
+
 There are a few helper functions that are available while interactively building
 scripts. They are shortly-named functions for common operations to make them easy
 to type in the editor. The functions are grouped into a few separate purposes:
@@ -238,3 +242,27 @@ to type in the editor. The functions are grouped into a few separate purposes:
   * [`range(min, max, step, thunk)`](#range) - call a function a certain number of times.
   * [`textured(geometry, txt, unshaded, opacity, s, t)`](#textured) - apply a texture to a geometry.
   * [`v3(x, y, z)`](#v3) - short-cut function for creating a THREE.Vector3 object.
+
+### User Input
+
+To be able to listen for user input, you create event listeners attached to the
+[`VRApplication`](#Primrose_VRApplication) object named `this` in the context of your
+script. To setup event listeners, in your script's setup header, call `this.addEventListener("<eventName>", callbackFunction)`.
+
+Currently, the available events are:
+* [`keydown`](#Primrose_VRApplication__keydown) - 
+* [`keyup`](#Primrose_VRApplication__keyup) - 
+* [`keypress`](#Primrose_VRApplication__keypress) - 
+* [`mousedown`](#Primrose_VRApplication__mousedown) - 
+* [`mouseup`](#Primrose_VRApplication__mouseup) - 
+* [`mousemove`](#Primrose_VRApplication__mousemove) - 
+* [`wheel`](#Primrose_VRApplication__wheel) - 
+* [`touchstart`](#Primrose_VRApplication__touchstart) - 
+* [`touchend`](#Primrose_VRApplication__touchend) - 
+* [`touchmove`](#Primrose_VRApplication__touchmove) - 
+* [`gazestart`](#Primrose_VRApplication__gazestart)
+* [`gazecomplete`](#Primrose_VRApplication__gazecomplete)
+* [`gazecancel`](#Primrose_VRApplication__gazecancel)
+* [`pointerstart`](#Primrose_VRApplication__pointerstart)
+* [`pointermove`](#Primrose_VRApplication__pointermove)
+* [`pointerend`](#Primrose_VRApplication__pointerend)
