@@ -144,27 +144,31 @@ function scroller ( id ) {
       // Start at 1 to skip the page title.
       for ( var i = 1; i < headers.length; ++i ) {
         var h = headers[i],
-            level = parseFloat( h.tagName.match( /\d/ )[0] ) - 1;
+            level = parseFloat( h.tagName.match( /\d/ )[0] ) - 1,
+            txt = h.innerText || h.textContent;
 
         if ( level > curLevel ) {
           var list = document.createElement( "ul" );
           elem.appendChild( list );
           lists.push( list );
           ++curLevel;
+          list.isIssue = elem.innerHTML.indexOf( "Issues" ) >= 0;
         }
         else if ( level < curLevel ) {
           lists.pop();
           --curLevel;
         }
 
-        var curList = lists[lists.length - 1],
-            link = document.createElement( "a" );
-        elem = document.createElement( "li" );
-        link.appendChild( document.createTextNode( h.innerText || h.textContent ) );
-        link.href = "javascript:scroller(\"header" + i + "\")";
-        h.id = "header" + i;
-        elem.appendChild( link );
-        curList.appendChild( elem );
+        var curList = lists[lists.length - 1];
+        if ( !curList.isIssue ) {
+          var link = document.createElement( "a" ),
+              elem = document.createElement( "li" );
+          link.appendChild( document.createTextNode( txt ) );
+          link.href = "javascript:scroller(\"header" + i + "\")";
+          h.id = "header" + i;
+          elem.appendChild( link );
+          curList.appendChild( elem );
+        }
       }
 
       headers[1].parentElement.insertBefore( root, headers[1] );
@@ -177,7 +181,7 @@ function scroller ( id ) {
     fixLinks();
     createShortcuts();
     if ( evt ) {
-      scroller("documentation");
+      scroller( "documentation" );
     }
   }
 
