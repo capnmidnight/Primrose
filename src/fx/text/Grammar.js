@@ -113,10 +113,11 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         }
       }
 
+      // recombine like-tokens
       for ( i = tokens.length - 1; i > 0; --i ) {
         var p = tokens[i - 1];
         t = tokens[i];
-        if ( p.type === t.type ) {
+        if ( p.type === t.type && p.type !== "newlines" ) {
           p.value += t.value;
           tokens.splice( i, 1 );
         }

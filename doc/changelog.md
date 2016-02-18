@@ -6,6 +6,7 @@ It's going to be nothing but documentation for a while.
 
 * Bugs
   * Prevent `alert()`, `confirm()`, and `prompt()` while in full screen mode.
+  * Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.
 * Features
   * This CHANGELOG page.
 
