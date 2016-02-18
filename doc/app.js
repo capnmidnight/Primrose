@@ -78,7 +78,8 @@ function scroller ( id ) {
       editors.push( new Primrose.Text.Controls.TextBox( "editor" + editors.length, {
         autoBindEvents: true,
         keyEventSource: window,
-        readOnly: true
+        readOnly: true,
+        tokenizer: Primrose.Text.Grammars.PlainText
       } ) );
       editors[editors.length - 1].addEventListener( "focus", editorFocused );
     }
