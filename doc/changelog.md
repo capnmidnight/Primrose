@@ -5,7 +5,7 @@
 It's going to be nothing but documentation for a while.
 
 * Bugs
-  * n/a
+  * Prevent `alert()`, `confirm()`, and `prompt()` while in full screen mode.
 * Features
   * This CHANGELOG page.
 

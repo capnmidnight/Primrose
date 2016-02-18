@@ -841,6 +841,31 @@ Primrose.VRApplication = ( function ( ) {
     window.addEventListener( "focus", this.start, false );
     this.renderer.domElement.addEventListener( 'webglcontextlost', this.stop, false );
     this.renderer.domElement.addEventListener( 'webglcontextrestored', this.start, false );
+
+    if ( window.alert.toString().indexOf( "native code" ) > -1 ) {
+      // overwrite the native alert functions so they can't be called while in
+      // fullscreen VR mode.
+
+      var rerouteDialog = function ( oldFunction, newFunction ) {
+        if ( !newFunction ) {
+          newFunction = function () {
+          };
+        }
+        return function () {
+          if ( isFullScreenMode() ) {
+            newFunction();
+          }
+          else {
+            oldFunction.apply( window, arguments );
+          }
+        }.bind( this );
+      }.bind( this );
+
+      window.alert = rerouteDialog( window.alert );
+      window.confirm = rerouteDialog( window.confirm );
+      window.prompt = rerouteDialog( window.prompt );
+    }
+    
     this.start();
   }
 
