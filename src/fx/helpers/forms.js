@@ -21,6 +21,8 @@ called the [`setSetting()`](#setSetting) function during a previous page session
     {name: "Basic usage",
       description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var text1 = document.getElementById(\"text1\");\n\
     document.addEventListener(\"unload\", function(){\n\
       setSetting(\"text1-value\", text1.value);\n\
@@ -62,6 +64,8 @@ time, then call the [`getSetting()`](#getSetting) function during a subsequent p
     {name: "Basic usage",
       description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var text1 = document.getElementById(\"text1\");\n\
     document.addEventListener(\"unload\", function(){\n\
       setSetting(\"text1-value\", text1.value);\n\
@@ -95,6 +99,8 @@ pliny.function( "", {
   examples: [ {
       name: "Basic usage",
       description: "\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
     setSetting(\"A\", \"modified-A\");\n\
     console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
@@ -123,12 +129,16 @@ pliny.function( "", {
   examples: [ {
       name: "Basic usage",
       description: "Assuming the following HTML form:\n\
+\n\
+    pliny.grammar(\"HTML\");\n\
     <form>\n\
       <input type=\"text\" id=\"txt\" value=\"hello\">\n\
       <input type=\"number\" id=\"num\" value=\"5\">\n\
     </form>\n\
 \n\
 ##Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var ctrls = findEverything();\n\
     ctrls.txt.value = \"world\";\n\
     ctrls.num.value = \"6\"6;\n\
@@ -177,12 +187,16 @@ pliny.function( "", {
   examples: [ {
       name: "Basic usage",
       description: "Assuming the following HTML form:\n\
+\n\
+    pliny.grammar(\"HTML\");\n\
     <form>\n\
       <input type=\"text\" id=\"txt\" value=\"hello\">\n\
       <input type=\"number\" id=\"num\" value=\"5\">\n\
     </form>\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var ctrls = findEverything();\n\
     ctrls.txt.value = \"world\";\n\
     ctrls.num.value = \"6\"6;\n\

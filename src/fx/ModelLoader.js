@@ -88,6 +88,8 @@ Primrose.ModelLoader = ( function () {
       {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var scene = new THREE.Scene(),\n\
      \n\
@@ -130,6 +132,8 @@ Primrose.ModelLoader = ( function () {
       {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var scene = new THREE.Scene(),\n\
     \n\
@@ -185,6 +189,8 @@ Primrose.ModelLoader = ( function () {
       {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var renderer = new THREE.WebGLRenderer(),\n\
         currentScene = new THREE.Scene(),\n\
@@ -231,6 +237,8 @@ Primrose.ModelLoader = ( function () {
       {name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var renderer = new THREE.WebGLRenderer(),\n\
         currentScene = new THREE.Scene(),\n\

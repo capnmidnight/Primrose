@@ -18,6 +18,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       {name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var plainTextGrammar = new Primrose.Text.Grammar(\n\
       // The name is for displaying in options views.\n\
       \"Plain-text\", [\n\
@@ -27,6 +29,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       {name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
       // Grammar rules are applied in the order they are specified.\n\
       [\n\
@@ -133,6 +137,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         {name: 'Tokenize some JavaScript', description: 'Primrose comes with a grammar for JavaScript built in.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var tokens = new Primrose.Text.Grammars.JavaScript\n\
       .tokenize("var x = 3;\\n\\\n\
     var y = 2;\\n\\\n\
@@ -140,6 +146,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     console.log(JSON.stringify(tokens));\n\
 \n\
 ## Result:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     [ \n\
       { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
       { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\

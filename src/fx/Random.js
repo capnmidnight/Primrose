@@ -16,21 +16,23 @@ Primrose.Random = ( function () {
       {name: "Generate a random number on the range [-1, 1).", description: "To generate a random number on a closed range, call the `Primrose.Random.number` function as shown:\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.number(-1, 1));\n\
     }\n\
 \n\
 ## Result (note that this is just one possible outcome):\n\
-    -0.4869012129493058\n\
-    0.5300767715089023\n\
-    0.11962601682171226\n\
-    -0.22012147679924965\n\
-    0.48508461797609925\n\
-    -0.8488651723600924\n\
-    0.15711558377370238\n\
-    -0.3644236018881202\n\
-    0.4486056035384536\n\
-    -0.9659552359953523"}
+> -0.4869012129493058  \n\
+> 0.5300767715089023  \n\
+> 0.11962601682171226  \n\
+> -0.22012147679924965  \n\
+> 0.48508461797609925  \n\
+> -0.8488651723600924  \n\
+> 0.15711558377370238  \n\
+> -0.3644236018881202  \n\
+> 0.4486056035384536  \n\
+> -0.9659552359953523"}
     ]
   } );
   Random.number = function ( min, max ) {
@@ -50,39 +52,43 @@ Primrose.Random = ( function () {
       {name: "Generate a random integer numbers on the range [-10, 10).", description: "To generate a random integer on a closed range, call the `Primrose.Random.integer` function as shown:\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.int(-10, 10));\n\
     }\n\
 \n\
 ## Result (note that this is just one possible outcome):\n\
-    -3\n\
-    1\n\
-    -2\n\
-    8\n\
-    7\n\
-    4\n\
-    5\n\
-    -9\n\
-    4\n\
-    0"},
+> -3  \n\
+> 1  \n\
+> -2  \n\
+> 8  \n\
+> 7  \n\
+> 4  \n\
+> 5  \n\
+> -9  \n\
+> 4  \n\
+> 0"},
       {name: "Generate skewed random integer numbers on the range [-100, 100).", description: "To generate a random integer skewed to one end of the range on a closed range, call the `Primrose.Random.integer` function with the `power` parameter as shown:\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.int(-100, 100, 5));\n\
     }\n\
 \n\
 ## Result (note that this is just one possible outcome):\n\
-    -100\n\
-    -100\n\
-    -78\n\
-    -81\n\
-    -99\n\
-    18\n\
-    -100\n\
-    -100\n\
-    -100\n\
-    52"}
+> -100  \n\
+> -100  \n\
+> -78  \n\
+> -81  \n\
+> -99  \n\
+> 18  \n\
+> -100  \n\
+> -100  \n\
+> -100  \n\
+> 52"}
     ]
   } );
   Random.int = function ( min, max, power ) {
@@ -107,6 +113,8 @@ Primrose.Random = ( function () {
       {name: "Select a random element from an array.", description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var numbers = [\n\
       \"one\",\n\
       \"two\",\n\
@@ -119,16 +127,16 @@ Primrose.Random = ( function () {
     }\n\
 \n\
 ## Result (note that this is just one possible outcome):\n\
-    three\n\
-    four\n\
-    four\n\
-    two\n\
-    three\n\
-    two\n\
-    five\n\
-    four\n\
-    three\n\
-    two"}
+> three  \n\
+> four  \n\
+> four  \n\
+> two  \n\
+> three  \n\
+> two  \n\
+> five  \n\
+> four  \n\
+> three  \n\
+> two"}
     ]
   } );
   Random.item = function ( arr ) {
@@ -148,21 +156,23 @@ Primrose.Random = ( function () {
       {name: "Generate random, even numbers.", description: "To generate numbers on a closed range with a constant step size between them, call the `Primrose.Random.step` function as shown:\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.steps(0, 100, 2));\n\
     }\n\
 \n\
 ## Result (note that this is just one possible outcome):\n\
-    86\n\
-    32\n\
-    86\n\
-    56\n\
-    4\n\
-    96\n\
-    68\n\
-    92\n\
-    4\n\
-    36"}
+> 86  \n\
+> 32  \n\
+> 86  \n\
+> 56  \n\
+> 4  \n\
+> 96  \n\
+> 68  \n\
+> 92  \n\
+> 4  \n\
+> 36"}
     ]
   } );
   Random.steps = function ( min, max, steps ) {

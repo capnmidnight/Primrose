@@ -18,7 +18,9 @@ Automatically workerized classes should have methods that take a single array fo
 * The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
 * The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often ommitted when programming against DOM.\n\
 \n\
-## Assuming the following class:\n\
+Assuming the following class:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     function MyClass(){\n\
       this.listeners = {\n\
         complete: []\n\
@@ -58,7 +60,9 @@ Automatically workerized classes should have methods that take a single array fo
       }\n\
     };\n\
 \n\
-## Then we can create and use an automatically workerized version of it as follows.\n\
+Then we can create and use an automatically workerized version of it as follows.\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var phys = new Primrose.Workerize(MyClass);\n\
     // we keep a local copy of the state so we can perform other operations on it.\n\
     var objects = [];\n\

@@ -49,6 +49,8 @@ performs basic conversions from DOM elements to the internal Control format."
         name: "Add an event listener.",
         description: "The `addEventListener()` method operates nearly identically\n\
 to the method of the same name on DOM elements.\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var txt = new Primrose.Text.Controls.TextBox();\n\
     txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
     txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
@@ -67,6 +69,8 @@ to the method of the same name on DOM elements.\n\
         name: "Focus on one control, blur all the rest",
         description: "When we have a list of controls and we are trying to track\n\
 focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var ctrls = [\n\
       new Primrose.Text.Controls.TextBox(),\n\
       new Primrose.Text.Controls.TextBox(),\n\
@@ -98,6 +102,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
         name: "Focus on one control, blur all the rest",
         description: "When we have a list of controls and we are trying to track\n\
 focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var ctrls = [\n\
       new Primrose.Text.Controls.TextBox(),\n\
       new Primrose.Text.Controls.TextBox(),\n\
@@ -150,6 +156,8 @@ class that implements its functionality.\n\
 \n\
 The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
 to a 3D element on-the-fly.\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
       my3DButton = new Primrose.Button();\n\
     my3DButton.copyElement(myDOMButton);"

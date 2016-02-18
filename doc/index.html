@@ -133,7 +133,8 @@
         </ul>
 
         <p>In the <code>index.html</code> file, enter the following markup.</p>
-        <pre data-grammar="HTML"><code>﻿&lt;!DOCTYPE html>
+        <pre data-grammar="HTML"><code>﻿pliny.grammar("HTML");
+    &lt;!DOCTYPE html>
 &lt;html>
   &lt;head>
     &lt;meta charset="utf-8">
@@ -150,7 +151,8 @@
 &lt;/html></code></pre>
 
         <p>In the <code>style.css</code> file, enter the following style definitions.</p>
-        <pre data-grammar="CSS"><code>html, body, #frontBuffer {
+        <pre data-grammar="CSS"><code>pliny.grammar("CSS");
+    html, body, #frontBuffer {
   padding: 0;
   margin: 0;
   border: 0;
@@ -169,7 +171,8 @@ html, body {
 }</code></pre>
 
         <p>In the <code>app.js</code> file, enter the following code.</p>
-        <pre data-grammar="JavaScript"><code>/* global Primrose, put */
+        <pre data-grammar="JavaScript"><code>pliny.grammar("JavaScript");
+/* global Primrose, put */
 var app = new Primrose.VRApplication( "My Primrose VR Application", {
       skyTexture: "bg.jpg",
       groundTexture: "deck.png"

@@ -58,6 +58,7 @@ The latest version of Primrose will always reside at:
 
 Link to the file by including a `<script>` tag in your page HTML:
 
+    pliny.grammar("HTML");
     <!DOCTYPE html>
     <html>
       <head>

@@ -35,34 +35,40 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
         description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(356);\n\
     a.degrees += 5;\n\
     console.log(a.degrees);\n\
 \n\
 ## Results:\n\
-    361"
+> 361"
       }, {
         name: "Convert degrees to radians",
         description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(10);\n\
     a.degrees += 355;\n\
     console.log(a.radians);\n\
 \n\
 ## Results:\n\
-    0.08726646259971647"
+> 0.08726646259971647"
       }, {
         name: "Convert radians to degress",
         description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
 \n\
 ## Code:\n\
+\n\
+    pliny.grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(0);\n\
     a.radians += Math.PI / 2;\n\
     console.log(a.degrees);\n\
 \n\
 ## Results:\n\
-    90"
+> 90"
       } ]
   } );
 

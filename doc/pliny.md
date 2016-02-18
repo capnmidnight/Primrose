@@ -10,6 +10,7 @@ cohesive package.
 > supported.
 
 ## Example:
+    pliny.grammar("JavaScript");
     pliny.function( "Primrose.Random", {
       name: "number",
       description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",

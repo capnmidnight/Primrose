@@ -72,6 +72,7 @@ function scroller ( id ) {
     }
   }
 
+  var GRAMMAR_TEST = /^pliny.grammar\("(\w+)"\);\n/;
   function replacePreBlocks () {
     var codeBlocks = doc.querySelectorAll( "pre" );
     while ( editors.length < codeBlocks.length ) {
@@ -86,11 +87,20 @@ function scroller ( id ) {
     for ( var i = 0; i < codeBlocks.length; ++i ) {
       var ed = editors[i],
           b = codeBlocks[i],
-          fs = parseFloat( document.defaultView.getComputedStyle( b, null ).getPropertyValue( "font-size" ) );
+          fs = parseFloat( document.defaultView.getComputedStyle( b, null ).getPropertyValue( "font-size" ) ),
+          txt = b.textContent || b.innerText,
+          grammarSpec = txt.match( GRAMMAR_TEST ),
+          tokenizer = Primrose.Text.Grammars.PlainText;
+      if ( grammarSpec ) {
+        var grammarName = grammarSpec[1];
+        tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
+        txt = txt.replace( GRAMMAR_TEST, "" );
+      }
+      ed.tokenizer = tokenizer;
       ed.setSize( b.clientWidth, Math.min( b.clientHeight * ( 1.25 + devicePixelRatio * 0.05 ), 400 ) );
       ed.targetSize = fs;
       setFontSize( ed );
-      ed.value = b.textContent || b.innerText;
+      ed.value = txt;
       ed.DOMElement.style.display = "block";
       ed.DOMElement.style.maxWidth = "100%";
       b.parentElement.replaceChild( ed.DOMElement, b );
