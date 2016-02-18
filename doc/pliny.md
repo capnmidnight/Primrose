@@ -5,10 +5,6 @@ loading the production Primrose library itself and querying its documentation
 database live. New code features and documentation for them are delivered in one
 cohesive package.
 
-> NOTE: documentation descriptions support a semi-limited subset of Markdown. Specifically,
-> none of the shortcuts for the link/image syntax are supported. Inline-HTML *is*
-> supported.
-
 ## Example:
     pliny.grammar("JavaScript");
     pliny.function( "Primrose.Random", {
