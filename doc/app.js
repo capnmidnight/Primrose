@@ -299,6 +299,8 @@ function scroller ( id ) {
     "hmd",
     "pliny",
     "changelog",
+    "../LICENSE",
+    "../CONTRIBUTORS",
     "lighting",
     "drum",
     "video",
