@@ -65,11 +65,11 @@ Link to the file by including a `<script>` tag in your page HTML:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>My Primrose VR Application</title>
         <script type="text/javascript" src="http://www.threejs.org/build/three.min.js"></script>
-         
+
         <!-- START: INCLUDE PRIMROSE LIBRARY -->
         <script type="text/javascript" src="http://www.primrosevr.com/bin/Primrose.min.js"></script>
         <!-- END: INCLUDE PRIMROSE LIBRARY -->
-         
+
         <link type="text/css" rel="stylesheet" href="style.css">
       </head>
       <body>

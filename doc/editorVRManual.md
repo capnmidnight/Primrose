@@ -156,7 +156,7 @@ In other words:
     var myBlock = put( brick( ROCK ) )
       .on( scene )
       .at( 0, 0, 0 );
-      
+
     // Then, return an update function so Primrose knows what to do for you
     // every frame
     var t = 0;
@@ -177,26 +177,26 @@ The code that is currently running in the example demo is:
         start = put( hub() )
         .on( scene )
         .at( -MIDX, 0, -DEPTH - 2 );
-        
+
     put( light( 0xffffff, 1, 500 ) )
         .on( start )
         .at( MIDX + 5, 8, MIDZ + 20 );
-        
+
     var balls = [ ];
-     
+
     for ( var i = 0; i < 10; ++i ) {
       balls.push( put( brick( WATER ) )
           .on( start )
           .at( Primrose.Random.int( WIDTH ),
               Primrose.Random.int( HEIGHT ),
               Primrose.Random.int( DEPTH ) ) );
-              
+
       balls[i].velocity = v3(
           Primrose.Random.number( 0, WIDTH ),
           Primrose.Random.number( 0, HEIGHT ),
           Primrose.Random.number( 0, DEPTH ) );
     }
-     
+
     function update ( dt ) {
       t += dt;
       for ( var i = 0; i < balls.length; ++i ) {

@@ -39,9 +39,9 @@ e.g. `Primrose.HTTP.XHR.help()`.
 
     [function] Primrose.HTTP.XHR([String] method, [String] type, [String] url, [Object] data, [Function] success, [Function] error, [Function] progress)
       parent: Primrose.HTTP
-    
+
       Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.
-    
+
       parameters:
         0: [String] method - The HTTP Verb being used for the request.
         1: [String] type - How the response should be interpreted. Defaults to "text". "json", "arraybuffer", and other values are also available. See the ref#[1].
@@ -50,9 +50,9 @@ e.g. `Primrose.HTTP.XHR.help()`.
         4: [Function] success - (Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event.
         5: [Function] error - (Optional) the callback to issue whenever an error occurs.
         6: [Function] progress - (Optional) A callback function to be called as the download from the server progresses.
-    
+
       references:
         0: MDN - XMLHttpRequest - responseType - https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype
-    
+
       examples:
         0: Make a GET request. - Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your need...
