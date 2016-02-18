@@ -309,7 +309,7 @@ function scroller ( id ) {
     "faq",
     "hmd",
     "pliny",
-    "changelog",
+    "../CHANGELOG",
     "../LICENSE",
     "../CONTRIBUTORS",
     "lighting",
