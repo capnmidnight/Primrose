@@ -28,11 +28,11 @@ both in your scripts and in your browser's developer console.
 If you ever have a question about how a function works, you can pop open
 the console and type in a query to the documentation database with the
 object's full-qualified name. For example, to read back the documentation
-specified above, we would type `pliny("Primrose.HTTP.XHR")`.
+specified above, we would type <kbd>pliny("Primrose.HTTP.XHR")</kbd>.
 
 Alternatively, many types of objects (namespaces, functions, classes, enumerations),
 have a convenience function added to them to display their own help file,
-e.g. `Primrose.HTTP.XHR.help()`.
+e.g. <kbd>Primrose.HTTP.XHR.help()</kbd>.
 
     [function] Primrose.HTTP.XHR([String] method, [String] type, [String] url, [Object] data, [Function] success, [Function] error, [Function] progress)
       parent: Primrose.HTTP
