@@ -24,7 +24,7 @@ pliny.function( "", {
   examples: [ {
       name: "A few examples.",
       description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     // Round a number to an integer.\n\
     console.assert(sigfig(12.345, 0) === \"12\");\n\
      \n\
@@ -83,7 +83,7 @@ Numerical precision, with zero-padding, is indicated with a period and trailing 
   examples: [
     {name: "Basic examples",
       description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(fmt(\"a: $1, b: $2\", 123, \"Sean\") === \"a: 123, b: Sean\");\n\
     console.assert(fmt(\"$001, $002, $003\", 1, 23, 456) === \"001, 023, 456\");\n\
     console.assert(fmt(\"$1.000\", Math.PI) === \"3.142\");\n\
@@ -185,7 +185,7 @@ pliny.function( "", {
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS pixel-unit value."} ],
   returns: "The number as a string, plus the text \"px\", with no intermediate whitespace.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(px(100.5) === \"100.5px\");"} ]
 } );
 var px = fmt.bind( this, "$1px" );
@@ -201,7 +201,7 @@ pliny.function( "", {
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS percentage-unit value."} ],
   returns: "The number as a string, plus the text \"%\", with no intermediate whitespace.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(pct(100.5) === \"100.5%\");"} ]
 } );
 var pct = fmt.bind( this, "$1%" );
@@ -217,7 +217,7 @@ pliny.function( "", {
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS em-unit value."} ],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(ems(100.5) === \"100.5em\");"} ]
 } );
 var ems = fmt.bind( this, "$1em" );
@@ -228,7 +228,7 @@ pliny.function( "", {
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS rem-unit value."} ],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(rems(100.5) === \"100.5rem\");"} ]
 } );
 var rems = fmt.bind( this, "$1rem" );
@@ -239,7 +239,7 @@ pliny.function( "", {
   parameters: [ {name: "value", type: "Number", description: "The number to make into a CSS view-width-unit value."} ],
   returns: "The number as a string, plus the text \"vw\", with no intermediate whitespace.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(vws(100.5) === \"100.5vw\");"} ]
 } );
 var vws = fmt.bind( this, "$1vw" );
@@ -258,7 +258,7 @@ pliny.function( "", {
     {name: "blue", type: "Number", description: "The blue component, on the range [0, 255]."} ],
   returns: "The color-value string, e.g. `rgb(120, 230, 64)`.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");"} ]
 } );
 var rgb = fmt.bind( this, "rgb($1, $2, $3)" );
@@ -278,7 +278,7 @@ pliny.function( "", {
     {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
   returns: "The color-value string, e.g. `rgba(120, 230, 64, 0.75)`.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");"} ]
 } );
 var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
@@ -297,7 +297,7 @@ pliny.function( "", {
     {name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]."} ],
   returns: "The color-value string, e.g. `hsl(120, 100, 50)`.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");"} ]
 } );
 var hsl = fmt.bind( this, "hsl($1, $2%, $3%)" );
@@ -317,7 +317,7 @@ pliny.function( "", {
     {name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]."} ],
   returns: "The color-value string, e.g. `hsla(120, 100, 50, 0.25)`.",
   examples: [ {name: "Basic usage", description: "\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");"} ]
 } );
 var hsla = fmt.bind( this, "hsla($1, $2%, $3%, $4)" );

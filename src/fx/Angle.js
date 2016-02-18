@@ -36,7 +36,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(356);\n\
     a.degrees += 5;\n\
     console.log(a.degrees);\n\
@@ -49,7 +49,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(10);\n\
     a.degrees += 355;\n\
     console.log(a.radians);\n\
@@ -62,7 +62,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var a = new Primrose.Angle(0);\n\
     a.radians += Math.PI / 2;\n\
     console.log(a.degrees);\n\

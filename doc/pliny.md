@@ -6,7 +6,7 @@ database live. New code features and documentation for them are delivered in one
 cohesive package.
 
 ## Example:
-    pliny.grammar("JavaScript");
+    grammar("JavaScript");
     pliny.function( "Primrose.Random", {
       name: "number",
       description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",

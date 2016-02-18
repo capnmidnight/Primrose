@@ -152,7 +152,7 @@ time in milliseconds that has elapsed since the last time the update function ra
 
 In other words:
 
-    pliny.grammar("JavaScript");
+    grammar("JavaScript");
     // perform setup here
     var myBlock = put( brick( ROCK ) )
       .on( scene )
@@ -169,7 +169,7 @@ In other words:
 
 The code that is currently running in the example demo is:
 
-    pliny.grammar("JavaScript");
+    grammar("JavaScript");
     var WIDTH = 5,
         HEIGHT = 5,
         DEPTH = 5

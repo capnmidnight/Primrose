@@ -23,7 +23,7 @@ Primrose.DOM = ( function () {
     returns: "DOM element",
     examples: [ { name: "Get an element by ID that already exists.", description: "Assuming the following HTML snippet:\n\
 \n\
-    pliny.grammar(\"HTML\");\n\
+    grammar(\"HTML\");\n\
     <div>\n\
       <div id=\"First\">first element</div>\n\
       <section id=\"second-elem\">\n\
@@ -34,12 +34,12 @@ Primrose.DOM = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
     console.assert(elem.textContent === \"Second element\");"},
     { name: "Validate the tag type.", description: "Assuming the following HTML snippet:\n\
 \n\
-    pliny.grammar(\"HTML\");\n\
+    grammar(\"HTML\");\n\
     <div>\n\
       <div id=\"First\">first element</div>\n\
       <section id=\"second-elem\">\n\
@@ -50,12 +50,12 @@ Primrose.DOM = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     //The following line of code should cause a runtime error.\n\
     Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"},
     { name: "Create an element.", description: "Assuming the following HTML snippet:\n\
 \n\
-    pliny.grammar(\"HTML\");\n\
+    grammar(\"HTML\");\n\
     <div>\n\
       <div id=\"First\">first element</div>\n\
       <section id=\"second-elem\">\n\
@@ -66,7 +66,7 @@ Primrose.DOM = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
     console.assert(elem.id === \"img2\");\n\
     console.assert(elem.parentElement === null);\n\
@@ -118,7 +118,7 @@ Basically, a quick way to get at all the named elements in a page.\n\
     returns: "An object full of element references, with fields named by the ID of the elements that were found.",
     examples: [ {name: "Get all child elements.", description: "Assuming the following HTML snippet:\n\
 \n\
-    pliny.grammar(\"HTML\");\n\
+    grammar(\"HTML\");\n\
     <div>\n\
       <div id=\"First\">first element</div>\n\
       <section id=\"second-elem\">\n\
@@ -129,7 +129,7 @@ Basically, a quick way to get at all the named elements in a page.\n\
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var elems = Primrose.DOM.findEverything();\n\
     console.log(elems.First.innerHTML);\n\
     console.log(elems[\"second-elem\"].textContent);\n\

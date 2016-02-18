@@ -20,7 +20,7 @@ Automatically workerized classes should have methods that take a single array fo
 \n\
 Assuming the following class:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     function MyClass(){\n\
       this.listeners = {\n\
         complete: []\n\
@@ -62,7 +62,7 @@ Assuming the following class:\n\
 \n\
 Then we can create and use an automatically workerized version of it as follows.\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var phys = new Primrose.Workerize(MyClass);\n\
     // we keep a local copy of the state so we can perform other operations on it.\n\
     var objects = [];\n\

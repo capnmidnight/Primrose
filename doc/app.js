@@ -72,7 +72,7 @@ function scroller ( id ) {
     }
   }
 
-  var GRAMMAR_TEST = /^pliny.grammar\("(\w+)"\);\n/;
+  var GRAMMAR_TEST = /^grammar\("(\w+)"\);\n/;
   function replacePreBlocks () {
     var codeBlocks = doc.querySelectorAll( "pre" );
     while ( editors.length < codeBlocks.length ) {

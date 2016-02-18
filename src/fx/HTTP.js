@@ -24,7 +24,7 @@ Primrose.HTTP = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
       console.log.bind(console, \"done\"),\n\
       console.error.bind(console),\n\
@@ -92,7 +92,7 @@ Primrose.HTTP = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
       console.log.bind(console, \"done\"),\n\
       console.error.bind(console),\n\
@@ -140,7 +140,7 @@ Primrose.HTTP = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     Primrose.HTTP.getObject(\"localFile.json\",\n\
       console.log.bind(console, \"done\"),\n\
       console.error.bind(console),\n\
@@ -170,7 +170,7 @@ Primrose.HTTP = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     Primrose.HTTP.getText(\"localFile.json\",\n\
       console.log.bind(console, \"done\"),\n\
       console.error.bind(console),\n\

@@ -89,7 +89,7 @@ Primrose.ModelLoader = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var scene = new THREE.Scene(),\n\
      \n\
@@ -133,7 +133,7 @@ Primrose.ModelLoader = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var scene = new THREE.Scene(),\n\
     \n\
@@ -190,7 +190,7 @@ Primrose.ModelLoader = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var renderer = new THREE.WebGLRenderer(),\n\
         currentScene = new THREE.Scene(),\n\
@@ -238,7 +238,7 @@ Primrose.ModelLoader = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     // Create the scene where objects will go\n\
     var renderer = new THREE.WebGLRenderer(),\n\
         currentScene = new THREE.Scene(),\n\

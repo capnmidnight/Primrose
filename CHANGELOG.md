@@ -8,7 +8,7 @@ It's going to be nothing but documentation for a while.
   * Prevent `alert()`, `confirm()`, and `prompt()` while in full screen mode.
   * Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.
 * Features
-  * Use `pliny.grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference. 
+  * Use `grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference. 
   * This CHANGELOG page.
 
 ## v0.20.5

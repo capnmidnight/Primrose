@@ -17,7 +17,7 @@ Primrose.Random = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.number(-1, 1));\n\
     }\n\
@@ -53,7 +53,7 @@ Primrose.Random = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.int(-10, 10));\n\
     }\n\
@@ -73,7 +73,7 @@ Primrose.Random = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.int(-100, 100, 5));\n\
     }\n\
@@ -114,7 +114,7 @@ Primrose.Random = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     var numbers = [\n\
       \"one\",\n\
       \"two\",\n\
@@ -157,7 +157,7 @@ Primrose.Random = ( function () {
 \n\
 ## Code:\n\
 \n\
-    pliny.grammar(\"JavaScript\");\n\
+    grammar(\"JavaScript\");\n\
     for(var i = 0; i < 10; ++i){\n\
       console.log(Primrose.Random.steps(0, 100, 2));\n\
     }\n\
