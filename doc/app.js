@@ -305,9 +305,10 @@ function scroller ( id ) {
 
   pliny.load( [
     "setup",
-    "editorVRManual",
     "faq",
+    "editorVRManual",
     "hmd",
+    "sync",
     "pliny",
     "../CHANGELOG",
     "../LICENSE",
