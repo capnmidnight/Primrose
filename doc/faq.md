@@ -94,3 +94,36 @@ Textor is another from-scratch text editor, written in TypeScript, that draws di
 to Canvas. They both look like a fine projects. Primrose is meant to be more than
 just a text editor. It's a general-purpose application framework for building
 productivity apps.
+
+## "Why the name Primrose?"
+There is a lot that goes in to naming a project. You want the project name to be
+memorable, concise, easy to pronounce, and not conjure bad feelings in potential
+user's minds. A bad name makes it hard for people to talk about your project, and
+you don't want to discourage people form talking about your project.
+
+With that in mind, we tried to imagine ourselves as a member of a development team,
+sitting in an office somewhere, trying to convince her coworkers to use our software.
+How does the phrase, "what if we used &lt;Insert Name Here>?" sound in the context
+of the meeting? A lot of potential names got thrown out just for being too hard
+to pronounce, too generic-sounding, or not something you'd want to say out loud
+in a professional setting.
+
+It's kind of hard to have negative connotations about a plant, especially a little
+one. Also, there is some precedent in software to name projects after plants.
+* Oak was the original name of the Java programming language.
+* NetBeans is an Integrated Development Environment, that gets its name from the fact that coffee has been grown on the island of Java for over 300 years.
+* IBM has a modeling suite named Rational Rose.
+* There used to be an accounting suite named Peachtree that is now named Sage; from one plant name to another.
+* Mint is used by two different companies:
+  * A personal finance tool that got bought out by Intuit, and
+  * [A distribution of Linux](http://www.linuxmint.com) (that we run here at Primrose LLC) based on Ubuntu.
+* PEAR is a PHP framework.
+* RaspberryPi is a small computer.
+* There's a whole company named Apple.
+* One of my favorite companies in the world is [AdaFruit](http://www.adafruit.com)
+
+So the name Primrose is largely arbitrary, a combination of making lists of plant
+names that sounded nice, coupled with web searching for them to figure out if they
+had already been taken. Primrose basically won out over Marigold, because we finally
+felt that a logo for a primrose flower would be easier to make than a logo for a
+marigold flower.
