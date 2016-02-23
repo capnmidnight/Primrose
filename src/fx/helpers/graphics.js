@@ -145,6 +145,31 @@ if ( typeof window.THREE !== "undefined" ) {
 }
 
 pliny.issue( "", {
+  name: "document shell",
+  type: "open",
+  description: "Finish writing the documentation for the [`shell`](#shell) function\n\
+in the helpers/graphics.js file."
+} );
+pliny.function( "", {
+  name: "shell",
+  description: "<under construction>"
+} );
+function shell ( r, slices, rings, phi, theta ) {
+  var SLICE = 0.45;
+  if ( phi === undefined ) {
+    phi = Math.PI * SLICE;
+  }
+  if ( theta === undefined ) {
+    theta = Math.PI * SLICE;
+  }
+  var phiStart = 1.5 * Math.PI - phi * 0.5,
+      thetaStart = ( Math.PI - theta ) * 0.5,
+      geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
+          thetaStart, theta, true );
+  return geom;
+}
+
+pliny.issue( "", {
   name: "document axis",
   type: "open",
   description: "Finish writing the documentation for the [`axis`](#axis) function\n\
@@ -386,31 +411,6 @@ pliny.function( "", {
 } );
 function cylinder ( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd ) {
   return new THREE.CylinderGeometry( rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd );
-}
-
-pliny.issue( "", {
-  name: "document shell",
-  type: "open",
-  description: "Finish writing the documentation for the [`shell`](#shell) function\n\
-in the helpers/graphics.js file."
-} );
-pliny.function( "", {
-  name: "shell",
-  description: "<under construction>"
-} );
-function shell ( r, slices, rings, phi, theta ) {
-  var SLICE = 0.45;
-  if ( phi === undefined ) {
-    phi = Math.PI * SLICE;
-  }
-  if ( theta === undefined ) {
-    theta = Math.PI * SLICE;
-  }
-  var phiStart = 1.5 * Math.PI - phi * 0.5,
-      thetaStart = ( Math.PI - theta ) * 0.5,
-      geom = new InsideSphereGeometry( r, slices, rings, phiStart, phi,
-          thetaStart, theta, true );
-  return geom;
 }
 
 pliny.issue( "", {
