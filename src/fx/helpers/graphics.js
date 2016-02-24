@@ -167,7 +167,7 @@ pliny.issue( "", {
 in the helpers/graphics.js file."
 } );
 
-pliny.class( "", {
+pliny.function( "", {
   name: "shell",
   parameters: [
     {name: "radius", type: "Number", description: "How far the sphere should extend away from a center point."},
