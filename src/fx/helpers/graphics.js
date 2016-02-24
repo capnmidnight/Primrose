@@ -2,13 +2,29 @@
 
 pliny.issue( "", {
   name: "document InsideSphereGeometry",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [`InsideSphereGeometry`](#InsideSphereGeometry) class\n\
 in the helpers/graphics.js file."
 } );
 pliny.class( "", {
   name: "InsideSphereGeometry",
-  description: "<under construction>"
+  parameters: [
+    {name: "radius", type: "Number", description: "How far the sphere should extend away from a center point."},
+    {name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry."},
+    {name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry."},
+    {name: "phiStart", type: "Number", description: "The angle around the Y-axis at which the sphere starts."},
+    {name: "phiLength", type: "Number", description: "The change in angle around the Y-axis to which the sphere ends."},
+    {name: "thetaStart", type: "Number", description: "The angle around the Z-axis at which the sphere starts."},
+    {name: "thetaLength", type: "Number", description: "The change in angle around the Z-axis to which the sphere ends."}
+  ],
+  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+note exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 } );
 function InsideSphereGeometry ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
   "use strict";
@@ -146,13 +162,24 @@ if ( typeof window.THREE !== "undefined" ) {
 
 pliny.issue( "", {
   name: "document shell",
-  type: "open",
+  type: "closed",
   description: "Finish writing the documentation for the [`shell`](#shell) function\n\
 in the helpers/graphics.js file."
 } );
-pliny.function( "", {
+
+pliny.class( "", {
   name: "shell",
-  description: "<under construction>"
+  parameters: [
+    {name: "radius", type: "Number", description: "How far the sphere should extend away from a center point."},
+    {name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry."},
+    {name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry."},
+    {name: "phi", type: "Number", description: "The angle width around the Y-axis of the sphere."},
+    {name: "thetaStart", type: "Number", description: "The angle width around the Z-axis of the sphere."}
+  ],
+  description: "The shell is basically an inside-out Sphere. Say you want a to model\n\
+the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
+outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
+case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry)."
 } );
 function shell ( r, slices, rings, phi, theta ) {
   var SLICE = 0.45;
