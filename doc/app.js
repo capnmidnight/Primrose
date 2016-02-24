@@ -308,6 +308,7 @@ function scroller ( id ) {
     "faq",
     "editorVRManual",
     "hmd",
+    "webvr",
     "sync",
     "pliny",
     "../CHANGELOG",
