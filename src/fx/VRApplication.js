@@ -879,6 +879,8 @@ Primrose.VRApplication = ( function ( ) {
     // the acceleration applied to falling objects
     gravity: 9.8,
     jumpSpeed: 3.13,
+    // by default, we want fullscreen to happen whenever the user touches the screen
+    disableAutoFullScreen: false,
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
     // the far plane of the camera
