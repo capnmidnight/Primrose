@@ -329,7 +329,7 @@
         while ( !!( match = scriptPattern.exec( script ) ) ) {
           var fieldType = match[1],
               start = match.index + match[0].length,
-              parameters = parseParameters( script.substring( start ) );
+              parameters = parseParameters( name, script.substring( start ) );
           // Shove in the context.
           if ( parameters.length === 1 ) {
             parameters.unshift( name );
@@ -354,11 +354,11 @@
   // read the script and parse out the JSON objects so we can later execute
   // the documentation function safely, i.e. not use eval().
   // 
+  // @param {String} objName - the name of the object for which we are processing parameters.
   // @param {String} script - the source code of the containing function.
-  // @param {String} start - the index at which the parameter list for the documentation function starts.
   // @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
   ///
-  function parseParameters ( script ) {
+  function parseParameters ( objName, script ) {
     var parameters = [ ];
 
     // Walk over the script...
@@ -391,7 +391,7 @@
         // ... save the parameter, skipping the first character because it's always
         // either the open paren for the parameter list or one of the commas
         // between parameters.
-        parameters.push( parseParameter( script.substring( start + 1, i ).trim( ) ) );
+        parameters.push( parseParameter( objName, script.substring( start + 1, i ).trim( ) ) );
 
         // Advance forward the start of the next token.
         start = i;
@@ -419,10 +419,11 @@
   // contextual scope, we need to make sure it's valid JSON before we try to
   // convert it to a real JavaScript object.
   // 
+  // @param {String} objName - the name of the object for which we are parsing a parameter.
   // @param {String} script - the subscript portion that refers to a single parameter.
   // @return {Object} - the value that the string represents, parsed with JSON.parse().
   ///
-  function parseParameter ( script ) {
+  function parseParameter ( objName, script ) {
     // Make sure all hash key labels are surrounded in quotation marks.
     var stringLiterals = [ ];
     var litReplace = function ( str ) {
@@ -455,7 +456,7 @@
     catch ( e ) {
       // If we made a bad assumption, this will tell us what the assumption was,
       // while also forwarding on the specific error.
-      console.error( script, "=>", param );
+      console.error( objName + ": " + script + " => " + param );
       throw e;
     }
   }
