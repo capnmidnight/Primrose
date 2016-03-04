@@ -39,7 +39,7 @@ Primrose.VRApplication = ( function ( ) {
         "keydown", "keyup", "keypress",
         "mousedown", "mouseup", "mousemove", "wheel",
         "touchstart", "touchend", "touchmove" ],
-      RESOLUTION_SCALE = 4;
+      RESOLUTION_SCALE = 1;
 
   pliny.class( "Primrose", {
     name: "VRApplication",
