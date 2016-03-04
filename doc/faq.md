@@ -40,6 +40,10 @@ Primrose is free, open source software ([GPLv3](https://github.com/capnmidnight/
 and may readily be used with other [FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software)
 projects.
 
+## "What is WebVR?"
+WebVR is a draft standard for presenting content in commonly available web browsers
+on virtual reality hardware. See [What is WebVR?](#WhatisWebVR?) for more information.
+
 ## "But the resolution on the Oculus Rift DK2 is awful!"
 This is certainly a problem, but there isn't much to do about it, and we believe
 it will not be a problem in the near future. We are developing Primrose to be able
