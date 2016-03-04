@@ -4,9 +4,9 @@ window.addEventListener( "load", function ( d, f ) {
       h = d[f]( "head" ),
       /*  */
        s = [
-       "/bin/three.min.js",
-       "/bin/marked.min.js",
-       "/bin/Primrose.min.js",
+       "/scripts/three.min.js",
+       "/scripts/marked.min.js",
+       "/scripts/Primrose.min.js",
        "app.js" ],
        /*
       s = [

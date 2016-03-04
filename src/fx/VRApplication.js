@@ -39,7 +39,7 @@ Primrose.VRApplication = ( function ( ) {
         "keydown", "keyup", "keypress",
         "mousedown", "mouseup", "mousemove", "wheel",
         "touchstart", "touchend", "touchmove" ],
-      RESOLUTION_SCALE = 1;
+      RESOLUTION_SCALE = 4;
 
   pliny.class( "Primrose", {
     name: "VRApplication",
@@ -775,6 +775,14 @@ Primrose.VRApplication = ( function ( ) {
     var basicKeyHandler = function ( evt ) {
       if ( !lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F ) {
         this.goFullScreen( true );
+      }
+      else if(evt.keyCode === 219){
+        RESOLUTION_SCALE -= 0.1;
+        setSize();
+      }
+      else if(evt.keyCode === 221){
+        RESOLUTION_SCALE += 0.1;
+        setSize();
       }
     }.bind( this );
 

@@ -30,7 +30,7 @@ cd Primrose
 npm install
 grunt</tt>
 
-From there, you may copy the `Primrose.min.js` file out of the `bin/` directory
+From there, you may copy the `Primrose.min.js` file out of the `scripts/` directory
 into your private project directory, or run the command <kbd>npm start</kbd> to
 run a copy of this website and try Primrose out right away.
 
@@ -46,8 +46,8 @@ its dependencies. This will require visiting each of the links in the "Dependenc
 section above and download their associated files manually.
 
 The latest version of Primrose will always reside at:
-* <http://www.primrosevr.com/bin/Primrose.js> - expanded version.
-* <http://www.primrosevr.com/bin/Primrose.min.js> - minified version.
+* <http://www.primrosevr.com/scripts/Primrose.js> - expanded version.
+* <http://www.primrosevr.com/scripts/Primrose.min.js> - minified version.
 
 > NOTE: this file is volatile. Whenever new versions are released, this file will
 > get updated automatically. Major-version releases may result in breaking,
@@ -68,7 +68,7 @@ Link to the file by including a `<script>` tag in your page HTML:
         <script type="text/javascript" src="http://www.threejs.org/build/three.min.js"></script>
 
         <!-- START: INCLUDE PRIMROSE LIBRARY -->
-        <script type="text/javascript" src="http://www.primrosevr.com/bin/Primrose.min.js"></script>
+        <script type="text/javascript" src="http://www.primrosevr.com/scripts/Primrose.min.js"></script>
         <!-- END: INCLUDE PRIMROSE LIBRARY -->
 
         <link type="text/css" rel="stylesheet" href="style.css">
@@ -117,7 +117,7 @@ There are a few optional dependencies:
   a wrapper for WebGL contexts that can help debug WebGL-specific issues.
 * [marked](https://github.com/chjj/marked) - a Markdown parser and compiler. Required 
   if Pliny is expected to generate HTML output.
-* [Pliny](http://www.primrosevr.com/bin/pliny.min.js) - Pliny provides the documentation
+* [Pliny](http://www.primrosevr.com/scripts/pliny.min.js) - Pliny provides the documentation
   for all of the namespaces, classes, functions, etc., in an online database that
   is accessible during Primrose live-coding sessions.
 

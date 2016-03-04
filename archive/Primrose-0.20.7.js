@@ -1,5 +1,5 @@
 /*
-  Primrose v0.20.6 2016-02-27
+  Primrose v0.20.7 2016-03-04
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   http://www.primrosevr.com
@@ -5850,7 +5850,7 @@ Primrose.VRApplication = ( function ( ) {
         "keydown", "keyup", "keypress",
         "mousedown", "mouseup", "mousemove", "wheel",
         "touchstart", "touchend", "touchmove" ],
-      RESOLUTION_SCALE = 1;
+      RESOLUTION_SCALE = 4;
 
   pliny.class( "Primrose", {
     name: "VRApplication",
@@ -6586,6 +6586,14 @@ Primrose.VRApplication = ( function ( ) {
     var basicKeyHandler = function ( evt ) {
       if ( !lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F ) {
         this.goFullScreen( true );
+      }
+      else if(evt.keyCode === 219){
+        RESOLUTION_SCALE -= 0.1;
+        setSize();
+      }
+      else if(evt.keyCode === 221){
+        RESOLUTION_SCALE += 0.1;
+        setSize();
       }
     }.bind( this );
 
@@ -16256,5 +16264,5 @@ pliny.issue( "Primrose.Text.Themes.Default", {
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Themes.Default](#Primrose_Text_Themes_Default) class in the themes/ directory"
 } );
-Primrose.VERSION = "v0.20.6";
-console.log("Using Primrose v0.20.6. Find out more at http://www.primrosevr.com");
+Primrose.VERSION = "v0.20.7";
+console.log("Using Primrose v0.20.7. Find out more at http://www.primrosevr.com");

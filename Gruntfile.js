@@ -22,23 +22,23 @@ var fs = require( "fs" ),
 uglifyFiles = files.map( function ( s ) {
   return{
     src: s,
-    dest: s.replace( pathX, "bin/$1.min.js" )
+    dest: s.replace( pathX, "scripts/$1.min.js" )
   };
 } ),
     copyFiles = files.map( function ( s ) {
       return {
         src: s,
-        dest: s.replace( pathX, "bin/$1.js" )
+        dest: s.replace( pathX, "scripts/$1.js" )
       };
     } );
 
 copyFiles.push( {
-  src: "bin/Primrose.js",
+  src: "scripts/Primrose.js",
   dest: "archive/Primrose-<%= pkg.version %>.js"
 } );
 
 copyFiles.push( {
-  src: "bin/Primrose.min.js",
+  src: "scripts/Primrose.min.js",
   dest: "archive/Primrose-<%= pkg.version %>.min.js"
 } );
 
