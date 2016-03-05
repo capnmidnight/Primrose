@@ -117,9 +117,98 @@ Primrose.Input.VR = ( function () {
     this.isPresenting = false;
     this.stageParameters = null;
 
-    this.getEyeParameters = device.display.getEyeParameters.bind( device.display );
-    this.getImmediatePose = device.sensor.getImmediateState.bind( device.sensor );
-    this.getPose = device.sensor.getState.bind( device.sensor );
+    this.getEyeParameters = function ( side ) {
+      console.log( "getting eye parameters: ", side );
+      var oldFormat = null;
+      if ( device.display.getEyeParameters ) {
+        oldFormat = device.display.getEyeParameters( side );
+      }
+      else {
+        oldFormat = {
+          renderRect: device.display.getRecommendedEyeRenderRect( side ),
+          eyeTranslation: device.display.getEyeTranslation( side ),
+          recommendedFieldOfView: device.display.getRecommendedEyeFieldOfView( side )
+        };
+      }
+
+      console.log( "VR Eye Parameters" );
+      console.log( "old format", oldFormat );
+
+      var newFormat = {
+        renderWidth: oldFormat.renderRect.width,
+        renderHeight: oldFormat.renderRect.height,
+        offset: new Float32Array( [
+          oldFormat.eyeTranslation.x,
+          oldFormat.eyeTranslation.y,
+          oldFormat.eyeTranslation.z
+        ] ),
+        fieldOfView: oldFormat.recommendedFieldOfView
+      };
+
+      console.log( "new format", newFormat );
+
+      return newFormat;
+    };
+    var frameID = 0;
+    function createPoseFromState ( state ) {
+      var pose = {
+        timestamp: state.timestamp,
+        frameID: ++frameID
+      };
+      if ( state.position ) {
+        pose.position = new Float32Array( [
+          state.position.x,
+          state.position.y,
+          state.position.z
+        ] );
+      }
+      if ( state.linearVelocity ) {
+        pose.linearVelocity = new Float32Array( [
+          state.linearVelocity.x,
+          state.linearVelocity.y,
+          state.linearVelocity.z
+        ] );
+      }
+      if ( state.linearAcceleration ) {
+        pose.linearAcceleration = new Float32Array( [
+          state.linearAcceleration.x,
+          state.linearAcceleration.y,
+          state.linearAcceleration.z
+        ] );
+      }
+      if ( state.orientation ) {
+        pose.orientation = new Float32Array( [
+          state.orientation.x,
+          state.orientation.y,
+          state.orientation.z,
+          state.orientation.w
+        ] );
+      }
+      if ( state.angularVelocity ) {
+        pose.angularVelocity = new Float32Array( [
+          state.angularVelocity.x,
+          state.angularVelocity.y,
+          state.angularVelocity.z
+        ] );
+      }
+      if ( state.angularAcceleration ) {
+        pose.angularAcceleration = new Float32Array( [
+          state.angularAcceleration.x,
+          state.angularAcceleration.y,
+          state.angularAcceleration.z
+        ] );
+      }
+      return pose;
+    }
+
+    this.getImmediatePose = function () {
+      return createPoseFromState( device.sensor.getImmediateState() );
+    };
+
+    this.getPose = function () {
+      return createPoseFromState( device.sensor.getState() );
+    };
+
     this.resetPose = device.sensor.resetSensor.bind( device.sensor );
 
     var currentLayer = null;
@@ -306,7 +395,9 @@ Primrose.Input.VR = ( function () {
       }
       else if ( navigator.getVRDevices ) {
         console.log( "Using Chromium Experimental WebVR API" );
-        navigator.getVRDevices().then( enumerateVRDevices.bind( this, elem ) ).catch( console.error.bind( console, "Could not find VR devices" ) );
+        navigator.getVRDevices()
+            .then( enumerateVRDevices.bind( this, elem ) )
+            .catch( console.error.bind( console, "Could not find VR devices" ) );
       } else if ( navigator.mozGetVRDevices ) {
         console.log( "Using Firefox Experimental WebVR API" );
         navigator.mozGetVRDevices( enumerateVRDevices.bind( this, elem ) );
@@ -339,28 +430,37 @@ Primrose.Input.VR = ( function () {
     if ( this.currentDisplay ) {
       var caps = this.currentDisplay.capabilities,
           pose = this.currentDisplay.getPose();
-      this.currentPose = pose;
       
-      if ( caps.hasPosition ) {
+      this.currentPose = pose;
+
+      if ( caps.hasPosition && pose.position ) {
         this.headX = pose.position[0];
         this.headY = pose.position[1];
         this.headZ = pose.position[2];
+      }
+      if ( pose.linearVelocity ) {
         this.headVX = pose.linearVelocity[0];
         this.headVY = pose.linearVelocity[1];
         this.headVZ = pose.linearVelocity[2];
+      }
+      if ( pose.linearAcceleration ) {
         this.headAX = pose.linearAcceleration[0];
         this.headAY = pose.linearAcceleration[1];
         this.headAZ = pose.linearAcceleration[2];
       }
 
-      if ( caps.hasOrientation ) {
+      if ( caps.hasOrientation && pose.orientation ) {
         this.headRX = pose.orientation[0];
         this.headRY = pose.orientation[1];
         this.headRZ = pose.orientation[2];
         this.headRW = pose.orientation[3];
+      }
+      if ( pose.angularVelocity ) {
         this.headRVX = pose.angularVelocity[0];
         this.headRVY = pose.angularVelocity[1];
         this.headRVZ = pose.angularVelocity[2];
+      }
+      if ( pose.angularAcceleration ) {
         this.headRAX = pose.angularAcceleration[0];
         this.headRAY = pose.angularAcceleration[1];
         this.headRAZ = pose.angularAcceleration[2];
@@ -377,37 +477,6 @@ Primrose.Input.VR = ( function () {
         this.getValue( w ) );
     return value;
   };
-
-  function getParams () {
-    if ( this.currentDisplay ) {
-      var params = null;
-      if ( this.currentDisplay.getEyeParameters ) {
-        params = {
-          left: this.currentDisplay.getEyeParameters( "left" ),
-          right: this.currentDisplay.getEyeParameters( "right" )
-        };
-      }
-      else {
-        var l = this.currentDisplay.getRecommendedEyeRenderRect( "left" ),
-            r = this.currentDisplay.getRecommendedEyeRenderRect( "right" );
-        params = {
-          left: {
-            renderWidth: l.width,
-            renderHeight: l.height,
-            offset: this.currentDisplay.getEyeTranslation( "left" ),
-            fieldOfView: this.currentDisplay.getRecommendedEyeFieldOfView( "left" )
-          },
-          right: {
-            renderWidth: r.width,
-            renderHeight: r.height,
-            offset: this.currentDisplay.getEyeTranslation( "right" ),
-            fieldOfView: this.currentDisplay.getRecommendedEyeFieldOfView( "right" )
-          }
-        };
-      }
-      return params;
-    }
-  }
 
   function fieldOfViewToProjectionMatrix ( fov, zNear, zFar ) {
     var upTan = Math.tan( fov.upDegrees * Math.PI / 180.0 ),
@@ -453,7 +522,10 @@ Primrose.Input.VR = ( function () {
     this.currentDisplay = this.displays[selectedIndex];
     if ( this.currentDisplay ) {
       this.enabled = true;
-      var params = getParams.call( this );
+      var params = {
+        left: this.currentDisplay.getEyeParameters( "left" ),
+        right: this.currentDisplay.getEyeParameters( "right" )
+      };
       this.transforms = [ {}, {} ];
       makeTransform( this.transforms[0], params.left, near, far );
       makeTransform( this.transforms[1], params.right, near, far );

@@ -71,10 +71,8 @@ Primrose.VRApplication = ( function ( ) {
         canvasWidth = Math.floor( elementWidth * pixelRatio * RESOLUTION_SCALE );
         canvasHeight = Math.floor( elementHeight * pixelRatio * RESOLUTION_SCALE );
         aspectWidth = canvasWidth;
-        if ( isiOS ) {
-          document.body.style.height = Math.max( document.body.clientHeight, elementHeight ) + "px";
-          document.documentElement.style.height = Math.max( document.documentElement.clientHeight, elementHeight ) + "px";
-        }
+        document.body.style.height = Math.max( document.body.clientHeight, elementHeight ) + "px";
+        document.documentElement.style.height = Math.max( document.documentElement.clientHeight, elementHeight ) + "px";
         this.renderer.setViewport( 0, 0, canvasWidth, canvasHeight );
         this.renderer.setScissor( 0, 0, canvasWidth, canvasHeight );
         this.camera.fov = this.options.defaultFOV;
