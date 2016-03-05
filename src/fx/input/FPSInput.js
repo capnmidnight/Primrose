@@ -11,7 +11,7 @@ Primrose.Input.FPSInput = ( function ( ) {
     name: "FPSInput",
     description: "<under construction>"
   });
-  function FPSInput ( DOMElement ) {
+  function FPSInput ( DOMElement, near, far ) {
     DOMElement = DOMElement || window;
 
     pliny.issue( "Primrose.Input.FPSInput", {
@@ -89,8 +89,8 @@ Primrose.Input.FPSInput = ( function ( ) {
         pitch: {axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       } ) ];
     
-    if ( navigator.getVRDevices ) {
-      this.managers.push( new Primrose.Input.VR( "vr" ) );
+    if ( isVR ) {
+      this.managers.push( new Primrose.Input.VR( "vr", near, far ) );
     }
     else if ( isMobile ) {
       this.managers.push(

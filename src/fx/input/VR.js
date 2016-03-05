@@ -1,12 +1,208 @@
-/* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny */
+/* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny, Promise */
 
 Primrose.Input.VR = ( function () {
-  
-  pliny.class("Primrose.Input", {
+
+  function withFullScreenChange ( elem, act ) {
+    return new Promise( function ( resolve, reject ) {
+      var tearDown,
+          onFullScreen,
+          onFullScreenError;
+
+      tearDown = function () {
+        elem.removeEventListener( "fullscreenchange", onFullScreen );
+        elem.removeEventListener( "webkitfullscreenchange", onFullScreen );
+        elem.removeEventListener( "mozfullscreenchange", onFullScreen );
+        elem.removeEventListener( "msfullscreenchange", onFullScreen );
+        elem.removeEventListener( "fullscreenerror", onFullScreenError );
+        elem.removeEventListener( "webkitfullscreenerror", onFullScreenError );
+        elem.removeEventListener( "mozfullscreenerror", onFullScreenError );
+        elem.removeEventListener( "msfullscreenerror", onFullScreenError );
+      };
+
+      onFullScreen = function () {
+        tearDown();
+        console.log( "got fullscreen" );
+        resolve( document.webkitFullscreenElement || document.fullscreenElement );
+      };
+
+      onFullScreenError = function ( evt ) {
+        tearDown();
+        console.error( "no got fullscreen" );
+        reject( evt );
+      };
+
+      elem.addEventListener( "fullscreenchange", onFullScreen, false );
+      elem.addEventListener( "webkitfullscreenchange", onFullScreen, false );
+      elem.addEventListener( "mozfullscreenchange", onFullScreen, false );
+      elem.addEventListener( "msfullscreenchange", onFullScreen, false );
+      elem.addEventListener( "fullscreenerror", onFullScreenError, false );
+      elem.addEventListener( "webkitfullscreenerror", onFullScreenError, false );
+      elem.addEventListener( "mozfullscreenerror", onFullScreenError, false );
+      elem.addEventListener( "msfullscreenerror", onFullScreenError, false );
+
+      act();
+    } );
+  }
+
+  function requestFullScreen ( elem, fullScreenParam ) {
+    console.log( "Entering fullscreen" );
+    return new Promise( function ( resolve, reject ) {
+      withFullScreenChange( elem, function () {
+        if ( elem.webkitRequestFullscreen ) {
+          elem.webkitRequestFullscreen( fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT );
+        }
+        else if ( elem.mozRequestFullScreen && fullScreenParam ) {
+          elem.mozRequestFullScreen( fullScreenParam );
+        }
+        else if ( elem.mozRequestFullScreen && !fullScreenParam ) {
+          elem.mozRequestFullScreen( );
+        }
+        else {
+          reject();
+        }
+      } )
+          .then( resolve )
+          .catch( reject );
+    } );
+  }
+
+  function exitFullScreen ( elem ) {
+    console.log( "Exiting fullscreen" );
+    return new Promise( function ( resolve, reject ) {
+      withFullScreenChange( elem, function () {
+        if ( document.exitFullscreen ) {
+          document.exitFullscreen();
+        }
+        else if ( document.webkitExitFullscreen ) {
+          document.webkitExitFullscreen();
+        }
+        else if ( document.webkitCancelFullScreen ) {
+          document.webkitCancelFullScreen();
+        }
+        else if ( document.mozCancelFullScreen ) {
+          document.mozCancelFullScreen();
+        }
+        else if ( document.msExitFullscreen ) {
+          document.msExitFullscreen( );
+        }
+        else {
+          reject();
+        }
+      } ).then( resolve )
+          .catch( reject );
+    } );
+  }
+
+  function MockVRDisplay ( device ) {
+    this.capabilities = {
+      canPresent: !!device.display,
+      hasExternalDisplay: !!device.display && !isMobile,
+      hasOrientation: !!device.sensor,
+      hasPosition: !!device.sensor && !isMobile
+    };
+
+    this.displayId = device.display.hardwareUnitId;
+
+    this.displayName = "";
+    var a = device.display.deviceName,
+        b = device.sensor.deviceName;
+    for ( var i = 0; i < a.length && i < b.length && a[i] === b[i]; ++i ) {
+      this.displayName += a[i];
+    }
+    while ( this.displayName.length > 0 && !/\w/.test( this.displayName[this.displayName.length - 1] ) ) {
+      this.displayName = this.displayName.substring( 0, this.displayName.length - 1 );
+    }
+
+    this.isConnected = true;
+    this.isPresenting = false;
+    this.stageParameters = null;
+
+    this.getEyeParameters = device.display.getEyeParameters.bind( device.display );
+    this.getImmediatePose = device.sensor.getImmediateState.bind( device.sensor );
+    this.getPose = device.sensor.getState.bind( device.sensor );
+    this.resetPose = device.sensor.resetSensor.bind( device.sensor );
+
+    var currentLayer = null;
+
+    this.getLayers = function () {
+      return [ currentLayer ];
+    };
+
+    var fullScreenParam = {vrDisplay: device.display, vrDistortion: true};
+
+    this.requestPresent = function ( layer ) {
+      var promises = [ ];
+      if ( currentLayer ) {
+        promises.push( this.exitPresent() );
+      }
+      promises.push( new Promise( function ( resolve, reject ) {
+        if ( !this.capabilities.canPresent ) {
+          reject( new Error( "This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName ) );
+        }
+        else if ( !layer ) {
+          reject( new Error( "No layer provided to requestPresent" ) );
+        }
+        else if ( !layer.source ) {
+          reject( new Error( "No source on layer parameter." ) );
+        }
+        else {
+          requestFullScreen( layer.source, fullScreenParam )
+              .then( function ( elem ) {
+                this.isPresenting = elem === layer.source;
+                currentLayer = layer;
+                if ( isMobile && screen.orientation && screen.orientation.lock ) {
+                  screen.orientation.lock( 'landscape-primary' );
+                }
+                resolve();
+              }.bind( this ) )
+              .catch( function ( evt ) {
+                this.isPresenting = false;
+                reject( evt );
+              }.bind( this ) );
+        }
+      }.bind( this ) ) );
+      return Promise.all( promises );
+    }.bind( this );
+
+    this.exitPresent = function () {
+      return new Promise( function ( resolve, reject ) {
+        if ( !this.isPresenting ) {
+          reject( new Error( "Not presenting." ) );
+        }
+        else if ( !currentLayer ) {
+          reject( new Error( "Not in control of presentation." ) );
+        }
+        else {
+          var clear = function () {
+            this.isPresenting = false;
+            currentLayer = null;
+          }.bind( this );
+
+          exitFullScreen( currentLayer.source )
+              .then( function () {
+                clear();
+                resolve();
+              } )
+              .catch( function ( err ) {
+                clear();
+                reject( err );
+              } );
+        }
+      } );
+    };
+  }
+
+  MockVRDisplay.prototype.requestAnimationFrame = window.requestAnimationFrame.bind( window );
+  MockVRDisplay.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind( window );
+
+  MockVRDisplay.prototype.submitFrame = function () {
+  };
+
+  pliny.class( "Primrose.Input", {
     name: "VR",
     description: "<under construction>"
-  });
-  function VRInput ( name, commands, socket, elem, selectedID ) {
+  } );
+  function VRInput ( name, near, far, commands, socket, elem, selectedIndex ) {
     if ( commands === undefined || commands === null ) {
       commands = VRInput.AXES.map( function ( a ) {
         return {
@@ -29,97 +225,90 @@ Primrose.Input.VR = ( function () {
         listeners[event].push( handler );
       }
       if ( event === "vrdeviceconnected" ) {
-        Object.keys( this.devices ).forEach( handler );
+        Object.keys( this.displays ).forEach( handler );
       }
     };
 
-    function sendAll ( arr, id ) {
-      for ( var i = 0; i < arr.length; ++i ) {
-        arr[i]( id );
+    function onConnected ( id ) {
+      for ( var i = 0; i < listeners.vrdeviceconnected.length; ++i ) {
+        listeners.vrdeviceconnected[i]( id );
       }
     }
 
-    function onConnected ( id ) {
-      sendAll( listeners.vrdeviceconnected, id );
-    }
-
-    function onDisconnected ( id ) {
-      sendAll( listeners.vrdevicelost, id );
-    }
-
-    this.devices = {};
-    this.deviceIDs = null;
-    this.sensor = null;
-    this.display = null;
+    this.displays = [ ];
+    this.currentDisplay = null;
+    this.currentPose = null;
     this.params = null;
     this.transforms = null;
 
-    function enumerateVRDevices ( elem, devices ) {
-      var id,
-          newDevices = [ ],
-          lostDevices = Object.keys( this.devices );
-
-      for ( var i = 0; i < devices.length; ++i ) {
-        var device = devices[i];
-        id = device.hardwareUnitId;
-        if ( !this.devices[id] ) {
-          newDevices.push( id );
-          var j = lostDevices.indexOf( id );
-          if ( j >= 0 ) {
-            lostDevices.splice( j, 1 );
-          }
-          this.devices[id] = {
-            display: null,
-            sensor: null
-          };
-        }
-        var vr = this.devices[id];
-        if ( device instanceof HMDVRDevice ) {
-          vr.display = device;
-        }
-        else if ( devices[i] instanceof PositionSensorVRDevice ) {
-          vr.sensor = device;
-        }
-      }
-
-      this.deviceIDs = Object.keys( this.devices );
-      this.deviceIDs.forEach( function ( id ) {
-        var d = this.devices[id],
-            a = d.display.deviceName,
-            b = d.sensor.deviceName;
-        d.name = "";
-        for ( var i = 0; i < a.length && i < b.length && a[i] === b[i]; ++i ) {
-          d.name += a[i];
-        }
-        while ( d.name.length > 0 && !/\w/.test( d.name[d.name.length - 1] ) ) {
-          d.name = d.name.substring( 0, d.name.length - 1 );
-        }
-      }.bind( this ) );
-
-      newDevices.forEach( onConnected );
-      lostDevices.forEach( onDisconnected );
+    function registerDisplays ( elem, displays ) {
+      console.log( "Displays found:", displays.length );
+      console.log( "Displays:", displays );
+      this.displays = displays;
 
       if ( elem ) {
+        console.log( "Building chooser interface.", elem );
         elem.innerHTML = "";
-        for ( id in this.devices ) {
+        for ( var i = 0; i < this.displays.length; ++i ) {
           var option = document.createElement( "option" );
-          option.value = id;
-          option.innerHTML = this.devices[id].sensor.deviceName;
-          option.selected = ( selectedID === id );
+          option.value = i;
+          option.innerHTML = this.displays[i].deviceName;
+          option.selected = ( selectedIndex === i );
           elem.appendChild( option );
         }
       }
 
-      selectedID = selectedID || this.deviceIDs.length === 1 && this.deviceIDs[0];
-      if ( selectedID ) {
-        this.connect( selectedID );
+      this.displays.forEach( onConnected );
+
+      if ( typeof selectedIndex !== "number" && this.displays.length === 1 ) {
+        selectedIndex = 0;
+      }
+      if ( typeof selectedIndex === "number" ) {
+        this.connect( selectedIndex, near, far );
       }
     }
 
-    function checkForVRDevices () {
-      if ( navigator.getVRDevices ) {
+    function enumerateVRDevices ( elem, devices ) {
+      console.log( "Devices found:", devices.length );
+      console.log( "Devices:", devices );
+      var displays = {},
+          id = null;
+
+      for ( var i = 0; i < devices.length; ++i ) {
+        var device = devices[i];
+        id = device.hardwareUnitId;
+        if ( !displays[id] ) {
+          displays[id] = {};
+        }
+
+        var display = displays[id];
+        if ( device instanceof HMDVRDevice ) {
+          display.display = device;
+        }
+        else if ( devices[i] instanceof PositionSensorVRDevice ) {
+          display.sensor = device;
+        }
+      }
+
+      var mockDisplays = [ ];
+      for ( id in displays ) {
+        mockDisplays.push( new MockVRDisplay( displays[id] ) );
+      }
+
+      registerDisplays.call( this, elem, mockDisplays );
+    }
+
+    function checkForVRDisplays () {
+      console.log( "Checking for VR Displays..." );
+      if ( navigator.getVRDisplays ) {
+        console.log( "Using WebVR API 1" );
+        navigator.getVRDisplays().then( registerDisplays.bind( this, elem ) );
+      }
+      else if ( navigator.getVRDevices ) {
+        console.log( "Using Chromium Experimental WebVR API" );
         navigator.getVRDevices().then( enumerateVRDevices.bind( this, elem ) ).catch( console.error.bind( console, "Could not find VR devices" ) );
       } else if ( navigator.mozGetVRDevices ) {
+        console.log( "Using Firefox Experimental WebVR API" );
         navigator.mozGetVRDevices( enumerateVRDevices.bind( this, elem ) );
       }
       else {
@@ -127,7 +316,7 @@ Primrose.Input.VR = ( function () {
       }
     }
 
-    checkForVRDevices.call( this );
+    checkForVRDisplays.call( this );
   }
 
   VRInput.AXES = [
@@ -140,47 +329,41 @@ Primrose.Input.VR = ( function () {
   ];
   Primrose.Input.ButtonAndAxis.inherit( VRInput );
 
+  VRInput.prototype.submitFrame = function () {
+    if ( this.currentDisplay ) {
+      this.currentDisplay.submitFrame( this.currentPose );
+    }
+  };
+
   VRInput.prototype.update = function ( dt ) {
-    if ( this.sensor ) {
-      var state = this.sensor.getState();
-
-      if ( state.position ) {
-        this.headX = state.position.x;
-        this.headY = state.position.y ;
-        this.headZ = state.position.z ;
+    if ( this.currentDisplay ) {
+      var caps = this.currentDisplay.capabilities,
+          pose = this.currentDisplay.getPose();
+      this.currentPose = pose;
+      
+      if ( caps.hasPosition ) {
+        this.headX = pose.position[0];
+        this.headY = pose.position[1];
+        this.headZ = pose.position[2];
+        this.headVX = pose.linearVelocity[0];
+        this.headVY = pose.linearVelocity[1];
+        this.headVZ = pose.linearVelocity[2];
+        this.headAX = pose.linearAcceleration[0];
+        this.headAY = pose.linearAcceleration[1];
+        this.headAZ = pose.linearAcceleration[2];
       }
 
-      if ( state.linearVelocity ) {
-        this.headVX = state.linearVelocity.x ;
-        this.headVY = state.linearVelocity.y ;
-        this.headVZ = state.linearVelocity.z ;
-      }
-
-      if ( state.linearAcceleration ) {
-        this.headAX = state.linearAcceleration.x ;
-        this.headAY = state.linearAcceleration.y ;
-        this.headAZ = state.linearAcceleration.z ;
-      }
-
-      if ( state.orientation ) {
-        this.headRX = state.orientation.x ;
-        this.headRY = state.orientation.y ;
-        this.headRZ = state.orientation.z ;
-        this.headRW = state.orientation.w ;
-      }
-
-      if ( state.angularVelocity ) {
-        this.headRVX = state.angularVelocity.x ;
-        this.headRVY = state.angularVelocity.y ;
-        this.headRVZ = state.angularVelocity.z ;
-        this.headRVW = state.angularVelocity.w ;
-      }
-
-      if ( state.angularAcceleration ) {
-        this.headRAX = state.angularAcceleration.x ;
-        this.headRAY = state.angularAcceleration.y ;
-        this.headRAZ = state.angularAcceleration.z ;
-        this.headRAW = state.angularAcceleration.w ;
+      if ( caps.hasOrientation ) {
+        this.headRX = pose.orientation[0];
+        this.headRY = pose.orientation[1];
+        this.headRZ = pose.orientation[2];
+        this.headRW = pose.orientation[3];
+        this.headRVX = pose.angularVelocity[0];
+        this.headRVY = pose.angularVelocity[1];
+        this.headRVZ = pose.angularVelocity[2];
+        this.headRAX = pose.angularAcceleration[0];
+        this.headRAY = pose.angularAcceleration[1];
+        this.headRAZ = pose.angularAcceleration[2];
       }
     }
     Primrose.Input.ButtonAndAxis.prototype.update.call( this, dt );
@@ -196,25 +379,29 @@ Primrose.Input.VR = ( function () {
   };
 
   function getParams () {
-    if ( this.display ) {
+    if ( this.currentDisplay ) {
       var params = null;
-      if ( this.display.getEyeParameters ) {
+      if ( this.currentDisplay.getEyeParameters ) {
         params = {
-          left: this.display.getEyeParameters( "left" ),
-          right: this.display.getEyeParameters( "right" )
+          left: this.currentDisplay.getEyeParameters( "left" ),
+          right: this.currentDisplay.getEyeParameters( "right" )
         };
       }
       else {
+        var l = this.currentDisplay.getRecommendedEyeRenderRect( "left" ),
+            r = this.currentDisplay.getRecommendedEyeRenderRect( "right" );
         params = {
           left: {
-            renderRect: this.display.getRecommendedEyeRenderRect( "left" ),
-            eyeTranslation: this.display.getEyeTranslation( "left" ),
-            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "left" )
+            renderWidth: l.width,
+            renderHeight: l.height,
+            offset: this.currentDisplay.getEyeTranslation( "left" ),
+            fieldOfView: this.currentDisplay.getRecommendedEyeFieldOfView( "left" )
           },
           right: {
-            renderRect: this.display.getRecommendedEyeRenderRect( "right" ),
-            eyeTranslation: this.display.getEyeTranslation( "right" ),
-            recommendedFieldOfView: this.display.getRecommendedEyeFieldOfView( "right" )
+            renderWidth: r.width,
+            renderHeight: r.height,
+            offset: this.currentDisplay.getEyeTranslation( "right" ),
+            fieldOfView: this.currentDisplay.getRecommendedEyeFieldOfView( "right" )
           }
         };
       }
@@ -222,23 +409,55 @@ Primrose.Input.VR = ( function () {
     }
   }
 
-  function makeTransform ( s, eye ) {
-    var t = eye.eyeTranslation;
-    s.transform = new THREE.Matrix4().makeTranslation( t.x, t.y, t.z );
-    s.viewport = eye.renderRect;
-    s.fov = eye.recommendedFieldOfView.leftDegrees + eye.recommendedFieldOfView.rightDegrees;
+  function fieldOfViewToProjectionMatrix ( fov, zNear, zFar ) {
+    var upTan = Math.tan( fov.upDegrees * Math.PI / 180.0 ),
+        downTan = Math.tan( fov.downDegrees * Math.PI / 180.0 ),
+        leftTan = Math.tan( fov.leftDegrees * Math.PI / 180.0 ),
+        rightTan = Math.tan( fov.rightDegrees * Math.PI / 180.0 ),
+        xScale = 2.0 / ( leftTan + rightTan ),
+        yScale = 2.0 / ( upTan + downTan ),
+        matrix = new THREE.Matrix4();
+    matrix.elements[0] = xScale;
+    matrix.elements[1] = 0.0;
+    matrix.elements[2] = 0.0;
+    matrix.elements[3] = 0.0;
+    matrix.elements[4] = 0.0;
+    matrix.elements[5] = yScale;
+    matrix.elements[6] = 0.0;
+    matrix.elements[7] = 0.0;
+    matrix.elements[8] = -( ( leftTan - rightTan ) * xScale * 0.5 );
+    matrix.elements[9] = ( ( upTan - downTan ) * yScale * 0.5 );
+    matrix.elements[10] = -( zNear + zFar ) / ( zFar - zNear );
+    matrix.elements[11] = -1.0;
+    matrix.elements[12] = 0.0;
+    matrix.elements[13] = 0.0;
+    matrix.elements[14] = -( 2.0 * zFar * zNear ) / ( zFar - zNear );
+    matrix.elements[15] = 0.0;
+
+    return matrix;
   }
 
-  VRInput.prototype.connect = function ( selectedID ) {
-    var device = this.devices[selectedID];
-    if ( device ) {
+  function makeTransform ( s, eye, near, far ) {
+    var t = eye.offset;
+    s.translation = new THREE.Matrix4().makeTranslation( t[0], t[1], t[2] );
+    s.projection = fieldOfViewToProjectionMatrix( eye.fieldOfView, near, far );
+    s.viewport = {
+      left: 0,
+      top: 0,
+      width: eye.renderWidth,
+      height: eye.renderHeight
+    };
+  }
+
+  VRInput.prototype.connect = function ( selectedIndex, near, far ) {
+    this.currentDisplay = this.displays[selectedIndex];
+    if ( this.currentDisplay ) {
       this.enabled = true;
-      this.sensor = device.sensor;
-      this.display = device.display;
       var params = getParams.call( this );
       this.transforms = [ {}, {} ];
-      makeTransform( this.transforms[0], params.left );
-      makeTransform( this.transforms[1], params.right );
+      makeTransform( this.transforms[0], params.left, near, far );
+      makeTransform( this.transforms[1], params.right, near, far );
+      this.transforms[1].viewport.left = this.transforms[0].viewport.width;
     }
   };
 

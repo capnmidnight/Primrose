@@ -1113,7 +1113,7 @@ the torch on to Safari in all of its many useless incarnations."
     description: "Flag indicating the browser supports awesomesauce as well as\n\
 the WebVR standard in some form."
   });
-  window.isVR = !!navigator.getVRDevices;
+  window.isVR = !!(navigator.getVRDevices || navigator.getVRDisplays);
 
   pliny.issue( "", {
     name: "Make a getting started page.",
