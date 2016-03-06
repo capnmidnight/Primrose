@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.21.0
+
+WebVR API 1.0 support!!! With backwards compatability to draft APIs.
+
 ## v0.20.6
 
 It's going to be nothing but documentation for a while.
@@ -10,6 +14,7 @@ It's going to be nothing but documentation for a while.
 * Features
   * Use `grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference. 
   * This CHANGELOG page.
+  * More documentation
 
 ## v0.20.5
 
