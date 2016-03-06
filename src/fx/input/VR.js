@@ -2,21 +2,22 @@
 
 Primrose.Input.VR = ( function () {
 
-  function withFullScreenChange ( elem, act ) {
+  function withFullScreenChange ( act ) {
     return new Promise( function ( resolve, reject ) {
-      var tearDown,
-          onFullScreen,
-          onFullScreenError;
-
-      tearDown = function () {
-        elem.removeEventListener( "fullscreenchange", onFullScreen );
-        elem.removeEventListener( "webkitfullscreenchange", onFullScreen );
-        elem.removeEventListener( "mozfullscreenchange", onFullScreen );
-        elem.removeEventListener( "msfullscreenchange", onFullScreen );
-        elem.removeEventListener( "fullscreenerror", onFullScreenError );
-        elem.removeEventListener( "webkitfullscreenerror", onFullScreenError );
-        elem.removeEventListener( "mozfullscreenerror", onFullScreenError );
-        elem.removeEventListener( "msfullscreenerror", onFullScreenError );
+      var onFullScreen,
+          onFullScreenError,
+          timeout,
+          tearDown = function () {
+        clearTimeout(timeout);
+        window.removeEventListener( "fullscreenchange", onFullScreen );
+        window.removeEventListener( "webkitfullscreenchange", onFullScreen );
+        window.removeEventListener( "mozfullscreenchange", onFullScreen );
+        window.removeEventListener( "msfullscreenchange", onFullScreen );
+        
+        window.removeEventListener( "fullscreenerror", onFullScreenError );
+        window.removeEventListener( "webkitfullscreenerror", onFullScreenError );
+        window.removeEventListener( "mozfullscreenerror", onFullScreenError );
+        window.removeEventListener( "msfullscreenerror", onFullScreenError );
       };
 
       onFullScreen = function () {
@@ -31,23 +32,28 @@ Primrose.Input.VR = ( function () {
         reject( evt );
       };
 
-      elem.addEventListener( "fullscreenchange", onFullScreen, false );
-      elem.addEventListener( "webkitfullscreenchange", onFullScreen, false );
-      elem.addEventListener( "mozfullscreenchange", onFullScreen, false );
-      elem.addEventListener( "msfullscreenchange", onFullScreen, false );
-      elem.addEventListener( "fullscreenerror", onFullScreenError, false );
-      elem.addEventListener( "webkitfullscreenerror", onFullScreenError, false );
-      elem.addEventListener( "mozfullscreenerror", onFullScreenError, false );
-      elem.addEventListener( "msfullscreenerror", onFullScreenError, false );
+      window.addEventListener( "fullscreenchange", onFullScreen, false );
+      window.addEventListener( "webkitfullscreenchange", onFullScreen, false );
+      window.addEventListener( "mozfullscreenchange", onFullScreen, false );
+      window.addEventListener( "msfullscreenchange", onFullScreen, false );
+      
+      window.addEventListener( "fullscreenerror", onFullScreenError, false );
+      window.addEventListener( "webkitfullscreenerror", onFullScreenError, false );
+      window.addEventListener( "mozfullscreenerror", onFullScreenError, false );
+      window.addEventListener( "msfullscreenerror", onFullScreenError, false );
 
       act();
+      
+      // Timeout wating on the fullscreen to happen, for systems like iOS that
+      // don't properly support it, even though they say they do.
+      timeout = setTimeout(reject, 1000);
     } );
   }
 
   function requestFullScreen ( elem, fullScreenParam ) {
-    console.log( "Entering fullscreen" );
+    console.log( "requesting fullscreen" );
     return new Promise( function ( resolve, reject ) {
-      withFullScreenChange( elem, function () {
+      withFullScreenChange( function () {
         if ( elem.webkitRequestFullscreen ) {
           elem.webkitRequestFullscreen( fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT );
         }
@@ -56,6 +62,9 @@ Primrose.Input.VR = ( function () {
         }
         else if ( elem.mozRequestFullScreen && !fullScreenParam ) {
           elem.mozRequestFullScreen( );
+        }
+        else if ( elem.requestFullScreen ) {
+          elem.requestFullScreen( );
         }
         else {
           reject();
@@ -66,10 +75,10 @@ Primrose.Input.VR = ( function () {
     } );
   }
 
-  function exitFullScreen ( elem ) {
+  function exitFullScreen ( ) {
     console.log( "Exiting fullscreen" );
     return new Promise( function ( resolve, reject ) {
-      withFullScreenChange( elem, function () {
+      withFullScreenChange( function () {
         if ( document.exitFullscreen ) {
           document.exitFullscreen();
         }
@@ -222,6 +231,7 @@ Primrose.Input.VR = ( function () {
     this.requestPresent = function ( layer ) {
       var promises = [ ];
       if ( currentLayer ) {
+        console.log("need to exit the previous presentation mode, first.");
         promises.push( this.exitPresent() );
       }
       promises.push( new Promise( function ( resolve, reject ) {
@@ -267,7 +277,7 @@ Primrose.Input.VR = ( function () {
             currentLayer = null;
           }.bind( this );
 
-          exitFullScreen( currentLayer.source )
+          exitFullScreen( )
               .then( function () {
                 clear();
                 resolve();
@@ -430,7 +440,7 @@ Primrose.Input.VR = ( function () {
     if ( this.currentDisplay ) {
       var caps = this.currentDisplay.capabilities,
           pose = this.currentDisplay.getPose();
-      
+
       this.currentPose = pose;
 
       if ( caps.hasPosition && pose.position ) {
@@ -530,6 +540,7 @@ Primrose.Input.VR = ( function () {
       makeTransform( this.transforms[0], params.left, near, far );
       makeTransform( this.transforms[1], params.right, near, far );
       this.transforms[1].viewport.left = this.transforms[0].viewport.width;
+      console.log( "Transforms built", this.transforms );
     }
   };
 
