@@ -182,7 +182,7 @@ section > article > ul > li img{
   margin: 0 auto;
 }
 
-#team img{
+#teamInfo img{
   border-radius:50%;
 }
 
@@ -244,7 +244,7 @@ footer > * {
   section > article > ul > li{
     display: inline-block;
     vertical-align: top;
-    width: calc(50% - 10px);
+    width: calc(33% - 10px);
     list-style: none;
   }
   main > section:last-child{
