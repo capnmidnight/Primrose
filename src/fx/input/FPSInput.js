@@ -167,8 +167,8 @@ Primrose.Input.FPSInput = ( function ( ) {
     description: ""
   } );
   FPSInput.prototype.zero = function () {
-    if ( this.vr ) {
-      this.vr.sensor.resetSensor( );
+    if ( this.vr && this.vr.currentDisplay) {
+      this.vr.currentDisplay.resetPose( );
     }
     if ( this.motion ) {
       this.motion.zeroAxes();
