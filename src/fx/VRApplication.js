@@ -489,7 +489,6 @@ Primrose.VRApplication = ( function ( ) {
         this.renderer.render( this.scene, this.camera );
       }
     }.bind( this );
-
     //
     // restoring the options the user selected
     //
@@ -802,8 +801,8 @@ Primrose.VRApplication = ( function ( ) {
         if ( this.inVR && evt.keyCode === Primrose.Keys.ESCAPE ) {
           this.stop();
           this.input.vr.currentDisplay.exitPresent()
-              .then( setSize )
-              .then( this.start );
+              .then( restart )
+              .catch( restart );
         }
         if ( !lockedToEditor() && evt.keyCode === Primrose.Keys.F ) {
           this.goFullScreen( true );
@@ -819,6 +818,11 @@ Primrose.VRApplication = ( function ( ) {
       }
     }.bind( this );
 
+    var restart = function () {
+      setSize();
+      this.start();
+    }.bind( this );
+
     //
     // Manage full-screen state
     //
@@ -831,8 +835,8 @@ Primrose.VRApplication = ( function ( ) {
           this.input.vr.currentDisplay.requestPresent( {
             source: this.renderer.domElement
           } )
-              .then( setSize )
-              .then( this.start() );
+              .then( restart )
+              .catch( restart );
         }
         else if ( !isiOS ) {
           requestFullScreen( this.renderer.domElement );
@@ -864,8 +868,8 @@ Primrose.VRApplication = ( function ( ) {
         if ( this.inVR ) {
           this.stop();
           this.input.vr.exitPresent()
-              .then( setSize )
-              .then( this.start );
+              .then( restart )
+              .catch( restart );
         }
         else {
           exitFullScreen( );
