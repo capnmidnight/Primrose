@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v0.21.1
+
+* Bugs
+  * Fixes for WebVR API fallback on current Firefox Nightly
+  * Fix for zeroing sensor on new WebVR API
+  * Don't resize canvas to full screen dimensions on desktop. This is only necessary on mobile devices, to support scrolling to remove browser chrome.
+
 ## v0.21.0
 
 WebVR API 1.0 support!!! With backwards compatability to draft APIs.
