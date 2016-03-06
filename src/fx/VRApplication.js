@@ -297,7 +297,9 @@ Primrose.VRApplication = ( function ( ) {
       strafe = this.input.getValue( "strafe" );
       drive = this.input.getValue( "drive" );
       pitch = this.input.getValue( "pitch" );
-      this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
+      if ( this.inVR ) {
+        this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
+      }
       qPitch.setFromAxisAngle( RIGHT, pitch );
       this.nose.visible = this.inVR;
       if ( !this.player.isOnGround ) {
