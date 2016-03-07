@@ -630,14 +630,12 @@ Primrose.Projector = ( function ( ) {
           return this;
         },
         subScalar: function ( s ) {
-
           this.x -= s;
           this.y -= s;
           this.z -= s;
           return this;
         },
         subVectors: function ( a, b ) {
-
           this.x = a.x - b.x;
           this.y = a.y - b.y;
           this.z = a.z - b.z;
@@ -2588,9 +2586,9 @@ Primrose.Projector = ( function ( ) {
             uvs = obj.geometry.uvs;
         for ( var j = 0; j < faces.length; ++j ) {
           var face = faces[j],
-              v0 = verts[face[0]],
-              v1 = verts[face[1]],
-              v2 = verts[face[2]];
+              v0 = verts[face[0] % faces.length],
+              v1 = verts[face[1] % faces.length],
+              v2 = verts[face[2] % faces.length];
           this.a.subVectors( v1, v0 );
           this.b.subVectors( v2, v0 );
           this.c.subVectors( this.p, this.f );
