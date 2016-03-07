@@ -209,7 +209,7 @@ file to use as the texture, execute code as such:\n\
       \"skyTexture.jpg\",\n\
       // Specify that the material should be shadeless, i.e. no shadows. This\n\
       // works best for skymaps.\n\
-      true );" }
+      true );"}
   ]
 } );
 function shell ( r, slices, rings, phi, theta ) {
@@ -394,21 +394,9 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     }
   }
   else {
-    var texture;
-    if ( typeof txt === "string" ) {
-      texture = THREE.ImageUtils.loadTexture( txt );
-    }
-    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
-      texture = txt.renderer.texture;
-    }
-    else {
-      texture = txt;
-    }
-
     if ( unshaded ) {
       material = new THREE.MeshBasicMaterial( {
         color: 0xffffff,
-        map: texture,
         transparent: true,
         shading: THREE.FlatShading,
         side: THREE.DoubleSide,
@@ -416,18 +404,36 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       } );
     }
     else {
-      material = new THREE.MeshLambertMaterial( {
+      material = new THREE.MeshStandardMaterial( {
         color: 0xffffff,
-        map: texture,
         transparent: true,
         side: THREE.DoubleSide,
         opacity: o
       } );
     }
 
-    if ( s * t > 1 ) {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set( s, t );
+    var setTexture = function ( texture ) {
+      if ( !texture ) {
+        console.log( txt );
+        console.trace();
+      }
+      else {
+        material.map = texture;
+        if ( s * t > 1 ) {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set( s, t );
+        }
+      }
+    };
+
+    if ( typeof txt === "string" ) {
+      Primrose.loadTexture( txt, setTexture );
+    }
+    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
+      setTexture( txt.renderer.texture );
+    }
+    else {
+      setTexture( txt );
     }
   }
 
@@ -486,8 +492,8 @@ function cloud ( verts, c, s ) {
   for ( var i = 0; i < verts.length; ++i ) {
     geom.vertices.push( verts[i] );
   }
-  var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
-  return new THREE.PointCloud( geom, mat );
+  var mat = new THREE.PointsMaterial( {color: c, size: s} );
+  return new THREE.Points( geom, mat );
 }
 
 pliny.issue( "", {

@@ -1,18 +1,11 @@
 /* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
 
-var GRASS = THREE.ImageUtils.loadTexture( "/examples/images/grass.png" ),
-    ROCK = THREE.ImageUtils.loadTexture( "/examples/images/rock.png" ),
-    SAND = THREE.ImageUtils.loadTexture( "/examples/images/sand.png" ),
-    WATER = THREE.ImageUtils.loadTexture( "/examples/images/water.png" ),
-    DECK = THREE.ImageUtils.loadTexture( "/examples/images/deck.png" ),
-    app = new Primrose.VRApplication( "Editor3D", {
-  disableAutoFullScreen: true,
-  useFog: false,
-  skyTexture: "/examples/images/bg2.jpg",
-  groundTexture: "/examples/images/deck.png"
-} );
-
-var isHomeScreen = window.self !== window.top,
+var GRASS = "/examples/images/grass.png",
+    ROCK = "/examples/images/rock.png",
+    SAND = "/examples/images/sand.png",
+    WATER = "/examples/images/water.png",
+    DECK = "/examples/images/deck.png",
+    isHomeScreen = window.self !== window.top,
     editor = null,
     output = null,
     documentation = null,
@@ -21,11 +14,17 @@ var isHomeScreen = window.self !== window.top,
     cmdA = isOSX ? "CMD" : "CTRL",
     cmdB = isOSX ? "OPT" : "SHIFT",
     cmdPre = cmdA + "+" + cmdB,
-    editorSphereY = app.avatarHeight - 0.25,
     subScene = new THREE.Object3D(),
     scriptUpdateTimeout,
     lastScript = null,
-    scriptAnimate = null;
+    scriptAnimate = null,
+    app = new Primrose.VRApplication( "Editor3D", {
+      disableAutoFullScreen: true,
+      useFog: false,
+      skyTexture: "/examples/images/bg2.jpg",
+      groundTexture: "/examples/images/deck.png"
+    } ),
+    editorSphereY = app.avatarHeight - 0.25;
 
 app.addEventListener( "ready", function () {
   app.scene.add( subScene );
@@ -41,8 +40,8 @@ app.addEventListener( "ready", function () {
   output = document.createElement( "pre" );
   output = app.appendChild( output );
   // or you can set the transforms directly on the Three.js object
-  output.mesh.position.set(1, editorSphereY, -0.25);
-  output.mesh.rotation.set(0, -Math.PI / 4, 0);
+  output.mesh.position.set( 1, editorSphereY, -0.25 );
+  output.mesh.rotation.set( 0, -Math.PI / 4, 0 );
   output.theme = Primrose.Text.Themes.Dark;
   output.fontSize = 32;
 
@@ -129,7 +128,7 @@ function updateScript ( ) {
   scriptUpdateTimeout = null;
 }
 
-function log(  ) {
+function log (  ) {
   if ( output ) {
     var msg = Array.prototype.join.call( arguments, ", " ),
         t = output;
@@ -137,29 +136,31 @@ function log(  ) {
     t.selectionStart = t.selectionEnd = t.value.length;
     t.scrollIntoView( t.frontCursor );
   }
-};
+}
+;
 
-function clrscr() {
+function clrscr () {
   if ( output ) {
     var t = output;
     t.value = "";
     t.selectionStart = t.selectionEnd = t.value.length;
     t.scrollIntoView( t.frontCursor );
   }
-};
+}
+;
 
 var cmdLabels = document.querySelectorAll( ".cmdLabel" );
 for ( var i = 0; i < cmdLabels.length; ++i ) {
   cmdLabels[i].innerHTML = cmdPre;
 }
 
-app.setFullScreenButton("goVR", "click", true);
-app.setFullScreenButton("goRegular", "click", false);
-app.ctrls.viewSource.addEventListener("click", function () {
+app.setFullScreenButton( "goVR", "click", true );
+app.setFullScreenButton( "goRegular", "click", false );
+app.ctrls.viewSource.addEventListener( "click", function () {
   var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-  path = path.replace("index.html", "app.js");
-  window.open(path);
-}, false);
+  path = path.replace( "index.html", "app.js" );
+  window.open( path );
+}, false );
 
 function getSourceCode ( skipReload ) {
   var defaultDemo = testDemo.toString(),
@@ -283,8 +284,8 @@ function getDocumentation () {
 
 /*
  TODO:
-
-
+ 
+ 
  
  var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
  ];
@@ -292,4 +293,4 @@ function getDocumentation () {
  setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
  setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
  setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
-*/
+ */

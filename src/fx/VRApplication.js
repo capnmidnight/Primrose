@@ -635,7 +635,7 @@ Primrose.VRApplication = ( function ( ) {
       DEBUG_WEBGL: this.options.DEBUG_WEBGL
     } );
     this.renderer.autoSortObjects = !isMobile;
-    this.renderer.enableScissorTest( true );
+    this.renderer.setScissorTest( true );
     this.renderer.setClearColor( this.options.backgroundColor );
     if ( !this.renderer.domElement.parentElement ) {
       document.body.appendChild( this.renderer.domElement );
