@@ -451,13 +451,6 @@ Primrose.VRApplication = ( function ( ) {
       }
 
       fire( "update", dt );
-      for ( j = 0; j < this.pickableObjects.length; ++j ) {
-        var obj = this.pickableObjects[j],
-            txt = obj.textarea;
-        if ( txt ) {
-          txt.render( );
-        }
-      }
 
       if ( this.inVR ) {
         for ( i = 0; i < this.input.transforms.length; ++i ) {

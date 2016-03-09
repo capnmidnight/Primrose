@@ -15,8 +15,3 @@ function loadFile ( fileName ) {
 
 loadFile( "/examples/music/app.js" );
 document.body.appendChild( ed.DOMElement );
-var anim = function () {
-  requestAnimationFrame( anim );
-  ed.render();
-};
-requestAnimationFrame( anim );

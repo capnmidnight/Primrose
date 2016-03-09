@@ -451,7 +451,7 @@ Primrose.Text.Renderers.Canvas = ( function ( ) {
             }
             renderCanvasTrim( tokenRows, gridBounds, padding, scroll, showLineNumbers, showScrollBars, wordWrap, lineCountWidth, focused );
           }
-
+          
           gfx.clearRect( 0, 0, canvas.width, canvas.height );
           gfx.drawImage( bgCanvas, 0, 0 );
           gfx.drawImage( fgCanvas, 0, 0 );

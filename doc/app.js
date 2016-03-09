@@ -72,7 +72,7 @@ function scroller ( id ) {
     }
   }
 
-  var GRAMMAR_TEST = /^grammar\("(\w+)"\);\n/;
+  var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
   function replacePreBlocks () {
     var codeBlocks = doc.querySelectorAll( "pre" );
     while ( editors.length < codeBlocks.length ) {
@@ -88,7 +88,7 @@ function scroller ( id ) {
       var ed = editors[i],
           b = codeBlocks[i],
           fs = parseFloat( document.defaultView.getComputedStyle( b, null ).getPropertyValue( "font-size" ) ),
-          txt = b.textContent || b.innerText,
+          txt = (b.textContent || b.innerText).trim(),
           grammarSpec = txt.match( GRAMMAR_TEST ),
           tokenizer = Primrose.Text.Grammars.PlainText;
       if ( grammarSpec ) {
@@ -99,7 +99,7 @@ function scroller ( id ) {
       ed.tokenizer = tokenizer;
       ed.setSize( b.clientWidth, Math.min( b.clientHeight * ( 1.25 + devicePixelRatio * 0.05 ), 400 ) );
       ed.targetSize = fs;
-      setFontSize( ed );
+      setFontSize(ed);
       ed.value = txt;
       ed.DOMElement.style.display = "block";
       ed.DOMElement.style.maxWidth = "100%";
@@ -195,18 +195,6 @@ function scroller ( id ) {
       scroller( "documentation" );
     }
   }
-
-  function paint () {
-    requestAnimationFrame( paint );
-    for ( var i = 0; i < editors.length; ++i ) {
-      var ed = editors[i];
-      if ( main.clientHeight + main.scrollTop > ed.DOMElement.offsetTop ) {
-        ed.update();
-        ed.render();
-      }
-    }
-  }
-  requestAnimationFrame( paint );
 
   // Walk the documentation database, grouping different objects by type.
   function buildDocumentation () {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -24,7 +24,7 @@
       window.addEventListener( "load", function () {
         ga( "send", "pageview" );
       }, false );</script>
-    <script type="text/javascript" src="/scripts/loader.min.js" async defer></script>
+    <script type="text/javascript" src="/lib/loader.js" async defer></script>
   </head>
   <body>
     <header role="banner">
@@ -133,8 +133,8 @@
         </ul>
 
         <p>In the <code>index.html</code> file, enter the following markup.</p>
-        <pre data-grammar="HTML"><code>﻿grammar("HTML");
-    &lt;!DOCTYPE html>
+        <pre data-grammar="HTML"><code>grammar("HTML");
+&lt;!DOCTYPE html>
 &lt;html>
   &lt;head>
     &lt;meta charset="utf-8">
@@ -152,7 +152,7 @@
 
         <p>In the <code>style.css</code> file, enter the following style definitions.</p>
         <pre data-grammar="CSS"><code>grammar("CSS");
-    html, body, #frontBuffer {
+html, body, #frontBuffer {
   padding: 0;
   margin: 0;
   border: 0;
