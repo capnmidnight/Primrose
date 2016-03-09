@@ -191,7 +191,7 @@ function testDemo ( scene ) {
       .on( scene )
       .at( -MIDX, 0, -DEPTH - 2 );
 
-  put( light( 0xffffff, 1, 500 ) )
+  put( light( 0xffffff, 1, 50 ) )
       .on( start )
       .at( MIDX + 5, 8, MIDZ + 20 );
 

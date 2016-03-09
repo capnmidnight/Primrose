@@ -678,7 +678,7 @@ Primrose.VRApplication = ( function ( ) {
     }
 
     this.camera.add( this.nose );
-    this.camera.add( light( 0xffffff, 1, 2, 0.5 ) );
+    this.camera.add( light( 0xffffff, 1, 1 ) );
     this.player.add( this.camera );
     this.scene.add( this.player );
     this.scene.add( this.pointer );
