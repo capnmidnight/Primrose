@@ -38,21 +38,11 @@
             <mimeMap fileExtension=".svg" mimeType="image/svg+xml" />
         </staticContent>
         <modules runAllManagedModulesForAllRequests="false" />
-        <iisnode watchedFiles="web.config;*.js"/>
         <!-- indicates that the server.js file is a Node.js application 
     to be handled by the iisnode module -->
         <handlers>
             <add name="iisnode" path="server.js" verb="*" modules="iisnode" />
         </handlers>
-        <rewrite>
-            <rules>
-                <clear />
-                <rule name="app" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
-                    <match url="iisnode.+" negate="true" />
-                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
-                    <action type="Rewrite" url="server.js" />
-                </rule>
-            </rules>
-        </rewrite>
+        <iisnode watchedFiles="web.config;*.js"/>
     </system.webServer>
 </configuration>
