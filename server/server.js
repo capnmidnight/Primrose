@@ -12,7 +12,7 @@
       v: "false",
       h: "localhost"
     }),
-    srcDir = ".",
+    srcDir = "./public",
     startPage = "",
     port = 8383,
     app, redir, io;

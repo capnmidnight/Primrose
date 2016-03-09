@@ -4,42 +4,41 @@ var fs = require( "fs" ),
     pathX = /.*\/(.*).js/,
     files = [
       "obj/Primrose.js",
-      "lib/analytics.js",
-      "lib/ga.js",
-      "lib/mailchimp.js",
-      "lib/pliny.js",
-      "lib/loader.js",
-      "lib/resizer.js",
-      "node_modules/cannon/build/cannon.js",
+      "public/lib/analytics.js",
+      "public/lib/ga.js",
+      "public/lib/mailchimp.js",
+      "public/lib/pliny.js",
+      "public/lib/loader.js",
+      "public/lib/resizer.js",
       "node_modules/leapjs/leap-0.6.4.js",
       "node_modules/socket.io-client/socket.io.js",
       "node_modules/three/three.js",
       "node_modules/marked/lib/marked.js"
     ],
     buildFiles = {
-      "obj/Primrose.js": [ "lib/pliny.js", "src/index.js", "src/fx/**/*.js" ]
+      "obj/Primrose.js": [ "public/lib/pliny.js", "public/src/index.js", "public/src/fx/**/*.js" ]
     },
 uglifyFiles = files.map( function ( s ) {
   return{
     src: s,
-    dest: s.replace( pathX, "scripts/$1.min.js" )
+    dest: s.replace( pathX, "public/scripts/$1.min.js" )
   };
 } ),
     copyFiles = files.map( function ( s ) {
       return {
         src: s,
-        dest: s.replace( pathX, "scripts/$1.js" )
+        dest: s.replace( pathX, "public/scripts/$1.js" )
       };
     } );
 
 copyFiles.push( {
-  src: "scripts/Primrose.js",
-  dest: "archive/Primrose-<%= pkg.version %>.js"
+  src: "public/scripts/Primrose.js",
+  dest: "public/archive/Primrose-<%= pkg.version %>.js"
 } );
 
 copyFiles.push( {
-  src: "scripts/Primrose.min.js",
-  dest: "archive/Primrose-<%= pkg.version %>.min.js"
+  src: "public/scripts/Primrose.min.js",
+  dest: "public/archive/Primrose-<%= pkg.version %>.min.js"
 } );
 
 
@@ -47,7 +46,7 @@ module.exports = function ( grunt ) {
   grunt.initConfig( {
     pkg: grunt.file.readJSON( "package.json" ),
     jshint: {
-      default: "src/**/*.js",
+      default: "public/src/**/*.js",
       options: {
         multistr: true
       }

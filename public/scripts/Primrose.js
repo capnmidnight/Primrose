@@ -1,5 +1,5 @@
 /*
-  Primrose v0.21.1 2016-03-06
+  Primrose v0.21.1 2016-03-09
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   http://www.primrosevr.com
@@ -944,7 +944,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global pliny, Primrose */
+/* global pliny, Primrose, THREE */
 
 window.Primrose = ( function () {
   "use strict";
@@ -1009,19 +1009,35 @@ window.Primrose = ( function () {
     return parseInt( s.substring( 1 ), 16 );
   } );
 
+  pliny.function( "Primrose", {
+    name: "loadTexture",
+    description: "Load a texture! Reads the THREE.ImageUtils.crossOrigin property to configure the Cross-Origin policy.",
+    paramters: [
+      {name: "url", type: "String", description: "The URL of the image to load as a texture."},
+      {name: "onLoad", type: "Function", description: "A callback for when the texture loads successfully."},
+      {name: "onProgress", type: "Function", description: "A callback for when the progress is made on loading the texture."},
+      {name: "onError", type: "Function", description: "A callback for if the texture fails to load."}
+    ]
+  } );
+  var textureLoader = new THREE.TextureLoader();
+  Primrose.loadTexture = function ( url, onLoad, onProgress, onError ) {
+    textureLoader.setCrossOrigin( THREE.ImageUtils.crossOrigin );
+    textureLoader.load( url, onLoad, onProgress, onError );
+  };
+
 // snagged and adapted from http://detectmobilebrowsers.com/
   pliny.value( "", {
     name: "isMobile",
     type: "Boolean",
     description: "Flag indicating the current system is a recognized \"mobile\"\n\
 device, usually possessing a motion sensor."
-  });  
+  } );
   window.isMobile = ( function ( a ) {
-      return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
-          a ) ||
-          /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-              a.substring( 0, 4 ) );
-    } )( navigator.userAgent || navigator.vendor || window.opera );
+    return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(
+        a ) ||
+        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+            a.substring( 0, 4 ) );
+  } )( navigator.userAgent || navigator.vendor || window.opera );
 
   pliny.value( "", {
     name: "isiOS",
@@ -1038,7 +1054,7 @@ paths necessary to deal with deficiencies in Apple's implementation of web stand
     description: "Flag indicating the current system is a computer running the Apple\n\
 OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
 idiosynchratic, concensus-defying keyboard shortcuts."
-  });
+  } );
   window.isOSX = /Macintosh/.test( navigator.userAgent || "" );
 
   pliny.value( "", {
@@ -1046,7 +1062,7 @@ idiosynchratic, concensus-defying keyboard shortcuts."
     type: "Boolean",
     description: "Flag indicating the current system is a computer running one of\n\
 the Microsoft Windows operating systems. We have not yet found a use for this flag."
-  });
+  } );
   window.isWindows = /Windows/.test( navigator.userAgent || "" );
 
   pliny.value( "", {
@@ -1057,7 +1073,7 @@ Opera is a substandard browser that lags adoption of cutting edge web technologi
 so you are not likely to need this flag if you are using Primrose, other than to\n\
 cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
 Google Chrome."
-  });
+  } );
   window.isOpera = !!window.opera || navigator.userAgent.indexOf( ' OPR/' ) >= 0;
 
   pliny.value( "", {
@@ -1068,7 +1084,7 @@ Safari is an overly opinionated browser that thinks users should be protected fr
 themselves in such a way as to prevent users from gaining access to the latest in\n\
 cutting-edge web technologies. Essentially, it was replaced Microsoft Internet\n\
 Explorer as the Internet Explorer of the web."
-  });
+  } );
   window.isSafari = Object.prototype.toString.call( window.HTMLElement ).indexOf( 'Constructor' ) > 0;
 
   pliny.value( "", {
@@ -1077,7 +1093,7 @@ Explorer as the Internet Explorer of the web."
     description: "Flag indicating the browser is currently calling itself Chrome\n\
 or Chromium. Chromium was one of the first browsers to implement virtual reality\n\
 features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
-  });
+  } );
   window.isChrome = !!window.chrome && !window.isOpera;
 
   pliny.value( "", {
@@ -1086,7 +1102,7 @@ features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
     description: "Flag indicating the browser is currently calling itself Firefox.\n\
 Firefox was one of the first browsers to implement virtual reality features directly\n\
 in the browser, thanks to the work of the MozVR team."
-  });
+  } );
   window.isFirefox = typeof window.InstallTrigger !== 'undefined';
 
   pliny.value( "", {
@@ -1095,7 +1111,7 @@ in the browser, thanks to the work of the MozVR team."
     description: "Flag indicating the browser is one of Chrome, Safari, or Opera.\n\
 WebKit browsers have certain issues in common that can be treated together, like\n\
 a common basis for orientation events."
-  });
+  } );
   window.isWebKit = window.isiOS || window.isOpera || window.isChrome;
 
   pliny.value( "", {
@@ -1104,7 +1120,7 @@ a common basis for orientation events."
     description: "Flag indicating the browser is currently calling itself Internet\n\
 Explorer. Once the bane of every web developer's existence, it has since passed\n\
 the torch on to Safari in all of its many useless incarnations."
-  });
+  } );
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
 
   pliny.value( "", {
@@ -1112,8 +1128,8 @@ the torch on to Safari in all of its many useless incarnations."
     type: "Boolean",
     description: "Flag indicating the browser supports awesomesauce as well as\n\
 the WebVR standard in some form."
-  });
-  window.isVR = !!(navigator.getVRDevices || navigator.getVRDisplays);
+  } );
+  window.isVR = !!( navigator.getVRDevices || navigator.getVRDisplays );
 
   pliny.issue( "", {
     name: "Make a getting started page.",
@@ -3551,14 +3567,12 @@ Primrose.Projector = ( function ( ) {
           return this;
         },
         subScalar: function ( s ) {
-
           this.x -= s;
           this.y -= s;
           this.z -= s;
           return this;
         },
         subVectors: function ( a, b ) {
-
           this.x = a.x - b.x;
           this.y = a.y - b.y;
           this.z = a.z - b.z;
@@ -5509,9 +5523,9 @@ Primrose.Projector = ( function ( ) {
             uvs = obj.geometry.uvs;
         for ( var j = 0; j < faces.length; ++j ) {
           var face = faces[j],
-              v0 = verts[face[0]],
-              v1 = verts[face[1]],
-              v2 = verts[face[2]];
+              v0 = verts[face[0] % faces.length],
+              v1 = verts[face[1] % faces.length],
+              v2 = verts[face[2] % faces.length];
           this.a.subVectors( v1, v0 );
           this.b.subVectors( v2, v0 );
           this.c.subVectors( this.p, this.f );
@@ -6108,7 +6122,9 @@ Primrose.VRApplication = ( function ( ) {
       strafe = this.input.getValue( "strafe" );
       drive = this.input.getValue( "drive" );
       pitch = this.input.getValue( "pitch" );
-      this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
+      if ( this.inVR ) {
+        this.input.getQuaternion( "headRX", "headRY", "headRZ", "headRW", qHead );
+      }
       qPitch.setFromAxisAngle( RIGHT, pitch );
       this.nose.visible = this.inVR;
       if ( !this.player.isOnGround ) {
@@ -6444,7 +6460,7 @@ Primrose.VRApplication = ( function ( ) {
       DEBUG_WEBGL: this.options.DEBUG_WEBGL
     } );
     this.renderer.autoSortObjects = !isMobile;
-    this.renderer.enableScissorTest( true );
+    this.renderer.setScissorTest( true );
     this.renderer.setClearColor( this.options.backgroundColor );
     if ( !this.renderer.domElement.parentElement ) {
       document.body.appendChild( this.renderer.domElement );
@@ -8178,7 +8194,7 @@ file to use as the texture, execute code as such:\n\
       \"skyTexture.jpg\",\n\
       // Specify that the material should be shadeless, i.e. no shadows. This\n\
       // works best for skymaps.\n\
-      true );" }
+      true );"}
   ]
 } );
 function shell ( r, slices, rings, phi, theta ) {
@@ -8363,21 +8379,9 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     }
   }
   else {
-    var texture;
-    if ( typeof txt === "string" ) {
-      texture = THREE.ImageUtils.loadTexture( txt );
-    }
-    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
-      texture = txt.renderer.texture;
-    }
-    else {
-      texture = txt;
-    }
-
     if ( unshaded ) {
       material = new THREE.MeshBasicMaterial( {
         color: 0xffffff,
-        map: texture,
         transparent: true,
         shading: THREE.FlatShading,
         side: THREE.DoubleSide,
@@ -8387,16 +8391,37 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     else {
       material = new THREE.MeshLambertMaterial( {
         color: 0xffffff,
-        map: texture,
         transparent: true,
         side: THREE.DoubleSide,
         opacity: o
       } );
     }
 
-    if ( s * t > 1 ) {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set( s, t );
+    var setTexture = function ( texture ) {
+      if ( !texture ) {
+        console.log( txt );
+        console.trace();
+      }
+      else {
+        material.map = texture;
+        material.needsUpdate = true;
+        if ( s * t > 1 ) {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set( s, t );
+        }
+      }
+    };
+
+    if ( typeof txt === "string" ) {
+      Primrose.loadTexture( txt, setTexture,
+          null,
+          console.error.bind( console, "Error loading texture", txt ) );
+    }
+    else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
+      setTexture( txt.renderer.texture );
+    }
+    else {
+      setTexture( txt );
     }
   }
 
@@ -8455,8 +8480,8 @@ function cloud ( verts, c, s ) {
   for ( var i = 0; i < verts.length; ++i ) {
     geom.vertices.push( verts[i] );
   }
-  var mat = new THREE.PointCloudMaterial( {color: c, size: s} );
-  return new THREE.PointCloud( geom, mat );
+  var mat = new THREE.PointsMaterial( {color: c, size: s} );
+  return new THREE.Points( geom, mat );
 }
 
 pliny.issue( "", {
