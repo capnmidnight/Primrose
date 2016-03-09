@@ -376,8 +376,7 @@
     <Compile Include="src\fx\text\renderers\DOM.js" />
     <Compile Include="src\fx\text\themes\Dark.js" />
     <Compile Include="src\fx\text\themes\Default.js" />
-    <Content Include="Web.config.old" />
-    <None Include="Web.Debug.config.old" />
+    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="archive" />
