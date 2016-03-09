@@ -49,6 +49,14 @@
     <Content Include="models\stars.json" />
     <Content Include="models\tree.jpg" />
     <Content Include="models\Untitled.png" />
+    <Content Include="music\ambient.mp3" />
+    <Content Include="music\click.mp3" />
+    <Content Include="music\click.ogg" />
+    <Content Include="music\game1.ogg" />
+    <Content Include="music\menu.mp3" />
+    <Content Include="music\menu.ogg" />
+    <Content Include="music\ocean.mp3" />
+    <Content Include="music\title.ogg" />
     <Content Include="robots.txt" />
     <Content Include="ga.html" />
     <Content Include="googlef740d821ffb81484.html" />
