@@ -1,0 +1,459 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0ab50445-5ce1-4ebd-a7fd-01c523ad3a0c}</ProjectGuid>
+    <ProjectHome />
+    <ProjectView>ProjectFiles</ProjectView>
+    <StartupFile>server.js</StartupFile>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Content Include="models\bear.json" />
+    <Content Include="models\BearSkin.png" />
+    <Content Include="models\brick.PNG" />
+    <Content Include="models\button.json" />
+    <Content Include="models\commodore_pet" />
+    <Content Include="models\commodore_pet.json" />
+    <Content Include="models\grass.png" />
+    <Content Include="models\grass.png.002.png" />
+    <Content Include="models\holodeck.json" />
+    <Content Include="models\holodeck.png" />
+    <Content Include="models\keyboard_map.png" />
+    <Content Include="models\ocean.jpg" />
+    <Content Include="models\ocean.jpg.002.jpg" />
+    <Content Include="models\scene.json" />
+    <Content Include="models\scene2.json" />
+    <Content Include="models\scene3.json" />
+    <Content Include="models\scene4.blend" />
+    <Content Include="models\scene4.json" />
+    <Content Include="models\scene5.json" />
+    <Content Include="models\skybox.png" />
+    <Content Include="models\smallbutton.json" />
+    <Content Include="models\stars.json" />
+    <Content Include="models\tree.jpg" />
+    <Content Include="models\Untitled.png" />
+    <Content Include="robots.txt" />
+    <Content Include="ga.html" />
+    <Content Include="googlef740d821ffb81484.html" />
+    <Content Include="index.html" />
+    <Content Include="missing.html" />
+    <Content Include="favicon.png" />
+    <Content Include="favicon.ico" />
+    <Content Include="package.json" />
+    <Content Include="CHANGELOG.md" />
+    <Content Include="CONTRIBUTORS.md" />
+    <Content Include="LICENSE.md" />
+    <Content Include="README.md" />
+    <Content Include="sitemap.xml" />
+    <Compile Include="Gruntfile.js" />
+    <Compile Include="server.js" />
+    <Compile Include="archive\Primrose-0.16.1.js" />
+    <Compile Include="archive\Primrose-0.16.1.min.js" />
+    <Compile Include="archive\Primrose-0.16.10.js" />
+    <Compile Include="archive\Primrose-0.16.10.min.js" />
+    <Compile Include="archive\Primrose-0.16.11.js" />
+    <Compile Include="archive\Primrose-0.16.11.min.js" />
+    <Compile Include="archive\Primrose-0.16.2.js" />
+    <Compile Include="archive\Primrose-0.16.2.min.js" />
+    <Compile Include="archive\Primrose-0.16.3.js" />
+    <Compile Include="archive\Primrose-0.16.3.min.js" />
+    <Compile Include="archive\Primrose-0.16.4.js" />
+    <Compile Include="archive\Primrose-0.16.4.min.js" />
+    <Compile Include="archive\Primrose-0.16.5.js" />
+    <Compile Include="archive\Primrose-0.16.5.min.js" />
+    <Compile Include="archive\Primrose-0.16.6.js" />
+    <Compile Include="archive\Primrose-0.16.6.min.js" />
+    <Compile Include="archive\Primrose-0.16.7.js" />
+    <Compile Include="archive\Primrose-0.16.7.min.js" />
+    <Compile Include="archive\Primrose-0.16.8.js" />
+    <Compile Include="archive\Primrose-0.16.8.min.js" />
+    <Compile Include="archive\Primrose-0.16.9.js" />
+    <Compile Include="archive\Primrose-0.16.9.min.js" />
+    <Compile Include="archive\Primrose-0.17.0.js" />
+    <Compile Include="archive\Primrose-0.17.0.min.js" />
+    <Compile Include="archive\Primrose-0.17.1.js" />
+    <Compile Include="archive\Primrose-0.17.1.min.js" />
+    <Compile Include="archive\Primrose-0.17.2.js" />
+    <Compile Include="archive\Primrose-0.17.2.min.js" />
+    <Compile Include="archive\Primrose-0.17.3.js" />
+    <Compile Include="archive\Primrose-0.17.3.min.js" />
+    <Compile Include="archive\Primrose-0.17.4.js" />
+    <Compile Include="archive\Primrose-0.17.4.min.js" />
+    <Compile Include="archive\Primrose-0.18.0.js" />
+    <Compile Include="archive\Primrose-0.18.0.min.js" />
+    <Compile Include="archive\Primrose-0.18.1.js" />
+    <Compile Include="archive\Primrose-0.18.1.min.js" />
+    <Compile Include="archive\Primrose-0.18.2.js" />
+    <Compile Include="archive\Primrose-0.18.2.min.js" />
+    <Compile Include="archive\Primrose-0.18.3.js" />
+    <Compile Include="archive\Primrose-0.18.3.min.js" />
+    <Compile Include="archive\Primrose-0.19.0.js" />
+    <Compile Include="archive\Primrose-0.19.0.min.js" />
+    <Compile Include="archive\Primrose-0.19.1.js" />
+    <Compile Include="archive\Primrose-0.19.1.min.js" />
+    <Compile Include="archive\Primrose-0.19.2.js" />
+    <Compile Include="archive\Primrose-0.19.2.min.js" />
+    <Compile Include="archive\Primrose-0.19.3.js" />
+    <Compile Include="archive\Primrose-0.19.3.min.js" />
+    <Compile Include="archive\Primrose-0.20.0.js" />
+    <Compile Include="archive\Primrose-0.20.0.min.js" />
+    <Compile Include="archive\Primrose-0.20.1.js" />
+    <Compile Include="archive\Primrose-0.20.1.min.js" />
+    <Compile Include="archive\Primrose-0.20.2.js" />
+    <Compile Include="archive\Primrose-0.20.2.min.js" />
+    <Compile Include="archive\Primrose-0.20.3.js" />
+    <Compile Include="archive\Primrose-0.20.3.min.js" />
+    <Compile Include="archive\Primrose-0.20.4.js" />
+    <Compile Include="archive\Primrose-0.20.4.min.js" />
+    <Compile Include="archive\Primrose-0.20.5.js" />
+    <Compile Include="archive\Primrose-0.20.5.min.js" />
+    <Compile Include="archive\Primrose-0.20.6.js" />
+    <Compile Include="archive\Primrose-0.20.6.min.js" />
+    <Compile Include="archive\Primrose-0.20.7.js" />
+    <Compile Include="archive\Primrose-0.20.7.min.js" />
+    <Compile Include="archive\Primrose-0.21.0.js" />
+    <Compile Include="archive\Primrose-0.21.0.min.js" />
+    <Compile Include="archive\Primrose-0.21.1.js" />
+    <Compile Include="archive\Primrose-0.21.1.min.js" />
+    <Content Include="doc\index.html" />
+    <Content Include="doc\style.css" />
+    <Content Include="doc\style.min.css" />
+    <Content Include="doc\gettingStarted.jpg" />
+    <Content Include="doc\adventure.md" />
+    <Content Include="doc\blenderAdvanced.md" />
+    <Content Include="doc\blenderBeginner.md" />
+    <Content Include="doc\drum.md" />
+    <Content Include="doc\editorVRManual.md" />
+    <Content Include="doc\editorVRTutorial.md" />
+    <Content Include="doc\export.md" />
+    <Content Include="doc\faq.md" />
+    <Content Include="doc\hmd.md" />
+    <Content Include="doc\lighting.md" />
+    <Content Include="doc\pliny.md" />
+    <Content Include="doc\server.md" />
+    <Content Include="doc\setup.md" />
+    <Content Include="doc\sync.md" />
+    <Content Include="doc\video.md" />
+    <Content Include="doc\webvr.md" />
+    <Compile Include="doc\app.js" />
+    <Content Include="examples\style.css" />
+    <Content Include="examples\style.min.css" />
+    <Content Include="images\cardboard128.png" />
+    <Content Include="images\cardboard64.png" />
+    <Content Include="images\chromium.webvr.png" />
+    <Content Include="images\deck.png" />
+    <Content Include="images\fullscreen128.png" />
+    <Content Include="images\fullscreen64.png" />
+    <Content Include="images\github.png" />
+    <Content Include="images\gplv3.png" />
+    <Content Include="images\grass.png" />
+    <Content Include="images\html5.png" />
+    <Content Include="images\js.png" />
+    <Content Include="images\logo128.png" />
+    <Content Include="images\logo128dark.png" />
+    <Content Include="images\logo16.png" />
+    <Content Include="images\logo256.png" />
+    <Content Include="images\logo32.png" />
+    <Content Include="images\logo64.png" />
+    <Content Include="images\primrose128.png" />
+    <Content Include="images\primrose32.png" />
+    <Content Include="images\primrose64.png" />
+    <Content Include="images\q.png" />
+    <Content Include="images\reddit.webvr.png" />
+    <Content Include="images\rock.png" />
+    <Content Include="images\sand.png" />
+    <Content Include="images\stm.png" />
+    <Content Include="images\stripe.png" />
+    <Content Include="images\water.png" />
+    <Content Include="images\webvr.info.png" />
+    <Content Include="images\bg1.jpg" />
+    <Content Include="images\bg2.jpg" />
+    <Content Include="images\mail-logo.jpg" />
+    <Content Include="images\mdn.webvr.jpg" />
+    <Content Include="images\mozvr.com.jpg" />
+    <Content Include="images\nightly.mozilla.jpg" />
+    <Content Include="images\screenshot.jpg" />
+    <Content Include="images\stm-2015-05.jpg" />
+    <Compile Include="lib\analytics.js" />
+    <Compile Include="lib\Blob.js" />
+    <Compile Include="lib\droid_sans_regular.typeface.js" />
+    <Compile Include="lib\FileSaver.js" />
+    <Compile Include="lib\ga.js" />
+    <Compile Include="lib\gl-matrix.js" />
+    <Compile Include="lib\loader.js" />
+    <Compile Include="lib\mailchimp.js" />
+    <Compile Include="lib\pliny.js" />
+    <Compile Include="lib\resizer.js" />
+    <Compile Include="lib\sha512.js" />
+    <Compile Include="lib\webgl-debug.js" />
+    <Compile Include="scripts\analytics.js" />
+    <Compile Include="scripts\analytics.min.js" />
+    <Compile Include="scripts\cannon.js" />
+    <Compile Include="scripts\cannon.min.js" />
+    <Compile Include="scripts\ga.js" />
+    <Compile Include="scripts\ga.min.js" />
+    <Compile Include="scripts\leap-0.6.4.js" />
+    <Compile Include="scripts\leap-0.6.4.min.js" />
+    <Compile Include="scripts\loader.js" />
+    <Compile Include="scripts\loader.min.js" />
+    <Compile Include="scripts\mailchimp.js" />
+    <Compile Include="scripts\mailchimp.min.js" />
+    <Compile Include="scripts\marked.js" />
+    <Compile Include="scripts\marked.min.js" />
+    <Compile Include="scripts\pliny.js" />
+    <Compile Include="scripts\pliny.min.js" />
+    <Compile Include="scripts\Primrose.js" />
+    <Compile Include="scripts\Primrose.min.js" />
+    <Compile Include="scripts\resizer.js" />
+    <Compile Include="scripts\resizer.min.js" />
+    <Compile Include="scripts\socket.io.js" />
+    <Compile Include="scripts\socket.io.min.js" />
+    <Compile Include="scripts\three.js" />
+    <Compile Include="scripts\three.min.js" />
+    <Compile Include="server\controllers.js" />
+    <Compile Include="server\core.js" />
+    <Compile Include="server\gameController.js" />
+    <Compile Include="server\master.js" />
+    <Compile Include="server\options.js" />
+    <Compile Include="server\requireDirectory.js" />
+    <Compile Include="server\server.js" />
+    <Compile Include="server\socketControllers.js" />
+    <Compile Include="server\starter.js" />
+    <Compile Include="server\webServer.js" />
+    <Compile Include="server\webSocketServer.js" />
+    <Compile Include="src\index.js" />
+    <Content Include="stylesheets\main.css" />
+    <Content Include="stylesheets\main.min.css" />
+    <Compile Include="test\Basic.js" />
+    <Compile Include="test\Grammar.js" />
+    <Compile Include="test\Point.js" />
+    <Compile Include="test\Rectangle.js" />
+    <Compile Include="test\Size.js" />
+    <Compile Include="test\testing.js" />
+    <Content Include="testimonials\hn-top-5-jan-30-2015-1526pm.PNG" />
+    <Content Include="testimonials\t00.PNG" />
+    <Content Include="doc\images\editorVR\consoleWindow.jpg" />
+    <Content Include="doc\images\editorVR\cursor1.jpg" />
+    <Content Include="doc\images\editorVR\cursor2.jpg" />
+    <Content Include="doc\images\editorVR\cursor3.jpg" />
+    <Content Include="doc\images\editorVR\cursor4.JPG" />
+    <Content Include="doc\images\editorVR\docWindow.jpg" />
+    <Content Include="doc\images\editorVR\layout.jpg" />
+    <Content Include="examples\commodore\index.html" />
+    <Content Include="examples\commodore\keyboard_map.png" />
+    <Content Include="examples\commodore\screenshot.jpg" />
+    <Content Include="examples\commodore\commodore_pet.json" />
+    <Compile Include="examples\commodore\app.js" />
+    <Content Include="examples\editor2d\index.html" />
+    <Content Include="examples\editor2d\style.css" />
+    <Content Include="examples\editor2d\style.min.css" />
+    <Compile Include="examples\editor2d\app.js" />
+    <Content Include="examples\editor3d\index.html" />
+    <Content Include="examples\editor3d\screenshot.jpg" />
+    <Compile Include="examples\editor3d\app.js" />
+    <Content Include="examples\empty\index.html" />
+    <Content Include="examples\empty\screenshot.jpg" />
+    <Compile Include="examples\empty\app.js" />
+    <Content Include="examples\evolve\index.html" />
+    <Content Include="examples\evolve\evolve.css" />
+    <Content Include="examples\glove\index.html" />
+    <Content Include="examples\glove\style.css" />
+    <Content Include="examples\glove\BearSkin.png" />
+    <Content Include="examples\glove\brick.PNG" />
+    <Content Include="examples\glove\grass.png" />
+    <Content Include="examples\glove\holodeck.png" />
+    <Content Include="examples\glove\skybox.png" />
+    <Content Include="examples\glove\ocean.jpg" />
+    <Content Include="examples\glove\tree.jpg" />
+    <Compile Include="examples\glove\app.js" />
+    <Content Include="examples\images\deck.png" />
+    <Content Include="examples\images\grass.png" />
+    <Content Include="examples\images\rock.png" />
+    <Content Include="examples\images\sand.png" />
+    <Content Include="examples\images\water.png" />
+    <Content Include="examples\images\bg.jpg" />
+    <Content Include="examples\images\bg1.jpg" />
+    <Content Include="examples\images\bg2.jpg" />
+    <Content Include="examples\jabbers\index.html" />
+    <Content Include="examples\jabbers\screenshot.jpg" />
+    <Compile Include="examples\jabbers\app.js" />
+    <Content Include="examples\keycodeTesting\index.html" />
+    <Content Include="examples\music\index.html" />
+    <Content Include="examples\music\screenshot.jpg" />
+    <Compile Include="examples\music\app.js" />
+    <Content Include="examples\temple\index.html" />
+    <Content Include="examples\temple\screenshot.jpg" />
+    <Compile Include="examples\temple\app.js" />
+    <Content Include="examples\test\index.html" />
+    <Compile Include="examples\test\app.js" />
+    <Compile Include="server\controllers\bears.js" />
+    <Compile Include="server\controllers\holodeck.js" />
+    <Compile Include="server\controllers\listRoot.js" />
+    <Compile Include="server\game\User.js" />
+    <Compile Include="server\socketControllers\demo.server.js" />
+    <Compile Include="server\socketControllers\peering.js" />
+    <Content Include="server\templates\game.html" />
+    <Content Include="server\templates\master.html" />
+    <Compile Include="src\fx\Angle.js" />
+    <Compile Include="src\fx\BaseControl.js" />
+    <Compile Include="src\fx\Button.js" />
+    <Compile Include="src\fx\ButtonFactory.js" />
+    <Compile Include="src\fx\DOM.js" />
+    <Compile Include="src\fx\HTTP.js" />
+    <Compile Include="src\fx\Keys.js" />
+    <Compile Include="src\fx\ModelLoader.js" />
+    <Compile Include="src\fx\NetworkedInput.js" />
+    <Compile Include="src\fx\Projector.js" />
+    <Compile Include="src\fx\Random.js" />
+    <Compile Include="src\fx\StateList.js" />
+    <Compile Include="src\fx\VRApplication.js" />
+    <Compile Include="src\fx\WebRTCSocket.js" />
+    <Compile Include="src\fx\Workerize.js" />
+    <Compile Include="src\fx\helpers\fmt.js" />
+    <Compile Include="src\fx\helpers\forms.js" />
+    <Compile Include="src\fx\helpers\graphics.js" />
+    <Compile Include="src\fx\helpers\oop.js" />
+    <Compile Include="src\fx\helpers\options.js" />
+    <Compile Include="src\fx\input\ButtonAndAxis.js" />
+    <Compile Include="src\fx\input\Camera.js" />
+    <Compile Include="src\fx\input\FPSInput.js" />
+    <Compile Include="src\fx\input\Gamepad.js" />
+    <Compile Include="src\fx\input\Keyboard.js" />
+    <Compile Include="src\fx\input\LeapMotion.js" />
+    <Compile Include="src\fx\input\Location.js" />
+    <Compile Include="src\fx\input\Motion.js" />
+    <Compile Include="src\fx\input\Mouse.js" />
+    <Compile Include="src\fx\input\Speech.js" />
+    <Compile Include="src\fx\input\Touch.js" />
+    <Compile Include="src\fx\input\VR.js" />
+    <Compile Include="src\fx\output\Audio3D.js" />
+    <Compile Include="src\fx\output\HapticGlove.js" />
+    <Compile Include="src\fx\output\Music.js" />
+    <Compile Include="src\fx\output\Speech.js" />
+    <Compile Include="src\fx\text\CodePage.js" />
+    <Compile Include="src\fx\text\CommandPack.js" />
+    <Compile Include="src\fx\text\Cursor.js" />
+    <Compile Include="src\fx\text\Grammar.js" />
+    <Compile Include="src\fx\text\OperatingSystem.js" />
+    <Compile Include="src\fx\text\Point.js" />
+    <Compile Include="src\fx\text\Rectangle.js" />
+    <Compile Include="src\fx\text\Rule.js" />
+    <Compile Include="src\fx\text\Size.js" />
+    <Compile Include="src\fx\text\Terminal.js" />
+    <Compile Include="src\fx\text\Token.js" />
+    <Compile Include="src\fx\text\code_pages\DE_QWERTZ.js" />
+    <Compile Include="src\fx\text\code_pages\EN_UKX.js" />
+    <Compile Include="src\fx\text\code_pages\EN_US.js" />
+    <Compile Include="src\fx\text\code_pages\FR_AZERTY.js" />
+    <Compile Include="src\fx\text\command_packs\TestViewer.js" />
+    <Compile Include="src\fx\text\command_packs\TextEditor.js" />
+    <Compile Include="src\fx\text\controls\PlainText.js" />
+    <Compile Include="src\fx\text\controls\TextBox.js" />
+    <Compile Include="src\fx\text\grammars\Basic.js" />
+    <Compile Include="src\fx\text\grammars\JavaScript.js" />
+    <Compile Include="src\fx\text\grammars\PlainText.js" />
+    <Compile Include="src\fx\text\grammars\TestResults.js" />
+    <Compile Include="src\fx\text\operating_systems\OSX.js" />
+    <Compile Include="src\fx\text\operating_systems\Windows.js" />
+    <Compile Include="src\fx\text\renderers\Canvas.js" />
+    <Compile Include="src\fx\text\renderers\DOM.js" />
+    <Compile Include="src\fx\text\themes\Dark.js" />
+    <Compile Include="src\fx\text\themes\Default.js" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="archive" />
+    <Folder Include="doc" />
+    <Folder Include="doc\images" />
+    <Folder Include="doc\images\editorVR" />
+    <Folder Include="examples" />
+    <Folder Include="examples\commodore" />
+    <Folder Include="examples\editor2d" />
+    <Folder Include="examples\editor3d" />
+    <Folder Include="examples\empty" />
+    <Folder Include="examples\evolve" />
+    <Folder Include="examples\glove" />
+    <Folder Include="examples\images" />
+    <Folder Include="examples\jabbers" />
+    <Folder Include="examples\keycodeTesting" />
+    <Folder Include="examples\music" />
+    <Folder Include="examples\temple" />
+    <Folder Include="examples\test" />
+    <Folder Include="images" />
+    <Folder Include="lib" />
+    <Folder Include="models\" />
+    <Folder Include="music" />
+    <Folder Include="scripts" />
+    <Folder Include="server" />
+    <Folder Include="server\controllers" />
+    <Folder Include="server\game" />
+    <Folder Include="server\socketControllers" />
+    <Folder Include="server\templates" />
+    <Folder Include="src" />
+    <Folder Include="src\fx" />
+    <Folder Include="src\fx\helpers" />
+    <Folder Include="src\fx\input" />
+    <Folder Include="src\fx\output" />
+    <Folder Include="src\fx\text" />
+    <Folder Include="src\fx\text\code_pages" />
+    <Folder Include="src\fx\text\command_packs" />
+    <Folder Include="src\fx\text\controls" />
+    <Folder Include="src\fx\text\grammars" />
+    <Folder Include="src\fx\text\operating_systems" />
+    <Folder Include="src\fx\text\renderers" />
+    <Folder Include="src\fx\text\themes" />
+    <Folder Include="stylesheets" />
+    <Folder Include="test" />
+    <Folder Include="testimonials" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

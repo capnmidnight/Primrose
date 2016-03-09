@@ -1,3 +1,4 @@
+/* global require, process, exp */
 ﻿var format = require("util").format,
     fs = require("fs"),
     http = require("http"),

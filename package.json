@@ -21,7 +21,8 @@
     "lib/"
   ],
   "scripts": {
-    "start": "node server/server.js -v:true"
+    "start": "node server.js -v:false",
+    "start-dev": "node server.js -v:true"
   },
   "keywords": [
     "virtual reality",
