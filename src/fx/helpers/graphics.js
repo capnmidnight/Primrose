@@ -404,7 +404,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       } );
     }
     else {
-      material = new THREE.MeshStandardMaterial( {
+      material = new THREE.MeshLambertMaterial( {
         color: 0xffffff,
         transparent: true,
         side: THREE.DoubleSide,
@@ -419,6 +419,7 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
       }
       else {
         material.map = texture;
+        material.needsUpdate = true;
         if ( s * t > 1 ) {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set( s, t );
@@ -427,7 +428,9 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     };
 
     if ( typeof txt === "string" ) {
-      Primrose.loadTexture( txt, setTexture );
+      Primrose.loadTexture( txt, setTexture,
+          null,
+          console.error.bind( console, "Error loading texture", txt ) );
     }
     else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
       setTexture( txt.renderer.texture );

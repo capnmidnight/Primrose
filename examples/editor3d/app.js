@@ -22,7 +22,7 @@ var GRASS = "/examples/images/grass.png",
       disableAutoFullScreen: true,
       useFog: false,
       skyTexture: "/examples/images/bg2.jpg",
-      groundTexture: "/examples/images/deck.png"
+      groundTexture: DECK
     } ),
     editorSphereY = app.avatarHeight - 0.25;
 
