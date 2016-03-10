@@ -16,6 +16,11 @@
     <StartWebBrowser>True</StartWebBrowser>
     <LaunchUrl>index.html</LaunchUrl>
     <UseIISExpress>true</UseIISExpress>
+    <NodeExePath>
+    </NodeExePath>
+    <NodeExeArguments>
+    </NodeExeArguments>
+    <ScriptArguments>-v:true</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +29,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="index.html.jade" />
     <Content Include="models\bear.json" />
     <Content Include="models\BearSkin.png" />
     <Content Include="models\brick.PNG" />
