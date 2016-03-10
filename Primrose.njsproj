@@ -192,8 +192,6 @@
     <Compile Include="test\Rectangle.js" />
     <Compile Include="test\Size.js" />
     <Compile Include="test\testing.js" />
-    <Content Include="testimonials\hn-top-5-jan-30-2015-1526pm.PNG" />
-    <Content Include="testimonials\t00.PNG" />
     <Content Include="doc\images\editorVR\consoleWindow.jpg" />
     <Content Include="doc\images\editorVR\cursor1.jpg" />
     <Content Include="doc\images\editorVR\cursor2.jpg" />
@@ -366,7 +364,6 @@
     <Folder Include="src\fx\text\themes" />
     <Folder Include="stylesheets" />
     <Folder Include="test" />
-    <Folder Include="testimonials" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
