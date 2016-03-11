@@ -30,6 +30,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="doc\index.html.jade" />
+    <Content Include="examples\commodore\index.html.jade" />
+    <Content Include="examples\empty\index.html.jade" />
+    <Content Include="examples\glove\index.html.jade" />
+    <Content Include="examples\jabbers\index.html.jade" />
+    <Content Include="examples\music\index.html.jade" />
+    <Content Include="examples\temple\index.html.jade" />
+    <Content Include="templates\demo.jade" />
+    <Content Include="examples\editor3d\index.html.jade" />
     <Content Include="images\stm.png" />
     <Content Include="templates\main.jade" />
     <Content Include="index.html.jade" />
@@ -244,8 +252,6 @@
     <Content Include="examples\temple\index.html" />
     <Content Include="examples\temple\screenshot.jpg" />
     <Compile Include="examples\temple\app.js" />
-    <Content Include="examples\test\index.html" />
-    <Compile Include="examples\test\app.js" />
     <Compile Include="server\controllers\bears.js" />
     <Compile Include="server\controllers\holodeck.js" />
     <Compile Include="server\controllers\listRoot.js" />
@@ -339,7 +345,6 @@
     <Folder Include="examples\keycodeTesting" />
     <Folder Include="examples\music" />
     <Folder Include="examples\temple" />
-    <Folder Include="examples\test" />
     <Folder Include="images" />
     <Folder Include="lib" />
     <Folder Include="models\" />

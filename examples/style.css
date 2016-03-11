@@ -10,54 +10,6 @@ html, body {
   margin: 0;
 }
 
-#loading, #progressBar {
-  position: absolute;
-  height: 100%;
-  top: 0;
-  left: 0;
-  font-size: 12vw;
-  padding: 7vw;
-}
-
-#loading {
-  color: white;
-  width: 100%;
-}
-
-#progressBar {
-  background-color: rgba(255,255,255,0.75);
-  color: black;
-  width: 0;
-  overflow: hidden;
-}
-
-article {
-  color: #fff;
-  background-image: linear-gradient(1deg,rgba(25,35,53,1),rgba(31,56,92,0.89),rgba(67,128,194,0.95));
-  box-shadow: 0 0 10px #8392a9;
-  text-shadow: 1px 1px 1px #020e1f;
-  position: absolute;
-  left: 1em;
-  top: 1em;
-  max-height: 95%;
-  width: 50em;
-  padding: 3em;
-  overflow-y: scroll;
-}
-
-input, select {
-  background-color: rgba(255,255,255,0.25);
-  color: white;
-  border: 0;
-  padding: .25em;
-  margin: .25em;
-  text-align: center;
-}
-
-select > option {
-  color: black;
-}
-
 body {
   background-color: #eee;
   background-repeat: no-repeat;

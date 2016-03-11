@@ -17,7 +17,7 @@
     <meta property="og:title" content="Primrose VR: WebVR Application Framework">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
     <title>Primrose VR: WebVR Application Framework</title>
-    <link href="/stylesheets/main.min.css" type="text/css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
     <script type="text/javascript" src="/scripts/ga.min.js" async defer></script>
   </head>
   <body>
@@ -34,10 +34,5 @@
         </ul>
       </nav>
     </header>
-    <main>
-    </main>
-    <footer><a href="https://www.twitter.com/primrose_vr" target="_blank">Twitter</a><a href="https://www.linkedin.com/company/primrose-vr" target="_blank">LinkedIn</a><a href="https://github.com/voodootikigod/logo.js" target="_blank"><img src="/images/js.png" alt="logo" title="JavaScript" style="height:32px"></a><a href="https://www.w3.org/html/" target="_blank"><img src="/images/html5.png" alt="logo" title="HTML5"></a><a href="https://www.gnu.org/licenses/gpl.html" target="_blank"><img src="/images/gplv3.png" alt="logo" title="GPLv3"></a><small>Copyright &copy; <a href="https://www.seanmcbeth.com" target="_blank">
-           
-          Sean T. McBeth <img src="/images/stm.png" alt="logo" title="Sean T. McBeth" style="height:32px">, 2014 - 2016.</a></small></footer>
   </body>
 </html>

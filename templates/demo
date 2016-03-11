@@ -11,7 +11,7 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/templates/withFramework">
+    <meta property="og:url" content="http://www.primrosevr.com/templates/demo">
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:title" content="Primrose VR: WebVR Application Framework">
@@ -89,8 +89,16 @@
     <script type="text/javascript" src="/src/fx/text/renderers/DOM.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Dark.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script>
+    <link type="text/css" rel="stylesheet" href="../style.css">
+    <style type="text/css">body{background-image:url(screenshot.jpg);}</style>
   </head>
   <body>
+    <canvas id="frontBuffer"></canvas>
+    <div id="controls">
+      <button id="viewSource" type="button">View source</button>
+      <button id="goVR" type="button"><img src="/images/cardboard64.png" alt="icon"></button>
+      <button id="goRegular" type="button"><img src="/images/fullscreen64.png" alt="icon"></button>
+    </div>
     <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
       <nav role="navigation">
         <ul>

@@ -1,0 +1,12 @@
+﻿extends withFramework.jade
+
+append head
+  link(type="text/css", rel="stylesheet", href= debug ? "../style.css" : "../style.min.css")
+  style(type="text/css") body{background-image:url(screenshot.jpg);}
+
+block banner
+  canvas#frontBuffer
+  #controls
+    button#viewSource(type="button") View source
+    button#goVR(type="button"): img(src="/images/cardboard64.png", alt="icon")
+    button#goRegular(type="button"): img(src="/images/fullscreen64.png", alt="icon")
