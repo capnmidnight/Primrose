@@ -1,6 +1,7 @@
 ﻿extends withFramework.jade
 
 append head
+  link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")
   link(type="text/css", rel="stylesheet", href= debug ? "../style.css" : "../style.min.css")
   style(type="text/css") body{background-image:url(screenshot.jpg);}
 

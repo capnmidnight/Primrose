@@ -1,6 +1,7 @@
 ﻿extends ./templates/main.jade
 
 append head
+  link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")
   script(src="//cdn.webglstats.com/stat.js", async, defer)
   script(type="text/javascript", src="/scripts/mailchimp.min.js", async, defer)
   
