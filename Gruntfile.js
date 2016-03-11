@@ -1,6 +1,7 @@
 /* global module */
 
 var pathX = /.*\/(.*).js/,
+    pkg = require("./package.json"),
     files = [
       "obj/Primrose.js",
       "lib/analytics.js",
@@ -42,46 +43,56 @@ copyFiles.push({
   dest: "archive/Primrose-<%= pkg.version %>.min.js"
 });
 
-var jadeConfiguration = {
-  options: {
-    data: {
-      debug: false,
-      version: "<%= pkg.version %>"
-    }
-  },
-  files: [
-    {
-      expand: true,
-      src: ["**/*.jade"],
-      dest: "",
-      ext: "",
-      extDot: "last"
-    }
-  ]
-},
-    jadeDebugConfiguration = JSON.parse(JSON.stringify(jadeConfiguration));
-jadeDebugConfiguration.options.pretty = true;
-jadeDebugConfiguration.options.data.debug = true;
+function jadeConfiguration(options, defaultData, appendData) {
+  var config = {
+    options: options,
+    files: [
+      {
+        expand: true,
+        src: ["**/*.jade"],
+        dest: "",
+        ext: "",
+        extDot: "last"
+      }
+    ]
+  };
+  
+  config.options.data = function (dest, src) {
+    var data = JSON.parse(JSON.stringify(defaultData));
+    data.version = pkg.version;
+    data.filename = dest;
+    appendData.call(data, dest, src);
+    return data;
+  }.bind(config);
+  
+  return config;
+}
+
+var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, { debug: true }, function (dest, src) {
+  this.debug = true;
+}),
+    jadeReleaseConfiguration = jadeConfiguration({}, {}, function (dest, src) {
+    });
 
 module.exports = function (grunt) {
   grunt.initConfig({
-
+    
     pkg: grunt.file.readJSON("package.json"),
-
+    
     clean: ["obj", "scripts", "debug", "release"],
-
+    
     jade: {
-      release: jadeConfiguration,
+      release: jadeReleaseConfiguration,
       debug: jadeDebugConfiguration
     },
-
+    
     jshint: {
       default: "src/**/*.js",
       options: {
         multistr: true
       }
     },
-
+    
     concat: {
       options: {
         banner: "/*\n\
@@ -99,20 +110,20 @@ module.exports = function (grunt) {
         files: buildFiles
       }
     },
-
+    
     uglify: {
       default: {
         files: uglifyFiles
       }
     },
-
+    
     copy: {
       default: {
         files: copyFiles
       }
     }
   });
-
+  
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-exec");
   grunt.loadNpmTasks("grunt-contrib-copy");
@@ -120,7 +131,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-jade");
-
+  
   grunt.registerTask("debug", ["jade:debug"]);
   grunt.registerTask("release", ["clean", "jade:release", "jshint", "concat", "uglify", "copy"]);
   grunt.registerTask("default", ["debug"]);

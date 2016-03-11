@@ -30,6 +30,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="doc\index.html.jade" />
+    <Content Include="images\stm.png" />
+    <Content Include="templates\main.jade" />
     <Content Include="index.html.jade" />
     <Content Include="models\bear.json" />
     <Content Include="models\BearSkin.png" />
@@ -124,7 +126,6 @@
     <Content Include="images\reddit.webvr.png" />
     <Content Include="images\rock.png" />
     <Content Include="images\sand.png" />
-    <Content Include="images\stm.png" />
     <Content Include="images\stripe.png" />
     <Content Include="images\water.png" />
     <Content Include="images\webvr.info.png" />
@@ -343,6 +344,7 @@
     <Folder Include="lib" />
     <Folder Include="models\" />
     <Folder Include="music" />
+    <Folder Include="templates\" />
     <Folder Include="scripts" />
     <Folder Include="server" />
     <Folder Include="server\controllers" />
