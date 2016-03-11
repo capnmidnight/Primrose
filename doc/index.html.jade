@@ -1,0 +1,160 @@
+﻿doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="description", content="A WebVR application framework.")
+    meta(name="keywords", content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose")
+    meta(property="og:type", content="website")
+    meta(property="og:site_name", content="Primrose VR")
+    meta(property="og:url", content="http://www.primrosevr.com/")
+    meta(property="og:title", content="Primrose VR")
+    meta(property="og:image", content="http://www.primrosevr.com/images/screenshot.jpg")
+    meta(property="og:description", content="Primrose: Framework for WebVR Applications")
+    meta(name="twitter:card", content="summary_large_image")
+    meta(name="twitter:site", content="@Sean_McBeth")
+    meta(name="twitter:title", content="Primrose VR")
+    meta(name="twitter:description", content="Primrose: Framework for WebVR Applications")
+    meta(name="twitter:image", content="http://www.primrosevr.com/images/screenshot.jpg")
+    title Primrose VR: WebVR Application Framework Documentation
+    link(rel="stylesheet", type="text/css", href="style.css")
+    script(type="text/javascript", src="/scripts/ga.min.js", async, defer)
+    script(type="text/javascript", src="/lib/loader.js", async, defer)
+  body
+    header(role="banner")
+      a#logo(href="/index.html")
+        img(src="/images/primrose32.png", alt="logo", title="Primrose logo")
+      nav(role="navigation")
+        ul
+          li: a(href="/index.html#intro") intro/
+          li: a(href="/index.html#webvr") webvr/
+          li: a(href="/doc/") doc/
+          li: a(href="/index.html#dev") download/
+          li: a(href="/index.html#team") team/
+          li: a(href="/index.html#mail") contact/
+          li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") src/
+    main
+      script(type="text/javascript", src="/lib/resizer.js", async)
+      #top
+      #contents
+        h1: a(href="/doc/") Primrose VR
+        input#docSearch(type="search", placeholder="Filter")
+        details(open)
+          summary Table of contents
+          nav
+            ul
+              li
+                h2 GitHub
+                ul
+                  li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Source code
+                  li: a(href="https://www.github.com/capnmidnight/Primrose/issues", target="_blank") Issues
+      #documentation
+        h1 Getting started
+        img.logo(src="/images/logo128.png", alt="logo", title="Primrose", style="float:left;padding:10px")
+        p Primrose is a cross-browser, multi-device framework for building productivity tools in #[a(href="/index.html#webvr") WebVR] applications. Developers model their scenes in #[a(href="https://www.blender.org", target="_blank") Blender] (or some other 3D modeling package), create a web page using Primrose to load the scene, then manipulate objects within the scene using interfaces similar to the standard DOM functions with which they are already familiar.
+        p It includes a suite of GUI controls—like buttons and a syntax-highlighting code editor control—to simplify the process of building VR applications that emphasize interactive, productive work. Use it to experiment with new ideas on productivity UIs in virtual spaces.
+        p Primrose is free, open source software (#[a(href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md", target="_blank") GPLv3]) and may readily be used with other #[a(href="https://en.wikipedia.org/wiki/Free_and_open-source_software", target="_blank") FOSS] projects.
+        ul
+          li: a(href="/scripts/Primrose.min.js", target="_blank") Download the latest version of the Primrose WebVR framework
+          li: a(href="#InstallationandSetup") Read detailed installation and setup instructions
+          li: a(href="#BuildaBasicDrumMachine") Learn how to make a simple drum-machine application
+        p
+          | Additionally, you may wish to:
+          ul
+            li: a(href="#WritingnewdocumentationwithPliny") Read about how the Pliny documentation system works with Primrose
+            li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Check out the GitHub repository
+            li: a(href="https://www.github.com/capnmidnight/Primrose/issues", target="_blank") File an issue report
+            li: a(href="http://threejs.org/", target="_blank") Learn more about THREE.js
+            li: a(href="http://webvr.info/", target="_blank") Learn more about WebVR
+            li: a(href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API", target="_blank") Read the WebVR documentation on MDN
+        h2 Example
+        p Using Primrose to make web applications is straightforward. To start, perform the following file operations all in the same directory:
+        ol
+          li download #[a(href="http://threejs.org/build/three.min.js", target="_blank") the latest THREE.js library file].
+          li download #[a(href="/scripts/Primrose.min.js", target="_blank") the latest Primrose library file].
+          li download #[a(href="/examples/images/bg.jpg", target="_blank") a skymap image].
+          li download #[a(href="/examples/images/deck.png", target="_blank") a ground texture].
+          li create a text file named #[code index.html]
+          li create a text file named #[code style.css]
+          li create a text file named #[code app.js]
+        p
+          | When you are done, your directory structure should look like:
+        ul
+          li app.js
+          li deck.png
+          li index.html
+          li sky.jpg
+          li style.css
+        p In the #[code index.html] file, enter the following markup.
+        pre: code.
+          grammar("HTML");
+          &lt;!DOCTYPE html>
+          &lt;html>
+            &lt;head>
+            &lt;meta charset="utf-8">
+            &lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
+            &lt;title>My Primrose VR Application&lt;/title>
+            &lt;script type="text/javascript" src="three.min.js">&lt;/script>
+            &lt;script type="text/javascript" src="Primrose.min.js">&lt;/script>
+            &lt;link type="text/css" rel="stylesheet" href="style.css">
+            &lt;/head>
+            &lt;body>
+            &lt;canvas id="frontBuffer" tabindex="1">&lt;/canvas>
+            &lt;script type="text/javascript" src="app.js">&lt;/script>
+            &lt;/body>
+          &lt;/html>
+        p In the #[code style.css] file, enter the following style definitions.
+        pre: code.
+          grammar("CSS");
+          html, body, #frontBuffer {
+            padding: 0;
+            margin: 0;
+            border: 0;
+            width: 100%;
+          }
+ 
+          html, body {
+            position: absolute;
+            height: 100%;
+          }
+ 
+          #frontBuffer {
+            position: fixed;
+            top: 0;
+            left: 0;
+          }
+        p In the #[code app.js] file, enter the following code.
+        pre: code.
+          grammar("JavaScript");
+          /* global Primrose, put */
+          var app = new Primrose.VRApplication( "My Primrose VR Application", {
+              skyTexture: "bg.jpg",
+              groundTexture: "deck.png"
+            } );
+ 
+          app.addEventListener( "ready", function () {
+            // Perform any post-initialization setup. Once this event fires, the Primrose
+            // framework is ready and will start animation as soon as this function returns.
+          } );
+ 
+          app.addEventListener( "gazecomplete", function(evt){
+            // You can respond to "intended stare" events here, i.e. when the user gazes
+            // at a particular object for an extended period of time. Usually, about three
+            // seconds.
+          } );
+ 
+          app.addEventListener( "pointerend", function(evt){
+            // You can respond to the user "clicking" an object here. This could be by using
+            // a mouse on their desktop PC or by touching the screen while looking at an
+            // object on a mobile device.
+          } );
+ 
+          app.addEventListener( "update", function ( dt ) {
+            // Perform per-frame updates here, like moving objects around according to your
+            // own rules.
+          } );
+        p The results, once ran in your browser, should look something like this:
+        img(src="images/gettingStarted.jpg", alt="screenshot", title="Blank scene")
+    #loading
+      | Loading...
+      #progressBar Loading...

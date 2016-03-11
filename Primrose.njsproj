@@ -29,6 +29,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\index.html.jade" />
     <Content Include="index.html.jade" />
     <Content Include="models\bear.json" />
     <Content Include="models\BearSkin.png" />
@@ -64,7 +65,6 @@
     <Content Include="music\title.ogg" />
     <Content Include="robots.txt" />
     <Content Include="ga.html" />
-    <Content Include="googlef740d821ffb81484.html" />
     <Content Include="index.html" />
     <Content Include="missing.html" />
     <Content Include="favicon.png" />
@@ -80,7 +80,7 @@
     <Content Include="doc\index.html" />
     <Content Include="doc\style.css" />
     <Content Include="doc\style.min.css" />
-    <Content Include="doc\gettingStarted.jpg" />
+    <Content Include="doc\images\gettingStarted.jpg" />
     <Content Include="doc\adventure.md" />
     <Content Include="doc\blenderAdvanced.md" />
     <Content Include="doc\blenderBeginner.md" />
