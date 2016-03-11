@@ -83,3 +83,4 @@ examples/ovrdesk/
 .vs/
 .ntvs_analysis.dat
 bin/Microsoft.NodejsTools.WebRole.dll
+.ntvs_analysis.dat.tmp
