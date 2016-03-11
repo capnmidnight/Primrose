@@ -13,7 +13,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <NodejsPort>8383</NodejsPort>
-    <StartWebBrowser>True</StartWebBrowser>
+    <StartWebBrowser>False</StartWebBrowser>
     <LaunchUrl>index.html</LaunchUrl>
     <UseIISExpress>true</UseIISExpress>
     <NodeExePath>
@@ -143,7 +143,6 @@
     <Compile Include="lib\FileSaver.js" />
     <Compile Include="lib\ga.js" />
     <Compile Include="lib\gl-matrix.js" />
-    <Compile Include="lib\loader.js" />
     <Compile Include="lib\mailchimp.js" />
     <Compile Include="lib\pliny.js" />
     <Compile Include="lib\resizer.js" />
@@ -320,6 +319,7 @@
     <Compile Include="src\fx\text\renderers\DOM.js" />
     <Compile Include="src\fx\text\themes\Dark.js" />
     <Compile Include="src\fx\text\themes\Default.js" />
+    <Content Include="templates\withFramework.jade" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,12 @@
-﻿extends ../templates/main.jade
+﻿extends ../templates/withFramework.jade
 
 block title
   meta(property="og:title", content="Primrose VR: WebVR Application Framework Documentation")
   meta(name="twitter:title", content="Primrose VR: WebVR Application Framework Documentation")
   title Primrose VR: WebVR Application Framework Documentation
   
-block head  
+append head  
   link(rel="stylesheet", type="text/css", href="style.css")
-  script(type="text/javascript", src="/lib/loader.js", async, defer)
   
 block main
   #top
@@ -130,8 +129,3 @@ block main
       } );
     p The results, once ran in your browser, should look something like this:
     img(src="images/gettingStarted.jpg", alt="screenshot", title="Blank scene")
-
-prepend footer
-  #loading
-    | Loading...
-    #progressBar Loading...
