@@ -1,1 +1,117 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/examples/jabbers/index.html"><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><script type="text/javascript" src="/scripts/ga.min.js" async defer></script><script type="text/javascript" src="/scripts/three.min.js"></script><script type="text/javascript" src="/scripts/marked.min.js"></script><script type="text/javascript" src="/scripts/Primrose.min.js"></script><link type="text/css" rel="stylesheet" href="/stylesheets/main.min.css"><link type="text/css" rel="stylesheet" href="../style.min.css"><style type="text/css">body{background-image:url(screenshot.jpg);}</style></head><body><canvas id="frontBuffer"></canvas><div id="controls"><button id="viewSource" type="button">View source</button><button id="goVR" type="button"><img src="/images/cardboard64.png" alt="icon"></button><button id="goRegular" type="button"><img src="/images/fullscreen64.png" alt="icon"></button></div><header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="/index.html#intro">intro/</a></li><li><a href="/index.html#webvr">webvr/</a></li><li><a href="/doc/">doc/</a></li><li><a href="/index.html#dev">download/</a></li><li><a href="/index.html#team">team/</a></li><li><a href="/index.html#mail">contact/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><script type="text/javascript" src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A WebVR application framework.">
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Primrose_VR">
+    <meta property="og:site_name" content="Primrose VR">
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
+    <meta property="og:url" content="http://www.primrosevr.com/examples/jabbers/index.html">
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:title" content="Primrose VR: WebVR Application Framework">
+    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
+    <title>Primrose VR: WebVR Application Framework</title>
+    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script>
+    <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
+    <script type="text/javascript" src="/lib/pliny.js"></script>
+    <script type="text/javascript" src="/lib/webgl-debug.js"></script>
+    <script type="text/javascript" src="/node_modules/three/three.js"></script>
+    <script type="text/javascript" src="/src/index.js"></script>
+    <script type="text/javascript" src="/src/fx/helpers/fmt.js"></script>
+    <script type="text/javascript" src="/src/fx/helpers/forms.js"></script>
+    <script type="text/javascript" src="/src/fx/helpers/graphics.js"></script>
+    <script type="text/javascript" src="/src/fx/helpers/oop.js"></script>
+    <script type="text/javascript" src="/src/fx/helpers/options.js"></script>
+    <script type="text/javascript" src="/src/fx/Angle.js"></script>
+    <script type="text/javascript" src="/src/fx/BaseControl.js"></script>
+    <script type="text/javascript" src="/src/fx/Button.js"></script>
+    <script type="text/javascript" src="/src/fx/ButtonFactory.js"></script>
+    <script type="text/javascript" src="/src/fx/DOM.js"></script>
+    <script type="text/javascript" src="/src/fx/HTTP.js"></script>
+    <script type="text/javascript" src="/src/fx/Keys.js"></script>
+    <script type="text/javascript" src="/src/fx/ModelLoader.js"></script>
+    <script type="text/javascript" src="/src/fx/NetworkedInput.js"></script>
+    <script type="text/javascript" src="/src/fx/Projector.js"></script>
+    <script type="text/javascript" src="/src/fx/Random.js"></script>
+    <script type="text/javascript" src="/src/fx/StateList.js"></script>
+    <script type="text/javascript" src="/src/fx/VRApplication.js"></script>
+    <script type="text/javascript" src="/src/fx/WebRTCSocket.js"></script>
+    <script type="text/javascript" src="/src/fx/Workerize.js"></script>
+    <script type="text/javascript" src="/src/fx/input/ButtonAndAxis.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Camera.js"></script>
+    <script type="text/javascript" src="/src/fx/input/FPSInput.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Gamepad.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Keyboard.js"></script>
+    <script type="text/javascript" src="/src/fx/input/LeapMotion.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Location.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Motion.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Mouse.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Speech.js"></script>
+    <script type="text/javascript" src="/src/fx/input/Touch.js"></script>
+    <script type="text/javascript" src="/src/fx/input/VR.js"></script>
+    <script type="text/javascript" src="/src/fx/output/Audio3D.js"></script>
+    <script type="text/javascript" src="/src/fx/output/HapticGlove.js"></script>
+    <script type="text/javascript" src="/src/fx/output/Music.js"></script>
+    <script type="text/javascript" src="/src/fx/output/Speech.js"></script>
+    <script type="text/javascript" src="/src/fx/text/CodePage.js"></script>
+    <script type="text/javascript" src="/src/fx/text/CommandPack.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Cursor.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Grammar.js"></script>
+    <script type="text/javascript" src="/src/fx/text/OperatingSystem.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Point.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Rectangle.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Rule.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Size.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Terminal.js"></script>
+    <script type="text/javascript" src="/src/fx/text/Token.js"></script>
+    <script type="text/javascript" src="/src/fx/text/code_pages/DE_QWERTZ.js"></script>
+    <script type="text/javascript" src="/src/fx/text/code_pages/EN_UKX.js"></script>
+    <script type="text/javascript" src="/src/fx/text/code_pages/EN_US.js"></script>
+    <script type="text/javascript" src="/src/fx/text/code_pages/FR_AZERTY.js"></script>
+    <script type="text/javascript" src="/src/fx/text/command_packs/TestViewer.js"></script>
+    <script type="text/javascript" src="/src/fx/text/command_packs/TextEditor.js"></script>
+    <script type="text/javascript" src="/src/fx/text/controls/PlainText.js"></script>
+    <script type="text/javascript" src="/src/fx/text/controls/TextBox.js"></script>
+    <script type="text/javascript" src="/src/fx/text/grammars/Basic.js"></script>
+    <script type="text/javascript" src="/src/fx/text/grammars/JavaScript.js"></script>
+    <script type="text/javascript" src="/src/fx/text/grammars/PlainText.js"></script>
+    <script type="text/javascript" src="/src/fx/text/grammars/TestResults.js"></script>
+    <script type="text/javascript" src="/src/fx/text/operating_systems/OSX.js"></script>
+    <script type="text/javascript" src="/src/fx/text/operating_systems/Windows.js"></script>
+    <script type="text/javascript" src="/src/fx/text/renderers/Canvas.js"></script>
+    <script type="text/javascript" src="/src/fx/text/renderers/DOM.js"></script>
+    <script type="text/javascript" src="/src/fx/text/themes/Dark.js"></script>
+    <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
+    <link type="text/css" rel="stylesheet" href="../style.css">
+    <style type="text/css">body{background-image:url(screenshot.jpg);}</style>
+  </head>
+  <body>
+    <canvas id="frontBuffer"></canvas>
+    <div id="controls">
+      <button id="viewSource" type="button">View source</button>
+      <button id="goVR" type="button"><img src="/images/cardboard64.png" alt="icon"></button>
+      <button id="goRegular" type="button"><img src="/images/fullscreen64.png" alt="icon"></button>
+    </div>
+    <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
+      <nav role="navigation">
+        <ul>
+          <li><a href="/index.html#intro">intro/</a></li>
+          <li><a href="/index.html#webvr">webvr/</a></li>
+          <li><a href="/doc/">doc/</a></li>
+          <li><a href="/index.html#dev">download/</a></li>
+          <li><a href="/index.html#team">team/</a></li>
+          <li><a href="/index.html#mail">contact/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header>
+    <script type="text/javascript" src="app.js"></script>
+  </body>
+</html>
