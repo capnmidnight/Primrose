@@ -31,6 +31,7 @@
   <ItemGroup>
     <Content Include="doc\index.html.jade" />
     <Content Include="examples\commodore\index.html.jade" />
+    <Content Include="examples\editor2d\index.html.jade" />
     <Content Include="examples\empty\index.html.jade" />
     <Content Include="examples\glove\index.html.jade" />
     <Content Include="examples\jabbers\index.html.jade" />
