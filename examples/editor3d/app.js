@@ -26,10 +26,15 @@ var GRASS = "/examples/images/grass.png",
     } ),
     editorSphereY = app.avatarHeight - 0.25;
 
+if (isHomeScreen) {
+  document.querySelector("header").style.display = "none";
+}
+
 app.addEventListener( "ready", function () {
   app.scene.add( subScene );
 
-  documentation = document.createElement( "pre" );
+  documentation = document.createElement("pre");
+  documentation.id = "documentation";
   documentation.innerHTML = getDocumentation();
   // Primrose will read the 3D transform from your CSS
   documentation.style.transform = "rotate3d(0, 1, 0, " +
@@ -37,7 +42,8 @@ app.addEventListener( "ready", function () {
       editorSphereY + "em, -0.25em)";
   documentation = app.appendChild( documentation );
 
-  output = document.createElement( "pre" );
+  output = document.createElement("pre");
+  output.id = "output";
   output = app.appendChild( output );
   // or you can set the transforms directly on the Three.js object
   output.mesh.position.set( 1, editorSphereY, -0.25 );
@@ -45,7 +51,8 @@ app.addEventListener( "ready", function () {
   output.theme = Primrose.Text.Themes.Dark;
   output.fontSize = 32;
 
-  editor = document.createElement( "textarea" );
+  editor = document.createElement("textarea");
+  editor.id = "editor";
   editor.value = getSourceCode( isHomeScreen );
   editor.style.transform = "translate3d(0, " + editorSphereY + "em, 0)";
   editor = app.appendChild( editor );
