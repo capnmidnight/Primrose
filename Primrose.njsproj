@@ -29,7 +29,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\editorVRManual .html.jade" />
     <Content Include="doc\index.html.jade" />
+    <Content Include="templates\documentation.jade" />
     <Content Include="examples\commodore\index.html.jade" />
     <Content Include="examples\editor2d\index.html.jade" />
     <Content Include="examples\empty\index.html.jade" />
