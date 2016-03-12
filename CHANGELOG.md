@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.21.2
+
+* Bugs
+  * Fixed having to make dev-to-production changes manually. Using full static site generation now.
+  * Fixed lighting for THREE.js r74.
+  * Got off of DreamHost, finally. Now on Azure.
+  * Don't move the camera view by orientation until the user hits the "go VR" button.
+  * Fixed out-of-bounds array access in projector (though ultimately, seems I broke the projector for buffered geometry)
+  * Fix for loading a texture more than once into multiple materials. Probably should cache the material, though.
+
 ## v0.21.1
 
 * Bugs
