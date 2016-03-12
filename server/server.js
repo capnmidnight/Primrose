@@ -10,12 +10,22 @@
     webSocketServer = require("./webSocketServer"),
     options = require("./options").parse(process.argv, {
       v: "false",
-      h: "localhost"
+      h: "localhost",
+      p: 8383
     }),
     srcDir = ".",
-    startPage = "",
-    port = 8383,
+    startPage = "examples/editor3d/index.html",
+    port = process.env.PORT || options.p,
     app, redir, io;
+
+if (typeof (port) === "string" || port instanceof String) {
+  if (/\d+/.test(port)) {
+    port = parseFloat(port);
+  }
+  else { 
+    throw new Error("Port value was not parseable: " + port);
+  }
+}
 
 function start(key, cert, ca) {
   var useSecure = !!(key && cert && ca);
