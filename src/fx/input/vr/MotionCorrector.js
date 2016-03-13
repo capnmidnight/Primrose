@@ -11,29 +11,33 @@
   // Constructor: new MotionCorrector( );
   ///
   function MotionCorrector() {
-    var euler = new THREE.Euler(),
-      orient = new THREE.Quaternion(),
-      quaternion = new THREE.Quaternion(),
+    var e = new THREE.Euler(),
+      o = new THREE.Quaternion(),
+      q = new THREE.Quaternion(),
       correct = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)),
       zero = new THREE.Quaternion(),
       first = true,
       listeners = [];
 
-    function checkOrientation (event) {
-      if (event.alpha !== null) {
+    function waitForOrientation(event) {
+      if (event.alpha) {
+        window.removeEventListener("deviceorientation", waitForOrientation);
+        checkOrientation(event);
+        window.addEventListener("deviceorientation", checkOrientation, false);
+      }
+    }
 
-        var alpha = event.alpha * Math.PI / 180,
-          beta = event.beta * Math.PI / 180,
-          gamma = event.gamma * Math.PI / 180;
-
-        quaternion.copy(zero);
-        euler.set(beta, alpha, -gamma, 'YXZ');
-        orient.setFromEuler(euler);
-        quaternion.multiply(orient);
-        quaternion.multiply(correct);
-        for (var i = 0; i < listeners.length; ++i) {
-          listeners[i](quaternion);
-        }
+    function checkOrientation(event) {
+      e.set(
+        event.beta * Math.PI / 180,
+        event.alpha * Math.PI / 180,
+        -event.gamma * Math.PI / 180, 'YXZ');
+      o.setFromEuler(e);
+      q.copy(zero)
+        .multiply(o)
+        .multiply(correct);
+      for (var i = 0; i < listeners.length; ++i) {
+        listeners[i](q);
       }
     };
     /*
@@ -62,7 +66,7 @@
       }
 
       if (first) {
-        window.addEventListener("deviceorientation", checkOrientation, bubbles);
+        window.addEventListener("deviceorientation", waitForOrientation, false);
         first = false;
       }
 
@@ -70,7 +74,7 @@
     };
 
     this.zeroAxes = function () {
-      zero.set(0, euler.y, 0, 1);
+      zero.set(0, e.y, 0, 1);
     };
   }
 
