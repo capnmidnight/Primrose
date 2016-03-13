@@ -190,7 +190,6 @@ Primrose.VRApplication = (function () {
       
       if (elementConstructors[type]) {
         obj = elementConstructors[type](elem);
-        console.log(obj.mesh.name);
       }
       
       return obj;

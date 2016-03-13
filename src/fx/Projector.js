@@ -2531,7 +2531,6 @@ Primrose.Projector = (function () {
     }
     this.setProperty(obj.uuid, "geometry.vertices", obj.geometry.vertices);
     this.updateObjects([obj]);
-    console.log(obj.name)
   };
   
   Projector.prototype.updateObjects = function (objs) {
