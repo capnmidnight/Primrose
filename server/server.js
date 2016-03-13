@@ -4,6 +4,7 @@
     http = require("http"),
     https = require("https"),
     socketio = require("socket.io"),
+    exec = require('child_process').exec,
     log = require("./core").log,
     starter = require("./starter"),
     webServer = require("./webServer").webServer,
@@ -18,11 +19,13 @@
     port = process.env.PORT || options.p,
     app, redir, io;
 
+options.v = (options.v === "true");
+
 if (typeof (port) === "string" || port instanceof String) {
   if (/\d+/.test(port)) {
     port = parseFloat(port);
   }
-  else { 
+  else {
     throw new Error("Port value was not parseable: " + port);
   }
 }
@@ -31,14 +34,12 @@ function start(key, cert, ca) {
   var useSecure = !!(key && cert && ca);
   if (useSecure) {
     log("secure");
-    app = https.createServer(
-      {
-        key: key,
-        cert: cert,
-        ca: ca
-      },
-            webServer(options.h, srcDir)
-    );
+    app = https.createServer({
+      key: key,
+      cert: cert,
+      ca: ca
+    },
+      webServer(options.h, srcDir));
     redir = http.createServer(webServer(options.h, port + 1));
     redir.listen(port);
     app.listen(port + 1);
@@ -109,16 +110,28 @@ function __readFiles(filePaths, callback, index, fileContents) {
   }
 }
 
-readFiles([
-  "../key.pem",
-  "../cert.pem",
-  "../ca.pem"],
+function go() {
+  readFiles([
+    "../key.pem",
+    "../cert.pem",
+    "../ca.pem"],
     function (err, files) {
-  if (err) {
-    console.error(err);
-    start();
-  }
-  else {
-    start.apply(this, files);
-  }
-});
+    if (err) {
+      console.error(err);
+      start();
+    }
+    else {
+      start.apply(this, files);
+    }
+  });
+}
+
+if (options.v) {
+  var child = exec("grunt");
+  child.stdout.pipe(process.stdout);
+  child.stderr.pipe(process.stderr);
+  child.on("exit", go);
+}
+else {
+  go();
+}
