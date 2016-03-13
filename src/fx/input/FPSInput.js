@@ -89,19 +89,8 @@ Primrose.Input.FPSInput = ( function ( ) {
         pitch: {axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       } ) ];
     
-    if ( isVR ) {
+    if (Primrose.Input.VR.isAvailable ) {
       this.managers.push( new Primrose.Input.VR( "vr", near, far ) );
-    }
-    else if ( isMobile ) {
-      this.managers.push(
-          new Primrose.Input.Motion( "motion", {
-            headVX: {axes: [ Primrose.Input.Motion.headAX ], integrate: true},
-            headVY: {axes: [ Primrose.Input.Motion.headAY ], integrate: true},
-            headVZ: {axes: [ Primrose.Input.Motion.headAZ ], integrate: true},
-            headX: {commands: [ Primrose.Input.Motion.headVX ], integrate: true},
-            headY: {commands: [ Primrose.Input.Motion.headVY ], integrate: true},
-            headZ: {commands: [ Primrose.Input.Motion.headVZ ], integrate: true}
-          } ) );
     }
 
     pliny.issue( "Primrose.Input.FPSInput", {

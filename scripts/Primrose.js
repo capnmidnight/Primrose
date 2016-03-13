@@ -9388,8 +9388,8 @@ Primrose.Input.FPSInput = ( function ( ) {
         pitch: {axes: [ Primrose.Input.Gamepad.RSY ], integrate: true}
       } ) ];
     
-    if ( isVR ) {
-      this.managers.push( new Primrose.Input.VR( "vr", near, far ) );
+    if (isVR) {
+      this.managers.push(new Primrose.Input.VR("vr", near, far, this.renderer.domElement));
     }
     else if ( isMobile ) {
       this.managers.push(

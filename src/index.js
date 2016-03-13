@@ -194,14 +194,6 @@ the torch on to Safari in all of its many useless incarnations."
   } );
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
 
-  pliny.value( "", {
-    name: "isVR",
-    type: "Boolean",
-    description: "Flag indicating the browser supports awesomesauce as well as\n\
-the WebVR standard in some form."
-  } );
-  window.isVR = !!( navigator.getVRDevices || navigator.getVRDisplays );
-
   pliny.issue( "", {
     name: "Make a getting started page.",
     type: "closed",

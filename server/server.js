@@ -11,8 +11,9 @@
     webSocketServer = require("./webSocketServer"),
     options = require("./options").parse(process.argv, {
       v: "false",
+      b: "false",
       h: "localhost",
-      p: 8383
+      p: "8383"
     }),
     srcDir = ".",
     startPage = "examples/editor3d/index.html",
@@ -20,6 +21,7 @@
     app, redir, io;
 
 options.v = (options.v === "true");
+options.b = (options.b === "true");
 
 if (typeof (port) === "string" || port instanceof String) {
   if (/\d+/.test(port)) {
@@ -126,7 +128,7 @@ function go() {
   });
 }
 
-if (options.v) {
+if (options.b) {
   var child = exec("grunt");
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
