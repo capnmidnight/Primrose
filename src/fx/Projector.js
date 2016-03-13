@@ -2532,9 +2532,6 @@ Primrose.Projector = (function () {
     this.setProperty(obj.uuid, "geometry.vertices", obj.geometry.vertices);
     this.updateObjects([obj]);
     console.log(obj.name)
-    console.log("\t", obj.geometry.faces.length, "faces");
-    console.log("\t", obj.geometry.uvs.length, "uvs");
-    console.log("\t", obj.geometry.vertices.length, "vertices");
   };
   
   Projector.prototype.updateObjects = function (objs) {
@@ -2544,6 +2541,7 @@ Primrose.Projector = (function () {
           a = new THREE.Matrix4(),
           b = new THREE.Matrix4().identity(),
           c = null;
+      
       while (head !== null) {
         a.fromArray(head.matrix);
         a.multiply(b);
@@ -2585,6 +2583,7 @@ Primrose.Projector = (function () {
         value = null;
     this.p.fromArray(p);
     this.f.fromArray(from);
+
     for (var i = 0; i < this.objectIDs.length; ++i) {
       var objID = this.objectIDs[i],
           obj = this.objects[objID];
@@ -2594,9 +2593,9 @@ Primrose.Projector = (function () {
             uvs = obj.geometry.uvs;
         for (var j = 0; j < faces.length; ++j) {
           var face = faces[j],
-              v0 = verts[face[0] % faces.length],
-              v1 = verts[face[1] % faces.length],
-              v2 = verts[face[2] % faces.length];
+              v0 = verts[face[0] % verts.length],
+              v1 = verts[face[1] % verts.length],
+              v2 = verts[face[2] % verts.length];
           this.a.subVectors(v1, v0);
           this.b.subVectors(v2, v0);
           this.c.subVectors(this.p, this.f);
@@ -2621,9 +2620,9 @@ Primrose.Projector = (function () {
                 };
                 
                 if (uvs) {
-                  v0 = uvs[face[0]];
-                  v1 = uvs[face[1]];
-                  v2 = uvs[face[2]];
+                  v0 = uvs[face[0] % uvs.length];
+                  v1 = uvs[face[1] % uvs.length];
+                  v2 = uvs[face[2] % uvs.length];
                   value.point = [
                     this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
                     this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1]];
