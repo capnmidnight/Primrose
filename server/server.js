@@ -129,6 +129,7 @@ function go() {
 }
 
 if (options.b) {
+  console.log("Rebuilding site templates");
   var child = exec("grunt");
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);

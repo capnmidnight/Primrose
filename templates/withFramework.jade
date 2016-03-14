@@ -2,10 +2,10 @@
 
 append head
   if debug
-    script(type="text/javascript", src= "/node_modules/marked/lib/marked.js")
-    script(type="text/javascript", src= "/lib/pliny.js")
     script(type="text/javascript", src= "/lib/webgl-debug.js")
     script(type="text/javascript", src= "/node_modules/three/three.js")
+    script(type="text/javascript", src= "/node_modules/marked/lib/marked.js")
+    script(type="text/javascript", src= "/lib/pliny.js")
     each file in frameworkFiles
       script(type="text/javascript", src=file)
   else
