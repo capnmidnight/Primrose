@@ -1,5 +1,57 @@
 /* global THREE, Primrose, isMobile, pliny */
 
+pliny.function("", {
+  name: "buffer",
+  description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  parameters: [
+    { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
+    { name: "width", type: "Number", description: "The width of the buffer to create." },
+    { name: "height", type: "Number", description: "The height of the buffer to create." }
+  ],
+  returns: "CanvasRenderingContext2D"
+});
+function buffer(idOrCanvasOrContext, width, height) {
+  if (height === undefined && width !== undefined) {
+    height = width;
+    width = idOrCanvasOrContext;
+    idOrCanvasOrContext = undefined;
+  }
+
+  var elem = null;
+  if (idOrCanvasOrContext instanceof CanvasRenderingContext2D) {
+    return idOrCanvasOrContext;
+  }
+  else if (idOrCanvasOrContext instanceof HTMLCanvasElement) {
+    elem = idOrCanvasOrContext;
+  }
+  else if (typeof (idOrCanvasOrContext) === "string" || idOrCanvasOrContext instanceof String) {
+    elem = document.getElementById(idOrCanvasOrContext);
+    if (elem === null) {
+      elem = document.createElement("canvas");
+      elem.id = idOrCanvasOrContext;
+    }
+    else if (elem.tagName !== "CANVAS") {
+      elem = null;
+    }
+  }
+  else if (typeof (idOrCanvasOrContext) === "undefined") {
+    elem = document.createElement("canvas");
+    elem.id = idOrCanvasOrContext = "auto_canvas" + (Date.now() ^ (Math.random() * 0xffffffff));
+  }
+
+  if (elem === null) {
+    pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
+    throw new Error(idOrCanvasOrContext + " does not refer to a valid canvas element.");
+  }
+
+  if (height != undefined) {
+    elem.width = width;
+    elem.height = height;
+  }
+
+  return elem.getContext("2d");
+}
+
 pliny.issue( "", {
   name: "document InsideSphereGeometry",
   type: "closed",
@@ -434,6 +486,11 @@ function textured ( geometry, txt, unshaded, o, s, t ) {
     }
     else if ( txt instanceof Primrose.Text.Controls.TextBox ) {
       setTexture( txt.renderer.texture );
+    }
+    else if (txt instanceof HTMLCanvasElement) {
+      var txt2 = new THREE.Texture(txt);
+      txt2.needsUpdate = true;
+      setTexture(txt2);
     }
     else {
       setTexture( txt );

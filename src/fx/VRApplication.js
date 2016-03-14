@@ -119,15 +119,14 @@ Primrose.VRApplication = (function () {
     };
 
     var makeEditor = function (scene, id, w, h, options) {
-      var SCALE = isMobile ? 0.25 : 0.5;
       options.size = options.size || new Primrose.Text.Size(1024 * w, 1024 * h);
       options.fontSize = options.fontSize || 32;
       if (options.opacity === undefined) {
         options.opacity = 1;
       }
       var text = new Primrose.Text.Controls.TextBox(id, options),
-        cellWidth = Math.round(SCALE * 1024 * w / options.fontSize),
-        cellHeight = Math.round(SCALE * 1024 * h / options.fontSize),
+        cellWidth = Math.round(512 * w / options.fontSize),
+        cellHeight = Math.round(512 * h / options.fontSize),
         makeGeom = options.useShell ?
           shell.bind(null, 1, cellWidth, cellHeight) :
           quad.bind(null, w, h, 1, 1),
@@ -374,7 +373,6 @@ Primrose.VRApplication = (function () {
       this.pointer.position.add(this.player.position);
       if (this.projector.ready) {
         this.projector.ready = false;
-        this.projector.updateObjects(this.pickableObjects.map(createPickableObject));
         this.projector.projectPointer([
           this.pointer.position.toArray(),
           transformForPicking(this.player)]);
