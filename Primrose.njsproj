@@ -170,7 +170,7 @@
     <Compile Include="server\starter.js" />
     <Compile Include="server\webServer.js" />
     <Compile Include="server\webSocketServer.js" />
-    <Compile Include="src\fx\helpers\fullscreen.js" />
+    <Compile Include="src\base\fullscreen.js" />
     <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
     <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
     <Compile Include="src\fx\input\vr\MotionCorrector.js" />
@@ -258,11 +258,11 @@
     <Compile Include="src\fx\VRApplication.js" />
     <Compile Include="src\fx\WebRTCSocket.js" />
     <Compile Include="src\fx\Workerize.js" />
-    <Compile Include="src\fx\helpers\fmt.js" />
-    <Compile Include="src\fx\helpers\forms.js" />
-    <Compile Include="src\fx\helpers\graphics.js" />
-    <Compile Include="src\fx\helpers\oop.js" />
-    <Compile Include="src\fx\helpers\options.js" />
+    <Compile Include="src\base\fmt.js" />
+    <Compile Include="src\base\forms.js" />
+    <Compile Include="src\base\graphics.js" />
+    <Compile Include="src\base\oop.js" />
+    <Compile Include="src\base\options.js" />
     <Compile Include="src\fx\input\ButtonAndAxis.js" />
     <Compile Include="src\fx\input\Camera.js" />
     <Compile Include="src\fx\input\FPSInput.js" />
@@ -341,7 +341,7 @@
     <Folder Include="server\templates" />
     <Folder Include="src" />
     <Folder Include="src\fx" />
-    <Folder Include="src\fx\helpers" />
+    <Folder Include="src\base\" />
     <Folder Include="src\fx\input" />
     <Folder Include="src\fx\output" />
     <Folder Include="src\fx\text" />

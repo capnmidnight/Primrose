@@ -1,24 +1,26 @@
 /* global module */
 
 var pathX = /.*\/(.*).js/,
-    pkg = require("./package.json"),
-    baseFiles = [
-      "obj/Primrose.js",
-      "lib/analytics.js",
-      "lib/ga.js",
-      "lib/mailchimp.js",
-      "lib/pliny.js",
-      "node_modules/leapjs/leap-0.6.4.js",
-      "node_modules/socket.io-client/socket.io.js",
-      "node_modules/three/three.js",
-      "node_modules/marked/lib/marked.js"
-    ],
-    copyFiles = baseFiles.map(function (s) {
-      return {
-        src: s,
-        dest: s.replace(pathX, "scripts/$1.js")
-      };
-    });
+  pkg = require("./package.json"),
+  fs = require("fs"),
+  path = require("path"),
+  baseFiles = [
+    "obj/Primrose.js",
+    "lib/analytics.js",
+    "lib/ga.js",
+    "lib/mailchimp.js",
+    "lib/pliny.js",
+    "node_modules/leapjs/leap-0.6.4.js",
+    "node_modules/socket.io-client/socket.io.js",
+    "node_modules/three/three.js",
+    "node_modules/marked/lib/marked.js"
+  ],
+  copyFiles = baseFiles.map(function (s) {
+    return {
+      src: s,
+      dest: s.replace(pathX, "scripts/$1.js")
+    };
+  });
 
 
 copyFiles.push({
@@ -31,54 +33,71 @@ copyFiles.push({
   dest: "archive/Primrose-<%= pkg.version %>.min.js"
 });
 
-function jadeConfiguration(options, defaultData, appendData) {
+function jadeConfiguration(options, defaultData) {
   var config = {
     options: options,
     files: [{
-        expand: true,
-        src: ["**/*.jade"],
-        dest: "",
-        ext: "",
-        extDot: "last"
-      }]
+      expand: true,
+      src: ["**/*.jade"],
+      dest: "",
+      ext: "",
+      extDot: "last"
+    }]
   };
-  
+
   config.options.data = function (dest, src) {
     var data = JSON.parse(JSON.stringify(defaultData));
     data.version = pkg.version;
     data.filename = dest;
-    appendData.call(data, dest, src);
     return data;
   }.bind(config);
-  
+
   return config;
 }
 
-var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, { debug: true }, function (dest, src) {
-  this.debug = true;
-}),
-    jadeReleaseConfiguration = jadeConfiguration({}, {}, function (dest, src) {
-    });
+
+var debugData = {
+  debug: true,
+  frameworkFiles: []
+},
+  directoryQueue = ["src"];
+while (directoryQueue.length > 0) {
+  var directory = directoryQueue.shift(),
+    subFiles = fs.readdirSync(directory);
+  for (var j = 0; j < subFiles.length; ++j) {
+    var subFile = path.join(directory, subFiles[j]),
+      stats = fs.statSync(subFile);
+    if (stats.isDirectory()) {
+      directoryQueue.push(subFile);
+    }
+    else {
+      debugData.frameworkFiles.push("/" + subFile.replace(/\\/g, "/"));
+    }
+  }
+}
+
+var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, debugData),
+  jadeReleaseConfiguration = jadeConfiguration({}, {});
 
 module.exports = function (grunt) {
   grunt.initConfig({
-    
+
     pkg: grunt.file.readJSON("package.json"),
-    
+
     clean: ["obj", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
-    
+
     jade: {
       release: jadeReleaseConfiguration,
       debug: jadeDebugConfiguration
     },
-    
+
     jshint: {
       default: "src/**/*.js",
       options: {
         multistr: true
       }
     },
-    
+
     concat: {
       options: {
         banner: "/*\n\
@@ -90,26 +109,26 @@ module.exports = function (grunt) {
 */\n",
         separator: ";",
         footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
-            "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
+        "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
       },
       default: {
         files: {
-          "obj/Primrose.js": ["lib/pliny.js", "src/index.js", "src/fx/**/*.js"]
+          "obj/Primrose.js": ["lib/pliny.js", "src/**/*.js"]
         }
       }
     },
-    
+
     cssmin: {
       default: {
         files: [{
-            expand: true,
-            src: ["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"],
-            dest: "",
-            ext: ".min.css"
-          }]
+          expand: true,
+          src: ["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"],
+          dest: "",
+          ext: ".min.css"
+        }]
       }
     },
-    
+
     uglify: {
       default: {
         files: baseFiles.map(function (s) {
@@ -120,14 +139,14 @@ module.exports = function (grunt) {
         })
       }
     },
-    
+
     copy: {
       default: {
         files: copyFiles
       }
     }
   });
-  
+
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-exec");
   grunt.loadNpmTasks("grunt-contrib-copy");
@@ -136,7 +155,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-jade");
-  
+
   grunt.registerTask("debug", ["jade:debug"]);
   grunt.registerTask("release", ["clean", "jade:release", "jshint", "concat", "cssmin", "uglify", "copy"]);
   grunt.registerTask("default", ["debug"]);
