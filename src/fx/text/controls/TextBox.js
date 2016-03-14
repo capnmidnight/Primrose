@@ -9,11 +9,11 @@ Primrose.Text.Controls.TextBox = (function () {
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
     parameters: [
-      { name: "renderToElementOrID", type: "String or Element", description: "Junk" },
-      { name: "options", type: "Object", description: "More junk." }
+      { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
+      { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }
     ]
   });
-  function TextBox(renderToElementOrID, options) {
+  function TextBox(idOrCanvasOrContext, options) {
     var self = this;
     //////////////////////////////////////////////////////////////////////////
     // normalize input parameters
@@ -61,7 +61,7 @@ Primrose.Text.Controls.TextBox = (function () {
         wordWrap = false,
         wheelScrollSpeed = 4,
         padding = 1,
-        renderer = new Renderer(renderToElementOrID, options),
+        renderer = new Renderer(idOrCanvasOrContext, options),
         surrogate = null,
         surrogateContainer = null;
     

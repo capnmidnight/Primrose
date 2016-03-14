@@ -312,7 +312,6 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin" />
     <Folder Include="doc" />
     <Folder Include="doc\images" />
     <Folder Include="doc\images\editorVR" />
@@ -332,6 +331,7 @@
     <Folder Include="lib" />
     <Folder Include="models\" />
     <Folder Include="music" />
+    <Folder Include="src\fx\gui2d\" />
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="templates\" />
     <Folder Include="server" />

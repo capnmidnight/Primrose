@@ -18,10 +18,10 @@
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
     <title>Primrose VR: WebVR Application Framework</title>
     <script type="text/javascript" src="/scripts/ga.min.js" async defer></script>
-    <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
-    <script type="text/javascript" src="/lib/pliny.js"></script>
     <script type="text/javascript" src="/lib/webgl-debug.js"></script>
     <script type="text/javascript" src="/node_modules/three/three.js"></script>
+    <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
+    <script type="text/javascript" src="/lib/pliny.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
     <script type="text/javascript" src="/src/base/fmt.js"></script>
     <script type="text/javascript" src="/src/base/forms.js"></script>
