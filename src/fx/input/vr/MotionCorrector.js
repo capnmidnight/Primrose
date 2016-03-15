@@ -39,7 +39,7 @@
       for (var i = 0; i < listeners.length; ++i) {
         listeners[i](q);
       }
-    };
+    }
     /*
      Add an event listener for motion/orientation events.
      

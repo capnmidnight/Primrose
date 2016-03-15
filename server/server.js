@@ -133,7 +133,16 @@ if (options.b) {
   var child = exec("grunt debug");
   child.stdout.pipe(process.stdout);
   child.stderr.pipe(process.stderr);
-  child.on("exit", go);
+  var p = new Promise(function (resolve, reject) {
+    child.stdout.on("data", function (data) {
+      if (data === "Waiting...\n") {
+        resolve();
+      }
+    });
+    child.on("end", resolve);
+  });
+  
+  p.then(go);
 }
 else {
   go();

@@ -207,7 +207,7 @@ Primrose.Text.Grammars.Basic = ( function ( ) {
             }
             script += t.value;
           }
-          with ( state ) { // jshint ignore:line
+          //with ( state ) { // jshint ignore:line
             try {
               return eval( script ); // jshint ignore:line
             }
@@ -217,7 +217,7 @@ Primrose.Text.Grammars.Basic = ( function ( ) {
               console.error( script );
               error( exp.message + ": " + script );
             }
-          }
+          //}
         }
 
         function declareVariable ( line ) {

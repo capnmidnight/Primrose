@@ -44,7 +44,7 @@ function buffer(idOrCanvasOrContext, width, height) {
     throw new Error(idOrCanvasOrContext + " does not refer to a valid canvas element.");
   }
 
-  if (height != undefined) {
+  if (height !== undefined) {
     elem.width = width;
     elem.height = height;
   }

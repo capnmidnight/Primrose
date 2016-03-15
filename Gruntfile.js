@@ -84,17 +84,51 @@ module.exports = function (grunt) {
 
     pkg: grunt.file.readJSON("package.json"),
 
-    clean: ["obj", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
+    clean: ["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
 
     jade: {
       release: jadeReleaseConfiguration,
       debug: jadeDebugConfiguration
     },
 
+    watch: {
+      jade: {
+        files: "**/*.jade",
+        tasks: ["jade:debug"]
+      }
+    },
+
+    cssmin: {
+      default: {
+        files: [{
+          expand: true,
+          src: ["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"],
+          dest: "",
+          ext: ".min.css"
+        }]
+      }
+    },
+
     jshint: {
       default: "src/**/*.js",
       options: {
-        multistr: true
+        multistr: true,
+        esnext: true
+      }
+    },
+
+    babel: {
+      options: {
+        sourceMap: false,
+        presets: ["es2015"]
+      },
+      dist: {
+        files: [{
+          expand: true,
+          cwd: "src",
+          src: ["**/*.js"],
+          dest: "es5"
+        }]
       }
     },
 
@@ -113,19 +147,8 @@ module.exports = function (grunt) {
       },
       default: {
         files: {
-          "obj/Primrose.js": ["lib/pliny.js", "src/**/*.js"]
+          "obj/Primrose.js": ["lib/pliny.js", "es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js"]
         }
-      }
-    },
-
-    cssmin: {
-      default: {
-        files: [{
-          expand: true,
-          src: ["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"],
-          dest: "",
-          ext: ".min.css"
-        }]
       }
     },
 
@@ -147,8 +170,10 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.loadNpmTasks("grunt-contrib-clean");
+  grunt.loadNpmTasks("grunt-babel");
   grunt.loadNpmTasks("grunt-exec");
+  grunt.loadNpmTasks("grunt-contrib-watch");
+  grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-contrib-concat");
@@ -156,7 +181,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-jade");
 
-  grunt.registerTask("debug", ["jade:debug"]);
-  grunt.registerTask("release", ["clean", "jade:release", "jshint", "concat", "cssmin", "uglify", "copy"]);
+  grunt.registerTask("debug", ["jshint", "watch"]);
+  grunt.registerTask("build-js", ["jshint", "babel", "concat", "uglify", "copy"]);
+  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "build-js"]);
   grunt.registerTask("default", ["debug"]);
 };

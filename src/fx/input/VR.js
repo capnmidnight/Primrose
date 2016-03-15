@@ -110,7 +110,7 @@ Primrose.Input.VR = (function () {
         console.log("Using WebVR API 1");
         navigator.getVRDisplays()
           .then(enumerateVRDisplays.bind(this, elem))
-          .catch(console.error.bind(console, "Could not find VR devices"));;
+          .catch(console.error.bind(console, "Could not find VR devices"));
       }
       else if (navigator.getVRDevices) {
         console.log("Using Chromium Experimental WebVR API");
