@@ -3,7 +3,8 @@
 Primrose.Text.Controls.TextBox = (function () {
   "use strict";
 
-  var SCROLL_SCALE = isFirefox ? 3 : 100;
+  var SCROLL_SCALE = isFirefox ? 3 : 100,
+    COUNTER = 0;
 
   pliny.class("Primrose.Text.Controls", {
     name: "TextBox",
@@ -14,11 +15,11 @@ Primrose.Text.Controls.TextBox = (function () {
     ]
   });
   class TextBox extends Primrose.Surface {
-    constructor(parentSurface, options) {
-      super(parentSurface.canvas.id + "-textbox");
-      //////////////////////////////////////////////////////////////////////////
+    constructor(bounds, options) {
+      super("Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]", bounds);
+      ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
-      //////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////
     
       if (typeof options === "string") {
         this.options = { file: this.options };
@@ -53,99 +54,96 @@ Primrose.Text.Controls.TextBox = (function () {
         "Home", "End",
         "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
 
-      //////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////
       // initialization
-      /////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////
 
-      //
+      
       // different browsers have different sets of keycodes for less-frequently
       // used keys like.
 
-      this.bounds = this.options.bounds;
-      this._subBounds = { left: 0, top: 0, width: this.bounds.width, height: this.bounds.height };
-      parentSurface.appendChild(this);
+      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.bounds.width, this.bounds.height);
 
-      this.tokens = null; //
-      this.lines = null;//
-      this._CommandSystem = null; //
-      this._keyboardSystem = null; //
-      this._commandPack = null; //
-      this._tokenRows = null; //
-      this._tokenHashes = null; //
-      this._tabString = null; //
-      this._currentTouchID = null; //
-      this._surrogate = null;//
-      this._surrogateContainer = null;//
+      this.tokens = null; 
+      this.lines = null;
+      this._CommandSystem = null; 
+      this._keyboardSystem = null; 
+      this._commandPack = null; 
+      this._tokenRows = null; 
+      this._tokenHashes = null; 
+      this._tabString = null; 
+      this._currentTouchID = null; 
+      this._surrogate = null;
+      this._surrogateContainer = null;
       this._lineCountWidth = null;
 
-      this._lastFont = null;//
-      this._lastText = null;//
-      this._lastCharacterWidth = null;//
-      this._lastCharacterHeight = null;//
-      this._lastGridBounds = null;//
-      this._lastPadding = null;//
-      this._lastFrontCursorI = -1;//
-      this._lastBackCursorI = -1;//
-      this._lastWidth = -1;//
-      this._lastHeight = -1;//
-      this._lastScrollX = -1;//
-      this._lastScrollY = -1;//
-      this._lastFocused = false;//
-      this._lastPointer = new Primrose.Text.Point();//
+      this._lastFont = null;
+      this._lastText = null;
+      this._lastCharacterWidth = null;
+      this._lastCharacterHeight = null;
+      this._lastGridBounds = null;
+      this._lastPadding = null;
+      this._lastFrontCursorI = -1;
+      this._lastBackCursorI = -1;
+      this._lastWidth = -1;
+      this._lastHeight = -1;
+      this._lastScrollX = -1;
+      this._lastScrollY = -1;
+      this._lastFocused = false;
+      this._lastPointer = new Primrose.Text.Point();
 
-      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));//
-      this._pointer = new Primrose.Text.Point();//
-      this._deadKeyState = "";//
-      this._keyNames = [];//
-      this._history = [];//
-      this._historyFrame = -1;//
-      this._topLeftGutter = new Primrose.Text.Size();//
-      this._bottomRightGutter = new Primrose.Text.Size();//
-      this._dragging = false;//
-      this._scrolling = false;//
-      this._wheelScrollSpeed = 4;//
-      this._padding = 1;//
-      this._fg = new Primrose.Surface(parentSurface.canvas.id + "-front", this.bounds.width, this.bounds.height);//
-      this._fgCanvas = this._fg.canvas;//
-      this._fgfx = this._fg.context;//
-      this._bg = new Primrose.Surface(parentSurface.canvas.id + "-back", this.bounds.width, this.bounds.height);//
-      this._bgCanvas = this._bg.canvas;//
-      this._bgfx = this._bg.context;//
-      this._trim = new Primrose.Surface(parentSurface.canvas.id + "-trim", this.bounds.width, this.bounds.height);//
-      this._trimCanvas = this._trim.canvas;//
-      this._tgfx = this._trim.context;//
-      this._rowCache = {};//
-      this._VSCROLL_WIDTH = 2;//
+      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+      this._pointer = new Primrose.Text.Point();
+      this._deadKeyState = "";
+      this._keyNames = [];
+      this._history = [];
+      this._historyFrame = -1;
+      this._topLeftGutter = new Primrose.Text.Size();
+      this._bottomRightGutter = new Primrose.Text.Size();
+      this._dragging = false;
+      this._scrolling = false;
+      this._wheelScrollSpeed = 4;
+      this._padding = 1;
+      this._fg = new Primrose.Surface(this.id + "-fore", this._subBounds);
+      this._fgCanvas = this._fg.canvas;
+      this._fgfx = this._fg.context;
+      this._bg = new Primrose.Surface(this.id + "-back", this._subBounds);
+      this._bgCanvas = this._bg.canvas;
+      this._bgfx = this._bg.context;
+      this._trim = new Primrose.Surface(this.id + "-trim", this._subBounds);
+      this._trimCanvas = this._trim.canvas;
+      this._tgfx = this._trim.context;
+      this._rowCache = {};
+      this._VSCROLL_WIDTH = 2;
 
-      this.id = this.canvas.id;//
-      this.tabWidth = this.options.tabWidth;//
-      this.showLineNumbers = !this.options.hideLineNumbers;//
-      this.showScrollBars = !this.options.hideScrollBars;//
-      this.wordWrap = !this.options.disableWordWrap;//
-      this.readOnly = !!this.options.readOnly;//
-      this.gridBounds = new Primrose.Text.Rectangle();//
-      this.frontCursor = new Primrose.Text.Cursor();//
-      this.backCursor = new Primrose.Text.Cursor();//
-      this.scroll = new Primrose.Text.Point();//
-      this.character = new Primrose.Text.Size();//
-      this.theme = this.options.theme;//
-      this.fontSize = this.options.fontSize;//
-      this.tokenizer = this.options.tokenizer;//
-      this.codePage = this.options.codePage;//
-      this.operatingSystem = this.options.os;//
-      this.setCommandSystem(this.options.commands);//
-      this.value = this.options.file;//
-      this.padding = this.options.padding || 1;//
+      this.id = this.canvas.id;
+      this.tabWidth = this.options.tabWidth;
+      this.showLineNumbers = !this.options.hideLineNumbers;
+      this.showScrollBars = !this.options.hideScrollBars;
+      this.wordWrap = !this.options.disableWordWrap;
+      this.readOnly = !!this.options.readOnly;
+      this.gridBounds = new Primrose.Text.Rectangle();
+      this.frontCursor = new Primrose.Text.Cursor();
+      this.backCursor = new Primrose.Text.Cursor();
+      this.scroll = new Primrose.Text.Point();
+      this.character = new Primrose.Text.Size();
+      this.theme = this.options.theme;
+      this.fontSize = this.options.fontSize;
+      this.tokenizer = this.options.tokenizer;
+      this.codePage = this.options.codePage;
+      this.operatingSystem = this.options.os;
+      this.setCommandSystem(this.options.commands);
+      this.value = this.options.file;
+      this.padding = this.options.padding || 1;
+
+      this.addEventListener("focus", this.render.bind(this), false);
+      this.addEventListener("blur", this.render.bind(this), false);
 
       this.bindEvents(
         this.options.keyEventSource,
         this.options.pointerEventSource,
         this.options.wheelEventSource,
         !this.options.disableClipboard);
-
-      this.appendChild(this._bg);
-      this.appendChild(this._fg);
-      this.appendChild(this._trim);
     }
 
     cursorPageUp(lines, cursor) {
@@ -210,15 +208,15 @@ Primrose.Text.Controls.TextBox = (function () {
       this.setGutter();
     }
 
+    get theme() {
+      return this._theme;
+    }
+
     set theme(t) {
       this._theme = clone(t || Primrose.Text.Themes.Default);
       this._theme.fontSize = this.fontSize;
       this.resize();
       this.render();
-    }
-
-    get theme() {
-      return this._theme;
     }
 
     get operatingSystem() {
@@ -333,6 +331,10 @@ Primrose.Text.Controls.TextBox = (function () {
       this.refreshCommandPack();
     }
 
+    get tabWidth() {
+      return this._tabWidth;
+    }
+
     set tabWidth(tw) {
       this._tabWidth = tw || 4;
       this._tabString = "";
@@ -341,8 +343,8 @@ Primrose.Text.Controls.TextBox = (function () {
       }
     }
 
-    get tabWidth() {
-      return this._tabWidth;
+    get tabString() {
+      return this._tabString;
     }
 
     get fontSize() {
@@ -358,6 +360,7 @@ Primrose.Text.Controls.TextBox = (function () {
         this.render();
       }
     }
+    
     get selectedText() {
       var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
         maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
@@ -413,6 +416,10 @@ Primrose.Text.Controls.TextBox = (function () {
       return this.canvas;
     }
 
+    get lockMovement() {
+      return this.focused && !this.readOnly;
+    }
+
     pushUndo(lines) {
       if (this._historyFrame < this._history.length - 1) {
         this._history.splice(this._historyFrame + 1);
@@ -441,78 +448,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this.render();
     }
 
-    render() {
-      if (this.resized) {
-        this.resize();
-      }
-      if (this.tokens) {
-        this.refreshGridBounds();
-        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
-          textChanged = this._lastText !== this.value,
-          characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-          characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-          paddingChanged = this.padding !== this._lastPadding,
-          layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || this.resized || paddingChanged;
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.width;
-        this._lastHeight = this.height;
-        this._lastPadding = this.padding;
-
-        if (layoutChanged) {
-          this.performLayout(this.gridBounds);
-        }
-
-        if (this.theme) {
-          var cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            focusChanged = this.focused !== this._lastFocused;
-
-          this._lastFrontCursorI = this.frontCursor.i;
-          this._lastBackCursorI = this.backCursor.i;
-          this._lastFocused = this.focused;
-          this._lastFont = this.context.font;
-          this._lastScrollX = this.scroll.x;
-          this._lastScrollY = this.scroll.y;
-
-          if (layoutChanged) {
-            this._rowCache = {};
-            if (this.resized) {
-              this.resize();
-            }
-          }
-
-          var foregroundChanged = layoutChanged || fontChanged || scrollChanged,
-            backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
-
-          if (foregroundChanged || backgroundChanged) {
-            this.renderCanvasBackground();
-
-            if (foregroundChanged || focusChanged) {
-              if (foregroundChanged) {
-                this.renderCanvasForeground();
-              }
-              this.renderCanvasTrim();
-            }
-
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.drawImage(this._bgCanvas, this._subBounds);
-            this.drawImage(this._fgCanvas, this._subBounds);
-            this.drawImage(this._trimCanvas, this._subBounds);
-            this.parent.drawImage(this.canvas, this.bounds);
-          }
-        }
-      }
-    }
-
-    get tabString() {
-      return this._tabString;
-    }
-
     scrollIntoView(currentCursor) {
       this.scroll.y += this.minDelta(currentCursor.y, this.scroll.y, this.scroll.y + this.gridBounds.height);
       if (!this.wordWrap) {
@@ -536,15 +471,15 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     startPointer(x, y) {
-      setCursorXY(this.frontCursor, x, y);
+      this.setCursorXY(this.frontCursor, x, y);
       this._dragging = true;
       this.render();
     }
 
     startUV(point) {
-      super.startUV(point);
-      if (point) {
+      if (!super.startUV(point)) {
         var p = this.mapUV(point);
+        console.log(this.id, "start pointer", p);
         this.startPointer(p.x, p.y);
       }
     }
@@ -594,7 +529,7 @@ Primrose.Text.Controls.TextBox = (function () {
         }
 
         if (enableClipboard) {
-          //
+          
           // the `surrogate` textarea makes clipboard events possible
           this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea-" + this.id, "textarea", HTMLTextAreaElement);
           this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container-" + this.id, this._surrogate);
@@ -765,15 +700,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this.resize();
     }
 
-    mapUV(point) {
-      if (point) {
-        return {
-          x: Math.floor(this.canvas.width * point[0]),
-          y: Math.floor(this.canvas.height * (1 - point[1]))
-        };
-      }
-    }
-
     clampScroll() {
       if (this.scroll.y < 0) {
         this.scroll.y = 0;
@@ -796,14 +722,6 @@ Primrose.Text.Controls.TextBox = (function () {
       if (moved) {
         this.render();
       }
-    }
-
-    get position() {
-      return this.mesh.position;
-    }
-
-    get quaternion() {
-      return this.mesh.quaternion;
     }
 
     setCursorXY(cursor, x, y) {
@@ -864,14 +782,14 @@ Primrose.Text.Controls.TextBox = (function () {
 
     mouseButtonDown(evt) {
       if (evt.button === 0) {
-        pointerStart(evt.clientX, evt.clientY);
+        this.pointerStart(evt.clientX, evt.clientY);
         evt.preventDefault();
       }
     }
 
     mouseMove(evt) {
       if (this.focused) {
-        pointerMove(evt.clientX, evt.clientY);
+        this.pointerMove(evt.clientX, evt.clientY);
       }
     }
 
@@ -884,7 +802,7 @@ Primrose.Text.Controls.TextBox = (function () {
     touchStart(evt) {
       if (this.focused && evt.touches.length > 0 && !this._dragging) {
         var t = evt.touches[0];
-        pointerStart(t.clientX, t.clientY);
+        this.pointerStart(t.clientX, t.clientY);
         this._currentTouchID = t.identifier;
       }
     }
@@ -893,7 +811,7 @@ Primrose.Text.Controls.TextBox = (function () {
       for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
         var t = evt.changedTouches[i];
         if (t.identifier === this._currentTouchID) {
-          pointerMove(t.clientX, t.clientY);
+          this.pointerMove(t.clientX, t.clientY);
           break;
         }
       }
@@ -1255,6 +1173,76 @@ Primrose.Text.Controls.TextBox = (function () {
       if (!this.focused) {
         this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
         this._tgfx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    }
+
+    render() {
+      if (this.resized) {
+        this.resize();
+      }
+      if (this.tokens) {
+        this.refreshGridBounds();
+        var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
+          textChanged = this._lastText !== this.value,
+          characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+          characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+          paddingChanged = this.padding !== this._lastPadding,
+          layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || this.resized || paddingChanged;
+
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.width;
+        this._lastHeight = this.height;
+        this._lastPadding = this.padding;
+
+        if (layoutChanged) {
+          this.performLayout(this.gridBounds);
+        }
+
+        if (this.theme) {
+          var cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
+            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+            fontChanged = this.context.font !== this._lastFont,
+            focusChanged = this.focused !== this._lastFocused;
+
+          this._lastFrontCursorI = this.frontCursor.i;
+          this._lastBackCursorI = this.backCursor.i;
+          this._lastFocused = this.focused;
+          this._lastFont = this.context.font;
+          this._lastScrollX = this.scroll.x;
+          this._lastScrollY = this.scroll.y;
+
+          if (layoutChanged) {
+            this._rowCache = {};
+            if (this.resized) {
+              this.resize();
+            }
+          }
+
+          var foregroundChanged = layoutChanged || fontChanged || scrollChanged,
+            backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
+
+          if (foregroundChanged || backgroundChanged) {
+            this.renderCanvasBackground();
+
+            if (foregroundChanged || focusChanged) {
+              if (foregroundChanged) {
+                this.renderCanvasForeground();
+              }
+              this.renderCanvasTrim();
+            }
+
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.drawImage(this._bgCanvas, this._subBounds);
+            this.drawImage(this._fgCanvas, this._subBounds);
+            this.drawImage(this._trimCanvas, this._subBounds);
+            if (this.parent) {
+              this.parent.drawImage(this.canvas, this.bounds);
+            }
+          }
+        }
       }
     }
 

@@ -111,7 +111,6 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
   });
     */
     focus() {
-      console.log("focus", this.id);
       this.focused = true;
       emit.call(this, "focus", { target: this });
     }
@@ -147,7 +146,6 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
   });
     */
     blur() {
-      console.log("blur", this.id);
       this.focused = false;
       for (let i = 0; i < this.children.length; ++i) {
         if (this.children[i].focused) {
@@ -179,7 +177,6 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
   });
     */
     appendChild(child) {
-      console.log("appendChild", this.id, child.id);
       if (child && !child.parent) {
         child.parent = this;
         this.children.push(child);
@@ -218,6 +215,14 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
         this.children.splice(i, 1);
         child.parent = null;
       }
+    }
+
+    get lockMovement() {
+      let lock = false;
+      for (let i = 0; i < this.children.length && !lock; ++i) {
+        lock |= this.children[i].lockMovement;
+      }
+      return lock;
     }
   }
   return Entity;

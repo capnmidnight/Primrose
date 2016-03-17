@@ -10,19 +10,16 @@
 Primrose.Surface = (function () {
   "use strict";
 
+  let COUNTER = 0;
+
   class Surface extends Primrose.Entity {
 
-    constructor(idOrCanvasOrContext, width, height) {
+    constructor(idOrCanvasOrContext, bounds) {
       super();
-
-      if (height === undefined && width !== undefined) {
-        height = width;
-        width = idOrCanvasOrContext;
-        idOrCanvasOrContext = undefined;
-      }
 
       this.canvas = null;
       this.context = null;
+      this.bounds = bounds;
 
       if (idOrCanvasOrContext instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
@@ -44,21 +41,19 @@ Primrose.Surface = (function () {
           this.canvas = null;
         }
       }
-      else if (typeof (idOrCanvasOrContext) === "undefined") {
+      else if (idOrCanvasOrContext === undefined || idOrCanvasOrContext === null) {
         this.canvas = document.createElement("canvas");
-        this.canvas.id = idOrCanvasOrContext = "auto_canvas" + (Date.now() ^ (Math.random() * 0xffffffff));
+        this.canvas.id = idOrCanvasOrContext = "Primrose.Surface[" + (COUNTER++) + "]";
       }
-
       if (this.canvas === null) {
         pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
+        console.error(typeof (idOrCanvasOrContext));
         console.error(idOrCanvasOrContext);
         throw new Error(idOrCanvasOrContext + " does not refer to a valid canvas element.");
       }
 
-      if (height !== undefined) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-      }
+      this.canvas.width = this.bounds.width;
+      this.canvas.height = this.bounds.height;
 
       if (this.context === null) {
         this.context = this.canvas.getContext("2d");
@@ -82,20 +77,17 @@ Primrose.Surface = (function () {
       if (this.parent) {
         this.parent.drawImage(this.canvas, this.bounds);
       }
-      else {
-        console.log("no parent", this.id);
-      }
     }
 
     get material() {
       if (!this._material) {
         this._material = new THREE.MeshLambertMaterial({
-            color: 0xffffff,
-            transparent: false,
-            side: THREE.DoubleSide,
-            opacity: 1,
-            map: this.texture
-          });
+          color: 0xffffff,
+          transparent: false,
+          side: THREE.DoubleSide,
+          opacity: 1,
+          map: this.texture
+        });
       }
       return this._material;
     }
@@ -107,6 +99,14 @@ Primrose.Surface = (function () {
       return this._texture;
     }
 
+    appendChild(child) {
+      if (!(child instanceof Surface)){
+        throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
+      }
+      super.appendChild(child);
+      this.drawImage(child.canvas, child.bounds);
+    }
+
     setSize(width, height) {
       const oldWidth = this.canvas.width,
         oldHeight = this.canvas.height,
@@ -114,34 +114,64 @@ Primrose.Surface = (function () {
         rY = heigh / oldHeight;
       this.canvas.width = width;
       this.canvas.height = height;
+      this.bounds.left *= rX;
+      this.bounds.top *= rY;
+      this.bounds.width *= rX;
+      this.bounds.width *= rY;
 
       for (let i = 0; i < this.children.length; ++i) {
         let child = this.children[i];
         if (child.setSize) {
           child.setSize(child.bounds.width * rX, child.bounds.height * rY);
         }
-        if (child.bounds) {
-          child.bounds.left *= rX;
-          child.bounds.top *= rY;
-          child.bounds.width *= rX;
-          child.bounds.height *= rY;
+      }
+    }
+
+    mapUV(point) {
+      let p = { x: point[0], y: point[1] };
+      p.x *= this.bounds.width;
+      p.y = this.bounds.height * (1 - p.y);
+      return p;
+    }
+
+    unmapUV(point) {
+      return [point.x / this.bounds.width, (1 - point.y / this.bounds.height)];
+    }
+
+    findChild(point, thunk) {
+      let p = this.mapUV(point),
+        found = false;
+      for (let i = this.children.length - 1; i >= 0; --i) {
+        let child = this.children[i];
+        if (!found &&
+          child.bounds.left <= p.x && p.x < child.bounds.right &&
+          child.bounds.top <= p.y && p.y < child.bounds.bottom) {
+          found = true;
+          if (!child.focused) {
+            child.focus();
+          }
+          let q = child.unmapUV({ x: p.x - child.bounds.left, y: p.y - child.bounds.top });
+          thunk(child, q);
+        }
+        else if(child.focused){
+          child.blur();
         }
       }
+      return found;
     }
 
     startUV(point) {
-      console.log("startUV", this.id);
-      for (var i = 0; i < this.children.length; ++i) {
-        console.log(this.children[i]);
-      }
+      return this.findChild(point, (child, q) => child.startUV(q));
     }
 
     moveUV(point) {
-      console.log("moveUV", this.id);
+      return this.findChild(point, (child, q) => child.moveUV(q));
     }
 
     endPointer() {
-      console.log("endPointer", this.id);
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].endPointer();
+      }
     }
   }
 

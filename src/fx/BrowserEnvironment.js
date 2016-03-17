@@ -100,7 +100,7 @@ Primrose.BrowserEnvironment = (function () {
     };
 
     var lockedToEditor = function () {
-      return this.currentControl && this.currentControl.readOnly === false;
+      return this.currentControl && this.currentControl.lockMovement;
     }.bind(this);
 
     this.zero = function () {

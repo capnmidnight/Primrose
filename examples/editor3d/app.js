@@ -26,7 +26,7 @@ var GRASS = "/examples/images/grass.png",
   }),
   myWindowMesh = null,
   editorSphereY = app.avatarHeight - 0.25,
-  myWindow = new Primrose.Surface(undefined, 2048, 2048);
+  myWindow = new Primrose.Surface(undefined, new Primrose.Text.Rectangle(0, 0, 2048, 2048));
 
 if (isHomeScreen) {
   document.querySelector("header").style.display = "none";
@@ -35,35 +35,36 @@ if (isHomeScreen) {
 app.addEventListener("ready", function () {
   app.scene.add(subScene);
 
-  documentation = new Primrose.Text.Controls.TextBox(myWindow, {
+  documentation = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(0, 1024, 1024, 1024), {
     tokenizer: Primrose.Text.Grammars.PlainText,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
     readOnly: true,
     fontSize: 32,
-    file: getDocumentation(),
-    bounds: new Primrose.Text.Rectangle(0, 1024, 1024, 1024)
+    file: getDocumentation()
   });
   
-  output = new Primrose.Text.Controls.TextBox(myWindow, {
+  output = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(1024, 1024, 1024, 1024), {
     tokenizer: Primrose.Text.Grammars.PlainText,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
     readOnly: true,
-    fontSize: 32,
-    bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024)
+    fontSize: 32
   });
 
-  editor = new Primrose.Text.Controls.TextBox(myWindow, {
+  editor = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(0, 0, 2048, 1024), {
     tokenizer: Primrose.Text.Grammars.JavaScript,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     fontSize: 32,
-    file: getSourceCode(isHomeScreen),
-    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024)
+    file: getSourceCode(isHomeScreen)
   });
+
+  myWindow.appendChild(documentation);
+  myWindow.appendChild(output);
+  myWindow.appendChild(editor);
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
