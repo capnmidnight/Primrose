@@ -62,6 +62,7 @@ Primrose.Surface = (function () {
 
       this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
       this.context.imageSmoothingEnabled = false;
+      this.context.textBaseline = "top";
       
       //document.body.appendChild(this.canvas);
       //document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hide", this.canvas));
@@ -69,14 +70,29 @@ Primrose.Surface = (function () {
       this.id = this.canvas.id;
     }
 
-    drawImage(image, bounds) {
-      this.context.drawImage(image, bounds.left, bounds.top, bounds.width, bounds.height);
+
+    invalidate(bounds) {
+      bounds = clone(bounds);
+      for (let i = 0; i < this.children.length; ++i) {
+        const child = this.children[i];
+        if (!(child.bounds.right < bounds.left || child.bounds.left > bounds.right ||
+          child.bounds.bottom < bounds.top || child.bounds.right > bounds.buttom)) {
+          this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
+          bounds.left = Math.min(bounds.left, child.bounds.left);
+          bounds.top = Math.min(bounds.top, child.bounds.top);
+          bounds.right = Math.max(bounds.right, child.bounds.right);
+          bounds.bottom = Math.max(bounds.bottom, child.bounds.bottom);
+        }
+        else {
+          console.log("did not draw", child.id);
+        }
+      }
       if (this._material) {
         this._texture.needsUpdate = true;
         this._material.needsUpdate = true;
       }
-      if (this.parent) {
-        this.parent.drawImage(this.canvas, this.bounds);
+      if (this.parent && this.parent.invalidate) {
+        this.parent.invalidate(bounds);
       }
     }
 
@@ -129,7 +145,7 @@ Primrose.Surface = (function () {
         throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
       }
       super.appendChild(child);
-      this.drawImage(child.canvas, child.bounds);
+      this.invalidate(child.bounds);
     }
 
     setSize(width, height) {

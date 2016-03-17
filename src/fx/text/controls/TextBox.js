@@ -22,7 +22,7 @@ Primrose.Text.Controls.TextBox = (function () {
       ////////////////////////////////////////////////////////////////////////
     
       if (typeof options === "string") {
-        this.options = { file: this.options };
+        this.options = { value: this.options };
       }
       else {
         this.options = options || {};
@@ -58,10 +58,6 @@ Primrose.Text.Controls.TextBox = (function () {
       // initialization
       ///////////////////////////////////////////////////////////////////////
 
-      
-      // different browsers have different sets of keycodes for less-frequently
-      // used keys like.
-
       this._subBounds = new Primrose.Text.Rectangle(0, 0, this.width, this.height);
 
       this.tokens = null;
@@ -91,7 +87,9 @@ Primrose.Text.Controls.TextBox = (function () {
       this._lastScrollY = -1;
       this._lastFocused = false;
       this._lastPointer = new Primrose.Text.Point();
-
+            
+      // different browsers have different sets of keycodes for less-frequently
+      // used keys like curly brackets.
       this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       this._pointer = new Primrose.Text.Point();
       this._deadKeyState = "";
@@ -103,7 +101,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this._dragging = false;
       this._scrolling = false;
       this._wheelScrollSpeed = 4;
-      this._padding = 1;
       this._fg = new Primrose.Surface(this.id + "-fore", this._subBounds);
       this._fgCanvas = this._fg.canvas;
       this._fgfx = this._fg.context;
@@ -116,7 +113,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this._rowCache = {};
       this._VSCROLL_WIDTH = 2;
 
-      this.id = this.canvas.id;
       this.tabWidth = this.options.tabWidth;
       this.showLineNumbers = !this.options.hideLineNumbers;
       this.showScrollBars = !this.options.hideScrollBars;
@@ -133,7 +129,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this.codePage = this.options.codePage;
       this.operatingSystem = this.options.os;
       this.setCommandSystem(this.options.commands);
-      this.value = this.options.file;
+      this.value = this.options.value;
       this.padding = this.options.padding || 1;
 
       this.addEventListener("focus", this.render.bind(this), false);
@@ -1214,11 +1210,11 @@ Primrose.Text.Controls.TextBox = (function () {
             }
 
             this.context.clearRect(0, 0, this.width, this.height);
-            this.drawImage(this._bgCanvas, this._subBounds);
-            this.drawImage(this._fgCanvas, this._subBounds);
-            this.drawImage(this._trimCanvas, this._subBounds);
+            this.context.drawImage(this._bgCanvas, this._subBounds.left, this._subBounds.top);
+            this.context.drawImage(this._fgCanvas, this._subBounds.left, this._subBounds.top);
+            this.context.drawImage(this._trimCanvas, this._subBounds.left, this._subBounds.top);
             if (this.parent) {
-              this.parent.drawImage(this.canvas, this.bounds);
+              this.parent.invalidate(this.bounds);
             }
           }
         }

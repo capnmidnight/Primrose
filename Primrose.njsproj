@@ -192,6 +192,7 @@
     <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
     <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
     <Compile Include="src\fx\input\vr\MotionCorrector.js" />
+    <Compile Include="src\fx\controls\Button2D.js" />
     <Compile Include="src\hub.js" />
     <Compile Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
@@ -349,6 +350,7 @@
     <Folder Include="music" />
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
+    <Folder Include="src\fx\controls\" />
     <Folder Include="templates\" />
     <Folder Include="server" />
     <Folder Include="server\controllers" />

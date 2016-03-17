@@ -23,6 +23,8 @@ window.Primrose = ( function () {
   pliny.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
   var Primrose = {};
 
+  Primrose.Controls = {};
+
   pliny.namespace("Primrose.DOM", "A few functions for manipulating DOM.");
   Primrose.DOM = {};
 

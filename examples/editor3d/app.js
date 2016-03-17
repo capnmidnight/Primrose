@@ -9,6 +9,7 @@ var GRASS = "/examples/images/grass.png",
   editor = null,
   output = null,
   documentation = null,
+  button1 = null,
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
   cmdA = isOSX ? "CMD" : "CTRL",
@@ -42,7 +43,7 @@ app.addEventListener("ready", function () {
     hideLineNumbers: true,
     readOnly: true,
     fontSize: 32,
-    file: getDocumentation()
+    value: getDocumentation()
   });
   
   output = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(1024, 1024, 1024, 1024), {
@@ -59,12 +60,22 @@ app.addEventListener("ready", function () {
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     fontSize: 32,
-    file: getSourceCode(isHomeScreen)
+    value: getSourceCode(isHomeScreen)
   });
+
+  button1 = new Primrose.Controls.Button2D(new Primrose.Text.Rectangle(1064, 1064, 300, 32), {
+    keyEventSource: window,
+    value: "Hello",
+    backgroundColor: "#ffff00",
+    color: "#0000ff"
+  });
+
+  button1.addEventListener("click", log.bind(window, "Clicked the button"), false);
 
   myWindow.appendChild(documentation);
   myWindow.appendChild(output);
   myWindow.appendChild(editor);
+  myWindow.appendChild(button1);
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";

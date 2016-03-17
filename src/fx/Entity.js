@@ -20,7 +20,8 @@ performs basic conversions from DOM elements to the internal Control format."
       this.focused = false;
       this.listeners = {
         focus: [],
-        blur: []
+        blur: [],
+        click: []
       };
     }
 
