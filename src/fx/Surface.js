@@ -62,8 +62,9 @@ Primrose.Surface = (function () {
 
       this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
       this.context.imageSmoothingEnabled = false;
-
-      document.body.appendChild(this.canvas);
+      
+      //document.body.appendChild(this.canvas);
+      //document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hide", this.canvas));
 
       this.id = this.canvas.id;
     }
@@ -77,6 +78,30 @@ Primrose.Surface = (function () {
       if (this.parent) {
         this.parent.drawImage(this.canvas, this.bounds);
       }
+    }
+
+    get width() {
+      return this.canvas.width;
+    }
+
+    set width(v) {
+      this.canvas.width = v;
+    }
+
+    get height() {
+      return this.canvas.height;
+    }
+
+    set height(v) {
+      this.canvas.height = v;
+    }
+
+    get elementWidth() {
+      return (this.bounds && this.bounds.width) || (this.canvas.clientWidth * devicePixelRatio);
+    }
+
+    get elementHeight() {
+      return (this.bounds && this.bounds.height) || (this.canvas.clientHeight * devicePixelRatio);
     }
 
     get material() {
@@ -128,14 +153,14 @@ Primrose.Surface = (function () {
     }
 
     mapUV(point) {
-      let p = { x: point[0], y: point[1] };
-      p.x *= this.bounds.width;
-      p.y = this.bounds.height * (1 - p.y);
-      return p;
+      return {
+        x: point[0] * this.width,
+        y: (1 - point[1]) * this.height
+      };
     }
 
     unmapUV(point) {
-      return [point.x / this.bounds.width, (1 - point.y / this.bounds.height)];
+      return [point.x / this.width, (1 - point.y / this.height)];
     }
 
     findChild(point, thunk) {

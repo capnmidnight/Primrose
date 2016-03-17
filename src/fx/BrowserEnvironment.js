@@ -739,11 +739,16 @@ Primrose.BrowserEnvironment = (function () {
       }
     };
 
+    var fsElementName = (function (elem, arr) {
+      for (var i = 0; i < arr.length; ++i) {
+        if (elem[arr[i]] !== undefined) {
+          return arr[i];
+        }
+      }
+    })(document, ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]);
+
     var isFullScreenMode = function () {
-      return (document.fullscreenElement ||
-        document.mozFullScreenElement ||
-        document.webkitFullscreenElement ||
-        document.msFullscreenElement ||
+      return (document[fsElementName] ||
         (this.input.vr && this.input.vr.currentDisplay && this.input.vr.currentDisplay.isPresenting));
     }.bind(this);
 

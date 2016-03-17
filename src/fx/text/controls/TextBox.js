@@ -62,17 +62,17 @@ Primrose.Text.Controls.TextBox = (function () {
       // different browsers have different sets of keycodes for less-frequently
       // used keys like.
 
-      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.bounds.width, this.bounds.height);
+      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.width, this.height);
 
-      this.tokens = null; 
+      this.tokens = null;
       this.lines = null;
-      this._CommandSystem = null; 
-      this._keyboardSystem = null; 
-      this._commandPack = null; 
-      this._tokenRows = null; 
-      this._tokenHashes = null; 
-      this._tabString = null; 
-      this._currentTouchID = null; 
+      this._CommandSystem = null;
+      this._keyboardSystem = null;
+      this._commandPack = null;
+      this._tokenRows = null;
+      this._tokenHashes = null;
+      this._tabString = null;
+      this._currentTouchID = null;
       this._surrogate = null;
       this._surrogateContainer = null;
       this._lineCountWidth = null;
@@ -360,7 +360,7 @@ Primrose.Text.Controls.TextBox = (function () {
         this.render();
       }
     }
-    
+
     get selectedText() {
       var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
         maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
@@ -390,22 +390,6 @@ Primrose.Text.Controls.TextBox = (function () {
         maxCursor.copy(minCursor);
         this.render();
       }
-    }
-
-    get elementWidth() {
-      return (this.bounds && this.bounds.width) || (this.canvas.clientWidth * devicePixelRatio);
-    }
-
-    get elementHeight() {
-      return (this.bounds && this.bounds.height) || (this.canvas.clientHeight * devicePixelRatio);
-    }
-
-    get width() {
-      return this.canvas.width;
-    }
-
-    get height() {
-      return this.canvas.height;
     }
 
     get resized() {
@@ -471,32 +455,24 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     startPointer(x, y) {
-      this.setCursorXY(this.frontCursor, x, y);
       this._dragging = true;
-      this.render();
+      this.setCursorXY(this.frontCursor, x, y);
     }
 
     startUV(point) {
-      if (!super.startUV(point)) {
-        var p = this.mapUV(point);
-        console.log(this.id, "start pointer", p);
-        this.startPointer(p.x, p.y);
-      }
+      var p = this.mapUV(point);
+      this.startPointer(p.x, p.y);
     }
 
     movePointer(x, y) {
       if (this._dragging) {
         this.setCursorXY(this.backCursor, x, y);
-        this.render();
       }
     }
 
     moveUV(point) {
-      super.moveUV(point);
-      if (point) {
-        var p = this.mapUV(point);
-        this.movePointer(p.x, p.y);
-      }
+      var p = this.mapUV(point);
+      this.movePointer(p.x, p.y);
     }
 
     endPointer() {
@@ -524,7 +500,7 @@ Primrose.Text.Controls.TextBox = (function () {
 
       if (k) {
 
-        if (k instanceof HTMLCanvasElement && !k.tabindex) {
+        if (k instanceof HTMLCanvasElement && (k.tabindex === undefined || k.tabindex === null)) {
           k.tabindex = 0;
         }
 
@@ -676,22 +652,22 @@ Primrose.Text.Controls.TextBox = (function () {
             this._bgCanvas.width =
             this._fgCanvas.width =
             this._trimCanvas.width =
-            this.canvas.width = this.elementWidth;
+            this.width = this.elementWidth;
           this._lastHeight =
             this._bgCanvas.height =
             this._fgCanvas.height =
             this._trimCanvas.height =
-            this.canvas.height = this.elementHeight;
+            this.height = this.elementHeight;
         }
       }
     }
 
     pixel2cell(point) {
-      var x = point.x * this.canvas.width / this.canvas.clientWidth;
-      var y = point.y * this.canvas.height / this.canvas.clientHeight;
+      const x = point.x * this.width / this.elementWidth,
+        y = point.y * this.height / this.elementHeight;
       point.set(
-        Math.round(x / this.character.width) + this.scroll.x - this.gridBounds.x,
-        Math.floor((y / this.character.height) - 0.25) + this.scroll.y);
+        Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x,
+        Math.floor((point.y / this.character.height) - 0.25) + this.scroll.y);
     }
 
     setSize(w, h) {
@@ -725,13 +701,15 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     setCursorXY(cursor, x, y) {
+      x = Math.round(x);
+      y = Math.round(y);
       this._pointer.set(x, y);
       this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      var gx = this._pointer.x - this.scroll.x;
-      var gy = this._pointer.y - this.scroll.y;
-      var onBottom = gy >= this.gridBounds.height;
-      var onLeft = gx < 0;
-      var onRight = this._pointer.x >= this.gridBounds.width;
+      let gx = this._pointer.x - this.scroll.x,
+        gy = this._pointer.y - this.scroll.y,
+        onBottom = gy >= this.gridBounds.height,
+        onLeft = gx < 0,
+        onRight = this._pointer.x >= this.gridBounds.width;
       if (!this._scrolling && !onBottom && !onLeft && !onRight) {
         cursor.setXY(this._pointer.x, this._pointer.y, this.lines);
         this.backCursor.copy(cursor);
@@ -762,6 +740,7 @@ Primrose.Text.Controls.TextBox = (function () {
         // clicked in the lower-left corner
       }
       this._lastPointer.copy(this._pointer);
+      this.render();
     }
 
     pointerStart(x, y) {
@@ -940,7 +919,7 @@ Primrose.Text.Controls.TextBox = (function () {
         this._bgfx.fillStyle = this.theme.regular.backColor;
       }
 
-      this._bgfx[clearFunc](0, 0, this.canvas.width, this.canvas.height);
+      this._bgfx[clearFunc](0, 0, this.width, this.height);
       this._bgfx.save();
       this._bgfx.translate(
         (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding,
@@ -1073,7 +1052,7 @@ Primrose.Text.Controls.TextBox = (function () {
         maxLineWidth = 0,
         i;
 
-      this._tgfx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this._tgfx.clearRect(0, 0, this.width, this.height);
       this._tgfx.save();
       this._tgfx.translate(this.padding, this.padding);
       this._tgfx.save();
@@ -1153,7 +1132,7 @@ Primrose.Text.Controls.TextBox = (function () {
         //vertical
         if (this._tokenRows.length > this.gridBounds.height) {
           var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-            bx = this.canvas.width - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+            bx = this.width - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
             bh = Math.max(this.character.height, scrollBarHeight);
           bw = this._VSCROLL_WIDTH * this.character.width;
           this._tgfx.fillRect(bx, scrollY, bw, bh);
@@ -1168,11 +1147,11 @@ Primrose.Text.Controls.TextBox = (function () {
         0,
         this.gridBounds.width,
         this.gridBounds.height);
-      this._tgfx.strokeRect(0, 0, this.canvas.width - 2 * this.padding, this.canvas.height - 2 * this.padding);
+      this._tgfx.strokeRect(0, 0, this.width - 2 * this.padding, this.height - 2 * this.padding);
       this._tgfx.restore();
       if (!this.focused) {
         this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this._tgfx.fillRect(0, 0, this.width, this.height);
       }
     }
 
@@ -1234,7 +1213,7 @@ Primrose.Text.Controls.TextBox = (function () {
               this.renderCanvasTrim();
             }
 
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.context.clearRect(0, 0, this.width, this.height);
             this.drawImage(this._bgCanvas, this._subBounds);
             this.drawImage(this._fgCanvas, this._subBounds);
             this.drawImage(this._trimCanvas, this._subBounds);
