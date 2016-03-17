@@ -48,8 +48,7 @@ Primrose.Text.CommandPacks.TextEditor = ( function () {
         prim.scrollIntoView( prim.frontCursor );
       },
       NORMAL_TAB: function ( prim, tokenRows ) {
-        var ts = prim.getTabString();
-        prim.selectedText = prim.getTabString();
+        prim.selectedText = prim.tabString;
       }
     };
 

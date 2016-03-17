@@ -47,7 +47,7 @@ Primrose.Text.CommandPacks.TestViewer = ( function () {
       prim.scrollIntoView( prim.frontCursor );
     },
     NORMAL_TAB: function ( prim, tokenRows ) {
-      prim.selectedText = prim.getTabString();
+      prim.selectedText = prim.tabString;
     }
   };
 } )();

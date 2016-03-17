@@ -15,7 +15,7 @@ var GRASS = "/examples/images/grass.png",
     dx = 7,
     dy = 2.5,
     dz = 4,
-    app = new Primrose.VRApplication( "AncientTemple", {
+    app = new Primrose.BrowserEnvironment( "AncientTemple", {
       disableAutoFullScreen: true,
       useFog: true,
       skyTexture: "/examples/images/bg2.jpg",

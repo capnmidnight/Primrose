@@ -1,4 +1,4 @@
-var app = new Primrose.VRApplication(
+var app = new Primrose.BrowserEnvironment(
     // We give the application a name here, in case we ever
     // hook it up to the Multiplayer Server.
     "sandbox", {

@@ -23,8 +23,14 @@ window.Primrose = ( function () {
   pliny.namespace( "Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments." );
   var Primrose = {};
 
-  pliny.namespace( "Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment." );
+  pliny.namespace("Primrose.DOM", "A few functions for manipulating DOM.");
+  Primrose.DOM = {};
+
+  pliny.namespace("Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment.");
   Primrose.Input = {};
+
+  pliny.namespace("Primrose.Network", "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN.");
+  Primrose.Network = {};
 
   pliny.namespace( "Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)." );
   Primrose.Output = {};

@@ -18,13 +18,11 @@
 
     onFullScreen = function () {
       setTimeout(tearDown);
-      console.log("got fullscreen");
       resolve(document.webkitFullscreenElement || document.fullscreenElement);
     };
 
     onFullScreenError = function (evt) {
       setTimeout(tearDown);
-      console.error("no got fullscreen");
       reject(evt);
     };
 
@@ -47,7 +45,6 @@
 }
 
 function requestFullScreen(elem, fullScreenParam) {
-  console.log("requesting fullscreen");
   return new Promise(function (resolve, reject) {
     withFullScreenChange(function () {
       if (elem.webkitRequestFullscreen) {
@@ -72,7 +69,6 @@ function requestFullScreen(elem, fullScreenParam) {
 }
 
 function exitFullScreen() {
-  console.log("Exiting fullscreen");
   return new Promise(function (resolve, reject) {
     withFullScreenChange(function () {
       if (document.exitFullscreen) {

@@ -2,7 +2,7 @@
 
 THREE.ImageLoader.crossOrigin = "anonymous";
 var DEBUG_VR = false,
-    app = new Primrose.VRApplication(
+    app = new Primrose.BrowserEnvironment(
         "glove demo", {
           sceneModel: "/models/scene5.json",
           skyTexture: "/examples/images/bg2.jpg",

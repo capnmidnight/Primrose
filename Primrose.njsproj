@@ -20,7 +20,7 @@
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:true</ScriptArguments>
+    <ScriptArguments>-v:true -b:false</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -170,10 +170,29 @@
     <Compile Include="server\starter.js" />
     <Compile Include="server\webServer.js" />
     <Compile Include="server\webSocketServer.js" />
+    <Compile Include="src\base\axis.js" />
+    <Compile Include="src\base\box.js" />
+    <Compile Include="src\base\brick.js" />
+    <Compile Include="src\base\clone.js" />
+    <Compile Include="src\base\cylinder.js" />
     <Compile Include="src\base\fullscreen.js" />
+    <Compile Include="src\base\put.js" />
+    <Compile Include="src\base\InsideSphereGeometry.js" />
+    <Compile Include="src\base\light.js" />
+    <Compile Include="src\base\quad.js" />
+    <Compile Include="src\base\shell.js" />
+    <Compile Include="src\base\sphere.js" />
+    <Compile Include="src\base\textured.js" />
+    <Compile Include="src\base\v3.js" />
+    <Compile Include="src\fx\DOM\cascadeElement.js" />
+    <Compile Include="src\fx\DOM\findEverything.js" />
+    <Compile Include="src\fx\DOM\makeHidingContainer.js" />
+    <Compile Include="src\fx\Surface.js" />
+    <Compile Include="src\fx\Entity.js" />
     <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
     <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
     <Compile Include="src\fx\input\vr\MotionCorrector.js" />
+    <Compile Include="src\hub.js" />
     <Compile Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
     <Content Include="stylesheets\main.min.css" />
@@ -247,20 +266,19 @@
     <Compile Include="src\fx\BaseControl.js" />
     <Compile Include="src\fx\Button.js" />
     <Compile Include="src\fx\ButtonFactory.js" />
-    <Compile Include="src\fx\DOM.js" />
     <Compile Include="src\fx\HTTP.js" />
     <Compile Include="src\fx\Keys.js" />
     <Compile Include="src\fx\ModelLoader.js" />
     <Compile Include="src\fx\NetworkedInput.js" />
     <Compile Include="src\fx\Projector.js" />
     <Compile Include="src\fx\Random.js" />
-    <Compile Include="src\fx\StateList.js" />
-    <Compile Include="src\fx\VRApplication.js" />
+    <Compile Include="src\fx\DOM\StateList.js" />
+    <Compile Include="src\fx\BrowserEnvironment.js" />
     <Compile Include="src\fx\WebRTCSocket.js" />
     <Compile Include="src\fx\Workerize.js" />
     <Compile Include="src\base\fmt.js" />
     <Compile Include="src\base\forms.js" />
-    <Compile Include="src\base\graphics.js" />
+    <Compile Include="src\base\cloud.js" />
     <Compile Include="src\base\oop.js" />
     <Compile Include="src\base\options.js" />
     <Compile Include="src\fx\input\ButtonAndAxis.js" />
@@ -304,8 +322,6 @@
     <Compile Include="src\fx\text\grammars\TestResults.js" />
     <Compile Include="src\fx\text\operating_systems\OSX.js" />
     <Compile Include="src\fx\text\operating_systems\Windows.js" />
-    <Compile Include="src\fx\text\renderers\Canvas.js" />
-    <Compile Include="src\fx\text\renderers\DOM.js" />
     <Compile Include="src\fx\text\themes\Dark.js" />
     <Compile Include="src\fx\text\themes\Default.js" />
     <Content Include="templates\withFramework.jade" />
@@ -331,8 +347,8 @@
     <Folder Include="lib" />
     <Folder Include="models\" />
     <Folder Include="music" />
-    <Folder Include="src\fx\gui2d\" />
     <Folder Include="src\fx\input\vr\" />
+    <Folder Include="src\fx\DOM\" />
     <Folder Include="templates\" />
     <Folder Include="server" />
     <Folder Include="server\controllers" />
@@ -350,7 +366,6 @@
     <Folder Include="src\fx\text\controls" />
     <Folder Include="src\fx\text\grammars" />
     <Folder Include="src\fx\text\operating_systems" />
-    <Folder Include="src\fx\text\renderers" />
     <Folder Include="src\fx\text\themes" />
     <Folder Include="stylesheets" />
     <Folder Include="test" />

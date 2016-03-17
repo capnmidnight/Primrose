@@ -45,11 +45,11 @@ function jadeConfiguration(options, defaultData) {
     }]
   };
 
+  defaultData.version = pkg.version;
+
   config.options.data = function (dest, src) {
-    var data = JSON.parse(JSON.stringify(defaultData));
-    data.version = pkg.version;
-    data.filename = dest;
-    return data;
+    defaultData.filename = dest;
+    return defaultData;
   }.bind(config);
 
   return config;

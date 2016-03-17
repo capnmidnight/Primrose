@@ -7,7 +7,7 @@ var WIDTH = 100,
     MIDZ = DEPTH / 2,
     t = 0,
     jabs = {},
-    app = new Primrose.VRApplication( "Editor3D", {
+    app = new Primrose.BrowserEnvironment( "Editor3D", {
       disableAutoFullScreen: true,
       skyTexture: "/examples/images/bg2.jpg",
       groundTexture: "/examples/images/grass.png"
