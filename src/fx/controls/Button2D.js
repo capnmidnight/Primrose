@@ -94,8 +94,7 @@ Primrose.Controls.Button2D = (function () {
       return this.canvas;
     }
 
-    startUV(point) {
-      super.startUV(point);
+    startPointer(point) {
       this._activated = true;
       this.render();
     }

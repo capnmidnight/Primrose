@@ -66,7 +66,7 @@ app.addEventListener("ready", function () {
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     fontSize: 32,
-    value: getSourceCode(isHomeScreen)
+    value: getSourceCode(isInIFrame)
   });
 
   button1 = new Primrose.Controls.Button2D({
