@@ -53,11 +53,14 @@ Primrose.Surface = (function () {
 
       this.id = this.canvas.id;
 
-      if (this.bounds.width === 0)
+      if (this.bounds.width === 0) {
         console.log(this.id);
+        this.bounds.width = this.imageWidth;
+        this.bounds.height = this.imageHeight;
+      }
 
-      this.canvas.width = this.bounds.width;
-      this.canvas.height = this.bounds.height;
+      this.imageWidth = this.bounds.width;
+      this.imageHeight = this.bounds.height;
 
       if (this.context === null) {
         this.context = this.canvas.getContext("2d");
@@ -67,9 +70,6 @@ Primrose.Surface = (function () {
       this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
       this.context.imageSmoothingEnabled = false;
       this.context.textBaseline = "top";
-      
-      //document.body.appendChild(this.canvas);
-      //document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hide", this.canvas));
     }
 
 
@@ -98,28 +98,73 @@ Primrose.Surface = (function () {
       }
     }
 
-    get width() {
+    get imageWidth() {
       return this.canvas.width;
     }
 
-    set width(v) {
+    set imageWidth(v) {
       this.canvas.width = v;
+      this.bounds.width = v;
     }
 
-    get height() {
+    get imageHeight() {
       return this.canvas.height;
     }
 
-    set height(v) {
+    set imageHeight(v) {
       this.canvas.height = v;
+      this.bounds.height = v;
     }
 
     get elementWidth() {
-      return (this.bounds && this.bounds.width) || (this.canvas.clientWidth * devicePixelRatio);
+      return this.canvas.clientWidth * devicePixelRatio;
+    }
+
+    set elementWidth(v) {
+      this.canvas.style.width = (v / devicePixelRatio) + "px";
     }
 
     get elementHeight() {
-      return (this.bounds && this.bounds.height) || (this.canvas.clientHeight * devicePixelRatio);
+      return this.canvas.clientHeight * devicePixelRatio;
+    }
+
+    set elementHeight(v) {
+      this.canvas.style.height = (v / devicePixelRatio) + "px";
+    }
+
+    get surfaceWidth() {
+      return this.canvas.parentElement ? this.elementWidth : this.bounds.width;
+    }
+
+    get surfaceHeight() {
+      return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
+    }
+
+    resized() {
+      return this.imageWidth !== this.surfaceWidth ||
+        this.imageHeight !== this.surfaceHeight;
+    }
+
+    resize() {
+      this.setSize(this.surfaceWidth, this.surfaceHeight);
+    }
+
+    setSize(width, height) {
+      const oldWidth = this.imageWidth,
+        oldHeight = this.imageHeight,
+        rX = width / oldWidth,
+        rY = height / oldHeight;
+      this.imageWidth = width;
+      this.imageHeight = height;
+      this.bounds.left *= rX;
+      this.bounds.top *= rY;
+
+      for (let i = 0; i < this.children.length; ++i) {
+        let child = this.children[i];
+        if (child.setSize) {
+          child.setSize(child.bounds.width * rX, child.bounds.height * rY);
+        }
+      }
     }
 
     get material() {
@@ -150,51 +195,29 @@ Primrose.Surface = (function () {
       this.invalidate(child.bounds);
     }
 
-    setSize(width, height) {
-      const oldWidth = this.canvas.width,
-        oldHeight = this.canvas.height,
-        rX = width / oldWidth,
-        rY = heigh / oldHeight;
-      this.canvas.width = width;
-      this.canvas.height = height;
-      this.bounds.left *= rX;
-      this.bounds.top *= rY;
-      this.bounds.width *= rX;
-      this.bounds.width *= rY;
-
-      for (let i = 0; i < this.children.length; ++i) {
-        let child = this.children[i];
-        if (child.setSize) {
-          child.setSize(child.bounds.width * rX, child.bounds.height * rY);
-        }
-      }
-    }
-
     mapUV(point) {
       return {
-        x: point[0] * this.width,
-        y: (1 - point[1]) * this.height
+        x: point[0] * this.imageWidth,
+        y: (1 - point[1]) * this.imageHeight
       };
     }
 
     unmapUV(point) {
-      return [point.x / this.width, (1 - point.y / this.height)];
+      return [point.x / this.imageWidth, (1 - point.y / this.imageHeight)];
     }
 
-    findChild(point, thunk) {
-      let p = this.mapUV(point),
-        found = false;
+    _findChild(x, y, thunk) {
+      let found = false;
       for (let i = this.children.length - 1; i >= 0; --i) {
         let child = this.children[i];
         if (!found &&
-          child.bounds.left <= p.x && p.x < child.bounds.right &&
-          child.bounds.top <= p.y && p.y < child.bounds.bottom) {
+          child.bounds.left <= x && x < child.bounds.right &&
+          child.bounds.top <= y && y < child.bounds.bottom) {
           found = true;
           if (!child.focused) {
             child.focus();
           }
-          let q = child.unmapUV({ x: p.x - child.bounds.left, y: p.y - child.bounds.top });
-          thunk(child, q);
+          thunk(child, x - child.bounds.left, y - child.bounds.top);
         }
         else if (child.focused) {
           child.blur();
@@ -203,12 +226,30 @@ Primrose.Surface = (function () {
       return found;
     }
 
+    startDOMPointer(x, y) {
+      return this.startPointer(x * devicePixelRatio, y * devicePixelRatio);
+    }
+
+    moveDOMPointer(x, y) {
+      return this.movePointer(x * devicePixelRatio, y * devicePixelRatio);
+    }
+
+    startPointer(x, y) {
+      return this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+    }
+
+    movePointer(x, y) {
+      return this._findChild(x, y, (child, x2, y2) => child.movePointer(x2, y2));
+    }
+
     startUV(point) {
-      return this.findChild(point, (child, q) => child.startUV(q));
+      var p = this.mapUV(point);
+      return this.startPointer(p.x, p.y);
     }
 
     moveUV(point) {
-      return this.findChild(point, (child, q) => child.moveUV(q));
+      var p = this.mapUV(point);
+      return this.movePointer(p.x, p.y);
     }
 
     endPointer() {

@@ -104,6 +104,13 @@ window.Primrose = ( function () {
     textureLoader.load( url, onLoad, onProgress, onError );
   };
 
+  pliny.value("", {
+    name: "isHomeScreen",
+    type: "Boolean",
+    description: "Flag indicating the script is currently running in an IFRAME or not."
+  });
+  window.isInIFrame = (window.self !== window.top);
+
 // snagged and adapted from http://detectmobilebrowsers.com/
   pliny.value( "", {
     name: "isMobile",

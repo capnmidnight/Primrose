@@ -1,6 +1,7 @@
 ﻿extends main.jade
 
 append head
+  <!-- start withFramework.jade head append -->
   if debug
     script(type="text/javascript", src= "/lib/webgl-debug.js")
     script(type="text/javascript", src= "/node_modules/three/three.js")
@@ -12,6 +13,10 @@ append head
     script(type="text/javascript", src="/scripts/three.min.js")
     script(type="text/javascript", src="/scripts/marked.min.js")
     script(type="text/javascript", src="/scripts/Primrose.min.js")
+  <!-- end withFramework.jade head append -->
 
 prepend footer
+  <!-- start withFramework.jade footer prepend -->
   script(type="text/javascript", src="app.js")
+  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
+  <!-- end withFramework.jade footer prepend -->

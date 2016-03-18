@@ -42,7 +42,7 @@ Primrose.Controls.Button2D = (function () {
       // initialization
       ///////////////////////////////////////////////////////////////////////
 
-      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.width, this.height);
+      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.imageWidth, this.imageHeight);
 
       this._currentTouchID = null;
 
@@ -87,7 +87,7 @@ Primrose.Controls.Button2D = (function () {
     }
 
     get resized() {
-      return this.width !== this.elementWidth || this.height !== this.elementHeight;
+      return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
     }
 
     get DOMElement() {
@@ -111,11 +111,11 @@ Primrose.Controls.Button2D = (function () {
 
     resize() {
       if (this.theme &&
-        (this._lastWidth !== this.elementWidth || this._lastHeight !== this.elementHeight)
-        && this.elementWidth > 0
-        && this.elementHeight > 0) {
-        this._lastWidth = this.width = this.elementWidth;
-        this._lastHeight = this.height = this.elementHeight;
+        (this._lastWidth !== this.surfaceWidth || this._lastHeight !== this.surfaceHeight)
+        && this.surfaceWidth > 0
+        && this.surfaceHeight > 0) {
+        this._lastWidth = this.imageWidth = this.surfaceWidth;
+        this._lastHeight = this.imageHeight = this.surfaceHeight;
       }
     }
 
@@ -153,8 +153,8 @@ Primrose.Controls.Button2D = (function () {
         this._lastText = this.value;
         this._lastCharacterWidth = this.character.width;
         this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.width;
-        this._lastHeight = this.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
         this._lastFont = this.context.font;
         this._lastActivated = this._activated;
 
@@ -167,13 +167,13 @@ Primrose.Controls.Button2D = (function () {
           this.context.fillStyle = backColor;
         }
 
-        this.context[clearFunc](0, 0, this.width, this.height);
+        this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
 
         if (this.value) {
           var lines = this.value.split("\n");
           for (var y = 0; y < lines.length; ++y) {
             var line = lines[y],
-              textY = (this.height - lines.length * this.character.height) / 2 + y * this.character.height,
+              textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height,
               testWidth = "";
 
             for (var x = 0; x < 10; ++x) {
@@ -181,7 +181,7 @@ Primrose.Controls.Button2D = (function () {
             }
 
             var textWidth = this.context.measureText(testWidth).width / 10,
-              textX = (this.width - textWidth) / 2,
+              textX = (this.imageWidth - textWidth) / 2,
               font = (this.theme.regular.fontWeight || "") +
                 " " + (this.theme.regular.fontStyle || "") +
                 " " + this.character.height + "px " + this.theme.fontFamily;
@@ -193,7 +193,7 @@ Primrose.Controls.Button2D = (function () {
 
         this.context.lineWidth = this._activated ? 4 : 2;
         this.context.strokeStyle = this.theme.regular.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
-        this.context.strokeRect(0, 0, this.width, this.height);
+        this.context.strokeRect(0, 0, this.imageWidth, this.imageHeight);
 
         if (this.parent) {
           this.parent.invalidate(this.bounds);

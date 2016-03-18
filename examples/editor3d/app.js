@@ -5,7 +5,6 @@ var GRASS = "/examples/images/grass.png",
   SAND = "/examples/images/sand.png",
   WATER = "/examples/images/water.png",
   DECK = "/examples/images/deck.png",
-  isHomeScreen = window.self !== window.top,
   editor = null,
   output = null,
   documentation = null,
@@ -33,7 +32,7 @@ var GRASS = "/examples/images/grass.png",
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
   });
 
-if (isHomeScreen) {
+if (isInIFrame) {
   document.querySelector("header").style.display = "none";
 }
 

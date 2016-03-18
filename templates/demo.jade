@@ -1,13 +1,17 @@
 ﻿extends withFramework.jade
 
 append head
+  <!-- start demo.jade head append -->
   link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")
   link(type="text/css", rel="stylesheet", href= debug ? "../style.css" : "../style.min.css")
   style(type="text/css") body{background-image:url(screenshot.jpg);}
+  <!-- end demo.jade head append -->
 
 block banner
+  <!-- start demo.jade banner block -->
   canvas#frontBuffer
   #controls
     button#viewSource(type="button") View source
     button#goVR(type="button"): img(src="/images/cardboard64.png", alt="icon")
     button#goRegular(type="button"): img(src="/images/fullscreen64.png", alt="icon")
+  <!-- end demo.jade banner block -->

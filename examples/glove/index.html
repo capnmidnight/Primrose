@@ -12,12 +12,15 @@
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
     <meta property="og:url" content="http://www.primrosevr.com/examples/glove/index.html">
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
-    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+    <!-- start main.jade title block -->
     <meta property="og:title" content="Primrose VR: WebVR Application Framework">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
-    <title>Primrose VR: WebVR Application Framework</title>
-    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script>
+    <title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
+    <!-- start main.jade head block -->
+    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append -->
     <script type="text/javascript" src="/lib/webgl-debug.js"></script>
     <script type="text/javascript" src="/node_modules/three/three.js"></script>
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
@@ -113,18 +116,19 @@
     <script type="text/javascript" src="/src/fx/text/operating_systems/OSX.js"></script>
     <script type="text/javascript" src="/src/fx/text/operating_systems/Windows.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script>
+    <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append -->
+    <!-- start demo.jade head append -->
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
     <link type="text/css" rel="stylesheet" href="../style.css">
-    <style type="text/css">body{background-image:url(screenshot.jpg);}</style>
+    <style type="text/css">body{background-image:url(screenshot.jpg);}</style><!-- end demo.jade head append --><!-- end main.jade head block -->
   </head>
-  <body>
+  <body><!-- start main.jade banner block --><!-- start demo.jade banner block -->
     <canvas id="frontBuffer"></canvas>
     <div id="controls">
       <button id="viewSource" type="button">View source</button>
       <button id="goVR" type="button"><img src="/images/cardboard64.png" alt="icon"></button>
       <button id="goRegular" type="button"><img src="/images/fullscreen64.png" alt="icon"></button>
-    </div>
+    </div><!-- end demo.jade banner block --><!-- end main.jade banner block -->
     <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
       <nav role="navigation">
         <ul>
@@ -137,7 +141,9 @@
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
         </ul>
       </nav>
-    </header>
+    </header><!-- start main.jade main block --><!-- end main.jade main block -->
+    <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
     <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
   </body>
 </html>

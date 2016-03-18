@@ -12,12 +12,15 @@
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
     <meta property="og:url" content="http://www.primrosevr.com/doc/index.html">
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
-    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+    <!-- start main.jade title block --><!-- start documentation.jade title block -->
     <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
-    <title>Primrose VR: WebVR Application Framework Documentation</title>
-    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script>
+    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block -->
+    <!-- start main.jade head block -->
+    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append -->
     <script type="text/javascript" src="/lib/webgl-debug.js"></script>
     <script type="text/javascript" src="/node_modules/three/three.js"></script>
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
@@ -113,10 +116,11 @@
     <script type="text/javascript" src="/src/fx/text/operating_systems/OSX.js"></script>
     <script type="text/javascript" src="/src/fx/text/operating_systems/Windows.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append -->
+    <!-- start documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append --><!-- end main.jade head block -->
   </head>
-  <body>
+  <body><!-- start main.jade banner block --><!-- end main.jade banner block -->
     <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
       <nav role="navigation">
         <ul>
@@ -129,7 +133,7 @@
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
         </ul>
       </nav>
-    </header>
+    </header><!-- start main.jade main block --><!-- start documentation.jade main block -->
     <main>
       <div id="top"></div>
       <div id="contents">
@@ -150,7 +154,7 @@
           </nav>
         </details>
       </div>
-      <div id="documentation">
+      <div id="documentation"><!-- start documentation.jade documentation block -->
         <h1>Getting started</h1><img src="/images/logo128.png" alt="logo" title="Primrose" style="float:left;padding:10px" class="logo">
         <p>Primrose is a cross-browser, multi-device framework for building productivity tools in <a href="/index.html#webvr">WebVR</a> applications. Developers model their scenes in <a href="https://www.blender.org" target="_blank">Blender</a> (or some other 3D modeling package), create a web page using Primrose to load the scene, then manipulate objects within the scene using interfaces similar to the standard DOM functions with which they are already familiar.</p>
         <p>It includes a suite of GUI controls—like buttons and a syntax-highlighting code editor control—to simplify the process of building VR applications that emphasize interactive, productive work. Use it to experiment with new ideas on productivity UIs in virtual spaces.</p>
@@ -253,9 +257,11 @@ app.addEventListener( "update", function ( dt ) {
   // Perform per-frame updates here, like moving objects around according to your
   // own rules.
 } );</code></pre>
-        <p>The results, once ran in your browser, should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene">
+        <p>The results, once ran in your browser, should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block -->
       </div>
-    </main>
+    </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
+    <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
     <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
   </body>
 </html>

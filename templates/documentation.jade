@@ -1,14 +1,19 @@
 ﻿extends ../templates/withFramework.jade
 
 block title
+  <!-- start documentation.jade title block -->
   meta(property="og:title", content="Primrose VR: WebVR Application Framework Documentation")
   meta(name="twitter:title", content="Primrose VR: WebVR Application Framework Documentation")
   title Primrose VR: WebVR Application Framework Documentation
+  <!-- end documentation.jade title block -->
   
-append head  
-  link(rel="stylesheet", type="text/css", href=debug ? "style.css" : "style.min.css")
+append head
+  <!-- start documentation.jade head append -->
+  link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
+  <!-- end documentation.jade head append -->
   
 block main
+  <!-- start documentation.jade main block -->
   main
     #top
     #contents
@@ -24,4 +29,7 @@ block main
                 li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Source code
                 li: a(href="https://www.github.com/capnmidnight/Primrose/issues", target="_blank") Issues
     #documentation
+      <!-- start documentation.jade documentation block -->
       block document
+      <!-- end documentation.jade documentation block -->
+  <!-- end documentation.jade main block -->

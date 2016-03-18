@@ -60,9 +60,6 @@ Primrose.Text.Controls.TextBox = (function () {
       ////////////////////////////////////////////////////////////////////////
       // initialization
       ///////////////////////////////////////////////////////////////////////
-
-      this._subBounds = new Primrose.Text.Rectangle(0, 0, this.width, this.height);
-
       this.tokens = null;
       this.lines = null;
       this._CommandSystem = null;
@@ -104,21 +101,22 @@ Primrose.Text.Controls.TextBox = (function () {
       this._dragging = false;
       this._scrolling = false;
       this._wheelScrollSpeed = 4;
+      var subBounds = new Primrose.Text.Rectangle(0, 0, this.bounds.width, this.bounds.height);
       this._fg = new Primrose.Surface({
         id: this.id + "-fore",
-        bounds: this._subBounds
+        bounds: subBounds
       });
       this._fgCanvas = this._fg.canvas;
       this._fgfx = this._fg.context;
       this._bg = new Primrose.Surface({
         id: this.id + "-back",
-        bounds: this._subBounds
+        bounds: subBounds
       });
       this._bgCanvas = this._bg.canvas;
       this._bgfx = this._bg.context;
       this._trim = new Primrose.Surface({
         id: this.id + "-trim",
-        bounds: this._subBounds
+        bounds: subBounds
       });
       this._trimCanvas = this._trim.canvas;
       this._tgfx = this._trim.context;
@@ -404,10 +402,6 @@ Primrose.Text.Controls.TextBox = (function () {
       }
     }
 
-    get resized() {
-      return this.width !== this.elementWidth || this.height !== this.elementHeight;
-    }
-
     get DOMElement() {
       return this.canvas;
     }
@@ -471,20 +465,10 @@ Primrose.Text.Controls.TextBox = (function () {
       this.setCursorXY(this.frontCursor, x, y);
     }
 
-    startUV(point) {
-      var p = this.mapUV(point);
-      this.startPointer(p.x, p.y);
-    }
-
     movePointer(x, y) {
       if (this._dragging) {
         this.setCursorXY(this.backCursor, x, y);
       }
-    }
-
-    moveUV(point) {
-      var p = this.mapUV(point);
-      this.movePointer(p.x, p.y);
     }
 
     endPointer() {
@@ -498,12 +482,12 @@ Primrose.Text.Controls.TextBox = (function () {
         if (!w) {
           p.addEventListener("wheel", this.readWheel.bind(this), false);
         }
-        p.addEventListener("mousedown", this.mouseButtonDown, false);
-        p.addEventListener("mousemove", this.mouseMove, false);
-        p.addEventListener("mouseup", this.mouseButtonUp, false);
-        p.addEventListener("touchstart", this.touchStart, false);
-        p.addEventListener("touchmove", this.touchMove, false);
-        p.addEventListener("touchend", this.touchEnd, false);
+        p.addEventListener("mousedown", this.mouseButtonDown.bind(this), false);
+        p.addEventListener("mousemove", this.mouseMove.bind(this), false);
+        p.addEventListener("mouseup", this.mouseButtonUp.bind(this), false);
+        p.addEventListener("touchstart", this.touchStart.bind(this), false);
+        p.addEventListener("touchmove", this.touchMove.bind(this), false);
+        p.addEventListener("touchend", this.touchEnd.bind(this), false);
       }
 
       if (w) {
@@ -649,6 +633,10 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     resize() {
+      super.resize();
+      this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
+      this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
       if (this.theme) {
         this.character.height = this.fontSize;
         this.context.font = this.character.height + "px " + this.theme.fontFamily;
@@ -658,34 +646,16 @@ Primrose.Text.Controls.TextBox = (function () {
         this.character.width = this.context.measureText(
           "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width /
           100;
-
-        if ((this._lastWidth !== this.elementWidth || this._lastHeight !== this.elementHeight) && this.elementWidth > 0 && this.elementHeight > 0) {
-          this._lastWidth =
-            this._bgCanvas.width =
-            this._fgCanvas.width =
-            this._trimCanvas.width =
-            this.width = this.elementWidth;
-          this._lastHeight =
-            this._bgCanvas.height =
-            this._fgCanvas.height =
-            this._trimCanvas.height =
-            this.height = this.elementHeight;
-        }
       }
+      this.render();
     }
 
     pixel2cell(point) {
-      const x = point.x * this.width / this.elementWidth,
-        y = point.y * this.height / this.elementHeight;
+      const x = point.x * this.imageWidth / this.surfaceWidth,
+        y = point.y * this.imageHeight / this.surfaceHeight;
       point.set(
         Math.round(point.x / this.character.width) + this.scroll.x - this.gridBounds.x,
         Math.floor((point.y / this.character.height) - 0.25) + this.scroll.y);
-    }
-
-    setSize(w, h) {
-      this.canvas.style.width = Math.round(w) + "px";
-      this.canvas.style.height = Math.round(h) + "px";
-      this.resize();
     }
 
     clampScroll() {
@@ -755,31 +725,16 @@ Primrose.Text.Controls.TextBox = (function () {
       this.render();
     }
 
-    pointerStart(x, y) {
-      if (this.options.pointerEventSource) {
-        this.focus();
-        var bounds = this.options.pointerEventSource.getBoundingClientRect();
-        this.startPointer(x - bounds.left, y - bounds.top);
-      }
-    }
-
-    pointerMove(x, y) {
-      if (this.options.pointerEventSource) {
-        var bounds = this.options.pointerEventSource.getBoundingClientRect();
-        this.movePointer(x - bounds.left, y - bounds.top);
-      }
-    }
-
     mouseButtonDown(evt) {
       if (evt.button === 0) {
-        this.pointerStart(evt.clientX, evt.clientY);
+        this.startDOMPointer(evt.clientX, evt.clientY);
         evt.preventDefault();
       }
     }
 
     mouseMove(evt) {
       if (this.focused) {
-        this.pointerMove(evt.clientX, evt.clientY);
+        this.moveDOMPointer(evt.clientX, evt.clientY);
       }
     }
 
@@ -792,7 +747,7 @@ Primrose.Text.Controls.TextBox = (function () {
     touchStart(evt) {
       if (this.focused && evt.touches.length > 0 && !this._dragging) {
         var t = evt.touches[0];
-        this.pointerStart(t.clientX, t.clientY);
+        this.startDOMPointer(t.clientX, t.clientY);
         this._currentTouchID = t.identifier;
       }
     }
@@ -801,7 +756,7 @@ Primrose.Text.Controls.TextBox = (function () {
       for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
         var t = evt.changedTouches[i];
         if (t.identifier === this._currentTouchID) {
-          this.pointerMove(t.clientX, t.clientY);
+          this.moveDOMPointer(t.clientX, t.clientY);
           break;
         }
       }
@@ -849,8 +804,8 @@ Primrose.Text.Controls.TextBox = (function () {
 
       var x = Math.floor(this._topLeftGutter.width + this._lineCountWidth + this.padding / this.character.width),
         y = Math.floor(this.padding / this.character.height),
-        w = Math.floor((this.width - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
-        h = Math.floor((this.height - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
+        w = Math.floor((this.imageWidth - 2 * this.padding) / this.character.width) - x - this._bottomRightGutter.width,
+        h = Math.floor((this.imageHeight - 2 * this.padding) / this.character.height) - y - this._bottomRightGutter.height;
       this.gridBounds.set(x, y, w, h);
     }
 
@@ -930,7 +885,7 @@ Primrose.Text.Controls.TextBox = (function () {
         this._bgfx.fillStyle = this.theme.regular.backColor;
       }
 
-      this._bgfx[clearFunc](0, 0, this.width, this.height);
+      this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
       this._bgfx.save();
       this._bgfx.translate(
         (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding,
@@ -998,7 +953,7 @@ Primrose.Text.Controls.TextBox = (function () {
         lineOffsetY = Math.ceil(this.character.height * 0.2),
         i;
 
-      this._fgfx.clearRect(0, 0, this._fgCanvas.width, this._fgCanvas.height);
+      this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
       this._fgfx.save();
       this._fgfx.translate((this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, this.padding);
       for (var y = 0; y < this._tokenRows.length; ++y) {
@@ -1050,7 +1005,7 @@ Primrose.Text.Controls.TextBox = (function () {
           this._rowCache[line] = this._fgfx.getImageData(
             this.padding,
             imageY + this.padding,
-            this._fgCanvas.width - 2 * this.padding,
+            this.imageWidth - 2 * this.padding,
             this.character.height);
         }
       }
@@ -1063,7 +1018,7 @@ Primrose.Text.Controls.TextBox = (function () {
         maxLineWidth = 0,
         i;
 
-      this._tgfx.clearRect(0, 0, this.width, this.height);
+      this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
       this._tgfx.save();
       this._tgfx.translate(this.padding, this.padding);
       this._tgfx.save();
@@ -1143,7 +1098,7 @@ Primrose.Text.Controls.TextBox = (function () {
         //vertical
         if (this._tokenRows.length > this.gridBounds.height) {
           var scrollBarHeight = drawHeight * (this.gridBounds.height / this._tokenRows.length),
-            bx = this.width - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
+            bx = this.image - this._VSCROLL_WIDTH * this.character.width - 2 * this.padding,
             bh = Math.max(this.character.height, scrollBarHeight);
           bw = this._VSCROLL_WIDTH * this.character.width;
           this._tgfx.fillRect(bx, scrollY, bw, bh);
@@ -1151,84 +1106,70 @@ Primrose.Text.Controls.TextBox = (function () {
         }
       }
 
+      this._tgfx.lineWidth = 2;
       this._tgfx.restore();
-      this._tgfx.strokeRect(0, 0, this.width - 1, this.height - 1);
+      this._tgfx.strokeRect(1, 1, this.imageWidth - 2, this.imageHeight - 2);
       if (!this.focused) {
         this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
-        this._tgfx.fillRect(0, 0, this.width, this.height);
+        this._tgfx.fillRect(0, 0, this.imageWidth, this.imageHeight);
       }
     }
 
     render() {
-      if (this.resized) {
-        this.resize();
-      }
-      if (this.tokens) {
+      if (this.tokens && this.theme) {
         this.refreshGridBounds();
         var boundsChanged = this.gridBounds.toString() !== this._lastGridBounds,
           textChanged = this._lastText !== this.value,
           characterWidthChanged = this.character.width !== this._lastCharacterWidth,
           characterHeightChanged = this.character.height !== this._lastCharacterHeight,
           paddingChanged = this.padding !== this._lastPadding,
-          layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || this.resized || paddingChanged;
+          layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || this.resized || paddingChanged,
+          cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
+          scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
+          fontChanged = this.context.font !== this._lastFont,
+          focusChanged = this.focused !== this._lastFocused,
+          foregroundChanged = layoutChanged || fontChanged || scrollChanged,
+          backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
 
         this._lastGridBounds = this.gridBounds.toString();
         this._lastText = this.value;
         this._lastCharacterWidth = this.character.width;
         this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.width;
-        this._lastHeight = this.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
         this._lastPadding = this.padding;
+        this._lastFrontCursorI = this.frontCursor.i;
+        this._lastBackCursorI = this.backCursor.i;
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
 
         if (layoutChanged) {
           this.performLayout(this.gridBounds);
+          this._rowCache = {};
         }
 
-        if (this.theme) {
-          var cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
-            scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
-            fontChanged = this.context.font !== this._lastFont,
-            focusChanged = this.focused !== this._lastFocused;
+        if (foregroundChanged || backgroundChanged) {
+          this.renderCanvasBackground();
 
-          this._lastFrontCursorI = this.frontCursor.i;
-          this._lastBackCursorI = this.backCursor.i;
-          this._lastFocused = this.focused;
-          this._lastFont = this.context.font;
-          this._lastScrollX = this.scroll.x;
-          this._lastScrollY = this.scroll.y;
-
-          if (layoutChanged) {
-            this._rowCache = {};
-            if (this.resized) {
-              this.resize();
+          if (foregroundChanged || focusChanged) {
+            if (foregroundChanged) {
+              this.renderCanvasForeground();
             }
+            this.renderCanvasTrim();
           }
 
-          var foregroundChanged = layoutChanged || fontChanged || scrollChanged,
-            backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
-
-          if (foregroundChanged || backgroundChanged) {
-            this.renderCanvasBackground();
-
-            if (foregroundChanged || focusChanged) {
-              if (foregroundChanged) {
-                this.renderCanvasForeground();
-              }
-              this.renderCanvasTrim();
-            }
-
-            this.context.clearRect(0, 0, this.width, this.height);
-            this.context.drawImage(this._bgCanvas, this._subBounds.left, this._subBounds.top);
-            this.context.drawImage(this._fgCanvas, this._subBounds.left, this._subBounds.top);
-            this.context.drawImage(this._trimCanvas, this._subBounds.left, this._subBounds.top);
-            if (this.parent) {
-              this.parent.invalidate(this.bounds);
-            }
+          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
+          this.context.drawImage(this._bgCanvas, 0, 0);
+          this.context.drawImage(this._fgCanvas, 0, 0);
+          this.context.drawImage(this._trimCanvas, 0, 0);
+          if (this.parent) {
+            this.parent.invalidate(this.bounds);
           }
         }
       }
     }
-
   }
 
   return TextBox;

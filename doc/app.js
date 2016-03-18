@@ -103,7 +103,7 @@ function scroller ( id ) {
       ed.value = txt;
       ed.DOMElement.style.display = "block";
       ed.DOMElement.style.maxWidth = "100%";
-      b.parentElement.replaceChild( ed.DOMElement, b );
+      b.parentElement.replaceChild(ed.DOMElement, b);
     }
     for ( var i = codeBlocks.length; i < editors.length; ++i ) {
       var ed = editors[i];
