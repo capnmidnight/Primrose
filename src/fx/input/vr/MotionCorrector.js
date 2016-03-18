@@ -14,6 +14,7 @@
     var e = new THREE.Euler(),
       o = new THREE.Quaternion(),
       q = new THREE.Quaternion(),
+      s = new THREE.Quaternion(),
       correct = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)),
       zero = new THREE.Quaternion(),
       first = true,
@@ -22,12 +23,19 @@
     function waitForOrientation(event) {
       if (event.alpha) {
         window.removeEventListener("deviceorientation", waitForOrientation);
-        checkOrientation(event);
-        window.addEventListener("deviceorientation", checkOrientation, false);
+        checkDeviceOrientation(event);
+        checkScreenOrientation();
+        window.addEventListener("deviceorientation", checkDeviceOrientation, false);
+        window.addEventListener("orientationchange", checkScreenOrientation, false);
       }
     }
 
-    function checkOrientation(event) {
+    function checkScreenOrientation() {
+      var a = Math.PI * -window.orientation / 360;
+      s.set(0, Math.sin(a), 0, Math.cos(a));
+    }
+
+    function checkDeviceOrientation(event) {
       e.set(
         event.beta * Math.PI / 180,
         event.alpha * Math.PI / 180,
@@ -35,6 +43,7 @@
       o.setFromEuler(e);
       q.copy(zero)
         .multiply(o)
+        .multiply(s)
         .multiply(correct);
       for (var i = 0; i < listeners.length; ++i) {
         listeners[i](q);
