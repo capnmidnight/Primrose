@@ -14,8 +14,10 @@ Primrose.Controls.Label = (function () {
     ]
   });
   class Label extends Primrose.Surface {
-    constructor(bounds, options) {
-      super("Primrose.Button[" + (COUNTER++) + "]", bounds);
+    constructor(options) {
+      super(patch(options, {
+        id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
+      }));
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
@@ -38,7 +40,7 @@ Primrose.Controls.Label = (function () {
       this._lastPadding = null;
       this._lastWidth = -1;
       this._lastHeight = -1;
-      
+
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize || (16 * devicePixelRatio);
@@ -104,11 +106,11 @@ Primrose.Controls.Label = (function () {
 
     _isChanged() {
       var textChanged = this._lastText !== this.value,
-      characterWidthChanged = this.character.width !== this._lastCharacterWidth,
-      characterHeightChanged = this.character.height !== this._lastCharacterHeight,
-      fontChanged = this.context.font !== this._lastFont,
-      activatedChanged = this._activated !== this._lastActivated,
-      changed = resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || activatedChanged;
+        characterWidthChanged = this.character.width !== this._lastCharacterWidth,
+        characterHeightChanged = this.character.height !== this._lastCharacterHeight,
+        fontChanged = this.context.font !== this._lastFont,
+        activatedChanged = this._activated !== this._lastActivated,
+        changed = resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || activatedChanged;
       return changed;
     }
 

@@ -76,7 +76,7 @@ function scroller ( id ) {
   function replacePreBlocks () {
     var codeBlocks = doc.querySelectorAll( "pre" );
     while ( editors.length < codeBlocks.length ) {
-      editors.push( new Primrose.Text.Controls.TextBox( "editor" + editors.length, {
+      editors.push( new Primrose.Text.Controls.TextBox( {
         autoBindEvents: true,
         keyEventSource: window,
         readOnly: true,

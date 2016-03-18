@@ -14,16 +14,20 @@ Primrose.Text.Controls.TextInput = (function () {
     ]
   });
   class TextInput extends Primrose.Text.Controls.TextBox {
-    constructor(bounds, options) {
-      super(bounds, modify(options, {
-        singleLine: true,
-        disableWordWrap: true,
-        hideLineNumbers: true,
-        hideScrollBars: true,
-        tabWidth: 1,
-        tokenizer: Primrose.Text.Grammars.PlainText,
-        commands: Primrose.Text.CommandPacks.TextInput
-      }));
+    constructor(options) {
+      super(overwrite(
+        patch(options, {
+          id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
+          padding: 5
+        }), {
+          singleLine: true,
+          disableWordWrap: true,
+          hideLineNumbers: true,
+          hideScrollBars: true,
+          tabWidth: 1,
+          tokenizer: Primrose.Text.Grammars.PlainText,
+          commands: Primrose.Text.CommandPacks.TextInput
+        }));
     }
 
     get value() {

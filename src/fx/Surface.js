@@ -2,9 +2,8 @@
   name: "Surface",
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
   parameters: [
-    { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
-    { name: "width", type: "Number", description: "The width of the surface to create." },
-    { name: "height", type: "Number", description: "The height of the surface to create." }
+    { name: "options.id", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
+    { name: "options.bounds", type: "Primrose.Text.Rectangle", description: "The size and location of the surface to create." }
   ]
 });
 Primrose.Surface = (function () {
@@ -14,43 +13,48 @@ Primrose.Surface = (function () {
 
   class Surface extends Primrose.Entity {
 
-    constructor(idOrCanvasOrContext, bounds) {
+    constructor(options) {
       super();
-
+      options = patch(options, {
+        id: "Primrose.Surface[" + (COUNTER++) + "]"
+      });
       this.canvas = null;
       this.context = null;
-      this.bounds = bounds;
+      this.bounds = options.bounds || new Primrose.Text.Rectangle();
+      this.id = options.id;
 
-      if (idOrCanvasOrContext instanceof Surface) {
+      if (options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
       }
-      else if (idOrCanvasOrContext instanceof CanvasRenderingContext2D) {
-        this.context = idOrCanvasOrContext;
+      else if (options.id instanceof CanvasRenderingContext2D) {
+        this.context = options.id;
         this.canvas = this.context.canvas;
       }
-      else if (idOrCanvasOrContext instanceof HTMLCanvasElement) {
-        this.canvas = idOrCanvasOrContext;
+      else if (options.id instanceof HTMLCanvasElement) {
+        this.canvas = options.id;
       }
-      else if (typeof (idOrCanvasOrContext) === "string" || idOrCanvasOrContext instanceof String) {
-        this.canvas = document.getElementById(idOrCanvasOrContext);
+      else if (typeof (options.id) === "string" || options.id instanceof String) {
+        this.canvas = document.getElementById(options.id);
         if (this.canvas === null) {
           this.canvas = document.createElement("canvas");
-          this.canvas.id = idOrCanvasOrContext;
+          this.canvas.id = options.id;
         }
         else if (this.canvas.tagName !== "CANVAS") {
           this.canvas = null;
         }
       }
-      else if (idOrCanvasOrContext === undefined || idOrCanvasOrContext === null) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.id = idOrCanvasOrContext = "Primrose.Surface[" + (COUNTER++) + "]";
-      }
+
       if (this.canvas === null) {
         pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
-        console.error(typeof (idOrCanvasOrContext));
-        console.error(idOrCanvasOrContext);
-        throw new Error(idOrCanvasOrContext + " does not refer to a valid canvas element.");
+        console.error(typeof (options.id));
+        console.error(options.id);
+        throw new Error(options.id + " does not refer to a valid canvas element.");
       }
+
+      this.id = this.canvas.id;
+
+      if (this.bounds.width === 0)
+        console.log(this.id);
 
       this.canvas.width = this.bounds.width;
       this.canvas.height = this.bounds.height;
@@ -66,8 +70,6 @@ Primrose.Surface = (function () {
       
       //document.body.appendChild(this.canvas);
       //document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hide", this.canvas));
-
-      this.id = this.canvas.id;
     }
 
 
@@ -141,7 +143,7 @@ Primrose.Surface = (function () {
     }
 
     appendChild(child) {
-      if (!(child instanceof Surface)){
+      if (!(child instanceof Surface)) {
         throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
       }
       super.appendChild(child);
@@ -194,7 +196,7 @@ Primrose.Surface = (function () {
           let q = child.unmapUV({ x: p.x - child.bounds.left, y: p.y - child.bounds.top });
           thunk(child, q);
         }
-        else if(child.focused){
+        else if (child.focused) {
           child.blur();
         }
       }

@@ -15,8 +15,10 @@ Primrose.Text.Controls.TextBox = (function () {
     ]
   });
   class TextBox extends Primrose.Surface {
-    constructor(bounds, options) {
-      super("Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]", bounds);
+    constructor(options) {
+      super(patch(options, {
+        id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"
+      }));
       this.listeners.change = [];
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
@@ -102,13 +104,22 @@ Primrose.Text.Controls.TextBox = (function () {
       this._dragging = false;
       this._scrolling = false;
       this._wheelScrollSpeed = 4;
-      this._fg = new Primrose.Surface(this.id + "-fore", this._subBounds);
+      this._fg = new Primrose.Surface({
+        id: this.id + "-fore",
+        bounds: this._subBounds
+      });
       this._fgCanvas = this._fg.canvas;
       this._fgfx = this._fg.context;
-      this._bg = new Primrose.Surface(this.id + "-back", this._subBounds);
+      this._bg = new Primrose.Surface({
+        id: this.id + "-back",
+        bounds: this._subBounds
+      });
       this._bgCanvas = this._bg.canvas;
       this._bgfx = this._bg.context;
-      this._trim = new Primrose.Surface(this.id + "-trim", this._subBounds);
+      this._trim = new Primrose.Surface({
+        id: this.id + "-trim",
+        bounds: this._subBounds
+      });
       this._trimCanvas = this._trim.canvas;
       this._tgfx = this._trim.context;
       this._rowCache = {};
@@ -1139,7 +1150,7 @@ Primrose.Text.Controls.TextBox = (function () {
           this._tgfx.strokeRect(bx, scrollY, bw, bh);
         }
       }
-      
+
       this._tgfx.restore();
       this._tgfx.strokeRect(0, 0, this.width - 1, this.height - 1);
       if (!this.focused) {

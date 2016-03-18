@@ -1,7 +1,7 @@
 /* global Primrose */
 
 "use strict";
-var ed = new Primrose.Text.Controls.TextBox( "editor", {
+var ed = new Primrose.Text.Controls.TextBox( {
   autoBindEvents: true,
   keyEventSource: window
 } );
@@ -14,4 +14,4 @@ function loadFile ( fileName ) {
 }
 
 loadFile( "/examples/music/app.js" );
-document.body.appendChild( ed.DOMElement );
+document.body.appendChild( ed.canvas );

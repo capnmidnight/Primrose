@@ -14,8 +14,10 @@ Primrose.Controls.Button2D = (function () {
     ]
   });
   class Button2D extends Primrose.Surface {
-    constructor(bounds, options) {
-      super("Primrose.Button[" + (COUNTER++) + "]", bounds);
+    constructor( options) {
+      super(patch(options, {
+        id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]"
+      }));
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////

@@ -176,7 +176,8 @@
     <Compile Include="src\base\clone.js" />
     <Compile Include="src\base\cylinder.js" />
     <Compile Include="src\base\fullscreen.js" />
-    <Compile Include="src\base\modify.js" />
+    <Compile Include="src\base\patch.js" />
+    <Compile Include="src\base\overwrite.js" />
     <Compile Include="src\base\put.js" />
     <Compile Include="src\base\InsideSphereGeometry.js" />
     <Compile Include="src\base\light.js" />

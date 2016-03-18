@@ -29,7 +29,9 @@ var GRASS = "/examples/images/grass.png",
   }),
   myWindowMesh = null,
   editorSphereY = app.avatarHeight - 0.25,
-  myWindow = new Primrose.Surface(undefined, new Primrose.Text.Rectangle(0, 0, 2048, 2048));
+  myWindow = new Primrose.Surface({
+    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
+  });
 
 if (isHomeScreen) {
   document.querySelector("header").style.display = "none";
@@ -38,7 +40,8 @@ if (isHomeScreen) {
 app.addEventListener("ready", function () {
   app.scene.add(subScene);
 
-  documentation = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(0, 1024, 1024, 1024), {
+  documentation = new Primrose.Text.Controls.TextBox({
+    bounds: new Primrose.Text.Rectangle(0, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
@@ -48,7 +51,8 @@ app.addEventListener("ready", function () {
     value: getDocumentation()
   });
   
-  output = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(1024, 1024, 1024, 1024), {
+  output = new Primrose.Text.Controls.TextBox({
+    bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
@@ -57,7 +61,8 @@ app.addEventListener("ready", function () {
     fontSize: 32
   });
 
-  editor = new Primrose.Text.Controls.TextBox(new Primrose.Text.Rectangle(0, 0, 2048, 1024), {
+  editor = new Primrose.Text.Controls.TextBox({
+    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024), 
     tokenizer: Primrose.Text.Grammars.JavaScript,
     keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
@@ -65,7 +70,8 @@ app.addEventListener("ready", function () {
     value: getSourceCode(isHomeScreen)
   });
 
-  button1 = new Primrose.Controls.Button2D(new Primrose.Text.Rectangle(1064, 1064, 300, 32), {
+  button1 = new Primrose.Controls.Button2D({
+    bounds: new Primrose.Text.Rectangle(1064, 1064, 300, 32), 
     keyEventSource: window,
     value: "Hello",
     backgroundColor: "#ffff00",
@@ -74,12 +80,14 @@ app.addEventListener("ready", function () {
 
   button1.addEventListener("click", log.bind(window, "Clicked the button"), false);
 
-  label1 = new Primrose.Controls.Label(new Primrose.Text.Rectangle(960, 695, 100, 32), {
+  label1 = new Primrose.Controls.Label({
+    bounds: new Primrose.Text.Rectangle(960, 695, 100, 32), 
     value: "A text box:",
     backgroundColor: "transparent"
   });
 
-  textField1 = new Primrose.Text.Controls.TextInput(new Primrose.Text.Rectangle(1064, 700, 300, 32), {
+  textField1 = new Primrose.Text.Controls.TextInput({
+    bounds: new Primrose.Text.Rectangle(1064, 700, 300, 32),
     keyEventSource: window,
     value: "OK, I get it",
     padding: 5
