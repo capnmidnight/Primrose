@@ -165,7 +165,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     ]'}
       ]
     } );
-    this.tokenize = function ( text ) {
+    this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
       var tokens = [ new Primrose.Text.Token( text, "regular", 0 ) ];
@@ -176,7 +176,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         }
       }
 
-      crudeParsing( tokens );
+      crudeParsing(tokens);
       return tokens;
     };
   }

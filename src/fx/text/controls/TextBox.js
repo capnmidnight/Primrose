@@ -17,6 +17,7 @@ Primrose.Text.Controls.TextBox = (function () {
   class TextBox extends Primrose.Surface {
     constructor(bounds, options) {
       super("Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]", bounds);
+      this.listeners.change = [];
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
@@ -118,6 +119,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this.showScrollBars = !this.options.hideScrollBars;
       this.wordWrap = !this.options.disableWordWrap;
       this.readOnly = !!this.options.readOnly;
+      this.multiline = !this.options.singleLine;
       this.gridBounds = new Primrose.Text.Rectangle();
       this.frontCursor = new Primrose.Text.Cursor();
       this.backCursor = new Primrose.Text.Cursor();
@@ -163,9 +165,43 @@ Primrose.Text.Controls.TextBox = (function () {
     set value(txt) {
       txt = txt || "";
       txt = txt.replace(/\r\n/g, "\n");
+      if (!this.multiline) {
+        txt = txt.replace(/\n/g, "");
+      }
       var lines = txt.split("\n");
       this.pushUndo(lines);
       this.render();
+      emit.call(this, "change", { target: this });
+    }
+
+    get selectedText() {
+      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
+        maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
+      return this.value.substring(minCursor.i, maxCursor.i);
+    }
+
+    set selectedText(str) {
+      str = str || "";
+      str = str.replace(/\r\n/g, "\n");
+
+      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
+        var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
+          maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
+          // TODO: don't recalc the string first.
+          text = this.value,
+          left = text.substring(0, minCursor.i),
+          right = text.substring(maxCursor.i);
+
+        var v = left + str + right;
+        this.value = v;
+        this.refreshGridBounds();
+        this.performLayout();
+        minCursor.advanceN(this.lines, Math.max(0, str.length));
+        this.scrollIntoView(maxCursor);
+        this.clampScroll();
+        maxCursor.copy(minCursor);
+        this.render();
+      }
     }
 
     get padding() {
@@ -353,37 +389,6 @@ Primrose.Text.Controls.TextBox = (function () {
       if (this.theme) {
         this.theme.fontSize = this._fontSize;
         this.resize();
-        this.render();
-      }
-    }
-
-    get selectedText() {
-      var minCursor = Primrose.Text.Cursor.min(this.frontCursor, this.backCursor),
-        maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor);
-      return this.value.substring(minCursor.i, maxCursor.i);
-    }
-
-    set selectedText(str) {
-      str = str || "";
-      str = str.replace(/\r\n/g, "\n");
-
-      if (this.frontCursor.i !== this.backCursor.i || str.length > 0) {
-        var minCursor = Primrose.Text.Cursor.min(this.frontCursor,
-          this.backCursor),
-          maxCursor = Primrose.Text.Cursor.max(this.frontCursor,
-            this.backCursor),
-          // TODO: don't recalc the string first.
-          text = this.value,
-          left = text.substring(0, minCursor.i),
-          right = text.substring(maxCursor.i);
-        this.value = left + str + right;
-        this.refreshTokens();
-        this.refreshGridBounds();
-        this.performLayout();
-        minCursor.advanceN(this.lines, Math.max(0, str.length));
-        this.scrollIntoView(maxCursor);
-        this.clampScroll();
-        maxCursor.copy(minCursor);
         this.render();
       }
     }
@@ -741,7 +746,6 @@ Primrose.Text.Controls.TextBox = (function () {
 
     pointerStart(x, y) {
       if (this.options.pointerEventSource) {
-        console.log(this);
         this.focus();
         var bounds = this.options.pointerEventSource.getBoundingClientRect();
         this.startPointer(x - bounds.left, y - bounds.top);
@@ -1135,16 +1139,9 @@ Primrose.Text.Controls.TextBox = (function () {
           this._tgfx.strokeRect(bx, scrollY, bw, bh);
         }
       }
-
-      this.strokeRect(this._tgfx,
-        this.theme.regular.foreColor ||
-        Primrose.Text.Themes.Default.regular.foreColor,
-        this.gridBounds.x,
-        0,
-        this.gridBounds.width,
-        this.gridBounds.height);
-      this._tgfx.strokeRect(0, 0, this.width - 2 * this.padding, this.height - 2 * this.padding);
+      
       this._tgfx.restore();
+      this._tgfx.strokeRect(0, 0, this.width - 1, this.height - 1);
       if (!this.focused) {
         this._tgfx.fillStyle = this.theme.regular.unfocused || Primrose.Text.Themes.Default.regular.unfocused;
         this._tgfx.fillRect(0, 0, this.width, this.height);

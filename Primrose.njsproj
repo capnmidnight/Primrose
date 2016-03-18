@@ -176,6 +176,7 @@
     <Compile Include="src\base\clone.js" />
     <Compile Include="src\base\cylinder.js" />
     <Compile Include="src\base\fullscreen.js" />
+    <Compile Include="src\base\modify.js" />
     <Compile Include="src\base\put.js" />
     <Compile Include="src\base\InsideSphereGeometry.js" />
     <Compile Include="src\base\light.js" />
@@ -193,6 +194,8 @@
     <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
     <Compile Include="src\fx\input\vr\MotionCorrector.js" />
     <Compile Include="src\fx\controls\Button2D.js" />
+    <Compile Include="src\fx\text\command_packs\TextInput.js" />
+    <Compile Include="src\fx\text\controls\TextInput.js" />
     <Compile Include="src\hub.js" />
     <Compile Include="src\index.js" />
     <Content Include="stylesheets\main.css" />

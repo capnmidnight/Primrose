@@ -10,6 +10,7 @@ var GRASS = "/examples/images/grass.png",
   output = null,
   documentation = null,
   button1 = null,
+  textField1 = null,
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
   cmdA = isOSX ? "CMD" : "CTRL",
@@ -72,10 +73,21 @@ app.addEventListener("ready", function () {
 
   button1.addEventListener("click", log.bind(window, "Clicked the button"), false);
 
+  textField1 = new Primrose.Text.Controls.TextInput(new Primrose.Text.Rectangle(1064, 700, 300, 32), {
+    keyEventSource: window,
+    value: "OK, I get it",
+    padding: 5
+  });
+  
+  textField1.addEventListener("change", function (evt) {
+    log(evt.target.value);
+  });
+
   myWindow.appendChild(documentation);
   myWindow.appendChild(output);
   myWindow.appendChild(editor);
   myWindow.appendChild(button1);
+  myWindow.appendChild(textField1);
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
