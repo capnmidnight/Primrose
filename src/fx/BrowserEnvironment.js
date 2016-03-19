@@ -705,13 +705,21 @@ Primrose.BrowserEnvironment = (function () {
       }
     }.bind(this);
 
-    var basicKeyHandler = function (evt) {
-      if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
-        if (!lockedToEditor() && evt.keyCode === Primrose.Keys.F) {
-          this.goFullScreen(true);
-        }
+    var keyDown = function (evt) {
+      if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F) {
+        this.goFullScreen(true);
+        evt.preventDefault();
+      }
+      else if (this.currentControl) {
+        this.currentControl.keyDown(evt);
       }
     }.bind(this);
+
+    var keyUp = (evt) => {
+      if (this.currentControl) {
+        this.currentControl.keyUp(evt);
+      }
+    };
 
     var restart = function () {
       setSize();
@@ -810,7 +818,19 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("mousedown", this.goFullScreen.bind(this, true), false);
       window.addEventListener("touchstart", this.goFullScreen.bind(this, true), false);
     }
-    window.addEventListener("keydown", basicKeyHandler, false);
+    window.addEventListener("keydown", keyDown, false);
+    window.addEventListener("keyup", keyUp, false);
+    window.addEventListener("beforepaste", (evt) => evt.returnValue = false, false);
+
+    var withCurrentControl = (name) => {
+      return (evt) => {
+        if (this.currentControl) {
+          this.currentControl[name](evt);
+        }
+      };
+    }
+    window.addEventListener("paste", withCurrentControl("readClipboard"), false);
+    window.addEventListener("wheel", withCurrentControl("readWheel"), false);
     this.input.addEventListener("jump", this.jump.bind(this), false);
     this.input.addEventListener("zero", this.zero.bind(this), false);
     this.projector.addEventListener("hit", handleHit, false);

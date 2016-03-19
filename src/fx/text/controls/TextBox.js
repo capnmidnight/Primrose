@@ -32,12 +32,6 @@ Primrose.Text.Controls.TextBox = (function () {
       }
 
       if (this.options.autoBindEvents) {
-        if (!this.options.readOnly && this.options.keyEventSource === undefined) {
-          this.options.keyEventSource = this.DOMElement;
-        }
-        if (this.options.pointerEventSource === undefined) {
-          this.options.pointerEventSource = this.DOMElement;
-        }
         if (this.options.wheelEventSource === undefined) {
           this.options.wheelEventSource = this.DOMElement;
         }
@@ -146,11 +140,29 @@ Primrose.Text.Controls.TextBox = (function () {
       this.addEventListener("focus", this.render.bind(this), false);
       this.addEventListener("blur", this.render.bind(this), false);
 
-      this.bindEvents(
-        this.options.keyEventSource,
-        this.options.pointerEventSource,
-        this.options.wheelEventSource,
-        !this.options.disableClipboard);
+
+
+      if (!this.options.disableClipboard) {
+          
+        // the `surrogate` textarea makes clipboard events possible
+        this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea-" + this.id, "textarea", HTMLTextAreaElement);
+        this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container-" + this.id, this._surrogate);
+        this._surrogateContainer.style.position = "absolute";
+        this._surrogateContainer.style.overflow = "hidden";
+        this._surrogateContainer.style.width = 0;
+        this._surrogateContainer.style.height = 0;
+        document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
+
+
+        var setFalse = (evt) => {
+          evt.returnValue = false;
+        };
+
+        this._surrogate.addEventListener("beforecopy", setFalse, false);
+        this._surrogate.addEventListener("copy", this.copySelectedText.bind(this), false);
+        this._surrogate.addEventListener("beforecut", setFalse, false);
+        this._surrogate.addEventListener("cut", this.cutSelectedText.bind(this), false);
+      }
     }
 
     cursorPageUp(lines, cursor) {
@@ -479,7 +491,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this._scrolling = false;
     }
 
-    bindEvents(k, p, w, enableClipboard) {
+    bindEvents(k, p, w) {
       if (p) {
         if (!w) {
           p.addEventListener("wheel", this.readWheel.bind(this), false);
@@ -502,18 +514,7 @@ Primrose.Text.Controls.TextBox = (function () {
           k.tabindex = 0;
         }
 
-        if (enableClipboard) {
-          
-          // the `surrogate` textarea makes clipboard events possible
-          this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea-" + this.id, "textarea", HTMLTextAreaElement);
-          this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container-" + this.id, this._surrogate);
-          this._surrogateContainer.style.position = "absolute";
-          this._surrogateContainer.style.overflow = "hidden";
-          this._surrogateContainer.style.width = 0;
-          this._surrogateContainer.style.height = 0;
-          document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
-
-
+        if (!this.options.disableClipboard) {
           var setFalse = (evt) => {
             evt.returnValue = false;
           };
@@ -526,10 +527,6 @@ Primrose.Text.Controls.TextBox = (function () {
               this._surrogate.focus();
             }
           }, true);
-          this._surrogate.addEventListener("beforecopy", setFalse, false);
-          this._surrogate.addEventListener("copy", this.copySelectedText.bind(this), false);
-          this._surrogate.addEventListener("beforecut", setFalse, false);
-          this._surrogate.addEventListener("cut", this.cutSelectedText.bind(this), false);
         }
 
         k.addEventListener("keydown", this.keyDown.bind(this), false);
@@ -547,7 +544,7 @@ Primrose.Text.Controls.TextBox = (function () {
         }
         evt.preventDefault();
         this._surrogate.style.display = "none";
-        this.options.keyEventSource.focus();
+        this.canvas.focus();
       }
     }
 
@@ -564,6 +561,10 @@ Primrose.Text.Controls.TextBox = (function () {
     keyDown(evt) {
       if (this.focused) {
         evt = evt || event;
+        if (this.operatingSystem.isClipboardReadingEvent(evt)) {
+          this._surrogate.style.display = "block";
+          this._surrogate.focus();
+        }
 
         var key = evt.keyCode;
         if (key !== Primrose.Keys.CTRL &&

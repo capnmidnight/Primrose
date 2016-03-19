@@ -43,7 +43,6 @@ app.addEventListener("ready", function () {
   documentation = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
-    keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
     readOnly: true,
@@ -54,7 +53,6 @@ app.addEventListener("ready", function () {
   output = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
-    keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
     readOnly: true,
@@ -64,7 +62,6 @@ app.addEventListener("ready", function () {
   editor = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024), 
     tokenizer: Primrose.Text.Grammars.JavaScript,
-    keyEventSource: window,
     wheelEventSource: app.renderer.domElement,
     fontSize: 32,
     value: getSourceCode(isInIFrame)
@@ -72,7 +69,6 @@ app.addEventListener("ready", function () {
 
   button1 = new Primrose.Controls.Button2D({
     bounds: new Primrose.Text.Rectangle(1064, 750, 500, 45), 
-    keyEventSource: window,
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
@@ -97,7 +93,6 @@ app.addEventListener("ready", function () {
 
   textField1 = new Primrose.Text.Controls.TextInput({
     bounds: new Primrose.Text.Rectangle(1064, 700, 300, 32),
-    keyEventSource: window,
     value: "OK, I get it",
     padding: 5
   });

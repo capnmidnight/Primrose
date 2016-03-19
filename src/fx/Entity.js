@@ -21,7 +21,13 @@ performs basic conversions from DOM elements to the internal Control format."
       this.listeners = {
         focus: [],
         blur: [],
-        click: []
+        click: [],
+        keydown: [],
+        keyup: [],
+        paste: [],
+        copy: [],
+        cut: [],
+        wheel: []
       };
     }
 
@@ -224,6 +230,33 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
         lock |= this.children[i].lockMovement;
       }
       return lock;
+    }
+
+    keyDown(evt) {
+      if (this.focused) {
+        evt.target = this;
+        emit.call(this, "keydown", evt);
+      }
+    }
+
+    keyUp(evt) {
+      if (this.focused) {
+        emit.call(this, "keyup", { target: this, evt });
+      }
+    }
+
+    readClipboard(evt) {
+      if (this.focused) {
+        evt.target = this;
+        emit.call(this, "paste", evt);
+      }
+    }
+
+    readWheel(evt) {
+      if (this.focused) {
+        evt.target = this;
+        emit.call(this, "wheel", evt);
+      }
     }
   }
   return Entity;

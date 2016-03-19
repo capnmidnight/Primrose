@@ -11,8 +11,7 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/templates/demo">
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css"><!-- start main.jade meta block -->
+    <meta property="og:url" content="http://www.primrosevr.com/templates/demo"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
     <!-- start main.jade title block -->

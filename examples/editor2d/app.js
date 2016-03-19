@@ -2,9 +2,7 @@
 
 "use strict";
 var ed = new Primrose.Text.Controls.TextBox({
-  id: "editor",
-  autoBindEvents: true,
-  keyEventSource: window
+  id: "editor"
 }),
   editorContainer = document.querySelector("#editorContainer");
 
@@ -23,5 +21,6 @@ if (!isInIFrame) {
   editorContainer.style.top = header.clientHeight + "px";
 }
 
+ed.bindEvents(window, window, window);
 window.addEventListener("resize", ed.resize.bind(ed), false);
 ed.resize();

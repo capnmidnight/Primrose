@@ -276,10 +276,34 @@ Primrose.Surface = (function () {
       return this.movePointer(p.x, p.y);
     }
 
-    endPointer() {
-      for (var i = 0; i < this.children.length; ++i) {
-        this.children[i].endPointer();
+    _forFocusedChildren(name, evt) {
+      if (this.focused) {
+        for (var i = 0; i < this.children.length; ++i) {
+          if (this.children[i].focused) {
+            this.children[i][name](evt);
+          }
+        }
       }
+    }
+
+    endPointer() {
+      this._forFocusedChildren("endPointer");
+    }
+
+    keyDown(evt) {
+      this._forFocusedChildren("keyDown", evt);
+    }
+
+    keyUp(evt) {
+      this._forFocusedChildren("keyUp", evt);
+    }
+
+    readClipboard(evt) {
+      this._forFocusedChildren("readClipboard", evt);
+    }
+
+    readWheel(evt) {
+      this._forFocusedChildren("readWheel", evt);
     }
   }
 
