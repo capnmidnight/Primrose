@@ -468,6 +468,7 @@ Primrose.Text.Controls.TextBox = (function () {
           this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
         }
         this.clampScroll();
+        this.render();
         evt.preventDefault();
       }
     }

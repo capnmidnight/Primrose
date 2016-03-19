@@ -14,7 +14,7 @@ Primrose.Controls.Button2D = (function () {
     ]
   });
   class Button2D extends Primrose.Surface {
-    constructor( options) {
+    constructor(options) {
       super(patch(options, {
         id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]"
       }));
@@ -94,13 +94,13 @@ Primrose.Controls.Button2D = (function () {
       return this.canvas;
     }
 
-    startPointer(point) {
+    startPointer(x, y) {
+      this.focus();
       this._activated = true;
       this.render();
     }
 
     endPointer() {
-      super.endPointer();
       if (this._activated) {
         this._activated = false;
         emit.call(this, "click", { target: this });

@@ -81,6 +81,7 @@ app.addEventListener("ready", function () {
       nextTheme = Primrose.Text.Themes.Dark;
       nextString = "Switch to light theme";
     }
+    log("Switching to theme: " + nextTheme.name);
     label1.theme = documentation.theme = output.theme = editor.theme = nextTheme;
     button1.value = nextString;
   }, false);

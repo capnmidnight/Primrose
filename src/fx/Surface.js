@@ -73,20 +73,15 @@ Primrose.Surface = (function () {
 
 
     invalidate(bounds) {
-      bounds = clone(bounds);
+      bounds = {
+        left: bounds.left,
+        top: bounds.top,
+        right: bounds.right,
+        bottom: bounds.bottom
+      };
       for (let i = 0; i < this.children.length; ++i) {
-        const child = this.children[i];
-        if (!(child.bounds.right < bounds.left || child.bounds.left > bounds.right ||
-          child.bounds.bottom < bounds.top || child.bounds.right > bounds.buttom)) {
-          this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
-          bounds.left = Math.min(bounds.left, child.bounds.left);
-          bounds.top = Math.min(bounds.top, child.bounds.top);
-          bounds.right = Math.max(bounds.right, child.bounds.right);
-          bounds.bottom = Math.max(bounds.bottom, child.bounds.bottom);
-        }
-        else {
-          console.log("did not draw", child.id);
-        }
+        var child = this.children[i];
+        this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
       }
       if (this._material) {
         this._texture.needsUpdate = true;
@@ -279,8 +274,9 @@ Primrose.Surface = (function () {
     _forFocusedChildren(name, evt) {
       if (this.focused) {
         for (var i = 0; i < this.children.length; ++i) {
-          if (this.children[i].focused) {
-            this.children[i][name](evt);
+          var child = this.children[i];
+          if (child.focused) {
+            child[name](evt);
           }
         }
       }

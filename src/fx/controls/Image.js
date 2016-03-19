@@ -53,8 +53,7 @@ Primrose.Controls.Image = (function () {
     set image(img) {
       this._image = img;
       if (img) {
-        this.imageWidth = this.image.width;
-        this.imageHeight = this.image.height;
+        this.setSize(this.image.width, this.image.height);
         this.render();
         emit.call(this, "load", { target: this });
       }
@@ -65,7 +64,6 @@ Primrose.Controls.Image = (function () {
 
     set value(src) {
       this._value = src;
-      this.image = null;
       if (imageCache[src]) {
         this.image = imageCache[src];
       }
@@ -76,8 +74,14 @@ Primrose.Controls.Image = (function () {
             imageCache[src] = temp;
             this.image = temp;
           }, false);
+          temp.addEventListener("error", () => {
+            this.image = null;
+          }, false);
           temp.addEventListener("error", console.error.bind(console, "Failed to load image: " + src), false);
           temp.src = src;
+        }
+        else {
+          this.image = null;
         }
       }
     }
@@ -91,11 +95,12 @@ Primrose.Controls.Image = (function () {
     }
 
     resize() {
-      if ((this._lastWidth !== this.surfaceWidth || this._lastHeight !== this.surfaceHeight)
+      if (this.resized
         && this.surfaceWidth > 0
         && this.surfaceHeight > 0) {
-        this._lastWidth = this.imageWidth = this.surfaceWidth;
-        this._lastHeight = this.imageHeight = this.surfaceHeight;
+        this.imageWidth = this.surfaceWidth;
+        this.imageHeight = this.surfaceHeight;
+        this.render();
       }
     }
 
@@ -115,11 +120,9 @@ Primrose.Controls.Image = (function () {
         this._lastHeight = this.imageHeight;
         this._lastImage = this.image;
 
+        this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
         if (this.image) {
           this.context.drawImage(this.image, 0, 0);
-        }
-        else {
-          this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
         }
 
         if (this.parent) {
