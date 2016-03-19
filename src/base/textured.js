@@ -9,23 +9,29 @@ pliny.function("", {
   description: "<under construction>"
 });
 var textured = (function () {
-  var cache = {};
-  function textured(geometry, txt, unshaded, o, s, t) {
+  var materialCache = {},
+    textureCache = {};
+  function textured(geometry, txt, options) {
     var material, surface;
-    if (o === undefined) {
-      o = 1;
+    options = options || {};
+    if (options.opacity === undefined) {
+      options.opacity = 1;
     }
 
-    if (cache[txt]) {
+
+    var textureDescription = [txt.id || txt.toString(), options.txtRepeatS, options.txtRepeatT].join(","),
+      materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
+
+    if (materialCache[materialDescription]) {
       console.log("using cached material");
-      material = cache[txt];
+      material = materialCache[materialDescription];
     }
     else if (typeof txt === "number") {
-      if (unshaded) {
+      if (options.unshaded) {
         material = new THREE.MeshBasicMaterial({
           transparent: true,
           color: txt,
-          opacity: o,
+          opacity: options.opacity,
           shading: THREE.FlatShading
         });
       }
@@ -33,7 +39,7 @@ var textured = (function () {
         material = new THREE.MeshLambertMaterial({
           transparent: true,
           color: txt,
-          opacity: o
+          opacity: options.opacity
         });
       }
     }
@@ -42,13 +48,13 @@ var textured = (function () {
       surface = txt;
     }
     else {
-      if (unshaded) {
+      if (options.unshaded) {
         material = new THREE.MeshBasicMaterial({
           color: 0xffffff,
           transparent: true,
           shading: THREE.FlatShading,
           side: THREE.DoubleSide,
-          opacity: o
+          opacity: options.opacity
         });
       }
       else {
@@ -56,7 +62,7 @@ var textured = (function () {
           color: 0xffffff,
           transparent: true,
           side: THREE.DoubleSide,
-          opacity: o
+          opacity: options.opacity
         });
       }
 
@@ -66,16 +72,20 @@ var textured = (function () {
           console.trace();
         }
         else {
+          textureCache[textureDescription] = texture;
           material.map = texture;
           material.needsUpdate = true;
-          if (s * t > 1) {
+          if (options.txtRepeatS * options.txtRepeatT > 1) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(s, t);
+            texture.repeat.set(options.txtRepeatS, options.txtRepeatT);
           }
         }
       };
 
-      if (typeof txt === "string") {
+      if (textureCache[textureDescription]) {
+        setTexture(textureCache[textureDescription]);
+      }
+      else if (typeof txt === "string") {
         Primrose.loadTexture(txt, setTexture,
           null,
           console.error.bind(console, "Error loading texture", txt));
@@ -105,7 +115,7 @@ var textured = (function () {
     if (surface) {
       obj.surface = surface;
     }
-    cache[txt] = material;
+    materialCache[materialDescription] = material;
     return obj;
   }
 

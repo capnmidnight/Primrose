@@ -566,7 +566,7 @@ Primrose.BrowserEnvironment = (function () {
           Math.PI * 2,
           Math.PI),
         this.options.skyTexture,
-        true);
+        { unshaded: true });
       this.sky.name = "Sky";
       this.scene.add(this.sky);
     }
@@ -574,7 +574,10 @@ Primrose.BrowserEnvironment = (function () {
     if (this.options.groundTexture) {
       var dim = 50,
         gm = new THREE.PlaneGeometry(dim, dim, dim, dim);
-      this.ground = textured(gm, this.options.groundTexture, false, 1, dim, dim);
+      this.ground = textured(gm, this.options.groundTexture, {
+        txtRepeatS: dim,
+        txtRepeatT: dim
+      });
       this.ground.rotation.x = Math.PI / 2;
       this.ground.name = "Ground";
       this.scene.add(this.ground);

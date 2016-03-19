@@ -48,7 +48,7 @@ file to use as the texture, execute code as such:\n\
       \"skyTexture.jpg\",\n\
       // Specify that the material should be shadeless, i.e. no shadows. This\n\
       // works best for skymaps.\n\
-      true );"}
+      {unshaded: true} );"}
   ]
 });
 function shell(r, slices, rings, phi, theta) {

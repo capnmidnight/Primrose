@@ -9,5 +9,8 @@ pliny.function("", {
   description: "<under construction>"
 });
 function brick(txt, w, h, l) {
-  return textured(box(w || 1, h || 1, l || 1), txt, false, 1, w, l);
+  return textured(box(w || 1, h || 1, l || 1), txt, {
+    txtRepeatS: w,
+    txtRepeatT: l
+  });
 }
