@@ -185,7 +185,7 @@ Primrose.BrowserEnvironment = (function () {
         this.projector.setObject(bag);
       }
     };
-
+    var headOffset = new THREE.Vector3();
     var animate = function (t) {
       RAF(animate);
       t *= 0.001;
@@ -286,7 +286,10 @@ Primrose.BrowserEnvironment = (function () {
             side = (2 * i) - 1;
           this.input.getVector3("headX", "headY", "headZ", this.camera.position);
           this.camera.projectionMatrix.copy(st.projection);
-          this.camera.position.applyMatrix4(st.translation);
+          headOffset.set(0, 0, 0);
+          headOffset.applyMatrix4(st.translation);
+          headOffset.applyQuaternion(qHead);
+          this.camera.position.add(headOffset);
           this.camera.quaternion.copy(qHead);
 
           this.nose.position.set(side * -0.12, -0.12, -0.15);

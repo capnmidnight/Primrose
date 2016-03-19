@@ -27,10 +27,10 @@
           renderHeight: currentLayer.source.height,
           offset: new Float32Array([dEye * 0.034, 0, 0]),
           fieldOfView: {
-            upDegrees: 37.5,
-            downDegrees: 37.5,
-            leftDegrees: 37.5,
-            rightDegrees: 37.5
+            upDegrees: 22.5,
+            downDegrees: 22.5,
+            leftDegrees: 45,
+            rightDegrees: 45
           }
         };
       }
