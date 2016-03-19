@@ -18,10 +18,10 @@ Primrose.Surface = (function () {
       options = patch(options, {
         id: "Primrose.Surface[" + (COUNTER++) + "]"
       });
+      this.listeners.move = [];
+      this.bounds = options.bounds || new Primrose.Text.Rectangle();
       this.canvas = null;
       this.context = null;
-      this.bounds = options.bounds || new Primrose.Text.Rectangle();
-      this.id = options.id;
 
       if (options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
@@ -54,7 +54,6 @@ Primrose.Surface = (function () {
       this.id = this.canvas.id;
 
       if (this.bounds.width === 0) {
-        console.log(this.id);
         this.bounds.width = this.imageWidth;
         this.bounds.height = this.imageHeight;
       }
@@ -207,23 +206,30 @@ Primrose.Surface = (function () {
     }
 
     _findChild(x, y, thunk) {
-      let found = false;
-      for (let i = this.children.length - 1; i >= 0; --i) {
-        let child = this.children[i];
-        if (!found &&
-          child.bounds.left <= x && x < child.bounds.right &&
-          child.bounds.top <= y && y < child.bounds.bottom) {
-          found = true;
-          if (!child.focused) {
-            child.focus();
-          }
-          thunk(child, x - child.bounds.left, y - child.bounds.top);
+      var here = this.inBounds(x, y),
+        found = null;
+      for (var i = this.children.length - 1; i >= 0; --i) {
+        var child = this.children[i];
+        if (!found && child.inBounds(x - this.bounds.left, y - this.bounds.top)) {
+          found = child;
         }
         else if (child.focused) {
           child.blur();
         }
       }
-      return found;
+      return found || here && this;
+    }
+
+    DOMInBounds(x, y) {
+      return this.inBounds(x * devicePixelRatio, y * devicePixelRatio);
+    }
+
+    UVInBounds(point) {
+      return this.inBounds(point[0] * this.imageWidth, (1 - point[1]) * this.imageHeight);
+    }
+
+    inBounds(x, y) {
+      return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
     }
 
     startDOMPointer(x, y) {
@@ -235,11 +241,30 @@ Primrose.Surface = (function () {
     }
 
     startPointer(x, y) {
-      return this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+      if (target) {
+        if (!this.focused) {
+          this.focus();
+        }
+        emit.call(this, "click", { target, x, y });
+        console.log(target);
+        if (target !== this) {
+          target.startPointer(x - this.bounds.left, y - this.bounds.top);
+        }
+      }
+      else if (this.focused) {
+        this.blur();
+      }
     }
 
     movePointer(x, y) {
-      return this._findChild(x, y, (child, x2, y2) => child.movePointer(x2, y2));
+      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+      if (target) {
+        emit.call(this, "move", { target, x, y });
+        if (target !== this) {
+          target.movePointer(x - this.bounds.left, y - this.bounds.top);
+        }
+      }
     }
 
     startUV(point) {

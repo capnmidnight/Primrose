@@ -461,8 +461,10 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     startPointer(x, y) {
-      this._dragging = true;
-      this.setCursorXY(this.frontCursor, x, y);
+      if (!super.startPointer(x, y)) {
+        this._dragging = true;
+        this.setCursorXY(this.frontCursor, x, y);
+      }
     }
 
     movePointer(x, y) {
