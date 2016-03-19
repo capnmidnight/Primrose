@@ -43,7 +43,7 @@ Primrose.Controls.Label = (function () {
 
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
-      this.fontSize = this.options.fontSize || (16 * devicePixelRatio);
+      this.fontSize = this.options.fontSize || 16;
       this.refreshCharacter();
       this.value = this.options.value;
     }
@@ -177,28 +177,9 @@ Primrose.Controls.Label = (function () {
   return Label;
 })();
 
-pliny.issue("Primrose.Text.Controls.TextBox", {
-  name: "document TextBox",
+pliny.issue("Primrose.Controls.Label", {
+  name: "document Label",
   type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Controls.TextBox](#Primrose_Text_Controls_TextBox)\n\
+  description: "Finish writing the documentation for the [Primrose.Controls.Label](#Primrose_Controls_Label)\n\
 class in the controls/ directory."
-});
-
-pliny.issue("Primrose.Text.Controls.TextBox", {
-  name: "TextBox does not render blank lines",
-  type: "open",
-  description: "If a line contains only a newline character, the line doesn't get\n\
-rendered at all. The next line gets rendered instead, with the line number it *would*\n\
-have had, had the blank line been rendered. Adding whitespace to the line causes\n\
-it to render. This seems to only happen for text that is loaded into the textbox,\n\
-not text that is entered by the keyboard."
-});
-
-pliny.issue("Primrose.Text.Controls.TextBox", {
-  name: "TextBox should re-render only on updates, not require an animation loop.",
-  type: "open",
-  description: "Currently, the TextBox knows quite a bit about when it needs to\n\
-update, but it doesn't use this information to actually kick off a render. It first\n\
-requires us to ask it to render, and then it decides if it's time to render. Instead,\n\
-the invalidation that causes it to decide to render should just kick off a render."
 });

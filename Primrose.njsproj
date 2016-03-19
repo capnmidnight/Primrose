@@ -186,6 +186,7 @@
     <Compile Include="src\base\sphere.js" />
     <Compile Include="src\base\textured.js" />
     <Compile Include="src\base\v3.js" />
+    <Compile Include="src\fx\controls\Image.js" />
     <Compile Include="src\fx\controls\Label.js" />
     <Compile Include="src\fx\DOM\cascadeElement.js" />
     <Compile Include="src\fx\DOM\findEverything.js" />

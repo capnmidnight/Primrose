@@ -11,6 +11,7 @@ var GRASS = "/examples/images/grass.png",
   button1 = null,
   textField1 = null,
   label1 = null,
+  image1 = null,
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
   cmdA = isOSX ? "CMD" : "CTRL",
@@ -70,14 +71,23 @@ app.addEventListener("ready", function () {
   });
 
   button1 = new Primrose.Controls.Button2D({
-    bounds: new Primrose.Text.Rectangle(1064, 1064, 300, 32), 
+    bounds: new Primrose.Text.Rectangle(1064, 750, 500, 45), 
     keyEventSource: window,
-    value: "Hello",
+    value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
   });
 
-  button1.addEventListener("click", log.bind(window, "Clicked the button"), false);
+  button1.addEventListener("click", function () {
+    var nextTheme = Primrose.Text.Themes.Default,
+      nextString = "Switch to dark theme";
+    if (editor.theme.name === nextTheme.name) {
+      nextTheme = Primrose.Text.Themes.Dark;
+      nextString = "Switch to light theme";
+    }
+    label1.theme = documentation.theme = output.theme = editor.theme = nextTheme;
+    button1.value = nextString;
+  }, false);
 
   label1 = new Primrose.Controls.Label({
     bounds: new Primrose.Text.Rectangle(960, 695, 100, 32), 
@@ -96,12 +106,27 @@ app.addEventListener("ready", function () {
     log(evt.target.value);
   });
 
+  image1 = new Primrose.Controls.Image({
+    bounds: new Primrose.Text.Rectangle(1000, 256, 128, 128),
+    value: "/images/logo128.png"
+  });
+
+  image1.addEventListener("click", log.bind(window, "Clicked the image"), false);
+  image1.addEventListener("load", function () {
+    var nextImage = "/images/logo128.png";
+    if (image1.value === nextImage) {
+      nextImage = "/images/stm.png";
+    }
+    setTimeout(() => image1.value = nextImage, 1000);
+  }, false);
+
   myWindow.appendChild(documentation);
   myWindow.appendChild(output);
   myWindow.appendChild(editor);
   myWindow.appendChild(button1);
   myWindow.appendChild(label1);
   myWindow.appendChild(textField1);
+  myWindow.appendChild(image1);
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
@@ -196,7 +221,6 @@ function log() {
     t.scrollIntoView(t.frontCursor);
   }
 }
-;
 
 function clrscr() {
   if (output) {
@@ -206,7 +230,6 @@ function clrscr() {
     t.scrollIntoView(t.frontCursor);
   }
 }
-;
 
 var cmdLabels = document.querySelectorAll(".cmdLabel");
 for (var i = 0; i < cmdLabels.length; ++i) {
@@ -328,7 +351,7 @@ function getDocumentation() {
     "    iterates on the range [start, end), passing the index as the parameter\n" +
     "    to thunk, accumulating an array of thunk's return value.\n" +
     "\n" +
-    "  textured( geometry, txt[, unshaded[, opacity[, txtRepeatS, txtRepeatT]]] );\n" +
+    "  textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );\n" +
     "    geometry: a THREE.Geometry object\n" +
     "    txt: a material definition of some kind. It could be a:\n" +
     "      number - a solid hex color\n" +

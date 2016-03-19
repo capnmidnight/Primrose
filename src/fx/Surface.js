@@ -247,7 +247,6 @@ Primrose.Surface = (function () {
           this.focus();
         }
         emit.call(this, "click", { target, x, y });
-        console.log(target);
         if (target !== this) {
           target.startPointer(x - this.bounds.left, y - this.bounds.top);
         }
