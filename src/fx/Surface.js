@@ -80,18 +80,20 @@ Primrose.Surface = (function () {
       };
       for (var i = 0; i < this.children.length; ++i) {
         var child = this.children[i];
-        if (child.bounds.right >= bounds.left &&
+        if (child.bounds.right > bounds.left &&
           child.bounds.left < bounds.right &&
-          child.bounds.bottom >= bounds.top &&
+          child.bounds.bottom > bounds.top &&
           child.bounds.top < bounds.bottom) {
           var left = Math.max(child.bounds.left, bounds.left),
             top = Math.max(child.bounds.top, bounds.top),
             right = Math.min(child.bounds.right, bounds.right),
             bottom = Math.min(child.bounds.bottom, bounds.bottom),
             width = right - left,
-            height = bottom - top;
+            height = bottom - top,
+            x = left - child.bounds.left,
+            y = top - child.bounds.top;
           this.context.drawImage(child.canvas,
-            left - child.bounds.left, top - child.bounds.top, width, height,
+            x, y, width, height,
             left, top, width, height);
         }
       }
