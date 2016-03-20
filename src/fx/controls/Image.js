@@ -90,10 +90,6 @@ Primrose.Controls.Image = (function () {
       return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
     }
 
-    get DOMElement() {
-      return this.canvas;
-    }
-
     resize() {
       if (this.resized
         && this.surfaceWidth > 0

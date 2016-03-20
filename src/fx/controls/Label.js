@@ -73,10 +73,6 @@ Primrose.Controls.Label = (function () {
       return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
     }
 
-    get DOMElement() {
-      return this.canvas;
-    }
-
     resize() {
       if (this.theme &&
         (this._lastWidth !== this.surfaceWidth || this._lastHeight !== this.surfaceHeight)

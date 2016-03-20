@@ -31,12 +31,6 @@ Primrose.Text.Controls.TextBox = (function () {
         this.options = options || {};
       }
 
-      if (this.options.autoBindEvents) {
-        if (this.options.wheelEventSource === undefined) {
-          this.options.wheelEventSource = this.DOMElement;
-        }
-      }
-
       var makeCursorCommand = function (name) {
         var method = name.toLowerCase();
         this["cursor" + name] = function (lines, cursor) {
@@ -401,21 +395,17 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     get fontSize() {
-      return this._fontSize || 16 * devicePixelRatio;
+      return this._fontSize || 16;
     }
 
     set fontSize(v) {
-      v = v || 16 * devicePixelRatio;
+      v = v || 16;
       this._fontSize = v;
       if (this.theme) {
         this.theme.fontSize = this._fontSize;
         this.resize();
         this.render();
       }
-    }
-
-    get DOMElement() {
-      return this.canvas;
     }
 
     get lockMovement() {
@@ -459,7 +449,6 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     readWheel(evt) {
-
       if (this.focused) {
         if (evt.shiftKey || isChrome) {
           this.fontSize += evt.deltaX / SCROLL_SCALE;
@@ -492,46 +481,27 @@ Primrose.Text.Controls.TextBox = (function () {
       this._scrolling = false;
     }
 
-    bindEvents(k, p, w) {
-      if (p) {
-        if (!w) {
-          p.addEventListener("wheel", this.readWheel.bind(this), false);
-        }
-        p.addEventListener("mousedown", this.mouseButtonDown.bind(this), false);
-        p.addEventListener("mousemove", this.mouseMove.bind(this), false);
-        p.addEventListener("mouseup", this.mouseButtonUp.bind(this), false);
-        p.addEventListener("touchstart", this.touchStart.bind(this), false);
-        p.addEventListener("touchmove", this.touchMove.bind(this), false);
-        p.addEventListener("touchend", this.touchEnd.bind(this), false);
+    bindEvents(elem) {
+      if (elem instanceof HTMLCanvasElement && (elem.tabindex === undefined || elem.tabindex === null)) {
+        elem.tabindex = 0;
       }
 
-      if (w) {
-        w.addEventListener("wheel", this.readWheel.bind(this), false);
-      }
-
-      if (k) {
-
-        if (k instanceof HTMLCanvasElement && (k.tabindex === undefined || k.tabindex === null)) {
-          k.tabindex = 0;
+      elem.addEventListener("wheel", this.readWheel.bind(this), false);
+      elem.addEventListener("mousedown", this.mouseButtonDown.bind(this), false);
+      elem.addEventListener("mousemove", this.mouseMove.bind(this), false);
+      elem.addEventListener("mouseup", this.mouseButtonUp.bind(this), false);
+      elem.addEventListener("touchstart", this.touchStart.bind(this), false);
+      elem.addEventListener("touchmove", this.touchMove.bind(this), false);
+      elem.addEventListener("touchend", this.touchEnd.bind(this), false);
+      elem.addEventListener("keydown", this.keyDown.bind(this), false);
+      elem.addEventListener("beforepaste", (evt) => evt.returnValue = false, false);
+      elem.addEventListener("paste", this.readClipboard.bind(this), false);
+      elem.addEventListener("keydown", (evt) => {
+        if (this.focused && this.operatingSystem.isClipboardReadingEvent(evt)) {
+          this._surrogate.style.display = "block";
+          this._surrogate.focus();
         }
-
-        if (!this.options.disableClipboard) {
-          var setFalse = (evt) => {
-            evt.returnValue = false;
-          };
-
-          k.addEventListener("beforepaste", setFalse, false);
-          k.addEventListener("paste", this.readClipboard.bind(this), false);
-          k.addEventListener("keydown", (evt) => {
-            if (this.focused && this.operatingSystem.isClipboardReadingEvent(evt)) {
-              this._surrogate.style.display = "block";
-              this._surrogate.focus();
-            }
-          }, true);
-        }
-
-        k.addEventListener("keydown", this.keyDown.bind(this), false);
-      }
+      }, true);
     }
 
     copySelectedText(evt) {

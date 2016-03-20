@@ -29,15 +29,6 @@ Primrose.Controls.Button2D = (function () {
         this.options = options || {};
       }
 
-      if (this.options.autoBindEvents) {
-        if (!this.options.readOnly && this.options.keyEventSource === undefined) {
-          this.options.keyEventSource = this.DOMElement;
-        }
-        if (this.options.pointerEventSource === undefined) {
-          this.options.pointerEventSource = this.DOMElement;
-        }
-      }
-
       ////////////////////////////////////////////////////////////////////////
       // initialization
       ///////////////////////////////////////////////////////////////////////
@@ -88,10 +79,6 @@ Primrose.Controls.Button2D = (function () {
 
     get resized() {
       return this.imageWidth !== this.surfaceWidth || this.imageHeight !== this.surfaceHeight;
-    }
-
-    get DOMElement() {
-      return this.canvas;
     }
 
     startPointer(x, y) {
