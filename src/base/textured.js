@@ -23,7 +23,6 @@ var textured = (function () {
       materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
 
     if (materialCache[materialDescription]) {
-      console.log("using cached material");
       material = materialCache[materialDescription];
     }
     else if (typeof txt === "number") {
