@@ -121,12 +121,16 @@ Primrose.Input.VR = (function () {
         console.log("Using Firefox Experimental WebVR API");
         navigator.mozGetVRDevices(enumerateLegacyVRDevices.bind(this, elem));
       }
-      else if (isMobile) {
-        console.log("Using Device Motion API");
-        createCardboardVRDisplay.call(this, elem);
-      }
       else {
-        console.log("Your browser doesn't have WebVR capability. Check out http://mozvr.com/");
+        var waitForValidMotion = (evt) => {
+          if (evt.alpha) {
+            window.removeEventListener("deviceorientation", waitForValidMotion);
+            console.log("Using Device Motion API", this);
+            createCardboardVRDisplay.call(this, elem);
+          }
+        }
+        console.log("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API");
+        window.addEventListener("deviceorientation", waitForValidMotion, false);
       }
     }
 
@@ -138,7 +142,7 @@ Primrose.Input.VR = (function () {
     type: "Boolean",
     description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."
   });
-  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || (isMobile && window.DeviceMotionEvent);
+  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || (isMobile || window.DeviceMotionEvent);
 
   VRInput.AXES = [
     "headX", "headY", "headZ",
