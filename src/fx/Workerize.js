@@ -194,8 +194,7 @@ Then we can create and use an automatically workerized version of it as follows.
 
 
     this.worker.onmessage = function (e) {
-      var f = e.data[0];
-      emit.call(this, f, e.data[1]);
+      emit.call(this, e.data[0], e.data[1]);
     }.bind(this);
 
     // create mappers from the UI-thread side method calls to the UI-thread side
