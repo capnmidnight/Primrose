@@ -65,7 +65,6 @@ Primrose.Surface = (function () {
         this.context = this.canvas.getContext("2d");
       }
 
-
       this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
       this.context.imageSmoothingEnabled = false;
       this.context.textBaseline = "top";
@@ -81,13 +80,28 @@ Primrose.Surface = (function () {
       };
       for (let i = 0; i < this.children.length; ++i) {
         var child = this.children[i];
-        this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
+        if (child.bounds.right >= bounds.left &&
+          child.bounds.left < bounds.right &&
+          child.bounds.bottom >= bounds.top &&
+          child.bounds.top < bounds.bottom) {
+          var left = Math.max(child.bounds.left, bounds.left),
+            top = Math.max(child.bounds.top, bounds.top),
+            right = Math.min(child.bounds.right, bounds.right),
+            bottom = Math.min(child.bounds.bottom, bounds.bottom),
+            width = right - left,
+            height = bottom - top;
+          this.context.drawImage(child.canvas,
+            left - child.bounds.left, top - child.bounds.top, width, height,
+            left, top, width, height);
+        }
       }
       if (this._material) {
         this._texture.needsUpdate = true;
         this._material.needsUpdate = true;
       }
       if (this.parent && this.parent.invalidate) {
+        bounds.left += this.bounds.left;
+        bounds.top += this.bounds.top;
         this.parent.invalidate(bounds);
       }
     }
