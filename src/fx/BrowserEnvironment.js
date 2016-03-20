@@ -785,7 +785,8 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       if (didIt) {
-        if (window.location.hash === "#fullscreen") {
+        if (!lockBack && window.location.hash === "#fullscreen") {
+          lockBack = true;
           history.back();
         }
         if (isPointerLocked()) {
@@ -794,7 +795,8 @@ Primrose.BrowserEnvironment = (function () {
       }
     }.bind(this);
 
-    var controlsBlock = null;
+    var controlsBlock = null,
+      lockBack = false;
 
     this.setFullScreenButton = function (id, event, useVR) {
       var elem = document.getElementById(id);
@@ -810,6 +812,7 @@ Primrose.BrowserEnvironment = (function () {
     };
 
     window.addEventListener("popstate", function (evt) {
+      lockBack = false;
       if (isFullScreenMode()) {
         this.input.mouse.exitPointerLock();
         evt.preventDefault();
