@@ -43,27 +43,21 @@ app.addEventListener("ready", function () {
   documentation = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
-    wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
     readOnly: true,
-    fontSize: 32,
     value: getDocumentation()
   });
   
   output = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
-    wheelEventSource: app.renderer.domElement,
     hideLineNumbers: true,
-    readOnly: true,
-    fontSize: 32
+    readOnly: true
   });
 
   editor = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024), 
     tokenizer: Primrose.Text.Grammars.JavaScript,
-    wheelEventSource: app.renderer.domElement,
-    fontSize: 32,
     value: getSourceCode(isInIFrame)
   });
 
