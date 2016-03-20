@@ -661,7 +661,7 @@ Primrose.Text.Controls.TextBox = (function () {
       y = Math.round(y);
       this._pointer.set(x, y);
       this.pixel2cell(this._pointer, this.scroll, this.gridBounds);
-      let gx = this._pointer.x - this.scroll.x,
+      var gx = this._pointer.x - this.scroll.x,
         gy = this._pointer.y - this.scroll.y,
         onBottom = gy >= this.gridBounds.height,
         onLeft = gx < 0,

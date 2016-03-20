@@ -154,7 +154,7 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     */
     blur() {
       this.focused = false;
-      for (let i = 0; i < this.children.length; ++i) {
+      for (var i = 0; i < this.children.length; ++i) {
         if (this.children[i].focused) {
           this.children[i].blur();
         }
@@ -225,8 +225,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     }
 
     get lockMovement() {
-      let lock = false;
-      for (let i = 0; i < this.children.length && !lock; ++i) {
+      var lock = false;
+      for (var i = 0; i < this.children.length && !lock; ++i) {
         lock |= this.children[i].lockMovement;
       }
       return lock;

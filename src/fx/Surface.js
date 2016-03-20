@@ -9,7 +9,7 @@
 Primrose.Surface = (function () {
   "use strict";
 
-  let COUNTER = 0;
+  var COUNTER = 0;
 
   class Surface extends Primrose.Entity {
 
@@ -78,7 +78,7 @@ Primrose.Surface = (function () {
         right: bounds.right,
         bottom: bounds.bottom
       };
-      for (let i = 0; i < this.children.length; ++i) {
+      for (var i = 0; i < this.children.length; ++i) {
         var child = this.children[i];
         if (child.bounds.right >= bounds.left &&
           child.bounds.left < bounds.right &&
@@ -167,8 +167,8 @@ Primrose.Surface = (function () {
       this.bounds.left *= rX;
       this.bounds.top *= rY;
 
-      for (let i = 0; i < this.children.length; ++i) {
-        let child = this.children[i];
+      for (var i = 0; i < this.children.length; ++i) {
+        var child = this.children[i];
         if (child.setSize) {
           child.setSize(child.bounds.width * rX, child.bounds.height * rY);
         }
