@@ -24,7 +24,6 @@
     <script type="text/javascript" src="/node_modules/three/three.js"></script>
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
     <script type="text/javascript" src="/lib/pliny.js"></script>
-    <script type="text/javascript" src="/src/hub.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
     <script type="text/javascript" src="/src/base/axis.js"></script>
     <script type="text/javascript" src="/src/base/box.js"></script>
@@ -35,6 +34,7 @@
     <script type="text/javascript" src="/src/base/fmt.js"></script>
     <script type="text/javascript" src="/src/base/forms.js"></script>
     <script type="text/javascript" src="/src/base/fullscreen.js"></script>
+    <script type="text/javascript" src="/src/base/hub.js"></script>
     <script type="text/javascript" src="/src/base/InsideSphereGeometry.js"></script>
     <script type="text/javascript" src="/src/base/light.js"></script>
     <script type="text/javascript" src="/src/base/oop.js"></script>

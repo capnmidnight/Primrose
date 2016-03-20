@@ -199,7 +199,7 @@
     <Compile Include="src\fx\controls\Button2D.js" />
     <Compile Include="src\fx\text\command_packs\TextInput.js" />
     <Compile Include="src\fx\text\controls\TextInput.js" />
-    <Compile Include="src\hub.js" />
+    <Compile Include="src\base\hub.js" />
     <Compile Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
     <Content Include="stylesheets\main.min.css" />
