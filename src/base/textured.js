@@ -101,7 +101,7 @@ var textured = (function () {
         setTexture(txt);
       }
     }
-
+    material.wireframe = !!options.wireframe;
     var obj = null;
     if (geometry.type.indexOf("Geometry") > -1) {
       obj = new THREE.Mesh(geometry, material);
