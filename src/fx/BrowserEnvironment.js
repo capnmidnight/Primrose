@@ -575,11 +575,11 @@ Primrose.BrowserEnvironment = (function () {
     }
 
     if (this.options.groundTexture) {
-      var dim = 50,
-        gm = new THREE.PlaneGeometry(dim, dim, dim, dim);
+      var dim = 10,
+        gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
       this.ground = textured(gm, this.options.groundTexture, {
-        txtRepeatS: dim,
-        txtRepeatT: dim
+        txtRepeatS: dim * 5,
+        txtRepeatT: dim * 5
       });
       this.ground.rotation.x = Math.PI / 2;
       this.ground.name = "Ground";
