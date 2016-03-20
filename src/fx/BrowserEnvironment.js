@@ -837,20 +837,20 @@ Primrose.BrowserEnvironment = (function () {
     }
     window.addEventListener("paste", withCurrentControl("readClipboard"), false);
     window.addEventListener("wheel", withCurrentControl("readWheel"), false);
-    this.input.addEventListener("jump", this.jump.bind(this), false);
-    this.input.addEventListener("zero", this.zero.bind(this), false);
-    this.projector.addEventListener("hit", handleHit, false);
     window.addEventListener("blur", this.stop, false);
     window.addEventListener("focus", this.start, false);
-    this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
-    this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
+    window.addEventListener("vrdisplaypresentchange", removeFullScreen, false);
     document.addEventListener("fullscreenchange", removeFullScreen, false);
     document.addEventListener("webkitfullscreenchange", removeFullScreen, false);
     document.addEventListener("mozfullscreenchange", removeFullScreen, false);
-    window.addEventListener("vrdisplaypresentchange", removeFullScreen, false);
     document.addEventListener("pointerlockchange", removeFullScreen, false);
     document.addEventListener("webkitpointerlockchange", removeFullScreen, false);
     document.addEventListener("mozpointerlockchange", removeFullScreen, false);
+    this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
+    this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
+    this.input.addEventListener("jump", this.jump.bind(this), false);
+    this.input.addEventListener("zero", this.zero.bind(this), false);
+    this.projector.addEventListener("hit", handleHit, false);
 
     Object.defineProperty(this, "inVR", {
       get: function () {
