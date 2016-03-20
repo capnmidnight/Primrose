@@ -58,8 +58,11 @@ window.Primrose = ( function () {
   pliny.namespace( "Primrose.Text.Renderers", "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon." );
   Primrose.Text.Renderers = {};
 
-  pliny.namespace( "Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar." );
+  pliny.namespace("Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar.");
   Primrose.Text.Themes = {};
+
+  pliny.namespace("Primrose.X", "Extensions and components that combine other Primrose elements.");
+  Primrose.X = {};
 
   pliny.value( "Primrose", {
     name: "SYS_FONTS",

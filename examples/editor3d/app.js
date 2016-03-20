@@ -9,9 +9,6 @@ var GRASS = "/examples/images/grass.png",
   output = null,
   documentation = null,
   button1 = null,
-  textField1 = null,
-  label1 = null,
-  image1 = null,
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
   cmdA = isOSX ? "CMD" : "CTRL",
@@ -28,6 +25,8 @@ var GRASS = "/examples/images/grass.png",
     groundTexture: DECK
   }),
   myWindowMesh = null,
+  loginForm = new Primrose.X.LoginForm(),
+  signupForm = new Primrose.X.SignupForm(),
   editorSphereY = app.avatarHeight - 0.25,
   myWindow = new Primrose.Surface({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
@@ -80,49 +79,40 @@ app.addEventListener("ready", function () {
     button1.value = nextString;
   }, false);
 
-  label1 = new Primrose.Controls.Label({
-    bounds: new Primrose.Text.Rectangle(960, 695, 100, 32), 
-    value: "A text box:",
-    backgroundColor: "transparent"
-  });
-
-  textField1 = new Primrose.Text.Controls.TextInput({
-    bounds: new Primrose.Text.Rectangle(1064, 700, 300, 32),
-    value: "OK, I get it",
-    padding: 5
-  });
-  
-  textField1.addEventListener("change", function (evt) {
-    log(evt.target.value);
-  });
-
-  image1 = new Primrose.Controls.Image({
-    bounds: new Primrose.Text.Rectangle(1000, 256, 128, 128),
-    value: "/images/logo128.png"
-  });
-
-  image1.addEventListener("click", log.bind(window, "Clicked the image"), false);
-  image1.addEventListener("load", function () {
-    var nextImage = "/images/logo128.png";
-    if (image1.value === nextImage) {
-      nextImage = "/images/stm.png";
-    }
-    setTimeout(() => image1.value = nextImage, 1000);
-  }, false);
-
   myWindow.appendChild(documentation);
   myWindow.appendChild(output);
   myWindow.appendChild(editor);
   myWindow.appendChild(button1);
-  myWindow.appendChild(label1);
-  myWindow.appendChild(textField1);
-  myWindow.appendChild(image1);
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
   myWindowMesh.position.y = editorSphereY;
   app.scene.add(myWindowMesh);
   app.registerPickableObject(myWindowMesh);
+
+  loginForm.mesh.position.y = editorSphereY + 0.25;
+  loginForm.mesh.position.x = -1.5;
+  loginForm.mesh.position.z = -1.5;
+
+  signupForm.mesh.position.y = editorSphereY + 0.25;
+  signupForm.mesh.position.x = -1.5;
+  signupForm.mesh.position.z = -1.5;
+  signupForm.mesh.visible = false;
+
+  app.scene.add(loginForm.mesh);
+  app.registerPickableObject(loginForm.mesh);
+  app.scene.add(signupForm.mesh);
+  app.registerPickableObject(signupForm.mesh);
+
+  loginForm.addEventListener("signup", () => {
+    loginForm.mesh.visible = false;
+    signupForm.mesh.visible = true;
+  }, false);
+
+  signupForm.addEventListener("login", () => {
+    loginForm.mesh.visible = true;
+    signupForm.mesh.visible = false;
+  }, false);
   
   log("INSTRUCTIONS:");
   log(" - " + cmdPre + "+E to show/hide editor");

@@ -13,14 +13,34 @@ var textured = (function () {
     textureCache = {};
   function textured(geometry, txt, options) {
     var material, surface;
+
     options = options || {};
     if (options.opacity === undefined) {
       options.opacity = 1;
     }
 
-
     var textureDescription = [txt.id || txt.toString(), options.txtRepeatS, options.txtRepeatT].join(","),
       materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
+
+    if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
+      if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
+        var uv = geometry.attributes.uv,
+          arr = uv.array;
+        if (options.scaleTextureWidth) {
+          for (var i = 0; i < arr.length; i += uv.itemSize) {
+            arr[i] *= options.scaleTextureWidth;
+          }
+        }
+        if (options.scaleTextureHeight) {
+          for (var i = 1; i < arr.length; i += uv.itemSize) {
+            arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
+          }
+        }
+      }
+      else {
+        console.trace(geometry);
+      }
+    }
 
     if (materialCache[materialDescription]) {
       material = materialCache[materialDescription];

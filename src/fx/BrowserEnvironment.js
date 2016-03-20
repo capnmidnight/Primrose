@@ -269,6 +269,8 @@ Primrose.BrowserEnvironment = (function () {
       this.pointer.position.add(this.player.position);
       if (this.projector.ready) {
         this.projector.ready = false;
+        var arr = Object.keys(this.pickableObjects).map((id) => createPickableObject(this.pickableObjects[id]));
+        this.projector.updateObjects(arr);
         this.projector.projectPointer([
           this.pointer.position.toArray(),
           transformForPicking(this.player)]);

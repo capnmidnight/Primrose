@@ -203,6 +203,8 @@
     <Compile Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
     <Content Include="stylesheets\main.min.css" />
+    <Compile Include="src\x\SignupForm.js" />
+    <Compile Include="src\x\LoginForm.js" />
     <Compile Include="test\Basic.js" />
     <Compile Include="test\Grammar.js" />
     <Compile Include="test\Point.js" />
@@ -357,6 +359,7 @@
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
+    <Folder Include="src\x\" />
     <Folder Include="templates\" />
     <Folder Include="server" />
     <Folder Include="server\controllers" />
