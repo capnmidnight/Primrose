@@ -2,7 +2,7 @@
   function CardboardVRDisplay() {
     this.capabilities = {
       canPresent: true,
-      hasExternalDisplay: true,
+      hasExternalDisplay: false,
       hasOrientation: true,
       hasPosition: false
     };

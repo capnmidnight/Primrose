@@ -48,46 +48,6 @@ Primrose.BrowserEnvironment = (function () {
   function BrowserEnvironment(name, options) {
     this.options = combineDefaults(options, BrowserEnvironment.DEFAULTS);
 
-    var setSize = function () {
-      var canvasWidth,
-        canvasHeight,
-        aspectWidth;
-
-      if (this.inVR) {
-        this.input.vr.resetTransforms(
-          this.options.nearPlane,
-          this.options.nearPlane + this.options.drawDistance);
-        var p = this.input.vr.transforms,
-          l = p[0],
-          r = p[1];
-        canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
-        canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
-        aspectWidth = canvasWidth / 2;
-        this.camera.aspect = aspectWidth / canvasHeight;
-      }
-      else {
-        var bounds = this.renderer.domElement.getBoundingClientRect(),
-          boundsRatio = screen.width / screen.height,
-          elementWidth = bounds.width,
-          elementHeight = isiOS ? (elementWidth * boundsRatio) : (elementWidth / boundsRatio),
-          pixelRatio = devicePixelRatio || 1;
-        canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
-        canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
-        aspectWidth = canvasWidth;
-        if (isMobile) {
-          document.body.style.height = Math.max(document.body.clientHeight, elementHeight) + "px";
-          document.documentElement.style.height = Math.max(document.documentElement.clientHeight, elementHeight) + "px";
-        }
-        this.renderer.setViewport(0, 0, canvasWidth, canvasHeight);
-        this.renderer.setScissor(0, 0, canvasWidth, canvasHeight);
-        this.camera.fov = this.options.defaultFOV;
-        this.camera.aspect = aspectWidth / canvasHeight;
-        this.camera.updateProjectionMatrix();
-      }
-      this.renderer.domElement.width = canvasWidth;
-      this.renderer.domElement.height = canvasHeight;
-    }.bind(this);
-
     var fire = emit.bind(this);
 
     this.addEventListener = function (event, thunk, bubbles) {
@@ -185,9 +145,8 @@ Primrose.BrowserEnvironment = (function () {
         this.projector.setObject(bag);
       }
     };
-    var headOffset = new THREE.Vector3();
-    var animate = function (t) {
-      RAF(animate);
+
+    var update = (t) => {
       t *= 0.001;
       var dt = t - lt,
         heading = 0,
@@ -205,8 +164,10 @@ Primrose.BrowserEnvironment = (function () {
       if (this.inVR) {
         this.input.getQuaternion("headRX", "headRY", "headRZ", "headRW", qHead);
       }
+      else {
+        qHead.set(0, 0, 0, 1);
+      }
       qPitch.setFromAxisAngle(RIGHT, pitch);
-      this.nose.visible = this.inVR;
       if (!this.player.isOnGround) {
         this.player.velocity.y -= this.options.gravity * dt;
       }
@@ -221,7 +182,7 @@ Primrose.BrowserEnvironment = (function () {
         this.player.velocity.applyQuaternion(qHeading);
       }
 
-      this.player.position.add(vTemp.copy(this.player.velocity).multiplyScalar(dt));
+      this.player.position.add(vBody.copy(this.player.velocity).multiplyScalar(dt));
       if (!this.player.isOnGround && this.player.position.y < this.avatarHeight) {
         this.player.isOnGround = true;
         this.player.position.y = this.avatarHeight;
@@ -279,43 +240,7 @@ Primrose.BrowserEnvironment = (function () {
       resolvePicking();
 
       fire("update", dt);
-
-      if (this.inVR) {
-        var trans = this.input.vr.transforms;
-        for (i = 0; i < trans.length; ++i) {
-          var st = trans[i],
-            v = st.viewport,
-            side = (2 * i) - 1;
-          this.input.getVector3("headX", "headY", "headZ", this.camera.position);
-          this.camera.projectionMatrix.copy(st.projection);
-          headOffset.set(0, 0, 0);
-          headOffset.applyMatrix4(st.translation);
-          headOffset.applyQuaternion(qHead);
-          this.camera.position.add(headOffset);
-          this.camera.quaternion.copy(qHead);
-
-          this.nose.position.set(side * -0.12, -0.12, -0.15);
-          this.nose.rotation.z = side * 0.7;
-          this.renderer.setViewport(
-            v.left * RESOLUTION_SCALE,
-            v.top * RESOLUTION_SCALE,
-            v.width * RESOLUTION_SCALE,
-            v.height * RESOLUTION_SCALE);
-          this.renderer.setScissor(
-            v.left * RESOLUTION_SCALE,
-            v.top * RESOLUTION_SCALE,
-            v.width * RESOLUTION_SCALE,
-            v.height * RESOLUTION_SCALE);
-          this.renderer.render(this.scene, this.camera);
-          this.input.vr.currentDisplay.submitFrame();
-        }
-      }
-      else {
-        this.camera.position.set(0, 0, 0);
-        this.camera.quaternion.copy(qHead);
-        this.renderer.render(this.scene, this.camera);
-      }
-    }.bind(this);
+    }
 
     var resolvePicking = function () {
       var lastButtons = this.input.getValue("dButtons");
@@ -399,6 +324,84 @@ Primrose.BrowserEnvironment = (function () {
         this.pointer.material.emissive.setRGB(0.25, 0, 0);
         this.pointer.scale.set(1, 1, 1);
       }
+    }.bind(this);
+
+    var animate = (t) => {
+      RAF(animate);
+
+      update(t);
+
+      if (this.inVR) {
+        var trans = this.input.vr.transforms;
+        for (i = 0; i < trans.length; ++i) {
+          var st = trans[i],
+            v = st.viewport,
+            side = (2 * i) - 1;
+          this.input.getVector3("headX", "headY", "headZ", this.camera.position);
+          this.camera.projectionMatrix.copy(st.projection);
+          vEye.set(0, 0, 0);
+          vEye.applyMatrix4(st.translation);
+          vEye.applyQuaternion(qHead);
+          this.camera.position.add(vEye);
+          this.camera.quaternion.copy(qHead);
+          this.nose.visible = true;
+          this.nose.position.set(side * -0.12, -0.12, -0.15);
+          this.nose.rotation.z = side * 0.7;
+          this.renderer.setViewport(
+            v.left * RESOLUTION_SCALE,
+            v.top * RESOLUTION_SCALE,
+            v.width * RESOLUTION_SCALE,
+            v.height * RESOLUTION_SCALE);
+          this.renderer.render(this.scene, this.camera);
+        }
+        this.input.vr.currentDisplay.submitFrame(this.input.vr.currentPose);
+      }
+      
+      if (!this.inVR || (this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+        this.camera.fov = this.options.defaultFOV;
+        this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
+        this.camera.updateProjectionMatrix();
+        this.camera.position.set(0, 0, 0);
+        this.camera.quaternion.copy(qHead);
+        this.nose.visible = false;
+        this.renderer.setViewport( 0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
+        this.renderer.render(this.scene, this.camera);
+      }
+    };
+
+
+    var setSize = function () {
+      var canvasWidth,
+        canvasHeight,
+        aspectWidth;
+
+      if (this.inVR) {
+        this.input.vr.resetTransforms(
+          this.options.nearPlane,
+          this.options.nearPlane + this.options.drawDistance);
+        var p = this.input.vr.transforms,
+          l = p[0],
+          r = p[1];
+        canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
+        canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
+        aspectWidth = canvasWidth / 2;
+      }
+      else {
+        var bounds = this.renderer.domElement.getBoundingClientRect(),
+          boundsRatio = screen.width / screen.height,
+          elementWidth = bounds.width,
+          elementHeight = isiOS ? (elementWidth * boundsRatio) : (elementWidth / boundsRatio),
+          pixelRatio = devicePixelRatio || 1;
+        canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
+        canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
+        aspectWidth = canvasWidth;
+        if (isMobile) {
+          document.body.style.height = Math.max(document.body.clientHeight, elementHeight) + "px";
+          document.documentElement.style.height = Math.max(document.documentElement.clientHeight, elementHeight) + "px";
+        }
+      }
+      this.renderer.domElement.width = canvasWidth;
+      this.renderer.domElement.height = canvasHeight;
     }.bind(this);
     //
     // restoring the options the user selected
@@ -491,7 +494,8 @@ Primrose.BrowserEnvironment = (function () {
       qPitch = new THREE.Quaternion(),
       qHeading = new THREE.Quaternion(),
       qHead = new THREE.Quaternion(),
-      vTemp = new THREE.Vector3(),
+      vEye = new THREE.Vector3(),
+      vBody = new THREE.Vector3(),
       skin = Primrose.Random.item(Primrose.SKIN_VALUES),
       sceneLoaded = !this.options.sceneModel,
       buttonLoaded = !this.options.button,
@@ -543,8 +547,8 @@ Primrose.BrowserEnvironment = (function () {
       logarithmicDepthBuffer: !isMobile,
       DEBUG_WEBGL: this.options.DEBUG_WEBGL
     });
+    this.renderer.autoClear = false;
     this.renderer.autoSortObjects = !isMobile;
-    this.renderer.setScissorTest(true);
     this.renderer.setClearColor(this.options.backgroundColor);
     if (!this.renderer.domElement.parentElement) {
       document.body.appendChild(this.renderer.domElement);
@@ -725,11 +729,6 @@ Primrose.BrowserEnvironment = (function () {
         this.currentControl.keyUp(evt);
       }
     };
-
-    var restart = function () {
-      setSize();
-      this.start();
-    }.bind(this);
     
     //
     // Manage full-screen state
@@ -738,12 +737,11 @@ Primrose.BrowserEnvironment = (function () {
       this.input.mouse.requestPointerLock();
       if (!isFullScreenMode()) {
         if (useVR && this.input.vr && this.input.vr.currentDisplay) {
-          this.stop();
           this.input.vr.currentDisplay.requestPresent({
             source: this.renderer.domElement
           })
-            .then(restart)
-            .catch(restart);
+            .then(setSize)
+            .catch(setSize);
         }
         else if (!isiOS) {
           requestFullScreen(this.renderer.domElement);
@@ -776,10 +774,9 @@ Primrose.BrowserEnvironment = (function () {
         evt instanceof Event && evt.type.indexOf("pointerlock") > -1 && !isPointerLocked()) {
         didIt = true;
         if (this.inVR) {
-          this.stop();
           this.input.vr.currentDisplay.exitPresent()
-            .then(restart)
-            .catch(restart);
+            .then(setSize)
+            .catch(setSize);
         }
         else {
           exitFullScreen();
@@ -837,11 +834,22 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
     }
+
+    var vrPresentChange = (evt) => {
+      console.log(evt);
+      if (this.inVR) {
+        setSize();
+      }
+      else {
+        removeFullScreen();
+      }
+    }
+
     window.addEventListener("paste", withCurrentControl("readClipboard"), false);
     window.addEventListener("wheel", withCurrentControl("readWheel"), false);
     window.addEventListener("blur", this.stop, false);
     window.addEventListener("focus", this.start, false);
-    window.addEventListener("vrdisplaypresentchange", removeFullScreen, false);
+    window.addEventListener("vrdisplaypresentchange", vrPresentChange, false);
     document.addEventListener("fullscreenchange", removeFullScreen, false);
     document.addEventListener("webkitfullscreenchange", removeFullScreen, false);
     document.addEventListener("mozfullscreenchange", removeFullScreen, false);
@@ -899,6 +907,8 @@ Primrose.BrowserEnvironment = (function () {
     jumpSpeed: 3.13,
     // by default, we want fullscreen to happen whenever the user touches the screen
     disableAutoFullScreen: false,
+    // by default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
+    disableMirroring: false,
     // the color that WebGL clears the background with before drawing
     backgroundColor: 0xafbfff,
     // the near plane of the camera
@@ -913,10 +923,6 @@ Primrose.BrowserEnvironment = (function () {
     dtNetworkUpdate: 0.125,
     canvasElement: "frontBuffer",
     gazeLength: 1
-    //    ,DEBUG_WEBGL: {
-    //      errorHandler: undefined,
-    //      logger: undefined
-    //    }
   };
 
   function createPickableObject(obj) {

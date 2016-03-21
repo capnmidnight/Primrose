@@ -2,7 +2,7 @@
   function LegacyVRDisplay(device) {
     this.capabilities = {
       canPresent: !!device.display,
-      hasExternalDisplay: !!device.display && !isMobile,
+      hasExternalDisplay: !isMobile,
       hasOrientation: !!device.sensor,
       hasPosition: !!device.sensor && !isMobile
     };
@@ -143,6 +143,7 @@
               if (isMobile && screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape-primary');
               }
+              window.dispatchEvent(new Event("vrdisplaypresentchange"));
               resolve();
             }.bind(this))
             .catch(function (evt) {
@@ -171,6 +172,7 @@
           exitFullScreen()
             .then(function () {
               clear();
+              window.dispatchEvent(new Event("vrdisplaypresentchange"));
               resolve();
             })
             .catch(function (err) {
