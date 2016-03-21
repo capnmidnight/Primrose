@@ -197,6 +197,10 @@
     <Compile Include="src\fx\HTTP\post.js" />
     <Compile Include="src\fx\HTTP\sendObject.js" />
     <Compile Include="src\fx\HTTP\XHR.js" />
+    <Compile Include="src\fx\Random\int.js" />
+    <Compile Include="src\fx\Random\item.js" />
+    <Compile Include="src\fx\Random\number.js" />
+    <Compile Include="src\fx\Random\steps.js" />
     <Compile Include="src\fx\Surface.js" />
     <Compile Include="src\fx\Entity.js" />
     <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
@@ -285,7 +289,6 @@
     <Compile Include="src\fx\ModelLoader.js" />
     <Compile Include="src\fx\NetworkedInput.js" />
     <Compile Include="src\fx\Projector.js" />
-    <Compile Include="src\fx\Random.js" />
     <Compile Include="src\fx\DOM\StateList.js" />
     <Compile Include="src\fx\BrowserEnvironment.js" />
     <Compile Include="src\fx\WebRTCSocket.js" />
@@ -365,6 +368,7 @@
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
     <Folder Include="src\fx\HTTP\" />
+    <Folder Include="src\fx\Random\" />
     <Folder Include="src\x\" />
     <Folder Include="templates\" />
     <Folder Include="server" />

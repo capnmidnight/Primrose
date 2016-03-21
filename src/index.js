@@ -40,6 +40,9 @@ window.Primrose = ( function () {
   pliny.namespace( "Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)." );
   Primrose.Output = {};
 
+  pliny.namespace("Primrose.Random", "Functions for handling random numbers of different criteria, or selecting random elements of arrays.");
+  Primrose.Random = {};
+
   pliny.namespace( "Primrose.Text", "The Text namespace contains classes everything regarding the Primrose source code editor." );
   Primrose.Text = {};
 
