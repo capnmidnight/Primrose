@@ -51,7 +51,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this.tokens = null;
       this.lines = null;
       this._CommandSystem = null;
-      this._keyboardSystem = null;
       this._commandPack = null;
       this._tokenRows = null;
       this._tokenHashes = null;
@@ -79,7 +78,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       this._pointer = new Primrose.Text.Point();
       this._deadKeyState = "";
-      this._keyNames = [];
       this._history = [];
       this._historyFrame = -1;
       this._topLeftGutter = new Primrose.Text.Size();
@@ -319,36 +317,6 @@ Primrose.Text.Controls.TextBox = (function () {
         }
       }
 
-      this._keyNames = [];
-      for (key in Primrose.Keys) {
-        code = Primrose.Keys[key];
-        if (!isNaN(code)) {
-          this._keyNames[code] = key;
-        }
-      }
-
-      this._keyboardSystem = {};
-      for (var type in this._codePage) {
-        var codes = this._codePage[type];
-        if (typeof (codes) === "object") {
-          for (code in codes) {
-            if (code.indexOf("_") > -1) {
-              var parts = code.split(' '),
-                browser = parts[0];
-              code = parts[1];
-              char = this._codePage.NORMAL[code];
-              name = browser + "_" + type + " " + char;
-            }
-            else {
-              char = this._codePage.NORMAL[code];
-              name = type + "_" + char;
-            }
-            this._keyNames[code] = char;
-            this._keyboardSystem[name] = codes[code];
-          }
-        }
-      }
-
       this.refreshCommandPack();
     }
 
@@ -537,7 +505,7 @@ Primrose.Text.Controls.TextBox = (function () {
             commandName += "NORMAL";
           }
 
-          commandName += "_" + this._keyNames[key];
+          commandName += "_" + this.codePage.keyNames[key];
 
           var func = this._commandPack[this._browser + "_" + commandName] ||
             this._commandPack[commandName];
@@ -711,8 +679,8 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     refreshCommandPack() {
-      if (this._keyboardSystem && this.operatingSystem && this._CommandSystem) {
-        this._commandPack = new this._CommandSystem(this.operatingSystem, this._keyboardSystem, this);
+      if (this.codePage && this.operatingSystem && this._CommandSystem) {
+        this._commandPack = new this._CommandSystem(this.operatingSystem, this.codePage, this);
       }
     }
 

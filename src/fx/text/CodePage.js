@@ -11,7 +11,7 @@ Primrose.Text.CodePage = ( function ( ) {
     this.name = name;
     this.language = lang;
 
-    copyObject( this, {
+    var commands = {
       NORMAL: {
         "65": "a",
         "66": "b",
@@ -68,20 +68,50 @@ Primrose.Text.CodePage = ( function ( ) {
         "89": "Y",
         "90": "Z"
       }
-    } );
+    };
 
-    copyObject( this, options );
+    copyObject(commands, options);
 
     for ( var i = 0; i <= 9; ++i ) {
       var code = Primrose.Keys["NUMPAD" + i];
-      this.NORMAL[code] = i.toString();
+      commands.NORMAL[code] = i.toString();
     }
 
-    this.NORMAL[Primrose.Keys.MULTIPLY] = "*";
-    this.NORMAL[Primrose.Keys.ADD] = "+";
-    this.NORMAL[Primrose.Keys.SUBTRACT] = "-";
-    this.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
-    this.NORMAL[Primrose.Keys.DIVIDE] = "/";
+    commands.NORMAL[Primrose.Keys.MULTIPLY] = "*";
+    commands.NORMAL[Primrose.Keys.ADD] = "+";
+    commands.NORMAL[Primrose.Keys.SUBTRACT] = "-";
+    commands.NORMAL[Primrose.Keys.DECIMALPOINT] = ".";
+    commands.NORMAL[Primrose.Keys.DIVIDE] = "/";
+
+    this.keyNames = {};
+    for (var key in Primrose.Keys) {
+      code = Primrose.Keys[key];
+      if (!isNaN(code)) {
+        this.keyNames[code] = key;
+      }
+    }
+    
+    var char, code, name;
+    for (var type in commands) {
+      var codes = commands[type];
+      if (typeof (codes) === "object") {
+        for (code in codes) {
+          if (code.indexOf("_") > -1) {
+            var parts = code.split(' '),
+              browser = parts[0];
+            code = parts[1];
+            char = commands.NORMAL[code];
+            name = browser + "_" + type + " " + char;
+          }
+          else {
+            char = commands.NORMAL[code];
+            name = type + "_" + char;
+          }
+          this.keyNames[code] = char;
+          this[name] = codes[code];
+        }
+      }
+    }
   }
 
   CodePage.DEAD = function ( key ) {
