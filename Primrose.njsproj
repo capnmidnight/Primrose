@@ -193,6 +193,7 @@
     <Compile Include="src\fx\DOM\makeHidingContainer.js" />
     <Compile Include="src\fx\HTTP\get.js" />
     <Compile Include="src\fx\HTTP\getObject.js" />
+    <Compile Include="src\fx\HTTP\getBuffer.js" />
     <Compile Include="src\fx\HTTP\getText.js" />
     <Compile Include="src\fx\HTTP\post.js" />
     <Compile Include="src\fx\HTTP\sendObject.js" />

@@ -1,137 +1,135 @@
 /* global Primrose, isOSX, pliny */
 
 
-pliny.class( "Primrose.Text", {
+pliny.class("Primrose.Text", {
   name: "Terminal",
   description: "<under construction>"
-} );
-Primrose.Text.Terminal = function ( inputEditor, outputEditor ) {
+});
+Primrose.Text.Terminal = function (inputEditor, outputEditor) {
   "use strict";
 
   outputEditor = outputEditor || inputEditor;
 
   var inputCallback = null,
-      currentProgram = null,
-      originalGrammar = null,
-      currentEditIndex = 0,
-      pageSize = 40,
-      outputQueue = [ ],
-      buffer = "",
-      restoreInput = inputEditor === outputEditor,
-      self = this;
+    currentProgram = null,
+    originalGrammar = null,
+    currentEditIndex = 0,
+    pageSize = 40,
+    outputQueue = [],
+    buffer = "",
+    restoreInput = inputEditor === outputEditor,
+    self = this;
 
   this.running = false;
   this.waitingForInput = false;
 
-  function toEnd ( editor ) {
+  function toEnd(editor) {
     editor.selectionStart = editor.selectionEnd = editor.value.length;
-    editor.scrollIntoView( editor.frontCursor );
+    editor.scrollIntoView(editor.frontCursor);
   }
 
-  function done () {
-    if ( self.running ) {
-      flush( );
+  function done() {
+    if (self.running) {
+      flush();
       self.running = false;
-      if ( restoreInput ) {
+      if (restoreInput) {
         inputEditor.tokenizer = originalGrammar;
         inputEditor.value = currentProgram;
       }
-      toEnd( inputEditor );
+      toEnd(inputEditor);
     }
   }
 
-  function clearScreen () {
+  function clearScreen() {
     outputEditor.selectionStart = outputEditor.selectionEnd = 0;
     outputEditor.value = "";
     return true;
   }
 
-  function flush () {
-    if ( buffer.length > 0 ) {
-      var lines = buffer.split( "\n" );
-      for ( var i = 0; i < pageSize && lines.length > 0; ++i ) {
-        outputQueue.push( lines.shift() );
+  function flush() {
+    if (buffer.length > 0) {
+      var lines = buffer.split("\n");
+      for (var i = 0; i < pageSize && lines.length > 0; ++i) {
+        outputQueue.push(lines.shift());
       }
-      if ( lines.length > 0 ) {
-        outputQueue.push( " ----- more -----" );
+      if (lines.length > 0) {
+        outputQueue.push(" ----- more -----");
       }
-      buffer = lines.join( "\n" );
+      buffer = lines.join("\n");
     }
   }
 
-  function input ( callback ) {
+  function input(callback) {
     inputCallback = callback;
     self.waitingForInput = true;
-    flush( );
+    flush();
   }
 
-  function stdout ( str ) {
+  function stdout(str) {
     buffer += str;
   }
 
-  this.sendInput = function ( evt ) {
-    if ( buffer.length > 0 ) {
-      flush( );
+  this.sendInput = function (evt) {
+    if (buffer.length > 0) {
+      flush();
     }
     else {
-      outputEditor.keyDown( evt );
-      var str = outputEditor.value.substring( currentEditIndex );
-      inputCallback( str.trim() );
+      outputEditor.keyDown(evt);
+      var str = outputEditor.value.substring(currentEditIndex);
+      inputCallback(str.trim());
       inputCallback = null;
       this.waitingForInput = false;
     }
   };
 
-  this.execute = function ( inVR ) {
+  this.execute = function (inVR) {
     pageSize = inVR ? 10 : 40;
     originalGrammar = inputEditor.tokenizer;
-    if ( originalGrammar && originalGrammar.interpret ) {
+    if (originalGrammar && originalGrammar.interpret) {
       this.running = true;
       var looper,
-          next = function () {
-            if ( self.running ) {
-              setTimeout( looper, 1 );
-            }
-          };
+        next = function () {
+          if (self.running) {
+            setTimeout(looper, 1);
+          }
+        };
 
       currentProgram = inputEditor.value;
-      looper = originalGrammar.interpret( currentProgram, input, stdout,
-          stdout, next, clearScreen, this.loadFile.bind( this ), done );
+      looper = originalGrammar.interpret(currentProgram, input, stdout,
+        stdout, next, clearScreen, this.loadFile.bind(this), done);
       outputEditor.tokenizer = Primrose.Text.Grammars.PlainText;
       clearScreen();
       next();
     }
   };
 
-  this.loadFile = function ( fileName, callback ) {
-    Primrose.HTTP.get( "text", fileName.toLowerCase(), function ( file ) {
-      if ( isOSX ) {
-        file = file.replace( "CTRL+SHIFT+SPACE", "CMD+OPT+E" );
-      }
-      inputEditor.value = currentProgram = file;
-      if ( callback ) {
-        callback();
-      }
-    } );
+  this.loadFile = function (fileName, callback) {
+    return Primrose.HTTP.getText(fileName.toLowerCase())
+      .then(function (file) {
+        if (isOSX) {
+          file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
+        }
+        inputEditor.value = currentProgram = file;
+      });
   };
 
   this.update = function () {
-    if ( outputQueue.length > 0 ) {
+    if (outputQueue.length > 0) {
       outputEditor.value += outputQueue.shift() + "\n";
-      toEnd( outputEditor );
+      toEnd(outputEditor);
       currentEditIndex = outputEditor.selectionStart;
     }
   };
 };
 
-pliny.issue( "Primrose.Text.Terminal", {
+pliny.issue("Primrose.Text.Terminal", {
   name: "document Terminal",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Terminal](#Primrose_Text_Terminal) class in the text/ directory"
-} );
+});
 
-pliny.issue( "Primrose.Text.Terminal", {
+pliny.issue("Primrose.Text.Terminal", {
   name: "Move Terminal to Controls namespace",
   type: "open",
   description: "Terminal should be a type of control, like TextArea and Button."
-} );
+});

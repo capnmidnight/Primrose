@@ -1,6 +1,6 @@
 ﻿pliny.function("Primrose.HTTP", {
-  name: "getText",
-  description: "Get plain text from a server.",
+  name: "getBuffer",
+  description: "Get an ArrayBuffer from a server.",
   returns: "If no success function is provide, returns a Promise. Otherwise, returns undefined.",
   parameters: [
     { name: "url", type: "String", description: "The resource to which the request is being sent." },
@@ -9,21 +9,24 @@
     { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }
   ],
   examples: [{
-    name: "Make a GET request for plain text.",
-    description: "Use this to load arbitrary files and do whatever you want with them.\n\
+    name: "Make a GET request for an ArrayBuffer.",
+    description: "Use this to load audio files and do whatever you want with them.\n\
 \n\
 ## Code:\n\
 \n\
     grammar(\"JavaScript\");\n\
-    Primrose.HTTP.getText(\"localFile.json\",\n\
-      console.log.bind(console, \"progress\"),\n\
-      console.log.bind(console, \"done\"),\n\
-      console.error.bind(console));\n\
-\n\
-## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\""}
+    var context = new AudioContext();\n\
+    Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
+      console.log.bind(console, \"progress\"));,\n\
+      function(buffer){\n\
+        context.decodeAudioData(\n\
+          buffer,\n\
+          console.log.bind(console, \"success\"),\n\
+          console.error.bind(console, \"error decoding\"));\n\
+      },\n\
+      console.error.bind(console, \"error loading\")\n"}
   ]
 });
-Primrose.HTTP.getText = function (url, progress, success, error) {
-  return Primrose.HTTP.get("text", url, progress, success, error);
+Primrose.HTTP.getBuffer = function (url, progress, success, error) {
+  return Primrose.HTTP.get("arraybuffer", url, progress, success, error);
 };
