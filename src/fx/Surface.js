@@ -243,27 +243,29 @@ Primrose.Surface = (function () {
       return this.bounds.left <= x && x < this.bounds.right && this.bounds.top <= y && y < this.bounds.bottom;
     }
 
-    startDOMPointer(x, y) {
-      return this.startPointer(x * devicePixelRatio, y * devicePixelRatio);
+    startDOMPointer(evt) {
+      this.startPointer(x * devicePixelRatio, y * devicePixelRatio);
     }
 
-    moveDOMPointer(x, y) {
-      return this.movePointer(x * devicePixelRatio, y * devicePixelRatio);
+    moveDOMPointer(evt) {
+      this.movePointer(x * devicePixelRatio, y * devicePixelRatio);
     }
 
     startPointer(x, y) {
-      var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
-      if (target) {
-        if (!this.focused) {
-          this.focus();
+      if (this.inBounds(x, y)) {
+        var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
+        if (target) {
+          if (!this.focused) {
+            this.focus();
+          }
+          emit.call(this, "click", { target, x, y });
+          if (target !== this) {
+            target.startPointer(x - this.bounds.left, y - this.bounds.top);
+          }
         }
-        emit.call(this, "click", { target, x, y });
-        if (target !== this) {
-          target.startPointer(x - this.bounds.left, y - this.bounds.top);
+        else if (this.focused) {
+          this.blur();
         }
-      }
-      else if (this.focused) {
-        this.blur();
       }
     }
 
@@ -279,43 +281,12 @@ Primrose.Surface = (function () {
 
     startUV(point) {
       var p = this.mapUV(point);
-      return this.startPointer(p.x, p.y);
+      this.startPointer(p.x, p.y);
     }
 
     moveUV(point) {
       var p = this.mapUV(point);
-      return this.movePointer(p.x, p.y);
-    }
-
-    _forFocusedChildren(name, evt) {
-      if (this.focused) {
-        for (var i = 0; i < this.children.length; ++i) {
-          var child = this.children[i];
-          if (child.focused) {
-            child[name](evt);
-          }
-        }
-      }
-    }
-
-    endPointer() {
-      this._forFocusedChildren("endPointer");
-    }
-
-    keyDown(evt) {
-      this._forFocusedChildren("keyDown", evt);
-    }
-
-    keyUp(evt) {
-      this._forFocusedChildren("keyUp", evt);
-    }
-
-    readClipboard(evt) {
-      this._forFocusedChildren("readClipboard", evt);
-    }
-
-    readWheel(evt) {
-      this._forFocusedChildren("readWheel", evt);
+      this.movePointer(p.x, p.y);
     }
   }
 

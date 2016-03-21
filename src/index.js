@@ -17,6 +17,8 @@
 
 /* global pliny, Primrose, THREE */
 
+var setFalse = (evt) => evt.returnValue = false;
+
 window.Primrose = ( function () {
   "use strict";
 

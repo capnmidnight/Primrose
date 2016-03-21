@@ -232,31 +232,69 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
       return lock;
     }
 
-    keyDown(evt) {
+    get focusedElement() {
       if (this.focused) {
-        evt.target = this;
-        emit.call(this, "keydown", evt);
+        for (var i = 0; i < this.children.length; ++i) {
+          var child = this.children[i];
+          if (child.focused) {
+            return child.focusedElement;
+          }
+        }
+        return this;
       }
+    }
+
+    _forFocusedChild(name, evt) {
+      var elem = this.focusedElement;
+      if (elem && elem !== this) {
+        elem[name](evt);
+      }
+    }
+
+    startDOMPointer(evt) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].startDOMPointer(evt);
+      }
+    }
+
+    moveDOMPointer(evt) {
+      this._forFocusedChild("moveDOMPointer", evt);
+    }
+
+    startUV(evt) {
+      this._forFocusedChild("startUV", evt);
+    }
+
+    moveUV(evt) {
+      this._forFocusedChild("moveUV", evt);
+    }
+
+    endPointer() {
+      this._forFocusedChild("endPointer");
+    }
+
+    keyDown(evt) {
+      this._forFocusedChild("keyDown", evt);
     }
 
     keyUp(evt) {
-      if (this.focused) {
-        emit.call(this, "keyup", { target: this, evt });
-      }
+      this._forFocusedChild("keyUp", evt);
     }
 
     readClipboard(evt) {
-      if (this.focused) {
-        evt.target = this;
-        emit.call(this, "paste", evt);
-      }
+      this._forFocusedChild("readClipboard", evt);
+    }
+
+    copySelectedText(evt) {
+      this._forFocusedChild("copySelectedText", evt);
+    }
+
+    cutSelectedText(evt) {
+      this._forFocusedChild("cutSelectedText", evt);
     }
 
     readWheel(evt) {
-      if (this.focused) {
-        evt.target = this;
-        emit.call(this, "wheel", evt);
-      }
+      this._forFocusedChild("readWheel", evt);
     }
   }
   return Entity;

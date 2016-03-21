@@ -57,8 +57,6 @@ Primrose.Text.Controls.TextBox = (function () {
       this._tokenHashes = null;
       this._tabString = null;
       this._currentTouchID = null;
-      this._surrogate = null;
-      this._surrogateContainer = null;
       this._lineCountWidth = null;
 
       this._lastFont = null;
@@ -133,30 +131,6 @@ Primrose.Text.Controls.TextBox = (function () {
 
       this.addEventListener("focus", this.render.bind(this), false);
       this.addEventListener("blur", this.render.bind(this), false);
-
-
-
-      if (!this.options.disableClipboard) {
-          
-        // the `surrogate` textarea makes clipboard events possible
-        this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea-" + this.id, "textarea", HTMLTextAreaElement);
-        this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container-" + this.id, this._surrogate);
-        this._surrogateContainer.style.position = "absolute";
-        this._surrogateContainer.style.overflow = "hidden";
-        this._surrogateContainer.style.width = 0;
-        this._surrogateContainer.style.height = 0;
-        document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
-
-
-        var setFalse = (evt) => {
-          evt.returnValue = false;
-        };
-
-        this._surrogate.addEventListener("beforecopy", setFalse, false);
-        this._surrogate.addEventListener("copy", this.copySelectedText.bind(this), false);
-        this._surrogate.addEventListener("beforecut", setFalse, false);
-        this._surrogate.addEventListener("cut", this.cutSelectedText.bind(this), false);
-      }
     }
 
     cursorPageUp(lines, cursor) {
@@ -486,6 +460,8 @@ Primrose.Text.Controls.TextBox = (function () {
         elem.tabindex = 0;
       }
 
+      BrowserEnvironment.createSurrogate.call(this);
+
       elem.addEventListener("wheel", this.readWheel.bind(this), false);
       elem.addEventListener("mousedown", this.mouseButtonDown.bind(this), false);
       elem.addEventListener("mousemove", this.mouseMove.bind(this), false);
@@ -497,7 +473,8 @@ Primrose.Text.Controls.TextBox = (function () {
       elem.addEventListener("beforepaste", (evt) => evt.returnValue = false, false);
       elem.addEventListener("paste", this.readClipboard.bind(this), false);
       elem.addEventListener("keydown", (evt) => {
-        if (this.focused && this.operatingSystem.isClipboardReadingEvent(evt)) {
+        var os = isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows;
+        if (this.focused && os.isClipboardReadingEvent(evt)) {
           this._surrogate.style.display = "block";
           this._surrogate.focus();
         }
@@ -505,17 +482,11 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     copySelectedText(evt) {
-      if (this.focused) {
+      if (this.focused && this.frontCursor.i !== this.backCursor.i) {
+        var clipboard = evt.clipboardData || window.clipboardData;
+        clipboard.setData(
+          window.clipboardData ? "Text" : "text/plain", this.selectedText);
         evt.returnValue = false;
-        if (this.frontCursor.i !== this.backCursor.i) {
-          var clipboard = evt.clipboardData || window.clipboardData;
-          clipboard.setData(
-            window.clipboardData ? "Text" : "text/plain",
-            this.selectedText);
-        }
-        evt.preventDefault();
-        this._surrogate.style.display = "none";
-        this.canvas.focus();
       }
     }
 
@@ -524,7 +495,6 @@ Primrose.Text.Controls.TextBox = (function () {
         this.copySelectedText(evt);
         if (!this.readOnly) {
           this.selectedText = "";
-          this.render();
         }
       }
     }
@@ -532,11 +502,6 @@ Primrose.Text.Controls.TextBox = (function () {
     keyDown(evt) {
       if (this.focused) {
         evt = evt || event;
-        if (this.operatingSystem.isClipboardReadingEvent(evt)) {
-          this._surrogate.style.display = "block";
-          this._surrogate.focus();
-        }
-
         var key = evt.keyCode;
         if (key !== Primrose.Keys.CTRL &&
           key !== Primrose.Keys.ALT &&
@@ -701,14 +666,14 @@ Primrose.Text.Controls.TextBox = (function () {
 
     mouseButtonDown(evt) {
       if (evt.button === 0) {
-        this.startDOMPointer(evt.clientX, evt.clientY);
+        this.startDOMPointer(evt);
         evt.preventDefault();
       }
     }
 
     mouseMove(evt) {
       if (this.focused) {
-        this.moveDOMPointer(evt.clientX, evt.clientY);
+        this.moveDOMPointer(evt);
       }
     }
 
@@ -721,7 +686,7 @@ Primrose.Text.Controls.TextBox = (function () {
     touchStart(evt) {
       if (this.focused && evt.touches.length > 0 && !this._dragging) {
         var t = evt.touches[0];
-        this.startDOMPointer(t.clientX, t.clientY);
+        this.startDOMPointer(t);
         this._currentTouchID = t.identifier;
       }
     }
@@ -730,7 +695,7 @@ Primrose.Text.Controls.TextBox = (function () {
       for (var i = 0; i < evt.changedTouches.length && this._dragging; ++i) {
         var t = evt.changedTouches[i];
         if (t.identifier === this._currentTouchID) {
-          this.moveDOMPointer(t.clientX, t.clientY);
+          this.moveDOMPointer(t);
           break;
         }
       }
