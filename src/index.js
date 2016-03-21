@@ -28,6 +28,9 @@ window.Primrose = ( function () {
   pliny.namespace("Primrose.DOM", "A few functions for manipulating DOM.");
   Primrose.DOM = {};
 
+  pliny.namespace("Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers.");
+  Primrose.HTTP = {};
+
   pliny.namespace("Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment.");
   Primrose.Input = {};
 

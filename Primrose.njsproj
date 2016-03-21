@@ -191,6 +191,12 @@
     <Compile Include="src\fx\DOM\cascadeElement.js" />
     <Compile Include="src\fx\DOM\findEverything.js" />
     <Compile Include="src\fx\DOM\makeHidingContainer.js" />
+    <Compile Include="src\fx\HTTP\get.js" />
+    <Compile Include="src\fx\HTTP\getObject.js" />
+    <Compile Include="src\fx\HTTP\getText.js" />
+    <Compile Include="src\fx\HTTP\post.js" />
+    <Compile Include="src\fx\HTTP\sendObject.js" />
+    <Compile Include="src\fx\HTTP\XHR.js" />
     <Compile Include="src\fx\Surface.js" />
     <Compile Include="src\fx\Entity.js" />
     <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
@@ -275,7 +281,6 @@
     <Compile Include="src\fx\BaseControl.js" />
     <Compile Include="src\fx\Button.js" />
     <Compile Include="src\fx\ButtonFactory.js" />
-    <Compile Include="src\fx\HTTP.js" />
     <Compile Include="src\fx\Keys.js" />
     <Compile Include="src\fx\ModelLoader.js" />
     <Compile Include="src\fx\NetworkedInput.js" />
@@ -359,6 +364,7 @@
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
+    <Folder Include="src\fx\HTTP\" />
     <Folder Include="src\x\" />
     <Folder Include="templates\" />
     <Folder Include="server" />
