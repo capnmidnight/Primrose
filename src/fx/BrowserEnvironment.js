@@ -332,6 +332,7 @@ Primrose.BrowserEnvironment = (function () {
 
         update(t);
 
+        this.renderer.clear(true, true, true);
         if (this.inVR) {
           var trans = this.input.vr.transforms;
           for (i = 0; i < trans.length; ++i) {
