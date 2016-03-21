@@ -110,9 +110,7 @@ Primrose.Text.CodePage = ( function ( ) {
             char = commands.NORMAL[code];
             cmdName = type + "_" + char;
           }
-          if (lang === "en-US") {
-            console.log(code, char, cmdName);
-          }
+
           this.keyNames[code] = char;
           this[cmdName] = codes[code];
         }

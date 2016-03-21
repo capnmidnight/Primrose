@@ -507,8 +507,17 @@ Primrose.Text.Controls.TextBox = (function () {
 
           commandName += "_" + this.codePage.keyNames[key];
 
-          var func = this._commandPack[this._browser + "_" + commandName] ||
-            this._commandPack[commandName];
+          var altCommandName = this._browser + "_" + commandName,
+            func = this.operatingSystem[altCommandName] ||
+              this.operatingSystem[commandName] ||
+              this._commandPack[altCommandName] ||
+              this._commandPack[commandName];
+
+          if (func instanceof String || typeof func === "string") {
+            func = this._commandPack[func] ||
+              this._commandPack[func];
+          }
+
           if (func) {
             this.frontCursor.moved = false;
             this.backCursor.moved = false;
