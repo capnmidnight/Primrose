@@ -22,12 +22,12 @@ var GRASS = "/examples/images/grass.png",
     disableAutoFullScreen: true,
     useFog: false,
     skyTexture: "/examples/images/bg2.jpg",
-    groundTexture: DECK
+    groundTexture: GRASS
   }),
   myWindowMesh = null,
   loginForm = new Primrose.X.LoginForm(),
   signupForm = new Primrose.X.SignupForm(),
-  editorSphereY = app.avatarHeight - 0.25,
+  editorSphereY = app.avatarHeight,
   myWindow = new Primrose.Surface({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
   });
@@ -44,24 +44,27 @@ app.addEventListener("ready", function () {
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
     readOnly: true,
-    value: getDocumentation()
+    value: getDocumentation(),
+    fontSize: 45
   });
   
   output = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
-    readOnly: true
+    readOnly: true,
+    fontSize: 45
   });
 
   editor = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024), 
     tokenizer: Primrose.Text.Grammars.JavaScript,
-    value: getSourceCode(isInIFrame)
+    value: getSourceCode(isInIFrame),
+    fontSize: 45
   });
 
   button1 = new Primrose.Controls.Button2D({
-    bounds: new Primrose.Text.Rectangle(1064, 750, 500, 45), 
+    bounds: new Primrose.Text.Rectangle(2048 - 500, 1024, 500, 45), 
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
@@ -75,7 +78,7 @@ app.addEventListener("ready", function () {
       nextString = "Switch to light theme";
     }
     log("Switching to theme: " + nextTheme.name);
-    label1.theme = documentation.theme = output.theme = editor.theme = nextTheme;
+    documentation.theme = output.theme = editor.theme = nextTheme;
     button1.value = nextString;
   }, false);
 
@@ -86,17 +89,14 @@ app.addEventListener("ready", function () {
 
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
+  myWindowMesh.position.x = 0.75;
   myWindowMesh.position.y = editorSphereY;
   app.scene.add(myWindowMesh);
   app.registerPickableObject(myWindowMesh);
 
-  loginForm.mesh.position.y = editorSphereY + 0.25;
-  loginForm.mesh.position.x = -1.5;
-  loginForm.mesh.position.z = -1.5;
-
-  signupForm.mesh.position.y = editorSphereY + 0.25;
-  signupForm.mesh.position.x = -1.5;
-  signupForm.mesh.position.z = -1.5;
+  signupForm.mesh.position.x = loginForm.mesh.position.x = -0.75;
+  signupForm.mesh.position.y = loginForm.mesh.position.y = editorSphereY;
+  signupForm.mesh.position.z = loginForm.mesh.position.z = -1;  
   signupForm.mesh.visible = false;
 
   app.scene.add(loginForm.mesh);
@@ -107,6 +107,10 @@ app.addEventListener("ready", function () {
   loginForm.addEventListener("signup", () => {
     loginForm.mesh.visible = false;
     signupForm.mesh.visible = true;
+  }, false);
+
+  loginForm.addEventListener("login", () => {
+
   }, false);
 
   signupForm.addEventListener("login", () => {
@@ -260,7 +264,7 @@ function testDemo(scene) {
   var balls = [];
 
   for (var i = 0; i < 10; ++i) {
-    balls.push(put(brick(WATER))
+    balls.push(put(brick(DECK))
       .on(start)
       .at(Primrose.Random.int(WIDTH),
       Primrose.Random.int(HEIGHT),
