@@ -110,7 +110,7 @@ app.addEventListener("ready", function () {
   }, false);
 
   loginForm.addEventListener("login", () => {
-
+    console.log(loginForm.userName.value, loginForm.password.value);
   }, false);
 
   signupForm.addEventListener("login", () => {

@@ -28,6 +28,8 @@ Primrose.Text.Controls.TextInput = (function () {
           tokenizer: Primrose.Text.Grammars.PlainText,
           commands: Primrose.Text.CommandPacks.TextInput
         }));
+
+      this.passwordCharacter = this.options.passwordCharacter;
     }
 
     get value() {
@@ -48,6 +50,17 @@ Primrose.Text.Controls.TextInput = (function () {
       v = v || "";
       v = v.replace(/\r?\n/g, "");
       super.selectedText = v;
+    }
+
+    drawText(ctx, txt, x, y) {
+      if (this.passwordCharacter) {
+        var val = "";
+        for (var i = 0; i < txt.length; ++i) {
+          val += this.passwordCharacter;
+        }
+        txt = val;
+      }
+      super.drawText(ctx, txt, x, y);
     }
   }
 

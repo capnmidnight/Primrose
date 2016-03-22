@@ -820,7 +820,8 @@ Primrose.Text.Controls.TextBox = (function () {
                 " " + this.character.height + "px " + this.theme.fontFamily;
               this._fgfx.font = font.trim();
               this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this._fgfx.fillText(
+              this.drawText(
+                this._fgfx,
                 t.value,
                 tokenFront.x * this.character.width,
                 textY);
@@ -843,6 +844,10 @@ Primrose.Text.Controls.TextBox = (function () {
         }
       }
       this._fgfx.restore();
+    }
+
+    drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
     }
 
     renderCanvasTrim() {

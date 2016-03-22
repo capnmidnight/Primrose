@@ -44,7 +44,8 @@
 
       this.password = new Primrose.Text.Controls.TextInput({
         bounds: new Primrose.Text.Rectangle(256, 100, 256, 50),
-        fontSize: 32
+        fontSize: 32,
+        passwordCharacter: "*"
       });
 
       this.loginButton = new Primrose.Controls.Button2D({
