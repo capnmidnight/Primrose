@@ -150,7 +150,7 @@ Primrose.Surface = (function () {
       return this.canvas.parentElement ? this.elementHeight : this.bounds.height;
     }
 
-    resized() {
+    get resized() {
       return this.imageWidth !== this.surfaceWidth ||
         this.imageHeight !== this.surfaceHeight;
     }
