@@ -208,6 +208,7 @@
     <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
     <Compile Include="src\fx\input\vr\MotionCorrector.js" />
     <Compile Include="src\fx\controls\Button2D.js" />
+    <Compile Include="src\fx\text\command_packs\BasicTextInput.js" />
     <Compile Include="src\fx\text\command_packs\TextInput.js" />
     <Compile Include="src\fx\text\controls\TextInput.js" />
     <Compile Include="src\base\hub.js" />
@@ -330,7 +331,6 @@
     <Compile Include="src\fx\text\code_pages\EN_UKX.js" />
     <Compile Include="src\fx\text\code_pages\EN_US.js" />
     <Compile Include="src\fx\text\code_pages\FR_AZERTY.js" />
-    <Compile Include="src\fx\text\command_packs\TestViewer.js" />
     <Compile Include="src\fx\text\command_packs\TextEditor.js" />
     <Compile Include="src\fx\text\controls\PlainText.js" />
     <Compile Include="src\fx\text\controls\TextBox.js" />

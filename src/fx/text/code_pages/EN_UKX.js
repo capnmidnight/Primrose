@@ -30,6 +30,7 @@ Primrose.Text.CodePages.EN_UKX = (function () {
       "222": "|"
     },
     NORMAL: {
+      "32": " ",
       "48": "0",
       "49": "1",
       "50": "2",
@@ -57,6 +58,7 @@ Primrose.Text.CodePages.EN_UKX = (function () {
       "222": "#",
       "223": "`"
     }, SHIFT: {
+      "32": " ",
       "48": ")",
       "49": "!",
       "50": "\"",

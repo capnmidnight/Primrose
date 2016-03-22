@@ -716,13 +716,26 @@ Primrose.BrowserEnvironment = (function () {
         }
       }.bind(this);
 
+      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       var keyDown = function (evt) {
         if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F) {
           this.goFullScreen(true);
           evt.preventDefault();
         }
         else if (this.currentControl) {
-          this.currentControl.keyDown(evt);
+          var elem = this.currentControl.focusedElement;
+          if (elem.execCommand) {
+            var oldDeadKeyState = this.operatingSystem._deadKeyState;
+            if (elem.execCommand(this._browser, this.codePage, this.operatingSystem.makeCommandName(evt, this.codePage))) {
+              evt.preventDefault();
+            }
+            if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+              this.operatingSystem._deadKeyState = "";
+            }
+          }
+          else {
+            elem.keyDown(evt);
+          }
         }
       }.bind(this);
 
@@ -812,9 +825,11 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this.operatingSystem = this.options.os;
 
       BrowserEnvironment.createSurrogate.call(this);
+
+      this.operatingSystem = this.options.os;
+      this.codePage = this.options.language;
 
       window.addEventListener("popstate", function (evt) {
         lockBack = false;
@@ -831,7 +846,8 @@ Primrose.BrowserEnvironment = (function () {
       }
       window.addEventListener("keydown", keyDown, false);
       window.addEventListener("keydown", (evt) => {
-        if (this.operatingSystem.isClipboardReadingEvent(evt)) {
+        var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+        if (cmdName === "CUT" || cmdName === "COPY") {
           this._surrogate.style.display = "block";
           this._surrogate.focus();
         }
@@ -905,13 +921,47 @@ Primrose.BrowserEnvironment = (function () {
 
       this.start();
     }
-    
+
     get operatingSystem() {
       return this._operatingSystem;
     }
 
     set operatingSystem(os) {
       this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
+    }
+
+    get codePage() {
+      return this._codePage;
+    }
+
+    set codePage(cp) {
+      var key,
+        code,
+        char,
+        name;
+      this._codePage = cp;
+      if (!this._codePage) {
+        var lang = (navigator.languages && navigator.languages[0]) ||
+          navigator.language ||
+          navigator.userLanguage ||
+          navigator.browserLanguage;
+
+        if (!lang || lang === "en") {
+          lang = "en-US";
+        }
+
+        for (key in Primrose.Text.CodePages) {
+          cp = Primrose.Text.CodePages[key];
+          if (cp.language === lang) {
+            this._codePage = cp;
+            break;
+          }
+        }
+
+        if (!this._codePage) {
+          this._codePage = Primrose.Text.CodePages.EN_US;
+        }
+      }
     }
 
     static createSurrogate() {

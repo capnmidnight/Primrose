@@ -84,15 +84,17 @@ Primrose.Text.CodePage = ( function ( ) {
     commands.NORMAL[Primrose.Keys.DIVIDE] = "/";
 
     this.keyNames = {};
+    this.commandNames = [];
     var char, code, cmdName;
     for (char in Primrose.Keys) {
       code = Primrose.Keys[char];
       if (!isNaN(code)) {
         this.keyNames[code] = char;
       }
-      if (lang === "en-US") {
-        console.log(code, char);
-      }
+    }
+
+    function overwriteText(txt, prim, lines) {
+      prim.selectedText = txt;
     }
     
     for (var type in commands) {
@@ -110,9 +112,13 @@ Primrose.Text.CodePage = ( function ( ) {
             char = commands.NORMAL[code];
             cmdName = type + "_" + char;
           }
-
+          this.commandNames.push(cmdName);
           this.keyNames[code] = char;
-          this[cmdName] = codes[code];
+          var func = codes[code];
+          if (typeof func !== "function") {
+            func = overwriteText.bind(null, func);
+          }
+          this[cmdName] = func;
         }
       }
     }

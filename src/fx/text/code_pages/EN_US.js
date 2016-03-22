@@ -10,6 +10,7 @@ Primrose.Text.CodePages.EN_US = (function () {
   } );
   return new CodePage("English: USA", "en-US", {
     NORMAL: {
+      "32": " ",
       "48": "0",
       "49": "1",
       "50": "2",
@@ -35,6 +36,7 @@ Primrose.Text.CodePages.EN_US = (function () {
       "222": "'"
     },
     SHIFT: {
+      "32": " ",
       "48": ")",
       "49": "!",
       "50": "@",

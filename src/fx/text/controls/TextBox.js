@@ -50,7 +50,6 @@ Primrose.Text.Controls.TextBox = (function () {
       ///////////////////////////////////////////////////////////////////////
       this.tokens = null;
       this.lines = null;
-      this._CommandSystem = null;
       this._commandPack = null;
       this._tokenRows = null;
       this._tokenHashes = null;
@@ -121,9 +120,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize;
       this.tokenizer = this.options.tokenizer;
-      this.codePage = this.options.codePage;
-      this.operatingSystem = this.options.os;
-      this.setCommandSystem(this.options.commands);
+      this.commandPack = this.options.commands || Primrose.Text.CommandPacks.TextEditor;
       this.value = this.options.value;
       this.padding = this.options.padding || 1;
 
@@ -238,18 +235,12 @@ Primrose.Text.Controls.TextBox = (function () {
       this.render();
     }
 
-    get operatingSystem() {
-      return this._operatingSystem;
+    get commandPack() {
+      return this._commandPack;
     }
 
-    set operatingSystem(os) {
-      this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
-      this.refreshCommandPack();
-    }
-
-    setCommandSystem(cmd) {
-      this._CommandSystem = cmd || Primrose.Text.CommandPacks.TextEditor;
-      this.refreshCommandPack();
+    set commandPack(v) {
+      this._commandPack = v;
     }
 
     get selectionStart() {
@@ -282,42 +273,6 @@ Primrose.Text.Controls.TextBox = (function () {
         this.refreshTokens();
         this.render();
       }
-    }
-
-    get codePage() {
-      return this._codePage;
-    }
-
-    set codePage(cp) {
-      var key,
-        code,
-        char,
-        name;
-      this._codePage = cp;
-      if (!this._codePage) {
-        var lang = (navigator.languages && navigator.languages[0]) ||
-          navigator.language ||
-          navigator.userLanguage ||
-          navigator.browserLanguage;
-
-        if (!lang || lang === "en") {
-          lang = "en-US";
-        }
-
-        for (key in Primrose.Text.CodePages) {
-          cp = Primrose.Text.CodePages[key];
-          if (cp.language === lang) {
-            this._codePage = cp;
-            break;
-          }
-        }
-
-        if (!this._codePage) {
-          this._codePage = Primrose.Text.CodePages.EN_US;
-        }
-      }
-
-      this.refreshCommandPack();
     }
 
     get tabWidth() {
@@ -467,73 +422,41 @@ Primrose.Text.Controls.TextBox = (function () {
       }
     }
 
-    keyDown(evt) {
-      if (this.focused) {
-        evt = evt || event;
-        var key = evt.keyCode;
-        if (key !== Primrose.Keys.CTRL &&
-          key !== Primrose.Keys.ALT &&
-          key !== Primrose.Keys.META_L &&
-          key !== Primrose.Keys.META_R &&
-          key !== Primrose.Keys.SHIFT &&
-          (!this.readOnly ||
-            key === Primrose.Keys.UPARROW ||
-            key === Primrose.Keys.DOWNARROW ||
-            key === Primrose.Keys.LEFTARROW ||
-            key === Primrose.Keys.RIGHTARROW ||
-            key === Primrose.Keys.PAGEUP ||
-            key === Primrose.Keys.PAGEDOWN ||
-            key === Primrose.Keys.END ||
-            key === Primrose.Keys.HOME)) {
+    execCommand(browser, codePage, commandName) {
+      if (commandName && this.focused && !this.readOnly) {
+        var altCommandName = browser + "_" + commandName,
+          func = this.commandPack[altCommandName] ||
+            this.commandPack[commandName] ||
+            codePage[altCommandName] ||
+            codePage[commandName];
 
-          var oldDeadKeyState = this._deadKeyState,
-            commandName = this._deadKeyState;
-
-          if (evt.ctrlKey) {
-            commandName += "CTRL";
-          }
-          if (evt.altKey) {
-            commandName += "ALT";
-          }
-          if (evt.metaKey) {
-            commandName += "META";
-          }
-          if (evt.shiftKey) {
-            commandName += "SHIFT";
-          }
-          if (commandName === this._deadKeyState) {
-            commandName += "NORMAL";
-          }
-
-          commandName += "_" + this.codePage.keyNames[key];
-
-          var altCommandName = this._browser + "_" + commandName,
-            func = this.operatingSystem[altCommandName] ||
-              this.operatingSystem[commandName] ||
-              this._commandPack[altCommandName] ||
-              this._commandPack[commandName];
-
-          if (func instanceof String || typeof func === "string") {
-            func = this._commandPack[func] ||
-              this._commandPack[func];
-          }
-
-          if (func) {
-            this.frontCursor.moved = false;
-            this.backCursor.moved = false;
-            func(this, this.lines);
-            if (this.frontCursor.moved && !this.backCursor.moved) {
-              this.backCursor.copy(this.frontCursor);
-            }
-            this.clampScroll();
-            evt.preventDefault();
-          }
-
-          if (this._deadKeyState === oldDeadKeyState) {
-            this._deadKeyState = "";
-          }
+        if (func instanceof String || typeof func === "string") {
+          console.log("okay");
+          func = this.commandPack[func] ||
+            this.commandPack[func] ||
+            func;
         }
-        this.render();
+        
+        if (func === undefined) {
+          return false;
+        }
+        else {
+          this.frontCursor.moved = false;
+          this.backCursor.moved = false;
+          if (func instanceof Function) {
+            func(this, this.lines);
+          }
+          else if (func instanceof String || typeof func === "string") {
+            console.log(func);
+            this.selectedText = func;
+          }
+          if (this.frontCursor.moved && !this.backCursor.moved) {
+            this.backCursor.copy(this.frontCursor);
+          }
+          this.clampScroll();
+          this.render();
+          return true;
+        }
       }
     }
 
@@ -684,12 +607,6 @@ Primrose.Text.Controls.TextBox = (function () {
         if (t.identifier === this._currentTouchID) {
           this.endPointer();
         }
-      }
-    }
-
-    refreshCommandPack() {
-      if (this.codePage && this.operatingSystem && this._CommandSystem) {
-        this._commandPack = new this._CommandSystem(this.operatingSystem, this.codePage, this);
       }
     }
 

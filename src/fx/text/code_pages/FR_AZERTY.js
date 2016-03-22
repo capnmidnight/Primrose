@@ -11,6 +11,7 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
   return new CodePage( "Français: AZERTY", "fr", {
     deadKeys: [ 221, 50, 55 ],
     NORMAL: {
+      "32": " ",
       "48": "à",
       "49": "&",
       "50": "é",
@@ -35,6 +36,7 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
       "226": "<"
     },
     SHIFT: {
+      "32": " ",
       "48": "0",
       "49": "1",
       "50": "2",

@@ -11,6 +11,7 @@ Primrose.Text.CodePages.DE_QWERTZ = (function () {
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
+      "32": " ",
       "48": "0",
       "49": "1",
       "50": "2",
@@ -58,6 +59,7 @@ Primrose.Text.CodePages.DE_QWERTZ = (function () {
       "89": "ý"
     },
     SHIFT: {
+      "32": " ",
       "48": "=",
       "49": "!",
       "50": "\"",
