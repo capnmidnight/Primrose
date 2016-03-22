@@ -329,9 +329,11 @@ Primrose.BrowserEnvironment = (function () {
 
       var animate = (t) => {
         RAF(animate);
-
         update(t);
+        render();
+      };
 
+      var render = () => {
         this.renderer.clear(true, true, true);
         if (this.inVR) {
           var trans = this.input.vr.transforms;
@@ -390,10 +392,12 @@ Primrose.BrowserEnvironment = (function () {
         }
         else {
           var bounds = this.renderer.domElement.getBoundingClientRect(),
-            boundsRatio = screen.width / screen.height,
             elementWidth = bounds.width,
-            elementHeight = isiOS ? (elementWidth * boundsRatio) : (elementWidth / boundsRatio),
+            elementHeight = bounds.height,
             pixelRatio = devicePixelRatio || 1;
+          if (isiOS) {
+            elementHeight = elementWidth * screen.width / screen.height;
+          }
           canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
           canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
           aspectWidth = canvasWidth;
@@ -404,6 +408,9 @@ Primrose.BrowserEnvironment = (function () {
         }
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
+        if (!this.timer) {
+          render();
+        }
       }.bind(this);
       //
       // restoring the options the user selected

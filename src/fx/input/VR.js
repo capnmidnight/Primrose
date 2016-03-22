@@ -105,31 +105,31 @@ Primrose.Input.VR = (function () {
     }
 
     function checkForVRDisplays() {
-      console.log("Checking for VR Displays...");
+      console.info("Checking for VR Displays...");
       if (navigator.getVRDisplays) {
-        console.log("Using WebVR API 1");
+        console.info("Using WebVR API 1");
         navigator.getVRDisplays()
           .then(enumerateVRDisplays.bind(this, elem))
           .catch(console.error.bind(console, "Could not find VR devices"));
       }
       else if (navigator.getVRDevices) {
-        console.log("Using Chromium Experimental WebVR API");
+        console.info("Using Chromium Experimental WebVR API");
         navigator.getVRDevices()
           .then(enumerateLegacyVRDevices.bind(this, elem))
           .catch(console.error.bind(console, "Could not find VR devices"));
       } else if (navigator.mozGetVRDevices) {
-        console.log("Using Firefox Experimental WebVR API");
+        console.info("Using Firefox Experimental WebVR API");
         navigator.mozGetVRDevices(enumerateLegacyVRDevices.bind(this, elem));
       }
       else {
         var waitForValidMotion = (evt) => {
           if (evt.alpha) {
             window.removeEventListener("deviceorientation", waitForValidMotion);
-            console.log("Using Device Motion API", this);
+            console.info("Using Device Motion API", this);
             createCardboardVRDisplay.call(this, elem);
           }
         }
-        console.log("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API");
+        console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
         window.addEventListener("deviceorientation", waitForValidMotion, false);
       }
     }

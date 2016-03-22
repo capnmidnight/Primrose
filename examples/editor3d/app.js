@@ -32,10 +32,6 @@ var GRASS = "/examples/images/grass.png",
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
   });
 
-if (isInIFrame) {
-  document.querySelector("header").style.display = "none";
-}
-
 app.addEventListener("ready", function () {
   app.scene.add(subScene);
 
