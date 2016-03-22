@@ -12,10 +12,10 @@ Primrose.Input.ButtonAndAxis = ( function () {
     name: "ButtonAndAxis",
     description: "<under construction>",
     parameters: [
-      {name: "", type: "", description: ""},
-      {name: "", type: "", description: ""},
-      {name: "", type: "", description: ""},
-      {name: "", type: "", description: ""}
+      {name: "name", type: "String", description: ""},
+      {name: "commands", type: "Array", description: ""},
+      {name: "socket", type: "WebSocket or WebRTCSocket", description: ""},
+      {name: "axes", type: "Array", description: ""}
     ]
   } );
   function ButtonAndAxisInput ( name, commands, socket, axes ) {
@@ -292,7 +292,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
     if ( arr ) {
       for ( var i = 0; i < arr.length; ++i ) {
         output[i] = {
-          index: Math.abs( arr[i] ) - 1,
+          index: Math.abs(arr[i]) - 1,
           toggle: arr[i] < 0,
           sign: ( arr[i] < 0 ) ? -1 : 1
         };
@@ -345,16 +345,24 @@ Primrose.Input.ButtonAndAxis = ( function () {
     if ( metaKeysSet ) {
       var pressed = true,
           value = 0,
-          n, v;
+          n, temp,
+          anyButtons = false;
+
+      for (n in this.inputState.buttons) {
+        if (this.inputState.buttons[n]) {
+          anyButtons = true;
+          break;
+        }
+      }
 
       if ( cmd.buttons ) {
         for ( n = 0; n < cmd.buttons.length; ++n ) {
-          var b = cmd.buttons[n];
-          var p = !!this.inputState.buttons[b.index + 1];
-          v = p ? b.sign : 0;
-          pressed = pressed && ( p && !b.toggle || !p && b.toggle );
-          if ( Math.abs( v ) > Math.abs( value ) ) {
-            value = v;
+          var btn = cmd.buttons[n];
+          var pressed = (btn.index === Primrose.Keys.ANY - 1) && anyButtons || !!this.inputState.buttons[btn.index + 1];
+          temp = pressed ? btn.sign : 0;
+          pressed = pressed && ( pressed && !btn.toggle || !pressed && btn.toggle );
+          if ( Math.abs( temp ) > Math.abs( value ) ) {
+            value = temp;
           }
         }
       }
@@ -362,17 +370,17 @@ Primrose.Input.ButtonAndAxis = ( function () {
       if ( cmd.axes ) {
         for ( n = 0; n < cmd.axes.length; ++n ) {
           var a = cmd.axes[n];
-          v = a.sign * this.inputState.axes[a.index];
-          if ( Math.abs( v ) > Math.abs( value ) ) {
-            value = v;
+          temp = a.sign * this.inputState.axes[a.index];
+          if ( Math.abs( temp ) > Math.abs( value ) ) {
+            value = temp;
           }
         }
       }
 
       for ( n = 0; n < cmd.commands.length; ++n ) {
-        v = this.getValue( cmd.commands[n] );
-        if ( Math.abs( v ) > Math.abs( value ) ) {
-          value = v;
+        temp = this.getValue( cmd.commands[n] );
+        if ( Math.abs( temp ) > Math.abs( value ) ) {
+          value = temp;
         }
       }
 
