@@ -794,8 +794,8 @@ Primrose.Text.Controls.TextBox = (function () {
         var line = this.lines[y] + this.padding,
           row = this._tokenRows[y],
           drawn = false,
-          textY = (y + 0.8 - this.scroll.y) * this.character.height,
-          imageY = (y - this.scroll.y - 0.2) * this.character.height + lineOffsetY;
+          textY = (y - 0.2 - this.scroll.y) * this.character.height,
+          imageY = textY + lineOffsetY;
 
         for (i = 0; i < row.length; ++i) {
           var t = row[i];
@@ -898,7 +898,7 @@ Primrose.Text.Controls.TextBox = (function () {
             this._tgfx.fillStyle = this.theme.regular.foreColor;
             this._tgfx.fillText(
               lineNumber,
-              0, (y + 0.8) * this.character.height);
+              0, (y - 0.2) * this.character.height);
           }
           lastLine = currentLine;
         }

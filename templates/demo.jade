@@ -1,5 +1,8 @@
 ﻿extends withFramework.jade
 
+block viewport
+  meta(name="viewport", content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no,user-scalable=no")
+
 append head
   <!-- start demo.jade head append -->
   link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")

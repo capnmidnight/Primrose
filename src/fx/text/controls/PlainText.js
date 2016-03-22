@@ -26,7 +26,6 @@ Primrose.Text.Controls.PlainText = ( function () {
       textContext.fillRect( 0, 0, textCanvas.width, textCanvas.height );
     }
     textContext.fillStyle = fgcolor;
-    textContext.textBaseline = "top";
 
     for ( var i = 0; i < lines.length; ++i ) {
       textContext.fillText( lines[i], 0, i * lineHeight );

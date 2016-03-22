@@ -162,6 +162,8 @@ Primrose.Surface = (function () {
     setSize(width, height) {
       const oldWidth = this.imageWidth,
         oldHeight = this.imageHeight,
+        oldTextBaseline = this.context.textBaseline,
+        oldTextAlign = this.context.textAlign,
         rX = width / oldWidth,
         rY = height / oldHeight;
       this.imageWidth = width;
@@ -175,6 +177,9 @@ Primrose.Surface = (function () {
           child.setSize(child.bounds.width * rX, child.bounds.height * rY);
         }
       }
+
+      this.context.textBaseline = oldTextBaseline;
+      this.context.textAlign = oldTextAlign;
     }
 
     get material() {
