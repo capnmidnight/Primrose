@@ -86,30 +86,7 @@ function scroller(id) {
         txt = txt.replace(GRAMMAR_TEST, "");
       }
 
-      b.innerHTML = "";
-
-      var tokenRows = tokenizer.tokenize(txt),
-        fs = parseFloat(document.defaultView.getComputedStyle(b, null).getPropertyValue("font-size"));
-      for (var y = 0; y < tokenRows.length; ++y) {
-        // draw the tokens on this row
-        var t = tokenRows[y];
-        if (t.type === "newlines") {
-          b.appendChild(document.createElement("br"));
-        }
-        else {
-          var style = Primrose.Text.Themes.Default[t.type] || {},
-            elem = document.createElement("span");
-          console.log(style);
-          elem.style.fontWeight = (style.fontWeight || Primrose.Text.Themes.Default.regular.fontWeight);
-          elem.style.fontStyle = (style.fontStyle || Primrose.Text.Themes.Default.regular.fontStyle || "");
-          elem.style.color = (style.foreColor);
-          elem.style.backgroundColor = (style.backColor);
-          elem.style.fontSize = fs + "px";
-          elem.style.fontFamily = Primrose.Text.Themes.Default.fontFamily;
-          elem.appendChild(document.createTextNode(t.value));
-          b.appendChild(elem);
-        }
-      }
+      b.innerHTML = tokenizer.toHTML(txt);
     }
   }
 

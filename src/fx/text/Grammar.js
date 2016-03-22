@@ -1,13 +1,13 @@
 /* global Primrose, pliny */
 
-Primrose.Text.Grammar = ( function ( ) {
+Primrose.Text.Grammar = (function () {
   "use strict";
 
-  pliny.class( "Primrose.Text", {
+  pliny.class("Primrose.Text", {
     name: "Grammar",
     parameters: [
-      {name: "name", type: "String", description: "A user-friendly name for the grammar, to be able to include it in an options listing."},
-      {name: "rules", type: "Array", description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."}
+      { name: "name", type: "String", description: "A user-friendly name for the grammar, to be able to include it in an options listing." },
+      { name: "rules", type: "Array", description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code." }
     ],
     description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
 \n\
@@ -15,7 +15,8 @@ As tokens are discovered, they are removed from the text being processed, so ord
 \n\
 See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
     examples: [
-      {name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+      {
+        name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
 \n\
 ## Code:\n\
 \n\
@@ -26,7 +27,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
       [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
     ] );"},
-      {name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+      {
+        name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
 \n\
 ## Code:\n\
 \n\
@@ -59,82 +61,107 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         [ \"identifiers\", /\\w+\\$?/ ]\n\
       ] );"}
     ]
-  } );
-  function Grammar ( name, rules ) {
-    pliny.property( {
+  });
+  function Grammar(name, rules) {
+    pliny.property({
       name: " name",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
-    } );
+    });
     this.name = name;
 
-    pliny.property( {
+    pliny.property({
       name: "grammar",
       type: "Array",
       description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
-    } );
+    });
     // clone the preprocessing grammar to start a new grammar
-    this.grammar = rules.map( function ( rule ) {
-      return new Primrose.Text.Rule( rule[0], rule[1] );
-    } );
+    this.grammar = rules.map(function (rule) {
+      return new Primrose.Text.Rule(rule[0], rule[1]);
+    });
 
-    function crudeParsing ( tokens ) {
+    function crudeParsing(tokens) {
       var commentDelim = null,
-          stringDelim = null,
-          line = 0,
-          i, t;
-      for ( i = 0; i < tokens.length; ++i ) {
+        stringDelim = null,
+        line = 0,
+        i, t;
+      for (i = 0; i < tokens.length; ++i) {
         t = tokens[i];
         t.line = line;
-        if ( t.type === "newlines" ) {
+        if (t.type === "newlines") {
           ++line;
         }
 
-        if ( stringDelim ) {
-          if ( t.type === "stringDelim" && t.value === stringDelim && ( i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\" ) ) {
+        if (stringDelim) {
+          if (t.type === "stringDelim" && t.value === stringDelim && (i === 0 || tokens[i - 1].value[tokens[i - 1].value.length - 1] !== "\\")) {
             stringDelim = null;
           }
-          if ( t.type !== "newlines" ) {
+          if (t.type !== "newlines") {
             t.type = "strings";
           }
         }
-        else if ( commentDelim ) {
-          if ( commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
-              commentDelim === "startLineComments" && t.type === "newlines" ) {
+        else if (commentDelim) {
+          if (commentDelim === "startBlockComments" && t.type === "endBlockComments" ||
+            commentDelim === "startLineComments" && t.type === "newlines") {
             commentDelim = null;
           }
-          if ( t.type !== "newlines" ) {
+          if (t.type !== "newlines") {
             t.type = "comments";
           }
         }
-        else if ( t.type === "stringDelim" ) {
+        else if (t.type === "stringDelim") {
           stringDelim = t.value;
           t.type = "strings";
         }
-        else if ( t.type === "startBlockComments" || t.type === "startLineComments" ) {
+        else if (t.type === "startBlockComments" || t.type === "startLineComments") {
           commentDelim = t.type;
           t.type = "comments";
         }
       }
 
       // recombine like-tokens
-      for ( i = tokens.length - 1; i > 0; --i ) {
+      for (i = tokens.length - 1; i > 0; --i) {
         var p = tokens[i - 1];
         t = tokens[i];
-        if ( p.type === t.type && p.type !== "newlines" ) {
+        if (p.type === t.type && p.type !== "newlines") {
           p.value += t.value;
-          tokens.splice( i, 1 );
+          tokens.splice(i, 1);
         }
       }
     }
 
-    pliny.method( {
+    Grammar.prototype.toHTML = function (txt) {
+      var tokenRows = this.tokenize(txt),
+        temp = document.createElement("div");
+      for (var y = 0; y < tokenRows.length; ++y) {
+        // draw the tokens on this row
+        var t = tokenRows[y];
+        if (t.type === "newlines") {
+          temp.appendChild(document.createElement("br"));
+        }
+        else {
+          var style = Primrose.Text.Themes.Default[t.type] || {},
+            elem = document.createElement("span");
+          elem.style.fontWeight = style.fontWeight || Primrose.Text.Themes.Default.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || Primrose.Text.Themes.Default.regular.fontStyle || "";
+          elem.style.color = style.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || Primrose.Text.Themes.Default.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || Primrose.Text.Themes.Default.fontFamily;
+          elem.appendChild(document.createTextNode(t.value));
+          temp.appendChild(elem);
+        }
+      }
+      return temp.innerHTML;
+    }
+
+    pliny.method({
       name: "tokenize",
-      parameters: [ {name: "text", type: "String", description: "The text to tokenize."} ],
+      parameters: [{ name: "text", type: "String", description: "The text to tokenize." }],
       returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
       description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
       examples: [
-        {name: 'Tokenize some JavaScript', description: 'Primrose comes with a grammar for JavaScript built in.\n\
+        {
+          name: 'Tokenize some JavaScript', description: 'Primrose comes with a grammar for JavaScript built in.\n\
 \n\
 ## Code:\n\
 \n\
@@ -164,15 +191,15 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
     ]'}
       ]
-    } );
+    });
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
-      var tokens = [ new Primrose.Text.Token( text, "regular", 0 ) ];
-      for ( var i = 0; i < this.grammar.length; ++i ) {
+      var tokens = [new Primrose.Text.Token(text, "regular", 0)];
+      for (var i = 0; i < this.grammar.length; ++i) {
         var rule = this.grammar[i];
-        for ( var j = 0; j < tokens.length; ++j ) {
-          rule.carveOutMatchedToken( tokens, j );
+        for (var j = 0; j < tokens.length; ++j) {
+          rule.carveOutMatchedToken(tokens, j);
         }
       }
 
@@ -182,10 +209,10 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
   }
 
   return Grammar;
-} )();
+})();
 
-pliny.issue( "Primrose.Text.Grammar", {
+pliny.issue("Primrose.Text.Grammar", {
   name: "document Grammar",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Text.Grammar](#Primrose_Text_Grammar) class in the text/ directory"
-} );
+});

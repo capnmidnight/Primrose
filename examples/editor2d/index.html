@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="description" content="A WebVR application framework.">
     <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
     <meta property="og:type" content="website">
@@ -144,7 +148,7 @@
         </ul>
       </nav>
     </header><!-- start main.jade main block -->
-    <div id="editorContainer"></div><!-- end main.jade main block -->
+    <pre id="editorContainer"></pre><!-- end main.jade main block -->
     <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
     <script type="text/javascript" src="app.js"></script>
     <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->

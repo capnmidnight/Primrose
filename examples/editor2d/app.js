@@ -1,28 +1,19 @@
 /* global Primrose */
 
 "use strict";
-var ed = new Primrose.Text.Controls.TextBox({
-  id: "editor"
-}),
-  editorContainer = document.querySelector("#editorContainer");
-
-function loadFile ( fileName ) {
+var editorContainer = document.querySelector("#editorContainer");
+document.body.style.backgroundColor = Primrose.Text.Themes.Default.regular.backColor;
+function loadFile(fileName) {
   Primrose.HTTP
     .getText(fileName)
     .then(function (file) {
-    ed.value = file;
-    ed.focus();
-  } );
+      editorContainer.innerHTML = Primrose.Text.Grammars.JavaScript.toHTML(file);
+    });
 }
 
-loadFile( "/examples/music/app.js" );
-editorContainer.appendChild(ed.canvas);
+loadFile("/examples/music/app.js");
 
 if (!isInIFrame) {
   var header = document.querySelector("header");
   editorContainer.style.top = header.clientHeight + "px";
 }
-
-ed.bindEvents(window, window, window);
-window.addEventListener("resize", ed.resize.bind(ed), false);
-ed.resize();
