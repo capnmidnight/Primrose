@@ -40,12 +40,23 @@ Primrose.Controls.Label = (function () {
       this._lastPadding = null;
       this._lastWidth = -1;
       this._lastHeight = -1;
+      this._lastTextAlign = null;
 
+      this.textAlign = this.options.textAlign;
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize || 16;
       this.refreshCharacter();
       this.value = this.options.value;
+    }
+
+    get textAlign() {
+      return this._textAlign;
+    }
+
+    set textAlign(v) {
+      this._textAlign = v;
+      this.render();
     }
 
     get value() {
@@ -106,7 +117,8 @@ Primrose.Controls.Label = (function () {
         characterHeightChanged = this.character.height !== this._lastCharacterHeight,
         fontChanged = this.context.font !== this._lastFont,
         activatedChanged = this._activated !== this._lastActivated,
-        changed = resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || activatedChanged;
+        alignChanged = this.textAlign !== this._lastTextAlign,
+        changed = resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || activatedChanged || alignChanged;
       return changed;
     }
 
@@ -123,7 +135,9 @@ Primrose.Controls.Label = (function () {
         this._lastWidth = this.imageWidth;
         this._lastHeight = this.imageHeight;
         this._lastFont = this.context.font;
+        this._lastTextAlign = this.textAlign;
 
+        this.context.textAlign = this.textAlign || "left";
         var backColor = this.options.backgroundColor || this.theme.regular.backColor,
           foreColor = this.options.color || this.theme.regular.foreColor;
 
@@ -146,9 +160,20 @@ Primrose.Controls.Label = (function () {
               testWidth += line;
             }
 
-            var textWidth = this.context.measureText(testWidth).width / 10,
-              textX = (this.imageWidth - textWidth) / 2,
-              font = (this.theme.regular.fontWeight || "") +
+            var textX = null;
+            switch (this.textAlign) {
+              case "right":
+                textX = this.imageWidth;
+                break;
+              case "center":
+                textX = this.imageWidth / 2;
+                break;
+              default:
+                textX = 0;
+                break
+            }
+
+            var font = (this.theme.regular.fontWeight || "") +
                 " " + (this.theme.regular.fontStyle || "") +
                 " " + this.character.height + "px " + this.theme.fontFamily;
             this.context.font = font.trim();
