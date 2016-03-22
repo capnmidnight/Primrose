@@ -966,22 +966,8 @@ Primrose.Text.Controls.TextBox = (function () {
           scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
           fontChanged = this.context.font !== this._lastFont,
           focusChanged = this.focused !== this._lastFocused,
-          foregroundChanged = layoutChanged || fontChanged || scrollChanged,
+          foregroundChanged = layoutChanged || focusChanged || fontChanged || scrollChanged,
           backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
-
-        this._lastGridBounds = this.gridBounds.toString();
-        this._lastText = this.value;
-        this._lastCharacterWidth = this.character.width;
-        this._lastCharacterHeight = this.character.height;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-        this._lastPadding = this.padding;
-        this._lastFrontCursorI = this.frontCursor.i;
-        this._lastBackCursorI = this.backCursor.i;
-        this._lastFocused = this.focused;
-        this._lastFont = this.context.font;
-        this._lastScrollX = this.scroll.x;
-        this._lastScrollY = this.scroll.y;
 
         if (layoutChanged) {
           this.performLayout(this.gridBounds);
@@ -1006,6 +992,20 @@ Primrose.Text.Controls.TextBox = (function () {
             this.parent.invalidate(this.bounds);
           }
         }
+
+        this._lastGridBounds = this.gridBounds.toString();
+        this._lastText = this.value;
+        this._lastCharacterWidth = this.character.width;
+        this._lastCharacterHeight = this.character.height;
+        this._lastWidth = this.imageWidth;
+        this._lastHeight = this.imageHeight;
+        this._lastPadding = this.padding;
+        this._lastFrontCursorI = this.frontCursor.i;
+        this._lastBackCursorI = this.backCursor.i;
+        this._lastFocused = this.focused;
+        this._lastFont = this.context.font;
+        this._lastScrollX = this.scroll.x;
+        this._lastScrollY = this.scroll.y;
       }
     }
   }
