@@ -68,10 +68,14 @@ Primrose.Surface = (function () {
       this.canvas.style.imageRendering = isChrome ? "pixelated" : "optimizespeed";
       this.context.imageSmoothingEnabled = false;
       this.context.textBaseline = "top";
+
+      this._texture = null;
+      this._material = null;
     }
 
 
     invalidate(bounds) {
+      bounds = bounds || this.bounds;
       bounds = {
         left: bounds.left,
         top: bounds.top,
@@ -97,8 +101,10 @@ Primrose.Surface = (function () {
             left, top, width, height);
         }
       }
-      if (this._material) {
+      if (this._texture) {
         this._texture.needsUpdate = true;
+      }
+      if (this._material) {
         this._material.needsUpdate = true;
       }
       if (this.parent && this.parent.invalidate) {
@@ -160,39 +166,13 @@ Primrose.Surface = (function () {
     }
 
     setSize(width, height) {
-      const oldWidth = this.imageWidth,
-        oldHeight = this.imageHeight,
-        oldTextBaseline = this.context.textBaseline,
-        oldTextAlign = this.context.textAlign,
-        rX = width / oldWidth,
-        rY = height / oldHeight;
+      const oldTextBaseline = this.context.textBaseline,
+        oldTextAlign = this.context.textAlign;
       this.imageWidth = width;
       this.imageHeight = height;
-      this.bounds.left *= rX;
-      this.bounds.top *= rY;
-
-      for (var i = 0; i < this.children.length; ++i) {
-        var child = this.children[i];
-        if (child.setSize) {
-          child.setSize(child.bounds.width * rX, child.bounds.height * rY);
-        }
-      }
 
       this.context.textBaseline = oldTextBaseline;
       this.context.textAlign = oldTextAlign;
-    }
-
-    get material() {
-      if (!this._material) {
-        this._material = new THREE.MeshLambertMaterial({
-          color: 0xffffff,
-          transparent: false,
-          side: THREE.DoubleSide,
-          opacity: 1,
-          map: this.texture
-        });
-      }
-      return this._material;
     }
 
     get texture() {

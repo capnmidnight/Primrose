@@ -961,7 +961,7 @@ Primrose.Text.Controls.TextBox = (function () {
           characterWidthChanged = this.character.width !== this._lastCharacterWidth,
           characterHeightChanged = this.character.height !== this._lastCharacterHeight,
           paddingChanged = this.padding !== this._lastPadding,
-          layoutChanged = boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || this.resized || paddingChanged,
+          layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
           cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
           scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
           fontChanged = this.context.font !== this._lastFont,

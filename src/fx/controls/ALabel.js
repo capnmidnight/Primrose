@@ -97,7 +97,7 @@ Primrose.Controls.Label = (function () {
         characterHeightChanged = this.character.height !== this._lastCharacterHeight,
         fontChanged = this.context.font !== this._lastFont,
         alignChanged = this.textAlign !== this._lastTextAlign,
-        changed = resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
+        changed = this.resized || textChanged || characterWidthChanged || characterHeightChanged || this.resized || fontChanged || alignChanged;
       return changed;
     }
 

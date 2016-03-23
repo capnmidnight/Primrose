@@ -341,6 +341,7 @@ Primrose.BrowserEnvironment = (function () {
             var st = trans[i],
               v = st.viewport,
               side = (2 * i) - 1;
+            Primrose.Entity.eyeBlankAll(i);
             this.input.getVector3("headX", "headY", "headZ", this.camera.position);
             this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);

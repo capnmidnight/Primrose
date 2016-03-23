@@ -4,6 +4,8 @@
 });
 Primrose.Entity = (function () {
   "use strict";
+  
+  var entities = new WeakMap();
 
   pliny.class("Primrose", {
     name: "Entity",
@@ -12,6 +14,16 @@ It manages a unique ID for every new control, the focus state of the control, an
 performs basic conversions from DOM elements to the internal Control format."
   });
   class Entity {
+
+    static registerEntity(e) {
+      entities[e.id] = e;
+    }
+
+    static eyeBlankAll(eye) {
+      for (var id in entities) {
+        entities[id].eyeBlank(eye);
+      }
+    }
 
     constructor(id) {
       this.id = id;
@@ -254,6 +266,12 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     startDOMPointer(evt) {
       for (var i = 0; i < this.children.length; ++i) {
         this.children[i].startDOMPointer(evt);
+      }
+    }
+
+    eyeBlank(eye) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].eyeBlank(eye);
       }
     }
 

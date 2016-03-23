@@ -25,12 +25,14 @@ var GRASS = "/examples/images/grass.png",
     groundTexture: GRASS
   }),
   myWindowMesh = null,
+  stereoImage = new Primrose.Controls.Image(),
   loginForm = new Primrose.X.LoginForm(),
   signupForm = new Primrose.X.SignupForm(),
   editorSphereY = app.avatarHeight,
   myWindow = new Primrose.Surface({
     bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
-  });
+  }),
+  img1Window = null;
 
 app.addEventListener("ready", function () {
   app.scene.add(subScene);
@@ -43,7 +45,7 @@ app.addEventListener("ready", function () {
     value: getDocumentation(),
     fontSize: 45
   });
-  
+
   output = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(1024, 1024, 1024, 1024),
     tokenizer: Primrose.Text.Grammars.PlainText,
@@ -53,18 +55,25 @@ app.addEventListener("ready", function () {
   });
 
   editor = new Primrose.Text.Controls.TextBox({
-    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024), 
+    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 1024),
     tokenizer: Primrose.Text.Grammars.JavaScript,
     value: getSourceCode(isInIFrame),
     fontSize: 45
   });
 
   button1 = new Primrose.Controls.Button2D({
-    bounds: new Primrose.Text.Rectangle(2048 - 500, 1024, 500, 45), 
+    bounds: new Primrose.Text.Rectangle(2048 - 500, 1024, 500, 45),
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
   });
+
+  function makeWindow(width, height, size) {
+    size = size || 1;
+    return textured(quad(size, size * height / width), new Primrose.Surface({
+      bounds: new Primrose.Text.Rectangle(0, 0, width, height)
+    }));
+  }
 
   button1.addEventListener("click", function () {
     var nextTheme = Primrose.Text.Themes.Default,
@@ -92,13 +101,22 @@ app.addEventListener("ready", function () {
 
   signupForm.mesh.position.x = loginForm.mesh.position.x = -0.75;
   signupForm.mesh.position.y = loginForm.mesh.position.y = editorSphereY;
-  signupForm.mesh.position.z = loginForm.mesh.position.z = -1;  
+  signupForm.mesh.position.z = loginForm.mesh.position.z = -1;
   signupForm.mesh.visible = false;
 
   app.scene.add(loginForm.mesh);
   app.registerPickableObject(loginForm.mesh);
   app.scene.add(signupForm.mesh);
   app.registerPickableObject(signupForm.mesh);
+
+  stereoImage.loadStereoImage("prong.stereo.jpg")
+    .then((img) => {
+      img1Window = makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
+      img1Window.position.set(2, editorSphereY, -0.5);
+      img1Window.surface.appendChild(stereoImage);
+      app.scene.add(img1Window);
+      app.registerPickableObject(img1Window);
+    });
 
   loginForm.addEventListener("signup", () => {
     loginForm.mesh.visible = false;
@@ -113,7 +131,7 @@ app.addEventListener("ready", function () {
     loginForm.mesh.visible = true;
     signupForm.mesh.visible = false;
   }, false);
-  
+
   log("INSTRUCTIONS:");
   log(" - " + cmdPre + "+E to show/hide editor");
   log(" - " + cmdPre + "+X to reload original demo code");
