@@ -236,6 +236,16 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
       }
     }
 
+    get theme() {
+      return null;
+    }
+
+    set theme(v) {
+      for (var i = 0; i < this.children.length; ++i) {
+        this.children[i].theme = v;
+      }
+    }
+
     get lockMovement() {
       var lock = false;
       for (var i = 0; i < this.children.length && !lock; ++i) {

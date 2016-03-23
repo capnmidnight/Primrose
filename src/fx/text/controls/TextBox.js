@@ -70,6 +70,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this._lastScrollX = -1;
       this._lastScrollY = -1;
       this._lastFocused = false;
+      this._lastThemeName = null;
       this._lastPointer = new Primrose.Text.Point();
             
       // different browsers have different sets of keycodes for less-frequently
@@ -231,7 +232,7 @@ Primrose.Text.Controls.TextBox = (function () {
     set theme(t) {
       this._theme = clone(t || Primrose.Text.Themes.Default);
       this._theme.fontSize = this.fontSize;
-      this.resize();
+      this._rowCache = {};
       this.render();
     }
 
@@ -965,8 +966,9 @@ Primrose.Text.Controls.TextBox = (function () {
           cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
           scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
           fontChanged = this.context.font !== this._lastFont,
+          themeChanged = this.theme.name !== this._lastThemeName,
           focusChanged = this.focused !== this._lastFocused,
-          foregroundChanged = layoutChanged || focusChanged || fontChanged || scrollChanged,
+          foregroundChanged = layoutChanged || focusChanged || fontChanged || themeChanged || scrollChanged,
           backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
 
         if (layoutChanged) {
@@ -1004,6 +1006,7 @@ Primrose.Text.Controls.TextBox = (function () {
         this._lastBackCursorI = this.backCursor.i;
         this._lastFocused = this.focused;
         this._lastFont = this.context.font;
+        this._lastThemeName = this.theme.name;
         this._lastScrollX = this.scroll.x;
         this._lastScrollY = this.scroll.y;
       }
