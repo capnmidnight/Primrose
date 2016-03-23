@@ -126,7 +126,7 @@ var textured = (function () {
       else if (txt instanceof Primrose.Surface) {
         txt._material = material;
         Primrose.Entity.registerEntity(txt);
-        setTexture(txt.texture);
+        setTexture(txt);
         obj.surface = txt;
       }
       else if (typeof txt === "string") {
