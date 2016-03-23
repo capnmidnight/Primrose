@@ -191,7 +191,7 @@ module.exports = function (grunt) {
       },
       default: {
         files: {
-          "obj/Primrose.js": ["lib/pliny.js", "es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js"]
+          "obj/Primrose.js": ["lib/pliny.js", "es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"]
         }
       }
     },
