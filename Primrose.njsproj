@@ -31,6 +31,7 @@
   <ItemGroup>
     <Content Include="doc\editorVRManual.html.jade" />
     <Content Include="doc\index.html.jade" />
+    <Content Include="examples\editor3d\prong.stereo.jpg" />
     <Content Include="templates\documentation.jade" />
     <Content Include="examples\commodore\index.html.jade" />
     <Content Include="examples\editor2d\index.html.jade" />
