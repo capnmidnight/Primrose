@@ -83,7 +83,7 @@ app.addEventListener("ready", function () {
       nextString = "Switch to light theme";
     }
     log("Switching to theme: " + nextTheme.name);
-    documentation.theme = output.theme = editor.theme = nextTheme;
+    signupForm.theme = loginForm.theme = documentation.theme = output.theme = editor.theme = nextTheme;
     button1.value = nextString;
   }, false);
 
