@@ -5,7 +5,7 @@ Primrose.Text.Grammars.PlainText = (function () {
 
   pliny.value( "Primrose.Text.Grammars", {
     name: "PlainText",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new Primrose.Text.Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]

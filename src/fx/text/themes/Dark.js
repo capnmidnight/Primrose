@@ -5,7 +5,7 @@ Primrose.Text.Themes.Dark = ( function ( ) {
   
   pliny.record( "Primrose.Text.Themes", {
     name: "Dark",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return {
     name: "Dark",

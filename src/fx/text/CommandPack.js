@@ -5,7 +5,7 @@ Primrose.Text.CommandPack = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "CommandPack",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function CommandPack ( name, commands ) {
     this.name = name;

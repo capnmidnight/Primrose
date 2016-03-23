@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "sphere",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function sphere(r, slices, rings) {
   return new THREE.SphereBufferGeometry(r, slices, rings);

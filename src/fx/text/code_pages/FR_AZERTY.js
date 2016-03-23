@@ -6,7 +6,7 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
   
   pliny.record( "Primrose.Text.CodePages", {
     name: "FR_AZERTY",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new CodePage( "Français: AZERTY", "fr", {
     deadKeys: [ 221, 50, 55 ],

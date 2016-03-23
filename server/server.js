@@ -16,7 +16,7 @@
       p: "8383"
     }),
     srcDir = ".",
-    startPage = "examples/editor3d/index.html",
+    startPage = options.p || "examples/editor3d/index.html",
     port = process.env.PORT || options.p,
     app, redir, io;
 

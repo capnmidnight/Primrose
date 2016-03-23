@@ -4,7 +4,7 @@ Primrose.Input.Mouse = ( function () {
   
   pliny.class("Primrose.Input", {
     name: "Mouse",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function MouseInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;

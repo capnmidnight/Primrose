@@ -8,7 +8,7 @@ in the helpers/options.js file."
 } );
 pliny.function( "", {
   name: "clearKeyOption",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function clearKeyOption ( evt ) {
   this.value = "";
@@ -23,7 +23,7 @@ in the helpers/options.js file."
 } );
 pliny.function( "", {
   name: "setKeyOption",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function setKeyOption ( outElem, elemArr, evt ) {
   this.dataset.keycode = evt.keyCode;
@@ -49,7 +49,7 @@ in the helpers/options.js file."
 } );
 pliny.function( "", {
   name: "setupKeyOption",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function setupKeyOption ( outElem, elemArr, index, char, code ) {
   var elem = elemArr[index];
@@ -67,7 +67,7 @@ in the helpers/options.js file."
 } );
 pliny.function( "", {
   name: "combineDefaults",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function combineDefaults(a, b){
   var c = {}, k;

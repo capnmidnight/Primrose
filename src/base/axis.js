@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "axis",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function axis(length, width) {
   var center = hub();

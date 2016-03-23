@@ -5,7 +5,7 @@ Primrose.Text.Rectangle = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "Rectangle",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Rectangle ( x, y, width, height ) {
     this.point = new Primrose.Text.Point( x, y );

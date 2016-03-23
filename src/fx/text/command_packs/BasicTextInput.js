@@ -10,7 +10,7 @@ Primrose.Text.CommandPacks.BasicTextInput = (function () {
 
   pliny.record("Primrose.Text.CommandPacks", {
     name: "TextInput",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   class BasicTextInput extends Primrose.Text.CommandPack {
     constructor(additionalName, additionalCommands) {

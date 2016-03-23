@@ -10,7 +10,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
   
   pliny.class( "Primrose.Input", {
     name: "ButtonAndAxis",
-    description: "<under construction>",
+    description: "| [under construction]",
     parameters: [
       {name: "name", type: "String", description: ""},
       {name: "commands", type: "Array", description: ""},
@@ -357,10 +357,10 @@ Primrose.Input.ButtonAndAxis = ( function () {
 
       if ( cmd.buttons ) {
         for ( n = 0; n < cmd.buttons.length; ++n ) {
-          var btn = cmd.buttons[n];
-          var pressed = (btn.index === Primrose.Keys.ANY - 1) && anyButtons || !!this.inputState.buttons[btn.index + 1];
-          temp = pressed ? btn.sign : 0;
-          pressed = pressed && ( pressed && !btn.toggle || !pressed && btn.toggle );
+          var btn = cmd.buttons[n],
+            p = (btn.index === Primrose.Keys.ANY - 1) && anyButtons || !!this.inputState.buttons[btn.index + 1];
+          temp = p ? btn.sign : 0;
+          pressed = pressed && ( p && !btn.toggle || !p && btn.toggle );
           if ( Math.abs( temp ) > Math.abs( value ) ) {
             value = temp;
           }

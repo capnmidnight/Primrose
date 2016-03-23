@@ -4,7 +4,7 @@ Primrose.Input.Motion = ( function ( ) {
 
   pliny.class("Primrose.Input", {
     name: "Motion",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function MotionInput ( name, commands, socket ) {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, MotionInput.AXES );
@@ -45,7 +45,9 @@ Primrose.Input.Motion = ( function ( ) {
         h = Math.floor( sh * devicePixelRatio ),
         i = ( eye + 1 ) / 2;
 
-    s.transform = new THREE.Matrix4().makeTranslation( eye * 0.034, 0, 0 );
+    if (window.THREE) {
+      s.transform = new THREE.Matrix4().makeTranslation(eye * 0.034, 0, 0);
+    }
     s.viewport = {
       x: i * w,
       y: 0,

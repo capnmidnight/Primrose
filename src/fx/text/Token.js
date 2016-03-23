@@ -5,7 +5,7 @@ Primrose.Text.Token = ( function () {
 
   pliny.class( "Primrose.Text", {
     name: "Token",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Token ( value, type, index, line ) {
     this.value = value;

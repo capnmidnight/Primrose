@@ -4,7 +4,7 @@ Primrose.Projector = (function () {
   
   pliny.class("Primrose", {
     name: "Projector",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function Projector(isWorker) {
     (function () {

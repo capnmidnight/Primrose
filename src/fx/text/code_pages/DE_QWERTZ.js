@@ -6,7 +6,7 @@ Primrose.Text.CodePages.DE_QWERTZ = (function () {
   
   pliny.record( "Primrose.Text.CodePages", {
     name: "DE_QWERTZ",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],

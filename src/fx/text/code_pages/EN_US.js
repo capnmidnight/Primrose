@@ -6,7 +6,7 @@ Primrose.Text.CodePages.EN_US = (function () {
   
   pliny.record( "Primrose.Text.CodePages", {
     name: "EN_US",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new CodePage("English: USA", "en-US", {
     NORMAL: {

@@ -18,7 +18,7 @@ Primrose.Output.Music = ( function () {
 
   pliny.class( "Primrose.Output", {
     name: "Music",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Music ( context, type, numNotes ) {
     this.audio = context || new AudioContext();

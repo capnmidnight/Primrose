@@ -5,7 +5,7 @@ Primrose.Text.Grammars.JavaScript = ( function () {
 
   pliny.value( "Primrose.Text.Grammars", {
     name: "JavaScript",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new Primrose.Text.Grammar( "JavaScript", [
     [ "newlines", /(?:\r\n|\r|\n)/ ],

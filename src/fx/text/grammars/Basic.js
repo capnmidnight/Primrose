@@ -4,7 +4,7 @@ Primrose.Text.Grammars.Basic = (function () {
 
   pliny.value("Primrose.Text.Grammars", {
     name: "Basic",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   var basicGrammar = new Primrose.Text.Grammar("BASIC",
     // Grammar rules are applied in the order they are specified.

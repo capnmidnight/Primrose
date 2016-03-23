@@ -5,7 +5,7 @@ Primrose.Text.CodePage = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "CodePage",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function CodePage ( name, lang, options ) {
     this.name = name;
@@ -72,8 +72,9 @@ Primrose.Text.CodePage = ( function ( ) {
 
     copyObject(commands, options);
 
+    var char, code, cmdName;
     for ( var i = 0; i <= 9; ++i ) {
-      var code = Primrose.Keys["NUMPAD" + i];
+      code = Primrose.Keys["NUMPAD" + i];
       commands.NORMAL[code] = i.toString();
     }
 
@@ -85,7 +86,6 @@ Primrose.Text.CodePage = ( function ( ) {
 
     this.keyNames = {};
     this.commandNames = [];
-    var char, code, cmdName;
     for (char in Primrose.Keys) {
       code = Primrose.Keys[char];
       if (!isNaN(code)) {

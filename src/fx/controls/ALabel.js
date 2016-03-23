@@ -41,7 +41,7 @@ Primrose.Controls.Label = (function () {
       this._lastWidth = -1;
       this._lastHeight = -1;
       this._lastTextAlign = null;
-      
+
       this.textAlign = this.options.textAlign;
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
@@ -144,12 +144,11 @@ Primrose.Controls.Label = (function () {
                 break;
               default:
                 textX = 0;
-                break
             }
 
             var font = (this.theme.regular.fontWeight || "") +
-                " " + (this.theme.regular.fontStyle || "") +
-                " " + this.character.height + "px " + this.theme.fontFamily;
+              " " + (this.theme.regular.fontStyle || "") +
+              " " + this.character.height + "px " + this.theme.fontFamily;
             this.context.font = font.trim();
             this.context.fillStyle = foreColor;
             this.context.fillText(line, textX, textY);

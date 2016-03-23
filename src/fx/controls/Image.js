@@ -94,7 +94,7 @@ Primrose.Controls.Image = (function () {
       return this.loadImage(src).then((img) => {
         var options = {
           bounds: new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height)
-        }
+        };
         var a = new Primrose.Surface(options),
           b = new Primrose.Surface(options);
         a.context.drawImage(img, 0, 0);
@@ -102,10 +102,10 @@ Primrose.Controls.Image = (function () {
         this.setImage(0, a.canvas);
         this.setImage(1, b.canvas);
         this.bounds.width = options.bounds.width;
-        this.bounds.height = options.bounds.height
+        this.bounds.height = options.bounds.height;
         this.render();
         return this;
-      })
+      });
     }
 
     get image() {

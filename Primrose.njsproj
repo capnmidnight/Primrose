@@ -20,7 +20,7 @@
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:false</ScriptArguments>
+    <ScriptArguments>-v:true -b:false -p:"doc/index.html"</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,9 +29,26 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\blenderAdvanced.html" />
+    <Content Include="doc\blenderBeginner.html" />
+    <Content Include="doc\drum.html" />
+    <Content Include="doc\editorVRManual.html" />
     <Content Include="doc\editorVRManual.html.jade" />
+    <Content Include="doc\editorVRTutorial.html" />
+    <Content Include="doc\export.html" />
+    <Content Include="doc\faq.html" />
+    <Content Include="doc\hmd.html" />
     <Content Include="doc\index.html.jade" />
+    <Content Include="doc\lighting.html" />
+    <Content Include="doc\pliny.html" />
+    <Content Include="doc\server.html" />
+    <Content Include="doc\setup.html" />
+    <Content Include="doc\sync.html" />
+    <Content Include="doc\video.html" />
+    <Content Include="doc\webvr.html" />
     <Content Include="examples\editor3d\prong.stereo.jpg" />
+    <Content Include="templates\docPages.jade" />
+    <Content Include="templates\docTutorials.jade" />
     <Content Include="templates\documentation.jade" />
     <Content Include="examples\commodore\index.html.jade" />
     <Content Include="examples\editor2d\index.html.jade" />
@@ -95,22 +112,20 @@
     <Content Include="doc\style.css" />
     <Content Include="doc\style.min.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
-    <Content Include="doc\adventure.md" />
-    <Content Include="doc\blenderAdvanced.md" />
-    <Content Include="doc\blenderBeginner.md" />
-    <Content Include="doc\drum.md" />
-    <Content Include="doc\editorVRManual.md" />
-    <Content Include="doc\editorVRTutorial.md" />
-    <Content Include="doc\export.md" />
-    <Content Include="doc\faq.md" />
-    <Content Include="doc\hmd.md" />
-    <Content Include="doc\lighting.md" />
-    <Content Include="doc\pliny.md" />
-    <Content Include="doc\server.md" />
-    <Content Include="doc\setup.md" />
-    <Content Include="doc\sync.md" />
-    <Content Include="doc\video.md" />
-    <Content Include="doc\webvr.md" />
+    <Content Include="doc\blenderAdvanced.html.jade" />
+    <Content Include="doc\blenderBeginner.html.jade" />
+    <Content Include="doc\drum.html.jade" />
+    <Content Include="doc\editorVRTutorial.html.jade" />
+    <Content Include="doc\export.html.jade" />
+    <Content Include="doc\faq.html.jade" />
+    <Content Include="doc\hmd.html.jade" />
+    <Content Include="doc\lighting.html.jade" />
+    <Content Include="doc\pliny.html.jade" />
+    <Content Include="doc\server.html.jade" />
+    <Content Include="doc\setup.html.jade" />
+    <Content Include="doc\sync.html.jade" />
+    <Content Include="doc\video.html.jade" />
+    <Content Include="doc\webvr.html.jade" />
     <Compile Include="doc\app.js" />
     <Content Include="examples\style.css" />
     <Content Include="examples\style.min.css" />

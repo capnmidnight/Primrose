@@ -6,7 +6,7 @@ Primrose.Text.CodePages.EN_UKX = (function () {
   
   pliny.record( "Primrose.Text.CodePages", {
     name: "EN_UKX",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {

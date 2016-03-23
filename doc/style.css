@@ -38,13 +38,13 @@ code, kbd{
 
 kbd, tt{
   color: #EEF6F8;
-  background-color: #853B9E;
+  background-color: #853B9E;  
 }
 
 
 tt{
   display: block;
-  white-space: pre;
+  white-space: pre-wrap;
   padding: 1em;
 }
 

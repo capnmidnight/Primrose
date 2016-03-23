@@ -5,7 +5,7 @@ Primrose.Text.OperatingSystems.OSX = ( function () {
 
   pliny.value( "Primrose.Text.OperatingSystems", {
     name: "OSX",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return new Primrose.Text.OperatingSystem(
       "OS X", "META", "ALT", "METASHIFT_z",

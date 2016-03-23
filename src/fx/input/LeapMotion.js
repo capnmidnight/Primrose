@@ -16,7 +16,7 @@ Primrose.Input.LeapMotion = ( function () {
   
   pliny.class("Primrose.Input", {
     name: "LeapMotionInput",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function LeapMotionInput ( name, commands, socket ) {
 

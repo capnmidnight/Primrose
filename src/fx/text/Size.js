@@ -5,7 +5,7 @@ Primrose.Text.Size = (function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "Size",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Size ( width, height ) {
     this.set( width || 0, height || 0 );

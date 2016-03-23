@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "brick",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function brick(txt, w, h, l) {
   return textured(box(w || 1, h || 1, l || 1), txt, {

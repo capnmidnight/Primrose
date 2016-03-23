@@ -5,7 +5,7 @@ Primrose.Text.Themes.Default = ( function ( ) {
   
   pliny.record( "Primrose.Text.Themes", {
     name: "Default",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   return {
     name: "Light",

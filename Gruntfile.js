@@ -55,26 +55,70 @@ function jadeConfiguration(options, defaultData) {
   return config;
 }
 
+function recurseDirectory(root) {
+  var directoryQueue = [root],
+    files = [];
+  while (directoryQueue.length > 0) {
+    var directory = directoryQueue.shift(),
+      subFiles = fs.readdirSync(directory);
+    for (var j = 0; j < subFiles.length; ++j) {
+      var subFile = path.join(directory, subFiles[j]),
+        stats = fs.statSync(subFile);
+      if (stats.isDirectory()) {
+        directoryQueue.push(subFile);
+      }
+      else {
+        files.push("/" + subFile.replace(/\\/g, "/"));
+      }
+    }
+  }
+  return files;
+}
 
 var debugData = {
   debug: true,
-  frameworkFiles: []
-},
-  directoryQueue = ["src"];
-while (directoryQueue.length > 0) {
-  var directory = directoryQueue.shift(),
-    subFiles = fs.readdirSync(directory);
-  for (var j = 0; j < subFiles.length; ++j) {
-    var subFile = path.join(directory, subFiles[j]),
-      stats = fs.statSync(subFile);
-    if (stats.isDirectory()) {
-      directoryQueue.push(subFile);
-    }
-    else {
-      debugData.frameworkFiles.push("/" + subFile.replace(/\\/g, "/"));
-    }
-  }
+  frameworkFiles: recurseDirectory("src")
 }
+
+var headerSpec = /\b(\w+)\r\n\s*h1 ([^\r\n]+)/,
+  docFiles = recurseDirectory("doc")
+    .filter(function (f) { return /.jade$/.test(f); })
+    .map(function (f, i) {
+      var file = fs.readFileSync(f.substring(1), "utf-8");
+      var match = file.match(headerSpec);
+      var index = i;
+      if (match[1].length > 0) {
+        index = parseInt(match[1]);
+      }
+      return {
+        fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
+        index: index,
+        title: match[2],
+        incomplete: /| [under construction]/.test(file)
+      };
+    });
+
+docFiles.sort(function (a, b) {
+  return a.index - b.index;
+});
+
+  pages = docFiles.filter(function (f) { return !/^Tutorial:/.test(f.title); }),
+  tutorials = docFiles.filter(function (f) { return /^Tutorial:/.test(f.title); });
+
+function makeList(files) {
+  return files
+    .map(function (f) {
+      var html = "li(data-name=\"" + f.title + "\"): a"
+      if (f.incomplete) {
+        html += ".incomplete";
+      }
+      html += "(href=\"" + f.fileName + "\") " + f.title;
+      return html;
+    }).join("\n");
+}
+
+fs.writeFileSync("templates/docPages.jade", makeList(pages));
+fs.writeFileSync("templates/docTutorials.jade", makeList(tutorials));
 
 var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, debugData),
   jadeReleaseConfiguration = jadeConfiguration({}, {});
@@ -93,7 +137,7 @@ module.exports = function (grunt) {
 
     watch: {
       jade: {
-        files: "**/*.jade",
+        files: "**/*.*.jade",
         tasks: ["jade:debug"]
       }
     },
@@ -181,6 +225,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-jade");
 
+  grunt.registerTask("none", []);
   grunt.registerTask("debug", ["jshint", "watch"]);
   grunt.registerTask("build-js", ["jshint", "babel", "concat", "uglify", "copy"]);
   grunt.registerTask("release", ["clean", "jade:release", "cssmin", "build-js"]);

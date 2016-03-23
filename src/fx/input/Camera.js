@@ -20,7 +20,7 @@ Primrose.Input.Camera = ( function () {
   
   pliny.class("Primrose.Input", {
     name: "Camera",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function CameraInput ( elem, id, size, x, y, z, options ) {
     MediaStreamTrack.getSources( function ( infos ) {

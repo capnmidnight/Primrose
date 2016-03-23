@@ -24,7 +24,7 @@ Primrose.WebRTCSocket = ( function () {
 
   pliny.class( "Primrose", {
     name: "WebRTCSocket",
-    description: "<under construction>"
+    description: "[under construction]"
   } );
   function WebRTCSocket ( proxyServer, isStarHub ) {
     var socket,

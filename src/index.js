@@ -109,8 +109,9 @@ window.Primrose = ( function () {
       {name: "onError", type: "Function", description: "A callback for if the texture fails to load."}
     ]
   } );
-  var textureLoader = new THREE.TextureLoader();
-  Primrose.loadTexture = function ( url, onLoad, onProgress, onError ) {
+  var textureLoader = null;
+  Primrose.loadTexture = function (url, onLoad, onProgress, onError) {
+    textureLoader = textureLoader || new THREE.TextureLoader();
     textureLoader.setCrossOrigin( THREE.ImageUtils.crossOrigin );
     textureLoader.load( url, onLoad, onProgress, onError );
   };

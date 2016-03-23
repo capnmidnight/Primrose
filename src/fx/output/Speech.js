@@ -14,7 +14,7 @@ Primrose.Output.Speech = ( function ( ) {
   try {
     pliny.class( "Primrose.Output", {
       name: "Speech",
-      description: "<under construction>"
+      description: "| [under construction]"
     } );
     return function ( options ) {
       options = options || {};
@@ -43,7 +43,7 @@ Primrose.Output.Speech = ( function ( ) {
     // in case of error, return a shim that lets us continue unabated
     pliny.class( "Primrose.Output", {
       name: "Speech",
-      description: "<under construction>"
+      description: "| [under construction]"
     } );
     return function ( ) {
       this.speak = function ( ) {

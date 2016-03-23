@@ -11,7 +11,7 @@ Primrose.Input.Keyboard = ( function () {
   pliny.class( "Primrose.Input", {
     name: "Keyboard",
     baseClass: "Primrose.Input.ButtonAndAxis",
-    description: "<under construction>",
+    description: "| [under construction]",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},

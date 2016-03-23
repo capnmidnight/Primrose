@@ -23,9 +23,8 @@
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
     <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block -->
     <!-- start main.jade head block -->
-    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append -->
-    <script type="text/javascript" src="/lib/webgl-debug.js"></script>
-    <script type="text/javascript" src="/node_modules/three/three.js"></script>
+    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- start withFramework.jade head append -->
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
     <script type="text/javascript" src="/lib/pliny.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
@@ -132,8 +131,7 @@
     <script type="text/javascript" src="/src/fx/text/operating_systems/Windows.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Dark.js"></script>
     <script type="text/javascript" src="/src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append -->
-    <!-- start documentation.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append --><!-- end main.jade head block -->
+    <!-- end documentation.jade head append --><!-- end main.jade head block -->
   </head>
   <body><!-- start main.jade banner block --><!-- end main.jade banner block -->
     <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
@@ -165,6 +163,32 @@
                   <li><a href="https://www.github.com/capnmidnight/Primrose/issues" target="_blank">Issues</a></li>
                 </ul>
               </li>
+              <li>
+                <h2>Pages</h2>
+                <ul>
+                  <li data-name="Installation and Setup"><a href="/doc/setup.html" class="incomplete">Installation and Setup</a></li>
+                  <li data-name="Frequently Asked Questions"><a href="/doc/faq.html" class="incomplete">Frequently Asked Questions</a></li>
+                  <li data-name="Using the VR Development Environment"><a href="/doc/editorVRManual.html" class="incomplete">Using the VR Development Environment</a></li>
+                  <li data-name="Head Mounted Displays"><a href="/doc/hmd.html" class="incomplete">Head Mounted Displays</a></li>
+                  <li data-name="What is WebVR?"><a href="/doc/webvr.html" class="incomplete">What is WebVR?</a></li>
+                  <li data-name="Synchronizing your Smartphone and PC"><a href="/doc/sync.html" class="incomplete">Synchronizing your Smartphone and PC</a></li>
+                  <li data-name="Writing new documentation with Pliny"><a href="/doc/pliny.html" class="incomplete">Writing new documentation with Pliny</a></li>
+                  <li data-name="Getting started"><a href="/doc/index.html" class="incomplete">Getting started</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Tutorials</h2>
+                <ul>
+                  <li data-name="Tutorial: Basic Lighting"><a href="/doc/lighting.html" class="incomplete">Tutorial: Basic Lighting</a></li>
+                  <li data-name="Tutorial: Build a Basic Drum Machine"><a href="/doc/drum.html" class="incomplete">Tutorial: Build a Basic Drum Machine</a></li>
+                  <li data-name="Tutorial: Display Images and Video"><a href="/doc/video.html" class="incomplete">Tutorial: Display Images and Video</a></li>
+                  <li data-name="Tutorial: Building and Saving a Scene in Primrose"><a href="/doc/export.html" class="incomplete">Tutorial: Building and Saving a Scene in Primrose</a></li>
+                  <li data-name="Tutorial: Building Basic Scenes in Blender"><a href="/doc/blenderBeginner.html" class="incomplete">Tutorial: Building Basic Scenes in Blender</a></li>
+                  <li data-name="Tutorial: More Advanced Scenes in Blender"><a href="/doc/blenderAdvanced.html" class="incomplete">Tutorial: More Advanced Scenes in Blender</a></li>
+                  <li data-name="Tutorial: Build a 3D Integrated Development Environment"><a href="/doc/editorVRTutorial.html" class="incomplete">Tutorial: Build a 3D Integrated Development Environment</a></li>
+                  <li data-name="Tutorial: Setup a Multiplayer Server"><a href="/doc/server.html" class="incomplete">Tutorial: Setup a Multiplayer Server</a></li>
+                </ul>
+              </li>
             </ul>
           </nav>
         </details>
@@ -172,8 +196,8 @@
       <div id="documentation"><!-- start documentation.jade documentation block --><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
-    <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
+    <!-- start main.jade footer block --><!-- start documentation.jade footer prepend -->
     <script type="text/javascript" src="app.js"></script>
-    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
+    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end documentation.jade footer prepend --><!-- end main.jade footer block -->
   </body>
 </html>

@@ -4,7 +4,7 @@ Primrose.Text.Controls.PlainText = ( function () {
 
   pliny.class( "Primrose.Text.Controls", {
     name: "PlainText",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function PlainText ( text, size, fgcolor, bgcolor, x, y, z, hAlign ) {
     text = text.replace( /\r\n/g, "\n" );

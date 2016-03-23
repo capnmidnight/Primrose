@@ -9,7 +9,7 @@ Primrose.Input.FPSInput = ( function ( ) {
   
   pliny.class("Primrose.Input", {
     name: "FPSInput",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function FPSInput ( DOMElement, near, far ) {
     DOMElement = DOMElement || window;

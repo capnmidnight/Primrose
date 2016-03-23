@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "light",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function light(color, intensity, distance, decay) {
   return new THREE.PointLight(color, intensity, distance, decay);

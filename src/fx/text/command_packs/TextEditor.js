@@ -10,7 +10,7 @@ Primrose.Text.CommandPacks.TextEditor = (function () {
 
   pliny.record("Primrose.Text.CommandPacks", {
     name: "TextEditor",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   return new Primrose.Text.CommandPacks.BasicTextInput(
     "Text Area input commands", {

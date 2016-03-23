@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 } );
 pliny.function( "", {
   name: "cloud",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function cloud ( verts, c, s ) {
   var geom = new THREE.Geometry();

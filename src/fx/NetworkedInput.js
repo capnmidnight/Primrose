@@ -4,7 +4,7 @@ Primrose.NetworkedInput = ( function () {
 
   pliny.class( "Primrose", {
     name: "NetworkedInput",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function NetworkedInput ( name, commands, socket ) {
     this.name = name;

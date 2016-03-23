@@ -1,4 +1,4 @@
-﻿extends ../templates/withFramework.jade
+﻿extends ../templates/main.jade
 
 block title
   <!-- start documentation.jade title block -->
@@ -10,6 +10,15 @@ block title
 append head
   <!-- start documentation.jade head append -->
   link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
+  <!-- start withFramework.jade head append -->
+  if debug
+    script(type="text/javascript", src= "/node_modules/marked/lib/marked.js")
+    script(type="text/javascript", src= "/lib/pliny.js")
+    each file in frameworkFiles
+      script(type="text/javascript", src=file)
+  else
+    script(type="text/javascript", src="/scripts/Primrose.min.js")
+  <!-- end withFramework.jade head append -->
   <!-- end documentation.jade head append -->
   
 block main
@@ -28,8 +37,22 @@ block main
               ul
                 li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Source code
                 li: a(href="https://www.github.com/capnmidnight/Primrose/issues", target="_blank") Issues
+            li
+              h2 Pages
+              ul
+                include ../templates/docPages.jade
+            li
+              h2 Tutorials
+              ul
+                include ../templates/docTutorials.jade
     #documentation
       <!-- start documentation.jade documentation block -->
       block document
       <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
+
+prepend footer
+  <!-- start documentation.jade footer prepend -->
+  script(type="text/javascript", src="app.js")
+  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
+  <!-- end documentation.jade footer prepend -->

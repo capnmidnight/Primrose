@@ -4,7 +4,7 @@ Primrose.Output.HapticGlove = ( function () {
   
   pliny.class( "Primrose.Output", {
     name: "HapticGlove",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function HapticGlove ( options ) {
 

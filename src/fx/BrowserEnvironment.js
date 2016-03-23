@@ -241,7 +241,7 @@ Primrose.BrowserEnvironment = (function () {
         resolvePicking();
 
         fire("update", dt);
-      }
+      };
 
       var resolvePicking = function () {
         var lastButtons = this.input.getValue("dButtons");
@@ -869,7 +869,7 @@ Primrose.BrowserEnvironment = (function () {
             this.currentControl[name](evt);
           }
         };
-      }
+      };
 
       var vrPresentChange = (evt) => {
         if (this.inVR) {
@@ -878,7 +878,7 @@ Primrose.BrowserEnvironment = (function () {
         else {
           removeFullScreen();
         }
-      }
+      };
 
       window.addEventListener("paste", withCurrentControl("readClipboard"), false);
       window.addEventListener("wheel", withCurrentControl("readWheel"), false);
@@ -974,7 +974,7 @@ Primrose.BrowserEnvironment = (function () {
 
     static createSurrogate() {
 
-      function clipboardOperation(name, evt) {
+      var clipboardOperation = function (name, evt) {
         if (this.currentControl) {
           this.currentControl[name + "SelectedText"](evt);
           if (!evt.returnValue) {
@@ -983,7 +983,7 @@ Primrose.BrowserEnvironment = (function () {
           this._surrogate.style.display = "none";
           this.currentControl.canvas.focus();
         }
-      }
+      };
 
       // the `surrogate` textarea makes clipboard events possible
       this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);

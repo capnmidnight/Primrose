@@ -152,7 +152,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         }
       }
       return temp.innerHTML;
-    }
+    };
 
     pliny.method({
       name: "tokenize",

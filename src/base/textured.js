@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "textured",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 var textured = (function () {
   var materialCache = {},
@@ -96,14 +96,15 @@ var textured = (function () {
         if ((options.scaleTextureWidth || options.scaleTextureHeight)) {
           if (geometry.attributes && geometry.attributes.uv && geometry.attributes.uv.array) {
             var uv = geometry.attributes.uv,
-              arr = uv.array;
+              arr = uv.array,
+              i;
             if (options.scaleTextureWidth) {
-              for (var i = 0; i < arr.length; i += uv.itemSize) {
+              for ( i = 0; i < arr.length; i += uv.itemSize) {
                 arr[i] *= options.scaleTextureWidth;
               }
             }
             if (options.scaleTextureHeight) {
-              for (var i = 1; i < arr.length; i += uv.itemSize) {
+              for ( i = 1; i < arr.length; i += uv.itemSize) {
                 arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
               }
             }

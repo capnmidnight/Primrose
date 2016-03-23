@@ -5,7 +5,7 @@ Primrose.Text.Point = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "Point",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Point ( x, y ) {
     this.set( x || 0, y || 0 );

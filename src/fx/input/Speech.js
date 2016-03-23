@@ -52,7 +52,7 @@ Primrose.Input.Speech = ( function () {
 
   pliny.class("Primrose.Input", {
     name: "Speech",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function SpeechInput ( name, commands, socket ) {
     Primrose.NetworkedInput.call( this, name, commands, socket );

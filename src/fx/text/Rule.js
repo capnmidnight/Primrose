@@ -5,7 +5,7 @@ Primrose.Text.Rule = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "Rule",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Rule ( name, test ) {
     this.name = name;

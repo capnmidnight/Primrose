@@ -4,7 +4,7 @@ Primrose.Input.Touch = ( function () {
   
   pliny.class("Primrose.Input", {
     name: "Touch",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function TouchInput ( name, DOMElement, commands, socket ) {
     DOMElement = DOMElement || window;

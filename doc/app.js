@@ -19,8 +19,6 @@ function scroller(id) {
     };
 
   var groupings = {
-    pages: [],
-    tutorials: [],
     examples: [],
     namespaces: [pliny.database],
     classes: [],
@@ -38,10 +36,12 @@ function scroller(id) {
       var list = lists[i];
       var elems = list.querySelectorAll("li"),
         search = this.value.toLocaleLowerCase(),
-        visibleCount = 0;
+        visibleCount = 0,
+        searchableCount = 0;
       for (var j = 0; j < elems.length; ++j) {
         var e = elems[j];
         if (e && e.dataset && e.dataset.name) {
+          ++searchableCount;
           var b = e.dataset.name.toLocaleLowerCase(),
             visible = (search.length === 0 || b.indexOf(search) > -1);
           if (visible) {
@@ -53,7 +53,7 @@ function scroller(id) {
           }
         }
       }
-      if (visibleCount === 0) {
+      if (searchableCount > 0 && visibleCount === 0) {
         list.parentElement.style.display = "none";
       }
       else {
@@ -180,14 +180,8 @@ function scroller(id) {
             group = groupings[key];
           for (var i = 0; i < collection.length; ++i) {
             var obj = collection[i];
-            if (key === "pages" && obj.fullName.indexOf("Tutorial:") === 0) {
-              obj.name = obj.name.substring(10);
-              groupings.tutorials.push(obj);
-            }
-            else {
-              group.push(obj);
-            }
-            docoCache["#" + obj.id.trim()] = pliny.formats.html.format(obj).replace(/<under construction>/g, "&lt;under construction>") + "<a href=\"javascript:scroller('top')\">top</a>";
+            group.push(obj);
+            docoCache["#" + obj.id.trim()] = pliny.formats.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>";
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
             // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
@@ -200,34 +194,31 @@ function scroller(id) {
 
   function renderDocs() {
     buildDocumentation();
-    groupings.pages.unshift({ id: "", fullName: "Getting Started" });
     // Build the menu.
     groupings.examples = pliny.database.examples || [];
     var output = "";
     for (var g in groupings) {
       if (g !== "methods" && g !== "events") {
         var group = groupings[g];
-        if (g !== "pages" && g !== "tutorials") {
-          group.sort(function (a, b) {
-            var c = a.fullName,
-              d = b.fullName;
-            if (c === "[Global]") {
-              c = "A" + c;
-            }
-            if (d === "[Global]") {
-              d = "A" + d;
-            }
-            if (c > d) {
-              return 1;
-            }
-            else if (c < d) {
-              return -1;
-            }
-            else {
-              return 0;
-            }
-          });
-        }
+        group.sort(function (a, b) {
+          var c = a.fullName,
+            d = b.fullName;
+          if (c === "[Global]") {
+            c = "A" + c;
+          }
+          if (d === "[Global]") {
+            d = "A" + d;
+          }
+          if (c > d) {
+            return 1;
+          }
+          else if (c < d) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        });
 
         output += "<li><h2>";
         if (g === "issues") {
@@ -243,7 +234,7 @@ function scroller(id) {
             var id = "#" + obj.id.trim(),
               doc = docoCache[id];
             output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
-            if (doc && doc.indexOf("&lt;under construction>") > -1) {
+            if (doc && doc.indexOf("[under construction]") > -1) {
               output += " class=\"incomplete\"";
             }
             output += ">" + obj.fullName + "</a></li>";
@@ -252,7 +243,7 @@ function scroller(id) {
         output += "</ul></li>";
       }
     }
-    nav.innerHTML = output;
+    nav.innerHTML += output;
     showHash();
     search.call(docSearch);
   }
@@ -262,27 +253,5 @@ function scroller(id) {
   docSearch.addEventListener("search", search, false);
   window.addEventListener("hashchange", showHash, false);
 
-  pliny.load([
-    "setup",
-    "faq",
-    "editorVRManual",
-    "hmd",
-    "webvr",
-    "sync",
-    "pliny",
-    "../CHANGELOG",
-    "../LICENSE",
-    "../CONTRIBUTORS",
-    "lighting",
-    "drum",
-    "video",
-    "export",
-    "blenderBeginner",
-    "blenderAdvanced",
-    "editorVRTutorial",
-    "adventure",
-    "server"
-  ].map(function (f) {
-    return f + ".md";
-  })).then(renderDocs);
+  renderDocs();
 })();

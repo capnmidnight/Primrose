@@ -3,7 +3,7 @@
 Primrose.Input.VR = (function () {
   pliny.class("Primrose.Input", {
     name: "VR",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function VRInput(name, near, far, commands, socket, elem, selectedIndex) {
     if (commands === undefined || commands === null) {
@@ -128,7 +128,7 @@ Primrose.Input.VR = (function () {
             console.info("Using Device Motion API", this);
             createCardboardVRDisplay.call(this, elem);
           }
-        }
+        };
         console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
         window.addEventListener("deviceorientation", waitForValidMotion, false);
       }

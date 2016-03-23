@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "put",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function put(object) {
   return {

@@ -11,7 +11,7 @@ Primrose.Output.Audio3D = (function () {
 
   pliny.class("Primrose.Output", {
     name: "Audio3D",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function Audio3D() {
 

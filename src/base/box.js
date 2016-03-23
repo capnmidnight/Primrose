@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "box",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function box(w, h, l) {
   if (h === undefined) {

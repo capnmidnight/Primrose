@@ -6,7 +6,7 @@ in the helpers/graphics.js file."
 });
 pliny.function("", {
   name: "quad",
-  description: "<under construction>"
+  description: "| [under construction]"
 });
 function quad(w, h, s, t) {
   if (h === undefined) {

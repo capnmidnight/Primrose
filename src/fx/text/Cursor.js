@@ -27,7 +27,7 @@ Primrose.Text.Cursor = ( function ( ) {
 
   pliny.class( "Primrose.Text", {
     name: "Cursor",
-    description: "<under construction>"
+    description: "| [under construction]"
   } );
   function Cursor ( i, x, y ) {
     this.i = i || 0;

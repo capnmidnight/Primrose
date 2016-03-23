@@ -8,7 +8,7 @@ in the helpers/oop.js file."
 } );
 pliny.function( "", {
   name: "copyObject",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function copyObject ( dest, source ) {
   var stack = [ {dest: dest, source: source} ];
@@ -40,7 +40,7 @@ in the helpers/oop.js file."
 } );
 pliny.function( "", {
   name: "inherit",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function inherit ( classType, parentType ) {
   classType.prototype = Object.create( parentType.prototype );
@@ -56,7 +56,7 @@ in the helpers/oop.js file."
 } );
 pliny.function( "", {
   name: "range",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function range ( n, m, s, t ) {
   var n2 = s && n || 0,
@@ -77,7 +77,7 @@ in the helpers/oop.js file."
 } );
 pliny.function( "", {
   name: "emit",
-  description: "<under construction>"
+  description: "| [under construction]"
 } );
 function emit ( evt, args ) {
   var handlers = this.listeners[evt];

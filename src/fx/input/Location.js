@@ -10,7 +10,7 @@ Primrose.Input.Location = ( function () {
   
   pliny.class("Primrose.Input", {
     name: "Location",
-    description: "<under construction>"
+    description: "| [under construction]"
   });
   function LocationInput ( name, commands, socket, options ) {
 
