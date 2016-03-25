@@ -334,8 +334,8 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var render = () => {
-        this.renderer.clear(true, true, true);
         if (this.inVR) {
+          this.renderer.clear(true, true, true);
           var trans = this.input.vr.transforms;
           for (i = 0; i < trans.length; ++i) {
             var st = trans[i],
@@ -363,6 +363,7 @@ Primrose.BrowserEnvironment = (function () {
         }
 
         if (!this.inVR || (this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+          this.renderer.clear(true, true, true);
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
