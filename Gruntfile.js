@@ -94,7 +94,7 @@ var headerSpec = /\b(\w+)\r\n\s*h1 ([^\r\n]+)/,
         fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
         index: index,
         title: match[2],
-        incomplete: /| [under construction]/.test(file)
+        incomplete: /\[under construction\]/.test(file)
       };
     });
 
