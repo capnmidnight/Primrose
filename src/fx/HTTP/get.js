@@ -24,5 +24,5 @@
   ]
 });
 Primrose.HTTP.get = function (type, url, options) {
-  return Primrose.HTTP.XHR("GET", type || "text", url, null, options);
+  return Primrose.HTTP.XHR("GET", type || "text", url, options);
 };

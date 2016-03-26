@@ -179,6 +179,13 @@
     <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
     <Compile Include="server\gameController.js" />
+    <Compile Include="server\http\get.js" />
+    <Compile Include="server\http\getBuffer.js" />
+    <Compile Include="server\http\getObject.js" />
+    <Compile Include="server\http\getText.js" />
+    <Compile Include="server\http\post.js" />
+    <Compile Include="server\http\request.js" />
+    <Compile Include="server\http\sendObject.js" />
     <Compile Include="server\master.js" />
     <Compile Include="server\options.js" />
     <Compile Include="server\requireDirectory.js" />
@@ -382,6 +389,7 @@
     <Folder Include="lib" />
     <Folder Include="models\" />
     <Folder Include="music" />
+    <Folder Include="server\http\" />
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />

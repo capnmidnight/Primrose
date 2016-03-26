@@ -4,10 +4,10 @@
   returns: "Promise",
   parameters: [
     { name: "url", type: "String", description: "The resource to which the request is being sent." },
-    { name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request." },
+    { name: "options.data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request." },
     { name: "options.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
   ]
 });
-Primrose.HTTP.sendObject = function (url, data, options) {
-  return Primrose.HTTP.put("json", url, data, options);
+Primrose.HTTP.sendObject = function (url, options) {
+  return Primrose.HTTP.post("json", url, options);
 };

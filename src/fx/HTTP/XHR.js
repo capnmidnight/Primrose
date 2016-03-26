@@ -6,10 +6,8 @@
     { name: "method", type: "String", description: "The HTTP Verb being used for the request." },
     { name: "type", type: "String", description: "How the response should be interpreted. Defaults to \"text\". \"json\", \"arraybuffer\", and other values are also available. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype)." },
     { name: "url", type: "String", description: "The resource to which the request is being sent." },
-    { name: "data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request." },
-    { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." },
-    { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event." },
-    { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }
+    { name: "options.data", type: "Object", description: "The data object to use as the request body payload, if this is a PUT request." },
+    { name: "options.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
   ],
   examples: [{
     name: "Make a GET request.",
@@ -29,6 +27,10 @@
 });
 Primrose.HTTP.XHR = function (method, type, url, options) {
   return new Promise(function (resolve, reject) {
+    options = options || {};
+    options.headers = options.headers || {};
+    options.headers.Accept = options.headers.Accept || type;
+
     var req = new XMLHttpRequest();
     req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
     req.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
@@ -54,27 +56,22 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
       req.responseType = type;
     }
 
-    if (options) {
-      req.onprogress = options.progress;
+    req.onprogress = options.progress;
 
-      if (options.header) {
-        for (var key in options.header) {
-          req.setRequestHeader(key, options.header[key]);
-        }
-      }
-      
-      req.withCredentials = !!options.withCredentials;
-
-      if (options.data) {
-        // We could do other data types, but in my case, I'm probably only ever
-        // going to want JSON. No sense in overcomplicating the interface for
-        // features I'm not going to use.
-        req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        req.send(JSON.stringify(options.data));
-      }
+    for (var key in options.headers) {
+      req.setRequestHeader(key, options.headers[key]);
     }
 
-    if(!options || !options.data){
+    req.withCredentials = !!options.withCredentials;
+
+    if (options.data) {
+      // We could do other data types, but in my case, I'm probably only ever
+      // going to want JSON. No sense in overcomplicating the interface for
+      // features I'm not going to use.
+      req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      req.send(JSON.stringify(options.data));
+    }
+    else {
       req.send();
     }
   });
