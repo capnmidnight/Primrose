@@ -18,10 +18,10 @@
 ## Code:\n\
 \n\
     grammar(\"JavaScript\");\n\
-    Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\",\n\
-      console.log.bind(console, \"done\"),\n\
-      console.error.bind(console),\n\
-      console.log.bind(console, \"progress\"));\n\
+    Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
+      progress: console.log.bind(console, \"progress\"))\n\
+      .then(console.log.bind(console, \"done\")))\n\
+      .catch(console.error.bind(console));\n\
 \n\
 ## Results:\n\
 > Object {field1: 1, field2: \"Field2\"}"}
