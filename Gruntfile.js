@@ -75,53 +75,35 @@ function recurseDirectory(root) {
   return files;
 }
 
-var debugData = {
-  debug: true,
-  frameworkFiles: recurseDirectory("src")
-}
+var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
+  debugData = {
+    debug: true,
+    frameworkFiles: recurseDirectory("src"),
+    docFiles: recurseDirectory("doc")
+      .filter(function (f) { return /.jade$/.test(f); })
+      .map(function (f, i) {
+        var file = fs.readFileSync(f.substring(1), "utf-8").toString(),
+          match = file.match(headerSpec),
+          index = i;
+        if (match[1].length > 0) {
+          index = parseInt(match[1]);
+        }
+        return {
+          fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
+          index: index,
+          title: match[2],
+          incomplete: /\[under construction\]/.test(file),
+          tutorial: /^Tutorial:/.test(match[2])
+        };
+      })
+  }
 
-var headerSpec = /\b(\w+)\r\n\s*h1 ([^\r\n]+)/,
-  docFiles = recurseDirectory("doc")
-    .filter(function (f) { return /.jade$/.test(f); })
-    .map(function (f, i) {
-      var file = fs.readFileSync(f.substring(1), "utf-8");
-      var match = file.match(headerSpec);
-      var index = i;
-      if (match[1].length > 0) {
-        index = parseInt(match[1]);
-      }
-      return {
-        fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
-        index: index,
-        title: match[2],
-        incomplete: /\[under construction\]/.test(file)
-      };
-    });
-
-docFiles.sort(function (a, b) {
+debugData.docFiles.sort(function (a, b) {
   return a.index - b.index;
 });
 
-  pages = docFiles.filter(function (f) { return !/^Tutorial:/.test(f.title); }),
-  tutorials = docFiles.filter(function (f) { return /^Tutorial:/.test(f.title); });
-
-function makeList(files) {
-  return files
-    .map(function (f) {
-      var html = "li(data-name=\"" + f.title + "\"): a"
-      if (f.incomplete) {
-        html += ".incomplete";
-      }
-      html += "(href=\"" + f.fileName + "\") " + f.title;
-      return html;
-    }).join("\n");
-}
-
-fs.writeFileSync("templates/docPages.jade", makeList(pages));
-fs.writeFileSync("templates/docTutorials.jade", makeList(tutorials));
-
 var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, debugData),
-  jadeReleaseConfiguration = jadeConfiguration({}, {});
+  jadeReleaseConfiguration = jadeConfiguration({}, { docFiles: debugData.docFiles });
 
 module.exports = function (grunt) {
   grunt.initConfig({
@@ -139,6 +121,10 @@ module.exports = function (grunt) {
       jade: {
         files: "**/*.*.jade",
         tasks: ["jade:debug"]
+      },
+      hint: {
+        files: "src/**/*.js",
+        tasks: ["jshint"]
       }
     },
 
