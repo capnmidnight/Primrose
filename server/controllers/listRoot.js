@@ -7,7 +7,7 @@ module.exports = {
   path: "",
   pattern: /^\/(?:index.html)?$/,
   GET: function (params, sendData, sendStaticFile, serverError) {
-    fs.readdir("html5", function (err, files) {
+    fs.readdir(".", function (err, files) {
       if (err) {
         serverError(500, err);
       }

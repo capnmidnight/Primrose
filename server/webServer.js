@@ -114,6 +114,7 @@ function sendData(req, res, mimeType, data, length) {
 }
 
 function serveRequest(srcDir, req, res) {
+  console.log("serving request", req.method, req.url);
   if (!matchController(srcDir, req, res, req.url, req.method) && req.method === "GET") {
     if (req.url.indexOf("..") === -1) {
       var url = req.url;
@@ -159,6 +160,7 @@ function isNumber(v) { return isFinite(v) && !isNaN(v); }
         - string: the directory from which to serve static files.
 */
 function webServer(host, target) {
+  console.log("set on host", host);
   IS_LOCAL = host === "localhost";
   if (!isString(host)) {
     throw new Error("`host` parameter not a supported type. Excpected string. Given: " + host + ", type: " + typeof (host));
@@ -167,9 +169,11 @@ function webServer(host, target) {
     throw new Error("`target` parameter not a supported type. Excpected number or string. Given: " + target + ", type: " + typeof (target));
   }
   else if (isString(target)) {
+    console.log("serving from", target);
     return serveRequest.bind(this, target);
   }
   else {
+    console.log("redirecting to", target);
     return redirectPort.bind(this, host, target);
   }
 };

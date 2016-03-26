@@ -1,63 +1,58 @@
 /* global require, process, exp */
 ﻿var format = require("util").format,
-    fs = require("fs"),
-    http = require("http"),
-    https = require("https"),
-    socketio = require("socket.io"),
-    exec = require('child_process').exec,
-    log = require("./core").log,
-    starter = require("./starter"),
-    webServer = require("./webServer").webServer,
-    webSocketServer = require("./webSocketServer"),
-    options = require("./options").parse(process.argv, {
-      v: "false",
-      b: "false",
-      h: "localhost",
-      p: "8383"
-    }),
-    srcDir = ".",
-    startPage = options.p || "examples/editor3d/index.html",
-    port = process.env.PORT || options.p,
-    app, redir, io;
+  fs = require("fs"),
+  http = require("http"),
+  https = require("https"),
+  socketio = require("socket.io"),
+  exec = require('child_process').exec,
+  log = require("./core").log,
+  starter = require("./starter"),
+  webServer = require("./webServer").webServer,
+  webSocketServer = require("./webSocketServer"),
+  options = require("./options").parse(process.argv, {
+    v: "false",
+    b: "false",
+    h: "localhost",
+    p: process.env.PORT || "8383",
+    d: "examples/editor3d/index.html",
+    s: "."
+  }),
+  appServer, redirector, io;
 
 options.v = (options.v === "true");
 options.b = (options.b === "true");
 
-if (typeof (port) === "string" || port instanceof String) {
-  if (/\d+/.test(port)) {
-    port = parseFloat(port);
+if (typeof (options.p) === "string" || options.p instanceof String) {
+  if (/\d+/.test(options.p)) {
+    options.p = parseFloat(options.p);
   }
   else {
-    throw new Error("Port value was not parseable: " + port);
+    throw new Error("Port value was not parseable: " + options.p);
   }
 }
 
 function start(key, cert, ca) {
   var useSecure = !!(key && cert && ca);
+  log("starting web server");
   if (useSecure) {
     log("secure");
-    app = https.createServer({
-      key: key,
-      cert: cert,
-      ca: ca
-    },
-      webServer(options.h, srcDir));
-    redir = http.createServer(webServer(options.h, port + 1));
-    redir.listen(port);
-    app.listen(port + 1);
+    appServer = https.createServer({ key: key, cert: cert, ca: ca }, webServer(options.h, options.s));
+    redirector = http.createServer(webServer(options.h, options.p + 1));
+    redirector.listen(options.p);
+    appServer.listen(options.p + 1);
   }
   else {
     log("insecure");
-    app = http.createServer(webServer(options.h, srcDir));
-    app.listen(port);
+    appServer = http.createServer(webServer(options.h, options.s));
+    appServer.listen(options.p);
   }
-  io = socketio.listen(app);
+  io = socketio.listen(appServer);
   io.sockets.on("connection", webSocketServer);
   console.log("options.v " + options.v);
-  if (options.v !== "false") {
+  if (options.v) {
     try {
       console.log("Starting browser");
-      starter(useSecure, port + (useSecure ? 1 : 0), startPage);
+      starter(useSecure, options.p + (useSecure ? 1 : 0), options.d);
     } catch (exp) {
       console.error("couldn't start browser", exp.message);
     }
@@ -118,14 +113,14 @@ function go() {
     "../cert.pem",
     "../ca.pem"],
     function (err, files) {
-    if (err) {
-      console.error(err);
-      start();
-    }
-    else {
-      start.apply(this, files);
-    }
-  });
+      if (err) {
+        console.error(err);
+        start();
+      }
+      else {
+        start.apply(this, files);
+      }
+    });
 }
 
 if (options.b) {
@@ -141,7 +136,7 @@ if (options.b) {
     });
     child.on("end", resolve);
   });
-  
+
   p.then(go);
 }
 else {

@@ -20,7 +20,7 @@
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:false -p:"doc/index.html"</ScriptArguments>
+    <ScriptArguments>-v:true -b:false -p:""</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -176,6 +176,7 @@
     <Compile Include="lib\sha512.js" />
     <Compile Include="lib\webgl-debug.js" />
     <Compile Include="server\controllers.js" />
+    <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
     <Compile Include="server\gameController.js" />
     <Compile Include="server\master.js" />
