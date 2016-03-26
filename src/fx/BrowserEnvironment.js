@@ -1090,7 +1090,7 @@ Primrose.BrowserEnvironment = (function () {
 pliny.issue("Primrose.BrowserEnvironment", {
   name: "document BrowserEnvironment",
   type: "open",
-  description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_VRApplication) class in the  directory"
+  description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_BrowserEnvironment) class in the  directory"
 });
 
 pliny.issue("Primrose.BrowserEnvironment", {

@@ -365,25 +365,25 @@ function update ( dt ) {
           </li>
         </ul>
         <h3>User Input</h3>
-        <p>To be able to listen for user input, you create event listeners attached to the <a href="#Primrose_VRApplication"><code>VRApplication</code></a> object named <code>this</code> in the context of your script. To setup event listeners, in your script's setup header, call <code>this.addEventListener("&lt;eventName>", callbackFunction)</code>.</p>
+        <p>To be able to listen for user input, you create event listeners attached to the <a href="#Primrose_BrowserEnvironment"><code>BrowserEnvironment</code></a> object named <code>this</code> in the context of your script. To setup event listeners, in your script's setup header, call <code>this.addEventListener("&lt;eventName>", callbackFunction)</code>.</p>
         <p>Currently, the available events are:</p>
         <ul>
-          <li><a href="#Primrose_VRApplication__keydown"><code>keydown</code></a> - a key is depressed on the keyboard.</li>
-          <li><a href="#Primrose_VRApplication__keyup"><code>keyup</code></a> - a depressed key is released on the keyboard.</li>
-          <li><a href="#Primrose_VRApplication__keypress"><code>keypress</code></a> - a key is depressed and released on the keyboard.</li>
-          <li><a href="#Primrose_VRApplication__wheel"><code>wheel</code></a> - the user rolls the mouse wheel.</li>
-          <li><a href="#Primrose_VRApplication__mousedown"><code>mousedown</code></a> - a button is depressed on the mouse.</li>
-          <li><a href="#Primrose_VRApplication__mouseup"><code>mouseup</code></a> - a depressed button is released on the mouse.</li>
-          <li><a href="#Primrose_VRApplication__mousemove"><code>mousemove</code></a> - the mouse is moved.</li>
-          <li><a href="#Primrose_VRApplication__touchstart"><code>touchstart</code></a> - a finger touches down on a touch screen.</li>
-          <li><a href="#Primrose_VRApplication__touchend"><code>touchend</code></a> - a finger touching the touch screen is removed.</li>
-          <li><a href="#Primrose_VRApplication__touchmove"><code>touchmove</code></a> - a finger is slid across the screen.</li>
-          <li><a href="#Primrose_VRApplication__pointerstart"><code>pointerstart</code></a> - either a <code>touchstart</code> or a <code>mousedown</code> occurs.</li>
-          <li><a href="#Primrose_VRApplication__pointermove"><code>pointermove</code></a> - either a <code>touchend</code> or <code>mouseup</code> occurs.</li>
-          <li><a href="#Primrose_VRApplication__pointerend"><code>pointerend</code></a> - either a <code>touchmove</code> or <code>mousemove</code> occurs.</li>
-          <li><a href="#Primrose_VRApplication__gazestart"><code>gazestart</code></a> - occurs when the central Selection Sphere hovers over an object, inferring the user started looking at that object.</li>
-          <li><a href="#Primrose_VRApplication__gazecomplete"><code>gazecomplete</code></a> - occurs if the Selection Sphere does not leave the object it hit in <code>gazestart</code> before the <a href="#Primrose_VRApplication_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
-          <li><a href="#Primrose_VRApplication__gazecancel"><code>gazecancel</code></a> - occurs if the Selection Sphere leaves the object it hit in <code>gazestart</code> before the <a href="#Primrose_VRApplication_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
+          <li><a href="#Primrose_BrowserEnvironment__keydown"><code>keydown</code></a> - a key is depressed on the keyboard.</li>
+          <li><a href="#Primrose_BrowserEnvironment__keyup"><code>keyup</code></a> - a depressed key is released on the keyboard.</li>
+          <li><a href="#Primrose_BrowserEnvironment__keypress"><code>keypress</code></a> - a key is depressed and released on the keyboard.</li>
+          <li><a href="#Primrose_BrowserEnvironment__wheel"><code>wheel</code></a> - the user rolls the mouse wheel.</li>
+          <li><a href="#Primrose_BrowserEnvironment__mousedown"><code>mousedown</code></a> - a button is depressed on the mouse.</li>
+          <li><a href="#Primrose_BrowserEnvironment__mouseup"><code>mouseup</code></a> - a depressed button is released on the mouse.</li>
+          <li><a href="#Primrose_BrowserEnvironment__mousemove"><code>mousemove</code></a> - the mouse is moved.</li>
+          <li><a href="#Primrose_BrowserEnvironment__touchstart"><code>touchstart</code></a> - a finger touches down on a touch screen.</li>
+          <li><a href="#Primrose_BrowserEnvironment__touchend"><code>touchend</code></a> - a finger touching the touch screen is removed.</li>
+          <li><a href="#Primrose_BrowserEnvironment__touchmove"><code>touchmove</code></a> - a finger is slid across the screen.</li>
+          <li><a href="#Primrose_BrowserEnvironment__pointerstart"><code>pointerstart</code></a> - either a <code>touchstart</code> or a <code>mousedown</code> occurs.</li>
+          <li><a href="#Primrose_BrowserEnvironment__pointermove"><code>pointermove</code></a> - either a <code>touchend</code> or <code>mouseup</code> occurs.</li>
+          <li><a href="#Primrose_BrowserEnvironment__pointerend"><code>pointerend</code></a> - either a <code>touchmove</code> or <code>mousemove</code> occurs.</li>
+          <li><a href="#Primrose_BrowserEnvironment__gazestart"><code>gazestart</code></a> - occurs when the central Selection Sphere hovers over an object, inferring the user started looking at that object.</li>
+          <li><a href="#Primrose_BrowserEnvironment__gazecomplete"><code>gazecomplete</code></a> - occurs if the Selection Sphere does not leave the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
+          <li><a href="#Primrose_BrowserEnvironment__gazecancel"><code>gazecancel</code></a> - occurs if the Selection Sphere leaves the object it hit in <code>gazestart</code> before the <a href="#Primrose_BrowserEnvironment_DEFAULTS_gazeLength"><code>gazeLength</code></a> expires (default 1s).</li>
         </ul><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
