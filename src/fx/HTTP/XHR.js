@@ -29,19 +29,19 @@
 });
 Primrose.HTTP.XHR = function (method, type, url, options) {
   return new Promise(function (resolve, reject) {
-    var xhr = new XMLHttpRequest();
-    xhr.onerror = (evt) => reject(new Error("Request error: " + evt.message));
-    xhr.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
-    xhr.onload = function () {
+    var req = new XMLHttpRequest();
+    req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
+    req.onabort = (evt) => reject(new Error("Request abort: " + evt.message));
+    req.onload = function () {
       // The other error events are client-errors. If there was a server error,
       // we'd find out about it during this event. We need to only respond to
       // successful requests, i.e. those with HTTP status code in the 200 or 300
       // range.
-      if (xhr.status < 400) {
-        resolve(xhr.response);
+      if (req.status < 400) {
+        resolve(req.response);
       }
       else {
-        reject(xhr);
+        reject(req);
       }
     };
 
@@ -49,33 +49,33 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
     // first. It seems counter intuitive, but think of it more like you're opening
     // an HTTP document to be able to write to it, and then you finish by sending
     // the document. The "open" method does not refer to a network connection.
-    xhr.open(method, url);
+    req.open(method, url);
     if (type) {
-      xhr.responseType = type;
+      req.responseType = type;
     }
 
     if (options) {
-      xhr.onprogress = options.progress;
+      req.onprogress = options.progress;
 
       if (options.header) {
         for (var key in options.header) {
-          xhr.setRequestHeader(key, options.header[key]);
+          req.setRequestHeader(key, options.header[key]);
         }
       }
       
-      xhr.withCredentials = !!options.withCredentials;
+      req.withCredentials = !!options.withCredentials;
 
       if (options.data) {
         // We could do other data types, but in my case, I'm probably only ever
         // going to want JSON. No sense in overcomplicating the interface for
         // features I'm not going to use.
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.send(JSON.stringify(options.data));
+        req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        req.send(JSON.stringify(options.data));
       }
     }
 
     if(!options || !options.data){
-      xhr.send();
+      req.send();
     }
   });
 };
