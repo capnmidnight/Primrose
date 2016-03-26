@@ -12,7 +12,7 @@
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <NodejsPort>8383</NodejsPort>
+    <NodejsPort>80</NodejsPort>
     <StartWebBrowser>False</StartWebBrowser>
     <LaunchUrl>index.html</LaunchUrl>
     <UseIISExpress>true</UseIISExpress>
@@ -20,7 +20,7 @@
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:false -p:""</ScriptArguments>
+    <ScriptArguments>-v:true -b:false -d:"index.html"</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +47,10 @@
     <Content Include="doc\video.html" />
     <Content Include="doc\webvr.html" />
     <Content Include="examples\editor3d\prong.stereo.jpg" />
+    <Content Include="examples\nypl\index.html" />
+    <Content Include="examples\nypl\index.html.jade" />
+    <Content Include="examples\nypl\prong.stereo.jpg" />
+    <Content Include="examples\nypl\screenshot.jpg" />
     <Content Include="templates\docPages.jade" />
     <Content Include="templates\docTutorials.jade" />
     <Content Include="templates\documentation.jade" />
@@ -106,6 +110,7 @@
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
     <Content Include="sitemap.xml" />
+    <Compile Include="examples\nypl\app.js" />
     <Compile Include="Gruntfile.js" />
     <Compile Include="server.js" />
     <Content Include="doc\index.html" />
@@ -301,7 +306,6 @@
     <Compile Include="examples\temple\app.js" />
     <Compile Include="server\controllers\bears.js" />
     <Compile Include="server\controllers\holodeck.js" />
-    <Compile Include="server\controllers\listRoot.js" />
     <Compile Include="server\game\User.js" />
     <Compile Include="server\socketControllers\demo.server.js" />
     <Compile Include="server\socketControllers\peering.js" />
@@ -384,6 +388,7 @@
     <Folder Include="examples\jabbers" />
     <Folder Include="examples\keycodeTesting" />
     <Folder Include="examples\music" />
+    <Folder Include="examples\nypl\" />
     <Folder Include="examples\temple" />
     <Folder Include="images" />
     <Folder Include="lib" />
