@@ -10,15 +10,14 @@ block title
 append head
   <!-- start documentation.jade head append -->
   link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
-  <!-- start withFramework.jade head append -->
   if debug
     script(type="text/javascript", src= "/node_modules/marked/lib/marked.js")
     script(type="text/javascript", src= "/lib/pliny.js")
     each file in frameworkFiles
       script(type="text/javascript", src=file)
   else
+    script(type="text/javascript", src="/scripts/marked.min.js")
     script(type="text/javascript", src="/scripts/Primrose.min.js")
-  <!-- end withFramework.jade head append -->
   <!-- end documentation.jade head append -->
   
 block main
