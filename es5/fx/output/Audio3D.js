@@ -33,7 +33,7 @@ Primrose.Output.Audio3D = function () {
     }
   }
 
-  Audio3D.prototype.loadBuffer = function (src, progress, success) {
+  Audio3D.prototype.loadBuffer = function (src, _progress, success) {
     var _this = this;
 
     if (!success) {
@@ -41,20 +41,22 @@ Primrose.Output.Audio3D = function () {
     }
 
     // just overlook the lack of progress indicator
-    if (!progress) {
-      progress = function progress() {};
+    if (!_progress) {
+      _progress = function progress() {};
     }
 
     var error = function error() {
-      progress("error", src);
+      _progress("error", src);
     };
 
     if (this.isAvailable) {
-      progress("loading", src);
-      return Primrose.HTTP.getBuffer(src, function (evt) {
-        progress("intermediate", src, evt.loaded);
+      _progress("loading", src);
+      return Primrose.HTTP.getBuffer(src, {
+        progress: function progress(evt) {
+          _progress("intermediate", src, evt.loaded);
+        }
       }).then(function (data) {
-        progress("success", src);
+        _progress("success", src);
         _this.context.decodeAudioData(data, success, error);
       }).catch(error);
     } else {

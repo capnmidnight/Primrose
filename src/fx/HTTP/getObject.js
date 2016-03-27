@@ -1,12 +1,10 @@
 ﻿pliny.function("Primrose.HTTP", {
   name: "getObject",
   description: "Get a JSON object from a server.",
-  returns: "If no success function is provide, returns a Promise. Otherwise, returns undefined.",
+  returns: "Promise",
   parameters: [
     { name: "url", type: "String", description: "The resource to which the request is being sent." },
-    { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." },
-    { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully, even going so far as to check HTTP status code on the OnLoad event." },
-    { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }
+    { name: "options.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
   ],
   examples: [{
     name: "Make a GET request for a JSON object.",
@@ -15,15 +13,16 @@
 ## Code:\n\
 \n\
     grammar(\"JavaScript\");\n\
-    Primrose.HTTP.getObject(\"localFile.json\",\n\
-      console.log.bind(console, \"progress\"),\n\
-      console.log.bind(console, \"done\"),\n\
-      console.error.bind(console));\n\
+    Primrose.HTTP.getObject(\"localFile.json\", {\n\
+        progress: console.log.bind(console, \"progress\")\n\
+      })\n\
+      .then(console.log.bind(console, \"done\"))\n\
+      .catch(console.error.bind(console)));\n\
 \n\
 ## Results:\n\
 > Object {field1: 1, field2: \"Field2\"}"}
   ]
 });
-Primrose.HTTP.getObject = function (url, progress, success, error) {
-  return Primrose.HTTP.get("json", url, progress, success, error);
+Primrose.HTTP.getObject = function (url, options) {
+  return Primrose.HTTP.get("json", url, options);
 };

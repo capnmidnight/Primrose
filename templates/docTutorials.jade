@@ -1,8 +1,6 @@
-li(data-name="Tutorial: Basic Lighting"): a.incomplete(href="/doc/lighting.html") Tutorial: Basic Lighting
-li(data-name="Tutorial: Build a Basic Drum Machine"): a.incomplete(href="/doc/drum.html") Tutorial: Build a Basic Drum Machine
-li(data-name="Tutorial: Display Images and Video"): a.incomplete(href="/doc/video.html") Tutorial: Display Images and Video
-li(data-name="Tutorial: Building and Saving a Scene in Primrose"): a.incomplete(href="/doc/export.html") Tutorial: Building and Saving a Scene in Primrose
-li(data-name="Tutorial: Building Basic Scenes in Blender"): a.incomplete(href="/doc/blenderBeginner.html") Tutorial: Building Basic Scenes in Blender
-li(data-name="Tutorial: More Advanced Scenes in Blender"): a.incomplete(href="/doc/blenderAdvanced.html") Tutorial: More Advanced Scenes in Blender
-li(data-name="Tutorial: Build a 3D Integrated Development Environment"): a.incomplete(href="/doc/editorVRTutorial.html") Tutorial: Build a 3D Integrated Development Environment
-li(data-name="Tutorial: Setup a Multiplayer Server"): a.incomplete(href="/doc/server.html") Tutorial: Setup a Multiplayer Server
+each file in docFiles
+  if(file.tutorial)
+    if(file.incomplete)
+      li(data-name=file.title): a.incomplete(href=file.fileName)= file.title
+    else
+      li(data-name=file.title): a(href=file.fileName)= file.title

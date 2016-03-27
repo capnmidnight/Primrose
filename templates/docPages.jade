@@ -1,8 +1,6 @@
-li(data-name="Installation and Setup"): a.incomplete(href="/doc/setup.html") Installation and Setup
-li(data-name="Frequently Asked Questions"): a.incomplete(href="/doc/faq.html") Frequently Asked Questions
-li(data-name="Using the VR Development Environment"): a.incomplete(href="/doc/editorVRManual.html") Using the VR Development Environment
-li(data-name="Head Mounted Displays"): a.incomplete(href="/doc/hmd.html") Head Mounted Displays
-li(data-name="What is WebVR?"): a.incomplete(href="/doc/webvr.html") What is WebVR?
-li(data-name="Synchronizing your Smartphone and PC"): a.incomplete(href="/doc/sync.html") Synchronizing your Smartphone and PC
-li(data-name="Writing new documentation with Pliny"): a.incomplete(href="/doc/pliny.html") Writing new documentation with Pliny
-li(data-name="Getting started"): a.incomplete(href="/doc/index.html") Getting started
+each file in docFiles
+  if(!file.tutorial)
+    if(file.incomplete)
+      li(data-name=file.title): a.incomplete(href=file.fileName)= file.title
+    else
+      li(data-name=file.title): a(href=file.fileName)= file.title

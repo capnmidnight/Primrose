@@ -49,10 +49,14 @@ function withFullScreenChange(act) {
 function requestFullScreen(elem, fullScreenParam) {
   return new Promise(function (resolve, reject) {
     withFullScreenChange(function () {
-      if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen(fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT);
+      if (elem.requestFullscreen && fullScreenParam) {
+        elem.requestFullscreen(fullScreenParam);
       } else if (elem.mozRequestFullScreen && fullScreenParam) {
         elem.mozRequestFullScreen(fullScreenParam);
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen(fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT);
+      } else if (elem.requestFullscreen && !fullScreenParam) {
+        elem.requestFullscreen();
       } else if (elem.mozRequestFullScreen && !fullScreenParam) {
         elem.mozRequestFullScreen();
       } else if (elem.requestFullScreen) {

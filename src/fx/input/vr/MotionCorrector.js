@@ -64,14 +64,10 @@
      */
     this.addEventListener = function (type, callback, bubbles) {
       if (type !== "deviceorientation") {
-        throw new Error(
-          "The only event type that is supported is \"deviceorientation\". Type parameter was: " +
-          type);
+        throw new Error("The only event type that is supported is \"deviceorientation\". Type parameter was: " + type);
       }
       if (typeof (callback) !== "function") {
-        throw new Error(
-          "A function must be provided as a callback parameter. Callback parameter was: " +
-          callback);
+        throw new Error("A function must be provided as a callback parameter. Callback parameter was: " + callback);
       }
 
       if (first) {

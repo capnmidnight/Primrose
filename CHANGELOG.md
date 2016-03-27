@@ -59,7 +59,7 @@ It's going to be nothing but documentation for a while.
 It's going to be nothing but documentation for a while.
 
 * Bugs
-  * Creating a [`Primrose.VRApplicatoin`](#Primrose_VRApplication) no longer spams the console with an inconsequential error (because the error is fixed!).
+  * Creating a [`Primrose.BrowserEnvironment`](#Primrose_BrowserEnvironment) no longer spams the console with an inconsequential error (because the error is fixed!).
   * Code samples on documentation page now resize with the page.
   * Cleaner font rendering.
   * Fixed a typo where [`Primrose.SKIN_VALUES`](#Primrose_SKIN_VALUES) was called `Primrose.SKINS_VALUES`.

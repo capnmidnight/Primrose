@@ -333,11 +333,13 @@ Primrose.BrowserEnvironment = (function () {
         render();
       };
 
+
+      var eyeCounter = 0, blankEye = false;
       var render = () => {
-        this.renderer.clear(true, true, true);
         if (this.inVR) {
+          this.renderer.clear(true, true, true);
           var trans = this.input.vr.transforms;
-          for (i = 0; i < trans.length; ++i) {
+          for (var i = 0; i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,
               side = (2 * i) - 1;
@@ -363,12 +365,16 @@ Primrose.BrowserEnvironment = (function () {
         }
 
         if (!this.inVR || (this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+          if (blankEye) {
+            Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
+          }
+          this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
           this.camera.position.set(0, 0, 0);
           this.camera.quaternion.copy(qHead);
-          this.nose.visible = false;
+          this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
         }
@@ -726,9 +732,15 @@ Primrose.BrowserEnvironment = (function () {
 
       this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       var keyDown = function (evt) {
-        if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey && evt.keyCode === Primrose.Keys.F) {
-          this.goFullScreen(true);
-          evt.preventDefault();
+        if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
+          if (evt.keyCode === Primrose.Keys.F) {
+            this.goFullScreen(true);
+            evt.preventDefault();
+          }
+          else if (evt.keyCode === Primrose.Keys.E) {
+            blankEye = true;
+            evt.preventDefault();
+          }
         }
         else if (this.currentControl) {
           var elem = this.currentControl.focusedElement;
@@ -750,6 +762,11 @@ Primrose.BrowserEnvironment = (function () {
       var keyUp = (evt) => {
         if (this.currentControl) {
           this.currentControl.keyUp(evt);
+        }
+        else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
+          if (evt.keyCode === Primrose.Keys.E) {
+            blankEye = false;
+          }
         }
       };
     
@@ -1073,7 +1090,7 @@ Primrose.BrowserEnvironment = (function () {
 pliny.issue("Primrose.BrowserEnvironment", {
   name: "document BrowserEnvironment",
   type: "open",
-  description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_VRApplication) class in the  directory"
+  description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_BrowserEnvironment) class in the  directory"
 });
 
 pliny.issue("Primrose.BrowserEnvironment", {

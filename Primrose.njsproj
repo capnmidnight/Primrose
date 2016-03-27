@@ -12,15 +12,16 @@
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <NodejsPort>8383</NodejsPort>
-    <StartWebBrowser>False</StartWebBrowser>
-    <LaunchUrl>index.html</LaunchUrl>
+    <NodejsPort>80</NodejsPort>
+    <StartWebBrowser>True</StartWebBrowser>
+    <LaunchUrl>examples/editor3d</LaunchUrl>
     <UseIISExpress>true</UseIISExpress>
     <NodeExePath>
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:false -p:"doc/index.html"</ScriptArguments>
+    <ScriptArguments>-v:false -b:false</ScriptArguments>
+    <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,7 +47,10 @@
     <Content Include="doc\sync.html" />
     <Content Include="doc\video.html" />
     <Content Include="doc\webvr.html" />
-    <Content Include="examples\editor3d\prong.stereo.jpg" />
+    <Content Include="examples\nypl\index.html" />
+    <Content Include="examples\nypl\index.html.jade" />
+    <Content Include="examples\nypl\prong.stereo.jpg" />
+    <Content Include="examples\nypl\screenshot.jpg" />
     <Content Include="templates\docPages.jade" />
     <Content Include="templates\docTutorials.jade" />
     <Content Include="templates\documentation.jade" />
@@ -106,6 +110,7 @@
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
     <Content Include="sitemap.xml" />
+    <Compile Include="examples\nypl\app.js" />
     <Compile Include="Gruntfile.js" />
     <Compile Include="server.js" />
     <Content Include="doc\index.html" />
@@ -176,8 +181,16 @@
     <Compile Include="lib\sha512.js" />
     <Compile Include="lib\webgl-debug.js" />
     <Compile Include="server\controllers.js" />
+    <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
     <Compile Include="server\gameController.js" />
+    <Compile Include="server\http\get.js" />
+    <Compile Include="server\http\getBuffer.js" />
+    <Compile Include="server\http\getObject.js" />
+    <Compile Include="server\http\getText.js" />
+    <Compile Include="server\http\post.js" />
+    <Compile Include="server\http\request.js" />
+    <Compile Include="server\http\sendObject.js" />
     <Compile Include="server\master.js" />
     <Compile Include="server\options.js" />
     <Compile Include="server\requireDirectory.js" />
@@ -293,7 +306,6 @@
     <Compile Include="examples\temple\app.js" />
     <Compile Include="server\controllers\bears.js" />
     <Compile Include="server\controllers\holodeck.js" />
-    <Compile Include="server\controllers\listRoot.js" />
     <Compile Include="server\game\User.js" />
     <Compile Include="server\socketControllers\demo.server.js" />
     <Compile Include="server\socketControllers\peering.js" />
@@ -359,7 +371,6 @@
     <Compile Include="src\fx\text\themes\Dark.js" />
     <Compile Include="src\fx\text\themes\Default.js" />
     <Content Include="templates\withFramework.jade" />
-    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="doc" />
@@ -376,11 +387,13 @@
     <Folder Include="examples\jabbers" />
     <Folder Include="examples\keycodeTesting" />
     <Folder Include="examples\music" />
+    <Folder Include="examples\nypl\" />
     <Folder Include="examples\temple" />
     <Folder Include="images" />
     <Folder Include="lib" />
     <Folder Include="models\" />
     <Folder Include="music" />
+    <Folder Include="server\http\" />
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />

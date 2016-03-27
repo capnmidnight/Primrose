@@ -2,7 +2,7 @@ var fs = require("fs");
 
 module.exports = function requireDirectory(path, mod) {
   mod.exports = [];
-  fs.readdir("./src/" + path, function (err, files) {
+  fs.readdir("./server/" + path, function (err, files) {
     if (!err) {
       var directories = [];
       for (var i = 0; i < files.length; ++i) {

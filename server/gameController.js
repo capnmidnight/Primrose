@@ -1,7 +1,7 @@
 var fmt = require("./core").fmt,
-    master = require("./master"),
-    fs = require("fs"),
-    findController = require("./webServer").findController;
+  master = require("./master"),
+  fs = require("fs"),
+  findController = require("./webServer").findController;
 
 function GameController(name, title) {
   this.name = name;
@@ -23,20 +23,20 @@ GameController.prototype.GET = function (params, sendData, sendStaticFile, serve
 
 GameController.prototype.html = function (sendData, sendStaticFile, serverError) {
   master.build(
-    sendData, 
-        serverError, 
-        "src/templates/game.html", 
-        this.name,
-        this.title);
+    sendData,
+    serverError,
+    "src/templates/game.html",
+    this.name,
+    this.title);
 };
 
 GameController.prototype.appcache = function (sendData, sendStaticFile, serverError) {
   getFileDescription(this.path, null, function (desc) {
     findFilesInFiles(
-      [this.path], 
-            this.appcachePath, 
-            sendAppCache.bind(this, desc.stamp, sendData), 
-            serverError);
+      [this.path],
+      this.appcachePath,
+      sendAppCache.bind(this, desc.stamp, sendData),
+      serverError);
   }.bind(this));
 };
 
@@ -69,9 +69,9 @@ function findFilesInFiles(paths, skipURL, success, error, accum, index) {
 }
 
 function findFilesInFile(path, skipURL, success, error, accum) {
-  fs.exists("html5/" + path, function (yes) {
+  fs.exists(path, function (yes) {
     if (yes) {
-      fs.readFile("html5/" + path, { encoding: "utf8" }, function (err, file) {
+      fs.readFile(path, { encoding: "utf8" }, function (err, file) {
         if (err) {
           console.error(path, err);
           error(500, err);
@@ -106,10 +106,10 @@ function extractFileReferences(path, file, skipURL, success, accum) {
   });
   strings.sort();
   strings = strings.filter(function (a, i) {
-    return a.length > 0 
-            && (i === 0 || a !== strings[i - 1]) 
-            && /^[^.].+\.\w+$/.test(a) 
-            && a !== skipURL;
+    return a.length > 0
+      && (i === 0 || a !== strings[i - 1])
+      && /^[^.].+\.\w+$/.test(a)
+      && a !== skipURL;
   });
   filterFiles(strings || [], success, accum);
 }
@@ -121,7 +121,7 @@ function filterFiles(strings, done, accum, index) {
     done(accum);
   }
   else {
-    fs.exists("html5/" + strings[index], function (yes) {
+    fs.exists(strings[index], function (yes) {
       if (yes) {
         accum.push(strings[index]);
       }
@@ -155,7 +155,7 @@ function getFileDescriptions(paths, done, accum, index) {
 function getFileDescription(path, data, done) {
   var send = function (length) {
     done({
-      name: path, 
+      name: path,
       size: length,
       stamp: length
     });
@@ -167,20 +167,20 @@ function getFileDescription(path, data, done) {
     var ctrl = findController("/" + path, "GET");
     if (ctrl) {
       ctrl.handler(
-        ctrl.parameters, 
-                function (type, file, length) {
+        ctrl.parameters,
+        function (type, file, length) {
           send(length);
         }
       );
     }
     else {
-      fs.stat("html5/" + path, function (err, stats) {
+      fs.lstat(path, function (err, stats) {
         if (err) {
           send(-1);
         }
         else {
           done({
-            name: path, 
+            name: path,
             size: stats.size,
             stamp: stats.atime.getTime() + stats.ctime.getTime() + stats.mtime.getTime()
           });

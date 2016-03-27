@@ -63,7 +63,7 @@ Primrose.Input.VR = function () {
 
       this.displays.forEach(onConnected);
 
-      if (typeof selectedIndex !== "number" && this.displays.length === 1) {
+      if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
         selectedIndex = 0;
       }
       if (typeof selectedIndex === "number") {

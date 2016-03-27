@@ -1,5 +1,6 @@
 ﻿extends ../templates/documentation.jade
 block document
+  // 0
   h1 Getting started
   img.logo(src="/images/logo128.png", alt="logo", title="Primrose", style="float:left;padding:10px")
 
@@ -81,7 +82,7 @@ block document
   pre: code.
     grammar("JavaScript");
     /* global Primrose, put */
-    var app = new Primrose.VRApplication( "My Primrose VR Application", {
+    var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
         skyTexture: "bg.jpg",
         groundTexture: "deck.png"
       } );
