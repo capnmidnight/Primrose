@@ -137,9 +137,11 @@ app.addEventListener("keydown", function (evt) {
 });
 
 window.addEventListener("unload", function () {
-  var script = editor.value;
-  if (script.length > 0) {
-    setSetting("code", script);
+  if (editor) {
+    var script = editor.value;
+    if (script.length > 0) {
+      setSetting("code", script);
+    }
   }
 });
 
