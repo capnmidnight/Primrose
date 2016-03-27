@@ -11605,7 +11605,7 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
   function LegacyVRDisplay(device) {
     this.capabilities = {
       canPresent: !!device.display,
-      hasExternalDisplay: !isMobile,
+      hasExternalDisplay: false,
       hasOrientation: !!device.sensor,
       hasPosition: !!device.sensor && !isMobile
     };
