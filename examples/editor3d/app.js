@@ -95,12 +95,12 @@ app.addEventListener("ready", function () {
   myWindowMesh = textured(shell(1, 16, 16), myWindow);
   myWindowMesh.name = "MyWindow";
   myWindowMesh.position.x = 0.75;
-  myWindowMesh.position.y = editorSphereY;
+  myWindowMesh.position.y = app.avatarHeight;
   app.scene.add(myWindowMesh);
   app.registerPickableObject(myWindowMesh);
 
   signupForm.mesh.position.x = loginForm.mesh.position.x = -0.75;
-  signupForm.mesh.position.y = loginForm.mesh.position.y = editorSphereY;
+  signupForm.mesh.position.y = loginForm.mesh.position.y = app.avatarHeight;
   signupForm.mesh.position.z = loginForm.mesh.position.z = -1;
   signupForm.mesh.visible = false;
 

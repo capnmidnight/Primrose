@@ -47,7 +47,6 @@
     <Content Include="doc\sync.html" />
     <Content Include="doc\video.html" />
     <Content Include="doc\webvr.html" />
-    <Content Include="examples\editor3d\prong.stereo.jpg" />
     <Content Include="examples\nypl\index.html" />
     <Content Include="examples\nypl\index.html.jade" />
     <Content Include="examples\nypl\prong.stereo.jpg" />
