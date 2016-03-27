@@ -31,6 +31,8 @@ Primrose.Text.Controls.TextBox = (function () {
         this.options = options || {};
       }
 
+      this.useCaching = !isFirefox || !isMobile;
+
       var makeCursorCommand = function (name) {
         var method = name.toLowerCase();
         this["cursor" + name] = function (lines, cursor) {
@@ -784,8 +786,7 @@ Primrose.Text.Controls.TextBox = (function () {
     renderCanvasForeground() {
       var tokenFront = new Primrose.Text.Cursor(),
         tokenBack = new Primrose.Text.Cursor(),
-        lineOffsetY = Math.ceil(this.character.height * 0.2),
-        i;
+        lineOffsetY = Math.ceil(this.character.height * 0.2);
 
       this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
       this._fgfx.save();
@@ -798,7 +799,7 @@ Primrose.Text.Controls.TextBox = (function () {
           textY = (y - 0.2 - this.scroll.y) * this.character.height,
           imageY = textY + lineOffsetY;
 
-        for (i = 0; i < row.length; ++i) {
+        for (var i = 0; i < row.length; ++i) {
           var t = row[i];
           tokenBack.x += t.value.length;
           tokenBack.i += t.value.length;
@@ -809,7 +810,7 @@ Primrose.Text.Controls.TextBox = (function () {
             this.gridBounds.width) {
 
             // draw the text
-            if (this._rowCache[line] !== undefined) {
+            if (this.useCaching && this._rowCache[line] !== undefined) {
               if (i === 0) {
                 this._fgfx.putImageData(this._rowCache[line], this.padding, imageY + this.padding);
               }
@@ -836,7 +837,7 @@ Primrose.Text.Controls.TextBox = (function () {
         tokenFront.x = 0;
         ++tokenFront.y;
         tokenBack.copy(tokenFront);
-        if (drawn && this._rowCache[line] === undefined) {
+        if (this.useCaching && drawn && this._rowCache[line] === undefined) {
           this._rowCache[line] = this._fgfx.getImageData(
             this.padding,
             imageY + this.padding,
@@ -844,6 +845,7 @@ Primrose.Text.Controls.TextBox = (function () {
             this.character.height);
         }
       }
+
       this._fgfx.restore();
     }
 
@@ -854,8 +856,7 @@ Primrose.Text.Controls.TextBox = (function () {
     renderCanvasTrim() {
       var tokenFront = new Primrose.Text.Cursor(),
         tokenBack = new Primrose.Text.Cursor(),
-        maxLineWidth = 0,
-        i;
+        maxLineWidth = 0;
 
       this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
       this._tgfx.save();
@@ -866,7 +867,7 @@ Primrose.Text.Controls.TextBox = (function () {
       for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
         var row = this._tokenRows[y];
 
-        for (i = 0; i < row.length; ++i) {
+        for (var i = 0; i < row.length; ++i) {
           var t = row[i];
           tokenBack.x += t.value.length;
           tokenBack.i += t.value.length;
