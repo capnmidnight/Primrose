@@ -21,9 +21,9 @@
     "lib/"
   ],
   "scripts": {
-    "start": "node server.js -v:false",
-    "start-dev": "node server.js -v:true -b:true",
-    "restart-dev": "node server.js -v:true"
+    "start": "node server.js -v:false -b:true -p:80",
+    "start-dev": "node server.js -v:true -b:true -p:80 -d:\"examples/editor3d/\"",
+    "restart-dev": "node server.js -v:true -b:false -p:80 -d:\"examples/editor3d/\""
   },
   "keywords": [
     "virtual reality",
