@@ -12,7 +12,7 @@ module.exports = {
   GET: function (params, sendData, sendStaticFile, serverError) {
     getObject("http://api.repo.nypl.org/api/v1/items/search?q=stereo&publicDomainOnly=true", {
       headers: {
-        Authorization: "Token token=kd7zdl8042m7gl7o"
+        Authorization: "Token token=" + process.env.NYPL_TOKEN
       }
     }).then(function (output) {
       console.log(output);

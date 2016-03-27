@@ -1,43 +1,43 @@
 var fs = require("fs"),
-    http = require("http"),
-    mime = require("mime"),
-    url = require("url"),
-    stream = require("stream"),
-    zlib = require("zlib"),
-    core = require("./core.js"),
-    routes = require("./controllers.js"),
-    filePattern = /([^?]+)(\?([^?]+))?/,
-    IS_LOCAL = false;
+  http = require("http"),
+  mime = require("mime"),
+  url = require("url"),
+  stream = require("stream"),
+  zlib = require("zlib"),
+  core = require("./core.js"),
+  routes = require("./controllers.js"),
+  filePattern = /([^?]+)(\?([^?]+))?/,
+  IS_LOCAL = false;
 
-function serverError(res, url, code) {
+function serverError(response, requestedURL, httpStatusCode) {
   var rest = Array.prototype.slice.call(arguments, 3),
-      msg = core.fmt("URL: [$1] $2: $3", url, code, http.STATUS_CODES[code]);
+    msg = core.fmt("URL: [$1] $2: $3", requestedURL, httpStatusCode, http.STATUS_CODES[httpStatusCode]);
   if (rest.length > 0) {
     msg += core.fmt(" -> [$1]", rest.join("], ["));
   }
-  
-  if (code >= 500) {
+
+  if (httpStatusCode >= 500) {
     console.error("Error", msg);
   }
   else {
-        // so many of these are just bots trying to exploit open proxies
-        // that it will fill up the logs with junk and before long we won't
-        // have any disk space left.
-        // console.warn("Warning", msg);
+    // so many of these are just bots trying to exploit open proxies
+    // that it will fill up the logs with junk and before long we won't
+    // have any disk space left.
+    // console.warn("Warning", msg);
   }
-  
-  res.writeHead(code);
-  res.end(msg);
+
+  response.writeHead(httpStatusCode);
+  response.end(msg);
 }
 
-function findController(url, method) {
+function findController(requestedURL, httpMethod) {
   for (var i = 0; i < routes.length; ++i) {
-    var matches = url.match(routes[i].pattern);
+    var matches = requestedURL.match(routes[i].pattern);
     if (matches) {
       matches.shift();
-      var handler = routes[i][method];
+      var handler = routes[i][httpMethod];
       if (!handler) {
-        serverError(res, url, 405);
+        serverError(res, requestedURL, 405);
       }
       else {
         return {
@@ -49,99 +49,92 @@ function findController(url, method) {
   }
 }
 
-function matchController(srcDir, req, res, url, method) {
-  var controller = findController(url, method);
+function matchController(srcDirectory, request, response, requestedURL, httpMethod) {
+  var controller = findController(requestedURL, httpMethod);
   if (controller) {
     controller.handler(
       controller.parameters,
-            sendData.bind(this, req, res),
-            sendStaticFile.bind(this, srcDir, req, res, url),
-            serverError.bind(this, res, url));
+      sendData.bind(this, request, response),
+      sendStaticFile.bind(this, srcDirectory, request, response, requestedURL),
+      serverError.bind(this, response, requestedURL));
     return true;
   }
   return false;
 }
 
-function sendStaticFile(srcDir, req, res, url, path) {
-  var mimeType = mime.lookup(path);
-  var send = function (p) {
-    fs.stat(p, function (err, stats) {
-      if (err) {
-        serverError(res, url, 500, err);
+function sendStaticFile(srcDirectory, request, response, requestedURL, filePath) {
+  fs.lstat(filePath, function (err, stats) {
+    if (err) {
+      serverError(response, requestedURL, 404, filePath);
+    }
+    else if (stats.isDirectory()) {
+      if (requestedURL[requestedURL.length - 1] !== "/") {
+        requestedURL += "/";
       }
-      else {
-        sendData(req, res, mimeType, fs.createReadStream(p), stats.size);
-      }
-    });
-  };
-  
-  fs.exists(path, function (yes) {
-    if (yes) {
-      send(path);
+      requestedURL += "index.html";
+      response.writeHead(307, { "Location": requestedURL });
+      response.end();
     }
     else {
-      serverError(res, url, 404, path);
+      sendData(request, response, mime.lookup(filePath), fs.createReadStream(filePath), stats.size);
     }
   });
 }
 
-function sendData(req, res, mimeType, data, length) {
+function sendData(request, response, mimeType, content, contentLength) {
   if (!mimeType) {
-    res.writeHead(415);
-    res.end();
+    response.writeHead(415);
+    response.end();
   }
   else {
     var headers = {
       "content-type": mimeType,
       "connection": "keep-alive"
     };
-    
-    if (data instanceof stream.Readable) {
-      headers["content-length"] = length;
-      res.writeHead(200, headers);
-      data.pipe(res);
+
+    if (content instanceof stream.Readable) {
+      headers["content-length"] = contentLength;
+      response.writeHead(200, headers);
+      content.pipe(response);
     }
     else {
       var send = function (d) {
         headers["content-length"] = d.length;
-        res.writeHead(200, headers);
-        res.end(d);
+        response.writeHead(200, headers);
+        response.end(d);
       };
-      
-      send(data);
+
+      send(content);
     }
   }
 }
 
-function serveRequest(srcDir, req, res) {
-  if (!matchController(srcDir, req, res, req.url, req.method) && req.method === "GET") {
-    if (req.url.indexOf("..") === -1) {
-      var url = req.url;
-      if (url[url.length - 1] === "/") {
-        url += "index.html";
-      }
-      var path = srcDir + url,
-          file = path.match(filePattern)[1];
-      sendStaticFile(srcDir, req, res, req.url, file);
+function serveRequest(srcDirectory, request, response) {
+  if (!matchController(srcDirectory, request, response, request.url, request.method) && request.method === "GET") {
+    if (request.url.indexOf("..") === -1) {
+      var newURL = request.url,
+        path = srcDirectory + newURL,
+        file = path.match(filePattern)[1];
+      sendStaticFile(srcDirectory, request, response, newURL, file);
     }
     else {
-      serverError(res, req.url, 403);
+      serverError(response, request.url, 403);
     }
   }
 }
 
-function redirectPort(host, target, req, res) {
-  var reqHost = req.headers.host && req.headers.host.replace(/(:\d+|$)/, ":" + target);
-  var url = "https://" + reqHost + req.url;
-  if (reqHost 
-        && (host === "localhost" || reqHost === host + ":" + target) 
-        && !/https?:/.test(req.url)) {
-    res.writeHead(307, { "Location": url });
+function redirectPort(host, target, request, response) {
+  var reqHost = request.headers.host && request.headers.host.replace(/(:\d+|$)/, ":" + target);
+  var url = "https://" + reqHost + request.url;
+  if (reqHost
+    && (host === "localhost" || reqHost === host + ":" + target)
+    && !/https?:/.test(request.url)) {
+    response.writeHead(307, { "Location": url });
   }
   else {
-    serverError(res, url, 400);
+    serverError(response, url, 400);
   }
-  res.end();
+  response.end();
 }
 
 function isString(v) { return typeof (v) === "string" || v instanceof String; }

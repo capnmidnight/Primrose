@@ -63,7 +63,7 @@ function recurseDirectory(root) {
       subFiles = fs.readdirSync(directory);
     for (var j = 0; j < subFiles.length; ++j) {
       var subFile = path.join(directory, subFiles[j]),
-        stats = fs.statSync(subFile);
+        stats = fs.lstatSync(subFile);
       if (stats.isDirectory()) {
         directoryQueue.push(subFile);
       }

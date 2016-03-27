@@ -174,7 +174,7 @@ function getFileDescription(path, data, done) {
       );
     }
     else {
-      fs.stat(path, function (err, stats) {
+      fs.lstat(path, function (err, stats) {
         if (err) {
           send(-1);
         }

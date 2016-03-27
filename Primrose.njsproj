@@ -13,14 +13,15 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <NodejsPort>80</NodejsPort>
-    <StartWebBrowser>False</StartWebBrowser>
-    <LaunchUrl>index.html</LaunchUrl>
+    <StartWebBrowser>True</StartWebBrowser>
+    <LaunchUrl>examples/editor3d</LaunchUrl>
     <UseIISExpress>true</UseIISExpress>
     <NodeExePath>
     </NodeExePath>
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-v:true -b:false -d:"index.html"</ScriptArguments>
+    <ScriptArguments>-v:false -b:false</ScriptArguments>
+    <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -371,7 +372,6 @@
     <Compile Include="src\fx\text\themes\Dark.js" />
     <Compile Include="src\fx\text\themes\Default.js" />
     <Content Include="templates\withFramework.jade" />
-    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="doc" />
