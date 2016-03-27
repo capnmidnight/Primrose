@@ -2,6 +2,7 @@ var fs = require("fs"),
   http = require("http"),
   mime = require("mime"),
   stream = require("stream"),
+  url = require("url"),
   core = require("./core.js"),
   routes = require("./controllers.js");
 
@@ -87,7 +88,25 @@ function sendData(request, response, mimeType, content, contentLength) {
 
 function serveRequest(request, response) {
   if (!matchController(request, response) && request.method === "GET") {
-    serverError(response, request.url, 403);
+    var parts = url.parse(request.url),
+      file = "." + parts.pathname;
+    if (file[file.length - 1] === "/") {
+      file += "index.html";
+    }
+
+    fs.lstat(file, function (err, stat) {
+      if (err) {
+        console.log("404", file);
+        serverError(response, request.url, 404);
+      }
+      else if (stat.isDirectory()) {
+        response.writeHead(307, { "Location": request.url + "/" });
+        response.end();
+      }
+      else {
+        sendData(request, response, mime.lookup(file), fs.createReadStream(file), stat.size);
+      }
+    });
   }
 }
 
