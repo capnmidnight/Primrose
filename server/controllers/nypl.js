@@ -9,7 +9,7 @@ var fmt = require("../core").fmt,
 module.exports = {
   path: "/nypl/",
   pattern: /^\/nypl\/?(?:\?(q=[^&]+))?/,
-  GET: function (params, sendData, sendStaticFile, serverError) {
+  GET: function (params, sendData, serverError) {
     getObject("http://api.repo.nypl.org/api/v1/items/search?q=stereo&publicDomainOnly=true", {
       headers: {
         Authorization: "Token token=" + process.env.NYPL_TOKEN

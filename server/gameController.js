@@ -11,17 +11,17 @@ function GameController(name, title) {
   this.pattern = new RegExp(fmt("^\\/$1.(html|appcache)$", name));
 };
 
-GameController.prototype.GET = function (params, sendData, sendStaticFile, serverError) {
+GameController.prototype.GET = function (params, sendData, serverError) {
   var f = this[params[0]];
   if (typeof (f) === "function") {
-    f.call(this, sendData, sendStaticFile, serverError);
+    f.call(this, sendData, serverError);
   }
   else {
     serverError(500, "no handler for " + params[0]);
   }
 };
 
-GameController.prototype.html = function (sendData, sendStaticFile, serverError) {
+GameController.prototype.html = function (sendData, serverError) {
   master.build(
     sendData,
     serverError,
@@ -30,7 +30,7 @@ GameController.prototype.html = function (sendData, sendStaticFile, serverError)
     this.title);
 };
 
-GameController.prototype.appcache = function (sendData, sendStaticFile, serverError) {
+GameController.prototype.appcache = function (sendData, serverError) {
   getFileDescription(this.path, null, function (desc) {
     findFilesInFiles(
       [this.path],
@@ -81,14 +81,6 @@ function findFilesInFile(path, skipURL, success, error, accum) {
         }
       });
     }
-    else {
-      var ctrl = findController("/" + path, "GET");
-      if (ctrl) {
-        ctrl.handler(ctrl.parameters, function (type, file, length) {
-          extractFileReferences(path, file, skipURL, success, accum);
-        }, null, error);
-      }
-    }
   });
 }
 
@@ -125,12 +117,6 @@ function filterFiles(strings, done, accum, index) {
       if (yes) {
         accum.push(strings[index]);
       }
-      else {
-        var ctrl = findController("/" + strings[index], "GET");
-        if (ctrl) {
-          accum.push(strings[index]);
-        }
-      }
       setImmediate(filterFiles, strings, done, accum, index + 1);
     });
   }
@@ -164,29 +150,18 @@ function getFileDescription(path, data, done) {
     send(data.length);
   }
   else {
-    var ctrl = findController("/" + path, "GET");
-    if (ctrl) {
-      ctrl.handler(
-        ctrl.parameters,
-        function (type, file, length) {
-          send(length);
-        }
-      );
-    }
-    else {
-      fs.lstat(path, function (err, stats) {
-        if (err) {
-          send(-1);
-        }
-        else {
-          done({
-            name: path,
-            size: stats.size,
-            stamp: stats.atime.getTime() + stats.ctime.getTime() + stats.mtime.getTime()
-          });
-        }
-      });
-    }
+    fs.lstat(path, function (err, stats) {
+      if (err) {
+        send(-1);
+      }
+      else {
+        done({
+          name: path,
+          size: stats.size,
+          stamp: stats.atime.getTime() + stats.ctime.getTime() + stats.mtime.getTime()
+        });
+      }
+    });
   }
 }
 

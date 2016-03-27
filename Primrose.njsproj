@@ -1,33 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>Primrose</Name>
+    <RootNamespace>Primrose</RootNamespace>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0ab50445-5ce1-4ebd-a7fd-01c523ad3a0c}</ProjectGuid>
-    <ProjectHome />
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectHome>.</ProjectHome>
     <StartupFile>server.js</StartupFile>
+    <SearchPath>
+    </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <NodejsPort>80</NodejsPort>
-    <StartWebBrowser>True</StartWebBrowser>
-    <LaunchUrl>examples/editor3d</LaunchUrl>
-    <UseIISExpress>true</UseIISExpress>
-    <NodeExePath>
-    </NodeExePath>
-    <NodeExeArguments>
-    </NodeExeArguments>
-    <ScriptArguments>-v:false -b:false</ScriptArguments>
+    <ProjectView>ProjectFiles</ProjectView>
+    <NodejsPort>1337</NodejsPort>
+    <StartWebBrowser>true</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="doc\blenderAdvanced.html" />
@@ -110,7 +109,7 @@
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
     <Content Include="sitemap.xml" />
-    <Compile Include="examples\nypl\app.js" />
+    <Content Include="examples\nypl\app.js" />
     <Compile Include="Gruntfile.js" />
     <Compile Include="server.js" />
     <Content Include="doc\index.html" />
@@ -131,7 +130,7 @@
     <Content Include="doc\sync.html.jade" />
     <Content Include="doc\video.html.jade" />
     <Content Include="doc\webvr.html.jade" />
-    <Compile Include="doc\app.js" />
+    <Content Include="doc\app.js" />
     <Content Include="examples\style.css" />
     <Content Include="examples\style.min.css" />
     <Content Include="images\cardboard128.png" />
@@ -169,17 +168,17 @@
     <Content Include="images\nightly.mozilla.jpg" />
     <Content Include="images\screenshot.jpg" />
     <Content Include="images\stm-2015-05.jpg" />
-    <Compile Include="lib\analytics.js" />
-    <Compile Include="lib\Blob.js" />
-    <Compile Include="lib\droid_sans_regular.typeface.js" />
-    <Compile Include="lib\FileSaver.js" />
-    <Compile Include="lib\ga.js" />
-    <Compile Include="lib\gl-matrix.js" />
-    <Compile Include="lib\mailchimp.js" />
-    <Compile Include="lib\pliny.js" />
-    <Compile Include="lib\resizer.js" />
-    <Compile Include="lib\sha512.js" />
-    <Compile Include="lib\webgl-debug.js" />
+    <Content Include="lib\analytics.js" />
+    <Content Include="lib\Blob.js" />
+    <Content Include="lib\droid_sans_regular.typeface.js" />
+    <Content Include="lib\FileSaver.js" />
+    <Content Include="lib\ga.js" />
+    <Content Include="lib\gl-matrix.js" />
+    <Content Include="lib\mailchimp.js" />
+    <Content Include="lib\pliny.js" />
+    <Content Include="lib\resizer.js" />
+    <Content Include="lib\sha512.js" />
+    <Content Include="lib\webgl-debug.js" />
     <Compile Include="server\controllers.js" />
     <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
@@ -194,64 +193,63 @@
     <Compile Include="server\master.js" />
     <Compile Include="server\options.js" />
     <Compile Include="server\requireDirectory.js" />
-    <Compile Include="server\server.js" />
     <Compile Include="server\socketControllers.js" />
     <Compile Include="server\starter.js" />
     <Compile Include="server\webServer.js" />
     <Compile Include="server\webSocketServer.js" />
-    <Compile Include="src\base\axis.js" />
-    <Compile Include="src\base\box.js" />
-    <Compile Include="src\base\brick.js" />
-    <Compile Include="src\base\clone.js" />
-    <Compile Include="src\base\cylinder.js" />
-    <Compile Include="src\base\fullscreen.js" />
-    <Compile Include="src\base\patch.js" />
-    <Compile Include="src\base\overwrite.js" />
-    <Compile Include="src\base\put.js" />
-    <Compile Include="src\base\InsideSphereGeometry.js" />
-    <Compile Include="src\base\light.js" />
-    <Compile Include="src\base\quad.js" />
-    <Compile Include="src\base\shell.js" />
-    <Compile Include="src\base\sphere.js" />
-    <Compile Include="src\base\textured.js" />
-    <Compile Include="src\base\v3.js" />
-    <Compile Include="src\fx\controls\Image.js" />
-    <Compile Include="src\fx\controls\ALabel.js" />
-    <Compile Include="src\fx\DOM\cascadeElement.js" />
-    <Compile Include="src\fx\DOM\findEverything.js" />
-    <Compile Include="src\fx\DOM\makeHidingContainer.js" />
-    <Compile Include="src\fx\HTTP\get.js" />
-    <Compile Include="src\fx\HTTP\getObject.js" />
-    <Compile Include="src\fx\HTTP\getBuffer.js" />
-    <Compile Include="src\fx\HTTP\getText.js" />
-    <Compile Include="src\fx\HTTP\post.js" />
-    <Compile Include="src\fx\HTTP\sendObject.js" />
-    <Compile Include="src\fx\HTTP\XHR.js" />
-    <Compile Include="src\fx\Random\int.js" />
-    <Compile Include="src\fx\Random\item.js" />
-    <Compile Include="src\fx\Random\number.js" />
-    <Compile Include="src\fx\Random\steps.js" />
-    <Compile Include="src\fx\Surface.js" />
-    <Compile Include="src\fx\Entity.js" />
-    <Compile Include="src\fx\input\vr\CardboardVRDisplay.js" />
-    <Compile Include="src\fx\input\vr\LegacyVRDisplay.js" />
-    <Compile Include="src\fx\input\vr\MotionCorrector.js" />
-    <Compile Include="src\fx\controls\Button2D.js" />
-    <Compile Include="src\fx\text\command_packs\BasicTextInput.js" />
-    <Compile Include="src\fx\text\command_packs\TextInput.js" />
-    <Compile Include="src\fx\text\controls\TextInput.js" />
-    <Compile Include="src\base\hub.js" />
-    <Compile Include="src\index.js" />
+    <Content Include="src\base\axis.js" />
+    <Content Include="src\base\box.js" />
+    <Content Include="src\base\brick.js" />
+    <Content Include="src\base\clone.js" />
+    <Content Include="src\base\cylinder.js" />
+    <Content Include="src\base\fullscreen.js" />
+    <Content Include="src\base\patch.js" />
+    <Content Include="src\base\overwrite.js" />
+    <Content Include="src\base\put.js" />
+    <Content Include="src\base\InsideSphereGeometry.js" />
+    <Content Include="src\base\light.js" />
+    <Content Include="src\base\quad.js" />
+    <Content Include="src\base\shell.js" />
+    <Content Include="src\base\sphere.js" />
+    <Content Include="src\base\textured.js" />
+    <Content Include="src\base\v3.js" />
+    <Content Include="src\fx\controls\Image.js" />
+    <Content Include="src\fx\controls\ALabel.js" />
+    <Content Include="src\fx\DOM\cascadeElement.js" />
+    <Content Include="src\fx\DOM\findEverything.js" />
+    <Content Include="src\fx\DOM\makeHidingContainer.js" />
+    <Content Include="src\fx\HTTP\get.js" />
+    <Content Include="src\fx\HTTP\getObject.js" />
+    <Content Include="src\fx\HTTP\getBuffer.js" />
+    <Content Include="src\fx\HTTP\getText.js" />
+    <Content Include="src\fx\HTTP\post.js" />
+    <Content Include="src\fx\HTTP\sendObject.js" />
+    <Content Include="src\fx\HTTP\XHR.js" />
+    <Content Include="src\fx\Random\int.js" />
+    <Content Include="src\fx\Random\item.js" />
+    <Content Include="src\fx\Random\number.js" />
+    <Content Include="src\fx\Random\steps.js" />
+    <Content Include="src\fx\Surface.js" />
+    <Content Include="src\fx\Entity.js" />
+    <Content Include="src\fx\input\vr\CardboardVRDisplay.js" />
+    <Content Include="src\fx\input\vr\LegacyVRDisplay.js" />
+    <Content Include="src\fx\input\vr\MotionCorrector.js" />
+    <Content Include="src\fx\controls\Button2D.js" />
+    <Content Include="src\fx\text\command_packs\BasicTextInput.js" />
+    <Content Include="src\fx\text\command_packs\TextInput.js" />
+    <Content Include="src\fx\text\controls\TextInput.js" />
+    <Content Include="src\base\hub.js" />
+    <Content Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
     <Content Include="stylesheets\main.min.css" />
-    <Compile Include="src\x\SignupForm.js" />
-    <Compile Include="src\x\LoginForm.js" />
-    <Compile Include="test\Basic.js" />
-    <Compile Include="test\Grammar.js" />
-    <Compile Include="test\Point.js" />
-    <Compile Include="test\Rectangle.js" />
-    <Compile Include="test\Size.js" />
-    <Compile Include="test\testing.js" />
+    <Content Include="src\x\SignupForm.js" />
+    <Content Include="src\x\LoginForm.js" />
+    <Content Include="test\Basic.js" />
+    <Content Include="test\Grammar.js" />
+    <Content Include="test\Point.js" />
+    <Content Include="test\Rectangle.js" />
+    <Content Include="test\Size.js" />
+    <Content Include="test\testing.js" />
     <Content Include="doc\images\editorVR\consoleWindow.jpg" />
     <Content Include="doc\images\editorVR\cursor1.jpg" />
     <Content Include="doc\images\editorVR\cursor2.jpg" />
@@ -263,17 +261,17 @@
     <Content Include="examples\commodore\keyboard_map.png" />
     <Content Include="examples\commodore\screenshot.jpg" />
     <Content Include="examples\commodore\commodore_pet.json" />
-    <Compile Include="examples\commodore\app.js" />
+    <Content Include="examples\commodore\app.js" />
     <Content Include="examples\editor2d\index.html" />
     <Content Include="examples\editor2d\style.css" />
     <Content Include="examples\editor2d\style.min.css" />
-    <Compile Include="examples\editor2d\app.js" />
+    <Content Include="examples\editor2d\app.js" />
     <Content Include="examples\editor3d\index.html" />
     <Content Include="examples\editor3d\screenshot.jpg" />
-    <Compile Include="examples\editor3d\app.js" />
+    <Content Include="examples\editor3d\app.js" />
     <Content Include="examples\empty\index.html" />
     <Content Include="examples\empty\screenshot.jpg" />
-    <Compile Include="examples\empty\app.js" />
+    <Content Include="examples\empty\app.js" />
     <Content Include="examples\evolve\index.html" />
     <Content Include="examples\evolve\evolve.css" />
     <Content Include="examples\glove\index.html" />
@@ -285,7 +283,7 @@
     <Content Include="examples\glove\skybox.png" />
     <Content Include="examples\glove\ocean.jpg" />
     <Content Include="examples\glove\tree.jpg" />
-    <Compile Include="examples\glove\app.js" />
+    <Content Include="examples\glove\app.js" />
     <Content Include="examples\images\deck.png" />
     <Content Include="examples\images\grass.png" />
     <Content Include="examples\images\rock.png" />
@@ -296,14 +294,14 @@
     <Content Include="examples\images\bg2.jpg" />
     <Content Include="examples\jabbers\index.html" />
     <Content Include="examples\jabbers\screenshot.jpg" />
-    <Compile Include="examples\jabbers\app.js" />
+    <Content Include="examples\jabbers\app.js" />
     <Content Include="examples\keycodeTesting\index.html" />
     <Content Include="examples\music\index.html" />
     <Content Include="examples\music\screenshot.jpg" />
-    <Compile Include="examples\music\app.js" />
+    <Content Include="examples\music\app.js" />
     <Content Include="examples\temple\index.html" />
     <Content Include="examples\temple\screenshot.jpg" />
-    <Compile Include="examples\temple\app.js" />
+    <Content Include="examples\temple\app.js" />
     <Compile Include="server\controllers\bears.js" />
     <Compile Include="server\controllers\holodeck.js" />
     <Compile Include="server\game\User.js" />
@@ -311,66 +309,67 @@
     <Compile Include="server\socketControllers\peering.js" />
     <Content Include="server\templates\game.html" />
     <Content Include="server\templates\master.html" />
-    <Compile Include="src\fx\Angle.js" />
-    <Compile Include="src\fx\BaseControl.js" />
-    <Compile Include="src\fx\Button.js" />
-    <Compile Include="src\fx\ButtonFactory.js" />
-    <Compile Include="src\fx\Keys.js" />
-    <Compile Include="src\fx\ModelLoader.js" />
-    <Compile Include="src\fx\NetworkedInput.js" />
-    <Compile Include="src\fx\Projector.js" />
-    <Compile Include="src\fx\DOM\StateList.js" />
-    <Compile Include="src\fx\BrowserEnvironment.js" />
-    <Compile Include="src\fx\WebRTCSocket.js" />
-    <Compile Include="src\fx\Workerize.js" />
-    <Compile Include="src\base\fmt.js" />
-    <Compile Include="src\base\forms.js" />
-    <Compile Include="src\base\cloud.js" />
-    <Compile Include="src\base\oop.js" />
-    <Compile Include="src\base\options.js" />
-    <Compile Include="src\fx\input\ButtonAndAxis.js" />
-    <Compile Include="src\fx\input\Camera.js" />
-    <Compile Include="src\fx\input\FPSInput.js" />
-    <Compile Include="src\fx\input\Gamepad.js" />
-    <Compile Include="src\fx\input\Keyboard.js" />
-    <Compile Include="src\fx\input\LeapMotion.js" />
-    <Compile Include="src\fx\input\Location.js" />
-    <Compile Include="src\fx\input\Motion.js" />
-    <Compile Include="src\fx\input\Mouse.js" />
-    <Compile Include="src\fx\input\Speech.js" />
-    <Compile Include="src\fx\input\Touch.js" />
-    <Compile Include="src\fx\input\VR.js" />
-    <Compile Include="src\fx\output\Audio3D.js" />
-    <Compile Include="src\fx\output\HapticGlove.js" />
-    <Compile Include="src\fx\output\Music.js" />
-    <Compile Include="src\fx\output\Speech.js" />
-    <Compile Include="src\fx\text\CodePage.js" />
-    <Compile Include="src\fx\text\CommandPack.js" />
-    <Compile Include="src\fx\text\Cursor.js" />
-    <Compile Include="src\fx\text\Grammar.js" />
-    <Compile Include="src\fx\text\OperatingSystem.js" />
-    <Compile Include="src\fx\text\Point.js" />
-    <Compile Include="src\fx\text\Rectangle.js" />
-    <Compile Include="src\fx\text\Rule.js" />
-    <Compile Include="src\fx\text\Size.js" />
-    <Compile Include="src\fx\text\Terminal.js" />
-    <Compile Include="src\fx\text\Token.js" />
-    <Compile Include="src\fx\text\code_pages\DE_QWERTZ.js" />
-    <Compile Include="src\fx\text\code_pages\EN_UKX.js" />
-    <Compile Include="src\fx\text\code_pages\EN_US.js" />
-    <Compile Include="src\fx\text\code_pages\FR_AZERTY.js" />
-    <Compile Include="src\fx\text\command_packs\TextEditor.js" />
-    <Compile Include="src\fx\text\controls\PlainText.js" />
-    <Compile Include="src\fx\text\controls\TextBox.js" />
-    <Compile Include="src\fx\text\grammars\Basic.js" />
-    <Compile Include="src\fx\text\grammars\JavaScript.js" />
-    <Compile Include="src\fx\text\grammars\PlainText.js" />
-    <Compile Include="src\fx\text\grammars\TestResults.js" />
-    <Compile Include="src\fx\text\operating_systems\OSX.js" />
-    <Compile Include="src\fx\text\operating_systems\Windows.js" />
-    <Compile Include="src\fx\text\themes\Dark.js" />
-    <Compile Include="src\fx\text\themes\Default.js" />
+    <Content Include="src\fx\Angle.js" />
+    <Content Include="src\fx\BaseControl.js" />
+    <Content Include="src\fx\Button.js" />
+    <Content Include="src\fx\ButtonFactory.js" />
+    <Content Include="src\fx\Keys.js" />
+    <Content Include="src\fx\ModelLoader.js" />
+    <Content Include="src\fx\NetworkedInput.js" />
+    <Content Include="src\fx\Projector.js" />
+    <Content Include="src\fx\DOM\StateList.js" />
+    <Content Include="src\fx\BrowserEnvironment.js" />
+    <Content Include="src\fx\WebRTCSocket.js" />
+    <Content Include="src\fx\Workerize.js" />
+    <Content Include="src\base\fmt.js" />
+    <Content Include="src\base\forms.js" />
+    <Content Include="src\base\cloud.js" />
+    <Content Include="src\base\oop.js" />
+    <Content Include="src\base\options.js" />
+    <Content Include="src\fx\input\ButtonAndAxis.js" />
+    <Content Include="src\fx\input\Camera.js" />
+    <Content Include="src\fx\input\FPSInput.js" />
+    <Content Include="src\fx\input\Gamepad.js" />
+    <Content Include="src\fx\input\Keyboard.js" />
+    <Content Include="src\fx\input\LeapMotion.js" />
+    <Content Include="src\fx\input\Location.js" />
+    <Content Include="src\fx\input\Motion.js" />
+    <Content Include="src\fx\input\Mouse.js" />
+    <Content Include="src\fx\input\Speech.js" />
+    <Content Include="src\fx\input\Touch.js" />
+    <Content Include="src\fx\input\VR.js" />
+    <Content Include="src\fx\output\Audio3D.js" />
+    <Content Include="src\fx\output\HapticGlove.js" />
+    <Content Include="src\fx\output\Music.js" />
+    <Content Include="src\fx\output\Speech.js" />
+    <Content Include="src\fx\text\CodePage.js" />
+    <Content Include="src\fx\text\CommandPack.js" />
+    <Content Include="src\fx\text\Cursor.js" />
+    <Content Include="src\fx\text\Grammar.js" />
+    <Content Include="src\fx\text\OperatingSystem.js" />
+    <Content Include="src\fx\text\Point.js" />
+    <Content Include="src\fx\text\Rectangle.js" />
+    <Content Include="src\fx\text\Rule.js" />
+    <Content Include="src\fx\text\Size.js" />
+    <Content Include="src\fx\text\Terminal.js" />
+    <Content Include="src\fx\text\Token.js" />
+    <Content Include="src\fx\text\code_pages\DE_QWERTZ.js" />
+    <Content Include="src\fx\text\code_pages\EN_UKX.js" />
+    <Content Include="src\fx\text\code_pages\EN_US.js" />
+    <Content Include="src\fx\text\code_pages\FR_AZERTY.js" />
+    <Content Include="src\fx\text\command_packs\TextEditor.js" />
+    <Content Include="src\fx\text\controls\PlainText.js" />
+    <Content Include="src\fx\text\controls\TextBox.js" />
+    <Content Include="src\fx\text\grammars\Basic.js" />
+    <Content Include="src\fx\text\grammars\JavaScript.js" />
+    <Content Include="src\fx\text\grammars\PlainText.js" />
+    <Content Include="src\fx\text\grammars\TestResults.js" />
+    <Content Include="src\fx\text\operating_systems\OSX.js" />
+    <Content Include="src\fx\text\operating_systems\Windows.js" />
+    <Content Include="src\fx\text\themes\Dark.js" />
+    <Content Include="src\fx\text\themes\Default.js" />
     <Content Include="templates\withFramework.jade" />
+    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="doc" />
