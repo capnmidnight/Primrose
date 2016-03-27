@@ -10,7 +10,6 @@ var pathX = /.*\/(.*).js/,
     "lib/ga.js",
     "lib/mailchimp.js",
     "lib/pliny.js",
-    "node_modules/leapjs/leap-0.6.4.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/marked/lib/marked.js"

@@ -1,5 +1,5 @@
 /*
-  primrose v0.22.0 2016-03-26
+  primrose v0.22.0 2016-03-27
   
   Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   http://www.primrosevr.com
@@ -14251,6 +14251,8 @@ Primrose.Text.Controls.TextBox = function () {
         _this.options = options || {};
       }
 
+      _this.useCaching = !isFirefox || !isMobile;
+
       var makeCursorCommand = function makeCursorCommand(name) {
         var method = name.toLowerCase();
         this["cursor" + name] = function (lines, cursor) {
@@ -14831,8 +14833,7 @@ Primrose.Text.Controls.TextBox = function () {
       value: function renderCanvasForeground() {
         var tokenFront = new Primrose.Text.Cursor(),
             tokenBack = new Primrose.Text.Cursor(),
-            lineOffsetY = Math.ceil(this.character.height * 0.2),
-            i;
+            lineOffsetY = Math.ceil(this.character.height * 0.2);
 
         this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
         this._fgfx.save();
@@ -14845,7 +14846,7 @@ Primrose.Text.Controls.TextBox = function () {
               textY = (y - 0.2 - this.scroll.y) * this.character.height,
               imageY = textY + lineOffsetY;
 
-          for (i = 0; i < row.length; ++i) {
+          for (var i = 0; i < row.length; ++i) {
             var t = row[i];
             tokenBack.x += t.value.length;
             tokenBack.i += t.value.length;
@@ -14854,7 +14855,7 @@ Primrose.Text.Controls.TextBox = function () {
             if (this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height && this.scroll.x <= tokenBack.x && tokenFront.x < this.scroll.x + this.gridBounds.width) {
 
               // draw the text
-              if (this._rowCache[line] !== undefined) {
+              if (this.useCaching && this._rowCache[line] !== undefined) {
                 if (i === 0) {
                   this._fgfx.putImageData(this._rowCache[line], this.padding, imageY + this.padding);
                 }
@@ -14874,10 +14875,11 @@ Primrose.Text.Controls.TextBox = function () {
           tokenFront.x = 0;
           ++tokenFront.y;
           tokenBack.copy(tokenFront);
-          if (drawn && this._rowCache[line] === undefined) {
+          if (this.useCaching && drawn && this._rowCache[line] === undefined) {
             this._rowCache[line] = this._fgfx.getImageData(this.padding, imageY + this.padding, this.imageWidth - 2 * this.padding, this.character.height);
           }
         }
+
         this._fgfx.restore();
       }
     }, {
@@ -14890,8 +14892,7 @@ Primrose.Text.Controls.TextBox = function () {
       value: function renderCanvasTrim() {
         var tokenFront = new Primrose.Text.Cursor(),
             tokenBack = new Primrose.Text.Cursor(),
-            maxLineWidth = 0,
-            i;
+            maxLineWidth = 0;
 
         this._tgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
         this._tgfx.save();
@@ -14902,7 +14903,7 @@ Primrose.Text.Controls.TextBox = function () {
         for (var y = 0, lastLine = -1; y < this._tokenRows.length; ++y) {
           var row = this._tokenRows[y];
 
-          for (i = 0; i < row.length; ++i) {
+          for (var i = 0; i < row.length; ++i) {
             var t = row[i];
             tokenBack.x += t.value.length;
             tokenBack.i += t.value.length;
@@ -16195,5 +16196,211 @@ pliny.issue("Primrose.Text.Themes.Default", {
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Themes.Default](#Primrose_Text_Themes_Default) class in the themes/ directory"
 });
+;"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Primrose.X.LoginForm = function () {
+  var COUNTER = 0;
+
+  var LoginForm = function (_Primrose$Entity) {
+    _inherits(LoginForm, _Primrose$Entity);
+
+    function LoginForm() {
+      _classCallCheck(this, LoginForm);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoginForm).call(this, "Primrose.X.LoginForm[" + COUNTER++ + "]"));
+
+      _this.listeners.login = [];
+      _this.listeners.signup = [];
+
+      _this.frame = new Primrose.Surface({
+        id: _this.id + "-frame",
+        bounds: new Primrose.Text.Rectangle(0, 0, 512, 150)
+      });
+
+      _this.labelUserName = new Primrose.Controls.Label({
+        id: _this.id + "-labelUserName",
+        bounds: new Primrose.Text.Rectangle(0, 0, 256, 50),
+        fontSize: 32,
+        value: "User name:",
+        textAlign: "right"
+      });
+
+      _this.userName = new Primrose.Text.Controls.TextInput({
+        id: _this.id + "-userName",
+        bounds: new Primrose.Text.Rectangle(256, 0, 256, 50),
+        fontSize: 32
+      });
+
+      _this.labelPassword = new Primrose.Controls.Label({
+        id: _this.id + "-labelPassword",
+        bounds: new Primrose.Text.Rectangle(0, 50, 256, 50),
+        fontSize: 32,
+        value: "Password:",
+        textAlign: "right"
+      });
+
+      _this.password = new Primrose.Text.Controls.TextInput({
+        id: _this.id + "-password",
+        bounds: new Primrose.Text.Rectangle(256, 50, 256, 50),
+        fontSize: 32,
+        passwordCharacter: "*"
+      });
+
+      _this.signupButton = new Primrose.Controls.Button2D({
+        id: _this.id + "-signupButton",
+        bounds: new Primrose.Text.Rectangle(0, 100, 256, 50),
+        fontSize: 32,
+        value: "Sign up"
+      });
+
+      _this.loginButton = new Primrose.Controls.Button2D({
+        id: _this.id + "-loginButton",
+        bounds: new Primrose.Text.Rectangle(256, 100, 256, 50),
+        fontSize: 32,
+        value: "Login"
+      });
+
+      _this.loginButton.addEventListener("click", function (evt) {
+        return emit.call(_this, "login", { target: _this });
+      }, false);
+      _this.signupButton.addEventListener("click", function (evt) {
+        return emit.call(_this, "signup", { target: _this });
+      }, false);
+
+      _this.mesh = textured(quad(1, 150 / 512), _this.frame);
+      _this.mesh.name = "LoginForm";
+
+      _this.frame.appendChild(_this.labelUserName);
+      _this.frame.appendChild(_this.userName);
+      _this.frame.appendChild(_this.labelPassword);
+      _this.frame.appendChild(_this.password);
+      _this.frame.appendChild(_this.signupButton);
+      _this.frame.appendChild(_this.loginButton);
+      _this.appendChild(_this.frame);
+      return _this;
+    }
+
+    return LoginForm;
+  }(Primrose.Entity);
+
+  return LoginForm;
+}();
+;"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Primrose.X.SignupForm = function () {
+  var COUNTER = 0;
+
+  var SignupForm = function (_Primrose$Entity) {
+    _inherits(SignupForm, _Primrose$Entity);
+
+    function SignupForm() {
+      _classCallCheck(this, SignupForm);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SignupForm).call(this, "Primrose.X.SignupForm[" + COUNTER++ + "]"));
+
+      _this.listeners.login = [];
+      _this.listeners.signup = [];
+
+      _this.frame = new Primrose.Surface({
+        id: _this.id + "-frame",
+        bounds: new Primrose.Text.Rectangle(0, 0, 512, 200)
+      });
+
+      _this.labelUserName = new Primrose.Controls.Label({
+        id: _this.id + "-labelUserName",
+        bounds: new Primrose.Text.Rectangle(0, 0, 256, 50),
+        fontSize: 32,
+        value: "User name:",
+        textAlign: "right"
+      });
+
+      _this.userName = new Primrose.Text.Controls.TextInput({
+        id: _this.id + "-userName",
+        bounds: new Primrose.Text.Rectangle(256, 0, 256, 50),
+        fontSize: 32
+      });
+
+      _this.labelEmail = new Primrose.Controls.Label({
+        id: _this.id + "-labelEmail",
+        bounds: new Primrose.Text.Rectangle(0, 50, 256, 50),
+        fontSize: 32,
+        value: "Email:",
+        textAlign: "center"
+      });
+
+      _this.email = new Primrose.Text.Controls.TextInput({
+        id: _this.id + "-email",
+        bounds: new Primrose.Text.Rectangle(256, 50, 256, 50),
+        fontSize: 32
+      });
+
+      _this.labelPassword = new Primrose.Controls.Label({
+        id: _this.id + "-labelPassword",
+        bounds: new Primrose.Text.Rectangle(0, 100, 256, 50),
+        fontSize: 32,
+        value: "Password:",
+        textAlign: "left"
+      });
+
+      _this.password = new Primrose.Text.Controls.TextInput({
+        id: _this.id + "-password",
+        bounds: new Primrose.Text.Rectangle(256, 100, 256, 50),
+        fontSize: 32,
+        passwordCharacter: "*"
+      });
+
+      _this.loginButton = new Primrose.Controls.Button2D({
+        id: _this.id + "-loginButton",
+        bounds: new Primrose.Text.Rectangle(0, 150, 256, 50),
+        fontSize: 32,
+        value: "Login"
+      });
+
+      _this.signupButton = new Primrose.Controls.Button2D({
+        id: _this.id + "-signupButton",
+        bounds: new Primrose.Text.Rectangle(256, 150, 256, 50),
+        fontSize: 32,
+        value: "Sign up"
+      });
+
+      _this.loginButton.addEventListener("click", function (evt) {
+        return emit.call(_this, "login", { target: _this });
+      }, false);
+      _this.signupButton.addEventListener("click", function (evt) {
+        return emit.call(_this, "signup", { target: _this });
+      }, false);
+
+      _this.mesh = textured(quad(1, 200 / 512), _this.frame);
+      _this.mesh.name = "SignupForm";
+
+      _this.frame.appendChild(_this.labelUserName);
+      _this.frame.appendChild(_this.userName);
+      _this.frame.appendChild(_this.labelEmail);
+      _this.frame.appendChild(_this.email);
+      _this.frame.appendChild(_this.labelPassword);
+      _this.frame.appendChild(_this.password);
+      _this.frame.appendChild(_this.loginButton);
+      _this.frame.appendChild(_this.signupButton);
+      _this.appendChild(_this.frame);
+      return _this;
+    }
+
+    return SignupForm;
+  }(Primrose.Entity);
+
+  return SignupForm;
+}();
 Primrose.VERSION = "v0.22.0";
 console.log("Using Primrose v0.22.0. Find out more at http://www.primrosevr.com");
