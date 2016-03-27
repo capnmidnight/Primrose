@@ -90,13 +90,13 @@ function serveRequest(request, response) {
   if (!matchController(request, response) && request.method === "GET") {
     var parts = url.parse(request.url),
       file = "." + parts.pathname;
+    
     if (file[file.length - 1] === "/") {
       file += "index.html";
     }
 
     fs.lstat(file, function (err, stat) {
       if (err) {
-        console.log("404", file);
         serverError(response, request.url, 404);
       }
       else if (stat.isDirectory()) {

@@ -21,6 +21,7 @@
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>true</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
+    <LaunchUrl>examples/editor3d/</LaunchUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
