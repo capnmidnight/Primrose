@@ -184,9 +184,9 @@ Primrose.Output.Audio3D = (function () {
   Audio3D.prototype.playBufferImmediate = function (buffer, volume) {
     this.createSound(false, this.createFixedSound.bind(this, function (snd) {
       snd.volume.gain.value = volume;
-      snd.source.addEventListener("ended", function (evt) {
+      snd.source.addEventListener("ended", (evt) => {
         snd.volume.disconnect(this.mainVolume);
-      }.bind(this));
+      });
       snd.source.start(0);
     }), buffer);
   };

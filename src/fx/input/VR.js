@@ -42,6 +42,9 @@ Primrose.Input.VR = (function () {
       }
     }
 
+    var onFullScreenChange = () => {
+    };
+
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
       console.log("Displays:", displays);
@@ -142,7 +145,7 @@ Primrose.Input.VR = (function () {
     type: "Boolean",
     description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."
   });
-  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || (isMobile || window.DeviceMotionEvent);
+  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || isMobile;
 
   VRInput.AXES = [
     "headX", "headY", "headZ",

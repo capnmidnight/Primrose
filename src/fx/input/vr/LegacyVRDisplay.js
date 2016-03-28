@@ -117,15 +117,14 @@
       return [currentLayer];
     };
 
-    var fullScreenParam = { vrDisplay: device.display, vrDistortion: true };
+    this._onFullScreenRemoved = () => {
+      console.log("exiting legacy presentation");
+      FullScreen.removeChangeListener(this._onFullScreenRemoved);
+      this.exitPresent();
+    };
 
-    this.requestPresent = function (layer) {
-      var promises = [];
-      if (currentLayer) {
-        console.log("need to exit the previous presentation mode, first.");
-        promises.push(this.exitPresent());
-      }
-      promises.push(new Promise(function (resolve, reject) {
+    this.requestPresent = (layer) => {
+      return new Promise((resolve, reject) => {
         if (!this.capabilities.canPresent) {
           reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
         }
@@ -136,57 +135,40 @@
           reject(new Error("No source on layer parameter."));
         }
         else {
-          requestFullScreen(layer.source, fullScreenParam)
-            .then(function (elem) {
+          FullScreen.request(layer.source, { vrDisplay: device.display, vrDistortion: true })
+            .then((elem) => {
               this.isPresenting = elem === layer.source;
               currentLayer = layer;
-              if (isMobile && screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape-primary');
-              }
-              window.dispatchEvent(new Event("vrdisplaypresentchange"));
-              resolve();
-            }.bind(this))
-            .catch(function (evt) {
-              this.isPresenting = false;
-              reject(evt);
-            }.bind(this));
-        }
-      }.bind(this)));
-      return Promise.all(promises);
-    }.bind(this);
-
-    this.exitPresent = function () {
-      return new Promise(function (resolve, reject) {
-        if (!this.isPresenting) {
-          reject(new Error("Not presenting."));
-        }
-        else if (!currentLayer) {
-          reject(new Error("Not in control of presentation."));
-        }
-        else {
-          var clear = function () {
-            this.isPresenting = false;
-            currentLayer = null;
-          }.bind(this);
-
-          exitFullScreen()
-            .then(function () {
-              clear();
+              FullScreen.addChangeListener(this._onFullScreenRemoved, false);
               window.dispatchEvent(new Event("vrdisplaypresentchange"));
               resolve();
             })
-            .catch(function (err) {
-              clear();
-              reject(err);
+            .catch((evt) => {
+              this.isPresenting = false;
+              reject(evt);
             });
         }
       });
+    };
+
+    this.exitPresent = function () {
+      var clear = () => {
+        console.log("exit presenting", this);
+        this.isPresenting = false;
+        currentLayer = null;
+      };
+      return FullScreen.exit()
+        .then(function (elem) {
+          clear();
+          window.dispatchEvent(new Event("vrdisplaypresentchange"));
+          return elem;
+        })
+        .catch(clear);
     };
   }
 
   LegacyVRDisplay.prototype.requestAnimationFrame = window.requestAnimationFrame.bind(window);
   LegacyVRDisplay.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind(window);
-
   LegacyVRDisplay.prototype.submitFrame = function () {
   };
   return LegacyVRDisplay;

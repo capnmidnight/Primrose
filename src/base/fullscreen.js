@@ -1,101 +1,91 @@
-﻿function withFullScreenChange(act) {
-  return new Promise(function (resolve, reject) {
-    var onFullScreen,
-      onFullScreenError,
-      timeout,
-      tearDown = function () {
-        clearTimeout(timeout);
-        window.removeEventListener("fullscreenchange", onFullScreen);
-        window.removeEventListener("webkitfullscreenchange", onFullScreen);
-        window.removeEventListener("mozfullscreenchange", onFullScreen);
-        window.removeEventListener("msfullscreenchange", onFullScreen);
+﻿var FullScreen = (function () {
+  "use strict";
 
-        window.removeEventListener("fullscreenerror", onFullScreenError);
-        window.removeEventListener("webkitfullscreenerror", onFullScreenError);
-        window.removeEventListener("mozfullscreenerror", onFullScreenError);
-        window.removeEventListener("msfullscreenerror", onFullScreenError);
-      };
+  var elementName = findProperty(document, ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]),
+    changeEventName = findProperty(document, ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"]),
+    errorEventName = findProperty(document, ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"]),
+    requestMethodName = findProperty(document.documentElement, ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"]),
+    exitMethodName = findProperty(document, ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"]);
 
-    onFullScreen = function () {
-      setTimeout(tearDown);
-      resolve(document.webkitFullscreenElement || document.fullscreenElement);
-    };
+  changeEventName = changeEventName && changeEventName.substring(2);
+  errorEventName = errorEventName && errorEventName.substring(2);
 
-    onFullScreenError = function (evt) {
-      setTimeout(tearDown);
-      reject(evt);
-    };
+  return {
+    addChangeListener: (thunk, bubbles) => document.addEventListener(changeEventName, thunk, bubbles),
+    removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),
+    addErrorListener: (thunk, bubbles) => document.addEventListener(errorEventName, thunk, bubbles),
+    removeErrorListener: (thunk) => document.removeEventListener(errorEventName, thunk),
+    getElement: () => document[elementName],
+    withChange: (act) => {
+      return new Promise((resolve, reject) => {
+        var onFullScreen,
+          onFullScreenError,
+          timeout,
+          tearDown = () => {
+            if (timeout) {
+              clearTimeout(timeout);
+            }
+            FullScreen.removeChangeListener(onFullScreen);
+            FullScreen.removeErrorListener(onFullScreenError);
+          };
 
-    window.addEventListener("fullscreenchange", onFullScreen, false);
-    window.addEventListener("webkitfullscreenchange", onFullScreen, false);
-    window.addEventListener("mozfullscreenchange", onFullScreen, false);
-    window.addEventListener("msfullscreenchange", onFullScreen, false);
+        onFullScreen = () => {
+          setTimeout(tearDown);
+          resolve(FullScreen.getElement());
+        };
 
-    window.addEventListener("fullscreenerror", onFullScreenError, false);
-    window.addEventListener("webkitfullscreenerror", onFullScreenError, false);
-    window.addEventListener("mozfullscreenerror", onFullScreenError, false);
-    window.addEventListener("msfullscreenerror", onFullScreenError, false);
+        onFullScreenError = (evt) => {
+          setTimeout(tearDown);
+          reject(evt);
+        };
 
-    act();
-      
-    // Timeout wating on the fullscreen to happen, for systems like iOS that
-    // don't properly support it, even though they say they do.
-    timeout = setTimeout(reject, 1000);
-  });
-}
+        FullScreen.addChangeListener(onFullScreen, false);
+        FullScreen.addErrorListener(onFullScreenError, false);
 
-function requestFullScreen(elem, fullScreenParam) {
-  return new Promise(function (resolve, reject) {
-    withFullScreenChange(function () {
-      if (elem.requestFullscreen && fullScreenParam) {
-        elem.requestFullscreen(fullScreenParam);
-      }
-      else if (elem.mozRequestFullScreen && fullScreenParam) {
-        elem.mozRequestFullScreen(fullScreenParam);
-      }
-      else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen(fullScreenParam || window.Element.ALLOW_KEYBOARD_INPUT);
-      }
-      else if (elem.requestFullscreen && !fullScreenParam) {
-        elem.requestFullscreen();
-      }
-      else if (elem.mozRequestFullScreen && !fullScreenParam) {
-        elem.mozRequestFullScreen();
-      }
-      else if (elem.requestFullScreen) {
-        elem.requestFullScreen();
-      }
-      else {
-        reject();
-      }
-    })
-      .then(resolve)
-      .catch(reject);
-  });
-}
-
-function exitFullScreen() {
-  return new Promise(function (resolve, reject) {
-    withFullScreenChange(function () {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-      else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-      else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen();
-      }
-      else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      }
-      else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-      else {
-        reject();
-      }
-    }).then(resolve)
-      .catch(reject);
-  });
-}
+        if (act()) {
+          tearDown();
+          resolve();
+        }
+        else {      
+          // Timeout wating on the fullscreen to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          timeout = setTimeout(() => {
+            tearDown();
+            reject("Fullscreen state did not change in allotted time");
+          }, 1000);
+        }
+      });
+    },
+    request: (elem, fullScreenParam) => {
+      return FullScreen.withChange(() => {
+        if (!requestMethodName) {
+          throw new Error("No Fullscreen API support.");
+        }
+        else if (FullScreen.getElement()) {
+          return true;
+        }
+        else if (fullScreenParam) {
+          elem[requestMethodName](fullScreenParam);
+        }
+        else if (isChrome) {
+          elem[requestMethodName](window.Element.ALLOW_KEYBOARD_INPUT);
+        } else {
+          elem[requestMethodName]();
+        }
+      });
+    },
+    exit: () => {
+      return FullScreen.withChange(() => {
+        if (!exitMethodName) {
+          throw new Error("No Fullscreen API support.");
+        }
+        else if (!FullScreen.getElement()) {
+          return true;
+        }
+        else {
+          document[exitMethodName]();
+        }
+      });
+    }
+  }
+})();

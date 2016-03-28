@@ -26,10 +26,10 @@ var app = new Primrose.BrowserEnvironment(
 
 // we setup the event handlers for going full-screen
 app.setFullScreenButton( "goVR", "click", true );
-app.setFullScreenButton( "goRegular", "click", false );
-app.ctrls.viewSource.addEventListener("click", function () {
+app.setFullScreenButton("goRegular", "click", false);
+document.querySelector("#viewSource").addEventListener("click", function () {
   var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-  path = path.replace("index.html", "app.js");
+  path = path.replace(/\/(index.html)?(#fullscreen)?$/, "/app.js");
   window.open(path);
 }, false);
 

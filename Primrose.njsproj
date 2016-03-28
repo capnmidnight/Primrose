@@ -30,6 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="src\base\findProperty.js" />
     <Content Include="doc\blenderAdvanced.html" />
     <Content Include="doc\blenderBeginner.html" />
     <Content Include="doc\drum.html" />

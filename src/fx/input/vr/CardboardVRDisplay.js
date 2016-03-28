@@ -39,13 +39,13 @@
       }
     };
 
-    corrector.addEventListener("deviceorientation", function (evt) {
+    corrector.addEventListener("deviceorientation", (evt) => {
       currentPose = {
         timestamp: performance.now(),
         frameID: ++frameID,
         orientation: new Float32Array(evt.toArray())
       };
-    }.bind(this));
+    });
 
     this.getImmediatePose = function () {
       return currentPose;
@@ -61,13 +61,15 @@
       return [currentLayer];
     };
 
-    this.requestPresent = function (layer) {
-      var promises = [];
-      if (currentLayer) {
-        console.log("need to exit the previous presentation mode, first.");
-        promises.push(this.exitPresent());
-      }
-      promises.push(new Promise(function (resolve, reject) {
+    this._onFullScreenRemoved = () => {
+      console.log("exiting cardboard presentation");
+      FullScreen.removeChangeListener(this._onFullScreenRemoved);
+      this.exitPresent();
+    };
+
+    this.requestPresent = (layer) => {
+      console.log("requestPresent");
+      return new Promise((resolve, reject) => {
         if (!this.capabilities.canPresent) {
           reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
         }
@@ -78,54 +80,33 @@
           reject(new Error("No source on layer parameter."));
         }
         else {
-          requestFullScreen(layer.source)
-            .then(function (elem) {
+          FullScreen.request(layer.source)
+            .then((elem) => {
               this.isPresenting = elem === layer.source;
               currentLayer = layer;
-              if (isMobile) {
-                if (screen.orientation && screen.orientation.lock) {
-                  screen.orientation.lock("landscape-primary");
-                }
-                else if (screen.mozLockOrientation) {
-                  screen.mozLockOrientation("landscape-primary");
-                }
-              }
-              resolve();
-            }.bind(this))
-            .catch(function (evt) {
-              this.isPresenting = false;
-              reject(evt);
-            }.bind(this));
-        }
-      }.bind(this)));
-      return Promise.all(promises);
-    }.bind(this);
-
-    this.exitPresent = function () {
-      return new Promise(function (resolve, reject) {
-        if (!this.isPresenting) {
-          console.warn("Wasn't presenting.");
-        }
-        if (!currentLayer) {
-          reject(new Error("Not in control of presentation."));
-        }
-        else {
-          var clear = function () {
-            this.isPresenting = false;
-            currentLayer = null;
-          }.bind(this);
-
-          exitFullScreen()
-            .then(function () {
-              clear();
+              FullScreen.addChangeListener(this._onFullScreenRemoved, false);
               resolve();
             })
-            .catch(function (err) {
-              clear();
-              reject(err);
+            .catch((evt) => {
+              this.isPresenting = false;
+              reject(evt);
             });
         }
       });
+    };
+
+    this.exitPresent = function () {
+      var clear = () => {
+        console.log("exit presenting", this);
+        this.isPresenting = false;
+        currentLayer = null;
+      };
+      return FullScreen.exit()
+        .then(function (elem) {
+          clear();
+          return elem;
+        })
+        .catch(clear);
     };
   }
 

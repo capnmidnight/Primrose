@@ -1,4 +1,44 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/templates/main"><!-- start main.jade meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
-<!-- start main.jade head block --><script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- end main.jade head block --></head><body><!-- start main.jade banner block --><!-- end main.jade banner block --><header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="/index.html#intro">intro/</a></li><li><a href="/index.html#webvr">webvr/</a></li><li><a href="/doc/">doc/</a></li><li><a href="/index.html#dev">download/</a></li><li><a href="/index.html#teamInfo">team/</a></li><li><a href="/index.html#mail">contact/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><!-- start main.jade main block --><!-- end main.jade main block -->
-<!-- start main.jade footer block --><!-- end main.jade footer block --></body></html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="A WebVR application framework.">
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Primrose_VR">
+    <meta property="og:site_name" content="Primrose VR">
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
+    <meta property="og:url" content="http://www.primrosevr.com/templates/main"><!-- start main.jade meta block -->
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+    <!-- start main.jade title block -->
+    <meta property="og:title" content="Primrose VR: WebVR Application Framework">
+    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
+    <title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
+    <!-- start main.jade head block -->
+    <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- end main.jade head block -->
+  </head>
+  <body><!-- start main.jade banner block --><!-- end main.jade banner block -->
+    <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
+      <nav role="navigation">
+        <ul>
+          <li><a href="/index.html#intro">intro/</a></li>
+          <li><a href="/index.html#webvr">webvr/</a></li>
+          <li><a href="/doc/">doc/</a></li>
+          <li><a href="/index.html#dev">download/</a></li>
+          <li><a href="/index.html#teamInfo">team/</a></li>
+          <li><a href="/index.html#mail">contact/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header><!-- start main.jade main block --><!-- end main.jade main block -->
+    <!-- start main.jade footer block --><!-- end main.jade footer block -->
+  </body>
+</html>
