@@ -24,15 +24,6 @@ var app = new Primrose.BrowserEnvironment(
       }
     } );
 
-// we setup the event handlers for going full-screen
-app.setFullScreenButton( "goVR", "click", true );
-app.setFullScreenButton("goRegular", "click", false);
-document.querySelector("#viewSource").addEventListener("click", function () {
-  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-  path = path.replace(/\/(index.html)?(#fullscreen)?$/, "/app.js");
-  window.open(path);
-}, false);
-
 // Once Primrose has setup the WebGL context, setup Three.js, 
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,

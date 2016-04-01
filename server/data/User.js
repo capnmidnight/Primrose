@@ -1,5 +1,4 @@
-var crypto = require("crypto"),
-    log = require("../core").log;
+var log = require("../core").log;
 
 function User(info) {
   this.devices = [];
@@ -14,24 +13,16 @@ function User(info) {
     heading: 0,
     dHeading: 0,
     isRunning: false,
-    userName: info.userName
+    userName: info.userName,
+    app: null
   };
-  
+
   this.salt = info.salt;
   this.hash = info.hash;
   this.email = info.email;
 }
 
-User.makeNewSalt = function () {
-  var bytes = crypto.randomBytes(256);
-  var salt = "";
-  for (var i = 0; i < bytes.length; ++i) {
-    salt += bytes[i].toString(16);
-  }
-  return salt;
-};
-
-User.prototype.addDevice = function (users, socket) {
+User.prototype.addDevice = function (socket, users) {
   //
   // find a slot in which to put the socket
   //
@@ -39,7 +30,7 @@ User.prototype.addDevice = function (users, socket) {
   while (index < this.devices.length && this.devices[index]) {
     ++index;
   }
-  
+
   log("Device added for $1", this.state.userName);
   this.devices[index] = socket;
   
@@ -53,6 +44,7 @@ User.prototype.addDevice = function (users, socket) {
       this.state.z = state.z;
       this.state.heading = state.heading;
       this.state.isRunning = state.isRunning;
+      this.state.app = state.app;
       this.broadcast(users, index, "userState", this.state);
     }.bind(this),
     onChat: User.prototype.chat.bind(this, users),
@@ -68,13 +60,13 @@ User.prototype.addDevice = function (users, socket) {
   // notify the new client of all of the users currently logged in
   //
   var userList = [];
-  for (var key in users) {
-    if (users[key].isConnected()) {
-      userList.push(users[key].state);
+  users.forEach(function (key, user) {
+    if (user.isConnected()) {
+      userList.push(user.state);
     }
-  }
+  });
   socket.emit("userList", userList);
-  
+
   if (index === 0) {
     //
     // notify all of the users of a new user
@@ -93,12 +85,12 @@ User.prototype.addDevice = function (users, socket) {
 
 User.prototype.broadcast = function (users, skipIndex) {
   var args = Array.prototype.slice.call(arguments, 2);
-  for (var key in users) {
-    var toUser = users[key];
-    toUser.emit
-            .bind(toUser, (toUser.state.userName === this.state.userName) ? skipIndex : -1)
-            .apply(toUser, args);
-  }
+  users.forEach(function (key, toUser) {
+    if (toUser.state.app === this.state.app) {
+      toUser.emit.bind(toUser, (toUser.state.userName === this.state.userName) ? skipIndex : -1)
+        .apply(toUser, args);
+    }
+  }.bind(this));
 };
 
 User.prototype.emit = function (skipIndex) {

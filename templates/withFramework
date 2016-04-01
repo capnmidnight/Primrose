@@ -25,10 +25,12 @@
     <!-- start main.jade head block -->
     <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append -->
     <script type="text/javascript" src="/lib/logger.js"></script>
-    <script type="text/javascript" src="/lib/webgl-debug.js"></script>
-    <script type="text/javascript" src="/node_modules/three/three.js"></script>
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
     <script type="text/javascript" src="/lib/pliny.js"></script>
+    <script type="text/javascript" src="/lib/webgl-debug.js"></script>
+    <script type="text/javascript" src="/lib/sha512.js"></script>
+    <script type="text/javascript" src="/node_modules/three/three.js"></script>
+    <script type="text/javascript" src="/node_modules/socket.io-client/socket.io.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
     <script type="text/javascript" src="/src/base/axis.js"></script>
     <script type="text/javascript" src="/src/base/box.js"></script>
@@ -149,7 +151,6 @@
       </nav>
     </header><!-- start main.jade main block --><!-- end main.jade main block -->
     <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
-    <script type="text/javascript" src="app.js"></script>
-    <script type="text/javascript"> if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
+    <script type="text/javascript" src="app.js"></script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
   </body>
 </html>

@@ -190,19 +190,6 @@ function clrscr() {
   }
 }
 
-var cmdLabels = document.querySelectorAll(".cmdLabel");
-for (var i = 0; i < cmdLabels.length; ++i) {
-  cmdLabels[i].innerHTML = cmdPre;
-}
-
-app.setFullScreenButton("goVR", "click", true);
-app.setFullScreenButton("goRegular", "click", false);
-document.querySelector("#viewSource").addEventListener("click", function () {
-  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-  path = path.replace(/\/(index.html)?(#fullscreen)?$/, "/app.js");
-  window.open(path);
-}, false);
-
 function getSourceCode(skipReload) {
   var defaultDemo = testDemo.toString(),
     src = skipReload && defaultDemo || getSetting("code", defaultDemo);

@@ -10,6 +10,7 @@ var pathX = /.*\/(.*).js/,
     "lib/ga.js",
     "lib/mailchimp.js",
     "lib/pliny.js",
+    "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/marked/lib/marked.js"
@@ -101,10 +102,12 @@ if (false) {
   debugData.frameworkFiles = debugData.frameworkFiles.map(function (f) { return f.replace(/^\/src\//, "/es5/"); });
 }
 
+debugData.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");
+debugData.frameworkFiles.unshift("/node_modules/three/three.js");
+debugData.frameworkFiles.unshift("/lib/sha512.js");
+debugData.frameworkFiles.unshift("/lib/webgl-debug.js");
 debugData.frameworkFiles.unshift("/lib/pliny.js");
 debugData.frameworkFiles.unshift("/node_modules/marked/lib/marked.js");
-debugData.frameworkFiles.unshift("/node_modules/three/three.js");
-debugData.frameworkFiles.unshift("/lib/webgl-debug.js");
 debugData.frameworkFiles.unshift("/lib/logger.js");
 
 debugData.docFiles.sort(function (a, b) {

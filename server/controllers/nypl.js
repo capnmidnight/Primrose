@@ -3,7 +3,6 @@ var getObject = require("../http/getObject");
 //http://api.repo.nypl.org/
 
 module.exports = {
-  path: "/nypl/",
   pattern: /^\/nypl\/?(?:\?(q=[^&]+))?/,
   GET: function (params, sendData, serverError) {
     getObject("http://api.repo.nypl.org/api/v1/items/search?q=stereo&publicDomainOnly=true", {

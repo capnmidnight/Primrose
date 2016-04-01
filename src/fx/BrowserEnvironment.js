@@ -871,7 +871,7 @@ Primrose.BrowserEnvironment = (function () {
             newFunction = function () {
             };
           }
-          return () => {
+          return function() {
             if (isFullScreenMode()) {
               newFunction();
             }

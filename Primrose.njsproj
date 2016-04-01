@@ -21,7 +21,7 @@
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
-    <LaunchUrl>doc/</LaunchUrl>
+    <LaunchUrl>examples/nypl</LaunchUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -186,7 +186,7 @@
     <Compile Include="server\controllers\logger.js" />
     <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
-    <Compile Include="server\gameController.js" />
+    <Compile Include="server\data\users.js" />
     <Compile Include="server\http\get.js" />
     <Compile Include="server\http\getBuffer.js" />
     <Compile Include="server\http\getObject.js" />
@@ -194,7 +194,6 @@
     <Compile Include="server\http\post.js" />
     <Compile Include="server\http\request.js" />
     <Compile Include="server\http\sendObject.js" />
-    <Compile Include="server\master.js" />
     <Compile Include="server\options.js" />
     <Compile Include="server\requireDirectory.js" />
     <Compile Include="server\socketControllers.js" />
@@ -306,11 +305,9 @@
     <Content Include="examples\temple\index.html" />
     <Content Include="examples\temple\screenshot.jpg" />
     <Content Include="examples\temple\app.js" />
-    <Compile Include="server\controllers\bears.js" />
-    <Compile Include="server\controllers\holodeck.js" />
-    <Compile Include="server\game\User.js" />
-    <Compile Include="server\socketControllers\demo.server.js" />
-    <Compile Include="server\socketControllers\peering.js" />
+    <Compile Include="server\data\User.js" />
+    <Compile Include="server\socketControllers\login.js" />
+    <Compile Include="server\socketControllers\peer.js" />
     <Content Include="server\templates\game.html" />
     <Content Include="server\templates\master.html" />
     <Content Include="src\fx\Angle.js" />
@@ -405,7 +402,7 @@
     <Folder Include="templates\" />
     <Folder Include="server" />
     <Folder Include="server\controllers" />
-    <Folder Include="server\game" />
+    <Folder Include="server\data\" />
     <Folder Include="server\socketControllers" />
     <Folder Include="server\templates" />
     <Folder Include="src" />

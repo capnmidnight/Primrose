@@ -22,14 +22,6 @@ var GRASS = "/examples/images/grass.png",
       groundTexture: ROCK
     } );
 
-app.setFullScreenButton( "goVR", "click", true );
-app.setFullScreenButton( "goRegular", "click", false );
-app.ctrls.viewSource.addEventListener( "click", function () {
-  var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-  path = path.replace( "index.html", "app.js" );
-  window.open( path );
-}, false );
-
 function column ( a, b, h ) {
   return textured( cylinder( a, b, h, 6, 1 ), SAND );
 }
