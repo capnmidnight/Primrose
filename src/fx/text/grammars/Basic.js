@@ -2,7 +2,8 @@
 
 Primrose.Text.Grammars.Basic = (function () {
 
-  pliny.value("Primrose.Text.Grammars", {
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
     name: "Basic",
     description: "| [under construction]"
   });
@@ -655,7 +656,8 @@ Primrose.Text.Grammars.Basic = (function () {
   return basicGrammar;
 })();
 
-pliny.issue("Primrose.Text.Grammars.Basic", {
+pliny.issue({
+  parent: "Primrose.Text.Grammars.Basic",
   name: "document Basic",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Grammars.Basic](#Primrose_Text_Grammars_Basic) class in the grammars/ directory"

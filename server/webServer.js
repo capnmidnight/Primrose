@@ -49,10 +49,28 @@ function findController(request) {
 function matchController(request, response) {
   var controller = findController(request);
   if (controller) {
-    controller.handler(
-      controller.parameters,
-      sendData.bind(this, request, response),
-      serverError.bind(this, response, request.url));
+    function execute(body) {
+      controller.handler(
+        controller.parameters,
+        sendData.bind(this, request, response),
+        serverError.bind(this, response, request.url),
+        body);
+    }
+    if (request.method === "PUT" || request.method === "POST") {
+      var body = [];
+      request.on("data", function (chunk) {
+        body.push(chunk);
+      }).on("end", function () {
+        var text = Buffer.concat(body).toString();
+        if (request.headers["content-type"].indexOf("json") > -1) {
+          text = JSON.parse(text);
+        }
+        execute(text);
+      });
+    }
+    else {
+      execute();
+    }
     return true;
   }
   return false;
@@ -69,19 +87,20 @@ function sendData(request, response, mimeType, content, contentLength) {
       "connection": "keep-alive"
     };
 
-    if (content instanceof stream.Readable) {
+    if (!content) {
+      headers["content-length"] = 0;
+      response.writeHead(200, headers);
+      response.end();
+    }
+    else if (content instanceof stream.Readable) {
       headers["content-length"] = contentLength;
       response.writeHead(200, headers);
       content.pipe(response);
     }
     else {
-      var send = function (d) {
-        headers["content-length"] = d.length;
-        response.writeHead(200, headers);
-        response.end(d);
-      };
-
-      send(content);
+      headers["content-length"] = content.length;
+      response.writeHead(200, headers);
+      response.end(content);
     }
   }
 }
@@ -90,7 +109,7 @@ function serveRequest(request, response) {
   if (!matchController(request, response) && request.method === "GET") {
     var parts = url.parse(request.url),
       file = "." + parts.pathname;
-    
+
     if (file[file.length - 1] === "/") {
       file += "index.html";
     }

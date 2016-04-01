@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.HTTP", {
+pliny.function({
+  parent: "Primrose.HTTP",
   name: "put",
   description: "Process an HTTP PUT request.",
   returns: "Promise",

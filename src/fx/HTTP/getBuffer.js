@@ -1,4 +1,5 @@
-﻿pliny.function("Primrose.HTTP", {
+﻿pliny.function({
+  parent: "Primrose.HTTP",
   name: "getBuffer",
   description: "Get an ArrayBuffer from a server.",
   returns: "Promise",

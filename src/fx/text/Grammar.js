@@ -3,7 +3,8 @@
 Primrose.Text.Grammar = (function () {
   "use strict";
 
-  pliny.class("Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Grammar",
     parameters: [
       { name: "name", type: "String", description: "A user-friendly name for the grammar, to be able to include it in an options listing." },
@@ -64,6 +65,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
   });
   function Grammar(name, rules) {
     pliny.property({
+      parent: "Primrose.Text.Grammar",
       name: " name",
       type: "String",
       description: "A user-friendly name for the grammar, to be able to include it in an options listing."
@@ -71,6 +73,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     this.name = name;
 
     pliny.property({
+      parent: "Primrose.Text.Grammar",
       name: "grammar",
       type: "Array",
       description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
@@ -155,6 +158,7 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     };
 
     pliny.method({
+      parent: "Primrose.Text.Grammar",
       name: "tokenize",
       parameters: [{ name: "text", type: "String", description: "The text to tokenize." }],
       returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
@@ -211,7 +215,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
   return Grammar;
 })();
 
-pliny.issue("Primrose.Text.Grammar", {
+pliny.issue({
+  parent: "Primrose.Text.Grammar",
   name: "document Grammar",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Text.Grammar](#Primrose_Text_Grammar) class in the text/ directory"

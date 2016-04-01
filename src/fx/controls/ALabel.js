@@ -5,7 +5,8 @@ Primrose.Controls.Label = (function () {
 
   var COUNTER = 0;
 
-  pliny.class("Primrose.Controls", {
+  pliny.class({
+    parent: "Primrose.Controls",
     name: "Label",
     description: "A simple label of text to put on a Surface.",
     parameters: [
@@ -171,7 +172,8 @@ Primrose.Controls.Label = (function () {
   return Label;
 })();
 
-pliny.issue("Primrose.Controls.Label", {
+pliny.issue({
+  parent: "Primrose.Controls.Label",
   name: "document Label",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Controls.Label](#Primrose_Controls_Label)\n\

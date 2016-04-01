@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.DOM", {
+pliny.function({
+  parent: "Primrose.DOM",
   name: "makeHidingContainer",
   description: "Takes an element and shoves it into a containing element that\n\
 is 0x0 pixels in size, with the overflow hidden. Sometimes, we need an element\n\

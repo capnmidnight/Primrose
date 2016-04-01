@@ -2,13 +2,15 @@
 
 Primrose.Input.Keyboard = ( function () {
 
-  pliny.issue( "Primrose.Input.Keyboard", {
+  pliny.issue({
+    parent: "Primrose.Input.Keyboard",
     name: "document Keyboard",
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Keyboard](#Primrose_Input_Keyboard) class in the input/ directory"
   } );
   
-  pliny.class( "Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Keyboard",
     baseClass: "Primrose.Input.ButtonAndAxis",
     description: "| [under construction]",

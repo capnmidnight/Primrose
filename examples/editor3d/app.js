@@ -1,5 +1,4 @@
 /* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
-
 var GRASS = "/examples/images/grass.png",
   ROCK = "/examples/images/rock.png",
   SAND = "/examples/images/sand.png",

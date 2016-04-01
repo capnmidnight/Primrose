@@ -1,13 +1,13 @@
 "use strict";
 
-pliny.issue("", {
+pliny.issue({
   name: "document shell",
   type: "closed",
   description: "Finish writing the documentation for the [`shell`](#shell) function\n\
 in the helpers/graphics.js file."
 });
 
-pliny.function("", {
+pliny.function({
   name: "shell",
   parameters: [{ name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." }, { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." }, { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." }, { name: "phi", type: "Number", description: "The angle in radians around the Y-axis of the sphere." }, { name: "thetaStart", type: "Number", description: "The angle in radians around the Z-axis of the sphere." }],
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\

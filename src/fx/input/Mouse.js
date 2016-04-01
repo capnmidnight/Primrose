@@ -2,7 +2,8 @@
 
 Primrose.Input.Mouse = (function () {
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Mouse",
     description: "| [under construction]"
   });
@@ -197,6 +198,7 @@ Primrose.Input.Mouse = (function () {
     request: (elem) => {
       return MouseInput.Lock.withChange(() => {
         if (!requestMethodName) {
+          console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
         }
         else if (MouseInput.Lock.getElement()) {
@@ -209,6 +211,7 @@ Primrose.Input.Mouse = (function () {
     exit: () => {
       return MouseInput.Lock.withChange(() => {
         if (!exitMethodName) {
+          console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
         }
         else if (!MouseInput.Lock.getElement()) {
@@ -231,7 +234,8 @@ Primrose.Input.Mouse = (function () {
   return MouseInput;
 })();
 
-pliny.issue("Primrose.Input.Mouse", {
+pliny.issue({
+  parent: "Primrose.Input.Mouse",
   name: "document Mouse",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.Mouse](#Primrose_Input_Mouse) class in the input/ directory"

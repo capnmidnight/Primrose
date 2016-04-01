@@ -2,6 +2,8 @@
 
 Primrose.Input.VR.CardboardVRDisplay = function () {
   function CardboardVRDisplay() {
+    var _this = this;
+
     this.capabilities = {
       canPresent: true,
       hasExternalDisplay: false,
@@ -46,7 +48,7 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
         frameID: ++frameID,
         orientation: new Float32Array(evt.toArray())
       };
-    }.bind(this));
+    });
 
     this.getImmediatePose = function () {
       return currentPose;
@@ -62,62 +64,47 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
       return [currentLayer];
     };
 
+    this._onFullScreenRemoved = function () {
+      console.log("exiting cardboard presentation");
+      FullScreen.removeChangeListener(_this._onFullScreenRemoved);
+      _this.exitPresent();
+    };
+
     this.requestPresent = function (layer) {
-      var promises = [];
-      if (currentLayer) {
-        console.log("need to exit the previous presentation mode, first.");
-        promises.push(this.exitPresent());
-      }
-      promises.push(new Promise(function (resolve, reject) {
-        if (!this.capabilities.canPresent) {
-          reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
+      console.log("requestPresent");
+      return new Promise(function (resolve, reject) {
+        if (!_this.capabilities.canPresent) {
+          reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
         } else if (!layer) {
           reject(new Error("No layer provided to requestPresent"));
         } else if (!layer.source) {
           reject(new Error("No source on layer parameter."));
         } else {
-          requestFullScreen(layer.source).then(function (elem) {
-            this.isPresenting = elem === layer.source;
+          FullScreen.request(layer.source).then(function (elem) {
+            _this.isPresenting = elem === layer.source;
             currentLayer = layer;
-            if (isMobile) {
-              if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock("landscape-primary");
-              } else if (screen.mozLockOrientation) {
-                screen.mozLockOrientation("landscape-primary");
-              }
-            }
+            FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
             resolve();
-          }.bind(this)).catch(function (evt) {
-            this.isPresenting = false;
+          }).catch(function (evt) {
+            _this.isPresenting = false;
             reject(evt);
-          }.bind(this));
-        }
-      }.bind(this)));
-      return Promise.all(promises);
-    }.bind(this);
-
-    this.exitPresent = function () {
-      return new Promise(function (resolve, reject) {
-        if (!this.isPresenting) {
-          console.warn("Wasn't presenting.");
-        }
-        if (!currentLayer) {
-          reject(new Error("Not in control of presentation."));
-        } else {
-          var clear = function () {
-            this.isPresenting = false;
-            currentLayer = null;
-          }.bind(this);
-
-          exitFullScreen().then(function () {
-            clear();
-            resolve();
-          }).catch(function (err) {
-            clear();
-            reject(err);
           });
         }
       });
+    };
+
+    this.exitPresent = function () {
+      var _this2 = this;
+
+      var clear = function clear() {
+        console.log("exit presenting", _this2);
+        _this2.isPresenting = false;
+        currentLayer = null;
+      };
+      return FullScreen.exit().then(function (elem) {
+        clear();
+        return elem;
+      }).catch(clear);
     };
   }
 

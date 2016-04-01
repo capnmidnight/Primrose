@@ -41,13 +41,14 @@ Primrose.BrowserEnvironment = (function () {
       "touchstart", "touchend", "touchmove"],
     RESOLUTION_SCALE = 1;
 
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "BrowserEnvironment",
     description: "Make a Virtual Reality app in your web browser!"
   });
   class BrowserEnvironment {
     constructor(name, options) {
-      this.options = combineDefaults(options, BrowserEnvironment.DEFAULTS);
+      this.options = patch(options, BrowserEnvironment.DEFAULTS);
 
       var fire = emit.bind(this);
 
@@ -1019,13 +1020,15 @@ Primrose.BrowserEnvironment = (function () {
   return BrowserEnvironment;
 })();
 
-pliny.issue("Primrose.BrowserEnvironment", {
+pliny.issue({
+  parent: "Primrose.BrowserEnvironment",
   name: "document BrowserEnvironment",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_BrowserEnvironment) class in the  directory"
 });
 
-pliny.issue("Primrose.BrowserEnvironment", {
+pliny.issue({
+  parent: "Primrose.BrowserEnvironment",
   name: "scene FOV issues",
   type: "open",
   description: "Image appears \"zoomed in\" when in VR mode. See \n\
@@ -1033,7 +1036,8 @@ pliny.issue("Primrose.BrowserEnvironment", {
 for more information."
 });
 
-pliny.issue("Primrose.BrowserEnvironment", {
+pliny.issue({
+  parent: "Primrose.BrowserEnvironment",
   name: "default light",
   type: "open",
   description: "When the user does not define a scene model file and opts to use the\n\

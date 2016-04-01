@@ -17,13 +17,4 @@ block banner
     button#viewSource(type="button", style="display:none") View source
     button#goVR(type="button"): img(src="/images/cardboard64.png", alt="icon")
     button#goRegular(type="button"): img(src="/images/fullscreen64.png", alt="icon")
-
-prepend footer
-  script(type="text/javascript").
-    if (isInIFrame) {
-      document.querySelector("header").style.display = "none";
-    }
-    else {
-      document.querySelector("#viewSource").style.display = "block";
-    }
   <!-- end demo.jade banner block -->

@@ -7,7 +7,8 @@ Primrose.Controls.Image = (function () {
     HTMLImage = window.Image,
     imageCache = {};
 
-  pliny.class("Primrose.Controls", {
+  pliny.class({
+    parent: "Primrose.Controls",
     name: "Image",
     description: "A simple 2D image to put on a Surface.",
     parameters: [
@@ -163,7 +164,8 @@ Primrose.Controls.Image = (function () {
   return Image;
 })();
 
-pliny.issue("Primrose.Controls.Image", {
+pliny.issue({
+  parent: "Primrose.Controls.Image",
   name: "document Image",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Controls.Image](#Primrose_Controls_Image)\n\

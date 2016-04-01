@@ -5,7 +5,8 @@ Primrose.Text.Controls.TextInput = (function () {
 
   var COUNTER = 0;
 
-  pliny.class("Primrose.Text.Controls", {
+  pliny.class({
+    parent: "Primrose.Text.Controls",
     name: "TextInput",
     description: "plain text input box.",
     parameters: [
@@ -67,14 +68,16 @@ Primrose.Text.Controls.TextInput = (function () {
   return TextInput;
 })();
 
-pliny.issue("Primrose.Text.Controls.TextInput", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextInput",
   name: "document TextInput",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Controls.TextInput](#Primrose_Text_Controls_TextInput)\n\
 class in the controls/ directory."
 });
 
-pliny.issue("Primrose.Text.Controls.TextInput", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextInput",
   name: "TextInput does not render blank lines",
   type: "open",
   description: "If a line contains only a newline character, the line doesn't get\n\
@@ -84,7 +87,8 @@ it to render. This seems to only happen for text that is loaded into the textbox
 not text that is entered by the keyboard."
 });
 
-pliny.issue("Primrose.Text.Controls.TextInput", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextInput",
   name: "TextInput should re-render only on updates, not require an animation loop.",
   type: "open",
   description: "Currently, the TextInput knows quite a bit about when it needs to\n\

@@ -12,7 +12,8 @@ Primrose.Output.Speech = ( function ( ) {
   }
 
   try {
-    pliny.class( "Primrose.Output", {
+    pliny.class({
+      parent: "Primrose.Output",
       name: "Speech",
       description: "| [under construction]"
     } );
@@ -41,7 +42,8 @@ Primrose.Output.Speech = ( function ( ) {
   catch ( exp ) {
 
     // in case of error, return a shim that lets us continue unabated
-    pliny.class( "Primrose.Output", {
+    pliny.class({
+      parent: "Primrose.Output",
       name: "Speech",
       description: "| [under construction]"
     } );
@@ -52,7 +54,8 @@ Primrose.Output.Speech = ( function ( ) {
   }
 } )( );
 
-pliny.issue( "Primrose.Output.Speech", {
+pliny.issue({
+  parent: "Primrose.Output.Speech",
   name: "document Speech",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Output.Speech](#Primrose_Output_Speech) class in the output/ directory"

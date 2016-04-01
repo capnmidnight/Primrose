@@ -1,7 +1,8 @@
 /* global Primrose, URL, pliny */
 
 Primrose.Workerize = (function () {
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "Workerize",
     description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
 \n\
@@ -215,7 +216,8 @@ Then we can create and use an automatically workerized version of it as follows.
     }
   }
 
-  pliny.method("Primrose.Workerize", {
+  pliny.method({
+    parent: "Primrose.Workerize",
     name: "methodShim",
     description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
     parameters: [
@@ -229,7 +231,8 @@ Then we can create and use an automatically workerized version of it as follows.
     this.worker.postMessage(this.args);
   };
 
-  pliny.method("Primrose.Workerize", {
+  pliny.method({
+    parent: "Primrose.Workerize",
     name: "addEventListener",
     description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
     parameters: [
@@ -245,7 +248,8 @@ Then we can create and use an automatically workerized version of it as follows.
   };
 
 
-  pliny.function("Primrose.Workerize", {
+  pliny.function({
+    parent: "Primrose.Workerize",
     name: "createWorker",
     description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
     parameters: [
@@ -276,7 +280,8 @@ Then we can create and use an automatically workerized version of it as follows.
   return Workerize;
 })();
 
-pliny.issue("Primrose.Workerize", {
+pliny.issue({
+  parent: "Primrose.Workerize",
   name: "document Workerize",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Workerize](#Primrose_Workerize) class in the  directory"

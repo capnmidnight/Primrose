@@ -118,7 +118,6 @@
     };
 
     this._onFullScreenRemoved = () => {
-      console.log("exiting legacy presentation");
       FullScreen.removeChangeListener(this._onFullScreenRemoved);
       this.exitPresent();
     };
@@ -135,13 +134,13 @@
           reject(new Error("No source on layer parameter."));
         }
         else {
-          FullScreen.request(layer.source, { vrDisplay: device.display, vrDistortion: true })
+          FullScreen.request(layer.source, { vrDisplay: device.display })
             .then((elem) => {
               this.isPresenting = elem === layer.source;
               currentLayer = layer;
               FullScreen.addChangeListener(this._onFullScreenRemoved, false);
-              window.dispatchEvent(new Event("vrdisplaypresentchange"));
               resolve();
+              return elem;
             })
             .catch((evt) => {
               this.isPresenting = false;
@@ -152,17 +151,13 @@
     };
 
     this.exitPresent = function () {
-      var clear = () => {
-        console.log("exit presenting", this);
+      var clear = (elem) => {
         this.isPresenting = false;
         currentLayer = null;
+        return elem;
       };
       return FullScreen.exit()
-        .then(function (elem) {
-          clear();
-          window.dispatchEvent(new Event("vrdisplaypresentchange"));
-          return elem;
-        })
+        .then(clear)
         .catch(clear);
     };
   }

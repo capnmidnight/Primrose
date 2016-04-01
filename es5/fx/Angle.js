@@ -5,7 +5,8 @@
 Primrose.Angle = function () {
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "Angle",
     description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
 keeps track of the previous state of angle values and keeps the change between\n\
@@ -83,6 +84,7 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
         d2,
         d3;
     pliny.property({
+      parent: "Primrose.Angle",
       name: "degrees",
       type: "Number",
       description: "Get/set the current value of the angle in degrees."
@@ -111,7 +113,8 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
     });
   }
 
-  pliny.property("Primrose.Angle", {
+  pliny.property({
+    parent: "Primrose.Angle",
     name: "radians",
     type: "Number",
     description: "Get/set the current value of the angle in radians."
@@ -128,7 +131,8 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
   return Angle;
 }();
 
-pliny.issue("Primrose.Angle", {
+pliny.issue({
+  parent: "Primrose.Angle",
   name: "document Angle",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Angle](#Primrose_Angle) class in the  directory"

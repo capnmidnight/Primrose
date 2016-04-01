@@ -4,7 +4,8 @@
 
 Primrose.Input.Mouse = function () {
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Mouse",
     description: "| [under construction]"
   });
@@ -104,16 +105,108 @@ Primrose.Input.Mouse = function () {
     };
   }
 
-  MouseInput.isPointerLocked = function () {
-    return !!(document.pointerLockElement || document.webkitPointerLockElement || document.mozPointerLockElement);
+  var elementName = findProperty(document, ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"]),
+      changeEventName = findProperty(document, ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"]),
+      errorEventName = findProperty(document, ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"]),
+      requestMethodName = findProperty(document.documentElement, ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"]),
+      exitMethodName = findProperty(document, ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+
+  changeEventName = changeEventName && changeEventName.substring(2);
+  errorEventName = errorEventName && errorEventName.substring(2);
+
+  MouseInput.Lock = {
+    addChangeListener: function addChangeListener(thunk, bubbles) {
+      return document.addEventListener(changeEventName, thunk, bubbles);
+    },
+    removeChangeListener: function removeChangeListener(thunk) {
+      return document.removeEventListener(changeEventName, thunk);
+    },
+    addErrorListener: function addErrorListener(thunk, bubbles) {
+      return document.addEventListener(errorEventName, thunk, bubbles);
+    },
+    removeErrorListener: function removeErrorListener(thunk) {
+      return document.removeEventListener(errorEventName, thunk);
+    },
+    getElement: function getElement() {
+      return document[elementName];
+    },
+    withChange: function withChange(act) {
+      return new Promise(function (resolve, reject) {
+        var onPointerLock,
+            onPointerLockError,
+            timeout,
+            tearDown = function tearDown() {
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+          MouseInput.Lock.removeChangeListener(onPointerLock);
+          MouseInput.Lock.removeErrorListener(onPointerLockError);
+        };
+
+        onPointerLock = function onPointerLock() {
+          setTimeout(tearDown);
+          resolve(MouseInput.Lock.getElement());
+        };
+
+        onPointerLockError = function onPointerLockError(evt) {
+          setTimeout(tearDown);
+          reject(evt);
+        };
+
+        MouseInput.Lock.addChangeListener(onPointerLock, false);
+        MouseInput.Lock.addErrorListener(onPointerLockError, false);
+
+        if (act()) {
+          tearDown();
+          resolve();
+        } else {
+          // Timeout wating on the pointer lock to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          timeout = setTimeout(function () {
+            tearDown();
+            reject("Pointer Lock state did not change in allotted time");
+          }, 1000);
+        }
+      });
+    },
+    request: function request(elem) {
+      return MouseInput.Lock.withChange(function () {
+        if (!requestMethodName) {
+          console.error("No Pointer Lock API support.");
+          throw new Error("No Pointer Lock API support.");
+        } else if (MouseInput.Lock.getElement()) {
+          return true;
+        } else {
+          elem[requestMethodName]();
+        }
+      });
+    },
+    exit: function exit() {
+      return MouseInput.Lock.withChange(function () {
+        if (!exitMethodName) {
+          console.error("No Pointer Lock API support.");
+          throw new Error("No Pointer Lock API support.");
+        } else if (!MouseInput.Lock.getElement()) {
+          return true;
+        } else {
+          document[exitMethodName]();
+        }
+      });
+    }
   };
+
+  MouseInput.isPointerLocked = function () {
+    return !!MouseInput.Lock.getElement();
+  };
+
   MouseInput.AXES = ["X", "Y", "Z", "W", "BUTTONS"];
   Primrose.Input.ButtonAndAxis.inherit(MouseInput);
 
   return MouseInput;
 }();
 
-pliny.issue("Primrose.Input.Mouse", {
+pliny.issue({
+  parent: "Primrose.Input.Mouse",
   name: "document Mouse",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.Mouse](#Primrose_Input_Mouse) class in the input/ directory"

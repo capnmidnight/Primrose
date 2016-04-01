@@ -3,7 +3,8 @@
 /* global Primrose, THREE, emit, pliny */
 
 Primrose.Button = function () {
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "Button",
     parameters: [{ name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button." }, { name: "name", type: "String", description: "A name for the button, to make it distinct from other buttons." }, { name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released." }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
@@ -11,7 +12,7 @@ Primrose.Button = function () {
   function Button(model, name, options) {
     Primrose.BaseControl.call(this);
 
-    options = combineDefaults(options, Button);
+    options = patch(options, Button);
     options.minDeflection = Math.cos(options.minDeflection);
     options.colorUnpressed = new THREE.Color(options.colorUnpressed);
     options.colorPressed = new THREE.Color(options.colorPressed);
@@ -83,12 +84,41 @@ Primrose.Button = function () {
 
   inherit(Button, Primrose.BaseControl);
 
-  pliny.record("Primrose.Button.DEFAULTS", "Default option values that override undefined options passed to the Button class.");
-  pliny.value("Primrose.Button.DEFAULTS", { name: "maxThrow", type: "Number", description: "The limit for how far the button can be depressed." });
-  pliny.value("Primrose.Button.DEFAULTS", { name: "minDeflection", type: "Number", description: "The minimum distance the button must be depressed before it is activated." });
-  pliny.value("Primrose.Button.DEFAULTS", { name: "colorUnpressed", type: "Number", description: "The color to change the button cap to when the button is deactivated." });
-  pliny.value("Primrose.Button.DEFAULTS", { name: "colorPressed", type: "Number", description: "The color to change the button cap to when the button is activated." });
-  pliny.value("Primrose.Button.DEFAULTS", { name: "toggle", type: "Boolean", description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released." });
+  pliny.record({
+    parent: "Button.",
+    name: "DEFAULTS",
+    description: "Default option values that override undefined options passed to the Button class."
+  });
+  pliny.value({
+    parent: "Primrose.Button.DEFAULTS",
+    name: "maxThrow",
+    type: "Number",
+    description: "The limit for how far the button can be depressed."
+  });
+  pliny.value({
+    parent: "Primrose.Button.DEFAULTS",
+    name: "minDeflection",
+    type: "Number",
+    description: "The minimum distance the button must be depressed before it is activated."
+  });
+  pliny.value({
+    parent: "Primrose.Button.DEFAULTS",
+    name: "colorUnpressed",
+    type: "Number",
+    description: "The color to change the button cap to when the button is deactivated."
+  });
+  pliny.value({
+    parent: "Primrose.Button.DEFAULTS",
+    name: "colorPressed",
+    type: "Number",
+    description: "The color to change the button cap to when the button is activated."
+  });
+  pliny.value({
+    parent: "Primrose.Button.DEFAULTS",
+    name: "toggle",
+    type: "Boolean",
+    description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
+  });
   Button.DEFAULTS = {
     maxThrow: 0.1,
     minDeflection: 10,
@@ -97,7 +127,8 @@ Primrose.Button = function () {
     toggle: true
   };
 
-  pliny.property("Primrose.Button", {
+  pliny.property({
+    parent: "Primrose.Button",
     name: "position",
     type: "THREE.Vector3",
     description: "The location of the button."
@@ -111,7 +142,8 @@ Primrose.Button = function () {
   return Button;
 }();
 
-pliny.issue("Primrose.Button", {
+pliny.issue({
+  parent: "Primrose.Button",
   name: "document Button",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Button](#Primrose_Button) class in the  directory"

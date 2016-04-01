@@ -8,7 +8,8 @@
 Primrose.Text.CommandPacks.BasicTextInput = (function () {
   "use strict";
 
-  pliny.record("Primrose.Text.CommandPacks", {
+  pliny.record({
+    parent: "Primrose.Text.CommandPacks",
     name: "TextInput",
     description: "| [under construction]"
   });
@@ -122,7 +123,8 @@ Primrose.Text.CommandPacks.BasicTextInput = (function () {
   return BasicTextInput;
 })();
 
-pliny.issue("Primrose.Text.CommandPacks.BasicTextInput", {
+pliny.issue({
+  parent: "Primrose.Text.CommandPacks.BasicTextInput",
   name: "document BasicTextInput",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.BasicTextInput](#Primrose.Text.CommandPacks.BasicTextInput) class in the command_packs/ directory"

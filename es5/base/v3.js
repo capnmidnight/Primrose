@@ -1,12 +1,12 @@
 "use strict";
 
-pliny.issue("", {
+pliny.issue({
   name: "document v3",
   type: "open",
   description: "Finish writing the documentation for the [`v3`](#v3) function\n\
 in the helpers/graphics.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "v3",
   description: "| [under construction]"
 });

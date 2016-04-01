@@ -1,4 +1,5 @@
-﻿pliny.class("Primrose", {
+﻿pliny.class({
+  parent: "Primrose",
   name: "Surface",
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
   parameters: [

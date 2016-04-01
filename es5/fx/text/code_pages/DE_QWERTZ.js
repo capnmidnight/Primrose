@@ -7,7 +7,8 @@ Primrose.Text.CodePages.DE_QWERTZ = function () {
 
   var CodePage = Primrose.Text.CodePage;
 
-  pliny.record("Primrose.Text.CodePages", {
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
     name: "DE_QWERTZ",
     description: "| [under construction]"
   });
@@ -130,7 +131,8 @@ Primrose.Text.CodePages.DE_QWERTZ = function () {
   });
 }();
 
-pliny.issue("Primrose.Text.CodePages.DE_QWERTZ", {
+pliny.issue({
+  parent: "Primrose.Text.CodePages.DE_QWERTZ",
   name: "document DE_QWERTZ",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.CodePages.DE_QWERTZ](#Primrose_Text_CodePages_DE_QWERTZ) class in the code_pages/ directory"

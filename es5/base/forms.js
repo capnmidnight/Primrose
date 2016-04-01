@@ -4,12 +4,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /* global pliny */
 
-pliny.issue("", {
+pliny.issue({
   name: "document getSetting",
   type: "closed",
   description: "Finish writing the documentation for the `getSetting()` function in the helpers/forms.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "getSetting",
   parameters: [{ name: " name", type: "string", description: "The name of the setting to read." }, { name: "defValue", type: "Object", description: "The default value to return, if the setting is not present in `localStorage`." }],
   returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
@@ -45,12 +45,12 @@ function getSetting(name, defValue) {
   return defValue;
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document setSetting",
   type: "closed",
   description: "Finish writing the documentation for the `setSetting()` function in the helpers/forms.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "setSetting",
   parameters: [{ name: " name", type: "string", description: "The name of the setting to set." }, { name: "val", type: "Object", description: "The value to write. It should be useable as a parameter to `JSON.stringify()`." }],
   description: "Writes named values to `localStorage`. The values should be valid\n\
@@ -79,12 +79,12 @@ function setSetting(name, val) {
   }
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document deleteSetting",
   type: "closed",
   description: "Finish writing the documentation for the `deleteSetting()` function in the helpers/forms.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "deleteSetting",
   parameters: [{ name: " name", type: "string", description: "The name of the setting to delete." }],
   description: "Removes an object from localStorage",
@@ -106,12 +106,12 @@ function deleteSetting(name) {
   }
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document readForm",
   type: "closed",
   description: "Finish writing the documentation for the `readForm()` function in the helpers/forms.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "readForm",
   parameters: [{ name: "ctrls", type: "Hash of Elements", description: "An array of HTML form elements, aka INPUT, TEXTAREA, SELECT, etc." }],
   returns: "Object",
@@ -159,12 +159,12 @@ function readForm(ctrls) {
   return state;
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document writeForm",
   type: "closed",
   description: "Finish writing the documentation for the `writeForm()` function in the helpers/forms.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "writeForm",
   parameters: [{ name: "ctrls", type: "Hash of Elements", description: "A hash-collection of HTML input elements that will have their values set." }, { name: "state", type: "Hash object", description: "The values that will be set on the form. Hash keys should match IDs of the elements in the `ctrls` parameter." }],
   description: "Writes out a full set of state values to an HTML input form, wherever keys in the `ctrls` parameter match keys in the `state` parameter.",
@@ -209,7 +209,7 @@ function writeForm(ctrls, state) {
   }
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document helpers/forms.js",
   type: "closed",
   description: "Finish writing the documentation for the [forms](#forms) file in the helpers/ directory."

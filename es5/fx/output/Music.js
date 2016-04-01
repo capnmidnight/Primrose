@@ -14,7 +14,8 @@ Primrose.Output.Music = function () {
     return 440 * Math.pow(PIANO_BASE, n - 49);
   }
 
-  pliny.class("Primrose.Output", {
+  pliny.class({
+    parent: "Primrose.Output",
     name: "Music",
     description: "| [under construction]"
   });
@@ -96,7 +97,8 @@ Primrose.Output.Music = function () {
   return Music;
 }();
 
-pliny.issue("Primrose.Output.Music", {
+pliny.issue({
+  parent: "Primrose.Output.Music",
   name: "document Music",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Output.Music](#Primrose_Output_Music) class in the output/ directory"

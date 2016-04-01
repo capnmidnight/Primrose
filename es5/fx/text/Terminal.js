@@ -2,7 +2,8 @@
 
 /* global Primrose, isOSX, pliny */
 
-pliny.class("Primrose.Text", {
+pliny.class({
+  parent: "Primrose.Text",
   name: "Terminal",
   description: "| [under construction]"
 });
@@ -120,13 +121,15 @@ Primrose.Text.Terminal = function (inputEditor, outputEditor) {
   };
 };
 
-pliny.issue("Primrose.Text.Terminal", {
+pliny.issue({
+  parent: "Primrose.Text.Terminal",
   name: "document Terminal",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Terminal](#Primrose_Text_Terminal) class in the text/ directory"
 });
 
-pliny.issue("Primrose.Text.Terminal", {
+pliny.issue({
+  parent: "Primrose.Text.Terminal",
   name: "Move Terminal to Controls namespace",
   type: "open",
   description: "Terminal should be a type of control, like TextArea and Button."

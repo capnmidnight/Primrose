@@ -1,4 +1,5 @@
-﻿pliny.function("Primrose.HTTP", {
+﻿pliny.function({
+  parent: "Primrose.HTTP",
   name: "get",
   description: "Process an HTTP GET request.",
   returns: "Promise",

@@ -3,7 +3,8 @@
 Primrose.Text.Grammars.TestResults = (function () {
   "use strict";
 
-  pliny.value( "Primrose.Text.Grammars", {
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
     name: "TestResults",
     description: "| [under construction]"
   } );
@@ -21,7 +22,8 @@ Primrose.Text.Grammars.TestResults = (function () {
   ]);
 })();
 
-pliny.issue( "Primrose.Text.Grammars.TestResults", {
+pliny.issue({
+  parent: "Primrose.Text.Grammars.TestResults",
   name: "document TestResults",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Grammars.TestResults](#Primrose_Text_Grammars_TestResults) class in the grammars/ directory"

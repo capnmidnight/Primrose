@@ -8,7 +8,8 @@
 Primrose.Text.CommandPacks.TextEditor = (function () {
   "use strict";
 
-  pliny.record("Primrose.Text.CommandPacks", {
+  pliny.record({
+    parent: "Primrose.Text.CommandPacks",
     name: "TextEditor",
     description: "| [under construction]"
   });
@@ -62,7 +63,8 @@ Primrose.Text.CommandPacks.TextEditor = (function () {
     });
 })();
 
-pliny.issue("Primrose.Text.CommandPacks.TextEditor", {
+pliny.issue({
+  parent: "Primrose.Text.CommandPacks.TextEditor",
   name: "document TextEditor",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.TextEditor](#Primrose_Text_CommandPacks_TextEditor) class in the command_packs/ directory"

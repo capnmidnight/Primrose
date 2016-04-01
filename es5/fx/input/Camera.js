@@ -7,13 +7,15 @@ Primrose.Input.Camera = function () {
   /* polyfill */
   Navigator.prototype.getUserMedia = Navigator.prototype.getUserMedia || Navigator.prototype.webkitGetUserMedia || Navigator.prototype.mozGetUserMedia || Navigator.prototype.msGetUserMedia || Navigator.prototype.oGetUserMedia || function () {};
 
-  pliny.issue("Primrose.Input.Camera", {
+  pliny.issue({
+    parent: "Primrose.Input.Camera",
     name: "document Camera",
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Camera](#Primrose_Input_Camera) class in the input/ directory"
   });
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Camera",
     description: "| [under construction]"
   });
@@ -34,35 +36,40 @@ Primrose.Input.Camera = function () {
       }
     });
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.options",
       type: "open",
       description: ""
     });
-    this.options = combineDefaults(options, CameraInput);
+    this.options = patch(options, CameraInput);
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.videoElement",
       type: "open",
       description: ""
     });
     this.videoElement = document.createElement("video");
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.buffer",
       type: "open",
       description: ""
     });
     this.buffer = document.createElement("canvas");
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.gfx",
       type: "open",
       description: ""
     });
     this.gfx = this.buffer.getContext("2d");
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.texture",
       type: "open",
       description: ""
@@ -84,7 +91,8 @@ Primrose.Input.Camera = function () {
     geometry.computeBoundingBox();
     geometry.computeVertexNormals();
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.mesh",
       type: "open",
       description: ""
@@ -92,7 +100,8 @@ Primrose.Input.Camera = function () {
     this.mesh = new THREE.Mesh(geometry, material);
     this.mesh.position.set(x, y, z);
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.streaming",
       type: "open",
       description: ""
@@ -143,7 +152,8 @@ Primrose.Input.Camera = function () {
       this.mesh.scale.set(aspectRatio, 1, 1);
     }.bind(this), false);
 
-    pliny.issue("Primrose.Input.Camera", {
+    pliny.issue({
+      parent: "Primrose.Input.Camera",
       name: "document Camera.connect",
       type: "open",
       description: ""
@@ -172,7 +182,8 @@ Primrose.Input.Camera = function () {
     }
   }
 
-  pliny.issue("Primrose.Input.Camera", {
+  pliny.issue({
+    parent: "Primrose.Input.Camera",
     name: "document Camera.DEFAULTS",
     type: "open",
     description: ""
@@ -181,7 +192,8 @@ Primrose.Input.Camera = function () {
     videoModes: [{ w: 320, h: 240 }, { w: 640, h: 480 }, "default"]
   };
 
-  pliny.issue("Primrose.Input.Camera", {
+  pliny.issue({
+    parent: "Primrose.Input.Camera",
     name: "document Camera.update",
     type: "open",
     description: ""

@@ -17,11 +17,11 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
-    <StartWebBrowser>true</StartWebBrowser>
+    <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
-    <LaunchUrl>examples/editor3d/</LaunchUrl>
+    <LaunchUrl>doc/</LaunchUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="lib\logger.js" />
     <Content Include="src\base\findProperty.js" />
     <Content Include="doc\blenderAdvanced.html" />
     <Content Include="doc\blenderBeginner.html" />
@@ -182,6 +183,7 @@
     <Content Include="lib\sha512.js" />
     <Content Include="lib\webgl-debug.js" />
     <Compile Include="server\controllers.js" />
+    <Compile Include="server\controllers\logger.js" />
     <Compile Include="server\controllers\nypl.js" />
     <Compile Include="server\core.js" />
     <Compile Include="server\gameController.js" />
@@ -327,7 +329,6 @@
     <Content Include="src\base\forms.js" />
     <Content Include="src\base\cloud.js" />
     <Content Include="src\base\oop.js" />
-    <Content Include="src\base\options.js" />
     <Content Include="src\fx\input\ButtonAndAxis.js" />
     <Content Include="src\fx\input\Camera.js" />
     <Content Include="src\fx\input\FPSInput.js" />

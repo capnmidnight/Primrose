@@ -7,7 +7,8 @@ Primrose.Text.CodePages.FR_AZERTY = function () {
 
   var CodePage = Primrose.Text.CodePage;
 
-  pliny.record("Primrose.Text.CodePages", {
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
     name: "FR_AZERTY",
     description: "| [under construction]"
   });
@@ -101,7 +102,8 @@ Primrose.Text.CodePages.FR_AZERTY = function () {
   });
 }();
 
-pliny.issue("Primrose.Text.CodePages.FR_AZERTY", {
+pliny.issue({
+  parent: "Primrose.Text.CodePages.FR_AZERTY",
   name: "document FR_AZERTY",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.CodePages.FR_AZERTY](#Primrose_Text_CodePages_FR_AZERTY) class in the code_pages/ directory"

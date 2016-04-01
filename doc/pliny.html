@@ -25,6 +25,9 @@
     <!-- start main.jade head block -->
     <script type="text/javascript" src="/scripts/ga.min.js" async defer></script><!-- start documentation.jade head append -->
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="/lib/logger.js"></script>
+    <script type="text/javascript" src="/lib/webgl-debug.js"></script>
+    <script type="text/javascript" src="/node_modules/three/three.js"></script>
     <script type="text/javascript" src="/node_modules/marked/lib/marked.js"></script>
     <script type="text/javascript" src="/lib/pliny.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
@@ -42,7 +45,6 @@
     <script type="text/javascript" src="/src/base/InsideSphereGeometry.js"></script>
     <script type="text/javascript" src="/src/base/light.js"></script>
     <script type="text/javascript" src="/src/base/oop.js"></script>
-    <script type="text/javascript" src="/src/base/options.js"></script>
     <script type="text/javascript" src="/src/base/overwrite.js"></script>
     <script type="text/javascript" src="/src/base/patch.js"></script>
     <script type="text/javascript" src="/src/base/put.js"></script>
@@ -199,7 +201,8 @@
         <p>Documentation in Primrose is recorded via explicit function calls, rather than the JavaDoc-style of parsing comment blocks. The documentation pages are built loading the production Primrose library itself and querying its documentation database live. New code features and documentation for them are delivered in one cohesive package.</p>
         <h2>Example:</h2>
         <pre><code>grammar("JavaScript");
-pliny.function( "Primrose.Random", {
+pliny.function( {
+  parent: "Primrose.Random",
   name: "number",
   description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",
   parameters: [

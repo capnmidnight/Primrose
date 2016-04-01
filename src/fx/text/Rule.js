@@ -3,7 +3,8 @@
 Primrose.Text.Rule = ( function ( ) {
   "use strict";
 
-  pliny.class( "Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Rule",
     description: "| [under construction]"
   } );
@@ -51,7 +52,8 @@ Primrose.Text.Rule = ( function ( ) {
   return Rule;
 } )();
 
-pliny.issue( "Primrose.Text.Rule", {
+pliny.issue({
+  parent: "Primrose.Text.Rule",
   name: "document Rule",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Rule](#Primrose_Text_Rule) class in the text/ directory"

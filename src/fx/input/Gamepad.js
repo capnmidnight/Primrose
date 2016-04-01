@@ -3,13 +3,15 @@
 Primrose.Input.Gamepad = ( function () {
 
 
-  pliny.issue( "Primrose.Input.Gamepad", {
+  pliny.issue({
+    parent: "Primrose.Input.Gamepad",
     name: "document Gamepad",
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
   } );
   
-  pliny.class( "Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Gamepad",
     description: "| [under construction]",
     parameters: [
@@ -28,14 +30,16 @@ Primrose.Input.Gamepad = ( function () {
         };
 
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.superUpdate",
       type: "open",
       description: ""
     } );
     this.superUpdate = this.update;
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.checkDevice",
       type: "open",
       description: ""
@@ -50,7 +54,8 @@ Primrose.Input.Gamepad = ( function () {
       }
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.update",
       type: "open",
       description: ""
@@ -120,7 +125,8 @@ Primrose.Input.Gamepad = ( function () {
       sendAll( listeners.gamepaddisconnected, id );
     }
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.getErrorMessage",
       type: "open",
       description: ""
@@ -129,7 +135,8 @@ Primrose.Input.Gamepad = ( function () {
       return errorMessage;
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.setGamepad",
       type: "open",
       description: ""
@@ -139,7 +146,8 @@ Primrose.Input.Gamepad = ( function () {
       this.inPhysicalUse = true;
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.clearGamepad",
       type: "open",
       description: ""
@@ -149,7 +157,8 @@ Primrose.Input.Gamepad = ( function () {
       this.inPhysicalUse = false;
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.isGamepadSet",
       type: "open",
       description: ""
@@ -158,7 +167,8 @@ Primrose.Input.Gamepad = ( function () {
       return !!gpid;
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.getConnectedGamepads",
       type: "open",
       description: ""
@@ -167,7 +177,8 @@ Primrose.Input.Gamepad = ( function () {
       return connectedGamepads.slice();
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.addEventListener",
       type: "open",
       description: ""
@@ -181,7 +192,8 @@ Primrose.Input.Gamepad = ( function () {
       }
     };
 
-    pliny.issue( "Primrose.Input.Gamepad", {
+    pliny.issue({
+      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.removeEventListener",
       type: "open",
       description: ""
@@ -194,15 +206,16 @@ Primrose.Input.Gamepad = ( function () {
 
     try {
       this.update( 0 );
-      available = true;
+      this.available = true;
     }
     catch ( err ) {
-      avaliable = false;
-      errorMessage = err;
+      this.avaliable = false;
+      this.errorMessage = err;
     }
   }
 
-  pliny.issue( "Primrose.Input.Gamepad", {
+  pliny.issue({
+    parent: "Primrose.Input.Gamepad",
     name: "document Gamepad.AXES",
     type: "open",
     description: ""
@@ -212,7 +225,8 @@ Primrose.Input.Gamepad = ( function () {
   return GamepadInput;
 } )();
 
-Primrose.Input.Gamepad.XBOX_BUTTONS = pliny.enumeration( "Primrose.Input.Gamepad", {
+Primrose.Input.Gamepad.XBOX_BUTTONS = pliny.enumeration({
+  parent: "Primrose.Input.Gamepad",
   name: "XBOX_BUTTONS",
   description: "Labeled names for each of the different control features of the Xbox 360 controller.",
   value: {

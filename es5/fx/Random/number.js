@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.Random", {
+pliny.function({
+  parent: "Primrose.Random",
   name: "number",
   description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",
   parameters: [{ name: "min", type: "Number", description: "The included minimum side of the range of numbers." }, { name: "max", type: "Number", description: "The excluded maximum side of the range of numbers." }],

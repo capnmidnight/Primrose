@@ -11,7 +11,8 @@ Primrose.WebRTCSocket = function () {
 
   Window.prototype.RTCSessionDescription = Window.prototype.RTCSessionDescription || Window.prototype.mozRTCSessionDescription || function () {};
 
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "WebRTCSocket",
     description: "[under construction]"
   });
@@ -209,7 +210,8 @@ Primrose.WebRTCSocket = function () {
   return WebRTCSocket;
 }();
 
-pliny.issue("Primrose.WebRTCSocket", {
+pliny.issue({
+  parent: "Primrose.WebRTCSocket",
   name: "document WebRTCSocket",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.WebRTCSocket](#Primrose_WebRTCSocket) class in the  directory"

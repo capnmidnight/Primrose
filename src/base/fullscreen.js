@@ -59,6 +59,7 @@
     request: (elem, fullScreenParam) => {
       return FullScreen.withChange(() => {
         if (!requestMethodName) {
+          console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
         }
         else if (FullScreen.getElement()) {
@@ -77,6 +78,7 @@
     exit: () => {
       return FullScreen.withChange(() => {
         if (!exitMethodName) {
+          console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
         }
         else if (!FullScreen.getElement()) {
@@ -87,5 +89,5 @@
         }
       });
     }
-  }
+  };
 })();

@@ -2,7 +2,8 @@
 
 Primrose.Projector = (function () {
   
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "Projector",
     description: "| [under construction]"
   });
@@ -2637,7 +2638,8 @@ Primrose.Projector = (function () {
   return Projector;
 })();
 
-pliny.issue("Primrose.Projector", {
+pliny.issue({
+  parent: "Primrose.Projector",
   name: "document Projector",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Projector](#Primrose_Projector) class in the  directory"

@@ -3,10 +3,6 @@
 append head
   <!-- start withFramework.jade head append -->
   if debug
-    script(type="text/javascript", src= "/lib/webgl-debug.js")
-    script(type="text/javascript", src= "/node_modules/three/three.js")
-    script(type="text/javascript", src= "/node_modules/marked/lib/marked.js")
-    script(type="text/javascript", src= "/lib/pliny.js")
     each file in frameworkFiles
       script(type="text/javascript", src=file)
   else
@@ -18,5 +14,5 @@ append head
 prepend footer
   <!-- start withFramework.jade footer prepend -->
   script(type="text/javascript", src="app.js")
-  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
+  script(type="text/javascript")  if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }
   <!-- end withFramework.jade footer prepend -->

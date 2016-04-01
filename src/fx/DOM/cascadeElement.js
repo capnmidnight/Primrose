@@ -1,6 +1,7 @@
 ﻿/* global Primrose, pliny */
 
-pliny.function("Primrose.DOM", {
+pliny.function({
+  parent: "Primrose.DOM",
   name: "cascadeElement",
   description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
   * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\

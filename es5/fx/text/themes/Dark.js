@@ -5,7 +5,8 @@
 Primrose.Text.Themes.Dark = function () {
   "use strict";
 
-  pliny.record("Primrose.Text.Themes", {
+  pliny.record({
+    parent: "Primrose.Text.Themes",
     name: "Dark",
     description: "| [under construction]"
   });
@@ -56,7 +57,8 @@ Primrose.Text.Themes.Dark = function () {
   };
 }();
 
-pliny.issue("Primrose.Text.Themes.Dark", {
+pliny.issue({
+  parent: "Primrose.Text.Themes.Dark",
   name: "document Dark",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Themes.Dark](#Primrose_Text_Themes_Dark) class in the themes/ directory"

@@ -3,7 +3,8 @@
 /* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny, Promise */
 
 Primrose.Input.VR = function () {
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "VR",
     description: "| [under construction]"
   });
@@ -43,6 +44,8 @@ Primrose.Input.VR = function () {
         listeners.vrdeviceconnected[i](id);
       }
     }
+
+    var onFullScreenChange = function onFullScreenChange() {};
 
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
@@ -134,25 +137,24 @@ Primrose.Input.VR = function () {
     checkForVRDisplays.call(this);
   }
 
-  pliny.value("Primrose.Input.VR", {
+  pliny.value({
+    parent: "Primrose.Input.VR",
     name: "isAvailable",
     type: "Boolean",
     description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."
   });
-  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || isMobile || window.DeviceMotionEvent;
+  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || isMobile;
 
   VRInput.AXES = ["headX", "headY", "headZ", "headVX", "headVY", "headVZ", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW", "headRVX", "headRVY", "headRVZ", "headRAX", "headRAY", "headRAZ"];
   Primrose.Input.ButtonAndAxis.inherit(VRInput);
 
   VRInput.prototype.update = function (dt) {
     if (this.currentDisplay) {
-      var caps = this.currentDisplay.capabilities,
-          pose = this.currentDisplay.getPose();
-
+      var pose = this.currentDisplay.getPose();
       if (pose) {
         this.currentPose = pose;
 
-        if (caps.hasPosition && pose.position) {
+        if (pose.position) {
           this.headX = pose.position[0];
           this.headY = pose.position[1];
           this.headZ = pose.position[2];
@@ -168,7 +170,7 @@ Primrose.Input.VR = function () {
           this.headAZ = pose.linearAcceleration[2];
         }
 
-        if (caps.hasOrientation && pose.orientation) {
+        if (pose.orientation) {
           this.headRX = pose.orientation[0];
           this.headRY = pose.orientation[1];
           this.headRZ = pose.orientation[2];
@@ -258,7 +260,8 @@ Primrose.Input.VR = function () {
   return VRInput;
 }();
 
-pliny.issue("Primrose.Input.VR", {
+pliny.issue({
+  parent: "Primrose.Input.VR",
   name: "document VR",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.VR](#Primrose_Input_VR) class in the input/ directory"

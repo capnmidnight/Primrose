@@ -1,4 +1,4 @@
-﻿pliny.function("", {
+﻿pliny.function({
   name: "clone",
   parameters: [{ name: "obj", type: "Object", description: "The object-literal to clone" }],  
   description: "Creates a copy of a JavaScript object literal.",

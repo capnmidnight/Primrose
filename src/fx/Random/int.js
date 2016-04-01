@@ -1,4 +1,5 @@
-﻿pliny.function("Primrose.Random", {
+﻿pliny.function({
+  parent: "Primrose.Random",
   name: "int",
   description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another.",
   parameters: [

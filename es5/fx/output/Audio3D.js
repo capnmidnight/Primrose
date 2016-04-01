@@ -7,7 +7,8 @@ Primrose.Output.Audio3D = function () {
   // polyfill
   Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
-  pliny.class("Primrose.Output", {
+  pliny.class({
+    parent: "Primrose.Output",
     name: "Audio3D",
     description: "| [under construction]"
   });
@@ -169,10 +170,12 @@ Primrose.Output.Audio3D = function () {
 
   Audio3D.prototype.playBufferImmediate = function (buffer, volume) {
     this.createSound(false, this.createFixedSound.bind(this, function (snd) {
+      var _this2 = this;
+
       snd.volume.gain.value = volume;
       snd.source.addEventListener("ended", function (evt) {
-        snd.volume.disconnect(this.mainVolume);
-      }.bind(this));
+        snd.volume.disconnect(_this2.mainVolume);
+      });
       snd.source.start(0);
     }), buffer);
   };
@@ -180,7 +183,8 @@ Primrose.Output.Audio3D = function () {
   return Audio3D;
 }();
 
-pliny.issue("Primrose.Output.Audio3D", {
+pliny.issue({
+  parent: "Primrose.Output.Audio3D",
   name: "document Audio3D",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Output.Audio3D](#Primrose_Output_Audio3D) class in the output/ directory"

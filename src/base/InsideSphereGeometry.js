@@ -1,10 +1,10 @@
-﻿pliny.issue("", {
+﻿pliny.issue({
   name: "document InsideSphereGeometry",
   type: "closed",
   description: "Finish writing the documentation for the [`InsideSphereGeometry`](#InsideSphereGeometry) class\n\
 in the helpers/graphics.js file."
 });
-pliny.class("", {
+pliny.class({
   name: "InsideSphereGeometry",
   parameters: [
     { name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." },

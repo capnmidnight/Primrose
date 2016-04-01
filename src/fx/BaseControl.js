@@ -17,14 +17,16 @@ Primrose.BaseControl = (function () {
       NUMBER_PATTERN + DELIM +
       NUMBER_PATTERN + "rad\\s*\\)", "i");
 
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "BaseControl",
     description: "The BaseControl class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
 performs basic conversions from DOM elements to the internal Control format."
   });
 
-  pliny.method("Primrose.BaseControl", {
+  pliny.method({
+    parent: "Primrose.BaseControl",
     name: "addEventListener",
     description: "Adding an event listener registers a function as being ready to receive events.",
     parameters: [
@@ -43,7 +45,8 @@ to the method of the same name on DOM elements.\n\
     }]
   });
 
-  pliny.method("Primrose.BaseControl", {
+  pliny.method({
+    parent: "Primrose.BaseControl",
     name: "focus",
     description: "Sets the focus property of the control, does not change the focus property of any other control.",
     examples: [{
@@ -72,7 +75,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     }]
   });
 
-  pliny.method("Primrose.BaseControl", {
+  pliny.method({
+    parent: "Primrose.BaseControl",
     name: "blur",
     description: "Unsets the focus property of the control, does not change the focus property of any other control.",
     examples: [{
@@ -101,7 +105,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     }]
   });
 
-  pliny.method("Primrose.BaseControl", {
+  pliny.method({
+    parent: "Primrose.BaseControl",
     name: "copyElement",
     description: "Copies properties from a DOM element that the control is supposed to match.",
     parameters: [
@@ -123,7 +128,8 @@ to a 3D element on-the-fly.\n\
     ]
   });
 
-  pliny.issue("Primrose.BaseControl", {
+  pliny.issue({
+    parent: "Primrose.BaseControl",
     name: "document BaseControl",
     type: "closed",
     description: "Finish writing the documentation for the [Primrose.BaseControl](#Primrose_BaseControl) class in the  directory"

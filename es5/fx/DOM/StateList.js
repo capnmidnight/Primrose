@@ -5,7 +5,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 /* global Primrose, HTMLSelectElement, pliny */
 
 Primrose.DOM.StateList = function () {
-  pliny.class("Primrose.DOM", {
+  pliny.class({
+    parent: "Primrose.DOM",
     name: "StateList",
     description: "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.\n\
 \n\
@@ -48,6 +49,7 @@ The states paramareter should be an array of State objects that take the form of
     }.bind(this), false);
 
     pliny.property({
+      parent: "Primrose.StateList",
       name: "DOMElement",
       type: "HTMLSelectElement",
       description: "The DOM element that should be put on the page to control the settings."
@@ -61,7 +63,8 @@ The states paramareter should be an array of State objects that take the form of
   return StateList;
 }();
 
-pliny.issue("Primrose.StateList", {
+pliny.issue({
+  parent: "Primrose.StateList",
   name: "document StateList",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.StateList](#Primrose_StateList) class in the  directory"

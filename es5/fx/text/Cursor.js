@@ -24,7 +24,8 @@ Primrose.Text.Cursor = function () {
     return reverse;
   }();
 
-  pliny.class("Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Cursor",
     description: "| [under construction]"
   });
@@ -248,7 +249,8 @@ Primrose.Text.Cursor = function () {
   return Cursor;
 }();
 
-pliny.issue("Primrose.Text.Cursor", {
+pliny.issue({
+  parent: "Primrose.Text.Cursor",
   name: "document Cursor",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Cursor](#Primrose_Text_Cursor) class in the text/ directory"

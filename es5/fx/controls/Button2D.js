@@ -17,7 +17,8 @@ Primrose.Controls.Button2D = function () {
 
   var COUNTER = 0;
 
-  pliny.class("Primrose.Controls", {
+  pliny.class({
+    parent: "Primrose.Controls",
     name: "Button2D",
     description: "A simple button to put on a Surface.",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
@@ -76,7 +77,8 @@ Primrose.Controls.Button2D = function () {
   return Button2D;
 }();
 
-pliny.issue("Primrose.Controls.Button2D", {
+pliny.issue({
+  parent: "Primrose.Controls.Button2D",
   name: "document Button2D",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Controls.Button2D](#Primrose_Controls_Button2D)\n\

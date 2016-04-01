@@ -5,7 +5,8 @@
 Primrose.Text.Token = function () {
   "use strict";
 
-  pliny.class("Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Token",
     description: "| [under construction]"
   });
@@ -33,7 +34,8 @@ Primrose.Text.Token = function () {
   return Token;
 }();
 
-pliny.issue("Primrose.Text.Token", {
+pliny.issue({
+  parent: "Primrose.Text.Token",
   name: "document Token",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Token](#Primrose_Text_Token) class in the text/ directory"

@@ -5,7 +5,8 @@
 Primrose.Keys = function () {
   "use strict";
 
-  pliny.enumeration("Primrose", {
+  pliny.enumeration({
+    parent: "Primrose",
     name: "Keys",
     description: "Keycode values for system keys that are the same across all international standards"
   });
@@ -140,7 +141,8 @@ Primrose.Keys = function () {
   return Keys;
 }();
 
-pliny.issue("Primrose.Keys", {
+pliny.issue({
+  parent: "Primrose.Keys",
   name: "document Keys",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.Keys](#Primrose_Keys) class in the  directory"

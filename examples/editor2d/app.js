@@ -12,8 +12,3 @@ function loadFile(fileName) {
 }
 
 loadFile("/examples/music/app.js");
-
-if (!isInIFrame) {
-  var header = document.querySelector("header");
-  editorContainer.style.top = header.clientHeight + "px";
-}

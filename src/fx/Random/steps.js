@@ -1,4 +1,5 @@
-﻿pliny.function("Primrose.Random", {
+﻿pliny.function({
+  parent: "Primrose.Random",
   name: "steps",
   description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive, sticking to a number of steps in between. Useful for randomly generating music note values on pentatonic scales.",
   parameters: [

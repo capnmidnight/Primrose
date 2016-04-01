@@ -1,8 +1,4 @@
-var fmt = require("../core").fmt,
-  master = require("../master"),
-  controllers = require("../controllers"),
-  fs = require("fs"),
-  getObject = require("../http/getObject");
+var getObject = require("../http/getObject");
 
 //http://api.repo.nypl.org/
 

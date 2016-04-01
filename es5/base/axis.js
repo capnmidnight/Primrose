@@ -1,14 +1,10 @@
 "use strict";
 
-pliny.issue("", {
-  name: "document axis",
-  type: "open",
-  description: "Finish writing the documentation for the [`axis`](#axis) function\n\
-in the helpers/graphics.js file."
-});
-pliny.function("", {
+pliny.function({
   name: "axis",
-  description: "| [under construction]"
+  description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
+  returns: "THREE.Object3D",
+  parameters: [{ name: "length", type: "Number", description: "The length each axis should be in its own axis." }, { name: "width", type: "Number", description: "The size each axis should be in the other axes." }]
 });
 function axis(length, width) {
   var center = hub();

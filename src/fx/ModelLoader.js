@@ -71,7 +71,8 @@ Primrose.ModelLoader = ( function () {
     }
   }
 
-  pliny.class( "Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "ModelLoader",
     description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.\n\
 \n\
@@ -124,7 +125,8 @@ Primrose.ModelLoader = ( function () {
     ModelLoader.loadObject( src, done, error, progress );
   }
 
-  pliny.method( "Primrose.ModelLoader", {
+  pliny.method({
+    parent: "Primrose.ModelLoader",
     name: "clone",
     description: "Creates a copy of the stored template model.",
     returns: "A THREE.Object3D that is a copy of the stored template.",
@@ -172,7 +174,8 @@ Primrose.ModelLoader = ( function () {
     return obj;
   };
 
-  pliny.function( "Primrose.ModelLoader", {
+  pliny.function({
+    parent: "Primrose.ModelLoader",
     name: "loadScene",
     description: "Asynchronously loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It also translates objects marked as GUI elements into instances of their associated elements within the Primrose framework.\n\
 \n\
@@ -220,7 +223,8 @@ Primrose.ModelLoader = ( function () {
     ModelLoader.loadObject( src, done, error, progress );
   };
 
-  pliny.function( "Primrose.ModelLoader", {
+  pliny.function({
+    parent: "Primrose.ModelLoader",
     name: "loadObject",
     description: "Asynchronously loads a JSON file as a JavaScript object. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It uses callbacks to tell you when loading progresses, when it's complete, or when an error occurred. Useful for one-time use models.\n\
 \n\
@@ -290,13 +294,15 @@ Primrose.ModelLoader = ( function () {
   return ModelLoader;
 } )();
 
-pliny.issue( "Primrose.ModelLoader", {
+pliny.issue({
+  parent: "Primrose.ModelLoader",
   name: "document ModelLoader",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.ModelLoader](#Primrose_ModelLoader) class in the  directory"
 } );
 
-pliny.issue( "Primrose.ModelLoader", {
+pliny.issue({
+  parent: "Primrose.ModelLoader",
   name: "Move ModelLoader to a Three.js specific namespace",
   type: "open",
   description: "This class won't work outside of a Three.js context. The bits of code that absolutely must have Three.js should be moved to their own namespace."

@@ -1,4 +1,5 @@
-﻿pliny.function("Primrose.HTTP", {
+﻿pliny.function({
+  parent: "Primrose.HTTP",
   name: "sendObject",
   description: "Send a JSON object to a server.",
   returns: "Promise",
@@ -9,5 +10,6 @@
   ]
 });
 Primrose.HTTP.sendObject = function (url, options) {
+  console.original_log("sendObject", options);
   return Primrose.HTTP.post("json", url, options);
 };

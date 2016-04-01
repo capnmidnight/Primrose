@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.DOM", {
+pliny.function({
+  parent: "Primrose.DOM",
   name: "findEverything",
   description: "Searches an element for all sub elements that have a named ID,\n\
 using that ID as the name of a field in a hashmap to store a reference to the element.\n\

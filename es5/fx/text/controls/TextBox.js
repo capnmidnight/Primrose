@@ -18,7 +18,8 @@ Primrose.Text.Controls.TextBox = function () {
   var SCROLL_SCALE = isFirefox ? 3 : 100,
       COUNTER = 0;
 
-  pliny.class("Primrose.Text.Controls", {
+  pliny.class({
+    parent: "Primrose.Text.Controls",
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }]
@@ -1010,14 +1011,16 @@ Primrose.Text.Controls.TextBox = function () {
   return TextBox;
 }();
 
-pliny.issue("Primrose.Text.Controls.TextBox", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextBox",
   name: "document TextBox",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Controls.TextBox](#Primrose_Text_Controls_TextBox)\n\
 class in the controls/ directory."
 });
 
-pliny.issue("Primrose.Text.Controls.TextBox", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextBox",
   name: "TextBox does not render blank lines",
   type: "open",
   description: "If a line contains only a newline character, the line doesn't get\n\
@@ -1027,7 +1030,8 @@ it to render. This seems to only happen for text that is loaded into the textbox
 not text that is entered by the keyboard."
 });
 
-pliny.issue("Primrose.Text.Controls.TextBox", {
+pliny.issue({
+  parent: "Primrose.Text.Controls.TextBox",
   name: "TextBox should re-render only on updates, not require an animation loop.",
   type: "open",
   description: "Currently, the TextBox knows quite a bit about when it needs to\n\

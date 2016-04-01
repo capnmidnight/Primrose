@@ -8,19 +8,22 @@ Primrose.Input.LeapMotion = ( function () {
   }
 
 
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion",
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.LeapMotion](#Primrose_Input_LeapMotion) class in the input/ directory"
   } );
   
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "LeapMotionInput",
     description: "| [under construction]"
   });
   function LeapMotionInput ( name, commands, socket ) {
 
-    pliny.issue( "Primrose.Input.LeapMotion", {
+    pliny.issue({
+      parent: "Primrose.Input.LeapMotion",
       name: "document LeapMotion.isStreaming",
       type: "open",
       description: ""
@@ -29,7 +32,8 @@ Primrose.Input.LeapMotion = ( function () {
 
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket, LeapMotionInput.AXES );
 
-    pliny.issue( "Primrose.Input.LeapMotion", {
+    pliny.issue({
+      parent: "Primrose.Input.LeapMotion",
       name: "document LeapMotion.controller",
       type: "open",
       description: ""
@@ -37,35 +41,40 @@ Primrose.Input.LeapMotion = ( function () {
     this.controller = new Leap.Controller( {enableGestures: true} );
   }
 
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.COMPONENTS",
     type: "open",
     description: ""
   } );
   LeapMotionInput.COMPONENTS = [ "X", "Y", "Z" ];
   
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.NUM_HANDS",
     type: "open",
     description: ""
   } );
   LeapMotionInput.NUM_HANDS = 2;
   
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.NUM_FINGERS",
     type: "open",
     description: ""
   } );
   LeapMotionInput.NUM_FINGERS = 10;
   
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.FINGER_PARTS",
     type: "open",
     description: ""
   } );
   LeapMotionInput.FINGER_PARTS = [ "tip", "dip", "pip", "mcp", "carp" ];
   
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.AXES",
     type: "open",
     description: ""
@@ -125,14 +134,16 @@ Primrose.Input.LeapMotion = ( function () {
 
   Primrose.Input.ButtonAndAxis.inherit( LeapMotionInput );
 
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.CONNECTION_TIMEOUT",
     type: "open",
     description: ""
   } );
   LeapMotionInput.CONNECTION_TIMEOUT = 5000;
   
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.E",
     type: "open",
     description: ""
@@ -147,7 +158,8 @@ Primrose.Input.LeapMotion = ( function () {
     }
   };
 
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.start",
     type: "open",
     description: ""
@@ -182,7 +194,8 @@ Primrose.Input.LeapMotion = ( function () {
     }
   };
 
-  pliny.issue( "Primrose.Input.LeapMotion", {
+  pliny.issue({
+    parent: "Primrose.Input.LeapMotion",
     name: "document LeapMotion.setState",
     type: "open",
     description: ""

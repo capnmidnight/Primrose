@@ -2,7 +2,8 @@
 
 Primrose.Input.Motion = ( function ( ) {
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Motion",
     description: "| [under construction]"
   });
@@ -75,7 +76,8 @@ Primrose.Input.Motion = ( function ( ) {
   return MotionInput;
 } )( );
 
-pliny.issue( "Primrose.Input.Motion", {
+pliny.issue({
+  parent: "Primrose.Input.Motion",
   name: "document Motion",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.Motion](#Primrose_Input_Motion) class in the input/ directory"

@@ -4,7 +4,8 @@ Primrose.ButtonFactory = ( function () {
 
   var buttonCount = 0;
 
-  pliny.class( "Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "ButtonFactory",
     description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
     parameters: [
@@ -40,7 +41,8 @@ Primrose.ButtonFactory = ( function () {
     }
   }
 
-  pliny.method( "Primrose.ButtonFactory", {
+  pliny.method({
+    parent: "Primrose.ButtonFactory",
     name: "create",
     description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
     parameters: [
@@ -58,7 +60,8 @@ Primrose.ButtonFactory = ( function () {
   return ButtonFactory;
 } )();
 
-pliny.issue( "Primrose.ButtonFactory", {
+pliny.issue({
+  parent: "Primrose.ButtonFactory",
   name: "document ButtonFactory",
   type: "closed",
   description: "Finish writing the documentation for the [Primrose.ButtonFactory](#Primrose_ButtonFactory) class in the  directory"

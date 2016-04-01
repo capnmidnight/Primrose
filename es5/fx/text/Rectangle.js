@@ -5,7 +5,8 @@
 Primrose.Text.Rectangle = function () {
   "use strict";
 
-  pliny.class("Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Rectangle",
     description: "| [under construction]"
   });
@@ -104,7 +105,8 @@ Primrose.Text.Rectangle = function () {
   return Rectangle;
 }();
 
-pliny.issue("Primrose.Text.Rectangle", {
+pliny.issue({
+  parent: "Primrose.Text.Rectangle",
   name: "document Rectangle",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Rectangle](#Primrose_Text_Rectangle) class in the text/ directory"

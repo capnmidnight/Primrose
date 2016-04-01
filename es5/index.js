@@ -26,71 +26,137 @@ var setFalse = function setFalse(evt) {
 window.Primrose = function () {
   "use strict";
 
-  pliny.namespace("Primrose", "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments.");
+  pliny.namespace({
+    name: "Primrose",
+    description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
+  });
   var Primrose = {};
 
   Primrose.Controls = {};
 
-  pliny.namespace("Primrose.DOM", "A few functions for manipulating DOM.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "DOM",
+    description: "A few functions for manipulating DOM."
+  });
   Primrose.DOM = {};
 
-  pliny.namespace("Primrose.HTTP", "A collection of basic XMLHttpRequest wrappers.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "HTTP",
+    description: "A collection of basic XMLHttpRequest wrappers."
+  });
   Primrose.HTTP = {};
 
-  pliny.namespace("Primrose.Input", "The Input namespace contains classes that handle user input, for use in navigating the 3D environment.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "Input",
+    description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
+  });
   Primrose.Input = {};
 
-  pliny.namespace("Primrose.Network", "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "Network",
+    description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
+  });
   Primrose.Network = {};
 
-  pliny.namespace("Primrose.Output", "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.).");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "Output",
+    description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
+  });
   Primrose.Output = {};
 
-  pliny.namespace("Primrose.Random", "Functions for handling random numbers of different criteria, or selecting random elements of arrays.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "Random",
+    description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
+  });
   Primrose.Random = {};
 
-  pliny.namespace("Primrose.Text", "The Text namespace contains classes everything regarding the Primrose source code editor.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "Text",
+    description: "The Text namespace contains classes everything regarding the Primrose source code editor."
+  });
   Primrose.Text = {};
 
-  pliny.namespace("Primrose.Text.CodePages", "The CodePages namespace contains international keyboard parameters.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "CodePages",
+    description: "The CodePages namespace contains international keyboard parameters."
+  });
   Primrose.Text.CodePages = {};
 
-  pliny.namespace("Primrose.Text.CommandPacks", "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "CommandPacks",
+    description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
+  });
   Primrose.Text.CommandPacks = {};
 
-  pliny.namespace("Primrose.Text.Controls", "The Controls namespace contains different types of text-oriented controls.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "Controls",
+    description: "The Controls namespace contains different types of text-oriented controls."
+  });
   Primrose.Text.Controls = {};
 
-  pliny.namespace("Primrose.Text.Grammars", "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "Grammars",
+    description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
+  });
   Primrose.Text.Grammars = {};
 
-  pliny.namespace("Primrose.Text.OperatingSystems", "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "OperatingSystems",
+    description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
+  });
   Primrose.Text.OperatingSystems = {};
 
-  pliny.namespace("Primrose.Text.Renderers", "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "Renderers",
+    description: "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon."
+  });
   Primrose.Text.Renderers = {};
 
-  pliny.namespace("Primrose.Text.Themes", "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar.");
+  pliny.namespace({
+    parent: "Text.",
+    name: "Themes",
+    description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
+  });
   Primrose.Text.Themes = {};
 
-  pliny.namespace("Primrose.X", "Extensions and components that combine other Primrose elements.");
+  pliny.namespace({
+    parent: "Primrose.",
+    name: "X",
+    description: "Extensions and components that combine other Primrose elements."
+  });
   Primrose.X = {};
 
-  pliny.value("Primrose", {
+  pliny.value({
+    parent: "Primrose",
     name: "SYS_FONTS",
     type: "String",
     description: "A selection of fonts that will match whatever the user's operating system normally uses."
   });
   Primrose.SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 
-  pliny.value("Primrose", {
+  pliny.value({
+    parent: "Primrose",
     name: "SKINS",
     type: "Array of String",
     description: "A selection of color values that closely match skin colors of people."
   });
   Primrose.SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
 
-  pliny.value("Primrose", {
+  pliny.value({
+    parent: "Primrose",
     name: "SKIN_VALUES",
     type: "Array of Number",
     description: "A selection of color values that closely match skin colors of people."
@@ -99,7 +165,8 @@ window.Primrose = function () {
     return parseInt(s.substring(1), 16);
   });
 
-  pliny.function("Primrose", {
+  pliny.function({
+    parent: "Primrose",
     name: "loadTexture",
     description: "Load a texture! Reads the THREE.ImageUtils.crossOrigin property to configure the Cross-Origin policy.",
     paramters: [{ name: "url", type: "String", description: "The URL of the image to load as a texture." }, { name: "onLoad", type: "Function", description: "A callback for when the texture loads successfully." }, { name: "onProgress", type: "Function", description: "A callback for when the progress is made on loading the texture." }, { name: "onError", type: "Function", description: "A callback for if the texture fails to load." }]
@@ -111,7 +178,7 @@ window.Primrose = function () {
     textureLoader.load(url, onLoad, onProgress, onError);
   };
 
-  pliny.value("", {
+  pliny.value({
     name: "isHomeScreen",
     type: "Boolean",
     description: "Flag indicating the script is currently running in an IFRAME or not."
@@ -119,7 +186,7 @@ window.Primrose = function () {
   window.isInIFrame = window.self !== window.top;
 
   // snagged and adapted from http://detectmobilebrowsers.com/
-  pliny.value("", {
+  pliny.value({
     name: "isMobile",
     type: "Boolean",
     description: "Flag indicating the current system is a recognized \"mobile\"\n\
@@ -130,7 +197,14 @@ device, usually possessing a motion sensor."
     );
   }(navigator.userAgent || navigator.vendor || window.opera);
 
-  pliny.value("", {
+  pliny.value({
+    name: "isGearVR",
+    type: "Boolean",
+    description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
+  });
+  window.isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
+
+  pliny.value({
     name: "isiOS",
     type: "Boolean",
     description: "Flag indicating the current system is a device running the Apple\n\
@@ -138,7 +212,7 @@ iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional cod
 paths necessary to deal with deficiencies in Apple's implementation of web standards." });
   window.isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
-  pliny.value("", {
+  pliny.value({
     name: "isOSX",
     type: "Boolean",
     description: "Flag indicating the current system is a computer running the Apple\n\
@@ -147,7 +221,7 @@ idiosynchratic, concensus-defying keyboard shortcuts."
   });
   window.isOSX = /Macintosh/.test(navigator.userAgent || "");
 
-  pliny.value("", {
+  pliny.value({
     name: "isWindows",
     type: "Boolean",
     description: "Flag indicating the current system is a computer running one of\n\
@@ -155,7 +229,7 @@ the Microsoft Windows operating systems. We have not yet found a use for this fl
   });
   window.isWindows = /Windows/.test(navigator.userAgent || "");
 
-  pliny.value("", {
+  pliny.value({
     name: "isOpera",
     type: "Boolean",
     description: "Flag indicating the browser is currently calling itself Opera.\n\
@@ -166,7 +240,7 @@ Google Chrome."
   });
   window.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
-  pliny.value("", {
+  pliny.value({
     name: "isSafari",
     type: "Boolean",
     description: "Flag indicating the browser is currently calling itself Safari.\n\
@@ -177,7 +251,7 @@ Explorer as the Internet Explorer of the web."
   });
   window.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 
-  pliny.value("", {
+  pliny.value({
     name: "isChrome",
     type: "Boolean",
     description: "Flag indicating the browser is currently calling itself Chrome\n\
@@ -186,7 +260,7 @@ features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
   });
   window.isChrome = !!window.chrome && !window.isOpera;
 
-  pliny.value("", {
+  pliny.value({
     name: "isFirefox",
     type: "Boolean",
     description: "Flag indicating the browser is currently calling itself Firefox.\n\
@@ -195,7 +269,7 @@ in the browser, thanks to the work of the MozVR team."
   });
   window.isFirefox = typeof window.InstallTrigger !== 'undefined';
 
-  pliny.value("", {
+  pliny.value({
     name: "isWebKit",
     type: "Boolean",
     description: "Flag indicating the browser is one of Chrome, Safari, or Opera.\n\
@@ -204,7 +278,7 @@ a common basis for orientation events."
   });
   window.isWebKit = window.isiOS || window.isOpera || window.isChrome;
 
-  pliny.value("", {
+  pliny.value({
     name: "isIE",
     type: "Boolean",
     description: "Flag indicating the browser is currently calling itself Internet\n\
@@ -213,124 +287,116 @@ the torch on to Safari in all of its many useless incarnations."
   });
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
 
-  pliny.issue("", {
-    name: "Make a getting started page.",
-    type: "closed",
-    description: "Make a page that explains downloading the right dependencies,\n\
-making a simple page using a sample scene, making it VR capable, and adding\n\
-objects to it."
-  });
-
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a simple Blender tutorial.",
     type: "open",
     description: "Show where to download Blender and how to use it to make a smooth-shaded,\n\
 flat color, low-poly scene and make it VR ready."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a more advanced Blender tutorial.",
     type: "open",
     description: "Show how to do texturing in Blender."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a simple lighting tutorial.",
     type: "open",
     description: "Basic point and spot lights."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a simple video tutorial.",
     type: "open",
     description: "Put a quad in the scene on which a movie can play. Make it look\n\
 like a drive-in to be really cool."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a drum machine tutorial.",
     type: "open",
     description: "Show how to create elements and useful interactions with those elements."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a 3D IDE tutorial.",
     type: "open",
     description: "Show how to build the 3D editor demo."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a basic server tutorial.",
     type: "open",
     description: "Show how to setup a basic Node WebSockets server to be able to do\n\
 multiplayer chat."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make an adventure demo.",
     type: "open",
     description: "Make a small adventure game of locked treasure chests and mazes."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make an HMD overview page.",
     type: "open",
     description: "Go into what is available, what are the key components, and how\n\
 to build your own Google Cardboard."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a tutorial on modeling a scene with Primrose and saving/exporting it.",
     type: "open",
     description: "Live program a scene and save it to an HTML file that can be put up\n\
 on a website and be ready to run in VR."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make a CHANGELOG",
     type: "open",
     description: "Document the changes between versions better."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make better icons for full-screen view.",
     type: "open",
     description: "The current icons don't match each other, and they are in a bad place on screen."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Link examples to each other.",
     type: "open",
     description: "Make it so you can jump from one example to another, both in 2D and VR contexts."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make more examples on CodePen.",
     type: "open",
     description: "Demonstrate using Primrose with the different options available in CodePen."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Update the README.",
     type: "open",
     description: "It's woefully out of date."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Make Haptic Glove tutorial.",
     type: "open",
     description: "Offer the supplies for sale, and show how to build a haptic glove\n\
 that can be used with Primrose."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Adopt ES6.",
     type: "open",
     description: "Classes and arrow functions are good. Rely on browser support for\n\
 development. Setup a transpiler for production builds."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Figure out a better module system.",
     type: "open",
     description: "I still want Primrose to be an \"Include one JS file\" type of library\n\
@@ -338,37 +404,37 @@ for working in browsers. But I also want the component parts to work well with N
 and other neuveau JS shenanigans."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with A-Frame.",
     type: "open",
     description: "If it's easy, it won't hurt."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with SceneVR.",
     type: "open",
     description: "If it's easy, it won't hurt."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with Vizor.",
     type: "open",
     description: "If it's easy, it won't hurt."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with X3D.",
     type: "open",
     description: "If it's easy, it won't hurt."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with JanusVR.",
     type: "open",
     description: "If it's easy, it won't hurt."
   });
 
-  pliny.issue("", {
+  pliny.issue({
     name: "Investigate compatability with AltspaceVR.",
     type: "open",
     description: "If it's easy, it won't hurt."

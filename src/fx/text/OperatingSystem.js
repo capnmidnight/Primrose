@@ -15,7 +15,8 @@ Primrose.Text.OperatingSystem = (function () {
     setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
   }
 
-  pliny.class("Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "OperatingSystem",
     description: "| [under construction]"
   });
@@ -84,7 +85,8 @@ Primrose.Text.OperatingSystem = (function () {
   return OperatingSystem;
 })();
 
-pliny.issue("Primrose.Text.OperatingSystem", {
+pliny.issue({
+  parent: "Primrose.Text.OperatingSystem",
   name: "document OperatingSystem",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.OperatingSystem](#Primrose_Text_OperatingSystem) class in the text/ directory"

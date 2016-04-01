@@ -2,7 +2,8 @@
 
 Primrose.NetworkedInput = ( function () {
 
-  pliny.class( "Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "NetworkedInput",
     description: "| [under construction]"
   } );
@@ -263,7 +264,8 @@ Primrose.NetworkedInput = ( function () {
   return NetworkedInput;
 } )();
 
-pliny.issue( "Primrose.NetworkedInput", {
+pliny.issue({
+  parent: "Primrose.NetworkedInput",
   name: "document NetworkedInput",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.NetworkedInput](#Primrose_NetworkedInput) class in the  directory"

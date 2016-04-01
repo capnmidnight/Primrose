@@ -7,7 +7,8 @@
 Primrose.Text.OperatingSystems.Windows = (function () {
   "use strict";
 
-  pliny.value( "Primrose.Text.OperatingSystems", {
+  pliny.value({
+    parent: "Primrose.Text.OperatingSystems",
     name: "OSX",
     description: "| [under construction]"
   } );
@@ -17,7 +18,8 @@ Primrose.Text.OperatingSystems.Windows = (function () {
       "CTRL", "HOME", "END");
 })();
 
-pliny.issue( "Primrose.Text.OperatingSystems.Windows", {
+pliny.issue({
+  parent: "Primrose.Text.OperatingSystems.Windows",
   name: "document Windows",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.OperatingSystems.Windows](#Primrose_Text_OperatingSystems_Windows) class in the operating_systems/ directory"

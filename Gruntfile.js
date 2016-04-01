@@ -95,7 +95,17 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
           tutorial: /^Tutorial:/.test(match[2])
         };
       })
-  }
+  };
+
+if (false) {
+  debugData.frameworkFiles = debugData.frameworkFiles.map(function (f) { return f.replace(/^\/src\//, "/es5/"); });
+}
+
+debugData.frameworkFiles.unshift("/lib/pliny.js");
+debugData.frameworkFiles.unshift("/node_modules/marked/lib/marked.js");
+debugData.frameworkFiles.unshift("/node_modules/three/three.js");
+debugData.frameworkFiles.unshift("/lib/webgl-debug.js");
+debugData.frameworkFiles.unshift("/lib/logger.js");
 
 debugData.docFiles.sort(function (a, b) {
   return a.index - b.index;
@@ -109,7 +119,7 @@ module.exports = function (grunt) {
 
     pkg: grunt.file.readJSON("package.json"),
 
-    clean: ["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
+    clean: ["obj", "es5/**/*.js", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
 
     jade: {
       release: jadeReleaseConfiguration,
@@ -123,7 +133,7 @@ module.exports = function (grunt) {
       },
       hint: {
         files: "src/**/*.js",
-        tasks: ["jshint"]
+        tasks: ["jshint", "babel"]
       }
     },
 
@@ -211,7 +221,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-jade");
 
   grunt.registerTask("none", []);
-  grunt.registerTask("debug", ["jshint", "watch"]);
+  grunt.registerTask("debug", ["jshint", "babel", "jade:debug", "watch:hint"]);
   grunt.registerTask("build-js", ["jshint", "babel", "concat", "uglify", "copy"]);
   grunt.registerTask("release", ["clean", "jade:release", "cssmin", "build-js"]);
   grunt.registerTask("default", ["debug"]);

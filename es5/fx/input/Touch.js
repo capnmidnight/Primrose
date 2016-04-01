@@ -4,7 +4,8 @@
 
 Primrose.Input.Touch = function () {
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Touch",
     description: "| [under construction]"
   });
@@ -51,7 +52,8 @@ Primrose.Input.Touch = function () {
   return TouchInput;
 }();
 
-pliny.issue("Primrose.Input.Touch", {
+pliny.issue({
+  parent: "Primrose.Input.Touch",
   name: "document Touch",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.Touch](#Primrose_Input_Touch) class in the input/ directory"

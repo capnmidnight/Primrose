@@ -1,20 +1,23 @@
 /* global Primrose, THREE, emit, isMobile, pliny */
 
 Primrose.Input.FPSInput = (function () {
-  pliny.issue("Primrose.Input.FPSInput", {
+  pliny.issue({
+    parent: "Primrose.Input.FPSInput",
     name: "document FPSInput",
     type: "open",
     description: "Finish writing the documentation for the [Primrose.Input.FPSInput](#Primrose_Input_FPSInput) class in the input/ directory"
   });
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "FPSInput",
     description: "| [under construction]"
   });
   function FPSInput(DOMElement, near, far) {
     DOMElement = DOMElement || window;
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.listeners",
       type: "open",
       description: ""
@@ -24,7 +27,8 @@ Primrose.Input.FPSInput = (function () {
       zero: []
     };
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.managers",
       type: "open",
       description: ""
@@ -97,37 +101,43 @@ Primrose.Input.FPSInput = (function () {
       this.managers.push(new Primrose.Input.VR("vr", near, far));
     }
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.keyboard",
       type: "open",
       description: ""
     });
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.mouse",
       type: "open",
       description: ""
     });
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.touch",
       type: "open",
       description: ""
     });
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.gamepad",
       type: "open",
       description: ""
     });
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.vr",
       type: "open",
       description: ""
     });
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.motion",
       type: "open",
       description: ""
@@ -138,7 +148,8 @@ Primrose.Input.FPSInput = (function () {
       return inst;
     }, this);
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.connectGamepad",
       type: "open",
       description: ""
@@ -154,7 +165,8 @@ Primrose.Input.FPSInput = (function () {
 
   var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
-  pliny.issue("Primrose.Input.FPSInput", {
+  pliny.issue({
+    parent: "Primrose.Input.FPSInput",
     name: "document FPSInput.zero",
     type: "open",
     description: ""
@@ -174,7 +186,8 @@ Primrose.Input.FPSInput = (function () {
     }
   };
 
-  pliny.issue("Primrose.Input.FPSInput", {
+  pliny.issue({
+    parent: "Primrose.Input.FPSInput",
     name: "document FPSInput.update",
     type: "open",
     description: ""
@@ -188,7 +201,8 @@ Primrose.Input.FPSInput = (function () {
     }
   };
 
-  pliny.issue("Primrose.Input.FPSInput", {
+  pliny.issue({
+    parent: "Primrose.Input.FPSInput",
     name: "document FPSInput.addEventListener",
     type: "open",
     description: ""
@@ -206,7 +220,8 @@ Primrose.Input.FPSInput = (function () {
     }
   };
 
-  pliny.issue("Primrose.Input.FPSInput", {
+  pliny.issue({
+    parent: "Primrose.Input.FPSInput",
     name: "document FPSInput.getValue",
     type: "open",
     description: ""
@@ -223,7 +238,8 @@ Primrose.Input.FPSInput = (function () {
   };
 
   if (window.THREE) {
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.getVector3",
       type: "open",
       description: ""
@@ -240,7 +256,8 @@ Primrose.Input.FPSInput = (function () {
       return value;
     };
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.getVector3s",
       type: "open",
       description: ""
@@ -257,7 +274,8 @@ Primrose.Input.FPSInput = (function () {
     };
 
     var temp = new THREE.Quaternion();
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.getQuaternion",
       type: "open",
       description: ""
@@ -278,7 +296,8 @@ Primrose.Input.FPSInput = (function () {
       return value;
     };
 
-    pliny.issue("Primrose.Input.FPSInput", {
+    pliny.issue({
+      parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.transforms",
       type: "open",
       description: ""

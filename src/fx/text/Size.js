@@ -3,7 +3,8 @@
 Primrose.Text.Size = (function ( ) {
   "use strict";
 
-  pliny.class( "Primrose.Text", {
+  pliny.class({
+    parent: "Primrose.Text",
     name: "Size",
     description: "| [under construction]"
   } );
@@ -34,7 +35,8 @@ Primrose.Text.Size = (function ( ) {
   return Size;
 } )();
 
-pliny.issue( "Primrose.Text.Size", {
+pliny.issue({
+  parent: "Primrose.Text.Size",
   name: "document Size",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Size](#Primrose_Text_Size) class in the text/ directory"

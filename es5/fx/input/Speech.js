@@ -52,7 +52,8 @@ Primrose.Input.Speech = function () {
   //  null if setup was successful.
   ///
 
-  pliny.class("Primrose.Input", {
+  pliny.class({
+    parent: "Primrose.Input",
     name: "Speech",
     description: "| [under construction]"
   });
@@ -209,7 +210,8 @@ Primrose.Input.Speech = function () {
   return SpeechInput;
 }();
 
-pliny.issue("Primrose.Input.Speech", {
+pliny.issue({
+  parent: "Primrose.Input.Speech",
   name: "document Speech",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Input.Speech](#Primrose_Input_Speech) class in the input/ directory"

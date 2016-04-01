@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.Random", {
+pliny.function({
+  parent: "Primrose.Random",
   name: "int",
   description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another.",
   parameters: [{ name: "min", type: "Number", description: "The included minimum side of the range of numbers." }, { name: "max", type: "Number", description: "The excluded maximum side of the range of numbers." }, { name: "power", type: "Number", description: "(Optional) The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range. Defaults to 1." }],

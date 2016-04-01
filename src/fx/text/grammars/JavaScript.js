@@ -3,7 +3,8 @@
 Primrose.Text.Grammars.JavaScript = ( function () {
   "use strict";
 
-  pliny.value( "Primrose.Text.Grammars", {
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
     name: "JavaScript",
     description: "| [under construction]"
   } );
@@ -24,7 +25,8 @@ Primrose.Text.Grammars.JavaScript = ( function () {
   ] );
 } )();
 
-pliny.issue( "Primrose.Text.Grammars.JavaScript", {
+pliny.issue({
+  parent: "Primrose.Text.Grammars.JavaScript",
   name: "document JavaScript",
   type: "open",
   description: "Finish writing the documentation for the [Primrose.Text.Grammars.JavaScript](#Primrose_Text_Grammars_JavaScript) class in the grammars/ directory"

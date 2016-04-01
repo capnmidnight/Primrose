@@ -2,18 +2,18 @@
 
 /* global pliny */
 
-pliny.issue("", {
+pliny.issue({
   name: "document helpers/fmt.js",
   type: "closed",
   description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
 });
 
-pliny.issue("", {
+pliny.issue({
   name: "document sigfig function",
   type: "closed",
   description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "sigfig",
   description: "Formats a decimal number to a certain length of decimal points.",
   parameters: [{ name: "x", type: "Number", description: "The number to format." }, { name: "y", type: "Number", description: "The number of digits after the decimal point to show." }],
@@ -47,12 +47,12 @@ function sigfig(x, y) {
   return v;
 }
 
-pliny.issue("", {
+pliny.issue({
   name: "document fmt function",
   type: "closed",
   description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "fmt",
   parameters: [{ name: "template", type: "String", description: "The template string containing dollar-sign delimited value references." }, { name: "varargs...", type: "Any", description: "The values to replace into the template. Generally speaking, the `toString()` method of the object will be called. However, dates have special handling. The precision count indicates the fields of the date to print.\n\
 * $1.0 - prints just the 4-digit year.\n\
@@ -162,12 +162,12 @@ var fmt = function () {
   return fmt;
 }();
 
-pliny.issue("", {
+pliny.issue({
   name: "document px function",
   type: "closed",
   description: "Finish writing the documentation for the [px](#px) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "px",
   description: "Appends the string \"px\" to the end of a number. Useful for specifying CSS units.",
   parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS pixel-unit value." }],
@@ -178,12 +178,12 @@ pliny.function("", {
 });
 var px = fmt.bind(undefined, "$1px");
 
-pliny.issue("", {
+pliny.issue({
   name: "document pct function",
   type: "closed",
   description: "Finish writing the documentation for the [pct](#pct) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "pct",
   description: "Appends the string \"%\" to the end of a number. Useful for specifying CSS units.",
   parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS percentage-unit value." }],
@@ -194,12 +194,12 @@ pliny.function("", {
 });
 var pct = fmt.bind(undefined, "$1%");
 
-pliny.issue("", {
+pliny.issue({
   name: "document ems function",
   type: "closed",
   description: "Finish writing the documentation for the [ems](#ems) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "ems",
   description: "Appends the string \"em\" to the end of a number. Useful for specifying CSS units.",
   parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS em-unit value." }],
@@ -210,7 +210,7 @@ pliny.function("", {
 });
 var ems = fmt.bind(undefined, "$1em");
 
-pliny.function("", {
+pliny.function({
   name: "rems",
   description: "Appends the string \"rem\" to the end of a number. Useful for specifying CSS units.",
   parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS rem-unit value." }],
@@ -221,7 +221,7 @@ pliny.function("", {
 });
 var rems = fmt.bind(undefined, "$1rem");
 
-pliny.function("", {
+pliny.function({
   name: "vws",
   description: "Appends the string \"vw\" to the end of a number. Useful for specifying CSS units.",
   parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS view-width-unit value." }],
@@ -232,12 +232,12 @@ pliny.function("", {
 });
 var vws = fmt.bind(undefined, "$1vw");
 
-pliny.issue("", {
+pliny.issue({
   name: "document rgb function",
   type: "closed",
   description: "Finish writing the documentation for the [rgb](#rgb) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "rgb",
   description: "Builds a CSS `rbg()` color-value string from three parameters.",
   parameters: [{ name: "red", type: "Number", description: "The red component, on the range [0, 255]." }, { name: "green", type: "Number", description: "The green component, on the range [0, 255]." }, { name: "blue", type: "Number", description: "The blue component, on the range [0, 255]." }],
@@ -248,12 +248,12 @@ pliny.function("", {
 });
 var rgb = fmt.bind(undefined, "rgb($1, $2, $3)");
 
-pliny.issue("", {
+pliny.issue({
   name: "document rgba function",
   type: "closed",
   description: "Finish writing the documentation for the [rgba](#rgba) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "rgba",
   description: "Builds a CSS `rbga()` color-value string from three parameters.",
   parameters: [{ name: "red", type: "Number", description: "The red component, on the range [0, 255]." }, { name: "green", type: "Number", description: "The green component, on the range [0, 255]." }, { name: "blue", type: "Number", description: "The blue component, on the range [0, 255]." }, { name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]." }],
@@ -264,12 +264,12 @@ pliny.function("", {
 });
 var rgba = fmt.bind(undefined, "rgba($1, $2, $3, $4)");
 
-pliny.issue("", {
+pliny.issue({
   name: "document hsl function",
   type: "closed",
   description: "Finish writing the documentation for the [hsl](#hsl) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "hsl",
   description: "Builds a CSS `hsl()` color-value string from three parameters.",
   parameters: [{ name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240." }, { name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]." }, { name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]." }],
@@ -280,12 +280,12 @@ pliny.function("", {
 });
 var hsl = fmt.bind(undefined, "hsl($1, $2%, $3%)");
 
-pliny.issue("", {
+pliny.issue({
   name: "document hsla function",
   type: "closed",
   description: "Finish writing the documentation for the [hsla](#hsla) function in the helpers/fmt.js file."
 });
-pliny.function("", {
+pliny.function({
   name: "hsla",
   description: "Builds a CSS `hsla()` color-value string from three parameters.",
   parameters: [{ name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240." }, { name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]." }, { name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]." }, { name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]." }],

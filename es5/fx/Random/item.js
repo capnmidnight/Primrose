@@ -1,6 +1,7 @@
 "use strict";
 
-pliny.function("Primrose.Random", {
+pliny.function({
+  parent: "Primrose.Random",
   name: "item",
   description: "Returns a random element from an array.",
   parameters: [{ name: "arr", type: "Array", description: "The array form which to pick items." }],

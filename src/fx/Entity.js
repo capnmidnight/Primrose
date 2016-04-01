@@ -1,4 +1,5 @@
-﻿pliny.class("Primrose", {
+﻿pliny.class({
+  parent: "Primrose",
   name: "Entity",
   description: "An object that receives user input events and network messages to perform actions."
 });
@@ -7,7 +8,8 @@ Primrose.Entity = (function () {
   
   var entities = new WeakMap();
 
-  pliny.class("Primrose", {
+  pliny.class({
+    parent: "Primrose",
     name: "Entity",
     description: "The Entity class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
@@ -44,7 +46,8 @@ performs basic conversions from DOM elements to the internal Control format."
     }
 
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "addEventListener",
     description: "Adding an event listener registers a function as being ready to receive events.",
     parameters: [
@@ -70,7 +73,8 @@ to the method of the same name on DOM elements.\n\
     }
 
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "removeEventListener",
       description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
         parameters: [
@@ -100,7 +104,8 @@ to the method of the same name on DOM elements.\n\
     }
 
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "focus",
     description: "Sets the focus property of the control, does not change the focus property of any other control.",
     examples: [{
@@ -135,7 +140,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     }
 
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "blur",
       description: "Unsets the focus property of the control, does not change the focus property of any other control.",
         examples: [{
@@ -175,7 +181,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     }
     
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "appendChild",
       description: "Adds an Entity as a child entity of this entity.",
       parameters: [
@@ -204,7 +211,8 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     
     
     /*
-  pliny.method("Primrose.Entity", {
+  pliny.method({
+    parent: "Primrose.Entity",
     name: "removeChild",
     description: "Removes an Entity from another Entity of this entity.",
     parameters: [

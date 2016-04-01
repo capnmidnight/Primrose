@@ -1,11 +1,11 @@
 /* global pliny */
 
-pliny.issue( "", {
+pliny.issue({
   name: "document getSetting",
   type: "closed",
   description: "Finish writing the documentation for the `getSetting()` function in the helpers/forms.js file."
 } );
-pliny.function( "", {
+pliny.function({
   name: "getSetting",
   parameters: [
     {name: " name", type: "string", description: "The name of the setting to read."},
@@ -46,12 +46,12 @@ function getSetting ( name, defValue ) {
   return defValue;
 }
 
-pliny.issue( "", {
+pliny.issue({
   name: "document setSetting",
   type: "closed",
   description: "Finish writing the documentation for the `setSetting()` function in the helpers/forms.js file."
 } );
-pliny.function( "", {
+pliny.function({
   name: "setSetting",
   parameters: [
     {name: " name", type: "string", description: "The name of the setting to set."},
@@ -85,12 +85,12 @@ function setSetting ( name, val ) {
   }
 }
 
-pliny.issue( "", {
+pliny.issue({
   name: "document deleteSetting",
   type: "closed",
   description: "Finish writing the documentation for the `deleteSetting()` function in the helpers/forms.js file."
 } );
-pliny.function( "", {
+pliny.function({
   name: "deleteSetting",
   parameters: [
     {name: " name", type: "string", description: "The name of the setting to delete."}
@@ -114,12 +114,12 @@ function deleteSetting ( name ) {
   }
 }
 
-pliny.issue( "", {
+pliny.issue({
   name: "document readForm",
   type: "closed",
   description: "Finish writing the documentation for the `readForm()` function in the helpers/forms.js file."
 } );
-pliny.function( "", {
+pliny.function({
   name: "readForm",
   parameters: [
     {name: "ctrls", type: "Hash of Elements", description: "An array of HTML form elements, aka INPUT, TEXTAREA, SELECT, etc."}
@@ -172,12 +172,12 @@ function readForm ( ctrls ) {
 }
 
 
-pliny.issue( "", {
+pliny.issue({
   name: "document writeForm",
   type: "closed",
   description: "Finish writing the documentation for the `writeForm()` function in the helpers/forms.js file."
 } );
-pliny.function( "", {
+pliny.function({
   name: "writeForm",
   parameters: [
     {name: "ctrls", type: "Hash of Elements", description: "A hash-collection of HTML input elements that will have their values set."},
@@ -229,7 +229,7 @@ function writeForm ( ctrls, state ) {
   }
 }
 
-pliny.issue( "", {
+pliny.issue({
   name: "document helpers/forms.js",
   type: "closed",
   description: "Finish writing the documentation for the [forms](#forms) file in the helpers/ directory."
