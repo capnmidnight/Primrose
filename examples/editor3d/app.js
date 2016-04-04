@@ -40,7 +40,7 @@ app.addEventListener("ready", function () {
   });
 
   output = new Primrose.Text.Controls.TextBox({
-    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight),
+    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 50, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 50),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
     readOnly: true,
@@ -48,7 +48,7 @@ app.addEventListener("ready", function () {
   });
 
   button1 = new Primrose.Controls.Button2D({
-    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 500, editor.surfaceHeight, 500, 45),
+    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 500, output.bounds.top, 500, 45),
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
