@@ -214,6 +214,8 @@ Then we can create and use an automatically workerized version of it as follows.
         this[k] = this.methodShim.bind(this, k);
       }
     }
+
+    this.ready = true;
   }
 
   pliny.method({

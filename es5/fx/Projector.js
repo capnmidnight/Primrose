@@ -2097,6 +2097,7 @@ Primrose.Projector = function () {
     this.listeners = {
       hit: []
     };
+    this.ready = true;
   }
 
   Projector.prototype.addEventListener = function (evt, handler) {

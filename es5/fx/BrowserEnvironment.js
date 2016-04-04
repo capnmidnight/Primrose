@@ -447,8 +447,11 @@ Primrose.BrowserEnvironment = function () {
 
       this.pickableObjects = {};
 
-      this.projector = new Primrose.Workerize(Primrose.Projector);
-      this.projector.ready = true;
+      if (isGearVR) {
+        this.projector = new Primrose.Projector();
+      } else {
+        this.projector = new Primrose.Workerize(Primrose.Projector);
+      }
 
       this.player = new THREE.Object3D();
       this.player.velocity = new THREE.Vector3();
