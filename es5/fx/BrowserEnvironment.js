@@ -43,10 +43,6 @@ Primrose.BrowserEnvironment = function () {
       FORWARDED_EVENTS = ["keydown", "keyup", "keypress", "mousedown", "mouseup", "mousemove", "wheel", "touchstart", "touchend", "touchmove"],
       RESOLUTION_SCALE = 1;
 
-  if (isGearVR) {
-    //    RESOLUTION_SCALE = 4 / 1.5;
-  }
-
   pliny.class({
     parent: "Primrose",
     name: "BrowserEnvironment",
@@ -175,7 +171,7 @@ Primrose.BrowserEnvironment = function () {
         strafe = _this.input.getValue("strafe");
         drive = _this.input.getValue("drive");
         pitch = _this.input.getValue("pitch");
-        if (_this.inVR) {
+        if (_this.inVR || isMobile) {
           _this.input.getQuaternion("headRX", "headRY", "headRZ", "headRW", qHead);
         } else {
           qHead.set(0, 0, 0, 1);
@@ -372,10 +368,15 @@ Primrose.BrowserEnvironment = function () {
         }
       };
 
-      var setSize = function setSize() {
-        var canvasWidth, canvasHeight, aspectWidth;
+      var setSize = function setSize(forceVR) {
+        var canvasWidth,
+            canvasHeight,
+            aspectWidth,
+            bounds = _this.renderer.domElement.getBoundingClientRect(),
+            elementWidth = bounds.width,
+            elementHeight = bounds.height;
 
-        if (_this.inVR) {
+        if (forceVR === true && _this.inVR) {
           var p = _this.input.vr.transforms,
               l = p[0],
               r = p[1];
@@ -383,10 +384,7 @@ Primrose.BrowserEnvironment = function () {
           canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
           aspectWidth = canvasWidth / 2;
         } else {
-          var bounds = _this.renderer.domElement.getBoundingClientRect(),
-              elementWidth = bounds.width,
-              elementHeight = bounds.height,
-              pixelRatio = devicePixelRatio || 1;
+          var pixelRatio = devicePixelRatio || 1;
           if (isiOS) {
             elementHeight = elementWidth * screen.width / screen.height;
           }
@@ -398,10 +396,9 @@ Primrose.BrowserEnvironment = function () {
             document.documentElement.style.height = Math.max(document.documentElement.clientHeight, elementHeight) + "px";
           }
         }
+
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
-        _this.renderer.domElement.style.width = document.body.clientWidth + "px";
-        _this.renderer.domElement.style.height = document.body.clientHeight + "px";
         if (!_this.timer) {
           render();
         }
@@ -469,12 +466,11 @@ Primrose.BrowserEnvironment = function () {
       this.renderer = new THREE.WebGLRenderer({
         canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
         antialias: !isMobile,
-        alpha: !isMobile,
-        logarithmicDepthBuffer: !isMobile,
-        DEBUG_WEBGL: this.options.DEBUG_WEBGL
+        alpha: true,
+        logarithmicDepthBuffer: false
       });
       this.renderer.autoClear = false;
-      this.renderer.autoSortObjects = !isMobile;
+      this.renderer.autoSortObjects = true;
       this.renderer.setClearColor(this.options.backgroundColor);
       if (!this.renderer.domElement.parentElement) {
         document.body.appendChild(this.renderer.domElement);
@@ -502,7 +498,7 @@ Primrose.BrowserEnvironment = function () {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5
         });
-        this.ground.rotation.x = Math.PI / 2;
+        this.ground.rotation.x = -Math.PI / 2;
         this.ground.name = "Ground";
         this.scene.add(this.ground);
         this.registerPickableObject(this.ground);
@@ -664,14 +660,15 @@ Primrose.BrowserEnvironment = function () {
       // Manage full-screen state
       //
       this.goFullScreen = function () {
-        console.log("goFullscreen");
-        FullScreen.request(_this.renderer.domElement);
+        return FullScreen.request(_this.renderer.domElement);
       };
 
       this.goVR = function () {
-        console.log("goVR");
+        setSize(true);
         _this.input.vr.currentDisplay.requestPresent({ source: _this.renderer.domElement }).then(function () {
           return _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+        }).then(function () {
+          return console.log(_this.renderer.domElement.clientWidth, "x", _this.renderer.domElement.clientHeight, "|", _this.renderer.domElement.clientWidth, "x", _this.renderer.domElement.clientHeight);
         });
       };
 
@@ -680,15 +677,17 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var checkFullScreen = function checkFullScreen(evt) {
-        console.log("checkFullScreen");
-        setHistory();
-        if (isFullScreenMode()) {
-          lockOrientation();
-          Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
-        } else {
-          unlockOrientation();
-          if (Primrose.Input.Mouse.Lock.getElement()) {
-            Primrose.Input.Mouse.Lock.exit();
+        if (!isGearVR) {
+          console.log("checkFullScreen");
+          setHistory();
+          if (isFullScreenMode()) {
+            lockOrientation();
+            Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
+          } else {
+            unlockOrientation();
+            if (Primrose.Input.Mouse.Lock.getElement()) {
+              Primrose.Input.Mouse.Lock.exit();
+            }
           }
         }
       };
@@ -721,11 +720,13 @@ Primrose.BrowserEnvironment = function () {
 
       var checkPresent = function checkPresent(evt) {
         console.log("checkPresent");
-        setHistory();
-        if (isFullScreenMode()) {
-          Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
-        } else if (Primrose.Input.Mouse.Lock.getElement()) {
-          Primrose.Input.Mouse.Lock.exit();
+        if (!isGearVR) {
+          setHistory();
+          if (isFullScreenMode()) {
+            Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
+          } else if (Primrose.Input.Mouse.Lock.getElement()) {
+            Primrose.Input.Mouse.Lock.exit();
+          }
         }
       };
 
@@ -939,7 +940,7 @@ Primrose.BrowserEnvironment = function () {
     // The color that WebGL clears the background with before drawing.
     backgroundColor: 0xafbfff,
     // the near plane of the camera
-    nearPlane: 0.1,
+    nearPlane: 0.01,
     // the far plane of the camera
     drawDistance: 100,
     // the field of view to use in non-VR settings
