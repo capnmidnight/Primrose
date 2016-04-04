@@ -23,23 +23,19 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
     this.stageParameters = null;
 
     this.getEyeParameters = function (side) {
-      if (currentLayer) {
-        var dEye = side === "left" ? -1 : 1;
+      var dEye = side === "left" ? -1 : 1;
 
-        return {
-          renderWidth: Math.floor(currentLayer.source.width / 2),
-          renderHeight: currentLayer.source.height,
-          offset: new Float32Array([dEye * 0.034, 0, 0]),
-          fieldOfView: {
-            upDegrees: 22.5,
-            downDegrees: 22.5,
-            leftDegrees: 45,
-            rightDegrees: 45
-          }
-        };
-      } else {
-        console.warn("no layer");
-      }
+      return {
+        renderWidth: Math.floor(screen.width * devicePixelRatio / 2),
+        renderHeight: screen.height * devicePixelRatio,
+        offset: new Float32Array([dEye * 0.03, 0, 0]),
+        fieldOfView: {
+          upDegrees: 40,
+          downDegrees: 40,
+          leftDegrees: 40,
+          rightDegrees: 40
+        }
+      };
     };
 
     corrector.addEventListener("deviceorientation", function (evt) {
@@ -72,32 +68,30 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
 
     this.requestPresent = function (layer) {
       console.log("requestPresent");
-      return new Promise(function (resolve, reject) {
-        if (!_this.capabilities.canPresent) {
-          reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
-        } else if (!layer) {
-          reject(new Error("No layer provided to requestPresent"));
-        } else if (!layer.source) {
-          reject(new Error("No source on layer parameter."));
-        } else {
-          FullScreen.request(layer.source).then(function (elem) {
-            _this.isPresenting = elem === layer.source;
-            currentLayer = layer;
-            FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
-            resolve();
-          }).catch(function (evt) {
-            _this.isPresenting = false;
-            reject(evt);
-          });
-        }
-      });
+      if (!_this.capabilities.canPresent) {
+        return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
+      } else if (!layer) {
+        return Promise.reject(new Error("No layer provided to requestPresent"));
+      } else if (!layer.source) {
+        return Promise.reject(new Error("No source on layer parameter."));
+      } else {
+        return FullScreen.request(layer.source).then(function (elem) {
+          _this.isPresenting = elem === layer.source;
+          currentLayer = layer;
+          FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
+          resolve();
+        }).catch(function (evt) {
+          _this.isPresenting = false;
+          reject(evt);
+        });
+      }
     };
 
     this.exitPresent = function () {
       var _this2 = this;
 
       var clear = function clear() {
-        console.log("exit presenting", _this2);
+        console.log("exit presenting");
         _this2.isPresenting = false;
         currentLayer = null;
       };

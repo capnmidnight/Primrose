@@ -114,8 +114,7 @@ Primrose.Input.VR = (function () {
       if (navigator.getVRDisplays && !isGearVR) {
         console.info("Using WebVR API 1");
         return navigator.getVRDisplays()
-          .then(enumerateVRDisplays.bind(this, elem))
-          .catch(reject);
+          .then(enumerateVRDisplays.bind(this, elem));
       }
       else if (navigator.getVRDevices && !isGearVR) {
         console.info("Using Chromium Experimental WebVR API");

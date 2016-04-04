@@ -75,15 +75,38 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
       return pose;
     }
 
-    this.getImmediatePose = function () {
-      return createPoseFromState(device.sensor.getImmediateState());
-    };
+    if (isGearVR) {
+      var corrector = new Primrose.Input.VR.MotionCorrector(),
+          currentPose = null;
 
-    this.getPose = function () {
-      return createPoseFromState(device.sensor.getState());
-    };
+      corrector.addEventListener("deviceorientation", function (evt) {
+        currentPose = {
+          timestamp: performance.now(),
+          frameID: ++frameID,
+          orientation: new Float32Array(evt.toArray())
+        };
+      });
 
-    this.resetPose = device.sensor.resetSensor.bind(device.sensor);
+      this.getImmediatePose = function () {
+        return currentPose;
+      };
+
+      this.getPose = function () {
+        return currentPose;
+      };
+
+      this.resetPose = corrector.zeroAxes.bind(corrector);
+    } else {
+      this.getImmediatePose = function () {
+        return createPoseFromState(device.sensor.getImmediateState());
+      };
+
+      this.getPose = function () {
+        return createPoseFromState(device.sensor.getState());
+      };
+
+      this.resetPose = device.sensor.resetSensor.bind(device.sensor);
+    }
 
     var currentLayer = null;
 
@@ -97,26 +120,23 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
     };
 
     this.requestPresent = function (layer) {
-      return new Promise(function (resolve, reject) {
-        if (!_this.capabilities.canPresent) {
-          reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
-        } else if (!layer) {
-          reject(new Error("No layer provided to requestPresent"));
-        } else if (!layer.source) {
-          reject(new Error("No source on layer parameter."));
-        } else {
-          FullScreen.request(layer.source, { vrDisplay: device.display }).then(function (elem) {
-            _this.isPresenting = elem === layer.source;
-            currentLayer = layer;
-            FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
-            resolve();
-            return elem;
-          }).catch(function (evt) {
-            _this.isPresenting = false;
-            reject(evt);
-          });
-        }
-      });
+      if (!_this.capabilities.canPresent) {
+        return Promise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
+      } else if (!layer) {
+        return Promise.reject(new Error("No layer provided to requestPresent"));
+      } else if (!layer.source) {
+        return Promise.reject(new Error("No source on layer parameter."));
+      } else {
+        return FullScreen.request(layer.source, { vrDisplay: device.display }).then(function (elem) {
+          _this.isPresenting = elem === layer.source;
+          currentLayer = layer;
+          FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
+          return elem;
+        }).catch(function (evt) {
+          _this.isPresenting = false;
+          return evt;
+        });
+      }
     };
 
     this.exitPresent = function () {
