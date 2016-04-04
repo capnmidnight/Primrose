@@ -76,7 +76,7 @@ function recurseDirectory(root) {
 }
 
 var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
-  debugData = {
+  debugDataES6 = {
     debug: true,
     frameworkFiles: recurseDirectory("src"),
     docFiles: recurseDirectory("doc")
@@ -98,26 +98,26 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
       })
   };
 
-if (false) {
-  debugData.frameworkFiles = debugData.frameworkFiles.map(function (f) {
-    return f.replace(/^\/src\//, "/es5/");
-  });
-}
+debugDataES6.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");
+debugDataES6.frameworkFiles.unshift("/node_modules/three/three.js");
+debugDataES6.frameworkFiles.unshift("/lib/sha512.js");
+debugDataES6.frameworkFiles.unshift("/lib/webgl-debug.js");
+debugDataES6.frameworkFiles.unshift("/lib/pliny.js");
+debugDataES6.frameworkFiles.unshift("/node_modules/marked/lib/marked.js");
+debugDataES6.frameworkFiles.unshift("/lib/logger.js");
 
-debugData.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");
-debugData.frameworkFiles.unshift("/node_modules/three/three.js");
-debugData.frameworkFiles.unshift("/lib/sha512.js");
-debugData.frameworkFiles.unshift("/lib/webgl-debug.js");
-debugData.frameworkFiles.unshift("/lib/pliny.js");
-debugData.frameworkFiles.unshift("/node_modules/marked/lib/marked.js");
-debugData.frameworkFiles.unshift("/lib/logger.js");
-
-debugData.docFiles.sort(function (a, b) {
+debugDataES6.docFiles.sort(function (a, b) {
   return a.index - b.index;
 });
 
-var jadeDebugConfiguration = jadeConfiguration({ pretty: true }, debugData),
-  jadeReleaseConfiguration = jadeConfiguration({}, { docFiles: debugData.docFiles });
+var debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
+debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
+  return f.replace(/^\/src\//, "/es5/");
+});
+
+var jadeDebugConfigurationES5 = jadeConfiguration({ pretty: true }, debugDataES5),
+  jadeDebugConfigurationES6 = jadeConfiguration({ pretty: true }, debugDataES6),
+  jadeReleaseConfiguration = jadeConfiguration({}, { docFiles: debugDataES6.docFiles });
 
 module.exports = function (grunt) {
   grunt.initConfig({
@@ -128,7 +128,8 @@ module.exports = function (grunt) {
 
     jade: {
       release: jadeReleaseConfiguration,
-      debug: jadeDebugConfiguration
+      "debug-es5": jadeDebugConfigurationES5,
+      "debug-es6": jadeDebugConfigurationES6
     },
 
     watch: {
@@ -226,8 +227,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-jade");
 
   grunt.registerTask("none", []);
-  grunt.registerTask("debug", ["jshint", "babel", "jade:debug", "watch:hint"]);
-  grunt.registerTask("build-js", ["jshint", "babel", "concat", "uglify", "copy"]);
+  grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint"]);
+  grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint"]);
   grunt.registerTask("release", ["clean", "jade:release", "cssmin", "build-js"]);
   grunt.registerTask("default", ["debug"]);
 };
