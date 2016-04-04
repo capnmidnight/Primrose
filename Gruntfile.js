@@ -99,7 +99,9 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
   };
 
 if (false) {
-  debugData.frameworkFiles = debugData.frameworkFiles.map(function (f) { return f.replace(/^\/src\//, "/es5/"); });
+  debugData.frameworkFiles = debugData.frameworkFiles.map(function (f) {
+    return f.replace(/^\/src\//, "/es5/");
+  });
 }
 
 debugData.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");

@@ -3,7 +3,7 @@
     this.capabilities = {
       canPresent: true,
       hasExternalDisplay: false,
-      hasOrientation: true,
+      hasOrientation: isMobile,
       hasPosition: false
     };
 

@@ -32,7 +32,9 @@ var GRASS = "/examples/images/grass.png",
   "userJoined",
   "userLeft",
   "userState",
-].forEach((n) => socket.on(n, console._log.bind(console, n.toLocaleUpperCase())));
+].forEach(function (n) {
+  socket.on(n, console._log.bind(console, n.toLocaleUpperCase()))
+});
 
 function makeWindow(width, height, size) {
   size = size || 1;
@@ -67,12 +69,12 @@ app.addEventListener("ready", function () {
   app.scene.add(signupForm.mesh);
   app.registerPickableObject(signupForm.mesh);
 
-  loginForm.addEventListener("signup", () => {
+  loginForm.addEventListener("signup", function() {
     loginForm.mesh.visible = false;
     signupForm.mesh.visible = true;
   }, false);
 
-  signupForm.addEventListener("login", () => {
+  signupForm.addEventListener("login", function() {
     loginForm.mesh.visible = true;
     signupForm.mesh.visible = false;
   }, false);
@@ -98,7 +100,9 @@ app.addEventListener("ready", function () {
           listUsers(users);
         };
 
-      socket.once("salt", (salt) => socket.emit("hash", CryptoJS.SHA512(salt + form.password.value).toString()));
+      socket.once("salt", function (salt) {
+        socket.emit("hash", CryptoJS.SHA512(salt + form.password.value).toString());
+      });
       socket.once("userList", success);
       socket.once(formName + "Failed", failHandler);
 

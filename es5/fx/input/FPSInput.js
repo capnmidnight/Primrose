@@ -15,7 +15,7 @@ Primrose.Input.FPSInput = function () {
     name: "FPSInput",
     description: "| [under construction]"
   });
-  function FPSInput(DOMElement, near, far) {
+  function FPSInput(DOMElement) {
     DOMElement = DOMElement || window;
 
     pliny.issue({
@@ -84,7 +84,9 @@ Primrose.Input.FPSInput = function () {
     })];
 
     if (Primrose.Input.VR.isAvailable) {
-      this.managers.push(new Primrose.Input.VR("vr", near, far));
+      var vr = new Primrose.Input.VR("vr");
+      this.managers.push(vr);
+      vr.init();
     }
 
     pliny.issue({

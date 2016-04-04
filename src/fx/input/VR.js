@@ -6,7 +6,7 @@ Primrose.Input.VR = (function () {
     name: "VR",
     description: "| [under construction]"
   });
-  function VRInput(name, near, far, commands, socket, elem, selectedIndex) {
+  function VRInput(name, commands, socket, elem, selectedIndex) {
     if (commands === undefined || commands === null) {
       commands = VRInput.AXES.map(function (a) {
         return {
@@ -69,7 +69,8 @@ Primrose.Input.VR = (function () {
         selectedIndex = 0;
       }
       if (typeof selectedIndex === "number") {
-        this.connect(selectedIndex, near, far);
+        this.connect(selectedIndex);
+        return this.currentDisplay;
       }
     }
 
@@ -100,45 +101,45 @@ Primrose.Input.VR = (function () {
         mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id]));
       }
 
-      enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
+      return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
     }
 
     function createCardboardVRDisplay(elem) {
       var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
-      enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
+      return enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
     }
 
-    function checkForVRDisplays() {
+    this.init = function () {
       console.info("Checking for VR Displays...");
-      if (navigator.getVRDisplays) {
+      if (navigator.getVRDisplays && !isGearVR) {
         console.info("Using WebVR API 1");
-        navigator.getVRDisplays()
+        return navigator.getVRDisplays()
           .then(enumerateVRDisplays.bind(this, elem))
-          .catch(console.error.bind(console, "Could not find VR devices"));
+          .catch(reject);
       }
-      else if (navigator.getVRDevices) {
+      else if (navigator.getVRDevices && !isGearVR) {
         console.info("Using Chromium Experimental WebVR API");
-        navigator.getVRDevices()
+        return navigator.getVRDevices()
           .then(enumerateLegacyVRDevices.bind(this, elem))
           .catch(console.error.bind(console, "Could not find VR devices"));
-      } else if (navigator.mozGetVRDevices) {
-        console.info("Using Firefox Experimental WebVR API");
-        navigator.mozGetVRDevices(enumerateLegacyVRDevices.bind(this, elem));
       }
       else {
-        var waitForValidMotion = (evt) => {
-          if (evt.alpha) {
-            window.removeEventListener("deviceorientation", waitForValidMotion);
-            console.info("Using Device Motion API", this);
-            createCardboardVRDisplay.call(this, elem);
-          }
-        };
-        console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
-        window.addEventListener("deviceorientation", waitForValidMotion, false);
+        return new Promise((resolve, reject) => {
+          var timer = setTimeout(reject, 1000);
+          var waitForValidMotion = (evt) => {
+            if (evt.alpha) {
+              clearTimeout(timer);
+              timer = null;
+              window.removeEventListener("deviceorientation", waitForValidMotion);
+              console.info("Using Device Motion API", this);
+              resolve(createCardboardVRDisplay.call(this, elem));
+            }
+          };
+          console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
+          window.addEventListener("deviceorientation", waitForValidMotion, false);
+        });
       }
-    }
-
-    checkForVRDisplays.call(this);
+    };
   }
 
   pliny.value({
@@ -267,7 +268,7 @@ Primrose.Input.VR = (function () {
     }
   };
 
-  VRInput.prototype.connect = function (selectedIndex, near, far) {
+  VRInput.prototype.connect = function (selectedIndex) {
     this.currentDisplay = this.displays[selectedIndex];
   };
 

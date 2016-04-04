@@ -7,7 +7,7 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
     this.capabilities = {
       canPresent: true,
       hasExternalDisplay: false,
-      hasOrientation: true,
+      hasOrientation: isMobile,
       hasPosition: false
     };
 

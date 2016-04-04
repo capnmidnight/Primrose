@@ -385,12 +385,9 @@ Primrose.BrowserEnvironment = (function () {
           aspectWidth;
 
         if (this.inVR) {
-          this.input.vr.resetTransforms(
-            this.options.nearPlane,
-            this.options.nearPlane + this.options.drawDistance);
           var p = this.input.vr.transforms,
             l = p[0],
-            r = p[1];
+            r = p[1]; 
           canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
           canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
           aspectWidth = canvasWidth / 2;
@@ -488,10 +485,7 @@ Primrose.BrowserEnvironment = (function () {
         document.body.appendChild(this.renderer.domElement);
       }
 
-      this.input = new Primrose.Input.FPSInput(
-        this.renderer.domElement,
-        this.options.nearPlane,
-        this.options.nearPlane + this.options.drawDistance);
+      this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
 
       this.scene = new THREE.Scene();
       if (this.options.useFog) {
@@ -703,7 +697,10 @@ Primrose.BrowserEnvironment = (function () {
 
       this.goVR = () => {
         console.log("goVR");
-        this.input.vr.currentDisplay.requestPresent({ source: this.renderer.domElement });
+        this.input.vr.currentDisplay.requestPresent({ source: this.renderer.domElement })
+          .then(() => this.input.vr.resetTransforms(
+            this.options.nearPlane,
+            this.options.nearPlane + this.options.drawDistance));
       };
 
       var isFullScreenMode = () => !!FullScreen.getElement() || this.inVR;

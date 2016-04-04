@@ -43,6 +43,10 @@ Primrose.BrowserEnvironment = function () {
       FORWARDED_EVENTS = ["keydown", "keyup", "keypress", "mousedown", "mouseup", "mousemove", "wheel", "touchstart", "touchend", "touchmove"],
       RESOLUTION_SCALE = 1;
 
+  if (isGearVR) {
+    //    RESOLUTION_SCALE = 4 / 1.5;
+  }
+
   pliny.class({
     parent: "Primrose",
     name: "BrowserEnvironment",
@@ -51,8 +55,7 @@ Primrose.BrowserEnvironment = function () {
 
   var BrowserEnvironment = function () {
     function BrowserEnvironment(name, options) {
-      var _this = this,
-          _arguments = arguments;
+      var _this = this;
 
       _classCallCheck(this, BrowserEnvironment);
 
@@ -373,7 +376,6 @@ Primrose.BrowserEnvironment = function () {
         var canvasWidth, canvasHeight, aspectWidth;
 
         if (_this.inVR) {
-          _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
           var p = _this.input.vr.transforms,
               l = p[0],
               r = p[1];
@@ -398,6 +400,8 @@ Primrose.BrowserEnvironment = function () {
         }
         _this.renderer.domElement.width = canvasWidth;
         _this.renderer.domElement.height = canvasHeight;
+        _this.renderer.domElement.style.width = document.body.clientWidth + "px";
+        _this.renderer.domElement.style.height = document.body.clientHeight + "px";
         if (!_this.timer) {
           render();
         }
@@ -473,7 +477,7 @@ Primrose.BrowserEnvironment = function () {
         document.body.appendChild(this.renderer.domElement);
       }
 
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
+      this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
 
       this.scene = new THREE.Scene();
       if (this.options.useFog) {
@@ -663,7 +667,9 @@ Primrose.BrowserEnvironment = function () {
 
       this.goVR = function () {
         console.log("goVR");
-        _this.input.vr.currentDisplay.requestPresent({ source: _this.renderer.domElement });
+        _this.input.vr.currentDisplay.requestPresent({ source: _this.renderer.domElement }).then(function () {
+          return _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+        });
       };
 
       var isFullScreenMode = function isFullScreenMode() {
@@ -827,7 +833,7 @@ Primrose.BrowserEnvironment = function () {
             if (isFullScreenMode()) {
               newFunction();
             } else {
-              oldFunction.apply(window, _arguments);
+              oldFunction.apply(window, arguments);
             }
           };
         };
