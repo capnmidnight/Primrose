@@ -48,21 +48,7 @@ Primrose.Input.VR = (function () {
 
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
-      console.log("Displays:", displays);
       this.displays = displays;
-
-      if (elem) {
-        console.log("Building chooser interface.", elem);
-        elem.innerHTML = "";
-        for (var i = 0; i < this.displays.length; ++i) {
-          var option = document.createElement("option");
-          option.value = i;
-          option.innerHTML = this.displays[i].deviceName;
-          option.selected = (selectedIndex === i);
-          elem.appendChild(option);
-        }
-      }
-
       this.displays.forEach(onConnected);
 
       if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
@@ -76,7 +62,6 @@ Primrose.Input.VR = (function () {
 
     function enumerateLegacyVRDevices(elem, devices) {
       console.log("Devices found:", devices.length);
-      console.log("Devices:", devices);
       var displays = {},
         id = null;
 
@@ -130,7 +115,7 @@ Primrose.Input.VR = (function () {
               clearTimeout(timer);
               timer = null;
               window.removeEventListener("deviceorientation", waitForValidMotion);
-              console.info("Using Device Motion API", this);
+              console.info("Using Device Motion API");
               resolve(createCardboardVRDisplay.call(this, elem));
             }
           };
