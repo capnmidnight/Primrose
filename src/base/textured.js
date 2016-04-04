@@ -21,21 +21,30 @@ var textured = (function () {
       materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
 
     if (!materialCache[materialDescription]) {
+
+      var materialOptions = {
+        transparent: true,
+        opacity: options.opacity,
+        side: THREE.DoubleSide,
+        alphaTest: 0.5
+      },
+        MaterialType = THREE.MeshStandardMaterial;
+
       if (options.unshaded) {
-        materialCache[materialDescription] = new THREE.MeshBasicMaterial({
-          transparent: true,
-          opacity: options.opacity,
-          shading: THREE.FlatShading,
-          side: THREE.DoubleSide
-        });
+        materialOptions.shading = THREE.FlatShading;
+        MaterialType = THREE.MeshBasicMaterial;
       }
       else {
-        materialCache[materialDescription] = new THREE.MeshLambertMaterial({
-          transparent: true,
-          opacity: options.opacity,
-          side: THREE.DoubleSide
-        });
+        if (options.roughness === undefined) {
+          options.roughness = 0.5;
+        }
+        if (options.metalness === undefined) {
+          options.metalness = 0;
+        }
+        materialOptions.roughness = options.roughness;
+        materialOptions.metalness = options.metalness;
       }
+      materialCache[materialDescription] = new MaterialType(materialOptions);
     }
 
     var material = materialCache[materialDescription];
@@ -99,12 +108,12 @@ var textured = (function () {
               arr = uv.array,
               i;
             if (options.scaleTextureWidth) {
-              for ( i = 0; i < arr.length; i += uv.itemSize) {
+              for (i = 0; i < arr.length; i += uv.itemSize) {
                 arr[i] *= options.scaleTextureWidth;
               }
             }
             if (options.scaleTextureHeight) {
-              for ( i = 1; i < arr.length; i += uv.itemSize) {
+              for (i = 1; i < arr.length; i += uv.itemSize) {
                 arr[i] = 1 - (1 - arr[i]) * options.scaleTextureHeight;
               }
             }
