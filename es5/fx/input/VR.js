@@ -49,21 +49,7 @@ Primrose.Input.VR = function () {
 
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
-      console.log("Displays:", displays);
       this.displays = displays;
-
-      if (elem) {
-        console.log("Building chooser interface.", elem);
-        elem.innerHTML = "";
-        for (var i = 0; i < this.displays.length; ++i) {
-          var option = document.createElement("option");
-          option.value = i;
-          option.innerHTML = this.displays[i].deviceName;
-          option.selected = selectedIndex === i;
-          elem.appendChild(option);
-        }
-      }
-
       this.displays.forEach(onConnected);
 
       if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
@@ -77,7 +63,6 @@ Primrose.Input.VR = function () {
 
     function enumerateLegacyVRDevices(elem, devices) {
       console.log("Devices found:", devices.length);
-      console.log("Devices:", devices);
       var displays = {},
           id = null;
 
@@ -113,10 +98,10 @@ Primrose.Input.VR = function () {
       var _this = this;
 
       console.info("Checking for VR Displays...");
-      if (navigator.getVRDisplays && !isGearVR) {
+      if (navigator.getVRDisplays) {
         console.info("Using WebVR API 1");
-        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this, elem)).catch(reject);
-      } else if (navigator.getVRDevices && !isGearVR) {
+        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this, elem));
+      } else if (navigator.getVRDevices) {
         console.info("Using Chromium Experimental WebVR API");
         return navigator.getVRDevices().then(enumerateLegacyVRDevices.bind(this, elem)).catch(console.error.bind(console, "Could not find VR devices"));
       } else {
@@ -127,7 +112,7 @@ Primrose.Input.VR = function () {
               clearTimeout(timer);
               timer = null;
               window.removeEventListener("deviceorientation", waitForValidMotion);
-              console.info("Using Device Motion API", _this);
+              console.info("Using Device Motion API");
               resolve(createCardboardVRDisplay.call(_this, elem));
             }
           };

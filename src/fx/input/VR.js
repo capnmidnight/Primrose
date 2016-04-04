@@ -96,12 +96,12 @@ Primrose.Input.VR = (function () {
 
     this.init = function () {
       console.info("Checking for VR Displays...");
-      if (navigator.getVRDisplays && !isGearVR) {
+      if (navigator.getVRDisplays) {
         console.info("Using WebVR API 1");
         return navigator.getVRDisplays()
           .then(enumerateVRDisplays.bind(this, elem));
       }
-      else if (navigator.getVRDevices && !isGearVR) {
+      else if (navigator.getVRDevices) {
         console.info("Using Chromium Experimental WebVR API");
         return navigator.getVRDevices()
           .then(enumerateLegacyVRDevices.bind(this, elem))
