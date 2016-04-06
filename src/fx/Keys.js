@@ -123,7 +123,14 @@ Primrose.Keys = ( function ( ) {
     F9: 120,
     F10: 121,
     F11: 122,
-    F12: 123
+    F12: 123,
+    ///////////////////////////////////////////////////////////////////////////
+    // media keys
+    ///////////////////////////////////////////////////////////////////////////
+    VOLUME_DOWN: 174,
+    VOLUME_UP: 175,
+    TRACK_NEXT: 176,
+    TRACK_PREVIOUS: 177
   };
 
   // create a reverse mapping from keyCode to name.
