@@ -33,12 +33,14 @@ copyFiles.push({
   dest: "archive/Primrose-<%= pkg.version %>.min.js"
 });
 
+var jadeFileSpec = ["*.jade", "doc/**/*.jade", "examples/**/*.jade"];
+
 function jadeConfiguration(options, defaultData) {
   var config = {
     options: options,
     files: [{
       expand: true,
-      src: ["**/*.jade"],
+      src: jadeFileSpec,
       dest: "",
       ext: "",
       extDot: "last"
@@ -124,7 +126,7 @@ module.exports = function (grunt) {
 
     pkg: grunt.file.readJSON("package.json"),
 
-    clean: ["obj", "es5/**/*.js", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
+    clean: ["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css"],
 
     jade: {
       release: jadeReleaseConfiguration,
@@ -134,7 +136,7 @@ module.exports = function (grunt) {
 
     watch: {
       jade: {
-        files: "**/*.*.jade",
+        files: jadeFileSpec,
         tasks: ["jade:debug"]
       },
       hint: {
@@ -229,6 +231,6 @@ module.exports = function (grunt) {
   grunt.registerTask("none", []);
   grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint"]);
   grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint"]);
-  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "build-js"]);
+  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "jshint", "babel", "concat", "uglify", "copy"]);
   grunt.registerTask("default", ["debug"]);
 };
