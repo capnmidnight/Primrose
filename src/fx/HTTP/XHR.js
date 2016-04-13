@@ -30,7 +30,12 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
   return new Promise(function (resolve, reject) {
     options = options || {};
     options.headers = options.headers || {};
-    options.headers.Accept = options.headers.Accept || type;
+    if ( method === "GET" ) {
+      options.headers.Accept = options.headers.Accept || type;
+    }
+    else {
+      options.headers["Content-Type"] = options.headers["Content-Type"] || type;
+    }
 
     var req = new XMLHttpRequest();
     req.onerror = (evt) => reject(new Error("Request error: " + evt.message));
@@ -66,10 +71,6 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
     req.withCredentials = !!options.withCredentials;
 
     if (options.data) {
-      // We could do other data types, but in my case, I'm probably only ever
-      // going to want JSON. No sense in overcomplicating the interface for
-      // features I'm not going to use.
-      req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       req.send(JSON.stringify(options.data));
     }
     else {

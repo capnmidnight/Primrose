@@ -97,7 +97,7 @@ Primrose.Input.FPSInput = (function () {
         pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
       })];
 
-    if (Primrose.Input.VR.isAvailable) {
+    if (Primrose.Input.VR.Version > 0) {
       var vr = new Primrose.Input.VR("vr");
       this.managers.push(vr);
       vr.init();

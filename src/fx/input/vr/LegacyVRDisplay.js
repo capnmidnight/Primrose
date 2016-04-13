@@ -144,6 +144,7 @@
     this._onFullScreenRemoved = () => {
       FullScreen.removeChangeListener(this._onFullScreenRemoved);
       this.exitPresent();
+      window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
     this.requestPresent = (layer) => {
@@ -162,6 +163,7 @@
             this.isPresenting = elem === layer.source;
             currentLayer = layer;
             FullScreen.addChangeListener(this._onFullScreenRemoved, false);
+            window.dispatchEvent(new Event("vrdisplaypresentchange"));
             return elem;
           })
           .catch((evt) => {

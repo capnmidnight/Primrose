@@ -128,11 +128,34 @@ Primrose.Input.VR = (function () {
 
   pliny.value({
     parent: "Primrose.Input.VR",
-    name: "isAvailable",
-    type: "Boolean",
-    description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."
+    name: "Version",
+    type: "Number",
+    description: "returns the version of WebVR that is supported (if any). Values:\n\
+  - 0: no WebVR support\n\
+  - 0.1: Device Orientation-based WebVR\n\
+  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
+  - 0.5: Legacy WebVR API\n\
+  - 1.0: Provisional WebVR API 1.0"
   });
-  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || isMobile;
+  Object.defineProperty(VRInput, "Version", {
+    get: function () {
+      if (navigator.getVRDisplays) {
+        return 1.0;
+      }
+      else if (navigator.getVRDevices) {
+        return 0.5;
+      }
+      else if (navigator.mozGetVRDevices) {
+        return 0.4;
+      }
+      else if (isMobile) {
+        return 0.1;
+      }
+      else {
+        return 0;
+      }
+    }
+  });
 
   VRInput.AXES = [
     "headX", "headY", "headZ",

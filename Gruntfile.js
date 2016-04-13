@@ -184,7 +184,7 @@ module.exports = function (grunt) {
         banner: "/*\n\
   <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
   <%= pkg.license.type %>\n\
-  Copyright (C) 2015 <%= pkg.author %>\n\
+  Copyright (C) 2015 - 2016 <%= pkg.author %>\n\
   <%= pkg.homepage %>\n\
   <%= pkg.repository.url %>\n\
 */\n",

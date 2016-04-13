@@ -60,6 +60,7 @@
       console.log("exiting cardboard presentation");
       FullScreen.removeChangeListener(this._onFullScreenRemoved);
       this.exitPresent();
+      window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
     this.requestPresent = (layer) => {
@@ -79,6 +80,7 @@
             this.isPresenting = elem === layer.source;
             currentLayer = layer;
             FullScreen.addChangeListener(this._onFullScreenRemoved, false);
+            window.dispatchEvent(new Event("vrdisplaypresentchange"));
             resolve();
           })
           .catch((evt) => {
