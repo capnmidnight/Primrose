@@ -350,9 +350,11 @@ Primrose.BrowserEnvironment = (function () {
             vEye.applyQuaternion(qHead);
             this.camera.position.add(vEye);
             this.camera.quaternion.copy(qHead);
-            this.nose.visible = true;
-            this.nose.position.set(side * -0.12, -0.12, -0.15);
-            this.nose.rotation.z = side * 0.7;
+            if (this.options.useNose) {
+              this.nose.visible = true;
+              this.nose.position.set(side * -0.12, -0.12, -0.15);
+              this.nose.rotation.z = side * 0.7;
+            }
             this.renderer.setViewport(
               v.left * RESOLUTION_SCALE,
               v.top * RESOLUTION_SCALE,
@@ -968,6 +970,7 @@ Primrose.BrowserEnvironment = (function () {
   BrowserEnvironment.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
 
   BrowserEnvironment.DEFAULTS = {
+    useNose: false,
     useLeap: false,
     useFog: true,
     avatarHeight: 1.75,
