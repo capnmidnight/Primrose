@@ -10,12 +10,11 @@
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
 
-  return {
+  var ns = {
     addChangeListener: (thunk, bubbles) => document.addEventListener(changeEventName, thunk, bubbles),
     removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),
     addErrorListener: (thunk, bubbles) => document.addEventListener(errorEventName, thunk, bubbles),
     removeErrorListener: (thunk) => document.removeEventListener(errorEventName, thunk),
-    getElement: () => document[elementName],
     withChange: (act) => {
       return new Promise((resolve, reject) => {
         var onFullScreen,
@@ -31,7 +30,7 @@
 
         onFullScreen = () => {
           setTimeout(tearDown);
-          resolve(FullScreen.getElement());
+          resolve(FullScreen.element);
         };
 
         onFullScreenError = (evt) => {
@@ -43,8 +42,9 @@
         FullScreen.addErrorListener(onFullScreenError, false);
 
         if (act()) {
+          // we've already gotten fullscreen, so don't wait for it.
           tearDown();
-          resolve();
+          resolve(FullScreen.element);
         }
         else {      
           // Timeout wating on the fullscreen to happen, for systems like iOS that
@@ -62,7 +62,7 @@
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
         }
-        else if (FullScreen.getElement()) {
+        else if (FullScreen.isActive) {
           return true;
         }
         else if (fullScreenParam) {
@@ -81,7 +81,7 @@
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
         }
-        else if (!FullScreen.getElement()) {
+        else if (!FullScreen.isActive) {
           return true;
         }
         else {
@@ -90,4 +90,15 @@
       });
     }
   };
+
+  Object.defineProperties(ns, {
+    element: {
+      get: ()=> document[elementName]
+    },
+    isActive: {
+      get: () => !!FullScreen.element
+    }
+  });
+
+  return ns;
 })();

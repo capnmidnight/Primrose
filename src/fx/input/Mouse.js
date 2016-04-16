@@ -22,7 +22,7 @@ Primrose.Input.Mouse = (function () {
 
     this.readEvent = function (event) {
       this.BUTTONS = event.buttons << 10;
-      if (MouseInput.isPointerLocked()) {
+      if (MouseInput.Lock.isActive) {
         var mx = event.movementX,
           my = event.movementY;
 
@@ -116,7 +116,7 @@ Primrose.Input.Mouse = (function () {
       };
 
     this.requestPointerLock = function () {
-      if (!MouseInput.isPointerLocked()) {
+      if (!MouseInput.Lock.isActive) {
         DOMElement.requestPointerLock();
       }
     };
@@ -128,7 +128,7 @@ Primrose.Input.Mouse = (function () {
       }).bind(document);
 
     this.togglePointerLock = function () {
-      if (MouseInput.isPointerLocked()) {
+      if (MouseInput.Lock.isActive) {
         this.exitPointerLock();
       }
       else {
@@ -154,7 +154,6 @@ Primrose.Input.Mouse = (function () {
     removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),
     addErrorListener: (thunk, bubbles) => document.addEventListener(errorEventName, thunk, bubbles),
     removeErrorListener: (thunk) => document.removeEventListener(errorEventName, thunk),
-    getElement: () => document[elementName],
     withChange: (act) => {
       return new Promise((resolve, reject) => {
         var onPointerLock,
@@ -170,7 +169,7 @@ Primrose.Input.Mouse = (function () {
 
         onPointerLock = () => {
           setTimeout(tearDown);
-          resolve(MouseInput.Lock.getElement());
+          resolve(MouseInput.Lock.element);
         };
 
         onPointerLockError = (evt) => {
@@ -201,7 +200,7 @@ Primrose.Input.Mouse = (function () {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
         }
-        else if (MouseInput.Lock.getElement()) {
+        else if (MouseInput.Lock.isActive) {
           return true;
         } else {
           elem[requestMethodName]();
@@ -214,7 +213,7 @@ Primrose.Input.Mouse = (function () {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
         }
-        else if (!MouseInput.Lock.getElement()) {
+        else if (!MouseInput.Lock.isActive) {
           return true;
         }
         else {
@@ -224,9 +223,14 @@ Primrose.Input.Mouse = (function () {
     }
   };
 
-  MouseInput.isPointerLocked = function () {
-    return !!MouseInput.Lock.getElement();
-  };
+  Object.defineProperties(MouseInput.Lock, {
+    element: {
+      get: () => document[elementName]
+    },
+    isActive: {
+      get: () => !!MouseInput.Lock.element
+    }
+  });
 
   MouseInput.AXES = ["X", "Y", "Z", "W", "BUTTONS"];
   Primrose.Input.ButtonAndAxis.inherit(MouseInput);

@@ -7,7 +7,6 @@ var GRASS = "/examples/images/grass.png",
   DECK = "/examples/images/deck.png",
   SKY = "/examples/images/bg2.jpg",
   app = new Primrose.BrowserEnvironment("Editor3D", {
-    disableAutoFullScreen: true,
     useFog: false,
     skyTexture: SKY,
     groundTexture: GRASS

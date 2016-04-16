@@ -18,7 +18,6 @@ var GRASS = "/examples/images/grass.png",
   lastScript = null,
   scriptAnimate = null,
   app = new Primrose.BrowserEnvironment("Editor3D", {
-    disableAutoFullScreen: true,
     useFog: false,
     skyTexture: "/examples/images/bg2.jpg",
     groundTexture: GRASS

@@ -22,8 +22,8 @@
       var dEye = side === "left" ? -1 : 1;
 
       return {
-        renderWidth: Math.floor(screen.width * devicePixelRatio / 2),
-        renderHeight: screen.height * devicePixelRatio,
+        renderWidth: Math.floor(screen.width * devicePixelRatio / 2) * CardboardVRDisplay.SUPERSAMPLE,
+        renderHeight: screen.height * devicePixelRatio * CardboardVRDisplay.SUPERSAMPLE,
         offset: new Float32Array([dEye * 0.03, 0, 0]),
         fieldOfView: {
           upDegrees: 40,
@@ -63,29 +63,30 @@
       window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
-    this.requestPresent = (layer) => {
-      console.log("requestPresent");
+    this.requestPresent = (layers) => {
       if (!this.capabilities.canPresent) {
         return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
       }
-      else if (!layer) {
-        return Promise.reject(new Error("No layer provided to requestPresent"));
+      else if (!layers) {
+        return Promise.reject(new Error("No layers provided to requestPresent"));
       }
-      else if (!layer.source) {
+      else if (!(layers instanceof Array)) {
+        return Promise.reject(new Error("Layers parameters must be an array"));
+      }
+      else if (layers.length !== 1) {
+        return Promise.reject(new Error("Only one layer at a time is supported right now."));
+      }
+      else if (!layers[0].source) {
         return Promise.reject(new Error("No source on layer parameter."));
       }
       else {
-        return FullScreen.request(layer.source)
+        return FullScreen.request(layers[0].source)
           .then((elem) => {
-            this.isPresenting = elem === layer.source;
-            currentLayer = layer;
+            currentLayer = layers[0];
+            this.isPresenting = elem === currentLayer.source;
             FullScreen.addChangeListener(this._onFullScreenRemoved, false);
             window.dispatchEvent(new Event("vrdisplaypresentchange"));
-            resolve();
-          })
-          .catch((evt) => {
-            this.isPresenting = false;
-            reject(evt);
+            return elem;
           });
       }
     };
@@ -103,7 +104,9 @@
         })
         .catch(clear);
     };
-  }
+  };
+
+  CardboardVRDisplay.SUPERSAMPLE = 1;
 
   CardboardVRDisplay.prototype.requestAnimationFrame = window.requestAnimationFrame.bind(window);
   CardboardVRDisplay.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind(window);

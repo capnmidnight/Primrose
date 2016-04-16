@@ -147,28 +147,30 @@
       window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
-    this.requestPresent = (layer) => {
+    this.requestPresent = (layers) => {
       if (!this.capabilities.canPresent) {
-        return Promise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
+        return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
       }
-      else if (!layer) {
-        return Promise.reject(new Error("No layer provided to requestPresent"));
+      else if (!layers) {
+        return Promise.reject(new Error("No layers provided to requestPresent"));
       }
-      else if (!layer.source) {
+      else if (!(layers instanceof Array)) {
+        return Promise.reject(new Error("Layers parameters must be an array"));
+      }
+      else if (layers.length !== 1) {
+        return Promise.reject(new Error("Only one layer at a time is supported right now."));
+      }
+      else if (!layers[0].source) {
         return Promise.reject(new Error("No source on layer parameter."));
       }
       else {
-        return FullScreen.request(layer.source, { vrDisplay: device.display })
+        return FullScreen.request(layers[0].source)
           .then((elem) => {
-            this.isPresenting = elem === layer.source;
-            currentLayer = layer;
+            currentLayer = layers[0];
+            this.isPresenting = elem === currentLayer.source;
             FullScreen.addChangeListener(this._onFullScreenRemoved, false);
             window.dispatchEvent(new Event("vrdisplaypresentchange"));
             return elem;
-          })
-          .catch((evt) => {
-            this.isPresenting = false;
-            return evt;
           });
       }
     };

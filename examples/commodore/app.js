@@ -6,7 +6,6 @@ var keyState = {},
     execKey = isOSX ? "E" : "SPACE",
     terminal = null,
     app = new Primrose.BrowserEnvironment( "Commodore", {
-      disableAutoFullScreen: true,
       sceneModel: "commodore_pet.json",
       skyTexture: "/images/bg2.jpg",
       groundTexture: "/images/deck.png"

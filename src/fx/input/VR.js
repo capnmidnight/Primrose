@@ -43,9 +43,6 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    var onFullScreenChange = () => {
-    };
-
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
       this.displays = displays;
@@ -166,6 +163,16 @@ Primrose.Input.VR = (function () {
     "headRAX", "headRAY", "headRAZ"
   ];
   Primrose.Input.ButtonAndAxis.inherit(VRInput);
+
+  VRInput.prototype.requestPresent = function (opts) {
+    if (!this.currentDisplay) {
+      return Promise.reject("No display");
+    }
+    else {
+      return this.currentDisplay.requestPresent(opts)
+        .then((elem) => elem || opts[0].source);
+    }
+  };
 
   VRInput.prototype.update = function (dt) {
     if (this.currentDisplay) {
