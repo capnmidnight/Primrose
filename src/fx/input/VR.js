@@ -169,7 +169,7 @@ Primrose.Input.VR = (function () {
       return Promise.reject("No display");
     }
     else {
-      return this.currentDisplay.requestPresent(opts)
+      return this.currentDisplay.requestPresent(VRInput.Version === 1 && isMobile ? opts[0] : opts)
         .then((elem) => elem || opts[0].source);
     }
   };
