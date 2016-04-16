@@ -83,10 +83,10 @@ Primrose.NetworkedInput = ( function () {
   };
 
   NetworkedInput.prototype.update = function () {
-    var t = performance.now(),
+    var t = performance.now() / 1000,
       dt = t - this.lastT;
     this.lastT = t;
-    if ( this.ready && this.enabled && this.inPhysicalUse && !this.paused ) {
+    if ( this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0 ) {
       for ( var name in this.commands ) {
         var cmd = this.commands[name];
         cmd.state.wasPressed = cmd.state.pressed;
@@ -108,16 +108,16 @@ Primrose.NetworkedInput = ( function () {
           this.evalCommand( cmd, metaKeysSet, dt );
 
           cmd.state.lt += dt;
-          if ( cmd.state.lt >= cmd.dt ) {
-            cmd.state.repeatCount++;
-          }
 
           cmd.state.fireAgain = cmd.state.pressed &&
               cmd.state.lt >= cmd.dt &&
-              cmd.state.repeatCount >= cmd.repetitions;
+            (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
 
-          if ( cmd.state.fireAgain ) {
+          if (cmd.state.fireAgain) {
             cmd.state.lt = 0;
+            ++cmd.state.repeatCount;
+          }
+          else if (!cmd.state.pressed) {
             cmd.state.repeatCount = 0;
           }
         }
@@ -140,11 +140,11 @@ Primrose.NetworkedInput = ( function () {
       for ( var name in this.commands ) {
         var cmd = this.commands[name];
         if ( cmd.state.fireAgain && cmd.commandDown ) {
-          cmd.commandDown();
+          cmd.commandDown(this.name);
         }
 
         if ( !cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp ) {
-          cmd.commandUp();
+          cmd.commandUp(this.name);
         }
       }
     }

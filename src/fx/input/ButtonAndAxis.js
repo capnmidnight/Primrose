@@ -344,7 +344,7 @@ Primrose.Input.ButtonAndAxis = ( function () {
       dt: cmd.dt || 0,
       deadzone: cmd.deadzone || 0,
       threshold: cmd.threshold || 0,
-      repetitions: cmd.repetitions || 1,
+      repetitions: cmd.repetitions || -1,
       scale: cmd.scale,
       offset: cmd.offset,
       min: cmd.min,

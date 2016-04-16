@@ -214,8 +214,6 @@ Primrose.Input.VR = (function () {
         }
       }
     }
-
-    this.update();
   };
 
   VRInput.prototype.getQuaternion = function (x, y, z, w, value) {

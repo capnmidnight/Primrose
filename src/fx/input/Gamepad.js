@@ -29,15 +29,6 @@ Primrose.Input.Gamepad = (function () {
         gamepaddisconnected: []
       };
 
-
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.superUpdate",
-      type: "open",
-      description: ""
-    });
-    this.superUpdate = this.update;
-
     pliny.issue({
       parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.checkDevice",
@@ -94,8 +85,6 @@ Primrose.Input.Gamepad = (function () {
           connectedGamepads.splice(i, 1);
         }
       }
-
-      this.update();
     };
 
     function add(arr, val) {
@@ -205,7 +194,7 @@ Primrose.Input.Gamepad = (function () {
     };
 
     try {
-      this.update(0);
+      this.update();
       this.available = true;
     }
     catch (err) {

@@ -27,7 +27,9 @@ Primrose.Input.FPSInput = (function () {
       jump: [],
       zero: [],
       lockpointer: [],
-      fullscreen: []
+      fullscreen: [],
+      pointerstart: [],
+      pointerend: []
     };
 
     pliny.issue({
@@ -40,7 +42,22 @@ Primrose.Input.FPSInput = (function () {
       // keyboard should always run on the window
       new Primrose.Input.Keyboard("keyboard", window, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
-        fullScreen: { buttons: [Primrose.Keys.F], commandDown: emit.bind(this, "fullscreen") },
+        pointer1: {
+          buttons: [Primrose.Keys.SPACE],
+          repetitions: 1,
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        pointer2: {
+          buttons: [Primrose.Keys.ENTER],
+          repetitions: 1,
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        fullScreen: {
+          buttons: [Primrose.Keys.F],
+          commandDown: emit.bind(this, "fullscreen")
+        },
         strafeLeft: {
           buttons: [
             -Primrose.Keys.A,
@@ -83,6 +100,12 @@ Primrose.Input.FPSInput = (function () {
       }),
       new Primrose.Input.Mouse("mouse", DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
+        pointer: {
+          buttons: [Primrose.Keys.ANY],
+          repetitions: 1,
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
         buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
         dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
         dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
@@ -93,10 +116,22 @@ Primrose.Input.FPSInput = (function () {
       }),
       new Primrose.Input.Touch("touch", DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+        pointer: {
+          buttons: [Primrose.Keys.ANY],
+          repetitions: 1,
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
         buttons: { axes: [Primrose.Input.Touch.FINGERS] },
         dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true }
       }),
       new Primrose.Input.Gamepad("gamepad", {
+        pointer: {
+          buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+          repetitions: 1,
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
         strafe: { axes: [Primrose.Input.Gamepad.LSX] },
         drive: { axes: [Primrose.Input.Gamepad.LSY] },
         heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
@@ -204,8 +239,9 @@ Primrose.Input.FPSInput = (function () {
   FPSInput.prototype.update = function () {
     for (var i = 0; i < this.managers.length; ++i) {
       var mgr = this.managers[i];
-      if (mgr.enabled && mgr.poll) {
-        mgr.poll();
+      if (mgr.enabled) {
+        mgr.poll && mgr.poll();
+        mgr.update();
       }
     }
   };
