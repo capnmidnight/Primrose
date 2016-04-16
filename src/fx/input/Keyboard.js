@@ -27,7 +27,8 @@ Primrose.Input.Keyboard = ( function () {
     Primrose.Input.ButtonAndAxis.call( this, name, commands, socket );
 
     function execute ( stateChange, event ) {
-      this.setButton( event.keyCode, stateChange );
+      this.setButton(event.keyCode, stateChange);
+      this.update();
     }
 
     DOMElement.addEventListener( "keydown", execute.bind( this, true ), false );

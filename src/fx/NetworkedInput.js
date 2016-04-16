@@ -21,12 +21,14 @@ Primrose.NetworkedInput = ( function () {
     this.inPhysicalUse = true;
     this.inputState = {};
     this.lastState = "";
+    this.lastT = performance.now();
 
     function readMetaKeys ( event ) {
       for ( var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i ) {
         var m = Primrose.Keys.MODIFIER_KEYS[i];
         this.inputState[m] = event[m + "Key"];
       }
+      this.update();
     }
 
     window.addEventListener( "keydown", readMetaKeys.bind( this ), false );
@@ -80,7 +82,10 @@ Primrose.NetworkedInput = ( function () {
     throw new Error( "cloneCommand function must be defined in subclass" );
   };
 
-  NetworkedInput.prototype.update = function ( dt ) {
+  NetworkedInput.prototype.update = function () {
+    var t = performance.now(),
+      dt = t - this.lastT;
+    this.lastT = t;
     if ( this.ready && this.enabled && this.inPhysicalUse && !this.paused ) {
       for ( var name in this.commands ) {
         var cmd = this.commands[name];

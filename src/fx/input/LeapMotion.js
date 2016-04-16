@@ -173,10 +173,8 @@ Primrose.Input.LeapMotion = ( function () {
           requestAnimationFrame( alternateLooper );
           gameUpdateLoop( t );
         };
-        startAlternate = requestAnimationFrame.bind( window,
-            alternateLooper );
-        var timeout = setTimeout( startAlternate,
-            LeapMotionInput.CONNECTION_TIMEOUT );
+        startAlternate = requestAnimationFrame.bind( window, alternateLooper );
+        var timeout = setTimeout( startAlternate, LeapMotionInput.CONNECTION_TIMEOUT );
         canceller = function () {
           clearTimeout( timeout );
           this.isStreaming = true;
@@ -235,6 +233,8 @@ Primrose.Input.LeapMotion = ( function () {
     if ( gameUpdateLoop ) {
       gameUpdateLoop( frame.timestamp * 0.001 );
     }
+
+    this.update();
   };
   return LeapMotionInput;
 } )();

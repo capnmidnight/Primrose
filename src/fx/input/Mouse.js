@@ -19,8 +19,20 @@ Primrose.Input.Mouse = (function () {
       this.X += dx;
       this.Y += dy;
     };
+    
+    DOMElement.addEventListener("mousedown", function (event) {
+      this.setButton(event.button, true);
+      this.BUTTONS = event.buttons << 10;
+      this.update();
+    }.bind(this), false);
 
-    this.readEvent = function (event) {
+    DOMElement.addEventListener("mouseup", function (event) {
+      this.setButton(event.button, false);
+      this.BUTTONS = event.buttons << 10;
+      this.update();
+    }.bind(this), false);
+
+    DOMElement.addEventListener("mousemove", function (event) {
       this.BUTTONS = event.buttons << 10;
       if (MouseInput.Lock.isActive) {
         var mx = event.movementX,
@@ -35,19 +47,8 @@ Primrose.Input.Mouse = (function () {
       else {
         this.setLocation(event.layerX, event.layerY);
       }
-    };
-
-    DOMElement.addEventListener("mousedown", function (event) {
-      this.setButton(event.button, true);
-      this.BUTTONS = event.buttons << 10;
+      this.update();
     }.bind(this), false);
-
-    DOMElement.addEventListener("mouseup", function (event) {
-      this.setButton(event.button, false);
-      this.BUTTONS = event.buttons << 10;
-    }.bind(this), false);
-
-    DOMElement.addEventListener("mousemove", this.readEvent.bind(this), false);
 
     DOMElement.addEventListener("wheel", function (event) {
       if (isChrome) {
@@ -61,6 +62,7 @@ Primrose.Input.Mouse = (function () {
         this.Z += event.deltaY;
       }
       event.preventDefault();
+      this.update();
     }.bind(this), false);
   }
 

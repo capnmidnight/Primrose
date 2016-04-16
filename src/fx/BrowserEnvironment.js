@@ -165,21 +165,16 @@ Primrose.BrowserEnvironment = (function () {
         checkFullscreen();
 
         movePlayer(dt);
-
         moveSky();
-
         moveGround();
-
         movePointer();
-
         resolvePicking();
-
         fire("update", dt);
       };
 
       var movePlayer = (dt) => {
 
-        this.input.update(dt);
+        this.input.update();
         var heading = this.input.getValue("heading"),
           pitch = this.input.getValue("pitch"),
           strafe = this.input.getValue("strafe"),
@@ -679,23 +674,9 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       var keyDown = (evt) => {
         if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
-          if (evt.keyCode === Primrose.Keys.F && !isFullScreenMode()) {
-            if (Primrose.Input.VR.Version > 0) {
-              this.goVR();
-            }
-            else {
-              this.goFullScreen();
-            }
-            evt.preventDefault();
-          }
-          else if (evt.keyCode === Primrose.Keys.X && this.inVR) {
-            this.input.vr.currentDisplay.exitPresent();
-            evt.preventDefault();
-          }
-          else if (evt.keyCode === Primrose.Keys.E) {
+          if (evt.keyCode === Primrose.Keys.E) {
             blankEye = true;
             evt.preventDefault();
           }
@@ -753,12 +734,6 @@ Primrose.BrowserEnvironment = (function () {
         });
 
 
-      var lockPointer = () => Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
-      window.addEventListener("click", lockPointer, false);
-      window.addEventListener("touchstart", lockPointer, false);
-      window.addEventListener("keydown", lockPointer, false);
-
-
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive && this.inVR) {
           this.input.vr.currentDisplay.exitPresent();
@@ -785,20 +760,26 @@ Primrose.BrowserEnvironment = (function () {
       this.operatingSystem = this.options.os;
       this.codePage = this.options.language;
 
-      window.addEventListener("resize", setSize, false);
 
-
-      window.addEventListener("keydown", keyDown, false);
-      window.addEventListener("keydown", (evt) => {
+      var focusClipboard = (evt) => {
         var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
         if (cmdName === "CUT" || cmdName === "COPY") {
           this._surrogate.style.display = "block";
           this._surrogate.focus();
         }
-      }, true);
-      window.addEventListener("keyup", keyUp, false);
-      window.addEventListener("beforepaste", setFalse, false);
+      };
 
+      var setPointerLock = () => Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
+      var setFullscreen = () => {
+        if (!isFullScreenMode()) {
+          if (Primrose.Input.VR.Version > 0) {
+            this.goVR();
+          }
+          else {
+            this.goFullScreen();
+          }
+        }
+      };
       var withCurrentControl = (name) => {
         return (evt) => {
           if (this.currentControl) {
@@ -807,6 +788,15 @@ Primrose.BrowserEnvironment = (function () {
         };
       };
 
+      window.addEventListener("resize", setSize, false);
+
+
+
+      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
+      window.addEventListener("keydown", keyDown, false);
+      window.addEventListener("keyup", keyUp, false);
+      window.addEventListener("keydown", focusClipboard, true);
+      window.addEventListener("beforepaste", setFalse, false);
       window.addEventListener("paste", withCurrentControl("readClipboard"), false);
       window.addEventListener("wheel", withCurrentControl("readWheel"), false);
       window.addEventListener("blur", this.stop, false);
@@ -815,6 +805,8 @@ Primrose.BrowserEnvironment = (function () {
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
       this.input.addEventListener("jump", this.jump.bind(this), false);
       this.input.addEventListener("zero", this.zero.bind(this), false);
+      this.input.addEventListener("lockpointer", setPointerLock, false);
+      this.input.addEventListener("fullscreen", setFullscreen, false);
       this.projector.addEventListener("hit", handleHit, false);
 
       Object.defineProperties(this, {

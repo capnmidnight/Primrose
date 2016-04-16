@@ -35,6 +35,7 @@ Primrose.Input.Touch = ( function () {
           this.FINGERS &= mask;
         }
       }
+      this.update();
     }
 
     DOMElement.addEventListener( "touchstart", setState.bind( this, true, false ), false );

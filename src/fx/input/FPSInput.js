@@ -16,6 +16,7 @@ Primrose.Input.FPSInput = (function () {
   function FPSInput(DOMElement) {
     DOMElement = DOMElement || window;
 
+
     pliny.issue({
       parent: "Primrose.Input.FPSInput",
       name: "document FPSInput.listeners",
@@ -24,7 +25,9 @@ Primrose.Input.FPSInput = (function () {
     });
     this.listeners = {
       jump: [],
-      zero: []
+      zero: [],
+      lockpointer: [],
+      fullscreen: []
     };
 
     pliny.issue({
@@ -36,6 +39,8 @@ Primrose.Input.FPSInput = (function () {
     this.managers = [
       // keyboard should always run on the window
       new Primrose.Input.Keyboard("keyboard", window, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+        fullScreen: { buttons: [Primrose.Keys.F], commandDown: emit.bind(this, "fullscreen") },
         strafeLeft: {
           buttons: [
             -Primrose.Keys.A,
@@ -77,6 +82,7 @@ Primrose.Input.FPSInput = (function () {
         }
       }),
       new Primrose.Input.Mouse("mouse", DOMElement, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
         buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
         dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
         dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
@@ -86,6 +92,7 @@ Primrose.Input.FPSInput = (function () {
         pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
       }),
       new Primrose.Input.Touch("touch", DOMElement, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         buttons: { axes: [Primrose.Input.Touch.FINGERS] },
         dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true }
       }),
@@ -194,11 +201,11 @@ Primrose.Input.FPSInput = (function () {
     type: "open",
     description: ""
   });
-  FPSInput.prototype.update = function (dt) {
+  FPSInput.prototype.update = function () {
     for (var i = 0; i < this.managers.length; ++i) {
       var mgr = this.managers[i];
-      if (mgr.enabled) {
-        mgr.update(dt);
+      if (mgr.enabled && mgr.poll) {
+        mgr.poll();
       }
     }
   };

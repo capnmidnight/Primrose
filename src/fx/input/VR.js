@@ -174,7 +174,7 @@ Primrose.Input.VR = (function () {
     }
   };
 
-  VRInput.prototype.update = function (dt) {
+  VRInput.prototype.poll = function () {
     if (this.currentDisplay) {
       var pose = this.currentDisplay.getPose();
       if (pose) {
@@ -214,7 +214,8 @@ Primrose.Input.VR = (function () {
         }
       }
     }
-    Primrose.Input.ButtonAndAxis.prototype.update.call(this, dt);
+
+    this.update();
   };
 
   VRInput.prototype.getQuaternion = function (x, y, z, w, value) {

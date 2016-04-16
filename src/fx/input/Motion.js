@@ -15,7 +15,7 @@ Primrose.Input.Motion = ( function ( ) {
         RIGHT = new THREE.Vector3( 1, 0, 0 ),
         UP = new THREE.Vector3( 0, 1, 0 ),
         FORWARD = new THREE.Vector3( 0, 0, -1 );
-    corrector.addEventListener( "deviceorientation", function ( evt ) {
+    corrector.addEventListener( "deviceorientation", ( evt ) => {
       for ( var i = 0; i < MotionInput.AXES.length; ++i ) {
         var k = MotionInput.AXES[i];
         this.setAxis( k, evt[k] );
@@ -28,7 +28,8 @@ Primrose.Input.Motion = ( function ( ) {
       this.headRY = a.y;
       this.headRZ = a.z;
       this.headRW = a.w;
-    }.bind( this ) );
+      this.update();
+    } );
     this.zeroAxes = corrector.zeroAxes.bind( corrector );
   }
 
