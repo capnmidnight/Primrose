@@ -104,7 +104,7 @@
         })
         .catch(clear);
     };
-  };
+  }
 
   CardboardVRDisplay.SUPERSAMPLE = 1;
 

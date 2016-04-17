@@ -288,7 +288,7 @@ Primrose.BrowserEnvironment = (function () {
             this.currentControl = null;
           }
         }
-      }
+      };
 
       var pointerEnd = (name) => {
         if (!(name === "keyboard" && lockedToEditor()) && currentHit) {
@@ -302,7 +302,7 @@ Primrose.BrowserEnvironment = (function () {
             }
           }
         }
-      }
+      };
 
       var resolvePicking = () => {
 
@@ -737,7 +737,7 @@ Primrose.BrowserEnvironment = (function () {
             var adder = () => {
               window.addEventListener("vrdisplaypresentchange", remover, false);
               window.removeEventListener("vrdisplaypresentchange", adder);
-            }
+            };
 
             window.addEventListener("vrdisplaypresentchange", adder, false);
           }

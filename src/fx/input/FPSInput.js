@@ -240,7 +240,9 @@ Primrose.Input.FPSInput = (function () {
     for (var i = 0; i < this.managers.length; ++i) {
       var mgr = this.managers[i];
       if (mgr.enabled) {
-        mgr.poll && mgr.poll();
+        if (mgr.poll) {
+          mgr.poll();
+        }
         mgr.update();
       }
     }
