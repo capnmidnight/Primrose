@@ -22,9 +22,21 @@ Primrose.Input.Mouse = function () {
       this.Y += dy;
     };
 
-    this.readEvent = function (event) {
+    DOMElement.addEventListener("mousedown", function (event) {
+      this.setButton(event.button, true);
       this.BUTTONS = event.buttons << 10;
-      if (MouseInput.isPointerLocked()) {
+      this.update();
+    }.bind(this), false);
+
+    DOMElement.addEventListener("mouseup", function (event) {
+      this.setButton(event.button, false);
+      this.BUTTONS = event.buttons << 10;
+      this.update();
+    }.bind(this), false);
+
+    DOMElement.addEventListener("mousemove", function (event) {
+      this.BUTTONS = event.buttons << 10;
+      if (MouseInput.Lock.isActive) {
         var mx = event.movementX,
             my = event.movementY;
 
@@ -36,19 +48,8 @@ Primrose.Input.Mouse = function () {
       } else {
         this.setLocation(event.layerX, event.layerY);
       }
-    };
-
-    DOMElement.addEventListener("mousedown", function (event) {
-      this.setButton(event.button, true);
-      this.BUTTONS = event.buttons << 10;
+      this.update();
     }.bind(this), false);
-
-    DOMElement.addEventListener("mouseup", function (event) {
-      this.setButton(event.button, false);
-      this.BUTTONS = event.buttons << 10;
-    }.bind(this), false);
-
-    DOMElement.addEventListener("mousemove", this.readEvent.bind(this), false);
 
     DOMElement.addEventListener("wheel", function (event) {
       if (isChrome) {
@@ -60,49 +61,8 @@ Primrose.Input.Mouse = function () {
         this.Z += event.deltaY;
       }
       event.preventDefault();
+      this.update();
     }.bind(this), false);
-
-    this.addEventListener = function (event, handler, bubbles) {
-      if (event === "pointerlockchange") {
-        if (document.exitPointerLock) {
-          document.addEventListener('pointerlockchange', handler, bubbles);
-        } else if (document.mozExitPointerLock) {
-          document.addEventListener('mozpointerlockchange', handler, bubbles);
-        } else if (document.webkitExitPointerLock) {
-          document.addEventListener('webkitpointerlockchange', handler, bubbles);
-        }
-      }
-    };
-
-    this.removeEventListener = function (event, handler, bubbles) {
-      if (event === "pointerlockchange") {
-        if (document.exitPointerLock) {
-          document.removeEventListener('pointerlockchange', handler, bubbles);
-        } else if (document.mozExitPointerLock) {
-          document.removeEventListener('mozpointerlockchange', handler, bubbles);
-        } else if (document.webkitExitPointerLock) {
-          document.removeEventListener('webkitpointerlockchange', handler, bubbles);
-        }
-      }
-    };
-
-    DOMElement.requestPointerLock = DOMElement.requestPointerLock || DOMElement.webkitRequestPointerLock || DOMElement.mozRequestPointerLock || function () {};
-
-    this.requestPointerLock = function () {
-      if (!MouseInput.isPointerLocked()) {
-        DOMElement.requestPointerLock();
-      }
-    };
-
-    this.exitPointerLock = (document.webkitExitPointerLock || document.mozExitPointerLock || document.exitPointerLock || function () {}).bind(document);
-
-    this.togglePointerLock = function () {
-      if (MouseInput.isPointerLocked()) {
-        this.exitPointerLock();
-      } else {
-        this.requestPointerLock();
-      }
-    };
   }
 
   var elementName = findProperty(document, ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"]),
@@ -127,9 +87,6 @@ Primrose.Input.Mouse = function () {
     removeErrorListener: function removeErrorListener(thunk) {
       return document.removeEventListener(errorEventName, thunk);
     },
-    getElement: function getElement() {
-      return document[elementName];
-    },
     withChange: function withChange(act) {
       return new Promise(function (resolve, reject) {
         var onPointerLock,
@@ -145,7 +102,7 @@ Primrose.Input.Mouse = function () {
 
         onPointerLock = function onPointerLock() {
           setTimeout(tearDown);
-          resolve(MouseInput.Lock.getElement());
+          resolve(MouseInput.Lock.element);
         };
 
         onPointerLockError = function onPointerLockError(evt) {
@@ -174,7 +131,7 @@ Primrose.Input.Mouse = function () {
         if (!requestMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (MouseInput.Lock.getElement()) {
+        } else if (MouseInput.Lock.isActive) {
           return true;
         } else {
           elem[requestMethodName]();
@@ -186,7 +143,7 @@ Primrose.Input.Mouse = function () {
         if (!exitMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (!MouseInput.Lock.getElement()) {
+        } else if (!MouseInput.Lock.isActive) {
           return true;
         } else {
           document[exitMethodName]();
@@ -195,9 +152,18 @@ Primrose.Input.Mouse = function () {
     }
   };
 
-  MouseInput.isPointerLocked = function () {
-    return !!MouseInput.Lock.getElement();
-  };
+  Object.defineProperties(MouseInput.Lock, {
+    element: {
+      get: function get() {
+        return document[elementName];
+      }
+    },
+    isActive: {
+      get: function get() {
+        return !!MouseInput.Lock.element;
+      }
+    }
+  });
 
   MouseInput.AXES = ["X", "Y", "Z", "W", "BUTTONS"];
   Primrose.Input.ButtonAndAxis.inherit(MouseInput);

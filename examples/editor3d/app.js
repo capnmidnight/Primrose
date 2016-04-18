@@ -19,6 +19,7 @@ var GRASS = "/examples/images/grass.png",
   scriptAnimate = null,
   app = new Primrose.BrowserEnvironment("Editor3D", {
     useFog: false,
+    sceneModel: "/models/cardboard.obj",
     skyTexture: "/examples/images/bg2.jpg",
     groundTexture: GRASS
   }),

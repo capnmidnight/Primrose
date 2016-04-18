@@ -571,7 +571,8 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       if (this.options.sceneModel) {
-        Primrose.ModelLoader.loadScene(this.options.sceneModel, (sceneGraph) => {
+        Primrose.ModelLoader.loadScene(this.options.sceneModel)
+          .then((sceneGraph) => {
           sceneLoaded = true;
           this.scene.add.apply(this.scene, sceneGraph.children);
           this.scene.traverse((obj) => {

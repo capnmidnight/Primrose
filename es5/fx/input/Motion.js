@@ -10,6 +10,8 @@ Primrose.Input.Motion = function () {
     description: "| [under construction]"
   });
   function MotionInput(name, commands, socket) {
+    var _this = this;
+
     Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, MotionInput.AXES);
     var corrector = new MotionCorrector(),
         a = new THREE.Quaternion(),
@@ -20,14 +22,15 @@ Primrose.Input.Motion = function () {
     corrector.addEventListener("deviceorientation", function (evt) {
       for (var i = 0; i < MotionInput.AXES.length; ++i) {
         var k = MotionInput.AXES[i];
-        this.setAxis(k, evt[k]);
+        _this.setAxis(k, evt[k]);
       }
       a.set(0, 0, 0, 1).multiply(b.setFromAxisAngle(UP, evt.HEADING)).multiply(b.setFromAxisAngle(RIGHT, evt.PITCH)).multiply(b.setFromAxisAngle(FORWARD, evt.ROLL));
-      this.headRX = a.x;
-      this.headRY = a.y;
-      this.headRZ = a.z;
-      this.headRW = a.w;
-    }.bind(this));
+      _this.headRX = a.x;
+      _this.headRY = a.y;
+      _this.headRZ = a.z;
+      _this.headRW = a.w;
+      _this.update();
+    });
     this.zeroAxes = corrector.zeroAxes.bind(corrector);
   }
 

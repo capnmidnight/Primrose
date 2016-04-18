@@ -75,6 +75,7 @@ Primrose.Input.Location = function () {
         this.setAxis(k, location.coords[p]);
       }
     }
+    this.update();
   };
   return LocationInput;
 }();

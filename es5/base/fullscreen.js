@@ -12,7 +12,7 @@ var FullScreen = function () {
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
 
-  return {
+  var ns = {
     addChangeListener: function addChangeListener(thunk, bubbles) {
       return document.addEventListener(changeEventName, thunk, bubbles);
     },
@@ -24,9 +24,6 @@ var FullScreen = function () {
     },
     removeErrorListener: function removeErrorListener(thunk) {
       return document.removeEventListener(errorEventName, thunk);
-    },
-    getElement: function getElement() {
-      return document[elementName];
     },
     withChange: function withChange(act) {
       return new Promise(function (resolve, reject) {
@@ -43,7 +40,7 @@ var FullScreen = function () {
 
         onFullScreen = function onFullScreen() {
           setTimeout(tearDown);
-          resolve(FullScreen.getElement());
+          resolve(FullScreen.element);
         };
 
         onFullScreenError = function onFullScreenError(evt) {
@@ -55,8 +52,9 @@ var FullScreen = function () {
         FullScreen.addErrorListener(onFullScreenError, false);
 
         if (act()) {
+          // we've already gotten fullscreen, so don't wait for it.
           tearDown();
-          resolve();
+          resolve(FullScreen.element);
         } else {
           // Timeout wating on the fullscreen to happen, for systems like iOS that
           // don't properly support it, even though they say they do.
@@ -72,7 +70,7 @@ var FullScreen = function () {
         if (!requestMethodName) {
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
-        } else if (FullScreen.getElement()) {
+        } else if (FullScreen.isActive) {
           return true;
         } else if (fullScreenParam) {
           elem[requestMethodName](fullScreenParam);
@@ -88,7 +86,7 @@ var FullScreen = function () {
         if (!exitMethodName) {
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
-        } else if (!FullScreen.getElement()) {
+        } else if (!FullScreen.isActive) {
           return true;
         } else {
           document[exitMethodName]();
@@ -96,4 +94,19 @@ var FullScreen = function () {
       });
     }
   };
+
+  Object.defineProperties(ns, {
+    element: {
+      get: function get() {
+        return document[elementName];
+      }
+    },
+    isActive: {
+      get: function get() {
+        return !!FullScreen.element;
+      }
+    }
+  });
+
+  return ns;
 }();

@@ -13,6 +13,8 @@ var pathX = /.*\/(.*).js/,
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
+    "node_modules/three/examples/js/loaders/OBJLoader.js",
+    "node_modules/three/examples/js/loaders/MTLLoader.js",
     "node_modules/marked/lib/marked.js"
   ],
   copyFiles = baseFiles.map(function (s) {
@@ -101,6 +103,8 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
   };
 
 debugDataES6.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");
+debugDataES6.frameworkFiles.unshift("/node_modules/three/examples/js/loaders/OBJLoader.js");
+debugDataES6.frameworkFiles.unshift("/node_modules/three/examples/js/loaders/MTLLoader.js");
 debugDataES6.frameworkFiles.unshift("/node_modules/three/three.js");
 debugDataES6.frameworkFiles.unshift("/lib/sha512.js");
 debugDataES6.frameworkFiles.unshift("/lib/webgl-debug.js");
@@ -139,9 +143,13 @@ module.exports = function (grunt) {
         files: jadeFileSpec,
         tasks: ["jade:debug"]
       },
-      hint: {
+      "hint-es5": {
         files: "src/**/*.js",
         tasks: ["jshint", "babel"]
+      },
+      "hint-es6": {
+        files: "src/**/*.js",
+        tasks: ["jshint"]
       }
     },
 
@@ -229,8 +237,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-jade");
 
   grunt.registerTask("none", []);
-  grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint"]);
-  grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint"]);
+  grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint-es6"]);
+  grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint-es5"]);
   grunt.registerTask("release", ["clean", "jade:release", "cssmin", "jshint", "babel", "concat", "uglify", "copy"]);
   grunt.registerTask("default", ["debug"]);
 };

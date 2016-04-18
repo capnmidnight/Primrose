@@ -179,6 +179,8 @@ Primrose.Input.LeapMotion = function () {
     if (gameUpdateLoop) {
       gameUpdateLoop(frame.timestamp * 0.001);
     }
+
+    this.update();
   };
   return LeapMotionInput;
 }();

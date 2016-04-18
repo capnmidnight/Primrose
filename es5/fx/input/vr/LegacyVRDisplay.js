@@ -117,24 +117,30 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
     this._onFullScreenRemoved = function () {
       FullScreen.removeChangeListener(_this._onFullScreenRemoved);
       _this.exitPresent();
+      window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
-    this.requestPresent = function (layer) {
+    this.requestPresent = function (layers) {
       if (!_this.capabilities.canPresent) {
-        return Promise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
-      } else if (!layer) {
-        return Promise.reject(new Error("No layer provided to requestPresent"));
-      } else if (!layer.source) {
+        return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
+      } else if (!layers) {
+        return Promise.reject(new Error("No layers provided to requestPresent"));
+      } else if (!(layers instanceof Array)) {
+        return Promise.reject(new Error("Layers parameters must be an array"));
+      } else if (layers.length !== 1) {
+        return Promise.reject(new Error("Only one layer at a time is supported right now."));
+      } else if (!layers[0].source) {
         return Promise.reject(new Error("No source on layer parameter."));
       } else {
-        return FullScreen.request(layer.source, { vrDisplay: device.display }).then(function (elem) {
-          _this.isPresenting = elem === layer.source;
-          currentLayer = layer;
+        return FullScreen.request(layers[0].source, {
+          vrDisplay: device.display,
+          vrDistortion: true
+        }).then(function (elem) {
+          currentLayer = layers[0];
+          _this.isPresenting = elem === currentLayer.source;
           FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
+          window.dispatchEvent(new Event("vrdisplaypresentchange"));
           return elem;
-        }).catch(function (evt) {
-          _this.isPresenting = false;
-          return evt;
         });
       }
     };

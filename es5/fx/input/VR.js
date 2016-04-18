@@ -45,8 +45,6 @@ Primrose.Input.VR = function () {
       }
     }
 
-    var onFullScreenChange = function onFullScreenChange() {};
-
     function enumerateVRDisplays(elem, displays) {
       console.log("Displays found:", displays.length);
       this.displays = displays;
@@ -125,16 +123,45 @@ Primrose.Input.VR = function () {
 
   pliny.value({
     parent: "Primrose.Input.VR",
-    name: "isAvailable",
-    type: "Boolean",
-    description: "Flag indicating the browser supports awesomesauce as well as the WebVR standard in some form."
+    name: "Version",
+    type: "Number",
+    description: "returns the version of WebVR that is supported (if any). Values:\n\
+  - 0: no WebVR support\n\
+  - 0.1: Device Orientation-based WebVR\n\
+  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
+  - 0.5: Legacy WebVR API\n\
+  - 1.0: Provisional WebVR API 1.0"
   });
-  VRInput.isAvailable = navigator.getVRDisplays || navigator.getVRDevices || navigator.mozGetVRDevices || isMobile;
+  Object.defineProperty(VRInput, "Version", {
+    get: function get() {
+      if (navigator.getVRDisplays) {
+        return 1.0;
+      } else if (navigator.getVRDevices) {
+        return 0.5;
+      } else if (navigator.mozGetVRDevices) {
+        return 0.4;
+      } else if (isMobile) {
+        return 0.1;
+      } else {
+        return 0;
+      }
+    }
+  });
 
   VRInput.AXES = ["headX", "headY", "headZ", "headVX", "headVY", "headVZ", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW", "headRVX", "headRVY", "headRVZ", "headRAX", "headRAY", "headRAZ"];
   Primrose.Input.ButtonAndAxis.inherit(VRInput);
 
-  VRInput.prototype.update = function (dt) {
+  VRInput.prototype.requestPresent = function (opts) {
+    if (!this.currentDisplay) {
+      return Promise.reject("No display");
+    } else {
+      return this.currentDisplay.requestPresent(VRInput.Version === 1 && isMobile ? opts[0] : opts).then(function (elem) {
+        return elem || opts[0].source;
+      });
+    }
+  };
+
+  VRInput.prototype.poll = function () {
     if (this.currentDisplay) {
       var pose = this.currentDisplay.getPose();
       if (pose) {
@@ -174,7 +201,6 @@ Primrose.Input.VR = function () {
         }
       }
     }
-    Primrose.Input.ButtonAndAxis.prototype.update.call(this, dt);
   };
 
   VRInput.prototype.getQuaternion = function (x, y, z, w, value) {

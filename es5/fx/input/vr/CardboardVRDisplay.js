@@ -26,8 +26,8 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
       var dEye = side === "left" ? -1 : 1;
 
       return {
-        renderWidth: Math.floor(screen.width * devicePixelRatio / 2),
-        renderHeight: screen.height * devicePixelRatio,
+        renderWidth: Math.floor(screen.width * devicePixelRatio / 2) * CardboardVRDisplay.SUPERSAMPLE,
+        renderHeight: screen.height * devicePixelRatio * CardboardVRDisplay.SUPERSAMPLE,
         offset: new Float32Array([dEye * 0.03, 0, 0]),
         fieldOfView: {
           upDegrees: 40,
@@ -64,25 +64,27 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
       console.log("exiting cardboard presentation");
       FullScreen.removeChangeListener(_this._onFullScreenRemoved);
       _this.exitPresent();
+      window.dispatchEvent(new Event("vrdisplaypresentchange"));
     };
 
-    this.requestPresent = function (layer) {
-      console.log("requestPresent");
+    this.requestPresent = function (layers) {
       if (!_this.capabilities.canPresent) {
         return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
-      } else if (!layer) {
-        return Promise.reject(new Error("No layer provided to requestPresent"));
-      } else if (!layer.source) {
+      } else if (!layers) {
+        return Promise.reject(new Error("No layers provided to requestPresent"));
+      } else if (!(layers instanceof Array)) {
+        return Promise.reject(new Error("Layers parameters must be an array"));
+      } else if (layers.length !== 1) {
+        return Promise.reject(new Error("Only one layer at a time is supported right now."));
+      } else if (!layers[0].source) {
         return Promise.reject(new Error("No source on layer parameter."));
       } else {
-        return FullScreen.request(layer.source).then(function (elem) {
-          _this.isPresenting = elem === layer.source;
-          currentLayer = layer;
+        return FullScreen.request(layers[0].source).then(function (elem) {
+          currentLayer = layers[0];
+          _this.isPresenting = elem === currentLayer.source;
           FullScreen.addChangeListener(_this._onFullScreenRemoved, false);
-          resolve();
-        }).catch(function (evt) {
-          _this.isPresenting = false;
-          reject(evt);
+          window.dispatchEvent(new Event("vrdisplaypresentchange"));
+          return elem;
         });
       }
     };
@@ -101,6 +103,8 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
       }).catch(clear);
     };
   }
+
+  CardboardVRDisplay.SUPERSAMPLE = 1;
 
   CardboardVRDisplay.prototype.requestAnimationFrame = window.requestAnimationFrame.bind(window);
   CardboardVRDisplay.prototype.cancelAnimationFrame = window.cancelAnimationFrame.bind(window);

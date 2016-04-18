@@ -27,14 +27,6 @@ Primrose.Input.Gamepad = function () {
 
     pliny.issue({
       parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.superUpdate",
-      type: "open",
-      description: ""
-    });
-    this.superUpdate = this.update;
-
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
       name: "document Gamepad.checkDevice",
       type: "open",
       description: ""
@@ -47,15 +39,16 @@ Primrose.Input.Gamepad = function () {
       for (i = 0; i < pad.axes.length; ++i) {
         this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
       }
+      console.log(pad.axes.join(", "));
     };
 
     pliny.issue({
       parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.update",
+      name: "document Gamepad.poll",
       type: "open",
       description: ""
     });
-    this.update = function (dt) {
+    this.poll = function () {
       var pads,
           currentPads = [],
           i;
@@ -70,6 +63,9 @@ Primrose.Input.Gamepad = function () {
         for (i = 0; i < pads.length; ++i) {
           var pad = pads[i];
           if (pad) {
+            if (!gpid) {
+              gpid = pad.id;
+            }
             if (connectedGamepads.indexOf(pad.id) === -1) {
               connectedGamepads.push(pad.id);
               onConnected(pad.id);
@@ -88,8 +84,6 @@ Primrose.Input.Gamepad = function () {
           connectedGamepads.splice(i, 1);
         }
       }
-
-      this.superUpdate(dt);
     };
 
     function add(arr, val) {
@@ -199,7 +193,7 @@ Primrose.Input.Gamepad = function () {
     };
 
     try {
-      this.update(0);
+      this.update();
       this.available = true;
     } catch (err) {
       this.avaliable = false;
@@ -218,26 +212,26 @@ Primrose.Input.Gamepad = function () {
   return GamepadInput;
 }();
 
-Primrose.Input.Gamepad.XBOX_BUTTONS = pliny.enumeration({
+pliny.enumeration({
   parent: "Primrose.Input.Gamepad",
   name: "XBOX_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller.",
-  value: {
-    A: 1,
-    B: 2,
-    X: 3,
-    Y: 4,
-    leftBumper: 5,
-    rightBumper: 6,
-    leftTrigger: 7,
-    rightTrigger: 8,
-    back: 9,
-    start: 10,
-    leftStick: 11,
-    rightStick: 12,
-    up: 13,
-    down: 14,
-    left: 15,
-    right: 16
-  }
+  description: "Labeled names for each of the different control features of the Xbox 360 controller."
 });
+Primrose.Input.Gamepad.XBOX_BUTTONS = {
+  A: 1,
+  B: 2,
+  X: 3,
+  Y: 4,
+  leftBumper: 5,
+  rightBumper: 6,
+  leftTrigger: 7,
+  rightTrigger: 8,
+  back: 9,
+  start: 10,
+  leftStick: 11,
+  rightStick: 12,
+  up: 13,
+  down: 14,
+  left: 15,
+  right: 16
+};

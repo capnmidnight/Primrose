@@ -13,7 +13,10 @@ Primrose.ModelLoader = function () {
 
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
-  var JSON = THREE.ObjectLoader && new THREE.ObjectLoader();
+  var JSON = THREE.ObjectLoader && new THREE.ObjectLoader(),
+      FBX = THREE.FBXLoader && new THREE.FBXLoader(),
+      OBJ = THREE.OBJLoader && new THREE.OBJLoader(),
+      STL = THREE.STLLoader && new THREE.STLLoader();
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
   // come out correctly, so we need to do a correction.
@@ -79,7 +82,8 @@ Primrose.ModelLoader = function () {
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
 > policy that Primrose uses for requests.",
     parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
-    examples: [{ name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+    examples: [{
+      name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -122,7 +126,8 @@ Primrose.ModelLoader = function () {
     name: "clone",
     description: "Creates a copy of the stored template model.",
     returns: "A THREE.Object3D that is a copy of the stored template.",
-    examples: [{ name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+    examples: [{
+      name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -173,7 +178,8 @@ Primrose.ModelLoader = function () {
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
 > policy that Primrose uses for requests.",
     parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
-    examples: [{ name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+    examples: [{
+      name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -215,7 +221,8 @@ Primrose.ModelLoader = function () {
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
 > policy that Primrose uses for requests.",
     parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
-    examples: [{ name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+    examples: [{
+      name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
 ## Code:\n\
 \n\
@@ -239,30 +246,32 @@ Primrose.ModelLoader = function () {
      \n\
     requestAnimationFrame(paint);" }]
   });
-  ModelLoader.loadObject = function (src, success, error, progress) {
-    var done = function done(scene) {
-      setProperties(scene);
-      if (success) {
-        success(scene);
-      }
-    };
+  ModelLoader.loadObject = function (src, progress) {
+    return new Promise(function (resolve, reject) {
+      var done = function done(scene) {
+        setProperties(scene);
+        if (resolve) {
+          resolve(scene);
+        }
+      };
 
-    if (!JSON) {
-      if (error) {
-        error("JSON seems to be broken right now");
-      }
-    } else {
-      try {
-        JSON.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-        JSON.load(src, function (json) {
-          done(fixJSONScene(json));
-        }, progress, error);
-      } catch (exp) {
-        if (error) {
-          error(exp);
+      if (!JSON) {
+        if (reject) {
+          reject("JSON seems to be broken right now");
+        }
+      } else {
+        try {
+          JSON.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+          JSON.load(src, function (json) {
+            done(fixJSONScene(json));
+          }, progress, reject);
+        } catch (exp) {
+          if (reject) {
+            reject(exp);
+          }
         }
       }
-    }
+    });
   };
 
   return ModelLoader;

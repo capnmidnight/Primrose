@@ -16,6 +16,8 @@ Primrose.Input.FPSInput = function () {
     description: "| [under construction]"
   });
   function FPSInput(DOMElement) {
+    var _this = this;
+
     DOMElement = DOMElement || window;
 
     pliny.issue({
@@ -25,8 +27,11 @@ Primrose.Input.FPSInput = function () {
       description: ""
     });
     this.listeners = {
-      jump: [],
-      zero: []
+      zero: [],
+      lockpointer: [],
+      fullscreen: [],
+      pointerstart: [],
+      pointerend: []
     };
 
     pliny.issue({
@@ -38,6 +43,23 @@ Primrose.Input.FPSInput = function () {
     this.managers = [
     // keyboard should always run on the window
     new Primrose.Input.Keyboard("keyboard", window, {
+      lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+      pointer1: {
+        buttons: [Primrose.Keys.SPACE],
+        repetitions: 1,
+        commandDown: emit.bind(this, "pointerstart"),
+        commandUp: emit.bind(this, "pointerend")
+      },
+      pointer2: {
+        buttons: [Primrose.Keys.ENTER],
+        repetitions: 1,
+        commandDown: emit.bind(this, "pointerstart"),
+        commandUp: emit.bind(this, "pointerend")
+      },
+      fullScreen: {
+        buttons: [Primrose.Keys.F],
+        commandDown: emit.bind(this, "fullscreen")
+      },
       strafeLeft: {
         buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
       },
@@ -54,17 +76,19 @@ Primrose.Input.FPSInput = function () {
       drive: { commands: ["driveForward", "driveBack"] },
       select: { buttons: [Primrose.Keys.ENTER] },
       dSelect: { buttons: [Primrose.Keys.ENTER], delta: true },
-      jump: {
-        buttons: [Primrose.Keys.SPACE],
-        metaKeys: [-Primrose.Keys.SHIFT],
-        commandDown: emit.bind(this, "jump"), dt: 0.5
-      },
       zero: {
         buttons: [Primrose.Keys.Z],
         metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
         commandUp: emit.bind(this, "zero")
       }
     }), new Primrose.Input.Mouse("mouse", DOMElement, {
+      lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
+      pointer: {
+        buttons: [Primrose.Keys.ANY],
+        repetitions: 1,
+        commandDown: emit.bind(this, "pointerstart"),
+        commandUp: emit.bind(this, "pointerend")
+      },
       buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
       dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
       dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
@@ -73,9 +97,22 @@ Primrose.Input.FPSInput = function () {
       pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
       pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
     }), new Primrose.Input.Touch("touch", DOMElement, {
+      lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+      pointer: {
+        buttons: [Primrose.Keys.ANY],
+        repetitions: 1,
+        commandDown: emit.bind(this, "pointerstart"),
+        commandUp: emit.bind(this, "pointerend")
+      },
       buttons: { axes: [Primrose.Input.Touch.FINGERS] },
       dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true }
     }), new Primrose.Input.Gamepad("gamepad", {
+      pointer: {
+        buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+        repetitions: 1,
+        commandDown: emit.bind(this, "pointerstart"),
+        commandUp: emit.bind(this, "pointerend")
+      },
       strafe: { axes: [Primrose.Input.Gamepad.LSX] },
       drive: { axes: [Primrose.Input.Gamepad.LSY] },
       heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
@@ -83,7 +120,7 @@ Primrose.Input.FPSInput = function () {
       pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
     })];
 
-    if (Primrose.Input.VR.isAvailable) {
+    if (Primrose.Input.VR.Version > 0) {
       var vr = new Primrose.Input.VR("vr");
       this.managers.push(vr);
       vr.init();
@@ -131,23 +168,9 @@ Primrose.Input.FPSInput = function () {
       description: ""
     });
 
-    this.managers.reduce(function (inst, mgr) {
-      inst[mgr.name] = mgr;
-      return inst;
-    }, this);
-
-    pliny.issue({
-      parent: "Primrose.Input.FPSInput",
-      name: "document FPSInput.connectGamepad",
-      type: "open",
-      description: ""
+    this.managers.forEach(function (mgr) {
+      return _this[mgr.name] = mgr;
     });
-    this.connectGamepad = function (id) {
-      if (!this.gamepad.isGamepadSet() && confirm(fmt("Would you like to use this gamepad? \"$1\"", id))) {
-        this.gamepad.setGamepad(id);
-      }
-    };
-    this.gamepad.addEventListener("gamepadconnected", this.connectGamepad.bind(this), false);
   }
 
   var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
@@ -179,11 +202,14 @@ Primrose.Input.FPSInput = function () {
     type: "open",
     description: ""
   });
-  FPSInput.prototype.update = function (dt) {
+  FPSInput.prototype.update = function () {
     for (var i = 0; i < this.managers.length; ++i) {
       var mgr = this.managers[i];
       if (mgr.enabled) {
-        mgr.update(dt);
+        if (mgr.poll) {
+          mgr.poll();
+        }
+        mgr.update();
       }
     }
   };

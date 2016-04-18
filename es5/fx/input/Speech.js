@@ -161,6 +161,7 @@ Primrose.Input.Speech = function () {
         if (newCommand !== this.inputState) {
           this.inputState.text = newCommand;
         }
+        this.update();
       }.bind(this), true);
 
       available = true;
