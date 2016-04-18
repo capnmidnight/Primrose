@@ -434,7 +434,9 @@ Primrose.BrowserEnvironment = (function () {
           this.input.vr.currentDisplay.submitFrame(this.input.vr.currentPose);
         }
 
-        this.audio.setPlayer(this.camera);
+        if (!isMobile) {
+          this.audio.setPlayer(this.camera);
+        }
 
         if (!this.inVR || (this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           if (blankEye) {
@@ -613,8 +615,7 @@ Primrose.BrowserEnvironment = (function () {
       this.audio = new Primrose.Output.Audio3D();
       var audioReady = null,
         ocean = null;
-      console.log(this.options.ambientSound);
-      if (this.options.ambientSound) {
+      if (this.options.ambientSound && !isMobile) {
         audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
           .then((aud) => {
             ocean = aud;

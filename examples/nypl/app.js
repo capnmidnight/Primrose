@@ -44,15 +44,17 @@ function makeWindow(width, height, size) {
 
 app.addEventListener("ready", function () {
 
-  stereoImage.loadStereoImage("prong.stereo.jpg")
-    .then(function (img) {
-      myWindow = put(makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5))
-        .on(app.scene)
-        .at(0, app.avatarHeight, -1.5);
-      myWindow.surface.appendChild(stereoImage);
-      app.scene.add(myWindow);
-      app.registerPickableObject(myWindow);
-    });
+  if (!isMobile) {
+    stereoImage.loadStereoImage("prong.stereo.jpg")
+      .then(function (img) {
+        myWindow = put(makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5))
+          .on(app.scene)
+          .at(0, app.avatarHeight, -1.5);
+        myWindow.surface.appendChild(stereoImage);
+        app.scene.add(myWindow);
+        app.registerPickableObject(myWindow);
+      });
+  }
 
   signupForm.mesh.position.x = loginForm.mesh.position.x = -0.75;
   signupForm.mesh.position.y = loginForm.mesh.position.y = app.avatarHeight;

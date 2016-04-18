@@ -24,9 +24,7 @@ var GRASS = "/examples/images/grass.png",
     groundTexture: GRASS
   }),
   editorFrameMesh = null,
-  editorFrame = new Primrose.Surface({
-    bounds: new Primrose.Text.Rectangle(0, 0, 1024, 1024)
-  }),
+  editorFrame = null,
   documentationMesh = null,
   stereoImage = new Primrose.Controls.Image(),
   stereoImageWindow;
@@ -51,11 +49,18 @@ app.addEventListener("ready", function () {
       app.registerPickableObject(stereoImageWindow);
     });
 
+  var editorSize = isMobile ? 512 : 1024,
+    fontSize = isMobile ? 10 : 20;
+
+  editorFrame = new Primrose.Surface({
+    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
+  });
+
   editor = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
     tokenizer: Primrose.Text.Grammars.JavaScript,
     value: getSourceCode(isInIFrame),
-    fontSize: 20
+    fontSize: fontSize
   });
 
   output = new Primrose.Text.Controls.TextBox({
@@ -63,7 +68,7 @@ app.addEventListener("ready", function () {
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
     readOnly: true,
-    fontSize: 20
+    fontSize: fontSize
   });
 
   button1 = new Primrose.Controls.Button2D({
@@ -95,12 +100,12 @@ app.addEventListener("ready", function () {
   app.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Text.Controls.TextBox({
-    bounds: new Primrose.Text.Rectangle(0, 0, 1024, 1024),
+    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
     readOnly: true,
     value: getDocumentation(),
-    fontSize: 35
+    fontSize: fontSize
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
