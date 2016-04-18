@@ -30,6 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="examples\editor3d\prong.stereo.jpg" />
     <Content Include="lib\logger.js" />
     <Content Include="models\cardboard.mtl" />
     <Content Include="models\cardboard.obj" />

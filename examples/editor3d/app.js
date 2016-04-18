@@ -27,10 +27,29 @@ var GRASS = "/examples/images/grass.png",
   editorFrame = new Primrose.Surface({
     bounds: new Primrose.Text.Rectangle(0, 0, 1024, 1024)
   }),
-  documentationMesh = null;
+  documentationMesh = null,
+  stereoImage = new Primrose.Controls.Image(),
+  stereoImageWindow;
+
+function makeWindow(width, height, size) {
+  size = size || 1;
+  return textured(quad(size, size * height / width), new Primrose.Surface({
+    bounds: new Primrose.Text.Rectangle(0, 0, width, height)
+  }));
+}
 
 app.addEventListener("ready", function () {
   app.scene.add(subScene);
+
+  stereoImage.loadStereoImage("prong.stereo.jpg")
+    .then(function (img) {
+      stereoImageWindow = makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
+      stereoImageWindow.rotation.set(0, 75 * Math.PI / 180, 0);
+      stereoImageWindow.position.set(-4, app.avatarHeight, -1);
+      stereoImageWindow.surface.appendChild(stereoImage);
+      app.scene.add(stereoImageWindow);
+      app.registerPickableObject(stereoImageWindow);
+    });
 
   editor = new Primrose.Text.Controls.TextBox({
     bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),

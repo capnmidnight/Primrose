@@ -19,7 +19,7 @@ var GRASS = "/examples/images/grass.png",
   loginForm = new Primrose.X.LoginForm(),
   signupForm = new Primrose.X.SignupForm(),
   stereoImage = new Primrose.Controls.Image(),
-  myWindow,
+  stereoImageWindow,
   socket = new io(location.origin);
 
 ["chat",
@@ -46,7 +46,7 @@ app.addEventListener("ready", function () {
 
   stereoImage.loadStereoImage("prong.stereo.jpg")
     .then(function (img) {
-      var myWindow = put(makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5))
+      myWindow = put(makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5))
         .on(app.scene)
         .at(0, app.avatarHeight, -1.5);
       myWindow.surface.appendChild(stereoImage);
