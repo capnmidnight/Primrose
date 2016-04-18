@@ -74,19 +74,16 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.registerPickableObject = (obj) => {
-        if (obj.type === "Object3D") {
-          obj.children[0].name = obj.children[0].name || obj.name;
-          obj = obj.children[0];
-        }
         if (obj) {
-          var bag = createPickableObject(obj),
-            verts, faces, uvs, i;
-        
+          var bag = createPickableObject(obj, true),
+            verts, faces, uvs, i,
+            geometry = bag.geometry;
+
           // it would be nice to do this the other way around, to have everything
           // stored in ArrayBuffers, instead of regular arrays, to pass to the
           // Worker thread. Maybe later.
-          if (obj.geometry instanceof THREE.BufferGeometry) {
-            var attr = obj.geometry.attributes,
+          if (geometry instanceof THREE.BufferGeometry) {
+            var attr = geometry.attributes,
               pos = attr.position,
               uv = attr.uv,
               idx = attr.index;
@@ -114,13 +111,13 @@ Primrose.BrowserEnvironment = (function () {
             }
           }
           else {
-            verts = obj.geometry.vertices.map((v) => v.toArray());
+            verts = geometry.vertices.map((v) => v.toArray());
             faces = [];
             uvs = [];
             // IDK why, but non-buffered geometry has an additional array layer
-            for (i = 0; i < obj.geometry.faces.length; ++i) {
-              var f = obj.geometry.faces[i],
-                faceUVs = obj.geometry.faceVertexUvs[0][i];
+            for (i = 0; i < geometry.faces.length; ++i) {
+              var f = geometry.faces[i],
+                faceUVs = geometry.faceVertexUvs[0][i];
               faces.push([f.a, f.b, f.c]);
               uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
               uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
@@ -134,7 +131,7 @@ Primrose.BrowserEnvironment = (function () {
             uvs: uvs
           };
 
-          this.pickableObjects[obj.uuid] = obj;
+          this.pickableObjects[bag.uuid] = obj;
           this.projector.setObject(bag);
         }
       };
@@ -247,7 +244,7 @@ Primrose.BrowserEnvironment = (function () {
         this.pointer.position.applyQuaternion(this.player.quaternion);
         this.pointer.position.add(this.player.position);
       };
-      
+
       var pointerStart = (name) => {
         if (!(name === "keyboard" && lockedToEditor())) {
           if (currentHit) {
@@ -255,6 +252,7 @@ Primrose.BrowserEnvironment = (function () {
             if (object) {
               var control = object.button || object.surface;
               fire("pointerstart", currentHit);
+              emit.call(object, "click");
 
               if (this.currentControl && this.currentControl !== control) {
                 this.currentControl.blur();
@@ -301,7 +299,15 @@ Primrose.BrowserEnvironment = (function () {
 
         if (this.projector.ready) {
           this.projector.ready = false;
-          var arr = Object.keys(this.pickableObjects).map((id) => createPickableObject(this.pickableObjects[id]));
+          var arr = Object.keys(this.pickableObjects).map((id) => {
+            var obj = this.pickableObjects[id];
+            var bagObj = obj;
+            if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
+              bagObj = obj.children[0];
+              bagObj.name = bagObj.name || obj.name;
+            }
+            return createPickableObject(bagObj);
+          });
           this.projector.updateObjects(arr);
           this.projector.projectPointer([
             this.pointer.position.toArray(),
@@ -409,7 +415,7 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var setSize = (evt) => {
+      var setSize = () => {
         var canvasWidth,
           canvasHeight,
           aspectWidth,
@@ -464,9 +470,70 @@ Primrose.BrowserEnvironment = (function () {
         vEye = new THREE.Vector3(),
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
-        sceneLoaded = !this.options.sceneModel,
-        buttonLoaded = !this.options.button,
-        readyFired = false;
+        readyFired = false,
+        modelFiles = [
+          "/models/monitor.obj",
+          "/models/cardboard.obj",
+        ],
+        monitor = null,
+        cardboard = null;
+      if (this.options.sceneModel) {
+        modelFiles.push(this.options.sceneModel);
+      }
+      if (this.options.button && typeof this.options.model === "string") {
+        modelFiles.push(this.options.button.model);
+      }
+      var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then((models) => {
+        monitor = models[0];
+        cardboard = models[1];
+
+        monitor.rotation.set(0, 270 * Math.PI / 180, 0);
+        monitor.position.set(0, 0.7, -1);
+        monitor.name = "Monitor";
+        monitor.addEventListener("click", app.goFullScreen, false);
+        this.registerPickableObject(monitor);
+        this.scene.add(monitor);
+        this.scene.Monitor = monitor;
+
+        if (Primrose.Input.VR.Version > 0) {
+
+          monitor.rotation.set(0, 300 * Math.PI / 180, 0);
+          monitor.position.set(-0.25, 0.7, -1);
+
+          cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
+          cardboard.position.set(0.2, 1.75, -1);
+          cardboard.name = "Cardboard";
+          cardboard.addEventListener("click", app.goVR, false);
+          this.registerPickableObject(cardboard);
+          this.scene.add(cardboard);
+          this.scene.Cardboard = cardboard;
+        }
+        else {
+        }
+
+        var dIndex = 0;
+        if (this.options.sceneModel) {
+          buildScene(models[2]);
+          dIndex = 1;
+        }
+        if (this.options.button) {
+          var btnTemplate = models[2 + dIndex];
+          this.buttonFactory = new Primrose.ButtonFactory(
+            btnTemplate,
+            this.options.button.options);
+        }
+        else {
+          this.buttonFactory = new Primrose.ButtonFactory(
+            brick(0xff0000, 1, 1, 1), {
+              maxThrow: 0.1,
+              minDeflection: 10,
+              colorUnpressed: 0x7f0000,
+              colorPressed: 0x007f00,
+              toggle: true
+            });
+        }
+      }).then(() => fire("ready"));
+    
     
       //
       // Initialize public properties
@@ -570,61 +637,34 @@ Primrose.BrowserEnvironment = (function () {
         this.camera.add(this.passthrough.mesh);
       }
 
-      if (this.options.sceneModel) {
-        Primrose.ModelLoader.loadScene(this.options.sceneModel)
-          .then((sceneGraph) => {
-          sceneLoaded = true;
-          this.scene.add.apply(this.scene, sceneGraph.children);
-          this.scene.traverse((obj) => {
-            if (obj.name) {
-              this.scene[obj.name] = obj;
-            }
-          });
-          if (sceneGraph.Camera) {
-            this.camera.position.copy(sceneGraph.Camera.position);
-            this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
+
+      var buildScene = (sceneGraph) => {
+        sceneGraph.buttons = [];
+        sceneGraph.traverse(function (child) {
+          if (child.isButton) {
+            sceneGraph.buttons.push(
+              new Primrose.Button(child.parent, child.name));
+          }
+          if (child.name) {
+            sceneGraph[child.name] = child;
           }
         });
-      }
-
-      if (this.options.button) {
-        this.buttonFactory = new Primrose.ButtonFactory(
-          this.options.button.model,
-          this.options.button.options,
-          () => buttonLoaded = true);
-      }
-      else {
-        this.buttonFactory = new Primrose.ButtonFactory(
-          brick(0xff0000, 1, 1, 1), {
-            maxThrow: 0.1,
-            minDeflection: 10,
-            colorUnpressed: 0x7f0000,
-            colorPressed: 0x007f00,
-            toggle: true
-          });
-      }
-
-
-      var waitForResources = (t) => {
-        lt = t * 0.001;
-        if (sceneLoaded && buttonLoaded) {
-          if (!readyFired) {
-            readyFired = true;
-            setSize();
-            try {
-              fire("ready");
-            }
-            catch (exp) {
-              console.error(exp);
-              console.warn("There was an error during setup, but we're going to continue anyway.");
-            }
+        this.scene.add.apply(this.scene, sceneGraph.children);
+        this.scene.traverse((obj) => {
+          if (obj.name) {
+            this.scene[obj.name] = obj;
           }
-          RAF(animate);
+        });
+        if (sceneGraph.Camera) {
+          this.camera.position.copy(sceneGraph.Camera.position);
+          this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
         }
-        else {
-          RAF(waitForResources);
-        }
+        return sceneGraph;
       };
+
+      put(light(0xffffff, 1.5, 50))
+        .on(this.scene)
+        .at(10, 10, 10);
 
       var RAF = (callback) => {
         if (this.inVR) {
@@ -636,9 +676,9 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.start = () => {
-        if (!this.timer) {
-          RAF(waitForResources);
-        }
+        modelsReady
+          .then(setSize)
+          .then(() => RAF(animate));
       };
 
       this.stop = () => {
@@ -720,25 +760,33 @@ Primrose.BrowserEnvironment = (function () {
       //
       this.goFullScreen = () => FullScreen.request(this.renderer.domElement);
 
-      this.goVR = () => this.input.vr.requestPresent([{ source: this.renderer.domElement }])
-        .then((elem) => {
-          if (Primrose.Input.VR.Version === 1 && isMobile) {
-            var remover = () => {
-              this.input.vr.currentDisplay.exitPresent();
-              window.removeEventListener("vrdisplaypresentchange", remover);
-            };
+      this.goVR = () => {
+        if (this.input.vr) {
+          return this.input.vr.requestPresent([{ source: this.renderer.domElement }])
+            .then((elem) => {
+              if (Primrose.Input.VR.Version === 1 && isMobile) {
+                var remover = () => {
+                  this.input.vr.currentDisplay.exitPresent();
+                  window.removeEventListener("vrdisplaypresentchange", remover);
+                };
 
-            var adder = () => {
-              window.addEventListener("vrdisplaypresentchange", remover, false);
-              window.removeEventListener("vrdisplaypresentchange", adder);
-            };
+                var adder = () => {
+                  window.addEventListener("vrdisplaypresentchange", remover, false);
+                  window.removeEventListener("vrdisplaypresentchange", adder);
+                };
 
-            window.addEventListener("vrdisplaypresentchange", adder, false);
-          }
+                window.addEventListener("vrdisplaypresentchange", adder, false);
+              }
 
-          return elem;
-        });
+              return elem;
+            });
+        }
+      };
 
+
+      var showHideButtons = () => cardboard.visible = monitor.visible = !isFullScreenMode();
+      window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
+      FullScreen.addChangeListener(showHideButtons, false);
 
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive && this.inVR) {
@@ -746,20 +794,9 @@ Primrose.BrowserEnvironment = (function () {
         }
       }, false);
 
-      window.addEventListener("vrdisplaypresentchange", () => setSize(), false);
+      window.addEventListener("vrdisplaypresentchange", setSize, false);
 
-      var isFullScreenMode = () => FullScreen.isActive || this.inVR;
-
-      this.setFullScreenButton = (id, event, useVR) => {
-        var elem = document.getElementById(id);
-        if (elem) {
-          var show = !useVR || Primrose.Input.VR.Version > 0;
-          elem.style.display = show ? "block" : "none";
-          elem.style.cursor = show ? "pointer" : "not-allowed";
-          elem.title = show ? (useVR ? "Go Split-Screen" : "Go Fullscreen") : "VR is not available in your current browser.";
-          elem.addEventListener(event, (useVR ? this.goVR : this.goFullScreen), false);
-        }
-      };
+      var isFullScreenMode = () => !!(FullScreen.isActive || this.inVR);
 
       BrowserEnvironment.createSurrogate.call(this);
 
@@ -775,7 +812,11 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var setPointerLock = () => Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
+      var setPointerLock = () => {
+        if (!isMobile) {
+          return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
+        }
+      }
       var setFullscreen = () => {
         if (!isFullScreenMode()) {
           if (Primrose.Input.VR.Version > 0) {
@@ -816,15 +857,6 @@ Primrose.BrowserEnvironment = (function () {
       Object.defineProperties(this, {
         inVR: {
           get: () => this.input.vr && this.input.vr.currentDisplay && this.input.vr.currentDisplay.isPresenting
-        },
-        logInVR: {
-          get: () => {
-            console.log(
-              !!this.input.vr,
-              this.input.vr && !!this.input.vr.currentDisplay,
-              this.input.vr && this.input.vr.currentDisplay && this.input.vr.currentDisplay.isPresenting);
-            return this.inVR;
-          }
         }
       });
 
@@ -952,14 +984,22 @@ Primrose.BrowserEnvironment = (function () {
     canvasElement: "frontBuffer"
   };
 
-  function createPickableObject(obj) {
+  function createPickableObject(obj, includeGeometry) {
+    var bagObj = obj;
+    if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
+      bagObj = obj.children[0];
+      bagObj.name = bagObj.name || obj.name;
+    }
     var bag = {
-      uuid: obj.uuid,
+      uuid: bagObj.uuid,
       visible: obj.visible,
       name: obj.name
     };
+    if (includeGeometry) {
+      bag.geometry = bagObj.geometry;
+    }
     var originalBag = bag,
-      head = obj;
+      head = bagObj;
     while (head !== null) {
       head.updateMatrix();
       bag.matrix = head.matrix.elements.subarray(0, head.matrix.elements.length);
@@ -967,6 +1007,7 @@ Primrose.BrowserEnvironment = (function () {
       bag = bag.parent;
       head = head.parent;
     }
+
     return originalBag;
   }
 

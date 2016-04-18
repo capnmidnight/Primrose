@@ -30,10 +30,8 @@
     <script type="text/javascript" src="/lib/webgl-debug.js"></script>
     <script type="text/javascript" src="/lib/sha512.js"></script>
     <script type="text/javascript" src="/node_modules/three/three.js"></script>
-    <script type="text/javascript" src="/node_modules/three/examples/js/loaders/STLLoader.js"></script>
     <script type="text/javascript" src="/node_modules/three/examples/js/loaders/MTLLoader.js"></script>
     <script type="text/javascript" src="/node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-    <script type="text/javascript" src="/node_modules/three/examples/js/loaders/FBXLoader.js"></script>
     <script type="text/javascript" src="/node_modules/socket.io-client/socket.io.js"></script>
     <script type="text/javascript" src="/src/index.js"></script>
     <script type="text/javascript" src="/src/base/axis.js"></script>
@@ -145,12 +143,7 @@
     <style type="text/css">body{background-image:url(screenshot.jpg);}</style><!-- end demo.jade head append --><!-- end main.jade head block -->
   </head>
   <body><!-- start main.jade banner block --><!-- start demo.jade banner block -->
-    <canvas id="frontBuffer"></canvas>
-    <div id="controls">
-      <button id="viewSource" type="button" style="display:none">View source</button>
-      <button id="goVR" type="button"><img src="/images/cardboard64.png" alt="icon"></button>
-      <button id="goRegular" type="button"><img src="/images/fullscreen64.png" alt="icon"></button>
-    </div><!-- end demo.jade banner block --><!-- end main.jade banner block -->
+    <canvas id="frontBuffer"></canvas><!-- end demo.jade banner block --><!-- end main.jade banner block -->
     <header role="banner"><a id="logo" href="/index.html"><img src="/images/primrose32.png" alt="logo" title="Primrose logo"></a>
       <nav role="navigation">
         <ul>
@@ -166,15 +159,6 @@
     </header><!-- start main.jade main block --><!-- end main.jade main block -->
     <!-- start main.jade footer block --><!-- start withFramework.jade footer prepend -->
     <script type="text/javascript" src="app.js"></script><!-- end withFramework.jade footer prepend -->
-    <script type="text/javascript">
-      if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }
-      app.setFullScreenButton("goVR", "click", true);
-      app.setFullScreenButton("goRegular", "click", false);
-      document.querySelector("#viewSource").addEventListener("click", function () {
-        var path = "https://github.com/capnmidnight/Primrose/tree/master" + document.location.pathname;
-        path = path.replace(/\/(index.html)?(#fullscreen)?$/, "/app.js");
-        window.open(path);
-      }, false);
-    </script><!-- end main.jade footer block -->
+    <script type="text/javascript">if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }</script><!-- end main.jade footer block -->
   </body>
 </html>

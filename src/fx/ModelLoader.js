@@ -21,8 +21,6 @@ Primrose.ModelLoader = (function () {
   },
     EXTENSION_PATTERN = /\.(\w+)$/;
 
-  console.log(loaders);
-
   // Sometimes, the properties that export out of Blender and into Three.js don't
   // come out correctly, so we need to do a correction.
   function fixJSONScene(json) {
@@ -48,7 +46,6 @@ Primrose.ModelLoader = (function () {
   };
 
   function setProperties(object) {
-    console.log(object);
     object.traverse(function (obj) {
       if (obj instanceof THREE.Mesh) {
         for (var prop in propertyTests) {
@@ -57,20 +54,6 @@ Primrose.ModelLoader = (function () {
       }
     });
     return object;
-  }
-
-  function buildScene(progress, scene) {
-    scene.buttons = [];
-    scene.traverse(function (child) {
-      if (child.isButton) {
-        scene.buttons.push(
-          new Primrose.Button(child.parent, child.name));
-      }
-      if (child.name) {
-        scene[child.name] = child;
-      }
-    });
-    return scene;
   }
 
   pliny.class({
@@ -180,58 +163,6 @@ Primrose.ModelLoader = (function () {
 
   pliny.function({
     parent: "Primrose.ModelLoader",
-    name: "loadScene",
-    description: "Asynchronously loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It also translates objects marked as GUI elements into instances of their associated elements within the Primrose framework.\n\
-\n\
-> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-> policy that Primrose uses for requests.",
-    returns: "Promise",
-    parameters: [
-      { name: "src", type: "String", description: "The file from which to load." },
-      { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." },
-      { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
-    ],
-    examples: [
-      {
-        name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
-\n\
-## Code:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    // Create the scene where objects will go\n\
-    var renderer = new THREE.WebGLRenderer(),\n\
-        currentScene = new THREE.Scene(),\n\
-        camera = new THREE.PerspectiveCamera();\n\
-     \n\
-    // Load up the file, optionally \"check it out\"\n\
-    Primrose.ModelLoader.loadScene(\"path/to/scene.json\", console.log.bind(console, \"Progress:\"))\n\
-    .then(function(newScene){\n\
-      currentScene = newScene;\n\
-      newScene.traverse(function(child){\n\
-        if(child instanceof THREE.PerspectiveCamera){\n\
-          camera = child;\n\
-        }\n\
-        // Do whatever else you want to the individual child objects of the scene.\n\
-      });\n\
-    })\n\
-    .catch(console.error.bind(console));\n\
-     \n\
-    function paint(t){\n\
-      requestAnimationFrame(paint);\n\
-      renderer.render(scene, camera);\n\
-    }\n\
-     \n\
-    requestAnimationFrame(paint);"}
-    ]
-  });
-  ModelLoader.loadScene = function (src, type, progress) {
-    return ModelLoader.loadObject(src, type, progress)
-      .then(buildScene.bind(window, progress));
-  };
-
-  pliny.function({
-    parent: "Primrose.ModelLoader",
     name: "loadObject",
     description: "Asynchronously loads a JSON file as a JavaScript object. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It uses callbacks to tell you when loading progresses, when it's complete, or when an error occurred. Useful for one-time use models.\n\
 \n\
@@ -279,7 +210,6 @@ Primrose.ModelLoader = (function () {
     }
     else {
       extension = extension.toUpperCase();
-      console.log(extension);
       var Loader = loaders[extension];
       if (!Loader) {
         return Promise.reject("There is no loader type for the file extension: " + extension);
@@ -318,6 +248,22 @@ Primrose.ModelLoader = (function () {
     }
   };
 
+  ModelLoader.loadObjects = function (arr, progress, output, model) {
+    if (!output) {
+      output = [];
+    }
+    if (model) {
+      output.push(model);
+    }
+    if (arr.length === 0) {
+      return Promise.resolve(output);
+    }
+    else {
+      var nextModel = arr.shift();
+      return ModelLoader.loadObject(nextModel, null, progress)
+        .then(ModelLoader.loadObjects.bind(ModelLoader, arr, progress, output));
+    }
+  };
   return ModelLoader;
 })();
 

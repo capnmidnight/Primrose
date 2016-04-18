@@ -19,13 +19,12 @@ var GRASS = "/examples/images/grass.png",
   scriptAnimate = null,
   app = new Primrose.BrowserEnvironment("Editor3D", {
     useFog: false,
-    sceneModel: "/models/cardboard.obj",
     skyTexture: "/examples/images/bg2.jpg",
     groundTexture: GRASS
   }),
   editorFrameMesh = null,
   editorFrame = new Primrose.Surface({
-    bounds: new Primrose.Text.Rectangle(0, 0, 2048, 2048)
+    bounds: new Primrose.Text.Rectangle(0, 0, 1024, 1024)
   }),
   documentationMesh = null;
 
@@ -36,19 +35,19 @@ app.addEventListener("ready", function () {
     bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
     tokenizer: Primrose.Text.Grammars.JavaScript,
     value: getSourceCode(isInIFrame),
-    fontSize: 45
+    fontSize: 20
   });
 
   output = new Primrose.Text.Controls.TextBox({
-    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 50, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 50),
+    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 25, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 25),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
     readOnly: true,
-    fontSize: 45
+    fontSize: 20
   });
 
   button1 = new Primrose.Controls.Button2D({
-    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 500, output.bounds.top, 500, 45),
+    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 400, output.bounds.top, 400, 45),
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
     color: "#0000ff"
@@ -69,8 +68,7 @@ app.addEventListener("ready", function () {
   editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
-
-  editorFrameMesh = textured(shell(1, 16, 16), editorFrame);
+  editorFrameMesh = textured(shell(3, 10, 10), editorFrame);
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, app.avatarHeight, 0);
   app.scene.add(editorFrameMesh);
@@ -82,11 +80,11 @@ app.addEventListener("ready", function () {
     hideLineNumbers: true,
     readOnly: true,
     value: getDocumentation(),
-    fontSize: 45
+    fontSize: 35
   });
 
-  documentationMesh = textured(quad(1, 1), documentation);
-  documentationMesh.position.set(-1, app.avatarHeight, -0.25);
+  documentationMesh = textured(quad(2, 2), documentation);
+  documentationMesh.position.set(-3, app.avatarHeight, -2);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
   app.scene.add(documentationMesh);
   app.registerPickableObject(documentationMesh);
@@ -212,16 +210,13 @@ function testDemo(scene) {
   var WIDTH = 5,
     HEIGHT = 5,
     DEPTH = 5,
-    MIDX = WIDTH / 2,
-    MIDY = HEIGHT / 2, MIDZ = DEPTH / 2,
+    MIDX = WIDTH / 2 - 5,
+    MIDY = HEIGHT / 2,
+    MIDZ = DEPTH / 2,
     t = 0,
     start = put(hub())
       .on(scene)
       .at(-MIDX, 0, -DEPTH - 2);
-
-  put(light(0xffffff, 1, 50))
-    .on(start)
-    .at(MIDX + 5, 8, MIDZ + 20);
 
   var balls = [];
 
