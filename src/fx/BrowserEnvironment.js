@@ -73,13 +73,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this.jump = () => {
-        if (this.player.isOnGround && !lockedToEditor()) {
-          this.player.velocity.y += this.options.jumpSpeed;
-          this.player.isOnGround = false;
-        }
-      };
-
       this.registerPickableObject = (obj) => {
         if (obj.type === "Object3D") {
           obj.children[0].name = obj.children[0].name || obj.name;
@@ -812,7 +805,6 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("focus", this.start, false);
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
-      this.input.addEventListener("jump", this.jump.bind(this), false);
       this.input.addEventListener("zero", this.zero.bind(this), false);
       this.input.addEventListener("lockpointer", setPointerLock, false);
       this.input.addEventListener("fullscreen", setFullscreen, false);
@@ -942,8 +934,6 @@ Primrose.BrowserEnvironment = (function () {
     walkSpeed: 2,
     // The acceleration applied to falling objects.
     gravity: 9.8,
-    // The instantaneous speed to apply to the avatar when you jump. Set to 0 to disable jumping.
-    jumpSpeed: 3.13,
     // The amount of time in seconds to require gazes on objects before triggering the gaze event.
     gazeLength: 1,
     // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.

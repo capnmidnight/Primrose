@@ -24,7 +24,6 @@ Primrose.Input.FPSInput = (function () {
       description: ""
     });
     this.listeners = {
-      jump: [],
       zero: [],
       lockpointer: [],
       fullscreen: [],
@@ -82,11 +81,6 @@ Primrose.Input.FPSInput = (function () {
         drive: { commands: ["driveForward", "driveBack"] },
         select: { buttons: [Primrose.Keys.ENTER] },
         dSelect: { buttons: [Primrose.Keys.ENTER], delta: true },
-        jump: {
-          buttons: [Primrose.Keys.SPACE],
-          metaKeys: [-Primrose.Keys.SHIFT],
-          commandDown: emit.bind(this, "jump"), dt: 0.5
-        },
         zero: {
           buttons: [Primrose.Keys.Z],
           metaKeys: [
