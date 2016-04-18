@@ -20,6 +20,7 @@ var GRASS = "/examples/images/grass.png",
   app = new Primrose.BrowserEnvironment("Editor3D", {
     useFog: false,
     skyTexture: "/examples/images/bg2.jpg",
+    ambientSound: "/music/wind.ogg",
     groundTexture: GRASS
   }),
   editorFrameMesh = null,

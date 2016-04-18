@@ -6,7 +6,7 @@ var GRASS = "/examples/images/grass.png",
   WATER = "/examples/images/water.png",
   DECK = "/examples/images/deck.png",
   SKY = "/examples/images/bg2.jpg",
-  app = new Primrose.BrowserEnvironment("Editor3D", {
+  app = new Primrose.BrowserEnvironment("NYPL", {
     useFog: false,
     skyTexture: SKY,
     groundTexture: GRASS

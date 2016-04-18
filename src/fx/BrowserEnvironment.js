@@ -343,7 +343,7 @@ Primrose.BrowserEnvironment = (function () {
           for (var i = 0; i < del.length; ++i) {
             delete this.pickableObjects[del[i]];
           }
-          console.log(arr.length, del.length);
+
           this.projector.projectPointer([
             this.pointer.position.toArray(),
             transformForPicking(this.player)]);
@@ -433,6 +433,8 @@ Primrose.BrowserEnvironment = (function () {
           }
           this.input.vr.currentDisplay.submitFrame(this.input.vr.currentPose);
         }
+
+        this.audio.setPlayer(this.camera);
 
         if (!this.inVR || (this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           if (blankEye) {
@@ -527,7 +529,9 @@ Primrose.BrowserEnvironment = (function () {
         readyFired = false,
         modelFiles = [
           "/models/monitor.obj",
+          "/models/fullscreen_text.obj",
           "/models/cardboard.obj",
+          "/models/vr_text.obj",
         ],
         monitor = null,
         cardboard = null;
@@ -539,7 +543,7 @@ Primrose.BrowserEnvironment = (function () {
       }
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then((models) => {
         monitor = models[0];
-        cardboard = models[1];
+        cardboard = models[2];
 
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);
@@ -548,8 +552,9 @@ Primrose.BrowserEnvironment = (function () {
         this.scene.add(monitor);
         this.scene.Monitor = monitor;
         this.registerPickableObject(monitor);
+        monitor.add(models[1]);
 
-        if (Primrose.Input.VR.Version > 0) {
+        if (Primrose.Input.VR.Version >= 0) {
 
           monitor.rotation.set(0, 300 * Math.PI / 180, 0);
           monitor.position.set(-0.25, 0.7, -1);
@@ -561,15 +566,16 @@ Primrose.BrowserEnvironment = (function () {
           this.scene.add(cardboard);
           this.scene.Cardboard = cardboard;
           this.registerPickableObject(cardboard);
+          cardboard.add(models[3]);
         }
 
         var dIndex = 0;
         if (this.options.sceneModel) {
-          buildScene(models[2]);
+          buildScene(models[4]);
           dIndex = 1;
         }
         if (this.options.button) {
-          var btnTemplate = models[2 + dIndex];
+          var btnTemplate = models[4 + dIndex];
           this.buttonFactory = new Primrose.ButtonFactory(
             btnTemplate,
             this.options.button.options);
@@ -605,7 +611,20 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.audio = new Primrose.Output.Audio3D();
-
+      var audioReady = null,
+        ocean = null;
+      console.log(this.options.ambientSound);
+      if (this.options.ambientSound) {
+        audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
+          .then((aud) => {
+            ocean = aud;
+            ocean.volume.gain.value = 0.1;
+            ocean.source.start();
+          });
+      }
+      else {
+        audioReady = Promise.resolve();
+      }
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -619,6 +638,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.player = new THREE.Object3D();
       this.player.velocity = new THREE.Vector3();
+      this.player.name = "Player";
       this.player.position.set(0, this.avatarHeight, 0);
       this.player.isOnGround = true;
 
@@ -680,7 +700,6 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.camera.add(this.nose);
-      this.camera.add(light(0xffffff, 1, 1));
       this.player.add(this.camera);
       this.scene.add(this.player);
       this.scene.add(this.pointer);
@@ -716,7 +735,7 @@ Primrose.BrowserEnvironment = (function () {
 
       put(light(0xffffff, 1.5, 50))
         .on(this.scene)
-        .at(10, 10, 10);
+        .at(0, 10, 10);
 
       var RAF = (callback) => {
         if (this.inVR) {
@@ -728,7 +747,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.start = () => {
-        modelsReady
+        Promise.all([modelsReady, audioReady])
           .then(setSize)
           .then(() => RAF(animate));
       };
