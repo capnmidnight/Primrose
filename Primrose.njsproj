@@ -30,7 +30,10 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="examples\editor3d\monitor.json" />
     <Content Include="lib\logger.js" />
+    <Content Include="models\monitor.blend" />
+    <Content Include="models\monitor.json" />
     <Content Include="src\base\findProperty.js" />
     <Content Include="doc\blenderAdvanced.html" />
     <Content Include="doc\blenderBeginner.html" />
