@@ -299,16 +299,8 @@ Primrose.BrowserEnvironment = (function () {
 
         if (this.projector.ready) {
           this.projector.ready = false;
-          var arr = Object.keys(this.pickableObjects).map((id) => {
-            var obj = this.pickableObjects[id];
-            var bagObj = obj;
-            if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
-              bagObj = obj.children[0];
-              bagObj.name = bagObj.name || obj.name;
-            }
-            return createPickableObject(bagObj);
-          });
-          this.projector.updateObjects(arr);
+          var arr = Object.keys(this.pickableObjects).map((id) => this.pickableObjects[id]);
+          this.updatePickableObjects(arr);
           this.projector.projectPointer([
             this.pointer.position.toArray(),
             transformForPicking(this.player)]);
@@ -803,7 +795,15 @@ Primrose.BrowserEnvironment = (function () {
       };
 
 
-      var showHideButtons = () => cardboard.visible = monitor.visible = !isFullScreenMode();
+      var showHideButtons = () => {
+        cardboard.disabled = monitor.disabled = isFullScreenMode();
+        cardboard.visible = monitor.visible = !isFullScreenMode();
+      };
+
+      this.updatePickableObjects = (arr) => {
+        this.projector.updateObjects(arr.map(createPickableObject));
+      };
+
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
       FullScreen.addChangeListener(showHideButtons, false);
 
@@ -1012,9 +1012,10 @@ Primrose.BrowserEnvironment = (function () {
     var bag = {
       uuid: bagObj.uuid,
       visible: obj.visible,
-      name: obj.name
+      name: obj.name,
+      disabled: !!obj.disabled
     };
-    if (includeGeometry) {
+    if (includeGeometry === true) {
       bag.geometry = bagObj.geometry;
     }
     var originalBag = bag,

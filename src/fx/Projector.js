@@ -2553,6 +2553,7 @@ Primrose.Projector = (function () {
       }
       this.setProperty(obj.uuid, "matrix", b);
       this.setProperty(obj.uuid, "visible", obj.visible);
+      this.setProperty(obj.uuid, "disabled", obj.disabled);
       delete obj.parent;
     }
   };
@@ -2588,7 +2589,7 @@ Primrose.Projector = (function () {
     for (var i = 0; i < this.objectIDs.length; ++i) {
       var objID = this.objectIDs[i],
           obj = this.objects[objID];
-      if (obj.visible) {
+      if (!obj.disabled) {
         var verts = this._getVerts(obj),
             faces = obj.geometry.faces,
             uvs = obj.geometry.uvs;

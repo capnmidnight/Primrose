@@ -43,15 +43,12 @@ function makeWindow(width, height, size) {
 }
 
 app.addEventListener("ready", function () {
-  var sun = put(light(0xffffff))
-    .on(app.scene)
-    .at(10, 10, 10);
 
   stereoImage.loadStereoImage("prong.stereo.jpg")
     .then(function (img) {
       var myWindow = put(makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5))
         .on(app.scene)
-        .at(0, app.avatarHeight, -1);
+        .at(0, app.avatarHeight, -1.5);
       myWindow.surface.appendChild(stereoImage);
       app.scene.add(myWindow);
       app.registerPickableObject(myWindow);
@@ -59,7 +56,7 @@ app.addEventListener("ready", function () {
 
   signupForm.mesh.position.x = loginForm.mesh.position.x = -0.75;
   signupForm.mesh.position.y = loginForm.mesh.position.y = app.avatarHeight;
-  signupForm.mesh.position.z = loginForm.mesh.position.z = -1;
+  signupForm.mesh.position.z = loginForm.mesh.position.z = -1.5;
   loginForm.userName.value = getSetting("userName");
   loginForm.mesh.visible = false;
 
@@ -67,16 +64,16 @@ app.addEventListener("ready", function () {
   app.registerPickableObject(loginForm.mesh);
   app.scene.add(signupForm.mesh);
   app.registerPickableObject(signupForm.mesh);
+ 
+  var setState = function (state) {
+    loginForm.disabled = !state;
+    loginForm.mesh.visible = state;
+    signupForm.disabled = state;
+    signupForm.mesh.visible = !state;
+  };
 
-  loginForm.addEventListener("signup", function() {
-    loginForm.mesh.visible = false;
-    signupForm.mesh.visible = true;
-  }, false);
-
-  signupForm.addEventListener("login", function() {
-    loginForm.mesh.visible = true;
-    signupForm.mesh.visible = false;
-  }, false);
+  loginForm.addEventListener("signup", setState.bind(window, false), false);
+  signupForm.addEventListener("login", setState.bind(window, true), false);
 
   function listUsers(users) {
     signupForm.mesh.visible = loginForm.mesh.visible = false;
