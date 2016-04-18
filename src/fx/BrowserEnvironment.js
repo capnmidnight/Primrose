@@ -73,6 +73,36 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+      var createPickableObject = (obj, includeGeometry) => {
+        var bagObj = obj;
+        if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
+          bagObj = obj.children[0];
+          bagObj.name = bagObj.name || obj.name;
+        }
+        var bag = {
+          uuid: bagObj.uuid,
+          visible: obj.visible,
+          name: obj.name,
+          disabled: !!obj.disabled,
+          inScene: false
+        };
+        if (includeGeometry === true) {
+          bag.geometry = bagObj.geometry;
+        }
+        var headBag = bag,
+          head = bagObj;
+        while (head !== null) {
+          head.updateMatrix();
+          headBag.matrix = head.matrix.elements.subarray(0, head.matrix.elements.length);
+          headBag.parent = head.parent ? {} : null;
+          headBag = headBag.parent;
+          bag.inScene |= (head === this.scene);
+          head = head.parent;
+        }
+
+        return bag;
+      }
+
       this.registerPickableObject = (obj) => {
         if (obj) {
           var bag = createPickableObject(obj, true),
@@ -299,8 +329,21 @@ Primrose.BrowserEnvironment = (function () {
 
         if (this.projector.ready) {
           this.projector.ready = false;
-          var arr = Object.keys(this.pickableObjects).map((id) => this.pickableObjects[id]);
-          this.updatePickableObjects(arr);
+          var arr = [],
+            del = [];
+          for (var key in this.pickableObjects) {
+            var obj = this.pickableObjects[key],
+              p = createPickableObject(obj);
+            arr.push(p);
+            if (!p.inScene) {
+              del.push(key);
+            }
+          }
+          this.projector.updateObjects(arr);
+          for (var i = 0; i < del.length; ++i) {
+            delete this.pickableObjects[del[i]];
+          }
+          console.log(arr.length, del.length);
           this.projector.projectPointer([
             this.pointer.position.toArray(),
             transformForPicking(this.player)]);
@@ -501,10 +544,10 @@ Primrose.BrowserEnvironment = (function () {
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);
         monitor.name = "Monitor";
-        monitor.addEventListener("click", app.goFullScreen, false);
-        this.registerPickableObject(monitor);
+        monitor.addEventListener("click", this.goFullScreen, false);
         this.scene.add(monitor);
         this.scene.Monitor = monitor;
+        this.registerPickableObject(monitor);
 
         if (Primrose.Input.VR.Version > 0) {
 
@@ -514,12 +557,10 @@ Primrose.BrowserEnvironment = (function () {
           cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
           cardboard.position.set(0.2, 1.75, -1);
           cardboard.name = "Cardboard";
-          cardboard.addEventListener("click", app.goVR, false);
-          this.registerPickableObject(cardboard);
+          cardboard.addEventListener("click", this.goVR, false);
           this.scene.add(cardboard);
           this.scene.Cardboard = cardboard;
-        }
-        else {
+          this.registerPickableObject(cardboard);
         }
 
         var dIndex = 0;
@@ -800,10 +841,6 @@ Primrose.BrowserEnvironment = (function () {
         cardboard.visible = monitor.visible = !isFullScreenMode();
       };
 
-      this.updatePickableObjects = (arr) => {
-        this.projector.updateObjects(arr.map(createPickableObject));
-      };
-
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
       FullScreen.addChangeListener(showHideButtons, false);
 
@@ -1000,36 +1037,10 @@ Primrose.BrowserEnvironment = (function () {
     defaultFOV: 75,
     // the amount of time to allow to elapse between sending state to the server
     dtNetworkUpdate: 0.125,
-    canvasElement: "frontBuffer"
+    canvasElement: "frontBuffer",
+    // The sound to play on loop in the background
+    ambientSound: null
   };
-
-  function createPickableObject(obj, includeGeometry) {
-    var bagObj = obj;
-    if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
-      bagObj = obj.children[0];
-      bagObj.name = bagObj.name || obj.name;
-    }
-    var bag = {
-      uuid: bagObj.uuid,
-      visible: obj.visible,
-      name: obj.name,
-      disabled: !!obj.disabled
-    };
-    if (includeGeometry === true) {
-      bag.geometry = bagObj.geometry;
-    }
-    var originalBag = bag,
-      head = bagObj;
-    while (head !== null) {
-      head.updateMatrix();
-      bag.matrix = head.matrix.elements.subarray(0, head.matrix.elements.length);
-      bag.parent = head.parent ? {} : null;
-      bag = bag.parent;
-      head = head.parent;
-    }
-
-    return originalBag;
-  }
 
   function transformForPicking(obj) {
     var p = obj.position.clone();

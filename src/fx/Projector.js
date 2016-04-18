@@ -2537,24 +2537,30 @@ Primrose.Projector = (function () {
   
   Projector.prototype.updateObjects = function (objs) {
     for (var i = 0; i < objs.length; ++i) {
-      var obj = objs[i],
-          head = obj,
+      var obj = objs[i];
+      if (obj.inScene) {
+        var head = obj,
           a = new THREE.Matrix4(),
           b = new THREE.Matrix4().identity(),
           c = null;
-      
-      while (head !== null) {
-        a.fromArray(head.matrix);
-        a.multiply(b);
-        c = a;
-        a = b;
-        b = c;
-        head = head.parent;
+
+        while (head !== null) {
+          a.fromArray(head.matrix);
+          a.multiply(b);
+          c = a;
+          a = b;
+          b = c;
+          head = head.parent;
+        }
+        this.setProperty(obj.uuid, "matrix", b);
+        this.setProperty(obj.uuid, "visible", obj.visible);
+        this.setProperty(obj.uuid, "disabled", obj.disabled);
+        delete obj.parent;
       }
-      this.setProperty(obj.uuid, "matrix", b);
-      this.setProperty(obj.uuid, "visible", obj.visible);
-      this.setProperty(obj.uuid, "disabled", obj.disabled);
-      delete obj.parent;
+      else {
+        delete this.objects[obj.uuid];
+        this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
+      }
     }
   };
 
