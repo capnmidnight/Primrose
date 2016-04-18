@@ -424,7 +424,18 @@ Primrose.BrowserEnvironment = (function () {
           elementHeight = bounds.height;
 
         if (this.inVR) {
-
+          if (isMobile) {
+            var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+            if (type.indexOf("landscape") === -1) {
+              type = "landscape-primary";
+            }
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock(type);
+            }
+            else if (screen.mozLockOrientation) {
+              screen.mozLockOrientation(type);
+            }
+          }
           this.input.vr.resetTransforms(
             this.options.nearPlane,
             this.options.nearPlane + this.options.drawDistance);
@@ -437,6 +448,14 @@ Primrose.BrowserEnvironment = (function () {
           aspectWidth = canvasWidth / 2;
         }
         else {
+          if (isMobile) {
+            if (screen.orientation && screen.orientation.unlock) {
+              screen.orientation.unlock();
+            }
+            else if (screen.mozUnlockOrientation) {
+              screen.mozUnlockOrientation();
+            }
+          }
           var pixelRatio = devicePixelRatio || 1;
           if (isiOS) {
             elementHeight = elementWidth * screen.width / screen.height;
