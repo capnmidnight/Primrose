@@ -32,7 +32,7 @@ var GRASS = "/examples/images/grass.png",
   "userLeft",
   "userState",
 ].forEach(function (n) {
-  socket.on(n, console._log.bind(console, n.toLocaleUpperCase()))
+  socket.on(n, (console._log || console.log).bind(console, n.toLocaleUpperCase()))
 });
 
 function makeWindow(width, height, size) {
