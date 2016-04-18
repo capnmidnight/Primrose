@@ -164,7 +164,10 @@
         return Promise.reject(new Error("No source on layer parameter."));
       }
       else {
-        return FullScreen.request(layers[0].source)
+        return FullScreen.request(layers[0].source, {
+          vrDisplay: device.display,
+          vrDistortion: true
+        })
           .then((elem) => {
             currentLayer = layers[0];
             this.isPresenting = elem === currentLayer.source;
