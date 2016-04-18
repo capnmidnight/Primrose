@@ -181,24 +181,7 @@ Primrose.Input.FPSInput = (function () {
       description: ""
     });
 
-    this.managers.reduce(function (inst, mgr) {
-      inst[mgr.name] = mgr;
-      return inst;
-    }, this);
-
-    pliny.issue({
-      parent: "Primrose.Input.FPSInput",
-      name: "document FPSInput.connectGamepad",
-      type: "open",
-      description: ""
-    });
-    this.connectGamepad = function (id) {
-      if (!this.gamepad.isGamepadSet() && confirm(fmt(
-        "Would you like to use this gamepad? \"$1\"", id))) {
-        this.gamepad.setGamepad(id);
-      }
-    };
-    this.gamepad.addEventListener("gamepadconnected", this.connectGamepad.bind(this), false);
+    this.managers.forEach((mgr) => this[mgr.name] = mgr);
   }
 
   var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];

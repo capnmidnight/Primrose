@@ -43,6 +43,7 @@ Primrose.Input.Gamepad = (function () {
       for (i = 0; i < pad.axes.length; ++i) {
         this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
       }
+      console.log(pad.axes.join(", "));
     };
 
     pliny.issue({
@@ -67,6 +68,9 @@ Primrose.Input.Gamepad = (function () {
         for (i = 0; i < pads.length; ++i) {
           var pad = pads[i];
           if (pad) {
+            if (!gpid) {
+              gpid = pad.id;
+            }
             if (connectedGamepads.indexOf(pad.id) === -1) {
               connectedGamepads.push(pad.id);
               onConnected(pad.id);
