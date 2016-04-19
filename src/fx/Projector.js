@@ -2523,15 +2523,9 @@ Primrose.Projector = (function () {
   };
 
   Projector.prototype.setObject = function (obj) {
-    if (!this.objects[obj.uuid]) {
-      this.objectIDs.push(obj.uuid);
-      this.objects[obj.uuid] = obj;
-      obj.matrix = new THREE.Matrix4().fromArray(obj.matrix);
-    }
-    else {
-      this.setProperty(obj.uuid, "geometry.faces", obj.geometry.faces);
-      this.setProperty(obj.uuid, "geometry.uvs", obj.geometry.uvs);
-    }
+    this.objectIDs.push(obj.uuid);
+    this.objects[obj.uuid] = obj;
+    obj.matrix = new THREE.Matrix4().fromArray(obj.matrix);
     var uvs = obj.geometry.uvs,
       minU = Number.MAX_VALUE,
       minV = Number.MAX_VALUE,
@@ -2566,17 +2560,18 @@ Primrose.Projector = (function () {
   Projector.prototype.updateObjects = function (objs) {
     for (var i = 0; i < objs.length; ++i) {
       var obj = objs[i];
-      if (obj.inScene) {
+      if (obj.inScene !== false) {
         var head = obj,
-          curObj = this.objects[obj.uuid],
-          matrix = curObj && curObj.matrix || new THREE.Matrix4();
-        matrix.fromArray(obj.matrix);
-        if (!curObj) {
-          this.setProperty(obj.uuid, "matrix", matrix);
+          curObj = this.objects[obj.uuid];
+        if (obj.matrix !== undefined) {
+          curObj.matrix.fromArray(obj.matrix);
         }
-        this.setProperty(obj.uuid, "visible", obj.visible);
-        this.setProperty(obj.uuid, "disabled", obj.disabled);
-        delete obj.parent;
+        if (obj.visible !== undefined) {
+          this.setProperty(obj.uuid, "visible", obj.visible);
+        }
+        if (obj.disabled !== undefined) {
+          this.setProperty(obj.uuid, "disabled", obj.disabled);
+        }
       }
       else {
         delete this.objects[obj.uuid];

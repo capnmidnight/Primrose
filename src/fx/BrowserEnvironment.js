@@ -75,17 +75,24 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var createPickableObject = (obj, includeGeometry) => {
-        var bagObj = obj;
+        var geomObj = obj;
         if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
-          bagObj = obj.children[0];
-          bagObj.name = bagObj.name || obj.name;
+          geomObj = obj.children[0];
+          geomObj.name = geomObj.name || obj.name;
         }
-        var id = bagObj.uuid,
-          head = bagObj,
+        var id = geomObj.uuid,
           mLeft = new THREE.Matrix4(),
           mRight = new THREE.Matrix4().identity(),
           mSwap,
-          inScene = false;
+          inScene = false,
+          lastBag = objectHistory[id],
+          update = false,
+          disabled = !!obj.disabled,
+          bag = {
+            uuid: id,
+            name: obj.name
+          },
+          head = geomObj;
 
         while (head !== null) {
           head.updateMatrix();
@@ -98,21 +105,44 @@ Primrose.BrowserEnvironment = (function () {
           inScene = inScene || (head === this.scene);
         }
 
-        var bag = {
-          uuid: id,
-          visible: obj.visible,
-          name: obj.name,
-          disabled: !!obj.disabled,
-          matrix: mRight.elements.subarray(0, mRight.elements.length),
-          inScene: inScene
-        };
-
-        if (includeGeometry === true) {
-          bag.geometry = bagObj.geometry;
-          console.log(bag);
+        if (!lastBag || lastBag.visible !== obj.visible) {
+          update = true;
+          bag.visible = obj.visible;
         }
 
-        return bag;
+        if (!lastBag || lastBag.disabled !== disabled) {
+          update = true;
+          bag.disabled = disabled;
+        }
+
+        var m = mRight.elements.subarray(0, mRight.elements.length),
+          mStr = m.join(",");
+        if (!lastBag || !lastBag.matrix || lastBag.matrix.join(",") !== mStr) {
+          update = true;
+          bag.matrix = m;
+        }
+
+        if (!lastBag || lastBag.inScene !== inScene) {
+          update = true;
+          bag.inScene = inScene;
+        }
+
+        if (includeGeometry === true) {
+          update = true;
+          bag.geometry = geomObj.geometry;
+        }
+
+        if (update) {
+          if (!lastBag) {
+            objectHistory[id] = bag;
+          }
+          else {
+            for (var key in bag) {
+              lastBag[key] = bag[key];
+            }
+          }
+          return bag;
+        }
       }
 
       var objectHistory = {};
@@ -350,12 +380,15 @@ Primrose.BrowserEnvironment = (function () {
               p = createPickableObject(obj);
             if (p) {
               arr.push(p);
-              if (!p.inScene) {
+              if (p.inScene === false) {
                 del.push(key);
               }
             }
           }
-          this.projector.updateObjects(arr);
+
+          if (arr.length > 0) {
+            this.projector.updateObjects(arr);
+          }
           for (var i = 0; i < del.length; ++i) {
             delete this.pickableObjects[del[i]];
           }
