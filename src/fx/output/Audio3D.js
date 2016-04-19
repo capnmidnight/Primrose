@@ -46,7 +46,7 @@ Primrose.Output.Audio3D = (function () {
           my = swap.elements[13],
           mz = swap.elements[14];
         swap.elements[12] = swap.elements[13] = swap.elements[14] = 0;
-        console.log(mx, my, mz);
+
         this.context.listener.setPosition(mx, my, mz);
         vec.set(0, 0, 1);
         vec.applyProjection(right);
