@@ -73,35 +73,49 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+
       var createPickableObject = (obj, includeGeometry) => {
         var bagObj = obj;
         if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
           bagObj = obj.children[0];
           bagObj.name = bagObj.name || obj.name;
         }
+        var id = bagObj.uuid,
+          head = bagObj,
+          mLeft = new THREE.Matrix4(),
+          mRight = new THREE.Matrix4().identity(),
+          mSwap,
+          inScene = false;
+
+        while (head !== null) {
+          head.updateMatrix();
+          mLeft.copy(head.matrix);
+          mLeft.multiply(mRight);
+          mSwap = mLeft;
+          mLeft = mRight;
+          mRight = mSwap;
+          head = head.parent;
+          inScene = inScene || (head === this.scene);
+        }
+
         var bag = {
-          uuid: bagObj.uuid,
+          uuid: id,
           visible: obj.visible,
           name: obj.name,
           disabled: !!obj.disabled,
-          inScene: false
+          matrix: mRight.elements.subarray(0, mRight.elements.length),
+          inScene: inScene
         };
+
         if (includeGeometry === true) {
           bag.geometry = bagObj.geometry;
-        }
-        var headBag = bag,
-          head = bagObj;
-        while (head !== null) {
-          head.updateMatrix();
-          headBag.matrix = head.matrix.elements.subarray(0, head.matrix.elements.length);
-          headBag.parent = head.parent ? {} : null;
-          headBag = headBag.parent;
-          bag.inScene |= (head === this.scene);
-          head = head.parent;
+          console.log(bag);
         }
 
         return bag;
       }
+
+      var objectHistory = {};
 
       this.registerPickableObject = (obj) => {
         if (obj) {
@@ -334,9 +348,11 @@ Primrose.BrowserEnvironment = (function () {
           for (var key in this.pickableObjects) {
             var obj = this.pickableObjects[key],
               p = createPickableObject(obj);
-            arr.push(p);
-            if (!p.inScene) {
-              del.push(key);
+            if (p) {
+              arr.push(p);
+              if (!p.inScene) {
+                del.push(key);
+              }
             }
           }
           this.projector.updateObjects(arr);
