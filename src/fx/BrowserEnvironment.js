@@ -90,7 +90,12 @@ Primrose.BrowserEnvironment = (function () {
           disabled = !!obj.disabled,
           bag = {
             uuid: id,
-            name: obj.name
+            name: null,
+            inScene: null,
+            visible: null,
+            disabled: null,
+            matrix: null,
+            geometry: null
           },
           head = geomObj;
 
@@ -129,6 +134,7 @@ Primrose.BrowserEnvironment = (function () {
 
         if (includeGeometry === true) {
           update = true;
+          bag.name = obj.name;
           bag.geometry = geomObj.geometry;
         }
 

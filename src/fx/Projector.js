@@ -2563,13 +2563,13 @@ Primrose.Projector = (function () {
       if (obj.inScene !== false) {
         var head = obj,
           curObj = this.objects[obj.uuid];
-        if (obj.matrix !== undefined) {
+        if (obj.matrix !== null) {
           curObj.matrix.fromArray(obj.matrix);
         }
-        if (obj.visible !== undefined) {
+        if (obj.visible !== null) {
           this.setProperty(obj.uuid, "visible", obj.visible);
         }
-        if (obj.disabled !== undefined) {
+        if (obj.disabled !== null) {
           this.setProperty(obj.uuid, "disabled", obj.disabled);
         }
       }
