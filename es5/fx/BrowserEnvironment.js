@@ -79,23 +79,98 @@ Primrose.BrowserEnvironment = function () {
         }
       };
 
-      this.registerPickableObject = function (obj) {
-        if (obj.type === "Object3D") {
-          obj.children[0].name = obj.children[0].name || obj.name;
-          obj = obj.children[0];
+      var createPickableObject = function createPickableObject(obj, includeGeometry) {
+        var geomObj = obj;
+        if ((obj.type === "Object3D" || obj.type === "Group") && obj.children[0]) {
+          geomObj = obj.children[0];
+          geomObj.name = geomObj.name || obj.name;
         }
+        var id = geomObj.uuid,
+            mLeft = new THREE.Matrix4(),
+            mRight = new THREE.Matrix4().identity(),
+            mSwap,
+            inScene = false,
+            lastBag = objectHistory[id],
+            update = false,
+            disabled = !!obj.disabled,
+            bag = {
+          uuid: id,
+          name: null,
+          inScene: null,
+          visible: null,
+          disabled: null,
+          matrix: null,
+          geometry: null
+        },
+            head = geomObj;
+
+        while (head !== null) {
+          head.updateMatrix();
+          mLeft.copy(head.matrix);
+          mLeft.multiply(mRight);
+          mSwap = mLeft;
+          mLeft = mRight;
+          mRight = mSwap;
+          head = head.parent;
+          inScene = inScene || head === _this.scene;
+        }
+
+        if (!lastBag || lastBag.visible !== obj.visible) {
+          update = true;
+          bag.visible = obj.visible;
+        }
+
+        if (!lastBag || lastBag.disabled !== disabled) {
+          update = true;
+          bag.disabled = disabled;
+        }
+
+        var m = mRight.elements.subarray(0, mRight.elements.length),
+            mStr = m.join(",");
+        if (!lastBag || !lastBag.matrix || lastBag.matrix.join(",") !== mStr) {
+          update = true;
+          bag.matrix = m;
+        }
+
+        if (!lastBag || lastBag.inScene !== inScene) {
+          update = true;
+          bag.inScene = inScene;
+        }
+
+        if (includeGeometry === true) {
+          update = true;
+          bag.name = obj.name;
+          bag.geometry = geomObj.geometry;
+        }
+
+        if (update) {
+          if (!lastBag) {
+            objectHistory[id] = bag;
+          } else {
+            for (var key in bag) {
+              lastBag[key] = bag[key];
+            }
+          }
+          return bag;
+        }
+      };
+
+      var objectHistory = {};
+
+      this.registerPickableObject = function (obj) {
         if (obj) {
-          var bag = createPickableObject(obj),
+          var bag = createPickableObject(obj, true),
               verts,
               faces,
               uvs,
-              i;
+              i,
+              geometry = bag.geometry;
 
           // it would be nice to do this the other way around, to have everything
           // stored in ArrayBuffers, instead of regular arrays, to pass to the
           // Worker thread. Maybe later.
-          if (obj.geometry instanceof THREE.BufferGeometry) {
-            var attr = obj.geometry.attributes,
+          if (geometry instanceof THREE.BufferGeometry) {
+            var attr = geometry.attributes,
                 pos = attr.position,
                 uv = attr.uv,
                 idx = attr.index;
@@ -121,15 +196,15 @@ Primrose.BrowserEnvironment = function () {
               }
             }
           } else {
-            verts = obj.geometry.vertices.map(function (v) {
+            verts = geometry.vertices.map(function (v) {
               return v.toArray();
             });
             faces = [];
             uvs = [];
             // IDK why, but non-buffered geometry has an additional array layer
-            for (i = 0; i < obj.geometry.faces.length; ++i) {
-              var f = obj.geometry.faces[i],
-                  faceUVs = obj.geometry.faceVertexUvs[0][i];
+            for (i = 0; i < geometry.faces.length; ++i) {
+              var f = geometry.faces[i],
+                  faceUVs = geometry.faceVertexUvs[0][i];
               faces.push([f.a, f.b, f.c]);
               uvs[f.a] = [faceUVs[0].x, faceUVs[0].y];
               uvs[f.b] = [faceUVs[1].x, faceUVs[1].y];
@@ -143,7 +218,7 @@ Primrose.BrowserEnvironment = function () {
             uvs: uvs
           };
 
-          _this.pickableObjects[obj.uuid] = obj;
+          _this.pickableObjects[bag.uuid] = obj;
           _this.projector.setObject(bag);
         }
       };
@@ -257,6 +332,7 @@ Primrose.BrowserEnvironment = function () {
             if (object) {
               var control = object.button || object.surface;
               fire("pointerstart", currentHit);
+              emit.call(object, "click");
 
               if (_this.currentControl && _this.currentControl !== control) {
                 _this.currentControl.blur();
@@ -301,10 +377,26 @@ Primrose.BrowserEnvironment = function () {
 
         if (_this.projector.ready) {
           _this.projector.ready = false;
-          var arr = Object.keys(_this.pickableObjects).map(function (id) {
-            return createPickableObject(_this.pickableObjects[id]);
-          });
-          _this.projector.updateObjects(arr);
+          var arr = [],
+              del = [];
+          for (var key in _this.pickableObjects) {
+            var obj = _this.pickableObjects[key],
+                p = createPickableObject(obj);
+            if (p) {
+              arr.push(p);
+              if (p.inScene === false) {
+                del.push(key);
+              }
+            }
+          }
+
+          if (arr.length > 0) {
+            _this.projector.updateObjects(arr);
+          }
+          for (var i = 0; i < del.length; ++i) {
+            delete _this.pickableObjects[del[i]];
+          }
+
           _this.projector.projectPointer([_this.pointer.position.toArray(), transformForPicking(_this.player)]);
         }
 
@@ -384,6 +476,10 @@ Primrose.BrowserEnvironment = function () {
           _this.input.vr.currentDisplay.submitFrame(_this.input.vr.currentPose);
         }
 
+        if (!isMobile) {
+          _this.audio.setPlayer(_this.camera);
+        }
+
         if (!_this.inVR || _this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
           if (blankEye) {
             Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
@@ -400,7 +496,7 @@ Primrose.BrowserEnvironment = function () {
         }
       };
 
-      var setSize = function setSize(evt) {
+      var setSize = function setSize() {
         var canvasWidth,
             canvasHeight,
             aspectWidth,
@@ -409,7 +505,17 @@ Primrose.BrowserEnvironment = function () {
             elementHeight = bounds.height;
 
         if (_this.inVR) {
-
+          if (isMobile) {
+            var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+            if (type.indexOf("landscape") === -1) {
+              type = "landscape-primary";
+            }
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock(type);
+            } else if (screen.mozLockOrientation) {
+              screen.mozLockOrientation(type);
+            }
+          }
           _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
           var p = _this.input.vr.transforms,
@@ -419,6 +525,13 @@ Primrose.BrowserEnvironment = function () {
           canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
           aspectWidth = canvasWidth / 2;
         } else {
+          if (isMobile) {
+            if (screen.orientation && screen.orientation.unlock) {
+              screen.orientation.unlock();
+            } else if (screen.mozUnlockOrientation) {
+              screen.mozUnlockOrientation();
+            }
+          }
           var pixelRatio = devicePixelRatio || 1;
           if (isiOS) {
             elementHeight = elementWidth * screen.width / screen.height;
@@ -452,9 +565,64 @@ Primrose.BrowserEnvironment = function () {
           vEye = new THREE.Vector3(),
           vBody = new THREE.Vector3(),
           skin = Primrose.Random.item(Primrose.SKIN_VALUES),
-          sceneLoaded = !this.options.sceneModel,
-          buttonLoaded = !this.options.button,
-          readyFired = false;
+          readyFired = false,
+          modelFiles = ["/models/monitor.obj", "/models/fullscreen_text.obj", "/models/cardboard.obj", "/models/vr_text.obj"],
+          monitor = null,
+          cardboard = null;
+      if (this.options.sceneModel) {
+        modelFiles.push(this.options.sceneModel);
+      }
+      if (this.options.button && typeof this.options.model === "string") {
+        modelFiles.push(this.options.button.model);
+      }
+      var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then(function (models) {
+        monitor = models[0];
+        cardboard = models[2];
+
+        monitor.rotation.set(0, 270 * Math.PI / 180, 0);
+        monitor.position.set(0, 0.7, -1);
+        monitor.name = "Monitor";
+        monitor.addEventListener("click", _this.goFullScreen, false);
+        _this.scene.add(monitor);
+        _this.scene.Monitor = monitor;
+        _this.registerPickableObject(monitor);
+        monitor.add(models[1]);
+
+        if (Primrose.Input.VR.Version >= 0) {
+
+          monitor.rotation.set(0, 300 * Math.PI / 180, 0);
+          monitor.position.set(-0.25, 0.7, -1);
+
+          cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
+          cardboard.position.set(0.2, 1.75, -1);
+          cardboard.name = "Cardboard";
+          cardboard.addEventListener("click", _this.goVR, false);
+          _this.scene.add(cardboard);
+          _this.scene.Cardboard = cardboard;
+          _this.registerPickableObject(cardboard);
+          cardboard.add(models[3]);
+        }
+
+        var dIndex = 0;
+        if (_this.options.sceneModel) {
+          buildScene(models[4]);
+          dIndex = 1;
+        }
+        if (_this.options.button) {
+          var btnTemplate = models[4 + dIndex];
+          _this.buttonFactory = new Primrose.ButtonFactory(btnTemplate, _this.options.button.options);
+        } else {
+          _this.buttonFactory = new Primrose.ButtonFactory(brick(0xff0000, 1, 1, 1), {
+            maxThrow: 0.1,
+            minDeflection: 10,
+            colorUnpressed: 0x7f0000,
+            colorPressed: 0x007f00,
+            toggle: true
+          });
+        }
+      }).then(function () {
+        return fire("ready");
+      });
 
       //
       // Initialize public properties
@@ -474,7 +642,17 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.audio = new Primrose.Output.Audio3D();
-
+      var audioReady = null,
+          ocean = null;
+      if (this.options.ambientSound && !isMobile) {
+        audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1).then(function (aud) {
+          ocean = aud;
+          ocean.volume.gain.value = 0.1;
+          ocean.source.start();
+        });
+      } else {
+        audioReady = Promise.resolve();
+      }
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -487,6 +665,7 @@ Primrose.BrowserEnvironment = function () {
 
       this.player = new THREE.Object3D();
       this.player.velocity = new THREE.Vector3();
+      this.player.name = "Player";
       this.player.position.set(0, this.avatarHeight, 0);
       this.player.isOnGround = true;
 
@@ -540,7 +719,6 @@ Primrose.BrowserEnvironment = function () {
       }
 
       this.camera.add(this.nose);
-      this.camera.add(light(0xffffff, 1, 1));
       this.player.add(this.camera);
       this.scene.add(this.player);
       this.scene.add(this.pointer);
@@ -549,54 +727,30 @@ Primrose.BrowserEnvironment = function () {
         this.camera.add(this.passthrough.mesh);
       }
 
-      if (this.options.sceneModel) {
-        Primrose.ModelLoader.loadScene(this.options.sceneModel, function (sceneGraph) {
-          sceneLoaded = true;
-          _this.scene.add.apply(_this.scene, sceneGraph.children);
-          _this.scene.traverse(function (obj) {
-            if (obj.name) {
-              _this.scene[obj.name] = obj;
-            }
-          });
-          if (sceneGraph.Camera) {
-            _this.camera.position.copy(sceneGraph.Camera.position);
-            _this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
+      var buildScene = function buildScene(sceneGraph) {
+        sceneGraph.buttons = [];
+        sceneGraph.traverse(function (child) {
+          if (child.isButton) {
+            sceneGraph.buttons.push(new Primrose.Button(child.parent, child.name));
+          }
+          if (child.name) {
+            sceneGraph[child.name] = child;
           }
         });
-      }
-
-      if (this.options.button) {
-        this.buttonFactory = new Primrose.ButtonFactory(this.options.button.model, this.options.button.options, function () {
-          return buttonLoaded = true;
-        });
-      } else {
-        this.buttonFactory = new Primrose.ButtonFactory(brick(0xff0000, 1, 1, 1), {
-          maxThrow: 0.1,
-          minDeflection: 10,
-          colorUnpressed: 0x7f0000,
-          colorPressed: 0x007f00,
-          toggle: true
-        });
-      }
-
-      var waitForResources = function waitForResources(t) {
-        lt = t * 0.001;
-        if (sceneLoaded && buttonLoaded) {
-          if (!readyFired) {
-            readyFired = true;
-            setSize();
-            try {
-              fire("ready");
-            } catch (exp) {
-              console.error(exp);
-              console.warn("There was an error during setup, but we're going to continue anyway.");
-            }
+        _this.scene.add.apply(_this.scene, sceneGraph.children);
+        _this.scene.traverse(function (obj) {
+          if (obj.name) {
+            _this.scene[obj.name] = obj;
           }
-          RAF(animate);
-        } else {
-          RAF(waitForResources);
+        });
+        if (sceneGraph.Camera) {
+          _this.camera.position.copy(sceneGraph.Camera.position);
+          _this.camera.quaternion.copy(sceneGraph.Camera.quaternion);
         }
+        return sceneGraph;
       };
+
+      put(light(0xffffff, 1.5, 50)).on(this.scene).at(0, 10, 10);
 
       var RAF = function RAF(callback) {
         if (_this.inVR) {
@@ -607,9 +761,9 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.start = function () {
-        if (!_this.timer) {
-          RAF(waitForResources);
-        }
+        Promise.all([modelsReady, audioReady]).then(setSize).then(function () {
+          return RAF(animate);
+        });
       };
 
       this.stop = function () {
@@ -689,24 +843,34 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.goVR = function () {
-        return _this.input.vr.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
-          if (Primrose.Input.VR.Version === 1 && isMobile) {
-            var remover = function remover() {
-              _this.input.vr.currentDisplay.exitPresent();
-              window.removeEventListener("vrdisplaypresentchange", remover);
-            };
+        if (_this.input.vr) {
+          return _this.input.vr.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
+            if (Primrose.Input.VR.Version === 1 && isMobile) {
+              var remover = function remover() {
+                _this.input.vr.currentDisplay.exitPresent();
+                window.removeEventListener("vrdisplaypresentchange", remover);
+              };
 
-            var adder = function adder() {
-              window.addEventListener("vrdisplaypresentchange", remover, false);
-              window.removeEventListener("vrdisplaypresentchange", adder);
-            };
+              var adder = function adder() {
+                window.addEventListener("vrdisplaypresentchange", remover, false);
+                window.removeEventListener("vrdisplaypresentchange", adder);
+              };
 
-            window.addEventListener("vrdisplaypresentchange", adder, false);
-          }
+              window.addEventListener("vrdisplaypresentchange", adder, false);
+            }
 
-          return elem;
-        });
+            return elem;
+          });
+        }
       };
+
+      var showHideButtons = function showHideButtons() {
+        cardboard.disabled = monitor.disabled = isFullScreenMode();
+        cardboard.visible = monitor.visible = !isFullScreenMode();
+      };
+
+      window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
+      FullScreen.addChangeListener(showHideButtons, false);
 
       Primrose.Input.Mouse.Lock.addChangeListener(function (evt) {
         if (!Primrose.Input.Mouse.Lock.isActive && _this.inVR) {
@@ -714,23 +878,10 @@ Primrose.BrowserEnvironment = function () {
         }
       }, false);
 
-      window.addEventListener("vrdisplaypresentchange", function () {
-        return setSize();
-      }, false);
+      window.addEventListener("vrdisplaypresentchange", setSize, false);
 
       var isFullScreenMode = function isFullScreenMode() {
-        return FullScreen.isActive || _this.inVR;
-      };
-
-      this.setFullScreenButton = function (id, event, useVR) {
-        var elem = document.getElementById(id);
-        if (elem) {
-          var show = !useVR || Primrose.Input.VR.Version > 0;
-          elem.style.display = show ? "block" : "none";
-          elem.style.cursor = show ? "pointer" : "not-allowed";
-          elem.title = show ? useVR ? "Go Split-Screen" : "Go Fullscreen" : "VR is not available in your current browser.";
-          elem.addEventListener(event, useVR ? _this.goVR : _this.goFullScreen, false);
-        }
+        return !!(FullScreen.isActive || _this.inVR);
       };
 
       BrowserEnvironment.createSurrogate.call(this);
@@ -747,8 +898,11 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var setPointerLock = function setPointerLock() {
-        return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
+        if (!isMobile) {
+          return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
+        }
       };
+
       var setFullscreen = function setFullscreen() {
         if (!isFullScreenMode()) {
           if (Primrose.Input.VR.Version > 0) {
@@ -758,6 +912,7 @@ Primrose.BrowserEnvironment = function () {
           }
         }
       };
+
       var withCurrentControl = function withCurrentControl(name) {
         return function (evt) {
           if (_this.currentControl) {
@@ -789,12 +944,6 @@ Primrose.BrowserEnvironment = function () {
         inVR: {
           get: function get() {
             return _this.input.vr && _this.input.vr.currentDisplay && _this.input.vr.currentDisplay.isPresenting;
-          }
-        },
-        logInVR: {
-          get: function get() {
-            console.log(!!_this.input.vr, _this.input.vr && !!_this.input.vr.currentDisplay, _this.input.vr && _this.input.vr.currentDisplay && _this.input.vr.currentDisplay.isPresenting);
-            return _this.inVR;
           }
         }
       });
@@ -918,26 +1067,10 @@ Primrose.BrowserEnvironment = function () {
     defaultFOV: 75,
     // the amount of time to allow to elapse between sending state to the server
     dtNetworkUpdate: 0.125,
-    canvasElement: "frontBuffer"
+    canvasElement: "frontBuffer",
+    // The sound to play on loop in the background
+    ambientSound: null
   };
-
-  function createPickableObject(obj) {
-    var bag = {
-      uuid: obj.uuid,
-      visible: obj.visible,
-      name: obj.name
-    };
-    var originalBag = bag,
-        head = obj;
-    while (head !== null) {
-      head.updateMatrix();
-      bag.matrix = head.matrix.elements.subarray(0, head.matrix.elements.length);
-      bag.parent = head.parent ? {} : null;
-      bag = bag.parent;
-      head = head.parent;
-    }
-    return originalBag;
-  }
 
   function transformForPicking(obj) {
     var p = obj.position.clone();

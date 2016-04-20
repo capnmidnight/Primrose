@@ -17,7 +17,7 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
@@ -30,6 +30,8 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="examples\commodore\dogstar.bas" />
+    <Content Include="examples\commodore\oregon.bas" />
     <Content Include="src\base\cache.js" />
     <Content Include="examples\editor3d\prong.stereo.jpg" />
     <Content Include="lib\logger.js" />
@@ -315,8 +317,6 @@
     <Compile Include="server\data\User.js" />
     <Compile Include="server\socketControllers\login.js" />
     <Compile Include="server\socketControllers\peer.js" />
-    <Content Include="server\templates\game.html" />
-    <Content Include="server\templates\master.html" />
     <Content Include="src\fx\Angle.js" />
     <Content Include="src\fx\BaseControl.js" />
     <Content Include="src\fx\Button.js" />
@@ -411,7 +411,6 @@
     <Folder Include="server\controllers" />
     <Folder Include="server\data\" />
     <Folder Include="server\socketControllers" />
-    <Folder Include="server\templates" />
     <Folder Include="src" />
     <Folder Include="src\fx" />
     <Folder Include="src\base\" />

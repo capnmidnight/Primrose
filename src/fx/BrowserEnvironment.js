@@ -149,7 +149,7 @@ Primrose.BrowserEnvironment = (function () {
           }
           return bag;
         }
-      }
+      };
 
       var objectHistory = {};
 
@@ -947,7 +947,8 @@ Primrose.BrowserEnvironment = (function () {
         if (!isMobile) {
           return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
         }
-      }
+      };
+
       var setFullscreen = () => {
         if (!isFullScreenMode()) {
           if (Primrose.Input.VR.Version > 0) {
@@ -958,6 +959,7 @@ Primrose.BrowserEnvironment = (function () {
           }
         }
       };
+
       var withCurrentControl = (name) => {
         return (evt) => {
           if (this.currentControl) {

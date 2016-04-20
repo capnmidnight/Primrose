@@ -74,8 +74,6 @@ app.addEventListener( "ready", function () {
         .at( x, 12, z );
   }
 
-  put( light( 0xffffff, 1, 500 ) ).on( start )
-      .at( MIDX + 5, 8, MIDZ + 20 );
   put( brick( ROCK, WIDTH, 1, DEPTH ) ).on( start ).at( WIDTH/2, 12.5, DEPTH/2 );
 }.bind( app ) );
 

@@ -14,5 +14,7 @@ function quad(w, h, s, t) {
   if (h === undefined) {
     h = w;
   }
-  return new THREE.PlaneBufferGeometry(w, h, s, t);
+  return cache("PlaneBufferGeometry(" + w + ", " + h + ", " + s + ", " + t + ")", function () {
+    return new THREE.PlaneBufferGeometry(w, h, s, t);
+  });
 }

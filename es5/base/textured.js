@@ -11,19 +11,17 @@ pliny.function({
   description: "| [under construction]"
 });
 var textured = function () {
-  var materialCache = {},
-      textureCache = {};
+  var textureCache = {};
   function textured(geometry, txt, options) {
     options = options || {};
     if (options.opacity === undefined) {
       options.opacity = 1;
     }
 
-    var textureDescription = [txt.id || txt.toString(), options.txtRepeatS, options.txtRepeatT].join(","),
-        materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
-
-    if (!materialCache[materialDescription]) {
-
+    var txtID = txt.id || txt.toString(),
+        textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
+        materialDescription = "material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ")",
+        material = cache(materialDescription, function () {
       var materialOptions = {
         transparent: true,
         opacity: options.opacity,
@@ -45,10 +43,9 @@ var textured = function () {
         materialOptions.roughness = options.roughness;
         materialOptions.metalness = options.metalness;
       }
-      materialCache[materialDescription] = new MaterialType(materialOptions);
-    }
+      return new MaterialType(materialOptions);
+    });
 
-    var material = materialCache[materialDescription];
     material.wireframe = !!options.wireframe;
 
     var obj = null;

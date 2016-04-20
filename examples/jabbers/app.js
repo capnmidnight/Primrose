@@ -93,7 +93,6 @@ function Jabber ( w, h, s ) {
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
 app.addEventListener( "ready", function () {
-  put( light( 0xffffff ) ).on( app.scene ).at( 0, 10, 0 );
   for ( var i = 0; i < 25; ++i ) {
     var jab = put( Jabber(
         MIDX / 5,

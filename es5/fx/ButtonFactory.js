@@ -10,32 +10,21 @@ Primrose.ButtonFactory = function () {
     parent: "Primrose",
     name: "ButtonFactory",
     description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
-    parameters: [{ name: "templateFile", type: "(String|THREE.Object3D}", description: "Either a path to a Three.js formatted JSON file, or a THREE.Object3D, that specifies a 3D model for a button, to be used as a template." }, { name: "options", type: "Object", description: "The options to apply to all buttons that get created by the factory." }, { name: "complete", type: "Function", description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path." }]
+    parameters: [{ name: "template", type: "THREE.Object3D", description: "A THREE.Object3D that specifies a 3D model for a button, to be used as a template." }, { name: "options", type: "Object", description: "The options to apply to all buttons that get created by the factory." }, { name: "complete", type: "Function", description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path." }]
   });
-  function ButtonFactory(templateFile, options, complete) {
-
+  function ButtonFactory(templateFile, options) {
     pliny.property({
       name: "options",
       type: "Object",
       description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
     });
     this.options = options;
-
-    if (typeof templateFile === "string") {
-      Primrose.ModelLoader.loadObject(templateFile, function (obj) {
-        this.template = obj;
-        if (complete) {
-          complete();
-        }
-      }.bind(this));
-    } else {
-      pliny.property({
-        name: "template",
-        type: "THREE.Object3D",
-        description: "The 3D model for the button, that will be cloned every time a new button is created."
-      });
-      this.template = templateFile;
-    }
+    pliny.property({
+      name: "template",
+      type: "THREE.Object3D",
+      description: "The 3D model for the button, that will be cloned every time a new button is created."
+    });
+    this.template = templateFile;
   }
 
   pliny.method({

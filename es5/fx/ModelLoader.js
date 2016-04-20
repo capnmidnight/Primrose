@@ -13,10 +13,14 @@ Primrose.ModelLoader = function () {
 
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
-  var JSON = THREE.ObjectLoader && new THREE.ObjectLoader(),
-      FBX = THREE.FBXLoader && new THREE.FBXLoader(),
-      OBJ = THREE.OBJLoader && new THREE.OBJLoader(),
-      STL = THREE.STLLoader && new THREE.STLLoader();
+  var loaders = {
+    JSON: THREE.ObjectLoader && new THREE.ObjectLoader(),
+    FBX: THREE.FBXLoader && new THREE.FBXLoader(),
+    MTL: THREE.MTLLoader && new THREE.MTLLoader(),
+    OBJ: THREE.OBJLoader && new THREE.OBJLoader(),
+    STL: THREE.STLLoader && new THREE.STLLoader()
+  },
+      EXTENSION_PATTERN = /\.(\w+)$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
   // come out correctly, so we need to do a correction.
@@ -50,38 +54,16 @@ Primrose.ModelLoader = function () {
         }
       }
     });
-  }
-
-  function buildScene(success, error, progress, scene) {
-    try {
-      scene.buttons = [];
-      scene.traverse(function (child) {
-        if (child.isButton) {
-          scene.buttons.push(new Primrose.Button(child.parent, child.name));
-        }
-        if (child.name) {
-          scene[child.name] = child;
-        }
-      });
-      if (success) {
-        success(scene);
-      }
-    } catch (exp) {
-      if (error) {
-        error(exp);
-      }
-    }
+    return object;
   }
 
   pliny.class({
     parent: "Primrose",
     name: "ModelLoader",
-    description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.\n\
+    description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
 \n\
-> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-> policy that Primrose uses for requests.",
-    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+> NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
+    parameters: [{ name: "template", type: "THREE.Object3D", description: "The 3D model to make clonable." }],
     examples: [{
       name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
@@ -92,34 +74,35 @@ Primrose.ModelLoader = function () {
     var scene = new THREE.Scene(),\n\
      \n\
     // Load up the file, optionally \"check it out\"\n\
-      modelFactory = new Primrose.ModelLoader(\"path/to/model.json\", function(model){\n\
-        model.traverse(function(child){\n\
+      modelFactory = new Primrose.loadModel(\"path/to/model.json\", console.log.bind(console, \"Progress:\"))\n\
+      .then(function(model){\n\
+        model.template.traverse(function(child){\n\
           // Do whatever you want to the individual child objects of the scene.\n\
         });\n\
-    }, console.error.bind(console), console.log.bind(console, \"Progress:\"));\n\
      \n\
-    // Add copies of the model to the scene every time the user hits the ENTER key.\n\
-    window.addEventListener(\"keyup\", function(evt){\n\
-      // If the template object exists, then the model loaded successfully.\n\
-      if(modelFactory.template && evt.keyCode === 10){\n\
-        scene.add(modelFactory.clone());\n\
-      }\n\
-    });" }]
+      // Add copies of the model to the scene every time the user hits the ENTER key.\n\
+      window.addEventListener(\"keyup\", function(evt){\n\
+        // If the template object exists, then the model loaded successfully.\n\
+        if(evt.keyCode === 10){\n\
+          scene.add(model.clone());\n\
+        }\n\
+      });\n\
+    })\n\
+    .catch(console.error.bind(console));" }]
   });
-  function ModelLoader(src, success, error, progress) {
+  function ModelLoader(template) {
     pliny.property({
       name: "template",
       type: "THREE.Object3D",
       description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
     });
-    var done = function (scene) {
-      this.template = scene;
-      if (success) {
-        success(scene);
-      }
-    }.bind(this);
-    ModelLoader.loadObject(src, done, error, progress);
+    this.template = template;
   }
+  ModelLoader.loadModel = function (src, type, progress) {
+    return ModelLoader.loadObject(src, type, progress).then(function (scene) {
+      return new ModelLoader(scene);
+    });
+  };
 
   pliny.method({
     parent: "Primrose.ModelLoader",
@@ -171,56 +154,14 @@ Primrose.ModelLoader = function () {
 
   pliny.function({
     parent: "Primrose.ModelLoader",
-    name: "loadScene",
-    description: "Asynchronously loads a model intended to be used as a scene. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It also translates objects marked as GUI elements into instances of their associated elements within the Primrose framework.\n\
-\n\
-> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-> policy that Primrose uses for requests.",
-    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
-    examples: [{
-      name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
-\n\
-## Code:\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    // Create the scene where objects will go\n\
-    var renderer = new THREE.WebGLRenderer(),\n\
-        currentScene = new THREE.Scene(),\n\
-        camera = new THREE.PerspectiveCamera();\n\
-     \n\
-    // Load up the file, optionally \"check it out\"\n\
-    Primrose.ModelLoader.loadScene(\"path/to/scene.json\", function(newScene){\n\
-      currentScene = newScene;\n\
-      newScene.traverse(function(child){\n\
-        if(child instanceof THREE.PerspectiveCamera){\n\
-          camera = child;\n\
-        }\n\
-        // Do whatever else you want to the individual child objects of the scene.\n\
-      });\n\
-    }, console.error.bind(console), console.log.bind(console, \"Progress:\"));\n\
-     \n\
-    function paint(t){\n\
-      requestAnimationFrame(paint);\n\
-      renderer.render(scene, camera);\n\
-    }\n\
-     \n\
-    requestAnimationFrame(paint);" }]
-  });
-  ModelLoader.loadScene = function (src, success, error, progress) {
-    var done = buildScene.bind(window, success, error, progress);
-    ModelLoader.loadObject(src, done, error, progress);
-  };
-
-  pliny.function({
-    parent: "Primrose.ModelLoader",
     name: "loadObject",
     description: "Asynchronously loads a JSON file as a JavaScript object. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It uses callbacks to tell you when loading progresses, when it's complete, or when an error occurred. Useful for one-time use models.\n\
 \n\
 > NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
 > policy that Primrose uses for requests.",
-    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." }, { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+    returns: "Promise",
+    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
     examples: [{
       name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
@@ -235,9 +176,10 @@ Primrose.ModelLoader = function () {
     // Load up the file\n\
     Primrose.ModelLoader.loadObject(\n\
       \"path/to/model.json\",\n\
-      scene.add.bind(scene),\n\
-      console.error.bind(console),\n\
-      console.log.bind(console, \"Progress:\"));\n\
+      null,\n\
+      console.log.bind(console, \"Progress:\"))\n\
+      .then(scene.add.bind(scene))\n\
+      .catch(console.error.bind(console));\n\
      \n\
     function paint(t){\n\
       requestAnimationFrame(paint);\n\
@@ -246,34 +188,64 @@ Primrose.ModelLoader = function () {
      \n\
     requestAnimationFrame(paint);" }]
   });
-  ModelLoader.loadObject = function (src, progress) {
-    return new Promise(function (resolve, reject) {
-      var done = function done(scene) {
-        setProperties(scene);
-        if (resolve) {
-          resolve(scene);
-        }
-      };
-
-      if (!JSON) {
-        if (reject) {
-          reject("JSON seems to be broken right now");
-        }
+  ModelLoader.loadObject = function (src, type, progress) {
+    var extension = type || src.match(EXTENSION_PATTERN)[1];
+    if (!extension) {
+      return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
+    } else {
+      extension = extension.toUpperCase();
+      var Loader = loaders[extension];
+      if (!Loader) {
+        return Promise.reject("There is no loader type for the file extension: " + extension);
       } else {
-        try {
-          JSON.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-          JSON.load(src, function (json) {
-            done(fixJSONScene(json));
-          }, progress, reject);
-        } catch (exp) {
-          if (reject) {
-            reject(exp);
-          }
+        var promise = Promise.resolve();
+
+        if (extension === "OBJ") {
+          var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
+          promise = promise.then(function () {
+            return ModelLoader.loadObject(newPath, "mtl", progress).then(function (materials) {
+              materials.preload();
+              Loader.setMaterials(materials);
+            });
+          });
         }
+
+        promise = promise.then(function () {
+          return new Promise(function (resolve, reject) {
+            if (Loader.setCrossOrigin) {
+              Loader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+            }
+            Loader.load(src, resolve, progress, reject);
+          });
+        });
+
+        if (extension === "JSON") {
+          promise = promise.then(fixJSONScene);
+        }
+
+        if (extension !== "MTL") {
+          promise = promise.then(setProperties);
+        }
+
+        return promise;
       }
-    });
+    }
   };
 
+  ModelLoader.loadObjects = function (arr, progress, output, model) {
+    if (!output) {
+      output = [];
+    }
+    if (model) {
+      output.push(model);
+    }
+    if (arr.length === 0) {
+      return Promise.resolve(output);
+    } else {
+      var nextModel = arr.shift();
+      return ModelLoader.loadObject(nextModel, null, progress).then(ModelLoader.loadObjects.bind(ModelLoader, arr, progress, output));
+    }
+  };
   return ModelLoader;
 }();
 

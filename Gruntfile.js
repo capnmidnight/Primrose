@@ -1,29 +1,31 @@
 /* global module */
 
-var pathX = /.*\/(.*).js/,
-  pkg = require("./package.json"),
+var pkg = require("./package.json"),
   fs = require("fs"),
   path = require("path"),
-  baseFiles = [
-    "obj/Primrose.js",
-    "lib/analytics.js",
-    "lib/ga.js",
-    "lib/mailchimp.js",
+  headerFiles = [
+    "node_modules/marked/lib/marked.js",
     "lib/pliny.js",
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "node_modules/marked/lib/marked.js"
+    "node_modules/three/examples/js/loaders/MTLLoader.js"
   ],
+  baseFiles = headerFiles.slice();
+
+baseFiles.splice(baseFiles.length, 0,
+  "obj/Primrose.js",
+  "lib/analytics.js",
+  "lib/ga.js");
+
+var pathX = /.*\/(.*).js/,
   copyFiles = baseFiles.map(function (s) {
     return {
       src: s,
       dest: s.replace(pathX, "scripts/$1.js")
     };
   });
-
 
 copyFiles.push({
   src: "scripts/Primrose.js",
@@ -102,15 +104,16 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
       })
   };
 
-debugDataES6.frameworkFiles.unshift("/node_modules/socket.io-client/socket.io.js");
-debugDataES6.frameworkFiles.unshift("/node_modules/three/examples/js/loaders/OBJLoader.js");
-debugDataES6.frameworkFiles.unshift("/node_modules/three/examples/js/loaders/MTLLoader.js");
-debugDataES6.frameworkFiles.unshift("/node_modules/three/three.js");
-debugDataES6.frameworkFiles.unshift("/lib/sha512.js");
-debugDataES6.frameworkFiles.unshift("/lib/webgl-debug.js");
-debugDataES6.frameworkFiles.unshift("/lib/pliny.js");
-debugDataES6.frameworkFiles.unshift("/node_modules/marked/lib/marked.js");
-debugDataES6.frameworkFiles.unshift("/lib/logger.js");
+debugDataES6.frameworkFiles.splice(0, 0,
+  "/lib/logger.js",
+  "/lib/webgl-debug.js");
+
+debugDataES6.frameworkFiles.splice
+  .bind(debugDataES6.frameworkFiles, 0, 0)
+  .apply(debugDataES6.frameworkFiles, headerFiles
+    .map(function (f) {
+      return "/" + f;
+    }));
 
 debugDataES6.docFiles.sort(function (a, b) {
   return a.index - b.index;
@@ -202,7 +205,7 @@ module.exports = function (grunt) {
       },
       default: {
         files: {
-          "obj/Primrose.js": ["lib/pliny.js", "es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"]
+          "obj/Primrose.js": ["es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"]
         }
       }
     },

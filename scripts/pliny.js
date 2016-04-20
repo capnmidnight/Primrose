@@ -136,83 +136,69 @@
   // Reads the documentation metadata and builds up the documentation database.
   // 
   // @param {String} fieldType - the name of the type of object for which we're reading metadata: function, class, namespace, etc.
-  // @param {String} parentName - a period-delimited list of object accessors, naming the object that stores the object being analyzed.
   // @param {String} info - the metadata object the user provided us.
   ///
-  function analyzeObject(fieldType, parentName, info) {
-    // Sometimes, this function gets called through in a contextual state, in
-    // which case, we don't care about the actual function call. We fill in
-    // the context when we parse any function-type objects that get documented.
-    if (info) {
-      if (typeof info === "string" || info instanceof String) {
-        var parts = parentName.split("."),
-          objectName = parts.pop();
-          parentName = parts.join(".");
-        info = { name: objectName, description: info };
+  function analyzeObject(fieldType, info) {
+    // If the user didn't supply a type for the metadata object, we infer it
+    // from context.
+    if (typeof info.fieldType === 'undefined') {
+      info.fieldType = fieldType;
+    }
+
+
+    // Find out where we're going to store the object in the metadata database and where in the parent object we're going to store the documentation object.
+    var parentBag = fillBag(info.parent || ""),
+      pluralName = fieldType + "s";
+    pluralName = pluralName.replace(/ys$/, "ies").replace(/ss$/, "ses");
+    if (!parentBag[pluralName]) {
+      parentBag[pluralName] = [];
+    }
+    var arr = parentBag[pluralName];
+
+    // Make sure we haven't already stored an object by this name.
+    var found = false;
+    for (var i = 0; i < arr.length; ++i) {
+      if (arr[i].name === info.name) {
+        found = true;
       }
+    }
 
-      // If the user didn't supply a type for the metadata object, we infer it
-      // from context.
-      if (typeof info.fieldType === 'undefined') {
-        info.fieldType = fieldType;
-      }
+    if (!found) {
+      var subArrays = {};
 
-      // Make an object path name for the object we're documenting.
-      if (!info.parent && parentName.length > 0) {
-        info.parent = parentName;
-      }
-
-      // Find out where we're going to store the object in the metadata database.
-      var parentBag = fillBag(parentName);
-
-      // Figure out where in the parent object we're going to store the documentation object.
-      var pluralName = fieldType + "s";
-      pluralName = pluralName.replace(/ys$/, "ies").replace(/ss$/, "ses");
-      if (!parentBag[pluralName]) {
-        parentBag[pluralName] = [];
-      }
-      var arr = parentBag[pluralName];
-
-      // Make sure we haven't already stored an object by this name.
-      var found = false;
-      for (var i = 0; i < arr.length; ++i) {
-        if (arr[i].name === info.name) {
-          found = true;
-        }
-      }
-
-      if (!found) {
-        var subArrays = {};
-
-        ["examples",
-          "issues",
-          "comments"].forEach(function (k) {
-            if (typeof info[k] !== "undefined") {
-              subArrays[k] = info[k];
-              delete info[k];
-            }
-          });
-
-        // After we copy the metadata, we get back the documentation database object
-        // that will store the fuller data we get from other objects.
-        info = copyObjectMetadata(info);
-
-        arr.push(info);
-
-        // Handle other parent-child relationships.
-        if (info.fieldType === "class" && info.baseClass) {
-          pliny.subClass(info.baseClass, info);
-        }
-
-        for (var k in subArrays) {
-          var subArr = subArrays[k],
-            type = k.substring(0, k.length - 1);
-          for (var i = 0; i < subArr.length; ++i) {
-            pliny[type](info.fullName.replace(/::/g, "."), subArr[i]);
+      ["examples",
+        "issues",
+        "comments"].forEach(function (k) {
+          if (typeof info[k] !== "undefined") {
+            subArrays[k] = info[k];
+            delete info[k];
           }
+        });
+
+      // After we copy the metadata, we get back the documentation database object
+      // that will store the fuller data we get from other objects.
+      info = copyObjectMetadata(info);
+
+      arr.push(info);
+
+      // Handle other parent-child relationships.
+      if (info.fieldType === "class" && info.baseClass) {
+        if (info.parent === undefined) {
+          info.parent = info.baseClass;
+        }
+        pliny.subClass(info);
+      }
+
+      for (var k in subArrays) {
+        var subArr = subArrays[k],
+          type = k.substring(0, k.length - 1);
+        for (var i = 0; i < subArr.length; ++i) {
+          if (subArr[i].parent === undefined) {
+            subArr[i].parent = info.fullName.replace(/::/g, ".");
+          }
+          pliny[type](subArr[i]);
         }
       }
-      return info.value;
     }
   }
 
@@ -320,17 +306,14 @@
         while (!!(match = scriptPattern.exec(script))) {
           var fieldType = match[1],
             start = match.index + match[0].length,
-            parameters = parseParameters(name, script.substring(start));
+            fieldInfo = getFieldInfo(script.substring(start));
           // Shove in the context.
-          if (parameters.length === 1) {
-            parameters.unshift(name);
-          }
-          else {
-            parameters[0] = name + "." + parameters[0];
+          if (fieldInfo.parent === undefined) {
+            fieldInfo.parent = name;
           }
 
           // And follow the normal documentation path.
-          pliny[fieldType].apply(null, parameters);
+          pliny[fieldType].call(null, fieldInfo);
         }
       }
 
@@ -345,23 +328,29 @@
   // read the script and parse out the JSON objects so we can later execute
   // the documentation function safely, i.e. not use eval().
   // 
-  // @param {String} objName - the name of the object for which we are processing parameters.
   // @param {String} script - the source code of the containing function.
   // @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
   ///
-  function parseParameters(objName, script) {
-    var parameters = [];
+  function getFieldInfo(script) {
+    var parameters = [],
+      start = 0,
+      scopeLevel = 0,
+      inString = false,
+      stringToken = null;
 
     // Walk over the script...
-    for (var i = 0, start = 0, scopeLevel = 0, inString = false; i < script.length; ++i) {
+    for (var i = 0; i < script.length; ++i) {
       // ... a character at a time
       var c = script.charAt(i);
 
       // Keep track of whether or not we're in a string. We're looking for any
       // quotation marks that are either at the beginning of the string or have
       // not previously been escaped by a backslash...
-      if (c === '"' && (i === 0 || script.charAt(i - 1) !== '\\')) {
+      if ((inString && c === stringToken || !inString && (c === '"' || c === "'")) && (i === 0 || script.charAt(i - 1) !== '\\')) {
         inString = !inString;
+        if (inString) {
+          stringToken = c;
+        }
       }
 
       // ... because only then...
@@ -376,13 +365,13 @@
         }
       }
 
-      // If we're exited the parameter list, or we're inside the parameter list 
+      // If we've exited the parameter list, or we're inside the parameter list 
       // and see a comma that is not inside of a string literal...
       if (scopeLevel === 0 || scopeLevel === 1 && c === ',' && !inString) {
         // ... save the parameter, skipping the first character because it's always
         // either the open paren for the parameter list or one of the commas
         // between parameters.
-        parameters.push(parseParameter(objName, script.substring(start + 1, i).trim()));
+        parameters.push(parseParameter(script.substring(start + 1, i).trim()));
 
         // Advance forward the start of the next token.
         start = i;
@@ -394,7 +383,10 @@
         }
       }
     }
-    return parameters;
+    if (parameters.length !== 1) {
+      throw new Error("There should have only been one parameter to the function");
+    }
+    return parameters[0];
   }
 
   ////
@@ -410,11 +402,10 @@
   // contextual scope, we need to make sure it's valid JSON before we try to
   // convert it to a real JavaScript object.
   // 
-  // @param {String} objName - the name of the object for which we are parsing a parameter.
   // @param {String} script - the subscript portion that refers to a single parameter.
   // @return {Object} - the value that the string represents, parsed with JSON.parse().
   ///
-  function parseParameter(objName, script) {
+  function parseParameter(script) {
     // Make sure all hash key labels are surrounded in quotation marks.
     var stringLiterals = [];
     var litReplace = function (str) {
@@ -440,16 +431,7 @@
       .replace(/&STRING_LIT(\d+);/g, litReturn)
       .replace(/&STRING_LIT(\d+);/g, litReturn)
       .replace(/\\\r?\n/g, "");
-
-    try {
-      return JSON.parse(param);
-    }
-    catch (e) {
-      // If we made a bad assumption, this will tell us what the assumption was,
-      // while also forwarding on the specific error.
-      console.error(objName + ": " + script + " => " + param);
-      throw e;
-    }
+    return JSON.parse(param);
   }
 
   // A collection of different ways to output documentation data.
@@ -496,10 +478,10 @@
         return output;
       }
     },
-    checkAndFormatField: function (obj, prop, i) {
+    checkAndFormatField: function (obj, prop) {
       var obj2 = obj[prop];
       if (obj2) {
-        return this.formatField(obj, prop, obj2, i);
+        return this.formatField(obj, prop, obj2);
       }
     }
   };
@@ -680,7 +662,7 @@
         output += "<a href=\"#" + p.id + "\">";
       }
 
-      output += "<code>" + topLevel && p.fieldType !== "example" ? p.fullName : p.name;
+      output += "<code>" + (topLevel && p.fieldType !== "example" && p.fullName || p.name);
 
       if (p.type) {
         output += " <span class=\"type\">" + p.type + "</span>";
@@ -701,7 +683,7 @@
       if (isContainer && !topLevel) {
         output += "</a>";
       }
-      
+
       return output + "</code></" + tag + ">";
     }
   };
@@ -817,7 +799,8 @@
     for (var key in enumeration) {
       var val = enumeration[key];
       if (enumeration.hasOwnProperty(key) && typeof (val) === "number") {
-        pliny.value(enumName, {
+        pliny.value({
+          parent: enumName,
           name: key,
           type: "Number",
           description: val.toString(),

@@ -4,30 +4,35 @@ var GRASS = "/examples/images/grass.png",
   SAND = "/examples/images/sand.png",
   WATER = "/examples/images/water.png",
   DECK = "/examples/images/deck.png",
-  editor = null,
-  output = null,
-  documentation = null,
-  button1 = null,
-  modA = isOSX ? "metaKey" : "ctrlKey",
-  modB = isOSX ? "altKey" : "shiftKey",
-  cmdA = isOSX ? "CMD" : "CTRL",
-  cmdB = isOSX ? "OPT" : "SHIFT",
-  cmdPre = cmdA + "+" + cmdB,
-  subScene = new THREE.Object3D(),
-  scriptUpdateTimeout,
-  lastScript = null,
-  scriptAnimate = null,
+
   app = new Primrose.BrowserEnvironment("Editor3D", {
     useFog: false,
     skyTexture: "/examples/images/bg2.jpg",
     ambientSound: "/music/wind.ogg",
     groundTexture: GRASS
   }),
-  editorFrameMesh = null,
+
+  subScene = new THREE.Object3D(),
+
+  editor = null,
+  output = null,
+  button1 = null,
   editorFrame = null,
+  editorFrameMesh = null,
+  documentation = null,
   documentationMesh = null,
   stereoImage = new Primrose.Controls.Image(),
-  stereoImageWindow;
+  stereoImageWindow,
+
+  modA = isOSX ? "metaKey" : "ctrlKey",
+  modB = isOSX ? "altKey" : "shiftKey",
+  cmdA = isOSX ? "CMD" : "CTRL",
+  cmdB = isOSX ? "OPT" : "SHIFT",
+  cmdPre = cmdA + "+" + cmdB,
+
+  scriptUpdateTimeout,
+  lastScript = null,
+  scriptAnimate = null;
 
 function makeWindow(width, height, size) {
   size = size || 1;

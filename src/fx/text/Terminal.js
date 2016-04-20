@@ -104,13 +104,14 @@ Primrose.Text.Terminal = function (inputEditor, outputEditor) {
     }
   };
 
-  this.loadFile = function (fileName, callback) {
+  this.loadFile = function (fileName) {
     return Primrose.HTTP.getText(fileName.toLowerCase())
       .then(function (file) {
         if (isOSX) {
           file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
         }
         inputEditor.value = currentProgram = file;
+        return file;
       });
   };
 

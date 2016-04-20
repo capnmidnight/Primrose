@@ -2128,36 +2128,58 @@ Primrose.Projector = function () {
   };
 
   Projector.prototype.setObject = function (obj) {
-    if (!this.objects[obj.uuid]) {
-      this.objectIDs.push(obj.uuid);
-      this.objects[obj.uuid] = obj;
+    this.objectIDs.push(obj.uuid);
+    this.objects[obj.uuid] = obj;
+    obj.matrix = new THREE.Matrix4().fromArray(obj.matrix);
+    var uvs = obj.geometry.uvs,
+        minU = Number.MAX_VALUE,
+        minV = Number.MAX_VALUE,
+        maxU = Number.MIN_VALUE,
+        maxV = Number.MIN_VALUE;
+    if (uvs && uvs.length > 0) {
+      for (var i = 0; i < uvs.length; ++i) {
+        var uv = uvs[i],
+            u = uv[0],
+            v = uv[1];
+        minU = Math.min(minU, u);
+        maxU = Math.max(maxU, u);
+        minV = Math.min(minV, v);
+        maxV = Math.max(maxV, v);
+      }
     } else {
-      this.setProperty(obj.uuid, "geometry.faces", obj.geometry.faces);
-      this.setProperty(obj.uuid, "geometry.uvs", obj.geometry.uvs);
+      minU = 0;
+      maxU = 1;
+      minV = 0;
+      maxV = 1;
     }
+
+    this.setProperty(obj.uuid, "minU", minU);
+    this.setProperty(obj.uuid, "maxU", maxU);
+    this.setProperty(obj.uuid, "minV", minV);
+    this.setProperty(obj.uuid, "maxV", maxV);
     this.setProperty(obj.uuid, "geometry.vertices", obj.geometry.vertices);
     this.updateObjects([obj]);
   };
 
   Projector.prototype.updateObjects = function (objs) {
     for (var i = 0; i < objs.length; ++i) {
-      var obj = objs[i],
-          head = obj,
-          a = new THREE.Matrix4(),
-          b = new THREE.Matrix4().identity(),
-          c = null;
-
-      while (head !== null) {
-        a.fromArray(head.matrix);
-        a.multiply(b);
-        c = a;
-        a = b;
-        b = c;
-        head = head.parent;
+      var obj = objs[i];
+      if (obj.inScene !== false) {
+        var head = obj,
+            curObj = this.objects[obj.uuid];
+        if (obj.matrix !== null) {
+          curObj.matrix.fromArray(obj.matrix);
+        }
+        if (obj.visible !== null) {
+          this.setProperty(obj.uuid, "visible", obj.visible);
+        }
+        if (obj.disabled !== null) {
+          this.setProperty(obj.uuid, "disabled", obj.disabled);
+        }
+      } else {
+        delete this.objects[obj.uuid];
+        this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
       }
-      this.setProperty(obj.uuid, "matrix", b);
-      this.setProperty(obj.uuid, "visible", obj.visible);
-      delete obj.parent;
     }
   };
 
@@ -2192,7 +2214,7 @@ Primrose.Projector = function () {
     for (var i = 0; i < this.objectIDs.length; ++i) {
       var objID = this.objectIDs[i],
           obj = this.objects[objID];
-      if (obj.visible) {
+      if (!obj.disabled) {
         var verts = this._getVerts(obj),
             faces = obj.geometry.faces,
             uvs = obj.geometry.uvs;
@@ -2208,7 +2230,7 @@ Primrose.Projector = function () {
           if (this.m.determinant() !== 0) {
             this.m.getInverse(this.m);
             this.d.subVectors(this.f, v0).applyMatrix4(this.m);
-            if (this.d.x >= 0 && this.d.x <= 1 && this.d.y >= 0 && this.d.y <= 1 && this.d.z > 0) {
+            if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
               this.c.multiplyScalar(this.d.z).add(this.f);
               var dist = Math.sign(this.d.z) * this.p.distanceTo(this.c);
               if (!value || dist < value.distance) {
@@ -2224,7 +2246,13 @@ Primrose.Projector = function () {
                   v0 = uvs[face[0] % uvs.length];
                   v1 = uvs[face[1] % uvs.length];
                   v2 = uvs[face[2] % uvs.length];
-                  value.point = [this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0], this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1]];
+                  var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
+                      v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
+                  if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
+                    value.point = [u, v];
+                  } else {
+                    value = null;
+                  }
                 }
               }
             }
