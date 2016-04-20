@@ -59,16 +59,11 @@ Primrose.ModelLoader = (function () {
   pliny.class({
     parent: "Primrose",
     name: "ModelLoader",
-    description: "Loads a model and keeps a reference of it around to be able to use as a factory of models.\n\
+    description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
 \n\
-> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-> policy that Primrose uses for requests.",
+> NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
     parameters: [
-      { name: "src", type: "String", description: "The file from which to load." },
-      { name: "success", type: "Function", description: "(Optional) the callback to issue whenever the request finishes successfully." },
-      { name: "error", type: "Function", description: "(Optional) the callback to issue whenever an error occurs." },
-      { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
+      { name: "template", type: "THREE.Object3D", description: "The 3D model to make clonable." }
     ],
     examples: [
       {
