@@ -1,45 +1,63 @@
-# Primrose: A text editor that draws to Canvas
+# Primrose VR: Productive Virtual Reality
 
-Primrose[0] is a lightweight[1] text editor control for Web browsers[2]. It can be used as a texture on a WebGL mesh. It includes basic syntax highlighting and keyboard shortcuts.
+The Primrose Framework helps web developers create virtual reality experiences within standard web browsers on desktop and mobile devices alike. Through its common interaction space, design tools, interface objects, and user experience best-practices, users and developers collaborate to create interactive multimedia and productivity applications.
 
-## A Problem
+## Example
+    // different operating systems have different keyboard shortcuts.
+    var modA = isOSX ? "metaKey" : "ctrlKey",
+        modB = isOSX ? "altKey" : "shiftKey",
+        execKey = isOSX ? "E" : "SPACE",
 
-Say you are writing an HTML5 Single-Page Application, it is primarily based around the Canvas tag--e.g. a game, either 2D or 3D--and you would like to provide an editable text control *within* the Canvas context. You might also like that text control to provide the basic features you've come to expect from most modern text editors, e.g. keyboard shortcuts and syntax highlighting.
+        // a place to stow an object we will modify out of the loaded scene file
+        terminal = null,
 
-You might be tempted to implement your syntax highlighting with a Content-Editable Div or IFrame element, layered on top of the Canvas element. At face value it seems like a good idea: leverage the awesome text formatting power of the browser. Unfortunately, you quickly learn that Content-Editable is built with WYSIWYG editing of emails in mind, where the formatting is directly controlled by the user, not by heuristics defined by the programmer.
+        // setup the VR environment
+        app = new Primrose.BrowserEnvironment( "Commodore", {
+          sceneModel: "commodore_pet.json",
+          skyTexture: "/images/bg2.jpg",
+          groundTexture: "/images/deck.png"
+        } );
 
-But it is possible, and a number of third party controls do it. However, I personally haven't yet found such a third party control that was the right mix of features and ease-of-use for my needs. They usually involve project configurations that don't mesh well with my own projects, or they are tightly integrated into a larger framework of a full WYSIWYG editor.
+    function isExecuteCommand ( evt ) {
+      return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];
+    }
 
-You might even consider giving up on your dreams and skipping the syntax highlighting altogether, going with a regular, ol' TextArea element instead. Or even if you acquire a working Content-Editable solution[3], you will still have a problem. All solutions that involve overlaying an HTML element do not composite well with your own graphics drawing operations.
+    app.addEventListener( "keydown", function ( evt ) {
+      if ( terminal.running &&
+          terminal.waitingForInput &&
+          evt.keyCode === Primrose.Keys.ENTER ) {
+        terminal.sendInput( evt );
+      }
+      else if ( !terminal.running &&
+          isExecuteCommand( evt ) ) {
+        terminal.execute();
+      }
+    } );
 
-In the Graphics2D context, the text will not be an actual part of your image. You won't be able to save the Canvas with the text to an image file. Though this is likely not that big of a concern, it's still a case that Primrose covers.
+    app.addEventListener( "ready", function () {
 
-Much more importantly, in the WegGL context, the HTML Element will not be a part the scene and will not work with any depth buffering. Your text will always be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene. You will have to duplicate all of your world and camera transformations from the WebGL context to CSS3 3D transforms[4]. And any form of stereo rendering will require you to keep a secondary HTML element in sync with the edits made in the primary element.
+      // A hack to reposition the objects in the scene because the model file is a little janky
+      app.scene.traverse( function ( obj ) {
+        if ( obj.name && obj.parent && obj.parent.uuid === app.scene.uuid ) {
+          obj.position.y += app.avatarHeight * 0.9;
+          obj.position.z -= 1;
+        }
+      } );
 
-## A Solution
-
-Primrose emulates common features found in text editor controls, drawing directly to a Canvas element. It can be configured to source events from other elements--useful when Canvas is being used as a texture and thus is not a part of the DOM to be able to receive input events. And it is fully programmable, allowing the implementer to customize its operation quickly and easily. It is designed to be a simple, syntax-highlighting source code editor, not an everything-to-everyone WYSIWYG editor.
-
-## Examples
-
-[TBD]
+      // the `convertToEditor` method makes an editor out of existing geometry.
+      var editor = app.convertToEditor( app.scene.Screen );
+      editor.padding = 10;
+      terminal = new Primrose.Text.Terminal( app.scene.Screen.textarea );
+      terminal.loadFile( "oregon.bas" );
+    } );
+    
+## Issues
+The issues list is not here on Github, it's on [https://trello.com/b/NVZsaC1P/primrosevr](Trello)
 
 ## Licensing
 
-Primrose is free, open source software and may be readily used with other FOSS.
+Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.
 
 ## Contributions
 
 To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.
-
-## Notes
-
-[0] The name is arbitrary.
-
-[1] Note that "lightweight" in the context of GUI controls means "rendered in software", as opposed to "using the native GUI controls provided by the operating system". In this context, we're considering the browser to be a part of the "operating system", as from the perspective of a SPA, it is.
-
-[2] It requires only that your browser implement Canvas and the Graphics2D context in their most common, basic forms. I am not aware of any commonly-used browsers that have not had this feature for several years now.
-
-[3] Or another, obscure solution involving rendering HTML elements in SVG that has a bevy of its own issues involving cross-browser compatibility and security issues.
-
-[4] Violating the DRY principle, and fraught with cross-browser peril.
