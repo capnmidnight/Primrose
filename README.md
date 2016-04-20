@@ -52,7 +52,7 @@ The Primrose Framework helps web developers create virtual reality experiences w
     } );
     
 ## Issues
-The issues list is not here on Github, it's on [https://trello.com/b/NVZsaC1P/primrosevr](Trello)
+The issues list is not here on Github, it's on [Trello](https://trello.com/b/NVZsaC1P/primrosevr).
 
 ## Licensing
 
