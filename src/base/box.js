@@ -15,5 +15,7 @@ function box(width, height, length) {
   if (length === undefined) {
     length = width;
   }
-  return new THREE.BoxGeometry(width, height, length);
+  return cache(
+    `BoxGeometry(${width}, ${height}, ${length})`,
+    () => new THREE.BoxGeometry(width, height, length));
 }

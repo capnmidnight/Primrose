@@ -13,7 +13,9 @@ function cloud ( verts, c, s ) {
   for ( var i = 0; i < verts.length; ++i ) {
     geom.vertices.push( verts[i] );
   }
-  var mat = new THREE.PointsMaterial( {color: c, size: s} );
+  var mat = cache(
+    `PointsMaterial(${c}, ${s})`,
+    () => new THREE.PointsMaterial({ color: c, size: s }));
   return new THREE.Points( geom, mat );
 }
 

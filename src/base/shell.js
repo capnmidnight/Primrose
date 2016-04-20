@@ -60,8 +60,8 @@ function shell(r, slices, rings, phi, theta) {
     theta = Math.PI * SLICE;
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
-    thetaStart = (Math.PI - theta) * 0.5,
-    geom = new InsideSphereGeometry(r, slices, rings, phiStart, phi,
-      thetaStart, theta, true);
-  return geom;
+    thetaStart = (Math.PI - theta) * 0.5;
+  return cache(
+    `InsideSphereGeometry(${r}, ${slices}, ${rings}, ${phi}, ${theta})`,
+    ()=>new InsideSphereGeometry(r, slices, rings, phiStart, phi, thetaStart, theta, true));
 }

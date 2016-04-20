@@ -9,5 +9,7 @@ pliny.function({
   description: "| [under construction]"
 });
 function sphere(r, slices, rings) {
-  return new THREE.SphereBufferGeometry(r, slices, rings);
+  return cache(
+    `SphereBufferGeometry(${r}, ${slices}, ${rings})`,
+    () => new THREE.SphereBufferGeometry(r, slices, rings));
 }

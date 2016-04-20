@@ -9,45 +9,42 @@ pliny.function({
   description: "| [under construction]"
 });
 var textured = (function () {
-  var materialCache = {},
-    textureCache = {};
+  var textureCache = {};
   function textured(geometry, txt, options) {
     options = options || {};
     if (options.opacity === undefined) {
       options.opacity = 1;
     }
 
-    var textureDescription = [txt.id || txt.toString(), options.txtRepeatS, options.txtRepeatT].join(","),
-      materialDescription = [textureDescription, options.unshaded, options.opacity].join(",");
+    var txtID = txt.id || txt.toString(),
+      textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
+      materialDescription = `material(${textureDescription}, ${options.unshaded}, ${options.opacity})`,
+      material = cache(materialDescription, () => {
+        var materialOptions = {
+          transparent: true,
+          opacity: options.opacity,
+          side: THREE.DoubleSide,
+          alphaTest: 0.5
+        },
+          MaterialType = THREE.MeshStandardMaterial;
 
-    if (!materialCache[materialDescription]) {
-
-      var materialOptions = {
-        transparent: true,
-        opacity: options.opacity,
-        side: THREE.DoubleSide,
-        alphaTest: 0.5
-      },
-        MaterialType = THREE.MeshStandardMaterial;
-
-      if (options.unshaded) {
-        materialOptions.shading = THREE.FlatShading;
-        MaterialType = THREE.MeshBasicMaterial;
-      }
-      else {
-        if (options.roughness === undefined) {
-          options.roughness = 0.5;
+        if (options.unshaded) {
+          materialOptions.shading = THREE.FlatShading;
+          MaterialType = THREE.MeshBasicMaterial;
         }
-        if (options.metalness === undefined) {
-          options.metalness = 0;
+        else {
+          if (options.roughness === undefined) {
+            options.roughness = 0.5;
+          }
+          if (options.metalness === undefined) {
+            options.metalness = 0;
+          }
+          materialOptions.roughness = options.roughness;
+          materialOptions.metalness = options.metalness;
         }
-        materialOptions.roughness = options.roughness;
-        materialOptions.metalness = options.metalness;
-      }
-      materialCache[materialDescription] = new MaterialType(materialOptions);
-    }
+        return new MaterialType(materialOptions);
+      });
 
-    var material = materialCache[materialDescription];
     material.wireframe = !!options.wireframe;
 
     var obj = null;
