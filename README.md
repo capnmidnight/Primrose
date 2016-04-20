@@ -1,5 +1,4 @@
 # Primrose VR: Productive Virtual Reality
-
 The Primrose Framework helps web developers create virtual reality experiences within standard web browsers on desktop and mobile devices alike. Through its common interaction space, design tools, interface objects, and user experience best-practices, users and developers collaborate to create interactive multimedia and productivity applications.
 
 ## Example
@@ -52,14 +51,10 @@ The Primrose Framework helps web developers create virtual reality experiences w
     } );
     
 ## Issues
-The issues list is not here on Github, it's on [https://trello.com/b/NVZsaC1P/primrosevr](Trello)
+The issues list is not here on Github, it's on [Trello](https://trello.com/b/NVZsaC1P/primrosevr).
 
 ## Licensing
-
 Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.
 
 ## Contributions
-
 To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.
-
-## Notes
