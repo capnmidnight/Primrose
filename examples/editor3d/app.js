@@ -34,9 +34,10 @@ var GRASS = "/examples/images/grass.png",
   lastScript = null,
   scriptAnimate = null;
 
-function makeWindow(width, height, size) {
+function makeWindow(id, width, height, size) {
   size = size || 1;
   return textured(quad(size, size * height / width), new Primrose.Surface({
+    id: id,
     bounds: new Primrose.Text.Rectangle(0, 0, width, height)
   }));
 }
@@ -46,7 +47,7 @@ app.addEventListener("ready", function () {
 
   stereoImage.loadStereoImage("prong.stereo.jpg")
     .then(function (img) {
-      stereoImageWindow = makeWindow(stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
+      stereoImageWindow = makeWindow("StereoImage", stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
       stereoImageWindow.rotation.set(0, 75 * Math.PI / 180, 0);
       stereoImageWindow.position.set(-4, app.avatarHeight, -1);
       stereoImageWindow.surface.appendChild(stereoImage);
@@ -58,10 +59,12 @@ app.addEventListener("ready", function () {
     fontSize = isMobile ? 10 : 20;
 
   editorFrame = new Primrose.Surface({
+    id: "EditorFrame",
     bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
   });
 
   editor = new Primrose.Text.Controls.TextBox({
+    id: "Editor",
     bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
     tokenizer: Primrose.Text.Grammars.JavaScript,
     value: getSourceCode(isInIFrame),
@@ -69,6 +72,7 @@ app.addEventListener("ready", function () {
   });
 
   output = new Primrose.Text.Controls.TextBox({
+    id: "Output",
     bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 25, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 25),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,
@@ -77,6 +81,7 @@ app.addEventListener("ready", function () {
   });
 
   button1 = new Primrose.Controls.Button2D({
+    id: "ThemeButton",
     bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 400, output.bounds.top, 400, 45),
     value: "Switch to dark theme",
     backgroundColor: "#ffff00",
@@ -105,6 +110,7 @@ app.addEventListener("ready", function () {
   app.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Text.Controls.TextBox({
+    id: "Documentation",
     bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
     tokenizer: Primrose.Text.Grammars.PlainText,
     hideLineNumbers: true,

@@ -75,10 +75,27 @@ Primrose.Surface = (function () {
     }
 
 
-    invalidate() {
+    invalidate(bounds) {
+      var useDefault = !bounds;
+      if (!bounds) {
+        bounds = this.bounds.clone();
+        bounds.left = 0;
+        bounds.top = 0;
+      }
+      else if(bounds instanceof Primrose.Text.Rectangle){
+        bounds = bounds.clone();
+      }
       for (var i = 0; i < this.children.length; ++i) {
-        var child = this.children[i];
-        this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
+        var child = this.children[i],
+          overlap = bounds.overlap(child.bounds);
+        if (overlap) {
+          var x = overlap.left - child.bounds.left,
+            y = overlap.top - child.bounds.top;
+          this.context.drawImage(
+            child.canvas,
+            x, y, overlap.width, overlap.height,
+            overlap.x, overlap.y, overlap.width, overlap.height);
+        }
       }
       if (this._texture) {
         this._texture.needsUpdate = true;
@@ -87,7 +104,9 @@ Primrose.Surface = (function () {
         this._material.needsUpdate = true;
       }
       if (this.parent && this.parent.invalidate) {
-        this.parent.invalidate();
+        bounds.left += this.bounds.left;
+        bounds.top += this.bounds.top;
+        this.parent.invalidate(bounds);
       }
     }
 

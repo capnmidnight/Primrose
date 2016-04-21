@@ -963,10 +963,12 @@ Primrose.Text.Controls.TextBox = (function () {
           themeChanged = this.theme.name !== this._lastThemeName,
           focusChanged = this.focused !== this._lastFocused,
 
+          //changeBounds = new Primrose.Text.Rectangle(0, 0, 0, 0),
+
           layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-          foregroundChanged = layoutChanged || fontChanged || themeChanged || scrollChanged || cursorChanged,
-          backgroundChanged = foregroundChanged || cursorChanged,
-          trimChanged = foregroundChanged || focusChanged,
+          backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+          foregroundChanged = backgroundChanged || textChanged,
+          trimChanged = backgroundChanged || focusChanged,
           imageChanged = foregroundChanged || backgroundChanged || trimChanged;
 
         if (layoutChanged) {

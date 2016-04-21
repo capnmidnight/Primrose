@@ -7528,10 +7528,23 @@ Primrose.Surface = function () {
 
     _createClass(Surface, [{
       key: "invalidate",
-      value: function invalidate() {
+      value: function invalidate(bounds) {
+        var useDefault = !bounds;
+        if (!bounds) {
+          bounds = this.bounds.clone();
+          bounds.left = 0;
+          bounds.top = 0;
+        } else if (bounds instanceof Primrose.Text.Rectangle) {
+          bounds = bounds.clone();
+        }
         for (var i = 0; i < this.children.length; ++i) {
-          var child = this.children[i];
-          this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
+          var child = this.children[i],
+              overlap = bounds.overlap(child.bounds);
+          if (overlap) {
+            var x = overlap.left - child.bounds.left,
+                y = overlap.top - child.bounds.top;
+            this.context.drawImage(child.canvas, x, y, overlap.width, overlap.height, overlap.x, overlap.y, overlap.width, overlap.height);
+          }
         }
         if (this._texture) {
           this._texture.needsUpdate = true;
@@ -7540,7 +7553,9 @@ Primrose.Surface = function () {
           this._material.needsUpdate = true;
         }
         if (this.parent && this.parent.invalidate) {
-          this.parent.invalidate();
+          bounds.left += this.bounds.left;
+          bounds.top += this.bounds.top;
+          this.parent.invalidate(bounds);
         }
       }
     }, {
@@ -12660,6 +12675,10 @@ pliny.issue({
 });
 ;"use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /* global qp, Primrose, pliny */
 
 Primrose.Text.Rectangle = function () {
@@ -12670,97 +12689,123 @@ Primrose.Text.Rectangle = function () {
     name: "Rectangle",
     description: "| [under construction]"
   });
-  function Rectangle(x, y, width, height) {
-    this.point = new Primrose.Text.Point(x, y);
-    this.size = new Primrose.Text.Size(width, height);
 
-    Object.defineProperties(this, {
-      x: {
-        get: function get() {
-          return this.point.x;
-        },
-        set: function set(x) {
-          this.point.x = x;
-        }
-      },
-      left: {
-        get: function get() {
-          return this.point.x;
-        },
-        set: function set(x) {
-          this.point.x = x;
-        }
-      },
-      width: {
-        get: function get() {
-          return this.size.width;
-        },
-        set: function set(width) {
-          this.size.width = width;
-        }
-      },
-      right: {
-        get: function get() {
-          return this.point.x + this.size.width;
-        },
-        set: function set(right) {
-          this.point.x = right - this.size.width;
-        }
-      },
-      y: {
-        get: function get() {
-          return this.point.y;
-        },
-        set: function set(y) {
-          this.point.y = y;
-        }
-      },
-      top: {
-        get: function get() {
-          return this.point.y;
-        },
-        set: function set(y) {
-          this.point.y = y;
-        }
-      },
-      height: {
-        get: function get() {
-          return this.size.height;
-        },
-        set: function set(height) {
-          this.size.height = height;
-        }
-      },
-      bottom: {
-        get: function get() {
-          return this.point.y + this.size.height;
-        },
-        set: function set(bottom) {
-          this.point.y = bottom - this.size.height;
+  var Rectangle = function () {
+    function Rectangle(x, y, width, height) {
+      _classCallCheck(this, Rectangle);
+
+      this.point = new Primrose.Text.Point(x, y);
+      this.size = new Primrose.Text.Size(width, height);
+    }
+
+    _createClass(Rectangle, [{
+      key: "set",
+      value: function set(x, y, width, height) {
+        this.point.set(x, y);
+        this.size.set(width, height);
+      }
+    }, {
+      key: "copy",
+      value: function copy(r) {
+        if (r) {
+          this.point.copy(r.point);
+          this.size.copy(r.size);
         }
       }
-    });
-  }
+    }, {
+      key: "clone",
+      value: function clone() {
+        return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
+      }
+    }, {
+      key: "toString",
+      value: function toString() {
+        return "[" + this.point.toString() + " x " + this.size.toString() + "]";
+      }
+    }, {
+      key: "overlap",
+      value: function overlap(r) {
+        var left = Math.max(this.left, r.left),
+            top = Math.max(this.top, r.top),
+            right = Math.min(this.right, r.right),
+            bottom = Math.min(this.bottom, r.bottom);
+        if (right > left && bottom > top) {
+          return new Rectangle(left, top, right - left, bottom - top);
+        }
+      }
+    }, {
+      key: "x",
+      get: function get() {
+        return this.point.x;
+      },
+      set: function set(x) {
+        this.point.x = x;
+      }
+    }, {
+      key: "left",
+      get: function get() {
+        return this.point.x;
+      },
+      set: function set(x) {
+        this.point.x = x;
+      }
+    }, {
+      key: "width",
+      get: function get() {
+        return this.size.width;
+      },
+      set: function set(width) {
+        this.size.width = width;
+      }
+    }, {
+      key: "right",
+      get: function get() {
+        return this.point.x + this.size.width;
+      },
+      set: function set(right) {
+        this.point.x = right - this.size.width;
+      }
+    }, {
+      key: "y",
+      get: function get() {
+        return this.point.y;
+      },
+      set: function set(y) {
+        this.point.y = y;
+      }
+    }, {
+      key: "top",
+      get: function get() {
+        return this.point.y;
+      },
+      set: function set(y) {
+        this.point.y = y;
+      }
+    }, {
+      key: "height",
+      get: function get() {
+        return this.size.height;
+      },
+      set: function set(height) {
+        this.size.height = height;
+      }
+    }, {
+      key: "bottom",
+      get: function get() {
+        return this.point.y + this.size.height;
+      },
+      set: function set(bottom) {
+        this.point.y = bottom - this.size.height;
+      }
+    }, {
+      key: "area",
+      get: function get() {
+        return this.width * this.height;
+      }
+    }]);
 
-  Rectangle.prototype.set = function (x, y, width, height) {
-    this.point.set(x, y);
-    this.size.set(width, height);
-  };
-
-  Rectangle.prototype.copy = function (r) {
-    if (r) {
-      this.point.copy(r.point);
-      this.size.copy(r.size);
-    }
-  };
-
-  Rectangle.prototype.clone = function () {
-    return new Rectangle(this.point.x, this.point.y, this.size.width, this.size.height);
-  };
-
-  Rectangle.prototype.toString = function () {
-    return "[" + this.point.toString() + " x " + this.size.toString() + "]";
-  };
+    return Rectangle;
+  }();
 
   return Rectangle;
 }();
@@ -14586,10 +14631,14 @@ Primrose.Text.Controls.TextBox = function () {
               fontChanged = this.context.font !== this._lastFont,
               themeChanged = this.theme.name !== this._lastThemeName,
               focusChanged = this.focused !== this._lastFocused,
-              layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
-              foregroundChanged = layoutChanged || fontChanged || themeChanged || scrollChanged || cursorChanged,
-              backgroundChanged = foregroundChanged || cursorChanged,
-              trimChanged = foregroundChanged || focusChanged,
+
+
+          //changeBounds = new Primrose.Text.Rectangle(0, 0, 0, 0),
+
+          layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+              backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
+              foregroundChanged = backgroundChanged || textChanged,
+              trimChanged = backgroundChanged || focusChanged,
               imageChanged = foregroundChanged || backgroundChanged || trimChanged;
 
           if (layoutChanged) {
