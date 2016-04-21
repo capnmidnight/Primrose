@@ -595,12 +595,14 @@ Primrose.BrowserEnvironment = (function () {
       if (this.options.sceneModel) {
         modelFiles.push(this.options.sceneModel);
       }
-      if (this.options.button && typeof this.options.model === "string") {
+      if (this.options.button && typeof this.options.button.model === "string") {
         modelFiles.push(this.options.button.model);
       }
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then((models) => {
-        monitor = models[0];
-        cardboard = models[2];
+        monitor = models.shift();
+        var monitorText = models.shift();
+        cardboard = models.shift();
+        var cardboardText = models.shift()
 
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);
@@ -609,7 +611,7 @@ Primrose.BrowserEnvironment = (function () {
         this.scene.add(monitor);
         this.scene.Monitor = monitor;
         this.registerPickableObject(monitor);
-        monitor.add(models[1]);
+        monitor.add(monitorText);
 
         if (Primrose.Input.VR.Version >= 0) {
 
@@ -623,18 +625,15 @@ Primrose.BrowserEnvironment = (function () {
           this.scene.add(cardboard);
           this.scene.Cardboard = cardboard;
           this.registerPickableObject(cardboard);
-          cardboard.add(models[3]);
+          cardboard.add(cardboardText);
         }
-
-        var dIndex = 0;
+        
         if (this.options.sceneModel) {
-          buildScene(models[4]);
-          dIndex = 1;
+          buildScene(models.shift());
         }
         if (this.options.button) {
-          var btnTemplate = models[4 + dIndex];
           this.buttonFactory = new Primrose.ButtonFactory(
-            btnTemplate,
+            models.shift(),
             this.options.button.options);
         }
         else {
