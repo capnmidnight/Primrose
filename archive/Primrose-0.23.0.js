@@ -4617,7 +4617,9 @@ Primrose.ModelLoader = function () {
   pliny.function({
     parent: "Primrose.ModelLoader",
     name: "loadObject",
-    description: "Asynchronously loads a JSON file as a JavaScript object. It processes the scene for attributes, creates new properties on the scene to give us faster access to some of the elements within it. It uses callbacks to tell you when loading progresses, when it's complete, or when an error occurred. Useful for one-time use models.\n\
+    description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
+faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
+Useful for one-time use models.\n\
 \n\
 > NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
@@ -4694,6 +4696,59 @@ Primrose.ModelLoader = function () {
     }
   };
 
+  pliny.function({
+    parent: "Primrose.ModelLoader",
+    name: "loadObjects",
+    description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
+faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
+Useful for static models.\n\
+\n\
+> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
+> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
+> policy that Primrose uses for requests.",
+    returns: "Promise",
+    parameters: [{ name: "arr", type: "Array", description: "The files from which to load." }, { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+    examples: [{
+      name: "Load some models.", description: "When Blender exports models, they are frequently treated as full scenes, essentially making them scene-graph sub-trees.\n\
+We can load a bunch of models in one go using the following code.\n\
+\n\
+## Code:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    // Create the scene where objects will go\n\
+    var renderer = new THREE.WebGLRenderer(),\n\
+        currentScene = new THREE.Scene(),\n\
+        camera = new THREE.PerspectiveCamera(),\n\
+        allModels = null;\n\
+     \n\
+    // Load up the file\n\
+    Primrose.ModelLoader.loadObjects(\n\
+      [\"path/to/model1.json\",\n\
+        \"path/to/model2.json\",\n\
+        \"path/to/model3.json\",\n\
+        \"path/to/model4.json\"],\n\
+      null,\n\
+      console.log.bind(console, \"Progress:\"))\n\
+      .then(function(models){\n\
+        allModels = models;\n\
+        models.forEach(function(model){\n\
+          scene.add(model);\n\
+        });\n\
+      })\n\
+      .catch(console.error.bind(console));\n\
+     \n\
+    function paint(t){\n\
+      requestAnimationFrame(paint);\n\
+      \n\
+      if(allModels){\n\
+        // do whatever updating you want on the models\n\
+      }\n\
+      \n\
+      renderer.render(scene, camera);\n\
+    }\n\
+    \n\
+    requestAnimationFrame(paint);" }]
+  });
   ModelLoader.loadObjects = function (arr, progress, output, model) {
     if (!output) {
       output = [];
@@ -4710,13 +4765,6 @@ Primrose.ModelLoader = function () {
   };
   return ModelLoader;
 }();
-
-pliny.issue({
-  parent: "Primrose.ModelLoader",
-  name: "document ModelLoader",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.ModelLoader](#Primrose_ModelLoader) class in the  directory"
-});
 
 pliny.issue({
   parent: "Primrose.ModelLoader",

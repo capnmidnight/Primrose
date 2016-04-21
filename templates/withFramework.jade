@@ -6,16 +6,11 @@ append head
     each file in frameworkFiles
       script(type="text/javascript", src=file)
   else
-    script(type="text/javascript", src="/scripts/three.min.js")
-    script(type="text/javascript", src="/scripts/MTLLoader.min.js")
-    script(type="text/javascript", src="/scripts/OBJLoader.min.js")
-    script(type="text/javascript", src="/scripts/marked.min.js")
-    script(type="text/javascript", src="/scripts/socket.io.min.js")
-    script(type="text/javascript", src="/scripts/pliny.min.js")
-    script(type="text/javascript", src="/scripts/Primrose.min.js")
+    script(type="text/javascript", src="/payload.js")
   <!-- end withFramework.jade head append -->
 
 prepend footer
   <!-- start withFramework.jade footer prepend -->
   script(type="text/javascript", src="app.js")
+  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
   <!-- end withFramework.jade footer prepend -->

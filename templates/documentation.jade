@@ -1,4 +1,4 @@
-﻿extends ../templates/main.jade
+﻿extends ../templates/withFramework.jade
 
 block title
   <!-- start documentation.jade title block -->
@@ -10,13 +10,6 @@ block title
 append head
   <!-- start documentation.jade head append -->
   link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
-  if debug
-    each file in frameworkFiles
-      script(type="text/javascript", src=file)
-  else
-    script(type="text/javascript", src="/scripts/marked.min.js")
-    script(type="text/javascript", src="/scripts/pliny.min.js")
-    script(type="text/javascript", src="/scripts/Primrose.min.js")
   <!-- end documentation.jade head append -->
   
 block main
@@ -48,9 +41,3 @@ block main
       block document
       <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
-
-prepend footer
-  <!-- start documentation.jade footer prepend -->
-  script(type="text/javascript", src="app.js")
-  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
-  <!-- end documentation.jade footer prepend -->

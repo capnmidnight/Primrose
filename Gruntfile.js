@@ -12,13 +12,18 @@ var pkg = require("./package.json"),
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js"
   ],
-  baseFiles = headerFiles.slice();
+  baseFiles = headerFiles.slice(),
+  payloadFiles = headerFiles.map(function (f) {
+    return "scripts/" + f.match(/(\w+(\.\w+)*).js$/)[1] + ".min.js";
+  });
+
+payloadFiles.push("scripts/Primrose.min.js");
 
 baseFiles.splice(baseFiles.length, 0,
-  "obj/Primrose.js",
   "lib/analytics.js",
   "lib/ga.js",
-  "lib/mailchimp.js");
+  "lib/mailchimp.js",
+  "obj/Primrose.js");
 
 var pathX = /.*\/(.*).js/,
   copyFiles = baseFiles.map(function (s) {
@@ -192,24 +197,34 @@ module.exports = function (grunt) {
     },
 
     concat: {
-      options: {
-        banner: "/*\n\
+      primrose: {
+        options: {
+          banner: "/*\n\
   <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
   <%= pkg.license.type %>\n\
   Copyright (C) 2015 - 2016 <%= pkg.author %>\n\
   <%= pkg.homepage %>\n\
   <%= pkg.repository.url %>\n\
 */\n",
-        separator: ";",
-        footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
-        "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
-      },
-      default: {
+          separator: ";",
+          footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
+          "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
+        },
         files: {
           "obj/Primrose.js": ["es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"]
         }
+      },
+
+      payload: {
+        options: {
+          separater: ";"
+        },
+        files: {
+          "payload.js": payloadFiles
+        }
       }
     },
+
 
     uglify: {
       default: {
@@ -243,6 +258,6 @@ module.exports = function (grunt) {
   grunt.registerTask("none", []);
   grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint-es6"]);
   grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint-es5"]);
-  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "jshint", "babel", "concat", "uglify", "copy"]);
+  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "jshint", "babel", "concat:primrose", "uglify", "copy", "concat:payload"]);
   grunt.registerTask("default", ["debug"]);
 };
