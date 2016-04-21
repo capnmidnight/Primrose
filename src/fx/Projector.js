@@ -2478,8 +2478,7 @@ Primrose.Projector = (function () {
 
     this.objectIDs = [];
     this.objects = {};
-    this.transformCache = {};
-    this.vertCache = {};
+    this.geometryCache = {};
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
@@ -2509,17 +2508,13 @@ Primrose.Projector = (function () {
   // coordinations, because the object they are on could be rotated or
   // positioned somewhere else.
   Projector.prototype._getVerts = function (obj) {
-    var key = Array.prototype.join.call(obj.matrix.elements, ",");
-    if (key !== this.transformCache[obj.uuid]) {
-      var trans = [];
-      this.vertCache[obj.uuid] = trans;
-      var verts = obj.geometry.vertices;
-      for (var i = 0; i < verts.length; ++i) {
-        trans[i] = this._transform(obj, verts[i]);
-      }
-      this.transformCache[obj.uuid] = key;
+    var trans = [];
+    var geometry = this.geometryCache[obj.geomID],
+      verts = geometry.vertices;
+    for (var i = 0; i < verts.length; ++i) {
+      trans[i] = this._transform(obj, verts[i]);
     }
-    return this.vertCache[obj.uuid];
+    return trans;
   };
 
   Projector.prototype.setObject = function (obj) {
@@ -2533,13 +2528,15 @@ Primrose.Projector = (function () {
       maxV = Number.MIN_VALUE;
     if (uvs && uvs.length > 0) {
       for (var i = 0; i < uvs.length; ++i) {
-        var uv = uvs[i],
-          u = uv[0],
-          v = uv[1];
-        minU = Math.min(minU, u);
-        maxU = Math.max(maxU, u);
-        minV = Math.min(minV, v);
-        maxV = Math.max(maxV, v);
+        var uv = uvs[i];
+        if (uv) {
+          var u = uv[0],
+            v = uv[1];
+          minU = Math.min(minU, u);
+          maxU = Math.max(maxU, u);
+          minV = Math.min(minV, v);
+          maxV = Math.max(maxV, v);
+        }
       }
     }
     else {
@@ -2553,7 +2550,13 @@ Primrose.Projector = (function () {
     this.setProperty(obj.uuid, "maxU", maxU);
     this.setProperty(obj.uuid, "minV", minV);
     this.setProperty(obj.uuid, "maxV", maxV);
-    this.setProperty(obj.uuid, "geometry.vertices", obj.geometry.vertices);
+    this.setProperty(obj.uuid, "geomID", obj.geometry.uuid);
+    if (!this.geometryCache[obj.geometry.uuid]) {
+      this.geometryCache[obj.geometry.uuid] = obj.geometry;
+      for (var n = 0, verts = obj.geometry.vertices, l = verts.length; n < l; ++n) {
+        verts[n] = new THREE.Vector3().fromArray(verts[n]);
+      }
+    }
     this.updateObjects([obj]);
   };
 
@@ -2575,6 +2578,13 @@ Primrose.Projector = (function () {
       }
       else {
         delete this.objects[obj.uuid];
+        var found = false;
+        for (var j = 0; !found && j < this.objectIDs.length; ++j) {
+          found = found || this.objects[this.objectIDs[j]].geomID === obj.geomID;
+        }
+        if (!found) {
+          delete this.geometryCache[obj.geomID];
+        }
         this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
       }
     }
@@ -2592,11 +2602,6 @@ Primrose.Projector = (function () {
     }
     if (parts.length === 1) {
       propName = parts[0];
-      if (propName === "vertices") {
-        value = value.map(function (v) {
-          return new THREE.Vector3().fromArray(v);
-        });
-      }
       obj[parts[0]] = value;
     }
   };
@@ -2628,7 +2633,7 @@ Primrose.Projector = (function () {
             this.a.y, this.b.y, -this.c.y, 0,
             this.a.z, this.b.z, -this.c.z, 0,
             0, 0, 0, 1);
-          if (this.m.determinant() !== 0) {
+          if (Math.abs(this.m.determinant()) > 1e-10) {
             this.m.getInverse(this.m);
             this.d.subVectors(this.f, v0).applyMatrix4(this.m);
             if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {

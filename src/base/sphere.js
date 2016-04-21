@@ -10,6 +10,6 @@ pliny.function({
 });
 function sphere(r, slices, rings) {
   return cache(
-    `SphereBufferGeometry(${r}, ${slices}, ${rings})`,
-    () => new THREE.SphereBufferGeometry(r, slices, rings));
+    `SphereGeometry(${r}, ${slices}, ${rings})`,
+    () => new THREE.SphereGeometry(r, slices, rings));
 }

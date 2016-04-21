@@ -12989,12 +12989,13 @@ Primrose.Text.Terminal = function (inputEditor, outputEditor) {
     }
   };
 
-  this.loadFile = function (fileName, callback) {
+  this.loadFile = function (fileName) {
     return Primrose.HTTP.getText(fileName.toLowerCase()).then(function (file) {
       if (isOSX) {
         file = file.replace("CTRL+SHIFT+SPACE", "CMD+OPT+E");
       }
       inputEditor.value = currentProgram = file;
+      return file;
     });
   };
 
@@ -14470,7 +14471,7 @@ Primrose.Text.Controls.TextBox = function () {
                 var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
                 this._fgfx.font = font.trim();
                 this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-                this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
+                this._fgfx.fillText(t.value, tokenFront.x * this.character.width, textY);
                 drawn = true;
               }
             }
@@ -14487,11 +14488,6 @@ Primrose.Text.Controls.TextBox = function () {
         }
 
         this._fgfx.restore();
-      }
-    }, {
-      key: "drawText",
-      value: function drawText(ctx, txt, x, y) {
-        ctx.fillText(txt, x, y);
       }
     }, {
       key: "renderCanvasTrim",
@@ -14522,8 +14518,6 @@ Primrose.Text.Controls.TextBox = function () {
           tokenBack.copy(tokenFront);
 
           if (this.showLineNumbers && this.scroll.y <= y && y < this.scroll.y + this.gridBounds.height) {
-            // draw the tokens on this row
-            // be able to draw brand-new rows that don't have any tokens yet
             var currentLine = row.length > 0 ? row[0].line : lastLine + 1;
             // draw the left gutter
             var lineNumber = currentLine.toString();
@@ -14594,27 +14588,30 @@ Primrose.Text.Controls.TextBox = function () {
               characterWidthChanged = this.character.width !== this._lastCharacterWidth,
               characterHeightChanged = this.character.height !== this._lastCharacterHeight,
               paddingChanged = this.padding !== this._lastPadding,
-              layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
               cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
               scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
               fontChanged = this.context.font !== this._lastFont,
               themeChanged = this.theme.name !== this._lastThemeName,
               focusChanged = this.focused !== this._lastFocused,
-              foregroundChanged = layoutChanged || focusChanged || fontChanged || themeChanged || scrollChanged,
-              backgroundChanged = foregroundChanged || focusChanged || cursorChanged;
+              layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+              foregroundChanged = layoutChanged || fontChanged || themeChanged || scrollChanged || cursorChanged,
+              backgroundChanged = foregroundChanged || cursorChanged,
+              trimChanged = foregroundChanged || focusChanged,
+              imageChanged = foregroundChanged || backgroundChanged || trimChanged;
 
           if (layoutChanged) {
             this.performLayout(this.gridBounds);
             this._rowCache = {};
           }
 
-          if (foregroundChanged || backgroundChanged) {
-            this.renderCanvasBackground();
-
-            if (foregroundChanged || focusChanged) {
-              if (foregroundChanged) {
-                this.renderCanvasForeground();
-              }
+          if (imageChanged) {
+            if (backgroundChanged) {
+              this.renderCanvasBackground();
+            }
+            if (foregroundChanged) {
+              this.renderCanvasForeground();
+            }
+            if (trimChanged) {
               this.renderCanvasTrim();
             }
 
@@ -14622,9 +14619,7 @@ Primrose.Text.Controls.TextBox = function () {
             this.context.drawImage(this._bgCanvas, 0, 0);
             this.context.drawImage(this._fgCanvas, 0, 0);
             this.context.drawImage(this._trimCanvas, 0, 0);
-            if (this.parent) {
-              this.parent.invalidate(this.bounds);
-            }
+            this.invalidate(this.bounds);
           }
 
           this._lastGridBounds = this.gridBounds.toString();

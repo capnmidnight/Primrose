@@ -158,7 +158,6 @@ Primrose.BrowserEnvironment = (function () {
           var bag = createPickableObject(obj, true),
             verts, faces, uvs, i,
             geometry = bag.geometry;
-
           // it would be nice to do this the other way around, to have everything
           // stored in ArrayBuffers, instead of regular arrays, to pass to the
           // Worker thread. Maybe later.
@@ -206,6 +205,7 @@ Primrose.BrowserEnvironment = (function () {
           }
 
           bag.geometry = {
+            uuid: geometry.uuid,
             vertices: verts,
             faces: faces,
             uvs: uvs
