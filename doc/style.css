@@ -54,6 +54,9 @@ tt > a{
 
 code{
   color: #853B9E;
+}
+
+a > code {
   background-color: #EEF6F8;
 }
 
