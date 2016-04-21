@@ -165,7 +165,6 @@ Primrose.BrowserEnvironment = function () {
               uvs,
               i,
               geometry = bag.geometry;
-
           // it would be nice to do this the other way around, to have everything
           // stored in ArrayBuffers, instead of regular arrays, to pass to the
           // Worker thread. Maybe later.
@@ -213,6 +212,7 @@ Primrose.BrowserEnvironment = function () {
           }
 
           bag.geometry = {
+            uuid: geometry.uuid,
             vertices: verts,
             faces: faces,
             uvs: uvs
@@ -572,12 +572,14 @@ Primrose.BrowserEnvironment = function () {
       if (this.options.sceneModel) {
         modelFiles.push(this.options.sceneModel);
       }
-      if (this.options.button && typeof this.options.model === "string") {
+      if (this.options.button && typeof this.options.button.model === "string") {
         modelFiles.push(this.options.button.model);
       }
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then(function (models) {
-        monitor = models[0];
-        cardboard = models[2];
+        monitor = models.shift();
+        var monitorText = models.shift();
+        cardboard = models.shift();
+        var cardboardText = models.shift();
 
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);
@@ -586,7 +588,7 @@ Primrose.BrowserEnvironment = function () {
         _this.scene.add(monitor);
         _this.scene.Monitor = monitor;
         _this.registerPickableObject(monitor);
-        monitor.add(models[1]);
+        monitor.add(monitorText);
 
         if (Primrose.Input.VR.Version >= 0) {
 
@@ -600,17 +602,14 @@ Primrose.BrowserEnvironment = function () {
           _this.scene.add(cardboard);
           _this.scene.Cardboard = cardboard;
           _this.registerPickableObject(cardboard);
-          cardboard.add(models[3]);
+          cardboard.add(cardboardText);
         }
 
-        var dIndex = 0;
         if (_this.options.sceneModel) {
-          buildScene(models[4]);
-          dIndex = 1;
+          buildScene(models.shift());
         }
         if (_this.options.button) {
-          var btnTemplate = models[4 + dIndex];
-          _this.buttonFactory = new Primrose.ButtonFactory(btnTemplate, _this.options.button.options);
+          _this.buttonFactory = new Primrose.ButtonFactory(models.shift(), _this.options.button.options);
         } else {
           _this.buttonFactory = new Primrose.ButtonFactory(brick(0xff0000, 1, 1, 1), {
             maxThrow: 0.1,

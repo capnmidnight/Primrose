@@ -5,8 +5,6 @@ var cache = function () {
   return function (hash, makeObject) {
     if (!cache[hash]) {
       cache[hash] = makeObject();
-    } else {
-      console.info("Loading cached", hash);
     }
     return cache[hash];
   };

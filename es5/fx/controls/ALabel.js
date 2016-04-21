@@ -141,9 +141,7 @@ Primrose.Controls.Label = function () {
 
           this.renderCanvasTrim();
 
-          if (this.parent) {
-            this.parent.invalidate(this.bounds);
-          }
+          this.invalidate();
         }
       }
     }, {

@@ -88,27 +88,10 @@ Primrose.Surface = function () {
 
     _createClass(Surface, [{
       key: "invalidate",
-      value: function invalidate(bounds) {
-        bounds = bounds || this.bounds;
-        bounds = {
-          left: bounds.left,
-          top: bounds.top,
-          right: bounds.right,
-          bottom: bounds.bottom
-        };
+      value: function invalidate() {
         for (var i = 0; i < this.children.length; ++i) {
           var child = this.children[i];
-          if (child.bounds.right > bounds.left && child.bounds.left < bounds.right && child.bounds.bottom > bounds.top && child.bounds.top < bounds.bottom) {
-            var left = Math.max(child.bounds.left, bounds.left),
-                top = Math.max(child.bounds.top, bounds.top),
-                right = Math.min(child.bounds.right, bounds.right),
-                bottom = Math.min(child.bounds.bottom, bounds.bottom),
-                width = right - left,
-                height = bottom - top,
-                x = left - child.bounds.left,
-                y = top - child.bounds.top;
-            this.context.drawImage(child.canvas, x, y, width, height, left, top, width, height);
-          }
+          this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
         }
         if (this._texture) {
           this._texture.needsUpdate = true;
@@ -117,9 +100,7 @@ Primrose.Surface = function () {
           this._material.needsUpdate = true;
         }
         if (this.parent && this.parent.invalidate) {
-          bounds.left += this.bounds.left;
-          bounds.top += this.bounds.top;
-          this.parent.invalidate(bounds);
+          this.parent.invalidate();
         }
       }
     }, {
@@ -145,7 +126,7 @@ Primrose.Surface = function () {
           throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
         }
         _get(Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
-        this.invalidate(child.bounds);
+        this.invalidate();
       }
     }, {
       key: "mapUV",

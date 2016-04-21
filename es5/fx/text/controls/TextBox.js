@@ -807,7 +807,7 @@ Primrose.Text.Controls.TextBox = function () {
             this.context.drawImage(this._bgCanvas, 0, 0);
             this.context.drawImage(this._fgCanvas, 0, 0);
             this.context.drawImage(this._trimCanvas, 0, 0);
-            this.invalidate(this.bounds);
+            this.invalidate();
           }
 
           this._lastGridBounds = this.gridBounds.toString();

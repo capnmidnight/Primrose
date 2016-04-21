@@ -640,8 +640,6 @@ var cache = function () {
   return function (hash, makeObject) {
     if (!cache[hash]) {
       cache[hash] = makeObject();
-    } else {
-      console.info("Loading cached", hash);
     }
     return cache[hash];
   };
@@ -1636,8 +1634,8 @@ pliny.function({
   description: "| [under construction]"
 });
 function sphere(r, slices, rings) {
-  return cache("SphereBufferGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
-    return new THREE.SphereBufferGeometry(r, slices, rings);
+  return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
+    return new THREE.SphereGeometry(r, slices, rings);
   });
 }
 ;"use strict";
@@ -2309,7 +2307,6 @@ Primrose.BrowserEnvironment = function () {
               uvs,
               i,
               geometry = bag.geometry;
-
           // it would be nice to do this the other way around, to have everything
           // stored in ArrayBuffers, instead of regular arrays, to pass to the
           // Worker thread. Maybe later.
@@ -2357,6 +2354,7 @@ Primrose.BrowserEnvironment = function () {
           }
 
           bag.geometry = {
+            uuid: geometry.uuid,
             vertices: verts,
             faces: faces,
             uvs: uvs
@@ -2716,12 +2714,14 @@ Primrose.BrowserEnvironment = function () {
       if (this.options.sceneModel) {
         modelFiles.push(this.options.sceneModel);
       }
-      if (this.options.button && typeof this.options.model === "string") {
+      if (this.options.button && typeof this.options.button.model === "string") {
         modelFiles.push(this.options.button.model);
       }
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then(function (models) {
-        monitor = models[0];
-        cardboard = models[2];
+        monitor = models.shift();
+        var monitorText = models.shift();
+        cardboard = models.shift();
+        var cardboardText = models.shift();
 
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);
@@ -2730,7 +2730,7 @@ Primrose.BrowserEnvironment = function () {
         _this.scene.add(monitor);
         _this.scene.Monitor = monitor;
         _this.registerPickableObject(monitor);
-        monitor.add(models[1]);
+        monitor.add(monitorText);
 
         if (Primrose.Input.VR.Version >= 0) {
 
@@ -2744,17 +2744,14 @@ Primrose.BrowserEnvironment = function () {
           _this.scene.add(cardboard);
           _this.scene.Cardboard = cardboard;
           _this.registerPickableObject(cardboard);
-          cardboard.add(models[3]);
+          cardboard.add(cardboardText);
         }
 
-        var dIndex = 0;
         if (_this.options.sceneModel) {
-          buildScene(models[4]);
-          dIndex = 1;
+          buildScene(models.shift());
         }
         if (_this.options.button) {
-          var btnTemplate = models[4 + dIndex];
-          _this.buttonFactory = new Primrose.ButtonFactory(btnTemplate, _this.options.button.options);
+          _this.buttonFactory = new Primrose.ButtonFactory(models.shift(), _this.options.button.options);
         } else {
           _this.buttonFactory = new Primrose.ButtonFactory(brick(0xff0000, 1, 1, 1), {
             maxThrow: 0.1,
@@ -3254,6 +3251,12 @@ default scene, make sure a point light is added to the scene so the ground is vi
 });
 ;"use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 /* global Primrose, THREE, emit, pliny */
 
 Primrose.Button = function () {
@@ -3263,80 +3266,88 @@ Primrose.Button = function () {
     parameters: [{ name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button." }, { name: "name", type: "String", description: "A name for the button, to make it distinct from other buttons." }, { name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released." }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
   });
-  function Button(model, name, options) {
-    Primrose.BaseControl.call(this);
 
-    options = patch(options, Button);
-    options.minDeflection = Math.cos(options.minDeflection);
-    options.colorUnpressed = new THREE.Color(options.colorUnpressed);
-    options.colorPressed = new THREE.Color(options.colorPressed);
+  var Button = function (_Primrose$BaseControl) {
+    _inherits(Button, _Primrose$BaseControl);
 
-    pliny.event({
-      name: "click",
-      description: "Occurs when the button is activated."
-    });
-    this.listeners.click = [];
+    function Button(model, name, options) {
+      _classCallCheck(this, Button);
 
-    pliny.event({
-      name: "release",
-      description: "Occurs when the button is deactivated."
-    });
-    this.listeners.release = [];
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
 
-    pliny.property({
-      name: "base",
-      type: "THREE.Object3D",
-      description: "The stand the button cap sits on."
-    });
-    this.base = model.children[1];
+      options = patch(options, Button);
+      options.minDeflection = Math.cos(options.minDeflection);
+      options.colorUnpressed = new THREE.Color(options.colorUnpressed);
+      options.colorPressed = new THREE.Color(options.colorPressed);
 
-    pliny.property({
-      name: "base",
-      type: "THREE.Object3D",
-      description: "The moveable part of the button, that triggers the click event."
-    });
-    this.cap = model.children[0];
-    this.cap.name = name;
-    this.cap.material = this.cap.material.clone();
-    this.cap.button = this;
-    this.cap.base = this.base;
+      pliny.event({
+        name: "click",
+        description: "Occurs when the button is activated."
+      });
+      _this.listeners.click = [];
 
-    pliny.property({
-      name: "container",
-      type: "THREE.Object3D",
-      description: "A grouping collection for the base and cap."
-    });
-    this.container = new THREE.Object3D();
-    this.container.add(this.base);
-    this.container.add(this.cap);
+      pliny.event({
+        name: "release",
+        description: "Occurs when the button is deactivated."
+      });
+      _this.listeners.release = [];
 
-    pliny.property({
-      name: "color",
-      type: "Number",
-      description: "The current color of the button cap."
-    });
-    this.color = this.cap.material.color;
-    this.name = name;
-    this.element = null;
+      pliny.property({
+        name: "base",
+        type: "THREE.Object3D",
+        description: "The stand the button cap sits on."
+      });
+      _this.base = model.children[1];
 
-    this.startUV = function () {
-      this.color.copy(options.colorPressed);
-      if (this.element) {
-        this.element.click();
-      } else {
-        emit.call(this, "click");
-      }
-    };
+      pliny.property({
+        name: "base",
+        type: "THREE.Object3D",
+        description: "The moveable part of the button, that triggers the click event."
+      });
+      _this.cap = model.children[0];
+      _this.cap.name = name;
+      _this.cap.material = _this.cap.material.clone();
+      _this.cap.button = _this;
+      _this.cap.base = _this.base;
 
-    this.moveUV = function () {};
+      pliny.property({
+        name: "container",
+        type: "THREE.Object3D",
+        description: "A grouping collection for the base and cap."
+      });
+      _this.container = new THREE.Object3D();
+      _this.container.add(_this.base);
+      _this.container.add(_this.cap);
 
-    this.endPointer = function () {
-      this.color.copy(options.colorUnpressed);
-      emit.call(this, "release");
-    };
-  }
+      pliny.property({
+        name: "color",
+        type: "Number",
+        description: "The current color of the button cap."
+      });
+      _this.color = _this.cap.material.color;
+      _this.name = name;
+      _this.element = null;
 
-  inherit(Button, Primrose.BaseControl);
+      _this.startUV = function () {
+        this.color.copy(options.colorPressed);
+        if (this.element) {
+          this.element.click();
+        } else {
+          emit.call(this, "click");
+        }
+      };
+
+      _this.moveUV = function () {};
+
+      _this.endPointer = function () {
+        this.color.copy(options.colorUnpressed);
+        emit.call(this, "release");
+      };
+      return _this;
+    }
+
+    return Button;
+  }(Primrose.BaseControl);
 
   pliny.record({
     parent: "Button.",
@@ -7070,8 +7081,7 @@ Primrose.Projector = function () {
 
     this.objectIDs = [];
     this.objects = {};
-    this.transformCache = {};
-    this.vertCache = {};
+    this.geometryCache = {};
     this.a = new THREE.Vector3();
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
@@ -7099,17 +7109,13 @@ Primrose.Projector = function () {
   // coordinations, because the object they are on could be rotated or
   // positioned somewhere else.
   Projector.prototype._getVerts = function (obj) {
-    var key = Array.prototype.join.call(obj.matrix.elements, ",");
-    if (key !== this.transformCache[obj.uuid]) {
-      var trans = [];
-      this.vertCache[obj.uuid] = trans;
-      var verts = obj.geometry.vertices;
-      for (var i = 0; i < verts.length; ++i) {
-        trans[i] = this._transform(obj, verts[i]);
-      }
-      this.transformCache[obj.uuid] = key;
+    var trans = [];
+    var geometry = this.geometryCache[obj.geomID],
+        verts = geometry.vertices;
+    for (var i = 0; i < verts.length; ++i) {
+      trans[i] = this._transform(obj, verts[i]);
     }
-    return this.vertCache[obj.uuid];
+    return trans;
   };
 
   Projector.prototype.setObject = function (obj) {
@@ -7123,13 +7129,15 @@ Primrose.Projector = function () {
         maxV = Number.MIN_VALUE;
     if (uvs && uvs.length > 0) {
       for (var i = 0; i < uvs.length; ++i) {
-        var uv = uvs[i],
-            u = uv[0],
-            v = uv[1];
-        minU = Math.min(minU, u);
-        maxU = Math.max(maxU, u);
-        minV = Math.min(minV, v);
-        maxV = Math.max(maxV, v);
+        var uv = uvs[i];
+        if (uv) {
+          var u = uv[0],
+              v = uv[1];
+          minU = Math.min(minU, u);
+          maxU = Math.max(maxU, u);
+          minV = Math.min(minV, v);
+          maxV = Math.max(maxV, v);
+        }
       }
     } else {
       minU = 0;
@@ -7142,7 +7150,13 @@ Primrose.Projector = function () {
     this.setProperty(obj.uuid, "maxU", maxU);
     this.setProperty(obj.uuid, "minV", minV);
     this.setProperty(obj.uuid, "maxV", maxV);
-    this.setProperty(obj.uuid, "geometry.vertices", obj.geometry.vertices);
+    this.setProperty(obj.uuid, "geomID", obj.geometry.uuid);
+    if (!this.geometryCache[obj.geometry.uuid]) {
+      this.geometryCache[obj.geometry.uuid] = obj.geometry;
+      for (var n = 0, verts = obj.geometry.vertices, l = verts.length; n < l; ++n) {
+        verts[n] = new THREE.Vector3().fromArray(verts[n]);
+      }
+    }
     this.updateObjects([obj]);
   };
 
@@ -7163,6 +7177,13 @@ Primrose.Projector = function () {
         }
       } else {
         delete this.objects[obj.uuid];
+        var found = false;
+        for (var j = 0; !found && j < this.objectIDs.length; ++j) {
+          found = found || this.objects[this.objectIDs[j]].geomID === obj.geomID;
+        }
+        if (!found) {
+          delete this.geometryCache[obj.geomID];
+        }
         this.objectIDs.splice(this.objectIDs.indexOf(obj.uuid), 1);
       }
     }
@@ -7180,11 +7201,6 @@ Primrose.Projector = function () {
     }
     if (parts.length === 1) {
       propName = parts[0];
-      if (propName === "vertices") {
-        value = value.map(function (v) {
-          return new THREE.Vector3().fromArray(v);
-        });
-      }
       obj[parts[0]] = value;
     }
   };
@@ -7212,7 +7228,7 @@ Primrose.Projector = function () {
           this.b.subVectors(v2, v0);
           this.c.subVectors(this.p, this.f);
           this.m.set(this.a.x, this.b.x, -this.c.x, 0, this.a.y, this.b.y, -this.c.y, 0, this.a.z, this.b.z, -this.c.z, 0, 0, 0, 0, 1);
-          if (this.m.determinant() !== 0) {
+          if (Math.abs(this.m.determinant()) > 1e-10) {
             this.m.getInverse(this.m);
             this.d.subVectors(this.f, v0).applyMatrix4(this.m);
             if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
@@ -7512,27 +7528,10 @@ Primrose.Surface = function () {
 
     _createClass(Surface, [{
       key: "invalidate",
-      value: function invalidate(bounds) {
-        bounds = bounds || this.bounds;
-        bounds = {
-          left: bounds.left,
-          top: bounds.top,
-          right: bounds.right,
-          bottom: bounds.bottom
-        };
+      value: function invalidate() {
         for (var i = 0; i < this.children.length; ++i) {
           var child = this.children[i];
-          if (child.bounds.right > bounds.left && child.bounds.left < bounds.right && child.bounds.bottom > bounds.top && child.bounds.top < bounds.bottom) {
-            var left = Math.max(child.bounds.left, bounds.left),
-                top = Math.max(child.bounds.top, bounds.top),
-                right = Math.min(child.bounds.right, bounds.right),
-                bottom = Math.min(child.bounds.bottom, bounds.bottom),
-                width = right - left,
-                height = bottom - top,
-                x = left - child.bounds.left,
-                y = top - child.bounds.top;
-            this.context.drawImage(child.canvas, x, y, width, height, left, top, width, height);
-          }
+          this.context.drawImage(child.canvas, child.bounds.left, child.bounds.top);
         }
         if (this._texture) {
           this._texture.needsUpdate = true;
@@ -7541,9 +7540,7 @@ Primrose.Surface = function () {
           this._material.needsUpdate = true;
         }
         if (this.parent && this.parent.invalidate) {
-          bounds.left += this.bounds.left;
-          bounds.top += this.bounds.top;
-          this.parent.invalidate(bounds);
+          this.parent.invalidate();
         }
       }
     }, {
@@ -7569,7 +7566,7 @@ Primrose.Surface = function () {
           throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
         }
         _get(Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
-        this.invalidate(child.bounds);
+        this.invalidate();
       }
     }, {
       key: "mapUV",
@@ -8356,9 +8353,7 @@ Primrose.Controls.Label = function () {
 
           this.renderCanvasTrim();
 
-          if (this.parent) {
-            this.parent.invalidate(this.bounds);
-          }
+          this.invalidate();
         }
       }
     }, {
@@ -8660,9 +8655,7 @@ Primrose.Controls.Image = function () {
           this._lastHeight = this.imageHeight;
           this._lastImage = this.image;
 
-          if (this.parent) {
-            this.parent.invalidate(this.bounds);
-          }
+          this.invalidate();
         }
       }
     }, {
@@ -14619,7 +14612,7 @@ Primrose.Text.Controls.TextBox = function () {
             this.context.drawImage(this._bgCanvas, 0, 0);
             this.context.drawImage(this._fgCanvas, 0, 0);
             this.context.drawImage(this._trimCanvas, 0, 0);
-            this.invalidate(this.bounds);
+            this.invalidate();
           }
 
           this._lastGridBounds = this.gridBounds.toString();

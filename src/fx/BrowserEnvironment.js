@@ -602,7 +602,7 @@ Primrose.BrowserEnvironment = (function () {
         monitor = models.shift();
         var monitorText = models.shift();
         cardboard = models.shift();
-        var cardboardText = models.shift()
+        var cardboardText = models.shift();
 
         monitor.rotation.set(0, 270 * Math.PI / 180, 0);
         monitor.position.set(0, 0.7, -1);

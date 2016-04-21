@@ -17,7 +17,8 @@ var pkg = require("./package.json"),
 baseFiles.splice(baseFiles.length, 0,
   "obj/Primrose.js",
   "lib/analytics.js",
-  "lib/ga.js");
+  "lib/ga.js",
+  "lib/mailchimp.js");
 
 var pathX = /.*\/(.*).js/,
   copyFiles = baseFiles.map(function (s) {
