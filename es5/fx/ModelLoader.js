@@ -241,9 +241,7 @@ Useful for one-time use models.\n\
 faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
 Useful for static models.\n\
 \n\
-> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
-> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
-> policy that Primrose uses for requests.",
+See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for more details on how individual models are loaded.",
     returns: "Promise",
     parameters: [{ name: "arr", type: "Array", description: "The files from which to load." }, { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
     examples: [{
@@ -262,10 +260,9 @@ We can load a bunch of models in one go using the following code.\n\
     // Load up the file\n\
     Primrose.ModelLoader.loadObjects(\n\
       [\"path/to/model1.json\",\n\
-        \"path/to/model2.json\",\n\
-        \"path/to/model3.json\",\n\
-        \"path/to/model4.json\"],\n\
-      null,\n\
+        \"path/to/model2.obj\",\n\
+        \"path/to/model3.obj\",\n\
+        \"path/to/model4.fbx\"],\n\
       console.log.bind(console, \"Progress:\"))\n\
       .then(function(models){\n\
         allModels = models;\n\
