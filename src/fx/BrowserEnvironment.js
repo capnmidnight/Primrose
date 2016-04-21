@@ -30,7 +30,8 @@ Primrose.BrowserEnvironment = (function () {
    | `chatTextSize` - the size of a single line of text, in world units (default: 0.25)
    | `dtNetworkUpdate` - the amount of time to allow to elapse between sending state to teh server (default: 0.125)
    */
-  var RIGHT = new THREE.Vector3(1, 0, 0),
+  var MILLISECONDS_TO_SECONDS = 0.001,
+    RIGHT = new THREE.Vector3(1, 0, 0),
     UP = new THREE.Vector3(0, 1, 0),
     FORWARD = new THREE.Vector3(0, 0, -1),
     POINTER_RADIUS = 0.01,
@@ -227,7 +228,6 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var update = (t) => {
-        t *= 0.001;
         var dt = t - lt,
           i, j;
         lt = t;
@@ -452,7 +452,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var animate = (t) => {
         RAF(animate);
-        update(t);
+        update(t * MILLISECONDS_TO_SECONDS);
         render();
       };
 
@@ -804,6 +804,7 @@ Primrose.BrowserEnvironment = (function () {
       this.start = () => {
         Promise.all([modelsReady, audioReady])
           .then(setSize)
+          .then(() => lt = performance.now() * MILLISECONDS_TO_SECONDS)
           .then(() => RAF(animate));
       };
 
