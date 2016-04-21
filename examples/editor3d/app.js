@@ -244,6 +244,7 @@ function testDemo(scene) {
     MIDY = HEIGHT / 2,
     MIDZ = DEPTH / 2,
     t = 0,
+    R = Primrose.Random,
     start = put(hub())
       .on(scene)
       .at(-MIDX, 0, -DEPTH - 2);
@@ -253,32 +254,32 @@ function testDemo(scene) {
   for (var i = 0; i < 10; ++i) {
     balls.push(put(brick(DECK))
       .on(start)
-      .at(Primrose.Random.int(WIDTH),
-      Primrose.Random.int(HEIGHT),
-      Primrose.Random.int(DEPTH)));
+      .at(R.int(WIDTH),
+      R.int(HEIGHT),
+      R.int(DEPTH)));
 
     balls[i].velocity = v3(
-      Primrose.Random.number(0, WIDTH),
-      Primrose.Random.number(0, HEIGHT),
-      Primrose.Random.number(0, DEPTH));
+      R.number(0, WIDTH),
+      R.number(0, HEIGHT),
+      R.number(0, DEPTH));
   }
 
   function update(dt) {
     t += dt;
     for (var i = 0; i < balls.length; ++i) {
-      var ball = balls[i];
-      ball.position.add(ball.velocity.clone().multiplyScalar(dt));
-      if (ball.position.x < 0 && ball.velocity.x < 0
-        || WIDTH <= ball.position.x && ball.velocity.x > 0) {
-        ball.velocity.x *= -1;
+      var ball = balls[i],
+        p = ball.position,
+        v = ball.velocity;
+      p.add(v.clone().multiplyScalar(dt));
+      if (p.x < 0 && v.x < 0 || WIDTH <= p.x && v.x > 0) {
+        v.x *= -1;
       }
-      if (ball.position.y < 1 && ball.velocity.y < 0
-        || HEIGHT <= ball.position.y && ball.velocity.y > 0) {
-        ball.velocity.y *= -1;
+      if (p.y < 1 && v.y < 0 || HEIGHT <= p.y && v.y > 0) {
+        v.y *= -1;
       }
-      if (ball.position.z < 0 && ball.velocity.z < 0
-        || DEPTH <= ball.position.z && ball.velocity.z > 0) {
-        ball.velocity.z *= -1;
+      if (p.z < 0 && v.z < 0
+        || DEPTH <= p.z && v.z > 0) {
+        v.z *= -1;
       }
     }
   }
