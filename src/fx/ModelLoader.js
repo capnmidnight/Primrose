@@ -282,7 +282,6 @@ We can load a bunch of models in one go using the following code.\n\
         \"path/to/model2.json\",\n\
         \"path/to/model3.json\",\n\
         \"path/to/model4.json\"],\n\
-      null,\n\
       console.log.bind(console, \"Progress:\"))\n\
       .then(function(models){\n\
         allModels = models;\n\
