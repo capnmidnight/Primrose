@@ -1,5 +1,5 @@
 /*
-  primrose v0.23.0 2016-04-20
+  primrose v0.23.0 2016-04-21
   
   Copyright (C) 2015 - 2016 Sean T. McBeth <sean@seanmcbeth.com> (https://www.seanmcbeth.com)
   http://www.primrosevr.com
@@ -4122,9 +4122,7 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
   return new Promise(function (resolve, reject) {
     options = options || {};
     options.headers = options.headers || {};
-    if (method === "GET") {
-      options.headers.Accept = options.headers.Accept || type;
-    } else {
+    if (method === "POST") {
       options.headers["Content-Type"] = options.headers["Content-Type"] || type;
     }
 
