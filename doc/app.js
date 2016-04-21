@@ -160,13 +160,28 @@ function scroller(id) {
   }
 
   function showHash(evt) {
-    doc.innerHTML = docoCache[document.location.hash] || ("Not found: " + document.location.hash);
-    replacePreBlocks();
-    fixLinks();
-    createShortcuts();
-    if (evt) {
-      scroller("documentation");
+    var page = document.location.hash,
+      promise = null;
+    if (/\.md$/.test(page)) {
+      promise = Primrose.HTTP
+        .getText("/" + page.substring(1))
+        .then(marked);
     }
+    else {
+      promise = Promise.resolve(docoCache[page].toString());
+    }
+
+    promise
+      .catch(() => "Not found: " + page)
+      .then(function (html) {
+        doc.innerHTML = html;
+        replacePreBlocks();
+        fixLinks();
+        createShortcuts();
+        if (evt) {
+          scroller("documentation");
+        }
+      });
   }
 
   // Walk the documentation database, grouping different objects by type.

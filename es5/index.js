@@ -353,18 +353,6 @@ on a website and be ready to run in VR."
   });
 
   pliny.issue({
-    name: "Make a CHANGELOG",
-    type: "open",
-    description: "Document the changes between versions better."
-  });
-
-  pliny.issue({
-    name: "Make better icons for full-screen view.",
-    type: "open",
-    description: "The current icons don't match each other, and they are in a bad place on screen."
-  });
-
-  pliny.issue({
     name: "Link examples to each other.",
     type: "open",
     description: "Make it so you can jump from one example to another, both in 2D and VR contexts."
@@ -374,12 +362,6 @@ on a website and be ready to run in VR."
     name: "Make more examples on CodePen.",
     type: "open",
     description: "Demonstrate using Primrose with the different options available in CodePen."
-  });
-
-  pliny.issue({
-    name: "Update the README.",
-    type: "open",
-    description: "It's woefully out of date."
   });
 
   pliny.issue({
@@ -394,6 +376,12 @@ that can be used with Primrose."
     type: "open",
     description: "Classes and arrow functions are good. Rely on browser support for\n\
 development. Setup a transpiler for production builds."
+  });
+
+  pliny.issue({
+    name: "Convert from Grunt to Gulp.",
+    type: "open",
+    description: "It's supposed to be a lot faster."
   });
 
   pliny.issue({
