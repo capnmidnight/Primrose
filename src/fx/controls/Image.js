@@ -152,10 +152,8 @@ Primrose.Controls.Image = (function () {
         this._lastWidth = this.imageWidth;
         this._lastHeight = this.imageHeight;
         this._lastImage = this.image;
-
-        if (this.parent) {
-          this.parent.invalidate(this.bounds);
-        }
+        
+        this.invalidate();
       }
     }
   }
