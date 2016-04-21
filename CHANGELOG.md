@@ -1,6 +1,110 @@
 # CHANGELOG
 
+## v0.23.0
 
+### What happened to v0.22.0?
+
+v0.22.0 got lost in the weeds. I bought a lawnmower to go find it, but that also got lost in the weeds.
+
+Seriously though, I got really busy and just never got around to making a production deployment. Then I bumped the version number and made a commit, so I felt I was stuck with v0.23.0. Because v0.22.0 never got properly released, I'm including all of it's changelog in v0.23.0
+
+### v0.23.0
+
+* Features
+  * New 2D GUI system, drawn to HTML Canvas elements and used as textures on 3D elements.
+    * Surfaces can be sub-classed to more specific controls.
+    * Surfaces can be children of other Surfaces, to render in subsections of the parent Surface.
+    * [`Primrose.Entity`](#Primrose_Entity) is anything that can hold children.
+    * [`Primrose.Surface`](#Primrose_Surface) is any Entity that has an HTML Canvas driving it.
+    * [`Primrose.Controls.Label`](#Primrose_Controls_Label) is a 2D text label. Labels can align text left, center, or right.
+    * [`Primrose.Controls.Button`](#Primrose_Controls_Button) is a 2D button. It's essentially a label with a border and a different appearance on-mouse-down, so it also supports text alignment.
+    * [`Primrose.Controls.Image`](#Primrose_Controls_Image) is a 2D or stereoscopic image. When viewing a stereo image on a 2D monitor, hit the E key on your keyboard to manually cause an eye-blank event and swap the left/right images being displayed.
+    * Converted [`Primrose.Text.Controls.TextBox`](#Primrose_Text_Controls_TextBox) to be a Surface.
+    * [`Primrose.Text.Controls.TextInput`](#Primrose_Text_Controls_TextInput) is a single-line text input control. It's essentially a `Primrose.Text.Controls.TextBox` that is constrained to a single line and only PlainText grammar. It can optionally have a character set as a password-blanking character.
+  * [`patch()`](#patch) function takes two objects-as-hashMaps. Any keys in the second hashMap that are missing in first will get added.
+  * [`overwrite()`](#overwrite) function is similar to patch, except it overwrites keys that match between objects.
+  * Textures, Materials, and Geometries now get cached to save a bunch of GPU memory.
+  * Redesigned how [`textured()`](#textured) works. Optional parameters now go in an options object-nee-hashMap as the last parameter to the function.
+  * Option for `textured()` to display objects as wireframes.
+  * Only dirty parts of images render now (roughly speaking), saving some draw time.
+  * Converted HTTP request handling and many other things over to using Promises instead of explicit callbacks.
+  * For WebVR API 1.0 scenarios, now rendering a non-stereo view on the monitor outside of the HMD.
+  * Documentation pages are now statically generated, for anything that is not based on the live documentation of the framework itself (e.g. tutorials).
+  * Added values to [`Primrose.Keys`](#Primrose_Keys):
+    * `ANY`, with value 0, a catch-all for any particular key on the keyboard (or button on the mouse, for that matter).
+    * `VOLUME_DOWN`, with value 174, for keyboards with media controls. Useful with certain types of Bluetooth gamepads that emulate keyboards.
+    * `VOLUME_UP`, with value 175, see above.
+    * `TRACK_NEXT`, with value 176, see above.
+    * `TRACK_PREVIOUS`, with value 177, see above.
+  * Updated Editor3D demo to demonstrate 2D windowing.
+  * Got the game server running on Azure. Someday soon, we'll have multiplayer again.
+  * Updated to Three.js r75.
+  * Enabled mouse pointer lock in windowed mode. Just click or hit a key on the keyboard.
+  * Changed from THREE.MeshLambertMaterial to THREE.MeshBasicMaterial, which looks nicer, more modern.
+  * Basic support for GearVR, though GearVR doesn't work well for any WebVR demos yet.
+  * Made user input udpates from from their actual event handlers, so application code can do "user-interaction required" API calls like `requestFullscreen` or `requestPointerLock`.
+  * Unified all selection-type events in [`Primrose.Input.FPSInput`](#Primrose_Input_FPSInput) so that `Primrose.BrowserEnvironment` could be simplified to use a pointer-events-like interface.
+  * Automatically select the first available gamepad for use, rather than bugging the user with a `confirm()` dialog.
+  * New monitor and Google Cardboard 3D icons for triggering fullscreen or presentation mode. Demos are now 100% 3D interface, no 2D interface left.
+  * Added support for OBJ files (and their associated MTL files, just make sure they have the same base filename and live in the same path) in [`Primrose.ModelLoader`](#Primrose_ModelLoader).
+  * Created option to disable clickable objects separately from making them invisible, to support being able to make invisible, but clickable objects.
+  * Garbage collect pickable objects when they get removed from a scene.
+  * Re-enabled ambient audio.
+  * Added the stereo image demo to the main Editor3D demo.
+* Admin
+  * Simplified server startup.
+  * Much more automated builds.
+  * Beginning to convert code to ES6, thanks to Babel.
+  * Split a bunch of utility functions into their own files.
+  * Renamed `Primrose.VRApplication` to `Primrose.BrowserEnvironment`, to better reflect its purpose. You write the application as part of your script that uses `Primrose.BrowserEnvironment`. It's not an application on its own, and could be host to multiple applications (eventually).
+  * Deleted a bunch of unused code.
+  * CodePages now construct their own command names, which goes a long way towards decoupling commands from explicit keyhandling and from controls themselves.
+  * OperatingSystem classes now don't specify commands, they just translate key events into command names and then leave it to the TextEditor command pack to figure out what to do with it.
+  * Sorted the order of tutorial files so they follow a progression of difficulty.
+  * Promisified VR headset setup.
+  * Created a proxy for `console.log` and `console.error` to make debugging on GearVR easier.
+  * Made builds run faster.
+  * Removed "jump" command from demos. Might make some people sick, and ties up a key for no good use.
+  * Finally updated the README beyond just talking about the text editor.
+  * Cleaned up the Editor3D demo code so it's easier to read.
+  * Concating all the Three.js and Primrose files into a single `package.js` for use on the website.
+  * Updated the documentation for `Primrose.ModelLoader`.
+* Bugs
+  * Fixed styling issues with documentation pages.
+  * Fix for Device Orientation API-based VR view on passive stereo viewers like Google Cardboard that are running in browsers that do not support WebVR. Now the scene doesn't skew when you tilt your head.
+  * Made sure TextBoxes weren't running their own key event listeners, because it conflicts with the other events key events for navigation that BrowserEnvironment must control. This makes it more difficult to use the Primrose text editor in a 2D environment, but Primrose isn't really meant for that.
+  * Fixed a bad stereo offset bug when rotating your head in VR. The image continued to split along the natural horizon, not your visual horizon.
+  * Fixed an issue where hitting the back button on a smartphone while in fullscreen mode would not just leave fullscreen mode but also history.back() out of the page.
+  * Fixed a bunch of issues where my janky code was making V8 deoptimize the JavaScript.
+  * Reduced the polygon count of the ground geometry.
+  * Fixed an issue where the WebGL canvas was not getting resized after entering presentation mode, so resolution was off in some browsers, or the stereo split was not in the right place.
+  * Preventing multiple text areas on the screen adding their own surrogate HTML TextArea to the document. Only one surrogate to rule them all, and in the DOMness bind them.
+  * No more platform-specific command handling in TextBox.
+  * Fixed an issue where TextBoxes were getting resized on every render.
+  * Fixed an issue where TextBoxes were not getting rerendered when they received focus (this is going to be a theme, this kind of bug fix, because the previous one hid a lot of issues).
+  * Fixed bad aspect ratios when resizing the browser window in windowed mode.
+  * Fixed an issue where TextBoxes were not getting rerendered when the theme was changed.
+  * Fixed an issue where systems with more than one HMD defined (e.g. Firefox with emulated HMD data for debugging enabled) would not allow VR view.
+  * Stopped using the deprecated fullscreen API calls when we don't have to.
+  * Hack to keep Firefox for Android getting into an infinite loop on the Editor3D demo. It ultimately breaks the demo, as now it doesn't interpret the code in the editor, but it's better than the alternative.
+  * Fixed an issue where WebVR API 1.0 mirrored view was attempting to be rendered on preview-WebVR, causing the image in the HMD to be majorly screwed up.
+  * Fixed the workflow for entering and exiting fullscreen.
+    * Hitting back on the smartphone exits both fullscreen and VR view, returning you to flat-view.
+    * Other ways of exiting fullscreen view, such as task-switching out of the browser on Android, return to flat-view.
+    * Screen orientation now gets locked when entering VR view, so extreme head tilts don't make the image rotate 90 degrees incorrectly.
+    * Leaving VR view unlocks screen orientation again.
+  * Fixed mouse pointer lock so it gets activated on fullscreen and deactivated when removing fullscreen.
+  * Fixed an issue where exiting mouse pointer lock at the same time as exiting fullscreen caused fullscreen to retrigger.
+  * Fixed issue where Chromium on Android reports it is using WebVR API 1, but expects a single `VRLayer` for `VRDisplay::requestPresent`, whereas Chromium for Windows expects a single-element array of such `VRLayer`s.
+  * Fixed picking so objects that only use a subset of a full texture (i.e. the UV coordinates are not on the full [0, 1] range), aren't pickable beyond their visual boundaries.
+  * Collapsing the world matrix for objects on the UI thread side to minimize the amount of data being sent to the worker thread.
+  * Diffing pickable objects from their previous state to reduce the number of postMessage calls on the worker thread, thereby drastically improving overal performance.
+  * Stopped using expando-objects for pickable object data so V8 stops deoptimizing the JavaScript.
+  * "Fixed" the Commodore PET demo. It won't interpret the BASIC code, as my interpreter was causing big deoptimizations, but at least it's visible.
+  * Fixed the Jabber Yabs demo.
+  * Fixed an issue where XHRs were setting the Accept header incorrectly.
+  * Fixed an issue where resuming from pause (e.g. the window losing focus) made a huge time-slice update.
+  * Enabled MTL, OBJ, and OGG file formats on the server.
 
 ## v0.21.2
 
