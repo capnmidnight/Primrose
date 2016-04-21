@@ -12106,6 +12106,10 @@ Primrose.Text.Cursor = function () {
     return b;
   };
 
+  Cursor.prototype.clone = function () {
+    return new Cursor(this.i, this.x, this.y);
+  };
+
   Cursor.prototype.toString = function () {
     return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
   };
@@ -13926,8 +13930,8 @@ Primrose.Text.Controls.TextBox = function () {
       _this._lastCharacterHeight = null;
       _this._lastGridBounds = null;
       _this._lastPadding = null;
-      _this._lastFrontCursorI = -1;
-      _this._lastBackCursorI = -1;
+      _this._lastFrontCursor = null;
+      _this._lastBackCursor = null;
       _this._lastWidth = -1;
       _this._lastHeight = -1;
       _this._lastScrollX = -1;
@@ -14626,16 +14630,13 @@ Primrose.Text.Controls.TextBox = function () {
               characterWidthChanged = this.character.width !== this._lastCharacterWidth,
               characterHeightChanged = this.character.height !== this._lastCharacterHeight,
               paddingChanged = this.padding !== this._lastPadding,
-              cursorChanged = this.frontCursor.i !== this._lastFrontCursorI || this._lastBackCursorI !== this.backCursor.i,
+              cursorChanged = !this._lastFrontCursor || !this._lastBackCursor || this.frontCursor.i !== this._lastFrontCursor.i || this._lastBackCursor.i !== this.backCursor.i,
               scrollChanged = this.scroll.x !== this._lastScrollX || this.scroll.y !== this._lastScrollY,
               fontChanged = this.context.font !== this._lastFont,
               themeChanged = this.theme.name !== this._lastThemeName,
               focusChanged = this.focused !== this._lastFocused,
-
-
-          //changeBounds = new Primrose.Text.Rectangle(0, 0, 0, 0),
-
-          layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
+              changeBounds = null,
+              layoutChanged = this.resized || boundsChanged || textChanged || characterWidthChanged || characterHeightChanged || paddingChanged,
               backgroundChanged = layoutChanged || cursorChanged || scrollChanged || themeChanged,
               foregroundChanged = backgroundChanged || textChanged,
               trimChanged = backgroundChanged || focusChanged,
@@ -14647,6 +14648,14 @@ Primrose.Text.Controls.TextBox = function () {
           }
 
           if (imageChanged) {
+            if (layoutChanged || scrollChanged || themeChanged || focusChanged) {
+              changeBounds = this.bounds.clone();
+            } else if (cursorChanged) {
+              var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
+                  bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
+              changeBounds = new Primrose.Text.Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);
+            }
+
             if (backgroundChanged) {
               this.renderCanvasBackground();
             }
@@ -14661,7 +14670,7 @@ Primrose.Text.Controls.TextBox = function () {
             this.context.drawImage(this._bgCanvas, 0, 0);
             this.context.drawImage(this._fgCanvas, 0, 0);
             this.context.drawImage(this._trimCanvas, 0, 0);
-            this.invalidate();
+            this.invalidate(changeBounds);
           }
 
           this._lastGridBounds = this.gridBounds.toString();
@@ -14671,8 +14680,8 @@ Primrose.Text.Controls.TextBox = function () {
           this._lastWidth = this.imageWidth;
           this._lastHeight = this.imageHeight;
           this._lastPadding = this.padding;
-          this._lastFrontCursorI = this.frontCursor.i;
-          this._lastBackCursorI = this.backCursor.i;
+          this._lastFrontCursor = this.frontCursor.clone();
+          this._lastBackCursor = this.backCursor.clone();
           this._lastFocused = this.focused;
           this._lastFont = this.context.font;
           this._lastThemeName = this.theme.name;

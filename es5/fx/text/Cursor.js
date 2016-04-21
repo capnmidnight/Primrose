@@ -50,6 +50,10 @@ Primrose.Text.Cursor = function () {
     return b;
   };
 
+  Cursor.prototype.clone = function () {
+    return new Cursor(this.i, this.x, this.y);
+  };
+
   Cursor.prototype.toString = function () {
     return "[i:" + this.i + " x:" + this.x + " y:" + this.y + "]";
   };
