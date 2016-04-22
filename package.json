@@ -54,7 +54,21 @@
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.7.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-exec": "^0.4.6",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-cached": "^1.1.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-copy": "0.0.2",
+    "gulp-cssmin": "^0.1.7",
+    "gulp-data": "^1.2.1",
+    "gulp-footer": "^1.0.5",
+    "gulp-header": "^1.7.1",
+    "gulp-jade": "^1.1.0",
+    "gulp-jshint": "^2.0.0",
+    "gulp-remember": "^0.3.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.3",
     "jade": "^1.11.0"
   }
 }

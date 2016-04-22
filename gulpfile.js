@@ -1,8 +1,19 @@
-/* global module */
-
-var pkg = require("./package.json"),
+﻿var gulp = require("gulp"),
+  babel = require("gulp-babel"),
+  clean = require("gulp-clean"),
+  concat = require("gulp-concat"),
+  copy = require("gulp-copy"),
+  cssmin = require("gulp-cssmin"),
+  data = require("gulp-data"),
+  footer = require("gulp-footer"),
   fs = require("fs"),
+  header = require("gulp-header"),
+  jade = require("gulp-jade"),
+  jshint = require("gulp-jshint"),
   path = require("path"),
+  pkg = require("./package.json"),
+  rename = require("gulp-rename"),
+  uglify = require("gulp-uglify"),
   headerFiles = [
     "node_modules/marked/lib/marked.js",
     "lib/pliny.js",
@@ -35,12 +46,12 @@ var pathX = /.*\/(.*).js/,
 
 copyFiles.push({
   src: "scripts/Primrose.js",
-  dest: "archive/Primrose-<%= pkg.version %>.js"
+  dest: "archive/Primrose-" + pkg.version + ".js"
 });
 
 copyFiles.push({
   src: "scripts/Primrose.min.js",
-  dest: "archive/Primrose-<%= pkg.version %>.min.js"
+  dest: "archive/Primrose-" + pkg.version + ".min.js"
 });
 
 var jadeFileSpec = ["*.jade", "doc/**/*.jade", "examples/**/*.jade"];
@@ -134,129 +145,80 @@ var jadeDebugConfigurationES5 = jadeConfiguration({ pretty: true }, debugDataES5
   jadeDebugConfigurationES6 = jadeConfiguration({ pretty: true }, debugDataES6),
   jadeReleaseConfiguration = jadeConfiguration({}, { docFiles: debugDataES6.docFiles });
 
-module.exports = function (grunt) {
-  grunt.initConfig({
 
-    pkg: grunt.file.readJSON("package.json"),
+gulp.task("clean", function () {
+  return gulp.src(["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css", "templates/*", "!templates/*.jade"])
+    .pipe(clean());
+});
 
-    clean: ["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css", "templates/*", "!templates/*.jade"],
+gulp.task("jadeRelease", ["clean"], function () {
+});
 
-    jade: {
-      release: jadeReleaseConfiguration,
-      "debug-es5": jadeDebugConfigurationES5,
-      "debug-es6": jadeDebugConfigurationES6
-    },
+gulp.task("jadeDebugES5", function () {
+});
 
-    watch: {
-      jade: {
-        files: jadeFileSpec,
-        tasks: ["jade:debug"]
-      },
-      "hint-es5": {
-        files: "src/**/*.js",
-        tasks: ["jshint", "babel"]
-      },
-      "hint-es6": {
-        files: "src/**/*.js",
-        tasks: ["jshint"]
-      }
-    },
+gulp.task("jadeDebugES6", function () {
+});
 
-    cssmin: {
-      default: {
-        files: [{
-          expand: true,
-          src: ["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"],
-          dest: "",
-          ext: ".min.css"
-        }]
-      }
-    },
+gulp.task("cssmin", ["clean"], function () {
+  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"], { base: "./" })
+		.pipe(cssmin())
+		.pipe(rename({ suffix: ".min" }))
+		.pipe(gulp.dest("./"));
+});
 
-    jshint: {
-      default: "src/**/*.js",
-      options: {
-        multistr: true,
-        esnext: true
-      }
-    },
+gulp.task("jshint", function () {
+  return gulp.src("src/**/*.js")
+    .pipe(jshint({
+      multistr: true,
+      esnext: true
+    }));
+});
 
-    babel: {
-      options: {
-        sourceMap: false,
-        presets: ["es2015"]
-      },
-      dist: {
-        files: [{
-          expand: true,
-          cwd: "src",
-          src: ["**/*.js"],
-          dest: "es5"
-        }]
-      }
-    },
+gulp.task("babel", ["jshint"], function () {
+  return gulp.src("src/**/*.js")
+    .pipe(babel({
+      sourceMap: false,
+      presets: ["es2015"]
+    }))
+    .pipe(gulp.dest("es5"));
+});
 
-    concat: {
-      primrose: {
-        options: {
-          banner: "/*\n\
-  <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today(\"yyyy-mm-dd\") %>\n\
-  <%= pkg.license.type %>\n\
-  Copyright (C) 2015 - 2016 <%= pkg.author %>\n\
-  <%= pkg.homepage %>\n\
-  <%= pkg.repository.url %>\n\
-*/\n",
-          separator: ";",
-          footer: "Primrose.VERSION = \"v<%= pkg.version %>\";\n" +
-          "console.log(\"Using Primrose v<%= pkg.version %>. Find out more at <%= pkg.homepage %>\");"
-        },
-        files: {
-          "obj/Primrose.js": ["es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"]
-        }
-      },
+gulp.task("makeRelease", ["babel"], function () {
+});
 
-      payload: {
-        options: {
-          separater: ";"
-        },
-        files: {
-          "payload.js": payloadFiles
-        }
-      }
-    },
+gulp.task("copy", ["uglify"], function () {
+});
 
+gulp.task("concatPayload", ["copy"], function () {
+  return gulp.src(payloadFiles)
+    .pipe(concat("payload.js", { newLine: ";" }))
+    .dest("./");
+});
 
-    uglify: {
-      default: {
-        files: baseFiles.map(function (s) {
-          return {
-            src: s,
-            dest: s.replace(pathX, "scripts/$1.min.js")
-          };
-        })
-      }
-    },
-
-    copy: {
-      default: {
-        files: copyFiles
-      }
+gulp.task("debugES6", ["jadeDebugES6", "jshint"], function () {
+  var watcher = gulp.watch("src/**/*.js", ["jshint"]);
+  watcher.on("change", function (event) {
+    if (event.type === "deleted") {
+      delete cached.caches.scripts[event.path];
+      remember.forget("scripts", event.path);
     }
   });
+});
 
-  grunt.loadNpmTasks("grunt-babel");
-  grunt.loadNpmTasks("grunt-contrib-watch");
-  grunt.loadNpmTasks("grunt-contrib-clean");
-  grunt.loadNpmTasks("grunt-contrib-copy");
-  grunt.loadNpmTasks("grunt-contrib-jshint");
-  grunt.loadNpmTasks("grunt-contrib-concat");
-  grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks("grunt-contrib-cssmin");
-  grunt.loadNpmTasks("grunt-contrib-jade");
+gulp.task("debugES5", ["jadeDebugES5", "jshint", "babel"], function () {
+  var watcher = gulp.watch("src/**/*.js", ["jshint", "babel"]);
+  watcher.on("change", function (event) {
+    if (event.type === "deleted") {
+      delete cached.caches.scripts[event.path];
+      remember.forget("scripts", event.path);
+    }
+  });
+});
 
-  grunt.registerTask("none", []);
-  grunt.registerTask("debug-es6", ["jshint", "jade:debug-es6", "watch:hint-es6"]);
-  grunt.registerTask("debug-es5", ["jshint", "babel", "jade:debug-es5", "watch:hint-es5"]);
-  grunt.registerTask("release", ["clean", "jade:release", "cssmin", "jshint", "babel", "concat:primrose", "uglify", "copy", "concat:payload"]);
-  grunt.registerTask("default", ["debug"]);
-};
+gulp.task("release", ["clean", "jadeRelease", "cssmin", "jshint", "babel"], function () {
+  "concatPrimrose", "uglify", "copy", "concatPayload"
+});
+
+
+gulp.task("default", ["debugES6"]);

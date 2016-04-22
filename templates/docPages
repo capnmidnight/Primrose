@@ -1,9 +1,0 @@
-
-<li data-name="Getting started"><a href="/doc/index.html">Getting started</a></li>
-<li data-name="Installation and Setup"><a href="/doc/setup.html">Installation and Setup</a></li>
-<li data-name="Frequently Asked Questions"><a href="/doc/faq.html">Frequently Asked Questions</a></li>
-<li data-name="Using the VR Development Environment"><a href="/doc/editorVRManual.html">Using the VR Development Environment</a></li>
-<li data-name="Head Mounted Displays"><a href="/doc/hmd.html" class="incomplete">Head Mounted Displays</a></li>
-<li data-name="What is WebVR?"><a href="/doc/webvr.html" class="incomplete">What is WebVR?</a></li>
-<li data-name="Synchronizing your Smartphone and PC"><a href="/doc/sync.html" class="incomplete">Synchronizing your Smartphone and PC</a></li>
-<li data-name="Writing new documentation with Pliny"><a href="/doc/pliny.html">Writing new documentation with Pliny</a></li>
