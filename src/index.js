@@ -31,105 +31,105 @@ window.Primrose = (function () {
   Primrose.Controls = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "DOM",
     description: "A few functions for manipulating DOM."
   });
   Primrose.DOM = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "HTTP",
     description: "A collection of basic XMLHttpRequest wrappers."
   });
   Primrose.HTTP = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "Input",
     description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
   });
   Primrose.Input = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "Network",
     description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
   });
   Primrose.Network = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "Output",
     description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
   });
   Primrose.Output = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "Random",
     description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
   });
   Primrose.Random = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "Text",
     description: "The Text namespace contains classes everything regarding the Primrose source code editor."
   });
   Primrose.Text = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "CodePages",
     description: "The CodePages namespace contains international keyboard parameters."
   });
   Primrose.Text.CodePages = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "CommandPacks",
     description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
   });
   Primrose.Text.CommandPacks = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "Controls",
     description: "The Controls namespace contains different types of text-oriented controls."
   });
   Primrose.Text.Controls = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "Grammars",
     description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
   });
   Primrose.Text.Grammars = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "OperatingSystems",
     description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
   });
   Primrose.Text.OperatingSystems = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "Renderers",
     description: "The Renderers namespace contains different renderers for using the general Text Editor logic in different output systems. Current, Canvas2D is the only system that works. A system for DOM elements exists, but it is broken and not likely to be fixed any time soon."
   });
   Primrose.Text.Renderers = {};
 
   pliny.namespace({
-    parent: "Text.",
+    parent: "Text",
     name: "Themes",
     description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
   });
   Primrose.Text.Themes = {};
 
   pliny.namespace({
-    parent: "Primrose.",
+    parent: "Primrose",
     name: "X",
     description: "Extensions and components that combine other Primrose elements."
   });

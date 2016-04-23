@@ -92,7 +92,7 @@ Primrose.Button = ( function () {
   }
   
   pliny.record({
-    parent: "Button.",
+    parent: "Primrose.Button",
     name: "DEFAULTS",
     description: "Default option values that override undefined options passed to the Button class."
   });
