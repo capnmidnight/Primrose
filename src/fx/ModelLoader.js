@@ -13,13 +13,18 @@ Primrose.ModelLoader = (function () {
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
   var loaders = {
-    JSON: THREE.ObjectLoader && new THREE.ObjectLoader(),
-    FBX: THREE.FBXLoader && new THREE.FBXLoader(),
-    MTL: THREE.MTLLoader && new THREE.MTLLoader(),
-    OBJ: THREE.OBJLoader && new THREE.OBJLoader(),
-    STL: THREE.STLLoader && new THREE.STLLoader()
+    json: THREE.ObjectLoader && new THREE.ObjectLoader(),
+    fbx: THREE.FBXLoader && new THREE.FBXLoader(),
+    mtl: THREE.MTLLoader && new THREE.MTLLoader(),
+    obj: THREE.OBJLoader && new THREE.OBJLoader(),
+    stl: THREE.STLLoader && new THREE.STLLoader()
   },
-    EXTENSION_PATTERN = /\.(\w+)$/;
+    mime = {
+      "text/prs.wavefront-obj": "obj",
+      "text/prs.wavefront-mtl": "mtl"
+    },
+    EXTENSION_PATTERN = /\.(\w+)$/,
+    NAME_PATTERN = /([^/]+)\.\w+$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
   // come out correctly, so we need to do a correction.
@@ -206,37 +211,45 @@ Useful for one-time use models.\n\
       return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
     }
     else {
-      extension = extension.toUpperCase();
+      extension = extension.toLowerCase();
       var Loader = loaders[extension];
       if (!Loader) {
         return Promise.reject("There is no loader type for the file extension: " + extension);
       }
       else {
-        var promise = Promise.resolve();
+        var name = src.match(NAME_PATTERN)[1],
+          elemID = name + "_" + extension.toLowerCase(),
+          elem = document.getElementById(elemID),
+          promise = Promise.resolve();
 
-        if (extension === "OBJ") {
+        if (extension === "obj") {
           var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
-          promise = promise.then(() => {
-            return ModelLoader.loadObject(newPath, "mtl", progress)
-              .then((materials) => {
-                materials.preload();
-                Loader.setMaterials(materials);
-              });
+          promise = promise.then(() => ModelLoader.loadObject(newPath, "mtl", progress));
+          promise = promise.then((materials) => {
+            materials.preload();
+            Loader.setMaterials(materials);
           });
         }
 
-        promise = promise.then(() => new Promise((resolve, reject) => {
+        if (elem) {
+          var elemSource = elem.innerHTML
+            .split(/\r?\n/g)
+            .map(function (s) { return s.trim(); })
+            .join("\n");
+          promise = promise.then(() => Loader.parse(elemSource));
+        }
+        else {
           if (Loader.setCrossOrigin) {
             Loader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
           }
-          Loader.load(src, resolve, progress, reject);
-        }));
+          promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
+        }
 
-        if (extension === "JSON") {
+        if (extension === "json") {
           promise = promise.then(fixJSONScene);
         }
 
-        if (extension !== "MTL") {
+        if (extension !== "mtl") {
           promise = promise.then(setProperties);
         }
 
@@ -302,21 +315,25 @@ We can load a bunch of models in one go using the following code.\n\
     requestAnimationFrame(paint);"}
     ]
   });
-  ModelLoader.loadObjects = function (arr, progress, output, model) {
+  ModelLoader.loadObjects = function (map) {
     if (!output) {
-      output = [];
+      output = {};
     }
-    if (model) {
-      output.push(model);
+
+    var promise = Promise.resolve(output);
+    for (var key in map) {
+      if (map[key]) {
+        promise = promise
+          .then(function (k, obj) {
+            return ModelLoader.loadObject(map[k])
+              .then(function (model) {
+                obj[k] = model;
+                return obj;
+              });
+          }.bind(null, key));
+      }
     }
-    if (arr.length === 0) {
-      return Promise.resolve(output);
-    }
-    else {
-      var nextModel = arr.shift();
-      return ModelLoader.loadObject(nextModel, null, progress)
-        .then(ModelLoader.loadObjects.bind(ModelLoader, arr, progress, output));
-    }
+    return promise;
   };
   return ModelLoader;
 })();

@@ -584,26 +584,29 @@ Primrose.BrowserEnvironment = (function () {
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         readyFired = false,
-        modelFiles = [
-          "../../models/monitor.obj",
-          "../../models/fullscreen_text.obj",
-          "../../models/cardboard.obj",
-          "../../models/vr_text.obj",
-        ],
+        modelFiles = {
+          monitor: "../../models/monitor.obj",
+          fullscreenText: "../../models/fullscreen_text.obj",
+          cardboard: null,
+          cardboardText: null,
+          scene: this.options.sceneModel,
+          button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
+        },
         monitor = null,
         cardboard = null;
-      if (this.options.sceneModel) {
-        modelFiles.push(this.options.sceneModel);
-      }
-      if (this.options.button && typeof this.options.button.model === "string") {
-        modelFiles.push(this.options.button.model);
+      if (Primrose.Input.VR.Version > 0) {
+        modelFiles.cardboard = "../../models/cardboard.obj";
+        modelFiles.cardboardText = "../../models/vr_text.obj";
       }
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
-          monitor = models.shift();
-          var monitorText = models.shift();
-          cardboard = models.shift();
-          var cardboardText = models.shift();
+
+          if (models.scene) {
+            buildScene(models.scene);
+          }
+
+          monitor = models.monitor;
+          var monitorText = models.fullscreenText;          
 
           monitor.rotation.set(0, 270 * Math.PI / 180, 0);
           monitor.position.set(0, 0.7, -1);
@@ -618,6 +621,8 @@ Primrose.BrowserEnvironment = (function () {
             monitor.rotation.set(0, 300 * Math.PI / 180, 0);
             monitor.position.set(-0.25, 0.7, -1);
 
+            cardboard = models.cardboard;
+            var cardboardText = models.cardboardText;
             cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
             cardboard.position.set(0.2, 1.75, -1);
             cardboard.name = "Cardboard";
@@ -628,12 +633,9 @@ Primrose.BrowserEnvironment = (function () {
             cardboard.add(cardboardText);
           }
 
-          if (this.options.sceneModel) {
-            buildScene(models.shift());
-          }
-          if (this.options.button) {
+          if (models.button) {
             this.buttonFactory = new Primrose.ButtonFactory(
-              models.shift(),
+              models.button,
               this.options.button.options);
           }
           else {
@@ -686,13 +688,18 @@ Primrose.BrowserEnvironment = (function () {
         audioReady = this.audio.load3DSound(this.options.ambientSound, true, -1, 1, -1)
           .then((aud) => {
             ocean = aud;
-            ocean.volume.gain.value = 0.1;
-            ocean.source.start();
+            if (!(ocean.source instanceof MediaElementAudioSourceNode)) {
+              ocean.volume.gain.value = 0.1;
+              console.log(ocean.source);
+              ocean.source.start();
+            }
           });
       }
       else {
         audioReady = Promise.resolve();
       }
+
+      var allReady = Promise.all([modelsReady, audioReady]);
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -815,7 +822,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.start = () => {
-        Promise.all([modelsReady, audioReady])
+        allReady
           .then(setSize)
           .then(() => lt = performance.now() * MILLISECONDS_TO_SECONDS)
           .then(() => RAF(animate));
@@ -925,8 +932,12 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
-        cardboard.disabled = monitor.disabled = isFullScreenMode();
-        cardboard.visible = monitor.visible = !isFullScreenMode();
+        if (cardboard) {
+          cardboard.disabled = isFullScreenMode();
+          cardboard.visible = !isFullScreenMode();
+        }
+        monitor.disabled = isFullScreenMode();
+        monitor.visible = !isFullScreenMode();
       };
 
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);

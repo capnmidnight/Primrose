@@ -15,6 +15,12 @@ block banner
   canvas#frontBuffer
   <!-- end demo.jade banner block -->
 
-append footer
+prepend footer
   script(type="text/javascript").
     if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }
+
+  script#monitor_mtl(type="text/prs.wavefront-mtl")
+    include ../models/monitor.mtl
+
+  script#monitor_obj(type="text/prs.wavefront-obj")
+    include ../models/monitor.obj
