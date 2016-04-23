@@ -1,10 +1,4 @@
-﻿pliny.issue({
-  name: "document cylinder",
-  type: "open",
-  description: "Finish writing the documentation for the [`cylinder`](#cylinder) function\n\
-in the helpers/graphics.js file."
-});
-pliny.function({
+﻿pliny.function({
   name: "cylinder",
   description: "| [under construction]"
 });

@@ -53,10 +53,3 @@ Primrose.Controls.Button2D = (function () {
   return Button2D;
 })();
 
-pliny.issue({
-  parent: "Primrose.Controls.Button2D",
-  name: "document Button2D",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Controls.Button2D](#Primrose_Controls_Button2D)\n\
-class in the controls/ directory."
-});

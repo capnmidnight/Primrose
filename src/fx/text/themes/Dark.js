@@ -55,9 +55,3 @@ Primrose.Text.Themes.Dark = ( function ( ) {
   };
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.Themes.Dark",
-  name: "document Dark",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Themes.Dark](#Primrose_Text_Themes_Dark) class in the themes/ directory"
-} );

@@ -219,9 +219,3 @@ Primrose.Input.Speech = ( function () {
   return SpeechInput;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Input.Speech",
-  name: "document Speech",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.Speech](#Primrose_Input_Speech) class in the input/ directory"
-} );

@@ -132,9 +132,3 @@ For more information, see [Radian - Wikipedia, the free encyclopedia](https://en
   return Angle;
 } )( );
 
-pliny.issue({
-  parent: "Primrose.Angle",
-  name: "document Angle",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.Angle](#Primrose_Angle) class in the  directory"
-} );

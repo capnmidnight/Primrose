@@ -288,9 +288,3 @@ Primrose.Input.VR = (function () {
   return VRInput;
 })();
 
-pliny.issue({
-  parent: "Primrose.Input.VR",
-  name: "document VR",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.VR](#Primrose_Input_VR) class in the input/ directory"
-});

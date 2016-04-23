@@ -62,16 +62,3 @@ Primrose.Text.Controls.PlainText = ( function () {
   return PlainText;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.Controls.PlainText",
-  name: "document PlainText",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Controls.PlainText](#Primrose_Text_Controls_PlainText) class in the controls/ directory"
-} );
-
-pliny.issue({
-  parent: "Primrose.Text.Controls.PlainText",
-  name: "rename PlainText",
-  type: "open",
-  description: "The purpose of this control is to be an easier-to-use, simpler text area that doesn't support syntax highlighting or complex layout flows. It will probably be used most often in the single-line form."
-} );

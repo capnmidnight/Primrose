@@ -14,9 +14,3 @@ Primrose.Text.OperatingSystems.OSX = ( function () {
       "META", "UPARROW", "DOWNARROW" );
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.OperatingSystems.OSX",
-  name: "document OSX",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.OperatingSystems.OSX](#Primrose_Text_OperatingSystems_OSX) class in the operating_systems/ directory"
-} );

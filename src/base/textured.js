@@ -1,10 +1,4 @@
-﻿pliny.issue({
-  name: "document textured",
-  type: "open",
-  description: "Finish writing the documentation for the [`textured`](#textured) function\n\
-in the helpers/graphics.js file."
-});
-pliny.function({
+﻿pliny.function({
   name: "textured",
   description: "| [under construction]"
 });

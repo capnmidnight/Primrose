@@ -282,9 +282,3 @@ Then we can create and use an automatically workerized version of it as follows.
   return Workerize;
 })();
 
-pliny.issue({
-  parent: "Primrose.Workerize",
-  name: "document Workerize",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.Workerize](#Primrose_Workerize) class in the  directory"
-});

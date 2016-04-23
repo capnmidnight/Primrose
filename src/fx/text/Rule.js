@@ -52,9 +52,3 @@ Primrose.Text.Rule = ( function ( ) {
   return Rule;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.Rule",
-  name: "document Rule",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Rule](#Primrose_Text_Rule) class in the text/ directory"
-} );

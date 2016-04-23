@@ -2,13 +2,6 @@
 
 Primrose.Input.ButtonAndAxis = ( function () {
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis",
-    type: "open",
-    description: "Finish writing the documentation for the [Primrose.Input.ButtonAndAxis](#Primrose_Input_ButtonAndAxis) class in the input/ directory."
-  } );
-  
   pliny.class({
     parent: "Primrose.Input",
     name: "ButtonAndAxis",
@@ -23,156 +16,48 @@ Primrose.Input.ButtonAndAxis = ( function () {
   function ButtonAndAxisInput ( name, commands, socket, axes ) {
     Primrose.NetworkedInput.call( this, name, commands, socket );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.inputState.axes",
-      type: "open",
-      description: ""
-    } );
     this.inputState.axes = [ ];
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.inputState.buttons",
-      type: "open",
-      description: ""
-    } );
     this.inputState.buttons = [ ];
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.axisNames",
-      type: "open",
-      description: ""
-    } );
     this.axisNames = axes || [ ];
 
     for ( var i = 0; i < this.axisNames.length; ++i ) {
       this.inputState.axes[i] = 0;
     }
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.setDeadzone",
-      type: "open",
-      description: ""
-    } );
     this.setDeadzone = this.setProperty.bind( this, "deadzone" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.setScale",
-      type: "open",
-      description: ""
-    } );
     this.setScale = this.setProperty.bind( this, "scale" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.setDT",
-      type: "open",
-      description: ""
-    } );
     this.setDT = this.setProperty.bind( this, "dt" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.setMin",
-      type: "open",
-      description: ""
-    } );
     this.setMin = this.setProperty.bind( this, "min" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.setMax",
-      type: "open",
-      description: ""
-    } );
     this.setMax = this.setProperty.bind( this, "max" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.addMetaKey",
-      type: "open",
-      description: ""
-    } );
     this.addMetaKey = this.addToArray.bind( this, "metaKeys" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.addAxis",
-      type: "open",
-      description: ""
-    } );
     this.addAxis = this.addToArray.bind( this, "axes" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.addButton",
-      type: "open",
-      description: ""
-    } );
     this.addButton = this.addToArray.bind( this, "buttons" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.removeMetaKey",
-      type: "open",
-      description: ""
-    } );
     this.removeMetaKey = this.removeFromArray.bind( this, "metaKeys" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.removeAxis",
-      type: "open",
-      description: ""
-    } );
     this.removeAxis = this.removeFromArray.bind( this, "axes" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.removeButton",
-      type: "open",
-      description: ""
-    } );
     this.removeButton = this.removeFromArray.bind( this, "buttons" );
 
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.invertAxis",
-      type: "open",
-      description: ""
-    } );
     this.invertAxis = this.invertInArray.bind( this, "axes" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.invertButton",
-      type: "open",
-      description: ""
-    } );
     this.invertButton = this.invertInArray.bind( this, "buttons" );
 
-    pliny.issue({
-      parent: "Primrose.Input.ButtonAndAxis",
-      name: "document ButtonAndAxis.invertMetaKey",
-      type: "open",
-      description: ""
-    } );
     this.invertMetaKey = this.invertInArray.bind( this, "metaKeys" );
   }
 
   inherit( ButtonAndAxisInput, Primrose.NetworkedInput );
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.inherit",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.inherit = function ( classFunc ) {
     inherit( classFunc, ButtonAndAxisInput );
     if ( classFunc.AXES ) {
@@ -190,12 +75,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     }
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.getAxis",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.getAxis = function ( name ) {
     var i = this.axisNames.indexOf( name );
     if ( i > -1 ) {
@@ -205,12 +84,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     return null;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.setAxis",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.setAxis = function ( name, value ) {
     var i = this.axisNames.indexOf( name );
     if ( i > -1 ) {
@@ -219,23 +92,11 @@ Primrose.Input.ButtonAndAxis = ( function () {
     }
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.setButton",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.setButton = function ( index, pressed ) {
     this.inPhysicalUse = true;
     this.inputState.buttons[index] = pressed;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.getValue",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.getValue = function ( name ) {
     return ( ( this.enabled || ( this.receiving && this.socketReady ) ) &&
         this.isEnabled( name ) &&
@@ -243,12 +104,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
         this.getAxis( name ) || 0;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.setValue",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.setValue = function ( name, value ) {
     var j = this.axisNames.indexOf( name );
     if ( !this.commands[name] && j > -1 ) {
@@ -259,12 +114,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     }
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.getVector3",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.getVector3 = function ( x, y, z, value ) {
     value = value || new THREE.Vector3();
     value.set(
@@ -274,12 +123,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     return value;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.addVector3",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.addVector3 = function ( x, y, z, value ) {
     value.x += this.getValue( x );
     value.y += this.getValue( y );
@@ -287,36 +130,18 @@ Primrose.Input.ButtonAndAxis = ( function () {
     return value;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.isDown",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.isDown = function ( name ) {
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
         this.isEnabled( name ) &&
         this.commands[name].state.pressed;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.isUp",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.isUp = function ( name ) {
     return ( this.enabled || ( this.receiving && this.socketReady ) ) &&
         this.isEnabled( name ) &&
         this.commands[name].state.pressed;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.maybeClone",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.maybeClone = function ( arr ) {
     var output = [ ];
     if ( arr ) {
@@ -331,12 +156,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     return output;
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.cloneCommand",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.cloneCommand = function ( cmd ) {
     return {
       name: cmd.name,
@@ -367,12 +186,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
     };
   };
 
-  pliny.issue({
-    parent: "Primrose.Input.ButtonAndAxis",
-    name: "document ButtonAndAxis.evalCommand",
-    type: "open",
-    description: ""
-  } );
   ButtonAndAxisInput.prototype.evalCommand = function ( cmd, metaKeysSet, dt ) {
     if ( metaKeysSet ) {
       var pressed = true,

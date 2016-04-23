@@ -121,9 +121,3 @@ Primrose.Output.HapticGlove = ( function () {
   return HapticGlove;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Output.HapticGlove",
-  name: "document HapticGlove",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Output.HapticGlove](#Primrose_Output_HapticGlove) class in the output/ directory"
-} );

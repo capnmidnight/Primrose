@@ -1,18 +1,6 @@
 /* global pliny */
 
 
-pliny.issue({
-  name: "document helpers/fmt.js",
-  type: "closed",
-  description: "Finish writing the documentation for the [fmt](#fmt) file in the helpers/ directory"
-} );
-
-
-pliny.issue({
-  name: "document sigfig function",
-  type: "closed",
-  description: "Finish writing the documentation for the [sigfig](#sigfig) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "sigfig",
   description: "Formats a decimal number to a certain length of decimal points.",
@@ -50,11 +38,6 @@ function sigfig ( x, y ) {
   return v;
 }
 
-pliny.issue({
-  name: "document fmt function",
-  type: "closed",
-  description: "Finish writing the documentation for the [fmt](#fmt) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "fmt",
   parameters: [
@@ -174,11 +157,6 @@ var fmt = ( function () {
 
 
 
-pliny.issue({
-  name: "document px function",
-  type: "closed",
-  description: "Finish writing the documentation for the [px](#px) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "px",
   description: "Appends the string \"px\" to the end of a number. Useful for specifying CSS units.",
@@ -190,11 +168,6 @@ pliny.function({
 } );
 var px = fmt.bind( this, "$1px" );
 
-pliny.issue({
-  name: "document pct function",
-  type: "closed",
-  description: "Finish writing the documentation for the [pct](#pct) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "pct",
   description: "Appends the string \"%\" to the end of a number. Useful for specifying CSS units.",
@@ -206,11 +179,6 @@ pliny.function({
 } );
 var pct = fmt.bind( this, "$1%" );
 
-pliny.issue({
-  name: "document ems function",
-  type: "closed",
-  description: "Finish writing the documentation for the [ems](#ems) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "ems",
   description: "Appends the string \"em\" to the end of a number. Useful for specifying CSS units.",
@@ -244,11 +212,6 @@ pliny.function({
 } );
 var vws = fmt.bind( this, "$1vw" );
 
-pliny.issue({
-  name: "document rgb function",
-  type: "closed",
-  description: "Finish writing the documentation for the [rgb](#rgb) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "rgb",
   description: "Builds a CSS `rbg()` color-value string from three parameters.",
@@ -263,11 +226,6 @@ pliny.function({
 } );
 var rgb = fmt.bind( this, "rgb($1, $2, $3)" );
 
-pliny.issue({
-  name: "document rgba function",
-  type: "closed",
-  description: "Finish writing the documentation for the [rgba](#rgba) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "rgba",
   description: "Builds a CSS `rbga()` color-value string from three parameters.",
@@ -283,11 +241,6 @@ pliny.function({
 } );
 var rgba = fmt.bind( this, "rgba($1, $2, $3, $4)" );
 
-pliny.issue({
-  name: "document hsl function",
-  type: "closed",
-  description: "Finish writing the documentation for the [hsl](#hsl) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "hsl",
   description: "Builds a CSS `hsl()` color-value string from three parameters.",
@@ -302,11 +255,6 @@ pliny.function({
 } );
 var hsl = fmt.bind( this, "hsl($1, $2%, $3%)" );
 
-pliny.issue({
-  name: "document hsla function",
-  type: "closed",
-  description: "Finish writing the documentation for the [hsla](#hsla) function in the helpers/fmt.js file."
-} );
 pliny.function({
   name: "hsla",
   description: "Builds a CSS `hsla()` color-value string from three parameters.",

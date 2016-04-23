@@ -1,11 +1,5 @@
 /* global pliny */
 
-pliny.issue({
-  name: "document copyObject",
-  type: "open",
-  description: "Finish writing the documentation for the [`copyObject`](#copyObject) function\n\
-in the helpers/oop.js file."
-} );
 pliny.function({
   name: "copyObject",
   description: "| [under construction]"
@@ -32,12 +26,6 @@ function copyObject ( dest, source ) {
   }
 }
 
-pliny.issue({
-  name: "document inherit",
-  type: "open",
-  description: "Finish writing the documentation for the [`inherit`](#inherit) function\n\
-in the helpers/oop.js file."
-} );
 pliny.function({
   name: "inherit",
   description: "| [under construction]"
@@ -48,12 +36,6 @@ function inherit ( classType, parentType ) {
 }
 
 
-pliny.issue({
-  name: "document range",
-  type: "open",
-  description: "Finish writing the documentation for the [`range`](#range) function\n\
-in the helpers/oop.js file."
-} );
 pliny.function({
   name: "range",
   description: "| [under construction]"
@@ -69,12 +51,6 @@ function range ( n, m, s, t ) {
 }
 
 
-pliny.issue({
-  name: "document emit",
-  type: "open",
-  description: "Finish writing the documentation for the [`emit`](#emit) function\n\
-in the helpers/oop.js file."
-} );
 pliny.function({
   name: "emit",
   description: "| [under construction]"
@@ -86,8 +62,3 @@ function emit ( evt, args ) {
   }
 }
 
-pliny.issue({
-  name: "document helpers/oop",
-  type: "open",
-  description: "Finish writing the documentation for the [oop](#oop) class in the helpers/ directory"
-} );

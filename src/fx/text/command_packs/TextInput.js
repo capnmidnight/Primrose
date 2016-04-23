@@ -16,9 +16,3 @@ Primrose.Text.CommandPacks.TextInput = (function () {
   return new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
 })();
 
-pliny.issue({
-  parent: "Primrose.Text.CommandPacks.TextInput",
-  name: "document TextInput",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.TextInput](#Primrose_Text_CommandPacks_TextInput) class in the command_packs/ directory"
-});

@@ -55,9 +55,3 @@ Primrose.Text.Themes.Default = ( function ( ) {
   };
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.Themes.Default",
-  name: "document Default",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Themes.Default](#Primrose_Text_Themes_Default) class in the themes/ directory"
-} );

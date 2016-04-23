@@ -58,9 +58,3 @@ The states paramareter should be an array of State objects that take the form of
   return StateList;
 } )();
 
-pliny.issue({
-  parent: "Primrose.StateList",
-  name: "document StateList",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.StateList](#Primrose_StateList) class in the  directory"
-} );

@@ -1,11 +1,4 @@
-﻿pliny.issue({
-  name: "document shell",
-  type: "closed",
-  description: "Finish writing the documentation for the [`shell`](#shell) function\n\
-in the helpers/graphics.js file."
-});
-
-pliny.function({
+﻿pliny.function({
   name: "shell",
   parameters: [
     { name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." },

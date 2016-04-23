@@ -99,9 +99,3 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
   } );
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.CodePages.FR_AZERTY",
-  name: "document FR_AZERTY",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CodePages.FR_AZERTY](#Primrose_Text_CodePages_FR_AZERTY) class in the code_pages/ directory"
-} );

@@ -167,9 +167,3 @@ Primrose.Input.Mouse = (function () {
   return MouseInput;
 })();
 
-pliny.issue({
-  parent: "Primrose.Input.Mouse",
-  name: "document Mouse",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.Mouse](#Primrose_Input_Mouse) class in the input/ directory"
-});

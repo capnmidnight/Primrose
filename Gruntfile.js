@@ -3,6 +3,7 @@
 var pkg = require("./package.json"),
   fs = require("fs"),
   path = require("path"),
+  recurseDirectory = require("./server/recurseDirectory"),
   headerFiles = [
     "node_modules/marked/lib/marked.js",
     "lib/pliny.js",
@@ -67,26 +68,6 @@ function jadeConfiguration(options, defaultData) {
   return config;
 }
 
-function recurseDirectory(root) {
-  var directoryQueue = [root],
-    files = [];
-  while (directoryQueue.length > 0) {
-    var directory = directoryQueue.shift(),
-      subFiles = fs.readdirSync(directory);
-    for (var j = 0; j < subFiles.length; ++j) {
-      var subFile = path.join(directory, subFiles[j]),
-        stats = fs.lstatSync(subFile);
-      if (stats.isDirectory()) {
-        directoryQueue.push(subFile);
-      }
-      else {
-        files.push("/" + subFile.replace(/\\/g, "/"));
-      }
-    }
-  }
-  return files;
-}
-
 var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
   debugDataES6 = {
     debug: true,
@@ -94,7 +75,7 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
     docFiles: recurseDirectory("doc")
       .filter(function (f) { return /.jade$/.test(f); })
       .map(function (f, i) {
-        var file = fs.readFileSync(f.substring(1), "utf-8").toString(),
+        var file = fs.readFileSync(f, "utf-8").toString(),
           match = file.match(headerSpec),
           index = i;
         if (match[1].length > 0) {
@@ -111,15 +92,12 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
   };
 
 debugDataES6.frameworkFiles.splice(0, 0,
-  "/lib/logger.js",
-  "/lib/webgl-debug.js");
+  "lib/logger.js",
+  "lib/webgl-debug.js");
 
 debugDataES6.frameworkFiles.splice
   .bind(debugDataES6.frameworkFiles, 0, 0)
-  .apply(debugDataES6.frameworkFiles, headerFiles
-    .map(function (f) {
-      return "/" + f;
-    }));
+  .apply(debugDataES6.frameworkFiles, headerFiles);
 
 debugDataES6.docFiles.sort(function (a, b) {
   return a.index - b.index;
@@ -127,7 +105,7 @@ debugDataES6.docFiles.sort(function (a, b) {
 
 var debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
 debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
-  return f.replace(/^\/src\//, "/es5/");
+  return f.replace(/^src\//, "es5/");
 });
 
 var jadeDebugConfigurationES5 = jadeConfiguration({ pretty: true }, debugDataES5),

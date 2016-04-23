@@ -1132,26 +1132,3 @@ Primrose.BrowserEnvironment = (function () {
   return BrowserEnvironment;
 })();
 
-pliny.issue({
-  parent: "Primrose.BrowserEnvironment",
-  name: "document BrowserEnvironment",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.BrowserEnvironment](#Primrose_BrowserEnvironment) class in the  directory"
-});
-
-pliny.issue({
-  parent: "Primrose.BrowserEnvironment",
-  name: "scene FOV issues",
-  type: "open",
-  description: "Image appears \"zoomed in\" when in VR mode. See \n\
-[VR mode seems \"zoomed in\" with DK2 · Issue #72 · capnmidnight/Primrose](https://github.com/capnmidnight/Primrose/issues/72) \n\
-for more information."
-});
-
-pliny.issue({
-  parent: "Primrose.BrowserEnvironment",
-  name: "default light",
-  type: "open",
-  description: "When the user does not define a scene model file and opts to use the\n\
-default scene, make sure a point light is added to the scene so the ground is visible."
-});

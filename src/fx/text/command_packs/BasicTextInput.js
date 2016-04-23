@@ -123,9 +123,3 @@ Primrose.Text.CommandPacks.BasicTextInput = (function () {
   return BasicTextInput;
 })();
 
-pliny.issue({
-  parent: "Primrose.Text.CommandPacks.BasicTextInput",
-  name: "document BasicTextInput",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.BasicTextInput](#Primrose.Text.CommandPacks.BasicTextInput) class in the command_packs/ directory"
-});

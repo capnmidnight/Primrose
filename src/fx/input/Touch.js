@@ -53,9 +53,3 @@ Primrose.Input.Touch = ( function () {
   return TouchInput;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Input.Touch",
-  name: "document Touch",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.Touch](#Primrose_Input_Touch) class in the input/ directory"
-} );

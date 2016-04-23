@@ -63,9 +63,3 @@ Primrose.Text.CommandPacks.TextEditor = (function () {
     });
 })();
 
-pliny.issue({
-  parent: "Primrose.Text.CommandPacks.TextEditor",
-  name: "document TextEditor",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CommandPacks.TextEditor](#Primrose_Text_CommandPacks_TextEditor) class in the command_packs/ directory"
-});

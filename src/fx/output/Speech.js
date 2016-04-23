@@ -54,9 +54,3 @@ Primrose.Output.Speech = ( function ( ) {
   }
 } )( );
 
-pliny.issue({
-  parent: "Primrose.Output.Speech",
-  name: "document Speech",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Output.Speech](#Primrose_Output_Speech) class in the output/ directory"
-} );

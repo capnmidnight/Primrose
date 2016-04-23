@@ -3,13 +3,6 @@
 Primrose.Input.Gamepad = (function () {
 
 
-  pliny.issue({
-    parent: "Primrose.Input.Gamepad",
-    name: "document Gamepad",
-    type: "open",
-    description: "Finish writing the documentation for the [Primrose.Input.Gamepad](#Primrose_Input_Gamepad) class in the input/ directory"
-  });
-
   pliny.class({
     parent: "Primrose.Input",
     name: "Gamepad",
@@ -29,12 +22,6 @@ Primrose.Input.Gamepad = (function () {
         gamepaddisconnected: []
       };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.checkDevice",
-      type: "open",
-      description: ""
-    });
     this.checkDevice = function (pad) {
       var i;
       for (i = 0; i < pad.buttons.length; ++i) {
@@ -46,12 +33,6 @@ Primrose.Input.Gamepad = (function () {
       console.log(pad.axes.join(", "));
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.poll",
-      type: "open",
-      description: ""
-    });
     this.poll = function () {
       var pads,
         currentPads = [],
@@ -118,64 +99,28 @@ Primrose.Input.Gamepad = (function () {
       sendAll(listeners.gamepaddisconnected, id);
     }
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.getErrorMessage",
-      type: "open",
-      description: ""
-    });
     this.getErrorMessage = function () {
       return errorMessage;
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.setGamepad",
-      type: "open",
-      description: ""
-    });
     this.setGamepad = function (id) {
       gpid = id;
       this.inPhysicalUse = true;
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.clearGamepad",
-      type: "open",
-      description: ""
-    });
     this.clearGamepad = function () {
       gpid = null;
       this.inPhysicalUse = false;
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.isGamepadSet",
-      type: "open",
-      description: ""
-    });
     this.isGamepadSet = function () {
       return !!gpid;
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.getConnectedGamepads",
-      type: "open",
-      description: ""
-    });
     this.getConnectedGamepads = function () {
       return connectedGamepads.slice();
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.addEventListener",
-      type: "open",
-      description: ""
-    });
     this.addEventListener = function (event, handler, bubbles) {
       if (listeners[event]) {
         listeners[event].push(handler);
@@ -185,12 +130,6 @@ Primrose.Input.Gamepad = (function () {
       }
     };
 
-    pliny.issue({
-      parent: "Primrose.Input.Gamepad",
-      name: "document Gamepad.removeEventListener",
-      type: "open",
-      description: ""
-    });
     this.removeEventListener = function (event, handler, bubbles) {
       if (listeners[event]) {
         remove(listeners[event], handler);
@@ -207,12 +146,6 @@ Primrose.Input.Gamepad = (function () {
     }
   }
 
-  pliny.issue({
-    parent: "Primrose.Input.Gamepad",
-    name: "document Gamepad.AXES",
-    type: "open",
-    description: ""
-  });
   GamepadInput.AXES = ["LSX", "LSY", "RSX", "RSY"];
   Primrose.Input.ButtonAndAxis.inherit(GamepadInput);
   return GamepadInput;

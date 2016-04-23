@@ -48,9 +48,3 @@ Primrose.ButtonFactory = (function () {
   return ButtonFactory;
 })();
 
-pliny.issue({
-  parent: "Primrose.ButtonFactory",
-  name: "document ButtonFactory",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.ButtonFactory](#Primrose_ButtonFactory) class in the  directory"
-});

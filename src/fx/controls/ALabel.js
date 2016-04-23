@@ -170,10 +170,3 @@ Primrose.Controls.Label = (function () {
   return Label;
 })();
 
-pliny.issue({
-  parent: "Primrose.Controls.Label",
-  name: "document Label",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Controls.Label](#Primrose_Controls_Label)\n\
-class in the controls/ directory."
-});

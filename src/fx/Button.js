@@ -150,9 +150,3 @@ Primrose.Button = ( function () {
   return Button;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Button",
-  name: "document Button",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.Button](#Primrose_Button) class in the  directory"
-} );

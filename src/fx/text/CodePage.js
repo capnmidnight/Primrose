@@ -134,9 +134,3 @@ Primrose.Text.CodePage = ( function ( ) {
   return CodePage;
 } ) ();
 
-pliny.issue({
-  parent: "Primrose.Text.CodePage",
-  name: "document CodePage",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CodePage](#Primrose_Text_CodePage) class in the text/ directory"
-} );

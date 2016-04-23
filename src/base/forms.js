@@ -1,10 +1,5 @@
 /* global pliny */
 
-pliny.issue({
-  name: "document getSetting",
-  type: "closed",
-  description: "Finish writing the documentation for the `getSetting()` function in the helpers/forms.js file."
-} );
 pliny.function({
   name: "getSetting",
   parameters: [
@@ -46,11 +41,6 @@ function getSetting ( name, defValue ) {
   return defValue;
 }
 
-pliny.issue({
-  name: "document setSetting",
-  type: "closed",
-  description: "Finish writing the documentation for the `setSetting()` function in the helpers/forms.js file."
-} );
 pliny.function({
   name: "setSetting",
   parameters: [
@@ -85,11 +75,6 @@ function setSetting ( name, val ) {
   }
 }
 
-pliny.issue({
-  name: "document deleteSetting",
-  type: "closed",
-  description: "Finish writing the documentation for the `deleteSetting()` function in the helpers/forms.js file."
-} );
 pliny.function({
   name: "deleteSetting",
   parameters: [
@@ -114,11 +99,6 @@ function deleteSetting ( name ) {
   }
 }
 
-pliny.issue({
-  name: "document readForm",
-  type: "closed",
-  description: "Finish writing the documentation for the `readForm()` function in the helpers/forms.js file."
-} );
 pliny.function({
   name: "readForm",
   parameters: [
@@ -172,11 +152,6 @@ function readForm ( ctrls ) {
 }
 
 
-pliny.issue({
-  name: "document writeForm",
-  type: "closed",
-  description: "Finish writing the documentation for the `writeForm()` function in the helpers/forms.js file."
-} );
 pliny.function({
   name: "writeForm",
   parameters: [
@@ -229,8 +204,3 @@ function writeForm ( ctrls, state ) {
   }
 }
 
-pliny.issue({
-  name: "document helpers/forms.js",
-  type: "closed",
-  description: "Finish writing the documentation for the [forms](#forms) file in the helpers/ directory."
-} );

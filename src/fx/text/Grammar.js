@@ -215,9 +215,3 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
   return Grammar;
 })();
 
-pliny.issue({
-  parent: "Primrose.Text.Grammar",
-  name: "document Grammar",
-  type: "closed",
-  description: "Finish writing the documentation for the [Primrose.Text.Grammar](#Primrose_Text_Grammar) class in the text/ directory"
-});

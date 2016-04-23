@@ -26,8 +26,7 @@ function scroller(id) {
     events: [],
     functions: [],
     enumerations: [],
-    records: [],
-    issues: []
+    records: []
   };
 
   function search() {
@@ -136,23 +135,20 @@ function scroller(id) {
           elem.appendChild(list);
           lists.push(list);
           ++curLevel;
-          list.isIssue = elem.innerHTML.indexOf("Issues") >= 0;
         }
         else if (level < curLevel) {
           lists.pop();
           --curLevel;
         }
 
-        var curList = lists[lists.length - 1];
-        if (!curList.isIssue) {
-          var link = document.createElement("a"),
-            elem = document.createElement("li");
-          link.appendChild(document.createTextNode(txt));
-          link.href = "javascript:scroller(\"header" + i + "\")";
-          h.id = "header" + i;
-          elem.appendChild(link);
-          curList.appendChild(elem);
-        }
+        var curList = lists[lists.length - 1],
+          link = document.createElement("a"),
+          elem = document.createElement("li");
+        link.appendChild(document.createTextNode(txt));
+        link.href = "javascript:scroller(\"header" + i + "\")";
+        h.id = "header" + i;
+        elem.appendChild(link);
+        curList.appendChild(elem);
       }
 
       headers[1].parentElement.insertBefore(root, headers[1]);
@@ -235,25 +231,16 @@ function scroller(id) {
           }
         });
 
-        output += "<li><h2>";
-        if (g === "issues") {
-          output += "Open Issues (" + group.length + ")";
-        }
-        else {
-          output += g;
-        }
-        output += "</h2><ul>";
+        output += "<li><h2>" + g + "</h2><ul>";
         for (var i = 0; i < group.length; ++i) {
-          var obj = group[i];
-          if (g !== "issues" || obj.type === "open") {
-            var id = "#" + obj.id.trim(),
-              doc = docoCache[id];
-            output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
-            if (doc && doc.indexOf("[under construction]") > -1) {
-              output += " class=\"incomplete\"";
-            }
-            output += ">" + obj.fullName + "</a></li>";
+          var obj = group[i],
+            id = "#" + obj.id.trim(),
+            doc = docoCache[id];
+          output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
+          if (doc && doc.indexOf("[under construction]") > -1) {
+            output += " class=\"incomplete\"";
           }
+          output += ">" + obj.fullName + "</a></li>";
         }
         output += "</ul></li>";
       }

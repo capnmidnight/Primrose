@@ -128,13 +128,6 @@ to a 3D element on-the-fly.\n\
     ]
   });
 
-  pliny.issue({
-    parent: "Primrose.BaseControl",
-    name: "document BaseControl",
-    type: "closed",
-    description: "Finish writing the documentation for the [Primrose.BaseControl](#Primrose_BaseControl) class in the  directory"
-  });
-
   class BaseControl {
     constructor() {
       pliny.property({

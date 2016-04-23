@@ -77,9 +77,3 @@ Primrose.Input.Motion = ( function ( ) {
   return MotionInput;
 } )( );
 
-pliny.issue({
-  parent: "Primrose.Input.Motion",
-  name: "document Motion",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Input.Motion](#Primrose_Input_Motion) class in the input/ directory"
-} );

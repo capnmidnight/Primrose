@@ -238,9 +238,3 @@ Primrose.WebRTCSocket = ( function () {
   return WebRTCSocket;
 } )();
 
-pliny.issue({
-  parent: "Primrose.WebRTCSocket",
-  name: "document WebRTCSocket",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.WebRTCSocket](#Primrose_WebRTCSocket) class in the  directory"
-} );

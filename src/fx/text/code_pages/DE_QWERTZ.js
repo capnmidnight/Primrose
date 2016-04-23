@@ -128,9 +128,3 @@ Primrose.Text.CodePages.DE_QWERTZ = (function () {
   });
 })();
 
-pliny.issue({
-  parent: "Primrose.Text.CodePages.DE_QWERTZ",
-  name: "document DE_QWERTZ",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.CodePages.DE_QWERTZ](#Primrose_Text_CodePages_DE_QWERTZ) class in the code_pages/ directory"
-} );

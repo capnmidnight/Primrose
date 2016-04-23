@@ -321,9 +321,3 @@ We can load a bunch of models in one go using the following code.\n\
   return ModelLoader;
 })();
 
-pliny.issue({
-  parent: "Primrose.ModelLoader",
-  name: "Move ModelLoader to a Three.js specific namespace",
-  type: "open",
-  description: "This class won't work outside of a Three.js context. The bits of code that absolutely must have Three.js should be moved to their own namespace."
-});

@@ -109,9 +109,3 @@ Primrose.Text.Rectangle = ( function ( ) {
   return Rectangle;
 } )();
 
-pliny.issue({
-  parent: "Primrose.Text.Rectangle",
-  name: "document Rectangle",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Text.Rectangle](#Primrose_Text_Rectangle) class in the text/ directory"
-} );

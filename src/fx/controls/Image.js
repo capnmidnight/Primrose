@@ -162,10 +162,3 @@ Primrose.Controls.Image = (function () {
   return Image;
 })();
 
-pliny.issue({
-  parent: "Primrose.Controls.Image",
-  name: "document Image",
-  type: "open",
-  description: "Finish writing the documentation for the [Primrose.Controls.Image](#Primrose_Controls_Image)\n\
-class in the controls/ directory."
-});
