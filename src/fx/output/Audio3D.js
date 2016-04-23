@@ -183,19 +183,26 @@ Primrose.Output.Audio3D = (function () {
       }]
   });
   Audio3D.prototype.loadSource = function (sources, loop) {
-    if (!(sources instanceof Array)) {
-      sources = [sources];
-    }
-    var audio = document.createElement("audio");
-    audio.autoplay = true;
-    audio.loop = loop;
-    sources.map((src) => {
-      var source = document.createElement("source");
-      source.src = src;
-      return source;
-    }).forEach(audio.appendChild.bind(audio));
     return new Promise((resolve, reject) => {
-      audio.onload = () => resolve(this.context.createMediaElementSource(audio));
+      if (!(sources instanceof Array)) {
+        sources = [sources];
+      }
+      var audio = document.createElement("audio");
+      audio.autoplay = true;
+      audio.loop = loop;
+      sources.map((src) => {
+        var source = document.createElement("source");
+        source.src = src;
+        return source;
+      }).forEach(audio.appendChild.bind(audio));
+      audio.oncanplay = () => {
+        var snd = {
+          volume: this.context.createGain(),
+          source: this.context.createMediaElementSource(audio)
+        };
+        snd.source.connect(snd.volume);
+        resolve(snd);
+      };
       audio.onerror = reject;
       document.body.appendChild(audio);
     });
