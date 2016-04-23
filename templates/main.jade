@@ -38,7 +38,8 @@ html
       
     <!-- start main.jade head block -->
     block head
-      script(type="text/javascript", src="/scripts/ga.min.js", async, defer)
+      script(type="text/javascript", src= fileRoot + "scripts/analytics.min.js")
+      script(type="text/javascript", src= fileRoot + "scripts/ga.min.js", async, defer)
     <!-- end main.jade head block -->
   body
   
@@ -46,17 +47,17 @@ html
     block banner
     <!-- end main.jade banner block -->
     header(role="banner")
-      a#logo(href="/index.html")
-        img(src="/images/primrose32.png", alt="logo", title="Primrose logo")
+      a#logo(href= fileRoot)
+        img(src= fileRoot + "images/primrose32.png", alt="logo", title="Primrose logo")
 
       nav(role="navigation")
         ul
-          li: a(href="/index.html#intro") intro/
-          li: a(href="/index.html#webvr") webvr/
-          li: a(href="/doc/") doc/
-          li: a(href="/index.html#dev") download/
-          li: a(href="/index.html#teamInfo") team/
-          li: a(href="/index.html#mail") contact/
+          li: a(href= fileRoot + "#intro") intro/
+          li: a(href= fileRoot + "#webvr") webvr/
+          li: a(href= fileRoot + "doc/") doc/
+          li: a(href= fileRoot + "#dev") download/
+          li: a(href= fileRoot + "#teamInfo") team/
+          li: a(href= fileRoot + "#mail") contact/
           li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") src/
 
     <!-- start main.jade main block -->

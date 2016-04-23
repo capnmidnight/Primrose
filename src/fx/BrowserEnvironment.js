@@ -585,10 +585,10 @@ Primrose.BrowserEnvironment = (function () {
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         readyFired = false,
         modelFiles = [
-          "/models/monitor.obj",
-          "/models/fullscreen_text.obj",
-          "/models/cardboard.obj",
-          "/models/vr_text.obj",
+          "../../models/monitor.obj",
+          "../../models/fullscreen_text.obj",
+          "../../models/cardboard.obj",
+          "../../models/vr_text.obj",
         ],
         monitor = null,
         cardboard = null;
@@ -598,57 +598,70 @@ Primrose.BrowserEnvironment = (function () {
       if (this.options.button && typeof this.options.button.model === "string") {
         modelFiles.push(this.options.button.model);
       }
-      var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then((models) => {
-        monitor = models.shift();
-        var monitorText = models.shift();
-        cardboard = models.shift();
-        var cardboardText = models.shift();
+      var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
+        .then((models) => {
+          monitor = models.shift();
+          var monitorText = models.shift();
+          cardboard = models.shift();
+          var cardboardText = models.shift();
 
-        monitor.rotation.set(0, 270 * Math.PI / 180, 0);
-        monitor.position.set(0, 0.7, -1);
-        monitor.name = "Monitor";
-        monitor.addEventListener("click", this.goFullScreen, false);
-        this.scene.add(monitor);
-        this.scene.Monitor = monitor;
-        this.registerPickableObject(monitor);
-        monitor.add(monitorText);
+          monitor.rotation.set(0, 270 * Math.PI / 180, 0);
+          monitor.position.set(0, 0.7, -1);
+          monitor.name = "Monitor";
+          monitor.addEventListener("click", this.goFullScreen, false);
+          this.scene.add(monitor);
+          this.scene.Monitor = monitor;
+          this.registerPickableObject(monitor);
+          monitor.add(monitorText);
 
-        if (Primrose.Input.VR.Version >= 0) {
+          if (Primrose.Input.VR.Version > 0) {
+            monitor.rotation.set(0, 300 * Math.PI / 180, 0);
+            monitor.position.set(-0.25, 0.7, -1);
 
-          monitor.rotation.set(0, 300 * Math.PI / 180, 0);
-          monitor.position.set(-0.25, 0.7, -1);
+            cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
+            cardboard.position.set(0.2, 1.75, -1);
+            cardboard.name = "Cardboard";
+            cardboard.addEventListener("click", this.goVR, false);
+            this.scene.add(cardboard);
+            this.scene.Cardboard = cardboard;
+            this.registerPickableObject(cardboard);
+            cardboard.add(cardboardText);
+          }
 
-          cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
-          cardboard.position.set(0.2, 1.75, -1);
-          cardboard.name = "Cardboard";
-          cardboard.addEventListener("click", this.goVR, false);
-          this.scene.add(cardboard);
-          this.scene.Cardboard = cardboard;
-          this.registerPickableObject(cardboard);
-          cardboard.add(cardboardText);
-        }
-        
-        if (this.options.sceneModel) {
-          buildScene(models.shift());
-        }
-        if (this.options.button) {
-          this.buttonFactory = new Primrose.ButtonFactory(
-            models.shift(),
-            this.options.button.options);
-        }
-        else {
-          this.buttonFactory = new Primrose.ButtonFactory(
-            brick(0xff0000, 1, 1, 1), {
-              maxThrow: 0.1,
-              minDeflection: 10,
-              colorUnpressed: 0x7f0000,
-              colorPressed: 0x007f00,
-              toggle: true
-            });
-        }
-      }).then(() => fire("ready"));
-    
-    
+          if (this.options.sceneModel) {
+            buildScene(models.shift());
+          }
+          if (this.options.button) {
+            this.buttonFactory = new Primrose.ButtonFactory(
+              models.shift(),
+              this.options.button.options);
+          }
+          else {
+            this.buttonFactory = new Primrose.ButtonFactory(
+              brick(0xff0000, 1, 1, 1), {
+                maxThrow: 0.1,
+                minDeflection: 10,
+                colorUnpressed: 0x7f0000,
+                colorPressed: 0x007f00,
+                toggle: true
+              });
+          }
+        })
+        .catch(() => {
+          if (!this.buttonFactory) {
+            this.buttonFactory = new Primrose.ButtonFactory(
+              brick(0xff0000, 1, 1, 1), {
+                maxThrow: 0.1,
+                minDeflection: 10,
+                colorUnpressed: 0x7f0000,
+                colorPressed: 0x007f00,
+                toggle: true
+              });
+          }
+        })
+        .then(() => fire("ready"));
+
+
       //
       // Initialize public properties
       //
@@ -881,7 +894,7 @@ Primrose.BrowserEnvironment = (function () {
           }
         }
       };
-    
+
       //
       // Manage full-screen state
       //
@@ -996,7 +1009,7 @@ Primrose.BrowserEnvironment = (function () {
       if (window.alert.toString().indexOf("native code") > -1) {
         // overwrite the native alert functions so they can't be called while in
         // fullscreen VR mode.
-      
+
         var rerouteDialog = (oldFunction, newFunction) => {
           if (!newFunction) {
             newFunction = function () {

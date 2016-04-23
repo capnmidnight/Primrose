@@ -4,11 +4,11 @@ THREE.ImageLoader.crossOrigin = "anonymous";
 var DEBUG_VR = false,
     app = new Primrose.BrowserEnvironment(
         "glove demo", {
-          sceneModel: "/models/scene5.json",
-          skyTexture: "/examples/images/bg2.jpg",
-          groundTexture: "/examples/images/deck.png",
+          sceneModel: "../../models/scene5.json",
+          skyTexture: "../images/bg2.jpg",
+          groundTexture: "../images/deck.png",
           button: {
-            model: "/models/smallbutton.json",
+            model: "../../models/smallbutton.json",
             options: {
               maxThrow: 0.1,
               minDeflection: 10,

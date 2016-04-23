@@ -9,8 +9,8 @@ var WIDTH = 100,
   jabs = {},
   R = Primrose.Random,
   app = new Primrose.BrowserEnvironment("Editor3D", {
-    skyTexture: "/examples/images/bg2.jpg",
-    groundTexture: "/examples/images/grass.png"
+    skyTexture: "../images/bg2.jpg",
+    groundTexture: "../images/grass.png"
   });
 
 // and clicking on the objects in the scene

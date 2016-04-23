@@ -1,14 +1,14 @@
 /* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
-var GRASS = "/examples/images/grass.png",
-  ROCK = "/examples/images/rock.png",
-  SAND = "/examples/images/sand.png",
-  WATER = "/examples/images/water.png",
-  DECK = "/examples/images/deck.png",
+var GRASS = "../images/grass.png",
+  ROCK = "../images/rock.png",
+  SAND = "../images/sand.png",
+  WATER = "../images/water.png",
+  DECK = "../images/deck.png",
 
   app = new Primrose.BrowserEnvironment("Editor3D", {
     useFog: false,
-    skyTexture: "/examples/images/bg2.jpg",
-    ambientSound: "/music/wind.ogg",
+    skyTexture: "../images/bg2.jpg",
+    ambientSound: "../../wind.ogg",
     groundTexture: GRASS
   }),
 

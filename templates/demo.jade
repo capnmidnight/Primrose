@@ -5,7 +5,7 @@ block viewport
 
 append head
   <!-- start demo.jade head append -->
-  link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")
+  link(type="text/css", rel="stylesheet", href= fileRoot + "stylesheets/" + (debug ? "main.css" : "main.min.css"))
   link(type="text/css", rel="stylesheet", href= debug ? "../style.css" : "../style.min.css")
   style(type="text/css") body{background-image:url(screenshot.jpg);}
   <!-- end demo.jade head append -->

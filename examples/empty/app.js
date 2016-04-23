@@ -1,7 +1,7 @@
 /* global Primrose, put */
 var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
-  skyTexture: "/examples/images/bg.jpg",
-  groundTexture: "/examples/images/deck.png"
+  skyTexture: "../images/bg.jpg",
+  groundTexture: "../images/deck.png"
 } );
 
 app.addEventListener( "ready", function () {

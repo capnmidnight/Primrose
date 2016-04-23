@@ -177,10 +177,10 @@ window.Primrose = (function () {
     ]
   });
   var textureLoader = null;
-  Primrose.loadTexture = function (url, onLoad, onProgress, onError) {
+  Primrose.loadTexture = function (url) {
     textureLoader = textureLoader || new THREE.TextureLoader();
     textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-    textureLoader.load(url, onLoad, onProgress, onError);
+    return new Promise((resolve, reject) => textureLoader.load(url, resolve, null, reject));
   };
 
   pliny.value({

@@ -62,6 +62,12 @@ function jadeConfiguration(options, defaultData) {
 
   config.options.data = function (dest, src) {
     defaultData.filename = dest;
+    var parts = dest.split("/");
+    parts.pop();
+    for (var i = 0; i < parts.length; ++i) {
+      parts[i] = "../";
+    }
+    defaultData.fileRoot = parts.join("");
     return defaultData;
   }.bind(config);
 

@@ -131,7 +131,9 @@ var textured = (function () {
         obj.surface = txt;
       }
       else if (typeof txt === "string") {
-        Primrose.loadTexture(txt, setTexture, null, console.error.bind(console, "Error loading texture", txt));
+        Primrose.loadTexture(txt)
+          .then(setTexture)
+          .catch(console.error.bind(console, "Error loading texture", txt));
       }
       else if (txt instanceof Primrose.Text.Controls.TextBox) {
         setTexture(txt.renderer.texture);

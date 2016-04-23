@@ -6,13 +6,13 @@ var app = new Primrose.BrowserEnvironment(
     // file, which basically describes a room or level in 
     // which the user will walk around, on which we can 
     // create additional objects.
-    sceneModel: "/models/holodeck.json",
+    sceneModel: "../../models/holodeck.json",
     // One of our GUI controls is configured here.
     button: {
       // This file references another Three.js JSON-formatted
       // model file, which will be cloned anytime a user
       // calls createElement("button").
-      model: "/models/smallbutton.json",
+      model: "../../models/smallbutton.json",
       // Display settings for different states of the button.
       options: {
         colorUnpressed: 0x7f0000,

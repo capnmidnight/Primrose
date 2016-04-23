@@ -1,10 +1,10 @@
 /* global Primrose, THREE, isMobile, put, exp */
 
-var GRASS = "/examples/images/grass.png",
-  ROCK = "/examples/images/rock.png",
-  SAND = "/examples/images/sand.png",
-  WATER = "/examples/images/water.png",
-  DECK = "/examples/images/deck.png",
+var GRASS = "../images/grass.png",
+  ROCK = "../images/rock.png",
+  SAND = "../images/sand.png",
+  WATER = "../images/water.png",
+  DECK = "../images/deck.png",
   WIDTH = 100,
   HEIGHT = 11,
   DEPTH = 100,
@@ -17,7 +17,7 @@ var GRASS = "/examples/images/grass.png",
   dz = 4,
   app = new Primrose.BrowserEnvironment("AncientTemple", {
     useFog: true,
-    skyTexture: "/examples/images/bg2.jpg",
+    skyTexture: "../images/bg2.jpg",
     groundTexture: ROCK
   });
 

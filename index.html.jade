@@ -1,15 +1,15 @@
 ﻿extends ./templates/main.jade
 
 append head
-  link(type="text/css", rel="stylesheet", href=debug ? "/stylesheets/main.css" : "/stylesheets/main.min.css")
+  link(type="text/css", rel="stylesheet", href= fileRoot + "stylesheets/" + (debug ? "main.css" : "main.min.css"))
   script(src="//cdn.webglstats.com/stat.js", async, defer)
-  script(type="text/javascript", src="/scripts/mailchimp.min.js", async, defer)
+  script(type="text/javascript", src= fileRoot + "scripts/mailchimp.min.js", async, defer)
   
 block banner
   section#demo
-    iframe#frontBuffer(src="/examples/editor3d/index.html", role="application", allowfullscreen)
+    iframe#frontBuffer(src= fileRoot + "examples/editor3d/index.html", role="application", allowfullscreen)
     #overlay
-      img(src="/images/primrose64.png", title="Primrose WebVR Framework", alt="Primrose Banner")
+      img(src= fileRoot + "images/primrose64.png", title="Primrose WebVR Framework", alt="Primrose Banner")
       p Productive Virtual Reality
     
 block main
@@ -18,7 +18,7 @@ block main
       article
         h2 Make VR Apps for your browser
         div
-          img(src="/images/logo128.png", alt="logo", title="Primrose", style="float:left;")
+          img(src= fileRoot + "images/logo128.png", alt="logo", title="Primrose", style="float:left;")
           p Primrose VR democratizes access to what experts and enthusiasts alike are calling "The Last Medium", aka Virtual Reality. Smartphones changed the world by providing people with constant access to applications that fit their on-the-go lifestyle, untethered from their desks. Virtual Reality will change the world by providing people with constant access to natural-feeling, face-to-face collaboration with anyone in the world.
 
           p The Primrose Framework helps web developers create virtual reality experiences within standard web browsers on desktop and mobile devices alike. Through its common interaction space, design tools, interface objects, and user experience best-practices, users and developers collaborate to create interactive multimedia and productivity applications.
@@ -29,32 +29,32 @@ block main
         h3 Examples
         ul
           li
-            a(href="/examples/editor3d/index.html", target="_blank")
-              img(src="/examples/editor3d/screenshot.jpg", alt="screenshot", title="3D Live Programming")
+            a(href= fileRoot + "examples/editor3d/index.html", target="_blank")
+              img(src= fileRoot + "examples/editor3d/screenshot.jpg", alt="screenshot", title="3D Live Programming")
               | 3D Live Programming
               br
               small Edit objects on the fly!
           li
-            a(href="/examples/temple/index.html", target="_blank")
-              img(src="/examples/temple/screenshot.jpg", alt="screenshot", title="Ancient Temple")
+            a(href= fileRoot + "examples/temple/index.html", target="_blank")
+              img(src= fileRoot + "examples/temple/screenshot.jpg", alt="screenshot", title="Ancient Temple")
               | Ancient Temple
               br
               small Randomly generated columns and dust!
           li
-            a(href="/examples/music/index.html", target="_blank")
-              img(src="/examples/music/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "examples/music/index.html", target="_blank")
+              img(src= fileRoot + "examples/music/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Music
               br
               small A little synthesizer keyboard you can play!
           li
-            a(href="/examples/commodore/index.html", target="_blank")
-              img(src="/examples/commodore/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "examples/commodore/index.html", target="_blank")
+              img(src= fileRoot + "examples/commodore/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Commodore PET
               br
               small Cutting edge 1977 technology!
           li
-            a(href="/examples/jabbers/index.html", target="_blank")
-              img(src="/examples/jabbers/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "examples/jabbers/index.html", target="_blank")
+              img(src= fileRoot + "examples/jabbers/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Bouncing Jabber Yabs
               br
               small Not at all creepy!
@@ -67,37 +67,37 @@ block main
         ul
           li
             a(href="http://webvr.info/", target="_blank")
-              img(src="/images/webvr.info.png", alt="logo", title="WebVR.info")
+              img(src= fileRoot + "images/webvr.info.png", alt="logo", title="WebVR.info")
               | WebVR.info
               br
               small WebVR standard information.
           li
             a(href="http://mozvr.com/", target="_blank")
-              img(src="/images/mozvr.com.jpg", alt="logo", title="MozVR.com")
+              img(src= fileRoot + "images/mozvr.com.jpg", alt="logo", title="MozVR.com")
               | MozVR.com
               br
               small Mozilla's WebVR team.
           li
             a(href="https://nightly.mozilla.org/", target="_blank")
-              img(src="/images/nightly.mozilla.jpg", alt="logo", title="Firefox Nightly")
+              img(src= fileRoot + "images/nightly.mozilla.jpg", alt="logo", title="Firefox Nightly")
               | Firefox Nightly
               br
               small With WebVR sauce!
           li
             a(href="http://blog.tojicode.com/2014/07/bringing-vr-to-chrome.html", target="_blank")
-              img(src="/images/chromium.webvr.png", alt="screenshot", title="Chromium WebVR")
+              img(src= fileRoot + "images/chromium.webvr.png", alt="screenshot", title="Chromium WebVR")
               | Chromium WebVR
               br
               small Also with WebVR sauce!
           li
             a(href="https://www.reddit.com/r/webvr", target="_blank")
-              img(src="/images/reddit.webvr.png", alt="screenshot", title="Reddit WebVR")
+              img(src= fileRoot + "images/reddit.webvr.png", alt="screenshot", title="Reddit WebVR")
               | WebVR Subreddit
               br
               small Links and discussion on VR for the Web, from around the Web.
           li
             a(href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API", target="_blank")
-              img(src="/images/mdn.webvr.jpg", alt="screenshot", title="Mozilla Developer Network: WebVR API")
+              img(src= fileRoot + "images/mdn.webvr.jpg", alt="screenshot", title="Mozilla Developer Network: WebVR API")
               | Mozilla Developer Network: WebVR API
               br
               small Documentation on the WebVR APIs as they are currently implemented.
@@ -108,13 +108,13 @@ block main
 
         p Getting up and running with Primrose  is quick and easy. Check out the example code below.
 
-        iframe#example(src="/examples/editor2d/index.html")
+        iframe#example(src= fileRoot + "examples/editor2d/index.html")
 
-        p: a.primary.button(href="/scripts/Primrose.min.js", target="_blank")
+        p: a.primary.button(href= fileRoot + "scripts/Primrose.min.js", target="_blank")
             | Download Primrose.min.js, v#{version} #[br]
             small 179KB, 55KB gzipped
 
-        p: a.secondary.button(href="/scripts/Primrose.js", target="_blank") 
+        p: a.secondary.button(href= fileRoot + "scripts/Primrose.js", target="_blank") 
             | Download Primrose.js, v#{version} #[br]
             small 381KB, useful for debugging
 
@@ -122,7 +122,7 @@ block main
             | Get the Source Code #[br]
             small GitHub repository
 
-        p: aside NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether or not the international keyboard support is correct. I'll also be making major breaking changes over the near future as I build new features, delete old ideas, and move code around to whatever place makes the best sense. If you have built something that relies on a particular version of Primrose, please see #[a(href="/archive/") the archive directory].
+        p: aside NOTE: This is still an early alpha release, with bugs of both the known and unknown variety. In particular, I have no way of testing whether or not the international keyboard support is correct. I'll also be making major breaking changes over the near future as I build new features, delete old ideas, and move code around to whatever place makes the best sense. If you have built something that relies on a particular version of Primrose, please see #[a(href= fileRoot + "archive/") the archive directory].
 
     section#teamInfo
       article
@@ -132,7 +132,7 @@ block main
 
         ul#teamPortraits
           li
-            img(alt="portrait", title="Sean T. McBeth", src="/images/stm-2015-05.jpg")
+            img(alt="portrait", title="Sean T. McBeth", src= fileRoot + "images/stm-2015-05.jpg")
             div
               h4 Sean T. McBeth
  
@@ -153,7 +153,7 @@ block main
                       | View Sean's profile on GitHub
 
           li
-            img(alt="portrait", title="Matt Dunn", src="/images/md-2016-03.jpg")
+            img(alt="portrait", title="Matt Dunn", src= fileRoot + "images/md-2016-03.jpg")
             div
               h4 Matt Dunn
 
@@ -165,7 +165,7 @@ block main
                 li: a(href="mailto:matt.dunn@primrosevr.com?subject=PrimroseVR.com", target="_blank") Email Matt
 
           li
-            img(alt="portrait", title="You?", src="/images/q.png")
+            img(alt="portrait", title="You?", src= fileRoot + "images/q.png")
             div
               h4 You?
 
@@ -222,11 +222,11 @@ block footer
   footer
     a(href="https://www.twitter.com/primrose_vr", target="_blank") Twitter
     a(href="https://www.linkedin.com/company/primrose-vr", target="_blank") LinkedIn
-    a(href="https://github.com/voodootikigod/logo.js", target="_blank"): img(src="/images/js.png", alt="logo", title="JavaScript", style="height:32px")
-    a(href="https://www.w3.org/html/", target="_blank"): img(src="/images/html5.png", alt="logo", title="HTML5")
-    a(href="https://www.gnu.org/licenses/gpl.html", target="_blank"): img(src="/images/gplv3.png", alt="logo", title="GPLv3")
+    a(href="https://github.com/voodootikigod/logo.js", target="_blank"): img(src= fileRoot + "images/js.png", alt="logo", title="JavaScript", style="height:32px")
+    a(href="https://www.w3.org/html/", target="_blank"): img(src= fileRoot + "images/html5.png", alt="logo", title="HTML5")
+    a(href="https://www.gnu.org/licenses/gpl.html", target="_blank"): img(src= fileRoot + "images/gplv3.png", alt="logo", title="GPLv3")
     small Copyright &copy; 
       a(href="https://www.seanmcbeth.com", target="_blank") 
         | Sean T. McBeth 
-        img(src="/images/stm.png", alt="logo", title="Sean T. McBeth", style="height:32px")
+        img(src= fileRoot + "images/stm.png", alt="logo", title="Sean T. McBeth", style="height:32px")
         |, 2014 - 2016.

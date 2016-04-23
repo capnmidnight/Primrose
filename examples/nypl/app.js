@@ -1,11 +1,11 @@
 /* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
 
-var GRASS = "/examples/images/grass.png",
-  ROCK = "/examples/images/rock.png",
-  SAND = "/examples/images/sand.png",
-  WATER = "/examples/images/water.png",
-  DECK = "/examples/images/deck.png",
-  SKY = "/examples/images/bg2.jpg",
+var GRASS = "../images/grass.png",
+  ROCK = "../images/rock.png",
+  SAND = "../images/sand.png",
+  WATER = "../images/water.png",
+  DECK = "../images/deck.png",
+  SKY = "../images/bg2.jpg",
   app = new Primrose.BrowserEnvironment("NYPL", {
     useFog: false,
     skyTexture: SKY,
