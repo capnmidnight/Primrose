@@ -66,9 +66,9 @@ app.addEventListener( "ready", function () {
         z = Primrose.Random.int( DEPTH );
     put( column( 0.5, 1, 1 ) )
         .on( start )
-        .at( x, 1, z );
-    put( column( 0.5, 0.5, 10 ) )
-        .on( start ).at( x, 6.5, z );
+        .at( x, 0, z );
+    put( column( 0.5, 0.5, 11 ) )
+        .on( start ).at( x, 6, z );
     put( column( 2, 0.5, 1 ) )
         .on( start )
         .at( x, 12, z );
