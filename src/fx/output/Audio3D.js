@@ -196,6 +196,7 @@ Primrose.Output.Audio3D = (function () {
         return source;
       }).forEach(audio.appendChild.bind(audio));
       audio.oncanplay = () => {
+        audio.oncanplay = null;
         var snd = {
           volume: this.context.createGain(),
           source: this.context.createMediaElementSource(audio)
