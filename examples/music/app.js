@@ -58,7 +58,7 @@ app.addEventListener("ready", function () {
         0.2));
 
     // Put the element into the scene
-    app.scene.add(btn);
-    app.registerPickableObject(btn);
+    app.scene.add(btn.container);
+    app.registerPickableObject(btn.cap);
   }
 });
