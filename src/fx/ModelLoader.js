@@ -316,11 +316,8 @@ We can load a bunch of models in one go using the following code.\n\
     ]
   });
   ModelLoader.loadObjects = function (map) {
-    if (!output) {
-      output = {};
-    }
-
-    var promise = Promise.resolve(output);
+    var output = {},
+      promise = Promise.resolve(output);
     for (var key in map) {
       if (map[key]) {
         promise = promise
