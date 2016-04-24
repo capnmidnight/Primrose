@@ -876,23 +876,25 @@ Primrose.BrowserEnvironment = (function () {
         }
         else if (this.currentControl) {
           var elem = this.currentControl.focusedElement;
-          if (elem.execCommand) {
-            var oldDeadKeyState = this.operatingSystem._deadKeyState;
-            if (elem.execCommand(this._browser, this.codePage, this.operatingSystem.makeCommandName(evt, this.codePage))) {
-              evt.preventDefault();
+          if (elem) {
+            if (elem.execCommand) {
+              var oldDeadKeyState = this.operatingSystem._deadKeyState;
+              if (elem.execCommand(this._browser, this.codePage, this.operatingSystem.makeCommandName(evt, this.codePage))) {
+                evt.preventDefault();
+              }
+              if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+                this.operatingSystem._deadKeyState = "";
+              }
             }
-            if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-              this.operatingSystem._deadKeyState = "";
+            else {
+              elem.keyDown(evt);
             }
-          }
-          else {
-            elem.keyDown(evt);
           }
         }
       };
 
       var keyUp = (evt) => {
-        if (this.currentControl) {
+        if (this.currentControl && this.currentControl.keyUp) {
           this.currentControl.keyUp(evt);
         }
         else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
@@ -987,7 +989,13 @@ Primrose.BrowserEnvironment = (function () {
       var withCurrentControl = (name) => {
         return (evt) => {
           if (this.currentControl) {
-            this.currentControl[name](evt);
+            var funk = this.currentControl[name];
+            if (funk) {
+              funk(evt);
+            }
+            else {
+              console.warn("Couldn't find %s on %o", name, this.currentControl);
+            }
           }
         };
       };
