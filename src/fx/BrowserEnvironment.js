@@ -439,7 +439,7 @@ Primrose.BrowserEnvironment = (function () {
               if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
                 fire("pointermove", currentHit);
               }
-              if (this.currentControl) {
+              if (this.currentControl && currentHit.point) {
                 this.currentControl.moveUV(currentHit.point);
               }
             }
