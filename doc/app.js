@@ -161,7 +161,7 @@ function scroller(id) {
     if (/\.md$/.test(page)) {
       promise = Primrose.HTTP
         .getText("/" + page.substring(1))
-        .then(marked);
+        .then(pliny.markdown);
     }
     else {
       promise = Promise.resolve(docoCache[page].toString());

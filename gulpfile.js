@@ -18,8 +18,7 @@
   pathX = /.*\/(.*).js/,
   pugFileSpec = ["*.jade", "doc/**/*.jade", "examples/**/*.jade"],
   headerFiles = [
-    "node_modules/marked/lib/marked.js",
-    "lib/pliny.js",
+    "node_modules/pliny/pliny.min.js",
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
