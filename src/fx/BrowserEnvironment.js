@@ -609,31 +609,28 @@ Primrose.BrowserEnvironment = (function () {
           }
 
           monitor = models.monitor;
-          var monitorText = models.fullscreenText;          
-
           monitor.rotation.set(0, 270 * Math.PI / 180, 0);
           monitor.position.set(0, 0.7, -1);
           monitor.name = "Monitor";
+          monitor.add(models.fullscreenText);
           monitor.addEventListener("click", this.goFullScreen, false);
           this.scene.add(monitor);
           this.scene.Monitor = monitor;
           this.registerPickableObject(monitor);
-          monitor.add(monitorText);
 
-          if (Primrose.Input.VR.Version > 0) {
+          if (models.cardboard) {
             monitor.rotation.set(0, 300 * Math.PI / 180, 0);
             monitor.position.set(-0.25, 0.7, -1);
 
             cardboard = models.cardboard;
-            var cardboardText = models.cardboardText;
             cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
             cardboard.position.set(0.2, 1.75, -1);
             cardboard.name = "Cardboard";
+            cardboard.add(models.cardboardText);
             cardboard.addEventListener("click", this.goVR, false);
             this.scene.add(cardboard);
             this.scene.Cardboard = cardboard;
             this.registerPickableObject(cardboard);
-            cardboard.add(cardboardText);
           }
 
           if (models.button) {
