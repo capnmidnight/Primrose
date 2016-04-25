@@ -83,6 +83,8 @@ Primrose.Input.FPSInput = (function () {
         },
         buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
         dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
+        pointerX: { axes: [Primrose.Input.Mouse.X] },
+        pointerY: { axes: [Primrose.Input.Mouse.Y] },
         dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
         heading: { commands: ["dx"], integrate: true },
         dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
@@ -98,7 +100,13 @@ Primrose.Input.FPSInput = (function () {
           commandUp: emit.bind(this, "pointerend")
         },
         buttons: { axes: [Primrose.Input.Touch.FINGERS] },
-        dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true }
+        dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true },
+        pointerX: { axes: [Primrose.Input.Touch.X0] },
+        pointerY: { axes: [Primrose.Input.Touch.Y0] },
+        dx: { axes: [-Primrose.Input.Touch.X0], delta: true, scale: 0.005, min: -5, max: 5 },
+        heading: { commands: ["dx"], integrate: true },
+        dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
+        pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
       }),
       new Primrose.Input.Gamepad("gamepad", {
         pointer: {
@@ -171,6 +179,19 @@ Primrose.Input.FPSInput = (function () {
       var mgr = this.managers[i];
       if (mgr.enabled) {
         value += mgr.getValue(name);
+      }
+    }
+    return value;
+  };
+
+  FPSInput.prototype.getLatestValue = function (name) {
+    var value = 0,
+      maxT = Number.MIN_VALUE;
+    for (var i = 0; i < this.managers.length; ++i) {
+      var mgr = this.managers[i];
+      if (mgr.enabled && mgr.lastT > maxT) {
+        maxT = mgr.lastT;
+        value = mgr.getValue(name);
       }
     }
     return value;

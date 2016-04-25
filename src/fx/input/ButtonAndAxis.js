@@ -48,7 +48,6 @@ Primrose.Input.ButtonAndAxis = ( function () {
 
     this.removeButton = this.removeFromArray.bind( this, "buttons" );
 
-
     this.invertAxis = this.invertInArray.bind( this, "axes" );
 
     this.invertButton = this.invertInArray.bind( this, "buttons" );
