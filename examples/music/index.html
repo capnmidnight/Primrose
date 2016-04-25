@@ -1,169 +1,8 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no,user-scalable=no">
-    <meta name="web-app-capable" content="yes">
-    <meta name="theme-color" content="black">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="description" content="A WebVR application framework.">
-    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@Primrose_VR">
-    <meta property="og:site_name" content="Primrose VR">
-    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
-    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/examples/music/index.html"><!-- start main.jade meta block -->
-    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
-    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block -->
-    <meta property="og:title" content="Primrose VR: WebVR Application Framework">
-    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
-    <title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
-<!-- start main.jade head block -->
-    <script type="text/javascript" src="../../scripts/analytics.min.js"></script>
-    <script type="text/javascript" src="../../scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append -->
-    <script type="text/javascript" src="../../node_modules/marked/lib/marked.js"></script>
-    <script type="text/javascript" src="../../lib/pliny.js"></script>
-    <script type="text/javascript" src="../../lib/sha512.js"></script>
-    <script type="text/javascript" src="../../node_modules/socket.io-client/socket.io.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/three.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
-    <script type="text/javascript" src="../../lib/logger.js"></script>
-    <script type="text/javascript" src="../../lib/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/index.js"></script>
-    <script type="text/javascript" src="../../src/base/axis.js"></script>
-    <script type="text/javascript" src="../../src/base/box.js"></script>
-    <script type="text/javascript" src="../../src/base/brick.js"></script>
-    <script type="text/javascript" src="../../src/base/cache.js"></script>
-    <script type="text/javascript" src="../../src/base/clone.js"></script>
-    <script type="text/javascript" src="../../src/base/cloud.js"></script>
-    <script type="text/javascript" src="../../src/base/cylinder.js"></script>
-    <script type="text/javascript" src="../../src/base/findProperty.js"></script>
-    <script type="text/javascript" src="../../src/base/fmt.js"></script>
-    <script type="text/javascript" src="../../src/base/forms.js"></script>
-    <script type="text/javascript" src="../../src/base/fullscreen.js"></script>
-    <script type="text/javascript" src="../../src/base/hub.js"></script>
-    <script type="text/javascript" src="../../src/base/InsideSphereGeometry.js"></script>
-    <script type="text/javascript" src="../../src/base/light.js"></script>
-    <script type="text/javascript" src="../../src/base/oop.js"></script>
-    <script type="text/javascript" src="../../src/base/overwrite.js"></script>
-    <script type="text/javascript" src="../../src/base/patch.js"></script>
-    <script type="text/javascript" src="../../src/base/put.js"></script>
-    <script type="text/javascript" src="../../src/base/quad.js"></script>
-    <script type="text/javascript" src="../../src/base/shell.js"></script>
-    <script type="text/javascript" src="../../src/base/sphere.js"></script>
-    <script type="text/javascript" src="../../src/base/textured.js"></script>
-    <script type="text/javascript" src="../../src/base/v3.js"></script>
-    <script type="text/javascript" src="../../src/fx/Angle.js"></script>
-    <script type="text/javascript" src="../../src/fx/BaseControl.js"></script>
-    <script type="text/javascript" src="../../src/fx/BrowserEnvironment.js"></script>
-    <script type="text/javascript" src="../../src/fx/Button.js"></script>
-    <script type="text/javascript" src="../../src/fx/ButtonFactory.js"></script>
-    <script type="text/javascript" src="../../src/fx/Entity.js"></script>
-    <script type="text/javascript" src="../../src/fx/Keys.js"></script>
-    <script type="text/javascript" src="../../src/fx/ModelLoader.js"></script>
-    <script type="text/javascript" src="../../src/fx/NetworkedInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/Projector.js"></script>
-    <script type="text/javascript" src="../../src/fx/Surface.js"></script>
-    <script type="text/javascript" src="../../src/fx/WebRTCSocket.js"></script>
-    <script type="text/javascript" src="../../src/fx/Workerize.js"></script>
-    <script type="text/javascript" src="../../src/x/LoginForm.js"></script>
-    <script type="text/javascript" src="../../src/x/SignupForm.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/Button2D.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/Image.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/cascadeElement.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/findEverything.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/makeHidingContainer.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/StateList.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/get.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getBuffer.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getObject.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getText.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/post.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/sendObject.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/XHR.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/ButtonAndAxis.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Camera.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/FPSInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Gamepad.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Keyboard.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/LeapMotion.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Location.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Motion.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Mouse.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Speech.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Touch.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/VR.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Audio3D.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/HapticGlove.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Music.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Speech.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/int.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/item.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/number.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/steps.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/CodePage.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/CommandPack.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Cursor.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Grammar.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/OperatingSystem.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Point.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Rectangle.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Rule.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Size.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Terminal.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Token.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/CardboardVRDisplay.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/LegacyVRDisplay.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/MotionCorrector.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/DE_QWERTZ.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_UKX.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_US.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/FR_AZERTY.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/BasicTextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/TextEditor.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/TextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/PlainText.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/TextBox.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/TextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/Basic.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/JavaScript.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/PlainText.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/TestResults.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/operating_systems/OSX.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/operating_systems/Windows.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append --><!-- start demo.jade head append -->
-    <link type="text/css" rel="stylesheet" href="../../stylesheets/main.css">
-    <link type="text/css" rel="stylesheet" href="../style.css">
-    <style type="text/css">body{background-image:url(screenshot.jpg);}</style><!-- end demo.jade head append --><!-- end main.jade head block -->
-  </head>
-  <body><!-- start main.jade banner block --><!-- start demo.jade banner block -->
-    <canvas id="frontBuffer"></canvas><!-- end demo.jade banner block --><!-- end main.jade banner block -->
-    <header role="banner"><a id="logo" href="../../"><img src="../../images/primrose32.png" alt="logo" title="Primrose logo"></a>
-      <nav role="navigation">
-        <ul>
-          <li><a href="../../#intro">intro/</a></li>
-          <li><a href="../../#webvr">webvr/</a></li>
-          <li><a href="../../doc/">doc/</a></li>
-          <li><a href="../../#dev">download/</a></li>
-          <li><a href="../../#teamInfo">team/</a></li>
-          <li><a href="../../#mail">contact/</a></li>
-          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
-        </ul>
-      </nav>
-    </header><!-- start main.jade main block --><!-- end main.jade main block -->
-<!-- start main.jade footer block -->
-    <script type="text/javascript">
-      if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }
-      
-    </script>
-    <script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no,user-scalable=no"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/examples/music/index.html"><!-- start main.jade meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+<!-- start main.jade title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework"><title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
+<!-- start main.jade head block --><script type="text/javascript" src="../../scripts/analytics.min.js"></script><script type="text/javascript" src="../../scripts/ga.min.js" async defer></script><!-- start withFramework.jade head append --><script type="text/javascript" src="../../scripts/payload.min.js"></script><!-- end withFramework.jade head append --><!-- start demo.jade head append --><link type="text/css" rel="stylesheet" href="../../stylesheets/main.min.css"><link type="text/css" rel="stylesheet" href="../style.min.css"><style type="text/css">body{background-image:url(screenshot.jpg);}</style><!-- end demo.jade head append --><!-- end main.jade head block --></head><body><!-- start main.jade banner block --><!-- start demo.jade banner block --><canvas id="frontBuffer"></canvas><!-- end demo.jade banner block --><!-- end main.jade banner block --><header role="banner"><a id="logo" href="../../"><img src="../../images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="../../#intro">intro/</a></li><li><a href="../../#webvr">webvr/</a></li><li><a href="../../doc/">doc/</a></li><li><a href="../../#dev">download/</a></li><li><a href="../../#teamInfo">team/</a></li><li><a href="../../#mail">contact/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><!-- start main.jade main block --><!-- end main.jade main block -->
+<!-- start main.jade footer block --><script type="text/javascript">if (window.self !== window.top) { document.querySelector("header").style.display = "none"; }
+</script><script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material
@@ -174,9 +13,7 @@ Ks 0.152632 0.152632 0.152632
 Ni 1.000000
 d 1.000000
 illum 2
-
-    </script>
-    <script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib monitor.mtl
 o Monitor_Cube
@@ -288,9 +125,7 @@ f 29//3 31//3 30//3
 f 26//2 25//2 30//2
 f 27//1 28//1 31//1
 f 25//4 27//4 29//4
-
-    </script>
-    <script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+</script><script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material.001
@@ -301,9 +136,7 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-
-    </script>
-    <script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib fullscreen_text.mtl
 o Text
@@ -681,9 +514,7 @@ f 186//1 188//1 191//1
 f 188//1 190//1 191//1
 f 188//1 189//1 190//1
 f 186//1 187//1 188//1
-
-    </script>
-    <script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'CardboardLogo2.blend'
+</script><script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'CardboardLogo2.blend'
 # Material Count: 2
 
 newmtl Material
@@ -703,9 +534,7 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-
-    </script>
-    <script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'CardboardLogo2.blend'
+</script><script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'CardboardLogo2.blend'
 # www.blender.org
 mtllib cardboard.mtl
 o Cardboard_Cube.001
@@ -2313,9 +2142,7 @@ f 497//175 484//175 500//175
 f 496//176 498//176 486//176
 f 496//177 497//177 498//177
 f 497//178 485//178 498//178
-
-    </script>
-    <script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+</script><script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material.001
@@ -2326,9 +2153,7 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-
-    </script>
-    <script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib vr_text.mtl
 o VR_Text_Text.001
@@ -2409,9 +2234,4 @@ f 37//1 34//1 35//1
 f 34//1 32//1 33//1
 f 34//1 38//1 32//1
 f 37//1 38//1 34//1
-
-    </script><!-- start withFramework.jade footer prepend -->
-    <script type="text/javascript" src="app.js"></script>
-    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block -->
-  </body>
-</html>
+</script><!-- start withFramework.jade footer prepend --><script type="text/javascript" src="app.js"></script><script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><!-- end main.jade footer block --></body></html>
