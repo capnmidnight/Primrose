@@ -67,8 +67,6 @@
     <Content Include="examples\nypl\prong.stereo.jpg" />
     <Content Include="examples\nypl\screenshot.jpg" />
     <Content Include="images\md-2016-03.jpg" />
-    <Content Include="templates\docPages.jade" />
-    <Content Include="templates\docTutorials.jade" />
     <Content Include="templates\documentation.jade" />
     <Content Include="examples\commodore\index.html.jade" />
     <Content Include="examples\editor2d\index.html.jade" />

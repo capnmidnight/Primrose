@@ -659,7 +659,7 @@ Primrose.Text.Controls.TextBox = function () {
                 var font = (style.fontWeight || this.theme.regular.fontWeight || "") + " " + (style.fontStyle || this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
                 this._fgfx.font = font.trim();
                 this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-                this._fgfx.fillText(t.value, tokenFront.x * this.character.width, textY);
+                this.drawText(this._fgfx, t.value, tokenFront.x * this.character.width, textY);
                 drawn = true;
               }
             }
@@ -676,6 +676,14 @@ Primrose.Text.Controls.TextBox = function () {
         }
 
         this._fgfx.restore();
+      }
+
+      // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+
+    }, {
+      key: "drawText",
+      value: function drawText(ctx, txt, x, y) {
+        ctx.fillText(txt, x, y);
       }
     }, {
       key: "renderCanvasTrim",
@@ -796,6 +804,8 @@ Primrose.Text.Controls.TextBox = function () {
           if (imageChanged) {
             if (layoutChanged || scrollChanged || themeChanged || focusChanged) {
               changeBounds = this.bounds.clone();
+              changeBounds.left = 0;
+              changeBounds.top = 0;
             } else if (cursorChanged) {
               var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
                   bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;

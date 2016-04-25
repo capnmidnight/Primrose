@@ -21,7 +21,14 @@ Primrose.NetworkedInput = function () {
     this.receiving = true;
     this.socketReady = false;
     this.inPhysicalUse = true;
-    this.inputState = {};
+    this.inputState = {
+      buttons: null,
+      axes: null,
+      ctrl: false,
+      alt: false,
+      shift: false,
+      meta: false
+    };
     this.lastState = "";
     this.lastT = performance.now();
 

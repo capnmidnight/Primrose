@@ -11,7 +11,16 @@ append head
   <!-- start documentation.jade head append -->
   link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
   <!-- end documentation.jade head append -->
-  
+mixin fileList(name)
+  li
+    h2= name
+    ul
+      each file in docFiles
+        if(name === "Pages" && !file.tutorial || name === "Tutorials" && file.tutorial)
+          if(file.incomplete)
+            li(data-name=file.title): a.incomplete(href=file.fileName)= file.title
+          else
+            li(data-name=file.title): a(href=file.fileName)= file.title
 block main
   <!-- start documentation.jade main block -->
   main
@@ -31,14 +40,8 @@ block main
                 li: a(href="#LICENSE.md") LICENSE
                 li: a(href="#CHANGELOG.md") CHANGELOG
                 li: a(href="#CONTRIBUTORS.md") CONTRIBUTORS
-            li
-              h2 Pages
-              ul
-                include ../templates/docPages.jade
-            li
-              h2 Tutorials
-              ul
-                include ../templates/docTutorials.jade
+            +fileList("Pages")
+            +fileList("Tutorials")
     #documentation
       <!-- start documentation.jade documentation block -->
       block document

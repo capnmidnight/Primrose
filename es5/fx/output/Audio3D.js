@@ -69,7 +69,7 @@ Primrose.Output.Audio3D = function () {
     }
   }
 
-  Audio3D.prototype.loadBuffer = function (src) {
+  Audio3D.prototype.loadURL = function (src) {
     var _this2 = this;
 
     return Primrose.HTTP.getBuffer(src).then(function (data) {
@@ -79,15 +79,15 @@ Primrose.Output.Audio3D = function () {
     });
   };
 
-  Audio3D.prototype.loadBufferCascadeSrcList = function (srcs, index) {
+  Audio3D.prototype.loadURLCascadeSrcList = function (srcs, index) {
     var _this3 = this;
 
     index = index || 0;
     if (index >= srcs.length) {
       return Promise.reject("Failed to load a file from " + srcs.length + " files.");
     } else {
-      return this.loadBuffer(srcs[index]).catch(function () {
-        return setTimeout(_this3.loadBufferCascadeSrcList(_this3, srcs, index + 1), 0);
+      return this.loadURL(srcs[index]).catch(function () {
+        return setTimeout(_this3.loadURLCascadeSrcList(_this3, srcs, index + 1), 0);
       });
     }
   };
@@ -136,38 +136,94 @@ Primrose.Output.Audio3D = function () {
     return snd;
   };
 
-  Audio3D.prototype.loadSound = function (src, loop) {
-    return this.loadBuffer(src).then(this.createSound.bind(this, loop));
-  };
+  pliny.method({
+    parent: "Primrose.Output.Audio3D",
+    name: "loadSound",
+    returns: "Promise<MediaElementAudioSourceNode>",
+    parameters: [{ name: "sources", type: "String|Array<String>", description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag." }, { name: "loop", type: "Boolean", description: "(Optional) indicate that the sound should be played on loop." }],
+    description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
+    examples: [{
+      name: "Load a single audio file.",
+      description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var audio = new Primrose.Output.Audio3D();\n\
+    audio.loadSource(\"mySong.wav\").then(function(node){\n\
+      node.connect(audio.context.destination);\n\
+    });"
+    }, {
+      name: "Load a single audio file from a list of options.",
+      description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var audio = new Primrose.Output.Audio3D();\n\
+    audio.loadSource([\n\
+      \"mySong.mp3\",\n\
+      \"mySong.aac\",\n\
+      \"mySong.ogg\"\n\
+    ]).then(function(node){\n\
+      node.connect(audio.context.destination);\n\
+    });"
+    }, {
+      name: "Load an ambient audio file that should be looped.",
+      description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var audio = new Primrose.Output.Audio3D();\n\
+    audio.loadSource([\n\
+      \"mySong.mp3\",\n\
+      \"mySong.aac\",\n\
+      \"mySong.ogg\"\n\
+    ], true).then(function(node){\n\
+      node.connect(audio.context.destination);\n\
+    });"
+    }]
+  });
+  Audio3D.prototype.loadSource = function (sources, loop) {
+    var _this4 = this;
 
-  Audio3D.prototype.loadSoundCascadeSrcList = function (srcs, loop) {
-    return this.loadBufferCascadeSrcList(srcs).then(this.createSound.bind(this, loop));
+    return new Promise(function (resolve, reject) {
+      if (!(sources instanceof Array)) {
+        sources = [sources];
+      }
+      var audio = document.createElement("audio");
+      audio.autoplay = true;
+      audio.loop = loop;
+      sources.map(function (src) {
+        var source = document.createElement("source");
+        source.src = src;
+        return source;
+      }).forEach(audio.appendChild.bind(audio));
+      audio.oncanplay = function () {
+        audio.oncanplay = null;
+        var snd = {
+          volume: _this4.context.createGain(),
+          source: _this4.context.createMediaElementSource(audio)
+        };
+        snd.source.connect(snd.volume);
+        resolve(snd);
+      };
+      audio.onerror = reject;
+      document.body.appendChild(audio);
+    });
   };
 
   Audio3D.prototype.load3DSound = function (src, loop, x, y, z) {
-    return this.loadSound(src, loop).then(this.create3DSound.bind(this, x, y, z));
-  };
-
-  Audio3D.prototype.load3DSoundCascadeSrcList = function (srcs, loop, x, y, z) {
-    return this.loadSoundCascadeSrcList(srcs, loop).then(this.create3DSound.bind(this, x, y, z));
+    return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
   };
 
   Audio3D.prototype.loadFixedSound = function (src, loop) {
-    return this.loadSound(src, loop).then(this.createFixedSound.bind(this));
-  };
-
-  Audio3D.prototype.loadFixedSoundCascadeSrcList = function (srcs, loop) {
-    return this.loadSoundCascadeSrcList(srcs, loop).then(this.createFixedSound.bind(this));
+    return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
   };
 
   Audio3D.prototype.playBufferImmediate = function (buffer, volume) {
-    var _this4 = this;
+    var _this5 = this;
 
     var snd = this.createSound(false, buffer);
     snd = this.createFixedSound(snd);
     snd.volume.gain.value = volume;
     snd.source.addEventListener("ended", function (evt) {
-      snd.volume.disconnect(_this4.mainVolume);
+      snd.volume.disconnect(_this5.mainVolume);
     });
     snd.source.start(0);
     return snd;
