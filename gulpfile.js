@@ -111,31 +111,26 @@ gulp.task("jshint", function () {
     }));
 });
 
-gulp.task("clean", ["jshint"], function () {
-  return gulp.src(["obj", "es5", "scripts", "debug", "release", "doc/**/*.min.css", "examples/**/*.min.css", "stylesheets/**/*.min.css", "templates/*", "!templates/*.jade"])
-    .pipe(clean());
-});
-
-gulp.task("pugRelease", ["clean"], function () {
+gulp.task("pugRelease", ["jshint"], function () {
   return pugConfiguration({}, { docFiles: debugDataES6.docFiles });
 });
 
-gulp.task("pugDebugES5", ["clean"], function () {
+gulp.task("pugDebugES5", ["jshint"], function () {
   return pugConfiguration({ pretty: true }, debugDataES5);
 });
 
-gulp.task("pugDebugES6", ["clean"], function () {
+gulp.task("pugDebugES6", ["jshint"], function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
-gulp.task("cssmin", ["clean"], function () {
+gulp.task("cssmin", ["jshint"], function () {
   gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"], { base: "./" })
     .pipe(cssmin())
     .pipe(rename({ suffix: ".min" }))
     .pipe(gulp.dest("./"));
 });
 
-gulp.task("babel", ["clean"], function () {
+gulp.task("babel", ["jshint"], function () {
   return gulp.src("src/**/*.js", { base: "./src" })
     .pipe(babel({
       sourceMap: false,
@@ -180,6 +175,6 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("release", ["jshint", "clean", "pugRelease", "babel", "concatPrimrose", "copy", "concatPayload", "jsmin", "cssmin", "archive"]);
-
+gulp.task("release", ["jsmin", "cssmin", "pugRelease", "archive"]);
+gulp.task("debugES5", ["babel", "pugDebugES5"]);
 gulp.task("default", ["pugDebugES6"]);
