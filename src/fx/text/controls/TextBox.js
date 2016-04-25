@@ -823,8 +823,7 @@ Primrose.Text.Controls.TextBox = (function () {
                 " " + this.character.height + "px " + this.theme.fontFamily;
               this._fgfx.font = font.trim();
               this._fgfx.fillStyle = style.foreColor || this.theme.regular.foreColor;
-              this._fgfx.fillText(
-                t.value,
+              this.drawText(this._fgfx, t.value,
                 tokenFront.x * this.character.width,
                 textY);
               drawn = true;
@@ -848,6 +847,12 @@ Primrose.Text.Controls.TextBox = (function () {
 
       this._fgfx.restore();
     }
+
+    // provides a hook for TextInput to be able to override text drawing and spit out password blanking characters
+    drawText(ctx, txt, x, y) {
+      ctx.fillText(txt, x, y);
+    }
+
 
     renderCanvasTrim() {
       var tokenFront = new Primrose.Text.Cursor(),
