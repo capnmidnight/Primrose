@@ -512,7 +512,7 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var setSize = () => {
+      var modifyScreen = () => {
         var canvasWidth,
           canvasHeight,
           aspectWidth,
@@ -826,7 +826,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.start = () => {
         allReady
-          .then(setSize)
+          .then(modifyScreen)
           .then(() => lt = performance.now() * MILLISECONDS_TO_SECONDS)
           .then(() => RAF(animate));
       };
@@ -954,7 +954,7 @@ Primrose.BrowserEnvironment = (function () {
         }
       }, false);
 
-      window.addEventListener("vrdisplaypresentchange", setSize, false);
+      window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
 
       var isFullScreenMode = () => !!(FullScreen.isActive || this.inVR);
 
@@ -1010,7 +1010,7 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("beforepaste", setFalse, false);
       window.addEventListener("paste", withCurrentControl("readClipboard"), false);
       window.addEventListener("wheel", withCurrentControl("readWheel"), false);
-      window.addEventListener("resize", setSize, false);
+      window.addEventListener("resize", modifyScreen, false);
       window.addEventListener("blur", this.stop, false);
       window.addEventListener("focus", this.start, false);
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
