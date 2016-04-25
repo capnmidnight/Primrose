@@ -24,7 +24,7 @@ Primrose.Text.Controls.TextBox = (function () {
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
-    
+
       if (typeof options === "string") {
         this.options = { value: this.options };
       }
@@ -75,7 +75,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this._lastFocused = false;
       this._lastThemeName = null;
       this._lastPointer = new Primrose.Text.Point();
-            
+
       // different browsers have different sets of keycodes for less-frequently
       // used keys like curly brackets.
       this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
@@ -647,7 +647,7 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     performLayout() {
-      
+
       // group the tokens into rows
       this._tokenRows = [[]];
       this._tokenHashes = [""];
@@ -982,12 +982,7 @@ Primrose.Text.Controls.TextBox = (function () {
         }
 
         if (imageChanged) {
-          if (layoutChanged || scrollChanged || themeChanged || focusChanged) {
-            changeBounds = this.bounds.clone();
-            changeBounds.left = 0;
-            changeBounds.top = 0;
-          }
-          else if (cursorChanged) {
+          if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
             var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
               bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
             changeBounds = new Primrose.Text.Rectangle(
@@ -996,7 +991,6 @@ Primrose.Text.Controls.TextBox = (function () {
               this.bounds.width,
               (bottom - top) * this.character.height + 2);
           }
-
 
           if (backgroundChanged) {
             this.renderCanvasBackground();
