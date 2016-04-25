@@ -416,11 +416,9 @@ Primrose.BrowserEnvironment = (function () {
 
           if (object === this.ground) {
             this.pointer.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
-            document.body.style.cursor = "crosshair";
           }
           else {
             this.pointer.scale.set(1, 1, 1);
-            document.body.style.cursor = "text";
           }
           this.pointer.material.color.setRGB(1, 1, 1);
           this.pointer.material.emissive.setRGB(0.25, 0.25, 0.25);
@@ -449,7 +447,6 @@ Primrose.BrowserEnvironment = (function () {
           this.pointer.material.color.setRGB(1, 0, 0);
           this.pointer.material.emissive.setRGB(0.25, 0, 0);
           this.pointer.scale.set(1, 1, 1);
-          document.body.style.cursor = "not-allowed";
         }
       };
 
@@ -513,6 +510,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var modifyScreen = () => {
+        document.body.style.cursor = "default";
         var canvasWidth,
           canvasHeight,
           aspectWidth,
