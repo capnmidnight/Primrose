@@ -599,6 +599,20 @@ Primrose.BrowserEnvironment = (function () {
         modelFiles.cardboard = "../../models/cardboard.obj";
         modelFiles.cardboardText = "../../models/vr_text.obj";
       }
+
+      function setColor(model, color) {
+        return model.children[0].material.color.set(color);
+      }
+
+      function complementColor(color) {
+        var hsl = color.getHSL();
+        hsl.h = hsl.h + 0.5;
+        hsl.l = 1 - hsl.l;
+        while (hsl.h > 1) hsl.h -= 1;
+        color.setHSL(hsl.h, hsl.s, hsl.l);
+        return color;
+      }
+
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
 
@@ -615,7 +629,8 @@ Primrose.BrowserEnvironment = (function () {
           this.scene.add(monitor);
           this.scene.Monitor = monitor;
           this.registerPickableObject(monitor);
-
+          complementColor(setColor(models.fullscreenText, this.options.backgroundColor));
+          
           if (models.cardboard) {
             monitor.rotation.set(0, 300 * Math.PI / 180, 0);
             monitor.position.set(-0.25, 0.7, -1);
@@ -629,6 +644,8 @@ Primrose.BrowserEnvironment = (function () {
             this.scene.add(cardboard);
             this.scene.Cardboard = cardboard;
             this.registerPickableObject(cardboard);
+            complementColor(setColor(models.cardboardText, this.options.backgroundColor));
+
           }
 
           if (models.button) {
