@@ -984,6 +984,8 @@ Primrose.Text.Controls.TextBox = (function () {
         if (imageChanged) {
           if (layoutChanged || scrollChanged || themeChanged || focusChanged) {
             changeBounds = this.bounds.clone();
+            changeBounds.left = 0;
+            changeBounds.top = 0;
           }
           else if (cursorChanged) {
             var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
