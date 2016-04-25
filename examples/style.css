@@ -15,6 +15,7 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   font-family: -apple-system,'.SFNSText-Regular','San Francisco','Roboto','Segoe UI','Helvetica Neue','Lucida Grande',sans-serif;
+  cursor: wait;
 }
 
 #controls {
