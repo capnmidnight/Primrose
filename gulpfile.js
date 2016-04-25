@@ -142,7 +142,7 @@ gulp.task("babel", ["clean"], function () {
 });
 
 gulp.task("concatPrimrose", ["babel"], function () {
-  return gulp.src(["es5/index.js", "es5/base/**/*.js", "es5/fx/**/*.js", "es5/x/**/*.js"], { nosort: true })
+  return gulp.src(debugDataES5.frameworkFiles)
     .pipe(concat("Primrose.js", { newLine: ";" }))
     .pipe(gulp.dest("./obj"));
 });
