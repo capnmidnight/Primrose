@@ -38,8 +38,9 @@ html
       
     <!-- start main.jade head block -->
     block head
-      script(type="text/javascript", src= fileRoot + "scripts/analytics.min.js")
-      script(type="text/javascript", src= fileRoot + "scripts/ga.min.js", async, defer)
+      if !debug
+        script(type="text/javascript", src= fileRoot + "scripts/analytics.min.js")
+        script(type="text/javascript", src= fileRoot + "scripts/ga.min.js", async, defer)
     <!-- end main.jade head block -->
   body
   

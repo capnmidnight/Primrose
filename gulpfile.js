@@ -24,15 +24,18 @@
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "obj/Primrose.js"
+    "node_modules/three/examples/js/loaders/MTLLoader.js"
   ],
+  demoFiles = headerFiles.slice(),
   mainPageFiles = headerFiles.slice();
+
+demoFiles.push("obj/Primrose.js");
 
 mainPageFiles.splice(mainPageFiles.length, 0,
   "lib/analytics.js",
   "lib/ga.js",
-  "lib/mailchimp.js");
+  "lib/mailchimp.js",
+  "obj/Primrose.js");
 
 function pugConfiguration(options, defaultData) {
   return gulp.src(pugFileSpec, { base: "./" })
@@ -153,7 +156,7 @@ gulp.task("copy", ["concatPrimrose"], function () {
 });
 
 gulp.task("concatPayload", ["copy"], function () {
-  return gulp.src(headerFiles, { base: "./" })
+  return gulp.src(demoFiles, { base: "./" })
     .pipe(concat("payload.js", { newLine: ";" }))
     .pipe(gulp.dest("./obj"));
 });
@@ -179,4 +182,4 @@ gulp.task("archive", ["jsmin"], function () {
 
 gulp.task("release", ["jshint", "clean", "pugRelease", "babel", "concatPrimrose", "copy", "concatPayload", "jsmin", "cssmin", "archive"]);
 
-gulp.task("default", ["debugES6"]);
+gulp.task("default", ["pugDebugES6"]);

@@ -59,6 +59,7 @@
     "gulp-remember": "^0.3.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.5.3",
+    "jshint": "^2.9.2",
     "pug": "^2.0.0-alpha6"
   }
 }

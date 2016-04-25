@@ -125,7 +125,6 @@
     <Content Include="README.md" />
     <Content Include="sitemap.xml" />
     <Content Include="examples\nypl\app.js" />
-    <Compile Include="Gruntfile.js" />
     <Compile Include="gulpfile.js" />
     <Compile Include="payload.js" />
     <Compile Include="server.js" />
