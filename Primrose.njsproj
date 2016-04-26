@@ -125,7 +125,7 @@
     <Content Include="sitemap.xml" />
     <Content Include="examples\nypl\app.js" />
     <Compile Include="gulpfile.js" />
-    <Content Include="lib\loggerSetup.js" />
+    <Content Include="lib\loggerInit.js" />
     <Compile Include="payload.js" />
     <Compile Include="server.js" />
     <Content Include="doc\index.html" />

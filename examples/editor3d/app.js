@@ -95,7 +95,7 @@ app.addEventListener("ready", function () {
       nextTheme = Primrose.Text.Themes.Dark;
       nextString = "Switch to light theme";
     }
-    log("Switching to theme: " + nextTheme.name);
+    console.log("Switching to theme: " + nextTheme.name);
     documentation.theme = output.theme = editor.theme = nextTheme;
     button1.value = nextString;
   }, false);
@@ -125,11 +125,11 @@ app.addEventListener("ready", function () {
   app.scene.add(documentationMesh);
   app.registerPickableObject(documentationMesh);
 
-  log("INSTRUCTIONS:");
-  log(" - " + cmdPre + "+E to show/hide editor");
-  log(" - " + cmdPre + "+X to reload original demo code");
-  log(" - Z to reset position/sensor");
-  log();
+  console.log("INSTRUCTIONS:");
+  console.log(" - " + cmdPre + "+E to show/hide editor");
+  console.log(" - " + cmdPre + "+X to reload original demo code");
+  console.log(" - Z to reset position/sensor");
+  console.log();
 });
 
 app.addEventListener("update", function (dt) {
@@ -138,14 +138,7 @@ app.addEventListener("update", function (dt) {
   }
 
   if (scriptAnimate) {
-    try {
-      scriptAnimate.call(app, dt);
-    }
-    catch (exp) {
-      console.error(exp);
-      log("ERR: " + exp.message);
-      scriptAnimate = null;
-    }
+    scriptAnimate.call(app, dt);
   }
 });
 
@@ -182,38 +175,40 @@ function updateScript() {
   var newScript = editor.value,
     exp;
   if (newScript !== lastScript) {
+    scriptUpdateTimeout = null;
     lastScript = newScript;
     if (newScript.indexOf("function update") >= 0 &&
       newScript.indexOf("return update") < 0) {
       newScript += "\nreturn update;";
     }
     try {
-      log("----- loading new script -----");
+      console.log("----- loading new script -----");
       var scriptUpdate = new Function("scene", newScript);
       for (var i = subScene.children.length - 1; i >= 0; --i) {
         subScene.remove(subScene.children[i]);
       }
       scriptAnimate = scriptUpdate.call(app, subScene);
-      log("----- script loaded -----");
+      scriptAnimate(0);
+      console.log("----- script loaded -----");
     }
     catch (exp) {
-      console.error(exp);
-      log("ERR: " + exp.message);
       scriptAnimate = null;
+      throw exp;
     }
   }
-  scriptUpdateTimeout = null;
 }
 
-function log() {
+function log(msg) {
   if (output) {
-    var msg = Array.prototype.join.call(arguments, ", "),
+    var data = JSON.parse(msg),
       t = output;
-    t.value += msg + "\n";
+    t.value += data.name + ":> " + data.args[0] + "\n";
     t.selectionStart = t.selectionEnd = t.value.length;
     t.scrollIntoView(t.frontCursor);
   }
 }
+
+logger.setup(log);
 
 function clrscr() {
   if (output) {
@@ -294,7 +289,7 @@ function testDemo(scene) {
 // This is a function to just push it out of the way, uncluttering
 // the code above.
 function getDocumentation() {
-  return "functions:\n" + "  log( msg );\n" + "    print a message to the window below the editor.\n" +
+  return "functions:\n" + "  console.log( msg );\n" + "    print a message to the window below the editor.\n" +
     "\n" +
     "  put( objectA ).on( objectB )[.at( x, y, z )];\n" +
     "    objectA: a THREE.Object3D to be added to another,\n" +
@@ -340,17 +335,3 @@ function getDocumentation() {
     "    txtRepeatS: texture repeat in S direction (default 1).\n" +
     "    txtRepeat: texture repeat in T direction (default 1)";
 }
-
-
-/*
- TODO:
- 
- 
- 
- var elems = [ ctrls.leftKey, ctrls.rightKey, ctrls.forwardKey, ctrls.backKey
- ];
- setupKeyOption( ctrls.leftKey, elems, 0, "A", 65 );
- setupKeyOption( ctrls.rightKey, elems, 1, "D", 68 );
- setupKeyOption( ctrls.forwardKey, elems, 2, "W", 87 );
- setupKeyOption( ctrls.backKey, elems, 3, "S", 83 );
- */
