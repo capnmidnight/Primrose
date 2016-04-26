@@ -18,6 +18,8 @@
   pathX = /.*\/(.*).js/,
   pugFileSpec = ["*.jade", "doc/**/*.jade", "examples/**/*.jade"],
   headerFiles = [
+    "lib/logger.js",
+    "lib/loggerInit.js",
     "node_modules/pliny/pliny.min.js",
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
