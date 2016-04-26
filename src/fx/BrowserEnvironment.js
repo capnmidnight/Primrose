@@ -1004,9 +1004,8 @@ Primrose.BrowserEnvironment = (function () {
       var withCurrentControl = (name) => {
         return (evt) => {
           if (this.currentControl) {
-            var funk = this.currentControl[name];
-            if (funk) {
-              funk(evt);
+            if (this.currentControl[name]) {
+              this.currentControl[name](evt);
             }
             else {
               console.warn("Couldn't find %s on %o", name, this.currentControl);
