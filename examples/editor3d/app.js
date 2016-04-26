@@ -198,7 +198,7 @@ function updateScript() {
   }
 }
 
-function log(msg) {
+logger.setup(logger.USER, function (msg) {
   if (output) {
     var data = JSON.parse(msg),
       t = output;
@@ -206,9 +206,7 @@ function log(msg) {
     t.selectionStart = t.selectionEnd = t.value.length;
     t.scrollIntoView(t.frontCursor);
   }
-}
-
-logger.setup(log);
+});
 
 function clrscr() {
   if (output) {

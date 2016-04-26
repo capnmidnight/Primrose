@@ -38,7 +38,6 @@
     <Content Include="models\vr_text.obj" />
     <Content Include="src\base\cache.js" />
     <Content Include="examples\editor3d\prong.stereo.jpg" />
-    <Content Include="lib\logger.js" />
     <Content Include="models\cardboard.mtl" />
     <Content Include="models\cardboard.obj" />
     <Content Include="models\monitor.blend" />
