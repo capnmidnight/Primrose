@@ -85,9 +85,7 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
       })
   };
 
-debugDataES6.frameworkFiles.splice(0, 0,
-  "lib/logger.js",
-  "lib/webgl-debug.js");
+debugDataES6.frameworkFiles.unshift("lib/webgl-debug.js");
 
 debugDataES6.frameworkFiles.splice
   .bind(debugDataES6.frameworkFiles, 0, 0)

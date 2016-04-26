@@ -3,6 +3,8 @@
 append head
   <!-- start withFramework.jade head append -->
   if debug
+    script(type="text/javascript", src=fileRoot + "lib/logger.js")
+    script(type="text/javascript") logger.setup(logger.DISABLED, "/logger/");
     each file in frameworkFiles
       script(type="text/javascript", src=fileRoot + file)
   else
