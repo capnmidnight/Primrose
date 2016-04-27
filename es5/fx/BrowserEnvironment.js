@@ -127,8 +127,8 @@ Primrose.BrowserEnvironment = function () {
         }
 
         var m = mRight.elements.subarray(0, mRight.elements.length),
-            mStr = m.join(",");
-        if (!lastBag || !lastBag.matrix || lastBag.matrix.join(",") !== mStr) {
+            mStr = describeMatrix(m);
+        if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
           update = true;
           bag.matrix = m;
         }
@@ -155,6 +155,17 @@ Primrose.BrowserEnvironment = function () {
           return bag;
         }
       };
+
+      function describeMatrix(m) {
+        var output = "";
+        for (var i = 0; i < m.length; ++i) {
+          if (i > 0) {
+            output += ",";
+          }
+          output += m[i];
+        }
+        return output;
+      }
 
       var objectHistory = {};
 
@@ -497,7 +508,7 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var modifyScreen = function modifyScreen() {
-        document.body.style.cursor = "default";
+        _this.renderer.domElement.style.cursor = "default";
         var canvasWidth,
             canvasHeight,
             aspectWidth,
@@ -505,8 +516,8 @@ Primrose.BrowserEnvironment = function () {
             elementWidth = bounds.width,
             elementHeight = bounds.height;
 
-        if (_this.inVR) {
-          if (isMobile) {
+        if (isMobile) {
+          if (isFullScreenMode()) {
             var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
             if (type.indexOf("landscape") === -1) {
               type = "landscape-primary";
@@ -516,7 +527,16 @@ Primrose.BrowserEnvironment = function () {
             } else if (screen.mozLockOrientation) {
               screen.mozLockOrientation(type);
             }
+          } else {
+            if (screen.orientation && screen.orientation.unlock) {
+              screen.orientation.unlock();
+            } else if (screen.mozUnlockOrientation) {
+              screen.mozUnlockOrientation();
+            }
           }
+        }
+
+        if (_this.inVR) {
           _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
           var p = _this.input.vr.transforms,
@@ -526,16 +546,13 @@ Primrose.BrowserEnvironment = function () {
           canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
           aspectWidth = canvasWidth / 2;
         } else {
-          if (isMobile) {
-            if (screen.orientation && screen.orientation.unlock) {
-              screen.orientation.unlock();
-            } else if (screen.mozUnlockOrientation) {
-              screen.mozUnlockOrientation();
-            }
-          }
           var pixelRatio = devicePixelRatio || 1;
           if (isiOS) {
             elementHeight = elementWidth * screen.width / screen.height;
+          }
+          if (FullScreen.isActive) {
+            elementWidth = screen.width;
+            elementHeight = screen.height;
           }
           canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
           canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
@@ -568,8 +585,8 @@ Primrose.BrowserEnvironment = function () {
           skin = Primrose.Random.item(Primrose.SKIN_VALUES),
           readyFired = false,
           modelFiles = {
-        monitor: "../../models/monitor.obj",
-        fullscreenText: "../../models/fullscreen_text.obj",
+        monitor: "models/monitor.obj",
+        fullscreenText: "models/fullscreen_text.obj",
         cardboard: null,
         cardboardText: null,
         scene: this.options.sceneModel,
@@ -578,8 +595,8 @@ Primrose.BrowserEnvironment = function () {
           monitor = null,
           cardboard = null;
       if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = "../../models/cardboard.obj";
-        modelFiles.cardboardText = "../../models/vr_text.obj";
+        modelFiles.cardboard = "models/cardboard.obj";
+        modelFiles.cardboardText = "models/vr_text.obj";
       }
 
       function setColor(model, color) {
@@ -692,11 +709,7 @@ Primrose.BrowserEnvironment = function () {
 
       this.pickableObjects = {};
 
-      if (isGearVR) {
-        this.projector = new Primrose.Projector();
-      } else {
-        this.projector = new Primrose.Workerize(Primrose.Projector);
-      }
+      this.projector = new Primrose.Workerize(Primrose.Projector);
 
       this.player = new THREE.Object3D();
       this.player.velocity = new THREE.Vector3();
@@ -797,9 +810,9 @@ Primrose.BrowserEnvironment = function () {
 
       this.start = function () {
         allReady.then(modifyScreen).then(function () {
-          return lt = performance.now() * MILLISECONDS_TO_SECONDS;
-        }).then(function () {
-          return RAF(animate);
+          _this.audio.start();
+          lt = performance.now() * MILLISECONDS_TO_SECONDS;
+          RAF(animate);
         });
       };
 
@@ -809,6 +822,7 @@ Primrose.BrowserEnvironment = function () {
         } else {
           cancelAnimationFrame(_this.timer);
         }
+        _this.audio.stop();
         _this.timer = null;
       };
 
@@ -905,8 +919,8 @@ Primrose.BrowserEnvironment = function () {
 
       var showHideButtons = function showHideButtons() {
         if (cardboard) {
-          cardboard.disabled = isFullScreenMode();
-          cardboard.visible = !isFullScreenMode();
+          cardboard.disabled = _this.inVR;
+          cardboard.visible = !_this.inVR;
         }
         monitor.disabled = isFullScreenMode();
         monitor.visible = !isFullScreenMode();
@@ -941,7 +955,11 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var setPointerLock = function setPointerLock() {
-        if (!isMobile) {
+        if (isGearVR) {
+          return _this.goVR();
+        } else if (isMobile) {
+          return _this.goFullScreen();
+        } else {
           return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
         }
       };
@@ -959,9 +977,8 @@ Primrose.BrowserEnvironment = function () {
       var withCurrentControl = function withCurrentControl(name) {
         return function (evt) {
           if (_this.currentControl) {
-            var funk = _this.currentControl[name];
-            if (funk) {
-              funk(evt);
+            if (_this.currentControl[name]) {
+              _this.currentControl[name](evt);
             } else {
               console.warn("Couldn't find %s on %o", name, _this.currentControl);
             }

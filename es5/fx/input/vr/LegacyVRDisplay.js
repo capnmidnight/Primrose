@@ -75,38 +75,15 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
       return pose;
     }
 
-    if (isGearVR) {
-      var corrector = new Primrose.Input.VR.MotionCorrector(),
-          currentPose = null;
+    this.getImmediatePose = function () {
+      return createPoseFromState(device.sensor.getImmediateState());
+    };
 
-      corrector.addEventListener("deviceorientation", function (evt) {
-        currentPose = {
-          timestamp: performance.now(),
-          frameID: ++frameID,
-          orientation: new Float32Array(evt.toArray())
-        };
-      });
+    this.getPose = function () {
+      return createPoseFromState(device.sensor.getState());
+    };
 
-      this.getImmediatePose = function () {
-        return currentPose;
-      };
-
-      this.getPose = function () {
-        return currentPose;
-      };
-
-      this.resetPose = corrector.zeroAxes.bind(corrector);
-    } else {
-      this.getImmediatePose = function () {
-        return createPoseFromState(device.sensor.getImmediateState());
-      };
-
-      this.getPose = function () {
-        return createPoseFromState(device.sensor.getState());
-      };
-
-      this.resetPose = device.sensor.resetSensor.bind(device.sensor);
-    }
+    this.resetPose = device.sensor.resetSensor.bind(device.sensor);
 
     var currentLayer = null;
 

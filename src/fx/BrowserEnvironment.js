@@ -122,8 +122,8 @@ Primrose.BrowserEnvironment = (function () {
         }
 
         var m = mRight.elements.subarray(0, mRight.elements.length),
-          mStr = m.join(",");
-        if (!lastBag || !lastBag.matrix || lastBag.matrix.join(",") !== mStr) {
+          mStr = describeMatrix(m);
+        if (!lastBag || !lastBag.matrix || describeMatrix(lastBag.matrix) !== mStr) {
           update = true;
           bag.matrix = m;
         }
@@ -151,6 +151,18 @@ Primrose.BrowserEnvironment = (function () {
           return bag;
         }
       };
+
+      function describeMatrix(m) {
+        var output = "";
+        for (var i = 0; i < m.length; ++i) {
+          if (i > 0) {
+            output += ",";
+          }
+          output += m[i];
+        }
+        return output;
+      }
+
 
       var objectHistory = {};
 
@@ -638,7 +650,7 @@ Primrose.BrowserEnvironment = (function () {
           this.scene.Monitor = monitor;
           this.registerPickableObject(monitor);
           complementColor(setColor(models.fullscreenText, this.options.backgroundColor));
-          
+
           if (models.cardboard) {
             monitor.rotation.set(0, 300 * Math.PI / 180, 0);
             monitor.position.set(-0.25, 0.7, -1);
@@ -727,12 +739,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.pickableObjects = {};
 
-      if (isGearVR) {
-        this.projector = new Primrose.Projector();
-      }
-      else {
-        this.projector = new Primrose.Workerize(Primrose.Projector);
-      }
+      this.projector = new Primrose.Workerize(Primrose.Projector);
 
       this.player = new THREE.Object3D();
       this.player.velocity = new THREE.Vector3();

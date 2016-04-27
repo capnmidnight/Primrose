@@ -802,11 +802,7 @@ Primrose.Text.Controls.TextBox = function () {
           }
 
           if (imageChanged) {
-            if (layoutChanged || scrollChanged || themeChanged || focusChanged) {
-              changeBounds = this.bounds.clone();
-              changeBounds.left = 0;
-              changeBounds.top = 0;
-            } else if (cursorChanged) {
+            if (cursorChanged && !(layoutChanged || scrollChanged || themeChanged || focusChanged)) {
               var top = Math.min(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + this.gridBounds.y,
                   bottom = Math.max(this.frontCursor.y, this._lastFrontCursor.y, this.backCursor.y, this._lastBackCursor.y) - this.scroll.y + 1;
               changeBounds = new Primrose.Text.Rectangle(0, top * this.character.height, this.bounds.width, (bottom - top) * this.character.height + 2);

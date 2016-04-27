@@ -19,7 +19,6 @@ Primrose.Output.Audio3D = function () {
       this.context = new AudioContext();
       this.sampleRate = this.context.sampleRate;
       this.mainVolume = this.context.createGain();
-      this.mainVolume.connect(this.context.destination);
 
       var vec = new THREE.Vector3(),
           up = new THREE.Vector3(),
@@ -64,10 +63,20 @@ Primrose.Output.Audio3D = function () {
       this.setPosition = function () {};
       this.setVelocity = function () {};
       this.setOrientation = function () {};
+      this.start = function () {};
+      this.stop = function () {};
       this.error = exp;
       console.error("AudioContext not available. Reason: ", exp.message);
     }
   }
+
+  Audio3D.prototype.start = function () {
+    this.mainVolume.connect(this.context.destination);
+  };
+
+  Audio3D.prototype.stop = function () {
+    this.mainVolume.disconnect();
+  };
 
   Audio3D.prototype.loadURL = function (src) {
     var _this2 = this;
