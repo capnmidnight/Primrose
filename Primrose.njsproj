@@ -145,8 +145,7 @@
     <Content Include="doc\video.html.jade" />
     <Content Include="doc\webvr.html.jade" />
     <Content Include="doc\app.js" />
-    <Content Include="examples\style.css" />
-    <Content Include="examples\style.min.css" />
+    <Content Include="examples\example.css" />
     <Content Include="images\cardboard128.png" />
     <Content Include="images\cardboard64.png" />
     <Content Include="images\chromium.webvr.png" />

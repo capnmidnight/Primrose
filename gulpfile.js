@@ -110,19 +110,19 @@ gulp.task("jshint", function () {
     }));
 });
 
-gulp.task("pugRelease", ["jshint"], function () {
+gulp.task("pugRelease", function () {
   return pugConfiguration({}, { docFiles: debugDataES6.docFiles });
 });
 
-gulp.task("pugDebugES5", ["jshint"], function () {
+gulp.task("pugDebugES5", function () {
   return pugConfiguration({ pretty: true }, debugDataES5);
 });
 
-gulp.task("pugDebugES6", ["jshint"], function () {
+gulp.task("pugDebugES6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
-gulp.task("cssmin", ["jshint"], function () {
+gulp.task("cssmin", function () {
   gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"], { base: "./" })
     .pipe(cssmin())
     .pipe(rename({ suffix: ".min" }))
@@ -174,6 +174,6 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("release", ["jsmin", "cssmin", "pugRelease", "archive"]);
+gulp.task("release", ["cssmin", "pugRelease", "archive"]);
 gulp.task("debugES5", ["babel", "pugDebugES5"]);
 gulp.task("default", ["pugDebugES6"]);
