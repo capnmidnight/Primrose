@@ -594,8 +594,8 @@ Primrose.BrowserEnvironment = (function () {
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         readyFired = false,
         modelFiles = {
-          monitor: "../../models/monitor.obj",
-          fullscreenText: "../../models/fullscreen_text.obj",
+          monitor: "models/monitor.obj",
+          fullscreenText: "models/fullscreen_text.obj",
           cardboard: null,
           cardboardText: null,
           scene: this.options.sceneModel,
@@ -604,8 +604,8 @@ Primrose.BrowserEnvironment = (function () {
         monitor = null,
         cardboard = null;
       if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = "../../models/cardboard.obj";
-        modelFiles.cardboardText = "../../models/vr_text.obj";
+        modelFiles.cardboard = "models/cardboard.obj";
+        modelFiles.cardboardText = "models/vr_text.obj";
       }
 
       function setColor(model, color) {
