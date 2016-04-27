@@ -521,14 +521,6 @@ Primrose.BrowserEnvironment = (function () {
 
         if (isMobile) {
           if (isFullScreenMode()) {
-            if (screen.orientation && screen.orientation.unlock) {
-              screen.orientation.unlock();
-            }
-            else if (screen.mozUnlockOrientation) {
-              screen.mozUnlockOrientation();
-            }
-          }
-          else {
             var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
             if (type.indexOf("landscape") === -1) {
               type = "landscape-primary";
@@ -538,6 +530,14 @@ Primrose.BrowserEnvironment = (function () {
             }
             else if (screen.mozLockOrientation) {
               screen.mozLockOrientation(type);
+            }
+          }
+          else {
+            if (screen.orientation && screen.orientation.unlock) {
+              screen.orientation.unlock();
+            }
+            else if (screen.mozUnlockOrientation) {
+              screen.mozUnlockOrientation();
             }
           }
         }
