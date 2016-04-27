@@ -1,4 +1,4 @@
-﻿extends ../templates/withFramework.jade
+﻿extends withFramework.jade
 
 block title
   <!-- start documentation.jade title block -->
@@ -16,11 +16,11 @@ mixin fileList(name)
     h2= name
     ul
       each file in docFiles
-        if(name === "Pages" && !file.tutorial || name === "Tutorials" && file.tutorial)
+        if(name === "Pages" && !file.tutorial && !file.example || name === "Tutorials" && file.tutorial || name === "Examples" && file.example)
           if(file.incomplete)
-            li(data-name=file.title): a.incomplete(href=file.fileName)= file.title
+            li(data-name=file.title): a.incomplete(href=fileRoot + file.fileName)= file.title
           else
-            li(data-name=file.title): a(href=file.fileName)= file.title
+            li(data-name=file.title): a(href=fileRoot + file.fileName)= file.title
 block main
   <!-- start documentation.jade main block -->
   main
@@ -40,6 +40,7 @@ block main
                 li: a(href="#LICENSE.md") LICENSE
                 li: a(href="#CHANGELOG.md") CHANGELOG
                 li: a(href="#CONTRIBUTORS.md") CONTRIBUTORS
+            +fileList("Examples")
             +fileList("Pages")
             +fileList("Tutorials")
     #documentation
@@ -47,3 +48,5 @@ block main
       block document
       <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
+append footer
+  script(type="text/javascript", async, defer, src="app.js")

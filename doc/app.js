@@ -6,6 +6,25 @@ function scroller(id) {
   });
 }
 
+var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
+function replacePreBlocks() {
+  var doc = document.querySelector("#documentation"),
+    codeBlocks = doc.querySelectorAll("pre");
+  for (var i = 0; i < codeBlocks.length; ++i) {
+    var b = codeBlocks[i],
+      txt = (b.textContent || b.innerText).trim(),
+      grammarSpec = txt.match(GRAMMAR_TEST),
+      tokenizer = Primrose.Text.Grammars.PlainText;
+    if (grammarSpec) {
+      var grammarName = grammarSpec[1];
+      tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
+      txt = txt.replace(GRAMMAR_TEST, "");
+    }
+
+    b.innerHTML = tokenizer.toHTML(txt);
+  }
+}
+
 (function () {
   "use strict";
 
@@ -68,24 +87,6 @@ function scroller(id) {
       if (editors[i] !== evt.target) {
         editors[i].blur();
       }
-    }
-  }
-
-  var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
-  function replacePreBlocks() {
-    var codeBlocks = doc.querySelectorAll("pre");
-    for (var i = 0; i < codeBlocks.length; ++i) {
-      var b = codeBlocks[i],
-        txt = (b.textContent || b.innerText).trim(),
-        grammarSpec = txt.match(GRAMMAR_TEST),
-        tokenizer = Primrose.Text.Grammars.PlainText;
-      if (grammarSpec) {
-        var grammarName = grammarSpec[1];
-        tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
-        txt = txt.replace(GRAMMAR_TEST, "");
-      }
-
-      b.innerHTML = tokenizer.toHTML(txt);
     }
   }
 

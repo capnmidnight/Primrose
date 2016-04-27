@@ -1,0 +1,26 @@
+﻿extends templates/withFramework.jade
+
+append head
+  style.
+    html, body, #editorContainer{
+      position:absolute;
+      height:100%;
+      width:100%;
+      padding:0;
+      margin:0;
+      border:0;
+      left:0;
+      top:0;
+    }
+
+block main
+  pre#editorContainer
+  script(type="text/javascript").
+    "use strict";
+    var editorContainer = document.querySelector("#editorContainer");
+    document.body.style.backgroundColor = Primrose.Text.Themes.Default.regular.backColor;
+
+    Primrose.HTTP.getText("doc/music/app.js")
+      .then(function (file) {
+        editorContainer.innerHTML = Primrose.Text.Grammars.JavaScript.toHTML(file);
+      });

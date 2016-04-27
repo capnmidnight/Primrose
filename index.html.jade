@@ -7,7 +7,7 @@ append head
   
 block banner
   section#demo
-    iframe#frontBuffer(src= fileRoot + "examples/editor3d/index.html", role="application", allowfullscreen)
+    iframe#frontBuffer(src= fileRoot + "doc/editorVR.html", role="application", allowfullscreen)
     #overlay
       img(src= fileRoot + "images/primrose64.png", title="Primrose WebVR Framework", alt="Primrose Banner")
       p Productive Virtual Reality
@@ -29,32 +29,32 @@ block main
         h3 Examples
         ul
           li
-            a(href= fileRoot + "examples/editor3d/index.html", target="_blank")
-              img(src= fileRoot + "examples/editor3d/screenshot.jpg", alt="screenshot", title="3D Live Programming")
+            a(href= fileRoot + "doc/editorVR.html", target="_blank")
+              img(src= fileRoot + "doc/editorVR/screenshot.jpg", alt="screenshot", title="3D Live Programming")
               | 3D Live Programming
               br
               small Edit objects on the fly!
           li
-            a(href= fileRoot + "examples/temple/index.html", target="_blank")
-              img(src= fileRoot + "examples/temple/screenshot.jpg", alt="screenshot", title="Ancient Temple")
+            a(href= fileRoot + "doc/temple.html", target="_blank")
+              img(src= fileRoot + "doc/temple/screenshot.jpg", alt="screenshot", title="Ancient Temple")
               | Ancient Temple
               br
               small Randomly generated columns and dust!
           li
-            a(href= fileRoot + "examples/music/index.html", target="_blank")
-              img(src= fileRoot + "examples/music/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "doc/music.html", target="_blank")
+              img(src= fileRoot + "doc/music/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Music
               br
               small A little synthesizer keyboard you can play!
           li
-            a(href= fileRoot + "examples/commodore/index.html", target="_blank")
-              img(src= fileRoot + "examples/commodore/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "doc/commodore.html", target="_blank")
+              img(src= fileRoot + "doc/commodore/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Commodore PET
               br
               small Cutting edge 1977 technology!
           li
-            a(href= fileRoot + "examples/jabbers/index.html", target="_blank")
-              img(src= fileRoot + "examples/jabbers/screenshot.jpg", alt="screenshot", title="Commodore PET")
+            a(href= fileRoot + "doc/jabbers.html", target="_blank")
+              img(src= fileRoot + "doc/jabbers/screenshot.jpg", alt="screenshot", title="Commodore PET")
               | Bouncing Jabber Yabs
               br
               small Not at all creepy!
@@ -108,7 +108,7 @@ block main
 
         p Getting up and running with Primrose  is quick and easy. Check out the example code below.
 
-        iframe#example(src= fileRoot + "examples/editor2d/index.html")
+        iframe#example(src= fileRoot + "doc/editor2d.html")
 
         p: a.primary.button(href= fileRoot + "scripts/Primrose.min.js", target="_blank")
             | Download Primrose.min.js, v#{version} #[br]

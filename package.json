@@ -14,10 +14,10 @@
   },
   "bugs": "https://github.com/capnmidnight/Primrose/issues",
   "files": [
-    "LICENSE",
+    "LICENSE.md",
     "README.md",
-    "scripts/",
-    "examples/",
+    "src/",
+    "doc/",
     "lib/"
   ],
   "scripts": {

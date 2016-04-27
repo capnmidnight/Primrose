@@ -11,6 +11,5 @@ append head
 
 prepend footer
   <!-- start withFramework.jade footer prepend -->
-  script(type="text/javascript", src="app.js")
   script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
   <!-- end withFramework.jade footer prepend -->

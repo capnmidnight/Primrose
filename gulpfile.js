@@ -16,7 +16,7 @@
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   pathX = /.*\/(.*).js/,
-  pugFileSpec = ["*.jade", "doc/**/*.jade", "examples/**/*.jade"],
+  pugFileSpec = ["*.jade", "doc/**/*.jade"],
   headerFiles = [
     "node_modules/logger/logger.min.js",
     "lib/loggerInit.js",
@@ -49,13 +49,15 @@ function pugConfiguration(options, defaultData) {
         parts = name.split("/")
           .map(function () {
             return "../";
-          });
+          }),
+        shortName = name.match(/([^\/]+)\.html$/);
       parts.pop();
       return {
         debug: defaultData.debug,
         version: pkg.version,
-        filename: name,
+        filePath: name,
         fileRoot: parts.join(""),
+        fileName: shortName && shortName[1],
         docFiles: defaultData.docFiles,
         frameworkFiles: defaultData.frameworkFiles
       };
@@ -64,7 +66,7 @@ function pugConfiguration(options, defaultData) {
     .pipe(gulp.dest("."));
 }
 
-var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
+var headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
   debugDataES6 = {
     debug: true,
     frameworkFiles: recurseDirectory("src"),
@@ -74,7 +76,7 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
         var file = fs.readFileSync(f, "utf-8").toString(),
           match = file.match(headerSpec),
           index = i;
-        if (match[1].length > 0) {
+        if (match && match[1] && match[1].length > 0) {
           index = parseInt(match[1]);
         }
         return {
@@ -82,7 +84,8 @@ var headerSpec = /\b(\d+)\r\n\s*h1 ([^\r\n]+)/,
           index: index,
           title: match[2],
           incomplete: /\[under construction\]/.test(file),
-          tutorial: /^Tutorial:/.test(match[2])
+          tutorial: /^Tutorial:/.test(match[2]),
+          example: /^Example:/.test(match[2])
         };
       })
   };
@@ -123,7 +126,7 @@ gulp.task("pugDebugES6", function () {
 });
 
 gulp.task("cssmin", function () {
-  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "examples/**/*.css", "!*.min.css"], { base: "./" })
+  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "!*.min.css"], { base: "./" })
     .pipe(cssmin())
     .pipe(rename({ suffix: ".min" }))
     .pipe(gulp.dest("./"));

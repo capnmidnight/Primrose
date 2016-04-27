@@ -7,19 +7,19 @@
   <url>
     <loc>https://www.primrosevr.com/#intro</loc>
     <image:image>
-      <image:loc>https://www.primrosevr.com/examples/commodore/screenshot.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/doc/commodore/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primrosevr.com/examples/editor3d/screenshot.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/doc/editor3d/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primrosevr.com/examples/jabbers/screenshot.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/doc/jabbers/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primrosevr.com/examples/music/screenshot.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/doc/music/screenshot.jpg</image:loc>
     </image:image>
     <image:image>
-      <image:loc>https://www.primrosevr.com/examples/temple/screenshot.jpg</image:loc>
+      <image:loc>https://www.primrosevr.com/doc/temple/screenshot.jpg</image:loc>
     </image:image>
   </url>
   <url>
@@ -38,18 +38,18 @@
     <loc>https://www.primrosevr.com/#about</loc>
   </url>
   <url>
-    <loc>https://www.primrosevr.com/examples/commodore/index.html</loc>
+    <loc>https://www.primrosevr.com/doc/commodore.html</loc>
   </url>
   <url>
-    <loc>https://www.primrosevr.com/examples/editor3d/index.html</loc>
+    <loc>https://www.primrosevr.com/doc/editor3d.html</loc>
   </url>
   <url>
-    <loc>https://www.primrosevr.com/examples/jabbers/index.html</loc>
+    <loc>https://www.primrosevr.com/doc/jabbers.html</loc>
   </url>
   <url>
-    <loc>https://www.primrosevr.com/examples/music/index.html</loc>
+    <loc>https://www.primrosevr.com/doc/music.html</loc>
   </url>
   <url>
-    <loc>https://www.primrosevr.com/examples/temple/index.html</loc>
+    <loc>https://www.primrosevr.com/doc/temple.html</loc>
   </url>
 </urlset>
