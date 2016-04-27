@@ -87,7 +87,6 @@ ul {
 }
 
 header{
-  position: relative;
   left: 0;
   top: 0;
   width: 100%;
@@ -118,12 +117,10 @@ header a {
 
 
 main{
-  position: absolute;
   display: inline-block;
   top: 4em;
   width: 100%;
   bottom: 0;
-  overflow-y: scroll;
 }
 
 h2, h3, h4{
