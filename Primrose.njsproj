@@ -90,10 +90,6 @@
     <Content Include="doc\audio\click.mp3" />
     <Content Include="doc\audio\click.ogg" />
     <Content Include="doc\audio\game1.ogg" />
-    <Content Include="audio\menu.mp3" />
-    <Content Include="audio\menu.ogg" />
-    <Content Include="audio\ocean.mp3" />
-    <Content Include="audio\title.ogg" />
     <Content Include="robots.txt" />
     <Content Include="missing.html" />
     <Content Include="favicon.png" />
