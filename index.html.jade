@@ -7,7 +7,7 @@ append head
   
 block banner
   section#demo
-    iframe#frontBuffer(src= fileRoot + "doc/editorVR.html", role="application", allowfullscreen)
+    iframe#frontBuffer(src= fileRoot + "doc/frontPageBanner.html", role="application", allowfullscreen)
     #overlay
       img(src= fileRoot + "images/primrose64.png", title="Primrose WebVR Framework", alt="Primrose Banner")
       p Productive Virtual Reality
@@ -108,7 +108,7 @@ block main
 
         p Getting up and running with Primrose  is quick and easy. Check out the example code below.
 
-        iframe#example(src= fileRoot + "doc/editor2d.html")
+        iframe#example(src= fileRoot + "editor2d.html")
 
         p: a.primary.button(href= fileRoot + "scripts/Primrose.min.js", target="_blank")
             | Download Primrose.min.js, v#{version} #[br]

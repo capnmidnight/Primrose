@@ -76,17 +76,18 @@ var headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
         var file = fs.readFileSync(f, "utf-8").toString(),
           match = file.match(headerSpec),
           index = i;
-        if (match && match[1] && match[1].length > 0) {
-          index = parseInt(match[1]);
+        if (match) {
+          return {
+            fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
+            index: index,
+            title: match[2],
+            incomplete: /\[under construction\]/.test(file),
+            tutorial: /^Tutorial:/.test(match[2]),
+            example: /^Example:/.test(match[2])
+          };
         }
-        return {
-          fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
-          index: index,
-          title: match[2],
-          incomplete: /\[under construction\]/.test(file),
-          tutorial: /^Tutorial:/.test(match[2]),
-          example: /^Example:/.test(match[2])
-        };
+      }).filter(function (f) {
+        return f;
       })
   };
 

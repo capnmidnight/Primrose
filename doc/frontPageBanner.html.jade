@@ -1,0 +1,50 @@
+﻿extends ../templates/withFramework.jade
+
+append head
+  <!-- start demo.jade head append -->
+  style(type="text/css")
+    |  #frontBuffer {
+    |   width: 100%;
+    |   padding: 0;
+    |   margin: 0;
+    |   border: 0;
+    |   background-repeat: no-repeat;
+    |   background-color: #eee;
+    |   background-size: cover;
+    |   cursor: wait;
+    |   background-image:url(#{fileRoot}doc/editorVR/screenshot.jpg);
+    | }
+  <!-- end demo.jade head append -->
+
+block banner
+  <!-- start demo.jade banner block -->
+  canvas#frontBuffer
+  pre#editorContainer
+  <!-- end demo.jade banner block -->
+
+prepend footer
+  script#monitor_mtl(type="text/prs.wavefront-mtl")
+    include ../doc/models/monitor.mtl
+
+  script#monitor_obj(type="text/prs.wavefront-obj")
+    include ../doc/models/monitor.obj
+
+  script#fullscreen_text_mtl(type="text/prs.wavefront-mtl")
+    include ../doc/models/fullscreen_text.mtl
+
+  script#fullscreen_text_obj(type="text/prs.wavefront-obj")
+    include ../doc/models/fullscreen_text.obj
+
+  script#monitor_mtl(type="text/prs.wavefront-mtl")
+    include ../doc/models/cardboard.mtl
+
+  script#monitor_obj(type="text/prs.wavefront-obj")
+    include ../doc/models/cardboard.obj
+
+  script#fullscreen_text_mtl(type="text/prs.wavefront-mtl")
+    include ../doc/models/vr_text.mtl
+
+  script#fullscreen_text_obj(type="text/prs.wavefront-obj")
+    include ../doc/models/vr_text.obj
+
+  script(type="text/javascript", async, defer, src=fileRoot + "doc/editorVR/app.js")
