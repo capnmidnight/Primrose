@@ -847,8 +847,11 @@ Primrose.BrowserEnvironment = (function () {
       this.start = () => {
         allReady
           .then(modifyScreen)
-          .then(() => lt = performance.now() * MILLISECONDS_TO_SECONDS)
-          .then(() => RAF(animate));
+          .then(() => {
+            this.audio.start();
+            lt = performance.now() * MILLISECONDS_TO_SECONDS;
+            RAF(animate);
+          });
       };
 
       this.stop = () => {
@@ -858,6 +861,7 @@ Primrose.BrowserEnvironment = (function () {
         else {
           cancelAnimationFrame(this.timer);
         }
+        this.audio.stop();
         this.timer = null;
       };
 
