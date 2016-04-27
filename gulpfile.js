@@ -76,7 +76,11 @@ var headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
         var file = fs.readFileSync(f, "utf-8").toString(),
           match = file.match(headerSpec),
           index = i;
+
         if (match) {
+          if (match[1]) {
+            index = parseInt(match[1]);
+          }
           return {
             fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
             index: index,
