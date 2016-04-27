@@ -997,10 +997,13 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setPointerLock = () => {
-        if (isMobile) {
+        if (isGearVR) {
+          return this.goVR();
+        }
+        else if (isMobile) {
           return this.goFullScreen();
         }
-        else { 
+        else {
           return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
         }
       };
