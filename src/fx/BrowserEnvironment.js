@@ -555,6 +555,10 @@ Primrose.BrowserEnvironment = (function () {
           if (isiOS) {
             elementHeight = elementWidth * screen.width / screen.height;
           }
+          if (FullScreen.isActive) {
+            elementWidth = screen.width;
+            elementHeight = screen.height;
+          }
           canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
           canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
           aspectWidth = canvasWidth;
