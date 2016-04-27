@@ -510,7 +510,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var modifyScreen = () => {
-        document.body.style.cursor = "default";
+        this.renderer.domElement.style.cursor = "default";
         var canvasWidth,
           canvasHeight,
           aspectWidth,
