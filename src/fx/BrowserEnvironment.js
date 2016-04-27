@@ -958,8 +958,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var showHideButtons = () => {
         if (cardboard) {
-          cardboard.disabled = isFullScreenMode();
-          cardboard.visible = !isFullScreenMode();
+          cardboard.disabled = this.inVR;
+          cardboard.visible = !this.inVR;
         }
         monitor.disabled = isFullScreenMode();
         monitor.visible = !isFullScreenMode();
@@ -993,7 +993,10 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setPointerLock = () => {
-        if (!isMobile) {
+        if (isMobile) {
+          return this.goFullScreen();
+        }
+        else { 
           return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
         }
       };
