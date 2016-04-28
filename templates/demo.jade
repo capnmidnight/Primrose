@@ -54,7 +54,6 @@ append footer
     | Primrose.HTTP.getText("#{fileRoot}doc/#{fileName}/app.js")
     |   .then(function (file) {
     |     document.querySelector("#editorContainer").innerHTML = "grammar(\"JavaScript\");\n" + file;
-    |     replacePreBlocks();
     |   });
 
   script(type="text/javascript", async, defer, src=fileRoot + "doc/" + fileName + "/app.js")
