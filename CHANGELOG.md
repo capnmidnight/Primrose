@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.23.1
+## v0.23.1 - 2016/04/29
 
 * Compatability
   * Windows
@@ -52,7 +52,7 @@
   * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
 
 
-## v0.23.0
+## v0.23.0 - 2016/04/21
 
 ### What happened to v0.22.0?
 
@@ -158,7 +158,7 @@ Seriously though, I got really busy and just never got around to making a produc
   * Fixed an issue where resuming from pause (e.g. the window losing focus) made a huge time-slice update.
   * Enabled MTL, OBJ, and OGG file formats on the server.
 
-## v0.21.2
+## v0.21.2 - 2016/03/11
 
 * Bugs
   * Fixed having to make dev-to-production changes manually. Using full static site generation now.
@@ -168,18 +168,18 @@ Seriously though, I got really busy and just never got around to making a produc
   * Fixed out-of-bounds array access in projector (though ultimately, seems I broke the projector for buffered geometry)
   * Fix for loading a texture more than once into multiple materials. Probably should cache the material, though.
 
-## v0.21.1
+## v0.21.1 - 2016/03/06
 
 * Bugs
   * Fixes for WebVR API fallback on current Firefox Nightly
   * Fix for zeroing sensor on new WebVR API
   * Don't resize canvas to full screen dimensions on desktop. This is only necessary on mobile devices, to support scrolling to remove browser chrome.
 
-## v0.21.0
+## v0.21.0 - 2016/03/05
 
 WebVR API 1.0 support!!! With backwards compatability to draft APIs.
 
-## v0.20.6
+## v0.20.6 - 2016/02/27
 
 It's going to be nothing but documentation for a while.
 
@@ -191,7 +191,7 @@ It's going to be nothing but documentation for a while.
   * This CHANGELOG page.
   * More documentation
 
-## v0.20.5
+## v0.20.5 - 2016/02/15
 
 It's going to be nothing but documentation for a while.
 
@@ -202,7 +202,7 @@ It's going to be nothing but documentation for a while.
   * "Using the VR Development Environment" documentation.
   * Started CHANGELOG.
 
-## v0.20.4
+## v0.20.4 - 2016/02/12
 
 It's going to be nothing but documentation for a while.
 
@@ -212,7 +212,7 @@ It's going to be nothing but documentation for a while.
 * Features
   * "Using the VR Development Environment" documentation.
 
-## v0.20.3
+## v0.20.3 - 2016/02/11
 
 It's going to be nothing but documentation for a while.
 
@@ -234,7 +234,7 @@ It's going to be nothing but documentation for a while.
   * ["Installation and Setup"](#InstallationandSetup) documentation.
   * ["Frequently Asked Question"](#FrequentlyAskedQuestions) documentation.
 
-## v0.20.2
+## v0.20.2 - 2016/02/01
 
 * Bugs
   * Simplified [`pliny`](#WritingnewdocumentationwithPliny) interface.
