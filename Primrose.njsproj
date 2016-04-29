@@ -30,6 +30,11 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\audio\menu.mp3" />
+    <Content Include="doc\audio\menu.ogg" />
+    <Content Include="doc\audio\ocean.mp3" />
+    <Content Include="doc\audio\title.ogg" />
+    <Content Include="doc\audio\wind.ogg" />
     <Content Include="doc\commodore\dogstar.bas" />
     <Content Include="doc\commodore\oregon.bas" />
     <Content Include="doc\models\fullscreen_text.mtl" />
@@ -104,7 +109,6 @@
     <Content Include="doc\frontPageBanner.html.jade" />
     <Compile Include="gulpfile.js" />
     <Content Include="lib\loggerInit.js" />
-    <Compile Include="payload.js" />
     <Compile Include="server.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
@@ -222,7 +226,6 @@
     <Content Include="src\base\hub.js" />
     <Content Include="src\index.js" />
     <Content Include="stylesheets\main.css" />
-    <Content Include="stylesheets\main.min.css" />
     <Content Include="src\x\SignupForm.js" />
     <Content Include="src\x\LoginForm.js" />
     <Content Include="test\Basic.js" />

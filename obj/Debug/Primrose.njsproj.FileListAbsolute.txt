@@ -1,0 +1,2 @@
+D:\Sean\Projects\Primrose\obj\Debug\Primrose.njsprojResolveAssemblyReference.cache
+D:\Sean\Projects\Primrose\bin\Microsoft.NodejsTools.WebRole.dll

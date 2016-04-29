@@ -21,7 +21,7 @@ block document
   p Click on the image below to lock mouse cursor to demo.
   canvas#frontBuffer
   h2 Source
-  pre#editorContainer
+  pre#editorContainer= demoScript
   <!-- end demo.jade banner block -->
 
 prepend footer
@@ -50,10 +50,4 @@ prepend footer
     include ../doc/models/vr_text.obj
 
 append footer
-  script(type="text/javascript")
-    | Primrose.HTTP.getText("#{fileRoot}doc/#{fileName}/app.js")
-    |   .then(function (file) {
-    |     document.querySelector("#editorContainer").innerHTML = "grammar(\"JavaScript\");\n" + file;
-    |   });
-
-  script(type="text/javascript", async, defer, src=fileRoot + "doc/" + fileName + "/app.js")
+  script(type="text/javascript", async, defer, src=fileRoot + demoScriptName)

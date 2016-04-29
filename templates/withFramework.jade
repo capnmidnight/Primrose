@@ -6,7 +6,8 @@ append head
     each file in frameworkFiles
       script(type="text/javascript", src=fileRoot + file)
   else
-    script(type="text/javascript", src= fileRoot + "scripts/payload.min.js")
+    script(type="text/javascript", src= fileRoot + "PrimroseDependencies.min.js")
+    script(type="text/javascript", src= fileRoot + "Primrose.min.js")
   <!-- end withFramework.jade head append -->
 
 prepend footer

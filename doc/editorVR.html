@@ -1,242 +1,351 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="web-app-capable" content="yes">
-    <meta name="theme-color" content="black">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="description" content="A WebVR application framework.">
-    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@Primrose_VR">
-    <meta property="og:site_name" content="Primrose VR">
-    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
-    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/doc/editorVR.html"><!-- start main.jade meta block -->
-    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
-    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><!-- start documentation.jade title block -->
-    <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
-    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
-    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block -->
-<!-- start main.jade head block --><!-- start withFramework.jade head append -->
-    <script type="text/javascript" src="../node_modules/logger/logger.min.js"></script>
-    <script type="text/javascript" src="../lib/loggerInit.js"></script>
-    <script type="text/javascript" src="../node_modules/pliny/pliny.min.js"></script>
-    <script type="text/javascript" src="../lib/sha512.js"></script>
-    <script type="text/javascript" src="../node_modules/socket.io-client/socket.io.js"></script>
-    <script type="text/javascript" src="../node_modules/three/three.js"></script>
-    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
-    <script type="text/javascript" src="../lib/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/index.js"></script>
-    <script type="text/javascript" src="../src/base/axis.js"></script>
-    <script type="text/javascript" src="../src/base/box.js"></script>
-    <script type="text/javascript" src="../src/base/brick.js"></script>
-    <script type="text/javascript" src="../src/base/cache.js"></script>
-    <script type="text/javascript" src="../src/base/clone.js"></script>
-    <script type="text/javascript" src="../src/base/cloud.js"></script>
-    <script type="text/javascript" src="../src/base/cylinder.js"></script>
-    <script type="text/javascript" src="../src/base/findProperty.js"></script>
-    <script type="text/javascript" src="../src/base/fmt.js"></script>
-    <script type="text/javascript" src="../src/base/forms.js"></script>
-    <script type="text/javascript" src="../src/base/fullscreen.js"></script>
-    <script type="text/javascript" src="../src/base/hub.js"></script>
-    <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
-    <script type="text/javascript" src="../src/base/light.js"></script>
-    <script type="text/javascript" src="../src/base/oop.js"></script>
-    <script type="text/javascript" src="../src/base/overwrite.js"></script>
-    <script type="text/javascript" src="../src/base/patch.js"></script>
-    <script type="text/javascript" src="../src/base/put.js"></script>
-    <script type="text/javascript" src="../src/base/quad.js"></script>
-    <script type="text/javascript" src="../src/base/shell.js"></script>
-    <script type="text/javascript" src="../src/base/sphere.js"></script>
-    <script type="text/javascript" src="../src/base/textured.js"></script>
-    <script type="text/javascript" src="../src/base/v3.js"></script>
-    <script type="text/javascript" src="../src/fx/Angle.js"></script>
-    <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
-    <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
-    <script type="text/javascript" src="../src/fx/Button.js"></script>
-    <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
-    <script type="text/javascript" src="../src/fx/Entity.js"></script>
-    <script type="text/javascript" src="../src/fx/Keys.js"></script>
-    <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
-    <script type="text/javascript" src="../src/fx/NetworkedInput.js"></script>
-    <script type="text/javascript" src="../src/fx/Projector.js"></script>
-    <script type="text/javascript" src="../src/fx/Surface.js"></script>
-    <script type="text/javascript" src="../src/fx/WebRTCSocket.js"></script>
-    <script type="text/javascript" src="../src/fx/Workerize.js"></script>
-    <script type="text/javascript" src="../src/x/LoginForm.js"></script>
-    <script type="text/javascript" src="../src/x/SignupForm.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/StateList.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/get.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getBuffer.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getObject.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/XHR.js"></script>
-    <script type="text/javascript" src="../src/fx/input/ButtonAndAxis.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Camera.js"></script>
-    <script type="text/javascript" src="../src/fx/input/FPSInput.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Gamepad.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Keyboard.js"></script>
-    <script type="text/javascript" src="../src/fx/input/LeapMotion.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Location.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Motion.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Mouse.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Touch.js"></script>
-    <script type="text/javascript" src="../src/fx/input/VR.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
-    <script type="text/javascript" src="../src/fx/output/HapticGlove.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Music.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Speech.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/int.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/item.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/number.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/steps.js"></script>
-    <script type="text/javascript" src="../src/fx/text/CodePage.js"></script>
-    <script type="text/javascript" src="../src/fx/text/CommandPack.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Cursor.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Grammar.js"></script>
-    <script type="text/javascript" src="../src/fx/text/OperatingSystem.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Point.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Rectangle.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Rule.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Size.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Terminal.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Token.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/CardboardVRDisplay.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/LegacyVRDisplay.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/MotionCorrector.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/DE_QWERTZ.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/EN_UKX.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/EN_US.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/FR_AZERTY.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/BasicTextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/TextEditor.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/TextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/PlainText.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/TextBox.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/TextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/Basic.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/JavaScript.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/PlainText.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/TestResults.js"></script>
-    <script type="text/javascript" src="../src/fx/text/operating_systems/OSX.js"></script>
-    <script type="text/javascript" src="../src/fx/text/operating_systems/Windows.js"></script>
-    <script type="text/javascript" src="../src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append --><!-- start demo.jade head append -->
-    <style type="text/css">
-       #frontBuffer {
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        border: 0;
-        background-repeat: no-repeat;
-        background-color: #eee;
-        background-size: cover;
-        cursor: wait;
-        background-image:url(../doc/editorVR/screenshot.jpg);
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/doc/editorVR.html"><!-- start main.jade meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+<!-- start main.jade title block --><!-- start documentation.jade title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation"><title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append --><script type="text/javascript" src="../PrimroseDependencies.min.js"></script><script type="text/javascript" src="../Primrose.min.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append --><link rel="stylesheet" type="text/css" href="style.min.css"><!-- end documentation.jade head append --><!-- start demo.jade head append --><style type="text/css"> #frontBuffer {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background-repeat: no-repeat;
+  background-color: #eee;
+  background-size: cover;
+  cursor: wait;
+  background-image:url(../doc/editorVR/screenshot.jpg);
+}</style><!-- end demo.jade head append --></head><body><!-- start main.jade banner block --><!-- end main.jade banner block --><header role="banner"><a id="logo" href="../"><img src="../images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="../#intro">intro/</a></li><li><a href="../#webvr">webvr/</a></li><li><a href="../doc/">doc/</a></li><li><a href="../#dev">download/</a></li><li><a href="../#teamInfo">team/</a></li><li><a href="../#mail">contact/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><!-- start main.jade main block --><!-- start documentation.jade main block --><main><div id="top"></div><div id="contents"><h1><a href="../doc/">Primrose VR</a></h1><input id="docSearch" type="search" placeholder="Filter"><details open><summary>Table of contents</summary><nav><ul><li><h2>Project</h2><ul><li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li><li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li><li><a href="#LICENSE.md">LICENSE</a></li><li><a href="#CHANGELOG.md">CHANGELOG</a></li><li><a href="#CONTRIBUTORS.md">CONTRIBUTORS</a></li></ul></li><li><h2>Examples</h2><ul><li data-name="Example: Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Example: Commodore PET and Oregon Trail</a></li><li data-name="Example: Live programming in Virtual Reality"><a href="../doc/editorVR.html">Example: Live programming in Virtual Reality</a></li><li data-name="Example: Empty"><a href="../doc/empty.html">Example: Empty</a></li><li data-name="Example: Haptic glove interaction"><a href="../doc/glove.html">Example: Haptic glove interaction</a></li><li data-name="Example: Jabbar Yabs"><a href="../doc/jabbers.html">Example: Jabbar Yabs</a></li><li data-name="Example: Drum Machine"><a href="../doc/music.html">Example: Drum Machine</a></li><li data-name="Example: New York Public Library Search"><a href="../doc/nypl.html">Example: New York Public Library Search</a></li><li data-name="Example: Procedurally generated room"><a href="../doc/temple.html">Example: Procedurally generated room</a></li></ul></li><li><h2>Pages</h2><ul><li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li><li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li><li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li><li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li><li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li><li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li><li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li></ul></li><li><h2>Tutorials</h2><ul><li data-name="Tutorial: Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Tutorial: Basic Lighting</a></li><li data-name="Tutorial: Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Tutorial: Build a Basic Drum Machine</a></li><li data-name="Tutorial: Display Images and Video"><a class="incomplete" href="../doc/video.html">Tutorial: Display Images and Video</a></li><li data-name="Tutorial: Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Tutorial: Building and Saving a Scene in Primrose</a></li><li data-name="Tutorial: Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Tutorial: Building Basic Scenes in Blender</a></li><li data-name="Tutorial: More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">Tutorial: More Advanced Scenes in Blender</a></li><li data-name="Tutorial: Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Tutorial: Build a 3D Integrated Development Environment</a></li><li data-name="Tutorial: Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Tutorial: Setup a Multiplayer Server</a></li></ul></li></ul></nav></details></div><div id="documentation"><!-- start documentation.jade documentation block --><h1>Example: Live programming in Virtual Reality</h1><!-- start demo.jade banner block --><p>Click on the image below to lock mouse cursor to demo.</p><canvas id="frontBuffer"></canvas><h2>Source</h2><pre id="editorContainer">grammar(&quot;JavaScript&quot;);
+/* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
+var GRASS = &quot;images/grass.png&quot;,
+  ROCK = &quot;images/rock.png&quot;,
+  SAND = &quot;images/sand.png&quot;,
+  WATER = &quot;images/water.png&quot;,
+  DECK = &quot;images/deck.png&quot;,
+
+  app = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
+    useFog: false,
+    skyTexture: &quot;images/bg2.jpg&quot;,
+    ambientSound: &quot;audio/wind.ogg&quot;,
+    groundTexture: GRASS
+  }),
+
+  subScene = new THREE.Object3D(),
+
+  editor = null,
+  output = null,
+  button1 = null,
+  editorFrame = null,
+  editorFrameMesh = null,
+  documentation = null,
+  documentationMesh = null,
+  stereoImage = new Primrose.Controls.Image(),
+  stereoImageWindow,
+
+  modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
+  modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
+  cmdA = isOSX ? &quot;CMD&quot; : &quot;CTRL&quot;,
+  cmdB = isOSX ? &quot;OPT&quot; : &quot;SHIFT&quot;,
+  cmdPre = cmdA + &quot;+&quot; + cmdB,
+
+  scriptUpdateTimeout,
+  lastScript = null,
+  scriptAnimate = null;
+
+function makeWindow(id, width, height, size) {
+  size = size || 1;
+  return textured(quad(size, size * height / width), new Primrose.Surface({
+    id: id,
+    bounds: new Primrose.Text.Rectangle(0, 0, width, height)
+  }));
+}
+
+app.addEventListener(&quot;ready&quot;, function () {
+  app.scene.add(subScene);
+
+  stereoImage.loadStereoImage(&quot;images/prong.stereo.jpg&quot;)
+    .then(function (img) {
+      stereoImageWindow = makeWindow(&quot;StereoImage&quot;, stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
+      stereoImageWindow.rotation.set(0, 75 * Math.PI / 180, 0);
+      stereoImageWindow.position.set(-4, app.avatarHeight, -1);
+      stereoImageWindow.surface.appendChild(stereoImage);
+      app.scene.add(stereoImageWindow);
+      app.registerPickableObject(stereoImageWindow);
+    });
+
+  var editorSize = isMobile ? 512 : 1024,
+    fontSize = isMobile ? 10 : 20;
+
+  editorFrame = new Primrose.Surface({
+    id: &quot;EditorFrame&quot;,
+    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
+  });
+
+  editor = new Primrose.Text.Controls.TextBox({
+    id: &quot;Editor&quot;,
+    bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
+    tokenizer: Primrose.Text.Grammars.JavaScript,
+    value: getSourceCode(isInIFrame),
+    fontSize: fontSize
+  });
+
+  output = new Primrose.Text.Controls.TextBox({
+    id: &quot;Output&quot;,
+    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 25, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 25),
+    tokenizer: Primrose.Text.Grammars.PlainText,
+    hideLineNumbers: true,
+    readOnly: true,
+    fontSize: fontSize
+  });
+
+  button1 = new Primrose.Controls.Button2D({
+    id: &quot;ThemeButton&quot;,
+    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 400, output.bounds.top, 400, 45),
+    value: &quot;Switch to dark theme&quot;,
+    backgroundColor: &quot;#ffff00&quot;,
+    color: &quot;#0000ff&quot;
+  });
+
+  button1.addEventListener(&quot;click&quot;, function () {
+    var nextTheme = Primrose.Text.Themes.Default,
+      nextString = &quot;Switch to dark theme&quot;;
+    if (editor.theme.name === nextTheme.name) {
+      nextTheme = Primrose.Text.Themes.Dark;
+      nextString = &quot;Switch to light theme&quot;;
+    }
+    console.log(&quot;Switching to theme: &quot; + nextTheme.name);
+    documentation.theme = output.theme = editor.theme = nextTheme;
+    button1.value = nextString;
+  }, false);
+
+  editorFrame.appendChild(output);
+  editorFrame.appendChild(editor);
+  editorFrame.appendChild(button1);
+  editorFrameMesh = textured(shell(3, 10, 10), editorFrame);
+  editorFrameMesh.name = &quot;MyWindow&quot;;
+  editorFrameMesh.position.set(0, app.avatarHeight, 0);
+  app.scene.add(editorFrameMesh);
+  app.registerPickableObject(editorFrameMesh);
+
+  documentation = new Primrose.Text.Controls.TextBox({
+    id: &quot;Documentation&quot;,
+    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
+    tokenizer: Primrose.Text.Grammars.PlainText,
+    hideLineNumbers: true,
+    readOnly: true,
+    value: getDocumentation(),
+    fontSize: fontSize
+  });
+
+  documentationMesh = textured(quad(2, 2), documentation);
+  documentationMesh.position.set(-3, app.avatarHeight, -2);
+  documentationMesh.rotation.set(0, Math.PI / 4, 0);
+  app.scene.add(documentationMesh);
+  app.registerPickableObject(documentationMesh);
+
+  console.log(&quot;INSTRUCTIONS:&quot;);
+  console.log(&quot; - &quot; + cmdPre + &quot;+E to show/hide editor&quot;);
+  console.log(&quot; - &quot; + cmdPre + &quot;+X to reload original demo code&quot;);
+  console.log(&quot; - Z to reset position/sensor&quot;);
+  console.log();
+});
+
+app.addEventListener(&quot;update&quot;, function (dt) {
+  if (!scriptUpdateTimeout) {
+    scriptUpdateTimeout = setTimeout(updateScript, 500);
+  }
+
+  if (scriptAnimate) {
+    scriptAnimate.call(app, dt);
+  }
+});
+
+app.addEventListener(&quot;keydown&quot;, function (evt) {
+  if (evt[modA] &amp;&amp; evt[modB]) {
+    if (evt.keyCode === Primrose.Keys.E) {
+      documentation.mesh.visible = output.mesh.visible = editor.mesh.visible = !editor.mesh.visible;
+      if (!editor.mesh.visible &amp;&amp; app.currentEditor &amp;&amp; app.currentEditor.focused) {
+        app.currentEditor.blur();
+        app.currentEditor = null;
       }
-    </style><!-- end demo.jade head append --><!-- end main.jade head block -->
-  </head>
-  <body><!-- start main.jade banner block --><!-- end main.jade banner block -->
-    <header role="banner"><a id="logo" href="../"><img src="../images/primrose32.png" alt="logo" title="Primrose logo"></a>
-      <nav role="navigation">
-        <ul>
-          <li><a href="../#intro">intro/</a></li>
-          <li><a href="../#webvr">webvr/</a></li>
-          <li><a href="../doc/">doc/</a></li>
-          <li><a href="../#dev">download/</a></li>
-          <li><a href="../#teamInfo">team/</a></li>
-          <li><a href="../#mail">contact/</a></li>
-          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
-        </ul>
-      </nav>
-    </header><!-- start main.jade main block --><!-- start documentation.jade main block -->
-    <main>
-      <div id="top"></div>
-      <div id="contents">
-        <h1><a href="../doc/">Primrose VR</a></h1>
-        <input id="docSearch" type="search" placeholder="Filter">
-        <details open>
-          <summary>Table of contents</summary>
-          <nav>
-            <ul>
-              <li>
-                <h2>Project</h2>
-                <ul>
-                  <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li>
-                  <li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li>
-                  <li><a href="#LICENSE.md">LICENSE</a></li>
-                  <li><a href="#CHANGELOG.md">CHANGELOG</a></li>
-                  <li><a href="#CONTRIBUTORS.md">CONTRIBUTORS</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Examples</h2>
-                <ul>
-                  <li data-name="Example: Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Example: Commodore PET and Oregon Trail</a></li>
-                  <li data-name="Example: Live programming in Virtual Reality"><a href="../doc/editorVR.html">Example: Live programming in Virtual Reality</a></li>
-                  <li data-name="Example: Empty"><a href="../doc/empty.html">Example: Empty</a></li>
-                  <li data-name="Example: Haptic glove interaction"><a href="../doc/glove.html">Example: Haptic glove interaction</a></li>
-                  <li data-name="Example: Jabbar Yabs"><a href="../doc/jabbers.html">Example: Jabbar Yabs</a></li>
-                  <li data-name="Example: Drum Machine"><a href="../doc/music.html">Example: Drum Machine</a></li>
-                  <li data-name="Example: New York Public Library Search"><a href="../doc/nypl.html">Example: New York Public Library Search</a></li>
-                  <li data-name="Example: Procedurally generated room"><a href="../doc/temple.html">Example: Procedurally generated room</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Pages</h2>
-                <ul>
-                  <li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li>
-                  <li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li>
-                  <li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li>
-                  <li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li>
-                  <li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li>
-                  <li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li>
-                  <li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Tutorials</h2>
-                <ul>
-                  <li data-name="Tutorial: Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Tutorial: Basic Lighting</a></li>
-                  <li data-name="Tutorial: Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Tutorial: Build a Basic Drum Machine</a></li>
-                  <li data-name="Tutorial: Display Images and Video"><a class="incomplete" href="../doc/video.html">Tutorial: Display Images and Video</a></li>
-                  <li data-name="Tutorial: Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Tutorial: Building and Saving a Scene in Primrose</a></li>
-                  <li data-name="Tutorial: Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Tutorial: Building Basic Scenes in Blender</a></li>
-                  <li data-name="Tutorial: More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">Tutorial: More Advanced Scenes in Blender</a></li>
-                  <li data-name="Tutorial: Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Tutorial: Build a 3D Integrated Development Environment</a></li>
-                  <li data-name="Tutorial: Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Tutorial: Setup a Multiplayer Server</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
-        </details>
-      </div>
-      <div id="documentation"><!-- start documentation.jade documentation block -->
-        <h1>Example: Live programming in Virtual Reality</h1><!-- start demo.jade banner block -->
-        <p>Click on the image below to lock mouse cursor to demo.</p>
-        <canvas id="frontBuffer"></canvas>
-        <h2>Source</h2>
-        <pre id="editorContainer"></pre><!-- end demo.jade banner block --><!-- end documentation.jade documentation block -->
-      </div>
-    </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
-<!-- start main.jade footer block -->
-    <script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+    }
+    else if (evt.keyCode === Primrose.Keys.X) {
+      editor.value = getSourceCode(true);
+    }
+  }
+
+  if (scriptUpdateTimeout) {
+    clearTimeout(scriptUpdateTimeout);
+    scriptUpdateTimeout = null;
+  }
+});
+
+window.addEventListener(&quot;unload&quot;, function () {
+  if (editor) {
+    var script = editor.value;
+    if (script.length &gt; 0) {
+      setSetting(&quot;code&quot;, script);
+    }
+  }
+});
+
+function updateScript() {
+  var newScript = editor.value,
+    exp;
+  if (newScript !== lastScript) {
+    scriptUpdateTimeout = null;
+    lastScript = newScript;
+    if (newScript.indexOf(&quot;function update&quot;) &gt;= 0 &amp;&amp;
+      newScript.indexOf(&quot;return update&quot;) &lt; 0) {
+      newScript += &quot;\nreturn update;&quot;;
+    }
+    try {
+      console.log(&quot;----- loading new script -----&quot;);
+      var scriptUpdate = new Function(&quot;scene&quot;, newScript);
+      for (var i = subScene.children.length - 1; i &gt;= 0; --i) {
+        subScene.remove(subScene.children[i]);
+      }
+      scriptAnimate = scriptUpdate.call(app, subScene);
+      scriptAnimate(0);
+      console.log(&quot;----- script loaded -----&quot;);
+    }
+    catch (exp) {
+      scriptAnimate = null;
+      throw exp;
+    }
+  }
+}
+
+logger.setup(logger.USER, function (msg) {
+  if (output) {
+    var data = JSON.parse(msg),
+      t = output;
+    t.value += data.name + &quot;:&gt; &quot; + data.args[0] + &quot;\n&quot;;
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+});
+
+function clrscr() {
+  if (output) {
+    var t = output;
+    t.value = &quot;&quot;;
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+}
+
+function getSourceCode(skipReload) {
+  var defaultDemo = testDemo.toString(),
+    src = skipReload &amp;&amp; defaultDemo || getSetting(&quot;code&quot;, defaultDemo);
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if (src === defaultDemo) {
+    var lines = src.replace(&quot;\r\n&quot;, &quot;\n&quot;).split(&quot;\n&quot;);
+    lines.pop();
+    lines.shift();
+    for (var i = 0; i &lt; lines.length; ++i) {
+      lines[i] = lines[i].substring(2);
+    }
+    src = lines.join(&quot;\n&quot;);
+  }
+  return src.trim();
+}
+
+function testDemo(scene) {
+  var WIDTH = 5,
+    HEIGHT = 5,
+    DEPTH = 5,
+    MIDX = WIDTH / 2 - 5,
+    MIDY = HEIGHT / 2,
+    MIDZ = DEPTH / 2,
+    t = 0,
+    R = Primrose.Random,
+    start = put(hub())
+      .on(scene)
+      .at(-MIDX, 0, -DEPTH - 2);
+
+  var balls = [];
+
+  for (var i = 0; i &lt; 10; ++i) {
+    balls.push(put(brick(DECK))
+      .on(start)
+      .at(R.int(WIDTH),
+      R.int(HEIGHT),
+      R.int(DEPTH)));
+
+    balls[i].velocity = v3(
+      R.number(0, WIDTH),
+      R.number(0, HEIGHT),
+      R.number(0, DEPTH));
+  }
+
+  function update(dt) {
+    t += dt;
+    for (var i = 0; i &lt; balls.length; ++i) {
+      var ball = balls[i],
+        p = ball.position,
+        v = ball.velocity;
+      p.add(v.clone().multiplyScalar(dt));
+      if (p.x &lt; 0 &amp;&amp; v.x &lt; 0 || WIDTH &lt;= p.x &amp;&amp; v.x &gt; 0) {
+        v.x *= -1;
+      }
+      if (p.y &lt; 1 &amp;&amp; v.y &lt; 0 || HEIGHT &lt;= p.y &amp;&amp; v.y &gt; 0) {
+        v.y *= -1;
+      }
+      if (p.z &lt; 0 &amp;&amp; v.z &lt; 0
+        || DEPTH &lt;= p.z &amp;&amp; v.z &gt; 0) {
+        v.z *= -1;
+      }
+    }
+  }
+}
+
+// This is a function to just push it out of the way, uncluttering
+// the code above.
+function getDocumentation() {
+  return &quot;functions:\n&quot; + &quot;  console.log( msg );\n&quot; + &quot;    print a message to the window below the editor.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  put( objectA ).on( objectB )[.at( x, y, z )];\n&quot; +
+    &quot;    objectA: a THREE.Object3D to be added to another,\n&quot; +
+    &quot;    objectB: a THREE.Object3D where objectA will be added,\n&quot; +
+    &quot;    x, y, z: a location to set for objectA relative to objectB\n&quot; +
+    &quot;\n&quot; +
+    &quot;  light( color [, intensity[, distance[, decay]]] );\n&quot; +
+    &quot;    creates a THREE.PointLight with the same parameters.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  brick( txtName );\n&quot; +
+    &quot;    creates a textured cube with the named texture, one of:\n&quot; +
+    &quot;      [SAND, WATER, ROCK, GRASS, DECK].\n&quot; +
+    &quot;\n&quot; +
+    &quot;  quad( width[, height] );\n&quot; +
+    &quot;    creates a THREE.PlaneBufferGeometry with the same parameters.\n&quot; +
+    &quot;    if height is undefined, height is set to width (square).\n&quot; +
+    &quot;\n&quot; +
+    &quot;  box( width[, height, length] );\n&quot; +
+    &quot;    creates a THREE.BoxGeometry with the same parameters.\n&quot; +
+    &quot;    if height is undefined, height and length are set to width (cube).\n&quot; +
+    &quot;\n&quot; +
+    &quot;  hub( );\n&quot; +
+    &quot;    creates a raw THREE.Object3D. Useful for combining objects.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  sphere( radius[, slices, rings] );\n&quot; +
+    &quot;    creates a THREE.SphereGeometry with the same parameters.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  shell( radius[, slices, rings[, phi, theta]] );\n&quot; +
+    &quot;    creates a portion of the inside surface of a sphere.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  from( start ).to( end ).exec( thunk );\n&quot; +
+    &quot;    iterates on the range [start, end), passing the index as the parameter\n&quot; +
+    &quot;    to thunk, accumulating an array of thunk's return value.\n&quot; +
+    &quot;\n&quot; +
+    &quot;  textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );\n&quot; +
+    &quot;    geometry: a THREE.Geometry object\n&quot; +
+    &quot;    txt: a material definition of some kind. It could be a:\n&quot; +
+    &quot;      number - a solid hex color\n&quot; +
+    &quot;      string - a path to a texture image\n&quot; +
+    &quot;      Primrose.Text.Controls.TextBox - a text editor\n&quot; +
+    &quot;    unshaded: set to true to use constant lighting (default false)\n&quot; +
+    &quot;    opacity: 1 - opaque, 0 - transparent (default 1).\n&quot; +
+    &quot;    txtRepeatS: texture repeat in S direction (default 1).\n&quot; +
+    &quot;    txtRepeat: texture repeat in T direction (default 1)&quot;;
+}</pre><!-- end demo.jade banner block --><!-- end documentation.jade documentation block --></div></main><!-- end documentation.jade main block --><!-- end main.jade main block -->
+<!-- start main.jade footer block --><script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material
@@ -247,9 +356,7 @@ Ks 0.152632 0.152632 0.152632
 Ni 1.000000
 d 1.000000
 illum 2
-
-    </script>
-    <script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib monitor.mtl
 o Monitor_Cube
@@ -361,9 +468,7 @@ f 29//3 31//3 30//3
 f 26//2 25//2 30//2
 f 27//1 28//1 31//1
 f 25//4 27//4 29//4
-
-    </script>
-    <script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+</script><script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material.001
@@ -374,9 +479,7 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-
-    </script>
-    <script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib fullscreen_text.mtl
 o Text
@@ -754,9 +857,7 @@ f 186//1 188//1 191//1
 f 188//1 190//1 191//1
 f 188//1 189//1 190//1
 f 186//1 187//1 188//1
-
-    </script>
-    <script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'CardboardLogo2.blend'
+</script><script id="monitor_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'CardboardLogo2.blend'
 # Material Count: 2
 
 newmtl Material
@@ -776,9 +877,7 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.000000
 d 1.000000
 illum 2
-
-    </script>
-    <script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'CardboardLogo2.blend'
+</script><script id="monitor_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'CardboardLogo2.blend'
 # www.blender.org
 mtllib cardboard.mtl
 o Cardboard_Cube.001
@@ -2386,9 +2485,7 @@ f 497//175 484//175 500//175
 f 496//176 498//176 486//176
 f 496//177 497//177 498//177
 f 497//178 485//178 498//178
-
-    </script>
-    <script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
+</script><script id="fullscreen_text_mtl" type="text/prs.wavefront-mtl"># Blender MTL File: 'monitor.blend'
 # Material Count: 1
 
 newmtl Material.001
@@ -2399,9 +2496,7 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-
-    </script>
-    <script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
+</script><script id="fullscreen_text_obj" type="text/prs.wavefront-obj"># Blender v2.75 (sub 0) OBJ File: 'monitor.blend'
 # www.blender.org
 mtllib vr_text.mtl
 o VR_Text_Text.001
@@ -2482,15 +2577,4 @@ f 37//1 34//1 35//1
 f 34//1 32//1 33//1
 f 34//1 38//1 32//1
 f 37//1 38//1 34//1
-
-    </script><!-- start withFramework.jade footer prepend -->
-    <script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend -->
-    <script type="text/javascript" async defer src="app.js"></script>
-    <script type="text/javascript">Primrose.HTTP.getText("../doc/editorVR/app.js")
-        .then(function (file) {
-          document.querySelector("#editorContainer").innerHTML = "grammar(\"JavaScript\");\n" + file;
-        });
-    </script>
-    <script type="text/javascript" async defer src="../doc/editorVR/app.js"></script><!-- end main.jade footer block -->
-  </body>
-</html>
+</script><!-- start withFramework.jade footer prepend --><script type="text/javascript"> if (isInIFrame) { document.querySelector("header").style.display = "none"; }</script><!-- end withFramework.jade footer prepend --><script type="text/javascript" async defer src="app.js"></script><script type="text/javascript" async defer src="../doc/editorVR/app.js"></script><!-- end main.jade footer block --></body></html>

@@ -17,26 +17,57 @@
   uglify = require("gulp-uglify"),
   pathX = /.*\/(.*).js/,
   pugFileSpec = ["*.jade", "doc/**/*.jade"],
+  sourceFiles = recurseDirectory("src"),
   headerFiles = [
-    "node_modules/logger/logger.min.js",
+    "node_modules/logger/logger.js",
     "lib/loggerInit.js",
-    "node_modules/pliny/pliny.min.js",
+    "node_modules/pliny/pliny.js",
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js"
   ],
-  demoFiles = headerFiles.slice(),
-  mainPageFiles = headerFiles.slice();
+  mainPageFiles = ["lib/analytics.js", "lib/ga.js", "lib/mailchimp.js"],
+  headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
+  docFiles = recurseDirectory("doc")
+    .filter(function (f) { return /.jade$/.test(f); })
+    .map(function (f, i) {
+      var file = fs.readFileSync(f, "utf-8").toString(),
+        match = file.match(headerSpec),
+        index = i;
+      if (match) {
+        if (match[1]) {
+          index = parseInt(match[1]);
+        }
 
-demoFiles.push("obj/Primrose.js");
+        var obj = {
+          fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
+          index: index,
+          title: match[2],
+          incomplete: /\[under construction\]/.test(file),
+          tutorial: /^Tutorial:/.test(match[2]),
+          example: /^Example:/.test(match[2])
+        };
 
-mainPageFiles.splice(mainPageFiles.length, 0,
-  "lib/analytics.js",
-  "lib/ga.js",
-  "lib/mailchimp.js",
-  "obj/Primrose.js");
+        return obj;
+      }
+    }).filter(function (f) {
+      return f;
+    }),
+  debugDataES6 = {
+    debug: true,
+    frameworkFiles: headerFiles.concat(sourceFiles)
+  },
+  debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
+
+docFiles.sort(function (a, b) {
+  return a.index - b.index;
+});
+
+debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
+  return f.replace(/^src\//, "es5/");
+});
 
 function pugConfiguration(options, defaultData) {
   return gulp.src(pugFileSpec, { base: "./" })
@@ -44,7 +75,7 @@ function pugConfiguration(options, defaultData) {
       path.extname = "";
       return path;
     }))
-    .pipe(data(function (file) {
+    .pipe(data(function (file, callback) {
       var name = file.path.replace(/\\/g, "/"),
         parts = name.split("/")
           .map(function () {
@@ -52,66 +83,28 @@ function pugConfiguration(options, defaultData) {
           }),
         shortName = name.match(/([^\/]+)\.html$/);
       parts.pop();
-      return {
-        debug: defaultData.debug,
-        version: pkg.version,
-        filePath: name,
-        fileRoot: parts.join(""),
-        fileName: shortName && shortName[1],
-        docFiles: defaultData.docFiles,
-        frameworkFiles: defaultData.frameworkFiles
-      };
+
+      var scriptName = name.replace(/\.html$/, "/app.js");
+      fs.readFile(scriptName, "utf-8", function (err, txt) {
+        callback(undefined, {
+          debug: defaultData.debug,
+          version: pkg.version,
+          filePath: name,
+          fileRoot: parts.join(""),
+          fileName: shortName && shortName[1],
+          docFiles: docFiles,
+          frameworkFiles: defaultData.frameworkFiles,
+          demoScriptName: scriptName,
+          demoScript: !err && ("grammar(\"JavaScript\");\n" + txt)
+        });
+      });
     }))
     .pipe(pug(options))
     .pipe(gulp.dest("."));
 }
 
-var headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
-  debugDataES6 = {
-    debug: true,
-    frameworkFiles: recurseDirectory("src"),
-    docFiles: recurseDirectory("doc")
-      .filter(function (f) { return /.jade$/.test(f); })
-      .map(function (f, i) {
-        var file = fs.readFileSync(f, "utf-8").toString(),
-          match = file.match(headerSpec),
-          index = i;
-
-        if (match) {
-          if (match[1]) {
-            index = parseInt(match[1]);
-          }
-          return {
-            fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
-            index: index,
-            title: match[2],
-            incomplete: /\[under construction\]/.test(file),
-            tutorial: /^Tutorial:/.test(match[2]),
-            example: /^Example:/.test(match[2])
-          };
-        }
-      }).filter(function (f) {
-        return f;
-      })
-  };
-
-debugDataES6.frameworkFiles.unshift("lib/webgl-debug.js");
-
-debugDataES6.frameworkFiles.splice
-  .bind(debugDataES6.frameworkFiles, 0, 0)
-  .apply(debugDataES6.frameworkFiles, headerFiles);
-
-debugDataES6.docFiles.sort(function (a, b) {
-  return a.index - b.index;
-});
-
-var debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
-debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
-  return f.replace(/^src\//, "es5/");
-});
-
 gulp.task("jshint", function () {
-  return gulp.src("src/**/*.js")
+  return gulp.src(sourceFiles)
     .pipe(jshint({
       multistr: true,
       esnext: true
@@ -119,7 +112,7 @@ gulp.task("jshint", function () {
 });
 
 gulp.task("pugRelease", function () {
-  return pugConfiguration({}, { docFiles: debugDataES6.docFiles });
+  return pugConfiguration({}, {});
 });
 
 gulp.task("pugDebugES5", function () {
@@ -130,14 +123,19 @@ gulp.task("pugDebugES6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
-gulp.task("cssmin", function () {
+gulp.task("clean", ["jshint"], function () {
+  return gulp.src(["**/*.min.*", "!archive/*", "es5/*.js"])
+    .pipe(clean());
+});
+
+gulp.task("cssmin", ["clean"], function () {
   gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "!*.min.css"], { base: "./" })
     .pipe(cssmin())
     .pipe(rename({ suffix: ".min" }))
     .pipe(gulp.dest("./"));
 });
 
-gulp.task("babel", ["jshint"], function () {
+gulp.task("babel", ["clean"], function () {
   return gulp.src("src/**/*.js", { base: "./src" })
     .pipe(babel({
       sourceMap: false,
@@ -146,32 +144,33 @@ gulp.task("babel", ["jshint"], function () {
     .pipe(gulp.dest("./es5"));
 });
 
-gulp.task("concatPrimrose", ["babel"], function () {
-  return gulp.src(debugDataES5.frameworkFiles)
-    .pipe(concat("Primrose.js", { newLine: ";" }))
-    .pipe(gulp.dest("./obj"));
-});
-
-gulp.task("copy", ["concatPrimrose"], function () {
-  return gulp.src(mainPageFiles)
-    .pipe(gulp.dest("./obj"));
-});
-
-gulp.task("concatPayload", ["copy"], function () {
-  return gulp.src(demoFiles, { base: "./" })
-    .pipe(concat("payload.js", { newLine: ";" }))
-    .pipe(gulp.dest("./obj"));
-});
-
-gulp.task("jsmin", ["concatPayload"], function () {
-  return gulp.src(["obj/**/*.js"])
+function concatenate(stream, name) {
+  return stream
+    .pipe(concat(name + ".js", { newLine: "\n" }))
+    .pipe(gulp.dest("./"))
     .pipe(rename({ suffix: ".min" }))
     .pipe(uglify())
-    .pipe(gulp.dest("scripts"));
+    .pipe(gulp.dest("./"));
+}
+
+gulp.task("concatPrimrose", ["clean"], function () {
+  return concatenate(gulp.src(sourceFiles)
+    .pipe(babel({
+      sourceMap: false,
+      presets: ["es2015"]
+    })), "Primrose");
 });
 
-gulp.task("archive", ["jsmin"], function () {
-  return gulp.src(["scripts/Primrose*.js"])
+gulp.task("concatPayload", ["clean"], function () {
+  return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
+});
+
+gulp.task("concatMarketing", ["clean"], function () {
+  return concatenate(gulp.src(mainPageFiles), "PrimroseSite");
+});
+
+gulp.task("archive", ["concatPrimrose"], function () {
+  return gulp.src(["Primrose*.js"])
     .pipe(rename(function (file) {
       if (file.basename.indexOf(".min") > -1) {
         file.extname = ".min.js";
@@ -182,6 +181,6 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("release", ["cssmin", "pugRelease", "archive"]);
+gulp.task("release", ["cssmin", "pugRelease", "concatPayload", "concatMarketing", "archive"]);
 gulp.task("debugES5", ["babel", "pugDebugES5"]);
 gulp.task("default", ["pugDebugES6"]);

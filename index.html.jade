@@ -2,8 +2,8 @@
 
 append head
   link(type="text/css", rel="stylesheet", href= fileRoot + "stylesheets/" + (debug ? "main.css" : "main.min.css"))
-  script(src="//cdn.webglstats.com/stat.js", async, defer)
-  script(type="text/javascript", src= fileRoot + "scripts/mailchimp.min.js", async, defer)
+  if !debug
+    script(type="text/javascript", src=fileRoot + "PrimroseSite.min.js")
   
 block banner
   section#demo
@@ -110,11 +110,11 @@ block main
 
         iframe#example(src= fileRoot + "editor2d.html")
 
-        p: a.primary.button(href= fileRoot + "scripts/Primrose.min.js", target="_blank")
+        p: a.primary.button(href= fileRoot + "Primrose.min.js", target="_blank")
             | Download Primrose.min.js, v#{version} #[br]
             small 179KB, 55KB gzipped
 
-        p: a.secondary.button(href= fileRoot + "scripts/Primrose.js", target="_blank") 
+        p: a.secondary.button(href= fileRoot + "Primrose.js", target="_blank") 
             | Download Primrose.js, v#{version} #[br]
             small 381KB, useful for debugging
 
