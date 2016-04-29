@@ -95,7 +95,7 @@ function replacePreBlocks() {
     for (var i = 0; i < links.length; ++i) {
       var link = links[i],
         url = new URL(link.href);
-      if (url.host !== document.location.host || url.pathname !== document.location.pathname) {
+      if (url.host !== document.location.host) {
         link.target = "_blank";
       }
     }
