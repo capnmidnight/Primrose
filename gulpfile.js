@@ -21,6 +21,7 @@
   headerFiles = [
     "node_modules/logger/logger.js",
     "lib/loggerInit.js",
+    "lib/promise.js",
     "node_modules/pliny/pliny.js",
     "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
