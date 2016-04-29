@@ -39,9 +39,6 @@ html
     block head
   body
   
-    <!-- start main.jade banner block -->
-    block banner
-    <!-- end main.jade banner block -->
     header(role="banner")
       a#logo(href= fileRoot)
         img(src= fileRoot + "images/primrose32.png", alt="logo", title="Primrose logo")
@@ -55,6 +52,10 @@ html
           li: a(href= fileRoot + "#teamInfo") team/
           li: a(href= fileRoot + "#mail") contact/
           li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") src/
+
+    <!-- start main.jade banner block -->
+    block banner
+    <!-- end main.jade banner block -->
 
     <!-- start main.jade main block -->
     block main
