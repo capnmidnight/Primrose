@@ -1,25 +1,20 @@
 # CHANGELOG
 
+KEY:
+* [**Chromium** - The WebVR-enabled builds of Chromium provided by Brandon Jones](https://webvr.info/get-chrome/).
+* [**Chrome** - The latest release version of Google Chrome](https://www.google.com/chrome/)
+* [**Nightly** - The nightly development builds of Mozilla Firefox](https://nightly.mozilla.org/)
+* [**Firefox** - The latest release version of Mozilla Firefox](https://www.mozilla.org/en-US/firefox/products/)
+* [**Gear VR** - The "Samsung Internet for Gear VR" app in the Samsung Store on the Gear VR](http://developer.samsung.com/technical-doc/view.do?v=T000000270L)
+* **Windows** - Windows 8.1 and Windows 10.
+* **Android** - Android 6.0.1 running on the Samsung Galaxy S7
+
 ## v0.23.1 - 2016/04/29
 
-* Compatability
-  * Windows
-    * Chromium - full
-    * Google Chrome - Mono only
-    * Firefox Nightly - runs, but doesn't render (don't know why yet)
-    * Internet Explorer - does not run
-  * Android
-    * Chromium - Mono only
-    * Google Chrome - full (using Device Orientation fallback)
-    * Firefox Nightly - full (using legacy WebVR preview fallback)
-    * Samsung Internet - full (using Device Orientation fallback)
-    * Samsung Internet VR in Gear VR - full (though Samsung Internet VR's orientation tracking is defective)
-  * iOS
-    * Safari - untested
 * Bugs
   * Fixed some broken links in the Documentation.
   * Fixed positioning of columns in "Temple" demo. They now reach all the way to the ground.
-  * Converted to using HTML5 `&lt;audio>` tags converted to media sources instead of loading buffers directly from Web Audio API, to gain the widest audio format support in stupid browsers that implement decoding for `&lt;audio>` separately from Web Audio API.
+  * Converted to using HTML5 `<audio>` tags converted to media sources instead of loading buffers directly from Web Audio API, to gain the widest audio format support in stupid browsers that implement decoding for `<audio>` separately from Web Audio API.
   * Fixed issue where looping audio sources tried to reconnect to the audioContext at the end of the loop. This was causing an error because they were already connected.
   * Fixed the "Music" demo.
   * Fixed issue where dragging mouse over an object in the scene that did not have a mouse handler would cause an error.
@@ -43,13 +38,61 @@
   * Rewrote how the site is generated.
 * Features
   * Simplified the audio loading interface, so it can use the best file automatically.
-  * Models may be embeded in HTML files now, using `&lt;script>` tags.
+  * Models may be embeded in HTML files now, using `<script>` tags.
   * Now activating the "wait" cursor when demos first start loading.
   * Changed "EditorVR" demo to use logging proxy to display console.log calls, rather than supplying its own log function.
   * If user touches a demo on a mobile device, it automatically jumps to fullscreen.
   * If user touches a demo on Gear VR, it automatically jumps to VR mode.
   * Muting audio when the tab loses focus. 
   * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
+* Open issues
+  * Windows
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome 
+      * No HMD support (WebVR not yet available in Chrome).
+    * Nightly
+      * Only the "editorVR" demo currently works.
+      * Text baseline in canvas is incorrect.
+      * The image does not fill the HMD.
+      * Gamepad input slews to the right.
+    * Firefox
+      * Only the "editorVR" demo currently works.
+      * Text baseline in canvas is incorrect.
+      * No HMD support (WebVR not yet available in Firefox).
+      * Gamepad input slews to the right.
+  * Android
+    * Chromium
+      * WebVR mode does not activate correctly. Only Fullscreen "Magic Window" mode currently works.
+    * Chrome
+      * Device Orientation fallback has some problems with drift.
+    * Nightly
+      * Only the "editorVR" demo currently works.
+      * Low frame rate in fullscreen mode.
+    * Firefox
+      * Device Orientation fallback has some problems with drift.
+      * Image inverts under certain tilt conditions.
+      * Only the "editorVR" demo currently works.
+      * Low frame rate in fullscreen mode.
+    * Gear VR
+      * Low frame rate in fullscreen mode.
+      * Samsung's browser for Gear VR current has defective orientation tracking, making the overall experience very bad.
+  * All platforms
+    * Dynamic object allocation causing periodic garbage collections.
+    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
+    * Leap Motion input disabled.
+    * Multiplayer disabled.
+    * Device fusion over WebRTC disabled.
+    * Passthrough Cameras disabled.
+    * No options UI for keyboard preferences.
+    * No text-input for single-button, passive HMD devices.
+    * No support for tabbing through text fields.
+    * CSS text in documentation is not syntax highlighted.
+    * HTML text in documentation is not syntax highlighted.
+    * Documentation is only available in English.
+    * Button model is too short for comfort.
+    * Gaze action has no visual indicator of progress.
+    * No support for Unicode "Alt-codes".
+
 
 
 ## v0.23.0 - 2016/04/21
