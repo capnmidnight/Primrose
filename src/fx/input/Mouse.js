@@ -76,8 +76,7 @@ Primrose.Input.Mouse = (function () {
 
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
-
-
+  
   MouseInput.Lock = {
     addChangeListener: (thunk, bubbles) => document.addEventListener(changeEventName, thunk, bubbles),
     removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),

@@ -50,7 +50,6 @@ Primrose.Output.Music = function () {
       }
     } else {
       this.available = false;
-      IS_IN_GRID = true;
     }
   }
 

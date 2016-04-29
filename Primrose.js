@@ -8064,7 +8064,7 @@ Primrose.DOM.cascadeElement = function (id, tag, DOMClass) {
   if (elem === null) {
     pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
     throw new Error(id + " does not refer to a valid " + tag + " element.");
-  } else {
+  } else if (tag !== "canvas") {
     elem.innerHTML = "";
   }
   return elem;
@@ -9085,7 +9085,6 @@ Primrose.Input.Gamepad = function () {
       for (i = 0; i < pad.axes.length; ++i) {
         this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
       }
-      console.log(pad.axes.join(", "));
     };
 
     this.poll = function () {
@@ -10607,7 +10606,6 @@ Primrose.Output.Music = function () {
       }
     } else {
       this.available = false;
-      IS_IN_GRID = true;
     }
   }
 

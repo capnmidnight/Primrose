@@ -1,7 +1,8 @@
 /* global Primrose, put */
-var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
+var app = new Primrose.BrowserEnvironment("My Primrose VR Application", {
   skyTexture: "images/bg.jpg",
-  groundTexture: "images/deck.png"
+  groundTexture: "images/deck.png",
+  ambientSound: "audio/wind.ogg"
 } );
 
 app.addEventListener( "ready", function () {

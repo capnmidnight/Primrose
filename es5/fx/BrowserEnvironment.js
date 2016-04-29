@@ -701,7 +701,7 @@ Primrose.BrowserEnvironment = function () {
           }
         });
       } else {
-        audioReady = Promise.resolve();
+        audioReady = new Promise.resolve().then(console.log.bind(console, "No audio files loaded"));
       }
 
       var allReady = Promise.all([modelsReady, audioReady]);

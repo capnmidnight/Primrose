@@ -30,7 +30,6 @@ Primrose.Input.Gamepad = (function () {
       for (i = 0; i < pad.axes.length; ++i) {
         this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
       }
-      console.log(pad.axes.join(", "));
     };
 
     this.poll = function () {

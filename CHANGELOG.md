@@ -1,5 +1,57 @@
 # CHANGELOG
 
+## v0.23.1
+
+* Compatability
+  * Windows
+    * Chromium - full
+    * Google Chrome - Mono only
+    * Firefox Nightly - runs, but doesn't render (don't know why yet)
+    * Internet Explorer - does not run
+  * Android
+    * Chromium - Mono only
+    * Google Chrome - full (using Device Orientation fallback)
+    * Firefox Nightly - full (using legacy WebVR preview fallback)
+    * Samsung Internet - full (using Device Orientation fallback)
+    * Samsung Internet VR in Gear VR - full (though Samsung Internet VR's orientation tracking is defective)
+  * iOS
+    * Safari - untested
+* Bugs
+  * Fixed some broken links in the Documentation.
+  * Fixed positioning of columns in "Temple" demo. They now reach all the way to the ground.
+  * Converted to using HTML5 `&lt;audio>` tags converted to media sources instead of loading buffers directly from Web Audio API, to gain the widest audio format support in stupid browsers that implement decoding for `&lt;audio>` separately from Web Audio API.
+  * Fixed issue where looping audio sources tried to reconnect to the audioContext at the end of the loop. This was causing an error because they were already connected.
+  * Fixed the "Music" demo.
+  * Fixed issue where dragging mouse over an object in the scene that did not have a mouse handler would cause an error.
+  * Fixed issue where passwords were not being blanked out.
+  * Fixed issue where textboxes were not getting refreshed reliably.
+  * Made the 3D text labels above icons easier to read against the light background.
+  * Fixed mousewheel scrolling and resizing.
+  * Locking screen rotation on regular fullScreen, too, for "magic window" type devices.
+  * Fixed Samsung Internet VR support for Gear VR compatability. It "works" in the sense that it runs without error. The browser has some issues with orientation tracking right now that make the experience pretty bad.
+  * Fixed the layout of the main site header menu on the documentation site.
+  * Added a `Promise` polyfill for IE/Edge support.
+  * Fixed "undefined variable" error in `Primrose.Output.Music`.
+* Admin
+  * Moved to using Gulp instead of Grunt for task running. Runs significantly faster, and the build commands just look cleaner.
+  * Removed `pliny.issue`. Sticking to using Trello to log issues.
+  * Renamed `BrowserEnvironment.setSize()` to `modifyScreen()`, as it did more than just setting the size of canvas.
+  * My favorite thing: deleted unused code.
+  * Carved the "pliny" documentation library out to [https://www.github.com/capnmidnight/pliny](its own project).
+  * Carved the "logger" console logging proxying library out to [https://www.github.com/capnmidnight/logger](its own project).
+  * Moved demos to the documentation folder, and embeded them in the documentation template.
+  * Rewrote how the site is generated.
+* Features
+  * Simplified the audio loading interface, so it can use the best file automatically.
+  * Models may be embeded in HTML files now, using `&lt;script>` tags.
+  * Now activating the "wait" cursor when demos first start loading.
+  * Changed "EditorVR" demo to use logging proxy to display console.log calls, rather than supplying its own log function.
+  * If user touches a demo on a mobile device, it automatically jumps to fullscreen.
+  * If user touches a demo on Gear VR, it automatically jumps to VR mode.
+  * Muting audio when the tab loses focus. 
+  * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
+
+
 ## v0.23.0
 
 ### What happened to v0.22.0?
