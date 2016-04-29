@@ -16,7 +16,6 @@ var GRASS = "images/grass.png",
   dy = 2.5,
   dz = 4,
   app = new Primrose.BrowserEnvironment("AncientTemple", {
-    useFog: true,
     skyTexture: "images/bg2.jpg",
     groundTexture: ROCK
   });

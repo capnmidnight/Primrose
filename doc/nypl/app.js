@@ -7,7 +7,6 @@ var GRASS = "images/grass.png",
   DECK = "images/deck.png",
   SKY = "images/bg2.jpg",
   app = new Primrose.BrowserEnvironment("NYPL", {
-    useFog: false,
     skyTexture: SKY,
     groundTexture: GRASS
   }),

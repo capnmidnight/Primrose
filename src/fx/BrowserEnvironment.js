@@ -1166,7 +1166,7 @@ Primrose.BrowserEnvironment = (function () {
   BrowserEnvironment.DEFAULTS = {
     useNose: false,
     useLeap: false,
-    useFog: true,
+    useFog: false,
     avatarHeight: 1.75,
     walkSpeed: 2,
     // The acceleration applied to falling objects.
