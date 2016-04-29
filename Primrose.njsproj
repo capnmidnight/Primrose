@@ -159,7 +159,6 @@
     <Content Include="lib\gl-matrix.js" />
     <Content Include="lib\mailchimp.js" />
     <Content Include="lib\sha512.js" />
-    <Content Include="lib\webgl-debug.js" />
     <Compile Include="server\controllers.js" />
     <Compile Include="server\controllers\logger.js" />
     <Compile Include="server\controllers\nypl.js" />
