@@ -9,8 +9,3 @@ append head
     script(type="text/javascript", src= fileRoot + "PrimroseDependencies.min.js")
     script(type="text/javascript", src= fileRoot + "Primrose.min.js")
   <!-- end withFramework.jade head append -->
-
-prepend footer
-  <!-- start withFramework.jade footer prepend -->
-  script(type="text/javascript")  if (isInIFrame) { document.querySelector("header").style.display = "none"; }
-  <!-- end withFramework.jade footer prepend -->
