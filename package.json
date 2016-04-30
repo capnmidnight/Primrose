@@ -35,6 +35,7 @@
     "highlighting"
   ],
   "dependencies": {
+    "autotrack": "^0.6.5",
     "azure-storage": "^0.10.0",
     "leapjs": "^0.6.4",
     "logger": "git+https://github.com/capnmidnight/logger.git",

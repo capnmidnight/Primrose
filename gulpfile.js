@@ -30,7 +30,10 @@
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js"
   ],
-  mainPageFiles = ["lib/analytics.js", "lib/ga.js", "lib/mailchimp.js"],
+  mainPageFiles = [
+    "lib/ga-snippet.js",
+    "node_modules/autotrack/autotrack.js"
+  ],
   headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
   docFiles = recurseDirectory("doc")
     .filter(function (f) { return /.jade$/.test(f); })
@@ -59,6 +62,8 @@
     }),
   debugDataES6 = {
     debug: true,
+    jsExt: ".js",
+    cssExt: ".css",
     frameworkFiles: headerFiles.concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
@@ -91,6 +96,8 @@ function pugConfiguration(options, defaultData) {
         callback(undefined, {
           debug: defaultData.debug,
           version: pkg.version,
+          cssExt: defaultData.cssExt,
+          jsExt: defaultData.jsExt,
           filePath: name,
           fileRoot: parts.join(""),
           fileName: shortName && shortName[1],
@@ -114,7 +121,10 @@ gulp.task("jshint", function () {
 });
 
 gulp.task("pugRelease", function () {
-  return pugConfiguration({}, {});
+  return pugConfiguration({}, {
+    jsExt: ".min.js",
+    cssExt: ".min.css"
+  });
 });
 
 gulp.task("pugDebugES5", function () {

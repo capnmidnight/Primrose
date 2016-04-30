@@ -9,7 +9,7 @@ block title
   
 append head
   <!-- start documentation.jade head append -->
-  link(rel="stylesheet", type="text/css", href=(debug ? "style.css" : "style.min.css"))
+  link(rel="stylesheet", type="text/css", href= "style" + cssExt)
   <!-- end documentation.jade head append -->
 mixin fileList(name)
   li
