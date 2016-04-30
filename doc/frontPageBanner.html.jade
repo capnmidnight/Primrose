@@ -6,8 +6,8 @@ html
       each file in frameworkFiles
         script(type="text/javascript", src=fileRoot + file)
     else
-      script(type="text/javascript", src= fileRoot + "PrimroseDependencies.min.js")
-      script(type="text/javascript", src= fileRoot + "Primrose.min.js")
+      script(type="text/javascript", src= fileRoot + "PrimroseDependencies" + jsExt)
+      script(type="text/javascript", src= fileRoot + "Primrose" + jsExt)
 
     style(type="text/css")
       | html, body, #frontBuffer {

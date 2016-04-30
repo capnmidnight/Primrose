@@ -473,7 +473,7 @@ Primrose.BrowserEnvironment = (function () {
       var render = () => {
         if (this.inVR) {
           this.renderer.clear(true, true, true);
-          var trans = this.input.VR.transforms;
+          var trans = xVR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,

@@ -1137,15 +1137,6 @@ function copyObject(dest, source) {
 }
 
 pliny.function({
-  name: "inherit",
-  description: "| [under construction]"
-});
-function inherit(classType, parentType) {
-  classType.prototype = Object.create(parentType.prototype);
-  classType.prototype.constructor = classType;
-}
-
-pliny.function({
   name: "range",
   description: "| [under construction]"
 });
@@ -2061,7 +2052,7 @@ Primrose.BrowserEnvironment = function () {
             drive = _this.input.getValue("drive");
 
         if (_this.inVR || isMobile) {
-          _this.input.getQuaternion("headRX", "headRY", "headRZ", "headRW", qHead);
+          _this.input.getOrientation(qHead);
         } else {
           qHead.set(0, 0, 0, 1);
         }
@@ -2223,8 +2214,8 @@ Primrose.BrowserEnvironment = function () {
                 control = object.button || object.surface;
 
             if (!lockedToEditor()) {
-              buttons |= _this.input.keyboard.getValue("select");
-              clickChanged = clickChanged || _this.input.keyboard.getValue("dSelect") !== 0;
+              buttons |= _this.input.Keyboard.getValue("select");
+              clickChanged = clickChanged || _this.input.Keyboard.getValue("dSelect") !== 0;
             }
 
             if (!clickChanged && buttons > 0) {
@@ -2254,7 +2245,7 @@ Primrose.BrowserEnvironment = function () {
       var render = function render() {
         if (_this.inVR) {
           _this.renderer.clear(true, true, true);
-          var trans = _this.input.vr.transforms;
+          var trans = xVR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
                 v = st.viewport,
@@ -2275,14 +2266,14 @@ Primrose.BrowserEnvironment = function () {
             _this.renderer.setViewport(v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE);
             _this.renderer.render(_this.scene, _this.camera);
           }
-          _this.input.vr.currentDisplay.submitFrame(_this.input.vr.currentPose);
+          _this.input.VR.currentDisplay.submitFrame(_this.input.VR.currentPose);
         }
 
         if (!isMobile) {
           _this.audio.setPlayer(_this.camera);
         }
 
-        if (!_this.inVR || _this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
+        if (!_this.inVR || _this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
           if (blankEye) {
             Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
           }
@@ -2328,9 +2319,9 @@ Primrose.BrowserEnvironment = function () {
         }
 
         if (_this.inVR) {
-          _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+          _this.input.VR.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
-          var p = _this.input.vr.transforms,
+          var p = _this.input.VR.transforms,
               l = p[0],
               r = p[1];
           canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
@@ -2593,7 +2584,7 @@ Primrose.BrowserEnvironment = function () {
 
       var RAF = function RAF(callback) {
         if (_this.inVR) {
-          _this.timer = _this.input.vr.currentDisplay.requestAnimationFrame(callback);
+          _this.timer = _this.input.VR.currentDisplay.requestAnimationFrame(callback);
         } else {
           _this.timer = requestAnimationFrame(callback);
         }
@@ -2609,7 +2600,7 @@ Primrose.BrowserEnvironment = function () {
 
       this.stop = function () {
         if (_this.inVR) {
-          _this.input.vr.currentDisplay.cancelAnimationFrame(_this.timer);
+          _this.input.VR.currentDisplay.cancelAnimationFrame(_this.timer);
         } else {
           cancelAnimationFrame(_this.timer);
         }
@@ -2687,11 +2678,11 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.goVR = function () {
-        if (_this.input.vr) {
-          return _this.input.vr.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
+        if (_this.input.VR) {
+          return _this.input.VR.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
             if (Primrose.Input.VR.Version === 1 && isMobile) {
               var remover = function remover() {
-                _this.input.vr.currentDisplay.exitPresent();
+                _this.input.VR.currentDisplay.exitPresent();
                 window.removeEventListener("vrdisplaypresentchange", remover);
               };
 
@@ -2722,7 +2713,7 @@ Primrose.BrowserEnvironment = function () {
 
       Primrose.Input.Mouse.Lock.addChangeListener(function (evt) {
         if (!Primrose.Input.Mouse.Lock.isActive && _this.inVR) {
-          _this.input.vr.currentDisplay.exitPresent();
+          _this.input.VR.currentDisplay.exitPresent();
         }
       }, false);
 
@@ -2799,7 +2790,7 @@ Primrose.BrowserEnvironment = function () {
       Object.defineProperties(this, {
         inVR: {
           get: function get() {
-            return _this.input.vr && _this.input.vr.currentDisplay && _this.input.vr.currentDisplay.isPresenting;
+            return _this.input.VR && _this.input.VR.currentDisplay && _this.input.VR.currentDisplay.isPresenting;
           }
         }
       });
@@ -2954,6 +2945,7 @@ Primrose.Button = function () {
   pliny.class({
     parent: "Primrose",
     name: "Button",
+    baseClass: "Primrose.BaseControl",
     parameters: [{ name: "model", type: "THREE.Object3D", description: "A 3D model to use as the graphics for this button." }, { name: "name", type: "String", description: "A name for the button, to make it distinct from other buttons." }, { name: "options", type: "Object", description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released." }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
   });
@@ -3530,6 +3522,589 @@ performs basic conversions from DOM elements to the internal Control format."
 }();
 "use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/* global Primrose, pliny */
+
+Primrose.InputProcessor = function () {
+
+  pliny.class({
+    parent: "Primrose",
+    name: "InputProcessor",
+    description: "| [under construction]"
+  });
+
+  var InputProcessor = function () {
+    _createClass(InputProcessor, null, [{
+      key: "defineAxisProperties",
+      value: function defineAxisProperties(classFunc, values) {
+        classFunc.AXES = values;
+        values.forEach(function (name, i) {
+          classFunc[name] = i + 1;
+          Object.defineProperty(classFunc.prototype, name, {
+            get: function get() {
+              return this.getAxis(name);
+            },
+            set: function set(v) {
+              this.setAxis(name, v);
+            }
+          });
+        });
+      }
+    }]);
+
+    function InputProcessor(name, commands, socket) {
+      var _this = this;
+
+      _classCallCheck(this, InputProcessor);
+
+      this.name = name;
+      this.commands = {};
+      this.commandNames = [];
+      this.socket = socket;
+      this.enabled = true;
+      this.paused = false;
+      this.ready = true;
+      this.transmitting = true;
+      this.receiving = true;
+      this.socketReady = false;
+      this.inPhysicalUse = true;
+      this.inputState = {
+        buttons: [],
+        axes: [],
+        ctrl: false,
+        alt: false,
+        shift: false,
+        meta: false
+      };
+      this.lastState = "";
+      this.lastT = performance.now();
+
+      var readMetaKeys = function readMetaKeys(event) {
+        for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+          var m = Primrose.Keys.MODIFIER_KEYS[i];
+          _this.inputState[m] = event[m + "Key"];
+        }
+        _this.update();
+      };
+
+      window.addEventListener("keydown", readMetaKeys, false);
+      window.addEventListener("keyup", readMetaKeys, false);
+
+      if (socket) {
+        socket.on("open", function () {
+          this.socketReady = true;
+          this.inPhysicalUse = !this.receiving;
+        }.bind(this));
+        socket.on(name, function (cmdState) {
+          if (this.receiving) {
+            this.inPhysicalUse = false;
+            this.decodeStateSnapshot(cmdState);
+            this.fireCommands();
+          }
+        }.bind(this));
+        socket.on("close", function () {
+          this.inPhysicalUse = true;
+          this.socketReady = false;
+        }.bind(this));
+      }
+
+      for (var cmdName in commands) {
+        this.addCommand(cmdName, commands[cmdName]);
+      }
+
+      for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+        this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
+      }
+
+      this.axisNames = Primrose.Input[name] && Primrose.Input[name].AXES || [];
+
+      for (var i = 0; i < this.axisNames.length; ++i) {
+        this.inputState.axes[i] = 0;
+      }
+    }
+
+    _createClass(InputProcessor, [{
+      key: "addCommand",
+      value: function addCommand(name, cmd) {
+        cmd.name = name;
+        cmd = this.cloneCommand(cmd);
+        cmd.repetitions = cmd.repetitions || 1;
+        cmd.state = {
+          value: null,
+          pressed: false,
+          wasPressed: false,
+          fireAgain: false,
+          lt: 0,
+          ct: 0,
+          repeatCount: 0
+        };
+        this.commands[name] = cmd;
+        this.commandNames.push(name);
+      }
+    }, {
+      key: "cloneCommand",
+      value: function cloneCommand(cmd) {
+        return {
+          name: cmd.name,
+          disabled: !!cmd.disabled,
+          dt: cmd.dt || 0,
+          deadzone: cmd.deadzone || 0,
+          threshold: cmd.threshold || 0,
+          repetitions: cmd.repetitions || -1,
+          scale: cmd.scale,
+          offset: cmd.offset,
+          min: cmd.min,
+          max: cmd.max,
+          integrate: cmd.integrate || false,
+          delta: cmd.delta || false,
+          axes: this.maybeClone(cmd.axes),
+          commands: cmd.commands && cmd.commands.slice() || [],
+          buttons: this.maybeClone(cmd.buttons),
+          metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(function (k) {
+            for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+              var m = Primrose.Keys.MODIFIER_KEYS[i];
+              if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
+                return Math.sign(k) * (i + 1);
+              }
+            }
+          }.bind(this))),
+          commandDown: cmd.commandDown,
+          commandUp: cmd.commandUp
+        };
+      }
+    }, {
+      key: "update",
+      value: function update() {
+        var t = performance.now() / 1000,
+            dt = t - this.lastT;
+        this.lastT = t;
+        if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
+          for (var name in this.commands) {
+            var cmd = this.commands[name];
+            cmd.state.wasPressed = cmd.state.pressed;
+            cmd.state.pressed = false;
+            if (!cmd.disabled) {
+              var metaKeysSet = true;
+
+              if (cmd.metaKeys) {
+                for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+                  var m = cmd.metaKeys[n];
+                  metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
+                }
+              }
+
+              if (metaKeysSet) {
+                var pressed = true,
+                    value = 0,
+                    n,
+                    temp,
+                    anyButtons = false;
+
+                for (n in this.inputState.buttons) {
+                  if (this.inputState.buttons[n]) {
+                    anyButtons = true;
+                    break;
+                  }
+                }
+
+                if (cmd.buttons) {
+                  for (n = 0; n < cmd.buttons.length; ++n) {
+                    var btn = cmd.buttons[n],
+                        p = btn.index === Primrose.Keys.ANY - 1 && anyButtons || !!this.inputState.buttons[btn.index + 1];
+                    temp = p ? btn.sign : 0;
+                    pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+                    if (Math.abs(temp) > Math.abs(value)) {
+                      value = temp;
+                    }
+                  }
+                }
+
+                if (cmd.axes) {
+                  for (n = 0; n < cmd.axes.length; ++n) {
+                    var a = cmd.axes[n];
+                    temp = a.sign * this.inputState.axes[a.index];
+                    if (Math.abs(temp) > Math.abs(value)) {
+                      value = temp;
+                    }
+                  }
+                }
+
+                for (n = 0; n < cmd.commands.length; ++n) {
+                  temp = this.getValue(cmd.commands[n]);
+                  if (Math.abs(temp) > Math.abs(value)) {
+                    value = temp;
+                  }
+                }
+
+                if (cmd.scale !== undefined) {
+                  value *= cmd.scale;
+                }
+
+                if (cmd.offset !== undefined) {
+                  value += cmd.offset;
+                }
+
+                if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                  value = 0;
+                }
+
+                if (cmd.integrate) {
+                  value = this.getValue(cmd.name) + value * dt;
+                } else if (cmd.delta) {
+                  var ov = value;
+                  if (cmd.state.lv !== undefined) {
+                    value = (value - cmd.state.lv) / dt;
+                  }
+                  cmd.state.lv = ov;
+                }
+
+                if (cmd.min !== undefined) {
+                  value = Math.max(cmd.min, value);
+                }
+
+                if (cmd.max !== undefined) {
+                  value = Math.min(cmd.max, value);
+                }
+
+                if (cmd.threshold) {
+                  pressed = pressed && value > cmd.threshold;
+                }
+
+                cmd.state.pressed = pressed;
+                cmd.state.value = value;
+              }
+
+              cmd.state.lt += dt;
+
+              cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+
+              if (cmd.state.fireAgain) {
+                cmd.state.lt = 0;
+                ++cmd.state.repeatCount;
+              } else if (!cmd.state.pressed) {
+                cmd.state.repeatCount = 0;
+              }
+            }
+          }
+
+          if (this.socketReady && this.transmitting) {
+            var finalState = this.makeStateSnapshot();
+            if (finalState !== this.lastState) {
+              this.socket.emit(this.name, finalState);
+              this.lastState = finalState;
+            }
+          }
+
+          this.fireCommands();
+        }
+      }
+    }, {
+      key: "fireCommands",
+      value: function fireCommands() {
+        if (this.ready && !this.paused) {
+          for (var name in this.commands) {
+            var cmd = this.commands[name];
+            if (cmd.state.fireAgain && cmd.commandDown) {
+              cmd.commandDown(this.name);
+            }
+
+            if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
+              cmd.commandUp(this.name);
+            }
+          }
+        }
+      }
+    }, {
+      key: "makeStateSnapshot",
+      value: function makeStateSnapshot() {
+        var state = "",
+            i = 0,
+            l = Object.keys(this.commands).length;
+        for (var name in this.commands) {
+          var cmd = this.commands[name];
+          if (cmd.state) {
+            state += i << 2 | (cmd.state.pressed ? 0x1 : 0) | (cmd.state.fireAgain ? 0x2 : 0) + ":" + cmd.state.value;
+            if (i < l - 1) {
+              state += "|";
+            }
+          }
+          ++i;
+        }
+        return state;
+      }
+    }, {
+      key: "decodeStateSnapshot",
+      value: function decodeStateSnapshot(snapshot) {
+        var cmd, name;
+        for (name in this.commands) {
+          cmd = this.commands[name];
+          cmd.state.wasPressed = cmd.state.pressed;
+        }
+        var records = snapshot.split("|");
+        for (var i = 0; i < records.length; ++i) {
+          var record = records[i],
+              parts = record.split(":"),
+              cmdIndex = parseInt(parts[0], 10),
+              pressed = (cmdIndex & 0x1) !== 0,
+              fireAgain = (flags & 0x2) !== 0,
+              flags = parseInt(parts[2], 10);
+          cmdIndex >>= 2;
+          name = this.commandNames(cmdIndex);
+          cmd = this.commands[name];
+          cmd.state = {
+            value: parseFloat(parts[1]),
+            pressed: pressed,
+            fireAgain: fireAgain
+          };
+        }
+      }
+    }, {
+      key: "setProperty",
+      value: function setProperty(key, name, value) {
+        if (this.commands[name]) {
+          this.commands[name][key] = value;
+        }
+      }
+    }, {
+      key: "setDeadzone",
+      value: function setDeadzone(name, value) {
+        this.setProperty("deadzone", name, value);
+      }
+    }, {
+      key: "setScale",
+      value: function setScale(name, value) {
+        this.setProperty("scale", name, value);
+      }
+    }, {
+      key: "setDT",
+      value: function setDT(name, value) {
+        this.setProperty("dt", name, value);
+      }
+    }, {
+      key: "setMin",
+      value: function setMin(name, value) {
+        this.setProperty("min", name, value);
+      }
+    }, {
+      key: "setMax",
+      value: function setMax(name, value) {
+        this.setProperty("max", name, value);
+      }
+    }, {
+      key: "addToArray",
+      value: function addToArray(key, name, value) {
+        if (this.commands[name] && this.commands[name][key]) {
+          this.commands[name][key].push(value);
+        }
+      }
+    }, {
+      key: "addMetaKey",
+      value: function addMetaKey(name, value) {
+        this.addToArray("metaKeys", name, value);
+      }
+    }, {
+      key: "addAxis",
+      value: function addAxis(name, value) {
+        this.addToArray("axes", name, value);
+      }
+    }, {
+      key: "addButton",
+      value: function addButton(name, value) {
+        this.addToArray("buttons", name, value);
+      }
+    }, {
+      key: "removeMetaKey",
+      value: function removeMetaKey(name, value) {
+        this.removeFromArray("metaKeys", name, value);
+      }
+    }, {
+      key: "removeAxis",
+      value: function removeAxis(name, value) {
+        this.removeFromArray("axes", name, value);
+      }
+    }, {
+      key: "removeButton",
+      value: function removeButton(name, value) {
+        this.removeFromArray("buttons", name, value);
+      }
+    }, {
+      key: "invertAxis",
+      value: function invertAxis(name, value) {
+        this.invertInArray("axes", name, value);
+      }
+    }, {
+      key: "invertButton",
+      value: function invertButton(name, value) {
+        this.invertInArray("buttons", name, value);
+      }
+    }, {
+      key: "invertMetaKey",
+      value: function invertMetaKey(name, value) {
+        this.invertInArray("metaKeys", name, value);
+      }
+    }, {
+      key: "removeFromArray",
+      value: function removeFromArray(key, name, value) {
+        if (this.commands[name] && this.commands[name][key]) {
+          var arr = this.commands[name][key],
+              n = arr.indexOf(value);
+          if (n > -1) {
+            arr.splice(n, 1);
+          }
+        }
+      }
+    }, {
+      key: "invertInArray",
+      value: function invertInArray(key, name, value) {
+        if (this.commands[name] && this.commands[name][key]) {
+          var arr = this.commands[name][key],
+              n = arr.indexOf(value);
+          if (n > -1) {
+            arr[n] *= -1;
+          }
+        }
+      }
+    }, {
+      key: "pause",
+      value: function pause(v) {
+        this.paused = v;
+      }
+    }, {
+      key: "isPaused",
+      value: function isPaused() {
+        return this.paused;
+      }
+    }, {
+      key: "enable",
+      value: function enable(k, v) {
+        if (v === undefined || v === null) {
+          v = k;
+          k = null;
+        }
+
+        if (k) {
+          this.setProperty("disabled", k, !v);
+        } else {
+          this.enabled = v;
+        }
+      }
+    }, {
+      key: "isEnabled",
+      value: function isEnabled(name) {
+        return name && this.commands[name] && !this.commands[name].disabled;
+      }
+    }, {
+      key: "transmit",
+      value: function transmit(v) {
+        this.transmitting = v;
+      }
+    }, {
+      key: "isTransmitting",
+      value: function isTransmitting() {
+        return this.transmitting;
+      }
+    }, {
+      key: "receive",
+      value: function receive(v) {
+        this.receiving = v;
+      }
+    }, {
+      key: "isReceiving",
+      value: function isReceiving() {
+        return this.receiving;
+      }
+    }, {
+      key: "getAxis",
+      value: function getAxis(name) {
+        var i = this.axisNames.indexOf(name);
+        if (i > -1) {
+          var value = this.inputState.axes[i] || 0;
+          return value;
+        }
+        return null;
+      }
+    }, {
+      key: "setAxis",
+      value: function setAxis(name, value) {
+        var i = this.axisNames.indexOf(name);
+        if (i > -1) {
+          this.inPhysicalUse = true;
+          this.inputState.axes[i] = value;
+        }
+      }
+    }, {
+      key: "setButton",
+      value: function setButton(index, pressed) {
+        this.inPhysicalUse = true;
+        this.inputState.buttons[index] = pressed;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(name) {
+        return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.value || this.getAxis(name) || 0;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(name, value) {
+        var j = this.axisNames.indexOf(name);
+        if (!this.commands[name] && j > -1) {
+          this.setAxis(name, value);
+        } else if (this.commands[name] && !this.commands[name].disabled) {
+          this.commands[name].state.value = value;
+        }
+      }
+    }, {
+      key: "getVector3",
+      value: function getVector3(x, y, z, value) {
+        value = value || new THREE.Vector3();
+        value.set(this.getValue(x), this.getValue(y), this.getValue(z));
+        return value;
+      }
+    }, {
+      key: "addVector3",
+      value: function addVector3(x, y, z, value) {
+        value.x += this.getValue(x);
+        value.y += this.getValue(y);
+        value.z += this.getValue(z);
+        return value;
+      }
+    }, {
+      key: "isDown",
+      value: function isDown(name) {
+        return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
+      }
+    }, {
+      key: "isUp",
+      value: function isUp(name) {
+        return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
+      }
+    }, {
+      key: "maybeClone",
+      value: function maybeClone(arr) {
+        var output = [];
+        if (arr) {
+          for (var i = 0; i < arr.length; ++i) {
+            output[i] = {
+              index: Math.abs(arr[i]) - 1,
+              toggle: arr[i] < 0,
+              sign: arr[i] < 0 ? -1 : 1
+            };
+          }
+        }
+        return output;
+      }
+    }]);
+
+    return InputProcessor;
+  }();
+
+  return InputProcessor;
+}();
+"use strict";
+
 /* global Primrose, pliny */
 
 Primrose.Keys = function () {
@@ -4002,276 +4577,6 @@ We can load a bunch of models in one go using the following code.\n\
   }
 
   return ModelLoader;
-}();
-"use strict";
-
-/* global Primrose, pliny */
-
-Primrose.NetworkedInput = function () {
-
-  pliny.class({
-    parent: "Primrose",
-    name: "NetworkedInput",
-    description: "| [under construction]"
-  });
-  function NetworkedInput(name, commands, socket) {
-    this.name = name;
-    this.commands = {};
-    this.commandNames = [];
-    this.socket = socket;
-    this.enabled = true;
-    this.paused = false;
-    this.ready = true;
-    this.transmitting = true;
-    this.receiving = true;
-    this.socketReady = false;
-    this.inPhysicalUse = true;
-    this.inputState = {
-      buttons: null,
-      axes: null,
-      ctrl: false,
-      alt: false,
-      shift: false,
-      meta: false
-    };
-    this.lastState = "";
-    this.lastT = performance.now();
-
-    function readMetaKeys(event) {
-      for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-        var m = Primrose.Keys.MODIFIER_KEYS[i];
-        this.inputState[m] = event[m + "Key"];
-      }
-      this.update();
-    }
-
-    window.addEventListener("keydown", readMetaKeys.bind(this), false);
-    window.addEventListener("keyup", readMetaKeys.bind(this), false);
-
-    if (socket) {
-      socket.on("open", function () {
-        this.socketReady = true;
-        this.inPhysicalUse = !this.receiving;
-      }.bind(this));
-      socket.on(name, function (cmdState) {
-        if (this.receiving) {
-          this.inPhysicalUse = false;
-          this.decodeStateSnapshot(cmdState);
-          this.fireCommands();
-        }
-      }.bind(this));
-      socket.on("close", function () {
-        this.inPhysicalUse = true;
-        this.socketReady = false;
-      }.bind(this));
-    }
-
-    for (var cmdName in commands) {
-      this.addCommand(cmdName, commands[cmdName]);
-    }
-
-    for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-      this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
-    }
-  }
-
-  NetworkedInput.prototype.addCommand = function (name, cmd) {
-    cmd.name = name;
-    cmd = this.cloneCommand(cmd);
-    cmd.repetitions = cmd.repetitions || 1;
-    cmd.state = {
-      value: null,
-      pressed: false,
-      wasPressed: false,
-      fireAgain: false,
-      lt: 0,
-      ct: 0,
-      repeatCount: 0
-    };
-    this.commands[name] = cmd;
-    this.commandNames.push(name);
-  };
-
-  NetworkedInput.prototype.cloneCommand = function (cmd) {
-    throw new Error("cloneCommand function must be defined in subclass");
-  };
-
-  NetworkedInput.prototype.update = function () {
-    var t = performance.now() / 1000,
-        dt = t - this.lastT;
-    this.lastT = t;
-    if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
-      for (var name in this.commands) {
-        var cmd = this.commands[name];
-        cmd.state.wasPressed = cmd.state.pressed;
-        cmd.state.pressed = false;
-        if (!cmd.disabled) {
-          var metaKeysSet = true;
-
-          if (cmd.metaKeys) {
-            for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
-              var m = cmd.metaKeys[n];
-              metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
-            }
-          }
-
-          this.evalCommand(cmd, metaKeysSet, dt);
-
-          cmd.state.lt += dt;
-
-          cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
-
-          if (cmd.state.fireAgain) {
-            cmd.state.lt = 0;
-            ++cmd.state.repeatCount;
-          } else if (!cmd.state.pressed) {
-            cmd.state.repeatCount = 0;
-          }
-        }
-      }
-
-      if (this.socketReady && this.transmitting) {
-        var finalState = this.makeStateSnapshot();
-        if (finalState !== this.lastState) {
-          this.socket.emit(this.name, finalState);
-          this.lastState = finalState;
-        }
-      }
-
-      this.fireCommands();
-    }
-  };
-
-  NetworkedInput.prototype.fireCommands = function () {
-    if (this.ready && !this.paused) {
-      for (var name in this.commands) {
-        var cmd = this.commands[name];
-        if (cmd.state.fireAgain && cmd.commandDown) {
-          cmd.commandDown(this.name);
-        }
-
-        if (!cmd.state.pressed && cmd.state.wasPressed && cmd.commandUp) {
-          cmd.commandUp(this.name);
-        }
-      }
-    }
-  };
-
-  NetworkedInput.prototype.makeStateSnapshot = function () {
-    var state = "",
-        i = 0,
-        l = Object.keys(this.commands).length;
-    for (var name in this.commands) {
-      var cmd = this.commands[name];
-      if (cmd.state) {
-        state += i << 2 | (cmd.state.pressed ? 0x1 : 0) | (cmd.state.fireAgain ? 0x2 : 0) + ":" + cmd.state.value;
-        if (i < l - 1) {
-          state += "|";
-        }
-      }
-      ++i;
-    }
-    return state;
-  };
-
-  NetworkedInput.prototype.decodeStateSnapshot = function (snapshot) {
-    var cmd, name;
-    for (name in this.commands) {
-      cmd = this.commands[name];
-      cmd.state.wasPressed = cmd.state.pressed;
-    }
-    var records = snapshot.split("|");
-    for (var i = 0; i < records.length; ++i) {
-      var record = records[i],
-          parts = record.split(":"),
-          cmdIndex = parseInt(parts[0], 10),
-          pressed = (cmdIndex & 0x1) !== 0,
-          fireAgain = (flags & 0x2) !== 0,
-          flags = parseInt(parts[2], 10);
-      cmdIndex >>= 2;
-      name = this.commandNames(cmdIndex);
-      cmd = this.commands[name];
-      cmd.state = {
-        value: parseFloat(parts[1]),
-        pressed: pressed,
-        fireAgain: fireAgain
-      };
-    }
-  };
-
-  NetworkedInput.prototype.setProperty = function (key, name, value) {
-    if (this.commands[name]) {
-      this.commands[name][key] = value;
-    }
-  };
-
-  NetworkedInput.prototype.addToArray = function (key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      this.commands[name][key].push(value);
-    }
-  };
-
-  NetworkedInput.prototype.removeFromArray = function (key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      var arr = this.commands[name][key],
-          n = arr.indexOf(value);
-      if (n > -1) {
-        arr.splice(n, 1);
-      }
-    }
-  };
-
-  NetworkedInput.prototype.invertInArray = function (key, name, value) {
-    if (this.commands[name] && this.commands[name][key]) {
-      var arr = this.commands[name][key],
-          n = arr.indexOf(value);
-      if (n > -1) {
-        arr[n] *= -1;
-      }
-    }
-  };
-
-  NetworkedInput.prototype.pause = function (v) {
-    this.paused = v;
-  };
-
-  NetworkedInput.prototype.isPaused = function () {
-    return this.paused;
-  };
-
-  NetworkedInput.prototype.enable = function (k, v) {
-    if (v === undefined || v === null) {
-      v = k;
-      k = null;
-    }
-
-    if (k) {
-      this.setProperty("disabled", k, !v);
-    } else {
-      this.enabled = v;
-    }
-  };
-
-  NetworkedInput.prototype.isEnabled = function (name) {
-    return name && this.commands[name] && !this.commands[name].disabled;
-  };
-
-  NetworkedInput.prototype.transmit = function (v) {
-    this.transmitting = v;
-  };
-
-  NetworkedInput.prototype.isTransmitting = function () {
-    return this.transmitting;
-  };
-
-  NetworkedInput.prototype.receive = function (v) {
-    this.receiving = v;
-  };
-
-  NetworkedInput.prototype.isReceiving = function () {
-    return this.receiving;
-  };
-  return NetworkedInput;
 }();
 "use strict";
 
@@ -6562,6 +6867,7 @@ pliny.class({
   parent: "Primrose",
   name: "Surface",
   description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+  baseClass: "Primrose.Entity",
   parameters: [{ name: "options.id", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options.bounds", type: "Primrose.Text.Rectangle", description: "The size and location of the surface to create." }]
 });
 Primrose.Surface = function () {
@@ -7327,6 +7633,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Primrose.X.LoginForm = function () {
   var COUNTER = 0;
+  pliny.class({
+    parent: "Primrose.X",
+    name: "LoginForm",
+    description: "| [Under Construction]",
+    baseClass: "Primrose.Entity"
+  });
 
   var LoginForm = function (_Primrose$Entity) {
     _inherits(LoginForm, _Primrose$Entity);
@@ -7422,6 +7734,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Primrose.X.SignupForm = function () {
   var COUNTER = 0;
+  pliny.class({
+    parent: "Primrose.X",
+    name: "SignupForm",
+    description: "| [Under Construction]",
+    baseClass: "Primrose.Entity"
+  });
 
   var SignupForm = function (_Primrose$Entity) {
     _inherits(SignupForm, _Primrose$Entity);
@@ -7544,6 +7862,7 @@ Primrose.Controls.Label = function () {
     parent: "Primrose.Controls",
     name: "Label",
     description: "A simple label of text to put on a Surface.",
+    baseClass: "Primrose.Surface",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
   });
 
@@ -7732,6 +8051,7 @@ Primrose.Controls.Button2D = function () {
     parent: "Primrose.Controls",
     name: "Button2D",
     description: "A simple button to put on a Surface.",
+    baseClass: "Primrose.Controls.Label",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
   });
 
@@ -7810,6 +8130,7 @@ Primrose.Controls.Image = function () {
     parent: "Primrose.Controls",
     name: "Image",
     description: "A simple 2D image to put on a Surface.",
+    baseClass: "Primrose.Surface",
     parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Button." }]
   });
 
@@ -8421,264 +8742,6 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
 };
 "use strict";
 
-/* global Primrose, THREE, pliny */
-
-Primrose.Input.ButtonAndAxis = function () {
-
-  pliny.class({
-    parent: "Primrose.Input",
-    name: "ButtonAndAxis",
-    description: "| [under construction]",
-    parameters: [{ name: "name", type: "String", description: "" }, { name: "commands", type: "Array", description: "" }, { name: "socket", type: "WebSocket or WebRTCSocket", description: "" }, { name: "axes", type: "Array", description: "" }]
-  });
-  function ButtonAndAxisInput(name, commands, socket, axes) {
-    Primrose.NetworkedInput.call(this, name, commands, socket);
-
-    this.inputState.axes = [];
-
-    this.inputState.buttons = [];
-
-    this.axisNames = axes || [];
-
-    for (var i = 0; i < this.axisNames.length; ++i) {
-      this.inputState.axes[i] = 0;
-    }
-
-    this.setDeadzone = this.setProperty.bind(this, "deadzone");
-
-    this.setScale = this.setProperty.bind(this, "scale");
-
-    this.setDT = this.setProperty.bind(this, "dt");
-
-    this.setMin = this.setProperty.bind(this, "min");
-
-    this.setMax = this.setProperty.bind(this, "max");
-
-    this.addMetaKey = this.addToArray.bind(this, "metaKeys");
-
-    this.addAxis = this.addToArray.bind(this, "axes");
-
-    this.addButton = this.addToArray.bind(this, "buttons");
-
-    this.removeMetaKey = this.removeFromArray.bind(this, "metaKeys");
-
-    this.removeAxis = this.removeFromArray.bind(this, "axes");
-
-    this.removeButton = this.removeFromArray.bind(this, "buttons");
-
-    this.invertAxis = this.invertInArray.bind(this, "axes");
-
-    this.invertButton = this.invertInArray.bind(this, "buttons");
-
-    this.invertMetaKey = this.invertInArray.bind(this, "metaKeys");
-  }
-
-  inherit(ButtonAndAxisInput, Primrose.NetworkedInput);
-
-  ButtonAndAxisInput.inherit = function (classFunc) {
-    inherit(classFunc, ButtonAndAxisInput);
-    if (classFunc.AXES) {
-      classFunc.AXES.forEach(function (name, i) {
-        classFunc[name] = i + 1;
-        Object.defineProperty(classFunc.prototype, name, {
-          get: function get() {
-            return this.getAxis(name);
-          },
-          set: function set(v) {
-            this.setAxis(name, v);
-          }
-        });
-      });
-    }
-  };
-
-  ButtonAndAxisInput.prototype.getAxis = function (name) {
-    var i = this.axisNames.indexOf(name);
-    if (i > -1) {
-      var value = this.inputState.axes[i] || 0;
-      return value;
-    }
-    return null;
-  };
-
-  ButtonAndAxisInput.prototype.setAxis = function (name, value) {
-    var i = this.axisNames.indexOf(name);
-    if (i > -1) {
-      this.inPhysicalUse = true;
-      this.inputState.axes[i] = value;
-    }
-  };
-
-  ButtonAndAxisInput.prototype.setButton = function (index, pressed) {
-    this.inPhysicalUse = true;
-    this.inputState.buttons[index] = pressed;
-  };
-
-  ButtonAndAxisInput.prototype.getValue = function (name) {
-    return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.value || this.getAxis(name) || 0;
-  };
-
-  ButtonAndAxisInput.prototype.setValue = function (name, value) {
-    var j = this.axisNames.indexOf(name);
-    if (!this.commands[name] && j > -1) {
-      this.setAxis(name, value);
-    } else if (this.commands[name] && !this.commands[name].disabled) {
-      this.commands[name].state.value = value;
-    }
-  };
-
-  ButtonAndAxisInput.prototype.getVector3 = function (x, y, z, value) {
-    value = value || new THREE.Vector3();
-    value.set(this.getValue(x), this.getValue(y), this.getValue(z));
-    return value;
-  };
-
-  ButtonAndAxisInput.prototype.addVector3 = function (x, y, z, value) {
-    value.x += this.getValue(x);
-    value.y += this.getValue(y);
-    value.z += this.getValue(z);
-    return value;
-  };
-
-  ButtonAndAxisInput.prototype.isDown = function (name) {
-    return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
-  };
-
-  ButtonAndAxisInput.prototype.isUp = function (name) {
-    return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
-  };
-
-  ButtonAndAxisInput.prototype.maybeClone = function (arr) {
-    var output = [];
-    if (arr) {
-      for (var i = 0; i < arr.length; ++i) {
-        output[i] = {
-          index: Math.abs(arr[i]) - 1,
-          toggle: arr[i] < 0,
-          sign: arr[i] < 0 ? -1 : 1
-        };
-      }
-    }
-    return output;
-  };
-
-  ButtonAndAxisInput.prototype.cloneCommand = function (cmd) {
-    return {
-      name: cmd.name,
-      disabled: !!cmd.disabled,
-      dt: cmd.dt || 0,
-      deadzone: cmd.deadzone || 0,
-      threshold: cmd.threshold || 0,
-      repetitions: cmd.repetitions || -1,
-      scale: cmd.scale,
-      offset: cmd.offset,
-      min: cmd.min,
-      max: cmd.max,
-      integrate: cmd.integrate || false,
-      delta: cmd.delta || false,
-      axes: this.maybeClone(cmd.axes),
-      commands: cmd.commands && cmd.commands.slice() || [],
-      buttons: this.maybeClone(cmd.buttons),
-      metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(function (k) {
-        for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
-          var m = Primrose.Keys.MODIFIER_KEYS[i];
-          if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
-            return Math.sign(k) * (i + 1);
-          }
-        }
-      }.bind(this))),
-      commandDown: cmd.commandDown,
-      commandUp: cmd.commandUp
-    };
-  };
-
-  ButtonAndAxisInput.prototype.evalCommand = function (cmd, metaKeysSet, dt) {
-    if (metaKeysSet) {
-      var pressed = true,
-          value = 0,
-          n,
-          temp,
-          anyButtons = false;
-
-      for (n in this.inputState.buttons) {
-        if (this.inputState.buttons[n]) {
-          anyButtons = true;
-          break;
-        }
-      }
-
-      if (cmd.buttons) {
-        for (n = 0; n < cmd.buttons.length; ++n) {
-          var btn = cmd.buttons[n],
-              p = btn.index === Primrose.Keys.ANY - 1 && anyButtons || !!this.inputState.buttons[btn.index + 1];
-          temp = p ? btn.sign : 0;
-          pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
-          if (Math.abs(temp) > Math.abs(value)) {
-            value = temp;
-          }
-        }
-      }
-
-      if (cmd.axes) {
-        for (n = 0; n < cmd.axes.length; ++n) {
-          var a = cmd.axes[n];
-          temp = a.sign * this.inputState.axes[a.index];
-          if (Math.abs(temp) > Math.abs(value)) {
-            value = temp;
-          }
-        }
-      }
-
-      for (n = 0; n < cmd.commands.length; ++n) {
-        temp = this.getValue(cmd.commands[n]);
-        if (Math.abs(temp) > Math.abs(value)) {
-          value = temp;
-        }
-      }
-
-      if (cmd.scale !== undefined) {
-        value *= cmd.scale;
-      }
-
-      if (cmd.offset !== undefined) {
-        value += cmd.offset;
-      }
-
-      if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-        value = 0;
-      }
-
-      if (cmd.integrate) {
-        value = this.getValue(cmd.name) + value * dt;
-      } else if (cmd.delta) {
-        var ov = value;
-        if (cmd.state.lv !== undefined) {
-          value = (value - cmd.state.lv) / dt;
-        }
-        cmd.state.lv = ov;
-      }
-
-      if (cmd.min !== undefined) {
-        value = Math.max(cmd.min, value);
-      }
-
-      if (cmd.max !== undefined) {
-        value = Math.min(cmd.max, value);
-      }
-
-      if (cmd.threshold) {
-        pressed = pressed && value > cmd.threshold;
-      }
-
-      cmd.state.pressed = pressed;
-      cmd.state.value = value;
-    }
-  };
-
-  return ButtonAndAxisInput;
-}();
-"use strict";
-
 /* global Primrose, MediaStreamTrack, THREE, Navigator, pliny */
 
 Primrose.Input.Camera = function () {
@@ -8841,7 +8904,7 @@ Primrose.Input.FPSInput = function () {
 
     this.managers = [
     // keyboard should always run on the window
-    new Primrose.Input.Keyboard("keyboard", window, {
+    new Primrose.Input.Keyboard(window, {
       lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
       pointer1: {
         buttons: [Primrose.Keys.SPACE],
@@ -8880,7 +8943,7 @@ Primrose.Input.FPSInput = function () {
         metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
         commandUp: emit.bind(this, "zero")
       }
-    }), new Primrose.Input.Mouse("mouse", DOMElement, {
+    }), new Primrose.Input.Mouse(DOMElement, {
       lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
       pointer: {
         buttons: [Primrose.Keys.ANY],
@@ -8897,7 +8960,7 @@ Primrose.Input.FPSInput = function () {
       dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
       pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
       pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
-    }), new Primrose.Input.Touch("touch", DOMElement, {
+    }), new Primrose.Input.Touch(DOMElement, {
       lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
       pointer: {
         buttons: [Primrose.Keys.ANY],
@@ -8913,7 +8976,7 @@ Primrose.Input.FPSInput = function () {
       heading: { commands: ["dx"], integrate: true },
       dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
       pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
-    }), new Primrose.Input.Gamepad("gamepad", {
+    }), new Primrose.Input.Gamepad({
       pointer: {
         buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
         repetitions: 1,
@@ -8928,7 +8991,7 @@ Primrose.Input.FPSInput = function () {
     })];
 
     if (Primrose.Input.VR.Version > 0) {
-      var vr = new Primrose.Input.VR("vr");
+      var vr = new Primrose.Input.VR();
       this.managers.push(vr);
       vr.init();
     }
@@ -9028,13 +9091,13 @@ Primrose.Input.FPSInput = function () {
     };
 
     var temp = new THREE.Quaternion();
-    FPSInput.prototype.getQuaternion = function (x, y, z, w, value, accumulate) {
+    FPSInput.prototype.getOrientation = function (x, y, z, w, value, accumulate) {
       value = value || new THREE.Quaternion();
       value.set(0, 0, 0, 1);
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if (mgr.enabled && mgr.getQuaternion) {
-          mgr.getQuaternion(x, y, z, w, temp);
+        if (mgr.enabled && mgr.getOrientation) {
+          mgr.getOrientation(x, y, z, w, temp);
           value.multiply(temp);
           if (!accumulate) {
             break;
@@ -9059,6 +9122,12 @@ Primrose.Input.FPSInput = function () {
 }();
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 /* global Primrose, pliny */
 
 Primrose.Input.Gamepad = function () {
@@ -9067,140 +9136,151 @@ Primrose.Input.Gamepad = function () {
     parent: "Primrose.Input",
     name: "Gamepad",
     description: "| [under construction]",
+    baseClass: "Primrose.InputProcessor",
     parameters: [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]
   });
-  function GamepadInput(name, commands, socket, gpid) {
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, GamepadInput.AXES, true);
-    var connectedGamepads = [],
-        listeners = {
-      gamepadconnected: [],
-      gamepaddisconnected: []
-    };
 
-    this.checkDevice = function (pad) {
-      var i;
-      for (i = 0; i < pad.buttons.length; ++i) {
-        this.setButton(i, pad.buttons[i].pressed);
-      }
-      for (i = 0; i < pad.axes.length; ++i) {
-        this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
-      }
-    };
+  var Gamepad = function (_Primrose$InputProces) {
+    _inherits(Gamepad, _Primrose$InputProces);
 
-    this.poll = function () {
-      var pads,
-          currentPads = [],
-          i;
+    function Gamepad(commands, socket, gpid) {
+      _classCallCheck(this, Gamepad);
 
-      if (navigator.getGamepads) {
-        pads = navigator.getGamepads();
-      } else if (navigator.webkitGetGamepads) {
-        pads = navigator.webkitGetGamepads();
-      }
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, "Gamepad", commands, socket));
 
-      if (pads) {
-        for (i = 0; i < pads.length; ++i) {
-          var pad = pads[i];
-          if (pad) {
-            if (!gpid) {
-              gpid = pad.id;
+      var connectedGamepads = [],
+          listeners = {
+        gamepadconnected: [],
+        gamepaddisconnected: []
+      };
+
+      _this.checkDevice = function (pad) {
+        var i;
+        for (i = 0; i < pad.buttons.length; ++i) {
+          this.setButton(i, pad.buttons[i].pressed);
+        }
+        for (i = 0; i < pad.axes.length; ++i) {
+          this.setAxis(Gamepad.AXES[i], pad.axes[i]);
+        }
+      };
+
+      _this.poll = function () {
+        var pads,
+            currentPads = [],
+            i;
+
+        if (navigator.getGamepads) {
+          pads = navigator.getGamepads();
+        } else if (navigator.webkitGetGamepads) {
+          pads = navigator.webkitGetGamepads();
+        }
+
+        if (pads) {
+          for (i = 0; i < pads.length; ++i) {
+            var pad = pads[i];
+            if (pad) {
+              if (!gpid) {
+                gpid = pad.id;
+              }
+              if (connectedGamepads.indexOf(pad.id) === -1) {
+                connectedGamepads.push(pad.id);
+                onConnected(pad.id);
+              }
+              if (pad.id === gpid) {
+                this.checkDevice(pad);
+              }
+              currentPads.push(pad.id);
             }
-            if (connectedGamepads.indexOf(pad.id) === -1) {
-              connectedGamepads.push(pad.id);
-              onConnected(pad.id);
-            }
-            if (pad.id === gpid) {
-              this.checkDevice(pad);
-            }
-            currentPads.push(pad.id);
           }
         }
-      }
 
-      for (i = connectedGamepads.length - 1; i >= 0; --i) {
-        if (currentPads.indexOf(connectedGamepads[i]) === -1) {
-          onDisconnected(connectedGamepads[i]);
-          connectedGamepads.splice(i, 1);
+        for (i = connectedGamepads.length - 1; i >= 0; --i) {
+          if (currentPads.indexOf(connectedGamepads[i]) === -1) {
+            onDisconnected(connectedGamepads[i]);
+            connectedGamepads.splice(i, 1);
+          }
+        }
+      };
+
+      function add(arr, val) {
+        if (arr.indexOf(val) === -1) {
+          arr.push(val);
         }
       }
-    };
 
-    function add(arr, val) {
-      if (arr.indexOf(val) === -1) {
-        arr.push(val);
+      function remove(arr, val) {
+        var index = arr.indexOf(val);
+        if (index > -1) {
+          arr.splice(index, 1);
+        }
       }
+
+      function sendAll(arr, id) {
+        for (var i = 0; i < arr.length; ++i) {
+          arr[i](id);
+        }
+      }
+
+      function onConnected(id) {
+        sendAll(listeners.gamepadconnected, id);
+      }
+
+      function onDisconnected(id) {
+        sendAll(listeners.gamepaddisconnected, id);
+      }
+
+      _this.getErrorMessage = function () {
+        return errorMessage;
+      };
+
+      _this.setGamepad = function (id) {
+        gpid = id;
+        this.inPhysicalUse = true;
+      };
+
+      _this.clearGamepad = function () {
+        gpid = null;
+        this.inPhysicalUse = false;
+      };
+
+      _this.isGamepadSet = function () {
+        return !!gpid;
+      };
+
+      _this.getConnectedGamepads = function () {
+        return connectedGamepads.slice();
+      };
+
+      _this.addEventListener = function (event, handler, bubbles) {
+        if (listeners[event]) {
+          listeners[event].push(handler);
+        }
+        if (event === "gamepadconnected") {
+          connectedGamepads.forEach(onConnected);
+        }
+      };
+
+      _this.removeEventListener = function (event, handler, bubbles) {
+        if (listeners[event]) {
+          remove(listeners[event], handler);
+        }
+      };
+
+      try {
+        _this.update();
+        _this.available = true;
+      } catch (err) {
+        _this.avaliable = false;
+        _this.errorMessage = err;
+      }
+      return _this;
     }
 
-    function remove(arr, val) {
-      var index = arr.indexOf(val);
-      if (index > -1) {
-        arr.splice(index, 1);
-      }
-    }
+    return Gamepad;
+  }(Primrose.InputProcessor);
 
-    function sendAll(arr, id) {
-      for (var i = 0; i < arr.length; ++i) {
-        arr[i](id);
-      }
-    }
-
-    function onConnected(id) {
-      sendAll(listeners.gamepadconnected, id);
-    }
-
-    function onDisconnected(id) {
-      sendAll(listeners.gamepaddisconnected, id);
-    }
-
-    this.getErrorMessage = function () {
-      return errorMessage;
-    };
-
-    this.setGamepad = function (id) {
-      gpid = id;
-      this.inPhysicalUse = true;
-    };
-
-    this.clearGamepad = function () {
-      gpid = null;
-      this.inPhysicalUse = false;
-    };
-
-    this.isGamepadSet = function () {
-      return !!gpid;
-    };
-
-    this.getConnectedGamepads = function () {
-      return connectedGamepads.slice();
-    };
-
-    this.addEventListener = function (event, handler, bubbles) {
-      if (listeners[event]) {
-        listeners[event].push(handler);
-      }
-      if (event === "gamepadconnected") {
-        connectedGamepads.forEach(onConnected);
-      }
-    };
-
-    this.removeEventListener = function (event, handler, bubbles) {
-      if (listeners[event]) {
-        remove(listeners[event], handler);
-      }
-    };
-
-    try {
-      this.update();
-      this.available = true;
-    } catch (err) {
-      this.avaliable = false;
-      this.errorMessage = err;
-    }
-  }
-
-  GamepadInput.AXES = ["LSX", "LSY", "RSX", "RSY"];
-  Primrose.Input.ButtonAndAxis.inherit(GamepadInput);
-  return GamepadInput;
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY"]);
+  return Gamepad;
 }();
 
 pliny.enumeration({
@@ -9228,41 +9308,66 @@ Primrose.Input.Gamepad.XBOX_BUTTONS = {
 };
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /* global Primrose, pliny */
 
 Primrose.Input.Keyboard = function () {
+  var _pliny$class;
 
-  pliny.class({
+  pliny.class((_pliny$class = {
     parent: "Primrose.Input",
     name: "Keyboard",
-    baseClass: "Primrose.Input.ButtonAndAxis",
-    description: "| [under construction]",
-    parameters: [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]
-  });
-  function KeyboardInput(name, DOMElement, commands, socket) {
-    DOMElement = DOMElement || window;
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  }, _defineProperty(_pliny$class, "baseClass", "Primrose.InputProcessor"), _defineProperty(_pliny$class, "parameters", [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]), _pliny$class));
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket);
+  var Keyboard = function (_Primrose$InputProces) {
+    _inherits(Keyboard, _Primrose$InputProces);
 
-    function execute(stateChange, event) {
-      this.setButton(event.keyCode, stateChange);
-      this.update();
+    function Keyboard(DOMElement, commands, socket) {
+      _classCallCheck(this, Keyboard);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Keyboard).call(this, "Keyboard", commands, socket));
+
+      DOMElement = DOMElement || window;
+
+      function execute(stateChange, event) {
+        this.setButton(event.keyCode, stateChange);
+        this.update();
+      }
+
+      DOMElement.addEventListener("keydown", execute.bind(_this, true), false);
+      DOMElement.addEventListener("keyup", execute.bind(_this, false), false);
+      return _this;
     }
 
-    DOMElement.addEventListener("keydown", execute.bind(this, true), false);
-    DOMElement.addEventListener("keyup", execute.bind(this, false), false);
-  }
+    return Keyboard;
+  }(Primrose.InputProcessor);
 
-  Primrose.Input.ButtonAndAxis.inherit(KeyboardInput);
-  return KeyboardInput;
+  return Keyboard;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, requestAnimationFrame, Leap, LeapMotionInput, pliny */
 
 Primrose.Input.LeapMotion = function () {
   function processFingerParts(i) {
-    return LeapMotionInput.FINGER_PARTS.map(function (p) {
+    return LeapMotion.FINGER_PARTS.map(function (p) {
       return "FINGER" + i + p.toUpperCase();
     });
   }
@@ -9270,106 +9375,127 @@ Primrose.Input.LeapMotion = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "LeapMotionInput",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function LeapMotionInput(name, commands, socket) {
 
-    this.isStreaming = false;
+  var LeapMotion = function (_Primrose$InputProces) {
+    _inherits(LeapMotion, _Primrose$InputProces);
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, LeapMotionInput.AXES);
+    function LeapMotion(commands, socket) {
+      _classCallCheck(this, LeapMotion);
 
-    this.controller = new Leap.Controller({ enableGestures: true });
-  }
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LeapMotion).call(this, "LeapMotion", commands, socket));
 
-  LeapMotionInput.COMPONENTS = ["X", "Y", "Z"];
-
-  LeapMotionInput.NUM_HANDS = 2;
-
-  LeapMotionInput.NUM_FINGERS = 10;
-
-  LeapMotionInput.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
-
-  LeapMotionInput.AXES = ["X0", "Y0", "Z0", "X1", "Y1", "Z1", "FINGER0TIPX", "FINGER0TIPY", "FINGER0DIPX", "FINGER0DIPY", "FINGER0PIPX", "FINGER0PIPY", "FINGER0MCPX", "FINGER0MCPY", "FINGER0CARPX", "FINGER0CARPY", "FINGER1TIPX", "FINGER1TIPY", "FINGER1DIPX", "FINGER1DIPY", "FINGER1PIPX", "FINGER1PIPY", "FINGER1MCPX", "FINGER1MCPY", "FINGER1CARPX", "FINGER1CARPY", "FINGER2TIPX", "FINGER2TIPY", "FINGER2DIPX", "FINGER2DIPY", "FINGER2PIPX", "FINGER2PIPY", "FINGER2MCPX", "FINGER2MCPY", "FINGER2CARPX", "FINGER2CARPY", "FINGER3TIPX", "FINGER3TIPY", "FINGER3DIPX", "FINGER3DIPY", "FINGER3PIPX", "FINGER3PIPY", "FINGER3MCPX", "FINGER3MCPY", "FINGER3CARPX", "FINGER3CARPY", "FINGER4TIPX", "FINGER4TIPY", "FINGER4DIPX", "FINGER4DIPY", "FINGER4PIPX", "FINGER4PIPY", "FINGER4MCPX", "FINGER4MCPY", "FINGER4CARPX", "FINGER4CARPY", "FINGER5TIPX", "FINGER5TIPY", "FINGER5DIPX", "FINGER5DIPY", "FINGER5PIPX", "FINGER5PIPY", "FINGER5MCPX", "FINGER5MCPY", "FINGER5CARPX", "FINGER5CARPY", "FINGER6TIPX", "FINGER6TIPY", "FINGER6DIPX", "FINGER6DIPY", "FINGER6PIPX", "FINGER6PIPY", "FINGER6MCPX", "FINGER6MCPY", "FINGER6CARPX", "FINGER6CARPY", "FINGER7TIPX", "FINGER7TIPY", "FINGER7DIPX", "FINGER7DIPY", "FINGER7PIPX", "FINGER7PIPY", "FINGER7MCPX", "FINGER7MCPY", "FINGER7CARPX", "FINGER7CARPY", "FINGER8TIPX", "FINGER8TIPY", "FINGER8DIPX", "FINGER8DIPY", "FINGER8PIPX", "FINGER8PIPY", "FINGER8MCPX", "FINGER8MCPY", "FINGER8CARPX", "FINGER8CARPY", "FINGER9TIPX", "FINGER9TIPY", "FINGER9DIPX", "FINGER9DIPY", "FINGER9PIPX", "FINGER9PIPY", "FINGER9MCPX", "FINGER9MCPY", "FINGER9CARPX", "FINGER9CARPY"];
-
-  Primrose.Input.ButtonAndAxis.inherit(LeapMotionInput);
-
-  LeapMotionInput.CONNECTION_TIMEOUT = 5000;
-
-  LeapMotionInput.prototype.E = function (e, f) {
-    if (f) {
-      this.controller.on(e, f);
-    } else {
-      this.controller.on(e, console.log.bind(console, "Leap Motion Event: " + e));
-    }
-  };
-
-  LeapMotionInput.prototype.start = function (gameUpdateLoop) {
-    if (this.isEnabled()) {
-      var canceller = null,
-          startAlternate = null;
-      if (gameUpdateLoop) {
-        var alternateLooper = function alternateLooper(t) {
-          requestAnimationFrame(alternateLooper);
-          gameUpdateLoop(t);
-        };
-        startAlternate = requestAnimationFrame.bind(window, alternateLooper);
-        var timeout = setTimeout(startAlternate, LeapMotionInput.CONNECTION_TIMEOUT);
-        canceller = function () {
-          clearTimeout(timeout);
-          this.isStreaming = true;
-        }.bind(this);
-        this.E("deviceStreaming", canceller);
-        this.E("streamingStarted", canceller);
-        this.E("streamingStopped", startAlternate);
-      }
-      this.E("connect");
-      //this.E("protocol");
-      this.E("deviceStopped");
-      this.E("disconnect");
-      this.E("frame", this.setState.bind(this, gameUpdateLoop));
-      this.controller.connect();
-    }
-  };
-
-  LeapMotionInput.prototype.setState = function (gameUpdateLoop, frame) {
-    var prevFrame = this.controller.history.get(1),
-        i,
-        j;
-    if (!prevFrame || frame.hands.length !== prevFrame.hands.length) {
-      for (i = 0; i < this.commands.length; ++i) {
-        this.enable(this.commands[i].name, frame.hands.length > 0);
-      }
+      _this.isStreaming = false;
+      _this.controller = new Leap.Controller({ enableGestures: true });
+      return _this;
     }
 
-    for (i = 0; i < frame.hands.length; ++i) {
-      var hand = frame.hands[i].palmPosition;
-      var handName = "HAND" + i;
-      for (j = 0; j < LeapMotionInput.COMPONENTS.length; ++j) {
-        this.setAxis(handName + LeapMotionInput.COMPONENTS[j], hand[j]);
-      }
-    }
-
-    for (i = 0; i < frame.fingers.length; ++i) {
-      var finger = frame.fingers[i];
-      var fingerName = "FINGER" + i;
-      for (j = 0; j < LeapMotionInput.FINGER_PARTS.length; ++j) {
-        var joint = finger[LeapMotionInput.FINGER_PARTS[j] + "Position"];
-        var jointName = fingerName + LeapMotionInput.FINGER_PARTS[j].toUpperCase();
-        for (var k = 0; k < LeapMotionInput.COMPONENTS.length; ++k) {
-          this.setAxis(jointName + LeapMotionInput.COMPONENTS[k], joint[k]);
+    _createClass(LeapMotion, [{
+      key: "E",
+      value: function E(e, f) {
+        if (f) {
+          this.controller.on(e, f);
+        } else {
+          this.controller.on(e, console.log.bind(console, "Leap Motion Event: " + e));
         }
       }
-    }
+    }, {
+      key: "start",
+      value: function start(gameUpdateLoop) {
+        if (this.isEnabled()) {
+          var canceller = null,
+              startAlternate = null;
+          if (gameUpdateLoop) {
+            var alternateLooper = function alternateLooper(t) {
+              requestAnimationFrame(alternateLooper);
+              gameUpdateLoop(t);
+            };
+            startAlternate = requestAnimationFrame.bind(window, alternateLooper);
+            var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
+            canceller = function () {
+              clearTimeout(timeout);
+              this.isStreaming = true;
+            }.bind(this);
+            this.E("deviceStreaming", canceller);
+            this.E("streamingStarted", canceller);
+            this.E("streamingStopped", startAlternate);
+          }
+          this.E("connect");
+          //this.E("protocol");
+          this.E("deviceStopped");
+          this.E("disconnect");
+          this.E("frame", this.setState.bind(this, gameUpdateLoop));
+          this.controller.connect();
+        }
+      }
+    }, {
+      key: "setState",
+      value: function setState(gameUpdateLoop, frame) {
+        var prevFrame = this.controller.history.get(1),
+            i,
+            j;
+        if (!prevFrame || frame.hands.length !== prevFrame.hands.length) {
+          for (i = 0; i < this.commands.length; ++i) {
+            this.enable(this.commands[i].name, frame.hands.length > 0);
+          }
+        }
 
-    if (gameUpdateLoop) {
-      gameUpdateLoop(frame.timestamp * 0.001);
-    }
+        for (i = 0; i < frame.hands.length; ++i) {
+          var hand = frame.hands[i].palmPosition;
+          var handName = "HAND" + i;
+          for (j = 0; j < LeapMotion.COMPONENTS.length; ++j) {
+            this.setAxis(handName + LeapMotion.COMPONENTS[j], hand[j]);
+          }
+        }
 
-    this.update();
-  };
-  return LeapMotionInput;
+        for (i = 0; i < frame.fingers.length; ++i) {
+          var finger = frame.fingers[i];
+          var fingerName = "FINGER" + i;
+          for (j = 0; j < LeapMotion.FINGER_PARTS.length; ++j) {
+            var joint = finger[LeapMotion.FINGER_PARTS[j] + "Position"];
+            var jointName = fingerName + LeapMotion.FINGER_PARTS[j].toUpperCase();
+            for (var k = 0; k < LeapMotion.COMPONENTS.length; ++k) {
+              this.setAxis(jointName + LeapMotion.COMPONENTS[k], joint[k]);
+            }
+          }
+        }
+
+        if (gameUpdateLoop) {
+          gameUpdateLoop(frame.timestamp * 0.001);
+        }
+
+        this.update();
+      }
+    }]);
+
+    return LeapMotion;
+  }(Primrose.InputProcessor);
+
+  LeapMotion.COMPONENTS = ["X", "Y", "Z"];
+
+  LeapMotion.NUM_HANDS = 2;
+
+  LeapMotion.NUM_FINGERS = 10;
+
+  LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
+
+  Primrose.InputProcessor.defineAxisProperties(LeapMotion, ["X0", "Y0", "Z0", "X1", "Y1", "Z1", "FINGER0TIPX", "FINGER0TIPY", "FINGER0DIPX", "FINGER0DIPY", "FINGER0PIPX", "FINGER0PIPY", "FINGER0MCPX", "FINGER0MCPY", "FINGER0CARPX", "FINGER0CARPY", "FINGER1TIPX", "FINGER1TIPY", "FINGER1DIPX", "FINGER1DIPY", "FINGER1PIPX", "FINGER1PIPY", "FINGER1MCPX", "FINGER1MCPY", "FINGER1CARPX", "FINGER1CARPY", "FINGER2TIPX", "FINGER2TIPY", "FINGER2DIPX", "FINGER2DIPY", "FINGER2PIPX", "FINGER2PIPY", "FINGER2MCPX", "FINGER2MCPY", "FINGER2CARPX", "FINGER2CARPY", "FINGER3TIPX", "FINGER3TIPY", "FINGER3DIPX", "FINGER3DIPY", "FINGER3PIPX", "FINGER3PIPY", "FINGER3MCPX", "FINGER3MCPY", "FINGER3CARPX", "FINGER3CARPY", "FINGER4TIPX", "FINGER4TIPY", "FINGER4DIPX", "FINGER4DIPY", "FINGER4PIPX", "FINGER4PIPY", "FINGER4MCPX", "FINGER4MCPY", "FINGER4CARPX", "FINGER4CARPY", "FINGER5TIPX", "FINGER5TIPY", "FINGER5DIPX", "FINGER5DIPY", "FINGER5PIPX", "FINGER5PIPY", "FINGER5MCPX", "FINGER5MCPY", "FINGER5CARPX", "FINGER5CARPY", "FINGER6TIPX", "FINGER6TIPY", "FINGER6DIPX", "FINGER6DIPY", "FINGER6PIPX", "FINGER6PIPY", "FINGER6MCPX", "FINGER6MCPY", "FINGER6CARPX", "FINGER6CARPY", "FINGER7TIPX", "FINGER7TIPY", "FINGER7DIPX", "FINGER7DIPY", "FINGER7PIPX", "FINGER7PIPY", "FINGER7MCPX", "FINGER7MCPY", "FINGER7CARPX", "FINGER7CARPY", "FINGER8TIPX", "FINGER8TIPY", "FINGER8DIPX", "FINGER8DIPY", "FINGER8PIPX", "FINGER8PIPY", "FINGER8MCPX", "FINGER8MCPY", "FINGER8CARPX", "FINGER8CARPY", "FINGER9TIPX", "FINGER9TIPY", "FINGER9DIPX", "FINGER9DIPY", "FINGER9PIPX", "FINGER9PIPY", "FINGER9MCPX", "FINGER9MCPY", "FINGER9CARPX", "FINGER9CARPY"]);
+
+  LeapMotion.CONNECTION_TIMEOUT = 5000;
+
+  return LeapMotion;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, pliny */
 
@@ -9378,42 +9504,64 @@ Primrose.Input.Location = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Location",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function LocationInput(name, commands, socket, options) {
 
-    this.options = patch(options, LocationInput);
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, LocationInput.AXES);
+  var Location = function (_Primrose$InputProces) {
+    _inherits(Location, _Primrose$InputProces);
 
-    this.available = !!navigator.geolocation;
-    if (this.available) {
-      navigator.geolocation.watchPosition(this.setState.bind(this), function () {
-        this.available = false;
-      }.bind(this), this.options);
+    function Location(commands, socket, options) {
+      _classCallCheck(this, Location);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Location).call(this, "Location", commands, socket));
+
+      _this.options = patch(options, Location.DEFAULTS);
+
+      _this.available = !!navigator.geolocation;
+      if (_this.available) {
+        navigator.geolocation.watchPosition(_this.setState.bind(_this), function () {
+          this.available = false;
+        }.bind(_this), _this.options);
+      }
+      return _this;
     }
-  }
 
-  LocationInput.AXES = ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"];
-  Primrose.Input.ButtonAndAxis.inherit(LocationInput);
+    _createClass(Location, [{
+      key: "setState",
+      value: function setState(location) {
+        for (var p in location.coords) {
+          var k = p.toUpperCase();
+          if (Location.AXES.indexOf(k) > -1) {
+            this.setAxis(k, location.coords[p]);
+          }
+        }
+        this.update();
+      }
+    }]);
 
-  LocationInput.DEFAULTS = {
+    return Location;
+  }(Primrose.InputProcessor);
+
+  Primrose.InputProcessor.defineAxisProperties(Location, ["LONGITUDE", "LATITUDE", "ALTITUDE", "HEADING", "SPEED"]);
+
+  Location.DEFAULTS = {
     enableHighAccuracy: true,
     maximumAge: 30000,
     timeout: 25000
   };
 
-  LocationInput.prototype.setState = function (location) {
-    for (var p in location.coords) {
-      var k = p.toUpperCase();
-      if (LocationInput.AXES.indexOf(k) > -1) {
-        this.setAxis(k, location.coords[p]);
-      }
-    }
-    this.update();
-  };
-  return LocationInput;
+  return Location;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio, pliny */
 
@@ -9422,35 +9570,53 @@ Primrose.Input.Motion = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Motion",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function MotionInput(name, commands, socket) {
-    var _this = this;
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, MotionInput.AXES);
-    var corrector = new MotionCorrector(),
-        a = new THREE.Quaternion(),
-        b = new THREE.Quaternion(),
-        RIGHT = new THREE.Vector3(1, 0, 0),
-        UP = new THREE.Vector3(0, 1, 0),
-        FORWARD = new THREE.Vector3(0, 0, -1);
-    corrector.addEventListener("deviceorientation", function (evt) {
-      for (var i = 0; i < MotionInput.AXES.length; ++i) {
-        var k = MotionInput.AXES[i];
-        _this.setAxis(k, evt[k]);
+  var Motion = function (_Primrose$InputProces) {
+    _inherits(Motion, _Primrose$InputProces);
+
+    function Motion(commands, socket) {
+      _classCallCheck(this, Motion);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Motion).call(this, "Motion", commands, socket));
+
+      var corrector = new MotionCorrector(),
+          a = new THREE.Quaternion(),
+          b = new THREE.Quaternion(),
+          RIGHT = new THREE.Vector3(1, 0, 0),
+          UP = new THREE.Vector3(0, 1, 0),
+          FORWARD = new THREE.Vector3(0, 0, -1);
+      corrector.addEventListener("deviceorientation", function (evt) {
+        for (var i = 0; i < Motion.AXES.length; ++i) {
+          var k = Motion.AXES[i];
+          _this.setAxis(k, evt[k]);
+        }
+        a.set(0, 0, 0, 1).multiply(b.setFromAxisAngle(UP, evt.HEADING)).multiply(b.setFromAxisAngle(RIGHT, evt.PITCH)).multiply(b.setFromAxisAngle(FORWARD, evt.ROLL));
+        _this.headRX = a.x;
+        _this.headRY = a.y;
+        _this.headRZ = a.z;
+        _this.headRW = a.w;
+        _this.update();
+      });
+      _this.zeroAxes = corrector.zeroAxes.bind(corrector);
+      return _this;
+    }
+
+    _createClass(Motion, [{
+      key: "getOrientation",
+      value: function getOrientation(value) {
+        value = value || new THREE.Quaternion();
+        value.set(this.getValue("headRX"), this.getValue("headRY"), this.getValue("headRZ"), this.getValue("headRW"));
+        return value;
       }
-      a.set(0, 0, 0, 1).multiply(b.setFromAxisAngle(UP, evt.HEADING)).multiply(b.setFromAxisAngle(RIGHT, evt.PITCH)).multiply(b.setFromAxisAngle(FORWARD, evt.ROLL));
-      _this.headRX = a.x;
-      _this.headRY = a.y;
-      _this.headRZ = a.z;
-      _this.headRW = a.w;
-      _this.update();
-    });
-    this.zeroAxes = corrector.zeroAxes.bind(corrector);
-  }
+    }]);
 
-  MotionInput.AXES = ["HEADING", "PITCH", "ROLL", "D_HEADING", "D_PITCH", "D_ROLL", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW"];
-  Primrose.Input.ButtonAndAxis.inherit(MotionInput);
+    return Motion;
+  }(Primrose.InputProcessor);
+
+  Primrose.InputProcessor.defineAxisProperties(Motion, ["HEADING", "PITCH", "ROLL", "D_HEADING", "D_PITCH", "D_ROLL", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW"]);
 
   function makeTransform(s, eye) {
     var sw = Math.max(screen.width, screen.height),
@@ -9470,22 +9636,26 @@ Primrose.Input.Motion = function () {
       top: 0,
       right: (i + 1) * w,
       bottom: h,
-      left: i * w };
+      left: i * w
+    };
     s.fov = 75;
   }
 
-  MotionInput.DEFAULT_TRANSFORMS = [{}, {}];
-  makeTransform(MotionInput.DEFAULT_TRANSFORMS[0], -1);
-  makeTransform(MotionInput.DEFAULT_TRANSFORMS[1], 1);
+  Motion.DEFAULT_TRANSFORMS = [{}, {}];
+  makeTransform(Motion.DEFAULT_TRANSFORMS[0], -1);
+  makeTransform(Motion.DEFAULT_TRANSFORMS[1], 1);
 
-  MotionInput.prototype.getQuaternion = function (x, y, z, w, value) {
-    value = value || new THREE.Quaternion();
-    value.set(this.getValue(x), this.getValue(y), this.getValue(z), this.getValue(w));
-    return value;
-  };
-  return MotionInput;
+  return Motion;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, THREE, isChrome, pliny */
 
@@ -9494,63 +9664,80 @@ Primrose.Input.Mouse = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Mouse",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function MouseInput(name, DOMElement, commands, socket) {
-    DOMElement = DOMElement || window;
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, MouseInput.AXES);
-    this.setLocation = function (x, y) {
-      this.X = x;
-      this.Y = y;
-    };
 
-    this.setMovement = function (dx, dy) {
-      this.X += dx;
-      this.Y += dy;
-    };
+  var Mouse = function (_Primrose$InputProces) {
+    _inherits(Mouse, _Primrose$InputProces);
 
-    DOMElement.addEventListener("mousedown", function (event) {
-      this.setButton(event.button, true);
-      this.BUTTONS = event.buttons << 10;
-      this.update();
-    }.bind(this), false);
+    function Mouse(DOMElement, commands, socket) {
+      _classCallCheck(this, Mouse);
 
-    DOMElement.addEventListener("mouseup", function (event) {
-      this.setButton(event.button, false);
-      this.BUTTONS = event.buttons << 10;
-      this.update();
-    }.bind(this), false);
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Mouse).call(this, "Mouse", commands, socket));
 
-    DOMElement.addEventListener("mousemove", function (event) {
-      this.BUTTONS = event.buttons << 10;
-      if (MouseInput.Lock.isActive) {
-        var mx = event.movementX,
-            my = event.movementY;
+      DOMElement = DOMElement || window;
 
-        if (mx === undefined) {
-          mx = event.webkitMovementX || event.mozMovementX || 0;
-          my = event.webkitMovementY || event.mozMovementY || 0;
+      DOMElement.addEventListener("mousedown", function (event) {
+        _this.setButton(event.button, true);
+        _this.BUTTONS = event.buttons << 10;
+        _this.update();
+      }, false);
+
+      DOMElement.addEventListener("mouseup", function (event) {
+        _this.setButton(event.button, false);
+        _this.BUTTONS = event.buttons << 10;
+        _this.update();
+      }, false);
+
+      DOMElement.addEventListener("mousemove", function (event) {
+        _this.BUTTONS = event.buttons << 10;
+        if (Mouse.Lock.isActive) {
+          var mx = event.movementX,
+              my = event.movementY;
+
+          if (mx === undefined) {
+            mx = event.webkitMovementX || event.mozMovementX || 0;
+            my = event.webkitMovementY || event.mozMovementY || 0;
+          }
+          _this.setMovement(mx, my);
+        } else {
+          _this.setLocation(event.layerX, event.layerY);
         }
-        this.setMovement(mx, my);
-      } else {
-        this.setLocation(event.layerX, event.layerY);
-      }
-      this.update();
-    }.bind(this), false);
+        _this.update();
+      }, false);
 
-    DOMElement.addEventListener("wheel", function (event) {
-      if (isChrome) {
-        this.W += event.deltaX;
-        this.Z += event.deltaY;
-      } else if (event.shiftKey) {
-        this.W += event.deltaY;
-      } else {
-        this.Z += event.deltaY;
+      DOMElement.addEventListener("wheel", function (event) {
+        if (isChrome) {
+          _this.W += event.deltaX;
+          _this.Z += event.deltaY;
+        } else if (event.shiftKey) {
+          _this.W += event.deltaY;
+        } else {
+          _this.Z += event.deltaY;
+        }
+        event.preventDefault();
+        _this.update();
+      }, false);
+      return _this;
+    }
+
+    _createClass(Mouse, [{
+      key: "setLocation",
+      value: function setLocation(x, y) {
+        this.X = x;
+        this.Y = y;
       }
-      event.preventDefault();
-      this.update();
-    }.bind(this), false);
-  }
+    }, {
+      key: "setMovement",
+      value: function setMovement(dx, dy) {
+        this.X += dx;
+        this.Y += dy;
+      }
+    }]);
+
+    return Mouse;
+  }(Primrose.InputProcessor);
 
   var elementName = findProperty(document, ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"]),
       changeEventName = findProperty(document, ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"]),
@@ -9561,7 +9748,7 @@ Primrose.Input.Mouse = function () {
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
 
-  MouseInput.Lock = {
+  Mouse.Lock = {
     addChangeListener: function addChangeListener(thunk, bubbles) {
       return document.addEventListener(changeEventName, thunk, bubbles);
     },
@@ -9583,13 +9770,13 @@ Primrose.Input.Mouse = function () {
           if (timeout) {
             clearTimeout(timeout);
           }
-          MouseInput.Lock.removeChangeListener(onPointerLock);
-          MouseInput.Lock.removeErrorListener(onPointerLockError);
+          Mouse.Lock.removeChangeListener(onPointerLock);
+          Mouse.Lock.removeErrorListener(onPointerLockError);
         };
 
         onPointerLock = function onPointerLock() {
           setTimeout(tearDown);
-          resolve(MouseInput.Lock.element);
+          resolve(Mouse.Lock.element);
         };
 
         onPointerLockError = function onPointerLockError(evt) {
@@ -9597,8 +9784,8 @@ Primrose.Input.Mouse = function () {
           reject(evt);
         };
 
-        MouseInput.Lock.addChangeListener(onPointerLock, false);
-        MouseInput.Lock.addErrorListener(onPointerLockError, false);
+        Mouse.Lock.addChangeListener(onPointerLock, false);
+        Mouse.Lock.addErrorListener(onPointerLockError, false);
 
         if (act()) {
           tearDown();
@@ -9614,11 +9801,11 @@ Primrose.Input.Mouse = function () {
       });
     },
     request: function request(elem) {
-      return MouseInput.Lock.withChange(function () {
+      return Mouse.Lock.withChange(function () {
         if (!requestMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (MouseInput.Lock.isActive) {
+        } else if (Mouse.Lock.isActive) {
           return true;
         } else {
           elem[requestMethodName]();
@@ -9626,11 +9813,11 @@ Primrose.Input.Mouse = function () {
       });
     },
     exit: function exit() {
-      return MouseInput.Lock.withChange(function () {
+      return Mouse.Lock.withChange(function () {
         if (!exitMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (!MouseInput.Lock.isActive) {
+        } else if (!Mouse.Lock.isActive) {
           return true;
         } else {
           document[exitMethodName]();
@@ -9639,7 +9826,7 @@ Primrose.Input.Mouse = function () {
     }
   };
 
-  Object.defineProperties(MouseInput.Lock, {
+  Object.defineProperties(Mouse.Lock, {
     element: {
       get: function get() {
         return document[elementName];
@@ -9647,17 +9834,26 @@ Primrose.Input.Mouse = function () {
     },
     isActive: {
       get: function get() {
-        return !!MouseInput.Lock.element;
+        return !!Mouse.Lock.element;
       }
     }
   });
 
-  MouseInput.AXES = ["X", "Y", "Z", "W", "BUTTONS"];
-  Primrose.Input.ButtonAndAxis.inherit(MouseInput);
+  Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);
 
-  return MouseInput;
+  return Mouse;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, pliny */
 
@@ -9714,162 +9910,186 @@ Primrose.Input.Speech = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Speech",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function SpeechInput(name, commands, socket) {
-    Primrose.NetworkedInput.call(this, name, commands, socket);
-    var running = false,
-        recognition = null,
-        errorMessage = null;
 
-    function warn() {
-      var msg = fmt("Failed to initialize speech engine. Reason: $1", errorMessage.message);
-      console.error(msg);
-      return false;
-    }
+  var Speech = function (_Primrose$InputProces) {
+    _inherits(Speech, _Primrose$InputProces);
 
-    function start() {
-      if (!available) {
-        return warn();
-      } else if (!running) {
-        running = true;
-        recognition.start();
-        return true;
+    function Speech(commands, socket) {
+      _classCallCheck(this, Speech);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Speech).call(this, "Speech", commands, socket));
+
+      var running = false,
+          recognition = null,
+          errorMessage = null;
+
+      function warn() {
+        var msg = fmt("Failed to initialize speech engine. Reason: $1", errorMessage.message);
+        console.error(msg);
+        return false;
       }
-      return false;
-    }
 
-    function stop() {
-      if (!available) {
-        return warn();
-      }
-      if (running) {
-        recognition.stop();
-        return true;
-      }
-      return false;
-    }
-
-    this.check = function () {
-      if (this.enabled && !running) {
-        start();
-      } else if (!this.enabled && running) {
-        stop();
-      }
-    };
-
-    this.getErrorMessage = function () {
-      return errorMessage;
-    };
-
-    try {
-      if (window.SpeechRecognition) {
-        // just in case this ever gets standardized
-        recognition = new SpeechRecognition();
-      } else {
-        // purposefully don't check the existance so it errors out and setup fails.
-        recognition = new webkitSpeechRecognition();
-      }
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "en-US";
-      var restart = false;
-      recognition.addEventListener("start", function () {
-        console.log("speech started");
-        command = "";
-      }.bind(this), true);
-
-      recognition.addEventListener("error", function (event) {
-        restart = true;
-        console.log("speech error", event);
-        running = false;
-        command = "speech error";
-      }.bind(this), true);
-
-      recognition.addEventListener("end", function () {
-        console.log("speech ended", arguments);
-        running = false;
-        command = "speech ended";
-        if (restart) {
-          restart = false;
-          this.enable(true);
+      function start() {
+        if (!available) {
+          return warn();
+        } else if (!running) {
+          running = true;
+          recognition.start();
+          return true;
         }
-      }.bind(this), true);
+        return false;
+      }
 
-      recognition.addEventListener("result", function (event) {
-        var newCommand = [];
-        var result = event.results[event.resultIndex];
-        var max = 0;
-        var maxI = -1;
-        if (result && result.isFinal) {
-          for (var i = 0; i < result.length; ++i) {
-            var alt = result[i];
-            if (alt.confidence > max) {
-              max = alt.confidence;
-              maxI = i;
+      function stop() {
+        if (!available) {
+          return warn();
+        }
+        if (running) {
+          recognition.stop();
+          return true;
+        }
+        return false;
+      }
+
+      _this.check = function () {
+        if (this.enabled && !running) {
+          start();
+        } else if (!this.enabled && running) {
+          stop();
+        }
+      };
+
+      _this.getErrorMessage = function () {
+        return errorMessage;
+      };
+
+      try {
+        if (window.SpeechRecognition) {
+          // just in case this ever gets standardized
+          recognition = new SpeechRecognition();
+        } else {
+          // purposefully don't check the existance so it errors out and setup fails.
+          recognition = new webkitSpeechRecognition();
+        }
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+        var restart = false;
+        recognition.addEventListener("start", function () {
+          console.log("speech started");
+          command = "";
+        }.bind(_this), true);
+
+        recognition.addEventListener("error", function (event) {
+          restart = true;
+          console.log("speech error", event);
+          running = false;
+          command = "speech error";
+        }.bind(_this), true);
+
+        recognition.addEventListener("end", function () {
+          console.log("speech ended", arguments);
+          running = false;
+          command = "speech ended";
+          if (restart) {
+            restart = false;
+            this.enable(true);
+          }
+        }.bind(_this), true);
+
+        recognition.addEventListener("result", function (event) {
+          var newCommand = [];
+          var result = event.results[event.resultIndex];
+          var max = 0;
+          var maxI = -1;
+          if (result && result.isFinal) {
+            for (var i = 0; i < result.length; ++i) {
+              var alt = result[i];
+              if (alt.confidence > max) {
+                max = alt.confidence;
+                maxI = i;
+              }
+            }
+          }
+
+          if (max > 0.85) {
+            newCommand.push(result[maxI].transcript.trim());
+          }
+
+          newCommand = newCommand.join(" ");
+
+          if (newCommand !== this.inputState) {
+            this.inputState.text = newCommand;
+          }
+          this.update();
+        }.bind(_this), true);
+
+        available = true;
+      } catch (err) {
+        errorMessage = err;
+        available = false;
+      }
+      return _this;
+    }
+
+    _createClass(Speech, [{
+      key: "cloneCommand",
+      value: function cloneCommand(cmd) {
+        return {
+          name: cmd.name,
+          preamble: cmd.preamble,
+          keywords: Speech.maybeClone(cmd.keywords),
+          commandUp: cmd.commandUp,
+          disabled: cmd.disabled
+        };
+      }
+    }, {
+      key: "evalCommand",
+      value: function evalCommand(cmd, cmdState, metaKeysSet, dt) {
+        if (metaKeysSet && this.inputState.text) {
+          for (var i = 0; i < cmd.keywords.length; ++i) {
+            if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
+              cmdState.pressed = true;
+              cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
+              this.inputState.text = null;
             }
           }
         }
-
-        if (max > 0.85) {
-          newCommand.push(result[maxI].transcript.trim());
-        }
-
-        newCommand = newCommand.join(" ");
-
-        if (newCommand !== this.inputState) {
-          this.inputState.text = newCommand;
-        }
-        this.update();
-      }.bind(this), true);
-
-      available = true;
-    } catch (err) {
-      errorMessage = err;
-      available = false;
-    }
-  }
-
-  inherit(SpeechInput, Primrose.NetworkedInput);
-
-  SpeechInput.maybeClone = function (arr) {
-    return arr && arr.slice() || [];
-  };
-
-  SpeechInput.prototype.cloneCommand = function (cmd) {
-    return {
-      name: cmd.name,
-      preamble: cmd.preamble,
-      keywords: SpeechInput.maybeClone(cmd.keywords),
-      commandUp: cmd.commandUp,
-      disabled: cmd.disabled
-    };
-  };
-
-  SpeechInput.prototype.evalCommand = function (cmd, cmdState, metaKeysSet, dt) {
-    if (metaKeysSet && this.inputState.text) {
-      for (var i = 0; i < cmd.keywords.length; ++i) {
-        if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
-          cmdState.pressed = true;
-          cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
-          this.inputState.text = null;
-        }
       }
-    }
-  };
+    }, {
+      key: "enable",
+      value: function enable(k, v) {
+        _get(Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
+        this.check();
+      }
+    }, {
+      key: "transmit",
+      value: function transmit(v) {
+        _get(Object.getPrototypeOf(Speech.prototype), "transmit", this).call(this, v);
+        this.check();
+      }
+    }], [{
+      key: "maybeClone",
+      value: function maybeClone(arr) {
+        return arr && arr.slice() || [];
+      }
+    }]);
 
-  SpeechInput.prototype.enable = function (k, v) {
-    Primrose.NetworkedInput.prototype.enable.call(this, k, v);
-    this.check();
-  };
+    return Speech;
+  }(Primrose.InputProcessor);
 
-  SpeechInput.prototype.transmit = function (v) {
-    Primrose.NetworkedInput.prototype.transmit.call(this, v);
-    this.check();
-  };
-  return SpeechInput;
+  return Speech;
 }();
 "use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global Primrose, pliny */
 
@@ -9878,261 +10098,89 @@ Primrose.Input.Touch = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Touch",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function TouchInput(name, DOMElement, commands, socket) {
-    DOMElement = DOMElement || window;
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, TouchInput.AXES);
+  var Touch = function (_Primrose$InputProces) {
+    _inherits(Touch, _Primrose$InputProces);
 
-    function setState(stateChange, setAxis, event) {
-      var touches = event.changedTouches;
-      for (var i = 0; i < touches.length; ++i) {
-        var t = touches[i];
+    function Touch(DOMElement, commands, socket) {
+      _classCallCheck(this, Touch);
 
-        if (setAxis) {
-          this.setAxis("X" + t.identifier, t.pageX);
-          this.setAxis("Y" + t.identifier, t.pageY);
-        } else {
-          this.setAxis("LX" + t.identifier, t.pageX);
-          this.setAxis("LY" + t.identifier, t.pageY);
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Touch).call(this, "Touch", commands, socket));
+
+      DOMElement = DOMElement || window;
+
+      function setState(stateChange, setAxis, event) {
+        var touches = event.changedTouches;
+        for (var i = 0; i < touches.length; ++i) {
+          var t = touches[i];
+
+          if (setAxis) {
+            this.setAxis("X" + t.identifier, t.pageX);
+            this.setAxis("Y" + t.identifier, t.pageY);
+          } else {
+            this.setAxis("LX" + t.identifier, t.pageX);
+            this.setAxis("LY" + t.identifier, t.pageY);
+          }
+
+          var mask = 1 << t.identifier;
+          if (stateChange) {
+            this.FINGERS |= mask;
+          } else {
+            mask = ~mask;
+            this.FINGERS &= mask;
+          }
         }
-
-        var mask = 1 << t.identifier;
-        if (stateChange) {
-          this.FINGERS |= mask;
-        } else {
-          mask = ~mask;
-          this.FINGERS &= mask;
-        }
+        this.update();
       }
-      this.update();
+
+      DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
+      DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);
+      DOMElement.addEventListener("touchmove", setState.bind(_this, true, true), false);
+      return _this;
     }
 
-    DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
-    DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);
-    DOMElement.addEventListener("touchmove", setState.bind(this, true, true), false);
+    return Touch;
+  }(Primrose.InputProcessor);
+
+  Touch.NUM_FINGERS = 10;
+
+  var axes = ["FINGERS"];
+  for (var i = 0; i < Touch.NUM_FINGERS; ++i) {
+    axes.push("X" + i);
+    axes.push("Y" + i);
   }
 
-  TouchInput.NUM_FINGERS = 10;
-  TouchInput.AXES = ["FINGERS"];
-  for (var i = 0; i < TouchInput.NUM_FINGERS; ++i) {
-    TouchInput.AXES.push("X" + i);
-    TouchInput.AXES.push("Y" + i);
-  }
-  Primrose.Input.ButtonAndAxis.inherit(TouchInput);
-  return TouchInput;
+  Primrose.InputProcessor.defineAxisProperties(Touch, axes);
+  return Touch;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny, Promise */
 
 Primrose.Input.VR = function () {
-  pliny.class({
-    parent: "Primrose.Input",
-    name: "VR",
-    description: "| [under construction]"
-  });
-  function VRInput(name, commands, socket, elem, selectedIndex) {
-    if (commands === undefined || commands === null) {
-      commands = VRInput.AXES.map(function (a) {
-        return {
-          name: a,
-          axes: [Primrose.Input.VR[a]]
-        };
-      });
-    }
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, VRInput.AXES);
-
-    var listeners = {
-      vrdeviceconnected: [],
-      vrdevicelost: []
-    };
-
-    this.addEventListener = function (event, handler, bubbles) {
-      if (listeners[event]) {
-        listeners[event].push(handler);
-      }
-      if (event === "vrdeviceconnected") {
-        Object.keys(this.displays).forEach(handler);
-      }
-    };
-
-    this.displays = [];
-    this.currentDisplay = null;
-    this.currentPose = null;
-    this.transforms = null;
-
-    function onConnected(id) {
-      for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
-        listeners.vrdeviceconnected[i](id);
-      }
-    }
-
-    function enumerateVRDisplays(elem, displays) {
-      console.log("Displays found:", displays.length);
-      this.displays = displays;
-      this.displays.forEach(onConnected);
-
-      if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
-        selectedIndex = 0;
-      }
-      if (typeof selectedIndex === "number") {
-        this.connect(selectedIndex);
-        return this.currentDisplay;
-      }
-    }
-
-    function enumerateLegacyVRDevices(elem, devices) {
-      console.log("Devices found:", devices.length);
-      var displays = {},
-          id = null;
-
-      for (var i = 0; i < devices.length; ++i) {
-        var device = devices[i];
-        id = device.hardwareUnitId;
-        if (!displays[id]) {
-          displays[id] = {};
-        }
-
-        var display = displays[id];
-        if (device instanceof HMDVRDevice) {
-          display.display = device;
-        } else if (devices[i] instanceof PositionSensorVRDevice) {
-          display.sensor = device;
-        }
-      }
-
-      var mockedLegacyDisplays = [];
-      for (id in displays) {
-        mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id]));
-      }
-
-      return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
-    }
-
-    function createCardboardVRDisplay(elem) {
-      var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
-      return enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
-    }
-
-    this.init = function () {
-      var _this = this;
-
-      console.info("Checking for VR Displays...");
-      if (navigator.getVRDisplays) {
-        console.info("Using WebVR API 1");
-        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this, elem));
-      } else if (navigator.getVRDevices) {
-        console.info("Using Chromium Experimental WebVR API");
-        return navigator.getVRDevices().then(enumerateLegacyVRDevices.bind(this, elem)).catch(console.error.bind(console, "Could not find VR devices"));
-      } else {
-        return new Promise(function (resolve, reject) {
-          var timer = setTimeout(reject, 1000);
-          var waitForValidMotion = function waitForValidMotion(evt) {
-            if (evt.alpha) {
-              clearTimeout(timer);
-              timer = null;
-              window.removeEventListener("deviceorientation", waitForValidMotion);
-              console.info("Using Device Motion API");
-              resolve(createCardboardVRDisplay.call(_this, elem));
-            }
-          };
-          console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
-          window.addEventListener("deviceorientation", waitForValidMotion, false);
-        });
-      }
+  function makeTransform(s, eye, near, far) {
+    var t = eye.offset;
+    s.translation = new THREE.Matrix4().makeTranslation(t[0], t[1], t[2]);
+    s.projection = fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far);
+    s.viewport = {
+      left: 0,
+      top: 0,
+      width: eye.renderWidth,
+      height: eye.renderHeight
     };
   }
-
-  pliny.value({
-    parent: "Primrose.Input.VR",
-    name: "Version",
-    type: "Number",
-    description: "returns the version of WebVR that is supported (if any). Values:\n\
-  - 0: no WebVR support\n\
-  - 0.1: Device Orientation-based WebVR\n\
-  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
-  - 0.5: Legacy WebVR API\n\
-  - 1.0: Provisional WebVR API 1.0"
-  });
-  Object.defineProperty(VRInput, "Version", {
-    get: function get() {
-      if (navigator.getVRDisplays) {
-        return 1.0;
-      } else if (navigator.getVRDevices) {
-        return 0.5;
-      } else if (navigator.mozGetVRDevices) {
-        return 0.4;
-      } else if (isMobile) {
-        return 0.1;
-      } else {
-        return 0;
-      }
-    }
-  });
-
-  VRInput.AXES = ["headX", "headY", "headZ", "headVX", "headVY", "headVZ", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW", "headRVX", "headRVY", "headRVZ", "headRAX", "headRAY", "headRAZ"];
-  Primrose.Input.ButtonAndAxis.inherit(VRInput);
-
-  VRInput.prototype.requestPresent = function (opts) {
-    if (!this.currentDisplay) {
-      return Promise.reject("No display");
-    } else {
-      return this.currentDisplay.requestPresent(VRInput.Version === 1 && isMobile ? opts[0] : opts).then(function (elem) {
-        return elem || opts[0].source;
-      });
-    }
-  };
-
-  VRInput.prototype.poll = function () {
-    if (this.currentDisplay) {
-      var pose = this.currentDisplay.getPose();
-      if (pose) {
-        this.currentPose = pose;
-
-        if (pose.position) {
-          this.headX = pose.position[0];
-          this.headY = pose.position[1];
-          this.headZ = pose.position[2];
-        }
-        if (pose.linearVelocity) {
-          this.headVX = pose.linearVelocity[0];
-          this.headVY = pose.linearVelocity[1];
-          this.headVZ = pose.linearVelocity[2];
-        }
-        if (pose.linearAcceleration) {
-          this.headAX = pose.linearAcceleration[0];
-          this.headAY = pose.linearAcceleration[1];
-          this.headAZ = pose.linearAcceleration[2];
-        }
-
-        if (pose.orientation) {
-          this.headRX = pose.orientation[0];
-          this.headRY = pose.orientation[1];
-          this.headRZ = pose.orientation[2];
-          this.headRW = pose.orientation[3];
-        }
-        if (pose.angularVelocity) {
-          this.headRVX = pose.angularVelocity[0];
-          this.headRVY = pose.angularVelocity[1];
-          this.headRVZ = pose.angularVelocity[2];
-        }
-        if (pose.angularAcceleration) {
-          this.headRAX = pose.angularAcceleration[0];
-          this.headRAY = pose.angularAcceleration[1];
-          this.headRAZ = pose.angularAcceleration[2];
-        }
-      }
-    }
-  };
-
-  VRInput.prototype.getQuaternion = function (x, y, z, w, value) {
-    value = value || new THREE.Quaternion();
-    value.set(this.getValue(x), this.getValue(y), this.getValue(z), this.getValue(w));
-    return value;
-  };
 
   function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
     var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
@@ -10163,38 +10211,248 @@ Primrose.Input.VR = function () {
     return matrix;
   }
 
-  function makeTransform(s, eye, near, far) {
-    var t = eye.offset;
-    s.translation = new THREE.Matrix4().makeTranslation(t[0], t[1], t[2]);
-    s.projection = fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far);
-    s.viewport = {
-      left: 0,
-      top: 0,
-      width: eye.renderWidth,
-      height: eye.renderHeight
-    };
-  }
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "VR",
+    description: "| [under construction]"
+  });
+  pliny.value({
+    parent: "Primrose.Input.VR",
+    name: "Version",
+    type: "Number",
+    baseClass: "Primrose.InputProcessor",
+    description: "returns the version of WebVR that is supported (if any). Values:\n\
+  - 0: no WebVR support\n\
+  - 0.1: Device Orientation-based WebVR\n\
+  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
+  - 0.5: Legacy WebVR API\n\
+  - 1.0: Provisional WebVR API 1.0"
+  });
 
-  VRInput.prototype.resetTransforms = function (near, far) {
-    if (this.currentDisplay) {
-      this.enabled = true;
-      var params = {
-        left: this.currentDisplay.getEyeParameters("left"),
-        right: this.currentDisplay.getEyeParameters("right")
+  var VR = function (_Primrose$InputProces) {
+    _inherits(VR, _Primrose$InputProces);
+
+    function VR(commands, socket, elem, selectedIndex) {
+      _classCallCheck(this, VR);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VR).call(this, "VR", commands, socket));
+
+      if (commands === undefined || commands === null) {
+        commands = VR.AXES.map(function (a) {
+          return {
+            name: a,
+            axes: [Primrose.Input.VR[a]]
+          };
+        });
+      }
+
+      var listeners = {
+        vrdeviceconnected: [],
+        vrdevicelost: []
       };
-      var transforms = [{}, {}];
-      makeTransform(transforms[0], params.left, near, far);
-      makeTransform(transforms[1], params.right, near, far);
-      transforms[1].viewport.left = transforms[0].viewport.width;
-      this.transforms = transforms;
+
+      _this.addEventListener = function (event, handler, bubbles) {
+        if (listeners[event]) {
+          listeners[event].push(handler);
+        }
+        if (event === "vrdeviceconnected") {
+          Object.keys(this.displays).forEach(handler);
+        }
+      };
+
+      _this.displays = [];
+      _this.currentDisplay = null;
+      _this.currentPose = null;
+      _this.transforms = null;
+
+      function onConnected(id) {
+        for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
+          listeners.vrdeviceconnected[i](id);
+        }
+      }
+
+      function enumerateVRDisplays(elem, displays) {
+        console.log("Displays found:", displays.length);
+        this.displays = displays;
+        this.displays.forEach(onConnected);
+
+        if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
+          selectedIndex = 0;
+        }
+        if (typeof selectedIndex === "number") {
+          this.connect(selectedIndex);
+          return this.currentDisplay;
+        }
+      }
+
+      function enumerateLegacyVRDevices(elem, devices) {
+        console.log("Devices found:", devices.length);
+        var displays = {},
+            id = null;
+
+        for (var i = 0; i < devices.length; ++i) {
+          var device = devices[i];
+          id = device.hardwareUnitId;
+          if (!displays[id]) {
+            displays[id] = {};
+          }
+
+          var display = displays[id];
+          if (device instanceof HMDVRDevice) {
+            display.display = device;
+          } else if (devices[i] instanceof PositionSensorVRDevice) {
+            display.sensor = device;
+          }
+        }
+
+        var mockedLegacyDisplays = [];
+        for (id in displays) {
+          mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id]));
+        }
+
+        return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
+      }
+
+      function createCardboardVRDisplay(elem) {
+        var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
+        return enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
+      }
+
+      _this.init = function () {
+        var _this2 = this;
+
+        console.info("Checking for VR Displays...");
+        if (navigator.getVRDisplays) {
+          console.info("Using WebVR API 1");
+          return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this, elem));
+        } else if (navigator.getVRDevices) {
+          console.info("Using Chromium Experimental WebVR API");
+          return navigator.getVRDevices().then(enumerateLegacyVRDevices.bind(this, elem)).catch(console.error.bind(console, "Could not find VR devices"));
+        } else {
+          return new Promise(function (resolve, reject) {
+            var timer = setTimeout(reject, 1000);
+            var waitForValidMotion = function waitForValidMotion(evt) {
+              if (evt.alpha) {
+                clearTimeout(timer);
+                timer = null;
+                window.removeEventListener("deviceorientation", waitForValidMotion);
+                console.info("Using Device Motion API");
+                resolve(createCardboardVRDisplay.call(_this2, elem));
+              }
+            };
+            console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
+            window.addEventListener("deviceorientation", waitForValidMotion, false);
+          });
+        }
+      };
+      return _this;
     }
-  };
 
-  VRInput.prototype.connect = function (selectedIndex) {
-    this.currentDisplay = this.displays[selectedIndex];
-  };
+    _createClass(VR, [{
+      key: "requestPresent",
+      value: function requestPresent(opts) {
+        if (!this.currentDisplay) {
+          return Promise.reject("No display");
+        } else {
+          return this.currentDisplay.requestPresent(VR.Version === 1 && isMobile ? opts[0] : opts).then(function (elem) {
+            return elem || opts[0].source;
+          });
+        }
+      }
+    }, {
+      key: "poll",
+      value: function poll() {
+        if (this.currentDisplay) {
+          var pose = this.currentDisplay.getPose();
+          if (pose) {
+            this.currentPose = pose;
 
-  return VRInput;
+            if (pose.position) {
+              this.headX = pose.position[0];
+              this.headY = pose.position[1];
+              this.headZ = pose.position[2];
+            }
+            if (pose.linearVelocity) {
+              this.headVX = pose.linearVelocity[0];
+              this.headVY = pose.linearVelocity[1];
+              this.headVZ = pose.linearVelocity[2];
+            }
+            if (pose.linearAcceleration) {
+              this.headAX = pose.linearAcceleration[0];
+              this.headAY = pose.linearAcceleration[1];
+              this.headAZ = pose.linearAcceleration[2];
+            }
+
+            if (pose.orientation) {
+              this.headRX = pose.orientation[0];
+              this.headRY = pose.orientation[1];
+              this.headRZ = pose.orientation[2];
+              this.headRW = pose.orientation[3];
+            }
+            if (pose.angularVelocity) {
+              this.headRVX = pose.angularVelocity[0];
+              this.headRVY = pose.angularVelocity[1];
+              this.headRVZ = pose.angularVelocity[2];
+            }
+            if (pose.angularAcceleration) {
+              this.headRAX = pose.angularAcceleration[0];
+              this.headRAY = pose.angularAcceleration[1];
+              this.headRAZ = pose.angularAcceleration[2];
+            }
+          }
+        }
+      }
+    }, {
+      key: "getOrientation",
+      value: function getOrientation(value) {
+        value = value || new THREE.Quaternion();
+        value.set(this.getValue("headRX"), this.getValue("headRY"), this.getValue("headRZ"), this.getValue("headRW"));
+        return value;
+      }
+    }, {
+      key: "resetTransforms",
+      value: function resetTransforms(near, far) {
+        if (this.currentDisplay) {
+          this.enabled = true;
+          var params = {
+            left: this.currentDisplay.getEyeParameters("left"),
+            right: this.currentDisplay.getEyeParameters("right")
+          };
+          var transforms = [{}, {}];
+          makeTransform(transforms[0], params.left, near, far);
+          makeTransform(transforms[1], params.right, near, far);
+          transforms[1].viewport.left = transforms[0].viewport.width;
+          this.transforms = transforms;
+        }
+      }
+    }, {
+      key: "connect",
+      value: function connect(selectedIndex) {
+        this.currentDisplay = this.displays[selectedIndex];
+      }
+    }], [{
+      key: "Version",
+      get: function get() {
+        if (navigator.getVRDisplays) {
+          return 1.0;
+        } else if (navigator.getVRDevices) {
+          return 0.5;
+        } else if (navigator.mozGetVRDevices) {
+          return 0.4;
+        } else if (isMobile) {
+          return 0.1;
+        } else {
+          return 0;
+        }
+      }
+    }]);
+
+    return VR;
+  }(Primrose.InputProcessor);
+
+  Primrose.InputProcessor.defineAxisProperties(VR, ["headX", "headY", "headZ", "headVX", "headVY", "headVZ", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW", "headRVX", "headRVY", "headRVZ", "headRAX", "headRAY", "headRAZ"]);
+
+  return VR;
 }();
 "use strict";
 
@@ -12768,6 +13026,7 @@ Primrose.Text.CommandPacks.BasicTextInput = function () {
   pliny.record({
     parent: "Primrose.Text.CommandPacks",
     name: "TextInput",
+    baseClass: "Primrose.Text.CommandPack",
     description: "| [under construction]"
   });
 
@@ -13057,6 +13316,7 @@ Primrose.Text.Controls.TextBox = function () {
     parent: "Primrose.Text.Controls",
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
+    baseClass: "Primrose.Surface",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }]
   });
 
@@ -14079,6 +14339,7 @@ Primrose.Text.Controls.TextInput = function () {
     parent: "Primrose.Text.Controls",
     name: "TextInput",
     description: "plain text input box.",
+    baseClass: "Primrose.Text.Controls.TextBox",
     parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the TextInput." }]
   });
 

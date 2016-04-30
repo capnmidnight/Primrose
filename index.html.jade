@@ -1,9 +1,7 @@
 ﻿extends ./templates/main.jade
 
 append head
-  link(type="text/css", rel="stylesheet", href= fileRoot + "stylesheets/" + (debug ? "main.css" : "main.min.css"))
-  if !debug
-    script(type="text/javascript", src=fileRoot + "PrimroseSite.min.js")
+  link(type="text/css", rel="stylesheet", href= fileRoot + "stylesheets/main" + cssExt)
   
 block banner
   section#demo
@@ -175,51 +173,12 @@ block main
 
               ul
                 li: a(href="mailto:sean.mcbeth@primrosevr.com?subject=Contributing+to+Primrose") Email us directly
-                li: a(href="#mail") Sign up for the mailing list
                 li: a(href="https://github.com/capnmidnight/Primrose", target="_blank") Check out the repository
                   | Fork the project, change the code or add documentation and submit pull requests. Submit issues. Poke around and have fun!
 
-    section#mail
-      article
-        h2 Stay in Contact
-        p Join the mailing list to receive sporadic updates on Primrose.
-        <!-- Begin MailChimp Signup Form -->
-        #mc_embed_signup
-          form.validate(id="mc-embedded-subscribe-form", action="//coworksupernova.us8.list-manage.com/subscribe/post?u=81af61e5ed1771efc26829263&amp;id=14fb0203a4", method="post", name="mc-embedded-subscribe-form", target="_blank", novalidate)
-            #mc_embed_signup_scroll
-              div.indicates-required
-                  span.asterisk *
-                  | indicates required
-              div.mc-field-group
-                label(for="mce-EMAIL") Email Address
-                  span.asterisk *
-                input#mce-EMAIL.required.email(type="email", value="", name="EMAIL")
-              div.mc-field-group
-                label(for="mce-FNAME") First Name
-                input#mce-FNAME(type="text", value="", name="FNAME")
-              div.mc-field-group
-                label(for="mce-LNAME") Last Name
-                input#mce-LNAME(type="text", value="", name="LNAME")
-              div.mc-field-group.input-group
-                h3 Email Format
-                ul
-                  li
-                      input#mce-EMAILTYPE-0(type="radio", value="html", name="EMAILTYPE")
-                      label(for="mce-EMAILTYPE-0") html
-                  li
-                      input#mce-EMAILTYPE-1(type="radio", value="text", name="EMAILTYPE")
-                      label(for="mce-EMAILTYPE-1") text
-              div#mce-responses
-                div#mce-error-response.response(style="display:none")
-                div#mce-success-response.response(style="display:none")
-              <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups -->
-              div(style="position: absolute; left: -5000px;")
-                  input(type="text", name="b_81af61e5ed1771efc26829263_14fb0203a4", tabindex="-1", value="")
-              button#mc-embedded-subscribe.primary.button(type="submit", name="subscribe", style="border-radius:0;width:100%;color: #3B3D13;") Subscribe
-        <!--End mc_embed_signup-->
-
 block footer
   footer
+    script(type="text/javascript", src=fileRoot + "PrimroseSite" + jsExt)
     a(href="https://www.twitter.com/primrose_vr", target="_blank") Twitter
     a(href="https://www.linkedin.com/company/primrose-vr", target="_blank") LinkedIn
     a(href="https://github.com/voodootikigod/logo.js", target="_blank"): img(src= fileRoot + "images/js.png", alt="logo", title="JavaScript", style="height:32px")

@@ -157,11 +157,9 @@
     <Content Include="images\nightly.mozilla.jpg" />
     <Content Include="images\screenshot.jpg" />
     <Content Include="images\stm-2015-05.jpg" />
-    <Content Include="lib\analytics.js" />
     <Content Include="lib\droid_sans_regular.typeface.js" />
-    <Content Include="lib\ga.js" />
+    <Content Include="lib\ga-snippet.js" />
     <Content Include="lib\gl-matrix.js" />
-    <Content Include="lib\mailchimp.js" />
     <Content Include="lib\sha512.js" />
     <Compile Include="server\controllers.js" />
     <Compile Include="server\controllers\logger.js" />
