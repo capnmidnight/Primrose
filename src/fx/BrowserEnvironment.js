@@ -522,7 +522,6 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var modifyScreen = () => {
-        this.renderer.domElement.style.cursor = "default";
         var canvasWidth,
           canvasHeight,
           aspectWidth,
@@ -696,7 +695,10 @@ Primrose.BrowserEnvironment = (function () {
               });
           }
         })
-        .then(() => fire("ready"));
+        .then(() => {
+          this.renderer.domElement.style.cursor = "default";
+          fire("ready");
+        });
 
 
       //
