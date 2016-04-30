@@ -182,7 +182,7 @@ gulp.task("concatMarketing", ["clean"], function () {
 });
 
 gulp.task("archive", ["concatPrimrose"], function () {
-  return gulp.src(["Primrose*.js"])
+  return gulp.src(["Primrose.js", "Primrose.min.js"])
     .pipe(rename(function (file) {
       if (file.basename.indexOf(".min") > -1) {
         file.extname = ".min.js";
