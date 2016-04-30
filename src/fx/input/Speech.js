@@ -53,169 +53,166 @@ Primrose.Input.Speech = ( function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Speech",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function SpeechInput ( name, commands, socket ) {
-    Primrose.NetworkedInput.call( this, name, commands, socket );
-    var running = false,
+  class Speech extends Primrose.InputProcessor {
+    constructor(commands, socket) {
+      super("Speech", commands, socket);
+      var running = false,
         recognition = null,
         errorMessage = null;
 
-    function warn () {
-      var msg = fmt( "Failed to initialize speech engine. Reason: $1",
-          errorMessage.message );
-      console.error( msg );
-      return false;
-    }
+      function warn() {
+        var msg = fmt("Failed to initialize speech engine. Reason: $1",
+          errorMessage.message);
+        console.error(msg);
+        return false;
+      }
 
-    function start () {
-      if ( !available ) {
-        return warn();
-      }
-      else if ( !running ) {
-        running = true;
-        recognition.start();
-        return true;
-      }
-      return false;
-    }
-
-    function stop () {
-      if ( !available ) {
-        return warn();
-      }
-      if ( running ) {
-        recognition.stop();
-        return true;
-      }
-      return false;
-    }
-
-    this.check = function () {
-      if ( this.enabled && !running ) {
-        start();
-      }
-      else if ( !this.enabled && running ) {
-        stop();
-      }
-    };
-
-    this.getErrorMessage = function () {
-      return errorMessage;
-    };
-
-    try {
-      if ( window.SpeechRecognition ) {
-        // just in case this ever gets standardized
-        recognition = new SpeechRecognition();
-      }
-      else {
-        // purposefully don't check the existance so it errors out and setup fails.
-        recognition = new webkitSpeechRecognition();
-      }
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "en-US";
-      var restart = false;
-      recognition.addEventListener( "start", function () {
-        console.log( "speech started" );
-        command = "";
-      }.bind( this ), true );
-
-      recognition.addEventListener( "error", function ( event ) {
-        restart = true;
-        console.log( "speech error", event );
-        running = false;
-        command = "speech error";
-      }.bind( this ), true );
-
-      recognition.addEventListener( "end", function () {
-        console.log( "speech ended", arguments );
-        running = false;
-        command = "speech ended";
-        if ( restart ) {
-          restart = false;
-          this.enable( true );
+      function start() {
+        if (!available) {
+          return warn();
         }
-      }.bind( this ), true );
+        else if (!running) {
+          running = true;
+          recognition.start();
+          return true;
+        }
+        return false;
+      }
 
-      recognition.addEventListener( "result", function ( event ) {
-        var newCommand = [ ];
-        var result = event.results[event.resultIndex];
-        var max = 0;
-        var maxI = -1;
-        if ( result && result.isFinal ) {
-          for ( var i = 0; i < result.length; ++i ) {
-            var alt = result[i];
-            if ( alt.confidence > max ) {
-              max = alt.confidence;
-              maxI = i;
+      function stop() {
+        if (!available) {
+          return warn();
+        }
+        if (running) {
+          recognition.stop();
+          return true;
+        }
+        return false;
+      }
+
+      this.check = function () {
+        if (this.enabled && !running) {
+          start();
+        }
+        else if (!this.enabled && running) {
+          stop();
+        }
+      };
+
+      this.getErrorMessage = function () {
+        return errorMessage;
+      };
+
+      try {
+        if (window.SpeechRecognition) {
+          // just in case this ever gets standardized
+          recognition = new SpeechRecognition();
+        }
+        else {
+          // purposefully don't check the existance so it errors out and setup fails.
+          recognition = new webkitSpeechRecognition();
+        }
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+        var restart = false;
+        recognition.addEventListener("start", function () {
+          console.log("speech started");
+          command = "";
+        }.bind(this), true);
+
+        recognition.addEventListener("error", function (event) {
+          restart = true;
+          console.log("speech error", event);
+          running = false;
+          command = "speech error";
+        }.bind(this), true);
+
+        recognition.addEventListener("end", function () {
+          console.log("speech ended", arguments);
+          running = false;
+          command = "speech ended";
+          if (restart) {
+            restart = false;
+            this.enable(true);
+          }
+        }.bind(this), true);
+
+        recognition.addEventListener("result", function (event) {
+          var newCommand = [];
+          var result = event.results[event.resultIndex];
+          var max = 0;
+          var maxI = -1;
+          if (result && result.isFinal) {
+            for (var i = 0; i < result.length; ++i) {
+              var alt = result[i];
+              if (alt.confidence > max) {
+                max = alt.confidence;
+                maxI = i;
+              }
             }
           }
-        }
 
-        if ( max > 0.85 ) {
-          newCommand.push( result[maxI].transcript.trim() );
-        }
+          if (max > 0.85) {
+            newCommand.push(result[maxI].transcript.trim());
+          }
 
-        newCommand = newCommand.join( " " );
+          newCommand = newCommand.join(" ");
 
-        if ( newCommand !== this.inputState ) {
-          this.inputState.text = newCommand;
-        }
-        this.update();
-      }.bind( this ), true );
+          if (newCommand !== this.inputState) {
+            this.inputState.text = newCommand;
+          }
+          this.update();
+        }.bind(this), true);
 
-      available = true;
+        available = true;
+      }
+      catch (err) {
+        errorMessage = err;
+        available = false;
+      }
     }
-    catch ( err ) {
-      errorMessage = err;
-      available = false;
+
+    static maybeClone(arr) {
+      return (arr && arr.slice()) || [];
+    }
+
+    cloneCommand(cmd) {
+      return {
+        name: cmd.name,
+        preamble: cmd.preamble,
+        keywords: Speech.maybeClone(cmd.keywords),
+        commandUp: cmd.commandUp,
+        disabled: cmd.disabled
+      };
+    }
+
+    evalCommand(cmd, cmdState, metaKeysSet, dt) {
+      if (metaKeysSet && this.inputState.text) {
+        for (var i = 0; i < cmd.keywords.length; ++i) {
+          if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
+            cmdState.pressed = true;
+            cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
+            this.inputState.text = null;
+          }
+        }
+      }
+    }
+
+    enable(k, v) {
+      super.enable(k, v);
+      this.check();
+    }
+
+    transmit(v) {
+      super.transmit(v);
+      this.check();
     }
   }
 
-  inherit( SpeechInput, Primrose.NetworkedInput );
-
-  SpeechInput.maybeClone = function ( arr ) {
-    return ( arr && arr.slice() ) || [ ];
-  };
-
-  SpeechInput.prototype.cloneCommand = function ( cmd ) {
-    return {
-      name: cmd.name,
-      preamble: cmd.preamble,
-      keywords: SpeechInput.maybeClone( cmd.keywords ),
-      commandUp: cmd.commandUp,
-      disabled: cmd.disabled
-    };
-  };
-
-  SpeechInput.prototype.evalCommand = function ( cmd, cmdState,
-      metaKeysSet, dt ) {
-    if ( metaKeysSet && this.inputState.text ) {
-      for ( var i = 0; i < cmd.keywords.length; ++i ) {
-        if ( this.inputState.text.indexOf( cmd.keywords[i] ) === 0 &&
-            ( cmd.preamble || cmd.keywords[i].length ===
-                this.inputState.text.length ) ) {
-          cmdState.pressed = true;
-          cmdState.value = this.inputState.text.substring(
-              cmd.keywords[i].length )
-              .trim();
-          this.inputState.text = null;
-        }
-      }
-    }
-  };
-
-  SpeechInput.prototype.enable = function ( k, v ) {
-    Primrose.NetworkedInput.prototype.enable.call( this, k, v );
-    this.check();
-  };
-
-  SpeechInput.prototype.transmit = function ( v ) {
-    Primrose.NetworkedInput.prototype.transmit.call( this, v );
-    this.check();
-  };
-  return SpeechInput;
+  return Speech;
 } )();
 

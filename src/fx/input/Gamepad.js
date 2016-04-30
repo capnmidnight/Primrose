@@ -7,6 +7,7 @@ Primrose.Input.Gamepad = (function () {
     parent: "Primrose.Input",
     name: "Gamepad",
     description: "| [under construction]",
+    baseClass: "Primrose.InputProcessor",
     parameters: [
       { name: "", type: "", description: "" },
       { name: "", type: "", description: "" },
@@ -14,140 +15,140 @@ Primrose.Input.Gamepad = (function () {
       { name: "", type: "", description: "" }
     ]
   });
-  function GamepadInput(name, commands, socket, gpid) {
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, GamepadInput.AXES, true);
-    var connectedGamepads = [],
-      listeners = {
-        gamepadconnected: [],
-        gamepaddisconnected: []
+  class Gamepad extends Primrose.InputProcessor {
+    constructor(commands, socket, gpid) {
+      super("Gamepad", commands, socket);
+      var connectedGamepads = [],
+        listeners = {
+          gamepadconnected: [],
+          gamepaddisconnected: []
+        };
+
+      this.checkDevice = function (pad) {
+        var i;
+        for (i = 0; i < pad.buttons.length; ++i) {
+          this.setButton(i, pad.buttons[i].pressed);
+        }
+        for (i = 0; i < pad.axes.length; ++i) {
+          this.setAxis(Gamepad.AXES[i], pad.axes[i]);
+        }
       };
 
-    this.checkDevice = function (pad) {
-      var i;
-      for (i = 0; i < pad.buttons.length; ++i) {
-        this.setButton(i, pad.buttons[i].pressed);
-      }
-      for (i = 0; i < pad.axes.length; ++i) {
-        this.setAxis(GamepadInput.AXES[i], pad.axes[i]);
-      }
-    };
+      this.poll = function () {
+        var pads,
+          currentPads = [],
+          i;
 
-    this.poll = function () {
-      var pads,
-        currentPads = [],
-        i;
+        if (navigator.getGamepads) {
+          pads = navigator.getGamepads();
+        }
+        else if (navigator.webkitGetGamepads) {
+          pads = navigator.webkitGetGamepads();
+        }
 
-      if (navigator.getGamepads) {
-        pads = navigator.getGamepads();
-      }
-      else if (navigator.webkitGetGamepads) {
-        pads = navigator.webkitGetGamepads();
-      }
-
-      if (pads) {
-        for (i = 0; i < pads.length; ++i) {
-          var pad = pads[i];
-          if (pad) {
-            if (!gpid) {
-              gpid = pad.id;
+        if (pads) {
+          for (i = 0; i < pads.length; ++i) {
+            var pad = pads[i];
+            if (pad) {
+              if (!gpid) {
+                gpid = pad.id;
+              }
+              if (connectedGamepads.indexOf(pad.id) === -1) {
+                connectedGamepads.push(pad.id);
+                onConnected(pad.id);
+              }
+              if (pad.id === gpid) {
+                this.checkDevice(pad);
+              }
+              currentPads.push(pad.id);
             }
-            if (connectedGamepads.indexOf(pad.id) === -1) {
-              connectedGamepads.push(pad.id);
-              onConnected(pad.id);
-            }
-            if (pad.id === gpid) {
-              this.checkDevice(pad);
-            }
-            currentPads.push(pad.id);
           }
         }
-      }
 
-      for (i = connectedGamepads.length - 1; i >= 0; --i) {
-        if (currentPads.indexOf(connectedGamepads[i]) === -1) {
-          onDisconnected(connectedGamepads[i]);
-          connectedGamepads.splice(i, 1);
+        for (i = connectedGamepads.length - 1; i >= 0; --i) {
+          if (currentPads.indexOf(connectedGamepads[i]) === -1) {
+            onDisconnected(connectedGamepads[i]);
+            connectedGamepads.splice(i, 1);
+          }
+        }
+      };
+
+      function add(arr, val) {
+        if (arr.indexOf(val) === -1) {
+          arr.push(val);
         }
       }
-    };
 
-    function add(arr, val) {
-      if (arr.indexOf(val) === -1) {
-        arr.push(val);
+      function remove(arr, val) {
+        var index = arr.indexOf(val);
+        if (index > -1) {
+          arr.splice(index, 1);
+        }
       }
-    }
 
-    function remove(arr, val) {
-      var index = arr.indexOf(val);
-      if (index > -1) {
-        arr.splice(index, 1);
+      function sendAll(arr, id) {
+        for (var i = 0; i < arr.length; ++i) {
+          arr[i](id);
+        }
       }
-    }
 
-    function sendAll(arr, id) {
-      for (var i = 0; i < arr.length; ++i) {
-        arr[i](id);
+      function onConnected(id) {
+        sendAll(listeners.gamepadconnected, id);
       }
-    }
 
-    function onConnected(id) {
-      sendAll(listeners.gamepadconnected, id);
-    }
-
-    function onDisconnected(id) {
-      sendAll(listeners.gamepaddisconnected, id);
-    }
-
-    this.getErrorMessage = function () {
-      return errorMessage;
-    };
-
-    this.setGamepad = function (id) {
-      gpid = id;
-      this.inPhysicalUse = true;
-    };
-
-    this.clearGamepad = function () {
-      gpid = null;
-      this.inPhysicalUse = false;
-    };
-
-    this.isGamepadSet = function () {
-      return !!gpid;
-    };
-
-    this.getConnectedGamepads = function () {
-      return connectedGamepads.slice();
-    };
-
-    this.addEventListener = function (event, handler, bubbles) {
-      if (listeners[event]) {
-        listeners[event].push(handler);
+      function onDisconnected(id) {
+        sendAll(listeners.gamepaddisconnected, id);
       }
-      if (event === "gamepadconnected") {
-        connectedGamepads.forEach(onConnected);
-      }
-    };
 
-    this.removeEventListener = function (event, handler, bubbles) {
-      if (listeners[event]) {
-        remove(listeners[event], handler);
-      }
-    };
+      this.getErrorMessage = function () {
+        return errorMessage;
+      };
 
-    try {
-      this.update();
-      this.available = true;
-    }
-    catch (err) {
-      this.avaliable = false;
-      this.errorMessage = err;
+      this.setGamepad = function (id) {
+        gpid = id;
+        this.inPhysicalUse = true;
+      };
+
+      this.clearGamepad = function () {
+        gpid = null;
+        this.inPhysicalUse = false;
+      };
+
+      this.isGamepadSet = function () {
+        return !!gpid;
+      };
+
+      this.getConnectedGamepads = function () {
+        return connectedGamepads.slice();
+      };
+
+      this.addEventListener = function (event, handler, bubbles) {
+        if (listeners[event]) {
+          listeners[event].push(handler);
+        }
+        if (event === "gamepadconnected") {
+          connectedGamepads.forEach(onConnected);
+        }
+      };
+
+      this.removeEventListener = function (event, handler, bubbles) {
+        if (listeners[event]) {
+          remove(listeners[event], handler);
+        }
+      };
+
+      try {
+        this.update();
+        this.available = true;
+      }
+      catch (err) {
+        this.avaliable = false;
+        this.errorMessage = err;
+      }
     }
   }
-
-  GamepadInput.AXES = ["LSX", "LSY", "RSX", "RSY"];
-  Primrose.Input.ButtonAndAxis.inherit(GamepadInput);
-  return GamepadInput;
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY"]);
+  return Gamepad;
 })();
 
 pliny.enumeration({

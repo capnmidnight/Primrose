@@ -20,7 +20,7 @@ Primrose.Input.FPSInput = (function () {
 
     this.managers = [
       // keyboard should always run on the window
-      new Primrose.Input.Keyboard("keyboard", window, {
+      new Primrose.Input.Keyboard(window, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         pointer1: {
           buttons: [Primrose.Keys.SPACE],
@@ -73,7 +73,7 @@ Primrose.Input.FPSInput = (function () {
           commandUp: emit.bind(this, "zero")
         }
       }),
-      new Primrose.Input.Mouse("mouse", DOMElement, {
+      new Primrose.Input.Mouse(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -91,7 +91,7 @@ Primrose.Input.FPSInput = (function () {
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
         pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
       }),
-      new Primrose.Input.Touch("touch", DOMElement, {
+      new Primrose.Input.Touch(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -108,7 +108,7 @@ Primrose.Input.FPSInput = (function () {
         dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
       }),
-      new Primrose.Input.Gamepad("gamepad", {
+      new Primrose.Input.Gamepad({
         pointer: {
           buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
           repetitions: 1,
@@ -123,7 +123,7 @@ Primrose.Input.FPSInput = (function () {
       })];
 
     if (Primrose.Input.VR.Version > 0) {
-      var vr = new Primrose.Input.VR("vr");
+      var vr = new Primrose.Input.VR();
       this.managers.push(vr);
       vr.init();
     }
@@ -222,13 +222,13 @@ Primrose.Input.FPSInput = (function () {
     };
 
     var temp = new THREE.Quaternion();
-    FPSInput.prototype.getQuaternion = function (x, y, z, w, value, accumulate) {
+    FPSInput.prototype.getOrientation = function (x, y, z, w, value, accumulate) {
       value = value || new THREE.Quaternion();
       value.set(0, 0, 0, 1);
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if (mgr.enabled && mgr.getQuaternion) {
-          mgr.getQuaternion(x, y, z, w, temp);
+        if (mgr.enabled && mgr.getOrientation) {
+          mgr.getOrientation(x, y, z, w, temp);
           value.multiply(temp);
           if (!accumulate) {
             break;

@@ -1,5 +1,11 @@
 ﻿Primrose.X.LoginForm = (function () {
   var COUNTER = 0;
+  pliny.class({
+    parent: "Primrose.X",
+    name: "LoginForm",
+    description: "| [Under Construction]",
+    baseClass: "Primrose.Entity"
+  });
   class LoginForm extends Primrose.Entity {
     constructor() {
       super(`Primrose.X.LoginForm[${COUNTER++}]`);

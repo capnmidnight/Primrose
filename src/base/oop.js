@@ -26,15 +26,6 @@ function copyObject ( dest, source ) {
   }
 }
 
-pliny.function({
-  name: "inherit",
-  description: "| [under construction]"
-} );
-function inherit ( classType, parentType ) {
-  classType.prototype = Object.create( parentType.prototype );
-  classType.prototype.constructor = classType;
-}
-
 
 pliny.function({
   name: "range",

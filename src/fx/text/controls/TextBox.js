@@ -10,6 +10,7 @@ Primrose.Text.Controls.TextBox = (function () {
     parent: "Primrose.Text.Controls",
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
+    baseClass: "Primrose.Surface",
     parameters: [
       { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
       { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }

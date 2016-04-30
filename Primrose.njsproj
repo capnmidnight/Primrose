@@ -279,7 +279,7 @@
     <Content Include="src\fx\ButtonFactory.js" />
     <Content Include="src\fx\Keys.js" />
     <Content Include="src\fx\ModelLoader.js" />
-    <Content Include="src\fx\NetworkedInput.js" />
+    <Content Include="src\fx\InputProcessor.js" />
     <Content Include="src\fx\Projector.js" />
     <Content Include="src\fx\DOM\StateList.js" />
     <Content Include="src\fx\BrowserEnvironment.js" />
@@ -289,7 +289,6 @@
     <Content Include="src\base\forms.js" />
     <Content Include="src\base\cloud.js" />
     <Content Include="src\base\oop.js" />
-    <Content Include="src\fx\input\ButtonAndAxis.js" />
     <Content Include="src\fx\input\Camera.js" />
     <Content Include="src\fx\input\FPSInput.js" />
     <Content Include="src\fx\input\Gamepad.js" />

@@ -5,8 +5,9 @@ Primrose.Input.Keyboard = ( function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Keyboard",
-    baseClass: "Primrose.Input.ButtonAndAxis",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]",
+    baseClass: "Primrose.InputProcessor",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},
@@ -14,20 +15,20 @@ Primrose.Input.Keyboard = ( function () {
       {name: "", type: "", description: ""}
     ]
   } );
-  function KeyboardInput ( name, DOMElement, commands, socket ) {
-    DOMElement = DOMElement || window;
+  class Keyboard extends Primrose.InputProcessor {
+    constructor(DOMElement, commands, socket) {
+      super("Keyboard", commands, socket);
+      DOMElement = DOMElement || window;
 
-    Primrose.Input.ButtonAndAxis.call( this, name, commands, socket );
+      function execute(stateChange, event) {
+        this.setButton(event.keyCode, stateChange);
+        this.update();
+      }
 
-    function execute ( stateChange, event ) {
-      this.setButton(event.keyCode, stateChange);
-      this.update();
+      DOMElement.addEventListener("keydown", execute.bind(this, true), false);
+      DOMElement.addEventListener("keyup", execute.bind(this, false), false);
     }
-
-    DOMElement.addEventListener( "keydown", execute.bind( this, true ), false );
-    DOMElement.addEventListener( "keyup", execute.bind( this, false ), false );
   }
 
-  Primrose.Input.ButtonAndAxis.inherit( KeyboardInput );
-  return KeyboardInput;
+  return Keyboard;
 } )();
