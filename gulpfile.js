@@ -203,7 +203,7 @@ gulp.task("jsmin", ["carveDocumentation", "concat:payload", "concat:marketing"],
 
 
 gulp.task("archive", ["jsmin"], function () {
-  return gulp.src(["Primrose*.js"])
+  return gulp.src(["Primrose*.js", "!PrimroseSite*", "!PrimroseDependencies*"])
     .pipe(rename(function (file) {
       if (file.basename.indexOf(".min") > -1) {
         file.extname = ".min.js";
