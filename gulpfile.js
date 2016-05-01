@@ -11,6 +11,7 @@
   jshint = require("gulp-jshint"),
   path = require("path"),
   pkg = require("./package.json"),
+  pliny = require("./pliny"),
   pug = require("gulp-pug"),
   recurseDirectory = require("./server/recurseDirectory"),
   rename = require("gulp-rename"),
@@ -77,6 +78,7 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 });
 
 function pugConfiguration(options, defaultData) {
+  var destination = ".";
   return gulp.src(pugFileSpec, { base: "./" })
     .pipe(rename(function (path) {
       path.extname = "";
@@ -88,28 +90,34 @@ function pugConfiguration(options, defaultData) {
           .map(function () {
             return "../";
           }),
-        shortName = name.match(/([^\/]+)\.html$/);
+        shortName = name.match(/([^\/]+)\.html$/),
+        scriptName = name.replace(/\.html$/, "/app.js");
+
       parts.pop();
 
-      var scriptName = name.replace(/\.html$/, "/app.js");
-      fs.readFile(scriptName, "utf-8", function (err, txt) {
-        callback(undefined, {
-          debug: defaultData.debug,
-          version: pkg.version,
-          cssExt: defaultData.cssExt,
-          jsExt: defaultData.jsExt,
-          filePath: name,
-          fileRoot: parts.join(""),
-          fileName: shortName && shortName[1],
-          docFiles: docFiles,
-          frameworkFiles: defaultData.frameworkFiles,
-          demoScriptName: scriptName,
-          demoScript: !err && ("grammar(\"JavaScript\");\n" + txt)
-        });
+      var exists = fs.existsSync(scriptName);
+        txt = exists && fs.readFileSync(scriptName, "utf-8"),
+        size = (fs.lstatSync("Primrose.js").size / 1000).toFixed(1),
+        minifiedSize = (fs.lstatSync("Primrose.min.js").size / 1000).toFixed(1);
+
+      callback(null, {
+        debug: defaultData.debug,
+        version: pkg.version,
+        cssExt: defaultData.cssExt,
+        jsExt: defaultData.jsExt,
+        filePath: name,
+        fileRoot: parts.join(""),
+        fileName: shortName && shortName[1],
+        sizeKB: size,
+        sizeMinKB: minifiedSize,
+        docFiles: docFiles,
+        frameworkFiles: defaultData.frameworkFiles,
+        demoScriptName: scriptName,
+        demoScript: exists && ("grammar(\"JavaScript\");\n" + txt)
       });
     }))
     .pipe(pug(options))
-    .pipe(gulp.dest("."));
+    .pipe(gulp.dest(destination));
 }
 
 gulp.task("jshint", function () {
@@ -120,18 +128,18 @@ gulp.task("jshint", function () {
     }));
 });
 
-gulp.task("pugRelease", function () {
+gulp.task("pug:release", ["archive"], function () {
   return pugConfiguration({}, {
     jsExt: ".min.js",
     cssExt: ".min.css"
   });
 });
 
-gulp.task("pugDebugES5", function () {
+gulp.task("pug:debug:es5", function () {
   return pugConfiguration({ pretty: true }, debugDataES5);
 });
 
-gulp.task("pugDebugES6", function () {
+gulp.task("pug:debug:es6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
@@ -140,32 +148,30 @@ gulp.task("clean", ["jshint"], function () {
     .pipe(clean());
 });
 
-gulp.task("cssmin", ["clean"], function () {
-  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "!*.min.css"], { base: "./" })
+gulp.task("cssmin", function () {
+  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "!**/*.min.css"], { base: "./" })
     .pipe(cssmin())
     .pipe(rename({ suffix: ".min" }))
     .pipe(gulp.dest("./"));
 });
 
-gulp.task("babel", ["clean"], function () {
+gulp.task("babel", function () {
+  var destination = "./es5";
   return gulp.src("src/**/*.js", { base: "./src" })
     .pipe(babel({
       sourceMap: false,
       presets: ["es2015"]
     }))
-    .pipe(gulp.dest("./es5"));
+    .pipe(gulp.dest(destination));
 });
 
 function concatenate(stream, name) {
   return stream
     .pipe(concat(name + ".js", { newLine: "\n" }))
-    .pipe(gulp.dest("./"))
-    .pipe(rename({ suffix: ".min" }))
-    .pipe(uglify())
     .pipe(gulp.dest("./"));
 }
 
-gulp.task("concatPrimrose", ["clean"], function () {
+gulp.task("concat:primrose", function () {
   return concatenate(gulp.src(sourceFiles)
     .pipe(babel({
       sourceMap: false,
@@ -173,26 +179,43 @@ gulp.task("concatPrimrose", ["clean"], function () {
     })), "Primrose");
 });
 
-gulp.task("concatPayload", ["clean"], function () {
+gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
+  pliny.carve("Primrose.js", "PrimroseDocumentation.js", function () {
+    console.log("done");
+    callback();
+  });
+});
+
+gulp.task("concat:payload", function () {
   return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
 });
 
-gulp.task("concatMarketing", ["clean"], function () {
+gulp.task("concat:marketing", function () {
   return concatenate(gulp.src(mainPageFiles), "PrimroseSite");
 });
 
-gulp.task("archive", ["concatPrimrose"], function () {
-  return gulp.src(["Primrose.js", "Primrose.min.js"])
+gulp.task("jsmin", ["carveDocumentation", "concat:payload", "concat:marketing"], function () {
+  return gulp.src(["Primrose*.js", "!*.min.js"])
+    .pipe(rename({ suffix: ".min" }))
+    .pipe(uglify())
+    .pipe(gulp.dest("./"));
+});
+
+
+gulp.task("archive", ["jsmin"], function () {
+  return gulp.src(["Primrose*.js"])
     .pipe(rename(function (file) {
       if (file.basename.indexOf(".min") > -1) {
         file.extname = ".min.js";
+        file.basename = file.basename.substring(0, file.basename.length - 4);
       }
-      file.basename = "Primrose-" + pkg.version;
+      file.basename += "-" + pkg.version;
       return file;
     }))
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("release", ["cssmin", "pugRelease", "concatPayload", "concatMarketing", "archive"]);
-gulp.task("debugES5", ["babel", "pugDebugES5"]);
-gulp.task("default", ["pugDebugES6"]);
+gulp.task("default", ["pug:debug:es6"]);
+gulp.task("debug", ["pug:debug:es6"]);
+gulp.task("stage", ["babel", "pug:debug:es5"]);
+gulp.task("release", ["cssmin", "pug:release"]);

@@ -10,6 +10,8 @@ block title
 append head
   <!-- start documentation.jade head append -->
   link(rel="stylesheet", type="text/css", href= "style" + cssExt)
+  if !debug
+    script(type="text/javascript", src= fileRoot + "PrimroseDocumentation.min.js")
   <!-- end documentation.jade head append -->
 mixin fileList(name)
   li

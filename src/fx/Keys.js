@@ -140,9 +140,8 @@ Primrose.Keys = ( function ( ) {
       Keys[val] = key;
     }
   }
-  
-  pliny.setEnumerationValues("Primrose.Keys", Keys);
 
   return Keys;
 } )();
 
+pliny.setEnumerationValues("Primrose.Keys", Primrose.Keys);

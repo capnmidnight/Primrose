@@ -110,11 +110,11 @@ block main
 
         p: a.primary.button(href= fileRoot + "Primrose.min.js", target="_blank")
             | Download Primrose.min.js, v#{version} #[br]
-            small 179KB, 55KB gzipped
+            small Only #{sizeMinKB}KB, that's less than most JPEGs
 
         p: a.secondary.button(href= fileRoot + "Primrose.js", target="_blank") 
             | Download Primrose.js, v#{version} #[br]
-            small 381KB, useful for debugging
+            small #{sizeKB}KB, useful for debugging
 
         p: a.secondary.button(href="https://www.github.com/capnmidnight/Primrose/", target="_blank")
             | Get the Source Code #[br]
