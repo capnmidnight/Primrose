@@ -1,5 +1,3 @@
-/* global Primrose, speechSynthesis, pliny */
-
 Primrose.Output.Speech = ( function ( ) {
   function pickRandomOption ( options, key, min, max ) {
     if ( options[key] === undefined ) {

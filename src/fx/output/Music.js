@@ -1,5 +1,3 @@
-/* global Primrose, Window, pliny */
-
 Primrose.Output.Music = ( function () {
 
   /* polyfill */

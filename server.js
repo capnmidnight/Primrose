@@ -1,4 +1,3 @@
-/* global require, process, exp */
 var http = require("http"),
   socketio = require("socket.io"),
   webServer = require("./server/webServer").webServer,

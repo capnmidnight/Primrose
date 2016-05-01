@@ -1,5 +1,3 @@
-/* global Primrose, io, Leap, pliny */
-
 Primrose.Output.HapticGlove = ( function () {
   
   pliny.class({

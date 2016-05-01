@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.EN_UKX = (function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;

@@ -1,5 +1,3 @@
-/* global Primrose, THREE, emit, isMobile, pliny */
-
 Primrose.Input.FPSInput = (function () {
   pliny.class({
     parent: "Primrose.Input",

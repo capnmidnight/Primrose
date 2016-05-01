@@ -1,5 +1,3 @@
-/* global Primrose, io, Window, pliny */
-
 Primrose.WebRTCSocket = ( function () {
 
   /* polyfills */

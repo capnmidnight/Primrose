@@ -1,4 +1,3 @@
-/* global Primrose, put */
 var app = new Primrose.BrowserEnvironment("My Primrose VR Application", {
   skyTexture: "images/bg.jpg",
   groundTexture: "images/deck.png",

@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
- 
 //// 
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.

@@ -1,5 +1,3 @@
-/* global Primrose, THREE, pliny, emit */
-
 Primrose.BaseControl = (function () {
   "use strict";
 

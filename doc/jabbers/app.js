@@ -1,4 +1,3 @@
-/* global Primrose, put */
 var WIDTH = 100,
   HEIGHT = 6,
   DEPTH = 100,

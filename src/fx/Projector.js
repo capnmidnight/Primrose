@@ -1,5 +1,3 @@
-/* global Primrose, THREE, Function, emit, self, pliny */
-
 Primrose.Projector = (function () {
 
   pliny.class({

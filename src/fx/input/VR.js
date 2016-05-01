@@ -1,5 +1,3 @@
-/* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny, Promise */
-
 Primrose.Input.VR = (function () {
 
   function makeTransform(s, eye, near, far) {

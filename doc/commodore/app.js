@@ -1,4 +1,3 @@
-/* global isOSX, Primrose, THREE, put */
 // different operating systems have different keyboard shortcuts.
 var modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",

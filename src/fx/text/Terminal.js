@@ -1,6 +1,3 @@
-/* global Primrose, isOSX, pliny */
-
-
 pliny.class({
   parent: "Primrose.Text",
   name: "Terminal",

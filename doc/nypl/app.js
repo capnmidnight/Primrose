@@ -1,5 +1,3 @@
-/* global isOSX, Primrose, THREE, isVR, isMobile, put, exp */
-
 var GRASS = "images/grass.png",
   ROCK = "images/rock.png",
   SAND = "images/sand.png",

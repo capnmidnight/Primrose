@@ -1,5 +1,3 @@
-/* global Primrose, THREE, isChrome, pliny */
-
 Primrose.Input.Mouse = (function () {
 
   pliny.class({

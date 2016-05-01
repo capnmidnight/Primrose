@@ -1,5 +1,3 @@
-/* global Primrose, THREE */
-
 THREE.ImageLoader.crossOrigin = "anonymous";
 var DEBUG_VR = false,
     app = new Primrose.BrowserEnvironment(

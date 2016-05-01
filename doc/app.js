@@ -1,4 +1,3 @@
-/* global pliny, Primrose, devicePixelRatio */
 function scroller(id) {
   document.getElementById(id).scrollIntoView({
     block: "top",

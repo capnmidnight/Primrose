@@ -1,5 +1,3 @@
-/* global Primrose, Assert */
-
 ( function () {
   function runProgramTest ( program, expectedOutput, inputQueue ) {
     var buffer = "";

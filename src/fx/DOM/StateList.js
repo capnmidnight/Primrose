@@ -1,5 +1,3 @@
-/* global Primrose, HTMLSelectElement, pliny */
-
 Primrose.DOM.StateList = ( function () {
   pliny.class({
     parent: "Primrose.DOM",

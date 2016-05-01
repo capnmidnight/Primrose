@@ -1,4 +1,3 @@
-/* global Primrose, THREE, pliny */
 
 Primrose.Text.Controls.PlainText = ( function () {
 

@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Angle = ( function ( ) {
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;

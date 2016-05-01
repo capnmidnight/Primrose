@@ -1,5 +1,3 @@
-/* global Primose, Assert */
-
 Primrose.Text.Point.tests = {
   zero: function () {
     var p = new Primrose.Text.Point();

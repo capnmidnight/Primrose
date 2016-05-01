@@ -1,5 +1,3 @@
-/* global Primrose, THREE, emit, pliny */
-
 Primrose.Button = ( function () {
   pliny.class({
     parent: "Primrose",

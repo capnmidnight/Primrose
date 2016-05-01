@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.InputProcessor = (function () {
 
   pliny.class({

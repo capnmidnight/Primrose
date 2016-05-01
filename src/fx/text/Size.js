@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Text.Size = (function ( ) {
   "use strict";
 

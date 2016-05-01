@@ -1,5 +1,3 @@
-/* global Assert, Primrose */
-
 "use strict";
 
 Primrose.Text.Rectangle.tests = {

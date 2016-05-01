@@ -1,5 +1,3 @@
-/* global Assert */
-
 "use strict";
 
 Primrose.Text.Grammar.tests = {

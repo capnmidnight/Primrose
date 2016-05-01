@@ -1,5 +1,3 @@
-/* global Primrose, MediaStreamTrack, THREE, Navigator, pliny */
-
 Primrose.Input.Camera = ( function () {
 
   /* polyfill */

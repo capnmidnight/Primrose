@@ -1,5 +1,3 @@
-/* global pliny */
-
 pliny.function({
   name: "getSetting",
   parameters: [

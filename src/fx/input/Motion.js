@@ -1,5 +1,3 @@
-/* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio, pliny */
-
 Primrose.Input.Motion = (function () {
 
   pliny.class({

@@ -1,6 +1,3 @@
-/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice, devicePixelRatio
- * Function, emit, isMobile, isiOS, shell, quad, HTMLCanvasElement, pliny */
-
 Primrose.BrowserEnvironment = (function () {
   "use strict";
 

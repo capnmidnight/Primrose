@@ -1,5 +1,3 @@
-/* global Primrose, requestAnimationFrame, Leap, LeapMotionInput, pliny */
-
 Primrose.Input.LeapMotion = ( function () {
   function processFingerParts ( i ) {
     return LeapMotion.FINGER_PARTS.map( function ( p ) {

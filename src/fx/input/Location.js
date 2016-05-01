@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Input.Location = ( function () {
 
   pliny.class({

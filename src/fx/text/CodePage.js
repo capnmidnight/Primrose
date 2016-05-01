@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Text.CodePage = ( function ( ) {
   "use strict";
 

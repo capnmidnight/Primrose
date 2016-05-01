@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Text.Grammars.JavaScript = ( function () {
   "use strict";
 

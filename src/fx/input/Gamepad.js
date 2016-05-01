@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Input.Gamepad = (function () {
 
 

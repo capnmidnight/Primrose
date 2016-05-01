@@ -1,6 +1,4 @@
-﻿/* global Primrose, pliny */
-
-pliny.function({
+﻿pliny.function({
   parent: "Primrose.DOM",
   name: "cascadeElement",
   description: "* If `id` is a string, tries to find the DOM element that has said ID\n\

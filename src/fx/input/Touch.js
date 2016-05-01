@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.Input.Touch = ( function () {
   
   pliny.class({

@@ -1,5 +1,3 @@
-/* global Primrose, pliny */
-
 Primrose.ButtonFactory = (function () {
 
   var buttonCount = 0;

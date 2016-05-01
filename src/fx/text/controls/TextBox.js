@@ -1,5 +1,3 @@
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Text.Controls.TextBox = (function () {
   "use strict";
 
