@@ -1,17 +1,12 @@
 ﻿var gulp = require("gulp"),
   babel = require("gulp-babel"),
-  clean = require("gulp-clean"),
   concat = require("gulp-concat"),
-  copy = require("gulp-copy"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
-  footer = require("gulp-footer"),
   fs = require("fs"),
-  header = require("gulp-header"),
   jshint = require("gulp-jshint"),
-  path = require("path"),
   pkg = require("./package.json"),
-  pliny = require("./pliny"),
+  pliny = require("pliny"),
   pug = require("gulp-pug"),
   recurseDirectory = require("./server/recurseDirectory"),
   rename = require("gulp-rename"),
@@ -78,7 +73,9 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 });
 
 function pugConfiguration(options, defaultData) {
-  var destination = ".";
+  var destination = ".",
+    size = (fs.lstatSync("Primrose.js").size / 1000).toFixed(1),
+    minifiedSize = (fs.lstatSync("Primrose.min.js").size / 1000).toFixed(1);
   return gulp.src(pugFileSpec, { base: "./" })
     .pipe(rename(function (path) {
       path.extname = "";
@@ -96,9 +93,7 @@ function pugConfiguration(options, defaultData) {
       parts.pop();
 
       var exists = fs.existsSync(scriptName);
-        txt = exists && fs.readFileSync(scriptName, "utf-8"),
-        size = (fs.lstatSync("Primrose.js").size / 1000).toFixed(1),
-        minifiedSize = (fs.lstatSync("Primrose.min.js").size / 1000).toFixed(1);
+      txt = exists && fs.readFileSync(scriptName, "utf-8");
 
       callback(null, {
         debug: defaultData.debug,
@@ -141,11 +136,6 @@ gulp.task("pug:debug:es5", function () {
 
 gulp.task("pug:debug:es6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
-});
-
-gulp.task("clean", ["jshint"], function () {
-  return gulp.src(["**/*.min.*", "!archive/*", "es5/*.js"])
-    .pipe(clean());
 });
 
 gulp.task("cssmin", function () {

@@ -109,7 +109,6 @@
     <Content Include="doc\frontPageBanner.html.jade" />
     <Compile Include="gulpfile.js" />
     <Content Include="lib\loggerInit.js" />
-    <Compile Include="pliny.js" />
     <Compile Include="server.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
