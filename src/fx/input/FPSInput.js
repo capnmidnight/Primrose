@@ -63,7 +63,6 @@ Primrose.Input.FPSInput = (function () {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
-          repetitions: 1,
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
@@ -81,7 +80,6 @@ Primrose.Input.FPSInput = (function () {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
-          repetitions: 1,
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
@@ -97,7 +95,6 @@ Primrose.Input.FPSInput = (function () {
       new Primrose.Input.Gamepad({
         pointer: {
           buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
-          repetitions: 1,
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
