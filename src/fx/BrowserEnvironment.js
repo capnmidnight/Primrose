@@ -241,8 +241,6 @@ Primrose.BrowserEnvironment = (function () {
           i, j;
         lt = t;
 
-        checkFullscreen();
-
         movePlayer(dt);
         moveSky();
         moveGround();
@@ -460,6 +458,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var animate = (t) => {
+        checkFullscreen();
         RAF(animate);
         update(t * MILLISECONDS_TO_SECONDS);
         render();
