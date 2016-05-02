@@ -5,7 +5,6 @@ Primrose.Input.Keyboard = ( function () {
     name: "Keyboard",
     baseClass: "Primrose.InputProcessor",
     description: "| [under construction]",
-    baseClass: "Primrose.InputProcessor",
     parameters: [
       {name: "", type: "", description: ""},
       {name: "", type: "", description: ""},
