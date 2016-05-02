@@ -67,10 +67,13 @@ var textured = (function () {
       material.color.set(0xffffff);
 
       var setTexture = function (texture) {
+        var surface;
         if (texture instanceof Primrose.Surface) {
+          surface = texture;
+          texture = surface.texture;
           if (options.scaleTextureWidth || !options.scaleTextureHeight) {
-            var imgWidth = texture.imageWidth,
-              imgHeight = texture.imageHeight,
+            var imgWidth = surface.imageWidth,
+              imgHeight = surface.imageHeight,
               dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
               dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
               newWidth = Math.pow(2, dimX),
@@ -87,14 +90,12 @@ var textured = (function () {
                 options.scaleTextureHeight = scaleY;
               }
 
-              texture.bounds.width = newWidth;
-              texture.bounds.height = newHeight;
-              texture.resize();
-              texture.invalidate();
+              surface.bounds.width = newWidth;
+              surface.bounds.height = newHeight;
+              surface.resize();
+              surface.render(true);
             }
           }
-
-          texture = texture.texture;
         }
 
 

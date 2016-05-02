@@ -504,7 +504,8 @@ Primrose.BrowserEnvironment = (function () {
 
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           if (blankEye) {
-            Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
+            eyeCounter = 1 - eyeCounter;
+            Primrose.Entity.eyeBlankAll(eyeCounter);
           }
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;

@@ -53,7 +53,11 @@ Primrose.Controls.Image = (function () {
       });
     }
 
-    _loadImage(i, src) {
+    loadImage(i, src) {
+      if (typeof i !== "number" && !(i instanceof Number)) {
+        src = i;
+        i = 0;
+      }
       return new Promise((resolve, reject) => {
         if (imageCache[src]) {
           resolve(imageCache[src]);
@@ -72,37 +76,32 @@ Primrose.Controls.Image = (function () {
         else {
           reject("Image was null");
         }
+      }).then((img) => {
+        this.setImage(i, img);
+        return img;
+      }).catch((err) => {
+        console.error("Failed to load image %s. Reason: %s", src, err);
+        this.setImage(i, null);
       });
-    }
-
-    loadImage(i, src) {
-      if (typeof i !== "number" && !(i instanceof Number)) {
-        src = i;
-        i = 0;
-      }
-      return this._loadImage(i, src)
-        .then((img) => {
-          this.setImage(i, img);
-          return img;
-        }).catch((err) => {
-          console.error("Failed to load image %s. Reason: %s", src, err);
-          this.setImage(i, null);
-        });
     }
 
     loadStereoImage(src) {
       return this.loadImage(src).then((img) => {
-        var options = {
-          bounds: new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height)
-        };
-        var a = new Primrose.Surface(options),
-          b = new Primrose.Surface(options);
+        var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
+          a = new Primrose.Surface({
+            id: this.id + "-left",
+            bounds: bounds
+          }),
+          b = new Primrose.Surface({
+            id: this.id + "-right",
+            bounds: bounds
+          });
         a.context.drawImage(img, 0, 0);
-        b.context.drawImage(img, -options.bounds.width, 0);
+        b.context.drawImage(img, -bounds.width, 0);
         this.setImage(0, a.canvas);
         this.setImage(1, b.canvas);
-        this.bounds.width = options.bounds.width;
-        this.bounds.height = options.bounds.height;
+        this.bounds.width = bounds.width;
+        this.bounds.height = bounds.height;
         this.render();
         return this;
       });
@@ -135,15 +134,15 @@ Primrose.Controls.Image = (function () {
       this.render();
     }
 
-    render() {
-      if (this._changed) {
-        if(this.resized){
+    render(force) {
+      if (this._changed || force) {
+        if (this.resized) {
           this.resize();
         }
-        else{
+        else if (this.image !== this._lastImage) {
           this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
         }
-        
+
         if (this.image) {
           this.context.drawImage(this.image, 0, 0);
         }
@@ -151,7 +150,7 @@ Primrose.Controls.Image = (function () {
         this._lastWidth = this.imageWidth;
         this._lastHeight = this.imageHeight;
         this._lastImage = this.image;
-        
+
         this.invalidate();
       }
     }

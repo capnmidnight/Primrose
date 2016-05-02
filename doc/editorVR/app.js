@@ -19,8 +19,8 @@ var GRASS = "images/grass.png",
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  stereoImage = new Primrose.Controls.Image(),
-  stereoImageWindow,
+  stereoImage = null,
+  stereoImageMesh = null,
 
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
@@ -34,26 +34,20 @@ var GRASS = "images/grass.png",
 
   editorCenter = new THREE.Object3D();
 
-function makeWindow(id, width, height, size) {
-  size = size || 1;
-  return textured(quad(size, size * height / width), new Primrose.Surface({
-    id: id,
-    bounds: new Primrose.Text.Rectangle(0, 0, width, height)
-  }));
-}
-
 app.addEventListener("ready", function () {
   app.scene.add(editorCenter);
   app.scene.add(subScene);
 
+  stereoImage = new Primrose.Controls.Image({
+    id: "StereoImage"
+  });
   stereoImage.loadStereoImage("images/prong.stereo.jpg")
-    .then(function (img) {
-      stereoImageWindow = makeWindow("StereoImage", stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
-      stereoImageWindow.rotation.set(0, 75 * Math.PI / 180, 0);
-      stereoImageWindow.position.set(-4, app.avatarHeight, -1);
-      stereoImageWindow.surface.appendChild(stereoImage);
-      app.scene.add(stereoImageWindow);
-      app.registerPickableObject(stereoImageWindow);
+    .then(function () {
+      stereoImageMesh = textured(quad(0.5, 0.5 * stereoImage.imageHeight / stereoImage.imageWidth), stereoImage);
+      stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
+      stereoImageMesh.position.set(-4, app.avatarHeight, -1);
+      app.scene.add(stereoImageMesh);
+      app.registerPickableObject(stereoImageMesh);
     });
 
   var editorSize = isMobile ? 512 : 1024,
