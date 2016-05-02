@@ -137,6 +137,20 @@ Primrose.InputProcessor = (function () {
       };
     }
 
+    maybeClone(arr) {
+      var output = [];
+      if (arr) {
+        for (var i = 0; i < arr.length; ++i) {
+          output[i] = {
+            index: Math.abs(arr[i]) - 1,
+            toggle: arr[i] < 0,
+            sign: (arr[i] < 0) ? -1 : 1
+          };
+        }
+      }
+      return output;
+    }
+
     update() {
       var t = performance.now() / 1000,
         dt = t - this.lastT;
@@ -523,20 +537,6 @@ Primrose.InputProcessor = (function () {
       return (this.enabled || (this.receiving && this.socketReady)) &&
         this.isEnabled(name) &&
         this.commands[name].state.pressed;
-    }
-
-    maybeClone(arr) {
-      var output = [];
-      if (arr) {
-        for (var i = 0; i < arr.length; ++i) {
-          output[i] = {
-            index: Math.abs(arr[i]) - 1,
-            toggle: arr[i] < 0,
-            sign: (arr[i] < 0) ? -1 : 1
-          };
-        }
-      }
-      return output;
     }
   }
   return InputProcessor;
