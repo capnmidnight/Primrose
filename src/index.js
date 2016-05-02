@@ -163,24 +163,6 @@ window.Primrose = (function () {
     return parseInt(s.substring(1), 16);
   });
 
-  pliny.function({
-    parent: "Primrose",
-    name: "loadTexture",
-    description: "Load a texture! Reads the THREE.ImageUtils.crossOrigin property to configure the Cross-Origin policy.",
-    paramters: [
-      { name: "url", type: "String", description: "The URL of the image to load as a texture." },
-      { name: "onLoad", type: "Function", description: "A callback for when the texture loads successfully." },
-      { name: "onProgress", type: "Function", description: "A callback for when the progress is made on loading the texture." },
-      { name: "onError", type: "Function", description: "A callback for if the texture fails to load." }
-    ]
-  });
-  var textureLoader = null;
-  Primrose.loadTexture = function (url) {
-    textureLoader = textureLoader || new THREE.TextureLoader();
-    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-    return new Promise((resolve, reject) => textureLoader.load(url, resolve, null, reject));
-  };
-
   pliny.value({
     name: "isHomeScreen",
     type: "Boolean",

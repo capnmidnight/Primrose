@@ -3,7 +3,18 @@
   description: "| [under construction]"
 });
 var textured = (function () {
-  var textureCache = {};
+  var textureLoader = null,
+    textureCache = {};
+  Primrose.loadTexture = function (url) {
+    if (!textureLoader) {
+      textureLoader = new THREE.TextureLoader();
+    }
+    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+    return cache(
+      `Image(${url})`,
+      () => new Promise((resolve, reject) => textureLoader.load(url, resolve, null, reject)));
+  };
+
   function textured(geometry, txt, options) {
     options = options || {};
     if (options.opacity === undefined) {
@@ -15,10 +26,10 @@ var textured = (function () {
       materialDescription = `material(${textureDescription}, ${options.unshaded}, ${options.opacity})`,
       material = cache(materialDescription, () => {
         var materialOptions = {
-          transparent: true,
+          transparent: options.opacity < 1,
           opacity: options.opacity,
           side: THREE.DoubleSide,
-          alphaTest: 0.5
+          alphaTest: 1 - options.opacity
         },
           MaterialType = THREE.MeshStandardMaterial;
 
