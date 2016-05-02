@@ -28,8 +28,7 @@ var textured = (function () {
         var materialOptions = {
           transparent: options.opacity < 1,
           opacity: options.opacity,
-          side: THREE.DoubleSide,
-          alphaTest: 1 - options.opacity
+          side: THREE.DoubleSide
         },
           MaterialType = THREE.MeshStandardMaterial;
 
@@ -57,8 +56,8 @@ var textured = (function () {
       obj = new THREE.Mesh(geometry, material);
     }
     else if (geometry instanceof THREE.Object3D) {
-      geometry.material = material;
       obj = geometry;
+      obj.material = material;
     }
 
     if (typeof txt === "number" || txt instanceof Number) {
@@ -156,7 +155,7 @@ var textured = (function () {
         setTexture(txt);
       }
     }
-
+    
     return obj;
   }
 
