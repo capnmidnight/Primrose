@@ -250,6 +250,9 @@ function replacePreBlocks() {
     nav.innerHTML += output;
     showHash();
     search.call(docSearch);
+    if (isMobile) {
+      document.querySelector("#contents > details").open = false;
+    }
   }
 
   // Setup the navigation events

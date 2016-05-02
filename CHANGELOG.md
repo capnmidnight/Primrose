@@ -12,8 +12,30 @@ KEY:
 ## v0.23.2 - 2016/05/06
 
 * Bugs
+  * Fixed documentation TOC hider for Firefox.
+  * Fixed transparency for the most part.
+  * Fixed error that would occur in the "editorVR" demo when the user elected to not return an update function from their script.
+  * Fixed "any key" behavior.
+  * Fixed an issue where entering fullscreen on mobile would fail because requesting pointerlock would fail.
+  * Added JSON MIME type for web server. I have no idea why my testing was working before.
+  * Fixed an issue where stereo images did not render in mono-view.
+  * Fixed an error when hiding the editor in the "editorVR" demo.
 * Admin
+  * Now showing menu on main page on mobile.
+  * Turned fog off by default. It's still an option.
+  * Removed the mailing list from the front page. It was breaking in some browsers and I don't have time to figure it out right now.
+  * Documentation now gets carved out to a separate file when releases are built, to make for a smaller main script file if you don't want to also load the documentation.
+  * Updated documentation for [`axis()`](index.html#axis).
+  * Automatically hide TOC on mobile.
 * Features
+  * Made the editor in the "editorVR" demo follow the user, so it's easier to find.
+  * Auto quality scaling: 
+    * If the animation falls under 45FPS, the resolution of the rendering is automatically degraded. 
+    * On desktop, if the animation hits 60+FPS, the resolution of the rendering is automatically upgraded. Mobile devices are too volatile to do this reliably.
+    * In the "editorVR" demo, if you hit the minimum quality setting and the rendering is still slow
+      * your live-coded script is canceled,
+      * all of your objects removed from the scene,
+      * and they don't return until you edit your script.
 * Open issues
   * Windows
     * Chromium - NONE! Full support, no extraneous issues.
@@ -58,6 +80,7 @@ KEY:
     * Documentation is only available in English.
     * Button model is too short for comfort.
     * Gaze action has no visual indicator of progress.
+    * Gaze action does not trigger Surfaces.
     * No support for Unicode "Alt-codes".
 
 ## v0.23.1 - 2016/04/29

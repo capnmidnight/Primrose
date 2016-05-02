@@ -128,7 +128,7 @@ h2, h3, h4{
 }
 
 #documentation a[target="_blank"]::after{
-  content: " ⇗";
+  content: " â‡—";
 }
 
 #documentation article h1 {
@@ -302,6 +302,7 @@ a {
 
 #docSearch{
   padding: 0.5em;
+  margin-top: 1em;
 }
 
 details > summary {
