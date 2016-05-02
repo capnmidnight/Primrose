@@ -7,7 +7,7 @@ Primrose.Keys = (function () {
     description: "Keycode values for system keys that are the same across all international standards"
   });
   var Keys = {
-    ANY: 0,
+    ANY: Number.MAX_VALUE,
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
