@@ -1004,20 +1004,15 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setPointerLock = () => {
-        if (Primrose.Input.VR.Version >= 1) {
-          return this.goVR();
-        }
-        else if (isMobile) {
-          return this.goFullScreen();
-        }
-        else {
-          return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
-        }
+        return ((Primrose.Input.Mouse.Lock.isActive || isMobile)
+          ? Promise.resolve()
+          : Primrose.Input.Mouse.Lock.request(this.renderer.domElement))
+          .then(setFullscreen);
       };
 
       var setFullscreen = () => {
         if (!isFullScreenMode()) {
-          if (Primrose.Input.VR.Version > 0) {
+          if (Primrose.Input.VR.Version >= 1) {
             this.goVR();
           }
           else {
