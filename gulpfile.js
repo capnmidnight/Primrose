@@ -12,7 +12,6 @@
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   pathX = /.*\/(.*).js/,
-  pugFileSpec = ["*.jade", "doc/**/*.jade"],
   sourceFiles = recurseDirectory("src"),
   headerFiles = [
     "node_modules/logger/logger.js",
@@ -76,7 +75,7 @@ function pugConfiguration(options, defaultData) {
   var destination = ".",
     size = (fs.lstatSync("Primrose.js").size / 1000).toFixed(1),
     minifiedSize = (fs.lstatSync("Primrose.min.js").size / 1000).toFixed(1);
-  return gulp.src(pugFileSpec, { base: "./" })
+  return gulp.src(["*.jade", "doc/**/*.jade"], { base: "./" })
     .pipe(rename(function (path) {
       path.extname = "";
       return path;
