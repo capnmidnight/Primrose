@@ -30,7 +30,9 @@ var GRASS = "images/grass.png",
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null;
+  scriptAnimate = null,
+
+  editorCenter = new THREE.Object3D();
 
 function makeWindow(id, width, height, size) {
   size = size || 1;
@@ -41,6 +43,7 @@ function makeWindow(id, width, height, size) {
 }
 
 app.addEventListener("ready", function () {
+  app.scene.add(editorCenter);
   app.scene.add(subScene);
 
   stereoImage.loadStereoImage("images/prong.stereo.jpg")
@@ -103,8 +106,8 @@ app.addEventListener("ready", function () {
   editorFrame.appendChild(button1);
   editorFrameMesh = textured(shell(3, 10, 10), editorFrame);
   editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, app.avatarHeight, 0);
-  app.scene.add(editorFrameMesh);
+  editorFrameMesh.position.set(0, 0, 0);
+  editorCenter.add(editorFrameMesh);
   app.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Text.Controls.TextBox({
@@ -118,7 +121,7 @@ app.addEventListener("ready", function () {
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
-  documentationMesh.position.set(-3, app.avatarHeight, -2);
+  documentationMesh.position.set(-2.2, app.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
   app.scene.add(documentationMesh);
   app.registerPickableObject(documentationMesh);
@@ -134,6 +137,8 @@ app.addEventListener("update", function (dt) {
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
+
+  editorCenter.position.copy(app.player.position);
 
   if (scriptAnimate) {
     scriptAnimate.call(app, dt);
