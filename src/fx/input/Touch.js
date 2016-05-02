@@ -25,6 +25,8 @@ Primrose.Input.Touch = ( function () {
             this.setAxis("LY" + t.identifier, t.pageY);
           }
 
+          this.setButton("FINGER" + t.identifier, stateChange);
+
           var mask = 1 << t.identifier;
           if (stateChange) {
             this.FINGERS |= mask;
@@ -46,7 +48,7 @@ Primrose.Input.Touch = ( function () {
   Touch.NUM_FINGERS = 10;
 
   var axes = ["FINGERS"];
-  for ( var i = 0; i < Touch.NUM_FINGERS; ++i ) {
+  for (var i = 0; i < Touch.NUM_FINGERS; ++i) {
     axes.push( "X" + i );
     axes.push( "Y" + i );
   }
