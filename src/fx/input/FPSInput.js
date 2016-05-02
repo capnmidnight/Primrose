@@ -20,18 +20,6 @@ Primrose.Input.FPSInput = (function () {
       // keyboard should always run on the window
       new Primrose.Input.Keyboard(window, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
-        pointer1: {
-          buttons: [Primrose.Keys.SPACE],
-          repetitions: 1,
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
-        pointer2: {
-          buttons: [Primrose.Keys.ENTER],
-          repetitions: 1,
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
         fullScreen: {
           buttons: [Primrose.Keys.F],
           commandDown: emit.bind(this, "fullscreen")
