@@ -104,7 +104,9 @@ app.addEventListener("ready", function () {
   editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
-  editorFrameMesh = textured(shell(3, 10, 10), editorFrame);
+  editorFrameMesh = textured(shell(3, 10, 10), editorFrame, {
+    opacity: 0.75
+  });
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, 0, 0);
   editorCenter.add(editorFrameMesh);
