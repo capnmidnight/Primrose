@@ -9,6 +9,57 @@ KEY:
 * **Windows** - Windows 8.1 and Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.23.2 - 2016/05/06
+
+* Bugs
+* Admin
+* Features
+* Open issues
+  * Windows
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - No HMD support (Of course, WebVR not yet available in Chrome).
+    * Nightly
+      * Only the "editorVR" demo currently works.
+      * Text baseline in canvas is incorrect.
+      * The image does not fill the HMD.
+      * Gamepad input slews to the right.
+    * Firefox
+      * Only the "editorVR" demo currently works.
+      * Text baseline in canvas is incorrect.
+      * No HMD support (WebVR not yet available in Firefox).
+      * Gamepad input slews to the right.
+  * Android
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - Works, but Device Orientation fallback has some problems with drift.
+    * Nightly
+      * Only the "editorVR" demo currently works.
+      * Low frame rate in fullscreen mode.
+    * Firefox
+      * Device Orientation fallback has some problems with drift.
+      * Image inverts under certain tilt conditions.
+      * Only the "editorVR" demo currently works.
+      * Low frame rate in fullscreen mode.
+    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
+      * Orientation tracking is pretty bad, making the overall experience very bad.
+      * The touchpad doesn't work, so interactions are not working.
+      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
+  * All platforms
+    * Dynamic object allocation causing periodic garbage collections.
+    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
+    * Leap Motion input disabled.
+    * Multiplayer disabled.
+    * Device fusion over WebRTC disabled.
+    * Passthrough Cameras disabled.
+    * No options UI for keyboard preferences.
+    * No text-input for single-button, passive HMD devices.
+    * No support for tabbing through text fields.
+    * CSS text in documentation is not syntax highlighted.
+    * HTML text in documentation is not syntax highlighted.
+    * Documentation is only available in English.
+    * Button model is too short for comfort.
+    * Gaze action has no visual indicator of progress.
+    * No support for Unicode "Alt-codes".
+
 ## v0.23.1 - 2016/04/29
 
 * Bugs
