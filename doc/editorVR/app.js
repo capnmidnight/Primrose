@@ -152,7 +152,7 @@ app.addEventListener("keydown", function (evt) {
     if (evt.keyCode === Primrose.Keys.E) {
       documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
       documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
-      if (!editor.mesh.visible && app.currentEditor && app.currentEditor.focused) {
+      if (!editorFrameMesh.visible && app.currentEditor && app.currentEditor.focused) {
         app.currentEditor.blur();
         app.currentEditor = null;
       }
