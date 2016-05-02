@@ -1051,7 +1051,7 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("focus", this.start, false);
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
-      this.input.addEventListener("zero", this.zero.bind(this), false);
+      this.input.addEventListener("zero", this.zero, false);
       this.input.addEventListener("lockpointer", setPointerLock, false);
       this.input.addEventListener("fullscreen", setFullscreen, false);
       this.input.addEventListener("pointerstart", pointerStart, false);
