@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, THREE, pliny */
-
 Primrose.Text.Controls.PlainText = function () {
 
   pliny.class({

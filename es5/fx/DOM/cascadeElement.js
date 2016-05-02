@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 pliny.function({
   parent: "Primrose.DOM",
   name: "cascadeElement",
@@ -87,7 +85,7 @@ Primrose.DOM.cascadeElement = function (id, tag, DOMClass) {
   if (elem === null) {
     pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
     throw new Error(id + " does not refer to a valid " + tag + " element.");
-  } else {
+  } else if (tag !== "canvas") {
     elem.innerHTML = "";
   }
   return elem;

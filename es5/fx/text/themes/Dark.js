@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Themes.Dark = function () {
   "use strict";
 

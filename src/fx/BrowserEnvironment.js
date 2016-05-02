@@ -470,7 +470,7 @@ Primrose.BrowserEnvironment = (function () {
       var render = () => {
         if (this.inVR) {
           this.renderer.clear(true, true, true);
-          var trans = xVR.transforms;
+          var trans = this.input.VR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,
@@ -1004,7 +1004,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setPointerLock = () => {
-        if (isGearVR) {
+        if (Primrose.Input.VR.Version >= 1) {
           return this.goVR();
         }
         else if (isMobile) {

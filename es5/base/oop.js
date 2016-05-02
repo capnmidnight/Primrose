@@ -2,8 +2,6 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-/* global pliny */
-
 pliny.function({
   name: "copyObject",
   description: "| [under construction]"
@@ -27,15 +25,6 @@ function copyObject(dest, source) {
       }
     }
   }
-}
-
-pliny.function({
-  name: "inherit",
-  description: "| [under construction]"
-});
-function inherit(classType, parentType) {
-  classType.prototype = Object.create(parentType.prototype);
-  classType.prototype.constructor = classType;
 }
 
 pliny.function({

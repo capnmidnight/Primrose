@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Grammar = function () {
   "use strict";
 

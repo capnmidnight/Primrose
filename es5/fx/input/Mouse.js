@@ -1,69 +1,92 @@
 "use strict";
 
-/* global Primrose, THREE, isChrome, pliny */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.Mouse = function () {
 
   pliny.class({
     parent: "Primrose.Input",
     name: "Mouse",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function MouseInput(name, DOMElement, commands, socket) {
-    DOMElement = DOMElement || window;
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket, MouseInput.AXES);
-    this.setLocation = function (x, y) {
-      this.X = x;
-      this.Y = y;
-    };
 
-    this.setMovement = function (dx, dy) {
-      this.X += dx;
-      this.Y += dy;
-    };
+  var Mouse = function (_Primrose$InputProces) {
+    _inherits(Mouse, _Primrose$InputProces);
 
-    DOMElement.addEventListener("mousedown", function (event) {
-      this.setButton(event.button, true);
-      this.BUTTONS = event.buttons << 10;
-      this.update();
-    }.bind(this), false);
+    function Mouse(DOMElement, commands, socket) {
+      _classCallCheck(this, Mouse);
 
-    DOMElement.addEventListener("mouseup", function (event) {
-      this.setButton(event.button, false);
-      this.BUTTONS = event.buttons << 10;
-      this.update();
-    }.bind(this), false);
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Mouse).call(this, "Mouse", commands, socket));
 
-    DOMElement.addEventListener("mousemove", function (event) {
-      this.BUTTONS = event.buttons << 10;
-      if (MouseInput.Lock.isActive) {
-        var mx = event.movementX,
-            my = event.movementY;
+      DOMElement = DOMElement || window;
 
-        if (mx === undefined) {
-          mx = event.webkitMovementX || event.mozMovementX || 0;
-          my = event.webkitMovementY || event.mozMovementY || 0;
+      DOMElement.addEventListener("mousedown", function (event) {
+        _this.setButton(event.button, true);
+        _this.BUTTONS = event.buttons << 10;
+        _this.update();
+      }, false);
+
+      DOMElement.addEventListener("mouseup", function (event) {
+        _this.setButton(event.button, false);
+        _this.BUTTONS = event.buttons << 10;
+        _this.update();
+      }, false);
+
+      DOMElement.addEventListener("mousemove", function (event) {
+        _this.BUTTONS = event.buttons << 10;
+        if (Mouse.Lock.isActive) {
+          var mx = event.movementX,
+              my = event.movementY;
+
+          if (mx === undefined) {
+            mx = event.webkitMovementX || event.mozMovementX || 0;
+            my = event.webkitMovementY || event.mozMovementY || 0;
+          }
+          _this.setMovement(mx, my);
+        } else {
+          _this.setLocation(event.layerX, event.layerY);
         }
-        this.setMovement(mx, my);
-      } else {
-        this.setLocation(event.layerX, event.layerY);
-      }
-      this.update();
-    }.bind(this), false);
+        _this.update();
+      }, false);
 
-    DOMElement.addEventListener("wheel", function (event) {
-      if (isChrome) {
-        this.W += event.deltaX;
-        this.Z += event.deltaY;
-      } else if (event.shiftKey) {
-        this.W += event.deltaY;
-      } else {
-        this.Z += event.deltaY;
+      DOMElement.addEventListener("wheel", function (event) {
+        if (isChrome) {
+          _this.W += event.deltaX;
+          _this.Z += event.deltaY;
+        } else if (event.shiftKey) {
+          _this.W += event.deltaY;
+        } else {
+          _this.Z += event.deltaY;
+        }
+        event.preventDefault();
+        _this.update();
+      }, false);
+      return _this;
+    }
+
+    _createClass(Mouse, [{
+      key: "setLocation",
+      value: function setLocation(x, y) {
+        this.X = x;
+        this.Y = y;
       }
-      event.preventDefault();
-      this.update();
-    }.bind(this), false);
-  }
+    }, {
+      key: "setMovement",
+      value: function setMovement(dx, dy) {
+        this.X += dx;
+        this.Y += dy;
+      }
+    }]);
+
+    return Mouse;
+  }(Primrose.InputProcessor);
 
   var elementName = findProperty(document, ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"]),
       changeEventName = findProperty(document, ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"]),
@@ -74,7 +97,7 @@ Primrose.Input.Mouse = function () {
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
 
-  MouseInput.Lock = {
+  Mouse.Lock = {
     addChangeListener: function addChangeListener(thunk, bubbles) {
       return document.addEventListener(changeEventName, thunk, bubbles);
     },
@@ -96,13 +119,13 @@ Primrose.Input.Mouse = function () {
           if (timeout) {
             clearTimeout(timeout);
           }
-          MouseInput.Lock.removeChangeListener(onPointerLock);
-          MouseInput.Lock.removeErrorListener(onPointerLockError);
+          Mouse.Lock.removeChangeListener(onPointerLock);
+          Mouse.Lock.removeErrorListener(onPointerLockError);
         };
 
         onPointerLock = function onPointerLock() {
           setTimeout(tearDown);
-          resolve(MouseInput.Lock.element);
+          resolve(Mouse.Lock.element);
         };
 
         onPointerLockError = function onPointerLockError(evt) {
@@ -110,8 +133,8 @@ Primrose.Input.Mouse = function () {
           reject(evt);
         };
 
-        MouseInput.Lock.addChangeListener(onPointerLock, false);
-        MouseInput.Lock.addErrorListener(onPointerLockError, false);
+        Mouse.Lock.addChangeListener(onPointerLock, false);
+        Mouse.Lock.addErrorListener(onPointerLockError, false);
 
         if (act()) {
           tearDown();
@@ -127,11 +150,11 @@ Primrose.Input.Mouse = function () {
       });
     },
     request: function request(elem) {
-      return MouseInput.Lock.withChange(function () {
+      return Mouse.Lock.withChange(function () {
         if (!requestMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (MouseInput.Lock.isActive) {
+        } else if (Mouse.Lock.isActive) {
           return true;
         } else {
           elem[requestMethodName]();
@@ -139,11 +162,11 @@ Primrose.Input.Mouse = function () {
       });
     },
     exit: function exit() {
-      return MouseInput.Lock.withChange(function () {
+      return Mouse.Lock.withChange(function () {
         if (!exitMethodName) {
           console.error("No Pointer Lock API support.");
           throw new Error("No Pointer Lock API support.");
-        } else if (!MouseInput.Lock.isActive) {
+        } else if (!Mouse.Lock.isActive) {
           return true;
         } else {
           document[exitMethodName]();
@@ -152,7 +175,7 @@ Primrose.Input.Mouse = function () {
     }
   };
 
-  Object.defineProperties(MouseInput.Lock, {
+  Object.defineProperties(Mouse.Lock, {
     element: {
       get: function get() {
         return document[elementName];
@@ -160,13 +183,12 @@ Primrose.Input.Mouse = function () {
     },
     isActive: {
       get: function get() {
-        return !!MouseInput.Lock.element;
+        return !!Mouse.Lock.element;
       }
     }
   });
 
-  MouseInput.AXES = ["X", "Y", "Z", "W", "BUTTONS"];
-  Primrose.Input.ButtonAndAxis.inherit(MouseInput);
+  Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);
 
-  return MouseInput;
+  return Mouse;
 }();

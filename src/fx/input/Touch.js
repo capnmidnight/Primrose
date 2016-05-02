@@ -36,6 +36,7 @@ Primrose.Input.Touch = ( function () {
             this.FINGERS &= mask;
           }
         }
+        event.preventDefault();
         this.update();
       }
 

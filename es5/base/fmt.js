@@ -1,7 +1,5 @@
 "use strict";
 
-/* global pliny */
-
 pliny.function({
   name: "sigfig",
   description: "Formats a decimal number to a certain length of decimal points.",

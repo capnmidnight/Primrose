@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, Window, pliny */
-
 Primrose.Output.Audio3D = function () {
 
   // polyfill

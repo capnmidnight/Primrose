@@ -2,8 +2,6 @@
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* global Primrose, HTMLSelectElement, pliny */
-
 Primrose.DOM.StateList = function () {
   pliny.class({
     parent: "Primrose.DOM",

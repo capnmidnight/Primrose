@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Keys = function () {
   "use strict";
 
@@ -11,7 +9,7 @@ Primrose.Keys = function () {
     description: "Keycode values for system keys that are the same across all international standards"
   });
   var Keys = {
-    ANY: 0,
+    ANY: Number.MAX_VALUE,
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
@@ -142,8 +140,6 @@ Primrose.Keys = function () {
       Keys[val] = key;
     }
   }
-
-  pliny.setEnumerationValues("Primrose.Keys", Keys);
 
   return Keys;
 }();

@@ -2,8 +2,6 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-/* global pliny */
-
 pliny.function({
   name: "getSetting",
   parameters: [{ name: " name", type: "string", description: "The name of the setting to read." }, { name: "defValue", type: "Object", description: "The default value to return, if the setting is not present in `localStorage`." }],

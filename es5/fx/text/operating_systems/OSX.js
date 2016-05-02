@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.OperatingSystems.OSX = function () {
   "use strict";
 

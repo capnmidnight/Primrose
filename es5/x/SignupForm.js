@@ -8,6 +8,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Primrose.X.SignupForm = function () {
   var COUNTER = 0;
+  pliny.class({
+    parent: "Primrose.X",
+    name: "SignupForm",
+    description: "| [Under Construction]",
+    baseClass: "Primrose.Entity"
+  });
 
   var SignupForm = function (_Primrose$Entity) {
     _inherits(SignupForm, _Primrose$Entity);

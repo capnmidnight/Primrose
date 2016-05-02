@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, URL, pliny */
-
 Primrose.Workerize = function () {
   pliny.class({
     parent: "Primrose",

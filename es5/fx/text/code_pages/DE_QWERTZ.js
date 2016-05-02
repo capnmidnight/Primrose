@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.DE_QWERTZ = function () {
   "use strict";
 

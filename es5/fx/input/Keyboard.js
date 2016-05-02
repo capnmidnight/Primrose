@@ -1,30 +1,43 @@
 "use strict";
 
-/* global Primrose, pliny */
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.Keyboard = function () {
 
   pliny.class({
     parent: "Primrose.Input",
     name: "Keyboard",
-    baseClass: "Primrose.Input.ButtonAndAxis",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]",
     parameters: [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]
   });
-  function KeyboardInput(name, DOMElement, commands, socket) {
-    DOMElement = DOMElement || window;
 
-    Primrose.Input.ButtonAndAxis.call(this, name, commands, socket);
+  var Keyboard = function (_Primrose$InputProces) {
+    _inherits(Keyboard, _Primrose$InputProces);
 
-    function execute(stateChange, event) {
-      this.setButton(event.keyCode, stateChange);
-      this.update();
+    function Keyboard(DOMElement, commands, socket) {
+      _classCallCheck(this, Keyboard);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Keyboard).call(this, "Keyboard", commands, socket));
+
+      DOMElement = DOMElement || window;
+
+      function execute(stateChange, event) {
+        this.setButton(event.keyCode, stateChange);
+        this.update();
+      }
+
+      DOMElement.addEventListener("keydown", execute.bind(_this, true), false);
+      DOMElement.addEventListener("keyup", execute.bind(_this, false), false);
+      return _this;
     }
 
-    DOMElement.addEventListener("keydown", execute.bind(this, true), false);
-    DOMElement.addEventListener("keyup", execute.bind(this, false), false);
-  }
+    return Keyboard;
+  }(Primrose.InputProcessor);
 
-  Primrose.Input.ButtonAndAxis.inherit(KeyboardInput);
-  return KeyboardInput;
+  return Keyboard;
 }();

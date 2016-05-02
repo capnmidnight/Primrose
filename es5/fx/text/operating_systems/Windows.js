@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 ////
 // cut, copy, and paste commands are events that the browser manages,
 // so we don't have to include handlers for them here.

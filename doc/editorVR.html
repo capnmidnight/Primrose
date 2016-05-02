@@ -254,8 +254,8 @@ var GRASS = &quot;images/grass.png&quot;,
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  stereoImage = new Primrose.Controls.Image(),
-  stereoImageWindow,
+  stereoImage = null,
+  stereoImageMesh = null,
 
   modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
   modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
@@ -265,27 +265,24 @@ var GRASS = &quot;images/grass.png&quot;,
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null;
+  scriptAnimate = null,
 
-function makeWindow(id, width, height, size) {
-  size = size || 1;
-  return textured(quad(size, size * height / width), new Primrose.Surface({
-    id: id,
-    bounds: new Primrose.Text.Rectangle(0, 0, width, height)
-  }));
-}
+  editorCenter = new THREE.Object3D();
 
 app.addEventListener(&quot;ready&quot;, function () {
+  app.scene.add(editorCenter);
   app.scene.add(subScene);
 
+  stereoImage = new Primrose.Controls.Image({
+    id: &quot;StereoImage&quot;
+  });
   stereoImage.loadStereoImage(&quot;images/prong.stereo.jpg&quot;)
-    .then(function (img) {
-      stereoImageWindow = makeWindow(&quot;StereoImage&quot;, stereoImage.imageWidth, stereoImage.imageHeight, 0.5);
-      stereoImageWindow.rotation.set(0, 75 * Math.PI / 180, 0);
-      stereoImageWindow.position.set(-4, app.avatarHeight, -1);
-      stereoImageWindow.surface.appendChild(stereoImage);
-      app.scene.add(stereoImageWindow);
-      app.registerPickableObject(stereoImageWindow);
+    .then(function () {
+      stereoImageMesh = textured(quad(0.5, 0.5 * stereoImage.imageHeight / stereoImage.imageWidth), stereoImage);
+      stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
+      stereoImageMesh.position.set(-4, app.avatarHeight, -1);
+      app.scene.add(stereoImageMesh);
+      app.registerPickableObject(stereoImageMesh);
     });
 
   var editorSize = isMobile ? 512 : 1024,
@@ -336,10 +333,12 @@ app.addEventListener(&quot;ready&quot;, function () {
   editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
-  editorFrameMesh = textured(shell(3, 10, 10), editorFrame);
+  editorFrameMesh = textured(shell(3, 10, 10), editorFrame, {
+    opacity: 0.75
+  });
   editorFrameMesh.name = &quot;MyWindow&quot;;
-  editorFrameMesh.position.set(0, app.avatarHeight, 0);
-  app.scene.add(editorFrameMesh);
+  editorFrameMesh.position.set(0, 0, 0);
+  editorCenter.add(editorFrameMesh);
   app.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Text.Controls.TextBox({
@@ -353,7 +352,7 @@ app.addEventListener(&quot;ready&quot;, function () {
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
-  documentationMesh.position.set(-3, app.avatarHeight, -2);
+  documentationMesh.position.set(-2.2, app.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
   app.scene.add(documentationMesh);
   app.registerPickableObject(documentationMesh);
@@ -370,6 +369,8 @@ app.addEventListener(&quot;update&quot;, function (dt) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
+  editorCenter.position.copy(app.player.position);
+
   if (scriptAnimate) {
     scriptAnimate.call(app, dt);
   }
@@ -378,8 +379,9 @@ app.addEventListener(&quot;update&quot;, function (dt) {
 app.addEventListener(&quot;keydown&quot;, function (evt) {
   if (evt[modA] &amp;&amp; evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      documentation.mesh.visible = output.mesh.visible = editor.mesh.visible = !editor.mesh.visible;
-      if (!editor.mesh.visible &amp;&amp; app.currentEditor &amp;&amp; app.currentEditor.focused) {
+      documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
+      documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
+      if (!editorFrameMesh.visible &amp;&amp; app.currentEditor &amp;&amp; app.currentEditor.focused) {
         app.currentEditor.blur();
         app.currentEditor = null;
       }
@@ -421,8 +423,13 @@ function updateScript() {
         subScene.remove(subScene.children[i]);
       }
       scriptAnimate = scriptUpdate.call(app, subScene);
-      scriptAnimate(0);
+      if (scriptAnimate) {
+        scriptAnimate(0);
+      }
       console.log(&quot;----- script loaded -----&quot;);
+      if (!scriptAnimate) {
+        console.log(&quot;----- No update script provided -----&quot;);
+      }
     }
     catch (exp) {
       scriptAnimate = null;

@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, THREE, pliny */
-
 Primrose.ModelLoader = function () {
   // If Three.js hasn't been loaded, then this module doesn't make sense and we
   // can just return a shim to prevent errors from occuring. This is useful in

@@ -1,7 +1,5 @@
 "use strict";
 
-/* global qp, Primrose, pliny */
-
 Primrose.Text.Cursor = function () {
   "use strict";
 

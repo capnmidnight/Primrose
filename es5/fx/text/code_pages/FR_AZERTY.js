@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.FR_AZERTY = function () {
   "use strict";
 

@@ -1,7 +1,5 @@
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.EN_US = function () {
   "use strict";
 

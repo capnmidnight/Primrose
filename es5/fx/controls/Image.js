@@ -8,8 +8,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Controls.Image = function () {
   "use strict";
 
@@ -21,6 +19,7 @@ Primrose.Controls.Image = function () {
     parent: "Primrose.Controls",
     name: "Image",
     description: "A simple 2D image to put on a Surface.",
+    baseClass: "Primrose.Surface",
     parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Button." }]
   });
 
@@ -69,8 +68,14 @@ Primrose.Controls.Image = function () {
     }
 
     _createClass(Image, [{
-      key: "_loadImage",
-      value: function _loadImage(i, src) {
+      key: "loadImage",
+      value: function loadImage(i, src) {
+        var _this2 = this;
+
+        if (typeof i !== "number" && !(i instanceof Number)) {
+          src = i;
+          i = 0;
+        }
         return new Promise(function (resolve, reject) {
           if (imageCache[src]) {
             resolve(imageCache[src]);
@@ -87,18 +92,7 @@ Primrose.Controls.Image = function () {
           } else {
             reject("Image was null");
           }
-        });
-      }
-    }, {
-      key: "loadImage",
-      value: function loadImage(i, src) {
-        var _this2 = this;
-
-        if (typeof i !== "number" && !(i instanceof Number)) {
-          src = i;
-          i = 0;
-        }
-        return this._loadImage(i, src).then(function (img) {
+        }).then(function (img) {
           _this2.setImage(i, img);
           return img;
         }).catch(function (err) {
@@ -112,17 +106,21 @@ Primrose.Controls.Image = function () {
         var _this3 = this;
 
         return this.loadImage(src).then(function (img) {
-          var options = {
-            bounds: new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height)
-          };
-          var a = new Primrose.Surface(options),
-              b = new Primrose.Surface(options);
+          var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
+              a = new Primrose.Surface({
+            id: _this3.id + "-left",
+            bounds: bounds
+          }),
+              b = new Primrose.Surface({
+            id: _this3.id + "-right",
+            bounds: bounds
+          });
           a.context.drawImage(img, 0, 0);
-          b.context.drawImage(img, -options.bounds.width, 0);
+          b.context.drawImage(img, -bounds.width, 0);
           _this3.setImage(0, a.canvas);
           _this3.setImage(1, b.canvas);
-          _this3.bounds.width = options.bounds.width;
-          _this3.bounds.height = options.bounds.height;
+          _this3.bounds.width = bounds.width;
+          _this3.bounds.height = bounds.height;
           _this3.render();
           return _this3;
         });
@@ -147,11 +145,11 @@ Primrose.Controls.Image = function () {
       }
     }, {
       key: "render",
-      value: function render() {
-        if (this._changed) {
+      value: function render(force) {
+        if (this._changed || force) {
           if (this.resized) {
             this.resize();
-          } else {
+          } else if (this.image !== this._lastImage) {
             this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
           }
 

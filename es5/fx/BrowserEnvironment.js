@@ -4,9 +4,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice, devicePixelRatio
- * Function, emit, isMobile, isiOS, shell, quad, HTMLCanvasElement, pliny */
-
 Primrose.BrowserEnvironment = function () {
   "use strict";
 
@@ -270,7 +267,7 @@ Primrose.BrowserEnvironment = function () {
             drive = _this.input.getValue("drive");
 
         if (_this.inVR || isMobile) {
-          _this.input.getQuaternion("headRX", "headRY", "headRZ", "headRW", qHead);
+          _this.input.getOrientation(qHead);
         } else {
           qHead.set(0, 0, 0, 1);
         }
@@ -432,8 +429,8 @@ Primrose.BrowserEnvironment = function () {
                 control = object.button || object.surface;
 
             if (!lockedToEditor()) {
-              buttons |= _this.input.keyboard.getValue("select");
-              clickChanged = clickChanged || _this.input.keyboard.getValue("dSelect") !== 0;
+              buttons |= _this.input.Keyboard.getValue("select");
+              clickChanged = clickChanged || _this.input.Keyboard.getValue("dSelect") !== 0;
             }
 
             if (!clickChanged && buttons > 0) {
@@ -463,7 +460,7 @@ Primrose.BrowserEnvironment = function () {
       var render = function render() {
         if (_this.inVR) {
           _this.renderer.clear(true, true, true);
-          var trans = _this.input.vr.transforms;
+          var trans = _this.input.VR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
                 v = st.viewport,
@@ -484,16 +481,17 @@ Primrose.BrowserEnvironment = function () {
             _this.renderer.setViewport(v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE);
             _this.renderer.render(_this.scene, _this.camera);
           }
-          _this.input.vr.currentDisplay.submitFrame(_this.input.vr.currentPose);
+          _this.input.VR.currentDisplay.submitFrame(_this.input.VR.currentPose);
         }
 
         if (!isMobile) {
           _this.audio.setPlayer(_this.camera);
         }
 
-        if (!_this.inVR || _this.input.vr.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
+        if (!_this.inVR || _this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
           if (blankEye) {
-            Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
+            eyeCounter = 1 - eyeCounter;
+            Primrose.Entity.eyeBlankAll(eyeCounter);
           }
           _this.nose.visible = false;
           _this.camera.fov = _this.options.defaultFOV;
@@ -508,7 +506,6 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var modifyScreen = function modifyScreen() {
-        _this.renderer.domElement.style.cursor = "default";
         var canvasWidth,
             canvasHeight,
             aspectWidth,
@@ -537,9 +534,9 @@ Primrose.BrowserEnvironment = function () {
         }
 
         if (_this.inVR) {
-          _this.input.vr.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
+          _this.input.VR.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
 
-          var p = _this.input.vr.transforms,
+          var p = _this.input.VR.transforms,
               l = p[0],
               r = p[1];
           canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
@@ -668,7 +665,8 @@ Primrose.BrowserEnvironment = function () {
           });
         }
       }).then(function () {
-        return fire("ready");
+        _this.renderer.domElement.style.cursor = "default";
+        fire("ready");
       });
 
       //
@@ -701,7 +699,7 @@ Primrose.BrowserEnvironment = function () {
           }
         });
       } else {
-        audioReady = new Promise.resolve().then(console.log.bind(console, "No audio files loaded"));
+        audioReady = Promise.resolve();
       }
 
       var allReady = Promise.all([modelsReady, audioReady]);
@@ -802,7 +800,7 @@ Primrose.BrowserEnvironment = function () {
 
       var RAF = function RAF(callback) {
         if (_this.inVR) {
-          _this.timer = _this.input.vr.currentDisplay.requestAnimationFrame(callback);
+          _this.timer = _this.input.VR.currentDisplay.requestAnimationFrame(callback);
         } else {
           _this.timer = requestAnimationFrame(callback);
         }
@@ -818,7 +816,7 @@ Primrose.BrowserEnvironment = function () {
 
       this.stop = function () {
         if (_this.inVR) {
-          _this.input.vr.currentDisplay.cancelAnimationFrame(_this.timer);
+          _this.input.VR.currentDisplay.cancelAnimationFrame(_this.timer);
         } else {
           cancelAnimationFrame(_this.timer);
         }
@@ -896,11 +894,11 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.goVR = function () {
-        if (_this.input.vr) {
-          return _this.input.vr.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
+        if (_this.input.VR) {
+          return _this.input.VR.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
             if (Primrose.Input.VR.Version === 1 && isMobile) {
               var remover = function remover() {
-                _this.input.vr.currentDisplay.exitPresent();
+                _this.input.VR.currentDisplay.exitPresent();
                 window.removeEventListener("vrdisplaypresentchange", remover);
               };
 
@@ -931,7 +929,7 @@ Primrose.BrowserEnvironment = function () {
 
       Primrose.Input.Mouse.Lock.addChangeListener(function (evt) {
         if (!Primrose.Input.Mouse.Lock.isActive && _this.inVR) {
-          _this.input.vr.currentDisplay.exitPresent();
+          _this.input.VR.currentDisplay.exitPresent();
         }
       }, false);
 
@@ -955,7 +953,7 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var setPointerLock = function setPointerLock() {
-        if (isGearVR) {
+        if (Primrose.Input.VR.Version >= 1) {
           return _this.goVR();
         } else if (isMobile) {
           return _this.goFullScreen();
@@ -1008,7 +1006,7 @@ Primrose.BrowserEnvironment = function () {
       Object.defineProperties(this, {
         inVR: {
           get: function get() {
-            return _this.input.vr && _this.input.vr.currentDisplay && _this.input.vr.currentDisplay.isPresenting;
+            return _this.input.VR && _this.input.VR.currentDisplay && _this.input.VR.currentDisplay.isPresenting;
           }
         }
       });
@@ -1113,7 +1111,7 @@ Primrose.BrowserEnvironment = function () {
   BrowserEnvironment.DEFAULTS = {
     useNose: false,
     useLeap: false,
-    useFog: true,
+    useFog: false,
     avatarHeight: 1.75,
     walkSpeed: 2,
     // The acceleration applied to falling objects.

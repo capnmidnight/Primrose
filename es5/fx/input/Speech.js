@@ -1,6 +1,14 @@
 "use strict";
 
-/* global Primrose, pliny */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.Speech = function () {
 
@@ -55,158 +63,176 @@ Primrose.Input.Speech = function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "Speech",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
-  function SpeechInput(name, commands, socket) {
-    Primrose.NetworkedInput.call(this, name, commands, socket);
-    var running = false,
-        recognition = null,
-        errorMessage = null;
 
-    function warn() {
-      var msg = fmt("Failed to initialize speech engine. Reason: $1", errorMessage.message);
-      console.error(msg);
-      return false;
-    }
+  var Speech = function (_Primrose$InputProces) {
+    _inherits(Speech, _Primrose$InputProces);
 
-    function start() {
-      if (!available) {
-        return warn();
-      } else if (!running) {
-        running = true;
-        recognition.start();
-        return true;
+    function Speech(commands, socket) {
+      _classCallCheck(this, Speech);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Speech).call(this, "Speech", commands, socket));
+
+      var running = false,
+          recognition = null,
+          errorMessage = null;
+
+      function warn() {
+        var msg = fmt("Failed to initialize speech engine. Reason: $1", errorMessage.message);
+        console.error(msg);
+        return false;
       }
-      return false;
-    }
 
-    function stop() {
-      if (!available) {
-        return warn();
-      }
-      if (running) {
-        recognition.stop();
-        return true;
-      }
-      return false;
-    }
-
-    this.check = function () {
-      if (this.enabled && !running) {
-        start();
-      } else if (!this.enabled && running) {
-        stop();
-      }
-    };
-
-    this.getErrorMessage = function () {
-      return errorMessage;
-    };
-
-    try {
-      if (window.SpeechRecognition) {
-        // just in case this ever gets standardized
-        recognition = new SpeechRecognition();
-      } else {
-        // purposefully don't check the existance so it errors out and setup fails.
-        recognition = new webkitSpeechRecognition();
-      }
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = "en-US";
-      var restart = false;
-      recognition.addEventListener("start", function () {
-        console.log("speech started");
-        command = "";
-      }.bind(this), true);
-
-      recognition.addEventListener("error", function (event) {
-        restart = true;
-        console.log("speech error", event);
-        running = false;
-        command = "speech error";
-      }.bind(this), true);
-
-      recognition.addEventListener("end", function () {
-        console.log("speech ended", arguments);
-        running = false;
-        command = "speech ended";
-        if (restart) {
-          restart = false;
-          this.enable(true);
+      function start() {
+        if (!available) {
+          return warn();
+        } else if (!running) {
+          running = true;
+          recognition.start();
+          return true;
         }
-      }.bind(this), true);
+        return false;
+      }
 
-      recognition.addEventListener("result", function (event) {
-        var newCommand = [];
-        var result = event.results[event.resultIndex];
-        var max = 0;
-        var maxI = -1;
-        if (result && result.isFinal) {
-          for (var i = 0; i < result.length; ++i) {
-            var alt = result[i];
-            if (alt.confidence > max) {
-              max = alt.confidence;
-              maxI = i;
+      function stop() {
+        if (!available) {
+          return warn();
+        }
+        if (running) {
+          recognition.stop();
+          return true;
+        }
+        return false;
+      }
+
+      _this.check = function () {
+        if (this.enabled && !running) {
+          start();
+        } else if (!this.enabled && running) {
+          stop();
+        }
+      };
+
+      _this.getErrorMessage = function () {
+        return errorMessage;
+      };
+
+      try {
+        if (window.SpeechRecognition) {
+          // just in case this ever gets standardized
+          recognition = new SpeechRecognition();
+        } else {
+          // purposefully don't check the existance so it errors out and setup fails.
+          recognition = new webkitSpeechRecognition();
+        }
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+        var restart = false;
+        recognition.addEventListener("start", function () {
+          console.log("speech started");
+          command = "";
+        }.bind(_this), true);
+
+        recognition.addEventListener("error", function (event) {
+          restart = true;
+          console.log("speech error", event);
+          running = false;
+          command = "speech error";
+        }.bind(_this), true);
+
+        recognition.addEventListener("end", function () {
+          console.log("speech ended", arguments);
+          running = false;
+          command = "speech ended";
+          if (restart) {
+            restart = false;
+            this.enable(true);
+          }
+        }.bind(_this), true);
+
+        recognition.addEventListener("result", function (event) {
+          var newCommand = [];
+          var result = event.results[event.resultIndex];
+          var max = 0;
+          var maxI = -1;
+          if (result && result.isFinal) {
+            for (var i = 0; i < result.length; ++i) {
+              var alt = result[i];
+              if (alt.confidence > max) {
+                max = alt.confidence;
+                maxI = i;
+              }
+            }
+          }
+
+          if (max > 0.85) {
+            newCommand.push(result[maxI].transcript.trim());
+          }
+
+          newCommand = newCommand.join(" ");
+
+          if (newCommand !== this.inputState) {
+            this.inputState.text = newCommand;
+          }
+          this.update();
+        }.bind(_this), true);
+
+        available = true;
+      } catch (err) {
+        errorMessage = err;
+        available = false;
+      }
+      return _this;
+    }
+
+    _createClass(Speech, [{
+      key: "cloneCommand",
+      value: function cloneCommand(cmd) {
+        return {
+          name: cmd.name,
+          preamble: cmd.preamble,
+          keywords: Speech.maybeClone(cmd.keywords),
+          commandUp: cmd.commandUp,
+          disabled: cmd.disabled
+        };
+      }
+    }, {
+      key: "evalCommand",
+      value: function evalCommand(cmd, cmdState, metaKeysSet, dt) {
+        if (metaKeysSet && this.inputState.text) {
+          for (var i = 0; i < cmd.keywords.length; ++i) {
+            if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
+              cmdState.pressed = true;
+              cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
+              this.inputState.text = null;
             }
           }
         }
-
-        if (max > 0.85) {
-          newCommand.push(result[maxI].transcript.trim());
-        }
-
-        newCommand = newCommand.join(" ");
-
-        if (newCommand !== this.inputState) {
-          this.inputState.text = newCommand;
-        }
-        this.update();
-      }.bind(this), true);
-
-      available = true;
-    } catch (err) {
-      errorMessage = err;
-      available = false;
-    }
-  }
-
-  inherit(SpeechInput, Primrose.NetworkedInput);
-
-  SpeechInput.maybeClone = function (arr) {
-    return arr && arr.slice() || [];
-  };
-
-  SpeechInput.prototype.cloneCommand = function (cmd) {
-    return {
-      name: cmd.name,
-      preamble: cmd.preamble,
-      keywords: SpeechInput.maybeClone(cmd.keywords),
-      commandUp: cmd.commandUp,
-      disabled: cmd.disabled
-    };
-  };
-
-  SpeechInput.prototype.evalCommand = function (cmd, cmdState, metaKeysSet, dt) {
-    if (metaKeysSet && this.inputState.text) {
-      for (var i = 0; i < cmd.keywords.length; ++i) {
-        if (this.inputState.text.indexOf(cmd.keywords[i]) === 0 && (cmd.preamble || cmd.keywords[i].length === this.inputState.text.length)) {
-          cmdState.pressed = true;
-          cmdState.value = this.inputState.text.substring(cmd.keywords[i].length).trim();
-          this.inputState.text = null;
-        }
       }
-    }
-  };
+    }, {
+      key: "enable",
+      value: function enable(k, v) {
+        _get(Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
+        this.check();
+      }
+    }, {
+      key: "transmit",
+      value: function transmit(v) {
+        _get(Object.getPrototypeOf(Speech.prototype), "transmit", this).call(this, v);
+        this.check();
+      }
+    }], [{
+      key: "maybeClone",
+      value: function maybeClone(arr) {
+        return arr && arr.slice() || [];
+      }
+    }]);
 
-  SpeechInput.prototype.enable = function (k, v) {
-    Primrose.NetworkedInput.prototype.enable.call(this, k, v);
-    this.check();
-  };
+    return Speech;
+  }(Primrose.InputProcessor);
 
-  SpeechInput.prototype.transmit = function (v) {
-    Primrose.NetworkedInput.prototype.transmit.call(this, v);
-    this.check();
-  };
-  return SpeechInput;
+  return Speech;
 }();
