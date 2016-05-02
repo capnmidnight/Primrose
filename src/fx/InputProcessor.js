@@ -93,7 +93,9 @@ Primrose.InputProcessor = (function () {
     addCommand(name, cmd) {
       cmd.name = name;
       cmd = this.cloneCommand(cmd);
-      cmd.repetitions = cmd.repetitions || 1;
+      if (typeof cmd.repetitions === "undefined") {
+        cmd.repetitions = 1;
+      }
       cmd.state = {
         value: null,
         pressed: false,
@@ -114,7 +116,7 @@ Primrose.InputProcessor = (function () {
         dt: cmd.dt || 0,
         deadzone: cmd.deadzone || 0,
         threshold: cmd.threshold || 0,
-        repetitions: cmd.repetitions || -1,
+        repetitions: cmd.repetitions,
         scale: cmd.scale,
         offset: cmd.offset,
         min: cmd.min,
