@@ -193,8 +193,13 @@ function updateScript() {
         subScene.remove(subScene.children[i]);
       }
       scriptAnimate = scriptUpdate.call(app, subScene);
-      scriptAnimate(0);
+      if (scriptAnimate) {
+        scriptAnimate(0);
+      }
       console.log("----- script loaded -----");
+      if (!scriptAnimate) {
+        console.log("----- No update script provided -----");
+      }
     }
     catch (exp) {
       scriptAnimate = null;
