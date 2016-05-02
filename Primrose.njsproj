@@ -30,6 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="src\fx\Quality.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
     <Content Include="doc\audio\ocean.mp3" />
@@ -37,6 +38,7 @@
     <Content Include="doc\audio\wind.ogg" />
     <Content Include="doc\commodore\dogstar.bas" />
     <Content Include="doc\commodore\oregon.bas" />
+    <Content Include="doc\images\space.png" />
     <Content Include="doc\models\fullscreen_text.mtl" />
     <Content Include="doc\models\fullscreen_text.obj" />
     <Content Include="doc\models\vr_text.mtl" />
