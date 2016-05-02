@@ -190,7 +190,8 @@ Primrose.InputProcessor = (function () {
               if (cmd.buttons) {
                 for (n = 0; n < cmd.buttons.length; ++n) {
                   var btn = cmd.buttons[n],
-                    p = (btn.index === Primrose.Keys.ANY - 1) && anyButtons || !!this.inputState.buttons[btn.index + 1];
+                    code = btn.index + 1,
+                    p = (code === Primrose.Keys.ANY) && anyButtons || !!this.inputState.buttons[code];
                   temp = p ? btn.sign : 0;
                   pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
                   if (Math.abs(temp) > Math.abs(value)) {
