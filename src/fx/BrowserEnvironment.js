@@ -36,8 +36,7 @@ Primrose.BrowserEnvironment = (function () {
     FORWARDED_EVENTS = [
       "keydown", "keyup", "keypress",
       "mousedown", "mouseup", "mousemove", "wheel",
-      "touchstart", "touchend", "touchmove"],
-    RESOLUTION_SCALE = 1;
+      "touchstart", "touchend", "touchmove"];
 
   pliny.class({
     parent: "Primrose",
@@ -68,6 +67,9 @@ Primrose.BrowserEnvironment = (function () {
           this.player.position.set(0, this.avatarHeight, 0);
           this.player.velocity.set(0, 0, 0);
           this.input.zero();
+          if (this.quality === Primrose.Quality.NONE) {
+            this.quality = Primrose.Quality.HIGH;
+          }
         }
       };
 
@@ -246,6 +248,7 @@ Primrose.BrowserEnvironment = (function () {
         moveGround();
         movePointer();
         resolvePicking();
+        checkQuality();
         fire("update", dt);
       };
 
@@ -488,10 +491,10 @@ Primrose.BrowserEnvironment = (function () {
               this.nose.rotation.z = side * 0.7;
             }
             this.renderer.setViewport(
-              v.left * RESOLUTION_SCALE,
-              v.top * RESOLUTION_SCALE,
-              v.width * RESOLUTION_SCALE,
-              v.height * RESOLUTION_SCALE);
+              v.left * resolutionScale,
+              v.top * resolutionScale,
+              v.width * resolutionScale,
+              v.height * resolutionScale);
             this.renderer.render(this.scene, this.camera);
           }
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
@@ -558,8 +561,8 @@ Primrose.BrowserEnvironment = (function () {
           var p = this.input.VR.transforms,
             l = p[0],
             r = p[1];
-          canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
-          canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
+          canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * resolutionScale);
+          canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * resolutionScale);
           aspectWidth = canvasWidth / 2;
         }
         else {
@@ -571,8 +574,8 @@ Primrose.BrowserEnvironment = (function () {
             elementWidth = screen.width;
             elementHeight = screen.height;
           }
-          canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
-          canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
+          canvasWidth = Math.floor(elementWidth * pixelRatio * resolutionScale);
+          canvasHeight = Math.floor(elementHeight * pixelRatio * resolutionScale);
           aspectWidth = canvasWidth;
           if (isMobile) {
             document.body.style.height = Math.max(document.body.clientHeight, elementHeight) + "px";
@@ -582,6 +585,14 @@ Primrose.BrowserEnvironment = (function () {
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
+        if (isFullScreenMode() && !this.inVR) {
+          this.renderer.domElement.style.width = px(screen.width);
+          this.renderer.domElement.style.height = px(screen.height);
+        }
+        else {
+          this.renderer.domElement.style.width = "";
+          this.renderer.domElement.style.height = "";
+        }
         if (!this.timer) {
           render();
         }
@@ -610,7 +621,10 @@ Primrose.BrowserEnvironment = (function () {
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
         },
         monitor = null,
-        cardboard = null;
+        cardboard = null,
+        resolutionScale = 1;
+
+
       if (Primrose.Input.VR.Version > 0) {
         modelFiles.cardboard = "models/cardboard.obj";
         modelFiles.cardboardText = "models/vr_text.obj";
@@ -852,7 +866,6 @@ Primrose.BrowserEnvironment = (function () {
 
       this.start = () => {
         allReady
-          .then(modifyScreen)
           .then(() => {
             this.audio.start();
             lt = performance.now() * MILLISECONDS_TO_SECONDS;
@@ -1052,11 +1065,78 @@ Primrose.BrowserEnvironment = (function () {
       this.input.addEventListener("pointerend", pointerEnd, false);
       this.projector.addEventListener("hit", handleHit, false);
 
+      var quality = -1,
+        frameCount = 0, frameTime = 0,
+        NUM_FRAMES = 10,
+        LEAD_TIME = 2000,
+        lastQualityChange = 0,
+        dq1 = 0,
+        dq2 = 0;
+
+      var checkQuality = () => {
+        if (this.options.autoScaleQuality &&
+          // don't check quality if we've already hit the bottom of the barrel.
+          this.quality !== Primrose.Quality.NONE) {
+          if (frameTime < lastQualityChange + LEAD_TIME) {
+            // wait a few seconds before testing quality
+            frameTime = performance.now();
+          }
+          else {
+            ++frameCount;
+            if (frameCount === NUM_FRAMES) {
+              var now = performance.now(),
+                dt = (now - frameTime) * 0.001,
+                fps = Math.round(NUM_FRAMES / dt);
+              frameTime = now;
+              frameCount = 0;
+              // save the last change
+              dq2 = dq1;
+
+              // if we drop low, decrease quality
+              if (fps < 45) {
+                dq1 = -1;
+              }
+              else if (
+                // don't upgrade on mobile devices
+                !isMobile &&
+                //good speed
+                fps >= 60 &&
+                // still room to grow
+                this.quality < Primrose.Quality.MAXIMUM &&
+                // and the last change wasn't a downgrade
+                dq2 !== -1) {
+                dq1 = 1;
+              }
+              else {
+                dq1 = 0;
+              }
+              if (dq1 !== 0) {
+                this.quality += dq1;
+              }
+              lastQualityChange = now;
+            }
+          }
+        }
+      };
+
       Object.defineProperties(this, {
         inVR: {
           get: () => this.input.VR && this.input.VR.currentDisplay && this.input.VR.currentDisplay.isPresenting
+        },
+        quality: {
+          get: () => quality,
+          set: (v) => {
+            if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
+              quality = v;
+              resolutionScale = Primrose.RESOLUTION_SCALES[v];
+            }
+            allReady.then(modifyScreen);
+          }
         }
       });
+
+
+      this.quality = this.options.quality;
 
       if (window.alert.toString().indexOf("native code") > -1) {
         // overwrite the native alert functions so they can't be called while in
@@ -1158,6 +1238,8 @@ Primrose.BrowserEnvironment = (function () {
   BrowserEnvironment.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
 
   BrowserEnvironment.DEFAULTS = {
+    autoScaleQuality: true,
+    quality: Primrose.Quality.MAXIMUM,
     useNose: false,
     useLeap: false,
     useFog: false,

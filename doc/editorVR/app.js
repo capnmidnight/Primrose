@@ -137,7 +137,15 @@ app.addEventListener("update", function (dt) {
   editorCenter.position.copy(app.player.position);
 
   if (scriptAnimate) {
-    scriptAnimate.call(app, dt);
+    // If quality has degraded, it's likely because the user bombed on a script.
+    // Let's help them not lose their lunch.
+    if (app.quality === Primrose.Quality.NONE) {
+      scriptAnimate = null;
+      wipeScene();
+    }
+    else{
+      scriptAnimate.call(app, dt);
+    }
   }
 });
 
@@ -171,6 +179,12 @@ window.addEventListener("unload", function () {
   }
 });
 
+function wipeScene() {
+  for (var i = subScene.children.length - 1; i >= 0; --i) {
+    subScene.remove(subScene.children[i]);
+  }
+}
+
 function updateScript() {
   var newScript = editor.value,
     exp;
@@ -184,9 +198,7 @@ function updateScript() {
     try {
       console.log("----- loading new script -----");
       var scriptUpdate = new Function("scene", newScript);
-      for (var i = subScene.children.length - 1; i >= 0; --i) {
-        subScene.remove(subScene.children[i]);
-      }
+      wipeScene();
       scriptAnimate = scriptUpdate.call(app, subScene);
       if (scriptAnimate) {
         scriptAnimate(0);
@@ -194,6 +206,9 @@ function updateScript() {
       console.log("----- script loaded -----");
       if (!scriptAnimate) {
         console.log("----- No update script provided -----");
+      }
+      else if (app.quality === Primrose.Quality.NONE) {
+        app.quality = Primrose.Quality.MEDIUM;
       }
     }
     catch (exp) {
