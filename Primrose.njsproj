@@ -30,7 +30,6 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="src\fx\Quality.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
     <Content Include="doc\audio\ocean.mp3" />
