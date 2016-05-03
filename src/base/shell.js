@@ -4,8 +4,8 @@
     { name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." },
     { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." },
     { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." },
-    { name: "phi", type: "Number", description: "The angle in radians around the Y-axis of the sphere." },
-    { name: "thetaStart", type: "Number", description: "The angle in radians around the Z-axis of the sphere." }
+    { name: "phi", type: "Number", description: "(Optional) The angle in radians around the Y-axis of the sphere. Defaults to 80 degrees." },
+    { name: "thetaStart", type: "Number", description: "(Optional) The angle in radians around the Z-axis of the sphere. Defaults to 48 degrees." }
   ],
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\
 the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
@@ -26,7 +26,7 @@ file to use as the texture, execute code as such:\n\
           // The number of slices defines how smooth the sphere will be in the\n\
           // horizontal direction. Think of it like lines of longitude.\n\
           18,\n\
-          // The number of rinigs defines how smooth the sphere will be in the\n\
+          // The number of rings defines how smooth the sphere will be in the\n\
           // vertical direction. Think of it like lines of latitude.\n\
           9,\n\
           // The phi angle is the number or radians around the 'belt' of the sphere\n\
@@ -50,7 +50,7 @@ function shell(r, slices, rings, phi, theta) {
     phi = Math.PI * SLICE;
   }
   if (theta === undefined) {
-    theta = Math.PI * SLICE;
+    theta = Math.PI * SLICE * 0.6;
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
     thetaStart = (Math.PI - theta) * 0.5;
