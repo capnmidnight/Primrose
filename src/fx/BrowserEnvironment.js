@@ -617,7 +617,8 @@ Primrose.BrowserEnvironment = (function () {
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
         },
         monitor = null,
-        cardboard = null,
+        cardboardFactory = null,
+        cardboardTextFactory = null,
         resolutionScale = 1;
 
 
@@ -639,6 +640,27 @@ Primrose.BrowserEnvironment = (function () {
         return color;
       }
 
+      var putIconInScene = (icon, i, arr) => {
+        var arm = hub();
+        put(icon).on(arm).at(0, 0, -1);
+        put(arm).on(this.scene).at(0, this.options.avatarHeight, 0);
+        arm.rotation.set(0, Math.PI * (45 * n - 22.5) / 180 * arr.length, 0);
+        this.registerPickableObject(icon);
+      };
+
+      var makeCardboard = (display, i) => {
+        var cardboard = cardboardFactory.clone();
+        cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
+        cardboard.position.set(0.2, 1.75, -1);
+        cardboard.name = "Cardboard";
+        cardboard.add(cardboardTextFactory.clone());
+        cardboard.addEventListener("click", this.goVR.bind(this, i), false);
+        this.scene.add(cardboard);
+        this.scene.Cardboard = cardboard;
+        this.registerPickableObject(cardboard);
+        return cardboard;
+      };
+
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
 
@@ -652,27 +674,22 @@ Primrose.BrowserEnvironment = (function () {
           monitor.name = "Monitor";
           monitor.add(models.fullscreenText);
           monitor.addEventListener("click", this.goFullScreen, false);
-          this.scene.add(monitor);
           this.scene.Monitor = monitor;
-          this.registerPickableObject(monitor);
           complementColor(setColor(models.fullscreenText, this.options.backgroundColor));
+
+          var icons = [monitor];
 
           if (models.cardboard) {
             monitor.rotation.set(0, 300 * Math.PI / 180, 0);
             monitor.position.set(-0.25, 0.7, -1);
 
-            cardboard = models.cardboard;
-            cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
-            cardboard.position.set(0.2, 1.75, -1);
-            cardboard.name = "Cardboard";
-            cardboard.add(models.cardboardText);
-            cardboard.addEventListener("click", this.goVR, false);
-            this.scene.add(cardboard);
-            this.scene.Cardboard = cardboard;
-            this.registerPickableObject(cardboard);
+            cardboardFactory = new Primrose.ModelLoader(models.cardboard);
             complementColor(setColor(models.cardboardText, this.options.backgroundColor));
-
+            cardboardTextFactory = new Primrose.ModelLoader(models.cardboardText);
+            icons = icons.concat(this.input.VR.displays.map(makeCardboard));
           }
+
+          icons.forEach(putIconInScene);
 
           if (models.button) {
             this.buttonFactory = new Primrose.ButtonFactory(
@@ -951,8 +968,9 @@ Primrose.BrowserEnvironment = (function () {
       //
       this.goFullScreen = () => FullScreen.request(this.renderer.domElement);
 
-      this.goVR = () => {
+      this.goVR = (index) => {
         if (this.input.VR) {
+          this.input.VR.connect(index);
           return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
             .then((elem) => {
               if (Primrose.Input.VR.Version === 1 && isMobile) {
@@ -976,9 +994,9 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
-        if (cardboard) {
-          cardboard.disabled = this.inVR;
-          cardboard.visible = !this.inVR;
+        if (cardboardFactory) {
+          cardboardFactory.disabled = this.inVR;
+          cardboardFactory.visible = !this.inVR;
         }
         monitor.disabled = isFullScreenMode();
         monitor.visible = !isFullScreenMode();
@@ -1020,8 +1038,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var setFullscreen = () => {
         if (!isFullScreenMode()) {
-          if (Primrose.Input.VR.Version >= 1) {
-            this.goVR();
+          if (Primrose.Input.VR.Version >= 1 && isMobile) {
+            this.goVR(0);
           }
           else {
             this.goFullScreen();
