@@ -572,8 +572,12 @@ Primrose.BrowserEnvironment = (function () {
           if (FullScreen.isActive) {
             elementWidth = screen.width;
             elementHeight = screen.height;
+            this.renderer.domElement.style.width = px(elementWidth);
+            this.renderer.domElement.style.height = px(elementHeight);
           }
           else {
+            this.renderer.domElement.style.width = "";
+            this.renderer.domElement.style.height = "";
             var bounds = this.renderer.domElement.getBoundingClientRect();
             elementWidth = bounds.width;
             if (isiOS) {
@@ -588,7 +592,8 @@ Primrose.BrowserEnvironment = (function () {
           aspectWidth = canvasWidth;
         }
 
-        this.renderer.setSize(canvasWidth, canvasHeight);
+        this.renderer.domElement.width = canvasWidth;
+        this.renderer.domElement.height = canvasHeight;
         if (!this.timer) {
           render();
         }
@@ -616,7 +621,7 @@ Primrose.BrowserEnvironment = (function () {
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
         },
-        monitor = null,
+        icons = [],
         cardboardFactory = null,
         cardboardTextFactory = null,
         resolutionScale = 1;
@@ -642,7 +647,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var putIconInScene = (icon, i, arr) => {
         var arm = hub();
-        put(icon).on(arm).at(0, 0, -1);
+        arm.add(icon);
+        icon.position.z = -1;
         put(arm).on(this.scene).at(0, this.options.avatarHeight, 0);
         arm.rotation.set(0, Math.PI * (45 * n - 22.5) / 180 * arr.length, 0);
         this.registerPickableObject(icon);
@@ -668,25 +674,23 @@ Primrose.BrowserEnvironment = (function () {
             buildScene(models.scene);
           }
 
-          monitor = models.monitor;
-          monitor.rotation.set(0, 270 * Math.PI / 180, 0);
-          monitor.position.set(0, 0.7, -1);
+          var monitor = models.monitor;
           monitor.name = "Monitor";
           monitor.add(models.fullscreenText);
           monitor.addEventListener("click", this.goFullScreen, false);
-          this.scene.Monitor = monitor;
+          monitor.rotation.set(0, Math.PI * 3 / 2, 0);
+          monitor.position.y = -1;
           complementColor(setColor(models.fullscreenText, this.options.backgroundColor));
 
-          var icons = [monitor];
+          icons.push(monitor);
 
           if (models.cardboard) {
-            monitor.rotation.set(0, 300 * Math.PI / 180, 0);
-            monitor.position.set(-0.25, 0.7, -1);
-
             cardboardFactory = new Primrose.ModelLoader(models.cardboard);
             complementColor(setColor(models.cardboardText, this.options.backgroundColor));
             cardboardTextFactory = new Primrose.ModelLoader(models.cardboardText);
-            icons = icons.concat(this.input.VR.displays.map(makeCardboard));
+            icons.splice
+              .bind(icons, icons.length, 0)
+              .apply(icons, this.input.VR.displays.map(makeCardboard));
           }
 
           icons.forEach(putIconInScene);
@@ -994,12 +998,10 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
-        if (cardboardFactory) {
-          cardboardFactory.disabled = this.inVR;
-          cardboardFactory.visible = !this.inVR;
-        }
-        monitor.disabled = isFullScreenMode();
-        monitor.visible = !isFullScreenMode();
+        icons.forEach((icon) => {
+          icon.visible = !isFullScreenMode();
+          icon.disabled = isFullScreenMode();
+        });
       };
 
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
