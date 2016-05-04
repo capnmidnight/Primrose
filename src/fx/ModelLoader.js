@@ -11,17 +11,18 @@ Primrose.ModelLoader = (function () {
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
   var loaders = {
-    json: THREE.ObjectLoader && new THREE.ObjectLoader(),
-    fbx: THREE.FBXLoader && new THREE.FBXLoader(),
-    mtl: THREE.MTLLoader && new THREE.MTLLoader(),
-    obj: THREE.OBJLoader && new THREE.OBJLoader(),
-    stl: THREE.STLLoader && new THREE.STLLoader()
+    ".json": THREE.ObjectLoader && new THREE.ObjectLoader(),
+    ".fbx": THREE.FBXLoader && new THREE.FBXLoader(),
+    ".mtl": THREE.MTLLoader && new THREE.MTLLoader(),
+    ".obj": THREE.OBJLoader && new THREE.OBJLoader(),
+    ".stl": THREE.STLLoader && new THREE.STLLoader(),
+    ".typeface.js": THREE.FontLoader && new THREE.FontLoader()
   },
     mime = {
       "text/prs.wavefront-obj": "obj",
       "text/prs.wavefront-mtl": "mtl"
     },
-    EXTENSION_PATTERN = /\.(\w+)$/,
+    EXTENSION_PATTERN = /(\.(\w+))+$/,
     NAME_PATTERN = /([^/]+)\.\w+$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
@@ -204,7 +205,8 @@ Useful for one-time use models.\n\
     ]
   });
   ModelLoader.loadObject = function (src, type, progress) {
-    var extension = type || src.match(EXTENSION_PATTERN)[1];
+    var extMatch = src.match(EXTENSION_PATTERN),
+      extension = type && ("." + type) || extMatch[0];
     if (!extension) {
       return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
     }
@@ -215,12 +217,12 @@ Useful for one-time use models.\n\
         return Promise.reject("There is no loader type for the file extension: " + extension);
       }
       else {
-        var name = src.match(NAME_PATTERN)[1],
+        var name = src.substring(0, extMatch.index),
           elemID = name + "_" + extension.toLowerCase(),
           elem = document.getElementById(elemID),
           promise = Promise.resolve();
 
-        if (extension === "obj") {
+        if (extension === ".obj") {
           var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
           promise = promise.then(() => ModelLoader.loadObject(newPath, "mtl", progress));
           promise = promise.then((materials) => {
@@ -243,14 +245,14 @@ Useful for one-time use models.\n\
           promise = promise.then(() => new Promise((resolve, reject) => Loader.load(src, resolve, progress, reject)));
         }
 
-        if (extension === "json") {
+        if (extension === ".json") {
           promise = promise.then(fixJSONScene);
         }
 
-        if (extension !== "mtl") {
+        if (extension !== ".mtl" && extension !== ".typeface.js") {
           promise = promise.then(setProperties);
         }
-
+        promise = promise.catch(console.error.bind(console, "MODEL_ERR", src))
         return promise;
       }
     }

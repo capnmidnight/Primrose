@@ -619,12 +619,14 @@ Primrose.BrowserEnvironment = (function () {
           cardboard: null,
           cardboardText: null,
           scene: this.options.sceneModel,
-          button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
+          button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
+          font: "fonts/helvetiker_regular.typeface.js"
         },
         icons = [],
         cardboardFactory = null,
         cardboardTextFactory = null,
-        resolutionScale = 1;
+        resolutionScale = 1,
+        font = null;
 
 
       if (Primrose.Input.VR.Version > 0) {
@@ -650,17 +652,26 @@ Primrose.BrowserEnvironment = (function () {
         arm.add(icon);
         icon.position.z = -1;
         put(arm).on(this.scene).at(0, this.options.avatarHeight, 0);
-        arm.rotation.set(0, Math.PI * (45 * n - 22.5) / 180 * arr.length, 0);
+        var wedge = 75 / arr.length;
+        arm.rotation.set(0, Math.PI * wedge * ((arr.length - 1) * 0.5 - i) / 180, 0);
         this.registerPickableObject(icon);
       };
 
       var makeCardboard = (display, i) => {
         var cardboard = cardboardFactory.clone();
-        cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
-        cardboard.position.set(0.2, 1.75, -1);
+        cardboard.rotation.set(0, 270 * Math.PI / 180, 0);
         cardboard.name = "Cardboard";
         cardboard.add(cardboardTextFactory.clone());
         cardboard.addEventListener("click", this.goVR.bind(this, i), false);
+        var titleGeom = new THREE.TextGeometry(display.displayName, {
+          font: font,
+          size: 0.05,
+          curveSegments: 2,
+          height: 0
+        });
+        titleGeom.computeBoundingSphere();
+        var text = put(textured(titleGeom, 0xffffff)).on(cardboard).at(0, -0.1, titleGeom.boundingSphere.radius);
+        text.rotation.set(0, 90 * Math.PI / 180, 0);
         this.scene.add(cardboard);
         this.scene.Cardboard = cardboard;
         this.registerPickableObject(cardboard);
@@ -669,6 +680,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
+
+          font = models.font;
 
           if (models.scene) {
             buildScene(models.scene);
@@ -711,7 +724,8 @@ Primrose.BrowserEnvironment = (function () {
               });
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
           if (!this.buttonFactory) {
             this.buttonFactory = new Primrose.ButtonFactory(
               brick(0xff0000, 1, 1, 1), {
@@ -1039,8 +1053,8 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setFullscreen = () => {
-        if (!isFullScreenMode()) {
-          if (Primrose.Input.VR.Version >= 1 && isMobile) {
+        if (!isFullScreenMode() && isMobile) {
+          if (Primrose.Input.VR.Version >= 1) {
             this.goVR(0);
           }
           else {
@@ -1115,6 +1129,8 @@ Primrose.BrowserEnvironment = (function () {
               else if (
                 // don't upgrade on mobile devices
                 !isMobile &&
+                // don't upgrade if the user says not to
+                this.options.autoRescaleQuality &&
                 //good speed
                 fps >= 60 &&
                 // still room to grow
@@ -1255,6 +1271,7 @@ Primrose.BrowserEnvironment = (function () {
 
   BrowserEnvironment.DEFAULTS = {
     autoScaleQuality: true,
+    autoRescaleQuality: false,
     quality: Primrose.Quality.MAXIMUM,
     useNose: false,
     useLeap: false,
