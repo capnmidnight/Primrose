@@ -1,6 +1,8 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
+  const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+
   var temp = new THREE.Quaternion();
 
   pliny.class({
@@ -225,8 +227,6 @@ Primrose.Input.FPSInput = (function () {
       return this.VR && this.VR.displays;
     }
   }
-
-  FPSInput.SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
   return FPSInput;
 })();
