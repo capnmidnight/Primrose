@@ -521,15 +521,7 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var modifyScreen = () => {
-        var canvasWidth,
-          canvasHeight,
-          aspectWidth,
-          bounds = this.renderer.domElement.getBoundingClientRect(),
-          elementWidth = bounds.width,
-          elementHeight = bounds.height;
-
-
+      var setOrientationLock = () => {
         if (isMobile) {
           if (isFullScreenMode()) {
             var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
@@ -552,6 +544,14 @@ Primrose.BrowserEnvironment = (function () {
             }
           }
         }
+      };
+
+      var modifyScreen = () => {
+        var canvasWidth,
+          canvasHeight,
+          aspectWidth;
+
+        setOrientationLock();
 
         if (this.inVR) {
           this.input.VR.resetTransforms(
@@ -566,33 +566,29 @@ Primrose.BrowserEnvironment = (function () {
           aspectWidth = canvasWidth / 2;
         }
         else {
-          var pixelRatio = devicePixelRatio || 1;
-          if (isiOS) {
-            elementHeight = elementWidth * screen.width / screen.height;
-          }
+          var pixelRatio = devicePixelRatio || 1,
+            elementWidth,
+            elementHeight;
           if (FullScreen.isActive) {
             elementWidth = screen.width;
             elementHeight = screen.height;
           }
+          else {
+            var bounds = this.renderer.domElement.getBoundingClientRect();
+            elementWidth = bounds.width;
+            if (isiOS) {
+              elementHeight = elementWidth * screen.width / screen.height;
+            }
+            else {
+              elementHeight = bounds.height;
+            }
+          }
           canvasWidth = Math.floor(elementWidth * pixelRatio * resolutionScale);
           canvasHeight = Math.floor(elementHeight * pixelRatio * resolutionScale);
           aspectWidth = canvasWidth;
-          if (isMobile) {
-            document.body.style.height = Math.max(document.body.clientHeight, elementHeight) + "px";
-            document.documentElement.style.height = Math.max(document.documentElement.clientHeight, elementHeight) + "px";
-          }
         }
 
-        this.renderer.domElement.width = canvasWidth;
-        this.renderer.domElement.height = canvasHeight;
-        if (isFullScreenMode() && !this.inVR) {
-          this.renderer.domElement.style.width = px(screen.width);
-          this.renderer.domElement.style.height = px(screen.height);
-        }
-        else {
-          this.renderer.domElement.style.width = "";
-          this.renderer.domElement.style.height = "";
-        }
+        this.renderer.setSize(canvasWidth, canvasHeight);
         if (!this.timer) {
           render();
         }
