@@ -168,7 +168,8 @@ function replacePreBlocks() {
     }
 
     promise
-      .catch(function () {
+      .catch(function (err) {
+        console.error(err);
         return "Not found: " + page;
       })
       .then(function (html) {
