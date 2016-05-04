@@ -21,9 +21,15 @@ var textured = (function () {
       options.opacity = 1;
     }
 
-    var txtID = txt.id || txt.toString(),
-      textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
-      materialDescription = `material(${textureDescription}, ${options.unshaded}, ${options.opacity})`,
+    var material = null;
+    if (txt instanceof THREE.Material) {
+      material = txt;
+      txt = null;
+    }
+    else {
+      var txtID = txt.id || txt.toString(),
+        textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
+        materialDescription = `material(${textureDescription}, ${options.unshaded}, ${options.opacity})`;
       material = cache(materialDescription, () => {
         var materialOptions = {
           transparent: options.opacity < 1,
@@ -48,6 +54,7 @@ var textured = (function () {
         }
         return new MaterialType(materialOptions);
       });
+    }
 
     material.wireframe = !!options.wireframe;
 
@@ -63,7 +70,7 @@ var textured = (function () {
     if (typeof txt === "number" || txt instanceof Number) {
       material.color.set(txt);
     }
-    else {
+    else if (txt) {
       material.color.set(0xffffff);
 
       var setTexture = function (texture) {
@@ -156,7 +163,7 @@ var textured = (function () {
         setTexture(txt);
       }
     }
-    
+
     return obj;
   }
 

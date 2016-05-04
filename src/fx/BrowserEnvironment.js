@@ -670,7 +670,9 @@ Primrose.BrowserEnvironment = (function () {
           height: 0
         });
         titleGeom.computeBoundingSphere();
-        var text = put(textured(titleGeom, 0xffffff)).on(cardboard).at(0, -0.1, titleGeom.boundingSphere.radius);
+        var text = put(textured(titleGeom, cardboardTextFactory.template.children[0].material))
+          .on(cardboard)
+          .at(0, -0.1, titleGeom.boundingSphere.radius);
         text.rotation.set(0, 90 * Math.PI / 180, 0);
         this.scene.add(cardboard);
         this.scene.Cardboard = cardboard;
