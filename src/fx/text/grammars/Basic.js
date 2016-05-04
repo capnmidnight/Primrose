@@ -211,8 +211,8 @@ Primrose.Text.Grammars.Basic = (function () {
         return eval(script); // jshint ignore:line
       }
       catch (exp) {
-        console.debug(line.join(", "));
         console.error(exp);
+        console.debug(line.join(", "));
         console.error(script);
         error(exp.message + ": " + script);
       }

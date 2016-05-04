@@ -92,7 +92,10 @@
     };
 
     this.exitPresent = function () {
-      var clear = () => {
+      var clear = (err) => {
+        if (err) {
+          console.error(err);
+        }
         console.log("exit presenting");
         this.isPresenting = false;
         currentLayer = null;

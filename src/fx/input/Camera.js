@@ -120,8 +120,9 @@ Primrose.Input.Camera = ( function () {
           this.videoElement.src = null;
           this.streaming = false;
         }
-        catch ( err ) {
-          console.error( "While stopping", err );
+        catch (exp) {
+          console.error(exp);
+          console.error( "While stopping" );
         }
       }
 

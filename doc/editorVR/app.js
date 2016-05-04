@@ -212,6 +212,7 @@ function updateScript() {
       }
     }
     catch (exp) {
+      console.error(exp);
       scriptAnimate = null;
       throw exp;
     }

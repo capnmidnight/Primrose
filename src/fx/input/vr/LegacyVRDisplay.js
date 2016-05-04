@@ -155,13 +155,19 @@
     };
 
     this.exitPresent = function () {
-      var clear = (elem) => {
+      var clear = (err) => {
+        if (err) {
+          console.error(err);
+        }
+        console.log("exit presenting");
         this.isPresenting = false;
         currentLayer = null;
-        return elem;
       };
       return FullScreen.exit()
-        .then(clear)
+        .then(function (elem) {
+          clear();
+          return elem;
+        })
         .catch(clear);
     };
   }

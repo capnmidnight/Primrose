@@ -168,8 +168,9 @@ Primrose.Input.Speech = ( function () {
 
         available = true;
       }
-      catch (err) {
-        errorMessage = err;
+      catch (exp) {
+        console.error(exp);
+        errorMessage = exp;
         available = false;
       }
     }

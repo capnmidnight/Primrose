@@ -17,7 +17,8 @@ fs.readFile("users.json", "utf8", function (err, file) {
       log("Users found");
     }
     catch (exp) {
-      log("User file corrupted.", exp.message);
+      console.error(exp);
+      log("User file corrupted.");
     }
   }
 });

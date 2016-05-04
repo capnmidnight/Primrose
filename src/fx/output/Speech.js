@@ -37,7 +37,8 @@ Primrose.Output.Speech = ( function ( ) {
       };
     };
   }
-  catch ( exp ) {
+  catch (exp) {
+    console.error(exp);
 
     // in case of error, return a shim that lets us continue unabated
     pliny.class({

@@ -80,7 +80,8 @@ Primrose.Controls.Image = (function () {
         this.setImage(i, img);
         return img;
       }).catch((err) => {
-        console.error("Failed to load image %s. Reason: %s", src, err);
+        console.error("Failed to load image " + src);
+        console.error(err);
         this.setImage(i, null);
       });
     }
