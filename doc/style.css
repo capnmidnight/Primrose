@@ -128,7 +128,7 @@ h2, h3, h4{
 }
 
 #documentation a[target="_blank"]::after{
-  content: " â‡—";
+  content: " \21d7";
 }
 
 #documentation article h1 {
