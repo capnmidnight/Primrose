@@ -42,6 +42,7 @@
     <Content Include="doc\models\fullscreen_text.obj" />
     <Content Include="doc\models\vr_text.mtl" />
     <Content Include="doc\models\vr_text.obj" />
+    <Content Include="herettp.exe" />
     <Content Include="src\base\cache.js" />
     <Content Include="doc\models\cardboard.mtl" />
     <Content Include="doc\models\cardboard.obj" />
