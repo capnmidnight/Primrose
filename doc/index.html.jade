@@ -28,6 +28,7 @@ block document
     li download #[a(href= fileRoot + "Primrose.min.js", target="_blank") the latest Primrose library file].
     li download #[a(href= fileRoot + "doc/images/bg.jpg", target="_blank") a skymap image].
     li download #[a(href= fileRoot + "doc/images/deck.png", target="_blank") a ground texture].
+    li download #[a(href= fileRoot + "herettp.exe", target="_blank") a local web server. (Optional if you already know how to configure and run a web server on your local machine)
     li create a text file named #[code index.html]
     li create a text file named #[code style.css]
     li create a text file named #[code app.js]
@@ -36,8 +37,9 @@ block document
   ul
     li app.js
     li deck.png
+    li herettp.exe
     li index.html
-    li sky.jpg
+    li bg.jpg
     li style.css
 
   p In the #[code index.html] file, enter the following markup.
@@ -108,5 +110,6 @@ block document
       // Perform per-frame updates here, like moving objects around according to your
       // own rules.
     } );
-  p The results, once ran in your browser, should look something like this:
+  p Now, if you have your server configured on your own, you will know how to open the page.
+  p If you don't, then double-click on herettp.exe and the program should start--possibly requesting Administrator Privileges to be able to run the web server--and automatically open the `index.html` page in your browser. It should look something like this:
   img(src="images/gettingStarted.jpg", alt="screenshot", title="Blank scene")

@@ -445,6 +445,7 @@ function updateScript() {
       }
     }
     catch (exp) {
+      console.error(exp);
       scriptAnimate = null;
       throw exp;
     }
@@ -585,7 +586,8 @@ function getDocumentation() {
     &quot;    opacity: 1 - opaque, 0 - transparent (default 1).\n&quot; +
     &quot;    txtRepeatS: texture repeat in S direction (default 1).\n&quot; +
     &quot;    txtRepeat: texture repeat in T direction (default 1)&quot;;
-}</pre><!-- end demo.jade banner block --><!-- end documentation.jade documentation block -->
+}
+</pre><!-- end demo.jade banner block --><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
