@@ -11,6 +11,7 @@
   recurseDirectory = require("./server/recurseDirectory"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
+  zip = require("gulp-zip"),
   pathX = /.*\/(.*).js/,
   sourceFiles = recurseDirectory("src"),
   headerFiles = [
@@ -204,7 +205,18 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
+gulp.task("copy:quickstart", function () {
+  return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe", "Primrose*.min.js", "doc/models/monitor.*", "doc/models/cardboard.*"])
+    .pipe(gulp.dest("quickstart"));
+});
+
+gulp.task("quickstart", ["jsmin", "copy:quickstart"], function () {
+  return gulp.src(["quickstart/**/*"])
+    .pipe(zip("quickstart.zip"))
+    .pipe(gulp.dest("."));
+});
+
 gulp.task("default", ["pug:debug:es6"]);
 gulp.task("debug", ["pug:debug:es6"]);
 gulp.task("stage", ["babel", "pug:debug:es5"]);
-gulp.task("release", ["cssmin", "pug:release"]);
+gulp.task("release", ["cssmin", "pug:release", "quickstart"]);

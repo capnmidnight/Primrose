@@ -17,8 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global pliny, Primrose, THREE */
-
 var setFalse = function setFalse(evt) {
   return evt.returnValue = false;
 };
@@ -68,15 +66,6 @@ window.Primrose = function () {
     return parseInt(s.substring(1), 16);
   });
 
-  var textureLoader = null;
-  Primrose.loadTexture = function (url) {
-    textureLoader = textureLoader || new THREE.TextureLoader();
-    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
-    return new Promise(function (resolve, reject) {
-      return textureLoader.load(url, resolve, null, reject);
-    });
-  };
-
   window.isInIFrame = window.self !== window.top;
 
   // snagged and adapted from http://detectmobilebrowsers.com/
@@ -104,6 +93,20 @@ window.Primrose = function () {
   window.isWebKit = window.isiOS || window.isOpera || window.isChrome;
 
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+  Primrose.RESOLUTION_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+  if (!isMobile) {
+    Primrose.RESOLUTION_SCALES.push(2);
+  }
+
+  Primrose.Quality = {
+    NONE: 0,
+    VERYLOW: 1,
+    LOW: 2,
+    MEDIUM: 3,
+    HIGH: 4,
+    MAXIMUM: Primrose.RESOLUTION_SCALES.length - 1
+  };
 
   return Primrose;
 }();
@@ -182,8 +185,6 @@ function findProperty(elem, arr) {
   }
 }
 "use strict";
-
-/* global pliny */
 
 function sigfig(x, y) {
   var p = Math.pow(10, y);
@@ -293,8 +294,6 @@ var hsla = fmt.bind(undefined, "hsla($1, $2%, $3%, $4)");
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-/* global pliny */
-
 function getSetting(name, defValue) {
   if (window.localStorage) {
     var val = window.localStorage.getItem(name);
@@ -303,6 +302,8 @@ function getSetting(name, defValue) {
         return JSON.parse(val);
       } catch (exp) {
         console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+        console.error(exp);
+        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val));
       }
     }
   }
@@ -600,8 +601,6 @@ function light(color, intensity, distance, decay) {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-/* global pliny */
-
 function copyObject(dest, source) {
   var stack = [{ dest: dest, source: source }];
   while (stack.length > 0) {
@@ -692,7 +691,7 @@ function shell(r, slices, rings, phi, theta) {
     phi = Math.PI * SLICE;
   }
   if (theta === undefined) {
-    theta = Math.PI * SLICE;
+    theta = Math.PI * SLICE * 0.6;
   }
   var phiStart = 1.5 * Math.PI - phi * 0.5,
       thetaStart = (Math.PI - theta) * 0.5;
@@ -710,40 +709,58 @@ function sphere(r, slices, rings) {
 "use strict";
 
 var textured = function () {
-  var textureCache = {};
+  var textureLoader = null,
+      textureCache = {};
+  Primrose.loadTexture = function (url) {
+    if (!textureLoader) {
+      textureLoader = new THREE.TextureLoader();
+    }
+    textureLoader.setCrossOrigin(THREE.ImageUtils.crossOrigin);
+    return cache("Image(" + url + ")", function () {
+      return new Promise(function (resolve, reject) {
+        return textureLoader.load(url, resolve, null, reject);
+      });
+    });
+  };
+
   function textured(geometry, txt, options) {
     options = options || {};
     if (options.opacity === undefined) {
       options.opacity = 1;
     }
 
-    var txtID = txt.id || txt.toString(),
-        textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
-        materialDescription = "material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ")",
-        material = cache(materialDescription, function () {
-      var materialOptions = {
-        transparent: true,
-        opacity: options.opacity,
-        side: THREE.DoubleSide,
-        alphaTest: 0.5
-      },
-          MaterialType = THREE.MeshStandardMaterial;
+    var material = null;
+    if (txt instanceof THREE.Material) {
+      material = txt;
+      txt = null;
+    } else {
+      var txtID = txt.id || txt.toString(),
+          textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
+          materialDescription = "material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ")";
+      material = cache(materialDescription, function () {
+        var materialOptions = {
+          transparent: options.opacity < 1,
+          opacity: options.opacity,
+          side: THREE.DoubleSide
+        },
+            MaterialType = THREE.MeshStandardMaterial;
 
-      if (options.unshaded) {
-        materialOptions.shading = THREE.FlatShading;
-        MaterialType = THREE.MeshBasicMaterial;
-      } else {
-        if (options.roughness === undefined) {
-          options.roughness = 0.5;
+        if (options.unshaded) {
+          materialOptions.shading = THREE.FlatShading;
+          MaterialType = THREE.MeshBasicMaterial;
+        } else {
+          if (options.roughness === undefined) {
+            options.roughness = 0.5;
+          }
+          if (options.metalness === undefined) {
+            options.metalness = 0;
+          }
+          materialOptions.roughness = options.roughness;
+          materialOptions.metalness = options.metalness;
         }
-        if (options.metalness === undefined) {
-          options.metalness = 0;
-        }
-        materialOptions.roughness = options.roughness;
-        materialOptions.metalness = options.metalness;
-      }
-      return new MaterialType(materialOptions);
-    });
+        return new MaterialType(materialOptions);
+      });
+    }
 
     material.wireframe = !!options.wireframe;
 
@@ -751,20 +768,23 @@ var textured = function () {
     if (geometry.type.indexOf("Geometry") > -1) {
       obj = new THREE.Mesh(geometry, material);
     } else if (geometry instanceof THREE.Object3D) {
-      geometry.material = material;
       obj = geometry;
+      obj.material = material;
     }
 
     if (typeof txt === "number" || txt instanceof Number) {
       material.color.set(txt);
-    } else {
+    } else if (txt) {
       material.color.set(0xffffff);
 
       var setTexture = function setTexture(texture) {
+        var surface;
         if (texture instanceof Primrose.Surface) {
+          surface = texture;
+          texture = surface.texture;
           if (options.scaleTextureWidth || !options.scaleTextureHeight) {
-            var imgWidth = texture.imageWidth,
-                imgHeight = texture.imageHeight,
+            var imgWidth = surface.imageWidth,
+                imgHeight = surface.imageHeight,
                 dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
                 dimY = Math.ceil(Math.log(imgHeight) / Math.LN2),
                 newWidth = Math.pow(2, dimX),
@@ -781,14 +801,12 @@ var textured = function () {
                 options.scaleTextureHeight = scaleY;
               }
 
-              texture.bounds.width = newWidth;
-              texture.bounds.height = newHeight;
-              texture.resize();
-              texture.invalidate();
+              surface.bounds.width = newWidth;
+              surface.bounds.height = newHeight;
+              surface.resize();
+              surface.render(true);
             }
           }
-
-          texture = texture.texture;
         }
 
         if (options.txtRepeatS * options.txtRepeatT > 1) {
@@ -852,8 +870,6 @@ function v3(x, y, z) {
 }
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Angle = function () {
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;
@@ -907,8 +923,6 @@ Primrose.Angle = function () {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/* global Primrose, THREE, pliny, emit */
 
 Primrose.BaseControl = function () {
   "use strict";
@@ -981,9 +995,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* global Primrose, THREE, io, CryptoJS, Notification, HMDVRDevice, devicePixelRatio
- * Function, emit, isMobile, isiOS, shell, quad, HTMLCanvasElement, pliny */
-
 Primrose.BrowserEnvironment = function () {
   "use strict";
 
@@ -1018,8 +1029,7 @@ Primrose.BrowserEnvironment = function () {
       FORWARD = new THREE.Vector3(0, 0, -1),
       POINTER_RADIUS = 0.01,
       POINTER_RESCALE = 20,
-      FORWARDED_EVENTS = ["keydown", "keyup", "keypress", "mousedown", "mouseup", "mousemove", "wheel", "touchstart", "touchend", "touchmove"],
-      RESOLUTION_SCALE = 1;
+      FORWARDED_EVENTS = ["keydown", "keyup", "keypress", "mousedown", "mouseup", "mousemove", "wheel", "touchstart", "touchend", "touchmove"];
 
   var BrowserEnvironment = function () {
     function BrowserEnvironment(name, options) {
@@ -1048,6 +1058,9 @@ Primrose.BrowserEnvironment = function () {
           _this.player.position.set(0, _this.avatarHeight, 0);
           _this.player.velocity.set(0, 0, 0);
           _this.input.zero();
+          if (_this.quality === Primrose.Quality.NONE) {
+            _this.quality = Primrose.Quality.HIGH;
+          }
         }
       };
 
@@ -1222,13 +1235,12 @@ Primrose.BrowserEnvironment = function () {
             j;
         lt = t;
 
-        checkFullscreen();
-
         movePlayer(dt);
         moveSky();
         moveGround();
         movePointer();
         resolvePicking();
+        checkQuality();
         fire("update", dt);
       };
 
@@ -1424,6 +1436,7 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var animate = function animate(t) {
+        checkFullscreen();
         RAF(animate);
         update(t * MILLISECONDS_TO_SECONDS);
         render();
@@ -1434,7 +1447,7 @@ Primrose.BrowserEnvironment = function () {
       var render = function render() {
         if (_this.inVR) {
           _this.renderer.clear(true, true, true);
-          var trans = xVR.transforms;
+          var trans = _this.input.VR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
                 v = st.viewport,
@@ -1452,7 +1465,7 @@ Primrose.BrowserEnvironment = function () {
               _this.nose.position.set(side * -0.12, -0.12, -0.15);
               _this.nose.rotation.z = side * 0.7;
             }
-            _this.renderer.setViewport(v.left * RESOLUTION_SCALE, v.top * RESOLUTION_SCALE, v.width * RESOLUTION_SCALE, v.height * RESOLUTION_SCALE);
+            _this.renderer.setViewport(v.left * resolutionScale, v.top * resolutionScale, v.width * resolutionScale, v.height * resolutionScale);
             _this.renderer.render(_this.scene, _this.camera);
           }
           _this.input.VR.currentDisplay.submitFrame(_this.input.VR.currentPose);
@@ -1464,7 +1477,8 @@ Primrose.BrowserEnvironment = function () {
 
         if (!_this.inVR || _this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !_this.options.disableMirroring) {
           if (blankEye) {
-            Primrose.Entity.eyeBlankAll(eyeCounter = 1 - eyeCounter);
+            eyeCounter = 1 - eyeCounter;
+            Primrose.Entity.eyeBlankAll(eyeCounter);
           }
           _this.nose.visible = false;
           _this.camera.fov = _this.options.defaultFOV;
@@ -1478,14 +1492,7 @@ Primrose.BrowserEnvironment = function () {
         }
       };
 
-      var modifyScreen = function modifyScreen() {
-        var canvasWidth,
-            canvasHeight,
-            aspectWidth,
-            bounds = _this.renderer.domElement.getBoundingClientRect(),
-            elementWidth = bounds.width,
-            elementHeight = bounds.height;
-
+      var setOrientationLock = function setOrientationLock() {
         if (isMobile) {
           if (isFullScreenMode()) {
             var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
@@ -1505,6 +1512,12 @@ Primrose.BrowserEnvironment = function () {
             }
           }
         }
+      };
+
+      var modifyScreen = function modifyScreen() {
+        var canvasWidth, canvasHeight, aspectWidth;
+
+        setOrientationLock();
 
         if (_this.inVR) {
           _this.input.VR.resetTransforms(_this.options.nearPlane, _this.options.nearPlane + _this.options.drawDistance);
@@ -1512,25 +1525,32 @@ Primrose.BrowserEnvironment = function () {
           var p = _this.input.VR.transforms,
               l = p[0],
               r = p[1];
-          canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * RESOLUTION_SCALE);
-          canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * RESOLUTION_SCALE);
+          canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * resolutionScale);
+          canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * resolutionScale);
           aspectWidth = canvasWidth / 2;
         } else {
-          var pixelRatio = devicePixelRatio || 1;
-          if (isiOS) {
-            elementHeight = elementWidth * screen.width / screen.height;
-          }
+          var pixelRatio = devicePixelRatio || 1,
+              elementWidth,
+              elementHeight;
           if (FullScreen.isActive) {
             elementWidth = screen.width;
             elementHeight = screen.height;
+            _this.renderer.domElement.style.width = px(elementWidth);
+            _this.renderer.domElement.style.height = px(elementHeight);
+          } else {
+            _this.renderer.domElement.style.width = "";
+            _this.renderer.domElement.style.height = "";
+            var bounds = _this.renderer.domElement.getBoundingClientRect();
+            elementWidth = bounds.width;
+            if (isiOS) {
+              elementHeight = elementWidth * screen.width / screen.height;
+            } else {
+              elementHeight = bounds.height;
+            }
           }
-          canvasWidth = Math.floor(elementWidth * pixelRatio * RESOLUTION_SCALE);
-          canvasHeight = Math.floor(elementHeight * pixelRatio * RESOLUTION_SCALE);
+          canvasWidth = Math.floor(elementWidth * pixelRatio * resolutionScale);
+          canvasHeight = Math.floor(elementHeight * pixelRatio * resolutionScale);
           aspectWidth = canvasWidth;
-          if (isMobile) {
-            document.body.style.height = Math.max(document.body.clientHeight, elementHeight) + "px";
-            document.documentElement.style.height = Math.max(document.documentElement.clientHeight, elementHeight) + "px";
-          }
         }
 
         _this.renderer.domElement.width = canvasWidth;
@@ -1560,10 +1580,15 @@ Primrose.BrowserEnvironment = function () {
         cardboard: null,
         cardboardText: null,
         scene: this.options.sceneModel,
-        button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model
+        button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
+        font: "fonts/helvetiker_regular.typeface.js"
       },
-          monitor = null,
-          cardboard = null;
+          icons = [],
+          cardboardFactory = null,
+          cardboardTextFactory = null,
+          resolutionScale = 1,
+          font = null;
+
       if (Primrose.Input.VR.Version > 0) {
         modelFiles.cardboard = "models/cardboard.obj";
         modelFiles.cardboardText = "models/vr_text.obj";
@@ -1583,38 +1608,63 @@ Primrose.BrowserEnvironment = function () {
         return color;
       }
 
+      var putIconInScene = function putIconInScene(icon, i, arr) {
+        var arm = hub();
+        arm.add(icon);
+        icon.position.z = -1;
+        put(arm).on(_this.scene).at(0, _this.options.avatarHeight, 0);
+        var wedge = 75 / arr.length;
+        arm.rotation.set(0, Math.PI * wedge * ((arr.length - 1) * 0.5 - i) / 180, 0);
+        _this.registerPickableObject(icon);
+      };
+
+      var makeCardboard = function makeCardboard(display, i) {
+        var cardboard = cardboardFactory.clone();
+        cardboard.rotation.set(0, 270 * Math.PI / 180, 0);
+        cardboard.name = "Cardboard";
+        cardboard.add(cardboardTextFactory.clone());
+        cardboard.addEventListener("click", _this.goVR.bind(_this, i), false);
+        var titleGeom = new THREE.TextGeometry(display.displayName, {
+          font: font,
+          size: 0.05,
+          curveSegments: 2,
+          height: 0
+        });
+        titleGeom.computeBoundingSphere();
+        var text = put(textured(titleGeom, cardboardTextFactory.template.children[0].material)).on(cardboard).at(0, -0.1, titleGeom.boundingSphere.radius);
+        text.rotation.set(0, 90 * Math.PI / 180, 0);
+        _this.scene.add(cardboard);
+        _this.scene.Cardboard = cardboard;
+        _this.registerPickableObject(cardboard);
+        return cardboard;
+      };
+
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles).then(function (models) {
+
+        font = models.font;
 
         if (models.scene) {
           buildScene(models.scene);
         }
 
-        monitor = models.monitor;
-        monitor.rotation.set(0, 270 * Math.PI / 180, 0);
-        monitor.position.set(0, 0.7, -1);
+        var monitor = models.monitor;
         monitor.name = "Monitor";
         monitor.add(models.fullscreenText);
         monitor.addEventListener("click", _this.goFullScreen, false);
-        _this.scene.add(monitor);
-        _this.scene.Monitor = monitor;
-        _this.registerPickableObject(monitor);
+        monitor.rotation.set(0, Math.PI * 3 / 2, 0);
+        monitor.position.y = -1;
         complementColor(setColor(models.fullscreenText, _this.options.backgroundColor));
 
-        if (models.cardboard) {
-          monitor.rotation.set(0, 300 * Math.PI / 180, 0);
-          monitor.position.set(-0.25, 0.7, -1);
+        icons.push(monitor);
 
-          cardboard = models.cardboard;
-          cardboard.rotation.set(0, 250 * Math.PI / 180, 0);
-          cardboard.position.set(0.2, 1.75, -1);
-          cardboard.name = "Cardboard";
-          cardboard.add(models.cardboardText);
-          cardboard.addEventListener("click", _this.goVR, false);
-          _this.scene.add(cardboard);
-          _this.scene.Cardboard = cardboard;
-          _this.registerPickableObject(cardboard);
+        if (models.cardboard) {
+          cardboardFactory = new Primrose.ModelLoader(models.cardboard);
           complementColor(setColor(models.cardboardText, _this.options.backgroundColor));
+          cardboardTextFactory = new Primrose.ModelLoader(models.cardboardText);
+          icons.splice.bind(icons, icons.length, 0).apply(icons, _this.input.VR.displays.map(makeCardboard));
         }
+
+        icons.forEach(putIconInScene);
 
         if (models.button) {
           _this.buttonFactory = new Primrose.ButtonFactory(models.button, _this.options.button.options);
@@ -1627,7 +1677,8 @@ Primrose.BrowserEnvironment = function () {
             toggle: true
           });
         }
-      }).catch(function () {
+      }).catch(function (err) {
+        console.error(err);
         if (!_this.buttonFactory) {
           _this.buttonFactory = new Primrose.ButtonFactory(brick(0xff0000, 1, 1, 1), {
             maxThrow: 0.1,
@@ -1780,7 +1831,7 @@ Primrose.BrowserEnvironment = function () {
       };
 
       this.start = function () {
-        allReady.then(modifyScreen).then(function () {
+        allReady.then(function () {
           _this.audio.start();
           lt = performance.now() * MILLISECONDS_TO_SECONDS;
           RAF(animate);
@@ -1866,8 +1917,9 @@ Primrose.BrowserEnvironment = function () {
         return FullScreen.request(_this.renderer.domElement);
       };
 
-      this.goVR = function () {
+      this.goVR = function (index) {
         if (_this.input.VR) {
+          _this.input.VR.connect(index);
           return _this.input.VR.requestPresent([{ source: _this.renderer.domElement }]).then(function (elem) {
             if (Primrose.Input.VR.Version === 1 && isMobile) {
               var remover = function remover() {
@@ -1889,12 +1941,10 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var showHideButtons = function showHideButtons() {
-        if (cardboard) {
-          cardboard.disabled = _this.inVR;
-          cardboard.visible = !_this.inVR;
-        }
-        monitor.disabled = isFullScreenMode();
-        monitor.visible = !isFullScreenMode();
+        icons.forEach(function (icon) {
+          icon.visible = !isFullScreenMode();
+          icon.disabled = isFullScreenMode();
+        });
       };
 
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
@@ -1926,19 +1976,13 @@ Primrose.BrowserEnvironment = function () {
       };
 
       var setPointerLock = function setPointerLock() {
-        if (isGearVR) {
-          return _this.goVR();
-        } else if (isMobile) {
-          return _this.goFullScreen();
-        } else {
-          return Primrose.Input.Mouse.Lock.isActive || Primrose.Input.Mouse.Lock.request(_this.renderer.domElement);
-        }
+        return (Primrose.Input.Mouse.Lock.isActive || isMobile ? Promise.resolve() : Primrose.Input.Mouse.Lock.request(_this.renderer.domElement)).then(setFullscreen);
       };
 
       var setFullscreen = function setFullscreen() {
-        if (!isFullScreenMode()) {
-          if (Primrose.Input.VR.Version > 0) {
-            _this.goVR();
+        if (!isFullScreenMode() && isMobile) {
+          if (Primrose.Input.VR.Version >= 1) {
+            _this.goVR(0);
           } else {
             _this.goFullScreen();
           }
@@ -1969,20 +2013,88 @@ Primrose.BrowserEnvironment = function () {
       window.addEventListener("focus", this.start, false);
       this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
       this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
-      this.input.addEventListener("zero", this.zero.bind(this), false);
+      this.input.addEventListener("zero", this.zero, false);
       this.input.addEventListener("lockpointer", setPointerLock, false);
       this.input.addEventListener("fullscreen", setFullscreen, false);
       this.input.addEventListener("pointerstart", pointerStart, false);
       this.input.addEventListener("pointerend", pointerEnd, false);
       this.projector.addEventListener("hit", handleHit, false);
 
+      var quality = -1,
+          frameCount = 0,
+          frameTime = 0,
+          NUM_FRAMES = 10,
+          LEAD_TIME = 2000,
+          lastQualityChange = 0,
+          dq1 = 0,
+          dq2 = 0;
+
+      var checkQuality = function checkQuality() {
+        if (_this.options.autoScaleQuality &&
+        // don't check quality if we've already hit the bottom of the barrel.
+        _this.quality !== Primrose.Quality.NONE) {
+          if (frameTime < lastQualityChange + LEAD_TIME) {
+            // wait a few seconds before testing quality
+            frameTime = performance.now();
+          } else {
+            ++frameCount;
+            if (frameCount === NUM_FRAMES) {
+              var now = performance.now(),
+                  dt = (now - frameTime) * 0.001,
+                  fps = Math.round(NUM_FRAMES / dt);
+              frameTime = now;
+              frameCount = 0;
+              // save the last change
+              dq2 = dq1;
+
+              // if we drop low, decrease quality
+              if (fps < 45) {
+                dq1 = -1;
+              } else if (
+              // don't upgrade on mobile devices
+              !isMobile &&
+              // don't upgrade if the user says not to
+              _this.options.autoRescaleQuality &&
+              //good speed
+              fps >= 60 &&
+              // still room to grow
+              _this.quality < Primrose.Quality.MAXIMUM &&
+              // and the last change wasn't a downgrade
+              dq2 !== -1) {
+                dq1 = 1;
+              } else {
+                dq1 = 0;
+              }
+              if (dq1 !== 0) {
+                _this.quality += dq1;
+              }
+              lastQualityChange = now;
+            }
+          }
+        }
+      };
+
       Object.defineProperties(this, {
         inVR: {
           get: function get() {
             return _this.input.VR && _this.input.VR.currentDisplay && _this.input.VR.currentDisplay.isPresenting;
           }
+        },
+        quality: {
+          get: function get() {
+            return quality;
+          },
+          set: function set(v) {
+            if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
+              quality = v;
+              resolutionScale = Primrose.RESOLUTION_SCALES[v];
+            }
+            allReady.then(modifyScreen);
+          }
         }
       });
+
+      this.quality = this.options.quality;
 
       if (window.alert.toString().indexOf("native code") > -1) {
         // overwrite the native alert functions so they can't be called while in
@@ -2082,6 +2194,9 @@ Primrose.BrowserEnvironment = function () {
   BrowserEnvironment.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
 
   BrowserEnvironment.DEFAULTS = {
+    autoScaleQuality: true,
+    autoRescaleQuality: false,
+    quality: Primrose.Quality.MAXIMUM,
     useNose: false,
     useLeap: false,
     useFog: false,
@@ -2127,8 +2242,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, THREE, emit, pliny */
 
 Primrose.Button = function () {
   var Button = function (_Primrose$BaseControl) {
@@ -2202,8 +2315,6 @@ Primrose.Button = function () {
   return Button;
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.ButtonFactory = function () {
 
@@ -2463,8 +2574,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* global Primrose, pliny */
-
 Primrose.InputProcessor = function () {
 
   var InputProcessor = function () {
@@ -2562,7 +2671,9 @@ Primrose.InputProcessor = function () {
       value: function addCommand(name, cmd) {
         cmd.name = name;
         cmd = this.cloneCommand(cmd);
-        cmd.repetitions = cmd.repetitions || 1;
+        if (typeof cmd.repetitions === "undefined") {
+          cmd.repetitions = 1;
+        }
         cmd.state = {
           value: null,
           pressed: false,
@@ -2584,7 +2695,7 @@ Primrose.InputProcessor = function () {
           dt: cmd.dt || 0,
           deadzone: cmd.deadzone || 0,
           threshold: cmd.threshold || 0,
-          repetitions: cmd.repetitions || -1,
+          repetitions: cmd.repetitions,
           scale: cmd.scale,
           offset: cmd.offset,
           min: cmd.min,
@@ -2605,6 +2716,21 @@ Primrose.InputProcessor = function () {
           commandDown: cmd.commandDown,
           commandUp: cmd.commandUp
         };
+      }
+    }, {
+      key: "maybeClone",
+      value: function maybeClone(arr) {
+        var output = [];
+        if (arr) {
+          for (var i = 0; i < arr.length; ++i) {
+            output[i] = {
+              index: Math.abs(arr[i]) - 1,
+              toggle: arr[i] < 0,
+              sign: arr[i] < 0 ? -1 : 1
+            };
+          }
+        }
+        return output;
       }
     }, {
       key: "update",
@@ -2644,7 +2770,8 @@ Primrose.InputProcessor = function () {
                 if (cmd.buttons) {
                   for (n = 0; n < cmd.buttons.length; ++n) {
                     var btn = cmd.buttons[n],
-                        p = btn.index === Primrose.Keys.ANY - 1 && anyButtons || !!this.inputState.buttons[btn.index + 1];
+                        code = btn.index + 1,
+                        p = code === Primrose.Keys.ANY && anyButtons || !!this.inputState.buttons[code];
                     temp = p ? btn.sign : 0;
                     pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
                     if (Math.abs(temp) > Math.abs(value)) {
@@ -3012,21 +3139,6 @@ Primrose.InputProcessor = function () {
       value: function isUp(name) {
         return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
       }
-    }, {
-      key: "maybeClone",
-      value: function maybeClone(arr) {
-        var output = [];
-        if (arr) {
-          for (var i = 0; i < arr.length; ++i) {
-            output[i] = {
-              index: Math.abs(arr[i]) - 1,
-              toggle: arr[i] < 0,
-              sign: arr[i] < 0 ? -1 : 1
-            };
-          }
-        }
-        return output;
-      }
     }]);
 
     return InputProcessor;
@@ -3036,13 +3148,11 @@ Primrose.InputProcessor = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Keys = function () {
   "use strict";
 
   var Keys = {
-    ANY: 0,
+    ANY: Number.MAX_VALUE,
     ///////////////////////////////////////////////////////////////////////////
     // modifiers
     ///////////////////////////////////////////////////////////////////////////
@@ -3176,10 +3286,7 @@ Primrose.Keys = function () {
 
   return Keys;
 }();
-
 "use strict";
-
-/* global Primrose, THREE, pliny */
 
 Primrose.ModelLoader = function () {
   // If Three.js hasn't been loaded, then this module doesn't make sense and we
@@ -3193,17 +3300,18 @@ Primrose.ModelLoader = function () {
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
   var loaders = {
-    json: THREE.ObjectLoader && new THREE.ObjectLoader(),
-    fbx: THREE.FBXLoader && new THREE.FBXLoader(),
-    mtl: THREE.MTLLoader && new THREE.MTLLoader(),
-    obj: THREE.OBJLoader && new THREE.OBJLoader(),
-    stl: THREE.STLLoader && new THREE.STLLoader()
+    ".json": THREE.ObjectLoader && new THREE.ObjectLoader(),
+    ".fbx": THREE.FBXLoader && new THREE.FBXLoader(),
+    ".mtl": THREE.MTLLoader && new THREE.MTLLoader(),
+    ".obj": THREE.OBJLoader && new THREE.OBJLoader(),
+    ".stl": THREE.STLLoader && new THREE.STLLoader(),
+    ".typeface.js": THREE.FontLoader && new THREE.FontLoader()
   },
       mime = {
     "text/prs.wavefront-obj": "obj",
     "text/prs.wavefront-mtl": "mtl"
   },
-      EXTENSION_PATTERN = /\.(\w+)$/,
+      EXTENSION_PATTERN = /(\.(\w+))+$/,
       NAME_PATTERN = /([^/]+)\.\w+$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
@@ -3270,7 +3378,8 @@ Primrose.ModelLoader = function () {
   };
 
   ModelLoader.loadObject = function (src, type, progress) {
-    var extension = type || src.match(EXTENSION_PATTERN)[1];
+    var extMatch = src.match(EXTENSION_PATTERN),
+        extension = type && "." + type || extMatch[0];
     if (!extension) {
       return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
     } else {
@@ -3279,12 +3388,12 @@ Primrose.ModelLoader = function () {
       if (!Loader) {
         return Promise.reject("There is no loader type for the file extension: " + extension);
       } else {
-        var name = src.match(NAME_PATTERN)[1],
+        var name = src.substring(0, extMatch.index),
             elemID = name + "_" + extension.toLowerCase(),
             elem = document.getElementById(elemID),
             promise = Promise.resolve();
 
-        if (extension === "obj") {
+        if (extension === ".obj") {
           var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
           promise = promise.then(function () {
             return ModelLoader.loadObject(newPath, "mtl", progress);
@@ -3313,14 +3422,14 @@ Primrose.ModelLoader = function () {
           });
         }
 
-        if (extension === "json") {
+        if (extension === ".json") {
           promise = promise.then(fixJSONScene);
         }
 
-        if (extension !== "mtl") {
+        if (extension !== ".mtl" && extension !== ".typeface.js") {
           promise = promise.then(setProperties);
         }
-
+        promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
         return promise;
       }
     }
@@ -3349,8 +3458,6 @@ Primrose.ModelLoader = function () {
   return ModelLoader;
 }();
 "use strict";
-
-/* global Primrose, THREE, Function, emit, self, pliny */
 
 Primrose.Projector = function () {
 
@@ -5916,8 +6023,6 @@ Primrose.Surface = function () {
 }();
 "use strict";
 
-/* global Primrose, io, Window, pliny */
-
 Primrose.WebRTCSocket = function () {
 
   /* polyfills */
@@ -6121,8 +6226,6 @@ Primrose.WebRTCSocket = function () {
   return WebRTCSocket;
 }();
 "use strict";
-
-/* global Primrose, URL, pliny */
 
 Primrose.Workerize = function () {
   function Workerize(func) {
@@ -6439,8 +6542,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Controls.Label = function () {
   "use strict";
 
@@ -6620,8 +6721,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Controls.Button2D = function () {
   "use strict";
 
@@ -6689,8 +6788,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Controls.Image = function () {
   "use strict";
 
@@ -6743,8 +6840,14 @@ Primrose.Controls.Image = function () {
     }
 
     _createClass(Image, [{
-      key: "_loadImage",
-      value: function _loadImage(i, src) {
+      key: "loadImage",
+      value: function loadImage(i, src) {
+        var _this2 = this;
+
+        if (typeof i !== "number" && !(i instanceof Number)) {
+          src = i;
+          i = 0;
+        }
         return new Promise(function (resolve, reject) {
           if (imageCache[src]) {
             resolve(imageCache[src]);
@@ -6761,22 +6864,12 @@ Primrose.Controls.Image = function () {
           } else {
             reject("Image was null");
           }
-        });
-      }
-    }, {
-      key: "loadImage",
-      value: function loadImage(i, src) {
-        var _this2 = this;
-
-        if (typeof i !== "number" && !(i instanceof Number)) {
-          src = i;
-          i = 0;
-        }
-        return this._loadImage(i, src).then(function (img) {
+        }).then(function (img) {
           _this2.setImage(i, img);
           return img;
         }).catch(function (err) {
-          console.error("Failed to load image %s. Reason: %s", src, err);
+          console.error("Failed to load image " + src);
+          console.error(err);
           _this2.setImage(i, null);
         });
       }
@@ -6786,17 +6879,21 @@ Primrose.Controls.Image = function () {
         var _this3 = this;
 
         return this.loadImage(src).then(function (img) {
-          var options = {
-            bounds: new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height)
-          };
-          var a = new Primrose.Surface(options),
-              b = new Primrose.Surface(options);
+          var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
+              a = new Primrose.Surface({
+            id: _this3.id + "-left",
+            bounds: bounds
+          }),
+              b = new Primrose.Surface({
+            id: _this3.id + "-right",
+            bounds: bounds
+          });
           a.context.drawImage(img, 0, 0);
-          b.context.drawImage(img, -options.bounds.width, 0);
+          b.context.drawImage(img, -bounds.width, 0);
           _this3.setImage(0, a.canvas);
           _this3.setImage(1, b.canvas);
-          _this3.bounds.width = options.bounds.width;
-          _this3.bounds.height = options.bounds.height;
+          _this3.bounds.width = bounds.width;
+          _this3.bounds.height = bounds.height;
           _this3.render();
           return _this3;
         });
@@ -6821,11 +6918,11 @@ Primrose.Controls.Image = function () {
       }
     }, {
       key: "render",
-      value: function render() {
-        if (this._changed) {
+      value: function render(force) {
+        if (this._changed || force) {
           if (this.resized) {
             this.resize();
-          } else {
+          } else if (this.image !== this._lastImage) {
             this.context.clearRect(0, 0, this.imageWidth, this.imageHeight);
           }
 
@@ -6861,8 +6958,6 @@ Primrose.Controls.Image = function () {
   return Image;
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.DOM.cascadeElement = function (id, tag, DOMClass) {
   var elem = null;
@@ -6921,8 +7016,6 @@ Primrose.DOM.makeHidingContainer = function (id, obj) {
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/* global Primrose, HTMLSelectElement, pliny */
 
 Primrose.DOM.StateList = function () {
   var StateList = function StateList(id, ctrls, states, callback, parent) {
@@ -7047,8 +7140,6 @@ Primrose.HTTP.XHR = function (method, type, url, options) {
 };
 "use strict";
 
-/* global Primrose, MediaStreamTrack, THREE, Navigator, pliny */
-
 Primrose.Input.Camera = function () {
 
   /* polyfill */
@@ -7153,8 +7244,9 @@ Primrose.Input.Camera = function () {
           }
           this.videoElement.src = null;
           this.streaming = false;
-        } catch (err) {
-          console.error("While stopping", err);
+        } catch (exp) {
+          console.error(exp);
+          console.error("While stopping");
         }
       }
 
@@ -7181,239 +7273,238 @@ Primrose.Input.Camera = function () {
 }();
 "use strict";
 
-/* global Primrose, THREE, emit, isMobile, pliny */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Primrose.Input.FPSInput = function () {
-  function FPSInput(DOMElement) {
-    var _this = this;
-
-    DOMElement = DOMElement || window;
-
-    this.listeners = {
-      zero: [],
-      lockpointer: [],
-      fullscreen: [],
-      pointerstart: [],
-      pointerend: []
-    };
-
-    this.managers = [
-    // keyboard should always run on the window
-    new Primrose.Input.Keyboard(window, {
-      lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
-      pointer1: {
-        buttons: [Primrose.Keys.SPACE],
-        repetitions: 1,
-        commandDown: emit.bind(this, "pointerstart"),
-        commandUp: emit.bind(this, "pointerend")
-      },
-      pointer2: {
-        buttons: [Primrose.Keys.ENTER],
-        repetitions: 1,
-        commandDown: emit.bind(this, "pointerstart"),
-        commandUp: emit.bind(this, "pointerend")
-      },
-      fullScreen: {
-        buttons: [Primrose.Keys.F],
-        commandDown: emit.bind(this, "fullscreen")
-      },
-      strafeLeft: {
-        buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
-      },
-      strafeRight: {
-        buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
-      },
-      strafe: { commands: ["strafeLeft", "strafeRight"] },
-      driveForward: {
-        buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
-      },
-      driveBack: {
-        buttons: [Primrose.Keys.S, Primrose.Keys.DOWNARROW]
-      },
-      drive: { commands: ["driveForward", "driveBack"] },
-      select: { buttons: [Primrose.Keys.ENTER] },
-      dSelect: { buttons: [Primrose.Keys.ENTER], delta: true },
-      zero: {
-        buttons: [Primrose.Keys.Z],
-        metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
-        commandUp: emit.bind(this, "zero")
-      }
-    }), new Primrose.Input.Mouse(DOMElement, {
-      lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
-      pointer: {
-        buttons: [Primrose.Keys.ANY],
-        repetitions: 1,
-        commandDown: emit.bind(this, "pointerstart"),
-        commandUp: emit.bind(this, "pointerend")
-      },
-      buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
-      dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
-      pointerX: { axes: [Primrose.Input.Mouse.X] },
-      pointerY: { axes: [Primrose.Input.Mouse.Y] },
-      dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
-      heading: { commands: ["dx"], integrate: true },
-      dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
-      pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
-      pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
-    }), new Primrose.Input.Touch(DOMElement, {
-      lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
-      pointer: {
-        buttons: [Primrose.Keys.ANY],
-        repetitions: 1,
-        commandDown: emit.bind(this, "pointerstart"),
-        commandUp: emit.bind(this, "pointerend")
-      },
-      buttons: { axes: [Primrose.Input.Touch.FINGERS] },
-      dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true },
-      pointerX: { axes: [Primrose.Input.Touch.X0] },
-      pointerY: { axes: [Primrose.Input.Touch.Y0] },
-      dx: { axes: [-Primrose.Input.Touch.X0], delta: true, scale: 0.005, min: -5, max: 5 },
-      heading: { commands: ["dx"], integrate: true },
-      dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
-      pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
-    }), new Primrose.Input.Gamepad({
-      pointer: {
-        buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
-        repetitions: 1,
-        commandDown: emit.bind(this, "pointerstart"),
-        commandUp: emit.bind(this, "pointerend")
-      },
-      strafe: { axes: [Primrose.Input.Gamepad.LSX] },
-      drive: { axes: [Primrose.Input.Gamepad.LSY] },
-      heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
-      dheading: { commands: ["heading"], delta: true },
-      pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
-    })];
-
-    if (Primrose.Input.VR.Version > 0) {
-      var vr = new Primrose.Input.VR();
-      this.managers.push(vr);
-      vr.init();
-    }
-
-    this.managers.forEach(function (mgr) {
-      return _this[mgr.name] = mgr;
-    });
-  }
+  "use strict";
 
   var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
 
-  FPSInput.prototype.zero = function () {
-    if (this.vr && this.vr.currentDisplay) {
-      this.vr.currentDisplay.resetPose();
-    }
-    if (this.motion) {
-      this.motion.zeroAxes();
-    }
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this.managers[i];
-      for (var j = 0; mgr.enabled && j < SETTINGS_TO_ZERO.length; ++j) {
-        mgr.setValue(SETTINGS_TO_ZERO[j], 0);
-      }
-    }
-  };
+  var temp = new THREE.Quaternion();
 
-  FPSInput.prototype.update = function () {
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this.managers[i];
-      if (mgr.enabled) {
-        if (mgr.poll) {
-          mgr.poll();
+  var FPSInput = function () {
+    function FPSInput(DOMElement) {
+      var _this = this;
+
+      _classCallCheck(this, FPSInput);
+
+      DOMElement = DOMElement || window;
+
+      this.listeners = {
+        zero: [],
+        lockpointer: [],
+        fullscreen: [],
+        pointerstart: [],
+        pointerend: []
+      };
+
+      this.managers = [
+      // keyboard should always run on the window
+      new Primrose.Input.Keyboard(window, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+        fullScreen: {
+          buttons: [Primrose.Keys.F],
+          commandDown: emit.bind(this, "fullscreen")
+        },
+        strafeLeft: {
+          buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
+        },
+        strafeRight: {
+          buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
+        },
+        strafe: { commands: ["strafeLeft", "strafeRight"] },
+        driveForward: {
+          buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
+        },
+        driveBack: {
+          buttons: [Primrose.Keys.S, Primrose.Keys.DOWNARROW]
+        },
+        drive: { commands: ["driveForward", "driveBack"] },
+        select: { buttons: [Primrose.Keys.ENTER] },
+        dSelect: { buttons: [Primrose.Keys.ENTER], delta: true },
+        zero: {
+          buttons: [Primrose.Keys.Z],
+          metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
+          commandUp: emit.bind(this, "zero")
         }
-        mgr.update();
-      }
-    }
-  };
+      }), new Primrose.Input.Mouse(DOMElement, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
+        pointer: {
+          buttons: [Primrose.Keys.ANY],
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
+        dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
+        pointerX: { axes: [Primrose.Input.Mouse.X] },
+        pointerY: { axes: [Primrose.Input.Mouse.Y] },
+        dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
+        heading: { commands: ["dx"], integrate: true },
+        dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
+        pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
+        pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
+      }), new Primrose.Input.Touch(DOMElement, {
+        lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+        pointer: {
+          buttons: [Primrose.Keys.ANY],
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        buttons: { axes: [Primrose.Input.Touch.FINGERS] },
+        dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true },
+        pointerX: { axes: [Primrose.Input.Touch.X0] },
+        pointerY: { axes: [Primrose.Input.Touch.Y0] },
+        dx: { axes: [-Primrose.Input.Touch.X0], delta: true, scale: 0.005, min: -5, max: 5 },
+        heading: { commands: ["dx"], integrate: true },
+        dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
+        pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
+      }), new Primrose.Input.Gamepad({
+        pointer: {
+          buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        strafe: { axes: [Primrose.Input.Gamepad.LSX] },
+        drive: { axes: [Primrose.Input.Gamepad.LSY] },
+        heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
+        dheading: { commands: ["heading"], delta: true },
+        pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
+      })];
 
-  FPSInput.prototype.addEventListener = function (evt, thunk, bubbles) {
-    if (this.listeners[evt]) {
-      this.listeners[evt].push(thunk);
-    } else {
+      if (Primrose.Input.VR.Version > 0) {
+        var vr = new Primrose.Input.VR();
+        this.managers.push(vr);
+        vr.init();
+      }
+
       this.managers.forEach(function (mgr) {
-        if (mgr.addEventListener) {
-          mgr.addEventListener(evt, thunk, bubbles);
-        }
+        return _this[mgr.name] = mgr;
       });
     }
-  };
 
-  FPSInput.prototype.getValue = function (name) {
-    var value = 0;
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this.managers[i];
-      if (mgr.enabled) {
-        value += mgr.getValue(name);
-      }
-    }
-    return value;
-  };
-
-  FPSInput.prototype.getLatestValue = function (name) {
-    var value = 0,
-        maxT = Number.MIN_VALUE;
-    for (var i = 0; i < this.managers.length; ++i) {
-      var mgr = this.managers[i];
-      if (mgr.enabled && mgr.lastT > maxT) {
-        maxT = mgr.lastT;
-        value = mgr.getValue(name);
-      }
-    }
-    return value;
-  };
-
-  if (window.THREE) {
-    FPSInput.prototype.getVector3 = function (x, y, z, value) {
-      value = value || new THREE.Vector3();
-      value.set(0, 0, 0);
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          mgr.addVector3(x, y, z, value);
+    _createClass(FPSInput, [{
+      key: "zero",
+      value: function zero() {
+        if (this.vr && this.vr.currentDisplay) {
+          this.vr.currentDisplay.resetPose();
         }
-      }
-      return value;
-    };
-
-    FPSInput.prototype.getVector3s = function (x, y, z, values) {
-      values = values || [];
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          values[i] = mgr.getVector3(x, y, z, values[i]);
+        if (this.motion) {
+          this.motion.zeroAxes();
         }
-      }
-      return values;
-    };
-
-    var temp = new THREE.Quaternion();
-    FPSInput.prototype.getOrientation = function (x, y, z, w, value, accumulate) {
-      value = value || new THREE.Quaternion();
-      value.set(0, 0, 0, 1);
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled && mgr.getOrientation) {
-          mgr.getOrientation(x, y, z, w, temp);
-          value.multiply(temp);
-          if (!accumulate) {
-            break;
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          for (var j = 0; mgr.enabled && j < SETTINGS_TO_ZERO.length; ++j) {
+            mgr.setValue(SETTINGS_TO_ZERO[j], 0);
           }
         }
       }
-      return value;
-    };
-
-    Object.defineProperty(FPSInput.prototype, "transforms", {
-      get: function get() {
-        if (this.vr && this.vr.transforms) {
-          return this.vr.transforms;
-        } else {
-          return Primrose.Input.Motion.DEFAULT_TRANSFORMS;
+    }, {
+      key: "update",
+      value: function update() {
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled) {
+            if (mgr.poll) {
+              mgr.poll();
+            }
+            mgr.update();
+          }
         }
       }
-    });
+    }, {
+      key: "addEventListener",
+      value: function addEventListener(evt, thunk, bubbles) {
+        if (this.listeners[evt]) {
+          this.listeners[evt].push(thunk);
+        } else {
+          this.managers.forEach(function (mgr) {
+            if (mgr.addEventListener) {
+              mgr.addEventListener(evt, thunk, bubbles);
+            }
+          });
+        }
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(name) {
+        var value = 0;
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled) {
+            value += mgr.getValue(name);
+          }
+        }
+        return value;
+      }
+    }, {
+      key: "getLatestValue",
+      value: function getLatestValue(name) {
+        var value = 0,
+            maxT = Number.MIN_VALUE;
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled && mgr.lastT > maxT) {
+            maxT = mgr.lastT;
+            value = mgr.getValue(name);
+          }
+        }
+        return value;
+      }
+    }, {
+      key: "getVector3",
+      value: function getVector3(x, y, z, value) {
+        value = value || new THREE.Vector3();
+        value.set(0, 0, 0);
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled) {
+            mgr.addVector3(x, y, z, value);
+          }
+        }
+        return value;
+      }
+    }, {
+      key: "getVector3s",
+      value: function getVector3s(x, y, z, values) {
+        values = values || [];
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled) {
+            values[i] = mgr.getVector3(x, y, z, values[i]);
+          }
+        }
+        return values;
+      }
+    }, {
+      key: "getOrientation",
+      value: function getOrientation(x, y, z, w, value, accumulate) {
+        value = value || new THREE.Quaternion();
+        value.set(0, 0, 0, 1);
+        for (var i = 0; i < this.managers.length; ++i) {
+          var mgr = this.managers[i];
+          if (mgr.enabled && mgr.getOrientation) {
+            mgr.getOrientation(x, y, z, w, temp);
+            value.multiply(temp);
+            if (!accumulate) {
+              break;
+            }
+          }
+        }
+        return value;
+      }
+    }, {
+      key: "VRDisplays",
+      get: function get() {
+        return this.VR && this.VR.displays;
+      }
+    }]);
 
     return FPSInput;
-  }
+  }();
+
+  return FPSInput;
 }();
 "use strict";
 
@@ -7422,8 +7513,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, pliny */
 
 Primrose.Input.Gamepad = function () {
 
@@ -7556,9 +7645,10 @@ Primrose.Input.Gamepad = function () {
       try {
         _this.update();
         _this.available = true;
-      } catch (err) {
+      } catch (exp) {
+        console.error(exp);
         _this.avaliable = false;
-        _this.errorMessage = err;
+        _this.errorMessage = exp;
       }
       return _this;
     }
@@ -7596,12 +7686,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-/* global Primrose, pliny */
-
 Primrose.Input.Keyboard = function () {
-  var _pliny$class;
 
   var Keyboard = function (_Primrose$InputProces) {
     _inherits(Keyboard, _Primrose$InputProces);
@@ -7637,8 +7722,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, requestAnimationFrame, Leap, LeapMotionInput, pliny */
 
 Primrose.Input.LeapMotion = function () {
   function processFingerParts(i) {
@@ -7765,8 +7848,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global Primrose, pliny */
-
 Primrose.Input.Location = function () {
 
   var Location = function (_Primrose$InputProces) {
@@ -7823,8 +7904,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, THREE, isWebKit, isiOS, devicePixelRatio, pliny */
 
 Primrose.Input.Motion = function () {
 
@@ -7910,8 +7989,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, THREE, isChrome, pliny */
 
 Primrose.Input.Mouse = function () {
 
@@ -8102,8 +8179,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global Primrose, pliny */
-
 Primrose.Input.Speech = function () {
 
   ////
@@ -8268,8 +8343,9 @@ Primrose.Input.Speech = function () {
         }.bind(_this), true);
 
         available = true;
-      } catch (err) {
-        errorMessage = err;
+      } catch (exp) {
+        console.error(exp);
+        errorMessage = exp;
         available = false;
       }
       return _this;
@@ -8331,8 +8407,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global Primrose, pliny */
-
 Primrose.Input.Touch = function () {
 
   var Touch = function (_Primrose$InputProces) {
@@ -8358,6 +8432,8 @@ Primrose.Input.Touch = function () {
             this.setAxis("LY" + t.identifier, t.pageY);
           }
 
+          this.setButton("FINGER" + t.identifier, stateChange);
+
           var mask = 1 << t.identifier;
           if (stateChange) {
             this.FINGERS |= mask;
@@ -8366,6 +8442,7 @@ Primrose.Input.Touch = function () {
             this.FINGERS &= mask;
           }
         }
+        event.preventDefault();
         this.update();
       }
 
@@ -8398,8 +8475,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global THREE, Primrose, HMDVRDevice, PositionSensorVRDevice, pliny, Promise */
 
 Primrose.Input.VR = function () {
 
@@ -8491,10 +8566,7 @@ Primrose.Input.VR = function () {
         this.displays = displays;
         this.displays.forEach(onConnected);
 
-        if (typeof selectedIndex !== "number" && this.displays.length >= 1) {
-          selectedIndex = 0;
-        }
-        if (typeof selectedIndex === "number") {
+        if (typeof selectedIndex === "number" && 0 <= selectedIndex && selectedIndex < this.displays.length) {
           this.connect(selectedIndex);
           return this.currentDisplay;
         }
@@ -8671,8 +8743,6 @@ Primrose.Input.VR = function () {
 }();
 "use strict";
 
-/* global Primrose, Window, pliny */
-
 Primrose.Output.Audio3D = function () {
 
   // polyfill
@@ -8725,6 +8795,8 @@ Primrose.Output.Audio3D = function () {
       };
       this.isAvailable = true;
     } catch (exp) {
+      console.error(exp);
+      console.error("AudioContext not available.");
       this.isAvailable = false;
       this.setPosition = function () {};
       this.setVelocity = function () {};
@@ -8732,7 +8804,6 @@ Primrose.Output.Audio3D = function () {
       this.start = function () {};
       this.stop = function () {};
       this.error = exp;
-      console.error("AudioContext not available. Reason: ", exp.message);
     }
   }
 
@@ -8761,8 +8832,9 @@ Primrose.Output.Audio3D = function () {
     if (index >= srcs.length) {
       return Promise.reject("Failed to load a file from " + srcs.length + " files.");
     } else {
-      return this.loadURL(srcs[index]).catch(function () {
-        return setTimeout(_this3.loadURLCascadeSrcList(_this3, srcs, index + 1), 0);
+      return this.loadURL(srcs[index]).catch(function (err) {
+        console.error(err);
+        return _this3.loadURLCascadeSrcList(srcs, index + 1);
       });
     }
   };
@@ -8864,8 +8936,6 @@ Primrose.Output.Audio3D = function () {
   return Audio3D;
 }();
 "use strict";
-
-/* global Primrose, io, Leap, pliny */
 
 Primrose.Output.HapticGlove = function () {
 
@@ -8976,8 +9046,6 @@ Primrose.Output.HapticGlove = function () {
 }();
 "use strict";
 
-/* global Primrose, Window, pliny */
-
 Primrose.Output.Music = function () {
 
   /* polyfill */
@@ -9068,8 +9136,6 @@ Primrose.Output.Music = function () {
 }();
 "use strict";
 
-/* global Primrose, speechSynthesis, pliny */
-
 Primrose.Output.Speech = function () {
   function pickRandomOption(options, key, min, max) {
     if (options[key] === undefined) {
@@ -9101,6 +9167,7 @@ Primrose.Output.Speech = function () {
       };
     };
   } catch (exp) {
+    console.error(exp);
 
     // in case of error, return a shim that lets us continue unabated
     return function () {
@@ -9138,8 +9205,6 @@ Primrose.Random.steps = function (min, max, steps) {
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-/* global Primrose, pliny */
 
 Primrose.Text.CodePage = function () {
   "use strict";
@@ -9270,8 +9335,6 @@ Primrose.Text.CodePage = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CommandPack = function () {
   "use strict";
 
@@ -9283,8 +9346,6 @@ Primrose.Text.CommandPack = function () {
   return CommandPack;
 }();
 "use strict";
-
-/* global qp, Primrose, pliny */
 
 Primrose.Text.Cursor = function () {
   "use strict";
@@ -9533,8 +9594,6 @@ Primrose.Text.Cursor = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Grammar = function () {
   "use strict";
 
@@ -9640,8 +9699,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* global Primrose, pliny */
-
 Primrose.Text.OperatingSystem = function () {
   "use strict";
 
@@ -9727,8 +9784,6 @@ Primrose.Text.OperatingSystem = function () {
 }();
 "use strict";
 
-/* global qp, Primrose, pliny */
-
 Primrose.Text.Point = function () {
   "use strict";
 
@@ -9763,8 +9818,6 @@ Primrose.Text.Point = function () {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/* global qp, Primrose, pliny */
 
 Primrose.Text.Rectangle = function () {
   "use strict";
@@ -9890,8 +9943,6 @@ Primrose.Text.Rectangle = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Rule = function () {
   "use strict";
 
@@ -9939,8 +9990,6 @@ Primrose.Text.Rule = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Size = function () {
   "use strict";
 
@@ -9971,8 +10020,6 @@ Primrose.Text.Size = function () {
   return Size;
 }();
 "use strict";
-
-/* global Primrose, isOSX, pliny */
 
 Primrose.Text.Terminal = function (inputEditor, outputEditor) {
   "use strict";
@@ -10089,8 +10136,6 @@ Primrose.Text.Terminal = function (inputEditor, outputEditor) {
   };
 };
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.Token = function () {
   "use strict";
@@ -10212,7 +10257,10 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
     this.exitPresent = function () {
       var _this2 = this;
 
-      var clear = function clear() {
+      var clear = function clear(err) {
+        if (err) {
+          console.error(err);
+        }
         console.log("exit presenting");
         _this2.isPresenting = false;
         currentLayer = null;
@@ -10360,12 +10408,18 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
     this.exitPresent = function () {
       var _this2 = this;
 
-      var clear = function clear(elem) {
+      var clear = function clear(err) {
+        if (err) {
+          console.error(err);
+        }
+        console.log("exit presenting");
         _this2.isPresenting = false;
         currentLayer = null;
-        return elem;
       };
-      return FullScreen.exit().then(clear).catch(clear);
+      return FullScreen.exit().then(function (elem) {
+        clear();
+        return elem;
+      }).catch(clear);
     };
   }
 
@@ -10461,8 +10515,6 @@ Primrose.Input.VR.MotionCorrector = function () {
   return MotionCorrector;
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.CodePages.DE_QWERTZ = function () {
   "use strict";
@@ -10589,8 +10641,6 @@ Primrose.Text.CodePages.DE_QWERTZ = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.EN_UKX = function () {
   "use strict";
 
@@ -10678,8 +10728,6 @@ Primrose.Text.CodePages.EN_UKX = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.CodePages.EN_US = function () {
   "use strict";
 
@@ -10741,8 +10789,6 @@ Primrose.Text.CodePages.EN_US = function () {
   });
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.CodePages.FR_AZERTY = function () {
   "use strict";
@@ -10845,8 +10891,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global Primrose, pliny */
 
 ////
 // For all of these commands, the "current" cursor is:
@@ -10973,8 +11017,6 @@ Primrose.Text.CommandPacks.BasicTextInput = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 ////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
@@ -11033,8 +11075,6 @@ Primrose.Text.CommandPacks.TextEditor = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 ////
 // For all of these commands, the "current" cursor is:
 // If SHIFT is not held, then "front.
@@ -11046,8 +11086,6 @@ Primrose.Text.CommandPacks.TextInput = function () {
   return new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
 }();
 "use strict";
-
-/* global Primrose, THREE, pliny */
 
 Primrose.Text.Controls.PlainText = function () {
 
@@ -11114,8 +11152,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
 
 Primrose.Text.Controls.TextBox = function () {
   "use strict";
@@ -12131,8 +12167,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/* global qp, Primrose, isOSX, isIE, isOpera, isChrome, isFirefox, isSafari, devicePixelRatio, HTMLCanvasElement, pliny */
-
 Primrose.Text.Controls.TextInput = function () {
   "use strict";
 
@@ -12201,8 +12235,6 @@ Primrose.Text.Controls.TextInput = function () {
   return TextInput;
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.Grammars.Basic = function () {
 
@@ -12389,8 +12421,8 @@ Primrose.Text.Grammars.Basic = function () {
       try {
         return eval(script); // jshint ignore:line
       } catch (exp) {
-        console.debug(line.join(", "));
         console.error(exp);
+        console.debug(line.join(", "));
         console.error(script);
         error(exp.message + ": " + script);
       }
@@ -12807,16 +12839,12 @@ Primrose.Text.Grammars.Basic = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Grammars.JavaScript = function () {
   "use strict";
 
   return new Primrose.Text.Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.Grammars.PlainText = function () {
   "use strict";
@@ -12825,8 +12853,6 @@ Primrose.Text.Grammars.PlainText = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.Grammars.TestResults = function () {
   "use strict";
 
@@ -12834,16 +12860,12 @@ Primrose.Text.Grammars.TestResults = function () {
 }();
 "use strict";
 
-/* global Primrose, pliny */
-
 Primrose.Text.OperatingSystems.OSX = function () {
   "use strict";
 
   return new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 ////
 // cut, copy, and paste commands are events that the browser manages,
@@ -12855,8 +12877,6 @@ Primrose.Text.OperatingSystems.Windows = function () {
   return new Primrose.Text.OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.Themes.Dark = function () {
   "use strict";
@@ -12908,8 +12928,6 @@ Primrose.Text.Themes.Dark = function () {
   };
 }();
 "use strict";
-
-/* global Primrose, pliny */
 
 Primrose.Text.Themes.Default = function () {
   "use strict";

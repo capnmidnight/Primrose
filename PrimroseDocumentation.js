@@ -95,12 +95,6 @@ pliny.namespace({
     type: "Array of Number",
     description: "A selection of color values that closely match skin colors of people."
   });
-  pliny.function({
-    parent: "Primrose",
-    name: "loadTexture",
-    description: "Load a texture! Reads the THREE.ImageUtils.crossOrigin property to configure the Cross-Origin policy.",
-    paramters: [{ name: "url", type: "String", description: "The URL of the image to load as a texture." }, { name: "onLoad", type: "Function", description: "A callback for when the texture loads successfully." }, { name: "onProgress", type: "Function", description: "A callback for when the progress is made on loading the texture." }, { name: "onError", type: "Function", description: "A callback for if the texture fails to load." }]
-  });
   pliny.value({
     name: "isHomeScreen",
     type: "Boolean",
@@ -182,11 +176,34 @@ a common basis for orientation events."
 Explorer. Once the bane of every web developer's existence, it has since passed\n\
 the torch on to Safari in all of its many useless incarnations."
   });
+  pliny.value({
+    parent: "Primrose",
+    name: "RESOLUTION_SCALES",
+    description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+  });
+  pliny.enumeration({
+    parent: "Primrose",
+    name: "Quality",
+    description: "Graphics quality settings."
+  });
   pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
   returns: "THREE.Object3D",
-  parameters: [{ name: "length", type: "Number", description: "The length each axis should be in its own axis." }, { name: "width", type: "Number", description: "The size each axis should be in the other axes." }]
+  parameters: [{ name: "length", type: "Number", description: "The length each axis should be in its own axis." }, { name: "width", type: "Number", description: "The size each axis should be in the other axes." }],
+  examples: [{
+    name: "Basic usage", description: "To create a fixed point of reference in the scene, use the `axis()` function.:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var scene = new THREE.Scene()\n\
+    // This set of axis bars will each be 1 meter long and 5cm wide.\n\
+    // They'll be centered on each other, so the individual halves\n\
+    // of the bars will only extend half a meter.\n\
+    scene.add(axis(1, 0.05));\n\
+\n\
+The result should appear as:\n\
+\n\
+![screenshot](images/axis.png)" }]
 });
 pliny.function({
   name: "box",
@@ -555,7 +572,7 @@ pliny.function({
 });
 pliny.function({
   name: "shell",
-  parameters: [{ name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." }, { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." }, { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." }, { name: "phi", type: "Number", description: "The angle in radians around the Y-axis of the sphere." }, { name: "thetaStart", type: "Number", description: "The angle in radians around the Z-axis of the sphere." }],
+  parameters: [{ name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." }, { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." }, { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." }, { name: "phi", type: "Number", description: "(Optional) The angle in radians around the Y-axis of the sphere. Defaults to 80 degrees." }, { name: "thetaStart", type: "Number", description: "(Optional) The angle in radians around the Z-axis of the sphere. Defaults to 48 degrees." }],
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\
 the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
 outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
@@ -574,7 +591,7 @@ file to use as the texture, execute code as such:\n\
           // The number of slices defines how smooth the sphere will be in the\n\
           // horizontal direction. Think of it like lines of longitude.\n\
           18,\n\
-          // The number of rinigs defines how smooth the sphere will be in the\n\
+          // The number of rings defines how smooth the sphere will be in the\n\
           // vertical direction. Think of it like lines of latitude.\n\
           9,\n\
           // The phi angle is the number or radians around the 'belt' of the sphere\n\
@@ -1072,8 +1089,7 @@ performs basic conversions from DOM elements to the internal Control format."
     name: "Keys",
     description: "Keycode values for system keys that are the same across all international standards"
   });
-  pliny.setEnumerationValues("Primrose.Keys", Primrose.Keys);
-pliny.class({
+  pliny.class({
     parent: "Primrose",
     name: "ModelLoader",
     description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
@@ -1703,6 +1719,7 @@ pliny.class({
     name: "FPSInput",
     description: "| [under construction]"
   });
+
   pliny.class({
     parent: "Primrose.Input",
     name: "Gamepad",
@@ -1716,12 +1733,13 @@ pliny.class({
   name: "XBOX_BUTTONS",
   description: "Labeled names for each of the different control features of the Xbox 360 controller."
 });
-pliny.class((_pliny$class = {
+pliny.class({
     parent: "Primrose.Input",
     name: "Keyboard",
     baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
-  }, _defineProperty(_pliny$class, "baseClass", "Primrose.InputProcessor"), _defineProperty(_pliny$class, "parameters", [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]), _pliny$class));
+    description: "| [under construction]",
+    parameters: [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]
+  });
 
   pliny.class({
     parent: "Primrose.Input",
