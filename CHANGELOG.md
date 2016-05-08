@@ -9,7 +9,7 @@ KEY:
 * **Windows** - Windows 8.1 and Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
-## v0.23.2 - 2016/05/06
+## v0.23.2 - 2016/05/08
 
 * Bugs
   * Fixed documentation TOC hider for Firefox.
@@ -36,6 +36,8 @@ KEY:
       * your live-coded script is canceled,
       * all of your objects removed from the scene,
       * and they don't return until you edit your script.
+  * Multiple HMDs connected to the machine (for those rare people with both the Rift and the Vive) now each have their own "Go VR" button, listing which device they will connect to.
+  * New [quickstart](/quickstart.zip) template package.
 * Open issues
   * Windows
     * Chromium - NONE! Full support, no extraneous issues.
