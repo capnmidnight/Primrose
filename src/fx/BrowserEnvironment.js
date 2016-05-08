@@ -654,19 +654,30 @@ Primrose.BrowserEnvironment = (function () {
         this.registerPickableObject(icon);
       };
 
+      var fgColor = null;
+
       var makeCardboard = (display, i) => {
-        var cardboard = cardboardFactory.clone();
-        cardboard.rotation.set(0, 270 * Math.PI / 180, 0);
-        cardboard.name = "Cardboard";
-        cardboard.add(cardboardTextFactory.clone());
+        var cardboard = cardboardFactory.clone(),
+          titleText = textured(text3D(0.05, display.displayName), fgColor),
+          vrText = textured(text3D(0.1, "VR"), fgColor);
+
+        cardboard.name = "Cardboard" + i;
         cardboard.addEventListener("click", this.goVR.bind(this, i), false);
-        var titleGeom = text3D(0.05, display.displayName);
-        var text = put(textured(titleGeom, cardboardTextFactory.template.children[0].material))
+
+        put(titleText)
           .on(cardboard)
-          .at(0, -0.1, titleGeom.boundingSphere.radius);
-        text.rotation.set(0, 90 * Math.PI / 180, 0);
-        this.scene.add(cardboard);
-        this.scene.Cardboard = cardboard;
+          .rot(0, 90 * Math.PI / 180, 0)
+          .at(0, -0.1, titleText.geometry.boundingSphere.radius);
+
+        put(vrText)
+          .on(cardboard)
+          .rot(0, 90 * Math.PI / 180, 0)
+          .at(0, 0.075, vrText.geometry.boundingSphere.radius);
+
+        put(cardboard)
+          .on(this.scene)
+          .rot(0, 270 * Math.PI / 180, 0);
+
         this.registerPickableObject(cardboard);
         return cardboard;
       };
@@ -688,32 +699,29 @@ Primrose.BrowserEnvironment = (function () {
             buildScene(models.scene);
           }
 
-          var bgColor = new THREE.Color(this.options.backgroundColor),
-            fgColor = complementColor(bgColor);
+          fgColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
 
           if (models.monitor) {
             var monitor = models.monitor;
             monitor.name = "Monitor";
-            var monitorText = textured(text3D(0.5, "Fullscreen"), fgColor);
+            var monitorText = textured(text3D(0.1, "Fullscreen"), fgColor),
+              radius = monitorText.geometry.boundingSphere.radius;
             put(monitorText)
               .on(monitor)
               .rot(0, 90 * Math.PI / 180, 0)
-              .at(0, 0.1, monitorText.boundingSphere.radius);
+              .at(0, 1.25, radius);
             monitor.addEventListener("click", this.goFullScreen, false);
             monitor.rotation.set(0, Math.PI * 3 / 2, 0);
             monitor.position.y = -1;
-
-
             icons.push(monitor);
           }
 
           if (models.cardboard) {
             cardboardFactory = new Primrose.ModelLoader(models.cardboard);
-            complementColor(setColor(models.cardboardText, this.options.backgroundColor));
-            cardboardTextFactory = new Primrose.ModelLoader(models.cardboardText);
             icons.splice
               .bind(icons, icons.length, 0)
-              .apply(icons, this.input.VR.displays.map(makeCardboard));
+              .apply(icons, (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
+                .map(makeCardboard));
           }
 
           icons.forEach(putIconInScene);
