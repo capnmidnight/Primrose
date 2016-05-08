@@ -1,6 +1,257 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/doc/index.html"><!-- start main.jade meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><!-- start documentation.jade title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation"><title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append --><script type="text/javascript" src="../PrimroseDependencies.min.js"></script><script type="text/javascript" src="../Primrose.min.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append --><link rel="stylesheet" type="text/css" href="style.min.css"><script type="text/javascript" src="../PrimroseDocumentation.min.js"></script><!-- end documentation.jade head append --></head><body><header role="banner"><a id="logo" href="../"><img src="../images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="../#intro">intro/</a></li><li><a href="../#webvr">webvr/</a></li><li><a href="../doc/">doc/</a></li><li><a href="../#dev">download/</a></li><li><a href="../#teamInfo">team/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><!-- start main.jade banner block --><!-- end main.jade banner block -->
-<!-- start main.jade main block --><!-- start documentation.jade main block --><main><div id="top"></div><div id="contents"><details open><input id="docSearch" type="search" placeholder="Filter"><summary>Table of contents</summary><nav><ul><li><h2>Project</h2><ul><li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li><li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li><li><a href="index.html#LICENSE.md">LICENSE</a></li><li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li><li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li></ul></li><li><h2>Examples</h2><ul><li data-name="Example: Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Example: Commodore PET and Oregon Trail</a></li><li data-name="Example: Live programming in Virtual Reality"><a href="../doc/editorVR.html">Example: Live programming in Virtual Reality</a></li><li data-name="Example: Empty"><a href="../doc/empty.html">Example: Empty</a></li><li data-name="Example: Haptic glove interaction"><a href="../doc/glove.html">Example: Haptic glove interaction</a></li><li data-name="Example: Jabber Yabs"><a href="../doc/jabbers.html">Example: Jabber Yabs</a></li><li data-name="Example: Drum Machine"><a href="../doc/music.html">Example: Drum Machine</a></li><li data-name="Example: New York Public Library Search"><a href="../doc/nypl.html">Example: New York Public Library Search</a></li><li data-name="Example: Procedurally generated room"><a href="../doc/temple.html">Example: Procedurally generated room</a></li></ul></li><li><h2>Pages</h2><ul><li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li><li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li><li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li><li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li><li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li><li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li><li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li></ul></li><li><h2>Tutorials</h2><ul><li data-name="Tutorial: Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Tutorial: Basic Lighting</a></li><li data-name="Tutorial: Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Tutorial: Build a Basic Drum Machine</a></li><li data-name="Tutorial: Display Images and Video"><a class="incomplete" href="../doc/video.html">Tutorial: Display Images and Video</a></li><li data-name="Tutorial: Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Tutorial: Building and Saving a Scene in Primrose</a></li><li data-name="Tutorial: Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Tutorial: Building Basic Scenes in Blender</a></li><li data-name="Tutorial: More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">Tutorial: More Advanced Scenes in Blender</a></li><li data-name="Tutorial: Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Tutorial: Build a 3D Integrated Development Environment</a></li><li data-name="Tutorial: Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Tutorial: Setup a Multiplayer Server</a></li></ul></li></ul></nav></details></div><div id="documentation"><!-- start documentation.jade documentation block --><!-- 0--><h1>Getting started</h1><img class="logo" src="../images/logo128.png" alt="logo" title="Primrose" style="float:left;padding:10px"><p>Primrose is a cross-browser, multi-device framework for building productivity tools in <a href="../#webvr">WebVR</a> applications. Developers model their scenes in <a href="https://www.blender.org" target="_blank">Blender</a> (or some other 3D modeling package), create a web page using Primrose to load the scene, then manipulate objects within the scene using interfaces similar to the standard DOM functions with which they are already familiar.</p><p>It includes a suite of GUI controls—like buttons and a syntax-highlighting code editor control—to simplify the process of building VR applications that emphasize interactive, productive work. Use it to experiment with new ideas on productivity UIs in virtual spaces.</p><p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p><ul><li><a href="../Primrose.min.js" target="_blank">Download the latest version of the Primrose WebVR framework</a></li><li><a href="../PrimroseDependencies.min.js" target="_blank">Download Primrose's dependencies as a single package</a></li><li><a href="../doc/setup.html">Read detailed installation and setup instructions</a></li><li><a href="../doc/drum.html">Learn how to make a simple drum-machine application</a></li></ul><p>Additionally, you may wish to:</p><ul><li><a href="https://github.com/capnmidnight/pliny/blob/master/README.md" target="_blank">Read about how the Pliny documentation system works with Primrose</a></li><li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Check out the GitHub repository</a></li><li><a href="https://www.github.com/capnmidnight/Primrose/issues" target="_blank">File an issue report</a></li><li><a href="http://threejs.org/" target="_blank">Learn more about Three.js</a></li><li><a href="http://webvr.info/" target="_blank">Learn more about WebVR</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">Read the WebVR documentation on MDN</a></li></ul><h2>Example</h2><p>Using Primrose to make web applications is straightforward. To start, perform the following file operations all in the same directory:</p><ol><li>download <a href="../PrimroseFull.min.js" target="_blank">the latest Primrose library file, with its dependencies pre-packaged</a>.</li><li>download <a href="../doc/images/bg.jpg" target="_blank">a skymap image</a>.</li><li>download <a href="../doc/images/deck.png" target="_blank">a ground texture</a>.</li><li>download <a href="../herettp.exe" target="_blank">a local web server</a>. (Optional if you already know how to configure and run a web server on your local machine)</li><li>create a text file named <code>index.html</code></li><p>When you are done, your directory structure should look like:</p></ol><ul><li>bg.jpg</li><li>deck.png</li><li>herettp.exe</li><li>index.html</li><li>PrimroseFull.min.js</li></ul><p>In the <code>index.html</code> file, enter the following markup.</p><pre><code>grammar("HTML");
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="A WebVR application framework.">
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Primrose_VR">
+    <meta property="og:site_name" content="Primrose VR">
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
+    <meta property="og:url" content="http://www.primrosevr.com/doc/index.html"><!-- start main.jade meta block -->
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+<!-- start main.jade title block --><!-- start documentation.jade title block -->
+    <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
+    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
+    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append -->
+    <script type="text/javascript" src="../node_modules/logger/logger.js"></script>
+    <script type="text/javascript" src="../lib/loggerInit.js"></script>
+    <script type="text/javascript" src="../lib/promise.js"></script>
+    <script type="text/javascript" src="../lib/Element.details.js"></script>
+    <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
+    <script type="text/javascript" src="../lib/sha512.js"></script>
+    <script type="text/javascript" src="../node_modules/socket.io-client/socket.io.js"></script>
+    <script type="text/javascript" src="../node_modules/three/three.js"></script>
+    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
+    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
+    <script type="text/javascript" src="../src/index.js"></script>
+    <script type="text/javascript" src="../src/base/axis.js"></script>
+    <script type="text/javascript" src="../src/base/box.js"></script>
+    <script type="text/javascript" src="../src/base/brick.js"></script>
+    <script type="text/javascript" src="../src/base/cache.js"></script>
+    <script type="text/javascript" src="../src/base/clone.js"></script>
+    <script type="text/javascript" src="../src/base/cloud.js"></script>
+    <script type="text/javascript" src="../src/base/cylinder.js"></script>
+    <script type="text/javascript" src="../src/base/findProperty.js"></script>
+    <script type="text/javascript" src="../src/base/fmt.js"></script>
+    <script type="text/javascript" src="../src/base/forms.js"></script>
+    <script type="text/javascript" src="../src/base/fullscreen.js"></script>
+    <script type="text/javascript" src="../src/base/hub.js"></script>
+    <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
+    <script type="text/javascript" src="../src/base/light.js"></script>
+    <script type="text/javascript" src="../src/base/oop.js"></script>
+    <script type="text/javascript" src="../src/base/overwrite.js"></script>
+    <script type="text/javascript" src="../src/base/patch.js"></script>
+    <script type="text/javascript" src="../src/base/put.js"></script>
+    <script type="text/javascript" src="../src/base/quad.js"></script>
+    <script type="text/javascript" src="../src/base/shell.js"></script>
+    <script type="text/javascript" src="../src/base/sphere.js"></script>
+    <script type="text/javascript" src="../src/base/textured.js"></script>
+    <script type="text/javascript" src="../src/base/v3.js"></script>
+    <script type="text/javascript" src="../src/fx/Angle.js"></script>
+    <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
+    <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
+    <script type="text/javascript" src="../src/fx/Button.js"></script>
+    <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
+    <script type="text/javascript" src="../src/fx/Entity.js"></script>
+    <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
+    <script type="text/javascript" src="../src/fx/Keys.js"></script>
+    <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
+    <script type="text/javascript" src="../src/fx/Projector.js"></script>
+    <script type="text/javascript" src="../src/fx/Surface.js"></script>
+    <script type="text/javascript" src="../src/fx/WebRTCSocket.js"></script>
+    <script type="text/javascript" src="../src/fx/Workerize.js"></script>
+    <script type="text/javascript" src="../src/x/LoginForm.js"></script>
+    <script type="text/javascript" src="../src/x/SignupForm.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/StateList.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/get.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getBuffer.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getObject.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/XHR.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Camera.js"></script>
+    <script type="text/javascript" src="../src/fx/input/FPSInput.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Gamepad.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Keyboard.js"></script>
+    <script type="text/javascript" src="../src/fx/input/LeapMotion.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Location.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Motion.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Mouse.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Touch.js"></script>
+    <script type="text/javascript" src="../src/fx/input/VR.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
+    <script type="text/javascript" src="../src/fx/output/HapticGlove.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Music.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Speech.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/int.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/item.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/number.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/steps.js"></script>
+    <script type="text/javascript" src="../src/fx/text/CodePage.js"></script>
+    <script type="text/javascript" src="../src/fx/text/CommandPack.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Cursor.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Grammar.js"></script>
+    <script type="text/javascript" src="../src/fx/text/OperatingSystem.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Point.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Rectangle.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Rule.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Size.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Terminal.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Token.js"></script>
+    <script type="text/javascript" src="../src/fx/input/vr/CardboardVRDisplay.js"></script>
+    <script type="text/javascript" src="../src/fx/input/vr/LegacyVRDisplay.js"></script>
+    <script type="text/javascript" src="../src/fx/input/vr/MotionCorrector.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/DE_QWERTZ.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/EN_UKX.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/EN_US.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/FR_AZERTY.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/BasicTextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/TextEditor.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/TextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/PlainText.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/TextBox.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/TextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/Basic.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/JavaScript.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/PlainText.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/TestResults.js"></script>
+    <script type="text/javascript" src="../src/fx/text/operating_systems/OSX.js"></script>
+    <script type="text/javascript" src="../src/fx/text/operating_systems/Windows.js"></script>
+    <script type="text/javascript" src="../src/fx/text/themes/Dark.js"></script>
+    <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
+  </head>
+  <body>
+    <header role="banner"><a id="logo" href="../"><img src="../images/primrose32.png" alt="logo" title="Primrose logo"></a>
+      <nav role="navigation">
+        <ul>
+          <li><a href="../#intro">intro/</a></li>
+          <li><a href="../#webvr">webvr/</a></li>
+          <li><a href="../doc/">doc/</a></li>
+          <li><a href="../#dev">download/</a></li>
+          <li><a href="../#teamInfo">team/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
+<!-- start main.jade main block --><!-- start documentation.jade main block -->
+    <main>
+      <div id="top"></div>
+      <div id="contents">
+        <details open>
+          <input id="docSearch" type="search" placeholder="Filter">
+          <summary>Table of contents</summary>
+          <nav>
+            <ul>
+              <li>
+                <h2>Project</h2>
+                <ul>
+                  <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li>
+                  <li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li>
+                  <li><a href="index.html#LICENSE.md">LICENSE</a></li>
+                  <li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li>
+                  <li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Examples</h2>
+                <ul>
+                  <li data-name="Example: Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Example: Commodore PET and Oregon Trail</a></li>
+                  <li data-name="Example: Live programming in Virtual Reality"><a href="../doc/editorVR.html">Example: Live programming in Virtual Reality</a></li>
+                  <li data-name="Example: Empty"><a href="../doc/empty.html">Example: Empty</a></li>
+                  <li data-name="Example: Haptic glove interaction"><a href="../doc/glove.html">Example: Haptic glove interaction</a></li>
+                  <li data-name="Example: Jabber Yabs"><a href="../doc/jabbers.html">Example: Jabber Yabs</a></li>
+                  <li data-name="Example: Drum Machine"><a href="../doc/music.html">Example: Drum Machine</a></li>
+                  <li data-name="Example: New York Public Library Search"><a href="../doc/nypl.html">Example: New York Public Library Search</a></li>
+                  <li data-name="Example: Procedurally generated room"><a href="../doc/temple.html">Example: Procedurally generated room</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Pages</h2>
+                <ul>
+                  <li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li>
+                  <li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li>
+                  <li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li>
+                  <li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li>
+                  <li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li>
+                  <li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li>
+                  <li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Tutorials</h2>
+                <ul>
+                  <li data-name="Tutorial: Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Tutorial: Basic Lighting</a></li>
+                  <li data-name="Tutorial: Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Tutorial: Build a Basic Drum Machine</a></li>
+                  <li data-name="Tutorial: Display Images and Video"><a class="incomplete" href="../doc/video.html">Tutorial: Display Images and Video</a></li>
+                  <li data-name="Tutorial: Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Tutorial: Building and Saving a Scene in Primrose</a></li>
+                  <li data-name="Tutorial: Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Tutorial: Building Basic Scenes in Blender</a></li>
+                  <li data-name="Tutorial: More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">Tutorial: More Advanced Scenes in Blender</a></li>
+                  <li data-name="Tutorial: Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Tutorial: Build a 3D Integrated Development Environment</a></li>
+                  <li data-name="Tutorial: Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Tutorial: Setup a Multiplayer Server</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </details>
+      </div>
+      <div id="documentation"><!-- start documentation.jade documentation block -->
+        <!-- 0-->
+        <h1>Getting started</h1><img class="logo" src="../images/logo128.png" alt="logo" title="Primrose" style="float:left;padding:10px">
+        <p>Primrose is a cross-browser, multi-device framework for building productivity tools in <a href="../#webvr">WebVR</a> applications. Developers model their scenes in <a href="https://www.blender.org" target="_blank">Blender</a> (or some other 3D modeling package), create a web page using Primrose to load the scene, then manipulate objects within the scene using interfaces similar to the standard DOM functions with which they are already familiar.</p>
+        <p>It includes a suite of GUI controls—like buttons and a syntax-highlighting code editor control—to simplify the process of building VR applications that emphasize interactive, productive work. Use it to experiment with new ideas on productivity UIs in virtual spaces.</p>
+        <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
+        <ul>
+          <li><a href="../Primrose.min.js" target="_blank">Download the latest version of the Primrose WebVR framework</a></li>
+          <li><a href="../PrimroseDependencies.min.js" target="_blank">Download Primrose's dependencies as a single package</a></li>
+          <li><a href="../doc/setup.html">Read detailed installation and setup instructions</a></li>
+          <li><a href="../doc/drum.html">Learn how to make a simple drum-machine application</a></li>
+        </ul>
+        <p>Additionally, you may wish to:</p>
+        <ul>
+          <li><a href="https://github.com/capnmidnight/pliny/blob/master/README.md" target="_blank">Read about how the Pliny documentation system works with Primrose</a></li>
+          <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Check out the GitHub repository</a></li>
+          <li><a href="https://www.github.com/capnmidnight/Primrose/issues" target="_blank">File an issue report</a></li>
+          <li><a href="http://threejs.org/" target="_blank">Learn more about Three.js</a></li>
+          <li><a href="http://webvr.info/" target="_blank">Learn more about WebVR</a></li>
+          <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">Read the WebVR documentation on MDN</a></li>
+        </ul>
+        <h2>Example</h2>
+        <p>Using Primrose to make web applications is straightforward. To start, perform the following file operations all in the same directory:</p>
+        <ol>
+          <li>download <a href="../PrimroseFull.min.js" target="_blank">the latest Primrose library file, with its dependencies pre-packaged</a>.</li>
+          <li>download <a href="../doc/images/bg.jpg" target="_blank">a skymap image</a>.</li>
+          <li>download <a href="../doc/images/deck.png" target="_blank">a ground texture</a>.</li>
+          <li>download <a href="../herettp.exe" target="_blank">a local web server</a>. (Optional if you already know how to configure and run a web server on your local machine)</li>
+          <li>create a text file named <code>index.html</code></li>
+          <p>When you are done, your directory structure should look like:</p>
+        </ol>
+        <ul>
+          <li>bg.jpg</li>
+          <li>deck.png</li>
+          <li>herettp.exe</li>
+          <li>index.html</li>
+          <li>PrimroseFull.min.js</li>
+        </ul>
+        <p>In the <code>index.html</code> file, enter the following markup.</p>
+        <pre><code>grammar("HTML");
 &lt;!DOCTYPE html>
 &lt;html>
   &lt;head>
@@ -61,5 +312,12 @@
     &lt;/script>
   &lt;/body>
 &lt;/html>
-</code></pre><p>Now, if you have your server configured on your own, you will know how to open the page.</p><p>If you don't, then double-click on herettp.exe and the program should start--possibly requesting Administrator Privileges to be able to run the web server--and automatically open the `index.html` page in your browser. It should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block --></div></main><!-- end documentation.jade main block --><!-- end main.jade main block -->
-<!-- start main.jade footer block --><script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block --></body></html>
+</code></pre>
+        <p>Now, if you have your server configured on your own, you will know how to open the page.</p>
+        <p>If you don't, then double-click on herettp.exe and the program should start--possibly requesting Administrator Privileges to be able to run the web server--and automatically open the `index.html` page in your browser. It should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block -->
+      </div>
+    </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
+<!-- start main.jade footer block -->
+    <script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block -->
+  </body>
+</html>

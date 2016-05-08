@@ -11,7 +11,10 @@ var modA = isOSX ? "metaKey" : "ctrlKey",
   app = new Primrose.BrowserEnvironment("Commodore", {
     sceneModel: "models/commodore_pet.json",
     skyTexture: "images/bg2.jpg",
-    groundTexture: "images/deck.png"
+    groundTexture: "images/deck.png",
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js"
   });
 
 function isExecuteCommand(evt) {

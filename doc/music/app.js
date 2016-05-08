@@ -1,12 +1,15 @@
 var app = new Primrose.BrowserEnvironment(
   // We give the application a name here, in case we ever
   // hook it up to the Multiplayer Server.
-  "sandbox", {
+  "Music", {
     // This file references a Three.js JSON-formatted scene
     // file, which basically describes a room or level in 
     // which the user will walk around, on which we can 
     // create additional objects.
     sceneModel: "models/holodeck.json",
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js",
     // One of our GUI controls is configured here.
     button: {
       // This file references another Three.js JSON-formatted

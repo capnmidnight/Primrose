@@ -7,7 +7,10 @@ var GRASS = "images/grass.png",
   app = new Primrose.BrowserEnvironment("Editor3D", {
     skyTexture: "images/bg2.jpg",
     ambientSound: "audio/wind.ogg",
-    groundTexture: GRASS
+    groundTexture: GRASS,
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js"
   }),
 
   subScene = new THREE.Object3D(),

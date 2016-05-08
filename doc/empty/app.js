@@ -1,7 +1,10 @@
 var app = new Primrose.BrowserEnvironment("My Primrose VR Application", {
-  skyTexture: "images/bg.jpg",
-  groundTexture: "images/deck.png",
-  ambientSound: "audio/wind.ogg"
+  skyTexture: "bg.jpg",
+  groundTexture: "deck.png",
+  ambientSound: "wind.ogg",
+  fullScreenIcon: "monitor.obj",
+  VRIcon: "cardboard.obj",
+  font: "helvetiker_regular.typeface.js"
 } );
 
 app.addEventListener( "ready", function () {

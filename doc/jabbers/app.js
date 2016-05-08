@@ -7,9 +7,12 @@ var WIDTH = 100,
   t = 0,
   jabs = {},
   R = Primrose.Random,
-  app = new Primrose.BrowserEnvironment("Editor3D", {
+  app = new Primrose.BrowserEnvironment("Jabber Yabs", {
     skyTexture: "images/bg2.jpg",
-    groundTexture: "images/grass.png"
+    groundTexture: "images/grass.png",
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js"
   });
 
 // and clicking on the objects in the scene

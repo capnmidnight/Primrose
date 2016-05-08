@@ -614,24 +614,20 @@ Primrose.BrowserEnvironment = (function () {
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         readyFired = false,
         modelFiles = {
-          monitor: "models/monitor.obj",
-          fullscreenText: "models/fullscreen_text.obj",
+          monitor: this.options.fullScreenIcon,
           cardboard: null,
-          cardboardText: null,
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
-          font: "fonts/helvetiker_regular.typeface.js"
+          font: this.options.font
         },
         icons = [],
         cardboardFactory = null,
         cardboardTextFactory = null,
-        resolutionScale = 1,
-        font = null;
+        resolutionScale = 1;
 
 
       if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = "models/cardboard.obj";
-        modelFiles.cardboardText = "models/vr_text.obj";
+        modelFiles.cardboard = this.options.VRIcon;
       }
 
       function setColor(model, color) {
@@ -639,12 +635,13 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       function complementColor(color) {
-        var hsl = color.getHSL();
+        var rgb = color.clone();
+        var hsl = rgb.getHSL();
         hsl.h = hsl.h + 0.5;
         hsl.l = 1 - hsl.l;
         while (hsl.h > 1) hsl.h -= 1;
-        color.setHSL(hsl.h, hsl.s, hsl.l);
-        return color;
+        rgb.setHSL(hsl.h, hsl.s, hsl.l);
+        return rgb;
       }
 
       var putIconInScene = (icon, i, arr) => {
@@ -663,13 +660,7 @@ Primrose.BrowserEnvironment = (function () {
         cardboard.name = "Cardboard";
         cardboard.add(cardboardTextFactory.clone());
         cardboard.addEventListener("click", this.goVR.bind(this, i), false);
-        var titleGeom = new THREE.TextGeometry(display.displayName, {
-          font: font,
-          size: 0.05,
-          curveSegments: 2,
-          height: 0
-        });
-        titleGeom.computeBoundingSphere();
+        var titleGeom = text3D(0.05, display.displayName);
         var text = put(textured(titleGeom, cardboardTextFactory.template.children[0].material))
           .on(cardboard)
           .at(0, -0.1, titleGeom.boundingSphere.radius);
@@ -682,22 +673,39 @@ Primrose.BrowserEnvironment = (function () {
 
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
-
-          font = models.font;
+          window.text3D = function (font, size, text) {
+            var geom = new THREE.TextGeometry(text, {
+              font: font,
+              size: size,
+              height: size / 5,
+              curveSegments: 2
+            });
+            geom.computeBoundingSphere();
+            return geom;
+          }.bind(window, models.font);
 
           if (models.scene) {
             buildScene(models.scene);
           }
 
-          var monitor = models.monitor;
-          monitor.name = "Monitor";
-          monitor.add(models.fullscreenText);
-          monitor.addEventListener("click", this.goFullScreen, false);
-          monitor.rotation.set(0, Math.PI * 3 / 2, 0);
-          monitor.position.y = -1;
-          complementColor(setColor(models.fullscreenText, this.options.backgroundColor));
+          var bgColor = new THREE.Color(this.options.backgroundColor),
+            fgColor = complementColor(bgColor);
 
-          icons.push(monitor);
+          if (models.monitor) {
+            var monitor = models.monitor;
+            monitor.name = "Monitor";
+            var monitorText = textured(text3D(0.5, "Fullscreen"), fgColor);
+            put(monitorText)
+              .on(monitor)
+              .rot(0, 90 * Math.PI / 180, 0)
+              .at(0, 0.1, monitorText.boundingSphere.radius);
+            monitor.addEventListener("click", this.goFullScreen, false);
+            monitor.rotation.set(0, Math.PI * 3 / 2, 0);
+            monitor.position.y = -1;
+
+
+            icons.push(monitor);
+          }
 
           if (models.cardboard) {
             cardboardFactory = new Primrose.ModelLoader(models.cardboard);

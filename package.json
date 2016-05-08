@@ -16,6 +16,14 @@
   "files": [
     "LICENSE.md",
     "README.md",
+    "CONTRIBUTORS.md",
+    "Primrose.js",
+    "Primrose.min.js",
+    "PrimroseDependencies.js",
+    "PrimroseDependencies.min.js",
+    "PrimroseDocumentation.js",
+    "PrimroseDocumentation.min.js",
+    "quickstart/",
     "src/",
     "doc/",
     "lib/"

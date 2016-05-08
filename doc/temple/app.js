@@ -15,7 +15,10 @@ var GRASS = "images/grass.png",
   dz = 4,
   app = new Primrose.BrowserEnvironment("AncientTemple", {
     skyTexture: "images/bg2.jpg",
-    groundTexture: ROCK
+    groundTexture: ROCK,
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js"
   });
 
 function column(a, b, h) {

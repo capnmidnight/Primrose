@@ -6,7 +6,10 @@ var GRASS = "images/grass.png",
   SKY = "images/bg2.jpg",
   app = new Primrose.BrowserEnvironment("NYPL", {
     skyTexture: SKY,
-    groundTexture: GRASS
+    groundTexture: GRASS,
+    fullScreenIcon: "models/monitor.obj",
+    VRIcon: "models/cardboard.obj",
+    font: "fonts/helvetiker_regular.typeface.js"
   }),
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
