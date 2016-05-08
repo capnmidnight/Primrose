@@ -118,9 +118,6 @@
     <Content Include="lib\Element.details.js" />
     <Content Include="lib\promise.js" />
     <Compile Include="quickstart\app.js" />
-    <Compile Include="quickstart\Primrose.min.js" />
-    <Compile Include="quickstart\PrimroseDependencies.min.js" />
-    <Compile Include="quickstart\PrimroseDocumentation.min.js" />
     <Compile Include="server.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
