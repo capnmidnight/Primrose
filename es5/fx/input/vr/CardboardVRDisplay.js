@@ -92,7 +92,10 @@ Primrose.Input.VR.CardboardVRDisplay = function () {
     this.exitPresent = function () {
       var _this2 = this;
 
-      var clear = function clear() {
+      var clear = function clear(err) {
+        if (err) {
+          console.error(err);
+        }
         console.log("exit presenting");
         _this2.isPresenting = false;
         currentLayer = null;

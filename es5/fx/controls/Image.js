@@ -96,7 +96,8 @@ Primrose.Controls.Image = function () {
           _this2.setImage(i, img);
           return img;
         }).catch(function (err) {
-          console.error("Failed to load image %s. Reason: %s", src, err);
+          console.error("Failed to load image " + src);
+          console.error(err);
           _this2.setImage(i, null);
         });
       }

@@ -32,6 +32,8 @@ function getSetting(name, defValue) {
         return JSON.parse(val);
       } catch (exp) {
         console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val), exp);
+        console.error(exp);
+        console.error("getSetting", name, val, typeof val === "undefined" ? "undefined" : _typeof(val));
       }
     }
   }

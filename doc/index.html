@@ -234,87 +234,53 @@
           <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API" target="_blank">Read the WebVR documentation on MDN</a></li>
         </ul>
         <h2>Example</h2>
-        <p>Using Primrose to make web applications is straightforward. To start, perform the following file operations all in the same directory:</p>
-        <ol>
-          <li>download <a href="../PrimroseFull.min.js" target="_blank">the latest Primrose library file, with its dependencies pre-packaged</a>.</li>
-          <li>download <a href="../doc/images/bg.jpg" target="_blank">a skymap image</a>.</li>
-          <li>download <a href="../doc/images/deck.png" target="_blank">a ground texture</a>.</li>
-          <li>download <a href="../herettp.exe" target="_blank">a local web server</a>. (Optional if you already know how to configure and run a web server on your local machine)</li>
-          <li>create a text file named <code>index.html</code></li>
-          <p>When you are done, your directory structure should look like:</p>
-        </ol>
+        <p>Using Primrose to make web applications is straightforward. To start, <a href="../quickstart.zip">download the `quickstart` example project</a>. In it, you will find the following files:</p>
         <ul>
-          <li>bg.jpg</li>
-          <li>deck.png</li>
-          <li>herettp.exe</li>
-          <li>index.html</li>
-          <li>PrimroseFull.min.js</li>
+          <li><code>app.js</code> - this is where you will write your JavaScript code to define your scene.</li>
+          <li><code>bg.jpg</code> - a skymap texture.</li>
+          <li><code>cardboard.mtl</code> - materials for cardboard.obj,</li>
+          <li><code>cardboard.obj</code> - an icon for activating VR mode.</li>
+          <li><code>deck.png</code> - a ground texture.</li>
+          <li><code>helvetiker_regular.typeface.js</code> - a font for 3D text elements.</li>
+          <li><code>index.html</code> - an HTML file to pull it all together.</li>
+          <li><code>monitor.mtl</code> - materials for monitor.obj,</li>
+          <li><code>monitor.obj</code> - an icon for activating regular full-screen mode.</li>
+          <li><code>Primrose.min.js</code> - the Primrose framework.</li>
+          <li><code>PrimroseDependencies.min.js</code> - 3rd party JS libraries like Three.js on which Primrose depends, prepackaged for you.</li>
+          <li><code>PrimroseDocumentation.min.js</code> - the live documentation database for Primrose.</li>
+          <li><code>StartHere.exe</code> - run this executable on Windows to setup a local web server and automatically start your browser.</li>
+          <li><code>wind.ogg</code> - some ambient noise for aiding in orienting one's self in the space.</li>
         </ul>
-        <p>In the <code>index.html</code> file, enter the following markup.</p>
-        <pre><code>grammar("HTML");
-&lt;!DOCTYPE html>
-&lt;html>
-  &lt;head>
-    &lt;meta charset="utf-8">
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
-    &lt;title>My Primrose VR Application&lt;/title>
-    &lt;style>
-      html, body, #frontBuffer {
-        padding: 0;
-        margin: 0;
-        border: 0;
-        width: 100%;
-      }
+        <p>In the <code>app.js</code> file, you'll find the relevant scripts to edit to make your own VR applications. The template project starts out fairly empty.</p>
+        <pre><code>grammar("JavaScript");
+var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
+    skyTexture: "bg.jpg",
+    groundTexture: "deck.png"
+  } );
 
-      html, body {
-        position: absolute;
-        height: 100%;
-      }
+app.addEventListener( "ready", function () {
+  // Perform any post-initialization setup. Once this event fires, the Primrose
+  // framework is ready and will start animation as soon as this function returns.
+} );
 
-      #frontBuffer {
-        position: fixed;
-        top: 0;
-        left: 0;
-      }
-    &lt;/style>
-    &lt;script type="text/javascript" src="PrimroseFull.min.js">&lt;/script>
-    &lt;link type="text/css" rel="stylesheet" href="style.css">
-  &lt;/head>
-  &lt;body>
-    &lt;canvas id="frontBuffer" tabindex="1">&lt;/canvas>
-    &lt;script type="text/javascript">
-      var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
-          skyTexture: "bg.jpg",
-          groundTexture: "deck.png"
-        } );
+app.addEventListener( "gazecomplete", function(evt){
+  // You can respond to "intended stare" events here, i.e. when the user gazes
+  // at a particular object for an extended period of time. Usually, about three
+  // seconds.
+} );
 
-      app.addEventListener( "ready", function () {
-        // Perform any post-initialization setup. Once this event fires, the Primrose
-        // framework is ready and will start animation as soon as this function returns.
-      } );
+app.addEventListener( "pointerend", function(evt){
+  // You can respond to the user "clicking" an object here. This could be by using
+  // a mouse on their desktop PC or by touching the screen while looking at an
+  // object on a mobile device.
+} );
 
-      app.addEventListener( "gazecomplete", function(evt){
-        // You can respond to "intended stare" events here, i.e. when the user gazes
-        // at a particular object for an extended period of time. Usually, about three
-        // seconds.
-      } );
-
-      app.addEventListener( "pointerend", function(evt){
-        // You can respond to the user "clicking" an object here. This could be by using
-        // a mouse on their desktop PC or by touching the screen while looking at an
-        // object on a mobile device.
-      } );
-
-      app.addEventListener( "update", function ( dt ) {
-        // Perform per-frame updates here, like moving objects around according to your
-        // own rules.
-      } );
-    &lt;/script>
-  &lt;/body>
-&lt;/html>
+app.addEventListener( "update", function ( dt ) {
+  // Perform per-frame updates here, like moving objects around according to your
+  // own rules.
+} );
 </code></pre>
-        <p>Now, if you have your server configured on your own, you will know how to open the page.</p>
-        <p>If you don't, then double-click on herettp.exe and the program should start--possibly requesting Administrator Privileges to be able to run the web server--and automatically open the `index.html` page in your browser. It should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block -->
+        <p>If everything worked correctly, it should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->

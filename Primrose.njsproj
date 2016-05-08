@@ -38,10 +38,6 @@
     <Content Include="doc\commodore\dogstar.bas" />
     <Content Include="doc\commodore\oregon.bas" />
     <Content Include="doc\images\space.png" />
-    <Content Include="doc\models\fullscreen_text.mtl" />
-    <Content Include="doc\models\fullscreen_text.obj" />
-    <Content Include="doc\models\vr_text.mtl" />
-    <Content Include="doc\models\vr_text.obj" />
     <Content Include="quickstart\bg.jpg" />
     <Content Include="quickstart\deck.png" />
     <Content Include="quickstart\index.html" />

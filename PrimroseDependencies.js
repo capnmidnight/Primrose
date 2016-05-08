@@ -107,7 +107,7 @@ var logger = (function () {
   return logger;
 })();
 
-logger.setup(logger.HTTP, "/logger/");
+logger.setup(logger.DISABLED, "/logger/");
 (function e(t, n, r) {
   function s(o, u) {
     if (!n[o]) {

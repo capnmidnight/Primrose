@@ -272,6 +272,16 @@ the torch on to Safari in all of its many useless incarnations."
   });
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
 
+  pliny.value({
+    parent: "Primrose",
+    name: "RESOLUTION_SCALES",
+    description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+  });
+  Primrose.RESOLUTION_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+  if (!isMobile) {
+    Primrose.RESOLUTION_SCALES.push(2);
+  }
+
   pliny.enumeration({
     parent: "Primrose",
     name: "Quality",
@@ -283,15 +293,8 @@ the torch on to Safari in all of its many useless incarnations."
     LOW: 2,
     MEDIUM: 3,
     HIGH: 4,
-    MAXIMUM: 5
+    MAXIMUM: Primrose.RESOLUTION_SCALES.length - 1
   };
-
-  pliny.value({
-    parent: "Primrose",
-    name: "RESOLUTION_SCALES",
-    description: "Scaling factors for changing the resolution of the display when the render quality level changes."
-  });
-  Primrose.RESOLUTION_SCALES = [0.5, 0.25, 0.333333, 0.5, 1, 2];
 
   return Primrose;
 }();

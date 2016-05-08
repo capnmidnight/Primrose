@@ -62,11 +62,9 @@ Primrose.Output.Audio3D = (function () {
       console.error(exp);
       console.error("AudioContext not available.");
       this.isAvailable = false;
-      this.setPosition = function () {
+      this.setPlayer = function () {
       };
       this.setVelocity = function () {
-      };
-      this.setOrientation = function () {
       };
       this.start = function () {
       };

@@ -57,14 +57,14 @@ Primrose.Output.Audio3D = function () {
       };
       this.isAvailable = true;
     } catch (exp) {
+      console.error(exp);
+      console.error("AudioContext not available.");
       this.isAvailable = false;
-      this.setPosition = function () {};
+      this.setPlayer = function () {};
       this.setVelocity = function () {};
-      this.setOrientation = function () {};
       this.start = function () {};
       this.stop = function () {};
       this.error = exp;
-      console.error("AudioContext not available. Reason: ", exp.message);
     }
   }
 
@@ -93,8 +93,9 @@ Primrose.Output.Audio3D = function () {
     if (index >= srcs.length) {
       return Promise.reject("Failed to load a file from " + srcs.length + " files.");
     } else {
-      return this.loadURL(srcs[index]).catch(function () {
-        return setTimeout(_this3.loadURLCascadeSrcList(_this3, srcs, index + 1), 0);
+      return this.loadURL(srcs[index]).catch(function (err) {
+        console.error(err);
+        return _this3.loadURLCascadeSrcList(srcs, index + 1);
       });
     }
   };

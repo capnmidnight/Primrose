@@ -125,12 +125,18 @@ Primrose.Input.VR.LegacyVRDisplay = function () {
     this.exitPresent = function () {
       var _this2 = this;
 
-      var clear = function clear(elem) {
+      var clear = function clear(err) {
+        if (err) {
+          console.error(err);
+        }
+        console.log("exit presenting");
         _this2.isPresenting = false;
         currentLayer = null;
-        return elem;
       };
-      return FullScreen.exit().then(clear).catch(clear);
+      return FullScreen.exit().then(function (elem) {
+        clear();
+        return elem;
+      }).catch(clear);
     };
   }
 

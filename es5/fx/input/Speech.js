@@ -181,8 +181,9 @@ Primrose.Input.Speech = function () {
         }.bind(_this), true);
 
         available = true;
-      } catch (err) {
-        errorMessage = err;
+      } catch (exp) {
+        console.error(exp);
+        errorMessage = exp;
         available = false;
       }
       return _this;

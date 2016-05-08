@@ -145,9 +145,10 @@ Primrose.Input.Gamepad = function () {
       try {
         _this.update();
         _this.available = true;
-      } catch (err) {
+      } catch (exp) {
+        console.error(exp);
         _this.avaliable = false;
-        _this.errorMessage = err;
+        _this.errorMessage = exp;
       }
       return _this;
     }
