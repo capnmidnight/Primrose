@@ -206,7 +206,12 @@ gulp.task("archive", ["jsmin"], function () {
 });
 
 gulp.task("copy:quickstart", function () {
-  return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe", "Primrose*.min.js", "doc/models/monitor.*", "doc/models/cardboard.*"])
+  return gulp.src([
+    "../HereTTP/bin/x86/Release/StartHere.exe",
+    "Primrose*.min.js", "!PrimroseSite.min.js",
+    "doc/models/monitor.*", "doc/models/fullscreen_text.*",
+    "doc/models/cardboard.*", "doc/models/vr_text.*",
+    "!*.blend"])
     .pipe(gulp.dest("quickstart"));
 });
 

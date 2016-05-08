@@ -2,7 +2,9 @@ THREE.ImageLoader.crossOrigin = "anonymous";
 
 var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
     skyTexture: "bg.jpg",
-    groundTexture: "deck.png"
+    groundTexture: "deck.png",
+    fullScreenIcon: "monitor.obj",
+    VRIcon: "cardboard.obj"
   } );
 
 app.addEventListener( "ready", function () {
