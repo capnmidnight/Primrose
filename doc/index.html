@@ -220,6 +220,7 @@
         <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md" target="_blank">GPLv3</a>) and may readily be used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a> projects.</p>
         <ul>
           <li><a href="../Primrose.min.js" target="_blank">Download the latest version of the Primrose WebVR framework</a></li>
+          <li><a href="../PrimroseDependencies.min.js" target="_blank">Download Primrose's dependencies as a single package</a></li>
           <li><a href="../doc/setup.html">Read detailed installation and setup instructions</a></li>
           <li><a href="../doc/drum.html">Learn how to make a simple drum-machine application</a></li>
         </ul>
@@ -235,23 +236,19 @@
         <h2>Example</h2>
         <p>Using Primrose to make web applications is straightforward. To start, perform the following file operations all in the same directory:</p>
         <ol>
-          <li>download <a href="http://threejs.org/build/three.min.js" target="_blank">the latest Three.js library file</a>.</li>
-          <li>download <a href="../Primrose.min.js" target="_blank">the latest Primrose library file</a>.</li>
+          <li>download <a href="../PrimroseFull.min.js" target="_blank">the latest Primrose library file, with its dependencies pre-packaged</a>.</li>
           <li>download <a href="../doc/images/bg.jpg" target="_blank">a skymap image</a>.</li>
           <li>download <a href="../doc/images/deck.png" target="_blank">a ground texture</a>.</li>
           <li>download <a href="../herettp.exe" target="_blank">a local web server</a>. (Optional if you already know how to configure and run a web server on your local machine)</li>
           <li>create a text file named <code>index.html</code></li>
-          <li>create a text file named <code>style.css</code></li>
-          <li>create a text file named <code>app.js</code></li>
+          <p>When you are done, your directory structure should look like:</p>
         </ol>
-        <p>When you are done, your directory structure should look like:</p>
         <ul>
-          <li>app.js</li>
+          <li>bg.jpg</li>
           <li>deck.png</li>
           <li>herettp.exe</li>
           <li>index.html</li>
-          <li>bg.jpg</li>
-          <li>style.css</li>
+          <li>PrimroseFull.min.js</li>
         </ul>
         <p>In the <code>index.html</code> file, enter the following markup.</p>
         <pre><code>grammar("HTML");
@@ -261,63 +258,61 @@
     &lt;meta charset="utf-8">
     &lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
     &lt;title>My Primrose VR Application&lt;/title>
-    &lt;script type="text/javascript" src="three.min.js">&lt;/script>
-    &lt;script type="text/javascript" src="Primrose.min.js">&lt;/script>
+    &lt;style>
+      html, body, #frontBuffer {
+        padding: 0;
+        margin: 0;
+        border: 0;
+        width: 100%;
+      }
+
+      html, body {
+        position: absolute;
+        height: 100%;
+      }
+
+      #frontBuffer {
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+    &lt;/style>
+    &lt;script type="text/javascript" src="PrimroseFull.min.js">&lt;/script>
     &lt;link type="text/css" rel="stylesheet" href="style.css">
   &lt;/head>
   &lt;body>
     &lt;canvas id="frontBuffer" tabindex="1">&lt;/canvas>
-    &lt;script type="text/javascript" src="app.js">&lt;/script>
+    &lt;script type="text/javascript">
+      var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
+          skyTexture: "bg.jpg",
+          groundTexture: "deck.png"
+        } );
+
+      app.addEventListener( "ready", function () {
+        // Perform any post-initialization setup. Once this event fires, the Primrose
+        // framework is ready and will start animation as soon as this function returns.
+      } );
+
+      app.addEventListener( "gazecomplete", function(evt){
+        // You can respond to "intended stare" events here, i.e. when the user gazes
+        // at a particular object for an extended period of time. Usually, about three
+        // seconds.
+      } );
+
+      app.addEventListener( "pointerend", function(evt){
+        // You can respond to the user "clicking" an object here. This could be by using
+        // a mouse on their desktop PC or by touching the screen while looking at an
+        // object on a mobile device.
+      } );
+
+      app.addEventListener( "update", function ( dt ) {
+        // Perform per-frame updates here, like moving objects around according to your
+        // own rules.
+      } );
+    &lt;/script>
   &lt;/body>
-&lt;/html></code></pre>
-        <p>In the <code>style.css</code> file, enter the following style definitions.</p>
-        <pre><code>grammar("CSS");
-html, body, #frontBuffer {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  width: 100%;
-}
-
-html, body {
-  position: absolute;
-  height: 100%;
-}
-
-#frontBuffer {
-  position: fixed;
-  top: 0;
-  left: 0;
-}</code></pre>
-        <p>In the <code>app.js</code> file, enter the following code.</p>
-        <pre><code>grammar("JavaScript");
-/* global Primrose, put */
-var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
-    skyTexture: "bg.jpg",
-    groundTexture: "deck.png"
-  } );
-
-app.addEventListener( "ready", function () {
-  // Perform any post-initialization setup. Once this event fires, the Primrose
-  // framework is ready and will start animation as soon as this function returns.
-} );
-
-app.addEventListener( "gazecomplete", function(evt){
-  // You can respond to "intended stare" events here, i.e. when the user gazes
-  // at a particular object for an extended period of time. Usually, about three
-  // seconds.
-} );
-
-app.addEventListener( "pointerend", function(evt){
-  // You can respond to the user "clicking" an object here. This could be by using
-  // a mouse on their desktop PC or by touching the screen while looking at an
-  // object on a mobile device.
-} );
-
-app.addEventListener( "update", function ( dt ) {
-  // Perform per-frame updates here, like moving objects around according to your
-  // own rules.
-} );</code></pre>
+&lt;/html>
+</code></pre>
         <p>Now, if you have your server configured on your own, you will know how to open the page.</p>
         <p>If you don't, then double-click on herettp.exe and the program should start--possibly requesting Administrator Privileges to be able to run the web server--and automatically open the `index.html` page in your browser. It should look something like this:</p><img src="images/gettingStarted.jpg" alt="screenshot" title="Blank scene"><!-- end documentation.jade documentation block -->
       </div>
