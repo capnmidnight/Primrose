@@ -108,6 +108,7 @@
     <Content Include="sitemap.xml" />
     <Content Include="doc\nypl\app.js" />
     <Content Include="doc\frontPageBanner.html.jade" />
+    <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
     <Content Include="lib\loggerInit.js" />

@@ -229,4 +229,4 @@ gulp.task("quickstart", ["copy:quickstart"], function () {
 gulp.task("debug", ["jshint", "pug:debug:es6"]);
 gulp.task("default", ["debug"]);
 gulp.task("stage", ["babel", "pug:debug:es5"]);
-gulp.task("release", ["cssmin", "pug:release", "quickstart"]);
+gulp.task("release", ["cssmin", "pug:release", "quickstart", "archive"]);

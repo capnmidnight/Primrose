@@ -1000,11 +1000,15 @@ Primrose.BrowserEnvironment = (function () {
       //
       // Manage full-screen state
       //
-      this.goFullScreen = () => FullScreen.request(this.renderer.domElement);
+      this.goFullScreen = () => {
+        setPointerLock();
+        FullScreen.request(this.renderer.domElement);
+      }
 
       this.goVR = (index) => {
         if (this.input.VR) {
           this.input.VR.connect(index);
+          setPointerLock();
           return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
             .then((elem) => {
               if (Primrose.Input.VR.Version === 1 && isMobile) {

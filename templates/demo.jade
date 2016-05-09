@@ -20,6 +20,7 @@ block document
   <!-- start demo.jade banner block -->
   p Click on the image below to lock mouse cursor to demo.
   canvas#frontBuffer
+  #fullScreenButtonContainer
   h2 Source
   pre#editorContainer= demoScript
   <!-- end demo.jade banner block -->
@@ -39,3 +40,4 @@ prepend footer
 
 append footer
   script(type="text/javascript", async, defer, src=fileRoot + demoScriptName)
+  script(type="text/javascript", src= fileRoot + "doc/demoUI.js")
