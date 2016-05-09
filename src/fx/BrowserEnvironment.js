@@ -796,7 +796,22 @@ Primrose.BrowserEnvironment = (function () {
         audioReady = Promise.resolve();
       }
 
-      var allReady = Promise.all([modelsReady, audioReady]);
+
+      var documentReady = null;
+      if (document.readyState === "complete") {
+        documentReady = Promise.resolve();
+      }
+      else {
+        documentReady = new Promise((resolve, reject) => {
+          document.addEventListener("readystatechange", (evt) => {
+            if (document.readyState === "complete") {
+              resolve();
+            }
+          }, false);
+        });
+      }
+
+      var allReady = Promise.all([modelsReady, audioReady, documentReady]);
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -817,28 +832,12 @@ Primrose.BrowserEnvironment = (function () {
       this.nose.name = "Nose";
       this.nose.scale.set(0.5, 1, 1);
 
-      this.renderer = new THREE.WebGLRenderer({
-        canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
-        antialias: !isMobile,
-        alpha: true,
-        logarithmicDepthBuffer: false
-      });
-      this.renderer.autoClear = false;
-      this.renderer.autoSortObjects = true;
-      this.renderer.setClearColor(this.options.backgroundColor);
-      if (!this.renderer.domElement.parentElement) {
-        document.body.appendChild(this.renderer.domElement);
-      }
-
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
-
       this.scene = new THREE.Scene();
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-
       if (this.options.skyTexture) {
         this.sky = textured(
           shell(
@@ -874,7 +873,6 @@ Primrose.BrowserEnvironment = (function () {
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
       }
-
 
       var buildScene = (sceneGraph) => {
         sceneGraph.buttons = [];
@@ -1104,14 +1102,35 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("resize", modifyScreen, false);
       window.addEventListener("blur", this.stop, false);
       window.addEventListener("focus", this.start, false);
-      this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
-      this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
-      this.input.addEventListener("zero", this.zero, false);
-      this.input.addEventListener("lockpointer", setPointerLock, false);
-      this.input.addEventListener("fullscreen", setFullscreen, false);
-      this.input.addEventListener("pointerstart", pointerStart, false);
-      this.input.addEventListener("pointerend", pointerEnd, false);
+
       this.projector.addEventListener("hit", handleHit, false);
+
+      documentReady.then(() => {
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
+          antialias: !isMobile,
+          alpha: true,
+          logarithmicDepthBuffer: false
+        });
+        this.renderer.autoClear = false;
+        this.renderer.autoSortObjects = true;
+        this.renderer.setClearColor(this.options.backgroundColor);
+        if (!this.renderer.domElement.parentElement) {
+          document.body.appendChild(this.renderer.domElement);
+        }
+
+        this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
+        this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
+
+
+        this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
+        this.input.addEventListener("zero", this.zero, false);
+        this.input.addEventListener("lockpointer", setPointerLock, false);
+        this.input.addEventListener("fullscreen", setFullscreen, false);
+        this.input.addEventListener("pointerstart", pointerStart, false);
+        this.input.addEventListener("pointerend", pointerEnd, false);
+      });
+
 
       var quality = -1,
         frameCount = 0, frameTime = 0,
