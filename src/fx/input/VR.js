@@ -129,7 +129,7 @@ Primrose.Input.VR = (function () {
 
         var mockedLegacyDisplays = [];
         for (id in displays) {
-          mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id]));
+          mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id].display, displays[id].sensor));
         }
 
         return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
