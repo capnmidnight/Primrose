@@ -1048,6 +1048,7 @@ Primrose.BrowserEnvironment = (function () {
       }, false);
 
       window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
+      FullScreen.addChangeListener(modifyScreen, false);
 
       var isFullScreenMode = () => !!(FullScreen.isActive || this.inVR);
 
@@ -1194,7 +1195,7 @@ Primrose.BrowserEnvironment = (function () {
 
       Object.defineProperties(this, {
         inVR: {
-          get: () => this.input.VR && this.input.VR.currentDisplay && this.input.VR.currentDisplay.isPresenting
+          get: () => this.input && this.input.VR && this.input.VR.currentDisplay && this.input.VR.currentDisplay.isPresenting
         },
         quality: {
           get: () => quality,

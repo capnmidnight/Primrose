@@ -1,4 +1,4 @@
-﻿Primrose.Input.VR.VRDisplayPolyfill = (function () {
+﻿Primrose.Input.VRDisplayPolyfill = (function () {
   "use strict";
   class VRDisplayPolyfill {
     constructor(canPresent, hasOrientation, hasPosition, displayID, displayName) {
@@ -16,6 +16,12 @@
       this.stageParameters = null;
 
       this._currentLayer = null;
+
+      this._onFullScreenRemoved = () => {
+        FullScreen.removeChangeListener(this._onFullScreenRemoved);
+        this.exitPresent();
+        window.dispatchEvent(new Event("vrdisplaypresentchange"));
+      };
     }
 
     getLayers() {
@@ -44,12 +50,6 @@
         .catch(clear);
     }
 
-    _onFullScreenRemoved() {
-      FullScreen.removeChangeListener(this._onFullScreenRemoved);
-      this.exitPresent();
-      window.dispatchEvent(new Event("vrdisplaypresentchange"));
-    }
-
     requestPresent(layers) {
       if (!this.capabilities.canPresent) {
         return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + this.displayId + ". Name: " + this.displayName));
@@ -67,10 +67,7 @@
         return Promise.reject(new Error("No source on layer parameter."));
       }
       else {
-        return FullScreen.request(layers[0].source, {
-          vrDisplay: legacyDisplay,
-          vrDistortion: true
-        })
+        return this._requestPresent(layers)
           .then((elem) => {
             this._currentLayer = layers[0];
             this.isPresenting = elem === this._currentLayer.source;

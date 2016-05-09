@@ -115,6 +115,13 @@
       };
 
       this.resetPose = legacySensor.resetSensor.bind(legacySensor);
+
+      this._requestPresent = (layers) => {
+        return FullScreen.request(layers[0].source, {
+          vrDisplay: legacyDisplay,
+          vrDistortion: true
+        });
+      };
     }
   };
   return LegacyVRDisplay;

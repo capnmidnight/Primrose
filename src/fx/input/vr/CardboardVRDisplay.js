@@ -41,6 +41,10 @@
       };
 
       this.resetPose = corrector.zeroAxes.bind(corrector);
+
+      this._requestPresent = (layers) => {
+        return FullScreen.request(layers[0].source);
+      };
     }
   }
 
