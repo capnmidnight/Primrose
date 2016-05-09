@@ -3,6 +3,7 @@
   concat = require("gulp-concat"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
+  footer = require("gulp-footer"),
   fs = require("fs"),
   jshint = require("gulp-jshint"),
   pkg = require("./package.json"),
@@ -72,14 +73,9 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
   return f.replace(/^src\//, "es5/");
 });
 
-function fileSize(file) {
-  return (fs.lstatSync(file).size / 1000).toFixed(1);
-}
+
 
 function pugConfiguration(options, defaultData) {
-  var size = fileSize("Primrose.js"),
-    minifiedSize = fileSize("Primrose.min.js");
-  
   return gulp.src(["*.jade", "doc/**/*.jade"], { base: "./" })
     .pipe(rename(function (path) {
       path.extname = "";
@@ -107,8 +103,9 @@ function pugConfiguration(options, defaultData) {
         filePath: name,
         fileRoot: parts.join(""),
         fileName: shortName && shortName[1],
-        sizeKB: size,
-        sizeMinKB: minifiedSize,
+        fileSize: function fileSize(file) {
+          return (fs.lstatSync(file).size / 1000).toFixed(1) + "KB";
+        },
         docFiles: docFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
@@ -159,10 +156,12 @@ gulp.task("babel", function () {
     .pipe(gulp.dest("./es5"));
 });
 
-function concatenate(stream, name) {
-  return stream
-    .pipe(concat(name + ".js", { newLine: "\n" }))
-    .pipe(gulp.dest("./"));
+function concatenate(stream, name, f) {
+  var s = stream.pipe(concat(name + ".js", { newLine: "\n" }));
+  if (f) {
+    s = s.pipe(footer(f));
+  }
+  return s.pipe(gulp.dest("./"));
 }
 
 gulp.task("concat:primrose", function () {
@@ -170,7 +169,7 @@ gulp.task("concat:primrose", function () {
     .pipe(babel({
       sourceMap: false,
       presets: ["es2015"]
-    })), "Primrose");
+    })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version +". Find out more at http://www.primrosevr.com\");");
 });
 
 gulp.task("concat:payload", function () {

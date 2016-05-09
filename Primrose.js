@@ -1738,7 +1738,20 @@ Primrose.BrowserEnvironment = function () {
         audioReady = Promise.resolve();
       }
 
-      var allReady = Promise.all([modelsReady, audioReady]);
+      var documentReady = null;
+      if (document.readyState === "complete") {
+        documentReady = Promise.resolve();
+      } else {
+        documentReady = new Promise(function (resolve, reject) {
+          document.addEventListener("readystatechange", function (evt) {
+            if (document.readyState === "complete") {
+              resolve();
+            }
+          }, false);
+        });
+      }
+
+      var allReady = Promise.all([modelsReady, audioReady, documentReady]);
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -1759,28 +1772,12 @@ Primrose.BrowserEnvironment = function () {
       this.nose.name = "Nose";
       this.nose.scale.set(0.5, 1, 1);
 
-      this.renderer = new THREE.WebGLRenderer({
-        canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
-        antialias: !isMobile,
-        alpha: true,
-        logarithmicDepthBuffer: false
-      });
-      this.renderer.autoClear = false;
-      this.renderer.autoSortObjects = true;
-      this.renderer.setClearColor(this.options.backgroundColor);
-      if (!this.renderer.domElement.parentElement) {
-        document.body.appendChild(this.renderer.domElement);
-      }
-
-      this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
-
       this.scene = new THREE.Scene();
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-
       if (this.options.skyTexture) {
         this.sky = textured(shell(this.options.drawDistance, 18, 9, Math.PI * 2, Math.PI), this.options.skyTexture, { unshaded: true });
         this.sky.name = "Sky";
@@ -2023,14 +2020,33 @@ Primrose.BrowserEnvironment = function () {
       window.addEventListener("resize", modifyScreen, false);
       window.addEventListener("blur", this.stop, false);
       window.addEventListener("focus", this.start, false);
-      this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
-      this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
-      this.input.addEventListener("zero", this.zero, false);
-      this.input.addEventListener("lockpointer", setPointerLock, false);
-      this.input.addEventListener("fullscreen", setFullscreen, false);
-      this.input.addEventListener("pointerstart", pointerStart, false);
-      this.input.addEventListener("pointerend", pointerEnd, false);
+
       this.projector.addEventListener("hit", handleHit, false);
+
+      documentReady.then(function () {
+        _this.renderer = new THREE.WebGLRenderer({
+          canvas: Primrose.DOM.cascadeElement(_this.options.canvasElement, "canvas", HTMLCanvasElement),
+          antialias: !isMobile,
+          alpha: true,
+          logarithmicDepthBuffer: false
+        });
+        _this.renderer.autoClear = false;
+        _this.renderer.autoSortObjects = true;
+        _this.renderer.setClearColor(_this.options.backgroundColor);
+        if (!_this.renderer.domElement.parentElement) {
+          document.body.appendChild(_this.renderer.domElement);
+        }
+
+        _this.renderer.domElement.addEventListener('webglcontextlost', _this.stop, false);
+        _this.renderer.domElement.addEventListener('webglcontextrestored', _this.start, false);
+
+        _this.input = new Primrose.Input.FPSInput(_this.renderer.domElement);
+        _this.input.addEventListener("zero", _this.zero, false);
+        _this.input.addEventListener("lockpointer", setPointerLock, false);
+        _this.input.addEventListener("fullscreen", setFullscreen, false);
+        _this.input.addEventListener("pointerstart", pointerStart, false);
+        _this.input.addEventListener("pointerend", pointerEnd, false);
+      });
 
       var quality = -1,
           frameCount = 0,
@@ -12989,3 +13005,5 @@ Primrose.Text.Themes.Default = function () {
     }
   };
 }();
+Primrose.VERSION = "v0.23.3";
+console.info("Using Primrose v0.23.3. Find out more at http://www.primrosevr.com");

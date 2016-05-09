@@ -108,13 +108,17 @@ block main
 
         iframe#example(src= fileRoot + "editor2d.html")
 
-        p: a.primary.button(href= fileRoot + "Primrose.min.js", target="_blank")
-            | Download Primrose.min.js, v#{version} #[br]
-            small Only #{sizeMinKB}KB, that's less than most JPEGs
+        p: a.primary.button(href= fileRoot + "quickstart.zip", target="_blank")
+            | Download the Quick Start template #[br]
+            small A #{fileSize("quickstart.zip")} ZIP file to get you started quickly.
 
-        p: a.secondary.button(href= fileRoot + "Primrose.js", target="_blank") 
-            | Download Primrose.js, v#{version} #[br]
-            small #{sizeKB}KB, useful for debugging
+        p: a.secondary.button(href= fileRoot + "Primrose.min.js", target="_blank")
+            | Download Primrose.min.js, v#{version} #[br]
+            small Only #{fileSize("Primrose.min.js")}, that's less than most JPEGs.
+
+        p: a.secondary.button(href= fileRoot + "PrimroseDependencies.min.js", target="_blank")
+            | Download PrimroseDependencies.min.js, v#{version} #[br]
+            small Mostly Three.js, #{fileSize("PrimroseDependencies.min.js")}, prepackaged to cache separately from Primrose.
 
         p: a.secondary.button(href="https://www.github.com/capnmidnight/Primrose/", target="_blank")
             | Get the Source Code #[br]
