@@ -18,16 +18,14 @@ KEY:
     * Chromium - NONE! Full support, no extraneous issues.
     * Chrome - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
     * Nightly
-      * Text baseline in canvas is incorrect.
-      * The image does not fill the HMD.
+      * The HMD tracks strangely.
       * Gamepad input slews to the right.
     * Firefox
-      * Text baseline in canvas is incorrect.
       * No HMD support (WebVR not yet available in Firefox).
       * Gamepad input slews to the right.
   * Android
     * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - Works, but Device Orientation fallback has some problems with drift.
+    * Chrome - "NONE", in the sense that it works as expected. Device Orientation fallback has some problems with drift, but that is to be expected before WebVR lands in the full release version of Chrome.
     * Nightly
       * Low frame rate in fullscreen mode.
     * Firefox

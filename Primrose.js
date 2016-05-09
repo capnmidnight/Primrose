@@ -11788,8 +11788,7 @@ Primrose.Text.Controls.TextBox = function () {
       key: "renderCanvasForeground",
       value: function renderCanvasForeground() {
         var tokenFront = new Primrose.Text.Cursor(),
-            tokenBack = new Primrose.Text.Cursor(),
-            lineOffsetY = Math.ceil(this.character.height * 0.2);
+            tokenBack = new Primrose.Text.Cursor();
 
         this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
         this._fgfx.save();
@@ -11799,8 +11798,7 @@ Primrose.Text.Controls.TextBox = function () {
           var line = this.lines[y] + this.padding,
               row = this._tokenRows[y],
               drawn = false,
-              textY = (y - 0.2 - this.scroll.y) * this.character.height,
-              imageY = textY + lineOffsetY;
+              textY = (y - this.scroll.y) * this.character.height;
 
           for (var i = 0; i < row.length; ++i) {
             var t = row[i];
@@ -11813,7 +11811,7 @@ Primrose.Text.Controls.TextBox = function () {
               // draw the text
               if (this.useCaching && this._rowCache[line] !== undefined) {
                 if (i === 0) {
-                  this._fgfx.putImageData(this._rowCache[line], this.padding, imageY + this.padding);
+                  this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding);
                 }
               } else {
                 var style = this.theme[t.type] || {};
@@ -11832,7 +11830,7 @@ Primrose.Text.Controls.TextBox = function () {
           ++tokenFront.y;
           tokenBack.copy(tokenFront);
           if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-            this._rowCache[line] = this._fgfx.getImageData(this.padding, imageY + this.padding, this.imageWidth - 2 * this.padding, this.character.height);
+            this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding, this.imageWidth - 2 * this.padding, this.character.height);
           }
         }
 
@@ -11886,7 +11884,7 @@ Primrose.Text.Controls.TextBox = function () {
 
             if (currentLine > lastLine) {
               this._tgfx.fillStyle = this.theme.regular.foreColor;
-              this._tgfx.fillText(lineNumber, 0, (y - 0.2) * this.character.height);
+              this._tgfx.fillText(lineNumber, 0, y * this.character.height);
             }
             lastLine = currentLine;
           }

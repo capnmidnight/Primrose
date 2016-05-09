@@ -147,7 +147,7 @@ gulp.task("jshint", function () {
     }));
 });
 
-gulp.task("babel", function () {
+gulp.task("babel", ["jshint"], function () {
   return gulp.src("src/**/*.js", { base: "./src" })
     .pipe(babel({
       sourceMap: false,
@@ -164,7 +164,7 @@ function concatenate(stream, name, f) {
   return s.pipe(gulp.dest("./"));
 }
 
-gulp.task("concat:primrose", function () {
+gulp.task("concat:primrose", ["jshint"], function () {
   return concatenate(gulp.src(sourceFiles)
     .pipe(babel({
       sourceMap: false,
@@ -172,7 +172,7 @@ gulp.task("concat:primrose", function () {
     })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version +". Find out more at http://www.primrosevr.com\");");
 });
 
-gulp.task("concat:payload", function () {
+gulp.task("concat:dependencies", function () {
   return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
 });
 
@@ -187,7 +187,7 @@ gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
   });
 });
 
-gulp.task("jsmin", ["carveDocumentation", "concat:payload", "concat:marketing"], function () {
+gulp.task("jsmin", ["carveDocumentation", "concat:dependencies", "concat:marketing"], function () {
   return gulp.src(["Primrose*.js", "!*.min.js"])
     .pipe(rename({ suffix: ".min" }))
     .pipe(uglify())
@@ -226,7 +226,7 @@ gulp.task("quickstart", ["copy:quickstart"], function () {
     .pipe(gulp.dest("."));
 });
 
-gulp.task("default", ["pug:debug:es6"]);
-gulp.task("debug", ["pug:debug:es6"]);
+gulp.task("debug", ["jshint", "pug:debug:es6"]);
+gulp.task("default", ["debug"]);
 gulp.task("stage", ["babel", "pug:debug:es5"]);
 gulp.task("release", ["cssmin", "pug:release", "quickstart"]);
