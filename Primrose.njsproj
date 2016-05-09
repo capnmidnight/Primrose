@@ -30,6 +30,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="src\fx\input\VRDisplayPolyfill.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
     <Content Include="doc\audio\ocean.mp3" />
@@ -108,7 +109,7 @@
     <Content Include="sitemap.xml" />
     <Content Include="doc\nypl\app.js" />
     <Content Include="doc\frontPageBanner.html.jade" />
-    <Compile Include="doc\demoUI.js" />
+    <Content Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
     <Content Include="lib\loggerInit.js" />
