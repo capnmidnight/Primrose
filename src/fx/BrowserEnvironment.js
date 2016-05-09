@@ -1202,6 +1202,7 @@ Primrose.BrowserEnvironment = (function () {
             if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
               quality = v;
               resolutionScale = Primrose.RESOLUTION_SCALES[v];
+              Primrose.Input.VR.CardboardVRDisplay.SUPERSAMPLE = resolutionScale;
             }
             allReady.then(modifyScreen);
           }
