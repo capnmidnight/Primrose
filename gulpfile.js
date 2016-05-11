@@ -92,16 +92,6 @@ function pugConfiguration(options, defaultData) {
         filePath: name,
         fileRoot: parts.join(""),
         fileName: shortName && shortName[1],
-        fileSize: function fileSize(file) {
-          var size = fs.lstatSync(file).size,
-            labelIndex = 0,
-            sizeLabels = ["B", "KB", "MB", "GB", "TB"];
-          while (size > 1000 && labelIndex < sizeLabels.length) {
-            size /= 1000;
-            ++labelIndex;
-          }
-          return size.toFixed(1) + sizeLabels[labelIndex];
-        },
         docFiles: docFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
