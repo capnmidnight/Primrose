@@ -23,6 +23,8 @@
     "PrimroseDependencies.min.js",
     "PrimroseDocumentation.js",
     "PrimroseDocumentation.min.js",
+    "StartHere-WINDOWS.ps1",
+    "StartHere-UNIX.sh",
     "archive/",
     "quickstart/",
     "src/",
@@ -30,7 +32,7 @@
     "lib/"
   ],
   "scripts": {
-    "start": "node server.js"
+    "start": "StartHere.sh"
   },
   "keywords": [
     "virtual reality",
