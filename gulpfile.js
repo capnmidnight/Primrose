@@ -12,23 +12,16 @@
   recurseDirectory = require("./recurseDirectory"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
-  pathX = /.*\/(.*).js/,
   sourceFiles = recurseDirectory("src"),
   headerFiles = [
     "node_modules/logger/logger.js",
-    "lib/loggerInit.js",
     "lib/promise.js",
     "lib/Element.details.js",
     "node_modules/pliny/pliny.js",
-    "lib/sha512.js",
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js"
-  ],
-  mainPageFiles = [
-    "lib/ga-snippet.js",
-    "node_modules/autotrack/autotrack.js"
   ],
   headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
   docFiles = recurseDirectory("templates/doc")
@@ -174,28 +167,35 @@ gulp.task("concat:dependencies", function () {
   return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
 });
 
-gulp.task("concat:marketing", function () {
-  return concatenate(gulp.src(mainPageFiles), "PrimroseSite");
-});
-
 gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
-  pliny.carve("Primrose.js", "PrimroseDocumentation.js", function () {
-    console.log("done");
-    callback();
-  });
+  pliny.carve("Primrose.js", "PrimroseDocumentation.js", callback);
 });
 
-gulp.task("jsmin", ["carveDocumentation", "concat:dependencies", "concat:marketing"], function () {
+gulp.task("jsmin", ["carveDocumentation", "concat:dependencies"], function () {
   return gulp.src(["Primrose*.js", "!*.min.js"])
     .pipe(rename({ suffix: ".min" }))
     .pipe(uglify())
     .pipe(gulp.dest("./"));
 });
 
+
+gulp.task("archive", ["jsmin"], function () {
+  return gulp.src(["Primrose*.js", "!PrimroseDependencies*"])
+    .pipe(rename(function (file) {
+      if (file.basename.indexOf(".min") > -1) {
+        file.extname = ".min.js";
+        file.basename = file.basename.substring(0, file.basename.length - 4);
+      }
+      file.basename += "-" + pkg.version;
+      return file;
+    }))
+    .pipe(gulp.dest("archive"));
+});
+
 gulp.task("copy:quickstart", ["jsmin"], function () {
   return gulp.src([
     "../HereTTP/bin/x86/Release/StartHere.exe",
-    "Primrose*.min.js", "!PrimroseSite.min.js",
+    "Primrose*.min.js",
     "doc/models/monitor.*",
     "doc/models/cardboard.*",
     "doc/fonts/helvetiker_regular.typeface.js",
@@ -207,4 +207,4 @@ gulp.task("copy:quickstart", ["jsmin"], function () {
 gulp.task("debug", ["jshint", "pug:debug:es6"]);
 gulp.task("default", ["debug"]);
 gulp.task("stage", ["babel", "pug:debug:es5"]);
-gulp.task("release", ["pug:release", "copy:quickstart", "jsmin"]);
+gulp.task("release", ["pug:release", "copy:quickstart", "archive"]);

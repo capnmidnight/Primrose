@@ -18,7 +18,7 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
@@ -32,6 +32,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="recurseDirectory.js" />
+    <Content Include="doc\images\axis.png" />
+    <Content Include="doc\images\logo128.png" />
+    <Content Include="doc\images\primrose32.png" />
     <Content Include="src\fx\input\VRDisplayPolyfill.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
@@ -53,7 +56,6 @@
     <Content Include="doc\models\monitor.obj" />
     <Content Include="src\base\findProperty.js" />
     <Content Include="doc\images\prong.stereo.jpg" />
-    <Content Include="doc\nypl\screenshot.jpg" />
     <Content Include="templates\documentation.jade" />
     <Content Include="templates\demo.jade" />
     <Content Include="templates\doc\blenderAdvanced.html.jade" />
@@ -67,13 +69,11 @@
     <Content Include="templates\doc\export.html.jade" />
     <Content Include="templates\doc\faq.html.jade" />
     <Content Include="templates\doc\frontPageBanner.html.jade" />
-    <Content Include="templates\doc\glove.html.jade" />
     <Content Include="templates\doc\hmd.html.jade" />
     <Content Include="templates\doc\index.html.jade" />
     <Content Include="templates\doc\jabbers.html.jade" />
     <Content Include="templates\doc\lighting.html.jade" />
     <Content Include="templates\doc\music.html.jade" />
-    <Content Include="templates\doc\nypl.html.jade" />
     <Content Include="templates\doc\server.html.jade" />
     <Content Include="templates\doc\setup.html.jade" />
     <Content Include="templates\doc\sync.html.jade" />
@@ -114,22 +114,16 @@
     <Content Include="CONTRIBUTORS.md" />
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
-    <Content Include="doc\nypl\app.js" />
-    <Content Include="doc\demoUI.js" />
+    <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
-    <Content Include="lib\loggerInit.js" />
     <Content Include="lib\Element.details.js" />
     <Content Include="lib\promise.js" />
     <Compile Include="quickstart\app.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
-    <Content Include="doc\app.js" />
+    <Compile Include="doc\app.js" />
     <Content Include="doc\example.css" />
-    <Content Include="lib\droid_sans_regular.typeface.js" />
-    <Content Include="lib\ga-snippet.js" />
-    <Content Include="lib\gl-matrix.js" />
-    <Content Include="lib\sha512.js" />
     <Content Include="src\base\axis.js" />
     <Content Include="src\base\box.js" />
     <Content Include="src\base\brick.js" />
@@ -189,20 +183,11 @@
     <Content Include="doc\images\editorVR\docWindow.jpg" />
     <Content Include="doc\images\editorVR\layout.jpg" />
     <Content Include="doc\commodore\screenshot.jpg" />
-    <Content Include="doc\commodore\app.js" />
+    <Compile Include="doc\commodore\app.js" />
     <Content Include="doc\editorVR\screenshot.jpg" />
-    <Content Include="doc\editorVR\app.js" />
+    <Compile Include="doc\editorVR\app.js" />
     <Content Include="doc\empty\screenshot.jpg" />
-    <Content Include="doc\empty\app.js" />
-    <Content Include="doc\glove\style.css" />
-    <Content Include="doc\glove\BearSkin.png" />
-    <Content Include="doc\glove\brick.PNG" />
-    <Content Include="doc\glove\grass.png" />
-    <Content Include="doc\glove\holodeck.png" />
-    <Content Include="doc\glove\skybox.png" />
-    <Content Include="doc\glove\ocean.jpg" />
-    <Content Include="doc\glove\tree.jpg" />
-    <Content Include="doc\glove\app.js" />
+    <Compile Include="doc\empty\app.js" />
     <Content Include="doc\images\deck.png" />
     <Content Include="doc\images\grass.png" />
     <Content Include="doc\images\rock.png" />
@@ -212,11 +197,11 @@
     <Content Include="doc\images\bg1.jpg" />
     <Content Include="doc\images\bg2.jpg" />
     <Content Include="doc\jabbers\screenshot.jpg" />
-    <Content Include="doc\jabbers\app.js" />
+    <Compile Include="doc\jabbers\app.js" />
     <Content Include="doc\music\screenshot.jpg" />
-    <Content Include="doc\music\app.js" />
+    <Compile Include="doc\music\app.js" />
     <Content Include="doc\temple\screenshot.jpg" />
-    <Content Include="doc\temple\app.js" />
+    <Compile Include="doc\temple\app.js" />
     <Content Include="src\fx\Angle.js" />
     <Content Include="src\fx\BaseControl.js" />
     <Content Include="src\fx\Button.js" />
@@ -284,10 +269,8 @@
     <Folder Include="doc\commodore\" />
     <Folder Include="doc\editorVR\" />
     <Folder Include="doc\empty\" />
-    <Folder Include="doc\glove\" />
     <Folder Include="doc\jabbers\" />
     <Folder Include="doc\music\" />
-    <Folder Include="doc\nypl\" />
     <Folder Include="doc\temple\" />
     <Folder Include="lib" />
     <Folder Include="doc\models\" />
