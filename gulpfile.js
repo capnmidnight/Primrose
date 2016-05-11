@@ -33,7 +33,7 @@
     "node_modules/autotrack/autotrack.js"
   ],
   headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
-  docFiles = recurseDirectory("doc")
+  docFiles = recurseDirectory("templates/doc")
     .filter(function (f) { return /.jade$/.test(f); })
     .map(function (f, i) {
       var file = fs.readFileSync(f, "utf-8").toString(),
@@ -45,7 +45,8 @@
         }
 
         var obj = {
-          fileName: f.replace(/\\/g, "/").replace(/\.jade$/, ""),
+          fileName: f.replace(/\\/g, "/")
+            .replace(/^templates\/(.+)\.jade$/, "$1"),
           index: index,
           title: match[2],
           incomplete: /\[under construction\]/.test(file),
