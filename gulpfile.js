@@ -6,10 +6,11 @@
   footer = require("gulp-footer"),
   fs = require("fs"),
   jshint = require("gulp-jshint"),
+  path = require("path"),
   pkg = require("./package.json"),
   pliny = require("pliny"),
   pug = require("gulp-pug"),
-  recurseDirectory = require("./server/recurseDirectory"),
+  recurseDirectory = require("./recurseDirectory"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   zip = require("gulp-zip"),
@@ -76,11 +77,7 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 
 
 function pugConfiguration(options, defaultData) {
-  return gulp.src(["*.jade", "doc/**/*.jade"], { base: "./" })
-    .pipe(rename(function (path) {
-      path.extname = "";
-      return path;
-    }))
+  return gulp.src(["*.jade", "*.pug", "templates/doc/*.jade", "templates/doc/*.pug"], { base: "./" })
     .pipe(data(function (file, callback) {
       var name = file.path.replace(/\\/g, "/"),
         parts = name.split("/")
@@ -114,6 +111,11 @@ function pugConfiguration(options, defaultData) {
     }))
     .pipe(pug(options))
     .on("error", console.error.bind(console, "PUG ERROR"))
+    .pipe(rename(function (p) {
+      p.extname = "";
+      p.dirname = p.dirname.replace("templates" + path.sep, "");
+      return p;
+    }))
     .pipe(gulp.dest("."));
 }
 

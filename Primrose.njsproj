@@ -10,14 +10,15 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{f2ff07a2-bbaf-40db-b8b0-38022708477c}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>server.js</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
@@ -30,6 +31,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="recurseDirectory.js" />
     <Content Include="src\fx\input\VRDisplayPolyfill.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
@@ -50,25 +52,21 @@
     <Content Include="doc\models\monitor.mtl" />
     <Content Include="doc\models\monitor.obj" />
     <Content Include="src\base\findProperty.js" />
-    <Content Include="doc\editorVRManual.html.jade" />
-    <Content Include="doc\index.html.jade" />
-    <Content Include="doc\nypl.html.jade" />
+    <Content Include="templates\doc\editorVRManual.html.jade" />
+    <Content Include="templates\doc\index.html.jade" />
+    <Content Include="templates\doc\nypl.html.jade" />
     <Content Include="doc\images\prong.stereo.jpg" />
     <Content Include="doc\nypl\screenshot.jpg" />
-    <Content Include="images\md-2016-03.jpg" />
     <Content Include="templates\documentation.jade" />
-    <Content Include="doc\commodore.html.jade" />
-    <Content Include="editor2d.html.jade" />
-    <Content Include="doc\empty.html.jade" />
-    <Content Include="doc\glove.html.jade" />
-    <Content Include="doc\jabbers.html.jade" />
-    <Content Include="doc\music.html.jade" />
-    <Content Include="doc\temple.html.jade" />
+    <Content Include="templates\doc\commodore.html.jade" />
+    <Content Include="templates\doc\empty.html.jade" />
+    <Content Include="templates\doc\glove.html.jade" />
+    <Content Include="templates\doc\jabbers.html.jade" />
+    <Content Include="templates\doc\music.html.jade" />
+    <Content Include="templates\doc\temple.html.jade" />
     <Content Include="templates\demo.jade" />
-    <Content Include="doc\editorVR.html.jade" />
-    <Content Include="images\stm.png" />
+    <Content Include="templates\doc\editorVR.html.jade" />
     <Content Include="templates\main.jade" />
-    <Content Include="index.html.jade" />
     <Content Include="doc\models\bear.json" />
     <Content Include="doc\models\BearSkin.png" />
     <Content Include="doc\models\brick.PNG" />
@@ -97,18 +95,13 @@
     <Content Include="doc\audio\click.mp3" />
     <Content Include="doc\audio\click.ogg" />
     <Content Include="doc\audio\game1.ogg" />
-    <Content Include="robots.txt" />
-    <Content Include="missing.html" />
-    <Content Include="favicon.png" />
-    <Content Include="favicon.ico" />
     <Content Include="package.json" />
     <Content Include="CHANGELOG.md" />
     <Content Include="CONTRIBUTORS.md" />
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
-    <Content Include="sitemap.xml" />
     <Content Include="doc\nypl\app.js" />
-    <Content Include="doc\frontPageBanner.html.jade" />
+    <Content Include="templates\doc\frontPageBanner.html.jade" />
     <Content Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
@@ -116,77 +109,27 @@
     <Content Include="lib\Element.details.js" />
     <Content Include="lib\promise.js" />
     <Compile Include="quickstart\app.js" />
-    <Compile Include="server.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
-    <Content Include="doc\blenderAdvanced.html.jade" />
-    <Content Include="doc\blenderBeginner.html.jade" />
-    <Content Include="doc\drum.html.jade" />
-    <Content Include="doc\editorVRTutorial.html.jade" />
-    <Content Include="doc\export.html.jade" />
-    <Content Include="doc\faq.html.jade" />
-    <Content Include="doc\hmd.html.jade" />
-    <Content Include="doc\lighting.html.jade" />
-    <Content Include="doc\server.html.jade" />
-    <Content Include="doc\setup.html.jade" />
-    <Content Include="doc\sync.html.jade" />
-    <Content Include="doc\video.html.jade" />
-    <Content Include="doc\webvr.html.jade" />
+    <Content Include="templates\doc\blenderAdvanced.html.jade" />
+    <Content Include="templates\doc\blenderBeginner.html.jade" />
+    <Content Include="templates\doc\drum.html.jade" />
+    <Content Include="templates\doc\editorVRTutorial.html.jade" />
+    <Content Include="templates\doc\export.html.jade" />
+    <Content Include="templates\doc\faq.html.jade" />
+    <Content Include="templates\doc\hmd.html.jade" />
+    <Content Include="templates\doc\lighting.html.jade" />
+    <Content Include="templates\doc\server.html.jade" />
+    <Content Include="templates\doc\setup.html.jade" />
+    <Content Include="templates\doc\sync.html.jade" />
+    <Content Include="templates\doc\video.html.jade" />
+    <Content Include="templates\doc\webvr.html.jade" />
     <Content Include="doc\app.js" />
     <Content Include="doc\example.css" />
-    <Content Include="images\cardboard128.png" />
-    <Content Include="images\cardboard64.png" />
-    <Content Include="images\chromium.webvr.png" />
-    <Content Include="images\fullscreen128.png" />
-    <Content Include="images\fullscreen64.png" />
-    <Content Include="images\github.png" />
-    <Content Include="images\gplv3.png" />
-    <Content Include="images\html5.png" />
-    <Content Include="images\js.png" />
-    <Content Include="images\logo128.png" />
-    <Content Include="images\logo128dark.png" />
-    <Content Include="images\logo16.png" />
-    <Content Include="images\logo256.png" />
-    <Content Include="images\logo32.png" />
-    <Content Include="images\logo64.png" />
-    <Content Include="images\primrose128.png" />
-    <Content Include="images\primrose32.png" />
-    <Content Include="images\primrose64.png" />
-    <Content Include="images\q.png" />
-    <Content Include="images\reddit.webvr.png" />
-    <Content Include="images\stripe.png" />
-    <Content Include="images\webvr.info.png" />
-    <Content Include="images\bg1.jpg" />
-    <Content Include="images\bg2.jpg" />
-    <Content Include="images\mail-logo.jpg" />
-    <Content Include="images\mdn.webvr.jpg" />
-    <Content Include="images\mozvr.com.jpg" />
-    <Content Include="images\nightly.mozilla.jpg" />
-    <Content Include="images\screenshot.jpg" />
-    <Content Include="images\stm-2015-05.jpg" />
     <Content Include="lib\droid_sans_regular.typeface.js" />
     <Content Include="lib\ga-snippet.js" />
     <Content Include="lib\gl-matrix.js" />
     <Content Include="lib\sha512.js" />
-    <Compile Include="server\controllers.js" />
-    <Compile Include="server\controllers\logger.js" />
-    <Compile Include="server\controllers\nypl.js" />
-    <Compile Include="server\core.js" />
-    <Compile Include="server\data\users.js" />
-    <Compile Include="server\http\get.js" />
-    <Compile Include="server\http\getBuffer.js" />
-    <Compile Include="server\http\getObject.js" />
-    <Compile Include="server\http\getText.js" />
-    <Compile Include="server\http\post.js" />
-    <Compile Include="server\http\request.js" />
-    <Compile Include="server\http\sendObject.js" />
-    <Compile Include="server\options.js" />
-    <Compile Include="server\recurseDirectory.js" />
-    <Compile Include="server\requireDirectory.js" />
-    <Compile Include="server\socketControllers.js" />
-    <Compile Include="server\starter.js" />
-    <Compile Include="server\webServer.js" />
-    <Compile Include="server\webSocketServer.js" />
     <Content Include="src\base\axis.js" />
     <Content Include="src\base\box.js" />
     <Content Include="src\base\brick.js" />
@@ -230,7 +173,6 @@
     <Content Include="src\fx\text\controls\TextInput.js" />
     <Content Include="src\base\hub.js" />
     <Content Include="src\index.js" />
-    <Content Include="stylesheets\main.css" />
     <Content Include="src\x\SignupForm.js" />
     <Content Include="src\x\LoginForm.js" />
     <Content Include="test\Basic.js" />
@@ -275,9 +217,6 @@
     <Content Include="doc\music\app.js" />
     <Content Include="doc\temple\screenshot.jpg" />
     <Content Include="doc\temple\app.js" />
-    <Compile Include="server\data\User.js" />
-    <Compile Include="server\socketControllers\login.js" />
-    <Compile Include="server\socketControllers\peer.js" />
     <Content Include="src\fx\Angle.js" />
     <Content Include="src\fx\BaseControl.js" />
     <Content Include="src\fx\Button.js" />
@@ -336,7 +275,6 @@
     <Content Include="src\fx\text\themes\Dark.js" />
     <Content Include="src\fx\text\themes\Default.js" />
     <Content Include="templates\withFramework.jade" />
-    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="doc" />
@@ -351,12 +289,10 @@
     <Folder Include="doc\music\" />
     <Folder Include="doc\nypl\" />
     <Folder Include="doc\temple\" />
-    <Folder Include="images" />
     <Folder Include="lib" />
     <Folder Include="doc\models\" />
     <Folder Include="doc\audio\" />
     <Folder Include="quickstart\" />
-    <Folder Include="server\http\" />
     <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
@@ -364,10 +300,6 @@
     <Folder Include="src\fx\Random\" />
     <Folder Include="src\x\" />
     <Folder Include="templates\" />
-    <Folder Include="server" />
-    <Folder Include="server\controllers" />
-    <Folder Include="server\data\" />
-    <Folder Include="server\socketControllers" />
     <Folder Include="src" />
     <Folder Include="src\fx" />
     <Folder Include="src\base\" />
@@ -380,7 +312,7 @@
     <Folder Include="src\fx\text\grammars" />
     <Folder Include="src\fx\text\operating_systems" />
     <Folder Include="src\fx\text\themes" />
-    <Folder Include="stylesheets" />
+    <Folder Include="templates\doc\" />
     <Folder Include="test" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />

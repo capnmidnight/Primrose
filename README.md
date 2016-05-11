@@ -13,8 +13,8 @@ The Primrose Framework helps web developers create virtual reality experiences w
         // setup the VR environment
         app = new Primrose.BrowserEnvironment( "Commodore", {
           sceneModel: "commodore_pet.json",
-          skyTexture: "/images/bg2.jpg",
-          groundTexture: "/images/deck.png"
+          skyTexture: "images/bg2.jpg",
+          groundTexture: "images/deck.png"
         } );
 
     function isExecuteCommand ( evt ) {
