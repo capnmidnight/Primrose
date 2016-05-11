@@ -78,6 +78,11 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 
 function pugConfiguration(options, defaultData) {
   return gulp.src(["*.jade", "*.pug", "templates/doc/*.jade", "templates/doc/*.pug"], { base: "./" })
+    .pipe(rename(function (p) {
+      p.extname = "";
+      p.dirname = p.dirname.replace("templates" + path.sep, "");
+      return p;
+    }))
     .pipe(data(function (file, callback) {
       var name = file.path.replace(/\\/g, "/"),
         parts = name.split("/")
@@ -111,11 +116,6 @@ function pugConfiguration(options, defaultData) {
     }))
     .pipe(pug(options))
     .on("error", console.error.bind(console, "PUG ERROR"))
-    .pipe(rename(function (p) {
-      p.extname = "";
-      p.dirname = p.dirname.replace("templates" + path.sep, "");
-      return p;
-    }))
     .pipe(gulp.dest("."));
 }
 
