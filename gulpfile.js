@@ -91,9 +91,6 @@ function pugConfiguration(options, defaultData) {
 
       parts.pop();
 
-      var exists = fs.existsSync(scriptName);
-      txt = exists && fs.readFileSync(scriptName, "utf-8");
-
       callback(null, {
         debug: defaultData.debug,
         version: pkg.version,
@@ -108,7 +105,9 @@ function pugConfiguration(options, defaultData) {
         docFiles: docFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
-        demoScript: exists && ("grammar(\"JavaScript\");\n" + txt)
+        getDemoScript: function getDemoScript(scriptName) {
+          return "grammar(\"JavaScript\");\n" + fs.readFileSync(scriptName, "utf-8");
+        }
       });
     }))
     .pipe(pug(options))
