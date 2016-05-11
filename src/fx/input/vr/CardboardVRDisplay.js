@@ -12,8 +12,8 @@
         var dEye = side === "left" ? -1 : 1;
 
         return {
-          renderWidth: Math.floor(screen.width * devicePixelRatio / 2) * CardboardVRDisplay.SUPERSAMPLE,
-          renderHeight: screen.height * devicePixelRatio * CardboardVRDisplay.SUPERSAMPLE,
+          renderWidth: Math.floor(screen.width * devicePixelRatio / 2),
+          renderHeight: screen.height * devicePixelRatio,
           offset: new Float32Array([dEye * 0.03, 0, 0]),
           fieldOfView: {
             upDegrees: 40,
@@ -47,8 +47,6 @@
       };
     }
   }
-
-  CardboardVRDisplay.SUPERSAMPLE = 1;
 
   return CardboardVRDisplay;
 })();

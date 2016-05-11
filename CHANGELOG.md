@@ -9,6 +9,59 @@ KEY:
 * **Windows** - Windows 8.1 and Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.23.4 - 2016/05/11
+
+This was an intermediate release, specifically focused on carving the primrosevr.com website bits out of the Primrose VR Github repository.
+
+* Bugs
+  * Yet another fix to fullscreen workflow
+* Admin
+  * Abstracted commonalities between CardboardVRDisplay and LegacyVRDisplay to a common base class.
+  * Removed all the stuff that was specific to the Primrose website and not the Primrose framework.
+* Features
+  * None
+* Open Issues
+  * Windows
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+      * Gamepad input slews to the right.
+    * Firefox
+      * No HMD support (WebVR not yet available in Firefox).
+      * Gamepad input slews to the right.
+  * Android
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - "NONE", in the sense that it works as expected. Device Orientation fallback has some problems with drift, but that is to be expected before WebVR lands in the full release version of Chrome.
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+      * Low frame rate in fullscreen mode.
+    * Firefox
+      * Device Orientation fallback has some problems with drift.
+      * Image inverts under certain tilt conditions.
+      * Low frame rate in fullscreen mode.
+    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
+      * Orientation tracking is pretty bad, making the overall experience very bad.
+      * The touchpad doesn't work, so interactions are not working.
+      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
+  * All platforms
+    * Dynamic object allocation causing periodic garbage collections.
+    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
+    * Leap Motion input disabled.
+    * Multiplayer disabled.
+    * Device fusion over WebRTC disabled.
+    * Passthrough Cameras disabled.
+    * No options UI for keyboard preferences.
+    * No text-input for single-button, passive HMD devices.
+    * No support for tabbing through text fields.
+    * CSS text in documentation is not syntax highlighted.
+    * HTML text in documentation is not syntax highlighted.
+    * Documentation is only available in English.
+    * Button model is too short for comfort.
+    * Gaze action has no visual indicator of progress.
+    * Gaze action does not trigger Surfaces.
+    * No support for Unicode "Alt-codes".
+
 ## v0.23.3 - 2016/05/09
 
 * Bugs
