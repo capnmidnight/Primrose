@@ -1,7 +1,6 @@
 ﻿var gulp = require("gulp"),
   babel = require("gulp-babel"),
   concat = require("gulp-concat"),
-  cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
   footer = require("gulp-footer"),
   fs = require("fs"),
@@ -13,7 +12,6 @@
   recurseDirectory = require("./recurseDirectory"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
-  zip = require("gulp-zip"),
   pathX = /.*\/(.*).js/,
   sourceFiles = recurseDirectory("src"),
   headerFiles = [
@@ -75,8 +73,6 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
   return f.replace(/^src\//, "es5/");
 });
 
-
-
 function pugConfiguration(options, defaultData) {
   return gulp.src(["*.jade", "*.pug", "templates/doc/*.jade", "templates/doc/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
@@ -135,13 +131,6 @@ gulp.task("pug:debug:es6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
-gulp.task("cssmin", function () {
-  gulp.src(["doc/**/*.css", "stylesheets/**/*.css", "!**/*.min.css"], { base: "./" })
-    .pipe(cssmin())
-    .pipe(rename({ suffix: ".min" }))
-    .pipe(gulp.dest("./"));
-});
-
 gulp.task("jshint", function () {
   return gulp.src(sourceFiles)
     .pipe(jshint({
@@ -197,20 +186,6 @@ gulp.task("jsmin", ["carveDocumentation", "concat:dependencies", "concat:marketi
     .pipe(gulp.dest("./"));
 });
 
-
-gulp.task("archive", ["jsmin"], function () {
-  return gulp.src(["Primrose*.js", "!PrimroseSite*", "!PrimroseDependencies*"])
-    .pipe(rename(function (file) {
-      if (file.basename.indexOf(".min") > -1) {
-        file.extname = ".min.js";
-        file.basename = file.basename.substring(0, file.basename.length - 4);
-      }
-      file.basename += "-" + pkg.version;
-      return file;
-    }))
-    .pipe(gulp.dest("archive"));
-});
-
 gulp.task("copy:quickstart", ["jsmin"], function () {
   return gulp.src([
     "../HereTTP/bin/x86/Release/StartHere.exe",
@@ -223,13 +198,7 @@ gulp.task("copy:quickstart", ["jsmin"], function () {
     .pipe(gulp.dest("quickstart"));
 });
 
-gulp.task("quickstart", ["copy:quickstart"], function () {
-  return gulp.src(["quickstart/**/*"])
-    .pipe(zip("quickstart.zip"))
-    .pipe(gulp.dest("."));
-});
-
 gulp.task("debug", ["jshint", "pug:debug:es6"]);
 gulp.task("default", ["debug"]);
 gulp.task("stage", ["babel", "pug:debug:es5"]);
-gulp.task("release", ["cssmin", "pug:release", "quickstart", "archive"]);
+gulp.task("release", ["pug:release", "copy:quickstart", "jsmin"]);
