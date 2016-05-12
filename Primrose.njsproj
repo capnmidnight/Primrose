@@ -31,7 +31,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="recurseDirectory.js" />
+    <Content Include="lib\recurseDirectory.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
     <Content Include="doc\images\primrose32.png" />
@@ -117,8 +117,6 @@
     <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
-    <Content Include="lib\Element.details.js" />
-    <Content Include="lib\promise.js" />
     <Compile Include="quickstart\app.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
