@@ -790,7 +790,7 @@ Primrose.BrowserEnvironment = (function () {
               console.log(ocean.source);
               ocean.source.start();
             }
-          });
+          }).catch(console.error.bind(console, "Audio3D loadSource"));
       }
       else {
         audioReady = Promise.resolve();
