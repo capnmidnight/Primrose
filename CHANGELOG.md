@@ -44,23 +44,6 @@ This was an intermediate release, specifically focused on carving the primrosevr
       * Orientation tracking is pretty bad, making the overall experience very bad.
       * The touchpad doesn't work, so interactions are not working.
       * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
-  * All platforms
-    * Dynamic object allocation causing periodic garbage collections.
-    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
-    * Leap Motion input disabled.
-    * Multiplayer disabled.
-    * Device fusion over WebRTC disabled.
-    * Passthrough Cameras disabled.
-    * No options UI for keyboard preferences.
-    * No text-input for single-button, passive HMD devices.
-    * No support for tabbing through text fields.
-    * CSS text in documentation is not syntax highlighted.
-    * HTML text in documentation is not syntax highlighted.
-    * Documentation is only available in English.
-    * Button model is too short for comfort.
-    * Gaze action has no visual indicator of progress.
-    * Gaze action does not trigger Surfaces.
-    * No support for Unicode "Alt-codes".
 
 ## v0.23.3 - 2016/05/09
 
@@ -89,23 +72,6 @@ This was an intermediate release, specifically focused on carving the primrosevr
       * Orientation tracking is pretty bad, making the overall experience very bad.
       * The touchpad doesn't work, so interactions are not working.
       * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
-  * All platforms
-    * Dynamic object allocation causing periodic garbage collections.
-    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
-    * Leap Motion input disabled.
-    * Multiplayer disabled.
-    * Device fusion over WebRTC disabled.
-    * Passthrough Cameras disabled.
-    * No options UI for keyboard preferences.
-    * No text-input for single-button, passive HMD devices.
-    * No support for tabbing through text fields.
-    * CSS text in documentation is not syntax highlighted.
-    * HTML text in documentation is not syntax highlighted.
-    * Documentation is only available in English.
-    * Button model is too short for comfort.
-    * Gaze action has no visual indicator of progress.
-    * Gaze action does not trigger Surfaces.
-    * No support for Unicode "Alt-codes".
 
 
 ## v0.23.2 - 2016/05/08
@@ -166,23 +132,6 @@ This was an intermediate release, specifically focused on carving the primrosevr
       * Orientation tracking is pretty bad, making the overall experience very bad.
       * The touchpad doesn't work, so interactions are not working.
       * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
-  * All platforms
-    * Dynamic object allocation causing periodic garbage collections.
-    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
-    * Leap Motion input disabled.
-    * Multiplayer disabled.
-    * Device fusion over WebRTC disabled.
-    * Passthrough Cameras disabled.
-    * No options UI for keyboard preferences.
-    * No text-input for single-button, passive HMD devices.
-    * No support for tabbing through text fields.
-    * CSS text in documentation is not syntax highlighted.
-    * HTML text in documentation is not syntax highlighted.
-    * Documentation is only available in English.
-    * Button model is too short for comfort.
-    * Gaze action has no visual indicator of progress.
-    * Gaze action does not trigger Surfaces.
-    * No support for Unicode "Alt-codes".
 
 ## v0.23.1 - 2016/04/29
 
@@ -251,22 +200,6 @@ This was an intermediate release, specifically focused on carving the primrosevr
     * Gear VR
       * Low frame rate in fullscreen mode.
       * Samsung's browser for Gear VR current has defective orientation tracking, making the overall experience very bad.
-  * All platforms
-    * Dynamic object allocation causing periodic garbage collections.
-    * Use of expando-objects instead of HashMaps causing V8 deoptimization.
-    * Leap Motion input disabled.
-    * Multiplayer disabled.
-    * Device fusion over WebRTC disabled.
-    * Passthrough Cameras disabled.
-    * No options UI for keyboard preferences.
-    * No text-input for single-button, passive HMD devices.
-    * No support for tabbing through text fields.
-    * CSS text in documentation is not syntax highlighted.
-    * HTML text in documentation is not syntax highlighted.
-    * Documentation is only available in English.
-    * Button model is too short for comfort.
-    * Gaze action has no visual indicator of progress.
-    * No support for Unicode "Alt-codes".
 
 
 
