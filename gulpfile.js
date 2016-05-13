@@ -40,7 +40,8 @@ var gulp = require("gulp"),
     "node_modules/socket.io-client/socket.io.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js"
+    "node_modules/three/examples/js/loaders/MTLLoader.js",
+    "node_modules/html2canvas/dist/html2canvas.js"
   ],
   headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
   docFiles = recurseDirectory("templates/doc")

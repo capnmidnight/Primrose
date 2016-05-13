@@ -46,6 +46,7 @@
     "highlighting"
   ],
   "dependencies": {
+    "html2canvas": "^0.5.0-beta4",
     "lavu-details-polyfill": "^0.1.0",
     "leapjs": "^0.6.4",
     "logger": "git+https://github.com/capnmidnight/logger.git",
