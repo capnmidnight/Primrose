@@ -25,13 +25,14 @@
     "PrimroseDocumentation.min.js",
     "StartHere-WINDOWS.ps1",
     "StartHere-UNIX.sh",
+    "StartHere.js",
     "archive/",
     "quickstart/",
     "src/",
     "doc/"
   ],
   "scripts": {
-    "start": "StartHere.sh"
+    "start": "node StartHere.js --url doc/"
   },
   "keywords": [
     "virtual reality",
