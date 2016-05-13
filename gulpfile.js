@@ -1,4 +1,24 @@
-﻿var gulp = require("gulp"),
+﻿function recurseDirectory(root) {
+  var directoryQueue = [root],
+    files = [];
+  while (directoryQueue.length > 0) {
+    var directory = directoryQueue.shift(),
+      subFiles = fs.readdirSync(directory);
+    for (var j = 0; j < subFiles.length; ++j) {
+      var subFile = path.join(directory, subFiles[j]),
+        stats = fs.lstatSync(subFile);
+      if (stats.isDirectory()) {
+        directoryQueue.push(subFile);
+      }
+      else {
+        files.push(subFile.replace(/\\/g, "/"));
+      }
+    }
+  }
+  return files;
+}
+
+var gulp = require("gulp"),
   babel = require("gulp-babel"),
   concat = require("gulp-concat"),
   data = require("gulp-data"),
@@ -9,7 +29,6 @@
   pkg = require("./package.json"),
   pliny = require("pliny"),
   pug = require("gulp-pug"),
-  recurseDirectory = require("./lib/recurseDirectory"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   sourceFiles = recurseDirectory("src"),
