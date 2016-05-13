@@ -1,0 +1,1 @@
+﻿require("child_process").execFile("quickstart/StartHere.exe", process.argv);
