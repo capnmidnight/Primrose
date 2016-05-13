@@ -28,8 +28,7 @@
     "archive/",
     "quickstart/",
     "src/",
-    "doc/",
-    "lib/"
+    "doc/"
   ],
   "scripts": {
     "start": "StartHere.sh"
