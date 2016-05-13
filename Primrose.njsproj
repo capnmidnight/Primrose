@@ -10,19 +10,19 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{f2ff07a2-bbaf-40db-b8b0-38022708477c}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>StartHere.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
     <LaunchUrl>doc/editorVR.html</LaunchUrl>
+    <ScriptArguments>--quiet</ScriptArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,7 +31,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="lib\recurseDirectory.js" />
+    <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
     <Content Include="doc\images\primrose32.png" />
@@ -270,7 +270,6 @@
     <Folder Include="doc\jabbers\" />
     <Folder Include="doc\music\" />
     <Folder Include="doc\temple\" />
-    <Folder Include="lib" />
     <Folder Include="doc\models\" />
     <Folder Include="doc\audio\" />
     <Folder Include="quickstart\" />
