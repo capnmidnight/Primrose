@@ -294,6 +294,42 @@
     <Folder Include="src\fx\text\themes" />
     <Folder Include="templates\doc\" />
     <Folder Include="test" />
+    <Folder Include="typings\" />
+    <Folder Include="typings\gulp-babel\" />
+    <Folder Include="typings\gulp-concat\" />
+    <Folder Include="typings\gulp-rename\" />
+    <Folder Include="typings\gulp-uglify\" />
+    <Folder Include="typings\gulp\" />
+    <Folder Include="typings\html2canvas\" />
+    <Folder Include="typings\jquery\" />
+    <Folder Include="typings\mime\" />
+    <Folder Include="typings\node\" />
+    <Folder Include="typings\orchestrator\" />
+    <Folder Include="typings\q\" />
+    <Folder Include="typings\socket.io-client\" />
+    <Folder Include="typings\socket.io\" />
+    <Folder Include="typings\source-map\" />
+    <Folder Include="typings\threejs\" />
+    <Folder Include="typings\uglify-js\" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="typings\gulp-babel\gulp-babel.d.ts" />
+    <TypeScriptCompile Include="typings\gulp-concat\gulp-concat.d.ts" />
+    <TypeScriptCompile Include="typings\gulp-rename\gulp-rename.d.ts" />
+    <TypeScriptCompile Include="typings\gulp-uglify\gulp-uglify.d.ts" />
+    <TypeScriptCompile Include="typings\gulp\gulp.d.ts" />
+    <TypeScriptCompile Include="typings\html2canvas\html2canvas.d.ts" />
+    <TypeScriptCompile Include="typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="typings\mime\mime.d.ts" />
+    <TypeScriptCompile Include="typings\node\node.d.ts" />
+    <TypeScriptCompile Include="typings\orchestrator\orchestrator.d.ts" />
+    <TypeScriptCompile Include="typings\q\Q.d.ts" />
+    <TypeScriptCompile Include="typings\socket.io-client\socket.io-client.d.ts" />
+    <TypeScriptCompile Include="typings\socket.io\socket.io.d.ts" />
+    <TypeScriptCompile Include="typings\source-map\source-map.d.ts" />
+    <TypeScriptCompile Include="typings\threejs\three.d.ts" />
+    <TypeScriptCompile Include="typings\tsd.d.ts" />
+    <TypeScriptCompile Include="typings\uglify-js\uglify-js.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
