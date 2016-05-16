@@ -43,7 +43,7 @@ var gulp = require("gulp"),
     "node_modules/three/examples/js/loaders/MTLLoader.js",
     "node_modules/html2canvas/dist/html2canvas.js"
   ],
-  headerSpec = /(?:\b(\d+)\r\n\s*)?h1 ([^\r\n]+)/,
+  headerSpec = /(?:\b(\d+)\r\n\s*)?h1 (?:(?:(\w+): )?([^\r\n]+))/,
   docFiles = recurseDirectory("templates/doc")
     .filter(function (f) { return /.jade$/.test(f); })
     .map(function (f, i) {
@@ -54,15 +54,15 @@ var gulp = require("gulp"),
         if (match[1]) {
           index = parseInt(match[1]);
         }
-
+        
         var obj = {
           fileName: f.replace(/\\/g, "/")
             .replace(/^templates\/(.+)\.jade$/, "$1"),
           index: index,
-          title: match[2],
-          incomplete: /\[under construction\]/.test(file),
-          tutorial: /^Tutorial:/.test(match[2]),
-          example: /^Example:/.test(match[2])
+          tutorial: match[2] === "Tutorial",
+          example: match[2] === "Example",
+          title: match[3],
+          incomplete: /\[under construction\]/.test(file)
         };
 
         return obj;
