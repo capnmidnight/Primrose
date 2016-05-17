@@ -95,7 +95,7 @@ Primrose.Input.VR = (function () {
         }
       }
 
-      function enumerateVRDisplays(elem, displays) {
+      function enumerateVRDisplays(displays) {
         console.log("Displays found:", displays.length);
         this.displays = displays;
         this.displays.forEach(onConnected);
@@ -106,7 +106,7 @@ Primrose.Input.VR = (function () {
         }
       }
 
-      function enumerateLegacyVRDevices(elem, devices) {
+      function enumerateLegacyVRDevices(devices) {
         console.log("Devices found:", devices.length);
         var displays = {},
           id = null;
@@ -132,12 +132,12 @@ Primrose.Input.VR = (function () {
           mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id].display, displays[id].sensor));
         }
 
-        return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
+        return enumerateVRDisplays.call(this, mockedLegacyDisplays);
       }
 
-      function createCardboardVRDisplay(elem) {
+      function createCardboardVRDisplay() {
         var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
-        return enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
+        return enumerateVRDisplays.call(this, mockedCardboardDisplays);
       }
 
       this.init = function () {
@@ -145,12 +145,12 @@ Primrose.Input.VR = (function () {
         if (navigator.getVRDisplays) {
           console.info("Using WebVR API 1");
           return navigator.getVRDisplays()
-            .then(enumerateVRDisplays.bind(this, elem));
+            .then(enumerateVRDisplays.bind(this));
         }
         else if (navigator.getVRDevices) {
           console.info("Using Chromium Experimental WebVR API");
           return navigator.getVRDevices()
-            .then(enumerateLegacyVRDevices.bind(this, elem))
+            .then(enumerateLegacyVRDevices.bind(this))
             .catch(console.error.bind(console, "Could not find VR devices"));
         }
         else {
@@ -162,7 +162,7 @@ Primrose.Input.VR = (function () {
                 timer = null;
                 window.removeEventListener("deviceorientation", waitForValidMotion);
                 console.info("Using Device Motion API");
-                resolve(createCardboardVRDisplay.call(this, elem));
+                resolve(createCardboardVRDisplay.call(this));
               }
             };
             console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");

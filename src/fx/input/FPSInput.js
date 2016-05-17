@@ -104,11 +104,11 @@ Primrose.Input.FPSInput = (function () {
             commandDown: emit.bind(this, "pointerstart"),
             commandUp: emit.bind(this, "pointerend")
           },
-          strafe: { axes: [Primrose.Input.Gamepad.LSX] },
-          drive: { axes: [Primrose.Input.Gamepad.LSY] },
-          heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
+          strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
+          drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
+          heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
           dheading: { commands: ["heading"], delta: true },
-          pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
+          pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
         })];
 
       if (Primrose.Input.VR.Version > 0) {
