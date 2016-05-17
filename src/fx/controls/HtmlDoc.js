@@ -21,7 +21,7 @@ Primrose.Controls.HtmlDoc = (function () {
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
-    
+
       if (typeof options === "string") {
         this.options = { value: this.options };
       }
@@ -46,69 +46,26 @@ Primrose.Controls.HtmlDoc = (function () {
     set value(txt) {
       txt = txt || "";
       this._value = txt.replace(/\r\n/g, "\n");
-      this.render();
-    }
-
-    
-    _isChanged() {
-      var textChanged = this._lastValue !== this.value,
-        imageChanged = this._lastImage !== this._image,
-        changed = textChanged || imageChanged;
-      return changed;
+      if (this._lastValue !== this._value) {
+        this._lastValue = this._value;
+        this._surrogate.innerHTML = this.value;
+        html2canvas(this._surrogate, {
+          onrendered: (canvas) => {
+            this._image = canvas;
+            this.setSize(canvas.width, canvas.height);
+            this.render();
+          }
+        });
+      }
     }
 
     render() {
-      if (this.resized) {
-        this.resize();
-      }
-
-      if (this._isChanged) {
-        this._lastValue = this.value;
-        this._lastWidth = this.imageWidth;
-        this._lastHeight = this.imageHeight;
-
-        var clearFunc = backColor ? "fillRect" : "clearRect";
-
-        if (this.theme.regular.backColor) {
-          this.context.fillStyle = backColor;
-        }
-
+      if (this._image !== this._lastImage) {
+        this._lastImage = this._image;
         this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
-
-        if (this.value) {
-          var lines = this.value.split("\n");
-          for (var y = 0; y < lines.length; ++y) {
-            var line = lines[y],
-              textY = (this.imageHeight - lines.length * this.character.height) / 2 + y * this.character.height;
-
-            var textX = null;
-            switch (this.textAlign) {
-              case "right":
-                textX = this.imageWidth;
-                break;
-              case "center":
-                textX = this.imageWidth / 2;
-                break;
-              default:
-                textX = 0;
-            }
-
-            var font = (this.theme.regular.fontWeight || "") +
-              " " + (this.theme.regular.fontStyle || "") +
-              " " + this.character.height + "px " + this.theme.fontFamily;
-            this.context.font = font.trim();
-            this.context.fillStyle = foreColor;
-            this.context.fillText(line, textX, textY);
-          }
-        }
-
-        this.renderCanvasTrim();
-        
+        this.context.drawImage(0, 0, this._image);
         this.invalidate();
       }
-    }
-
-    renderCanvasTrim() {
     }
   }
 
