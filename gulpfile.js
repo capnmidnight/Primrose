@@ -87,7 +87,7 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 });
 
 function pugConfiguration(options, defaultData) {
-  return gulp.src(["*.jade", "*.pug", "templates/doc/*.jade", "templates/doc/*.pug"], { base: "./" })
+  return gulp.src(["*.jade", "*.pug", "templates/doc/**/*.jade", "templates/doc/**/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
       p.extname = "";
       p.dirname = p.dirname.replace("templates" + path.sep, "");
