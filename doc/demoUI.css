@@ -1,22 +1,37 @@
-﻿*{
+﻿* {
     box-sizing: border-box;
 }
+
 html, body, #frontBuffer, #fullScreenButtonContainer {
- position: absolute;
- width: 100%;
- height: 100%;
- padding: 0;
- margin: 0;
- border: 0;
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+html, body, #frontBuffer {
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+#fullScreenButtonContainer{
+    bottom: 0;
+    right: 0;
 }
 
 #frontBuffer {
- background-repeat: no-repeat;
- background-color: #eee;
- background-size: cover;
- cursor: wait;
+    background-repeat: no-repeat;
+    background-color: #eee;
+    background-size: cover;
+    cursor: wait;
 }
 
-body > h1{
+body > h1 {
     display: none;
+}
+
+button{
+    padding: 1em;
 }
