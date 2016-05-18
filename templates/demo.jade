@@ -8,36 +8,13 @@ append head
     |   padding: 0;
     |   margin: 0;
     |   border: 0;
-    |   background-repeat: no-repeat;
-    |   background-color: #eee;
-    |   background-size: cover;
-    |   cursor: wait;
-    |   background-image:url(#{fileRoot}doc/#{fileName}/screenshot.jpg);
     | }
   <!-- end demo.jade head append -->
 
 block document
   <!-- start demo.jade banner block -->
+  h1= demoTitle
   p Click on the image below to lock mouse cursor to demo.
-  canvas#frontBuffer
-  #fullScreenButtonContainer
+  iframe#frontBuffer(src= fileRoot + "doc/" + fileName, role="application", allowfullscreen)
   h2 Source
   pre#editorContainer= getDemoScript(demoScriptName)
-  <!-- end demo.jade banner block -->
-
-prepend footer
-  script#monitor_mtl(type="text/prs.wavefront-mtl")
-    include ../doc/models/monitor.mtl
-
-  script#monitor_obj(type="text/prs.wavefront-obj")
-    include ../doc/models/monitor.obj
-
-  script#monitor_mtl(type="text/prs.wavefront-mtl")
-    include ../doc/models/cardboard.mtl
-
-  script#monitor_obj(type="text/prs.wavefront-obj")
-    include ../doc/models/cardboard.obj
-
-append footer
-  script(type="text/javascript", async, defer, src=fileRoot + demoScriptName)
-  script(type="text/javascript", src= fileRoot + "doc/demoUI.js")

@@ -18,7 +18,7 @@ mixin fileList(name)
     h2= name
     ul
       each file in docFiles
-        if(name === "Pages" && !file.tutorial && !file.example || name === "Tutorials" && file.tutorial || name === "Examples" && file.example)
+        if(file.type === name)
           if(file.incomplete)
             li(data-name=file.title): a.incomplete(href=fileRoot + file.fileName)= file.title
           else

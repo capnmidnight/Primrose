@@ -1,11 +1,11 @@
 "use strict";
 var app = new Primrose.BrowserEnvironment("My Primrose VR Application", {
-  skyTexture: "images/bg.jpg",
-  ambientSound: "audio/wind.ogg",
-  groundTexture: "images/deck.png",
-  fullScreenIcon: "models/monitor.obj",
-  VRIcon: "models/cardboard.obj",
-  font: "fonts/helvetiker_regular.typeface.js"
+  skyTexture: "../images/bg.jpg",
+  ambientSound: "../audio/wind.ogg",
+  groundTexture: "../images/deck.png",
+  fullScreenIcon: "../models/monitor.obj",
+  VRIcon: "../models/cardboard.obj",
+  font: "../fonts/helvetiker_regular.typeface.js"
 });
 
 app.addEventListener("ready", function () {

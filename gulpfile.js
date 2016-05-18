@@ -43,31 +43,45 @@ var gulp = require("gulp"),
     "node_modules/three/examples/js/loaders/MTLLoader.js",
     "node_modules/html2canvas/dist/html2canvas.js"
   ],
-  headerSpec = /(?:\b(\d+)\r\n\s*)?h1 (?:(?:(\w+): )?([^\r\n]+))/,
   docFiles = recurseDirectory("templates/doc")
-    .filter(function (f) { return /.jade$/.test(f); })
+    .filter(function (f) {
+      return /.jade$/.test(f);
+    })
     .map(function (f, i) {
       var file = fs.readFileSync(f, "utf-8").toString(),
-        match = file.match(headerSpec),
-        index = i;
+        // This regex looks for an H1 tag in the document. The H1 tag will be parsed
+        // to use as the link text in the menu.
+        headerSpec = /(?:\b(\d+)\r\n\s*)?h1 (?:(?:(\w+): )?([^\r\n]+))/,
+        match = file.match(headerSpec);
+      // Only pages that have an H1 tag are going to be included in the menu.
       if (match) {
+        var fileName = f.replace(/\\/g, "/").replace(/^templates\/(.+)\.jade$/, "$1"),
+          index = i,
+          type = (match[2] || "Page") + "s";
+
+        // there is an optional item index value that can be inserted before the page
+        // title H1, to define how the pages are sorted.
         if (match[1]) {
-          index = parseInt(match[1]);
+          index = parseFloat(match[1]);
         }
-        
+
+        if (type === "Examples") {
+          fileName = fileName.replace("/index", "");
+        }
+
         var obj = {
-          fileName: f.replace(/\\/g, "/")
-            .replace(/^templates\/(.+)\.jade$/, "$1"),
+          fileName: fileName,
           index: index,
-          tutorial: match[2] === "Tutorial",
-          example: match[2] === "Example",
+          type: type,
           title: match[3],
           incomplete: /\[under construction\]/.test(file)
         };
 
         return obj;
       }
-    }).filter(function (f) {
+    })
+    // discard any matches that didn't have an H1 header.
+    .filter(function (f) {
       return f;
     }),
   debugDataES6 = {
@@ -99,10 +113,19 @@ function pugConfiguration(options, defaultData) {
           .map(function () {
             return "../";
           }),
-        shortName = name.match(/([^\/]+)\.html$/),
-        scriptName = name.replace(/\.html$/, "/app.js");
-
+        shortName = name.match(/doc\/(\w+)[/.]/),
+        demoTitle = null;
+      
       parts.pop();
+      shortName = shortName && shortName[1];
+      var scriptName = "doc/" + shortName + "/app.js";
+
+      for (var i = 0; i < docFiles.length; ++i) {
+        var d = docFiles[i];
+        if (d.fileName === name) {
+          demoTitle = d.title;
+        }
+      }
 
       callback(null, {
         debug: defaultData.debug,
@@ -111,10 +134,11 @@ function pugConfiguration(options, defaultData) {
         jsExt: defaultData.jsExt,
         filePath: name,
         fileRoot: parts.join(""),
-        fileName: shortName && shortName[1],
+        fileName: shortName,
         docFiles: docFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
+        demoTitle: demoTitle,
         getDemoScript: function getDemoScript(scriptName) {
           return "grammar(\"JavaScript\");\n" + fs.readFileSync(scriptName, "utf-8");
         }
@@ -170,7 +194,7 @@ gulp.task("concat:primrose", ["jshint"], function () {
     .pipe(babel({
       sourceMap: false,
       presets: ["es2015"]
-    })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version +". Find out more at http://www.primrosevr.com\");");
+    })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version + ". Find out more at http://www.primrosevr.com\");");
 });
 
 gulp.task("concat:dependencies", function () {

@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="src\fx\controls\HtmlDoc.js" />
+    <Compile Include="doc\demoUI.css" />
     <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
@@ -57,28 +58,34 @@
     <Content Include="doc\models\monitor.obj" />
     <Content Include="src\base\findProperty.js" />
     <Content Include="doc\images\prong.stereo.jpg" />
+    <Content Include="templates\demoIFrame.jade" />
     <Content Include="templates\documentation.jade" />
     <Content Include="templates\demo.jade" />
     <Content Include="templates\doc\blenderAdvanced.html.jade" />
     <Content Include="templates\doc\blenderBeginner.html.jade" />
     <Content Include="templates\doc\commodore.html.jade" />
+    <Content Include="templates\doc\commodore\index.html.jade" />
     <Content Include="templates\doc\drum.html.jade" />
     <Content Include="templates\doc\editorVR.html.jade" />
+    <Content Include="templates\doc\editorVR\index.html.jade" />
     <Content Include="templates\doc\editorVRManual.html.jade" />
     <Content Include="templates\doc\editorVRTutorial.html.jade" />
     <Content Include="templates\doc\empty.html.jade" />
+    <Content Include="templates\doc\empty\index.html.jade" />
     <Content Include="templates\doc\export.html.jade" />
     <Content Include="templates\doc\faq.html.jade" />
-    <Content Include="templates\doc\frontPageBanner.html.jade" />
     <Content Include="templates\doc\hmd.html.jade" />
     <Content Include="templates\doc\index.html.jade" />
     <Content Include="templates\doc\jabbers.html.jade" />
+    <Content Include="templates\doc\jabbers\index.html.jade" />
     <Content Include="templates\doc\lighting.html.jade" />
     <Content Include="templates\doc\music.html.jade" />
+    <Content Include="templates\doc\music\index.html.jade" />
     <Content Include="templates\doc\server.html.jade" />
     <Content Include="templates\doc\setup.html.jade" />
     <Content Include="templates\doc\sync.html.jade" />
     <Content Include="templates\doc\temple.html.jade" />
+    <Content Include="templates\doc\temple\index.html.jade" />
     <Content Include="templates\doc\video.html.jade" />
     <Content Include="templates\doc\webvr.html.jade" />
     <Content Include="templates\main.jade" />
@@ -294,6 +301,12 @@
     <Folder Include="src\fx\text\operating_systems" />
     <Folder Include="src\fx\text\themes" />
     <Folder Include="templates\doc\" />
+    <Folder Include="templates\doc\commodore\" />
+    <Folder Include="templates\doc\editorVR\" />
+    <Folder Include="templates\doc\empty\" />
+    <Folder Include="templates\doc\jabbers\" />
+    <Folder Include="templates\doc\music\" />
+    <Folder Include="templates\doc\temple\" />
     <Folder Include="test" />
     <Folder Include="typings\" />
     <Folder Include="typings\gulp-babel\" />

@@ -1,16 +1,16 @@
-var GRASS = "images/grass.png",
-  ROCK = "images/rock.png",
-  SAND = "images/sand.png",
-  WATER = "images/water.png",
-  DECK = "images/deck.png",
+var GRASS = "../images/grass.png",
+  ROCK = "../images/rock.png",
+  SAND = "../images/sand.png",
+  WATER = "../images/water.png",
+  DECK = "../images/deck.png",
 
   app = new Primrose.BrowserEnvironment("Editor3D", {
-    skyTexture: "images/bg2.jpg",
-    ambientSound: "audio/wind.ogg",
+    skyTexture: "../images/bg2.jpg",
+    ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,
-    fullScreenIcon: "models/monitor.obj",
-    VRIcon: "models/cardboard.obj",
-    font: "fonts/helvetiker_regular.typeface.js"
+    fullScreenIcon: "../models/monitor.obj",
+    VRIcon: "../models/cardboard.obj",
+    font: "../fonts/helvetiker_regular.typeface.js"
   }),
 
   subScene = new THREE.Object3D(),
@@ -44,7 +44,7 @@ app.addEventListener("ready", function () {
   stereoImage = new Primrose.Controls.Image({
     id: "StereoImage"
   });
-  stereoImage.loadStereoImage("images/prong.stereo.jpg")
+  stereoImage.loadStereoImage("../images/prong.stereo.jpg")
     .then(function () {
       stereoImageMesh = textured(quad(0.5, 0.5 * stereoImage.imageHeight / stereoImage.imageWidth), stereoImage);
       stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
