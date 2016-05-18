@@ -1,20 +1,9 @@
 ﻿extends documentation.jade
 
-append head
-  <!-- start demo.jade head append -->
-  style(type="text/css")
-    |  #frontBuffer {
-    |   width: 100%;
-    |   padding: 0;
-    |   margin: 0;
-    |   border: 0;
-    | }
-  <!-- end demo.jade head append -->
-
 block document
   <!-- start demo.jade banner block -->
   h1= demoTitle
   p Click on the image below to lock mouse cursor to demo.
-  iframe#frontBuffer(src= fileRoot + "doc/" + fileName, role="application", allowfullscreen)
+  iframe#demo(src= fileRoot + "doc/" + fileName, role="application", allowfullscreen)
   h2 Source
   pre#editorContainer= getDemoScript(demoScriptName)

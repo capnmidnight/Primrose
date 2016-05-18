@@ -137,15 +137,7 @@
     <script type="text/javascript" src="../src/fx/text/operating_systems/Windows.js"></script>
     <script type="text/javascript" src="../src/fx/text/themes/Dark.js"></script>
     <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append --><!-- start demo.jade head append -->
-    <style type="text/css">
-       #frontBuffer {
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        border: 0;
-      }
-    </style><!-- end demo.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
   </head>
   <body>
     <header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose32.png" alt="logo" title="Primrose logo"></a>
@@ -222,7 +214,7 @@
       <div id="documentation"><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
         <h1>Procedurally generated room</h1>
         <p>Click on the image below to lock mouse cursor to demo.</p>
-        <iframe id="frontBuffer" src="../doc/temple" role="application" allowfullscreen></iframe>
+        <iframe id="demo" src="../doc/temple" role="application" allowfullscreen></iframe>
         <h2>Source</h2>
         <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var GRASS = &quot;../images/grass.png&quot;,
