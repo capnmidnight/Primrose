@@ -1,49 +1,42 @@
 ﻿extends ../templates/demo.jade
 prepend document
   h1 Example: Live programming in Virtual Reality
-  #docPage(style="display:none")
-    ul functions
+append footer
+  #docPage
+    h1 functions
+    ul
       li console.log( msg ); - print a message to the window below the editor.
       li put( objectA ).on( objectB )[.at( x, y, z )];#[br]
-    "    objectA: a THREE.Object3D to be added to another,\n" +
-    "    objectB: a THREE.Object3D where objectA will be added,\n" +
-    "    x, y, z: a location to set for objectA relative to objectB\n" +
-    "\n" +
-    "  light( color [, intensity[, distance[, decay]]] );\n" +
-    "    creates a THREE.PointLight with the same parameters.\n" +
-    "\n" +
-    "  brick( txtName );\n" +
-    "    creates a textured cube with the named texture, one of:\n" +
-    "      [SAND, WATER, ROCK, GRASS, DECK].\n" +
-    "\n" +
-    "  quad( width[, height] );\n" +
-    "    creates a THREE.PlaneBufferGeometry with the same parameters.\n" +
-    "    if height is undefined, height is set to width (square).\n" +
-    "\n" +
-    "  box( width[, height, length] );\n" +
-    "    creates a THREE.BoxGeometry with the same parameters.\n" +
-    "    if height is undefined, height and length are set to width (cube).\n" +
-    "\n" +
-    "  hub( );\n" +
-    "    creates a raw THREE.Object3D. Useful for combining objects.\n" +
-    "\n" +
-    "  sphere( radius[, slices, rings] );\n" +
-    "    creates a THREE.SphereGeometry with the same parameters.\n" +
-    "\n" +
-    "  shell( radius[, slices, rings[, phi, theta]] );\n" +
-    "    creates a portion of the inside surface of a sphere.\n" +
-    "\n" +
-    "  from( start ).to( end ).exec( thunk );\n" +
-    "    iterates on the range [start, end), passing the index as the parameter\n" +
-    "    to thunk, accumulating an array of thunk's return value.\n" +
-    "\n" +
-    "  textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );\n" +
-    "    geometry: a THREE.Geometry object\n" +
-    "    txt: a material definition of some kind. It could be a:\n" +
-    "      number - a solid hex color\n" +
-    "      string - a path to a texture image\n" +
-    "      Primrose.Text.Controls.TextBox - a text editor\n" +
-    "    unshaded: set to true to use constant lighting (default false)\n" +
-    "    opacity: 1 - opaque, 0 - transparent (default 1).\n" +
-    "    txtRepeatS: texture repeat in S direction (default 1).\n" +
-    "    txtRepeat: texture repeat in T direction (default 1)";
+        | objectA: a THREE.Object3D to be added to another,#[br]
+        | objectB: a THREE.Object3D where objectA will be added,#[br]
+        | x, y, z: a location to set for objectA relative to objectB#[br]
+      li light( color [, intensity[, distance[, decay]]] );#[br]
+        | creates a THREE.PointLight with the same parameters.#[br]
+      li brick( txtName );#[br]
+        | creates a textured cube with the named texture, one of:#[br]
+        |   [SAND, WATER, ROCK, GRASS, DECK].#[br]
+      li quad( width[, height] );#[br]
+        | creates a THREE.PlaneBufferGeometry with the same parameters.#[br]
+        | if height is undefined, height is set to width (square).#[br]
+      li box( width[, height, length] );#[br]
+        | creates a THREE.BoxGeometry with the same parameters.#[br]
+        | if height is undefined, height and length are set to width (cube).#[br]
+      li hub( );#[br]
+        | creates a raw THREE.Object3D. Useful for combining objects.#[br]
+      li sphere( radius[, slices, rings] );#[br]
+        | creates a THREE.SphereGeometry with the same parameters.#[br]
+      li shell( radius[, slices, rings[, phi, theta]] );#[br]
+        | creates a portion of the inside surface of a sphere.#[br]
+      li from( start ).to( end ).exec( thunk );#[br]
+        | iterates on the range [start, end), passing the index as the parameter#[br]
+        | to thunk, accumulating an array of thunk's return value.#[br]
+      li textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );#[br]
+        | geometry: a THREE.Geometry object#[br]
+        | txt: a material definition of some kind. It could be a:#[br]
+        |   number - a solid hex color#[br]
+        |   string - a path to a texture image#[br]
+        |   Primrose.Text.Controls.TextBox - a text editor#[br]
+        | unshaded: set to true to use constant lighting (default false)#[br]
+        | opacity: 1 - opaque, 0 - transparent (default 1).#[br]
+        | txtRepeatS: texture repeat in S direction (default 1).#[br]
+        | txtRepeat: texture repeat in T direction (default 1).

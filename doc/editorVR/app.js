@@ -112,7 +112,7 @@ app.addEventListener("ready", function () {
   documentation = new Primrose.Controls.HtmlDoc({
     id: "Documentation",
     bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
-    value: getDocumentation()
+    element: "docPage"
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
@@ -302,10 +302,4 @@ function testDemo(scene) {
       }
     }
   }
-}
-
-// This is a function to just push it out of the way, uncluttering
-// the code above.
-function getDocumentation() {
-  return document.getElementById("docPage").innerHTML;
 }
