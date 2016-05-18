@@ -102,7 +102,7 @@ This was an intermediate release, specifically focused on carving the primrosevr
       * all of your objects removed from the scene,
       * and they don't return until you edit your script.
   * Multiple HMDs connected to the machine (for those rare people with both the Rift and the Vive) now each have their own "Go VR" button, listing which device they will connect to.
-  * New [quickstart](/quickstart.zip) template package.
+  * New [quickstart](/PrimroseQuickstart.zip) template package.
 * Open issues
   * Windows
     * Chromium - NONE! Full support, no extraneous issues.
