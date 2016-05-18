@@ -31,15 +31,26 @@ Primrose.Controls.HtmlDoc = (function () {
       ////////////////////////////////////////////////////////////////////////
       // initialization
       ///////////////////////////////////////////////////////////////////////
-      this._lastValue = null;
       this._lastImage = null;
       this._image = null;
       this._element = Primrose.DOM.cascadeElement(this.options.element, "DIV", HTMLDivElement);
       this._element.style.position = "absolute";
+      this._element.style.display = "";
       this._element.style.width = px(this.bounds.width);
       this._element.style.height = px(this.bounds.height);
       document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hider", this._element));
       this._render();
+    }
+
+    get value() {
+      return this._element.innerHTML;
+    }
+
+    set value(v) {
+      if (v !== this._element.innerHTML) {
+        this._element.innerHTML = v;
+        this._render();
+      }
     }
 
     _render() {

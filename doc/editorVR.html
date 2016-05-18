@@ -535,7 +535,43 @@ function testDemo(scene) {
       }
     }
   }
-}</pre><!-- end demo.jade banner block --><!-- end documentation.jade documentation block -->
+}</pre><!-- end demo.jade banner block -->
+        <div id="docPage" style="display:none">
+          <h1>functions</h1>
+          <ul>
+            <li>console.log( msg ); - print a message to the window below the editor.</li>
+            <li>put( objectA ).on( objectB )[.at( x, y, z )];<br>objectA: a THREE.Object3D to be added to another,<br>
+              objectB: a THREE.Object3D where objectA will be added,<br>
+              x, y, z: a location to set for objectA relative to objectB<br>
+            </li>
+            <li>light( color [, intensity[, distance[, decay]]] );<br>creates a THREE.PointLight with the same parameters.<br></li>
+            <li>brick( txtName );<br>creates a textured cube with the named texture, one of:<br>
+                [SAND, WATER, ROCK, GRASS, DECK].<br>
+            </li>
+            <li>quad( width[, height] );<br>creates a THREE.PlaneBufferGeometry with the same parameters.<br>
+              if height is undefined, height is set to width (square).<br>
+            </li>
+            <li>box( width[, height, length] );<br>creates a THREE.BoxGeometry with the same parameters.<br>
+              if height is undefined, height and length are set to width (cube).<br>
+            </li>
+            <li>hub( );<br>creates a raw THREE.Object3D. Useful for combining objects.<br></li>
+            <li>sphere( radius[, slices, rings] );<br>creates a THREE.SphereGeometry with the same parameters.<br></li>
+            <li>shell( radius[, slices, rings[, phi, theta]] );<br>creates a portion of the inside surface of a sphere.<br></li>
+            <li>from( start ).to( end ).exec( thunk );<br>iterates on the range [start, end), passing the index as the parameter<br>
+              to thunk, accumulating an array of thunk's return value.<br>
+            </li>
+            <li>textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );<br>geometry: a THREE.Geometry object<br>
+              txt: a material definition of some kind. It could be a:<br>
+                number - a solid hex color<br>
+                string - a path to a texture image<br>
+                Primrose.Text.Controls.TextBox - a text editor<br>
+              unshaded: set to true to use constant lighting (default false)<br>
+              opacity: 1 - opaque, 0 - transparent (default 1).<br>
+              txtRepeatS: texture repeat in S direction (default 1).<br>
+              txtRepeat: texture repeat in T direction (default 1).
+            </li>
+          </ul>
+        </div><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
@@ -2300,42 +2336,6 @@ f 497//178 485//178 498//178
     </script>
     <script type="text/javascript" async defer src="app.js"></script>
     <script type="text/javascript" async defer src="../doc/editorVR/app.js"></script>
-    <script type="text/javascript" src="../doc/demoUI.js"></script>
-    <div id="docPage">
-      <h1>functions</h1>
-      <ul>
-        <li>console.log( msg ); - print a message to the window below the editor.</li>
-        <li>put( objectA ).on( objectB )[.at( x, y, z )];<br>objectA: a THREE.Object3D to be added to another,<br>
-          objectB: a THREE.Object3D where objectA will be added,<br>
-          x, y, z: a location to set for objectA relative to objectB<br>
-        </li>
-        <li>light( color [, intensity[, distance[, decay]]] );<br>creates a THREE.PointLight with the same parameters.<br></li>
-        <li>brick( txtName );<br>creates a textured cube with the named texture, one of:<br>
-            [SAND, WATER, ROCK, GRASS, DECK].<br>
-        </li>
-        <li>quad( width[, height] );<br>creates a THREE.PlaneBufferGeometry with the same parameters.<br>
-          if height is undefined, height is set to width (square).<br>
-        </li>
-        <li>box( width[, height, length] );<br>creates a THREE.BoxGeometry with the same parameters.<br>
-          if height is undefined, height and length are set to width (cube).<br>
-        </li>
-        <li>hub( );<br>creates a raw THREE.Object3D. Useful for combining objects.<br></li>
-        <li>sphere( radius[, slices, rings] );<br>creates a THREE.SphereGeometry with the same parameters.<br></li>
-        <li>shell( radius[, slices, rings[, phi, theta]] );<br>creates a portion of the inside surface of a sphere.<br></li>
-        <li>from( start ).to( end ).exec( thunk );<br>iterates on the range [start, end), passing the index as the parameter<br>
-          to thunk, accumulating an array of thunk's return value.<br>
-        </li>
-        <li>textured( geometry, txt[, options: { unshaded: false, wireframe: false, opacity: 1, txtRepeatS: 1, txtRepeatT: 1} ] );<br>geometry: a THREE.Geometry object<br>
-          txt: a material definition of some kind. It could be a:<br>
-            number - a solid hex color<br>
-            string - a path to a texture image<br>
-            Primrose.Text.Controls.TextBox - a text editor<br>
-          unshaded: set to true to use constant lighting (default false)<br>
-          opacity: 1 - opaque, 0 - transparent (default 1).<br>
-          txtRepeatS: texture repeat in S direction (default 1).<br>
-          txtRepeat: texture repeat in T direction (default 1).
-        </li>
-      </ul>
-    </div><!-- end main.jade footer block -->
+    <script type="text/javascript" src="../doc/demoUI.js"></script><!-- end main.jade footer block -->
   </body>
 </html>
