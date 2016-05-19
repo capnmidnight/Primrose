@@ -88,6 +88,10 @@ function Jabber(w, h, s) {
     v.y = app.options.gravity / 2;
     velocity.add(v);
   };
+  obj.addToBrowserEnvironment = function (env) {
+    env.scene.add(obj);
+    env.registerPickableObject(obj.body);
+  };
   return obj;
 }
 
@@ -97,11 +101,11 @@ function Jabber(w, h, s) {
 // indicating that we may make additional changes to the scene now.
 app.addEventListener("ready", function () {
   for (var i = 0; i < 25; ++i) {
-    var jab = put(Jabber(
+    var jab = Jabber(
       MIDX / 5,
-      MIDZ / 5, 1)).on(app.scene).at(0, 0, 0);
+      MIDZ / 5, 1);
     jabs[jab.body.uuid] = jab;
-    app.registerPickableObject(jab.body);
+    app.appendChild(jab);
   }
 });
 
