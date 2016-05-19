@@ -53,6 +53,14 @@ Primrose.Controls.Image = (function () {
       });
     }
 
+    get src() {
+      return this.getImage(this._currentImageIndex).src;
+    }
+
+    set src(v) {
+      this.loadImage(0, src);
+    }
+
     loadImage(i, src) {
       if (typeof i !== "number" && !(i instanceof Number)) {
         src = i;
