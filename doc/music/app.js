@@ -35,7 +35,7 @@ app.addEventListener("ready", function () {
  
   for (var i = 0; i < numButtons; ++i) {
     
-    var btn = app.buttonFactory.create();
+    var btn = app.createElement("button");
 
     // Spacing the buttons out in a rough arc around the origin.
     var x = (i - middle) * 0.25,
@@ -61,7 +61,6 @@ app.addEventListener("ready", function () {
         0.2));
 
     // Put the element into the scene
-    app.scene.add(btn.container);
-    app.registerPickableObject(btn.cap);
+    app.appendChild(btn);
   }
 });

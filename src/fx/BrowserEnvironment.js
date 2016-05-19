@@ -623,7 +623,10 @@ Primrose.BrowserEnvironment = (function () {
         icons = [],
         cardboardFactory = null,
         cardboardTextFactory = null,
-        resolutionScale = 1;
+        resolutionScale = 1,
+        factories = {
+          button: null
+        };
 
 
       if (Primrose.Input.VR.Version > 0) {
@@ -727,12 +730,12 @@ Primrose.BrowserEnvironment = (function () {
           icons.forEach(putIconInScene);
 
           if (models.button) {
-            this.buttonFactory = new Primrose.ButtonFactory(
+            factories.button = new Primrose.ButtonFactory(
               models.button,
               this.options.button.options);
           }
           else {
-            this.buttonFactory = new Primrose.ButtonFactory(
+            factories.button = new Primrose.ButtonFactory(
               brick(0xff0000, 1, 1, 1), {
                 maxThrow: 0.1,
                 minDeflection: 10,
@@ -744,8 +747,8 @@ Primrose.BrowserEnvironment = (function () {
         })
         .catch((err) => {
           console.error(err);
-          if (!this.buttonFactory) {
-            this.buttonFactory = new Primrose.ButtonFactory(
+          if (!factories.button) {
+            factories.button = new Primrose.ButtonFactory(
               brick(0xff0000, 1, 1, 1), {
                 maxThrow: 0.1,
                 minDeflection: 10,
@@ -760,6 +763,16 @@ Primrose.BrowserEnvironment = (function () {
           fire("ready");
         });
 
+      this.createElement = (type) => {
+        if (factories[type]) {
+          return factories[type].create();
+        }
+      };
+
+      this.appendChild = (elem) => {
+        console.log(elem);
+        elem.addToBrowserEnvironment(this);
+      };
 
       //
       // Initialize public properties

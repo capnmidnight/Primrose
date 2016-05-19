@@ -92,6 +92,11 @@ Primrose.Button = ( function () {
     get position() {
       return this.container.position;
     }
+
+    addToBrowserEnvironment(env) {
+      env.scene.add(this.container);
+      env.registerPickableObject(this.cap);
+    }
   }
   
   pliny.record({
