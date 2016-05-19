@@ -88,12 +88,24 @@ Primrose.Button = ( function () {
         emit.call(this, "release");
       };
     }
+    
+    get position() {
+      return this.container.position;
+    }
   }
   
   pliny.record({
     parent: "Primrose.Button",
     name: "DEFAULTS",
     description: "Default option values that override undefined options passed to the Button class."
+  });
+
+
+  pliny.property({
+    parent: "Primrose.Button",
+    name: "position",
+    type: "THREE.Vector3",
+    description: "The location of the button."
   });
   pliny.value({
     parent: "Primrose.Button.DEFAULTS",
@@ -132,19 +144,6 @@ Primrose.Button = ( function () {
     colorPressed: 0x007f00,
     toggle: true
   };
-
-
-  pliny.property({
-    parent: "Primrose.Button",
-    name: "position",
-    type: "THREE.Vector3",
-    description: "The location of the button."
-  } );
-  Object.defineProperty( Button.prototype, "position", {
-    get: function () {
-      return this.container.position;
-    }
-  } );
 
   return Button;
 } )();
