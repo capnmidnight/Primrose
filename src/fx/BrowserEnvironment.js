@@ -832,7 +832,7 @@ Primrose.BrowserEnvironment = (function () {
       this.nose.name = "Nose";
       this.nose.scale.set(0.5, 1, 1);
 
-      this.scene = new THREE.Scene();
+      this.scene = this.options.scene || new THREE.Scene();
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
@@ -1111,17 +1111,23 @@ Primrose.BrowserEnvironment = (function () {
       this.projector.addEventListener("hit", handleHit, false);
 
       documentReady.then(() => {
-        this.renderer = new THREE.WebGLRenderer({
-          canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
-          antialias: !isMobile,
-          alpha: true,
-          logarithmicDepthBuffer: false
-        });
-        this.renderer.autoClear = false;
-        this.renderer.autoSortObjects = true;
-        this.renderer.setClearColor(this.options.backgroundColor);
-        if (!this.renderer.domElement.parentElement) {
-          document.body.appendChild(this.renderer.domElement);
+        if (this.options.renderer) {
+          this.renderer = this.options.renderer;
+        }
+        else {
+          this.renderer = new THREE.WebGLRenderer({
+            canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
+            context: this.options.context,
+            antialias: !isMobile,
+            alpha: true,
+            logarithmicDepthBuffer: false
+          });
+          this.renderer.autoClear = false;
+          this.renderer.autoSortObjects = true;
+          this.renderer.setClearColor(this.options.backgroundColor);
+          if (!this.renderer.domElement.parentElement) {
+            document.body.appendChild(this.renderer.domElement);
+          }
         }
 
         this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
@@ -1328,17 +1334,24 @@ Primrose.BrowserEnvironment = (function () {
     disableMirroring: false,
     // The color that WebGL clears the background with before drawing.
     backgroundColor: 0xafbfff,
-    // the near plane of the camera
+    // the near plane of the camera.
     nearPlane: 0.01,
-    // the far plane of the camera
+    // the far plane of the camera.
     drawDistance: 100,
-    // the field of view to use in non-VR settings
+    // the field of view to use in non-VR settings.
     defaultFOV: 75,
-    // the amount of time to allow to elapse between sending state to the server
+    // the amount of time to allow to elapse between sending state to the server.
     dtNetworkUpdate: 0.125,
+    // The sound to play on loop in the background.
+    ambientSound: null,
+    // HTML5 canvas element, if one had already been created.
     canvasElement: "frontBuffer",
-    // The sound to play on loop in the background
-    ambientSound: null
+    // THREE.js renderer, if one had already been created.
+    renderer: null,
+    // A WebGL context to use, if one had already been created.
+    context: null,
+    // THREE.js scene, if one had already been created.
+    scene: null
   };
 
   function transformForPicking(obj) {
