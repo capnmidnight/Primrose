@@ -3,7 +3,7 @@
 block document
   <!-- start demo.jade banner block -->
   h1= demoTitle
-  p Click on the image below to lock mouse cursor to demo.
+  p Click on the image below to lock mouse cursor to demo. #[a(href=fileRoot + "doc/" + fileName, target="_blank") Open demo in new window].
   iframe#demo(src= fileRoot + "doc/" + fileName, role="application", allowfullscreen)
   h2 Source
   pre#editorContainer= getDemoScript(demoScriptName)
