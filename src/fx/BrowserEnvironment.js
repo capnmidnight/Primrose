@@ -854,9 +854,10 @@ Primrose.BrowserEnvironment = (function () {
       this.player.position.set(0, this.avatarHeight, 0);
       this.player.isOnGround = true;
 
-      this.pointer = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000);
-      this.pointer.material.emissive.setRGB(0.25, 0, 0);
-      this.pointer.material.opacity = 0.75;
+      this.pointer = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
+        emissive: 0x3f0000,
+        opacity: 0.75
+      });
 
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
