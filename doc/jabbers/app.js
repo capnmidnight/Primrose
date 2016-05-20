@@ -88,9 +88,10 @@ function Jabber(w, h, s) {
     v.y = env.options.gravity / 2;
     velocity.add(v);
   };
-  obj.addToBrowserEnvironment = function (env) {
-    env.scene.add(obj);
+  obj.addToBrowserEnvironment = function (env, scene) {
+    scene.add(obj);
     env.registerPickableObject(obj.body);
+    return obj;
   };
   return obj;
 }

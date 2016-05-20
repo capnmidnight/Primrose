@@ -14,12 +14,23 @@ Primrose.Controls.Button2D = (function () {
     ]
   });
   class Button2D extends Primrose.Controls.Label {
+
+    static create() {
+      return new Button2D();
+    }
+
     constructor(options) {
       super(patch(options, {
         id: "Primrose.Controls.Button2D[" + (COUNTER++) + "]",
         textAlign: "center"
       }));
       this._lastActivated = null;
+    }
+
+    addToBrowserEnvironment(env, scene) {
+      var btn3d = env.buttonFactory.create();
+      btn3d.listeners = this.listeners;
+      return env.appendChild(btn3d);
     }
 
     startPointer(x, y) {

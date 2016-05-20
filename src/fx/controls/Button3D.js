@@ -90,9 +90,10 @@ Primrose.Controls.Button3D = ( function () {
       return this.container.position;
     }
 
-    addToBrowserEnvironment(env) {
-      env.scene.add(this.container);
+    addToBrowserEnvironment(env, scene) {
+      scene.add(this.container);
       env.registerPickableObject(this.cap);
+      return this.container;
     }
   }
   

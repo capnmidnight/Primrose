@@ -625,7 +625,7 @@ Primrose.BrowserEnvironment = (function () {
         cardboardTextFactory = null,
         resolutionScale = 1,
         factories = {
-          button: null,
+          button: Primrose.Controls.Button2D,
           img: Primrose.Controls.Image,
           div: Primrose.Controls.HtmlDoc,
           textarea: Primrose.Text.Controls.TextBox
@@ -639,7 +639,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.appendChild = (elem) => {
-        return elem.addToBrowserEnvironment(this);
+        return elem.addToBrowserEnvironment(this, this.scene);
       };
 
 
@@ -744,12 +744,12 @@ Primrose.BrowserEnvironment = (function () {
           icons.forEach(putIconInScene);
 
           if (models.button) {
-            factories.button = new Primrose.ButtonFactory(
+            this.buttonFactory = new Primrose.ButtonFactory(
               models.button,
               this.options.button.options);
           }
           else {
-            factories.button = new Primrose.ButtonFactory(
+            this.buttonFactory = new Primrose.ButtonFactory(
               brick(0xff0000, 1, 1, 1), {
                 maxThrow: 0.1,
                 minDeflection: 10,
@@ -761,8 +761,8 @@ Primrose.BrowserEnvironment = (function () {
         })
         .catch((err) => {
           console.error(err);
-          if (!factories.button) {
-            factories.button = new Primrose.ButtonFactory(
+          if (!this.buttonFactory) {
+            this.buttonFactory = new Primrose.ButtonFactory(
               brick(0xff0000, 1, 1, 1), {
                 maxThrow: 0.1,
                 minDeflection: 10,

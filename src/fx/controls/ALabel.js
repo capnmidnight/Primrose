@@ -21,7 +21,7 @@ Primrose.Controls.Label = (function () {
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
-    
+
       if (typeof options === "string") {
         this.options = { value: this.options };
       }
@@ -48,6 +48,8 @@ Primrose.Controls.Label = (function () {
       this.fontSize = this.options.fontSize || 16;
       this.refreshCharacter();
       this.value = this.options.value;
+      this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
+      this.color = this.options.color || this.theme.regular.foreColor;
     }
 
     get textAlign() {
@@ -117,13 +119,10 @@ Primrose.Controls.Label = (function () {
 
         this.context.textAlign = this.textAlign || "left";
 
-        var backColor = this.options.backgroundColor || this.theme.regular.backColor,
-          foreColor = this.options.color || this.theme.regular.foreColor;
-
-        var clearFunc = backColor ? "fillRect" : "clearRect";
+        var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
 
         if (this.theme.regular.backColor) {
-          this.context.fillStyle = backColor;
+          this.context.fillStyle = this.backgroundColor;
         }
 
         this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
@@ -150,13 +149,13 @@ Primrose.Controls.Label = (function () {
               " " + (this.theme.regular.fontStyle || "") +
               " " + this.character.height + "px " + this.theme.fontFamily;
             this.context.font = font.trim();
-            this.context.fillStyle = foreColor;
+            this.context.fillStyle = this.color;
             this.context.fillText(line, textX, textY);
           }
         }
 
         this.renderCanvasTrim();
-        
+
         this.invalidate();
       }
     }

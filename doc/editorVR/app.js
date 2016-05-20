@@ -35,10 +35,10 @@ var GRASS = "../images/grass.png",
   lastScript = null,
   scriptAnimate = null,
 
-  editorCenter = new THREE.Object3D();
+  editorCenter = hub();
 
 env.addEventListener("ready", function () {
-  env.scene.add(editorCenter);
+  env.appendChild(editorCenter);
   env.scene.add(subScene);
 
   stereoImage = env.createElement("img");
@@ -58,6 +58,7 @@ env.addEventListener("ready", function () {
     id: "EditorFrame",
     bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
   });
+  editorFrame.className = "shell";
 
   editor = new Primrose.Text.Controls.TextBox({
     id: "Editor",
@@ -76,13 +77,15 @@ env.addEventListener("ready", function () {
     fontSize: fontSize
   });
 
-  button1 = new Primrose.Controls.Button2D({
-    id: "ThemeButton",
-    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 400, output.bounds.top, 400, 45),
-    value: "Switch to dark theme",
-    backgroundColor: "#ffff00",
-    color: "#0000ff"
-  });
+  button1 = env.createElement("button");
+  button1.id = "ThemeButton";
+  button1.style.backgroundColor = "#ffff00";
+  button1.style.color = "#0000ff";
+  button1.style.left = editorFrame.surfaceWidth - 400;
+  button1.style.top = output.bounds.top;
+  button1.style.width = 400;
+  button1.style.height = 45;
+  button1.value = "Switch to dark theme";
 
   button1.addEventListener("click", function () {
     var nextTheme = Primrose.Text.Themes.Default,
@@ -99,13 +102,10 @@ env.addEventListener("ready", function () {
   editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
-  editorFrameMesh = textured(shell(3, 10, 10), editorFrame, {
-    opacity: 0.75
-  });
+
+  editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, 0, 0);
-  editorCenter.add(editorFrameMesh);
-  env.registerPickableObject(editorFrameMesh);
 
   documentation = env.createElement("div");
   documentation.id = "Documentation";
@@ -138,7 +138,7 @@ env.addEventListener("update", function (dt) {
       scriptAnimate = null;
       wipeScene();
     }
-    else{
+    else {
       scriptAnimate.call(env, dt);
     }
   }

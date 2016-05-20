@@ -63,6 +63,14 @@ Primrose.Surface = (function () {
         fontSize: {
           get: () => { return this.fontSize; },
           set: (v) => { this.fontSize = v; }
+        },
+        backgroundColor: {
+          get: () => { return this.backgroundColor; },
+          set: (v) => { this.backgroundColor = v; }
+        },
+        color: {
+          get: () => { return this.color; },
+          set: (v) => { this.color = v; }
         }
       });
 
@@ -117,12 +125,12 @@ Primrose.Surface = (function () {
       this._material = null;
     }
 
-    addToBrowserEnvironment(env) {
+    addToBrowserEnvironment(env, scene) {
       var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
         mesh = textured(geom, this, {
-        opacity: this._opacity
-      });
-      env.scene.add(mesh);
+          opacity: this._opacity
+        });
+      scene.add(mesh);
       env.registerPickableObject(mesh);
       return mesh;
     }
@@ -134,7 +142,7 @@ Primrose.Surface = (function () {
         bounds.left = 0;
         bounds.top = 0;
       }
-      else if(bounds instanceof Primrose.Text.Rectangle){
+      else if (bounds instanceof Primrose.Text.Rectangle) {
         bounds = bounds.clone();
       }
       for (var i = 0; i < this.children.length; ++i) {

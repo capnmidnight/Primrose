@@ -32,15 +32,10 @@ env.addEventListener("ready", function () {
 
   var numButtons = 8,
     middle = (numButtons - 1) / 2;
- 
-  for (var i = 0; i < numButtons; ++i) {
-    
-    var btn = env.createElement("button");
 
-    // Spacing the buttons out in a rough arc around the origin.
-    var x = (i - middle) * 0.25,
-      z = -1.5 * Math.cos(x) + 1
-    btn.position.set(x, 0, z);
+  for (var i = 0; i < numButtons; ++i) {
+
+    var btn = env.createElement("button");
 
     // We can wire up event handlers on the button just like it was
     // a DOM element.
@@ -60,7 +55,11 @@ env.addEventListener("ready", function () {
         // Duration to play, in seconds.
         0.2));
 
-    // Put the element into the scene
-    env.appendChild(btn);
+    // Spacing the buttons out in a rough arc around the origin.
+    var x = (i - middle) * 0.25,
+      z = -1.5 * Math.cos(x) + 1,
+      // Put the element into the scene
+      btnBase = env.appendChild(btn);
+    btnBase.position.set(x, 0, z);
   }
 });

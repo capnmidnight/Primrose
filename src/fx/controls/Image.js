@@ -59,9 +59,9 @@ Primrose.Controls.Image = (function () {
       });
     }
 
-    addToBrowserEnvironment(env) {
+    addToBrowserEnvironment(env, scene) {
       var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
-      env.scene.add(imageMesh);
+      scene.add(imageMesh);
       env.registerPickableObject(imageMesh);
       return imageMesh;
     }

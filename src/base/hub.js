@@ -11,5 +11,12 @@
   ]
 });
 function hub() {
-  return new THREE.Object3D();
+  var obj = new THREE.Object3D();
+  obj.addToBrowserEnvironment = (env, scene) => {
+    scene.add(obj);
+    obj.appendChild = (child) => {
+      return child.addToBrowserEnvironment(env, obj);
+    };
+  };
+  return obj;
 }

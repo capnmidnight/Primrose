@@ -57,9 +57,9 @@ Primrose.Controls.HtmlDoc = (function () {
       }
     }
 
-    addToBrowserEnvironment(env) {
+    addToBrowserEnvironment(env, scene) {
       var mesh = textured(quad(2, 2), this);
-      env.scene.add(mesh);
+      scene.add(mesh);
       env.registerPickableObject(mesh);
       return mesh;
     }
