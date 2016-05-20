@@ -97,6 +97,37 @@ env.addEventListener("update", function (dt) {
   }
 });
 
+function pacman() {
+  var R = Primrose.Random.number,
+    L = Primrose.ModelLoader.loadObject,
+    colors = [
+      0xff0000,
+      0xffff00,
+      0xff00ff,
+      0x00ffff
+    ],
+    ghosts;
+  L("../models/ghost.obj").then(function (ghost) {
+    ghosts = colors.map(function (color, i) {
+      var g = ghost.clone(),
+        body = g.children[0];
+      textured(body, color);
+      scene.appendChild(g);
+      g.position.set(i * 3 - 4, 0, -5);
+      g.velocity = v3(R(-1, 1), 0, R(-1, 1));
+      return g;
+    });
+  });
+
+  return function (dt) {
+    if (ghosts) {
+      ghosts.forEach(function (g) {
+        g.position.add(g.velocity.clone().multiplyScalar(dt));
+      });
+    }
+  }
+}
+
 env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
@@ -106,6 +137,15 @@ env.addEventListener("keydown", function (evt) {
       }
       editorFrameMesh.visible = !editorFrameMesh.visible;
       editorFrameMesh.disabled = !editorFrameMesh.disabled;
+    }
+    else if (evt.keyCode === Primrose.Keys.E && editor) {
+      Primrose.HTTP.sendObject("saveScript", {
+        "Content-Type": "application/json",
+        data: {
+          fileName: "pacman",
+          content: editor.value
+        }
+      });
     }
     else if (evt.keyCode === Primrose.Keys.X) {
       editor.value = "";
