@@ -13,6 +13,11 @@ Primrose.Controls.HtmlDoc = (function () {
     ]
   });
   class HtmlDoc extends Primrose.Surface {
+
+    static create() {
+      return new HtmlDoc();
+    }
+
     constructor(options) {
       super(patch(options, {
         id: "Primrose.Controls.HtmlDoc[" + (COUNTER++) + "]"
