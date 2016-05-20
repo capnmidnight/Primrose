@@ -68,14 +68,12 @@ env.addEventListener("ready", function () {
     fontSize: fontSize
   });
 
-  output = new Primrose.Text.Controls.TextBox({
-    id: "Output",
-    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 25, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 25),
-    tokenizer: Primrose.Text.Grammars.PlainText,
-    hideLineNumbers: true,
-    readOnly: true,
-    fontSize: fontSize
-  });
+  output = env.createElement("pre");
+  output.id = "Output";
+  output.style.top = editor.surfaceHeight + 25;
+  output.style.width = editorFrame.surfaceWidth;
+  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
+  output.style.fontSize = fontSize;
 
   button1 = env.createElement("button");
   button1.id = "ThemeButton";
@@ -214,15 +212,15 @@ function updateScript() {
   }
 }
 
-//logger.setup(logger.USER, function (msg) {
-//  if (output) {
-//    var data = JSON.parse(msg),
-//      t = output;
-//    t.value += data.name + ":> " + data.args[0] + "\n";
-//    t.selectionStart = t.selectionEnd = t.value.length;
-//    t.scrollIntoView(t.frontCursor);
-//  }
-//});
+logger.setup(logger.USER, function (msg) {
+  if (output) {
+    var data = JSON.parse(msg),
+      t = output;
+    t.value += data.name + ":> " + data.args[0] + "\n";
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+});
 
 function clrscr() {
   if (output) {
