@@ -4,26 +4,7 @@ block document
   h1 Getting started
   img.logo(src= fileRoot + "doc/images/logo128.png", alt="logo", title="Primrose", style="float:left;padding:10px")
 
-  p Primrose is a cross-browser, multi-device framework for building productivity tools in #[a(href= fileRoot + "#webvr") WebVR] applications. Developers model their scenes in #[a(href="https://www.blender.org", target="_blank") Blender] (or some other 3D modeling package), create a web page using Primrose to load the scene, then manipulate objects within the scene using interfaces similar to the standard DOM functions with which they are already familiar.
-  p It includes a suite of GUI controls—like buttons and a syntax-highlighting code editor control—to simplify the process of building VR applications that emphasize interactive, productive work. Use it to experiment with new ideas on productivity UIs in virtual spaces.
-  p Primrose is free, open source software (#[a(href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md", target="_blank") GPLv3]) and may readily be used with other #[a(href="https://en.wikipedia.org/wiki/Free_and_open-source_software", target="_blank") FOSS] projects.
-  ul
-    li: a(href= fileRoot + "Primrose.min.js", target="_blank") Download the latest version of the Primrose WebVR framework
-    li: a(href= fileRoot + "PrimroseDependencies.min.js", target="_blank") Download Primrose's dependencies as a single package
-    li: a(href= fileRoot + "doc/setup.html") Read detailed installation and setup instructions
-    li: a(href= fileRoot + "doc/drum.html") Learn how to make a simple drum-machine application
-      
-  p Additionally, you may wish to:
-  ul
-    li: a(href="https://github.com/capnmidnight/pliny/blob/master/README.md", target="_blank") Read about how the Pliny documentation system works with Primrose
-    li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Check out the GitHub repository
-    li: a(href="https://www.github.com/capnmidnight/Primrose/issues", target="_blank") File an issue report
-    li: a(href="http://threejs.org/", target="_blank") Learn more about Three.js
-    li: a(href="http://webvr.info/", target="_blank") Learn more about WebVR
-    li: a(href="https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API", target="_blank") Read the WebVR documentation on MDN
-
-  h2 Example
-  p Using Primrose to make web applications is straightforward. To start, #[a(href= fileRoot + "PrimroseQuickstart.zip") download the `quickstart` example project]. In it, you will find the following files:
+  p Using Primrose to make web applications is straightforward. To start, #[a(href= fileRoot + "PrimroseQuickstart.zip") download the `Quick Start` example project]. In it, you will find files that create a basic project, showing details on how to model, setup, and run code to work with Primrose:
   ul
     li #[code app.js] - this is where you will write your JavaScript code to define your scene.
     li #[code bg.jpg] - a skymap texture.
@@ -39,7 +20,6 @@ block document
     li #[code PrimroseDocumentation.min.js] - the live documentation database for Primrose.
     li #[code StartHere.exe] - run this executable on Windows to setup a local web server and automatically start your browser.
     li #[code wind.ogg] - some ambient noise for aiding in orienting one's self in the space.
-
 
   p In the #[code app.js] file, you'll find the relevant scripts to edit to make your own VR applications. The template project starts out fairly empty.
   pre: code.
