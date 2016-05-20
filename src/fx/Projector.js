@@ -10,7 +10,7 @@ Primrose.Projector = (function () {
       if (typeof THREE === "undefined") {
         /* jshint ignore:start */
         // File:src/three.js
-        
+
         /**
        * This is just the THREE.Matrix4 and THREE.Vector3 classes from Three.js, to
        * be loaded into a WebWorker so the worker can do math. - STM
@@ -20,11 +20,11 @@ Primrose.Projector = (function () {
 
         self.THREE = { REVISION: '72dev' };
         // polyfills
-        
+
         if (Math.sign === undefined) {
-          
+
           // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign
-          
+
           Math.sign = function (x) {
 
             return (x < 0) ? -1 : (x > 0) ? 1 : +x;
@@ -33,10 +33,10 @@ Primrose.Projector = (function () {
 
         if (Function.prototype.name === undefined && Object.defineProperty !==
           undefined) {
-          
+
           // Missing in IE9-11.
           // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
-          
+
           Object.defineProperty(Function.prototype, 'name', {
             get: function () {
 
@@ -46,9 +46,9 @@ Primrose.Projector = (function () {
 
           });
         }
-        
+
         // File:src/math/Quaternion.js
-        
+
         /**
        * @author mikael emtinger / http://gomo.se/
        * @author alteredq / http://alteredqualia.com/
@@ -134,11 +134,11 @@ Primrose.Projector = (function () {
               throw new Error(
                 'THREE.Quaternion: .setFromEuler() now expects a Euler rotation rather than a Vector3 and order.');
             }
-            
+
             // http://www.mathworks.com/matlabcentral/fileexchange/
             // 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
             //	content/SpinCalc.m
-            
+
             var c1 = Math.cos(euler._x / 2);
             var c2 = Math.cos(euler._y / 2);
             var c3 = Math.cos(euler._z / 2);
@@ -188,11 +188,11 @@ Primrose.Projector = (function () {
             return this;
           },
           setFromAxisAngle: function (axis, angle) {
-            
+
             // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
-            
+
             // assumes axis is normalized
-            
+
             var halfAngle = angle / 2,
               s = Math.sin(
                 halfAngle);
@@ -204,11 +204,11 @@ Primrose.Projector = (function () {
             return this;
           },
           setFromRotationMatrix: function (m) {
-            
+
             // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
-            
+
             // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
-            
+
             var te = m.elements,
               m11 = te[0],
               m12 =
@@ -261,11 +261,11 @@ Primrose.Projector = (function () {
             return this;
           },
           setFromUnitVectors: function () {
-            
+
             // http://lolengine.net/blog/2014/02/24/quaternion-from-two-vectors-final
-            
+
             // assumes direction vectors vFrom and vTo are normalized
-            
+
             var v1,
               r;
             var EPS = 0.000001;
@@ -360,9 +360,9 @@ Primrose.Projector = (function () {
             return this.multiplyQuaternions(this, q);
           },
           multiplyQuaternions: function (a, b) {
-            
+
             // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-            
+
             var qax = a._x,
               qay =
                 a._y,
@@ -404,7 +404,7 @@ Primrose.Projector = (function () {
               w =
                 this._w;
             // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
-            
+
             var cosHalfTheta = w * qb._w + x * qb._x + y * qb._y + z * qb._z;
             if (cosHalfTheta < 0) {
 
@@ -493,7 +493,7 @@ Primrose.Projector = (function () {
             t);
         };
         // File:src/math/Vector3.js
-        
+
         /**
        * @author mrdoob / http://mrdoob.com/
        * @author *kile / http://kile.stravaganza.org/
@@ -709,9 +709,9 @@ Primrose.Projector = (function () {
             return this;
           },
           applyMatrix4: function (m) {
-            
+
             // input: THREE.Matrix4 affine matrix
-            
+
             var x = this.x,
               y =
                 this.y,
@@ -724,9 +724,9 @@ Primrose.Projector = (function () {
             return this;
           },
           applyProjection: function (m) {
-            
+
             // input: THREE.Matrix4 projection matrix
-            
+
             var x = this.x,
               y =
                 this.y,
@@ -735,7 +735,7 @@ Primrose.Projector = (function () {
             var e = m.elements;
             var d = 1 / (e[3] * x + e[7] * y + e[11] * z +
               e[15]); // perspective divide
-            
+
             this.x = (e[0] * x + e[4] * y + e[8] * z + e[12]) * d;
             this.y = (e[1] * x + e[5] * y + e[9] * z + e[13]) * d;
             this.z = (e[2] * x + e[6] * y + e[10] * z + e[14]) * d;
@@ -751,13 +751,13 @@ Primrose.Projector = (function () {
             var qz = q.z;
             var qw = q.w;
             // calculate quat * vector
-            
+
             var ix = qw * x + qy * z - qz * y;
             var iy = qw * y + qz * x - qx * z;
             var iz = qw * z + qx * y - qy * x;
             var iw = -qx * x - qy * y - qz * z;
             // calculate result * inverse quat
-            
+
             this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
             this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
             this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
@@ -788,10 +788,10 @@ Primrose.Projector = (function () {
             };
           } (),
           transformDirection: function (m) {
-            
+
             // input: THREE.Matrix4 affine matrix
             // vector interpreted as a direction
-            
+
             var x = this.x,
               y =
                 this.y,
@@ -867,9 +867,9 @@ Primrose.Projector = (function () {
             return this;
           },
           clamp: function (min, max) {
-            
+
             // This function assumes min < max, if this assumption isn't true it will not operate correctly
-            
+
             if (this.x < min.x) {
 
               this.x = min.x;
@@ -1061,10 +1061,10 @@ Primrose.Projector = (function () {
             };
           } (),
           reflect: function () {
-            
+
             // reflect incident vector off plane orthogonal to normal
             // normal is assumed to have unit length
-            
+
             var v1;
             return function reflect(normal) {
 
@@ -1081,7 +1081,7 @@ Primrose.Projector = (function () {
 
             var theta = this.dot(v) / (this.length() * v.length());
             // clamp, to handle numerical problems
-            
+
             return Math.acos(THREE.Math.clamp(theta, -1, 1));
           },
           distanceTo: function (v) {
@@ -1193,7 +1193,7 @@ Primrose.Projector = (function () {
 
         };
         // File:src/math/Matrix4.js
-        
+
         /**
        * @author mrdoob / http://mrdoob.com/
        * @author supereggbert / http://www.paulbrunt.co.uk/
@@ -1472,7 +1472,7 @@ Primrose.Projector = (function () {
               te[6] = b * e;
               te[10] = bd * f + ac;
             }
-            
+
             // last column
             te[3] = 0;
             te[7] = 0;
@@ -1843,7 +1843,7 @@ Primrose.Projector = (function () {
                 te[15];
             //TODO: make this more efficient
             //( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
-            
+
             return (
               n41 * (
                 +n14 * n23 * n32
@@ -1947,7 +1947,7 @@ Primrose.Projector = (function () {
             return this;
           },
           getInverse: function (m, throwOnInvertible) {
-            
+
             // based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
             var te = this.elements;
             var me = m.elements;
@@ -2143,9 +2143,9 @@ Primrose.Projector = (function () {
             return this;
           },
           makeRotationAxis: function (axis, angle) {
-            
+
             // Based on http://www.gamedev.net/reference/articles/article1199.asp
-            
+
             var c = Math.cos(angle);
             var s = Math.sin(angle);
             var t = 1 - c;
@@ -2213,10 +2213,10 @@ Primrose.Projector = (function () {
               position.y = te[13];
               position.z = te[14];
               // scale the rotation part
-              
+
               matrix.elements.set(
                 this.elements); // at this point matrix is incomplete so we can't use .copy()
-              
+
               var invSX = 1 / sx;
               var invSY = 1 / sy;
               var invSZ = 1 / sz;
@@ -2334,9 +2334,9 @@ Primrose.Projector = (function () {
 
         THREE.Math = {
           generateUUID: function () {
-            
+
             // http://www.broofa.com/Tools/Math.uuid.htm
-            
+
             var chars =
               '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
                 '');
@@ -2368,32 +2368,32 @@ Primrose.Projector = (function () {
             };
           } (),
           // Clamp value to range <a, b>
-          
+
           clamp: function (x, a, b) {
 
             return (x < a) ? a : ((x > b) ? b : x);
           },
           // Clamp value to range <a, inf)
-          
+
           clampBottom: function (x, a) {
 
             return x < a ? a : x;
           },
           // compute euclidian modulo of m % n
           // https://en.wikipedia.org/wiki/Modulo_operation
-          
+
           euclideanModulo: function (n, m) {
 
             return ((n % m) + m) % m;
           },
           // Linear mapping from range <a1, a2> to range <b1, b2>
-          
+
           mapLinear: function (x, a1, a2, b1, b2) {
 
             return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
           },
           // http://en.wikipedia.org/wiki/Smoothstep
-          
+
           smoothstep: function (x, min, max) {
 
             if (x <= min)
@@ -2414,25 +2414,25 @@ Primrose.Projector = (function () {
           },
           // Random float from <0, 1> with 16 bits of randomness
           // (standard Math.random() creates repetitive patterns when applied over larger space)
-          
+
           random16: function () {
 
             return (65280 * Math.random() + 255 * Math.random()) / 65535;
           },
           // Random integer from <low, high> interval
-          
+
           randInt: function (low, high) {
 
             return low + Math.floor(Math.random() * (high - low + 1));
           },
           // Random float from <low, high> interval
-          
+
           randFloat: function (low, high) {
 
             return low + Math.random() * (high - low);
           },
           // Random float from <-range/2, range/2> interval
-          
+
           randFloatSpread: function (range) {
 
             return range * (0.5 - Math.random());
@@ -2578,7 +2578,8 @@ Primrose.Projector = (function () {
         delete this.objects[obj.uuid];
         var found = false;
         for (var j = 0; !found && j < this.objectIDs.length; ++j) {
-          found = found || this.objects[this.objectIDs[j]].geomID === obj.geomID;
+          var obj2 = this.objects[this.objectIDs[j]];
+          found = found || obj2 && obj2.geomID === obj.geomID;
         }
         if (!found) {
           delete this.geometryCache[obj.geomID];
