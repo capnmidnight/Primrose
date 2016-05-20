@@ -625,7 +625,8 @@ Primrose.BrowserEnvironment = (function () {
         cardboardTextFactory = null,
         resolutionScale = 1,
         factories = {
-          button: null
+          button: null,
+          img: Primrose.Controls.Image
         };
 
 
@@ -770,8 +771,9 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.appendChild = (elem) => {
-        console.log(elem);
-        elem.addToBrowserEnvironment(this);
+        var res = elem.addToBrowserEnvironment(this);
+        console.log(res);
+        return res;
       };
 
       //

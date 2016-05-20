@@ -15,6 +15,11 @@ Primrose.Controls.Image = (function () {
     ]
   });
   class Image extends Primrose.Surface {
+
+    static create() {
+      return new Image();
+    }
+
     constructor(options) {
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
@@ -40,6 +45,7 @@ Primrose.Controls.Image = (function () {
       this._lastImage = null;
       this._images = [];
       this._currentImageIndex = 0;
+      this.className = "";
 
       setTimeout(() => {
         if (options.value) {
@@ -53,12 +59,24 @@ Primrose.Controls.Image = (function () {
       });
     }
 
+    addToBrowserEnvironment(env) {
+      var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
+      env.scene.add(imageMesh);
+      env.registerPickableObject(imageMesh);
+      return imageMesh;
+    }
+
     get src() {
       return this.getImage(this._currentImageIndex).src;
     }
 
     set src(v) {
-      this.loadImage(0, src);
+      if (this.className === "stereo") {
+        this.loadStereoImage(v);
+      }
+      else {
+        this.loadImage(0, src);
+      }
     }
 
     loadImage(i, src) {
