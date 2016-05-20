@@ -18,7 +18,11 @@ performs basic conversions from DOM elements to the internal Control format."
   class Entity {
 
     static registerEntity(e) {
-      entities[e.id] = e;
+      entities.set(e.id, e);
+      e.addEventListener("_idchanged", (evt) => {
+        entities.delete(evt.oldID);
+        entities.set(evt.entity.id, evt.entity);
+      }, false);
     }
 
     static eyeBlankAll(eye) {
@@ -41,8 +45,22 @@ performs basic conversions from DOM elements to the internal Control format."
         paste: [],
         copy: [],
         cut: [],
-        wheel: []
+        wheel: [],
+        _idchanged: []
       };
+    }
+
+    get id() {
+      return this._id;
+    }
+
+    set id(v) {
+      var oldID = this._id;
+      this._id = v;
+      emit.call(this, "_idchanged", {
+        oldID: oldID,
+        entity: this
+      });
     }
 
     /*
