@@ -54,11 +54,11 @@ env.addEventListener("ready", function () {
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
-  editorFrame = new Primrose.Surface({
-    id: "EditorFrame",
-    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
-  });
+  editorFrame = env.createElement("section");
+  editorFrame.id = "EditorFrame";
   editorFrame.className = "shell";
+  editorFrame.style.width = editorSize;
+  editorFrame.style.height = editorSize;
 
   editor = env.createElement("textarea");
   editor.id = "Editor";

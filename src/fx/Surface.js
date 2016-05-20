@@ -34,27 +34,25 @@ Primrose.Surface = (function () {
       Object.defineProperties(this.style, {
         width: {
           get: () => { return this.bounds.width; },
-          set: (v) => { this.bounds.width = v; }
+          set: (v) => {
+            this.bounds.width = v;
+            this.resize();
+          }
         },
         height: {
           get: () => { return this.bounds.height; },
-          set: (v) => { this.bounds.height = v; }
+          set: (v) => { 
+            this.bounds.height = v;
+            this.resize();
+          }
         },
         left: {
           get: () => { return this.bounds.left; },
           set: (v) => { this.bounds.left = v; }
         },
-        right: {
-          get: () => { return this.bounds.right; },
-          set: (v) => { this.bounds.right = v; }
-        },
         top: {
           get: () => { return this.bounds.top; },
           set: (v) => { this.bounds.top = v; }
-        },
-        bottom: {
-          get: () => { return this.bounds.bottom; },
-          set: (v) => { this.bounds.bottom = v; }
         },
         opacity: {
           get: () => { return this._opacity; },

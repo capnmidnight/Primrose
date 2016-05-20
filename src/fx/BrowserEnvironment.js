@@ -628,6 +628,7 @@ Primrose.BrowserEnvironment = (function () {
           button: Primrose.Controls.Button2D,
           img: Primrose.Controls.Image,
           div: Primrose.Controls.HtmlDoc,
+          section: Primrose.Surface,
           textarea: Primrose.Text.Controls.TextBox,
           pre: {
             create: () => new Primrose.Text.Controls.TextBox({
