@@ -1,63 +1,81 @@
-﻿var FullScreen = (function () {
+﻿const FullScreen = (function () {
   "use strict";
 
-  var elementName = findProperty(document, ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]),
-    changeEventName = findProperty(document, ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"]),
-    errorEventName = findProperty(document, ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"]),
+  function left(n, str) {
+    return str && str.substring(n);
+  }
+
+  const elementName = findProperty(document, ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"]),
     requestMethodName = findProperty(document.documentElement, ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"]),
-    exitMethodName = findProperty(document, ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"]);
+    exitMethodName = findProperty(document, ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"]),
+    changeEventName = left(2, findProperty(document, ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"])),
+    errorEventName = left(2, findProperty(document, ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"]));
 
-  changeEventName = changeEventName && changeEventName.substring(2);
-  errorEventName = errorEventName && errorEventName.substring(2);
-
-  var ns = {
-    addChangeListener: (thunk, bubbles) => document.addEventListener(changeEventName, thunk, bubbles),
-    removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),
-    addErrorListener: (thunk, bubbles) => document.addEventListener(errorEventName, thunk, bubbles),
-    removeErrorListener: (thunk) => document.removeEventListener(errorEventName, thunk),
-    withChange: (act) => {
-      return new Promise((resolve, reject) => {
-        var onFullScreen,
-          onFullScreenError,
-          timeout,
-          tearDown = () => {
-            if (timeout) {
-              clearTimeout(timeout);
-            }
-            FullScreen.removeChangeListener(onFullScreen);
-            FullScreen.removeErrorListener(onFullScreenError);
-          };
-
-        onFullScreen = () => {
-          setTimeout(tearDown);
-          resolve(FullScreen.element);
+  function withChange(act) {
+    return new Promise((resolve, reject) => {
+      var onFullScreen,
+        onFullScreenError,
+        timeout,
+        tearDown = () => {
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+          FullScreen.removeChangeListener(onFullScreen);
+          FullScreen.removeErrorListener(onFullScreenError);
         };
 
-        onFullScreenError = (evt) => {
-          setTimeout(tearDown);
-          reject(evt);
-        };
+      onFullScreen = () => {
+        setTimeout(tearDown);
+        resolve(FullScreen.element);
+      };
 
-        FullScreen.addChangeListener(onFullScreen, false);
-        FullScreen.addErrorListener(onFullScreenError, false);
+      onFullScreenError = (evt) => {
+        setTimeout(tearDown);
+        reject(evt);
+      };
 
-        if (act()) {
-          // we've already gotten fullscreen, so don't wait for it.
+      FullScreen.addChangeListener(onFullScreen, false);
+      FullScreen.addErrorListener(onFullScreenError, false);
+
+      if (act()) {
+        // we've already gotten fullscreen, so don't wait for it.
+        tearDown();
+        resolve(FullScreen.element);
+      }
+      else {
+        // Timeout wating on the fullscreen to happen, for systems like iOS that
+        // don't properly support it, even though they say they do.
+        timeout = setTimeout(() => {
           tearDown();
-          resolve(FullScreen.element);
-        }
-        else {      
-          // Timeout wating on the fullscreen to happen, for systems like iOS that
-          // don't properly support it, even though they say they do.
-          timeout = setTimeout(() => {
-            tearDown();
-            reject("Fullscreen state did not change in allotted time");
-          }, 1000);
-        }
-      });
-    },
-    request: (elem, fullScreenParam) => {
-      return FullScreen.withChange(() => {
+          reject("Fullscreen state did not change in allotted time");
+        }, 1000);
+      }
+    });
+  }
+
+  pliny.namespace({
+    name: "FullScreen",
+    description: "| [under construction]"
+  });
+  class FullScreen {
+    static addChangeListener(thunk, bubbles) {
+      document.addEventListener(changeEventName, thunk, bubbles);
+    }
+
+    static removeChangeListener(thunk) {
+      document.removeEventListener(changeEventName, thunk);
+    }
+
+    static addErrorListener(thunk, bubbles) {
+      document.addEventListener(errorEventName, thunk, bubbles);
+    }
+
+    static removeErrorListener(thunk) {
+      document.removeEventListener(errorEventName, thunk);
+    }
+
+    static request(elem, fullScreenParam) {
+      return withChange(() => {
         if (!requestMethodName) {
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
@@ -74,9 +92,10 @@
           elem[requestMethodName]();
         }
       });
-    },
-    exit: () => {
-      return FullScreen.withChange(() => {
+    }
+
+    static exit() {
+      return withChange(() => {
         if (!exitMethodName) {
           console.error("No Fullscreen API support.");
           throw new Error("No Fullscreen API support.");
@@ -89,16 +108,15 @@
         }
       });
     }
-  };
 
-  Object.defineProperties(ns, {
-    element: {
-      get: ()=> document[elementName]
-    },
-    isActive: {
-      get: () => !!FullScreen.element
+    static get element() {
+      return document[elementName];
     }
-  });
 
-  return ns;
+    static get isActive() {
+      return !!FullScreen.element;
+    }
+  }
+
+  return FullScreen;
 })();
