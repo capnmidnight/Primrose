@@ -6,7 +6,8 @@
 Primrose.Entity = (function () {
   "use strict";
   
-  var entities = new WeakMap();
+  var entityKeys = [],
+    entities = new WeakMap();
 
   pliny.class({
     parent: "Primrose",
@@ -19,16 +20,19 @@ performs basic conversions from DOM elements to the internal Control format."
 
     static registerEntity(e) {
       entities.set(e.id, e);
+      entityKeys.push(e.id);
       e.addEventListener("_idchanged", (evt) => {
+        entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
         entities.delete(evt.oldID);
         entities.set(evt.entity.id, evt.entity);
+        entityKeys.push(evt.entity.id);
       }, false);
     }
 
     static eyeBlankAll(eye) {
-      for (var id in entities) {
-        entities[id].eyeBlank(eye);
-      }
+      entityKeys.forEach((id) => {
+        entities.get(id).eyeBlank(eye);
+      });
     }
 
     constructor(id) {
@@ -56,7 +60,7 @@ performs basic conversions from DOM elements to the internal Control format."
 
     set id(v) {
       var oldID = this._id;
-      this._id = v;
+      this._id = new String(v);
       emit.call(this, "_idchanged", {
         oldID: oldID,
         entity: this
