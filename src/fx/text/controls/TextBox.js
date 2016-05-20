@@ -288,7 +288,7 @@ Primrose.Text.Controls.TextBox = (function () {
     }
 
     set tabWidth(tw) {
-      this._tabWidth = tw || 4;
+      this._tabWidth = tw || 2;
       this._tabString = "";
       for (var i = 0; i < this._tabWidth; ++i) {
         this._tabString += " ";
