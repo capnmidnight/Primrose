@@ -60,13 +60,13 @@ env.addEventListener("ready", function () {
   });
   editorFrame.className = "shell";
 
-  editor = new Primrose.Text.Controls.TextBox({
-    id: "Editor",
-    bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
-    tokenizer: Primrose.Text.Grammars.JavaScript,
-    value: getSourceCode(isInIFrame),
-    fontSize: fontSize
-  });
+  editor = env.createElement("textarea");
+  editor.id = "Editor";
+  editor.style.width = editorFrame.surfaceWidth;
+  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.fontSize = fontSize;
+  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
+  editor.value = getSourceCode(isInIFrame);
 
   output = env.createElement("pre");
   output.id = "Output";
