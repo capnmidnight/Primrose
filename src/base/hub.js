@@ -15,7 +15,14 @@ function hub() {
   obj.addToBrowserEnvironment = (env, scene) => {
     scene.add(obj);
     obj.appendChild = (child) => {
-      return child.addToBrowserEnvironment(env, obj);
+      if (child.addToBrowserEnvironment) {
+        return child.addToBrowserEnvironment(env, obj);
+      }
+      else {
+        scene.add(child);
+        env.registerPickableObject(child);
+        return child;
+      }
     };
   };
   return obj;
