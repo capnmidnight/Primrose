@@ -1,4 +1,4 @@
-var app = new Primrose.BrowserEnvironment(
+var env = new Primrose.BrowserEnvironment(
   // We give the application a name here, in case we ever
   // hook it up to the Multiplayer Server.
   "Music", {
@@ -28,14 +28,14 @@ var app = new Primrose.BrowserEnvironment(
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
-app.addEventListener("ready", function () {
+env.addEventListener("ready", function () {
 
   var numButtons = 8,
     middle = (numButtons - 1) / 2;
  
   for (var i = 0; i < numButtons; ++i) {
     
-    var btn = app.createElement("button");
+    var btn = env.createElement("button");
 
     // Spacing the buttons out in a rough arc around the origin.
     var x = (i - middle) * 0.25,
@@ -49,8 +49,8 @@ app.addEventListener("ready", function () {
       // Primrose already has a basic sound API setup, so you
       // can hook directly into it to create basic, procedurally
       // generated music.
-      app.music.play.bind(
-        app.music,
+      env.music.play.bind(
+        env.music,
         // The play method understands Piano key indices, so
         // we just need to calculate the note we want to play,
         // understanding Middle C to be note 44.
@@ -61,6 +61,6 @@ app.addEventListener("ready", function () {
         0.2));
 
     // Put the element into the scene
-    app.appendChild(btn);
+    env.appendChild(btn);
   }
 });

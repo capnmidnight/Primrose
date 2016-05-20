@@ -8,7 +8,7 @@ var modA = isOSX ? "metaKey" : "ctrlKey",
   terminal = null,
 
   // setup the VR environment
-  app = new Primrose.BrowserEnvironment("Commodore", {
+  env = new Primrose.BrowserEnvironment("Commodore", {
     sceneModel: "../models/commodore_pet.json",
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/deck.png",
@@ -30,7 +30,7 @@ window.addEventListener("keydown", function (evt) {
   }
 });
 
-app.addEventListener("ready", function () {
+env.addEventListener("ready", function () {
 
   // A hack to reposition the objects in the scene because the model file is a little janky
   ["CaseBottom", "CaseInset", "CaseTitle", "CaseTop",
@@ -38,16 +38,16 @@ app.addEventListener("ready", function () {
     "MonitorCase", "MonitorInset", "Screen",
     "TapeDeck", "TapeDeckControls", "TapeDeckDoor", "TapeDeckInset"]
     .map(function (name) {
-      return app.scene[name];
+      return env.scene[name];
     }).forEach(function (obj) {
-      obj.position.y += app.avatarHeight * 0.9;
+      obj.position.y += env.avatarHeight * 0.9;
       obj.position.z -= 3;
     });
 
-  for (var i = app.scene.children.length - 1; 0 <= i; --i) {
-    var obj = app.scene.children[i];
+  for (var i = env.scene.children.length - 1; 0 <= i; --i) {
+    var obj = env.scene.children[i];
     if (obj.name.length > 0 && obj.type === "PointLight") {
-      app.scene.remove(obj);
+      env.scene.remove(obj);
     }
   }
 
@@ -63,6 +63,6 @@ app.addEventListener("ready", function () {
   terminal = new Primrose.Text.Terminal(editor);
   terminal.loadFile("commodore/oregon.bas");
 
-  var editorMesh = textured(app.scene.Screen, editor);
-  app.registerPickableObject(editorMesh);
+  var editorMesh = textured(env.scene.Screen, editor);
+  env.registerPickableObject(editorMesh);
 });

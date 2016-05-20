@@ -70,8 +70,8 @@
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
     <script type="text/javascript" src="../src/x/SignupForm.js"></script>
     <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button3D.js"></script>
     <script type="text/javascript" src="../src/fx/controls/HtmlDoc.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
@@ -218,7 +218,7 @@
         <h2>Source</h2>
         <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 &quot;use strict&quot;;
-var app = new Primrose.BrowserEnvironment(&quot;My Primrose VR Application&quot;, {
+var env = new Primrose.BrowserEnvironment(&quot;My Primrose VR Application&quot;, {
   skyTexture: &quot;../images/bg.jpg&quot;,
   ambientSound: &quot;../audio/wind.ogg&quot;,
   groundTexture: &quot;../images/deck.png&quot;,
@@ -227,24 +227,24 @@ var app = new Primrose.BrowserEnvironment(&quot;My Primrose VR Application&quot;
   font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
 });
 
-app.addEventListener(&quot;ready&quot;, function () {
+env.addEventListener(&quot;ready&quot;, function () {
   // Perform any post-initialization setup. Once this event fires, the Primrose
   // framework is ready and will start animation as soon as this function returns.
 });
 
-app.addEventListener(&quot;gazecomplete&quot;, function (evt) {
+env.addEventListener(&quot;gazecomplete&quot;, function (evt) {
   // You can respond to &quot;intended stare&quot; events here, i.e. when the user gazes
   // at a particular object for an extended period of time. Usually, about three
   // seconds.
 });
 
-app.addEventListener(&quot;pointerend&quot;, function (evt) {
+env.addEventListener(&quot;pointerend&quot;, function (evt) {
   // You can respond to the user &quot;clicking&quot; an object here. This could be by using
   // a mouse on their desktop PC or by touching the screen while looking at an
   // object on a mobile device.
 });
 
-app.addEventListener(&quot;update&quot;, function (dt) {
+env.addEventListener(&quot;update&quot;, function (dt) {
   // Perform per-frame updates here, like moving objects around according to your
   // own rules.
 });</pre><!-- end documentation.jade documentation block -->

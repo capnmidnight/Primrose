@@ -7,7 +7,7 @@ var WIDTH = 100,
   t = 0,
   jabs = {},
   R = Primrose.Random,
-  app = new Primrose.BrowserEnvironment("Jabber Yabs", {
+  env = new Primrose.BrowserEnvironment("Jabber Yabs", {
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/grass.png",
     fullScreenIcon: "../models/monitor.obj",
@@ -21,8 +21,8 @@ function makeJabJump(evt) {
     jabs[evt.objectID].jump(evt.faceNormal);
   }
 }
-app.addEventListener("gazecomplete", makeJabJump);
-app.addEventListener("pointerend", makeJabJump);
+env.addEventListener("gazecomplete", makeJabJump);
+env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
   var ball = put(textured(sphere(0.05, 6, 3), 0xffffff))
@@ -53,7 +53,7 @@ function Jabber(w, h, s) {
 
   body.rotation.y = Math.PI;
   obj.update = function (dt) {
-    velocity.y -= app.options.gravity * dt;
+    velocity.y -= env.options.gravity * dt;
     body.position.add(v.copy(velocity).multiplyScalar(dt));
     if (velocity.x > 0 && body.position.x >= w ||
       velocity.x < 0 && body.position.x <= -w) {
@@ -67,10 +67,10 @@ function Jabber(w, h, s) {
       velocity.y = 0;
       body.position.y = 1;
     }
-    v.copy(body.position).sub(app.player.position);
+    v.copy(body.position).sub(env.player.position);
     var d = v.length();
     if (d < 3) {
-      body.lookAt(app.player.position);
+      body.lookAt(env.player.position);
       obj.position.set(
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),
@@ -85,7 +85,7 @@ function Jabber(w, h, s) {
   };
   obj.jump = function (normal) {
     v.fromArray(normal);
-    v.y = app.options.gravity / 2;
+    v.y = env.options.gravity / 2;
     velocity.add(v);
   };
   obj.addToBrowserEnvironment = function (env) {
@@ -99,17 +99,17 @@ function Jabber(w, h, s) {
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
-app.addEventListener("ready", function () {
+env.addEventListener("ready", function () {
   for (var i = 0; i < 25; ++i) {
     var jab = Jabber(
       MIDX / 5,
       MIDZ / 5, 1);
     jabs[jab.body.uuid] = jab;
-    app.appendChild(jab);
+    env.appendChild(jab);
   }
 });
 
-app.addEventListener("update", function (dt) {
+env.addEventListener("update", function (dt) {
   for (var id in jabs) {
     jabs[id].update(dt);
   }

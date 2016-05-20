@@ -4,7 +4,7 @@ var GRASS = "../images/grass.png",
   WATER = "../images/water.png",
   DECK = "../images/deck.png",
 
-  app = new Primrose.BrowserEnvironment("Editor3D", {
+  env = new Primrose.BrowserEnvironment("Editor3D", {
     skyTexture: "../images/bg2.jpg",
     ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,
@@ -22,7 +22,7 @@ var GRASS = "../images/grass.png",
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  stereoImage = null,
+  this = null,
   stereoImageMesh = null,
 
   modA = isOSX ? "metaKey" : "ctrlKey",
@@ -37,21 +37,19 @@ var GRASS = "../images/grass.png",
 
   editorCenter = new THREE.Object3D();
 
-app.addEventListener("ready", function () {
-  app.scene.add(editorCenter);
-  app.scene.add(subScene);
+env.addEventListener("ready", function () {
+  env.scene.add(editorCenter);
+  env.scene.add(subScene);
 
-  stereoImage = new Primrose.Controls.Image({
-    id: "StereoImage"
-  });
-  stereoImage.loadStereoImage("../images/prong.stereo.jpg")
-    .then(function () {
-      stereoImageMesh = textured(quad(0.5, 0.5 * stereoImage.imageHeight / stereoImage.imageWidth), stereoImage);
-      stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
-      stereoImageMesh.position.set(-4, app.avatarHeight, -1);
-      app.scene.add(stereoImageMesh);
-      app.registerPickableObject(stereoImageMesh);
-    });
+  this = env.createElement("img");
+  this.id = "StereoImage";
+  this.className = "stereo";
+  this.addEventListener("load", function (evt) {
+    stereoImageMesh = env.appendChild(this);
+    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
+    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
+  }, false);
+  this.src = "../images/prong.stereo.jpg";
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
@@ -107,7 +105,7 @@ app.addEventListener("ready", function () {
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, 0, 0);
   editorCenter.add(editorFrameMesh);
-  app.registerPickableObject(editorFrameMesh);
+  env.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Controls.HtmlDoc({
     id: "Documentation",
@@ -116,10 +114,10 @@ app.addEventListener("ready", function () {
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
-  documentationMesh.position.set(-2.2, app.avatarHeight, -1);
+  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
-  app.scene.add(documentationMesh);
-  app.registerPickableObject(documentationMesh);
+  env.scene.add(documentationMesh);
+  env.registerPickableObject(documentationMesh);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");
@@ -128,34 +126,34 @@ app.addEventListener("ready", function () {
   console.log();
 });
 
-app.addEventListener("update", function (dt) {
+env.addEventListener("update", function (dt) {
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(app.player.position);
+  editorCenter.position.copy(env.player.position);
 
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
-    if (app.quality === Primrose.Quality.NONE) {
+    if (env.quality === Primrose.Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
     }
     else{
-      scriptAnimate.call(app, dt);
+      scriptAnimate.call(env, dt);
     }
   }
 });
 
-app.addEventListener("keydown", function (evt) {
+env.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
       documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
       documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
-      if (!editorFrameMesh.visible && app.currentEditor && app.currentEditor.focused) {
-        app.currentEditor.blur();
-        app.currentEditor = null;
+      if (!editorFrameMesh.visible && env.currentEditor && env.currentEditor.focused) {
+        env.currentEditor.blur();
+        env.currentEditor = null;
       }
     }
     else if (evt.keyCode === Primrose.Keys.X) {
@@ -198,7 +196,7 @@ function updateScript() {
       console.log("----- loading new script -----");
       var scriptUpdate = new Function("scene", newScript);
       wipeScene();
-      scriptAnimate = scriptUpdate.call(app, subScene);
+      scriptAnimate = scriptUpdate.call(env, subScene);
       if (scriptAnimate) {
         scriptAnimate(0);
       }
@@ -206,8 +204,8 @@ function updateScript() {
       if (!scriptAnimate) {
         console.log("----- No update script provided -----");
       }
-      else if (app.quality === Primrose.Quality.NONE) {
-        app.quality = Primrose.Quality.MEDIUM;
+      else if (env.quality === Primrose.Quality.NONE) {
+        env.quality = Primrose.Quality.MEDIUM;
       }
     }
     catch (exp) {

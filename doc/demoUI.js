@@ -6,13 +6,13 @@
   document.getElementById("fullScreenButtonContainer").appendChild(btn);
 }
 function vrButton(display, i) {
-  addButton(display.displayName, app.goVR.bind(app, i));
+  addButton(display.displayName, env.goVR.bind(env, i));
 }
 window.addEventListener("load", function () {
-  app.addEventListener("ready", function () {
-    addButton("Fullscreen", app.goFullScreen.bind(app));
-    if (app.input.VRDisplays) {
-      app.input.VRDisplays.forEach(vrButton);
+  env.addEventListener("ready", function () {
+    addButton("Fullscreen", env.goFullScreen.bind(env));
+    if (env.input.VRDisplays) {
+      env.input.VRDisplays.forEach(vrButton);
     }
   }, false);
 }, false);

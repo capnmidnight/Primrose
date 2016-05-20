@@ -39,7 +39,7 @@ Primrose.ButtonFactory = (function () {
   ButtonFactory.prototype.create = function (toggle) {
     var name = "button" + (++buttonCount);
     var obj = this.template.clone();
-    var btn = new Primrose.Controls.Button(obj, name, this.options, toggle);
+    var btn = new Primrose.Controls.Button3D(obj, name, this.options, toggle);
     return btn;
   };
 

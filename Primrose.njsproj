@@ -210,7 +210,7 @@
     <Compile Include="doc\temple\app.js" />
     <Content Include="src\fx\Angle.js" />
     <Content Include="src\fx\BaseControl.js" />
-    <Content Include="src\fx\Button.js" />
+    <Content Include="src\fx\controls\Button.js" />
     <Content Include="src\fx\ButtonFactory.js" />
     <Content Include="src\fx\Keys.js" />
     <Content Include="src\fx\ModelLoader.js" />

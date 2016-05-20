@@ -70,8 +70,8 @@
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
     <script type="text/javascript" src="../src/x/SignupForm.js"></script>
     <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button3D.js"></script>
     <script type="text/javascript" src="../src/fx/controls/HtmlDoc.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
@@ -223,7 +223,7 @@ var GRASS = &quot;../images/grass.png&quot;,
   WATER = &quot;../images/water.png&quot;,
   DECK = &quot;../images/deck.png&quot;,
 
-  app = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
+  env = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
     skyTexture: &quot;../images/bg2.jpg&quot;,
     ambientSound: &quot;../audio/wind.ogg&quot;,
     groundTexture: GRASS,
@@ -241,7 +241,7 @@ var GRASS = &quot;../images/grass.png&quot;,
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  stereoImage = null,
+  this = null,
   stereoImageMesh = null,
 
   modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
@@ -256,21 +256,19 @@ var GRASS = &quot;../images/grass.png&quot;,
 
   editorCenter = new THREE.Object3D();
 
-app.addEventListener(&quot;ready&quot;, function () {
-  app.scene.add(editorCenter);
-  app.scene.add(subScene);
+env.addEventListener(&quot;ready&quot;, function () {
+  env.scene.add(editorCenter);
+  env.scene.add(subScene);
 
-  stereoImage = new Primrose.Controls.Image({
-    id: &quot;StereoImage&quot;
-  });
-  stereoImage.loadStereoImage(&quot;../images/prong.stereo.jpg&quot;)
-    .then(function () {
-      stereoImageMesh = textured(quad(0.5, 0.5 * stereoImage.imageHeight / stereoImage.imageWidth), stereoImage);
-      stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
-      stereoImageMesh.position.set(-4, app.avatarHeight, -1);
-      app.scene.add(stereoImageMesh);
-      app.registerPickableObject(stereoImageMesh);
-    });
+  this = env.createElement(&quot;img&quot;);
+  this.id = &quot;StereoImage&quot;;
+  this.className = &quot;stereo&quot;;
+  this.addEventListener(&quot;load&quot;, function (evt) {
+    stereoImageMesh = env.appendChild(this);
+    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
+    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
+  }, false);
+  this.src = &quot;../images/prong.stereo.jpg&quot;;
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
@@ -326,7 +324,7 @@ app.addEventListener(&quot;ready&quot;, function () {
   editorFrameMesh.name = &quot;MyWindow&quot;;
   editorFrameMesh.position.set(0, 0, 0);
   editorCenter.add(editorFrameMesh);
-  app.registerPickableObject(editorFrameMesh);
+  env.registerPickableObject(editorFrameMesh);
 
   documentation = new Primrose.Controls.HtmlDoc({
     id: &quot;Documentation&quot;,
@@ -335,10 +333,10 @@ app.addEventListener(&quot;ready&quot;, function () {
   });
 
   documentationMesh = textured(quad(2, 2), documentation);
-  documentationMesh.position.set(-2.2, app.avatarHeight, -1);
+  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
-  app.scene.add(documentationMesh);
-  app.registerPickableObject(documentationMesh);
+  env.scene.add(documentationMesh);
+  env.registerPickableObject(documentationMesh);
 
   console.log(&quot;INSTRUCTIONS:&quot;);
   console.log(&quot; - &quot; + cmdPre + &quot;+E to show/hide editor&quot;);
@@ -347,34 +345,34 @@ app.addEventListener(&quot;ready&quot;, function () {
   console.log();
 });
 
-app.addEventListener(&quot;update&quot;, function (dt) {
+env.addEventListener(&quot;update&quot;, function (dt) {
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(app.player.position);
+  editorCenter.position.copy(env.player.position);
 
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
-    if (app.quality === Primrose.Quality.NONE) {
+    if (env.quality === Primrose.Quality.NONE) {
       scriptAnimate = null;
       wipeScene();
     }
     else{
-      scriptAnimate.call(app, dt);
+      scriptAnimate.call(env, dt);
     }
   }
 });
 
-app.addEventListener(&quot;keydown&quot;, function (evt) {
+env.addEventListener(&quot;keydown&quot;, function (evt) {
   if (evt[modA] &amp;&amp; evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
       documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
       documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
-      if (!editorFrameMesh.visible &amp;&amp; app.currentEditor &amp;&amp; app.currentEditor.focused) {
-        app.currentEditor.blur();
-        app.currentEditor = null;
+      if (!editorFrameMesh.visible &amp;&amp; env.currentEditor &amp;&amp; env.currentEditor.focused) {
+        env.currentEditor.blur();
+        env.currentEditor = null;
       }
     }
     else if (evt.keyCode === Primrose.Keys.X) {
@@ -417,7 +415,7 @@ function updateScript() {
       console.log(&quot;----- loading new script -----&quot;);
       var scriptUpdate = new Function(&quot;scene&quot;, newScript);
       wipeScene();
-      scriptAnimate = scriptUpdate.call(app, subScene);
+      scriptAnimate = scriptUpdate.call(env, subScene);
       if (scriptAnimate) {
         scriptAnimate(0);
       }
@@ -425,8 +423,8 @@ function updateScript() {
       if (!scriptAnimate) {
         console.log(&quot;----- No update script provided -----&quot;);
       }
-      else if (app.quality === Primrose.Quality.NONE) {
-        app.quality = Primrose.Quality.MEDIUM;
+      else if (env.quality === Primrose.Quality.NONE) {
+        env.quality = Primrose.Quality.MEDIUM;
       }
     }
     catch (exp) {

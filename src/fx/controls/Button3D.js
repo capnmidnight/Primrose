@@ -1,4 +1,4 @@
-Primrose.Controls.Button = ( function () {
+Primrose.Controls.Button3D = ( function () {
   pliny.class({
     parent: "Primrose",
     name: "Button",
@@ -66,9 +66,6 @@ Primrose.Controls.Button = ( function () {
       this.color = this.cap.material.color;
       this.name = name;
       this.element = null;
-
-
-
       this.startUV = function () {
         this.color.copy(options.colorPressed);
         if (this.element) {
@@ -100,44 +97,44 @@ Primrose.Controls.Button = ( function () {
   }
   
   pliny.record({
-    parent: "Primrose.Controls.Button",
+    parent: "Primrose.Controls.Button3D",
     name: "DEFAULTS",
     description: "Default option values that override undefined options passed to the Button class."
   });
 
 
   pliny.property({
-    parent: "Primrose.Controls.Button",
+    parent: "Primrose.Controls.Button3D",
     name: "position",
     type: "THREE.Vector3",
     description: "The location of the button."
   });
   pliny.value({
-    parent: "Primrose.Controls.Button.DEFAULTS",
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
     name: "maxThrow",
     type: "Number",
     description: "The limit for how far the button can be depressed."
   });
   pliny.value({
-    parent: "Primrose.Controls.Button.DEFAULTS",
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
     name: "minDeflection",
     type: "Number",
     description: "The minimum distance the button must be depressed before it is activated."
   });
   pliny.value({
-    parent: "Primrose.Controls.Button.DEFAULTS",
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
     name: "colorUnpressed",
     type: "Number",
     description: "The color to change the button cap to when the button is deactivated."
   });
   pliny.value({
-    parent: "Primrose.Controls.Button.DEFAULTS",
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
     name: "colorPressed",
     type: "Number",
     description: "The color to change the button cap to when the button is activated."
   });
   pliny.value({
-    parent: "Primrose.Controls.Button.DEFAULTS",
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
     name: "toggle",
     type: "Boolean",
     description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."

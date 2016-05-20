@@ -220,7 +220,7 @@ Seriously though, I got really busy and just never got around to making a produc
     * [`Primrose.Entity`](#Primrose_Entity) is anything that can hold children.
     * [`Primrose.Surface`](#Primrose_Surface) is any Entity that has an HTML Canvas driving it.
     * [`Primrose.Controls.Label`](#Primrose_Controls_Label) is a 2D text label. Labels can align text left, center, or right.
-    * [`Primrose.Controls.Button`](#Primrose_Controls_Button) is a 2D button. It's essentially a label with a border and a different appearance on-mouse-down, so it also supports text alignment.
+    * [`Primrose.Controls.Button2D`](#Primrose_Controls_Button2D) is a 2D button. It's essentially a label with a border and a different appearance on-mouse-down, so it also supports text alignment.
     * [`Primrose.Controls.Image`](#Primrose_Controls_Image) is a 2D or stereoscopic image. When viewing a stereo image on a 2D monitor, hit the E key on your keyboard to manually cause an eye-blank event and swap the left/right images being displayed.
     * Converted [`Primrose.Text.Controls.TextBox`](#Primrose_Text_Controls_TextBox) to be a Surface.
     * [`Primrose.Text.Controls.TextInput`](#Primrose_Text_Controls_TextInput) is a single-line text input control. It's essentially a `Primrose.Text.Controls.TextBox` that is constrained to a single line and only PlainText grammar. It can optionally have a character set as a password-blanking character.

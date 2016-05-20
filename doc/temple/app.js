@@ -13,7 +13,7 @@ var GRASS = "../images/grass.png",
   dx = 7,
   dy = 2.5,
   dz = 4,
-  app = new Primrose.BrowserEnvironment("AncientTemple", {
+  env = new Primrose.BrowserEnvironment("AncientTemple", {
     skyTexture: "../images/bg2.jpg",
     groundTexture: ROCK,
     fullScreenIcon: "../models/monitor.obj",
@@ -25,7 +25,7 @@ function column(a, b, h) {
   return textured(cylinder(a, b, h, 6, 1), SAND);
 }
 
-app.addEventListener("ready", function () {
+env.addEventListener("ready", function () {
   var start = put(hub())
     .on(this.scene)
     .at(-MIDX, 0, -MIDZ),
@@ -76,9 +76,9 @@ app.addEventListener("ready", function () {
   }
 
   put(brick(ROCK, WIDTH, 1, DEPTH)).on(start).at(WIDTH / 2, 12.5, DEPTH / 2);
-}.bind(app));
+}.bind(env));
 
-app.addEventListener("update", function (dt) {
+env.addEventListener("update", function (dt) {
   t += dt;
 
   ball.position.x += dx * dt;

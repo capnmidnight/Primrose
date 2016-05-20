@@ -70,8 +70,8 @@
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
     <script type="text/javascript" src="../src/x/SignupForm.js"></script>
     <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button3D.js"></script>
     <script type="text/javascript" src="../src/fx/controls/HtmlDoc.js"></script>
     <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
@@ -227,7 +227,7 @@ var modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
   terminal = null,
 
   // setup the VR environment
-  app = new Primrose.BrowserEnvironment(&quot;Commodore&quot;, {
+  env = new Primrose.BrowserEnvironment(&quot;Commodore&quot;, {
     sceneModel: &quot;../models/commodore_pet.json&quot;,
     skyTexture: &quot;../images/bg2.jpg&quot;,
     groundTexture: &quot;../images/deck.png&quot;,
@@ -249,7 +249,7 @@ window.addEventListener(&quot;keydown&quot;, function (evt) {
   }
 });
 
-app.addEventListener(&quot;ready&quot;, function () {
+env.addEventListener(&quot;ready&quot;, function () {
 
   // A hack to reposition the objects in the scene because the model file is a little janky
   [&quot;CaseBottom&quot;, &quot;CaseInset&quot;, &quot;CaseTitle&quot;, &quot;CaseTop&quot;,
@@ -257,16 +257,16 @@ app.addEventListener(&quot;ready&quot;, function () {
     &quot;MonitorCase&quot;, &quot;MonitorInset&quot;, &quot;Screen&quot;,
     &quot;TapeDeck&quot;, &quot;TapeDeckControls&quot;, &quot;TapeDeckDoor&quot;, &quot;TapeDeckInset&quot;]
     .map(function (name) {
-      return app.scene[name];
+      return env.scene[name];
     }).forEach(function (obj) {
-      obj.position.y += app.avatarHeight * 0.9;
+      obj.position.y += env.avatarHeight * 0.9;
       obj.position.z -= 3;
     });
 
-  for (var i = app.scene.children.length - 1; 0 &lt;= i; --i) {
-    var obj = app.scene.children[i];
+  for (var i = env.scene.children.length - 1; 0 &lt;= i; --i) {
+    var obj = env.scene.children[i];
     if (obj.name.length &gt; 0 &amp;&amp; obj.type === &quot;PointLight&quot;) {
-      app.scene.remove(obj);
+      env.scene.remove(obj);
     }
   }
 
@@ -282,8 +282,8 @@ app.addEventListener(&quot;ready&quot;, function () {
   terminal = new Primrose.Text.Terminal(editor);
   terminal.loadFile(&quot;commodore/oregon.bas&quot;);
 
-  var editorMesh = textured(app.scene.Screen, editor);
-  app.registerPickableObject(editorMesh);
+  var editorMesh = textured(env.scene.Screen, editor);
+  env.registerPickableObject(editorMesh);
 });</pre><!-- end documentation.jade documentation block -->
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->

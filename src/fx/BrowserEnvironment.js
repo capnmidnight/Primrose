@@ -892,7 +892,7 @@ Primrose.BrowserEnvironment = (function () {
         sceneGraph.traverse(function (child) {
           if (child.isButton) {
             sceneGraph.buttons.push(
-              new Primrose.Controls.Button(child.parent, child.name));
+              new Primrose.Controls.Button3D(child.parent, child.name));
           }
           if (child.name) {
             sceneGraph[child.name] = child;
