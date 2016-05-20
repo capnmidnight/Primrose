@@ -78,7 +78,7 @@ var textured = (function () {
         if (texture instanceof Primrose.Surface) {
           surface = texture;
           texture = surface.texture;
-          if (options.scaleTextureWidth || !options.scaleTextureHeight) {
+          if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
             var imgWidth = surface.imageWidth,
               imgHeight = surface.imageHeight,
               dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),
