@@ -181,6 +181,7 @@
                   <li data-name="Empty"><a href="../doc/empty.html">Empty</a></li>
                   <li data-name="Jabber Yabs"><a href="../doc/jabbers.html">Jabber Yabs</a></li>
                   <li data-name="Drum Machine"><a href="../doc/music.html">Drum Machine</a></li>
+                  <li data-name="Pacman"><a href="../doc/pacman.html">Pacman</a></li>
                   <li data-name="Procedurally generated room"><a href="../doc/temple.html">Procedurally generated room</a></li>
                 </ul>
               </li>
@@ -228,12 +229,13 @@ var GRASS = &quot;../images/grass.png&quot;,
   DECK = &quot;../images/deck.png&quot;,
 
   env = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
-    skyTexture: &quot;../images/bg2.jpg&quot;,
+    skyTexture: DECK,
     ambientSound: &quot;../audio/wind.ogg&quot;,
-    groundTexture: GRASS,
+    groundTexture: DECK,
     fullScreenIcon: &quot;../models/monitor.obj&quot;,
     VRIcon: &quot;../models/cardboard.obj&quot;,
-    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
+    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
+    autoScaleQuality: false
   }),
 
   subScene = new THREE.Object3D(),

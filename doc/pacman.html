@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/doc/sync.html"><!-- start main.jade meta block -->
+    <meta property="og:url" content="http://www.primrosevr.com/doc/pacman.html"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
 <!-- start main.jade title block --><!-- start documentation.jade title block -->
@@ -216,9 +216,312 @@
       </div>
       <div id="documentation">
         <section>
-          <article><!-- start documentation.jade documentation block -->
-            <!-- 6-->
-            <h1>Synchronizing your Smartphone and PC</h1>[under construction]<!-- end documentation.jade documentation block -->
+          <article><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
+            <h1>Pacman</h1>
+            <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/pacman" target="_blank">Open demo in new window</a>.</p>
+            <iframe id="demo" src="../doc/pacman" role="application" allowfullscreen></iframe>
+            <h2>Source</h2>
+            <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
+var GRASS = &quot;../images/grass.png&quot;,
+  ROCK = &quot;../images/rock.png&quot;,
+  SAND = &quot;../images/sand.png&quot;,
+  WATER = &quot;../images/water.png&quot;,
+  DECK = &quot;../images/deck.png&quot;,
+
+  env = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
+    skyTexture: DECK,
+    ambientSound: &quot;../audio/wind.ogg&quot;,
+    groundTexture: DECK,
+    fullScreenIcon: &quot;../models/monitor.obj&quot;,
+    VRIcon: &quot;../models/cardboard.obj&quot;,
+    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
+    autoScaleQuality: false
+  }),
+
+  subScene = new THREE.Object3D(),
+
+  editor = null,
+  output = null,
+  button1 = null,
+  editorFrame = null,
+  editorFrameMesh = null,
+  documentation = null,
+  documentationMesh = null,
+  stereoImage = null,
+  stereoImageMesh = null,
+
+  modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
+  modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
+  cmdA = isOSX ? &quot;CMD&quot; : &quot;CTRL&quot;,
+  cmdB = isOSX ? &quot;OPT&quot; : &quot;SHIFT&quot;,
+  cmdPre = cmdA + &quot;+&quot; + cmdB,
+
+  scriptUpdateTimeout,
+  lastScript = null,
+  scriptAnimate = null,
+
+  editorCenter = hub();
+
+env.addEventListener(&quot;ready&quot;, function () {
+  env.appendChild(editorCenter);
+  env.scene.add(subScene);
+
+  stereoImage = env.createElement(&quot;img&quot;);
+  stereoImage.id = &quot;StereoImage&quot;;
+  stereoImage.className = &quot;stereo&quot;;
+  stereoImage.addEventListener(&quot;load&quot;, function (evt) {
+    stereoImageMesh = env.appendChild(stereoImage);
+    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
+    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
+  }, false);
+  stereoImage.src = &quot;../images/prong.stereo.jpg&quot;;
+
+  var editorSize = isMobile ? 512 : 1024,
+    fontSize = isMobile ? 10 : 20;
+
+  editorFrame = env.createElement(&quot;section&quot;);
+  editorFrame.id = &quot;EditorFrame&quot;;
+  editorFrame.className = &quot;shell&quot;;
+  editorFrame.style.width = editorSize;
+  editorFrame.style.height = editorSize;
+
+  editor = env.createElement(&quot;textarea&quot;);
+  editor.id = &quot;Editor&quot;;
+  editor.style.width = editorFrame.surfaceWidth;
+  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.fontSize = fontSize;
+  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
+  editor.value = getSourceCode(isInIFrame);
+
+  output = env.createElement(&quot;pre&quot;);
+  output.id = &quot;Output&quot;;
+  output.style.top = editor.surfaceHeight + 25;
+  output.style.width = editorFrame.surfaceWidth;
+  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
+  output.style.fontSize = fontSize;
+
+  button1 = env.createElement(&quot;button&quot;);
+  button1.id = &quot;ThemeButton&quot;;
+  button1.style.backgroundColor = &quot;#ffff00&quot;;
+  button1.style.color = &quot;#0000ff&quot;;
+  button1.style.left = editorFrame.surfaceWidth - 400;
+  button1.style.top = output.bounds.top;
+  button1.style.width = 400;
+  button1.style.height = 45;
+  button1.value = &quot;Switch to dark theme&quot;;
+
+  button1.addEventListener(&quot;click&quot;, function () {
+    var nextTheme = Primrose.Text.Themes.Default,
+      nextString = &quot;Switch to dark theme&quot;;
+    if (editor.theme.name === nextTheme.name) {
+      nextTheme = Primrose.Text.Themes.Dark;
+      nextString = &quot;Switch to light theme&quot;;
+    }
+    console.log(&quot;Switching to theme: &quot; + nextTheme.name);
+    documentation.theme = output.theme = editor.theme = nextTheme;
+    button1.value = nextString;
+  }, false);
+
+  editorFrame.appendChild(output);
+  editorFrame.appendChild(editor);
+  editorFrame.appendChild(button1);
+
+  editorFrameMesh = editorCenter.appendChild(editorFrame);
+  editorFrameMesh.name = &quot;MyWindow&quot;;
+  editorFrameMesh.position.set(0, 0, 0);
+
+  documentation = env.createElement(&quot;div&quot;);
+  documentation.id = &quot;Documentation&quot;;
+  documentation.style.width = editorSize;
+  documentation.style.height = editorSize;
+  documentation.element = &quot;docPage&quot;;
+
+  documentationMesh = env.appendChild(documentation);
+  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
+  documentationMesh.rotation.set(0, Math.PI / 4, 0);
+
+  console.log(&quot;INSTRUCTIONS:&quot;);
+  console.log(&quot; - &quot; + cmdPre + &quot;+E to show/hide editor&quot;);
+  console.log(&quot; - &quot; + cmdPre + &quot;+X to reload original demo code&quot;);
+  console.log(&quot; - Z to reset position/sensor&quot;);
+  console.log();
+});
+
+env.addEventListener(&quot;update&quot;, function (dt) {
+  if (!scriptUpdateTimeout) {
+    scriptUpdateTimeout = setTimeout(updateScript, 500);
+  }
+
+  editorCenter.position.copy(env.player.position);
+
+  if (scriptAnimate) {
+    // If quality has degraded, it's likely because the user bombed on a script.
+    // Let's help them not lose their lunch.
+    if (env.quality === Primrose.Quality.NONE) {
+      scriptAnimate = null;
+      wipeScene();
+    }
+    else {
+      scriptAnimate.call(env, dt);
+    }
+  }
+});
+
+env.addEventListener(&quot;keydown&quot;, function (evt) {
+  if (evt[modA] &amp;&amp; evt[modB]) {
+    if (evt.keyCode === Primrose.Keys.E) {
+      documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
+      documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
+      if (!editorFrameMesh.visible &amp;&amp; env.currentEditor &amp;&amp; env.currentEditor.focused) {
+        env.currentEditor.blur();
+        env.currentEditor = null;
+      }
+    }
+    else if (evt.keyCode === Primrose.Keys.X) {
+      editor.value = getSourceCode(true);
+    }
+  }
+
+  if (scriptUpdateTimeout) {
+    clearTimeout(scriptUpdateTimeout);
+    scriptUpdateTimeout = null;
+  }
+});
+
+window.addEventListener(&quot;unload&quot;, function () {
+  if (editor) {
+    var script = editor.value;
+    if (script.length &gt; 0) {
+      setSetting(&quot;code&quot;, script);
+    }
+  }
+});
+
+function wipeScene() {
+  for (var i = subScene.children.length - 1; i &gt;= 0; --i) {
+    subScene.remove(subScene.children[i]);
+  }
+}
+
+function updateScript() {
+  var newScript = editor.value,
+    exp;
+  if (newScript !== lastScript) {
+    scriptUpdateTimeout = null;
+    lastScript = newScript;
+    if (newScript.indexOf(&quot;function update&quot;) &gt;= 0 &amp;&amp;
+      newScript.indexOf(&quot;return update&quot;) &lt; 0) {
+      newScript += &quot;\nreturn update;&quot;;
+    }
+    try {
+      console.log(&quot;----- loading new script -----&quot;);
+      var scriptUpdate = new Function(&quot;scene&quot;, newScript);
+      wipeScene();
+      scriptAnimate = scriptUpdate.call(env, subScene);
+      if (scriptAnimate) {
+        scriptAnimate(0);
+      }
+      console.log(&quot;----- script loaded -----&quot;);
+      if (!scriptAnimate) {
+        console.log(&quot;----- No update script provided -----&quot;);
+      }
+      else if (env.quality === Primrose.Quality.NONE) {
+        env.quality = Primrose.Quality.MEDIUM;
+      }
+    }
+    catch (exp) {
+      console.error(exp);
+      scriptAnimate = null;
+      throw exp;
+    }
+  }
+}
+
+logger.setup(logger.USER, function (msg) {
+  if (output) {
+    var data = JSON.parse(msg),
+      t = output;
+    t.value += data.name + &quot;:&gt; &quot; + data.args[0] + &quot;\n&quot;;
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+});
+
+function clrscr() {
+  if (output) {
+    var t = output;
+    t.value = &quot;&quot;;
+    t.selectionStart = t.selectionEnd = t.value.length;
+    t.scrollIntoView(t.frontCursor);
+  }
+}
+
+function getSourceCode(skipReload) {
+  var defaultDemo = testDemo.toString(),
+    src = skipReload &amp;&amp; defaultDemo || getSetting(&quot;code&quot;, defaultDemo);
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if (src === defaultDemo) {
+    var lines = src.replace(&quot;\r\n&quot;, &quot;\n&quot;).split(&quot;\n&quot;);
+    lines.pop();
+    lines.shift();
+    for (var i = 0; i &lt; lines.length; ++i) {
+      lines[i] = lines[i].substring(2);
+    }
+    src = lines.join(&quot;\n&quot;);
+  }
+  return src.trim();
+}
+
+function testDemo(scene) {
+  var WIDTH = 5,
+    HEIGHT = 5,
+    DEPTH = 5,
+    MIDX = WIDTH / 2 - 5,
+    MIDY = HEIGHT / 2,
+    MIDZ = DEPTH / 2,
+    t = 0,
+    R = Primrose.Random,
+    start = put(hub())
+      .on(scene)
+      .at(-MIDX, 0, -DEPTH - 2);
+
+  var balls = [];
+
+  for (var i = 0; i &lt; 10; ++i) {
+    balls.push(put(brick(DECK))
+      .on(start)
+      .at(R.int(WIDTH),
+      R.int(HEIGHT),
+      R.int(DEPTH)));
+
+    balls[i].velocity = v3(
+      R.number(0, WIDTH),
+      R.number(0, HEIGHT),
+      R.number(0, DEPTH));
+  }
+
+  function update(dt) {
+    t += dt;
+    for (var i = 0; i &lt; balls.length; ++i) {
+      var ball = balls[i],
+        p = ball.position,
+        v = ball.velocity;
+      p.add(v.clone().multiplyScalar(dt));
+      if (p.x &lt; 0 &amp;&amp; v.x &lt; 0 || WIDTH &lt;= p.x &amp;&amp; v.x &gt; 0) {
+        v.x *= -1;
+      }
+      if (p.y &lt; 1 &amp;&amp; v.y &lt; 0 || HEIGHT &lt;= p.y &amp;&amp; v.y &gt; 0) {
+        v.y *= -1;
+      }
+      if (p.z &lt; 0 &amp;&amp; v.z &lt; 0
+        || DEPTH &lt;= p.z &amp;&amp; v.z &gt; 0) {
+        v.z *= -1;
+      }
+    }
+  }
+}</pre><!-- end documentation.jade documentation block -->
           </article>
         </section>
       </div>
