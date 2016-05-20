@@ -2,6 +2,9 @@ extends ../templates/documentation.jade
 block document
   // 1
   h1 Installation and Setup
+  
+  blockquote: p NOTE: The easiest way to get up and running with Primrose is to download the Quick Start template. Head over to the #[a(href="index.html") Getting Started page] to download it.
+
   p There are several ways to acquire, install, and use Primrose, depending on your needs. In general, there are two versions of the Primrose package, one that has been "minified", and one that has not. Minification is a process of removing comments and unnecessary whitespace characters, as well as renaming some internal, inaccessible variables and functions to be short, one- or two-character long names.
 
   p Versions that have been minified have the file extension #[code .min.js], whereas versions that are not minified just have the #[code .js] file extension. Wherever you see a reference to #[code Primrose.js], it may be replaced with #[code Primrose.min.js]. The choice between the two is easy:

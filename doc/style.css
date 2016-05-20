@@ -258,6 +258,10 @@ a {
   text-decoration: none;
 }
 
+blockquote a {
+  text-decoration: underline;
+}
+
 #contents a {
   color: black;
 }

@@ -213,12 +213,14 @@
           </nav>
         </details>
       </div>
-      <div id="documentation"><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
-        <h1>Procedurally generated room</h1>
-        <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/temple" target="_blank">Open demo in new window</a>.</p>
-        <iframe id="demo" src="../doc/temple" role="application" allowfullscreen></iframe>
-        <h2>Source</h2>
-        <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
+      <div id="documentation">
+        <section>
+          <article><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
+            <h1>Procedurally generated room</h1>
+            <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/temple" target="_blank">Open demo in new window</a>.</p>
+            <iframe id="demo" src="../doc/temple" role="application" allowfullscreen></iframe>
+            <h2>Source</h2>
+            <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var GRASS = &quot;../images/grass.png&quot;,
   ROCK = &quot;../images/rock.png&quot;,
   SAND = &quot;../images/sand.png&quot;,
@@ -318,6 +320,8 @@ env.addEventListener(&quot;update&quot;, function (dt) {
     dz *= -1;
   }
 });</pre><!-- end documentation.jade documentation block -->
+          </article>
+        </section>
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->

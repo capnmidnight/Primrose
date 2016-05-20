@@ -213,12 +213,14 @@
           </nav>
         </details>
       </div>
-      <div id="documentation"><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
-        <h1>Drum Machine</h1>
-        <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/music" target="_blank">Open demo in new window</a>.</p>
-        <iframe id="demo" src="../doc/music" role="application" allowfullscreen></iframe>
-        <h2>Source</h2>
-        <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
+      <div id="documentation">
+        <section>
+          <article><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
+            <h1>Drum Machine</h1>
+            <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/music" target="_blank">Open demo in new window</a>.</p>
+            <iframe id="demo" src="../doc/music" role="application" allowfullscreen></iframe>
+            <h2>Source</h2>
+            <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var env = new Primrose.BrowserEnvironment(
   // We give the application a name here, in case we ever
   // hook it up to the Multiplayer Server.
@@ -284,6 +286,8 @@ env.addEventListener(&quot;ready&quot;, function () {
     btnBase.position.set(x, 0, z);
   }
 });</pre><!-- end documentation.jade documentation block -->
+          </article>
+        </section>
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
