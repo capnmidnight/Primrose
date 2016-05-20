@@ -216,15 +216,15 @@ function updateScript() {
   }
 }
 
-logger.setup(logger.USER, function (msg) {
-  if (output) {
-    var data = JSON.parse(msg),
-      t = output;
-    t.value += data.name + ":> " + data.args[0] + "\n";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
-  }
-});
+//logger.setup(logger.USER, function (msg) {
+//  if (output) {
+//    var data = JSON.parse(msg),
+//      t = output;
+//    t.value += data.name + ":> " + data.args[0] + "\n";
+//    t.selectionStart = t.selectionEnd = t.value.length;
+//    t.scrollIntoView(t.frontCursor);
+//  }
+//});
 
 function clrscr() {
   if (output) {
