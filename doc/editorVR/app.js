@@ -107,17 +107,15 @@ env.addEventListener("ready", function () {
   editorCenter.add(editorFrameMesh);
   env.registerPickableObject(editorFrameMesh);
 
-  documentation = new Primrose.Controls.HtmlDoc({
-    id: "Documentation",
-    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
-    element: "docPage"
-  });
+  documentation = env.createElement("div");
+  documentation.id = "Documentation";
+  documentation.style.width = editorSize;
+  documentation.style.height = editorSize;
+  documentation.element = "docPage";
 
-  documentationMesh = textured(quad(2, 2), documentation);
+  documentationMesh = env.appendChild(documentation);
   documentationMesh.position.set(-2.2, env.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
-  env.scene.add(documentationMesh);
-  env.registerPickableObject(documentationMesh);
 
   console.log("INSTRUCTIONS:");
   console.log(" - " + cmdPre + "+E to show/hide editor");

@@ -38,13 +38,30 @@ Primrose.Controls.HtmlDoc = (function () {
       ///////////////////////////////////////////////////////////////////////
       this._lastImage = null;
       this._image = null;
-      this._element = Primrose.DOM.cascadeElement(this.options.element, "DIV", HTMLDivElement);
-      this._element.style.position = "absolute";
-      this._element.style.display = "";
-      this._element.style.width = px(this.bounds.width);
-      this._element.style.height = px(this.bounds.height);
-      document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hider", this._element));
-      this._render();
+      this.element = this.options.element;
+    }
+
+    get element() {
+      return this._element;
+    }
+
+    set element(v) {
+      if (v) {
+        this._element = Primrose.DOM.cascadeElement(v, "DIV", HTMLDivElement);
+        this._element.style.position = "absolute";
+        this._element.style.display = "";
+        this._element.style.width = px(this.bounds.width);
+        this._element.style.height = px(this.bounds.height);
+        document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hider", this._element));
+        this._render();
+      }
+    }
+
+    addToBrowserEnvironment(env) {
+      var mesh = textured(quad(2, 2), this);
+      env.scene.add(mesh);
+      env.registerPickableObject(mesh);
+      return mesh;
     }
 
     get value() {
