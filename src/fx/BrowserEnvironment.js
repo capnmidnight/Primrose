@@ -785,10 +785,6 @@ Primrose.BrowserEnvironment = (function () {
                 toggle: true
               });
           }
-        })
-        .then(() => {
-          this.renderer.domElement.style.cursor = "default";
-          fire("ready");
         });
 
       //
@@ -1171,6 +1167,9 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("fullscreen", setFullscreen, false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
+
+        this.renderer.domElement.style.cursor = "default";
+        fire("ready");
       });
 
 
