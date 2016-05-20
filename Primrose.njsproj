@@ -33,6 +33,8 @@
   <ItemGroup>
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
+    <Content Include="src\base\emit.js" />
+    <Content Include="src\base\range.js" />
     <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
@@ -223,7 +225,7 @@
     <Content Include="src\base\fmt.js" />
     <Content Include="src\base\forms.js" />
     <Content Include="src\base\cloud.js" />
-    <Content Include="src\base\oop.js" />
+    <Content Include="src\base\copyObject.js" />
     <Content Include="src\fx\input\Camera.js" />
     <Content Include="src\fx\input\FPSInput.js" />
     <Content Include="src\fx\input\Gamepad.js" />

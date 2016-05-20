@@ -38,7 +38,9 @@
     <script type="text/javascript" src="../src/base/cache.js"></script>
     <script type="text/javascript" src="../src/base/clone.js"></script>
     <script type="text/javascript" src="../src/base/cloud.js"></script>
+    <script type="text/javascript" src="../src/base/copyObject.js"></script>
     <script type="text/javascript" src="../src/base/cylinder.js"></script>
+    <script type="text/javascript" src="../src/base/emit.js"></script>
     <script type="text/javascript" src="../src/base/findProperty.js"></script>
     <script type="text/javascript" src="../src/base/fmt.js"></script>
     <script type="text/javascript" src="../src/base/forms.js"></script>
@@ -46,11 +48,11 @@
     <script type="text/javascript" src="../src/base/hub.js"></script>
     <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
     <script type="text/javascript" src="../src/base/light.js"></script>
-    <script type="text/javascript" src="../src/base/oop.js"></script>
     <script type="text/javascript" src="../src/base/overwrite.js"></script>
     <script type="text/javascript" src="../src/base/patch.js"></script>
     <script type="text/javascript" src="../src/base/put.js"></script>
     <script type="text/javascript" src="../src/base/quad.js"></script>
+    <script type="text/javascript" src="../src/base/range.js"></script>
     <script type="text/javascript" src="../src/base/shell.js"></script>
     <script type="text/javascript" src="../src/base/sphere.js"></script>
     <script type="text/javascript" src="../src/base/textured.js"></script>
@@ -241,7 +243,7 @@ var GRASS = &quot;../images/grass.png&quot;,
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  this = null,
+  stereoImage = null,
   stereoImageMesh = null,
 
   modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
@@ -254,54 +256,55 @@ var GRASS = &quot;../images/grass.png&quot;,
   lastScript = null,
   scriptAnimate = null,
 
-  editorCenter = new THREE.Object3D();
+  editorCenter = hub();
 
 env.addEventListener(&quot;ready&quot;, function () {
-  env.scene.add(editorCenter);
+  env.appendChild(editorCenter);
   env.scene.add(subScene);
 
-  this = env.createElement(&quot;img&quot;);
-  this.id = &quot;StereoImage&quot;;
-  this.className = &quot;stereo&quot;;
-  this.addEventListener(&quot;load&quot;, function (evt) {
-    stereoImageMesh = env.appendChild(this);
+  stereoImage = env.createElement(&quot;img&quot;);
+  stereoImage.id = &quot;StereoImage&quot;;
+  stereoImage.className = &quot;stereo&quot;;
+  stereoImage.addEventListener(&quot;load&quot;, function (evt) {
+    stereoImageMesh = env.appendChild(stereoImage);
     stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
     stereoImageMesh.position.set(-4, env.avatarHeight, -1);
   }, false);
-  this.src = &quot;../images/prong.stereo.jpg&quot;;
+  stereoImage.src = &quot;../images/prong.stereo.jpg&quot;;
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
 
-  editorFrame = new Primrose.Surface({
-    id: &quot;EditorFrame&quot;,
-    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize)
-  });
+  editorFrame = env.createElement(&quot;section&quot;);
+  editorFrame.id = &quot;EditorFrame&quot;;
+  editorFrame.className = &quot;shell&quot;;
+  editorFrame.style.width = editorSize;
+  editorFrame.style.height = editorSize;
 
-  editor = new Primrose.Text.Controls.TextBox({
-    id: &quot;Editor&quot;,
-    bounds: new Primrose.Text.Rectangle(0, 0, editorFrame.surfaceWidth, Math.floor(editorFrame.surfaceHeight * 2 / 3)),
-    tokenizer: Primrose.Text.Grammars.JavaScript,
-    value: getSourceCode(isInIFrame),
-    fontSize: fontSize
-  });
+  editor = env.createElement(&quot;textarea&quot;);
+  editor.id = &quot;Editor&quot;;
+  editor.style.width = editorFrame.surfaceWidth;
+  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.fontSize = fontSize;
+  editor.tokenizer = Primrose.Text.Grammars.JavaScript;
+  editor.value = getSourceCode(isInIFrame);
 
-  output = new Primrose.Text.Controls.TextBox({
-    id: &quot;Output&quot;,
-    bounds: new Primrose.Text.Rectangle(0, editor.surfaceHeight + 25, editorFrame.surfaceWidth, editorFrame.surfaceHeight - editor.surfaceHeight - 25),
-    tokenizer: Primrose.Text.Grammars.PlainText,
-    hideLineNumbers: true,
-    readOnly: true,
-    fontSize: fontSize
-  });
+  output = env.createElement(&quot;pre&quot;);
+  output.id = &quot;Output&quot;;
+  output.style.top = editor.surfaceHeight + 25;
+  output.style.width = editorFrame.surfaceWidth;
+  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
+  output.style.fontSize = fontSize;
 
-  button1 = new Primrose.Controls.Button2D({
-    id: &quot;ThemeButton&quot;,
-    bounds: new Primrose.Text.Rectangle(editorFrame.surfaceWidth - 400, output.bounds.top, 400, 45),
-    value: &quot;Switch to dark theme&quot;,
-    backgroundColor: &quot;#ffff00&quot;,
-    color: &quot;#0000ff&quot;
-  });
+  button1 = env.createElement(&quot;button&quot;);
+  button1.id = &quot;ThemeButton&quot;;
+  button1.style.backgroundColor = &quot;#ffff00&quot;;
+  button1.style.color = &quot;#0000ff&quot;;
+  button1.style.left = editorFrame.surfaceWidth - 400;
+  button1.style.top = output.bounds.top;
+  button1.style.width = 400;
+  button1.style.height = 45;
+  button1.value = &quot;Switch to dark theme&quot;;
 
   button1.addEventListener(&quot;click&quot;, function () {
     var nextTheme = Primrose.Text.Themes.Default,
@@ -318,25 +321,20 @@ env.addEventListener(&quot;ready&quot;, function () {
   editorFrame.appendChild(output);
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
-  editorFrameMesh = textured(shell(3, 10, 10), editorFrame, {
-    opacity: 0.75
-  });
+
+  editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = &quot;MyWindow&quot;;
   editorFrameMesh.position.set(0, 0, 0);
-  editorCenter.add(editorFrameMesh);
-  env.registerPickableObject(editorFrameMesh);
 
-  documentation = new Primrose.Controls.HtmlDoc({
-    id: &quot;Documentation&quot;,
-    bounds: new Primrose.Text.Rectangle(0, 0, editorSize, editorSize),
-    element: &quot;docPage&quot;
-  });
+  documentation = env.createElement(&quot;div&quot;);
+  documentation.id = &quot;Documentation&quot;;
+  documentation.style.width = editorSize;
+  documentation.style.height = editorSize;
+  documentation.element = &quot;docPage&quot;;
 
-  documentationMesh = textured(quad(2, 2), documentation);
+  documentationMesh = env.appendChild(documentation);
   documentationMesh.position.set(-2.2, env.avatarHeight, -1);
   documentationMesh.rotation.set(0, Math.PI / 4, 0);
-  env.scene.add(documentationMesh);
-  env.registerPickableObject(documentationMesh);
 
   console.log(&quot;INSTRUCTIONS:&quot;);
   console.log(&quot; - &quot; + cmdPre + &quot;+E to show/hide editor&quot;);
@@ -359,7 +357,7 @@ env.addEventListener(&quot;update&quot;, function (dt) {
       scriptAnimate = null;
       wipeScene();
     }
-    else{
+    else {
       scriptAnimate.call(env, dt);
     }
   }

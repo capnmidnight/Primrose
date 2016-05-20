@@ -23,31 +23,3 @@ function copyObject ( dest, source ) {
     }
   }
 }
-
-
-pliny.function({
-  name: "range",
-  description: "| [under construction]"
-} );
-function range ( n, m, s, t ) {
-  var n2 = s && n || 0,
-      m2 = s && m || n,
-      s2 = t && s || 1,
-      t2 = t || s || m;
-  for ( var i = n2; i < m2; i += s2 ) {
-    t2( i );
-  }
-}
-
-
-pliny.function({
-  name: "emit",
-  description: "| [under construction]"
-} );
-function emit ( evt, args ) {
-  var handlers = this.listeners && this.listeners[evt] || this._listeners && this._listeners[evt];
-  for ( var i = 0; handlers && i < handlers.length; ++i ) {
-    handlers[i]( args );
-  }
-}
-
