@@ -647,7 +647,13 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.appendChild = (elem) => {
-        return elem.addToBrowserEnvironment(this, this.scene);
+        if (elem instanceof THREE.Mesh) {
+          this.scene.add(elem);
+          this.registerPickableObject(elem);
+        }
+        else {
+          return elem.addToBrowserEnvironment(this, this.scene);
+        }
       };
 
 

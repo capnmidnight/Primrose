@@ -34,25 +34,24 @@ function eye(side, body) {
 }
 
 function Jabber(w, h, s) {
-  var obj = hub(),
-    skin = R.item(Primrose.SKIN_VALUES),
-    body = put(textured(sphere(0.2, 14, 7), skin)).on(obj).at(
-      R.number(-w, w),
-      1,
-      R.number(-h, h)),
+  var skin = R.item(Primrose.SKIN_VALUES),
+    body = textured(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),
       0,
       R.number(-s, s)),
     v = v3(0, 0, 0);
 
+  body.position.set(
+    R.number(-w, w),
+    1,
+    R.number(-h, h))
+
   eye(-1, body);
   eye(1, body);
-
-  obj.body = body;
-
+  
   body.rotation.y = Math.PI;
-  obj.update = function (dt) {
+  body.update = function (dt) {
     velocity.y -= env.options.gravity * dt;
     body.position.add(v.copy(velocity).multiplyScalar(dt));
     if (velocity.x > 0 && body.position.x >= w ||
@@ -71,7 +70,7 @@ function Jabber(w, h, s) {
     var d = v.length();
     if (d < 3) {
       body.lookAt(env.player.position);
-      obj.position.set(
+      body.position.set(
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01));
@@ -83,17 +82,12 @@ function Jabber(w, h, s) {
       body.lookAt(v.copy(velocity).add(body.position));
     }
   };
-  obj.jump = function (normal) {
+  body.jump = function (normal) {
     v.fromArray(normal);
     v.y = env.options.gravity / 2;
     velocity.add(v);
   };
-  obj.addToBrowserEnvironment = function (env, scene) {
-    scene.add(obj);
-    env.registerPickableObject(obj.body);
-    return obj;
-  };
-  return obj;
+  return body;
 }
 
 // Once Primrose has setup the WebGL context, setup Three.js, 
@@ -105,7 +99,7 @@ env.addEventListener("ready", function () {
     var jab = Jabber(
       MIDX / 5,
       MIDZ / 5, 1);
-    jabs[jab.body.uuid] = jab;
+    jabs[jab.uuid] = jab;
     env.appendChild(jab);
   }
 });
