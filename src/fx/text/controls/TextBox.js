@@ -356,7 +356,7 @@ Primrose.Text.Controls.TextBox = (function () {
     readWheel(evt) {
       if (this.focused) {
         if (evt.shiftKey || isChrome) {
-          this.fontSize += evt.deltaX / SCROLL_SCALE;
+          this.fontSize += -evt.deltaX / SCROLL_SCALE;
         }
         if (!evt.shiftKey || isChrome) {
           this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
