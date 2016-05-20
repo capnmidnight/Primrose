@@ -163,6 +163,10 @@ env.addEventListener("keydown", function (evt) {
   }
 });
 
+window.addEventListener("beforeunload", function (evt) {
+  return evt.returnValue = "Are you sure you want to leave?";
+}, false);
+
 window.addEventListener("unload", function () {
   if (editor) {
     var script = editor.value;
