@@ -626,7 +626,9 @@ Primrose.BrowserEnvironment = (function () {
         resolutionScale = 1,
         factories = {
           button: null,
-          img: Primrose.Controls.Image
+          img: Primrose.Controls.Image,
+          div: Primrose.Surface,
+          textarea: Primrose.Text.Controls.TextBox
         };
 
 

@@ -15,6 +15,11 @@ Primrose.Text.Controls.TextBox = (function () {
     ]
   });
   class TextBox extends Primrose.Surface {
+
+    static create() {
+      return new TextBox();
+    }
+
     constructor(options) {
       super(patch(options, {
         id: "Primrose.Text.Controls.TextBox[" + (COUNTER++) + "]"

@@ -60,6 +60,7 @@ Primrose.Controls.Image = (function () {
     }
 
     addToBrowserEnvironment(env) {
+      console.log(this.imageWidth, this.imageHeight);
       var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
       env.scene.add(imageMesh);
       env.registerPickableObject(imageMesh);
@@ -130,6 +131,8 @@ Primrose.Controls.Image = (function () {
         this.bounds.width = bounds.width;
         this.bounds.height = bounds.height;
         this.render();
+
+        emit.call(this, "load", { target: this });
         return this;
       });
     }
@@ -149,7 +152,6 @@ Primrose.Controls.Image = (function () {
     setImage(i, img) {
       this._images[i] = img;
       this.render();
-      emit.call(this, "load", { target: this });
     }
 
     get _changed() {

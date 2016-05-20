@@ -15,6 +15,10 @@ Primrose.Surface = (function () {
 
   class Surface extends Primrose.Entity {
 
+    static create() {
+      return new Surface();
+    }
+
     constructor(options) {
       super();
       options = patch(options, {
@@ -24,6 +28,44 @@ Primrose.Surface = (function () {
       this.bounds = options.bounds || new Primrose.Text.Rectangle();
       this.canvas = null;
       this.context = null;
+      this._opacity = 1;
+
+      this.style = {};
+      Object.defineProperties(this.style, {
+        width: {
+          get: () => { return this.bounds.width; },
+          set: (v) => { this.bounds.width = v; }
+        },
+        height: {
+          get: () => { return this.bounds.height; },
+          set: (v) => { this.bounds.height = v; }
+        },
+        left: {
+          get: () => { return this.bounds.left; },
+          set: (v) => { this.bounds.left = v; }
+        },
+        right: {
+          get: () => { return this.bounds.right; },
+          set: (v) => { this.bounds.right = v; }
+        },
+        top: {
+          get: () => { return this.bounds.top; },
+          set: (v) => { this.bounds.top = v; }
+        },
+        bottom: {
+          get: () => { return this.bounds.bottom; },
+          set: (v) => { this.bounds.bottom = v; }
+        },
+        opacity: {
+          get: () => { return this._opacity; },
+          set: (v) => { this._opacity = v; }
+        },
+        fontSize: {
+          get: () => { return this.fontSize; },
+          set: (v) => { this.fontSize = v; }
+        }
+      });
+
 
       if (options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
@@ -75,6 +117,15 @@ Primrose.Surface = (function () {
       this._material = null;
     }
 
+    addToBrowserEnvironment(env) {
+      var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
+        mesh = textured(geom, this, {
+        opacity: this._opacity
+      });
+      env.scene.add(mesh);
+      env.registerPickableObject(mesh);
+      return mesh;
+    }
 
     invalidate(bounds) {
       var useDefault = !bounds;

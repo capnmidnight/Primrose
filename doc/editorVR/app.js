@@ -22,7 +22,7 @@ var GRASS = "../images/grass.png",
   editorFrameMesh = null,
   documentation = null,
   documentationMesh = null,
-  this = null,
+  stereoImage = null,
   stereoImageMesh = null,
 
   modA = isOSX ? "metaKey" : "ctrlKey",
@@ -41,15 +41,15 @@ env.addEventListener("ready", function () {
   env.scene.add(editorCenter);
   env.scene.add(subScene);
 
-  this = env.createElement("img");
-  this.id = "StereoImage";
-  this.className = "stereo";
-  this.addEventListener("load", function (evt) {
-    stereoImageMesh = env.appendChild(this);
+  stereoImage = env.createElement("img");
+  stereoImage.id = "StereoImage";
+  stereoImage.className = "stereo";
+  stereoImage.addEventListener("load", function (evt) {
+    stereoImageMesh = env.appendChild(stereoImage);
     stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
     stereoImageMesh.position.set(-4, env.avatarHeight, -1);
   }, false);
-  this.src = "../images/prong.stereo.jpg";
+  stereoImage.src = "../images/prong.stereo.jpg";
 
   var editorSize = isMobile ? 512 : 1024,
     fontSize = isMobile ? 10 : 20;
