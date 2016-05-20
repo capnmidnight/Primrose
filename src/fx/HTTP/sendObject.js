@@ -10,6 +10,5 @@
   ]
 });
 Primrose.HTTP.sendObject = function (url, options) {
-  console.original_log("sendObject", options);
   return Primrose.HTTP.post("json", url, options);
 };
