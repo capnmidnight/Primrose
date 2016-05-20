@@ -31,8 +31,8 @@ Primrose.BrowserEnvironment = (function () {
     RIGHT = new THREE.Vector3(1, 0, 0),
     UP = new THREE.Vector3(0, 1, 0),
     FORWARD = new THREE.Vector3(0, 0, -1),
-    POINTER_RADIUS = 0.01,
-    POINTER_RESCALE = 20,
+    POINTER_RADIUS = 0.02,
+    POINTER_RESCALE = 10,
     FORWARDED_EVENTS = [
       "keydown", "keyup", "keypress",
       "mousedown", "mouseup", "mousemove", "wheel",
@@ -425,12 +425,13 @@ Primrose.BrowserEnvironment = (function () {
             fp[2] + fn[2] * POINTER_RADIUS);
 
           if (object === this.ground) {
-            this.pointer.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
+            this.pointer.scale.set(POINTER_RESCALE * 0.5, POINTER_RESCALE, POINTER_RESCALE * 0.5);
           }
           else {
-            this.pointer.scale.set(1, 1, 1);
+            this.pointer.scale.set(0.5, 1, 0.5);
           }
-          this.pointer.material.color.setRGB(1, 1, 1);
+
+          this.pointer.material.color.setRGB(0, 1, 0);
           this.pointer.material.emissive.setRGB(0.25, 0.25, 0.25);
 
           if (object) {
