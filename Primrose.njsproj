@@ -31,10 +31,12 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\pacman\screenshot.jpg" />
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
     <Content Include="src\base\emit.js" />
     <Content Include="src\base\range.js" />
+    <Compile Include="doc\pacman\app.js" />
     <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
@@ -68,6 +70,8 @@
     <Content Include="templates\doc\commodore.html.jade" />
     <Content Include="templates\doc\commodore\index.html.jade" />
     <Content Include="templates\doc\drum.html.jade" />
+    <Content Include="templates\doc\pacman\index.html.jade" />
+    <Content Include="templates\doc\pacman.html.jade" />
     <Content Include="templates\doc\editorVR.html.jade" />
     <Content Include="templates\doc\editorVR\index.html.jade" />
     <Content Include="templates\doc\editorVRManual.html.jade" />
@@ -270,6 +274,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="doc" />
+    <Folder Include="doc\pacman\" />
     <Folder Include="doc\fonts\" />
     <Folder Include="doc\images" />
     <Folder Include="doc\images\editorVR" />
@@ -303,6 +308,7 @@
     <Folder Include="src\fx\text\themes" />
     <Folder Include="templates\doc\" />
     <Folder Include="templates\doc\commodore\" />
+    <Folder Include="templates\doc\pacman\" />
     <Folder Include="templates\doc\editorVR\" />
     <Folder Include="templates\doc\empty\" />
     <Folder Include="templates\doc\jabbers\" />
