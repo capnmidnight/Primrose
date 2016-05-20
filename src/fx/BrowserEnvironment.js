@@ -632,6 +632,17 @@ Primrose.BrowserEnvironment = (function () {
         };
 
 
+      this.createElement = (type) => {
+        if (factories[type]) {
+          return factories[type].create();
+        }
+      };
+
+      this.appendChild = (elem) => {
+        return elem.addToBrowserEnvironment(this);
+      };
+
+
       if (Primrose.Input.VR.Version > 0) {
         modelFiles.cardboard = this.options.VRIcon;
       }
@@ -765,18 +776,6 @@ Primrose.BrowserEnvironment = (function () {
           this.renderer.domElement.style.cursor = "default";
           fire("ready");
         });
-
-      this.createElement = (type) => {
-        if (factories[type]) {
-          return factories[type].create();
-        }
-      };
-
-      this.appendChild = (elem) => {
-        var res = elem.addToBrowserEnvironment(this);
-        console.log(res);
-        return res;
-      };
 
       //
       // Initialize public properties
