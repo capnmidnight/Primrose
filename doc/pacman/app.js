@@ -6,12 +6,14 @@ var GRASS = "../images/grass.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment("Pacman", {
+    quality: Primrose.Quality.LOW,
+    autoScaleQuality: false,
+    autoRescaleQuality: false,
     skyTexture: DECK,
-    ambientSound: "../audio/wind.ogg",
+    ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
     VRIcon: "../models/cardboard.obj",
-    font: "../fonts/helvetiker_regular.typeface.js",
-    autoScaleQuality: false
+    font: "../fonts/helvetiker_regular.typeface.js"
   }),
 
   editor = null,
