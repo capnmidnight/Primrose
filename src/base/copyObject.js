@@ -1,6 +1,39 @@
 pliny.function({
   name: "copyObject",
-  description: "| [under construction]"
+  description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination.",
+  parameters: [
+    { name: "dest", type: "Object", description: "The object to which to copy fields." },
+    { name: "source", type: "Object", description: "The object from which to copy fields." }
+  ],
+  examples: [
+    {
+      name: "Copy an object.",
+      description: "Blah blah blah\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var dest = {\n\
+        a: 1,\n\
+        b: 2,\n\
+        c: {\n\
+          d: 3\n\
+        }\n\
+      },\n\
+      src = {\n\
+        b: 5,\n\
+        c: {\n\
+          e: 6\n\
+        },\n\
+        f: 7\n\
+      };\n\
+    \n\
+    copyObject(dest, src);\n\
+    console.assert(dest.a === 1);\n\
+    console.assert(dest.b === 5);\n\
+    console.assert(dest.c.d === 3);\n\
+    console.assert(dest.c.e === 6);\n\
+    console.assert(dest.f === 7);"
+    }
+  ]
 } );
 function copyObject ( dest, source ) {
   var stack = [ {dest: dest, source: source} ];
