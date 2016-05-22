@@ -173,8 +173,8 @@ Useful for one-time use models.\n\
     returns: "Promise",
     parameters: [
       { name: "src", type: "String", description: "The file from which to load." },
-      { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." },
-      { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
+      { name: "type", type: "String", optional: true, description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." },
+      { name: "progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }
     ],
     examples: [
       {
@@ -270,8 +270,8 @@ See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for 
     returns: "Promise",
     parameters: [
       { name: "arr", type: "Array", description: "The files from which to load." },
-      { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." },
-      { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
+      { name: "type", type: "String", optional: true, description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." },
+      { name: "progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }
     ],
     examples: [
       {

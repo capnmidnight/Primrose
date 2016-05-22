@@ -5,7 +5,7 @@
   parameters: [
     { name: "min", type: "Number", description: "The included minimum side of the range of numbers." },
     { name: "max", type: "Number", description: "The excluded maximum side of the range of numbers." },
-    { name: "power", type: "Number", description: "(Optional) The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range. Defaults to 1." }
+    { name: "power", type: "Number", optional: true, description: "The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range.", default: 1 }
   ],
   returns: "A random integer as good as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
   examples: [

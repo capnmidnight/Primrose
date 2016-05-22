@@ -5,7 +5,7 @@
   returns: "Promise",
   parameters: [
     { name: "url", type: "String", description: "The resource to which the request is being sent." },
-    { name: "optins.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }
+    { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }
   ],
   examples: [{
     name: "Make a GET request for plain text.",
