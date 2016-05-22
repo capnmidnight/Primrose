@@ -1,11 +1,11 @@
 ﻿pliny.function({
   name: "axis",
   description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
-  returns: "THREE.Object3D",
   parameters: [
     { name: "length", type: "Number", description: "The length each axis should be in its own axis." },
     { name: "width", type: "Number", description: "The size each axis should be in the other axes." }
   ],
+  returns: "THREE.Object3D",
   examples: [
     {
       name: "Basic usage", description: "To create a fixed point of reference in the scene, use the `axis()` function.:\n\

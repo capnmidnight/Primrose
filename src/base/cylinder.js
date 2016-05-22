@@ -15,7 +15,7 @@
   examples: [
     {
       name: "Basic usage",
-      description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple box geometry object that you can then add a material to create a mesh: \n\
+      description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
   \n\
     grammar(\"JavaScript\");\n\
     var geom = cylinder(),\n\
