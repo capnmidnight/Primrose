@@ -229,13 +229,12 @@ var GRASS = &quot;../images/grass.png&quot;,
   DECK = &quot;../images/deck.png&quot;,
 
   env = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
-    skyTexture: DECK,
+    skyTexture: &quot;../images/bg2.jpg&quot;,
     ambientSound: &quot;../audio/wind.ogg&quot;,
-    groundTexture: DECK,
+    groundTexture: GRASS,
     fullScreenIcon: &quot;../models/monitor.obj&quot;,
     VRIcon: &quot;../models/cardboard.obj&quot;,
-    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
-    autoScaleQuality: false
+    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
   }),
 
   subScene = new THREE.Object3D(),
@@ -387,6 +386,10 @@ env.addEventListener(&quot;keydown&quot;, function (evt) {
     scriptUpdateTimeout = null;
   }
 });
+
+window.addEventListener(&quot;beforeunload&quot;, function (evt) {
+  return evt.returnValue = &quot;Are you sure you want to leave?&quot;;
+}, false);
 
 window.addEventListener(&quot;unload&quot;, function () {
   if (editor) {

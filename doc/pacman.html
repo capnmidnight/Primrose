@@ -227,29 +227,24 @@ var GRASS = &quot;../images/grass.png&quot;,
   SAND = &quot;../images/sand.png&quot;,
   WATER = &quot;../images/water.png&quot;,
   DECK = &quot;../images/deck.png&quot;,
+  CODE_KEY = &quot;Pacman code&quot;,
 
-  env = new Primrose.BrowserEnvironment(&quot;Editor3D&quot;, {
+  env = new Primrose.BrowserEnvironment(&quot;Pacman&quot;, {
+    quality: Primrose.Quality.LOW,
+    autoScaleQuality: false,
+    autoRescaleQuality: false,
     skyTexture: DECK,
-    ambientSound: &quot;../audio/wind.ogg&quot;,
+    ambientSound: &quot;../audio/menu.ogg&quot;,
     groundTexture: DECK,
-    fullScreenIcon: &quot;../models/monitor.obj&quot;,
     VRIcon: &quot;../models/cardboard.obj&quot;,
-    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
-    autoScaleQuality: false
+    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
   }),
-
-  subScene = new THREE.Object3D(),
 
   editor = null,
   output = null,
-  button1 = null,
   editorFrame = null,
   editorFrameMesh = null,
-  documentation = null,
-  documentationMesh = null,
-  stereoImage = null,
-  stereoImageMesh = null,
-
+  
   modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
   modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
   cmdA = isOSX ? &quot;CMD&quot; : &quot;CTRL&quot;,
@@ -260,24 +255,15 @@ var GRASS = &quot;../images/grass.png&quot;,
   lastScript = null,
   scriptAnimate = null,
 
+  subScene = hub(),
   editorCenter = hub();
 
 env.addEventListener(&quot;ready&quot;, function () {
   env.appendChild(editorCenter);
-  env.scene.add(subScene);
-
-  stereoImage = env.createElement(&quot;img&quot;);
-  stereoImage.id = &quot;StereoImage&quot;;
-  stereoImage.className = &quot;stereo&quot;;
-  stereoImage.addEventListener(&quot;load&quot;, function (evt) {
-    stereoImageMesh = env.appendChild(stereoImage);
-    stereoImageMesh.rotation.set(0, 75 * Math.PI / 180, 0);
-    stereoImageMesh.position.set(-4, env.avatarHeight, -1);
-  }, false);
-  stereoImage.src = &quot;../images/prong.stereo.jpg&quot;;
+  env.appendChild(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-    fontSize = isMobile ? 10 : 20;
+    fontSize = 40;
 
   editorFrame = env.createElement(&quot;section&quot;);
   editorFrame.id = &quot;EditorFrame&quot;;
@@ -288,64 +274,34 @@ env.addEventListener(&quot;ready&quot;, function () {
   editor = env.createElement(&quot;textarea&quot;);
   editor.id = &quot;Editor&quot;;
   editor.style.width = editorFrame.surfaceWidth;
-  editor.style.height = Math.floor(editorFrame.surfaceHeight * 2 / 3);
+  editor.style.height = editorFrame.surfaceHeight;
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSourceCode(isInIFrame);
-
-  output = env.createElement(&quot;pre&quot;);
-  output.id = &quot;Output&quot;;
-  output.style.top = editor.surfaceHeight + 25;
-  output.style.width = editorFrame.surfaceWidth;
-  output.style.height = editorFrame.surfaceHeight - editor.surfaceHeight - 25;
-  output.style.fontSize = fontSize;
-
-  button1 = env.createElement(&quot;button&quot;);
-  button1.id = &quot;ThemeButton&quot;;
-  button1.style.backgroundColor = &quot;#ffff00&quot;;
-  button1.style.color = &quot;#0000ff&quot;;
-  button1.style.left = editorFrame.surfaceWidth - 400;
-  button1.style.top = output.bounds.top;
-  button1.style.width = 400;
-  button1.style.height = 45;
-  button1.value = &quot;Switch to dark theme&quot;;
-
-  button1.addEventListener(&quot;click&quot;, function () {
-    var nextTheme = Primrose.Text.Themes.Default,
-      nextString = &quot;Switch to dark theme&quot;;
-    if (editor.theme.name === nextTheme.name) {
-      nextTheme = Primrose.Text.Themes.Dark;
-      nextString = &quot;Switch to light theme&quot;;
-    }
-    console.log(&quot;Switching to theme: &quot; + nextTheme.name);
-    documentation.theme = output.theme = editor.theme = nextTheme;
-    button1.value = nextString;
-  }, false);
-
-  editorFrame.appendChild(output);
+  editor.value = getSetting(CODE_KEY);
+  
   editorFrame.appendChild(editor);
-  editorFrame.appendChild(button1);
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
-  editorFrameMesh.name = &quot;MyWindow&quot;;
+  editorFrameMesh.name = &quot;EditorFrameMesh&quot;;
   editorFrameMesh.position.set(0, 0, 0);
-
-  documentation = env.createElement(&quot;div&quot;);
-  documentation.id = &quot;Documentation&quot;;
-  documentation.style.width = editorSize;
-  documentation.style.height = editorSize;
-  documentation.element = &quot;docPage&quot;;
-
-  documentationMesh = env.appendChild(documentation);
-  documentationMesh.position.set(-2.2, env.avatarHeight, -1);
-  documentationMesh.rotation.set(0, Math.PI / 4, 0);
-
-  console.log(&quot;INSTRUCTIONS:&quot;);
-  console.log(&quot; - &quot; + cmdPre + &quot;+E to show/hide editor&quot;);
-  console.log(&quot; - &quot; + cmdPre + &quot;+X to reload original demo code&quot;);
-  console.log(&quot; - Z to reset position/sensor&quot;);
-  console.log();
+  editorFrameMesh.visible = false;
+  editorFrameMesh.disabled = true;
 });
+
+window.addEventListener(&quot;beforeunload&quot;, function (evt) {
+  if (editor &amp;&amp; editor.value !== getSetting(CODE_KEY)) {
+    return evt.returnValue = &quot;Are you sure you want to leave?&quot;;
+  }
+}, false);
+
+window.addEventListener(&quot;unload&quot;, function (evt) {
+  if (editor) {
+    var script = editor.value;
+    if (script.length &gt; 0) {
+      setSetting(CODE_KEY, script);
+    }
+  }
+}, false);
 
 env.addEventListener(&quot;update&quot;, function (dt) {
   if (!scriptUpdateTimeout) {
@@ -367,33 +323,64 @@ env.addEventListener(&quot;update&quot;, function (dt) {
   }
 });
 
+function pacman() {
+  var R = Primrose.Random.number,
+    L = Primrose.ModelLoader.loadObject,
+    colors = [
+      0xff0000,
+      0xffff00,
+      0xff00ff,
+      0x00ffff
+    ],
+    ghosts;
+  L(&quot;../models/ghost.obj&quot;).then(function (ghost) {
+    ghosts = colors.map(function (color, i) {
+      var g = ghost.clone(),
+        body = g.children[0];
+      textured(body, color);
+      scene.appendChild(g);
+      g.position.set(i * 3 - 4, 0, -5);
+      g.velocity = v3(R(-1, 1), 0, R(-1, 1));
+      return g;
+    });
+  });
+
+  return function (dt) {
+    if (ghosts) {
+      ghosts.forEach(function (g) {
+        g.position.add(g.velocity.clone().multiplyScalar(dt));
+      });
+    }
+  }
+}
+
 env.addEventListener(&quot;keydown&quot;, function (evt) {
   if (evt[modA] &amp;&amp; evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
-      documentationMesh.visible = editorFrameMesh.visible = !editorFrameMesh.visible;
-      documentationMesh.disabled = editorFrameMesh.disabled = !editorFrameMesh.disabled;
-      if (!editorFrameMesh.visible &amp;&amp; env.currentEditor &amp;&amp; env.currentEditor.focused) {
-        env.currentEditor.blur();
-        env.currentEditor = null;
+      if (editorFrameMesh.visible &amp;&amp; env.currentControl &amp;&amp; env.currentControl.focused) {
+        env.currentControl.blur();
+        env.currentControl = null;
       }
+      editorFrameMesh.visible = !editorFrameMesh.visible;
+      editorFrameMesh.disabled = !editorFrameMesh.disabled;
+    }
+    else if (evt.keyCode === Primrose.Keys.E &amp;&amp; editor) {
+      Primrose.HTTP.sendObject(&quot;saveScript&quot;, {
+        &quot;Content-Type&quot;: &quot;application/json&quot;,
+        data: {
+          fileName: &quot;pacman&quot;,
+          content: editor.value
+        }
+      });
     }
     else if (evt.keyCode === Primrose.Keys.X) {
-      editor.value = getSourceCode(true);
+      editor.value = &quot;&quot;;
     }
   }
 
   if (scriptUpdateTimeout) {
     clearTimeout(scriptUpdateTimeout);
     scriptUpdateTimeout = null;
-  }
-});
-
-window.addEventListener(&quot;unload&quot;, function () {
-  if (editor) {
-    var script = editor.value;
-    if (script.length &gt; 0) {
-      setSetting(&quot;code&quot;, script);
-    }
   }
 });
 
@@ -453,73 +440,6 @@ function clrscr() {
     t.value = &quot;&quot;;
     t.selectionStart = t.selectionEnd = t.value.length;
     t.scrollIntoView(t.frontCursor);
-  }
-}
-
-function getSourceCode(skipReload) {
-  var defaultDemo = testDemo.toString(),
-    src = skipReload &amp;&amp; defaultDemo || getSetting(&quot;code&quot;, defaultDemo);
-  // If there was no source code stored in local storage,
-  // we use the script from a saved function and assume
-  // it has been formatted with 2 spaces per-line.
-  if (src === defaultDemo) {
-    var lines = src.replace(&quot;\r\n&quot;, &quot;\n&quot;).split(&quot;\n&quot;);
-    lines.pop();
-    lines.shift();
-    for (var i = 0; i &lt; lines.length; ++i) {
-      lines[i] = lines[i].substring(2);
-    }
-    src = lines.join(&quot;\n&quot;);
-  }
-  return src.trim();
-}
-
-function testDemo(scene) {
-  var WIDTH = 5,
-    HEIGHT = 5,
-    DEPTH = 5,
-    MIDX = WIDTH / 2 - 5,
-    MIDY = HEIGHT / 2,
-    MIDZ = DEPTH / 2,
-    t = 0,
-    R = Primrose.Random,
-    start = put(hub())
-      .on(scene)
-      .at(-MIDX, 0, -DEPTH - 2);
-
-  var balls = [];
-
-  for (var i = 0; i &lt; 10; ++i) {
-    balls.push(put(brick(DECK))
-      .on(start)
-      .at(R.int(WIDTH),
-      R.int(HEIGHT),
-      R.int(DEPTH)));
-
-    balls[i].velocity = v3(
-      R.number(0, WIDTH),
-      R.number(0, HEIGHT),
-      R.number(0, DEPTH));
-  }
-
-  function update(dt) {
-    t += dt;
-    for (var i = 0; i &lt; balls.length; ++i) {
-      var ball = balls[i],
-        p = ball.position,
-        v = ball.velocity;
-      p.add(v.clone().multiplyScalar(dt));
-      if (p.x &lt; 0 &amp;&amp; v.x &lt; 0 || WIDTH &lt;= p.x &amp;&amp; v.x &gt; 0) {
-        v.x *= -1;
-      }
-      if (p.y &lt; 1 &amp;&amp; v.y &lt; 0 || HEIGHT &lt;= p.y &amp;&amp; v.y &gt; 0) {
-        v.y *= -1;
-      }
-      if (p.z &lt; 0 &amp;&amp; v.z &lt; 0
-        || DEPTH &lt;= p.z &amp;&amp; v.z &gt; 0) {
-        v.z *= -1;
-      }
-    }
   }
 }</pre><!-- end documentation.jade documentation block -->
           </article>
