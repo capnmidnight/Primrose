@@ -45,6 +45,7 @@
     <Content Include="src\base\range.js" />
     <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\pacman\app.js" />
+    <Compile Include="doc\pacman\pacman.js" />
     <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
