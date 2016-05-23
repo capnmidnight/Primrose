@@ -1162,7 +1162,10 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("pointerend", pointerEnd, false);
 
         this.renderer.domElement.style.cursor = "default";
-        this.input.VR.init().then(fire.bind(this, "ready"));
+        this.input.VR.init().then(() => {
+          this.input.VR.connect(0);
+          fire("ready");
+        });
       });
 
 
