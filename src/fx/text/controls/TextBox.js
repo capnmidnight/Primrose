@@ -2,7 +2,8 @@ Primrose.Text.Controls.TextBox = (function () {
   "use strict";
 
   var SCROLL_SCALE = isFirefox ? 3 : 100,
-    COUNTER = 0;
+    COUNTER = 0,
+    OFFSET = 5;
 
   pliny.class({
     parent: "Primrose.Text.Controls",
@@ -720,7 +721,8 @@ Primrose.Text.Controls.TextBox = (function () {
         maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
         tokenFront = new Primrose.Text.Cursor(),
         tokenBack = new Primrose.Text.Cursor(),
-        clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect";
+        clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+        OFFSETY = OFFSET / this.character.height;
 
       if (this.theme.regular.backColor) {
         this._bgfx.fillStyle = this.theme.regular.backColor;
@@ -737,7 +739,7 @@ Primrose.Text.Controls.TextBox = (function () {
       if (this.focused) {
         this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor ||
           Primrose.Text.Themes.Default.regular.currentRowBackColor,
-          0, minCursor.y,
+          0, minCursor.y + OFFSETY,
           this.gridBounds.width,
           maxCursor.y - minCursor.y + 1);
       }
@@ -765,7 +767,7 @@ Primrose.Text.Controls.TextBox = (function () {
               var cw = selectionBack.i - selectionFront.i;
               this.fillRect(this._bgfx, this.theme.regular.selectedBackColor ||
                 Primrose.Text.Themes.Default.regular.selectedBackColor,
-                selectionFront.x, selectionFront.y,
+                selectionFront.x, selectionFront.y + OFFSETY,
                 cw, 1);
             }
           }
@@ -782,8 +784,8 @@ Primrose.Text.Controls.TextBox = (function () {
       if (this.focused) {
         var cc = this.theme.cursorColor || "black";
         var w = 1 / this.character.width;
-        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y, w, 1);
-        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+        this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+        this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
       }
       this._bgfx.restore();
     }
@@ -815,7 +817,7 @@ Primrose.Text.Controls.TextBox = (function () {
             // draw the text
             if (this.useCaching && this._rowCache[line] !== undefined) {
               if (i === 0) {
-                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding);
+                this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
               }
             }
             else {
@@ -841,7 +843,7 @@ Primrose.Text.Controls.TextBox = (function () {
         if (this.useCaching && drawn && this._rowCache[line] === undefined) {
           this._rowCache[line] = this._fgfx.getImageData(
             this.padding,
-            textY + this.padding,
+            textY + this.padding + OFFSET,
             this.imageWidth - 2 * this.padding,
             this.character.height);
         }
