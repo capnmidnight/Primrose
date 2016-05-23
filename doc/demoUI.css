@@ -2,15 +2,23 @@
     box-sizing: border-box;
 }
 
-html, body, #frontBuffer, #fullScreenButtonContainer, progress {
+html, body, #frontBuffer, progress, #fullScreenButtonContainer {
     position: absolute;
-    padding: 0;
-    margin: 0;
     border: 0;
-    width: 100%;
-    height: 100%;
     left: 0;
     top: 0;
+}
+
+html, body, #frontBuffer {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+progress, #fullScreenButtonContainer {
+    margin: 1em;
+    width: calc(100% - 2em);
 }
 
 #frontBuffer {
