@@ -164,6 +164,7 @@ Primrose.Input.VR = (function () {
     }
 
     connect(selectedIndex) {
+      this.currentPose = null;
       this.currentDisplayIndex = selectedIndex;
     }
   }
