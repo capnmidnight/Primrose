@@ -1036,7 +1036,6 @@ Primrose.BrowserEnvironment = (function () {
       this.goVR = (index) => {
         if (this.input.VR) {
           this.input.VR.connect(index);
-          setOrientationLock();
           setPointerLock();
           return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
             .then((elem) => {
@@ -1061,6 +1060,9 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
+
+        setOrientationLock();
+
         icons.forEach((icon) => {
           icon.visible = !isFullScreenMode();
           icon.disabled = isFullScreenMode();
@@ -1068,7 +1070,6 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
-      FullScreen.addChangeListener(showHideButtons, false);
 
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive && this.inVR) {
