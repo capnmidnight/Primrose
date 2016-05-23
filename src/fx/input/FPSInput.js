@@ -201,26 +201,6 @@ Primrose.Input.FPSInput = (function () {
       }
       return values;
     }
-
-    getOrientation(x, y, z, w, value, accumulate) {
-      value = value || new THREE.Quaternion();
-      value.set(0, 0, 0, 1);
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled && mgr.getOrientation) {
-          mgr.getOrientation(x, y, z, w, temp);
-          value.multiply(temp);
-          if (!accumulate) {
-            break;
-          }
-        }
-      }
-      return value;
-    }
-
-    get VRDisplays() {
-      return this.VR && this.VR.displays;
-    }
   }
 
   return FPSInput;
