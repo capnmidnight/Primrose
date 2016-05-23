@@ -12,7 +12,8 @@ pliny.class({
 Primrose.Entity = function () {
   "use strict";
 
-  var entities = new WeakMap();
+  var entityKeys = [],
+      entities = new WeakMap();
 
   pliny.class({
     parent: "Primrose",
@@ -26,14 +27,21 @@ performs basic conversions from DOM elements to the internal Control format."
     _createClass(Entity, null, [{
       key: "registerEntity",
       value: function registerEntity(e) {
-        entities[e.id] = e;
+        entities.set(e.id, e);
+        entityKeys.push(e.id);
+        e.addEventListener("_idchanged", function (evt) {
+          entityKeys.splice(entityKeys.indexOf(evt.oldID), 1);
+          entities.delete(evt.oldID);
+          entities.set(evt.entity.id, evt.entity);
+          entityKeys.push(evt.entity.id);
+        }, false);
       }
     }, {
       key: "eyeBlankAll",
       value: function eyeBlankAll(eye) {
-        for (var id in entities) {
-          entities[id].eyeBlank(eye);
-        }
+        entityKeys.forEach(function (id) {
+          entities.get(id).eyeBlank(eye);
+        });
       }
     }]);
 
@@ -53,35 +61,36 @@ performs basic conversions from DOM elements to the internal Control format."
         paste: [],
         copy: [],
         cut: [],
-        wheel: []
+        wheel: [],
+        _idchanged: []
       };
     }
 
-    /*
-    pliny.method({
-    parent: "Primrose.Entity",
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [
-      { name: "evt", type: "String", description: "The name of the event for which we are listening." },
-      { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }
-    ],
-    examples: [{
-      name: "Add an event listener.",
-      description: "The `addEventListener()` method operates nearly identically\n\
-    to the method of the same name on DOM elements.\n\
-    \n\
-    grammar(\"JavaScript\");\n\
-    var txt = new Primrose.Text.Controls.TextBox();\n\
-    txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-    txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-    }]
-    });
-    */
-
-
     _createClass(Entity, [{
       key: "addEventListener",
+
+
+      /*
+      pliny.method({
+      parent: "Primrose.Entity",
+      name: "addEventListener",
+      description: "Adding an event listener registers a function as being ready to receive events.",
+      parameters: [
+        { name: "evt", type: "String", description: "The name of the event for which we are listening." },
+        { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }
+      ],
+      examples: [{
+        name: "Add an event listener.",
+        description: "The `addEventListener()` method operates nearly identically\n\
+      to the method of the same name on DOM elements.\n\
+      \n\
+      grammar(\"JavaScript\");\n\
+      var txt = new Primrose.Text.Controls.TextBox();\n\
+      txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
+      txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
+      }]
+      });
+      */
       value: function addEventListener(event, func) {
         if (this.listeners[event]) {
           this.listeners[event].push(func);
@@ -344,6 +353,19 @@ performs basic conversions from DOM elements to the internal Control format."
       key: "readWheel",
       value: function readWheel(evt) {
         this._forFocusedChild("readWheel", evt);
+      }
+    }, {
+      key: "id",
+      get: function get() {
+        return this._id;
+      },
+      set: function set(v) {
+        var oldID = this._id;
+        this._id = new String(v);
+        emit.call(this, "_idchanged", {
+          oldID: oldID,
+          entity: this
+        });
       }
     }, {
       key: "theme",

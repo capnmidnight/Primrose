@@ -1,8 +1,8 @@
 "use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -14,7 +14,8 @@ Primrose.Text.Controls.TextBox = function () {
   "use strict";
 
   var SCROLL_SCALE = isFirefox ? 3 : 100,
-      COUNTER = 0;
+      COUNTER = 0,
+      OFFSET = 5;
 
   pliny.class({
     parent: "Primrose.Text.Controls",
@@ -26,6 +27,13 @@ Primrose.Text.Controls.TextBox = function () {
 
   var TextBox = function (_Primrose$Surface) {
     _inherits(TextBox, _Primrose$Surface);
+
+    _createClass(TextBox, null, [{
+      key: "create",
+      value: function create() {
+        return new TextBox();
+      }
+    }]);
 
     function TextBox(options) {
       _classCallCheck(this, TextBox);
@@ -204,7 +212,7 @@ Primrose.Text.Controls.TextBox = function () {
       value: function readWheel(evt) {
         if (this.focused) {
           if (evt.shiftKey || isChrome) {
-            this.fontSize += evt.deltaX / SCROLL_SCALE;
+            this.fontSize += -evt.deltaX / SCROLL_SCALE;
           }
           if (!evt.shiftKey || isChrome) {
             this.scroll.y += Math.floor(evt.deltaY * this._wheelScrollSpeed / SCROLL_SCALE);
@@ -569,7 +577,8 @@ Primrose.Text.Controls.TextBox = function () {
             maxCursor = Primrose.Text.Cursor.max(this.frontCursor, this.backCursor),
             tokenFront = new Primrose.Text.Cursor(),
             tokenBack = new Primrose.Text.Cursor(),
-            clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect";
+            clearFunc = this.theme.regular.backColor ? "fillRect" : "clearRect",
+            OFFSETY = OFFSET / this.character.height;
 
         if (this.theme.regular.backColor) {
           this._bgfx.fillStyle = this.theme.regular.backColor;
@@ -581,7 +590,7 @@ Primrose.Text.Controls.TextBox = function () {
 
         // draw the current row highlighter
         if (this.focused) {
-          this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Primrose.Text.Themes.Default.regular.currentRowBackColor, 0, minCursor.y, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
+          this.fillRect(this._bgfx, this.theme.regular.currentRowBackColor || Primrose.Text.Themes.Default.regular.currentRowBackColor, 0, minCursor.y + OFFSETY, this.gridBounds.width, maxCursor.y - minCursor.y + 1);
         }
 
         for (var y = 0; y < this._tokenRows.length; ++y) {
@@ -601,7 +610,7 @@ Primrose.Text.Controls.TextBox = function () {
                 var selectionFront = Primrose.Text.Cursor.max(minCursor, tokenFront);
                 var selectionBack = Primrose.Text.Cursor.min(maxCursor, tokenBack);
                 var cw = selectionBack.i - selectionFront.i;
-                this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Primrose.Text.Themes.Default.regular.selectedBackColor, selectionFront.x, selectionFront.y, cw, 1);
+                this.fillRect(this._bgfx, this.theme.regular.selectedBackColor || Primrose.Text.Themes.Default.regular.selectedBackColor, selectionFront.x, selectionFront.y + OFFSETY, cw, 1);
               }
             }
 
@@ -617,8 +626,8 @@ Primrose.Text.Controls.TextBox = function () {
         if (this.focused) {
           var cc = this.theme.cursorColor || "black";
           var w = 1 / this.character.width;
-          this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y, w, 1);
-          this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y, w, 1);
+          this.fillRect(this._bgfx, cc, minCursor.x, minCursor.y + OFFSETY, w, 1);
+          this.fillRect(this._bgfx, cc, maxCursor.x, maxCursor.y + OFFSETY, w, 1);
         }
         this._bgfx.restore();
       }
@@ -626,8 +635,7 @@ Primrose.Text.Controls.TextBox = function () {
       key: "renderCanvasForeground",
       value: function renderCanvasForeground() {
         var tokenFront = new Primrose.Text.Cursor(),
-            tokenBack = new Primrose.Text.Cursor(),
-            lineOffsetY = Math.ceil(this.character.height * 0.2);
+            tokenBack = new Primrose.Text.Cursor();
 
         this._fgfx.clearRect(0, 0, this.imageWidth, this.imageHeight);
         this._fgfx.save();
@@ -637,8 +645,7 @@ Primrose.Text.Controls.TextBox = function () {
           var line = this.lines[y] + this.padding,
               row = this._tokenRows[y],
               drawn = false,
-              textY = (y - 0.2 - this.scroll.y) * this.character.height,
-              imageY = textY + lineOffsetY;
+              textY = (y - this.scroll.y) * this.character.height;
 
           for (var i = 0; i < row.length; ++i) {
             var t = row[i];
@@ -651,7 +658,7 @@ Primrose.Text.Controls.TextBox = function () {
               // draw the text
               if (this.useCaching && this._rowCache[line] !== undefined) {
                 if (i === 0) {
-                  this._fgfx.putImageData(this._rowCache[line], this.padding, imageY + this.padding);
+                  this._fgfx.putImageData(this._rowCache[line], this.padding, textY + this.padding + OFFSET);
                 }
               } else {
                 var style = this.theme[t.type] || {};
@@ -670,7 +677,7 @@ Primrose.Text.Controls.TextBox = function () {
           ++tokenFront.y;
           tokenBack.copy(tokenFront);
           if (this.useCaching && drawn && this._rowCache[line] === undefined) {
-            this._rowCache[line] = this._fgfx.getImageData(this.padding, imageY + this.padding, this.imageWidth - 2 * this.padding, this.character.height);
+            this._rowCache[line] = this._fgfx.getImageData(this.padding, textY + this.padding + OFFSET, this.imageWidth - 2 * this.padding, this.character.height);
           }
         }
 
@@ -724,7 +731,7 @@ Primrose.Text.Controls.TextBox = function () {
 
             if (currentLine > lastLine) {
               this._tgfx.fillStyle = this.theme.regular.foreColor;
-              this._tgfx.fillText(lineNumber, 0, (y - 0.2) * this.character.height);
+              this._tgfx.fillText(lineNumber, 0, y * this.character.height);
             }
             lastLine = currentLine;
           }
@@ -981,7 +988,7 @@ Primrose.Text.Controls.TextBox = function () {
         return this._tabWidth;
       },
       set: function set(tw) {
-        this._tabWidth = tw || 4;
+        this._tabWidth = tw || 2;
         this._tabString = "";
         for (var i = 0; i < this._tabWidth; ++i) {
           this._tabString += " ";

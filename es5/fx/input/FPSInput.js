@@ -33,7 +33,7 @@ Primrose.Input.FPSInput = function () {
         pointerend: []
       };
 
-      this.managers = [
+      this.managers = [new Primrose.Input.VR(),
       // keyboard should always run on the window
       new Primrose.Input.Keyboard(window, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
@@ -99,18 +99,12 @@ Primrose.Input.FPSInput = function () {
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
-        strafe: { axes: [Primrose.Input.Gamepad.LSX] },
-        drive: { axes: [Primrose.Input.Gamepad.LSY] },
-        heading: { axes: [-Primrose.Input.Gamepad.RSX], integrate: true },
+        strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
+        drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
+        heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
         dheading: { commands: ["heading"], delta: true },
-        pitch: { axes: [Primrose.Input.Gamepad.RSY], integrate: true }
+        pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
       })];
-
-      if (Primrose.Input.VR.Version > 0) {
-        var vr = new Primrose.Input.VR();
-        this.managers.push(vr);
-        vr.init();
-      }
 
       this.managers.forEach(function (mgr) {
         return _this[mgr.name] = mgr;
@@ -209,28 +203,6 @@ Primrose.Input.FPSInput = function () {
           }
         }
         return values;
-      }
-    }, {
-      key: "getOrientation",
-      value: function getOrientation(x, y, z, w, value, accumulate) {
-        value = value || new THREE.Quaternion();
-        value.set(0, 0, 0, 1);
-        for (var i = 0; i < this.managers.length; ++i) {
-          var mgr = this.managers[i];
-          if (mgr.enabled && mgr.getOrientation) {
-            mgr.getOrientation(x, y, z, w, temp);
-            value.multiply(temp);
-            if (!accumulate) {
-              break;
-            }
-          }
-        }
-        return value;
-      }
-    }, {
-      key: "VRDisplays",
-      get: function get() {
-        return this.VR && this.VR.displays;
       }
     }]);
 

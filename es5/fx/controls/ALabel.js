@@ -60,6 +60,8 @@ Primrose.Controls.Label = function () {
       _this.fontSize = _this.options.fontSize || 16;
       _this.refreshCharacter();
       _this.value = _this.options.value;
+      _this.backgroundColor = _this.options.backgroundColor || _this.theme.regular.backColor;
+      _this.color = _this.options.color || _this.theme.regular.foreColor;
       return _this;
     }
 
@@ -102,13 +104,10 @@ Primrose.Controls.Label = function () {
 
           this.context.textAlign = this.textAlign || "left";
 
-          var backColor = this.options.backgroundColor || this.theme.regular.backColor,
-              foreColor = this.options.color || this.theme.regular.foreColor;
-
-          var clearFunc = backColor ? "fillRect" : "clearRect";
+          var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
 
           if (this.theme.regular.backColor) {
-            this.context.fillStyle = backColor;
+            this.context.fillStyle = this.backgroundColor;
           }
 
           this.context[clearFunc](0, 0, this.imageWidth, this.imageHeight);
@@ -133,7 +132,7 @@ Primrose.Controls.Label = function () {
 
               var font = (this.theme.regular.fontWeight || "") + " " + (this.theme.regular.fontStyle || "") + " " + this.character.height + "px " + this.theme.fontFamily;
               this.context.font = font.trim();
-              this.context.fillStyle = foreColor;
+              this.context.fillStyle = this.color;
               this.context.fillText(line, textX, textY);
             }
           }

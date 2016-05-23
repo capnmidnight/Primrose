@@ -9,48 +9,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.VR = function () {
-
-  function makeTransform(s, eye, near, far) {
-    var t = eye.offset;
-    s.translation = new THREE.Matrix4().makeTranslation(t[0], t[1], t[2]);
-    s.projection = fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far);
-    s.viewport = {
-      left: 0,
-      top: 0,
-      width: eye.renderWidth,
-      height: eye.renderHeight
-    };
-  }
-
-  function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-    var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-        downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-        leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-        rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-        xScale = 2.0 / (leftTan + rightTan),
-        yScale = 2.0 / (upTan + downTan),
-        matrix = new THREE.Matrix4();
-
-    matrix.elements[0] = xScale;
-    matrix.elements[1] = 0.0;
-    matrix.elements[2] = 0.0;
-    matrix.elements[3] = 0.0;
-    matrix.elements[4] = 0.0;
-    matrix.elements[5] = yScale;
-    matrix.elements[6] = 0.0;
-    matrix.elements[7] = 0.0;
-    matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-    matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
-    matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-    matrix.elements[11] = -1.0;
-    matrix.elements[12] = 0.0;
-    matrix.elements[13] = 0.0;
-    matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-    matrix.elements[15] = 0.0;
-
-    return matrix;
-  }
-
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
@@ -101,9 +59,10 @@ Primrose.Input.VR = function () {
       };
 
       _this.displays = [];
-      _this.currentDisplay = null;
-      _this.currentPose = null;
+      _this._transforms = [];
       _this.transforms = null;
+      _this.currentDisplayIndex = -1;
+      _this.currentPose = null;
 
       function onConnected(id) {
         for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
@@ -111,7 +70,7 @@ Primrose.Input.VR = function () {
         }
       }
 
-      function enumerateVRDisplays(elem, displays) {
+      function enumerateVRDisplays(displays) {
         console.log("Displays found:", displays.length);
         this.displays = displays;
         this.displays.forEach(onConnected);
@@ -122,65 +81,9 @@ Primrose.Input.VR = function () {
         }
       }
 
-      function enumerateLegacyVRDevices(elem, devices) {
-        console.log("Devices found:", devices.length);
-        var displays = {},
-            id = null;
-
-        for (var i = 0; i < devices.length; ++i) {
-          var device = devices[i];
-          id = device.hardwareUnitId;
-          if (!displays[id]) {
-            displays[id] = {};
-          }
-
-          var display = displays[id];
-          if (device instanceof HMDVRDevice) {
-            display.display = device;
-          } else if (devices[i] instanceof PositionSensorVRDevice) {
-            display.sensor = device;
-          }
-        }
-
-        var mockedLegacyDisplays = [];
-        for (id in displays) {
-          mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id]));
-        }
-
-        return enumerateVRDisplays.call(this, elem, mockedLegacyDisplays);
-      }
-
-      function createCardboardVRDisplay(elem) {
-        var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
-        return enumerateVRDisplays.call(this, elem, mockedCardboardDisplays);
-      }
-
       _this.init = function () {
-        var _this2 = this;
-
-        console.info("Checking for VR Displays...");
-        if (navigator.getVRDisplays) {
-          console.info("Using WebVR API 1");
-          return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this, elem));
-        } else if (navigator.getVRDevices) {
-          console.info("Using Chromium Experimental WebVR API");
-          return navigator.getVRDevices().then(enumerateLegacyVRDevices.bind(this, elem)).catch(console.error.bind(console, "Could not find VR devices"));
-        } else {
-          return new Promise(function (resolve, reject) {
-            var timer = setTimeout(reject, 1000);
-            var waitForValidMotion = function waitForValidMotion(evt) {
-              if (evt.alpha) {
-                clearTimeout(timer);
-                timer = null;
-                window.removeEventListener("deviceorientation", waitForValidMotion);
-                console.info("Using Device Motion API");
-                resolve(createCardboardVRDisplay.call(_this2, elem));
-              }
-            };
-            console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
-            window.addEventListener("deviceorientation", waitForValidMotion, false);
-          });
-        }
+        console.info("Checking for displays...");
+        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this));
       };
       return _this;
     }
@@ -191,7 +94,7 @@ Primrose.Input.VR = function () {
         if (!this.currentDisplay) {
           return Promise.reject("No display");
         } else {
-          return this.currentDisplay.requestPresent(VR.Version === 1 && isMobile ? opts[0] : opts).then(function (elem) {
+          return this.currentDisplay.requestPresent(opts).then(function (elem) {
             return elem || opts[0].source;
           });
         }
@@ -250,22 +153,22 @@ Primrose.Input.VR = function () {
       key: "resetTransforms",
       value: function resetTransforms(near, far) {
         if (this.currentDisplay) {
-          this.enabled = true;
-          var params = {
-            left: this.currentDisplay.getEyeParameters("left"),
-            right: this.currentDisplay.getEyeParameters("right")
-          };
-          var transforms = [{}, {}];
-          makeTransform(transforms[0], params.left, near, far);
-          makeTransform(transforms[1], params.right, near, far);
-          transforms[1].viewport.left = transforms[0].viewport.width;
-          this.transforms = transforms;
+          if (!this._transforms[this.currentDisplayIndex]) {
+            this._transforms[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
+          }
+          this.transforms = this._transforms[this.currentDisplayIndex].getTransforms(near, far);
         }
       }
     }, {
       key: "connect",
       value: function connect(selectedIndex) {
-        this.currentDisplay = this.displays[selectedIndex];
+        this.currentPose = null;
+        this.currentDisplayIndex = selectedIndex;
+      }
+    }, {
+      key: "currentDisplay",
+      get: function get() {
+        return this.displays[this.currentDisplayIndex];
       }
     }], [{
       key: "Version",

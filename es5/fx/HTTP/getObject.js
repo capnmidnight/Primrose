@@ -5,7 +5,7 @@ pliny.function({
   name: "getObject",
   description: "Get a JSON object from a server.",
   returns: "Promise",
-  parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+  parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
   examples: [{
     name: "Make a GET request for a JSON object.",
     description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\

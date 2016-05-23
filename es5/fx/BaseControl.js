@@ -114,7 +114,7 @@ to a 3D element on-the-fly.\n\
 \n\
     grammar(\"JavaScript\");\n\
     var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
-      my3DButton = new Primrose.Button();\n\
+      my3DButton = new Primrose.Controls.Button3D();\n\
     my3DButton.copyElement(myDOMButton);"
     }]
   });

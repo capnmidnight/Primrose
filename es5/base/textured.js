@@ -24,15 +24,30 @@ var textured = function () {
     if (options.opacity === undefined) {
       options.opacity = 1;
     }
+    if (options.txtRepeatS === undefined) {
+      options.txtRepeatS = 1;
+    }
+    if (options.txtRepeatT === undefined) {
+      options.txtRepeatT = 1;
+    }
+    if (options.roughness === undefined) {
+      options.roughness = 0.5;
+    }
+    if (options.metalness === undefined) {
+      options.metalness = 0;
+    }
+
+    options.unshaded = !!options.unshaded;
+    options.wireframe = !!options.wireframe;
 
     var material = null;
     if (txt instanceof THREE.Material) {
       material = txt;
       txt = null;
     } else {
-      var txtID = txt.id || txt.toString(),
+      var txtID = (txt.id || txt).toString(),
           textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
-          materialDescription = "material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ")";
+          materialDescription = "Primrose.material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.wireframe + ", " + options.emissive + ")";
       material = cache(materialDescription, function () {
         var materialOptions = {
           transparent: options.opacity < 1,
@@ -45,20 +60,18 @@ var textured = function () {
           materialOptions.shading = THREE.FlatShading;
           MaterialType = THREE.MeshBasicMaterial;
         } else {
-          if (options.roughness === undefined) {
-            options.roughness = 0.5;
-          }
-          if (options.metalness === undefined) {
-            options.metalness = 0;
-          }
           materialOptions.roughness = options.roughness;
           materialOptions.metalness = options.metalness;
+
+          if (options.emissive !== undefined) {
+            materialOptions.emissive = options.emissive;
+          }
         }
         return new MaterialType(materialOptions);
       });
     }
 
-    material.wireframe = !!options.wireframe;
+    material.wireframe = options.wireframe;
 
     var obj = null;
     if (geometry.type.indexOf("Geometry") > -1) {
@@ -78,7 +91,7 @@ var textured = function () {
         if (texture instanceof Primrose.Surface) {
           surface = texture;
           texture = surface.texture;
-          if (options.scaleTextureWidth || !options.scaleTextureHeight) {
+          if (!options.scaleTextureWidth || !options.scaleTextureHeight) {
             var imgWidth = surface.imageWidth,
                 imgHeight = surface.imageHeight,
                 dimX = Math.ceil(Math.log(imgWidth) / Math.LN2),

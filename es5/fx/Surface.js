@@ -2,9 +2,9 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -27,6 +27,13 @@ Primrose.Surface = function () {
   var Surface = function (_Primrose$Entity) {
     _inherits(Surface, _Primrose$Entity);
 
+    _createClass(Surface, null, [{
+      key: "create",
+      value: function create() {
+        return new Surface();
+      }
+    }]);
+
     function Surface(options) {
       _classCallCheck(this, Surface);
 
@@ -39,6 +46,77 @@ Primrose.Surface = function () {
       _this.bounds = options.bounds || new Primrose.Text.Rectangle();
       _this.canvas = null;
       _this.context = null;
+      _this._opacity = 1;
+
+      _this.style = {};
+      Object.defineProperties(_this.style, {
+        width: {
+          get: function get() {
+            return _this.bounds.width;
+          },
+          set: function set(v) {
+            _this.bounds.width = v;
+            _this.resize();
+          }
+        },
+        height: {
+          get: function get() {
+            return _this.bounds.height;
+          },
+          set: function set(v) {
+            _this.bounds.height = v;
+            _this.resize();
+          }
+        },
+        left: {
+          get: function get() {
+            return _this.bounds.left;
+          },
+          set: function set(v) {
+            _this.bounds.left = v;
+          }
+        },
+        top: {
+          get: function get() {
+            return _this.bounds.top;
+          },
+          set: function set(v) {
+            _this.bounds.top = v;
+          }
+        },
+        opacity: {
+          get: function get() {
+            return _this._opacity;
+          },
+          set: function set(v) {
+            _this._opacity = v;
+          }
+        },
+        fontSize: {
+          get: function get() {
+            return _this.fontSize;
+          },
+          set: function set(v) {
+            _this.fontSize = v;
+          }
+        },
+        backgroundColor: {
+          get: function get() {
+            return _this.backgroundColor;
+          },
+          set: function set(v) {
+            _this.backgroundColor = v;
+          }
+        },
+        color: {
+          get: function get() {
+            return _this.color;
+          },
+          set: function set(v) {
+            _this.color = v;
+          }
+        }
+      });
 
       if (options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
@@ -88,6 +166,17 @@ Primrose.Surface = function () {
     }
 
     _createClass(Surface, [{
+      key: "addToBrowserEnvironment",
+      value: function addToBrowserEnvironment(env, scene) {
+        var geom = this.className === "shell" ? shell(3, 10, 10) : quad(2, 2),
+            mesh = textured(geom, this, {
+          opacity: this._opacity
+        });
+        scene.add(mesh);
+        env.registerPickableObject(mesh);
+        return mesh;
+      }
+    }, {
       key: "invalidate",
       value: function invalidate(bounds) {
         var useDefault = !bounds;

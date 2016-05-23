@@ -5,7 +5,7 @@ pliny.function({
   name: "getText",
   description: "Get plain text from a server.",
   returns: "Promise",
-  parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "optins.progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+  parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
   examples: [{
     name: "Make a GET request for plain text.",
     description: "Use this to load arbitrary files and do whatever you want with them.\n\

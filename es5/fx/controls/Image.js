@@ -26,6 +26,13 @@ Primrose.Controls.Image = function () {
   var Image = function (_Primrose$Surface) {
     _inherits(Image, _Primrose$Surface);
 
+    _createClass(Image, null, [{
+      key: "create",
+      value: function create() {
+        return new Image();
+      }
+    }]);
+
     function Image(options) {
       _classCallCheck(this, Image);
 
@@ -54,6 +61,7 @@ Primrose.Controls.Image = function () {
       _this._lastImage = null;
       _this._images = [];
       _this._currentImageIndex = 0;
+      _this.className = "";
 
       setTimeout(function () {
         if (options.value) {
@@ -68,6 +76,14 @@ Primrose.Controls.Image = function () {
     }
 
     _createClass(Image, [{
+      key: "addToBrowserEnvironment",
+      value: function addToBrowserEnvironment(env, scene) {
+        var imageMesh = textured(quad(0.5, 0.5 * this.imageHeight / this.imageWidth), this);
+        scene.add(imageMesh);
+        env.registerPickableObject(imageMesh);
+        return imageMesh;
+      }
+    }, {
       key: "loadImage",
       value: function loadImage(i, src) {
         var _this2 = this;
@@ -123,6 +139,8 @@ Primrose.Controls.Image = function () {
           _this3.bounds.width = bounds.width;
           _this3.bounds.height = bounds.height;
           _this3.render();
+
+          emit.call(_this3, "load", { target: _this3 });
           return _this3;
         });
       }
@@ -136,7 +154,6 @@ Primrose.Controls.Image = function () {
       value: function setImage(i, img) {
         this._images[i] = img;
         this.render();
-        emit.call(this, "load", { target: this });
       }
     }, {
       key: "eyeBlank",
@@ -163,6 +180,18 @@ Primrose.Controls.Image = function () {
           this._lastImage = this.image;
 
           this.invalidate();
+        }
+      }
+    }, {
+      key: "src",
+      get: function get() {
+        return this.getImage(this._currentImageIndex).src;
+      },
+      set: function set(v) {
+        if (this.className === "stereo") {
+          this.loadStereoImage(v);
+        } else {
+          this.loadImage(0, src);
         }
       }
     }, {

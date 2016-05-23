@@ -45,12 +45,13 @@ Primrose.Input.Gamepad = function () {
             currentPads = [],
             i;
 
-        if (navigator.getGamepads) {
-          pads = navigator.getGamepads();
-        } else if (navigator.webkitGetGamepads) {
-          pads = navigator.webkitGetGamepads();
+        if (!pads || pads.length === 0) {
+          if (navigator.getGamepads) {
+            pads = navigator.getGamepads();
+          } else if (navigator.webkitGetGamepads) {
+            pads = navigator.webkitGetGamepads();
+          }
         }
-
         if (pads) {
           for (i = 0; i < pads.length; ++i) {
             var pad = pads[i];

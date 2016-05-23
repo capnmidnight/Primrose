@@ -167,7 +167,7 @@ Useful for one-time use models.\n\
 > meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
 > policy that Primrose uses for requests.",
     returns: "Promise",
-    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+    parameters: [{ name: "src", type: "String", description: "The file from which to load." }, { name: "type", type: "String", optional: true, description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
     examples: [{
       name: "Load a basic model.", description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
 \n\
@@ -261,7 +261,7 @@ Useful for static models.\n\
 \n\
 See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for more details on how individual models are loaded.",
     returns: "Promise",
-    parameters: [{ name: "arr", type: "Array", description: "The files from which to load." }, { name: "type", type: "String", description: "(Optional) The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", description: "(Optional) A callback function to be called as the download from the server progresses." }],
+    parameters: [{ name: "arr", type: "Array", description: "The files from which to load." }, { name: "type", type: "String", optional: true, description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension." }, { name: "progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
     examples: [{
       name: "Load some models.", description: "When Blender exports models, they are frequently treated as full scenes, essentially making them scene-graph sub-trees.\n\
 We can load a bunch of models in one go using the following code.\n\

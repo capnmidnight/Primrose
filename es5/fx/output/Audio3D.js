@@ -148,7 +148,7 @@ Primrose.Output.Audio3D = function () {
     parent: "Primrose.Output.Audio3D",
     name: "loadSound",
     returns: "Promise<MediaElementAudioSourceNode>",
-    parameters: [{ name: "sources", type: "String|Array<String>", description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag." }, { name: "loop", type: "Boolean", description: "(Optional) indicate that the sound should be played on loop." }],
+    parameters: [{ name: "sources", type: "String|Array<String>", description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag." }, { name: "loop", type: "Boolean", optional: true, description: "indicate that the sound should be played on loop." }],
     description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
     examples: [{
       name: "Load a single audio file.",
@@ -203,12 +203,14 @@ Primrose.Output.Audio3D = function () {
         return source;
       }).forEach(audio.appendChild.bind(audio));
       audio.oncanplay = function () {
-        audio.oncanplay = null;
-        var snd = {
-          volume: _this4.context.createGain(),
-          source: _this4.context.createMediaElementSource(audio)
-        };
-        snd.source.connect(snd.volume);
+        if (_this4.context) {
+          audio.oncanplay = null;
+          var snd = {
+            volume: _this4.context.createGain(),
+            source: _this4.context.createMediaElementSource(audio)
+          };
+          snd.source.connect(snd.volume);
+        }
         resolve(snd);
       };
       audio.onerror = reject;

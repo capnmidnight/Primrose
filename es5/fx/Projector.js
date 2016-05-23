@@ -2181,7 +2181,8 @@ Primrose.Projector = function () {
         delete this.objects[obj.uuid];
         var found = false;
         for (var j = 0; !found && j < this.objectIDs.length; ++j) {
-          found = found || this.objects[this.objectIDs[j]].geomID === obj.geomID;
+          var obj2 = this.objects[this.objectIDs[j]];
+          found = found || obj2 && obj2.geomID === obj.geomID;
         }
         if (!found) {
           delete this.geometryCache[obj.geomID];

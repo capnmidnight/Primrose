@@ -21,6 +21,7 @@
 var gulp = require("gulp"),
   babel = require("gulp-babel"),
   concat = require("gulp-concat"),
+  cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
   footer = require("gulp-footer"),
   fs = require("fs"),
@@ -170,7 +171,7 @@ function pugConfiguration(options, defaultData) {
     .pipe(gulp.dest("."));
 }
 
-gulp.task("pug:release", function () {
+gulp.task("pug:release", ["cssmin", "jsmin"], function () {
   return pugConfiguration({}, {
     jsExt: ".min.js",
     cssExt: ".min.css",
@@ -178,8 +179,15 @@ gulp.task("pug:release", function () {
   });
 });
 
-gulp.task("pug:debug:es5", function () {
+gulp.task("pug:debug:es5", ["babel"], function () {
   return pugConfiguration({ pretty: true }, debugDataES5);
+});
+
+gulp.task("cssmin", function () {
+  return gulp.src(["doc/**/*.css", "!doc/**/*.min.css"], { base: "./doc" })
+    .pipe(rename({ suffix: ".min" }))
+    .pipe(cssmin())
+    .pipe(gulp.dest("./doc"));
 });
 
 gulp.task("pug:debug:es6", function () {
