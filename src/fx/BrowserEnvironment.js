@@ -552,8 +552,6 @@ Primrose.BrowserEnvironment = (function () {
           canvasHeight,
           aspectWidth;
 
-        setOrientationLock();
-
         if (this.inVR) {
           this.input.VR.resetTransforms(
             this.options.nearPlane,
@@ -621,9 +619,11 @@ Primrose.BrowserEnvironment = (function () {
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
-        icons = [],
-        cardboardFactory = null,
-        cardboardTextFactory = null,
+        fgColor = null,
+        icons = null,
+        iconModels = {
+          "Standard Monitor": null,
+        },
         resolutionScale = 1,
         factories = {
           button: Primrose.Controls.Button2D,
@@ -686,32 +686,35 @@ Primrose.BrowserEnvironment = (function () {
         this.registerPickableObject(icon);
       };
 
-      var fgColor = null;
-
-      var makeCardboard = (display, i) => {
-        var cardboard = cardboardFactory.clone(),
+      var makeIcon = (display, i) => {
+        var isVR = !(display instanceof StandardMonitorPolyfill),
+          icon = (iconModels[display.displayName] || iconModels["Google Cardboard"]).clone(),
+          geom = icon.children[0] && icon.children[0].geometry || icon.geometry,
           titleText = textured(text3D(0.05, display.displayName), fgColor),
-          vrText = textured(text3D(0.1, "VR"), fgColor);
+          funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), fgColor);
 
-        cardboard.name = "Cardboard" + i;
-        cardboard.addEventListener("click", this.goVR.bind(this, i), false);
+        icon.name = (display.displayName + "Icon").replace(/ /g, "");
+        icon.addEventListener("click", (isVR && this.goVR || this.goFullScreen).bind(this, i), false);
+
+        geom.computeBoundingBox();
+        
+        put(funcText)
+          .on(icon)
+          .rot(0, 90 * Math.PI / 180, 0)
+          .at(0, geom.boundingBox.max.y + 0.01, funcText.geometry.boundingSphere.radius);
+
 
         put(titleText)
-          .on(cardboard)
+          .on(icon)
           .rot(0, 90 * Math.PI / 180, 0)
-          .at(0, -0.1, titleText.geometry.boundingSphere.radius);
+          .at(0, geom.boundingBox.min.y - titleText.geometry.boundingBox.max.y - 0.01, titleText.geometry.boundingSphere.radius);
 
-        put(vrText)
-          .on(cardboard)
-          .rot(0, 90 * Math.PI / 180, 0)
-          .at(0, 0.075, vrText.geometry.boundingSphere.radius);
-
-        put(cardboard)
+        put(icon)
           .on(this.scene)
           .rot(0, 270 * Math.PI / 180, 0);
 
-        this.registerPickableObject(cardboard);
-        return cardboard;
+        this.registerPickableObject(icon);
+        return icon;
       };
 
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
@@ -724,6 +727,7 @@ Primrose.BrowserEnvironment = (function () {
               curveSegments: 2
             });
             geom.computeBoundingSphere();
+            geom.computeBoundingBox();
             return geom;
           }.bind(window, models.font);
 
@@ -734,27 +738,23 @@ Primrose.BrowserEnvironment = (function () {
           fgColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
 
           if (models.monitor) {
-            var monitor = models.monitor;
-            monitor.name = "Monitor";
-            var monitorText = textured(text3D(0.1, "Fullscreen"), fgColor),
-              radius = monitorText.geometry.boundingSphere.radius;
-            put(monitorText)
-              .on(monitor)
-              .rot(0, 90 * Math.PI / 180, 0)
-              .at(0, 1.25, radius);
-            monitor.addEventListener("click", this.goFullScreen, false);
-            monitor.rotation.set(0, Math.PI * 3 / 2, 0);
-            monitor.position.y = -1;
-            icons.push(monitor);
+            iconModels["Standard Monitor"] = new Primrose.ModelLoader(models.monitor);
           }
 
           if (models.cardboard) {
-            cardboardFactory = new Primrose.ModelLoader(models.cardboard);
-            icons.splice
-              .bind(icons, icons.length, 0)
-              .apply(icons, (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
-                .map(makeCardboard));
+            iconModels["Google Cardboard"] = new Primrose.ModelLoader(models.cardboard);
           }
+          else {
+            iconModels["Google Cardboard"] = brick(0xffffff, 0.1, 0.1, 0.1);
+          }
+
+          iconModels["Test Icon"] =
+            iconModels["Oculus Rift DK2, Oculus VR"] =
+            iconModels["Device Motion API"] =
+            iconModels["Google, Inc. Cardboard v1"] = iconModels["Google Cardboard"];
+
+          icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
+            .map(makeIcon);
 
           icons.forEach(putIconInScene);
 
@@ -1036,6 +1036,7 @@ Primrose.BrowserEnvironment = (function () {
       this.goVR = (index) => {
         if (this.input.VR) {
           this.input.VR.connect(index);
+          setOrientationLock();
           setPointerLock();
           return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
             .then((elem) => {
@@ -1170,7 +1171,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("pointerend", pointerEnd, false);
 
         this.renderer.domElement.style.cursor = "default";
-        fire("ready");
+        this.input.VR.init().then(fire.bind(this, "ready"));
       });
 
 
@@ -1233,6 +1234,9 @@ Primrose.BrowserEnvironment = (function () {
       Object.defineProperties(this, {
         inVR: {
           get: () => this.input && this.input.VR && this.input.VR.currentDisplay && this.input.VR.currentDisplay.isPresenting
+        },
+        displays: {
+          get: () => this.input && this.input.VR && this.input.VR.displays || []
         },
         quality: {
           get: () => quality,

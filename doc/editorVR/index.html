@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="web-app-capable" content="yes">
     <meta name="theme-color" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,129 +20,688 @@
     <meta property="og:title" content="Primrose VR: WebVR Application Framework">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
     <title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
-    <link type="text/css" rel="stylesheet" href="../../doc/demoUI.css">
-    <style>#frontBuffer { background-image:url(screenshot.jpg); }</style>
-    <script type="text/javascript" src="../../node_modules/logger/logger.js"></script>
-    <script type="text/javascript" src="../../node_modules/promise-polyfill/promise.js"></script>
-    <script type="text/javascript" src="../../node_modules/lavu-details-polyfill/lib/index.min.js"></script>
-    <script type="text/javascript" src="../../node_modules/pliny/pliny.js"></script>
-    <script type="text/javascript" src="../../node_modules/socket.io-client/socket.io.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/three.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
-    <script type="text/javascript" src="../../node_modules/html2canvas/dist/html2canvas.js"></script>
-    <script type="text/javascript" src="../../src/index.js"></script>
-    <script type="text/javascript" src="../../src/base/axis.js"></script>
-    <script type="text/javascript" src="../../src/base/box.js"></script>
-    <script type="text/javascript" src="../../src/base/brick.js"></script>
-    <script type="text/javascript" src="../../src/base/cache.js"></script>
-    <script type="text/javascript" src="../../src/base/clone.js"></script>
-    <script type="text/javascript" src="../../src/base/cloud.js"></script>
-    <script type="text/javascript" src="../../src/base/copyObject.js"></script>
-    <script type="text/javascript" src="../../src/base/cylinder.js"></script>
-    <script type="text/javascript" src="../../src/base/emit.js"></script>
-    <script type="text/javascript" src="../../src/base/findProperty.js"></script>
-    <script type="text/javascript" src="../../src/base/fmt.js"></script>
-    <script type="text/javascript" src="../../src/base/forms.js"></script>
-    <script type="text/javascript" src="../../src/base/fullscreen.js"></script>
-    <script type="text/javascript" src="../../src/base/hub.js"></script>
-    <script type="text/javascript" src="../../src/base/InsideSphereGeometry.js"></script>
-    <script type="text/javascript" src="../../src/base/light.js"></script>
-    <script type="text/javascript" src="../../src/base/overwrite.js"></script>
-    <script type="text/javascript" src="../../src/base/patch.js"></script>
-    <script type="text/javascript" src="../../src/base/put.js"></script>
-    <script type="text/javascript" src="../../src/base/quad.js"></script>
-    <script type="text/javascript" src="../../src/base/range.js"></script>
-    <script type="text/javascript" src="../../src/base/shell.js"></script>
-    <script type="text/javascript" src="../../src/base/sphere.js"></script>
-    <script type="text/javascript" src="../../src/base/textured.js"></script>
-    <script type="text/javascript" src="../../src/base/v3.js"></script>
-    <script type="text/javascript" src="../../src/fx/Angle.js"></script>
-    <script type="text/javascript" src="../../src/fx/BaseControl.js"></script>
-    <script type="text/javascript" src="../../src/fx/BrowserEnvironment.js"></script>
-    <script type="text/javascript" src="../../src/fx/ButtonFactory.js"></script>
-    <script type="text/javascript" src="../../src/fx/Entity.js"></script>
-    <script type="text/javascript" src="../../src/fx/InputProcessor.js"></script>
-    <script type="text/javascript" src="../../src/fx/Keys.js"></script>
-    <script type="text/javascript" src="../../src/fx/ModelLoader.js"></script>
-    <script type="text/javascript" src="../../src/fx/Projector.js"></script>
-    <script type="text/javascript" src="../../src/fx/Surface.js"></script>
-    <script type="text/javascript" src="../../src/fx/WebRTCSocket.js"></script>
-    <script type="text/javascript" src="../../src/fx/Workerize.js"></script>
-    <script type="text/javascript" src="../../src/x/LoginForm.js"></script>
-    <script type="text/javascript" src="../../src/x/SignupForm.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/Button2D.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/Button3D.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/HtmlDoc.js"></script>
-    <script type="text/javascript" src="../../src/fx/controls/Image.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/cascadeElement.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/findEverything.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/makeHidingContainer.js"></script>
-    <script type="text/javascript" src="../../src/fx/DOM/StateList.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/get.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getBuffer.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getObject.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/getText.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/post.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/sendObject.js"></script>
-    <script type="text/javascript" src="../../src/fx/HTTP/XHR.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Camera.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/FPSInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Gamepad.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Keyboard.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/LeapMotion.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Location.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Motion.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Mouse.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Speech.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/Touch.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/VR.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/VRDisplayPolyfill.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Audio3D.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/HapticGlove.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Music.js"></script>
-    <script type="text/javascript" src="../../src/fx/output/Speech.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/int.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/item.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/number.js"></script>
-    <script type="text/javascript" src="../../src/fx/Random/steps.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/CodePage.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/CommandPack.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Cursor.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Grammar.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/OperatingSystem.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Point.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Rectangle.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Rule.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Size.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Terminal.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/Token.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/CardboardVRDisplay.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/LegacyVRDisplay.js"></script>
-    <script type="text/javascript" src="../../src/fx/input/vr/MotionCorrector.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/DE_QWERTZ.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_UKX.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_US.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/code_pages/FR_AZERTY.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/BasicTextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/TextEditor.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/command_packs/TextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/PlainText.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/TextBox.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/controls/TextInput.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/Basic.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/JavaScript.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/PlainText.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/grammars/TestResults.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/operating_systems/OSX.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/operating_systems/Windows.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="../../src/fx/text/themes/Default.js"></script>
+    <style>﻿* {
+    box-sizing: border-box;
+}
+
+html, body, #frontBuffer, #fullScreenButtonContainer, progress {
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+#frontBuffer {
+    background-repeat: no-repeat;
+    background-color: #eee;
+    background-size: cover;
+    cursor: wait;
+}
+
+body > h1 {
+    display: none;
+}
+
+button{
+    padding: 1em;
+}
+ #frontBuffer { background-image:url(screenshot.jpg); }</style>
+    <script type="text/javascript">"use strict";
+
+// adapted from http://detectmobilebrowsers.com/
+
+window.isMobile = function (a) {
+  return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+}(navigator.userAgent || navigator.vendor || window.opera);
+
+function AbstractVRDisplayPolyfill(canPresent, hasOrientation, hasPosition, displayID, displayName, requestPresent) {
+  var _this = this;
+
+  this.capabilities = {
+    canPresent: canPresent,
+    hasExternalDisplay: false,
+    hasOrientation: hasOrientation,
+    hasPosition: hasPosition
+  };
+
+  this.displayID = displayID;
+  this.displayName = displayName;
+  this.isConnected = true;
+  this.isPresenting = false;
+  this.stageParameters = null;
+
+  var currentLayer = null;
+
+  var onFullScreenRemoved = function onFullScreenRemoved() {
+    FullScreen.removeChangeListener(onFullScreenRemoved);
+    _this.exitPresent();
+    window.dispatchEvent(new Event("vrdisplaypresentchange"));
+  };
+
+  this.requestPresent = function (layers) {
+    if (!_this.capabilities.canPresent) {
+      return Promrise.reject(new Error("This device cannot be used as a presentation display. DisplayID: " + _this.displayId + ". Name: " + _this.displayName));
+    } else if (!layers) {
+      return Promise.reject(new Error("No layers provided to requestPresent"));
+    } else if (!(layers instanceof Array)) {
+      return Promise.reject(new Error("Layers parameters must be an array"));
+    } else if (layers.length !== 1) {
+      return Promise.reject(new Error("Only one layer at a time is supported right now."));
+    } else if (!layers[0].source) {
+      return Promise.reject(new Error("No source on layer parameter."));
+    } else {
+      return requestPresent(layers).then(function (elem) {
+        currentLayer = layers[0];
+        _this.isPresenting = elem === currentLayer.source;
+        FullScreen.addChangeListener(onFullScreenRemoved, false);
+        window.dispatchEvent(new Event("vrdisplaypresentchange"));
+        return elem;
+      });
+    }
+  };
+
+  this.getLayers = function () {
+    if (currentLayer) {
+      return [currentLayer];
+    } else {
+      return [];
+    }
+  };
+
+  this.exitPresent = function () {
+    var clear = function clear(obj) {
+      _this.isPresenting = false;
+      currentLayer = null;
+      return obj;
+    };
+    return FullScreen.exit().then(clear).catch(function (err) {
+      console.error(err.message || err);
+      clear();
+    });
+  };
+
+  this.requestAnimationFrame = function (thunk) {
+    window.requestAnimationFrame(thunk);
+  };
+
+  this.cancelAnimationFrame = function (handle) {
+    window.cancelAnimationFrame(handle);
+  };
+
+  this.submitFrame = function () {};
+}
+"use strict";
+
+function CardboardVRDisplayPolyfill() {
+  AbstractVRDisplayPolyfill.call(this, true, isMobile, false, "B4CEAE28-1A89-4314-872E-9C223DDABD02", "Device Motion API", function (layers) {
+    return FullScreen.request(layers[0].source);
+  });
+
+  var currentPose = null,
+      frameID = 0,
+      q = new Float32Array([0, 0, 0, 1]),
+      p = new Float32Array([0, 0, 0]),
+      c = Math.sqrt(0.5),
+      zeroAlpha = 0,
+      first = true,
+      listeners = [],
+      beta,
+      alpha,
+      gamma,
+      cosBeta,
+      cosAlpha,
+      cosGamma,
+      sinBeta,
+      sinAlpha,
+      sinGamma,
+      ax,
+      ay,
+      az,
+      aw,
+      bx,
+      by,
+      bz,
+      bw,
+      orient,
+      sinOrient,
+      cosOrient;
+
+  function waitForOrientation(event) {
+    if (event.alpha) {
+      window.removeEventListener("deviceorientation", waitForOrientation);
+      checkDeviceOrientation(event);
+      window.addEventListener("deviceorientation", checkDeviceOrientation, false);
+    }
+  }
+
+  function checkDeviceOrientation(event) {
+
+    var t = performance.now();
+    if (!currentPose || t > currentPose.timestamp) {
+
+      beta = event.beta * Math.PI / 180;
+      alpha = event.alpha * Math.PI / 180;
+      gamma = -event.gamma * Math.PI / 180;
+      orient = Math.PI * -window.orientation / 360;
+
+      cosBeta = Math.cos(beta / 2);
+      cosAlpha = Math.cos(alpha / 2);
+      cosGamma = Math.cos(gamma / 2);
+      cosOrient = Math.cos(orient);
+
+      sinBeta = Math.sin(beta / 2);
+      sinAlpha = Math.sin(alpha / 2);
+      sinGamma = Math.sin(gamma / 2);
+      sinOrient = Math.sin(orient);
+
+      ax = sinBeta * cosAlpha * cosGamma + cosBeta * sinAlpha * sinGamma;
+      ay = cosBeta * sinAlpha * cosGamma - sinBeta * cosAlpha * sinGamma;
+      az = cosBeta * cosAlpha * sinGamma - sinBeta * sinAlpha * cosGamma;
+      aw = cosBeta * cosAlpha * cosGamma + sinBeta * sinAlpha * sinGamma;
+
+      q[0] = ax + zeroAlpha * az;
+      q[1] = zeroAlpha * aw + ay;
+      q[2] = az - zeroAlpha * ax;
+      q[3] = aw - zeroAlpha * ay;
+
+      bx = q[0] * cosOrient - q[2] * sinOrient;
+      by = q[1] * cosOrient + q[3] * sinOrient;
+      bz = q[2] * cosOrient + q[0] * sinOrient;
+      bw = q[3] * cosOrient - q[1] * sinOrient;
+
+      q[0] = bx * c - bw * c;
+      q[1] = by * c - bz * c;
+      q[2] = bz * c + by * c;
+      q[3] = bw * c + bx * c;
+
+      currentPose = {
+        timestamp: t,
+        frameID: ++frameID,
+        orientation: q,
+        position: p
+      };
+    }
+  }
+
+  this.getEyeParameters = function (side) {
+    if (side === "left" || side === "right") {
+      var dEye = side === "left" ? -1 : 1;
+
+      return {
+        renderWidth: Math.floor(screen.width * devicePixelRatio / 2),
+        renderHeight: screen.height * devicePixelRatio,
+        offset: new Float32Array([dEye * 0.03, 0, 0]),
+        fieldOfView: {
+          upDegrees: 40,
+          downDegrees: 40,
+          leftDegrees: 40,
+          rightDegrees: 40
+        }
+      };
+    }
+  };
+
+  this.getImmediatePose = function () {
+    return currentPose;
+  };
+
+  this.getPose = function () {
+    return currentPose;
+  };
+
+  this.resetPose = function () {
+    zeroAlpha = alpha;
+  };
+}
+"use strict";
+
+var FullScreen = function () {
+  "use strict";
+
+  function findProperty(elem, arr, pre, post) {
+    for (var i = 0; i < arr.length; ++i) {
+      var name = pre + arr[i] + post;
+      if (elem[name] !== undefined) {
+        return name;
+      }
+    }
+  }
+  var elementName = findProperty(document, ["fulls", "mozFullS", "webkitFulls", "msFulls"], "", "creenElement"),
+      changeEventName = findProperty(document, ["", "moz", "webkit", "ms"], "on", "fullscreenchange"),
+      errorEventName = findProperty(document, ["", "moz", "webkit", "ms"], "on", "fullscreenerror"),
+      requestMethodName = findProperty(document.documentElement, ["requestFulls", "mozRequestFullS", "webkitRequestFulls", "webkitRequestFullS", "msRequestFulls"], "", "creen"),
+      exitMethodName = findProperty(document, ["exitFulls", "mozExitFullS", "webkitExitFulls", "webkitExitFullS", "msExitFulls"], "", "creen");
+
+  changeEventName = changeEventName && changeEventName.substring(2);
+  errorEventName = errorEventName && errorEventName.substring(2);
+
+  var ns = {
+    addChangeListener: function addChangeListener(thunk, bubbles) {
+      return document.addEventListener(changeEventName, thunk, bubbles);
+    },
+    removeChangeListener: function removeChangeListener(thunk) {
+      return document.removeEventListener(changeEventName, thunk);
+    },
+    addErrorListener: function addErrorListener(thunk, bubbles) {
+      return document.addEventListener(errorEventName, thunk, bubbles);
+    },
+    removeErrorListener: function removeErrorListener(thunk) {
+      return document.removeEventListener(errorEventName, thunk);
+    },
+    withChange: function withChange(act) {
+      return new Promise(function (resolve, reject) {
+        var onFullScreen,
+            onFullScreenError,
+            timeout,
+            tearDown = function tearDown() {
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+          FullScreen.removeChangeListener(onFullScreen);
+          FullScreen.removeErrorListener(onFullScreenError);
+        };
+
+        onFullScreen = function onFullScreen() {
+          setTimeout(tearDown);
+          resolve(FullScreen.element);
+        };
+
+        onFullScreenError = function onFullScreenError(evt) {
+          setTimeout(tearDown);
+          reject(evt);
+        };
+
+        FullScreen.addChangeListener(onFullScreen, false);
+        FullScreen.addErrorListener(onFullScreenError, false);
+
+        if (act()) {
+          // we've already gotten fullscreen, so don't wait for it.
+          tearDown();
+          resolve(FullScreen.element);
+        } else {
+          // Timeout waiting on the fullscreen to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          timeout = setTimeout(function () {
+            tearDown();
+            reject("Fullscreen state did not change in allotted time");
+          }, 1000);
+        }
+      });
+    },
+    request: function request(elem, fullScreenParam) {
+      return FullScreen.withChange(function () {
+        if (!requestMethodName) {
+          throw new Error("No Fullscreen API support.");
+        } else if (FullScreen.isActive) {
+          return true;
+        } else if (fullScreenParam) {
+          elem[requestMethodName](fullScreenParam);
+        } else if (isChrome) {
+          elem[requestMethodName](window.Element.ALLOW_KEYBOARD_INPUT);
+        } else {
+          elem[requestMethodName]();
+        }
+      });
+    },
+    exit: function exit() {
+      return FullScreen.withChange(function () {
+        if (!exitMethodName) {
+          throw new Error("No Fullscreen API support.");
+        } else if (!FullScreen.isActive) {
+          return true;
+        } else {
+          document[exitMethodName]();
+        }
+      });
+    }
+  };
+
+  Object.defineProperties(ns, {
+    element: {
+      get: function get() {
+        return document[elementName];
+      }
+    },
+    isActive: {
+      get: function get() {
+        return !!FullScreen.element;
+      }
+    }
+  });
+
+  return ns;
+}();
+"use strict";
+
+function LegacyVRDisplayPolyfill(legacyDisplay, legacySensor) {
+  function makeDisplayName(legacyDisplay, legacySensor) {
+    var displayName = "";
+    var a = legacyDisplay.deviceName,
+        b = legacySensor.deviceName;
+    for (var i = 0; i < a.length && i < b.length && a[i] === b[i]; ++i) {
+      displayName += a[i];
+    }
+    while (displayName.length > 0 && !/\w/.test(displayName[displayName.length - 1])) {
+      displayName = displayName.substring(0, displayName.length - 1);
+    }
+    return displayName;
+  }
+
+  var frameID = 0,
+      fields = ["position", "linearVelocity", "linearAcceleration", "orientation", "angularVelocity", "angularAcceleration"];
+  function createPoseFromState(state) {
+    var pose = {
+      timestamp: state.timestamp,
+      frameID: ++frameID,
+      position: null,
+      linearVelocity: null,
+      linearAcceleration: null,
+      orientation: null,
+      angularVelocity: null,
+      angularAcceleration: null
+    };
+
+    fields.forEach(function (f) {
+      if (state[f]) {
+        var arr = [state[f].x, state[f].y, state[f].z];
+        if (f === "orientation") {
+          arr.push(state[f].w);
+        }
+        pose[f] = new Float32Array(arr);
+      }
+    });
+
+    return pose;
+  }
+
+  AbstractVRDisplayPolyfill.call(this, !!legacyDisplay, !!legacySensor, !!legacySensor, legacyDisplay.hardwareUnitId, makeDisplayName(legacyDisplay, legacySensor), function (layers) {
+    return FullScreen.request(layers[0].source, {
+      vrDisplay: legacyDisplay,
+      vrDistortion: true
+    });
+  });
+
+  this.getEyeParameters = function (side) {
+    var oldFormat = null;
+    if (legacyDisplay.getEyeParameters) {
+      oldFormat = legacyDisplay.getEyeParameters(side);
+    } else {
+      oldFormat = {
+        renderRect: legacyDisplay.getRecommendedEyeRenderRect(side),
+        eyeTranslation: legacyDisplay.getEyeTranslation(side),
+        recommendedFieldOfView: legacyDisplay.getRecommendedEyeFieldOfView(side)
+      };
+    }
+
+    var newFormat = {
+      renderWidth: oldFormat.renderRect.width,
+      renderHeight: oldFormat.renderRect.height,
+      offset: new Float32Array([oldFormat.eyeTranslation.x, oldFormat.eyeTranslation.y, oldFormat.eyeTranslation.z]),
+      fieldOfView: oldFormat.recommendedFieldOfView
+    };
+
+    return newFormat;
+  };
+
+  this.getImmediatePose = function () {
+    return createPoseFromState(legacySensor.getImmediateState());
+  };
+
+  this.getPose = function () {
+    return createPoseFromState(legacySensor.getState());
+  };
+
+  this.resetPose = legacySensor.resetSensor.bind(legacySensor);
+}
+"use strict";
+
+var loadFiles = function () {
+  "use strict";
+
+  function get(url, done, progress) {
+    var req = new XMLHttpRequest();
+    req.onload = function () {
+      if (req.status < 400) {
+        done(req.response);
+      }
+    };
+
+    req.open("GET", url);
+    req.onprogress = progress;
+    req.send();
+  }
+
+  function _loadFiles(files, done, progress, index, total, loaded) {
+    if (index < files.length) {
+      var file = files[index][0],
+          size = files[index][1],
+          ext = file.match(/\.\w+$/)[0] || "none",
+          lastLoaded = loaded;
+      get(file, function (content) {
+        if (ext === ".js") {
+          var s = document.createElement("script");
+          s.type = "text/javascript";
+          s.appendChild(document.createTextNode(content));
+          document.head.appendChild(s);
+        }
+
+        _loadFiles(files, done, progress, index + 1, total, loaded);
+      }, function (evt) {
+        return progress(loaded = lastLoaded + evt.loaded, total);
+      });
+    } else {
+      done();
+    }
+  }
+
+  /* syntax:
+  loadFiles([
+      // filename,  size
+      ["script1.js", 456],
+      ["script3.js", 8762],
+      ["script2.js", 12368]
+  ], function(objects){
+      // the thing to do when done.
+      console.assert(objects.name1 !== undefined);
+      console.assert(objects.name2 !== undefined);
+  }, function(n, m, size, total){
+      // track progress
+      console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+  });
+  */
+  return function loadFiles(manifestSpec, progress, done) {
+    function readManifest(manifest) {
+      var total = 0;
+      for (var i = 0; i < manifest.length; ++i) {
+        total += manifest[i][1];
+      }
+      progress = progress || console.log.bind(console, "File load progress");
+      _loadFiles(manifest, done, progress, 0, total, 0);
+    }
+
+    if (manifestSpec instanceof String || typeof manifestSpec === "string") {
+      get(manifestSpec, function (manifestText) {
+        readManifest(JSON.parse(manifestText));
+      });
+    } else if (manifestSpec instanceof Array) {
+      readManifest(manifestSpec);
+    }
+  };
+}();
+"use strict";
+
+function StandardMonitorPolyfill() {
+  AbstractVRDisplayPolyfill.call(this, true, false, false, "39025D3C-3B12-4F92-9FF5-85DC887CB545", "Standard Monitor", function (layers) {
+    return FullScreen.request(layers[0].source);
+  });
+
+  Object.defineProperty(this, "isPresenting", {
+    get: function get() {
+      return true;
+    },
+    set: function set() {}
+  });
+
+  var currentPose = {
+    timestamp: 0,
+    frameID: 0,
+    orientation: new Float32Array([0, 0, 0, 1]),
+    position: new Float32Array([0, 0, 0])
+  };
+
+  this.getEyeParameters = function (side) {
+    if (side === "left") {
+      return {
+        renderWidth: screen.width * devicePixelRatio,
+        renderHeight: screen.height * devicePixelRatio,
+        offset: new Float32Array([0, 0, 0]),
+        fieldOfView: {
+          upDegrees: 75,
+          downDegrees: 75,
+          leftDegrees: 75,
+          rightDegrees: 75
+        }
+      };
+    }
+  };
+
+  this.getImmediatePose = function () {
+    return currentPose;
+  };
+
+  this.getPose = function () {
+    return currentPose;
+  };
+
+  this.resetPose = function () {};
+}
+"use strict";
+
+var WebVRBootstrapper = function () {
+  var V = function () {
+    if (navigator.getVRDisplays) {
+      return 1.0;
+    } else if (navigator.getVRDevices) {
+      return 0.5;
+    } else if (navigator.mozGetVRDevices) {
+      return 0.4;
+    } else if (isMobile) {
+      return 0.1;
+    } else {
+      return 0;
+    }
+  }();
+
+  function WebVRBootstrapper(manifest, preLoad) {
+    "use strict";
+
+    function setup() {
+      if (document.readyState === "complete") {
+        if (V === 1) {
+          if (isMobile) {
+            // fix a defect in mobile Android with WebVR 1.0
+            var oldRequestPresent = VRDisplay.prototype.requestPresent;
+            VRDisplay.prototype.requestPresent = function (layers) {
+              return oldRequestPresent.call(this, layers[0]);
+            };
+          }
+        } else if (V === 0.5) {
+          navigator.getVRDisplays = function () {
+            return navigator.getVRDevices().then(function (devices) {
+              var displays = {},
+                  id = null;
+
+              for (var i = 0; i < devices.length; ++i) {
+                var device = devices[i];
+                id = device.hardwareUnitId;
+                if (!displays[id]) {
+                  displays[id] = {};
+                }
+
+                var display = displays[id];
+                if (device instanceof HMDVRDevice) {
+                  display.display = device;
+                } else if (devices[i] instanceof PositionSensorVRDevice) {
+                  display.sensor = device;
+                }
+              }
+
+              var mockedLegacyDisplays = [];
+              for (id in displays) {
+                mockedLegacyDisplays.push(new LegacyVRDisplayPolyfill(displays[id].display, displays[id].sensor));
+              }
+
+              return mockedLegacyDisplays;
+            });
+          };
+        } else if (V === 0.4) {
+          navigator.getVRDisplays = Promise.reject.bind(Promise, "You're using an extremely old version of Firefox Nightly. Please update your browser. https://webvr.info/get-chrome/");
+        } else if (V === 0.1) {
+          navigator.getVRDisplays = Promise.resolve.bind(Promise, [new CardboardVRDisplayPolyfill()]);
+        } else {
+          navigator.getVRDisplays = Promise.resolve.bind(Promise, []);
+        }
+
+        var oldGetVRDisplays = navigator.getVRDisplays;
+        navigator.getVRDisplays = function () {
+          return oldGetVRDisplays.call(navigator).then(function (displays) {
+            if (displays.length === 0 || !(displays[0] instanceof StandardMonitorPolyfill)) {
+              displays.unshift(new StandardMonitorPolyfill());
+            }
+            return displays;
+          });
+        };
+
+        document.removeEventListener("readystatechange", setup);
+        preLoad(function (progress, done) {
+          loadFiles(manifest, progress, function () {
+            navigator.getVRDisplays().then(done);
+          });
+        });
+        return true;
+      }
+    }
+    if (!setup()) {
+      document.addEventListener("readystatechange", setup);
+    }
+  }
+
+  WebVRBootstrapper.Version = V;
+  return WebVRBootstrapper;
+}();
+      WebVRBootstrapper([["../../node_modules/logger/logger.js",2927],["../../node_modules/promise-polyfill/promise.js",5964],["../../node_modules/lavu-details-polyfill/lib/index.min.js",3229],["../../node_modules/pliny/pliny.js",58797],["../../node_modules/socket.io-client/socket.io.js",184656],["../../node_modules/three/three.js",1005632],["../../node_modules/three/examples/js/loaders/OBJLoader.js",14431],["../../node_modules/three/examples/js/loaders/MTLLoader.js",8480],["../../node_modules/html2canvas/dist/html2canvas.js",126884],["../../src/index.js",10819],["../../src/base/axis.js",1183],["../../src/base/box.js",1547],["../../src/base/brick.js",1191],["../../src/base/cache.js",1364],["../../src/base/clone.js",753],["../../src/base/cloud.js",1660],["../../src/base/copyObject.js",1678],["../../src/base/cylinder.js",2280],["../../src/base/emit.js",1265],["../../src/base/findProperty.js",1083],["../../src/base/fmt.js",12631],["../../src/base/forms.js",7744],["../../src/base/hub.js",1053],["../../src/base/InsideSphereGeometry.js",5009],["../../src/base/light.js",940],["../../src/base/overwrite.js",216],["../../src/base/patch.js",1664],["../../src/base/put.js",437],["../../src/base/quad.js",270],["../../src/base/range.js",266],["../../src/base/shell.js",3167],["../../src/base/sphere.js",239],["../../src/base/textured.js",5915],["../../src/base/v3.js",139],["../../src/fx/Angle.js",4363],["../../src/fx/BaseControl.js",6468],["../../src/fx/BrowserEnvironment.js",47278],["../../src/fx/ButtonFactory.js",2178],["../../src/fx/Entity.js",10293],["../../src/fx/InputProcessor.js",15047],["../../src/fx/Keys.js",3704],["../../src/fx/ModelLoader.js",13660],["../../src/fx/Projector.js",80682],["../../src/fx/Surface.js",9890],["../../src/fx/WebRTCSocket.js",7421],["../../src/fx/Workerize.js",11819],["../../src/x/LoginForm.js",2634],["../../src/x/SignupForm.js",3167],["../../src/fx/controls/ALabel.js",5641],["../../src/fx/controls/Button2D.js",1904],["../../src/fx/controls/Button3D.js",5200],["../../src/fx/controls/HtmlDoc.js",2803],["../../src/fx/controls/Image.js",5012],["../../src/fx/DOM/cascadeElement.js",3962],["../../src/fx/DOM/findEverything.js",2043],["../../src/fx/DOM/makeHidingContainer.js",1221],["../../src/fx/DOM/StateList.js",2103],["../../src/fx/HTTP/get.js",1419],["../../src/fx/HTTP/getBuffer.js",1187],["../../src/fx/HTTP/getObject.js",1166],["../../src/fx/HTTP/getText.js",1015],["../../src/fx/HTTP/post.js",984],["../../src/fx/HTTP/sendObject.js",686],["../../src/fx/HTTP/XHR.js",3378],["../../src/fx/input/Camera.js",5066],["../../src/fx/input/FPSInput.js",7645],["../../src/fx/input/Gamepad.js",4503],["../../src/fx/input/Keyboard.js",944],["../../src/fx/input/LeapMotion.js",5309],["../../src/fx/input/Location.js",1208],["../../src/fx/input/Motion.js",2425],["../../src/fx/input/Mouse.js",5423],["../../src/fx/input/Speech.js",6486],["../../src/fx/input/Touch.js",1768],["../../src/fx/input/VR.js",6952],["../../src/fx/output/Audio3D.js",8805],["../../src/fx/output/HapticGlove.js",3341],["../../src/fx/output/Music.js",2588],["../../src/fx/output/Speech.js",1601],["../../src/fx/Random/int.js",2386],["../../src/fx/Random/item.js",1054],["../../src/fx/Random/number.js",1372],["../../src/fx/Random/steps.js",1538],["../../src/fx/text/CodePage.js",3142],["../../src/fx/text/CommandPack.js",330],["../../src/fx/text/Cursor.js",6381],["../../src/fx/text/Grammar.js",10732],["../../src/fx/text/OperatingSystem.js",2688],["../../src/fx/text/Point.js",670],["../../src/fx/text/Rectangle.js",2213],["../../src/fx/text/Rule.js",1592],["../../src/fx/text/Size.js",741],["../../src/fx/text/Terminal.js",3132],["../../src/fx/text/Token.js",796],["../../src/fx/text/code_pages/DE_QWERTZ.js",2435],["../../src/fx/text/code_pages/EN_UKX.js",1717],["../../src/fx/text/code_pages/EN_US.js",1236],["../../src/fx/text/code_pages/FR_AZERTY.js",1913],["../../src/fx/text/command_packs/BasicTextInput.js",4317],["../../src/fx/text/command_packs/TextEditor.js",2065],["../../src/fx/text/command_packs/TextInput.js",443],["../../src/fx/text/controls/PlainText.js",1960],["../../src/fx/text/controls/TextBox.js",35524],["../../src/fx/text/controls/TextInput.js",1894],["../../src/fx/text/grammars/Basic.js",18212],["../../src/fx/text/grammars/JavaScript.js",926],["../../src/fx/text/grammars/PlainText.js",304],["../../src/fx/text/grammars/TestResults.js",707],["../../src/fx/text/operating_systems/OSX.js",389],["../../src/fx/text/operating_systems/Windows.js",502],["../../src/fx/text/themes/Dark.js",1194],["../../src/fx/text/themes/Default.js",1197],["../../doc/editorVR/app.js",8899]], function (startDownload) {
+        function addButton(text, thunk) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.appendChild(document.createTextNode(text));
+          btn.addEventListener("click", thunk);
+          document.getElementById("fullScreenButtonContainer").appendChild(btn);
+        }
+        var b = document.querySelector("progress");
+        startDownload(function (n, m) {
+          b.max = m;
+          b.value = n;
+        }, function () {
+          b.style.display = "none";
+          function vrButton(display, i) {
+            addButton(display.displayName, (i === 0 ? env.goFullScreen : env.goVR).bind(env, i));
+          }
+          env.addEventListener("ready", function () {
+            env.displays.forEach(vrButton);
+          }, false);
+        });
+      });
+    </script>
   </head>
   <body><!-- start main.jade main block -->
     <h1>Example: Live programming in Virtual Reality</h1>
     <canvas id="frontBuffer"></canvas>
+    <progress></progress>
     <div id="fullScreenButtonContainer"></div>
     <div id="docPage" style="display:none">
       <h1>functions</h1>
@@ -180,8 +739,5 @@
         </li>
       </ul>
     </div><!-- end main.jade main block -->
-<!-- start main.jade footer block -->
-    <script type="text/javascript" async defer src="app.js"></script>
-    <script type="text/javascript" src="../../doc/demoUI.js"></script>
   </body>
 </html>

@@ -106,69 +106,9 @@ Primrose.Input.VR = (function () {
         }
       }
 
-      function enumerateLegacyVRDevices(devices) {
-        console.log("Devices found:", devices.length);
-        var displays = {},
-          id = null;
-
-        for (var i = 0; i < devices.length; ++i) {
-          var device = devices[i];
-          id = device.hardwareUnitId;
-          if (!displays[id]) {
-            displays[id] = {};
-          }
-
-          var display = displays[id];
-          if (device instanceof HMDVRDevice) {
-            display.display = device;
-          }
-          else if (devices[i] instanceof PositionSensorVRDevice) {
-            display.sensor = device;
-          }
-        }
-
-        var mockedLegacyDisplays = [];
-        for (id in displays) {
-          mockedLegacyDisplays.push(new Primrose.Input.VR.LegacyVRDisplay(displays[id].display, displays[id].sensor));
-        }
-
-        return enumerateVRDisplays.call(this, mockedLegacyDisplays);
-      }
-
-      function createCardboardVRDisplay() {
-        var mockedCardboardDisplays = [new Primrose.Input.VR.CardboardVRDisplay()];
-        return enumerateVRDisplays.call(this, mockedCardboardDisplays);
-      }
-
       this.init = function () {
-        console.info("Checking for VR Displays...");
-        if (navigator.getVRDisplays) {
-          console.info("Using WebVR API 1");
-          return navigator.getVRDisplays()
-            .then(enumerateVRDisplays.bind(this));
-        }
-        else if (navigator.getVRDevices) {
-          console.info("Using Chromium Experimental WebVR API");
-          return navigator.getVRDevices()
-            .then(enumerateLegacyVRDevices.bind(this))
-            .catch(console.error.bind(console, "Could not find VR devices"));
-        }
-        else {
-          return new Promise((resolve, reject) => {
-            var timer = setTimeout(reject, 1000);
-            var waitForValidMotion = (evt) => {
-              if (evt.alpha) {
-                clearTimeout(timer);
-                timer = null;
-                window.removeEventListener("deviceorientation", waitForValidMotion);
-                console.info("Using Device Motion API");
-                resolve(createCardboardVRDisplay.call(this));
-              }
-            };
-            console.info("Your browser doesn't have WebVR capability. Check out http://mozvr.com/. We're still going to try for Device Motion API, but there is no way to know ahead of time if your device has a motion sensor.");
-            window.addEventListener("deviceorientation", waitForValidMotion, false);
-          });
-        }
+        console.info("Checking for displays...");
+        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this));
       };
     }
 
@@ -195,7 +135,7 @@ Primrose.Input.VR = (function () {
         return Promise.reject("No display");
       }
       else {
-        return this.currentDisplay.requestPresent(VR.Version === 1 && isMobile ? opts[0] : opts)
+        return this.currentDisplay.requestPresent(opts)
           .then((elem) => elem || opts[0].source);
       }
     }

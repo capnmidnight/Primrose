@@ -44,7 +44,6 @@
     <script type="text/javascript" src="../src/base/findProperty.js"></script>
     <script type="text/javascript" src="../src/base/fmt.js"></script>
     <script type="text/javascript" src="../src/base/forms.js"></script>
-    <script type="text/javascript" src="../src/base/fullscreen.js"></script>
     <script type="text/javascript" src="../src/base/hub.js"></script>
     <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
     <script type="text/javascript" src="../src/base/light.js"></script>
@@ -98,7 +97,6 @@
     <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
     <script type="text/javascript" src="../src/fx/input/Touch.js"></script>
     <script type="text/javascript" src="../src/fx/input/VR.js"></script>
-    <script type="text/javascript" src="../src/fx/input/VRDisplayPolyfill.js"></script>
     <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
     <script type="text/javascript" src="../src/fx/output/HapticGlove.js"></script>
     <script type="text/javascript" src="../src/fx/output/Music.js"></script>
@@ -118,9 +116,6 @@
     <script type="text/javascript" src="../src/fx/text/Size.js"></script>
     <script type="text/javascript" src="../src/fx/text/Terminal.js"></script>
     <script type="text/javascript" src="../src/fx/text/Token.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/CardboardVRDisplay.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/LegacyVRDisplay.js"></script>
-    <script type="text/javascript" src="../src/fx/input/vr/MotionCorrector.js"></script>
     <script type="text/javascript" src="../src/fx/text/code_pages/DE_QWERTZ.js"></script>
     <script type="text/javascript" src="../src/fx/text/code_pages/EN_UKX.js"></script>
     <script type="text/javascript" src="../src/fx/text/code_pages/EN_US.js"></script>
@@ -230,12 +225,14 @@ var GRASS = &quot;../images/grass.png&quot;,
   CODE_KEY = &quot;Pacman code&quot;,
 
   env = new Primrose.BrowserEnvironment(&quot;Pacman&quot;, {
-    quality: Primrose.Quality.LOW,
+    quality: Primrose.Quality.HIGH,
     autoScaleQuality: false,
     autoRescaleQuality: false,
+    backgroundColor: 0x000000,
     skyTexture: DECK,
     ambientSound: &quot;../audio/menu.ogg&quot;,
     groundTexture: DECK,
+    fullScreenIcon: &quot;../models/monitor.obj&quot;,
     VRIcon: &quot;../models/cardboard.obj&quot;,
     font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
   }),
@@ -244,7 +241,7 @@ var GRASS = &quot;../images/grass.png&quot;,
   output = null,
   editorFrame = null,
   editorFrameMesh = null,
-  
+
   modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
   modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
   cmdA = isOSX ? &quot;CMD&quot; : &quot;CTRL&quot;,
@@ -263,7 +260,7 @@ env.addEventListener(&quot;ready&quot;, function () {
   env.appendChild(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-    fontSize = 40;
+    fontSize = 20;
 
   editorFrame = env.createElement(&quot;section&quot;);
   editorFrame.id = &quot;EditorFrame&quot;;
@@ -277,8 +274,8 @@ env.addEventListener(&quot;ready&quot;, function () {
   editor.style.height = editorFrame.surfaceHeight;
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSetting(CODE_KEY);
-  
+  editor.value = getSourceCode(isInIFrame);
+
   editorFrame.appendChild(editor);
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
@@ -289,7 +286,7 @@ env.addEventListener(&quot;ready&quot;, function () {
 });
 
 window.addEventListener(&quot;beforeunload&quot;, function (evt) {
-  if (editor &amp;&amp; editor.value !== getSetting(CODE_KEY)) {
+  if (false &amp;&amp; editor &amp;&amp; editor.value !== getSourceCode(true)) {
     return evt.returnValue = &quot;Are you sure you want to leave?&quot;;
   }
 }, false);
@@ -318,11 +315,33 @@ env.addEventListener(&quot;update&quot;, function (dt) {
       wipeScene();
     }
     else {
-      scriptAnimate.call(env, dt);
+      try {
+        scriptAnimate.call(env, dt);
+      }
+      catch (exp) {
+        console.error(exp);
+        scriptAnimate = null;
+      }
     }
   }
 });
-
+function getSourceCode(skipReload) {
+  var defaultDemo = pacman.toString(),
+    src = skipReload &amp;&amp; defaultDemo || getSetting(CODE_KEY, defaultDemo);
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if (src === defaultDemo) {
+    var lines = src.replace(&quot;\r\n&quot;, &quot;\n&quot;).split(&quot;\n&quot;);
+    lines.pop();
+    lines.shift();
+    for (var i = 0; i &lt; lines.length; ++i) {
+      lines[i] = lines[i].substring(2);
+    }
+    src = lines.join(&quot;\n&quot;);
+  }
+  return src.trim();
+}
 function pacman() {
   var R = Primrose.Random.number,
     L = Primrose.ModelLoader.loadObject,
@@ -423,16 +442,6 @@ function updateScript() {
     }
   }
 }
-
-logger.setup(logger.USER, function (msg) {
-  if (output) {
-    var data = JSON.parse(msg),
-      t = output;
-    t.value += data.name + &quot;:&gt; &quot; + data.args[0] + &quot;\n&quot;;
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
-  }
-});
 
 function clrscr() {
   if (output) {

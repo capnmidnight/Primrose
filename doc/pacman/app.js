@@ -9,9 +9,11 @@ var GRASS = "../images/grass.png",
     quality: Primrose.Quality.HIGH,
     autoScaleQuality: false,
     autoRescaleQuality: false,
+    backgroundColor: 0x000000,
     skyTexture: DECK,
     ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
+    fullScreenIcon: "../models/monitor.obj",
     VRIcon: "../models/cardboard.obj",
     font: "../fonts/helvetiker_regular.typeface.js"
   }),
@@ -39,7 +41,7 @@ env.addEventListener("ready", function () {
   env.appendChild(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-    fontSize = 40;
+    fontSize = 20;
 
   editorFrame = env.createElement("section");
   editorFrame.id = "EditorFrame";
@@ -53,7 +55,7 @@ env.addEventListener("ready", function () {
   editor.style.height = editorFrame.surfaceHeight;
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
-  editor.value = getSetting(CODE_KEY);
+  editor.value = getSourceCode(isInIFrame);
 
   editorFrame.appendChild(editor);
 
@@ -65,7 +67,7 @@ env.addEventListener("ready", function () {
 });
 
 window.addEventListener("beforeunload", function (evt) {
-  if (editor && editor.value !== getSetting(CODE_KEY)) {
+  if (false && editor && editor.value !== getSourceCode(true)) {
     return evt.returnValue = "Are you sure you want to leave?";
   }
 }, false);
@@ -104,7 +106,23 @@ env.addEventListener("update", function (dt) {
     }
   }
 });
-
+function getSourceCode(skipReload) {
+  var defaultDemo = pacman.toString(),
+    src = skipReload && defaultDemo || getSetting(CODE_KEY, defaultDemo);
+  // If there was no source code stored in local storage,
+  // we use the script from a saved function and assume
+  // it has been formatted with 2 spaces per-line.
+  if (src === defaultDemo) {
+    var lines = src.replace("\r\n", "\n").split("\n");
+    lines.pop();
+    lines.shift();
+    for (var i = 0; i < lines.length; ++i) {
+      lines[i] = lines[i].substring(2);
+    }
+    src = lines.join("\n");
+  }
+  return src.trim();
+}
 function pacman() {
   var R = Primrose.Random.number,
     L = Primrose.ModelLoader.loadObject,
@@ -205,16 +223,6 @@ function updateScript() {
     }
   }
 }
-
-logger.setup(logger.USER, function (msg) {
-  if (output) {
-    var data = JSON.parse(msg),
-      t = output;
-    t.value += data.name + ":> " + data.args[0] + "\n";
-    t.selectionStart = t.selectionEnd = t.value.length;
-    t.scrollIntoView(t.frontCursor);
-  }
-});
 
 function clrscr() {
   if (output) {

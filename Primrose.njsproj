@@ -17,7 +17,7 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <NodejsPort>80</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
     <Environment>NYPL_TOKEN=kd7zdl8042m7gl7o</Environment>
@@ -31,17 +31,24 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="doc\images\box.jpg" />
+    <Content Include="doc\images\brick.jpg" />
+    <Content Include="doc\images\cloud.JPG" />
+    <Content Include="doc\images\cylinder.jpg" />
+    <Content Include="doc\models\ghost.blend" />
+    <Content Include="doc\models\ghost.mtl" />
+    <Content Include="doc\models\ghost.obj" />
     <Content Include="doc\pacman\screenshot.jpg" />
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
     <Content Include="src\base\emit.js" />
     <Content Include="src\base\range.js" />
+    <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\pacman\app.js" />
     <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
     <Content Include="doc\images\primrose32.png" />
-    <Content Include="src\fx\input\VRDisplayPolyfill.js" />
     <Content Include="doc\audio\menu.mp3" />
     <Content Include="doc\audio\menu.ogg" />
     <Content Include="doc\audio\ocean.mp3" />
@@ -128,7 +135,6 @@
     <Content Include="CONTRIBUTORS.md" />
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
-    <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
     <Compile Include="quickstart\app.js" />
@@ -140,7 +146,6 @@
     <Content Include="src\base\brick.js" />
     <Content Include="src\base\clone.js" />
     <Content Include="src\base\cylinder.js" />
-    <Content Include="src\base\fullscreen.js" />
     <Content Include="src\base\patch.js" />
     <Content Include="src\base\overwrite.js" />
     <Content Include="src\base\put.js" />
@@ -169,9 +174,6 @@
     <Content Include="src\fx\Random\steps.js" />
     <Content Include="src\fx\Surface.js" />
     <Content Include="src\fx\Entity.js" />
-    <Content Include="src\fx\input\vr\CardboardVRDisplay.js" />
-    <Content Include="src\fx\input\vr\LegacyVRDisplay.js" />
-    <Content Include="src\fx\input\vr\MotionCorrector.js" />
     <Content Include="src\fx\controls\Button2D.js" />
     <Content Include="src\fx\text\command_packs\BasicTextInput.js" />
     <Content Include="src\fx\text\command_packs\TextInput.js" />
@@ -287,7 +289,6 @@
     <Folder Include="doc\models\" />
     <Folder Include="doc\audio\" />
     <Folder Include="quickstart\" />
-    <Folder Include="src\fx\input\vr\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
     <Folder Include="src\fx\HTTP\" />

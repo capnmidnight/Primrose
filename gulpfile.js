@@ -101,6 +101,16 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
 });
 
 function pugConfiguration(options, defaultData) {
+  function getFile(fileName) {
+    return fs.readFileSync(fileName, "utf-8");
+  }
+  function getDemoScript(scriptName) {
+    return "grammar(\"JavaScript\");\n" + getFile(scriptName);
+  }
+  function getFileDescrip(f) {
+    return [f, fs.lstatSync(f).size];
+  }
+  var frameworkFiles = defaultData.frameworkFiles.map(getFileDescrip);
   return gulp.src(["*.jade", "*.pug", "templates/doc/**/*.jade", "templates/doc/**/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
       p.extname = "";
@@ -115,10 +125,11 @@ function pugConfiguration(options, defaultData) {
           }),
         shortName = name.match(/doc\/(\w+)[/.]/),
         demoTitle = null;
-      
+
       parts.pop();
       shortName = shortName && shortName[1];
-      var scriptName = "doc/" + shortName + "/app.js";
+      var scriptName = "doc/" + shortName + "/app.js",
+        fileRoot = parts.join("");
 
       for (var i = 0; i < docFiles.length; ++i) {
         var d = docFiles[i];
@@ -127,21 +138,31 @@ function pugConfiguration(options, defaultData) {
         }
       }
 
+      var fxFiles = frameworkFiles;
+      if (fs.existsSync(scriptName)) {
+        fxFiles = fxFiles.concat([getFileDescrip(scriptName)]);
+      }
+
       callback(null, {
         debug: defaultData.debug,
         version: pkg.version,
         cssExt: defaultData.cssExt,
         jsExt: defaultData.jsExt,
         filePath: name,
-        fileRoot: parts.join(""),
+        fileRoot: fileRoot,
         fileName: shortName,
         docFiles: docFiles,
+        manifest: JSON.stringify(fxFiles.map(function (f) {
+          return [
+            fileRoot + f[0],
+            f[1]
+          ];
+        })),
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
         demoTitle: demoTitle,
-        getDemoScript: function getDemoScript(scriptName) {
-          return "grammar(\"JavaScript\");\n" + fs.readFileSync(scriptName, "utf-8");
-        }
+        getFile: getFile,
+        getDemoScript: getDemoScript
       });
     }))
     .pipe(pug(options))
@@ -152,7 +173,8 @@ function pugConfiguration(options, defaultData) {
 gulp.task("pug:release", function () {
   return pugConfiguration({}, {
     jsExt: ".min.js",
-    cssExt: ".min.css"
+    cssExt: ".min.css",
+    frameworkFiles: ["PrimroseDependencies.min.js", "Primrose.min.js"]
   });
 });
 

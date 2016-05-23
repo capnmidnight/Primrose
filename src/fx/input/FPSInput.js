@@ -23,6 +23,7 @@ Primrose.Input.FPSInput = (function () {
       };
 
       this.managers = [
+        new Primrose.Input.VR(),
         // keyboard should always run on the window
         new Primrose.Input.Keyboard(window, {
           lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
@@ -110,12 +111,6 @@ Primrose.Input.FPSInput = (function () {
           dheading: { commands: ["heading"], delta: true },
           pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
         })];
-
-      if (Primrose.Input.VR.Version > 0) {
-        var vr = new Primrose.Input.VR();
-        this.managers.push(vr);
-        vr.init();
-      }
 
       this.managers.forEach((mgr) => this[mgr.name] = mgr);
     }

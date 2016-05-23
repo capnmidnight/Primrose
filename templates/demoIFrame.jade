@@ -3,7 +3,7 @@ html
   head
     meta(charset="utf-8")
     block viewport
-      meta(name="viewport", content="width=device-width, initial-scale=1.0")
+      meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1")
       
     meta(name="web-app-capable", content="yes")
     meta(name="theme-color", content="black")
@@ -35,22 +35,35 @@ html
     <!-- end main.jade title block -->
 
     block head
-      link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
-      style #frontBuffer { background-image:url(screenshot.jpg); }
-      if debug
-        each file in frameworkFiles
-          script(type="text/javascript", src=fileRoot + file)
-      else
-        script(type="text/javascript", src= fileRoot + "PrimroseDependencies.min.js")
-        script(type="text/javascript", src= fileRoot + "Primrose.min.js")
+      style !{getFile("doc/demoUI" + cssExt)} #frontBuffer { background-image:url(screenshot.jpg); }
+      script(type="text/javascript").
+        !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}
+        WebVRBootstrapper(!{ manifest }, function (startDownload) {
+          function addButton(text, thunk) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.appendChild(document.createTextNode(text));
+            btn.addEventListener("click", thunk);
+            document.getElementById("fullScreenButtonContainer").appendChild(btn);
+          }
+          var b = document.querySelector("progress");
+          startDownload(function (n, m) {
+            b.max = m;
+            b.value = n;
+          }, function () {
+            b.style.display = "none";
+            function vrButton(display, i) {
+              addButton(display.displayName, (i === 0 ? env.goFullScreen : env.goVR).bind(env, i));
+            }
+            env.addEventListener("ready", function () {
+              env.displays.forEach(vrButton);
+            }, false);
+          });
+        });
   body
     <!-- start main.jade main block -->
     block main
       canvas#frontBuffer
+      progress
       #fullScreenButtonContainer
     <!-- end main.jade main block -->
-    
-    <!-- start main.jade footer block -->
-    block footer
-      script(type="text/javascript", async, defer, src="app.js")
-      script(type="text/javascript", src= fileRoot + "doc/demoUI.js")
