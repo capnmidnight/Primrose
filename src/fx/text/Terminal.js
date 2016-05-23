@@ -80,8 +80,8 @@ Primrose.Text.Terminal = function (inputEditor, outputEditor) {
     }
   };
 
-  this.execute = function (inVR) {
-    pageSize = inVR ? 10 : 40;
+  this.execute = function () {
+    pageSize = 10;
     originalGrammar = inputEditor.tokenizer;
     if (originalGrammar && originalGrammar.interpret) {
       this.running = true;
