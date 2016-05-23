@@ -228,16 +228,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var wasFullscreen = false;
-      var checkFullscreen = () => {
-        if (Primrose.Input.VR.Version === 1 && isMobile) {
-          if (wasFullscreen !== FullScreen.isActive) {
-            window.dispatchEvent(new Event("vrdisplaypresentchange"));
-            wasFullscreen = FullScreen.isActive;
-          }
-        }
-      };
-
       var update = (t) => {
         var dt = t - lt,
           i, j;
@@ -462,7 +452,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var animate = (t) => {
-        checkFullscreen();
+        WebVRBootstrapper.dispalyPresentChangeCheck();
         RAF(animate);
         update(t * MILLISECONDS_TO_SECONDS);
         render();
