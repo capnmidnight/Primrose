@@ -250,13 +250,10 @@ Primrose.BrowserEnvironment = (function () {
           strafe = this.input.getValue("strafe"),
           drive = this.input.getValue("drive");
 
-        if (this.inVR || isMobile) {
-          this.input.getOrientation(qHead);
-        }
-        else {
-          qHead.set(0, 0, 0, 1);
-        }
+        this.input.VR.getOrientation(qHead);
+
         qPitch.setFromAxisAngle(RIGHT, pitch);
+
         if (!this.player.isOnGround) {
           this.player.velocity.y -= this.options.gravity * dt;
         }
