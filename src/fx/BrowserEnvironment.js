@@ -510,73 +510,43 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setOrientationLock = () => {
-        if (isMobile) {
-          if (isFullScreenMode()) {
-            var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-            if (type.indexOf("landscape") === -1) {
-              type = "landscape-primary";
-            }
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock(type);
-            }
-            else if (screen.mozLockOrientation) {
-              screen.mozLockOrientation(type);
-            }
+        if (isFullScreenMode()) {
+          var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+          if (type.indexOf("landscape") === -1) {
+            type = "landscape-primary";
           }
-          else {
-            if (screen.orientation && screen.orientation.unlock) {
-              screen.orientation.unlock();
-            }
-            else if (screen.mozUnlockOrientation) {
-              screen.mozUnlockOrientation();
-            }
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock(type);
+          }
+          else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation(type);
+          }
+        }
+        else {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+          else if (screen.mozUnlockOrientation) {
+            screen.mozUnlockOrientation();
           }
         }
       };
 
       var modifyScreen = () => {
-        var canvasWidth,
-          canvasHeight,
-          aspectWidth;
+        this.input.VR.resetTransforms(
+          this.options.nearPlane,
+          this.options.nearPlane + this.options.drawDistance);
 
-        if (this.inVR) {
-          this.input.VR.resetTransforms(
-            this.options.nearPlane,
-            this.options.nearPlane + this.options.drawDistance);
+        var p = this.input.VR.transforms,
+          canvasWidth = 0,
+          canvasHeight = 0;
 
-          var p = this.input.VR.transforms,
-            l = p[0],
-            r = p[1];
-          canvasWidth = Math.floor((l.viewport.width + r.viewport.width) * resolutionScale);
-          canvasHeight = Math.floor(Math.max(l.viewport.height, r.viewport.height) * resolutionScale);
-          aspectWidth = canvasWidth / 2;
+        for (var i = 0; i < p.length; ++i) {
+          canvasWidth += p[i].viewport.width;
+          canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
         }
-        else {
-          var pixelRatio = devicePixelRatio || 1,
-            elementWidth,
-            elementHeight;
-          if (FullScreen.isActive) {
-            elementWidth = screen.width;
-            elementHeight = screen.height;
-            this.renderer.domElement.style.width = px(elementWidth);
-            this.renderer.domElement.style.height = px(elementHeight);
-          }
-          else {
-            this.renderer.domElement.style.width = "";
-            this.renderer.domElement.style.height = "";
-            var bounds = this.renderer.domElement.getBoundingClientRect();
-            elementWidth = bounds.width;
-            if (isiOS) {
-              elementHeight = elementWidth * screen.width / screen.height;
-            }
-            else {
-              elementHeight = bounds.height;
-            }
-          }
-          canvasWidth = Math.floor(elementWidth * pixelRatio * resolutionScale);
-          canvasHeight = Math.floor(elementHeight * pixelRatio * resolutionScale);
-          aspectWidth = canvasWidth;
-        }
+        canvasWidth = Math.floor(canvasWidth * resolutionScale);
+        canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
         this.renderer.domElement.width = canvasWidth;
         this.renderer.domElement.height = canvasHeight;
@@ -918,12 +888,7 @@ Primrose.BrowserEnvironment = (function () {
         .at(0, 10, 10);
 
       var RAF = (callback) => {
-        if (this.inVR) {
-          this.timer = this.input.VR.currentDisplay.requestAnimationFrame(callback);
-        }
-        else {
-          this.timer = requestAnimationFrame(callback);
-        }
+        this.timer = this.input.VR.currentDisplay.requestAnimationFrame(callback);
       };
 
       this.start = () => {
@@ -936,12 +901,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.stop = () => {
-        if (this.inVR) {
-          this.input.VR.currentDisplay.cancelAnimationFrame(this.timer);
-        }
-        else {
-          cancelAnimationFrame(this.timer);
-        }
+        this.input.VR.currentDisplay.cancelAnimationFrame(this.timer);
         this.audio.stop();
         this.timer = null;
       };
@@ -1015,51 +975,60 @@ Primrose.BrowserEnvironment = (function () {
       //
       // Manage full-screen state
       //
-      this.goFullScreen = () => {
-        setPointerLock();
-        FullScreen.request(this.renderer.domElement);
-      }
-
       this.goFullScreen = (index) => {
-        if (this.input.VR) {
-          setPointerLock();
-          this.input.VR.connect(index);
-          return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
-            .then((elem) => {
-              if (Primrose.Input.VR.Version === 1 && isMobile) {
-                var remover = () => {
-                  this.input.VR.currentDisplay.exitPresent();
-                  window.removeEventListener("vrdisplaypresentchange", remover);
-                };
+        setPointerLock();
+        this.input.VR.connect(index);
+        return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
+          .then((elem) => {
+            if (Primrose.Input.VR.Version === 1 && isMobile) {
+              var remover = () => {
+                this.input.VR.currentDisplay.exitPresent();
+                window.removeEventListener("vrdisplaypresentchange", remover);
+              };
 
-                var adder = () => {
-                  window.addEventListener("vrdisplaypresentchange", remover, false);
-                  window.removeEventListener("vrdisplaypresentchange", adder);
-                };
+              var adder = () => {
+                window.addEventListener("vrdisplaypresentchange", remover, false);
+                window.removeEventListener("vrdisplaypresentchange", adder);
+              };
 
-                window.addEventListener("vrdisplaypresentchange", adder, false);
-              }
+              window.addEventListener("vrdisplaypresentchange", adder, false);
+            }
 
-              return elem;
-            });
-        }
+            return elem;
+          });
       };
 
 
       var showHideButtons = () => {
-
-        setOrientationLock();
-
+        console.log(isFullScreenMode());
         icons.forEach((icon) => {
           icon.visible = !isFullScreenMode();
           icon.disabled = isFullScreenMode();
         });
       };
 
-      window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
+      if (isMobile) {
+        if (WebVRBootstrapper.Version >= 1) {
+          window.addEventListener("vrdisplaypresentchange", (evt) => {
+            if (window.VRDisplay && this.input.VR.currentDisplay instanceof VRDisplay) {
+              setOrientationLock();
+              showHideButtons();
+            }
+          }, false);
+        }
+        FullScreen.addChangeListener((evt) => {
+          if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
+            setOrientationLock();
+            showHideButtons();
+          }
+        }, false);
+      }
+      else {
+        window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
+      }
 
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
-        if (!Primrose.Input.Mouse.Lock.isActive && this.inVR) {
+        if (!Primrose.Input.Mouse.Lock.isActive) {
           this.input.VR.currentDisplay.exitPresent();
         }
       }, false);
@@ -1067,7 +1036,7 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
       FullScreen.addChangeListener(modifyScreen, false);
 
-      var isFullScreenMode = () => !!(FullScreen.isActive || this.inVR);
+      var isFullScreenMode = () => FullScreen.isActive || this.input.VR.currentDisplay.isPresenting;
 
       BrowserEnvironment.createSurrogate.call(this);
 
@@ -1092,7 +1061,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var setFullscreen = () => {
         if (!isFullScreenMode() && isMobile) {
-          this.goFullScreen(0);
+          this.goFullScreen(1);
         }
       };
 
@@ -1149,7 +1118,6 @@ Primrose.BrowserEnvironment = (function () {
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
         this.input.addEventListener("zero", this.zero, false);
         this.input.addEventListener("lockpointer", setPointerLock, false);
-        this.input.addEventListener("fullscreen", setFullscreen, false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
 
@@ -1218,11 +1186,14 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       Object.defineProperties(this, {
+        hasOrientation: {
+          get: () => this.input.VR.currentDisplay.hasOrientation
+        },
         inVR: {
-          get: () => this.input && this.input.VR && this.input.VR.currentDisplay && this.input.VR.currentDisplay.isPresenting
+          get: () => this.input.VR.transforms.length > 1
         },
         displays: {
-          get: () => this.input && this.input.VR && this.input.VR.displays || []
+          get: () => this.input.VR.displays || []
         },
         quality: {
           get: () => quality,
