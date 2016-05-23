@@ -1,46 +1,4 @@
 Primrose.Input.VR = (function () {
-
-  function makeTransform(s, eye, near, far) {
-    var t = eye.offset;
-    s.translation = new THREE.Matrix4().makeTranslation(t[0], t[1], t[2]);
-    s.projection = fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far);
-    s.viewport = {
-      left: 0,
-      top: 0,
-      width: eye.renderWidth,
-      height: eye.renderHeight
-    };
-  }
-
-  function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
-    var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
-      downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
-      leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
-      rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
-      xScale = 2.0 / (leftTan + rightTan),
-      yScale = 2.0 / (upTan + downTan),
-      matrix = new THREE.Matrix4();
-
-    matrix.elements[0] = xScale;
-    matrix.elements[1] = 0.0;
-    matrix.elements[2] = 0.0;
-    matrix.elements[3] = 0.0;
-    matrix.elements[4] = 0.0;
-    matrix.elements[5] = yScale;
-    matrix.elements[6] = 0.0;
-    matrix.elements[7] = 0.0;
-    matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
-    matrix.elements[9] = ((upTan - downTan) * yScale * 0.5);
-    matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
-    matrix.elements[11] = -1.0;
-    matrix.elements[12] = 0.0;
-    matrix.elements[13] = 0.0;
-    matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
-    matrix.elements[15] = 0.0;
-
-    return matrix;
-  }
-
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
@@ -85,9 +43,10 @@ Primrose.Input.VR = (function () {
       };
 
       this.displays = [];
-      this.currentDisplay = null;
-      this.currentPose = null;
+      this._transforms = [];
       this.transforms = null;
+      this.currentDisplayIndex = -1;
+      this.currentPose = null;
 
       function onConnected(id) {
         for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
@@ -193,21 +152,19 @@ Primrose.Input.VR = (function () {
 
     resetTransforms(near, far) {
       if (this.currentDisplay) {
-        this.enabled = true;
-        var params = {
-          left: this.currentDisplay.getEyeParameters("left"),
-          right: this.currentDisplay.getEyeParameters("right")
-        };
-        var transforms = [{}, {}];
-        makeTransform(transforms[0], params.left, near, far);
-        makeTransform(transforms[1], params.right, near, far);
-        transforms[1].viewport.left = transforms[0].viewport.width;
-        this.transforms = transforms;
+        if (!this._transforms[this.currentDisplayIndex]) {
+          this._transforms[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
+        }
+        this.transforms = this._transforms[this.currentDisplayIndex].getTransforms(near, far);
       }
     }
 
+    get currentDisplay() {
+      return this.displays[this.currentDisplayIndex];
+    }
+
     connect(selectedIndex) {
-      this.currentDisplay = this.displays[selectedIndex];
+      this.currentDisplayIndex = selectedIndex;
     }
   }
 
