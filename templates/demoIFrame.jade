@@ -36,8 +36,12 @@ html
 
     block head
       style !{getFile("doc/demoUI" + cssExt)} #frontBuffer { background-image:url(screenshot.jpg); }
+      if debug
+        script(type="text/javascript", src=fileRoot + "node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)
+      else
+        script(type="text/javascript").
+          !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}
       script(type="text/javascript").
-        !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}
         WebVRBootstrapper(!{ manifest }, function (startDownload) {
           function addButton(text, thunk) {
             var btn = document.createElement("button");
@@ -53,7 +57,7 @@ html
           }, function () {
             b.style.display = "none";
             function vrButton(display, i) {
-              addButton(display.displayName, (i === 0 ? env.goFullScreen : env.goVR).bind(env, i));
+              addButton(display.displayName, env.goFullScreen.bind(env, i));
             }
             env.addEventListener("ready", function () {
               env.displays.forEach(vrButton);
