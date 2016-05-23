@@ -248,11 +248,20 @@ Primrose.BrowserEnvironment = (function () {
         var heading = this.input.getValue("heading"),
           pitch = this.input.getValue("pitch"),
           strafe = this.input.getValue("strafe"),
-          drive = this.input.getValue("drive");
+          drive = this.input.getValue("drive"),
+          boost = this.input.getValue("boost");
 
         this.input.VR.getOrientation(qHead);
 
         qPitch.setFromAxisAngle(RIGHT, pitch);
+
+        if (!lockedToEditor()) {
+          if (this.player.velocity.y === 0 && boost > 0) {
+            this.player.isOnGround = false;
+          }
+
+          this.player.velocity.y += boost;
+        }
 
         if (!this.player.isOnGround) {
           this.player.velocity.y -= this.options.gravity * dt;
@@ -267,8 +276,8 @@ Primrose.BrowserEnvironment = (function () {
           this.player.velocity.y = 0;
           this.player.velocity.applyQuaternion(qHeading);
         }
-
         this.player.position.add(vBody.copy(this.player.velocity).multiplyScalar(dt));
+
         if (!this.player.isOnGround && this.player.position.y < this.avatarHeight) {
           this.player.isOnGround = true;
           this.player.position.y = this.avatarHeight;

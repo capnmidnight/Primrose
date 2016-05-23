@@ -42,6 +42,7 @@ Primrose.Input.FPSInput = (function () {
               Primrose.Keys.RIGHTARROW]
           },
           strafe: { commands: ["strafeLeft", "strafeRight"] },
+          boost: { buttons: [ Primrose.Keys.E ], scale: 0.2 },
           driveForward: {
             buttons: [
               -Primrose.Keys.W,
