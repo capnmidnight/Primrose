@@ -6,7 +6,7 @@ var GRASS = "../images/grass.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment("Pacman", {
-    quality: Primrose.Quality.LOW,
+    quality: Primrose.Quality.HIGH,
     autoScaleQuality: false,
     autoRescaleQuality: false,
     skyTexture: DECK,
@@ -20,7 +20,7 @@ var GRASS = "../images/grass.png",
   output = null,
   editorFrame = null,
   editorFrameMesh = null,
-  
+
   modA = isOSX ? "metaKey" : "ctrlKey",
   modB = isOSX ? "altKey" : "shiftKey",
   cmdA = isOSX ? "CMD" : "CTRL",
@@ -54,7 +54,7 @@ env.addEventListener("ready", function () {
   editor.style.fontSize = fontSize;
   editor.tokenizer = Primrose.Text.Grammars.JavaScript;
   editor.value = getSetting(CODE_KEY);
-  
+
   editorFrame.appendChild(editor);
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
@@ -94,7 +94,13 @@ env.addEventListener("update", function (dt) {
       wipeScene();
     }
     else {
-      scriptAnimate.call(env, dt);
+      try {
+        scriptAnimate.call(env, dt);
+      }
+      catch (exp) {
+        console.error(exp);
+        scriptAnimate = null;
+      }
     }
   }
 });
