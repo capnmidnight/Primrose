@@ -9,6 +9,10 @@ KEY:
 * **Windows** - Windows 8.1 and Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.24.0 - 2016/05/23
+
+(write changelog later)
+
 ## v0.23.4 - 2016/05/11
 
 This was an intermediate release, specifically focused on carving the primrosevr.com website bits out of the Primrose VR Github repository.
@@ -225,7 +229,6 @@ Seriously though, I got really busy and just never got around to making a produc
     * Converted [`Primrose.Text.Controls.TextBox`](#Primrose_Text_Controls_TextBox) to be a Surface.
     * [`Primrose.Text.Controls.TextInput`](#Primrose_Text_Controls_TextInput) is a single-line text input control. It's essentially a `Primrose.Text.Controls.TextBox` that is constrained to a single line and only PlainText grammar. It can optionally have a character set as a password-blanking character.
   * [`patch()`](#patch) function takes two objects-as-hashMaps. Any keys in the second hashMap that are missing in first will get added.
-  * [`overwrite()`](#overwrite) function is similar to patch, except it overwrites keys that match between objects.
   * Textures, Materials, and Geometries now get cached to save a bunch of GPU memory.
   * Redesigned how [`textured()`](#textured) works. Optional parameters now go in an options object-nee-hashMap as the last parameter to the function.
   * Option for `textured()` to display objects as wireframes.

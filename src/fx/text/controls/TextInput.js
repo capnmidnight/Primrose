@@ -15,7 +15,7 @@ Primrose.Text.Controls.TextInput = (function () {
   });
   class TextInput extends Primrose.Text.Controls.TextBox {
     constructor(options) {
-      super(overwrite(
+      super(copyObject(
         patch(options, {
           id: "Primrose.Text.Controls.TextInput[" + (COUNTER++) + "]",
           padding: 5
