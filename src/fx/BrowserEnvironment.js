@@ -684,10 +684,10 @@ Primrose.BrowserEnvironment = (function () {
           funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), fgColor);
 
         icon.name = (display.displayName + "Icon").replace(/ /g, "");
-        icon.addEventListener("click", (isVR && this.goVR || this.goFullScreen).bind(this, i), false);
+        icon.addEventListener("click", this.goFullScreen.bind(this, i), false);
 
         geom.computeBoundingBox();
-        
+
         put(funcText)
           .on(icon)
           .rot(0, 90 * Math.PI / 180, 0)
@@ -1023,10 +1023,10 @@ Primrose.BrowserEnvironment = (function () {
         FullScreen.request(this.renderer.domElement);
       }
 
-      this.goVR = (index) => {
+      this.goFullScreen = (index) => {
         if (this.input.VR) {
-          this.input.VR.connect(index);
           setPointerLock();
+          this.input.VR.connect(index);
           return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
             .then((elem) => {
               if (Primrose.Input.VR.Version === 1 && isMobile) {
@@ -1095,12 +1095,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var setFullscreen = () => {
         if (!isFullScreenMode() && isMobile) {
-          if (Primrose.Input.VR.Version >= 1) {
-            this.goVR(0);
-          }
-          else {
-            this.goFullScreen();
-          }
+          this.goFullScreen(0);
         }
       };
 
@@ -1243,7 +1238,6 @@ Primrose.BrowserEnvironment = (function () {
           }
         }
       });
-
 
       this.quality = this.options.quality;
 
