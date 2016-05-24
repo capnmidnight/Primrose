@@ -148,7 +148,6 @@
     <Content Include="src\base\clone.js" />
     <Content Include="src\base\cylinder.js" />
     <Content Include="src\base\patch.js" />
-    <Content Include="src\base\overwrite.js" />
     <Content Include="src\base\put.js" />
     <Content Include="src\base\InsideSphereGeometry.js" />
     <Content Include="src\base\light.js" />
