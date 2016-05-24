@@ -641,7 +641,9 @@ Primrose.BrowserEnvironment = (function () {
         var arm = hub();
         arm.add(icon);
         icon.position.z = -1;
-        put(arm).on(this.scene).at(0, this.options.avatarHeight, 0);
+        put(arm)
+          .on(this.scene)
+          .at(0, this.options.avatarHeight, 0);
         var wedge = 75 / arr.length;
         arm.rotation.set(0, Math.PI * wedge * ((arr.length - 1) * 0.5 - i) / 180, 0);
         this.registerPickableObject(icon);

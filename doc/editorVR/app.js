@@ -264,14 +264,16 @@ function testDemo(scene) {
     R = Primrose.Random,
     start = put(hub())
       .on(scene)
-      .at(-MIDX, 0, -DEPTH - 2);
+      .at(-MIDX, 0, -DEPTH - 2)
+      .obj();
 
   var balls = [];
 
   for (var i = 0; i < 10; ++i) {
     balls.push(put(brick(DECK))
       .on(start)
-      .at(R.int(WIDTH),
+      .at(R.int(WIDTH)
+      .obj(),
       R.int(HEIGHT),
       R.int(DEPTH)));
 
