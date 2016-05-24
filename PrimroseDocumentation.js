@@ -698,10 +698,6 @@ pliny.function({
   }]
 });
 pliny.function({
-  name: "overwrite",
-  description: "| [under construction]"
-});
-pliny.function({
   name: "patch",
   parameters: [{ name: "obj1", type: "Object", description: "The object to which to copy values that don't yet exist in the object." }, { name: "obj2", type: "Object", description: "The object from which to copy values to obj1, if obj1 does not already have a value in place." }],
   returns: "Object - the obj1 parameter, with the values copied from obj2",
@@ -787,7 +783,18 @@ pliny.function({
 });
 pliny.function({
   name: "v3",
-  description: "| [under construction]"
+  description: "A shortcut function for creating a new THREE.Vector3 object.",
+  parameters: [{ name: "x", type: "Number", description: "The X component of the vector" }, { name: "y", type: "Number", description: "The Y component of the vector" }, { name: "z", type: "Number", description: "The Z component of the vector" }],
+  returns: "THREE.Vector3",
+  examples: [{
+    name: "Create a vector",
+    description: "    grammar(\"JavaScript\");\n\
+    var a = v3(1, 2, 3);\n\
+    console.assert(a.x === 1);\n\
+    console.assert(a.y === 2);\n\
+    console.assert(a.z === 3);\n\
+    console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
+  }]
 });
 pliny.class({
     parent: "Primrose",

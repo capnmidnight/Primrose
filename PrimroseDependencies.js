@@ -6,7 +6,7 @@ var logger = (function () {
   function cloneArgs(args) {
     var output = [];
     for (var i = 0; i < args.length; ++i) {
-      if (typeof args[i] === "object") {
+      if (typeof args[i] === "object" && !(args[i] instanceof String)) {
         var obj1 = args[i],
         obj2 = {};
         for (var key in obj1) {
@@ -18,7 +18,7 @@ var logger = (function () {
         output.push(obj2);
       }
       else {
-        output.push(args[i]);
+        output.push(args[i].toString());
       }
     }
     return output;
@@ -119,7 +119,7 @@ var logger = (function () {
   // Use polyfill for setImmediate for performance gains
   var asap = (typeof setImmediate === 'function' && setImmediate) ||
     function (fn) {
-      setTimeoutFunc(fn, 1);
+      setTimeoutFunc(fn, 0);
     };
 
   var onUnhandledRejection = function onUnhandledRejection(err) {
@@ -208,9 +208,9 @@ var logger = (function () {
         if (!self._handled) {
           onUnhandledRejection(self._value);
         }
-      }, 1);
+      });
     }
-    
+
     for (var i = 0, len = self._deferreds.length; i < len; i++) {
       handle(self, self._deferreds[i]);
     }
@@ -253,7 +253,8 @@ var logger = (function () {
   };
 
   Promise.prototype.then = function (onFulfilled, onRejected) {
-    var prom = new Promise(noop);
+    var prom = new (this.constructor)(noop);
+
     handle(this, new Handler(onFulfilled, onRejected, prom));
     return prom;
   };
@@ -323,7 +324,7 @@ var logger = (function () {
   Promise._setImmediateFn = function _setImmediateFn(fn) {
     asap = fn;
   };
-  
+
   Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {
     onUnhandledRejection = fn;
   };
@@ -1339,6 +1340,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           } else {
             desc = n.description;
           }
+
+          if (n.optional) {
+            desc = "(Optional) " + desc;
+          }
+
+          if (n.default !== undefined) {
+            desc += " Defaults to <code>" + n.default + "</code>.";
+          }
+
           s += "<dl><dt>" + this.shortDescription(false, n) + "</dt><dd>" + markdown(desc) + "</dd></dl>";
         } else {
           s += this.shortDescription(false, n);
