@@ -39,7 +39,7 @@
     <Content Include="doc\models\ghost.mtl" />
     <Content Include="doc\models\ghost.obj" />
     <Content Include="doc\pacman\screenshot.jpg" />
-    <Content Include="src\base\THREE.Object3D.prototype.addToBrowserEnvironment.js" />
+    <Content Include="src\three-ext\Object3D.prototype.addToBrowserEnvironment.js" />
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
     <Content Include="src\base\emit.js" />
@@ -294,6 +294,7 @@
     <Folder Include="src\fx\controls\" />
     <Folder Include="src\fx\HTTP\" />
     <Folder Include="src\fx\Random\" />
+    <Folder Include="src\three-ext\" />
     <Folder Include="src\x\" />
     <Folder Include="templates\" />
     <Folder Include="src" />
