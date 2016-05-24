@@ -39,6 +39,7 @@
     <Content Include="doc\models\ghost.mtl" />
     <Content Include="doc\models\ghost.obj" />
     <Content Include="doc\pacman\screenshot.jpg" />
+    <Content Include="src\base\THREE.Object3D.prototype.addToBrowserEnvironment.js" />
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
     <Content Include="src\base\emit.js" />

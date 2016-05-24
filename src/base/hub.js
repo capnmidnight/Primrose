@@ -11,19 +11,5 @@
   ]
 });
 function hub() {
-  var obj = new THREE.Object3D();
-  obj.addToBrowserEnvironment = (env, scene) => {
-    scene.add(obj);
-    obj.appendChild = (child) => {
-      if (child.addToBrowserEnvironment) {
-        return child.addToBrowserEnvironment(env, obj);
-      }
-      else {
-        obj.add(child);
-        env.registerPickableObject(child);
-        return child;
-      }
-    };
-  };
-  return obj;
+  return new THREE.Object3D();
 }
