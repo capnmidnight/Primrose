@@ -580,7 +580,7 @@ Primrose.BrowserEnvironment = (function () {
         readyFired = false,
         modelFiles = {
           monitor: this.options.fullScreenIcon,
-          cardboard: null,
+          cardboard: this.options.VRIcon,
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
@@ -622,11 +622,6 @@ Primrose.BrowserEnvironment = (function () {
           return elem.addToBrowserEnvironment(this, this.scene);
         }
       };
-
-
-      if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = this.options.VRIcon;
-      }
 
       function setColor(model, color) {
         return model.children[0].material.color.set(color);
