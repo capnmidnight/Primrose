@@ -400,20 +400,7 @@ function writeForm(ctrls, state) {
 "use strict";
 
 function hub() {
-  var obj = new THREE.Object3D();
-  obj.addToBrowserEnvironment = function (env, scene) {
-    scene.add(obj);
-    obj.appendChild = function (child) {
-      if (child.addToBrowserEnvironment) {
-        return child.addToBrowserEnvironment(env, obj);
-      } else {
-        obj.add(child);
-        env.registerPickableObject(child);
-        return child;
-      }
-    };
-  };
-  return obj;
+  return new THREE.Object3D();
 }
 "use strict";
 
@@ -552,23 +539,62 @@ function patch(obj1, obj2) {
 "use strict";
 
 function put(object) {
-  var at = function at(x, y, z) {
+  var box = {
+    on: null,
+    at: null,
+    rot: null,
+    scale: null,
+    obj: function obj() {
+      return object;
+    }
+  },
+      on = function on(scene) {
+    if (scene.appendChild) {
+      scene.appendChild(object);
+    } else {
+      scene.add(object);
+    }
+    box.on = null;
+    if (box.at || box.rot || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
+  },
+      at = function at(x, y, z) {
     object.position.set(x, y, z);
-    return object;
+    box.at = null;
+    if (box.on || box.rot || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
   },
       rot = function rot(x, y, z) {
     object.rotation.set(x, y, z);
-    return { at: at };
-  };
-  return {
-    on: function on(s) {
-      s.add(object);
-      return {
-        at: at,
-        rot: rot
-      };
+    box.rot = null;
+    if (box.on || box.at || box.scale) {
+      return box;
+    } else {
+      return object;
+    }
+  },
+      scale = function scale(x, y, z) {
+    object.scale.set(x, y, z);
+    box.scale = null;
+    if (box.on || box.at || box.rot) {
+      return box;
+    } else {
+      return object;
     }
   };
+
+  box.on = on;
+  box.at = at;
+  box.rot = rot;
+  box.scale = scale;
+
+  return box;
 }
 "use strict";
 
@@ -1468,7 +1494,7 @@ Primrose.BrowserEnvironment = function () {
           readyFired = false,
           modelFiles = {
         monitor: this.options.fullScreenIcon,
-        cardboard: null,
+        cardboard: this.options.VRIcon,
         scene: this.options.sceneModel,
         button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
         font: this.options.font
@@ -1510,10 +1536,6 @@ Primrose.BrowserEnvironment = function () {
           return elem.addToBrowserEnvironment(_this, _this.scene);
         }
       };
-
-      if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = this.options.VRIcon;
-      }
 
       function setColor(model, color) {
         return model.children[0].material.color.set(color);
@@ -6334,6 +6356,27 @@ Primrose.Workerize = function () {
 
   return Workerize;
 }();
+"use strict";
+
+if (window.THREE) {
+  THREE.Object3D.prototype.addToBrowserEnvironment = function (env, scene) {
+    var _this = this;
+
+    scene.add(this);
+    // this has to be done as a lambda expression because it needs to capture the
+    // env variable provided in the addToBrowserEnvironment call;
+
+    this.appendChild = function (child) {
+      if (child.addToBrowserEnvironment) {
+        return child.addToBrowserEnvironment(env, _this);
+      } else {
+        _this.add(child);
+        env.registerPickableObject(child);
+        return child;
+      }
+    };
+  };
+}
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -12762,5 +12805,5 @@ Primrose.Text.Themes.Default = function () {
     }
   };
 }();
-Primrose.VERSION = "v0.24.0";
-console.info("Using Primrose v0.24.0. Find out more at http://www.primrosevr.com");
+Primrose.VERSION = "v0.24.1";
+console.info("Using Primrose v0.24.1. Find out more at http://www.primrosevr.com");

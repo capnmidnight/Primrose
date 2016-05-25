@@ -23,6 +23,7 @@ var gulp = require("gulp"),
   concat = require("gulp-concat"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
+  exec = require("child_process").exec,
   footer = require("gulp-footer"),
   fs = require("fs"),
   jshint = require("gulp-jshint"),
@@ -266,15 +267,30 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("copy:quickstart", ["jsmin"], function () {
+gulp.task("makeManifest", ["jsmin"], function (cb) {
+  exec("cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    cb(err);
+  });
+});
+
+gulp.task("copy:quickstart", ["makeManifest"], function () {
   return gulp.src([
     "../HereTTP/bin/x86/Release/StartHere.exe",
+    "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
     "Primrose*.min.js",
     "doc/models/monitor.*",
     "doc/models/cardboard.*",
     "doc/fonts/helvetiker_regular.typeface.js",
     "doc/audio/wind.ogg",
     "!**/*.blend"])
+    .pipe(rename(function (path) {
+      if (path.basename === "StartHere") {
+        path.basename += "-WINDOWS";
+      }
+      return path;
+    }))
     .pipe(gulp.dest("quickstart"));
 });
 

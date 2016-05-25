@@ -107,238 +107,6 @@ var logger = (function () {
   return logger;
 })();
 
-(function (root) {
-
-  // Store setTimeout reference so promise-polyfill will be unaffected by
-  // other code modifying setTimeout (like sinon.useFakeTimers())
-  var setTimeoutFunc = setTimeout;
-
-  function noop() {
-  }
-
-  // Use polyfill for setImmediate for performance gains
-  var asap = (typeof setImmediate === 'function' && setImmediate) ||
-    function (fn) {
-      setTimeoutFunc(fn, 0);
-    };
-
-  var onUnhandledRejection = function onUnhandledRejection(err) {
-    if (typeof console !== 'undefined' && console) {
-      console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
-    }
-  };
-
-  // Polyfill for Function.prototype.bind
-  function bind(fn, thisArg) {
-    return function () {
-      fn.apply(thisArg, arguments);
-    };
-  }
-
-  function Promise(fn) {
-    if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new');
-    if (typeof fn !== 'function') throw new TypeError('not a function');
-    this._state = 0;
-    this._handled = false;
-    this._value = undefined;
-    this._deferreds = [];
-
-    doResolve(fn, this);
-  }
-
-  function handle(self, deferred) {
-    while (self._state === 3) {
-      self = self._value;
-    }
-    if (self._state === 0) {
-      self._deferreds.push(deferred);
-      return;
-    }
-    self._handled = true;
-    asap(function () {
-      var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
-      if (cb === null) {
-        (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
-        return;
-      }
-      var ret;
-      try {
-        ret = cb(self._value);
-      } catch (e) {
-        reject(deferred.promise, e);
-        return;
-      }
-      resolve(deferred.promise, ret);
-    });
-  }
-
-  function resolve(self, newValue) {
-    try {
-      // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
-      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');
-      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
-        var then = newValue.then;
-        if (newValue instanceof Promise) {
-          self._state = 3;
-          self._value = newValue;
-          finale(self);
-          return;
-        } else if (typeof then === 'function') {
-          doResolve(bind(then, newValue), self);
-          return;
-        }
-      }
-      self._state = 1;
-      self._value = newValue;
-      finale(self);
-    } catch (e) {
-      reject(self, e);
-    }
-  }
-
-  function reject(self, newValue) {
-    self._state = 2;
-    self._value = newValue;
-    finale(self);
-  }
-
-  function finale(self) {
-    if (self._state === 2 && self._deferreds.length === 0) {
-      asap(function() {
-        if (!self._handled) {
-          onUnhandledRejection(self._value);
-        }
-      });
-    }
-
-    for (var i = 0, len = self._deferreds.length; i < len; i++) {
-      handle(self, self._deferreds[i]);
-    }
-    self._deferreds = null;
-  }
-
-  function Handler(onFulfilled, onRejected, promise) {
-    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
-    this.onRejected = typeof onRejected === 'function' ? onRejected : null;
-    this.promise = promise;
-  }
-
-  /**
-   * Take a potentially misbehaving resolver function and make sure
-   * onFulfilled and onRejected are only called once.
-   *
-   * Makes no guarantees about asynchrony.
-   */
-  function doResolve(fn, self) {
-    var done = false;
-    try {
-      fn(function (value) {
-        if (done) return;
-        done = true;
-        resolve(self, value);
-      }, function (reason) {
-        if (done) return;
-        done = true;
-        reject(self, reason);
-      });
-    } catch (ex) {
-      if (done) return;
-      done = true;
-      reject(self, ex);
-    }
-  }
-
-  Promise.prototype['catch'] = function (onRejected) {
-    return this.then(null, onRejected);
-  };
-
-  Promise.prototype.then = function (onFulfilled, onRejected) {
-    var prom = new (this.constructor)(noop);
-
-    handle(this, new Handler(onFulfilled, onRejected, prom));
-    return prom;
-  };
-
-  Promise.all = function (arr) {
-    var args = Array.prototype.slice.call(arr);
-
-    return new Promise(function (resolve, reject) {
-      if (args.length === 0) return resolve([]);
-      var remaining = args.length;
-
-      function res(i, val) {
-        try {
-          if (val && (typeof val === 'object' || typeof val === 'function')) {
-            var then = val.then;
-            if (typeof then === 'function') {
-              then.call(val, function (val) {
-                res(i, val);
-              }, reject);
-              return;
-            }
-          }
-          args[i] = val;
-          if (--remaining === 0) {
-            resolve(args);
-          }
-        } catch (ex) {
-          reject(ex);
-        }
-      }
-
-      for (var i = 0; i < args.length; i++) {
-        res(i, args[i]);
-      }
-    });
-  };
-
-  Promise.resolve = function (value) {
-    if (value && typeof value === 'object' && value.constructor === Promise) {
-      return value;
-    }
-
-    return new Promise(function (resolve) {
-      resolve(value);
-    });
-  };
-
-  Promise.reject = function (value) {
-    return new Promise(function (resolve, reject) {
-      reject(value);
-    });
-  };
-
-  Promise.race = function (values) {
-    return new Promise(function (resolve, reject) {
-      for (var i = 0, len = values.length; i < len; i++) {
-        values[i].then(resolve, reject);
-      }
-    });
-  };
-
-  /**
-   * Set the immediate function to execute callbacks
-   * @param fn {function} Function to execute
-   * @private
-   */
-  Promise._setImmediateFn = function _setImmediateFn(fn) {
-    asap = fn;
-  };
-
-  Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {
-    onUnhandledRejection = fn;
-  };
-
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Promise;
-  } else if (!root.Promise) {
-    root.Promise = Promise;
-  }
-
-})(this);
-
-!function(e,n){"object"==typeof exports&&"object"==typeof module?module.exports=n():"function"==typeof define&&define.amd?define("index",[],n):"object"==typeof exports?exports.index=n():e.index=n()}(this,function(){return function(e){function n(i){if(t[i])return t[i].exports;var r=t[i]={exports:{},id:i,loaded:!1};return e[i].call(r.exports,r,r.exports,n),r.loaded=!0,r.exports}var t={};return n.m=e,n.c=t,n.p="",n(0)}([function(e,n){"use strict";function t(e){if(Array.isArray(e)){for(var n=0,t=Array(e.length);n<e.length;n++)t[n]=e[n];return t}return Array.from(e)}function i(){if(l)return!1;var e='\n    details, details>summary {\n      display: block;\n    }\n    details > summary {\n      min-height: 1.4em;\n      padding: 0.125em;\n    }\n    details > summary:before {\n      content:"►";\n      font-size: 1em;\n      position: relative;\n      display: inline-block;\n      width: 1em;\n      height: 1em;\n      margin-right: 0.3em;\n      -webkit-transform-origin: 0.4em 0.6em;\n         -moz-transform-origin: 0.4em 0.6em;\n          -ms-transform-origin: 0.4em 0.6em;\n              transform-origin: 0.4em 0.6em;\n    }\n    details[open] > summary:before {\n      content:"▼"\n    }\n    details > *:not(summary) {\n      display: none;\n      opacity: 0;\n    }\n    details[open] > *:not(summary) {\n      display: block;\n      opacity: 1;\n\n      /* If you need to preserve the original display attribute then wrap detail child elements in a div-tag */\n      /* e.g. if you use an element with "display: inline", then wrap it inside a div */\n      /* Too much hassle to make JS preserve original attribute */\n    }\n\n    /* Use this to hide native indicator and use pseudoelement instead\n    summary::-webkit-details-marker {\n      display: none;\n    }\n    */';if(null===document.querySelector("#details-polyfill-css")){var n=document.createElement("style");return n.id="details-polyfill-css",n.textContent=e.replace(/(\/\*([^*]|(\*+[^*\/]))*\*+\/)/gm,"").replace(/\s/gm," "),n.appendChild(document.createTextNode("")),document.head.insertBefore(n,document.head.firstChild),!0}return!1}function r(){var e=arguments.length<=0||void 0===arguments[0]?document:arguments[0];if(l)return!1;var n=!1;return[].concat(t(e.querySelectorAll("details:not("+s+")"))).forEach(function(e){e.classList.add(d);var i=[].concat(t(e.childNodes)).find(function(e){return"summary"===e.nodeName.toLowerCase()});i||(i=document.createElement("summary"),i.textContent="Details",e.insertBefore(i,e.firstChild)),e.firstChild!==i&&(e.removeChild(i),e.insertBefore(i,e.firstChild)),i.tabIndex=0,i.addEventListener("keydown",function(e){if(e.target===i&&(e.keyCode===o||e.keyCode===a)){e.preventDefault(),e.stopPropagation();var n=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(n)}},!0),i.addEventListener("click",function(n){n.target===i&&(e.hasAttribute("open")?e.removeAttribute("open"):e.setAttribute("open","open"))},!0),n=!0}),n}Object.defineProperty(n,"__esModule",{value:!0}),n.polyfillDetails=r;var o=13,a=32,d="is-polyfilled",s="."+d,l="open"in document.createElement("details");window.addEventListener("load",function(){i(),r(document)})}])});
-//# sourceMappingURL=index.min.js.map
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -1565,6 +1333,238 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return module;
   }(), typeof module !== 'undefined' && require || openBag.bind(null, window));
 })();
+(function (root) {
+
+  // Store setTimeout reference so promise-polyfill will be unaffected by
+  // other code modifying setTimeout (like sinon.useFakeTimers())
+  var setTimeoutFunc = setTimeout;
+
+  function noop() {
+  }
+
+  // Use polyfill for setImmediate for performance gains
+  var asap = (typeof setImmediate === 'function' && setImmediate) ||
+    function (fn) {
+      setTimeoutFunc(fn, 0);
+    };
+
+  var onUnhandledRejection = function onUnhandledRejection(err) {
+    if (typeof console !== 'undefined' && console) {
+      console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
+    }
+  };
+
+  // Polyfill for Function.prototype.bind
+  function bind(fn, thisArg) {
+    return function () {
+      fn.apply(thisArg, arguments);
+    };
+  }
+
+  function Promise(fn) {
+    if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new');
+    if (typeof fn !== 'function') throw new TypeError('not a function');
+    this._state = 0;
+    this._handled = false;
+    this._value = undefined;
+    this._deferreds = [];
+
+    doResolve(fn, this);
+  }
+
+  function handle(self, deferred) {
+    while (self._state === 3) {
+      self = self._value;
+    }
+    if (self._state === 0) {
+      self._deferreds.push(deferred);
+      return;
+    }
+    self._handled = true;
+    asap(function () {
+      var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
+      if (cb === null) {
+        (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
+        return;
+      }
+      var ret;
+      try {
+        ret = cb(self._value);
+      } catch (e) {
+        reject(deferred.promise, e);
+        return;
+      }
+      resolve(deferred.promise, ret);
+    });
+  }
+
+  function resolve(self, newValue) {
+    try {
+      // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');
+      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+        var then = newValue.then;
+        if (newValue instanceof Promise) {
+          self._state = 3;
+          self._value = newValue;
+          finale(self);
+          return;
+        } else if (typeof then === 'function') {
+          doResolve(bind(then, newValue), self);
+          return;
+        }
+      }
+      self._state = 1;
+      self._value = newValue;
+      finale(self);
+    } catch (e) {
+      reject(self, e);
+    }
+  }
+
+  function reject(self, newValue) {
+    self._state = 2;
+    self._value = newValue;
+    finale(self);
+  }
+
+  function finale(self) {
+    if (self._state === 2 && self._deferreds.length === 0) {
+      asap(function() {
+        if (!self._handled) {
+          onUnhandledRejection(self._value);
+        }
+      });
+    }
+
+    for (var i = 0, len = self._deferreds.length; i < len; i++) {
+      handle(self, self._deferreds[i]);
+    }
+    self._deferreds = null;
+  }
+
+  function Handler(onFulfilled, onRejected, promise) {
+    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+    this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+    this.promise = promise;
+  }
+
+  /**
+   * Take a potentially misbehaving resolver function and make sure
+   * onFulfilled and onRejected are only called once.
+   *
+   * Makes no guarantees about asynchrony.
+   */
+  function doResolve(fn, self) {
+    var done = false;
+    try {
+      fn(function (value) {
+        if (done) return;
+        done = true;
+        resolve(self, value);
+      }, function (reason) {
+        if (done) return;
+        done = true;
+        reject(self, reason);
+      });
+    } catch (ex) {
+      if (done) return;
+      done = true;
+      reject(self, ex);
+    }
+  }
+
+  Promise.prototype['catch'] = function (onRejected) {
+    return this.then(null, onRejected);
+  };
+
+  Promise.prototype.then = function (onFulfilled, onRejected) {
+    var prom = new (this.constructor)(noop);
+
+    handle(this, new Handler(onFulfilled, onRejected, prom));
+    return prom;
+  };
+
+  Promise.all = function (arr) {
+    var args = Array.prototype.slice.call(arr);
+
+    return new Promise(function (resolve, reject) {
+      if (args.length === 0) return resolve([]);
+      var remaining = args.length;
+
+      function res(i, val) {
+        try {
+          if (val && (typeof val === 'object' || typeof val === 'function')) {
+            var then = val.then;
+            if (typeof then === 'function') {
+              then.call(val, function (val) {
+                res(i, val);
+              }, reject);
+              return;
+            }
+          }
+          args[i] = val;
+          if (--remaining === 0) {
+            resolve(args);
+          }
+        } catch (ex) {
+          reject(ex);
+        }
+      }
+
+      for (var i = 0; i < args.length; i++) {
+        res(i, args[i]);
+      }
+    });
+  };
+
+  Promise.resolve = function (value) {
+    if (value && typeof value === 'object' && value.constructor === Promise) {
+      return value;
+    }
+
+    return new Promise(function (resolve) {
+      resolve(value);
+    });
+  };
+
+  Promise.reject = function (value) {
+    return new Promise(function (resolve, reject) {
+      reject(value);
+    });
+  };
+
+  Promise.race = function (values) {
+    return new Promise(function (resolve, reject) {
+      for (var i = 0, len = values.length; i < len; i++) {
+        values[i].then(resolve, reject);
+      }
+    });
+  };
+
+  /**
+   * Set the immediate function to execute callbacks
+   * @param fn {function} Function to execute
+   * @private
+   */
+  Promise._setImmediateFn = function _setImmediateFn(fn) {
+    asap = fn;
+  };
+
+  Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {
+    onUnhandledRejection = fn;
+  };
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Promise;
+  } else if (!root.Promise) {
+    root.Promise = Promise;
+  }
+
+})(this);
+
+!function(e,n){"object"==typeof exports&&"object"==typeof module?module.exports=n():"function"==typeof define&&define.amd?define("index",[],n):"object"==typeof exports?exports.index=n():e.index=n()}(this,function(){return function(e){function n(i){if(t[i])return t[i].exports;var r=t[i]={exports:{},id:i,loaded:!1};return e[i].call(r.exports,r,r.exports,n),r.loaded=!0,r.exports}var t={};return n.m=e,n.c=t,n.p="",n(0)}([function(e,n){"use strict";function t(e){if(Array.isArray(e)){for(var n=0,t=Array(e.length);n<e.length;n++)t[n]=e[n];return t}return Array.from(e)}function i(){if(l)return!1;var e='\n    details, details>summary {\n      display: block;\n    }\n    details > summary {\n      min-height: 1.4em;\n      padding: 0.125em;\n    }\n    details > summary:before {\n      content:"►";\n      font-size: 1em;\n      position: relative;\n      display: inline-block;\n      width: 1em;\n      height: 1em;\n      margin-right: 0.3em;\n      -webkit-transform-origin: 0.4em 0.6em;\n         -moz-transform-origin: 0.4em 0.6em;\n          -ms-transform-origin: 0.4em 0.6em;\n              transform-origin: 0.4em 0.6em;\n    }\n    details[open] > summary:before {\n      content:"▼"\n    }\n    details > *:not(summary) {\n      display: none;\n      opacity: 0;\n    }\n    details[open] > *:not(summary) {\n      display: block;\n      opacity: 1;\n\n      /* If you need to preserve the original display attribute then wrap detail child elements in a div-tag */\n      /* e.g. if you use an element with "display: inline", then wrap it inside a div */\n      /* Too much hassle to make JS preserve original attribute */\n    }\n\n    /* Use this to hide native indicator and use pseudoelement instead\n    summary::-webkit-details-marker {\n      display: none;\n    }\n    */';if(null===document.querySelector("#details-polyfill-css")){var n=document.createElement("style");return n.id="details-polyfill-css",n.textContent=e.replace(/(\/\*([^*]|(\*+[^*\/]))*\*+\/)/gm,"").replace(/\s/gm," "),n.appendChild(document.createTextNode("")),document.head.insertBefore(n,document.head.firstChild),!0}return!1}function r(){var e=arguments.length<=0||void 0===arguments[0]?document:arguments[0];if(l)return!1;var n=!1;return[].concat(t(e.querySelectorAll("details:not("+s+")"))).forEach(function(e){e.classList.add(d);var i=[].concat(t(e.childNodes)).find(function(e){return"summary"===e.nodeName.toLowerCase()});i||(i=document.createElement("summary"),i.textContent="Details",e.insertBefore(i,e.firstChild)),e.firstChild!==i&&(e.removeChild(i),e.insertBefore(i,e.firstChild)),i.tabIndex=0,i.addEventListener("keydown",function(e){if(e.target===i&&(e.keyCode===o||e.keyCode===a)){e.preventDefault(),e.stopPropagation();var n=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(n)}},!0),i.addEventListener("click",function(n){n.target===i&&(e.hasAttribute("open")?e.removeAttribute("open"):e.setAttribute("open","open"))},!0),n=!0}),n}Object.defineProperty(n,"__esModule",{value:!0}),n.polyfillDetails=r;var o=13,a=32,d="is-polyfilled",s="."+d,l="open"in document.createElement("details");window.addEventListener("load",function(){i(),r(document)})}])});
+//# sourceMappingURL=index.min.js.map
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 module.exports =  _dereq_('./lib/');

@@ -725,7 +725,23 @@ pliny.function({
 });
 pliny.function({
   name: "put",
-  description: "| [under construction]"
+  description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
+\n\
+* .on(scene) - the Primrose.Entity or THREE.Object3D on which to append the element.\n\
+* .at(x, y, z) - set the translation for the object.\n\
+* .rot(x, y, z) - set the rotation for the object.\n\
+* .scale(x, y, z) - set the scale for the object.\n\
+* .obj() - return the naked object, if not all of the transformations are desired.",
+  parameters: [{ name: "object", type: "Object", description: "The object to manipulate." }],
+  returns: "Object",
+  examples: [{
+    name: "Put an object on a scene at a specific location.",
+    description: "    grammar(\"JavaScript\");\n\
+    var myCylinder = put(textured(cylinder(), 0x00ff00))\n\
+      .on(scene)\n\
+      .at(1, 2, 3)\n\
+      .obj();"
+  }]
 });
 pliny.function({
   name: "quad",
@@ -1511,7 +1527,19 @@ Then we can create and use an automatically workerized version of it as follows.
     parameters: [{ name: "script", type: "(String|Function)", description: "A String defining a script, or a Function that can be toString()'d to get it's script." }, { name: "stripFunc", type: "Boolean", description: "Set to true if you want the function to strip the surround function block scope from the script." }],
     returns: "The WebWorker object."
   });
-  pliny.class({
+  pliny.method({
+    parent: "THREE.Object3D",
+    name: "addToBrowserEnvironment",
+    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
+    parameters: [{ name: "env", type: "Primrose.BrowserEnvironment", description: "The environment (with collision detection and ray-picking capability) to which to register objects" }, { name: "scene", type: "THREE.Object3D", description: "The true parent element for `this` object" }]
+  });
+  pliny.method({
+      parent: "THREE.Object3D",
+      name: "appendChild",
+      description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
+      parameters: [{ name: "child", type: "Object", description: "Any Primrose.Entity or THREE.Object3D to add to this object." }]
+    });
+    pliny.class({
     parent: "Primrose.X",
     name: "LoginForm",
     description: "| [Under Construction]",
