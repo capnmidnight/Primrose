@@ -172,6 +172,21 @@ function pugConfiguration(options, defaultData) {
     .pipe(gulp.dest("."));
 }
 
+function X(name, cmd, deps){
+  gulp.task(name, deps || [], function(cb){
+    exec(cmd, function (err, stdout, stderr) {
+      console.log(stdout);
+      console.log(stderr);
+      cb(err);
+    });
+  });
+}
+
+X("build:herettp", "msbuild ../Primrose-Site/Primrose-Site.sln /t:Build /p:Configuration=Release;Platform=x86");
+X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
+X("build:logger", "cd ../logger && gulp");
+X("build:pliny", "cd ../pliny && gulp");
+
 gulp.task("pug:release", ["cssmin", "jsmin"], function () {
   return pugConfiguration({}, {
     jsExt: ".min.js",
@@ -228,7 +243,7 @@ gulp.task("concat:primrose", ["jshint"], function () {
     })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version + ". Find out more at http://www.primrosevr.com\");");
 });
 
-gulp.task("concat:dependencies", function () {
+gulp.task("concat:dependencies", ["build:logger", "build:pliny"], function () {
   return concatenate(gulp.src([
     "node_modules/logger/logger.js",
     "node_modules/pliny/pliny.js",
@@ -275,7 +290,7 @@ gulp.task("makeManifest", ["jsmin"], function (cb) {
   });
 });
 
-gulp.task("copy:quickstart", ["makeManifest"], function () {
+gulp.task("copy:quickstart", ["build:herettp", "build:bootstrapper", "makeManifest"], function () {
   return gulp.src([
     "../HereTTP/bin/x86/Release/StartHere.exe",
     "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
