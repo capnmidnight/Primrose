@@ -6,7 +6,7 @@ var GRASS = "../images/grass.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment("Pacman", {
-    quality: Primrose.Quality.HIGH,
+    quality: Primrose.Quality.VERYLOW,
     autoScaleQuality: false,
     autoRescaleQuality: false,
     backgroundColor: 0x000000,

@@ -37,7 +37,8 @@ html
     block head
       style !{getFile("doc/demoUI" + cssExt)} #frontBuffer { background-image:url(screenshot.jpg); }
       if debug
-        script(type="text/javascript", src=fileRoot + "node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)
+        for file in bootstrapFiles
+          script(type="text/javascript", src=fileRoot + file)
       else
         script(type="text/javascript").
           !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}

@@ -33,17 +33,6 @@ var gulp = require("gulp"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   sourceFiles = recurseDirectory("src"),
-  headerFiles = [
-    "node_modules/logger/logger.js",
-    "node_modules/promise-polyfill/promise.js",
-    "node_modules/lavu-details-polyfill/lib/index.min.js",
-    "node_modules/pliny/pliny.js",
-    "node_modules/socket.io-client/socket.io.js",
-    "node_modules/three/three.js",
-    "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "node_modules/html2canvas/dist/html2canvas.js"
-  ],
   docFiles = recurseDirectory("templates/doc")
     .filter(function (f) {
       return /.jade$/.test(f);
@@ -89,7 +78,17 @@ var gulp = require("gulp"),
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
-    frameworkFiles: headerFiles.concat(sourceFiles)
+    bootstrapFiles: recurseDirectory("../WebVR-Bootstrapper/src"),
+    frameworkFiles: [
+      "../logger/logger.js",
+      "../pliny/node_modules/marked/marked.min.js",
+      "../pliny/src/index.js",
+      "node_modules/socket.io-client/socket.io.js",
+      "node_modules/three/three.js",
+      "node_modules/three/examples/js/loaders/OBJLoader.js",
+      "node_modules/three/examples/js/loaders/MTLLoader.js",
+      "node_modules/html2canvas/dist/html2canvas.js"]
+      .concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
 
@@ -159,6 +158,7 @@ function pugConfiguration(options, defaultData) {
             f[1]
           ];
         })),
+        bootstrapFiles: defaultData.bootstrapFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
         demoTitle: demoTitle,
@@ -228,7 +228,17 @@ gulp.task("concat:primrose", ["jshint"], function () {
 });
 
 gulp.task("concat:dependencies", function () {
-  return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
+  return concatenate(gulp.src([
+    "node_modules/logger/logger.js",
+    "node_modules/pliny/pliny.js",
+    "node_modules/promise-polyfill/promise.js",
+    "node_modules/lavu-details-polyfill/lib/index.min.js",
+    "node_modules/socket.io-client/socket.io.js",
+    "node_modules/three/three.js",
+    "node_modules/three/examples/js/loaders/OBJLoader.js",
+    "node_modules/three/examples/js/loaders/MTLLoader.js",
+    "node_modules/html2canvas/dist/html2canvas.js"
+  ]), "PrimroseDependencies");
 });
 
 gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
