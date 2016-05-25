@@ -41,7 +41,7 @@ env.addEventListener("ready", function () {
   env.appendChild(subScene);
 
   var editorSize = isMobile ? 512 : 1024,
-    fontSize = 20;
+    fontSize = 40 / env.quality;
 
   editorFrame = env.createElement("section");
   editorFrame.id = "EditorFrame";
@@ -64,7 +64,7 @@ env.addEventListener("ready", function () {
   editorFrameMesh.position.set(0, 0, 0);
   editorFrameMesh.visible = false;
   editorFrameMesh.disabled = true;
-});
+}, false);
 
 window.addEventListener("beforeunload", function (evt) {
   if (false && editor && editor.value !== getSourceCode(true)) {
