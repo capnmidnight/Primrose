@@ -62,7 +62,6 @@
     <Content Include="quickstart\bg.jpg" />
     <Content Include="quickstart\deck.png" />
     <Content Include="quickstart\index.html" />
-    <Content Include="quickstart\StartHere.exe" />
     <Content Include="src\base\cache.js" />
     <Content Include="doc\models\cardboard.mtl" />
     <Content Include="doc\models\cardboard.obj" />
