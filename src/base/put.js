@@ -27,7 +27,12 @@ function put(object) {
     obj: () => object
   },
     on = function (scene) {
-      scene.appendChild(object);
+      if (scene.appendChild) {
+        scene.appendChild(object);
+      }
+      else {
+        scene.add(object);
+      }
       box.on = null;
       if (box.at || box.rot || box.scale) {
         return box;
