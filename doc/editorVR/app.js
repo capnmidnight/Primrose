@@ -272,10 +272,10 @@ function testDemo(scene) {
   for (var i = 0; i < 10; ++i) {
     balls.push(put(brick(DECK))
       .on(start)
-      .at(R.int(WIDTH)
-      .obj(),
-      R.int(HEIGHT),
-      R.int(DEPTH)));
+      .at(R.int(WIDTH),
+          R.int(HEIGHT),
+          R.int(DEPTH))
+      .obj());
 
     balls[i].velocity = v3(
       R.number(0, WIDTH),
