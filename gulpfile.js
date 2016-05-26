@@ -182,7 +182,7 @@ function X(name, cmd, deps){
   });
 }
 
-X("build:herettp", "msbuild ../Primrose-Site/Primrose-Site.sln /t:Build /p:Configuration=Release;Platform=x86");
+X("build:herettp", "msbuild ../VR.sln /t:Build /p:Configuration=Release;Platform=x86");
 X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
 X("build:logger", "cd ../logger && gulp");
 X("build:pliny", "cd ../pliny && gulp");
