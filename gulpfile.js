@@ -290,9 +290,18 @@ gulp.task("makeManifest", ["jsmin"], function (cb) {
   });
 });
 
-gulp.task("copy:quickstart", ["build:herettp", "build:bootstrapper", "makeManifest"], function () {
+gulp.task("copy:herettp", ["build:herettp"], function(){
+  return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe"])
+    .pipe(rename(function (path) {
+      path.basename += "-WINDOWS";
+      return path;
+    }))
+    .pipe(gulp.dest("."));
+});
+
+gulp.task("copy:quickstart", ["copy:herettp", "build:bootstrapper", "makeManifest"], function () {
   return gulp.src([
-    "../HereTTP/bin/x86/Release/StartHere.exe",
+    "StartHere*",
     "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
     "Primrose*.min.js",
     "doc/models/monitor.*",
@@ -300,12 +309,6 @@ gulp.task("copy:quickstart", ["build:herettp", "build:bootstrapper", "makeManife
     "doc/fonts/helvetiker_regular.typeface.js",
     "doc/audio/wind.ogg",
     "!**/*.blend"])
-    .pipe(rename(function (path) {
-      if (path.basename === "StartHere") {
-        path.basename += "-WINDOWS";
-      }
-      return path;
-    }))
     .pipe(gulp.dest("quickstart"));
 });
 
