@@ -32,6 +32,12 @@ body > h1 {
     display: none;
 }
 
-button{
-    padding: 1em;
+button {
+    padding: 10px 16px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #343436;
+    border: solid 3px transparent;
+    border-radius: 5px;
+    font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif;
 }
