@@ -10,7 +10,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{f2ff07a2-bbaf-40db-b8b0-38022708477c}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>StartHere.js</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -38,7 +39,40 @@
     <Content Include="doc\models\ghost.blend" />
     <Content Include="doc\models\ghost.mtl" />
     <Content Include="doc\models\ghost.obj" />
+    <Content Include="doc\models\meeting room.blend" />
+    <Content Include="doc\models\meetingroom.mtl" />
+    <Content Include="doc\models\meetingroom.obj" />
+    <Content Include="doc\models\meetingTex1.png" />
+    <Content Include="doc\models\meetingTex10.png" />
+    <Content Include="doc\models\meetingTex11.png" />
+    <Content Include="doc\models\meetingTex12.png" />
+    <Content Include="doc\models\meetingTex13.png" />
+    <Content Include="doc\models\meetingTex14.png" />
+    <Content Include="doc\models\meetingTex15.png" />
+    <Content Include="doc\models\meetingTex16.png" />
+    <Content Include="doc\models\meetingTex17.png" />
+    <Content Include="doc\models\meetingTex18.png" />
+    <Content Include="doc\models\meetingTex19.png" />
+    <Content Include="doc\models\meetingTex2.png" />
+    <Content Include="doc\models\meetingTex20.png" />
+    <Content Include="doc\models\meetingTex21.png" />
+    <Content Include="doc\models\meetingTex22.png" />
+    <Content Include="doc\models\meetingTex23.png" />
+    <Content Include="doc\models\meetingTex24.png" />
+    <Content Include="doc\models\meetingTex25.png" />
+    <Content Include="doc\models\meetingTex26.png" />
+    <Content Include="doc\models\meetingTex3.png" />
+    <Content Include="doc\models\meetingTex4.png" />
+    <Content Include="doc\models\meetingTex5.png" />
+    <Content Include="doc\models\meetingTex6.png" />
+    <Content Include="doc\models\meetingTex7.png" />
+    <Content Include="doc\models\meetingTex8.png" />
+    <Content Include="doc\models\meetingTex9.png" />
     <Content Include="doc\pacman\screenshot.jpg" />
+    <Content Include="meeting\index.html" />
+    <Content Include="meeting\makeManifest.sh" />
+    <Content Include="meeting\manifest.json" />
+    <Content Include="meeting\screenshot.jpg" />
     <Content Include="src\three-ext\Object3D.prototype.addToBrowserEnvironment.js" />
     <Content Include="src\fx\controls\HtmlDoc.js" />
     <Compile Include="doc\demoUI.css" />
@@ -47,7 +81,6 @@
     <Compile Include="doc\demoUI.js" />
     <Compile Include="doc\pacman\app.js" />
     <Compile Include="doc\pacman\pacman.js" />
-    <Compile Include="StartHere.js" />
     <Content Include="doc\images\axis.png" />
     <Content Include="doc\images\logo128.png" />
     <Content Include="doc\images\primrose32.png" />
@@ -138,6 +171,7 @@
     <Content Include="README.md" />
     <Compile Include="doc\fonts\helvetiker_regular.typeface.js" />
     <Compile Include="gulpfile.js" />
+    <Compile Include="meeting\app.js" />
     <Compile Include="quickstart\app.js" />
     <Content Include="doc\style.css" />
     <Content Include="doc\images\gettingStarted.jpg" />
@@ -182,6 +216,7 @@
     <Content Include="src\index.js" />
     <Content Include="src\x\SignupForm.js" />
     <Content Include="src\x\LoginForm.js" />
+    <Content Include="templates\meeting\index.html.jade" />
     <Content Include="test\Basic.js" />
     <Content Include="test\Grammar.js" />
     <Content Include="test\Point.js" />
@@ -288,6 +323,7 @@
     <Folder Include="doc\temple\" />
     <Folder Include="doc\models\" />
     <Folder Include="doc\audio\" />
+    <Folder Include="meeting\" />
     <Folder Include="quickstart\" />
     <Folder Include="src\fx\DOM\" />
     <Folder Include="src\fx\controls\" />
@@ -316,6 +352,7 @@
     <Folder Include="templates\doc\jabbers\" />
     <Folder Include="templates\doc\music\" />
     <Folder Include="templates\doc\temple\" />
+    <Folder Include="templates\meeting\" />
     <Folder Include="test" />
     <Folder Include="typings\" />
     <Folder Include="typings\gulp-babel\" />
