@@ -170,6 +170,10 @@ Primrose.Surface = (function () {
       }
     }
 
+    render(){
+      this.invalidate();
+    }
+
     get imageWidth() {
       return this.canvas.width;
     }
