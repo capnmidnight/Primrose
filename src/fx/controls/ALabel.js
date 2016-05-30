@@ -44,9 +44,9 @@ Primrose.Controls.Label = (function () {
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize || 16;
       this.refreshCharacter();
-      this.value = this.options.value;
       this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
       this.color = this.options.color || this.theme.regular.foreColor;
+      this.value = this.options.value;
     }
 
     get textAlign() {
