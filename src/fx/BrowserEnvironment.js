@@ -580,7 +580,7 @@ Primrose.BrowserEnvironment = (function () {
         readyFired = false,
         modelFiles = {
           monitor: this.options.fullScreenIcon,
-          cardboard: null,
+          cardboard: this.options.VRIcon,
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
@@ -623,11 +623,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-
-      if (Primrose.Input.VR.Version > 0) {
-        modelFiles.cardboard = this.options.VRIcon;
-      }
-
       function setColor(model, color) {
         return model.children[0].material.color.set(color);
       }
@@ -646,7 +641,9 @@ Primrose.BrowserEnvironment = (function () {
         var arm = hub();
         arm.add(icon);
         icon.position.z = -1;
-        put(arm).on(this.scene).at(0, this.options.avatarHeight, 0);
+        put(arm)
+          .on(this.scene)
+          .at(0, this.options.avatarHeight, 0);
         var wedge = 75 / arr.length;
         arm.rotation.set(0, Math.PI * wedge * ((arr.length - 1) * 0.5 - i) / 180, 0);
         this.registerPickableObject(icon);

@@ -23,6 +23,7 @@ var gulp = require("gulp"),
   concat = require("gulp-concat"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
+  exec = require("child_process").exec,
   footer = require("gulp-footer"),
   fs = require("fs"),
   jshint = require("gulp-jshint"),
@@ -33,17 +34,6 @@ var gulp = require("gulp"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
   sourceFiles = recurseDirectory("src"),
-  headerFiles = [
-    "node_modules/logger/logger.js",
-    "node_modules/promise-polyfill/promise.js",
-    "node_modules/lavu-details-polyfill/lib/index.min.js",
-    "node_modules/pliny/pliny.js",
-    "node_modules/socket.io-client/socket.io.js",
-    "node_modules/three/three.js",
-    "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "node_modules/html2canvas/dist/html2canvas.js"
-  ],
   docFiles = recurseDirectory("templates/doc")
     .filter(function (f) {
       return /.jade$/.test(f);
@@ -89,7 +79,17 @@ var gulp = require("gulp"),
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
-    frameworkFiles: headerFiles.concat(sourceFiles)
+    bootstrapFiles: recurseDirectory("../WebVR-Bootstrapper/src"),
+    frameworkFiles: [
+      "../logger/logger.js",
+      "../pliny/node_modules/marked/marked.min.js",
+      "../pliny/src/index.js",
+      "node_modules/socket.io-client/socket.io.js",
+      "node_modules/three/three.js",
+      "node_modules/three/examples/js/loaders/OBJLoader.js",
+      "node_modules/three/examples/js/loaders/MTLLoader.js",
+      "node_modules/html2canvas/dist/html2canvas.js"]
+      .concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
 
@@ -112,7 +112,9 @@ function pugConfiguration(options, defaultData) {
     return [f, fs.lstatSync(f).size];
   }
   var frameworkFiles = defaultData.frameworkFiles.map(getFileDescrip);
-  return gulp.src(["*.jade", "*.pug", "templates/doc/**/*.jade", "templates/doc/**/*.pug"], { base: "./" })
+  return gulp.src(["*.jade", "*.pug", 
+    "templates/doc/**/*.jade", "templates/doc/**/*.pug", 
+    "templates/meeting/**/*.jade", "templates/meeting/**/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
       p.extname = "";
       p.dirname = p.dirname.replace("templates" + path.sep, "");
@@ -124,13 +126,17 @@ function pugConfiguration(options, defaultData) {
           .map(function () {
             return "../";
           }),
-        shortName = name.match(/doc\/(\w+)[/.]/),
+        nameSpec = name.match(/(\w+\/)(\w+)[/.]/),
+        dirName = nameSpec && nameSpec[1],
+        shortName = nameSpec && nameSpec[2],
+        scriptName = dirName + shortName + "/app.js",
         demoTitle = null;
 
       parts.pop();
-      shortName = shortName && shortName[1];
-      var scriptName = "doc/" + shortName + "/app.js",
-        fileRoot = parts.join("");
+
+      scriptName = scriptName.replace("index/app.js", "app.js");
+
+      var fileRoot = parts.join("");
 
       for (var i = 0; i < docFiles.length; ++i) {
         var d = docFiles[i];
@@ -159,6 +165,7 @@ function pugConfiguration(options, defaultData) {
             f[1]
           ];
         })),
+        bootstrapFiles: defaultData.bootstrapFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
         demoTitle: demoTitle,
@@ -170,6 +177,21 @@ function pugConfiguration(options, defaultData) {
     .on("error", console.error.bind(console, "PUG ERROR"))
     .pipe(gulp.dest("."));
 }
+
+function X(name, cmd, deps){
+  gulp.task(name, deps || [], function(cb){
+    exec(cmd, function (err, stdout, stderr) {
+      console.log(stdout);
+      console.log(stderr);
+      cb(err);
+    });
+  });
+}
+
+X("build:herettp", "msbuild ../VR.sln /t:Build /p:Configuration=Release;Platform=x86");
+X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
+X("build:logger", "cd ../logger && gulp");
+X("build:pliny", "cd ../pliny && gulp");
 
 gulp.task("pug:release", ["cssmin", "jsmin"], function () {
   return pugConfiguration({}, {
@@ -227,8 +249,18 @@ gulp.task("concat:primrose", ["jshint"], function () {
     })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version + ". Find out more at http://www.primrosevr.com\");");
 });
 
-gulp.task("concat:dependencies", function () {
-  return concatenate(gulp.src(headerFiles), "PrimroseDependencies");
+gulp.task("concat:dependencies", ["build:logger", "build:pliny"], function () {
+  return concatenate(gulp.src([
+    "node_modules/logger/logger.js",
+    "node_modules/pliny/pliny.js",
+    "node_modules/promise-polyfill/promise.js",
+    "node_modules/lavu-details-polyfill/lib/index.min.js",
+    "node_modules/socket.io-client/socket.io.js",
+    "node_modules/three/three.js",
+    "node_modules/three/examples/js/loaders/OBJLoader.js",
+    "node_modules/three/examples/js/loaders/MTLLoader.js",
+    "node_modules/html2canvas/dist/html2canvas.js"
+  ]), "PrimroseDependencies");
 });
 
 gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
@@ -256,9 +288,27 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-gulp.task("copy:quickstart", ["jsmin"], function () {
+gulp.task("makeManifest", ["jsmin"], function (cb) {
+  exec("cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", function (err, stdout, stderr) {
+    console.log(stdout);
+    console.log(stderr);
+    cb(err);
+  });
+});
+
+gulp.task("copy:herettp", ["build:herettp"], function(){
+  return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe"])
+    .pipe(rename(function (path) {
+      path.basename += "-WINDOWS";
+      return path;
+    }))
+    .pipe(gulp.dest("."));
+});
+
+gulp.task("copy:quickstart", ["copy:herettp", "build:bootstrapper", "makeManifest"], function () {
   return gulp.src([
-    "../HereTTP/bin/x86/Release/StartHere.exe",
+    "StartHere*",
+    "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
     "Primrose*.min.js",
     "doc/models/monitor.*",
     "doc/models/cardboard.*",

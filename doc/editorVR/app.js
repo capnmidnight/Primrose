@@ -264,7 +264,8 @@ function testDemo(scene) {
     R = Primrose.Random,
     start = put(hub())
       .on(scene)
-      .at(-MIDX, 0, -DEPTH - 2);
+      .at(-MIDX, 0, -DEPTH - 2)
+      .obj();
 
   var balls = [];
 
@@ -272,8 +273,9 @@ function testDemo(scene) {
     balls.push(put(brick(DECK))
       .on(start)
       .at(R.int(WIDTH),
-      R.int(HEIGHT),
-      R.int(DEPTH)));
+          R.int(HEIGHT),
+          R.int(DEPTH))
+      .obj());
 
     balls[i].velocity = v3(
       R.number(0, WIDTH),

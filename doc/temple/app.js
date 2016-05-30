@@ -28,18 +28,24 @@ function column(a, b, h) {
 env.addEventListener("ready", function () {
   var start = put(hub())
     .on(this.scene)
-    .at(-MIDX, 0, -MIDZ),
+    .at(-MIDX, 0, -MIDZ)
+    .obj(),
     verts = [];
 
-  ball = put(brick(WATER)).on(start).at(0, 0, 0);
+  ball = put(brick(WATER))
+    .on(start)
+    .at(0, 0, 0)
+    .obj();
 
   for (var i = 0; i < 5000; ++i) {
     verts.push(v3(Primrose.Random.number(-0.5 * WIDTH, 0.5 * WIDTH),
       Primrose.Random.number(-0.5 * HEIGHT, 0.5 * HEIGHT),
       Primrose.Random.number(-0.5 * DEPTH, 0.5 * DEPTH)));
   }
+
   put(cloud(verts, this.options.backgroundColor, 0.05))
-    .on(start).at(MIDX, MIDY, MIDZ);
+    .on(start)
+    .at(MIDX, MIDY, MIDZ);
 
 
   function makeSphere(r, p) {
@@ -56,7 +62,9 @@ env.addEventListener("ready", function () {
         }
       }
     }
-    put(cloud(verts, 0xff0000, p * Math.sqrt(2))).on(start).at(MIDX - r, r, MIDZ - r);
+    put(cloud(verts, 0xff0000, p * Math.sqrt(2)))
+      .on(start)
+      .at(MIDX - r, r, MIDZ - r);
   }
 
   makeSphere(10, 0.1);
@@ -75,7 +83,9 @@ env.addEventListener("ready", function () {
       .at(x, 12, z);
   }
 
-  put(brick(ROCK, WIDTH, 1, DEPTH)).on(start).at(WIDTH / 2, 12.5, DEPTH / 2);
+  put(brick(ROCK, WIDTH, 1, DEPTH))
+    .on(start)
+    .at(WIDTH / 2, 12.5, DEPTH / 2);
 }.bind(env));
 
 env.addEventListener("update", function (dt) {

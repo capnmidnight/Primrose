@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -17,15 +17,16 @@
     "LICENSE.md",
     "README.md",
     "CONTRIBUTORS.md",
+    "CHANGELOG.md",
     "Primrose.js",
     "Primrose.min.js",
     "PrimroseDependencies.js",
     "PrimroseDependencies.min.js",
     "PrimroseDocumentation.js",
     "PrimroseDocumentation.min.js",
-    "StartHere-WINDOWS.ps1",
-    "StartHere-UNIX.sh",
-    "StartHere.js",
+    "StartHere-WINDOWS.exe",
+    "StartHere-LINUX.sh",
+    "StartHere-OS-X.sh",
     "archive/",
     "quickstart/",
     "src/",

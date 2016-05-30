@@ -1,0 +1,1 @@
+node ../../WebVR-Bootstrapper/index.js ../PrimroseDependencies.min.js ../Primrose.min.js app.js

@@ -113,7 +113,8 @@ block document
       // perform setup here
       var myBlock = put( brick( ROCK ) )
         .on( scene )
-        .at( 0, 0, 0 );
+        .at( 0, 0, 0 )
+        .obj();
 
       // Then, return an update function so Primrose knows what to do for you
       // every frame
@@ -135,7 +136,8 @@ block document
           t = 0,
           start = put( hub() )
           .on( scene )
-          .at( -MIDX, 0, -DEPTH - 2 );
+          .at( -MIDX, 0, -DEPTH - 2 )
+          .obj();
 
       put( light( 0xffffff, 1, 500 ) )
           .on( start )
@@ -148,7 +150,8 @@ block document
             .on( start )
             .at( Primrose.Random.int( WIDTH ),
                 Primrose.Random.int( HEIGHT ),
-                Primrose.Random.int( DEPTH ) ) );
+                Primrose.Random.int( DEPTH ) )
+            .obj() );
 
         balls[i].velocity = v3(
             Primrose.Random.number( 0, WIDTH ),

@@ -4,11 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Primrose VR Application</title>
-    <script type="text/javascript" src="PrimroseDependencies.min.js"></script>
-    <script type="text/javascript" src="Primrose.min.js"></script>
-    <script type="text/javascript" src="PrimroseDocumentation.min.js" async defer></script>
+    <script type="text/javascript" src="WebVRBootstrapper.min.js"></script>
+    <script>
+      WebVRBootstrapper( "manifest.json", function ( startDownload ) {
+        function addButton( text, thunk ) {
+          var btn = document.createElement( "button" );
+          btn.type = "button";
+          btn.appendChild( document.createTextNode( text ) );
+          btn.addEventListener( "click", thunk );
+          document.getElementById( "fsb" ).appendChild( btn );
+        }
+        var b = document.querySelector( "progress" );
+        startDownload( function ( n, m ) {
+          b.max = m;
+          b.value = n;
+        }, function () {
+          b.style.display = "none";
+          function vrButton( display, i ) {
+            addButton( display.displayName, env.goFullScreen.bind( env, i ) );
+          }
+          env.addEventListener( "ready", function () {
+            env.displays.forEach( vrButton );
+          }, false );
+        } );
+      } );
+    </script>
     <style type="text/css">
-      html, body, #frontBuffer {
+      html, body, canvas, progress, #fsb {
         position: fixed;
         top: 0;
         left: 0;
@@ -18,10 +40,19 @@
         border: 0;
         padding: 0;
       }
+
+      #fsb {
+        pointer-events: none;
+      }
+
+      button {
+        padding: 1em;
+      }
     </style>
   </head>
   <body>
     <canvas id="frontBuffer" tabindex="1"></canvas>
-    <script type="text/javascript" src="app.js"></script>
+    <progress></progress>
+    <div id="fsb"></div>
   </body>
 </html>

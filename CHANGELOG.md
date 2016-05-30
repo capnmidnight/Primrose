@@ -9,78 +9,139 @@ KEY:
 * **Windows** - Windows 8.1 and Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.24.1 - 2016/05/25
+
+* Features
+  * Scaling font size in "pacman" demo to account for rendering quality.
+* Defect fixes
+  * Fixes for Quick Start demo missing WebVR-Bootstrapper.
+  * Fix for `put()` regression in v0.24.0 that made it impossible to use with THREE.js objects.
+  * Fix for "EditorVR" demo causing an "undefined function" error
+* Admin
+  * Better labels for Quick Start "StartHere" scripts to differentiate the platform-specific cases.
+  * Dev build scripts now run off of direct file references, rather than piping everything through Git and NPM.
+  * Documentation for `put()` function.
+  * Documentation for `v3()` function.
+* Open Issues
+  * All systems
+    * Entering, exiting, then entering Full Screen mode frequently causes an error.
+    * 3D icons don't trigger full screen anymore (though they do trigger VR mode).
+  * Windows
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+    * Firefox - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
+  * Android
+    * Chromium - NONE! Full support, no extraneous issues.
+    * Chrome - "NONE", in the sense that it works as expected. Device Orientation fallback has some problems with drift, but that is to be expected before WebVR lands in the full release version of Chrome.
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+      * Low frame rate in fullscreen mode.
+    * Firefox
+      * Device Orientation fallback has some problems with drift.
+      * Image inverts under certain tilt conditions.
+      * Low frame rate in fullscreen mode.
+    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
+      * Orientation tracking is pretty bad, making the overall experience very bad.
+      * The touchpad doesn't work, so interactions are not working.
+      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
+
+
 ## v0.24.0 - 2016/05/23
 
-(write changelog later)
+* Features
+  * <a href="pacman.html">"Pacman" demo</a>! Ready for <a href="http://www.meetup.com/Virtual-Reality-DCVR/events/230911574/">the DCVR class I'm teaching</a>.
+  * New WebVR-Bootstrapper project, a very small library useful for polyfilling the WebVR 1.0 API and getting a page up and running quickly to load additional dependencies with a progress bar. Eventually, it will allow you to get on to the headset very quickly and display a 3D progress bar with head tracking.
+  * Progress bar showing time to load dependencies for a demo.
+  * Be able to use `BrowserEnvironment::appendChild()` with Three.js objects.
+  * DOM-ified interface for adding elements to the scene and manipulating Primrose.Entity properties.
+  * Made demos able to open in a new, larger window separate from the documentation site.
+  * Exposing more WebGL elements as configuration options when initializing Three.js in `BrowserEnvironment`:
+    * scene: a THREE.Scene, if the implementing developer already defined one.
+    * renderer: a THREE.WebGLRenderer, if the implementing developer already defined one.
+    * context: a WebGLRenderingContext, if the implementing developer already defined one.
+  * New `Primrose.Controls.HtmlDoc` surface, using <a href="https://html2canvas.hertzen.com">html2canvas</a> to render HTML content. NOTE: html2canvas has some limitations on how it can be used. It's at least useful for displaying formatted documentation in-scene.
+* Defect fixes
+  * Fixed an issue where switching display types would cause an error for a single frame, and that error would cause the editor demo to bomb out of the user's live-coded script.
+  * Mobile devices show they are head tracking right away again.
+  * Fixed visual issue where the highlight of a row of text would overlap the line above it slightly.
+  * Errors in the user's live-coded script now cause the script to stop running, rather than continuing to try to run and killing the framerate with thrown exceptions that get caught by the catch-all handler.
+  * Fixed an issue where objects were getting removed from the projector, but were still active in the scene.
+  * Prevent easily backspacing out of the demo while the user thinks they should be editing code.
+  * Fixed an issue where the `ready` event was getting fired before the `BrowserEnvironment` was truly ready.
+  * Inverted the direction of the mousewheel scroll-to-zoom, to match the browser's behavior. Wheel forward => bigger text.
+  * Fixed styling of `blockquote` elements in statically gen'd documentation pages.
+  * Fix for material for pointer taking over all red objects.
+  * More specific caching for materials so they don't clobber each other on opacity and metalness changes.
+  * Fixes for not properly using WeakMap for non-GC-preventing references to entities in the scene.
+  * Fixed an issue where changing the ID of an element would break the projector.
+  * Made demos easier to see on mobile devices.
+  * Fixed gamepad slewing. There is a deadzone for gamepad input that needs to be configurable per user still.
+  * Fixed an issue were attempting to load an unsupported audio format without providing a fallback would prevent demos from loading.
+* Admin
+  * WebVR-Bootstrapper also allows for single full-screen code path for all types of displays, both mono and stereo, minimizing some of the confusion in BrowserEnvironment.
+  * documentation for `light()` function.
+  * documentation for `findProperty()` function.
+  * documentation for `emit()` function.
+  * documentation for `copyObject()` function.
+  * documentation for `cylinder()` function.
+  * documentation for `box()` function.
+  * documentation for `hub()` function.
+  * documentation for `brick()` function.
+  * documentation for `cloud()` function.
+  * documentation for `cache()` function.
+  * Better pointer size and colors.
+  * Decreased the default tab width to 2, rather than 4.
+  * Edits to setup and installation documentation.
+  * Converted FullScreen to ES6 class syntax.
+  * Renamed `BrowserEnvironment` instances from `app` to `env`, to be a little clearer as to purpose.
+  * Renamed `Primrose.Controls.Button` to `Primrose.Controls.Button3D`.
+  * Moved demos out to an IFRAME in the documentation pages, so they don't execute in the context of the documentation page.
+  * All dependencies now come out of NPM, rather than files saved in the repository.
+
+
+
+
+
+  
+
 
 ## v0.23.4 - 2016/05/11
 
 This was an intermediate release, specifically focused on carving the primrosevr.com website bits out of the Primrose VR Github repository.
 
-* Bugs
+* Features
+  * None
+* Defect fixes
   * Yet another fix to fullscreen workflow
 * Admin
   * Abstracted commonalities between CardboardVRDisplay and LegacyVRDisplay to a common base class.
   * Removed all the stuff that was specific to the Primrose website and not the Primrose framework.
-* Features
-  * None
-* Open Issues
-  * Windows
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
-    * Nightly
-      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
-      * Gamepad input slews to the right.
-    * Firefox
-      * No HMD support (WebVR not yet available in Firefox).
-      * Gamepad input slews to the right.
-  * Android
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - "NONE", in the sense that it works as expected. Device Orientation fallback has some problems with drift, but that is to be expected before WebVR lands in the full release version of Chrome.
-    * Nightly
-      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
-      * Low frame rate in fullscreen mode.
-    * Firefox
-      * Device Orientation fallback has some problems with drift.
-      * Image inverts under certain tilt conditions.
-      * Low frame rate in fullscreen mode.
-    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
-      * Orientation tracking is pretty bad, making the overall experience very bad.
-      * The touchpad doesn't work, so interactions are not working.
-      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
 
 ## v0.23.3 - 2016/05/09
 
-* Bugs
+* Feature
+  * None
+* Admin
+  * None
+* Defect fixes
   * Fix for critical Firefox issue! Any DOM elements that are acquired before `document.readState === "complete"` will not be the same object references as those acquired after. It's like Firefox throws away the DOM and rebuilds it from scratch after the `DOMContentLoaded` event.
-* Open issues
-  * Windows
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - "NONE", in the sense that it works as expected. There is no HMD support, but that is to be expected before WebVR lands in the full release version of Chrome.
-    * Nightly
-      * The HMD tracks strangely.
-      * Gamepad input slews to the right.
-    * Firefox
-      * No HMD support (WebVR not yet available in Firefox).
-      * Gamepad input slews to the right.
-  * Android
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - "NONE", in the sense that it works as expected. Device Orientation fallback has some problems with drift, but that is to be expected before WebVR lands in the full release version of Chrome.
-    * Nightly
-      * Low frame rate in fullscreen mode.
-    * Firefox
-      * Device Orientation fallback has some problems with drift.
-      * Image inverts under certain tilt conditions.
-      * Low frame rate in fullscreen mode.
-    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
-      * Orientation tracking is pretty bad, making the overall experience very bad.
-      * The touchpad doesn't work, so interactions are not working.
-      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
-
 
 ## v0.23.2 - 2016/05/08
 
-* Bugs
+* Features
+  * Made the editor in the "editorVR" demo follow the user, so it's easier to find.
+  * Auto quality scaling: 
+    * If the animation falls under 45FPS, the resolution of the rendering is automatically degraded. 
+    * On desktop, if the animation hits 60+FPS, the resolution of the rendering is automatically upgraded. Mobile devices are too volatile to do this reliably.
+    * In the "editorVR" demo, if you hit the minimum quality setting and the rendering is still slow
+      * your live-coded script is canceled,
+      * all of your objects removed from the scene,
+      * and they don't return until you edit your script.
+  * Multiple HMDs connected to the machine (for those rare people with both the Rift and the Vive) now each have their own "Go VR" button, listing which device they will connect to.
+  * New [quickstart](/PrimroseQuickstart.zip) template package.
+* Defect fixes
   * Fixed documentation TOC hider for Firefox.
   * Fixed transparency for the most part.
   * Fixed error that would occur in the "editorVR" demo when the user elected to not return an update function from their script.
@@ -96,50 +157,19 @@ This was an intermediate release, specifically focused on carving the primrosevr
   * Documentation now gets carved out to a separate file when releases are built, to make for a smaller main script file if you don't want to also load the documentation.
   * Updated documentation for [`axis()`](index.html#axis).
   * Automatically hide TOC on mobile.
-* Features
-  * Made the editor in the "editorVR" demo follow the user, so it's easier to find.
-  * Auto quality scaling: 
-    * If the animation falls under 45FPS, the resolution of the rendering is automatically degraded. 
-    * On desktop, if the animation hits 60+FPS, the resolution of the rendering is automatically upgraded. Mobile devices are too volatile to do this reliably.
-    * In the "editorVR" demo, if you hit the minimum quality setting and the rendering is still slow
-      * your live-coded script is canceled,
-      * all of your objects removed from the scene,
-      * and they don't return until you edit your script.
-  * Multiple HMDs connected to the machine (for those rare people with both the Rift and the Vive) now each have their own "Go VR" button, listing which device they will connect to.
-  * New [quickstart](/PrimroseQuickstart.zip) template package.
-* Open issues
-  * Windows
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - No HMD support (Of course, WebVR not yet available in Chrome).
-    * Nightly
-      * Only the "editorVR" demo currently works.
-      * Text baseline in canvas is incorrect.
-      * The image does not fill the HMD.
-      * Gamepad input slews to the right.
-    * Firefox
-      * Only the "editorVR" demo currently works.
-      * Text baseline in canvas is incorrect.
-      * No HMD support (WebVR not yet available in Firefox).
-      * Gamepad input slews to the right.
-  * Android
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome - Works, but Device Orientation fallback has some problems with drift.
-    * Nightly
-      * Only the "editorVR" demo currently works.
-      * Low frame rate in fullscreen mode.
-    * Firefox
-      * Device Orientation fallback has some problems with drift.
-      * Image inverts under certain tilt conditions.
-      * Only the "editorVR" demo currently works.
-      * Low frame rate in fullscreen mode.
-    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
-      * Orientation tracking is pretty bad, making the overall experience very bad.
-      * The touchpad doesn't work, so interactions are not working.
-      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
 
 ## v0.23.1 - 2016/04/29
 
-* Bugs
+* Features
+  * Simplified the audio loading interface, so it can use the best file automatically.
+  * Models may be embeded in HTML files now, using `<script>` tags.
+  * Now activating the "wait" cursor when demos first start loading.
+  * Changed "EditorVR" demo to use logging proxy to display console.log calls, rather than supplying its own log function.
+  * If user touches a demo on a mobile device, it automatically jumps to fullscreen.
+  * If user touches a demo on Gear VR, it automatically jumps to VR mode.
+  * Muting audio when the tab loses focus. 
+  * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
+* Defect fixes
   * Fixed some broken links in the Documentation.
   * Fixed positioning of columns in "Temple" demo. They now reach all the way to the ground.
   * Converted to using HTML5 `<audio>` tags converted to media sources instead of loading buffers directly from Web Audio API, to gain the widest audio format support in stupid browsers that implement decoding for `<audio>` separately from Web Audio API.
@@ -164,48 +194,6 @@ This was an intermediate release, specifically focused on carving the primrosevr
   * Carved the "logger" console logging proxying library out to [https://www.github.com/capnmidnight/logger](its own project).
   * Moved demos to the documentation folder, and embeded them in the documentation template.
   * Rewrote how the site is generated.
-* Features
-  * Simplified the audio loading interface, so it can use the best file automatically.
-  * Models may be embeded in HTML files now, using `<script>` tags.
-  * Now activating the "wait" cursor when demos first start loading.
-  * Changed "EditorVR" demo to use logging proxy to display console.log calls, rather than supplying its own log function.
-  * If user touches a demo on a mobile device, it automatically jumps to fullscreen.
-  * If user touches a demo on Gear VR, it automatically jumps to VR mode.
-  * Muting audio when the tab loses focus. 
-  * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
-* Open issues
-  * Windows
-    * Chromium - NONE! Full support, no extraneous issues.
-    * Chrome 
-      * No HMD support (WebVR not yet available in Chrome).
-    * Nightly
-      * Only the "editorVR" demo currently works.
-      * Text baseline in canvas is incorrect.
-      * The image does not fill the HMD.
-      * Gamepad input slews to the right.
-    * Firefox
-      * Only the "editorVR" demo currently works.
-      * Text baseline in canvas is incorrect.
-      * No HMD support (WebVR not yet available in Firefox).
-      * Gamepad input slews to the right.
-  * Android
-    * Chromium
-      * WebVR mode does not activate correctly. Only Fullscreen "Magic Window" mode currently works.
-    * Chrome
-      * Device Orientation fallback has some problems with drift.
-    * Nightly
-      * Only the "editorVR" demo currently works.
-      * Low frame rate in fullscreen mode.
-    * Firefox
-      * Device Orientation fallback has some problems with drift.
-      * Image inverts under certain tilt conditions.
-      * Only the "editorVR" demo currently works.
-      * Low frame rate in fullscreen mode.
-    * Gear VR
-      * Low frame rate in fullscreen mode.
-      * Samsung's browser for Gear VR current has defective orientation tracking, making the overall experience very bad.
-
-
 
 ## v0.23.0 - 2016/04/21
 
@@ -257,25 +245,7 @@ Seriously though, I got really busy and just never got around to making a produc
   * Garbage collect pickable objects when they get removed from a scene.
   * Re-enabled ambient audio.
   * Added the stereo image demo to the main Editor3D demo.
-* Admin
-  * Simplified server startup.
-  * Much more automated builds.
-  * Beginning to convert code to ES6, thanks to Babel.
-  * Split a bunch of utility functions into their own files.
-  * Renamed `Primrose.VRApplication` to `Primrose.BrowserEnvironment`, to better reflect its purpose. You write the application as part of your script that uses `Primrose.BrowserEnvironment`. It's not an application on its own, and could be host to multiple applications (eventually).
-  * Deleted a bunch of unused code.
-  * CodePages now construct their own command names, which goes a long way towards decoupling commands from explicit keyhandling and from controls themselves.
-  * OperatingSystem classes now don't specify commands, they just translate key events into command names and then leave it to the TextEditor command pack to figure out what to do with it.
-  * Sorted the order of tutorial files so they follow a progression of difficulty.
-  * Promisified VR headset setup.
-  * Created a proxy for `console.log` and `console.error` to make debugging on GearVR easier.
-  * Made builds run faster.
-  * Removed "jump" command from demos. Might make some people sick, and ties up a key for no good use.
-  * Finally updated the README beyond just talking about the text editor.
-  * Cleaned up the Editor3D demo code so it's easier to read.
-  * Concating all the Three.js and Primrose files into a single `package.js` for use on the website.
-  * Updated the documentation for `Primrose.ModelLoader`.
-* Bugs
+* Defect fixes
   * Fixed styling issues with documentation pages.
   * Fix for Device Orientation API-based VR view on passive stereo viewers like Google Cardboard that are running in browsers that do not support WebVR. Now the scene doesn't skew when you tilt your head.
   * Made sure TextBoxes weren't running their own key event listeners, because it conflicts with the other events key events for navigation that BrowserEnvironment must control. This makes it more difficult to use the Primrose text editor in a 2D environment, but Primrose isn't really meant for that.
@@ -311,10 +281,32 @@ Seriously though, I got really busy and just never got around to making a produc
   * Fixed an issue where XHRs were setting the Accept header incorrectly.
   * Fixed an issue where resuming from pause (e.g. the window losing focus) made a huge time-slice update.
   * Enabled MTL, OBJ, and OGG file formats on the server.
+* Admin
+  * Simplified server startup.
+  * Much more automated builds.
+  * Beginning to convert code to ES6, thanks to Babel.
+  * Split a bunch of utility functions into their own files.
+  * Renamed `Primrose.VRApplication` to `Primrose.BrowserEnvironment`, to better reflect its purpose. You write the application as part of your script that uses `Primrose.BrowserEnvironment`. It's not an application on its own, and could be host to multiple applications (eventually).
+  * Deleted a bunch of unused code.
+  * CodePages now construct their own command names, which goes a long way towards decoupling commands from explicit keyhandling and from controls themselves.
+  * OperatingSystem classes now don't specify commands, they just translate key events into command names and then leave it to the TextEditor command pack to figure out what to do with it.
+  * Sorted the order of tutorial files so they follow a progression of difficulty.
+  * Promisified VR headset setup.
+  * Created a proxy for `console.log` and `console.error` to make debugging on GearVR easier.
+  * Made builds run faster.
+  * Removed "jump" command from demos. Might make some people sick, and ties up a key for no good use.
+  * Finally updated the README beyond just talking about the text editor.
+  * Cleaned up the Editor3D demo code so it's easier to read.
+  * Concating all the Three.js and Primrose files into a single `package.js` for use on the website.
+  * Updated the documentation for `Primrose.ModelLoader`.
 
 ## v0.21.2 - 2016/03/11
 
-* Bugs
+* Features
+  * None
+* Admin
+  * None
+* Defect fixes
   * Fixed having to make dev-to-production changes manually. Using full static site generation now.
   * Fixed lighting for Three.js r74.
   * Got off of DreamHost, finally. Now on Azure.
@@ -324,23 +316,34 @@ Seriously though, I got really busy and just never got around to making a produc
 
 ## v0.21.1 - 2016/03/06
 
-* Bugs
+* Features
+  * None
+* Admin
+  * None
+* Defect fixes
   * Fixes for WebVR API fallback on current Firefox Nightly
   * Fix for zeroing sensor on new WebVR API
   * Don't resize canvas to full screen dimensions on desktop. This is only necessary on mobile devices, to support scrolling to remove browser chrome.
 
 ## v0.21.0 - 2016/03/05
 
-WebVR API 1.0 support!!! With backwards compatability to draft APIs.
+* Features
+  * WebVR API 1.0 support!!! With backwards compatability to draft APIs.
+* Admin
+  * None
+* Defect fixes
+  * None
 
 ## v0.20.6 - 2016/02/27
 
 It's going to be nothing but documentation for a while.
 
-* Bugs
+* Features
+  * None
+* Defect fixes
   * Prevent `alert()`, `confirm()`, and `prompt()` while in full screen mode.
   * Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.
-* Features
+* Admin
   * Use `grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference. 
   * This CHANGELOG page.
   * More documentation
@@ -349,9 +352,11 @@ It's going to be nothing but documentation for a while.
 
 It's going to be nothing but documentation for a while.
 
-* Bugs
-  * Fixed issue where using the "top" link at the bottom of a documentation page would cause the page to reset to the introduction.
 * Features
+  * None
+* Defect fixes
+  * Fixed issue where using the "top" link at the bottom of a documentation page would cause the page to reset to the introduction.
+* Admin
   * Per-document table-of-contents in documentation page.
   * "Using the VR Development Environment" documentation.
   * Started CHANGELOG.
@@ -360,17 +365,21 @@ It's going to be nothing but documentation for a while.
 
 It's going to be nothing but documentation for a while.
 
-* Bugs
+* Features
+  * None
+* Defect fixes
   * Don't attempt to support <kbd>CTRL+Up/Down Arrow</kbd> movement on OS X.
   * Fix issue where some links into internal documentation were opening in a new window.
-* Features
+* Admin
   * "Using the VR Development Environment" documentation.
 
 ## v0.20.3 - 2016/02/11
 
 It's going to be nothing but documentation for a while.
 
-* Bugs
+* Features
+  * None
+* Defect fixes
   * Creating a [`Primrose.BrowserEnvironment`](#Primrose_BrowserEnvironment) no longer spams the console with an inconsequential error (because the error is fixed!).
   * Code samples on documentation page now resize with the page.
   * Cleaner font rendering.
@@ -378,7 +387,7 @@ It's going to be nothing but documentation for a while.
   * Long descriptions get shortened now, when displayed as part of a list of features on a parent object.
   * Better Markdown document parsing.
   * All functions and classes should now be included in documentation (though details not yet written).
-* Features
+* Admin
   * Documentation page can now load Markdown documents.
   * [`Primrose.ModelLoader`](#Primrose_ModelLoader) documentation.
   * Auto-generate `target="_blank"` for links that go away from the documentation page.
@@ -390,12 +399,14 @@ It's going to be nothing but documentation for a while.
 
 ## v0.20.2 - 2016/02/01
 
-* Bugs
+* Features
+  * None
+* Defect fixes
   * Simplified [`pliny`](#WritingnewdocumentationwithPliny) interface.
   * Cleaned up dependencies.
   * Set NPM startup script.
   * Better use of screen width for documentation page.
-* Features
+* Admin
   * [Getting Started](#) documentation.
   * [`Primrose.Text.Grammar`](#Primrose_Text_Grammar) documentation.
   * Issue traction in documentation.

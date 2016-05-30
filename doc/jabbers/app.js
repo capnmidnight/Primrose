@@ -26,7 +26,9 @@ env.addEventListener("pointerend", makeJabJump);
 
 function eye(side, body) {
   var ball = put(textured(sphere(0.05, 6, 3), 0xffffff))
-    .on(body).at(side * 0.07, 0.05, 0.16);
+    .on(body)
+    .at(side * 0.07, 0.05, 0.16)
+    .obj();
   put(textured(sphere(0.01, 3, 2), 0))
     .on(ball)
     .at(0, 0, 0.045);
