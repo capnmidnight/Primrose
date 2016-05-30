@@ -112,7 +112,9 @@ function pugConfiguration(options, defaultData) {
     return [f, fs.lstatSync(f).size];
   }
   var frameworkFiles = defaultData.frameworkFiles.map(getFileDescrip);
-  return gulp.src(["*.jade", "*.pug", "templates/doc/**/*.jade", "templates/doc/**/*.pug"], { base: "./" })
+  return gulp.src(["*.jade", "*.pug", 
+    "templates/doc/**/*.jade", "templates/doc/**/*.pug", 
+    "templates/meeting/**/*.jade", "templates/meeting/**/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
       p.extname = "";
       p.dirname = p.dirname.replace("templates" + path.sep, "");
@@ -124,13 +126,17 @@ function pugConfiguration(options, defaultData) {
           .map(function () {
             return "../";
           }),
-        shortName = name.match(/doc\/(\w+)[/.]/),
+        nameSpec = name.match(/(\w+\/)(\w+)[/.]/),
+        dirName = nameSpec && nameSpec[1],
+        shortName = nameSpec && nameSpec[2],
+        scriptName = dirName + shortName + "/app.js",
         demoTitle = null;
 
       parts.pop();
-      shortName = shortName && shortName[1];
-      var scriptName = "doc/" + shortName + "/app.js",
-        fileRoot = parts.join("");
+
+      scriptName = scriptName.replace("index/app.js", "app.js");
+
+      var fileRoot = parts.join("");
 
       for (var i = 0; i < docFiles.length; ++i) {
         var d = docFiles[i];
