@@ -22,15 +22,17 @@ Primrose.Surface = (function () {
     constructor(options) {
       super();
       options = patch(options, {
-        id: "Primrose.Surface[" + (COUNTER++) + "]"
+        id: "Primrose.Surface[" + (COUNTER++) + "]",
+        bounds: new Primrose.Text.Rectangle()
       });
       this.listeners.move = [];
-      this.bounds = options.bounds || new Primrose.Text.Rectangle();
+      this.bounds = options.bounds;
       this.canvas = null;
       this.context = null;
       this._opacity = 1;
 
       this.style = {};
+
       Object.defineProperties(this.style, {
         width: {
           get: () => { return this.bounds.width; },
