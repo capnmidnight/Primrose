@@ -22,7 +22,8 @@ Primrose.ModelLoader = (function () {
       "text/prs.wavefront-obj": "obj",
       "text/prs.wavefront-mtl": "mtl"
     },
-    EXTENSION_PATTERN = /(\.(\w+))+$/,
+    PATH_PATTERN = /((?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
+    EXTENSION_PATTERN = /(\.(?:\w+))+$/,
     NAME_PATTERN = /([^/]+)\.\w+$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
@@ -229,6 +230,13 @@ Useful for one-time use models.\n\
             materials.preload();
             Loader.setMaterials(materials);
           });
+        }
+        else if (extension === ".mtl") {
+          var match = src.match(PATH_PATTERN),
+            dir = match[1];
+          src = match[2] + match[3];
+          Loader.setBaseUrl(dir);
+          Loader.setPath(dir);
         }
 
         if (elem) {
