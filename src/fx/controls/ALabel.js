@@ -43,10 +43,10 @@ Primrose.Controls.Label = (function () {
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize || 16;
-      this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
-      this.color = this.options.color || this.theme.regular.foreColor;
       this.refreshCharacter();
       this.value = this.options.value;
+      this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
+      this.color = this.options.color || this.theme.regular.foreColor;
     }
 
     get textAlign() {
