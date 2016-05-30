@@ -801,7 +801,10 @@ Primrose.BrowserEnvironment = (function () {
         });
       }
 
-      var allReady = Promise.all([modelsReady, audioReady, documentReady]);
+      var allReady = Promise.all([modelsReady, audioReady, documentReady])
+        .then(() => {
+          fire("ready");
+        });
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -1130,7 +1133,6 @@ Primrose.BrowserEnvironment = (function () {
         this.renderer.domElement.style.cursor = "default";
         this.input.VR.init().then(() => {
           this.input.VR.connect(0);
-          fire("ready");
         });
       });
 
