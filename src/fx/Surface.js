@@ -21,12 +21,12 @@ Primrose.Surface = (function () {
 
     constructor(options) {
       super();
-      options = patch(options, {
+      this.options = patch(options, {
         id: "Primrose.Surface[" + (COUNTER++) + "]",
         bounds: new Primrose.Text.Rectangle()
       });
       this.listeners.move = [];
-      this.bounds = options.bounds;
+      this.bounds = this.options.bounds;
       this.canvas = null;
       this.context = null;
       this._opacity = 1;
@@ -75,21 +75,21 @@ Primrose.Surface = (function () {
       });
 
 
-      if (options.id instanceof Surface) {
+      if (this.options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
       }
-      else if (options.id instanceof CanvasRenderingContext2D) {
-        this.context = options.id;
+      else if (this.options.id instanceof CanvasRenderingContext2D) {
+        this.context = this.options.id;
         this.canvas = this.context.canvas;
       }
-      else if (options.id instanceof HTMLCanvasElement) {
-        this.canvas = options.id;
+      else if (this.options.id instanceof HTMLCanvasElement) {
+        this.canvas = this.options.id;
       }
-      else if (typeof (options.id) === "string" || options.id instanceof String) {
-        this.canvas = document.getElementById(options.id);
+      else if (typeof (this.options.id) === "string" || this.options.id instanceof String) {
+        this.canvas = document.getElementById(this.options.id);
         if (this.canvas === null) {
           this.canvas = document.createElement("canvas");
-          this.canvas.id = options.id;
+          this.canvas.id = this.options.id;
         }
         else if (this.canvas.tagName !== "CANVAS") {
           this.canvas = null;
@@ -98,9 +98,9 @@ Primrose.Surface = (function () {
 
       if (this.canvas === null) {
         pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
-        console.error(typeof (options.id));
-        console.error(options.id);
-        throw new Error(options.id + " does not refer to a valid canvas element.");
+        console.error(typeof (this.options.id));
+        console.error(this.options.id);
+        throw new Error(this.options.id + " does not refer to a valid canvas element.");
       }
 
       this.id = this.canvas.id;

@@ -15,9 +15,6 @@ Primrose.Controls.Label = (function () {
   });
   class Label extends Primrose.Surface {
     constructor(options) {
-      super(patch(options, {
-        id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
-      }));
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
@@ -25,9 +22,9 @@ Primrose.Controls.Label = (function () {
       if (typeof options === "string") {
         this.options = { value: this.options };
       }
-      else {
-        this.options = options || {};
-      }
+      super(patch(options, {
+        id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
+      }));
 
       ////////////////////////////////////////////////////////////////////////
       // initialization
@@ -46,10 +43,10 @@ Primrose.Controls.Label = (function () {
       this.character = new Primrose.Text.Size();
       this.theme = this.options.theme;
       this.fontSize = this.options.fontSize || 16;
-      this.refreshCharacter();
-      this.value = this.options.value;
       this.backgroundColor = this.options.backgroundColor || this.theme.regular.backColor;
       this.color = this.options.color || this.theme.regular.foreColor;
+      this.refreshCharacter();
+      this.value = this.options.value;
     }
 
     get textAlign() {
@@ -120,7 +117,6 @@ Primrose.Controls.Label = (function () {
         this.context.textAlign = this.textAlign || "left";
 
         var clearFunc = this.backgroundColor ? "fillRect" : "clearRect";
-
         if (this.theme.regular.backColor) {
           this.context.fillStyle = this.backgroundColor;
         }
