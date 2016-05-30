@@ -881,6 +881,11 @@ Primrose.BrowserEnvironment = (function () {
         });
         this.scene.add.apply(this.scene, sceneGraph.children);
         this.scene.traverse((obj) => {
+          if (this.options.disableDefaultLighting && obj.material && obj.material.map) {
+            textured(obj, obj.material.map, {
+              unshaded: true
+            });
+          }
           if (obj.name) {
             this.scene[obj.name] = obj;
           }
@@ -1331,6 +1336,8 @@ Primrose.BrowserEnvironment = (function () {
     gazeLength: 1,
     // By default, what we see in the VR view will get mirrored to a regular view on the primary screen. Set to true to improve performance.
     disableMirroring: false,
+    // By default, a single light is added to the scene,
+    disableDefaultLighting: false,
     // The color that WebGL clears the background with before drawing.
     backgroundColor: 0xafbfff,
     // the near plane of the camera.
