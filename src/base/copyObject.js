@@ -1,10 +1,12 @@
 pliny.function({
   name: "copyObject",
-  description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination.",
+  description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",
   parameters: [
     { name: "dest", type: "Object", description: "The object to which to copy fields." },
-    { name: "source", type: "Object", description: "The object from which to copy fields." }
+    { name: "source", type: "Object", description: "The object from which to copy fields." },
+    { name: "shallow", type: "Boolean", optional: true, default: "false", description: "Pass true to avoid recursing through object and only perform a shallow clone." }
   ],
+  returns: "Object",
   examples: [
     {
       name: "Copy an object.",
@@ -35,24 +37,23 @@ pliny.function({
     }
   ]
 } );
-function copyObject ( dest, source ) {
+function copyObject ( dest, source, shallow ) {
   var stack = [ {dest: dest, source: source} ];
   while ( stack.length > 0 ) {
     var frame = stack.pop();
     source = frame.source;
     dest = frame.dest;
     for ( var key in source ) {
-      if ( source.hasOwnProperty( key ) ) {
-        if ( typeof ( source[key] ) !== "object" ) {
-          dest[key] = source[key];
+      if ( shallow || typeof ( source[key] ) !== "object" || source[key] instanceof String ) {
+        dest[key] = source[key];
+      }
+      else {
+        if ( !dest[key] ) {
+          dest[key] = {};
         }
-        else {
-          if ( !dest[key] ) {
-            dest[key] = {};
-          }
-          stack.push( {dest: dest[key], source: source[key]} );
-        }
+        stack.push( {dest: dest[key], source: source[key]} );
       }
     }
   }
+  return dest;
 }

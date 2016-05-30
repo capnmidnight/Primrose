@@ -27,7 +27,7 @@ Primrose.Text.Controls.TextInput = (function () {
           tabWidth: 1,
           tokenizer: Primrose.Text.Grammars.PlainText,
           commands: Primrose.Text.CommandPacks.TextInput
-        }));
+        }, true));
 
       this.passwordCharacter = this.options.passwordCharacter;
     }
