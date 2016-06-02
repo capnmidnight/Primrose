@@ -10,14 +10,26 @@ var idSpec = location.search.match(/id=(\w+)/),
     VRIcon: "../doc/models/cardboard.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
-  login = new Primrose.X.LoginForm();
+  login = new Primrose.X.LoginForm(),
+  socket;
 
-login.addEventListener("login", function (socket) {
-  env.socket = socket;
+login.addEventListener("login", function () {
+  socket = io.connect("ws://" + location.hostname);
+  socket.on("loginFailed", console.error.bind(console, "login failed"));
+  socket.on("userList", console.log.bind(console, "user list"));
+  socket.once("handshakeComplete", function(){
+    socket.once("salt", function(salt){
+      socket.emit("hash", md5(salt + login.password.value));
+    });
+    socket.emit("login", {
+      userName: login.userName.value
+    });
+  });
+  socket.emit("handshake", "login");
 });
 
 login.addEventListener("logout", function () {
-  env.socket = null;
+
 });
 
 env.addEventListener("ready", function () {
