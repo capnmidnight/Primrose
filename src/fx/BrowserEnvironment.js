@@ -1014,7 +1014,6 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
-        console.log(isFullScreenMode());
         icons.forEach((icon) => {
           icon.visible = !isFullScreenMode();
           icon.disabled = isFullScreenMode();
