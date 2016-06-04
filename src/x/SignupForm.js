@@ -40,7 +40,7 @@
         bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Email:",
-        textAlign: "center"
+        textAlign: "right"
       });
 
       this.email = new Primrose.Text.Controls.TextInput({
@@ -54,7 +54,7 @@
         bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Password:",
-        textAlign: "left"
+        textAlign: "right"
       });
 
       this.password = new Primrose.Text.Controls.TextInput({
