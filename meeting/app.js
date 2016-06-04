@@ -77,8 +77,8 @@ login.addEventListener("login", function () {
   if (login.userName.value && login.password.value) {
     if (!socket) {
       socket = io.connect("ws://" + location.hostname);
-      socket.on("loginFailed", function () {
-        console.error("login failed");
+      socket.on("loginFailed", function (reason) {
+        console.error("login failed", reason);
         showSignup(true);
       });
       socket.on("userList", listUsers);
