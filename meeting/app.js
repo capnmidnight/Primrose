@@ -1,8 +1,8 @@
 var idSpec = location.search.match(/id=(\w+)/),
   meetingID = idSpec && idSpec[1] || "public",
   env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
-    skyTexture: 0xffffcc,
-    backgroundColor: 0xffffcc,
+    skyTexture: 0x000000,
+    backgroundColor: 0x000000,
     disableDefaultLighting: true,
     sceneModel: "../doc/models/meeting/meetingroom.obj",
     useFog: true,
@@ -27,7 +27,7 @@ signup.password.value = login.password.value = "ppyptky7";
 signup.email.value = "sean.mcbeth@gmail.com";
 
 function listUsers(users) {
-  singup.hide();
+  signup.hide();
   login.hide();
 }
 
