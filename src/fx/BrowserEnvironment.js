@@ -46,6 +46,7 @@ Primrose.BrowserEnvironment = (function () {
   class BrowserEnvironment {
     constructor(name, options) {
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
+      this.id = name;
 
       var fire = emit.bind(this);
 
