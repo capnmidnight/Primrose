@@ -105,6 +105,9 @@ env.addEventListener("ready", function () {
     if (obj.name.indexOf("Chair") === 0) {
       env.registerPickableObject(obj);
     }
+    else if (obj.name.indexOf("LightPanel") === 0) {
+      obj.material.emissive.setRGB(1, 1, 1);
+    }
   });
 });
 
