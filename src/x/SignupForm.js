@@ -1,26 +1,29 @@
 ﻿Primrose.X.SignupForm = (function () {
-  var COUNTER = 0;
+  const WIDTH = 512,
+    HEIGHT = 200;
+
+  let COUNTER = 0;
+
   pliny.class({
     parent: "Primrose.X",
     name: "SignupForm",
-    description: "| [Under Construction]",
-    baseClass: "Primrose.Entity"
+    description: "A basic signup form.",
+    baseClass: "Primrose.Controls.Form"
   });
-  class SignupForm extends Primrose.Entity {
+  class SignupForm extends Primrose.Controls.Form {
     constructor() {
-      super(`Primrose.X.SignupForm[${COUNTER++}]`);
+
+      super({
+        id: `Primrose.X.SignupForm[${COUNTER++}]`,
+        bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
+      });
 
       this.listeners.login = [];
       this.listeners.signup = [];
 
-      this.frame = new Primrose.Surface({
-        id: this.id + "-frame",
-        bounds: new Primrose.Text.Rectangle(0, 0, 512, 200)
-      });
-
       this.labelUserName = new Primrose.Controls.Label({
         id: this.id + "-labelUserName",
-        bounds: new Primrose.Text.Rectangle(0, 0, 256, 50),
+        bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "User name:",
         textAlign: "right"
@@ -28,13 +31,13 @@
 
       this.userName = new Primrose.Text.Controls.TextInput({
         id: this.id + "-userName",
-        bounds: new Primrose.Text.Rectangle(256, 0, 256, 50),
+        bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
         fontSize: 32
       });
 
       this.labelEmail = new Primrose.Controls.Label({
         id: this.id + "-labelEmail",
-        bounds: new Primrose.Text.Rectangle(0, 50, 256, 50),
+        bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Email:",
         textAlign: "center"
@@ -42,13 +45,13 @@
 
       this.email = new Primrose.Text.Controls.TextInput({
         id: this.id + "-email",
-        bounds: new Primrose.Text.Rectangle(256, 50, 256, 50),
+        bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32
       });
 
       this.labelPassword = new Primrose.Controls.Label({
         id: this.id + "-labelPassword",
-        bounds: new Primrose.Text.Rectangle(0, 100, 256, 50),
+        bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Password:",
         textAlign: "left"
@@ -56,21 +59,21 @@
 
       this.password = new Primrose.Text.Controls.TextInput({
         id: this.id + "-password",
-        bounds: new Primrose.Text.Rectangle(256, 100, 256, 50),
+        bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         passwordCharacter: "*"
       });
 
       this.loginButton = new Primrose.Controls.Button2D({
         id: this.id + "-loginButton",
-        bounds: new Primrose.Text.Rectangle(0, 150, 256, 50),
+        bounds: new Primrose.Text.Rectangle(0, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Login"
       });
 
       this.signupButton = new Primrose.Controls.Button2D({
         id: this.id + "-signupButton",
-        bounds: new Primrose.Text.Rectangle(256, 150, 256, 50),
+        bounds: new Primrose.Text.Rectangle(WIDTH / 2, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Sign up"
       });
@@ -78,18 +81,14 @@
       this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", { target: this }), false);
       this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", { target: this }), false);
 
-      this.mesh = textured(quad(1, 200/512), this.frame);
-      this.mesh.name = "SignupForm";
-
-      this.frame.appendChild(this.labelUserName);
-      this.frame.appendChild(this.userName);
-      this.frame.appendChild(this.labelEmail);
-      this.frame.appendChild(this.email);
-      this.frame.appendChild(this.labelPassword);
-      this.frame.appendChild(this.password);
-      this.frame.appendChild(this.loginButton);
-      this.frame.appendChild(this.signupButton);
-      this.appendChild(this.frame);
+      this.appendChild(this.labelUserName);
+      this.appendChild(this.userName);
+      this.appendChild(this.labelEmail);
+      this.appendChild(this.email);
+      this.appendChild(this.labelPassword);
+      this.appendChild(this.password);
+      this.appendChild(this.loginButton);
+      this.appendChild(this.signupButton);
     }
   }
 

@@ -33,8 +33,9 @@ var gulp = require("gulp"),
   pug = require("gulp-pug"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
-  sourceFiles = recurseDirectory("src"),
-  docFiles = recurseDirectory("templates/doc")
+  sourceFiles = recurseDirectory("src")
+sourceFiles.sort();
+var docFiles = recurseDirectory("templates/doc")
     .filter(function (f) {
       return /.jade$/.test(f);
     })

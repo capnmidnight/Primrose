@@ -1,31 +1,30 @@
 ﻿Primrose.X.LoginForm = (function () {
   var COUNTER = 0;
+  
+  const WIDTH = 512,
+    HEIGHT = 150;
+
   pliny.class({
     parent: "Primrose.X",
     name: "LoginForm",
-    description: "| [Under Construction]",
-    baseClass: "Primrose.Entity"
+    description: "A basic login form.",
+    baseClass: "Primrose.Controls.Form"
   });
-  class LoginForm extends Primrose.Entity {
+  class LoginForm extends Primrose.Controls.Form {
 
-    static create(){
+    static create() {
       return new LoginForm();
     }
 
     constructor() {
-      super(`Primrose.X.LoginForm[${COUNTER++}]`);
-
-      this.listeners.login = [];
-      this.listeners.signup = [];
-
-      const WIDTH = 512,
-            HEIGHT = 150;
-
-      this.frame = new Primrose.Surface({
-        id: this.id + "-frame",
+      super({
+        id: `Primrose.X.LoginForm[${COUNTER++}]`,
         bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
       });
 
+      this.listeners.login = [];
+      this.listeners.signup = [];
+      
       this.labelUserName = new Primrose.Controls.Label({
         id: this.id + "-labelUserName",
         bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
@@ -72,22 +71,12 @@
       this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", { target: this }), false);
       this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", { target: this }), false);
 
-      this.mesh = textured(quad(1, HEIGHT / WIDTH), this.frame);
-      this.mesh.name = "LoginForm";
-
-      this.frame.appendChild(this.labelUserName);
-      this.frame.appendChild(this.userName);
-      this.frame.appendChild(this.labelPassword);
-      this.frame.appendChild(this.password);
-      this.frame.appendChild(this.signupButton);
-      this.frame.appendChild(this.loginButton);
-      this.appendChild(this.frame);
-    }
-
-    addToBrowserEnvironment(env, scene){
-      scene.add(this.mesh);
-      env.registerPickableObject(this.mesh);
-      return this.mesh;
+      this.appendChild(this.labelUserName);
+      this.appendChild(this.userName);
+      this.appendChild(this.labelPassword);
+      this.appendChild(this.password);
+      this.appendChild(this.signupButton);
+      this.appendChild(this.loginButton);
     }
   }
 

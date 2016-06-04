@@ -32,6 +32,7 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="src\fx\controls\Form.js" />
     <Content Include="doc\images\box.jpg" />
     <Content Include="doc\images\brick.jpg" />
     <Content Include="doc\images\cloud.JPG" />
@@ -213,7 +214,7 @@
     <Content Include="src\fx\text\command_packs\TextInput.js" />
     <Content Include="src\fx\text\controls\TextInput.js" />
     <Content Include="src\base\hub.js" />
-    <Content Include="src\index.js" />
+    <Content Include="src\app.js" />
     <Content Include="src\x\SignupForm.js" />
     <Content Include="src\x\LoginForm.js" />
     <Content Include="templates\meeting\index.html.jade" />
