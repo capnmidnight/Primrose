@@ -1,6 +1,8 @@
 var idSpec = location.search.match(/id=(\w+)/),
   meetingID = idSpec && idSpec[1] || "public",
   env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
+    autoscaleQuality: false,
+    quality: Primrose.Quality.LOW,
     skyTexture: 0x000000,
     backgroundColor: 0x000000,
     disableDefaultLighting: true,
@@ -31,11 +33,9 @@ function listUsers(users) {
   login.hide();
 }
 
-var SHA256 = new Hashes.SHA256();
-
 function attemptSignup() {
   socket.once("salt", function (salt) {
-    var hash = SHA256.hex(salt + login.password.value)
+    var hash = new Hashes.SHA256().hex(salt + signup.password.value)
     socket.emit("hash", hash);
   });
   socket.emit("signup", {
@@ -65,11 +65,12 @@ signup.addEventListener("signup", function () {
 
 function attemptLogin() {
   socket.once("salt", function (salt) {
-    var hash = SHA256.hex(salt + login.password.value)
+    var hash = new Hashes.SHA256().hex(salt + login.password.value)
     socket.emit("hash", hash);
   });
   socket.emit("login", {
-    userName: login.userName.value
+    userName: login.userName.value,
+    app: env.id
   });
 }
 
