@@ -49,7 +49,7 @@ var textured = (function () {
         var materialOptions = {
           transparent: options.opacity < 1,
           opacity: options.opacity,
-          side: THREE.DoubleSide
+          side: options.side || THREE.FrontSide
         },
           MaterialType = THREE.MeshStandardMaterial;
 
