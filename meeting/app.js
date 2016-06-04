@@ -26,17 +26,18 @@ signup.userName.value = login.userName.value = "sean";
 signup.password.value = login.password.value = "ppyptky7";
 signup.email.value = "sean.mcbeth@gmail.com";
 
+function listUsers(users) {
+  singup.hide();
+  login.hide();
+}
+
 var SHA256 = new Hashes.SHA256();
 
 function attemptSignup() {
   socket.once("salt", function (salt) {
     var hash = SHA256.hex(salt + login.password.value)
-    console.log("signup salt", salt);
-    console.log("signup password", login.password.value);
-    console.log("signup hash", hash);
     socket.emit("hash", hash);
   });
-  console.log("signup", login.userName.value);
   socket.emit("signup", {
     userName: signup.userName.value,
     email: signup.email.value,
@@ -52,7 +53,7 @@ signup.addEventListener("signup", function () {
         console.error("signup failed", reason);
         showSignup(false);
       });
-      socket.on("userList", console.log.bind(console, "user list"));
+      socket.on("userList", listUsers);
       socket.once("handshakeComplete", attemptSignup);
       socket.emit("handshake", "login");
     }
@@ -65,12 +66,8 @@ signup.addEventListener("signup", function () {
 function attemptLogin() {
   socket.once("salt", function (salt) {
     var hash = SHA256.hex(salt + login.password.value)
-    console.log("login salt", salt);
-    console.log("login password", login.password.value);
-    console.log("login hash", hash);
     socket.emit("hash", hash);
   });
-  console.log("login", login.userName.value);
   socket.emit("login", {
     userName: login.userName.value
   });
@@ -84,7 +81,7 @@ login.addEventListener("login", function () {
         console.error("login failed");
         showSignup(true);
       });
-      socket.on("userList", console.log.bind(console, "user list"));
+      socket.on("userList", listUsers);
       socket.once("handshakeComplete", attemptLogin);
       socket.emit("handshake", "login");
     }
