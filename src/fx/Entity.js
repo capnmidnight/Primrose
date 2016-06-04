@@ -47,15 +47,15 @@
     constructor(id) {
       this.id = id;
 
-      pliny.field({
+      pliny.property({
         parent: "Primrose.Entity",
-        name: "parent",
+        name: "parent ",
         type: "Primrose.Entity",
         description: "The parent element of this eleemnt, if this element has been added as a child to another element."
       });
       this.parent = null;
 
-      pliny.field({
+      pliny.property({
         parent: "Primrose.Entity",
         name: "children",
         type: "Array",
@@ -63,7 +63,7 @@
       });
       this.children = [];
 
-      pliny.field({
+      pliny.property({
         parent: "Primrose.Entity",
         name: "focused",
         type: "Boolean",
@@ -71,7 +71,7 @@
       });
       this.focused = false;
 
-      pliny.field({
+      pliny.property({
         parent: "Primrose.Entity",
         name: "focusable",
         type: "Boolean",
@@ -79,7 +79,7 @@
       });
       this.focusable = true;
 
-      pliny.field({
+      pliny.property({
         parent: "Primrose.Entity",
         name: "listeners",
         type: "Object",
@@ -156,7 +156,7 @@
     get id() {
       pliny.property({
         parent: "Primrose.Entity",
-        name: "id",
+        name: "id ",
         type: "String",
         description: "Get or set the id for the control."
       });
@@ -229,7 +229,7 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "focus",
-        description: "Sets the focus property of the control, does not change the focus property of any other control.",
+        description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
         examples: [{
           name: "Focus on one control, blur all the rest",
           description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
@@ -254,15 +254,17 @@
     }"
         }]
       });
-      this.focused = true;
-      emit.call(this, "focus", { target: this });
+      if(this.focusable){
+        this.focused = true;
+        emit.call(this, "focus", { target: this });
+      }
     }
 
     blur() {
       pliny.method({
         parent: "Primrose.Entity",
         name: "blur",
-        description: "Unsets the focus property of the control, does not change the focus property of any other control.",
+        description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
         examples: [{
           name: "Focus on one control, blur all the rest",
           description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
@@ -287,13 +289,15 @@
     }"
         }]
       });
-      this.focused = false;
-      for (var i = 0; i < this.children.length; ++i) {
-        if (this.children[i].focused) {
-          this.children[i].blur();
+      if(this.focused){
+        this.focused = false;
+        for (var i = 0; i < this.children.length; ++i) {
+          if (this.children[i].focused) {
+            this.children[i].blur();
+          }
         }
+        emit.call(this, "blur", { target: this });
       }
-      emit.call(this, "blur", { target: this });
     }
 
     appendChild(child) {
