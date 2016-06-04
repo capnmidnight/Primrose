@@ -86,6 +86,7 @@ var docFiles = recurseDirectory("templates/doc")
       "../pliny/node_modules/marked/marked.min.js",
       "../pliny/src/index.js",
       "node_modules/socket.io-client/socket.io.js",
+      "node_modules/jshashes/hashes.js",
       "node_modules/three/three.js",
       "node_modules/three/examples/js/loaders/OBJLoader.js",
       "node_modules/three/examples/js/loaders/MTLLoader.js",
