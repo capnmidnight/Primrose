@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -85,14 +85,11 @@ button {
         startDownload(function (n, m) {
           b.max = m;
           b.value = n;
-        }, function () {
+        }, function ( displays ) {
           b.style.display = "none";
-          function vrButton(display, i) {
-            addButton(display.displayName, env.goFullScreen.bind(env, i));
-          }
-          env.addEventListener("ready", function () {
-            env.displays.forEach(vrButton);
-          }, false);
+          displays.forEach( function vrButton( display, i ) {
+            addButton( display.displayName, env.goFullScreen.bind( env, i ) );
+          } );
         });
       });
     </script>
