@@ -547,21 +547,23 @@ Primrose.BrowserEnvironment = (function () {
           this.options.nearPlane,
           this.options.nearPlane + this.options.drawDistance);
 
-        var p = this.input.VR.transforms,
-          canvasWidth = 0,
-          canvasHeight = 0;
+        var p = this.input.VR.transforms;
+        if (p) {
+          var canvasWidth = 0,
+            canvasHeight = 0;
 
-        for (var i = 0; i < p.length; ++i) {
-          canvasWidth += p[i].viewport.width;
-          canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
-        }
-        canvasWidth = Math.floor(canvasWidth * resolutionScale);
-        canvasHeight = Math.floor(canvasHeight * resolutionScale);
+          for (var i = 0; i < p.length; ++i) {
+            canvasWidth += p[i].viewport.width;
+            canvasHeight = Math.max(canvasHeight, p[i].viewport.height);
+          }
+          canvasWidth = Math.floor(canvasWidth * resolutionScale);
+          canvasHeight = Math.floor(canvasHeight * resolutionScale);
 
-        this.renderer.domElement.width = canvasWidth;
-        this.renderer.domElement.height = canvasHeight;
-        if (!this.timer) {
-          render();
+          this.renderer.domElement.width = canvasWidth;
+          this.renderer.domElement.height = canvasHeight;
+          if (!this.timer) {
+            render();
+          }
         }
       };
 
@@ -717,11 +719,6 @@ Primrose.BrowserEnvironment = (function () {
             iconModels["Device Motion API"] =
             iconModels["Google, Inc. Cardboard v1"] = iconModels["Google Cardboard"];
 
-          icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
-            .map(makeIcon);
-
-          icons.forEach(putIconInScene);
-
           if (models.button) {
             this.buttonFactory = new Primrose.ButtonFactory(
               models.button,
@@ -750,7 +747,8 @@ Primrose.BrowserEnvironment = (function () {
                 toggle: true
               });
           }
-        });
+        })
+        .then(console.log.bind(console, "models ready"));
 
       //
       // Initialize public properties
@@ -787,25 +785,25 @@ Primrose.BrowserEnvironment = (function () {
         audioReady = Promise.resolve();
       }
 
+      audioReady = audioReady.then(console.log.bind(console, "audio ready"))
+
 
       var documentReady = null;
       if (document.readyState === "complete") {
-        documentReady = Promise.resolve();
+        documentReady = Promise.resolve("already");
       }
       else {
         documentReady = new Promise((resolve, reject) => {
           document.addEventListener("readystatechange", (evt) => {
             if (document.readyState === "complete") {
-              resolve();
+              resolve("had to wait for it");
             }
           }, false);
         });
       }
 
-      var allReady = Promise.all([modelsReady, audioReady, documentReady])
-        .then(() => {
-          fire("ready");
-        });
+      documentReady = documentReady.then(console.log.bind(console, "document ready"));
+
       this.music = new Primrose.Output.Music(this.audio.context);
 
       this.pickableObjects = {};
@@ -902,23 +900,10 @@ Primrose.BrowserEnvironment = (function () {
         .on(this.scene)
         .at(0, 10, 10);
 
+      var currentTimerObject = null;
       var RAF = (callback) => {
-        this.timer = this.input.VR.currentDisplay.requestAnimationFrame(callback);
-      };
-
-      this.start = () => {
-        allReady
-          .then(() => {
-            this.audio.start();
-            lt = performance.now() * MILLISECONDS_TO_SECONDS;
-            RAF(animate);
-          });
-      };
-
-      this.stop = () => {
-        this.input.VR.currentDisplay.cancelAnimationFrame(this.timer);
-        this.audio.stop();
-        this.timer = null;
+        currentTimerObject = this.input.VR.currentDisplay || window;
+        this.timer = currentTimerObject.requestAnimationFrame(callback);
       };
 
       var handleHit = (h) => {
@@ -1105,7 +1090,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.projector.addEventListener("hit", handleHit, false);
 
-      documentReady.then(() => {
+      documentReady = documentReady.then(() => {
         if (this.options.renderer) {
           this.renderer = this.options.renderer;
         }
@@ -1134,9 +1119,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("lockpointer", setPointerLock, false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
-
-        this.renderer.domElement.style.cursor = "default";
-        this.input.VR.init().then(() => {
+        return this.input.VR.init().then(() => {
           this.input.VR.connect(0);
         });
       });
@@ -1198,12 +1181,44 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+      var allReady = Promise.all([
+        modelsReady,
+        audioReady,
+        documentReady
+      ])
+        .then(() => {
+          this.renderer.domElement.style.cursor = "default";
+          fire("ready");
+        });
+
+      this.start = () => {
+        allReady
+          .catch(console.error.bind(console, "not ready"))
+          .then(() => {
+            console.log("all ready");
+            icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
+              .map(makeIcon);
+            icons.forEach(putIconInScene);
+            this.audio.start();
+            lt = performance.now() * MILLISECONDS_TO_SECONDS;
+            RAF(animate);
+          });
+      };
+
+      this.stop = () => {
+        if (currentTimerObject) {
+          currentTimerObject.cancelAnimationFrame(this.timer);
+          this.audio.stop();
+          this.timer = null;
+        }
+      };
+
       Object.defineProperties(this, {
         hasOrientation: {
-          get: () => this.input.VR.currentDisplay.hasOrientation
+          get: () => this.input.VR.currentDisplay && this.input.VR.currentDisplay.hasOrientation
         },
         inVR: {
-          get: () => this.input.VR.transforms.length > 1
+          get: () => this.input.VR.transforms && this.input.VR.transforms.length > 1
         },
         displays: {
           get: () => this.input.VR.displays || []

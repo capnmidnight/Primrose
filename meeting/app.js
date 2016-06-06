@@ -2,7 +2,7 @@ var idSpec = location.search.match(/id=(\w+)/),
 meetingID = idSpec && idSpec[1] || "public",
 env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
   autoscaleQuality: false,
-  quality: Primrose.Quality.LOW,
+  quality: Primrose.Quality.MAXIMUM,
   skyTexture: 0x000000,
   backgroundColor: 0x000000,
   disableDefaultLighting: true,
