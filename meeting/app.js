@@ -32,7 +32,23 @@ showSignup(true);
 function listUsers(users) {
   signup.hide();
   login.hide();
-  console.log(users);
+  users.forEach(addUser);
+}
+
+function addUser(user){
+  console.log("addUser", user);
+}
+
+function receiveChat(evt){
+  console.log("chat", evt);
+}
+
+function updateUser(evt){
+  console.log("updateUser", evt);
+}
+
+function removeUser(evt){
+  console.log("removeUser", evt);
 }
 
 function authFailed(name){
@@ -44,48 +60,44 @@ function authFailed(name){
 
 function makeConnection(){
   if(socket){
-    return Promise.resolve();
+    authenticate();
   }
   else{
-    return new Promise(function(resolve, reject){
-      var protocol = location.protocol.replace("http", "ws");
-      socket = io.connect(protocol + "//" + location.hostname);
-      socket.on("signupFailed", authFailed("signup"));
-      socket.on("loginFailed", authFailed("login"));
-      socket.on("userList", listUsers);
-      socket.on("logoutComplete", showSignup.bind(null, false));
-      socket.once("handshakeComplete", resolve);
-      socket.emit("handshake", "login");
-    });
+    var protocol = location.protocol.replace("http", "ws");
+    socket = io.connect(protocol + "//" + location.hostname);
+    socket.on("connect", socket.emit.bind(socket, "handshake", "login"));
+    socket.on("handshakeComplete", authenticate);
+    socket.on("signupFailed", authFailed("signup"));
+    socket.on("loginFailed", authFailed("login"));
+    socket.on("userList", listUsers);
+    socket.on("userJoin", addUser);
+    socket.on("chat", receiveChat);
+    socket.on("userState", updateUser);
+    socket.on("userLeft", removeUser);
+    socket.on("logoutComplete", showSignup.bind(null, false));
   }
 }
 
-function attemptSignupLogin() {
+function authenticate() {
   var form = signup.visible ? signup : login,
   verb = signup.visible ? "signup" : "login",
   userName = form.userName.value,
   password = form.password.value,
   email = form.email && form.email.value;
 
-  if(userName && password && (!form.email || email)){
-    socket.once("salt", function (salt) {
-      var hash = new Hashes.SHA256().hex(salt + password)
-      socket.emit("hash", hash);
-    });
-    socket.emit(verb, {
-      userName: userName,
-      email: email,
-      app: env.id
-    });
-  }
+  socket.once("salt", function (salt) {
+    var hash = new Hashes.SHA256().hex(salt + password)
+    socket.emit("hash", hash);
+  });
+  socket.emit(verb, {
+    userName: userName,
+    email: email,
+    app: env.id
+  });
 }
 
-function doAuth(){
-  makeConnection().then(attemptSignupLogin);
-}
-
-signup.addEventListener("signup", doAuth, false);
-login.addEventListener("login", doAuth, false);
+signup.addEventListener("signup", makeConnection, false);
+login.addEventListener("login", makeConnection, false);
 
 env.addEventListener("ready", function () {
   login.position.set(-1, env.avatarHeight, -1.5);
