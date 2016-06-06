@@ -1,20 +1,24 @@
 var idSpec = location.search.match(/id=(\w+)/),
-  meetingID = idSpec && idSpec[1] || "public",
-  env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
-    autoscaleQuality: false,
-    quality: Primrose.Quality.LOW,
-    skyTexture: 0x000000,
-    backgroundColor: 0x000000,
-    disableDefaultLighting: true,
-    sceneModel: "../doc/models/meeting/meetingroom.obj",
-    useFog: true,
-    fullScreenIcon: "../doc/models/monitor.obj",
-    VRIcon: "../doc/models/cardboard.obj",
-    font: "../doc/fonts/helvetiker_regular.typeface.js"
-  }),
-  login = new Primrose.X.LoginForm(),
-  signup = new Primrose.X.SignupForm(),
-  socket;
+meetingID = idSpec && idSpec[1] || "public",
+env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
+  autoscaleQuality: false,
+  quality: Primrose.Quality.LOW,
+  skyTexture: 0x000000,
+  backgroundColor: 0x000000,
+  disableDefaultLighting: true,
+  sceneModel: "../doc/models/meeting/meetingroom.obj",
+  useFog: true,
+  fullScreenIcon: "../doc/models/monitor.obj",
+  VRIcon: "../doc/models/cardboard.obj",
+  font: "../doc/fonts/helvetiker_regular.typeface.js"
+}),
+login = new Primrose.X.LoginForm(),
+signup = new Primrose.X.SignupForm(),
+socket;
+
+signup.userName.value = login.userName.value = "sean";
+signup.password.value = login.password.value = "ppyptky7";
+signup.email.value = "sean.mcbeth@gmail.com";
 
 function showSignup(state) {
   signup[state ? "show" : "hide"]();
@@ -24,81 +28,68 @@ function showSignup(state) {
 login.addEventListener("signup", showSignup.bind(null, true), false);
 signup.addEventListener("login", showSignup.bind(null, false), false);
 showSignup(true);
-signup.userName.value = login.userName.value = "sean";
-signup.password.value = login.password.value = "ppyptky7";
-signup.email.value = "sean.mcbeth@gmail.com";
 
 function listUsers(users) {
   signup.hide();
   login.hide();
+  console.log(users);
 }
 
-function attemptSignup() {
-  socket.once("salt", function (salt) {
-    var hash = new Hashes.SHA256().hex(salt + signup.password.value)
-    socket.emit("hash", hash);
-  });
-  socket.emit("signup", {
-    userName: signup.userName.value,
-    email: signup.email.value,
-    app: env.id
-  });
-}
-
-signup.addEventListener("signup", function () {
-  if (signup.userName.value && signup.password.value) {
-    if (!socket) {
-      socket = io.connect("ws://" + location.hostname);
-      socket.on("signupFailed", function (reason) {
-        console.error("signup failed", reason);
-        showSignup(false);
-      });
-      socket.on("userList", listUsers);
-      socket.once("handshakeComplete", attemptSignup);
-      socket.emit("handshake", "login");
-    }
-    else {
-      attemptSignup();
-    }
+function authFailed(name){
+  return function(reason){
+    console.error(name + " failed", reason);
+    showSignup(name === "signup");
   }
-}, false);
-
-function attemptLogin() {
-  socket.once("salt", function (salt) {
-    var hash = new Hashes.SHA256().hex(salt + login.password.value)
-    socket.emit("hash", hash);
-  });
-  socket.emit("login", {
-    userName: login.userName.value,
-    app: env.id
-  });
 }
 
-login.addEventListener("login", function () {
-  if (login.userName.value && login.password.value) {
-    if (!socket) {
-      socket = io.connect("ws://" + location.hostname);
-      socket.on("loginFailed", function (reason) {
-        console.error("login failed", reason);
-        showSignup(true);
-      });
-      socket.on("userList", listUsers);
-      socket.once("handshakeComplete", attemptLogin);
-      socket.emit("handshake", "login");
-    }
-    else {
-      attemptLogin();
-    }
+function makeConnection(){
+  if(socket){
+    return Promise.resolve();
   }
-}, false);
+  else{
+    return new Promise(function(resolve, reject){
+      var protocol = location.protocol.replace("http", "ws");
+      socket = io.connect(protocol + "//" + location.hostname);
+      socket.on("signupFailed", authFailed("signup"));
+      socket.on("loginFailed", authFailed("login"));
+      socket.on("userList", listUsers);
+      socket.on("logoutComplete", showSignup.bind(null, false));
+      socket.once("handshakeComplete", resolve);
+      socket.emit("handshake", "login");
+    });
+  }
+}
 
-login.addEventListener("logout", function () {
+function attemptSignupLogin() {
+  var form = signup.visible ? signup : login,
+  verb = signup.visible ? "signup" : "login",
+  userName = form.userName.value,
+  password = form.password.value,
+  email = form.email && form.email.value;
 
-}, false);
+  if(userName && password && (!form.email || email)){
+    socket.once("salt", function (salt) {
+      var hash = new Hashes.SHA256().hex(salt + password)
+      socket.emit("hash", hash);
+    });
+    socket.emit(verb, {
+      userName: userName,
+      email: email,
+      app: env.id
+    });
+  }
+}
+
+function doAuth(){
+  makeConnection().then(attemptSignupLogin);
+}
+
+signup.addEventListener("signup", doAuth, false);
+login.addEventListener("login", doAuth, false);
 
 env.addEventListener("ready", function () {
-  login.mesh.position.set(-1, env.avatarHeight, -1.5);
-  signup.mesh.position.set(-1, env.avatarHeight, -1.5);
+  login.position.set(-1, env.avatarHeight, -1.5);
+  signup.position.set(-1, env.avatarHeight, -1.5);
   env.appendChild(login);
   env.appendChild(signup);
 
