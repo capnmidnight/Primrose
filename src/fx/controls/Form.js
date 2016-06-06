@@ -16,25 +16,52 @@
       super(patch(options, {
         id: `Primrose.Controls.Form[${COUNTER++}]`
       }));
-      
-      this.mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
-      this.mesh.name = this.id + "-mesh";
+      this._mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
+      this._mesh.name = this.id + "-mesh";
     }
 
     addToBrowserEnvironment(env, scene){
-      scene.add(this.mesh);
-      env.registerPickableObject(this.mesh);
-      return this.mesh;
+      scene.add(this._mesh);
+      env.registerPickableObject(this._mesh);
+      return this._mesh;
+    }
+
+    get position(){
+      return this._mesh.position;
+    }
+
+    get visible(){
+      return this._mesh.visible;
+    }
+
+    set visible(v){
+      this._mesh.visible = v;
+    }
+
+    get disabled(){
+      return this._mesh.disabled;
+    }
+
+    set disabled(v){
+      this._mesh.disabled = v;
+    }
+
+    get enabled(){
+      return !this.disabled;
+    }
+
+    set enabled(v){
+      this.disabled = !v;
     }
 
     hide() {
-      this.mesh.visible = false;
-      this.mesh.disabled = true;
+      this.visible = false;
+      this.disabled = true;
     }
 
     show() {
-      this.mesh.visible = true;
-      this.mesh.disabled = false;
+      this.visible = true;
+      this.disabled = false;
     }
   }
 
