@@ -5,28 +5,7 @@ Primrose.BrowserEnvironment = (function () {
     return function () {
     };
   }
-  /*
-   Create a new VR Application!
-   
-   `name` - name the application, for use with saving settings separately from
-   other applications on the same domain
-   `options` - optional values to override defaults
-   | `avatarHeight` - the offset from the ground at which to place the camera
-   | `walkSpeed` - how quickly the avatar moves across the ground
-   | `button`
-   | `model` - the model to use to make buttons, in THREE JSON format
-   | `options` - configuration parameters for buttons
-   | `maxThrow` - the distance the button may move
-   | `minDeflection` - the angle boundary in which to do hit tests on the button
-   | `colorUnpressed` - the color of the button when it is not depressed
-   | `colorPressed` - the color of the button when it is depressed
-   | `gravity` - the acceleration applied to falling objects (default: 9.8)
-   | `useLeap` - use the Leap Motion device
-   | `backgroundColor` - the color that WebGL clears the background with before drawing (default: 0x000000)
-   | `drawDistance` - the far plane of the camera (default: 500)
-   | `chatTextSize` - the size of a single line of text, in world units (default: 0.25)
-   | `dtNetworkUpdate` - the amount of time to allow to elapse between sending state to teh server (default: 0.125)
-   */
+
   var MILLISECONDS_TO_SECONDS = 0.001,
     RIGHT = new THREE.Vector3(1, 0, 0),
     UP = new THREE.Vector3(0, 1, 0),
@@ -1325,8 +1304,6 @@ Primrose.BrowserEnvironment = (function () {
     }
   }
 
-  BrowserEnvironment.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
-
   BrowserEnvironment.DEFAULTS = {
     antialias: true,
     autoScaleQuality: true,
@@ -1353,8 +1330,6 @@ Primrose.BrowserEnvironment = (function () {
     drawDistance: 100,
     // the field of view to use in non-VR settings.
     defaultFOV: 75,
-    // the amount of time to allow to elapse between sending state to the server.
-    dtNetworkUpdate: 0.125,
     // The sound to play on loop in the background.
     ambientSound: null,
     // HTML5 canvas element, if one had already been created.
