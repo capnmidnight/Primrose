@@ -25,6 +25,11 @@ Primrose.BrowserEnvironment = (function () {
   class BrowserEnvironment {
     constructor(name, options) {
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
+      
+      if (this.options.foregroundColor === undefined || this.options.foregroundColor === null) {
+        this.options.foregroundColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
+      }
+
       this.id = name;
 
       var fire = emit.bind(this);
@@ -225,13 +230,13 @@ Primrose.BrowserEnvironment = (function () {
       var movePlayer = (dt) => {
 
         this.input.update();
-        var heading = this.input.getValue("heading"),
-          pitch = this.input.getValue("pitch"),
+        this.player.heading = this.input.getValue("heading");
+        var pitch = this.input.getValue("pitch"),
           strafe = this.input.getValue("strafe"),
           drive = this.input.getValue("drive"),
           boost = this.input.getValue("boost");
 
-        this.input.VR.getOrientation(qHead);
+        this.input.VR.getOrientation(this.player.qHead);
 
         qPitch.setFromAxisAngle(RIGHT, pitch);
 
@@ -252,7 +257,7 @@ Primrose.BrowserEnvironment = (function () {
             .multiplyScalar(this.walkSpeed);
 
           qHeading.setFromAxisAngle(UP, currentHeading);
-          this.player.velocity.applyQuaternion(qHead);
+          this.player.velocity.applyQuaternion(this.player.qHead);
           this.player.velocity.y = 0;
           this.player.velocity.applyQuaternion(qHeading);
         }
@@ -265,18 +270,18 @@ Primrose.BrowserEnvironment = (function () {
         }
 
         if (this.inVR) {
-          var dHeading = heading - currentHeading;
+          var dHeading = this.player.heading - currentHeading;
           if (!lockedToEditor() && Math.abs(dHeading) > Math.PI / 5) {
             var dh = Math.sign(dHeading) * Math.PI / 100;
             currentHeading += dh;
-            heading -= dh;
-            dHeading = heading - currentHeading;
+            this.player.heading -= dh;
+            dHeading = this.player.heading - currentHeading;
           }
           this.player.quaternion.setFromAxisAngle(UP, currentHeading);
           qHeading.setFromAxisAngle(UP, dHeading).multiply(qPitch);
         }
         else {
-          currentHeading = heading;
+          currentHeading = this.player.heading;
           this.player.quaternion.setFromAxisAngle(UP, currentHeading);
           this.player.quaternion.multiply(qPitch);
         }
@@ -459,9 +464,9 @@ Primrose.BrowserEnvironment = (function () {
             this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);
             vEye.applyMatrix4(st.translation);
-            vEye.applyQuaternion(qHead);
+            vEye.applyQuaternion(this.player.qHead);
             this.camera.position.add(vEye);
-            this.camera.quaternion.copy(qHead);
+            this.camera.quaternion.copy(this.player.qHead);
             if (this.options.useNose) {
               this.nose.visible = true;
               this.nose.position.set(side * -0.12, -0.12, -0.15);
@@ -491,7 +496,7 @@ Primrose.BrowserEnvironment = (function () {
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
           this.camera.position.set(0, 0, 0);
-          this.camera.quaternion.copy(qHead);
+          this.camera.quaternion.copy(this.player.qHead);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
@@ -549,13 +554,13 @@ Primrose.BrowserEnvironment = (function () {
       //
       // Initialize local variables
       //
+
       var lt = 0,
         lastHit = null,
         currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion(),
         qHeading = new THREE.Quaternion(),
-        qHead = new THREE.Quaternion(),
         vEye = new THREE.Vector3(),
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
@@ -566,7 +571,6 @@ Primrose.BrowserEnvironment = (function () {
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
-        fgColor = null,
         icons = null,
         iconModels = {
           "Standard Monitor": null,
@@ -634,8 +638,8 @@ Primrose.BrowserEnvironment = (function () {
         var isVR = !(display instanceof StandardMonitorPolyfill),
           icon = (iconModels[display.displayName] || iconModels["Google Cardboard"]).clone(),
           geom = icon.children[0] && icon.children[0].geometry || icon.geometry,
-          titleText = textured(text3D(0.05, display.displayName), fgColor),
-          funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), fgColor);
+          titleText = textured(text3D(0.05, display.displayName), this.options.foregroundColor),
+          funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), this.options.foregroundColor);
 
         icon.name = (display.displayName + "Icon").replace(/ /g, "");
         icon.addEventListener("click", this.goFullScreen.bind(this, i), false);
@@ -678,8 +682,6 @@ Primrose.BrowserEnvironment = (function () {
           if (models.scene) {
             buildScene(models.scene);
           }
-
-          fgColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
 
           if (models.monitor) {
             iconModels["Standard Monitor"] = new Primrose.ModelLoader(models.monitor);
@@ -783,10 +785,12 @@ Primrose.BrowserEnvironment = (function () {
       this.projector = new Primrose.Workerize(Primrose.Projector);
 
       this.player = new THREE.Object3D();
-      this.player.velocity = new THREE.Vector3();
       this.player.name = "Player";
       this.player.position.set(0, this.avatarHeight, 0);
+      this.player.velocity = new THREE.Vector3();
       this.player.isOnGround = true;
+      this.player.heading = 0;
+      this.player.qHead = new THREE.Quaternion();
 
       this.pointer = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
         emissive: 0x3f0000,
