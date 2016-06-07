@@ -746,8 +746,7 @@ Primrose.BrowserEnvironment = (function () {
                 toggle: true
               });
           }
-        })
-        .then(console.log.bind(console, "models ready"));
+        });
 
       //
       // Initialize public properties
@@ -784,9 +783,6 @@ Primrose.BrowserEnvironment = (function () {
         audioReady = Promise.resolve();
       }
 
-      audioReady = audioReady.then(console.log.bind(console, "audio ready"))
-
-
       var documentReady = null;
       if (document.readyState === "complete") {
         documentReady = Promise.resolve("already");
@@ -800,8 +796,6 @@ Primrose.BrowserEnvironment = (function () {
           }, false);
         });
       }
-
-      documentReady = documentReady.then(console.log.bind(console, "document ready"));
 
       this.music = new Primrose.Output.Music(this.audio.context);
 
@@ -1192,9 +1186,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.start = () => {
         allReady
-          .catch(console.error.bind(console, "not ready"))
           .then(() => {
-            console.log("all ready");
             icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
               .map(makeIcon);
             icons.forEach(putIconInScene);
