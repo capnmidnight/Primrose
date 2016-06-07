@@ -1,12 +1,12 @@
 ﻿pliny.function({
   parent: "Primrose.Random",
   name: "number",
-  description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive.",
+  description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
   parameters: [
     { name: "min", type: "Number", description: "The included minimum side of the range of numbers." },
     { name: "max", type: "Number", description: "The excluded maximum side of the range of numbers." }
   ],
-  returns: "A random number as good as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
+  returns: "Number",
   examples: [
     {
       name: "Generate a random number on the range [-1, 1).", description: "To generate a random number on a closed range, call the `Primrose.Random.number` function as shown:\n\
