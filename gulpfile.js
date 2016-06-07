@@ -90,6 +90,7 @@ var docFiles = recurseDirectory("templates/doc")
       "node_modules/three/three.js",
       "node_modules/three/examples/js/loaders/OBJLoader.js",
       "node_modules/three/examples/js/loaders/MTLLoader.js",
+      "node_modules/three/examples/js/loaders/FBXLoader.js",
       "node_modules/html2canvas/dist/html2canvas.js"]
       .concat(sourceFiles)
   },
