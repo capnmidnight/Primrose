@@ -1,8 +1,8 @@
 # Blender MTL File: 'meeting room-baked.blend'
-# Material Count: 13
+# Material Count: 15
 
 newmtl BackdropMaterial
-Ns 247.058824
+Ns 17.647059
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.540000 0.540000 0.540000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 map_Kd BackdropTexture.png
 
-newmtl Chair1Material
+newmtl ChairMaterial.001
 Ns 39.215686
 Ka 1.000000 1.000000 1.000000
 Kd 0.167943 0.045181 0.009225
@@ -23,7 +23,7 @@ d 1.000000
 illum 2
 map_Kd Chair1Texture.png
 
-newmtl Chair2Material
+newmtl ChairMaterial.002
 Ns 152.941176
 Ka 1.000000 1.000000 1.000000
 Kd 0.042054 0.018393 0.239546
@@ -34,7 +34,7 @@ d 1.000000
 illum 2
 map_Kd Chair2Texture.png
 
-newmtl Chair3Material
+newmtl ChairMaterial.003
 Ns 145.098039
 Ka 1.000000 1.000000 1.000000
 Kd 0.350548 0.021513 0.027779
@@ -45,7 +45,7 @@ d 1.000000
 illum 2
 map_Kd Chair3Texture.png
 
-newmtl Chair4Material
+newmtl ChairMaterial.004
 Ns 113.725490
 Ka 1.000000 1.000000 1.000000
 Kd 0.007303 0.076577 0.005453
@@ -56,10 +56,10 @@ d 1.000000
 illum 2
 map_Kd Chair4Texture.png
 
-newmtl Cup1Material
-Ns 247.058824
+newmtl CupMaterial.001
+Ns 500.000000
 Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 0.001214
 Ks 0.540000 0.540000 0.540000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -67,10 +67,10 @@ d 1.000000
 illum 2
 map_Kd Cup1Texture.png
 
-newmtl Cup2Material
+newmtl CupMaterial.002
 Ns 247.058824
 Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
+Kd 0.000000 1.000000 1.000000
 Ks 0.540000 0.540000 0.540000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -78,10 +78,10 @@ d 1.000000
 illum 2
 map_Kd Cup2Texture.png
 
-newmtl Cup3Material
+newmtl CupMaterial.003
 Ns 247.058824
 Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
+Kd 1.000000 0.000000 1.000000
 Ks 0.540000 0.540000 0.540000
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
@@ -89,7 +89,7 @@ d 1.000000
 illum 2
 map_Kd Cup3Texture.png
 
-newmtl Cup4Material
+newmtl CupMaterial.004
 Ns 247.058824
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -100,7 +100,7 @@ d 1.000000
 illum 2
 map_Kd Cup4Texture.png
 
-newmtl Cup5Material
+newmtl CupMaterial.005
 Ns 247.058824
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -111,7 +111,28 @@ d 1.000000
 illum 2
 map_Kd Cup5Texture.png
 
-newmtl Material
+newmtl LampPostMaterial
+Ns 978.431373
+Ka 1.000000 1.000000 1.000000
+Kd 0.307489 0.307489 0.307489
+Ks 0.774000 0.774000 0.774000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl LampshadeMaterial
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.751454 0.800000 0.190748
+Ks 0.500000 0.500000 0.500000
+Ke 0.623706 0.664000 0.158321
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd LampshadeTexture.png
+
+newmtl LightPanelMaterial
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
