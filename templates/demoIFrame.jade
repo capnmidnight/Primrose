@@ -44,21 +44,20 @@ html
           !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}
       script(type="text/javascript").
         WebVRBootstrapper(!{ manifest }, function (startDownload) {
-          function addButton(text, thunk) {
+          var b = document.querySelector("progress");
+          function addButton(display, i) {
             var btn = document.createElement("button");
             btn.type = "button";
-            btn.appendChild(document.createTextNode(text));
-            btn.addEventListener("click", thunk);
+            btn.appendChild(document.createTextNode(display.displayName));
+            btn.addEventListener("click", env.goFullScreen.bind(env, i));
             document.getElementById("fullScreenButtonContainer").appendChild(btn);
           }
-          var b = document.querySelector("progress");
           startDownload(function (n, m) {
             b.max = m;
             b.value = n;
-        }, function ( displays ) {
-          b.style.display = "none";
-          displays.forEach( function vrButton( display, i ) {
-            addButton( display.displayName, env.goFullScreen.bind( env, i ) );
+          }, function (displays) {
+            b.style.display = "none";
+            displays.forEach(addButton);
           });
         });
   body
