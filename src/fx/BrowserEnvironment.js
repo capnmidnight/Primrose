@@ -580,7 +580,6 @@ Primrose.BrowserEnvironment = (function () {
         vEye = new THREE.Vector3(),
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
-        readyFired = false,
         modelFiles = {
           monitor: this.options.fullScreenIcon,
           cardboard: this.options.VRIcon,
