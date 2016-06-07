@@ -1,21 +1,25 @@
 var idSpec = location.search.match(/id=(\w+)/),
-meetingID = idSpec && idSpec[1] || "public",
-env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
-  autoScaleQuality: false,
-  autoRescaleQuality: false,
-  quality: Primrose.Quality.HIGH,
-  skyTexture: 0x000000,
-  backgroundColor: 0x000000,
-  disableDefaultLighting: true,
-  sceneModel: "../doc/models/meeting/meetingroom.obj",
-  useFog: true,
-  fullScreenIcon: "../doc/models/monitor.obj",
-  VRIcon: "../doc/models/cardboard.obj",
-  font: "../doc/fonts/helvetiker_regular.typeface.js"
-}),
-login = new Primrose.X.LoginForm(),
-signup = new Primrose.X.SignupForm(),
-socket;
+  meetingID = idSpec && idSpec[1] || "public",
+  NETWORK_DT = 0.25,
+  env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
+    autoScaleQuality: false,
+    autoRescaleQuality: false,
+    quality: Primrose.Quality.HIGH,
+    skyTexture: 0x000000,
+    backgroundColor: 0x000000,
+    disableDefaultLighting: true,
+    sceneModel: "../doc/models/meeting/meetingroom.obj",
+    useFog: true,
+    fullScreenIcon: "../doc/models/monitor.obj",
+    VRIcon: "../doc/models/cardboard.obj",
+    font: "../doc/fonts/helvetiker_regular.typeface.js"
+  }),
+  loggedIn = false,
+  login = new Primrose.X.LoginForm(),
+  signup = new Primrose.X.SignupForm(),
+  socket,
+  avatarFactory,
+  users = {};
 
 signup.userName.value = login.userName.value = "sean";
 signup.password.value = login.password.value = "ppyptky7";
@@ -33,37 +37,46 @@ showSignup(true);
 function listUsers(users) {
   signup.hide();
   login.hide();
+  loggedIn = true;
+
+  for (var key in users) {
+    env.scene.remove(users[key]);
+  }
   users.forEach(addUser);
 }
 
-function addUser(user){
+function addUser(user) {
   console.log("addUser", user);
 }
 
-function receiveChat(evt){
+function receiveChat(evt) {
   console.log("chat", evt);
 }
 
-function updateUser(evt){
+function updateUser(evt) {
   console.log("updateUser", evt);
 }
 
-function removeUser(evt){
+function removeUser(evt) {
   console.log("removeUser", evt);
 }
 
-function authFailed(name){
-  return function(reason){
+function authFailed(name) {
+  return function (reason) {
     console.error(name + " failed", reason);
     showSignup(name === "signup");
   }
 }
 
-function makeConnection(){
-  if(socket){
+function lostConnection() {
+  loggedIn = false;
+}
+
+function makeConnection() {
+  if (socket) {
     authenticate();
   }
-  else{
+  else {
     var protocol = location.protocol.replace("http", "ws");
     socket = io.connect(protocol + "//" + location.hostname);
     socket.on("connect", socket.emit.bind(socket, "handshake", "login"));
@@ -76,15 +89,16 @@ function makeConnection(){
     socket.on("userState", updateUser);
     socket.on("userLeft", removeUser);
     socket.on("logoutComplete", showSignup.bind(null, false));
+    socket.on("connection_lost", lostConnection);
   }
 }
 
 function authenticate() {
   var form = signup.visible ? signup : login,
-  verb = signup.visible ? "signup" : "login",
-  userName = form.userName.value,
-  password = form.password.value,
-  email = form.email && form.email.value;
+    verb = signup.visible ? "signup" : "login",
+    userName = form.userName.value,
+    password = form.password.value,
+    email = form.email && form.email.value;
 
   socket.once("salt", function (salt) {
     var hash = new Hashes.SHA256().hex(salt + password)
@@ -100,6 +114,7 @@ function authenticate() {
 signup.addEventListener("signup", makeConnection, false);
 login.addEventListener("login", makeConnection, false);
 
+
 env.addEventListener("ready", function () {
   login.position.set(-1, env.avatarHeight, -1.5);
   signup.position.set(-1, env.avatarHeight, -1.5);
@@ -114,6 +129,10 @@ env.addEventListener("ready", function () {
       obj.material.emissive.setRGB(1, 1, 1);
     }
   });
+
+  Primrose.ModelLoader.loadModel("../doc/models/avatar.obj").then(function (avatarModel) {
+    avatarFactory = avatarModel;
+  });
 });
 
 env.addEventListener("gazecomplete", function (evt) {
@@ -124,6 +143,13 @@ env.addEventListener("pointerend", function (evt) {
 
 });
 
+var lastNetworkUpdate = 0;
 env.addEventListener("update", function (dt) {
+  if (socket && loggedIn) {
+    lastNetworkUpdate += dt;
+    if (lastNetworkUpdate >= NETWORK_DT) {
+      lastNetworkUpdate -= NETWORK_DT;
 
+    }
+  }
 });
