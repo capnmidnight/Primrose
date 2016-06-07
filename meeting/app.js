@@ -116,8 +116,8 @@ login.addEventListener("login", makeConnection, false);
 
 
 env.addEventListener("ready", function () {
-  login.position.set(-1, env.avatarHeight, -1.5);
-  signup.position.set(-1, env.avatarHeight, -1.5);
+  login.position.set(0, env.avatarHeight, -0.5);
+  signup.position.set(0, env.avatarHeight, -0.5);
   env.appendChild(login);
   env.appendChild(signup);
 
