@@ -1,4 +1,6 @@
 Primrose.Input.VR = (function () {
+  const SLERP_A = isMobile ? 0.1 : 0,
+    SLERP_B = 1 - SLERP_A;
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
@@ -143,10 +145,16 @@ Primrose.Input.VR = (function () {
 
     getOrientation(value) {
       value = value || new THREE.Quaternion();
-      value.set(this.getValue("headRX"),
-        this.getValue("headRY"),
-        this.getValue("headRZ"),
-        this.getValue("headRW"));
+      var x = this.getValue("headRX"),
+        y = this.getValue("headRY"),
+        z = this.getValue("headRZ"),
+        w = this.getValue("headRW");
+      
+      value.set(
+        value.x * SLERP_A + x * SLERP_B,
+        value.y * SLERP_A + y * SLERP_B,
+        value.z * SLERP_A + z * SLERP_B,
+        value.w * SLERP_A + w * SLERP_B);
       return value;
     }
 
