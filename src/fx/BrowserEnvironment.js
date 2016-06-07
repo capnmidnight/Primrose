@@ -1091,7 +1091,7 @@ Primrose.BrowserEnvironment = (function () {
           this.renderer = new THREE.WebGLRenderer({
             canvas: Primrose.DOM.cascadeElement(this.options.canvasElement, "canvas", HTMLCanvasElement),
             context: this.options.context,
-            antialias: !isMobile,
+            antialias: this.options.antialias,
             alpha: true,
             logarithmicDepthBuffer: false
           });
@@ -1328,6 +1328,7 @@ Primrose.BrowserEnvironment = (function () {
   BrowserEnvironment.DEFAULT_USER_NAME = "CURRENT_USER_OFFLINE";
 
   BrowserEnvironment.DEFAULTS = {
+    antialias: true,
     autoScaleQuality: true,
     autoRescaleQuality: false,
     quality: Primrose.Quality.MAXIMUM,
