@@ -6,20 +6,8 @@ Primrose.Input.VR = (function () {
     name: "VR",
     description: "| [under construction]"
   });
-  pliny.value({
-    parent: "Primrose.Input.VR",
-    name: "Version",
-    type: "Number",
-    baseClass: "Primrose.InputProcessor",
-    description: "returns the version of WebVR that is supported (if any). Values:\n\
-  - 0: no WebVR support\n\
-  - 0.1: Device Orientation-based WebVR\n\
-  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
-  - 0.5: Legacy WebVR API\n\
-  - 1.0: Provisional WebVR API 1.0"
-  });
   class VR extends Primrose.InputProcessor {
-    constructor(commands, socket, elem, selectedIndex) {
+    constructor(commands, socket) {
       super("VR", commands, socket);
       if (commands === undefined || commands === null) {
         commands = VR.AXES.map(function (a) {
@@ -60,35 +48,13 @@ Primrose.Input.VR = (function () {
         console.log("Displays found:", displays.length);
         this.displays = displays;
         this.displays.forEach(onConnected);
-
-        if (typeof selectedIndex === "number" && 0 <= selectedIndex && selectedIndex < this.displays.length) {
-          this.connect(selectedIndex);
-          return this.currentDisplay;
-        }
+        return this.displays;
       }
 
       this.init = function () {
         console.info("Checking for displays...");
         return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this));
       };
-    }
-
-    static get Version() {
-      if (navigator.getVRDisplays) {
-        return 1.0;
-      }
-      else if (navigator.getVRDevices) {
-        return 0.5;
-      }
-      else if (navigator.mozGetVRDevices) {
-        return 0.4;
-      }
-      else if (isMobile) {
-        return 0.1;
-      }
-      else {
-        return 0;
-      }
     }
 
     requestPresent(opts) {
