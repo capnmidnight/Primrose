@@ -295,10 +295,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var moveGround = () => {
         if (this.ground) {
-          this.ground.position.set(
-            Math.floor(this.player.position.x),
-            0,
-            Math.floor(this.player.position.z));
+          this.ground.position.x = Math.floor(this.player.position.x);
+          this.ground.position.z = Math.floor(this.player.position.z);
           this.ground.material.needsUpdate = true;
         }
       };
@@ -807,7 +805,7 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
-      if (this.options.skyTexture) {
+      if (this.options.skyTexture !== undefined) {
         this.sky = textured(
           shell(
             this.options.drawDistance,
@@ -821,13 +819,16 @@ Primrose.BrowserEnvironment = (function () {
         this.scene.add(this.sky);
       }
 
-      if (this.options.groundTexture) {
+      if (this.options.groundTexture !== undefined) {
         var dim = 10,
           gm = new THREE.PlaneGeometry(dim * 5, dim * 5, dim, dim);
         this.ground = textured(gm, this.options.groundTexture, {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5
         });
+        if(this.options.sceneModel !== undefined){
+          this.ground.position.y = -0.02;
+        }
         this.ground.rotation.x = -Math.PI / 2;
         this.ground.name = "Ground";
         this.scene.add(this.ground);
