@@ -15,12 +15,13 @@ var idSpec = location.search.match(/id=(\w+)/),
     VRIcon: "../doc/models/cardboard.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
-  loggedIn = false,
   login = new Primrose.X.LoginForm(),
   signup = new Primrose.X.SignupForm(),
+  users = {},
   socket,
   avatarFactory,
-  users = {};
+  userName,
+  deviceIndex;
 
 signup.userName.value = login.userName.value = "sean";
 signup.password.value = login.password.value = "ppyptky7";
@@ -38,7 +39,6 @@ showSignup(true);
 function listUsers(newUsers) {
   signup.hide();
   login.hide();
-  loggedIn = true;
 
   Object.keys(users).forEach(removeUser);
   newUsers.forEach(addUser);
@@ -70,35 +70,47 @@ function receiveChat(evt) {
 }
 
 function updateUser(state) {
-  var key = state[0],
-    avatar = users[key];
-  if (!avatar) {
-    addUser(state);
+  var key = state[0];
+  if(key !== userName){
+    var avatar = users[key];
+    if (avatar) {
+      avatar.time = 0;
+
+      var name = textured(text3D(0.1, key), env.options.foregroundColor),
+        bounds = name.geometry.boundingBox.max;
+      name.rotation.set(0, Math.PI, 0);
+      name.position.set(bounds.x / 2, env.avatarHeight + bounds.y, 0);
+      avatar.add(name);
+      
+      avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
+
+      avatar.velocity.set(state[2], state[3], state[4]);
+      avatar.velocity.sub(avatar.position);
+      avatar.velocity.multiplyScalar(1 / NETWORK_DT);
+      
+      avatar.head.dQuaternion.set(state[7], state[5], state[6], state[8]);
+      avatar.head.dQuaternion.x -= avatar.head.quaternion.x;
+      avatar.head.dQuaternion.y -= avatar.head.quaternion.y;
+      avatar.head.dQuaternion.z -= avatar.head.quaternion.z;
+      avatar.head.dQuaternion.w -= avatar.head.quaternion.w;
+      avatar.head.dQuaternion.x /= NETWORK_DT;
+      avatar.head.dQuaternion.y /= NETWORK_DT;
+      avatar.head.dQuaternion.z /= NETWORK_DT;
+      avatar.head.dQuaternion.w /= NETWORK_DT;
+    }
+    else{
+      console.error("Unknown user", key);
+    }
   }
-  else {
-    avatar.time = 0;
-
-    var name = textured(text3D(0.1, key), env.options.foregroundColor),
-      bounds = name.geometry.boundingBox.max;
-    name.rotation.set(0, Math.PI, 0);
-    name.position.set(bounds.x / 2, env.avatarHeight + bounds.y, 0);
-    avatar.add(name);
-    
-    avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
-
-    avatar.velocity.set(state[2], state[3], state[4]);
-    avatar.velocity.sub(avatar.position);
-    avatar.velocity.multiplyScalar(1 / NETWORK_DT);
-    
-    avatar.head.dQuaternion.set(state[7], state[5], state[6], state[8]);
-    avatar.head.dQuaternion.x -= avatar.head.quaternion.x;
-    avatar.head.dQuaternion.y -= avatar.head.quaternion.y;
-    avatar.head.dQuaternion.z -= avatar.head.quaternion.z;
-    avatar.head.dQuaternion.w -= avatar.head.quaternion.w;
-    avatar.head.dQuaternion.x /= NETWORK_DT;
-    avatar.head.dQuaternion.y /= NETWORK_DT;
-    avatar.head.dQuaternion.z /= NETWORK_DT;
-    avatar.head.dQuaternion.w /= NETWORK_DT;
+  else if(deviceIndex > 0){
+    env.player.heading = state[1];
+    env.player.position.x = state[2];
+    env.player.position.y = state[3] + env.avatarHeight;
+    env.player.position.z = state[4];
+    env.player.qHead.x = state[5];
+    env.player.qHead.y = state[6];
+    env.player.qHead.z = state[7];
+    env.player.qHead.w = state[8];
   }
 }
 
@@ -115,17 +127,28 @@ function authFailed(name) {
 }
 
 function lostConnection() {
-  loggedIn = false;
+  deviceIndex = null;
+}
+
+function addDevice(index){
+  console.log("addDevice", arguments);
+  //socket.emit("peer", index);
+}
+
+function setDeviceIndex(index){
+  deviceIndex = index;
 }
 
 function makeConnection() {
   if (!socket) {
     var protocol = location.protocol.replace("http", "ws");
-    socket = io.connect(protocol + "//" + location.hostname);    
+    socket = io.connect(protocol + "//" + location.hostname); 
     socket.on("signupFailed", authFailed("signup"));
     socket.on("loginFailed", authFailed("login"));
     socket.on("userList", listUsers);
     socket.on("userJoin", addUser);
+    socket.on("deviceAdded", addDevice);
+    socket.on("deviceIndex", setDeviceIndex);
     socket.on("chat", receiveChat);
     socket.on("userState", updateUser);
     socket.on("userLeft", removeUser);
@@ -139,9 +162,10 @@ function makeConnection() {
 function authenticate() {
   var form = signup.visible ? signup : login,
     verb = signup.visible ? "signup" : "login",
-    userName = form.userName.value,
     password = form.password.value,
     email = form.email && form.email.value;
+
+  userName = form.userName.value.toLocaleUpperCase();
 
   socket.once("salt", function (salt) {
     var hash = new Hashes.SHA256().hex(salt + password)
@@ -179,7 +203,7 @@ env.addEventListener("ready", function () {
 var lastNetworkUpdate = 0,
   state = [0, 0, 0, 0, 0, 0, 0, 1];
 env.addEventListener("update", function (dt) {
-  if (socket && loggedIn) {
+  if (socket && deviceIndex === 0) {
     lastNetworkUpdate += dt;
     if (lastNetworkUpdate >= NETWORK_DT) {
       lastNetworkUpdate -= NETWORK_DT;
