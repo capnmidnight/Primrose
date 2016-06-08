@@ -48,8 +48,17 @@ function addUser(state) {
     avatar = avatarFactory.clone();
   avatar.name = key;
   avatar.velocity = new THREE.Vector3();
-  avatar.target = new THREE.Vector3();
   avatar.time = 0;
+  avatar.traverse(function (obj) {
+    if (obj.name === "AvatarBelt") {
+      textured(obj, Primrose.Random.color());
+    }
+    else if (obj.name === "AvatarHead") {
+      avatar.head = obj;
+    }
+  });
+  avatar.head.dQuaternion = new THREE.Quaternion();
+  avatar.dHeading = 0;
   env.scene.add(avatar);
   users[key] = avatar;
   updateUser(state);
@@ -66,26 +75,29 @@ function updateUser(state) {
     addUser(state);
   }
   else {
+    avatar.time = 0;
+
     var name = textured(text3D(0.1, key), env.options.foregroundColor),
       bounds = name.geometry.boundingBox.max;
-
     name.rotation.set(0, Math.PI, 0);
     name.position.set(bounds.x / 2, env.avatarHeight + bounds.y, 0);
     avatar.add(name);
-    avatar.rotation.set(0, state[1], 0);
-    avatar.target.set(state[5], state[6], state[7]);
-    avatar.target.multiplyScalar(NETWORK_DT);
-    avatar.target.x += state[2];
-    avatar.target.y += state[3];
-    avatar.target.z += state[4];
-    avatar.target.sub(avatar.position);
-    avatar.target.multiplyScalar(1 / NETWORK_DT);
-    avatar.velocity.copy(avatar.target);
-    avatar.time = 0;
-    /*  env.player.qHead.x,
-      env.player.qHead.y,
-      env.player.qHead.z,
-      env.player.qHead.w */
+    
+    avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
+
+    avatar.velocity.set(state[2], state[3], state[4]);
+    avatar.velocity.sub(avatar.position);
+    avatar.velocity.multiplyScalar(1 / NETWORK_DT);
+    
+    avatar.head.dQuaternion.set(state[7], state[5], state[6], state[8]);
+    avatar.head.dQuaternion.x -= avatar.head.quaternion.x;
+    avatar.head.dQuaternion.y -= avatar.head.quaternion.y;
+    avatar.head.dQuaternion.z -= avatar.head.quaternion.z;
+    avatar.head.dQuaternion.w -= avatar.head.quaternion.w;
+    avatar.head.dQuaternion.x /= NETWORK_DT;
+    avatar.head.dQuaternion.y /= NETWORK_DT;
+    avatar.head.dQuaternion.z /= NETWORK_DT;
+    avatar.head.dQuaternion.w /= NETWORK_DT;
   }
 }
 
@@ -163,13 +175,14 @@ env.addEventListener("ready", function () {
     }
   });
 
-  Primrose.ModelLoader.loadModel("../doc/models/avatar.obj").then(function (avatarModel) {
-    avatarFactory = avatarModel;
-  });
+  Primrose.ModelLoader.loadModel("../doc/models/avatar.json")
+    .then(function (avatarModel) {
+      avatarFactory = avatarModel;
+    });
 });
 
 var lastNetworkUpdate = 0,
-  state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+  state = [0, 0, 0, 0, 0, 0, 0, 1];
 env.addEventListener("update", function (dt) {
   if (socket && loggedIn) {
     lastNetworkUpdate += dt;
@@ -180,9 +193,6 @@ env.addEventListener("update", function (dt) {
         env.player.position.x,
         env.player.position.y - env.avatarHeight,
         env.player.position.z,
-        env.player.velocity.x,
-        env.player.velocity.y,
-        env.player.velocity.z,
         env.player.qHead.x,
         env.player.qHead.y,
         env.player.qHead.z,
@@ -202,7 +212,17 @@ env.addEventListener("update", function (dt) {
     avatar.time += dt;
     if (avatar.time >= NETWORK_DT) {
       avatar.velocity.multiplyScalar(0.5);
+      avatar.dHeading *= 0.5;
+      avatar.head.dQuaternion.x *= 0.5;
+      avatar.head.dQuaternion.y *= 0.5;
+      avatar.head.dQuaternion.z *= 0.5;
+      avatar.head.dQuaternion.w *= 0.5;
     }
     avatar.position.add(avatar.velocity.clone().multiplyScalar(dt));
+    avatar.rotation.y += avatar.dHeading * dt;
+    avatar.head.quaternion.x += avatar.head.dQuaternion.x * dt;
+    avatar.head.quaternion.y += avatar.head.dQuaternion.y * dt;
+    avatar.head.quaternion.z += avatar.head.dQuaternion.z * dt;
+    avatar.head.quaternion.w += avatar.head.dQuaternion.w * dt;
   }
 });
