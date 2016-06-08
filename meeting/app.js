@@ -118,14 +118,9 @@ function lostConnection() {
 }
 
 function makeConnection() {
-  if (socket) {
-    authenticate();
-  }
-  else {
+  if (!socket) {
     var protocol = location.protocol.replace("http", "ws");
-    socket = io.connect(protocol + "//" + location.hostname);
-    socket.on("connect", socket.emit.bind(socket, "handshake", "login"));
-    socket.on("handshakeComplete", authenticate);
+    socket = io.connect(protocol + "//" + location.hostname);    
     socket.on("signupFailed", authFailed("signup"));
     socket.on("loginFailed", authFailed("login"));
     socket.on("userList", listUsers);
@@ -136,6 +131,8 @@ function makeConnection() {
     socket.on("logoutComplete", showSignup.bind(null, false));
     socket.on("connection_lost", lostConnection);
   }
+
+  authenticate();
 }
 
 function authenticate() {
