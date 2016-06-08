@@ -956,7 +956,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.VR.connect(index);
         return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
           .then((elem) => {
-            if (Primrose.Input.VR.Version === 1 && isMobile) {
+            if (WebVRBootstrapper.Version === 1 && isMobile) {
               var remover = () => {
                 this.input.VR.currentDisplay.exitPresent();
                 window.removeEventListener("vrdisplaypresentchange", remover);
