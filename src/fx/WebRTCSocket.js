@@ -25,7 +25,7 @@ Primrose.WebRTCSocket = ( function () {
     name: "WebRTCSocket",
     description: "[under construction]"
   } );
-  function WebRTCSocket ( proxyServer, isStarHub ) {
+  function WebRTCSocket ( proxyServer ) {
     var socket,
         peers = [ ],
         channels = [ ],
@@ -184,8 +184,7 @@ Primrose.WebRTCSocket = ( function () {
             }
           } );
 
-          if ( isStarHub === true || ( isStarHub === undefined && myIndex <
-              theirIndex ) ) {
+          if ( myIndex < theirIndex ) {
             peer.addEventListener( "negotiationneeded", function ( evt ) {
               peer.createOffer(
                   descriptionCreated.bind( this, myIndex, theirIndex ),
@@ -207,8 +206,7 @@ Primrose.WebRTCSocket = ( function () {
               }
             } );
           }
-          else if ( isStarHub === false || ( isStarHub === undefined &&
-              myIndex > theirIndex ) ) {
+          else {
             peer.addEventListener( "datachannel", function ( evt ) {
               if ( evt.channel.id === theirIndex ) {
                 channels[evt.channel.id] = evt.channel;
