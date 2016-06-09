@@ -1031,14 +1031,7 @@ Primrose.BrowserEnvironment = (function () {
       var setPointerLock = () => {
         return ((Primrose.Input.Mouse.Lock.isActive || isMobile)
           ? Promise.resolve()
-          : Primrose.Input.Mouse.Lock.request(this.renderer.domElement))
-          .then(setFullscreen);
-      };
-
-      var setFullscreen = () => {
-        if (!isFullScreenMode() && isMobile) {
-          this.goFullScreen(1);
-        }
+          : Primrose.Input.Mouse.Lock.request(this.renderer.domElement));
       };
 
       var withCurrentControl = (name) => {
