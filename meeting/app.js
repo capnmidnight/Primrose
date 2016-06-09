@@ -27,16 +27,6 @@ var idSpec = location.search.match(/id=(\w+)/),
   userName,
   deviceIndex;
 
-///////////////////////////////////////////////////////////////////////////
-///////// test values /////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-ctrls3D.signup.userName.value = ctrls3D.login.userName.value = "sean";
-ctrls3D.signup.password.value = ctrls3D.login.password.value = "ppyptky7";
-ctrls3D.signup.email.value = "sean.mcbeth@gmail.com";
-///////////////////////////////////////////////////////////////////////////
-///////// end test values /////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-
 ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
 ctrls2D.loginForm.style.display = "";
@@ -59,7 +49,8 @@ ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login,
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
 
-showSignup(true);
+showSignup(document.cookie.indexOf("Primrose") === -1);
+document.cookie = "Primrose";
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
