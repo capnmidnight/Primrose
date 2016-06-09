@@ -7,7 +7,7 @@
   pliny.class({
     parent: "Primrose.X",
     name: "SignupForm",
-    description: "A basic signup form.",
+    description: "A basic registration form.",
     baseClass: "Primrose.Controls.Form"
   });
   class SignupForm extends Primrose.Controls.Form {
@@ -21,23 +21,9 @@
       this.listeners.login = [];
       this.listeners.signup = [];
 
-      this.labelUserName = new Primrose.Controls.Label({
-        id: this.id + "-labelUserName",
-        bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
-        fontSize: 32,
-        value: "User name:",
-        textAlign: "right"
-      });
-
-      this.userName = new Primrose.Text.Controls.TextInput({
-        id: this.id + "-userName",
-        bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
-        fontSize: 32
-      });
-
       this.labelEmail = new Primrose.Controls.Label({
         id: this.id + "-labelEmail",
-        bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+        bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
         value: "Email:",
         textAlign: "right"
@@ -45,6 +31,20 @@
 
       this.email = new Primrose.Text.Controls.TextInput({
         id: this.id + "-email",
+        bounds: new Primrose.Text.Rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT / 4),
+        fontSize: 32
+      });
+
+      this.labelUserName = new Primrose.Controls.Label({
+        id: this.id + "-labelUserName",
+        bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
+        fontSize: 32,
+        value: "User name:",
+        textAlign: "right"
+      });
+
+      this.userName = new Primrose.Text.Controls.TextInput({
+        id: this.id + "-userName",
         bounds: new Primrose.Text.Rectangle(WIDTH / 2, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32
       });
@@ -68,7 +68,7 @@
         id: this.id + "-loginButton",
         bounds: new Primrose.Text.Rectangle(0, 3 * HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
-        value: "Login"
+        value: "Log in"
       });
 
       this.signupButton = new Primrose.Controls.Button2D({

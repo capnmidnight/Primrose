@@ -1,12 +1,18 @@
 var idSpec = location.search.match(/id=(\w+)/),
   meetingID = idSpec && idSpec[1] || "public",
   NETWORK_DT = 0.25,
+  lastNetworkUpdate = 0,
+  state = [0, 0, 0, 0, 0, 0, 0, 1],
+  ctrls2D = Primrose.DOM.findEverything(),
+  ctrls3D = {
+    login: new Primrose.X.LoginForm(),
+    signup: new Primrose.X.SignupForm()
+  },
   env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
     autoScaleQuality: false,
     autoRescaleQuality: false,
     quality: Primrose.Quality.HIGH,
     groundTexture: 0x000000,
-    skyTexture: 0x000000,
     backgroundColor: 0x000000,
     disableDefaultLighting: true,
     sceneModel: "../doc/models/meeting/meetingroom.obj",
@@ -15,30 +21,72 @@ var idSpec = location.search.match(/id=(\w+)/),
     VRIcon: "../doc/models/cardboard.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
-  login = new Primrose.X.LoginForm(),
-  signup = new Primrose.X.SignupForm(),
   users = {},
   socket,
   avatarFactory,
   userName,
   deviceIndex;
 
-signup.userName.value = login.userName.value = "sean";
-signup.password.value = login.password.value = "ppyptky7";
-signup.email.value = "sean.mcbeth@gmail.com";
+///////////////////////////////////////////////////////////////////////////
+///////// test values /////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+ctrls3D.signup.userName.value = ctrls3D.login.userName.value = "sean";
+ctrls3D.signup.password.value = ctrls3D.login.password.value = "ppyptky7";
+ctrls3D.signup.email.value = "sean.mcbeth@gmail.com";
+///////////////////////////////////////////////////////////////////////////
+///////// end test values /////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
-function showSignup(state) {
-  signup[state ? "show" : "hide"]();
-  login[state ? "hide" : "show"]();
-}
+ctrls2D.switchMode.addEventListener("click", showSignup);
+ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
+ctrls2D.loginForm.style.display = "";
+ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
 
-login.addEventListener("signup", showSignup.bind(null, true), false);
-signup.addEventListener("login", showSignup.bind(null, false), false);
+ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
+ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);
+
+setTimeout(function () {
+  ctrls3D.signup.userName.value = ctrls3D.login.userName.value = ctrls2D.userName.value;
+  ctrls3D.signup.password.value = ctrls3D.login.password.value = ctrls2D.password.value;
+  ctrls3D.signup.email.value = ctrls2D.email.value;
+}, 250);
+
+ctrls3D.login.addEventListener("signup", showSignup.bind(null, true), false);
+ctrls3D.signup.addEventListener("login", showSignup.bind(null, false), false);
+ctrls3D.signup.addEventListener("signup", setLoginValues.bind(null, ctrls3D.signup, ctrls3D.login, ctrls2D), false);
+ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login, ctrls3D.signup, ctrls2D), false);
+
+env.addEventListener("ready", environmentReady);
+env.addEventListener("update", update);
+
 showSignup(true);
 
+function showSignup(state) {
+  if (typeof state !== "boolean") {
+    state = ctrls2D.emailRow.style.display === "none";
+  }
+
+  ctrls2D.emailRow.style.display = state ? "" : "none";
+  ctrls2D.switchMode.innerHTML = state ? "Log in" : "Sign up";
+  ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
+  ctrls2D.connect.innerHTML = state ? "Sign up" : "Log in";
+  ctrls2D.connect.className = state ? "signupButton" : "loginButton" ;
+
+  ctrls3D.signup.style.display = state ? "" : "none";
+  ctrls3D.login.style.display = state ? "none" : "";
+
+  if (state) {
+    ctrls3D.signup.userName.value = ctrls3D.login.userName.value;
+    ctrls3D.signup.password.value = ctrls3D.login.password.value;
+  }
+}
+
 function listUsers(newUsers) {
-  signup.hide();
-  login.hide();
+  ctrls3D.signup.style.display
+    = ctrls3D.login.style.display
+    = ctrls2D.loginForm.style.display
+    = "none";
+  ctrls2D.controls.style.width = "initial";
 
   Object.keys(users).forEach(removeUser);
   newUsers.forEach(addUser);
@@ -71,7 +119,7 @@ function receiveChat(evt) {
 
 function updateUser(state) {
   var key = state[0];
-  if(key !== userName){
+  if (key !== userName) {
     var avatar = users[key];
     if (avatar) {
       avatar.time = 0;
@@ -81,13 +129,13 @@ function updateUser(state) {
       name.rotation.set(0, Math.PI, 0);
       name.position.set(bounds.x / 2, env.avatarHeight + bounds.y, 0);
       avatar.add(name);
-      
+
       avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
 
       avatar.velocity.set(state[2], state[3], state[4]);
       avatar.velocity.sub(avatar.position);
       avatar.velocity.multiplyScalar(1 / NETWORK_DT);
-      
+
       avatar.head.dQuaternion.set(state[7], state[5], state[6], state[8]);
       avatar.head.dQuaternion.x -= avatar.head.quaternion.x;
       avatar.head.dQuaternion.y -= avatar.head.quaternion.y;
@@ -98,11 +146,11 @@ function updateUser(state) {
       avatar.head.dQuaternion.z /= NETWORK_DT;
       avatar.head.dQuaternion.w /= NETWORK_DT;
     }
-    else{
+    else {
       console.error("Unknown user", key);
     }
   }
-  else if(deviceIndex > 0){
+  else if (deviceIndex > 0) {
     env.player.heading = state[1];
     env.player.position.x = state[2];
     env.player.position.y = state[3] + env.avatarHeight;
@@ -130,19 +178,30 @@ function lostConnection() {
   deviceIndex = null;
 }
 
-function addDevice(index){
+function addDevice(index) {
   console.log("addDevice", arguments);
   //socket.emit("peer", index);
 }
 
-function setDeviceIndex(index){
+function setDeviceIndex(index) {
   deviceIndex = index;
 }
 
-function makeConnection() {
+function setLoginValues(formA, formB, formC) {
+  formB.userName.value = formC.userName.value = formA.userName.value;
+  formB.password.value = formC.password.value = formA.password.value;
+  if (formA.email) {
+    if (formB.email) {
+      formB.email.value = formA.email.value;
+    }
+    if (formC.email) {
+      formC.email.value = formA.email.value;
+    }
+  }
+
   if (!socket) {
     var protocol = location.protocol.replace("http", "ws");
-    socket = io.connect(protocol + "//" + location.hostname); 
+    socket = io.connect(protocol + "//" + location.hostname);
     socket.on("signupFailed", authFailed("signup"));
     socket.on("loginFailed", authFailed("login"));
     socket.on("userList", listUsers);
@@ -160,12 +219,11 @@ function makeConnection() {
 }
 
 function authenticate() {
-  var form = signup.visible ? signup : login,
-    verb = signup.visible ? "signup" : "login",
-    password = form.password.value,
-    email = form.email && form.email.value;
+  var verb = ctrls3D.signup.style.display === "none" ? "login" : "signup",
+    password = ctrls3D.signup.password.value,
+    email = ctrls3D.signup.email.value;
 
-  userName = form.userName.value.toLocaleUpperCase();
+  userName = ctrls3D.signup.userName.value.toLocaleUpperCase();
 
   socket.once("salt", function (salt) {
     var hash = new Hashes.SHA256().hex(salt + password)
@@ -178,15 +236,9 @@ function authenticate() {
   });
 }
 
-signup.addEventListener("signup", makeConnection, false);
-login.addEventListener("login", makeConnection, false);
-
-
-env.addEventListener("ready", function () {
-  login.position.set(0, env.avatarHeight, -0.5);
-  signup.position.set(0, env.avatarHeight, -0.5);
-  env.appendChild(login);
-  env.appendChild(signup);
+function environmentReady() {
+  env.appendChild(ctrls3D.login);
+  env.appendChild(ctrls3D.signup);
 
   env.scene.traverse(function (obj) {
     if (obj.name.indexOf("LightPanel") === 0) {
@@ -198,11 +250,9 @@ env.addEventListener("ready", function () {
     .then(function (avatarModel) {
       avatarFactory = avatarModel;
     });
-});
+}
 
-var lastNetworkUpdate = 0,
-  state = [0, 0, 0, 0, 0, 0, 0, 1];
-env.addEventListener("update", function (dt) {
+function update(dt) {
   if (socket && deviceIndex === 0) {
     lastNetworkUpdate += dt;
     if (lastNetworkUpdate >= NETWORK_DT) {
@@ -244,4 +294,4 @@ env.addEventListener("update", function (dt) {
     avatar.head.quaternion.z += avatar.head.dQuaternion.z * dt;
     avatar.head.quaternion.w += avatar.head.dQuaternion.w * dt;
   }
-});
+}

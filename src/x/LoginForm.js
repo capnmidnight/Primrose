@@ -7,7 +7,7 @@
   pliny.class({
     parent: "Primrose.X",
     name: "LoginForm",
-    description: "A basic login form.",
+    description: "A basic authentication form.",
     baseClass: "Primrose.Controls.Form"
   });
   class LoginForm extends Primrose.Controls.Form {

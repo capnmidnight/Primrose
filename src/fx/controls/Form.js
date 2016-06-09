@@ -18,6 +18,23 @@
       }));
       this._mesh = textured(quad(1, this.bounds.height / this.bounds.width), this);
       this._mesh.name = this.id + "-mesh";
+      Object.defineProperties(this.style, {
+        display: {
+          get: () => this._mesh.visible ? "" : "none",
+          set: (v) => {
+            if (v === "none") {
+              this.hide();
+            }
+            else {
+              this.show();
+            }
+          }
+        },
+        visible: {
+          get: () => this._mesh.visible ? "" : "hidden",
+          set: (v) => this.visible = v !== "hidden"
+        }
+      });
     }
 
     addToBrowserEnvironment(env, scene){

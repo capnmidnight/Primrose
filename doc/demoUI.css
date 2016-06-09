@@ -2,23 +2,31 @@
     box-sizing: border-box;
 }
 
-html, body, #frontBuffer, progress, #fullScreenButtonContainer {
+html, body, #frontBuffer, progress, #controls {
     position: absolute;
     border: 0;
     left: 0;
     top: 0;
 }
 
-html, body, #frontBuffer {
+html, body, #frontBuffer, #controls {
     padding: 0;
     margin: 0;
     height: 100%;
     width: 100%;
 }
 
-progress, #fullScreenButtonContainer {
+progress, #controls {
+}
+
+progress {
     margin: 1em;
     width: calc(100% - 2em);
+}
+
+#controls{
+    padding: 1em;
+    width: 100%;
 }
 
 #frontBuffer {
@@ -26,6 +34,10 @@ progress, #fullScreenButtonContainer {
     background-color: #eee;
     background-size: cover;
     cursor: wait;
+}
+
+body, input, button { 
+    font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif
 }
 
 body > h1 {
@@ -39,5 +51,52 @@ button {
     background-color: #343436;
     border: solid 3px transparent;
     border-radius: 5px;
-    font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif;
+}
+
+#loginForm{
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    background-color: rgba(0, 0, 0, 0.66);
+    max-width: 50%;
+    min-width: 360px;
+    margin: 0 auto;
+    padding: 3em;
+    transform: translate(-50%, 0);
+}
+
+#loginForm > div > input {
+    width: calc(100% - 10px);
+    padding: 10px;
+    border: none;
+    margin: 5px;
+    background-color: #4e4e4e;
+    color: white;
+}
+
+#loginRow {
+    display: flex;
+}
+
+#loginRow > button {
+    width: 50%;
+    margin: 5px;
+    background-color: transparent;
+}
+
+#switchMode {
+    color: white;
+    border-color: white;
+}
+
+#connect {
+    color: #30f3e1;
+    border-color: #30f3e1;
+    font-weight: bold;
+}
+
+#closeButton{
+    color: white;
+    float:right;
 }

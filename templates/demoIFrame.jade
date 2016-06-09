@@ -35,28 +35,33 @@ html
     <!-- end main.jade title block -->
 
     block head
-      style !{getFile("doc/demoUI" + cssExt)} #frontBuffer { background-image:url(screenshot.jpg); }
       if debug
+        link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
         for file in bootstrapFiles
           script(type="text/javascript", src=fileRoot + file)
       else
+        style !{getFile("doc/demoUI" + cssExt)}
         script(type="text/javascript").
           !{getFile("node_modules/webvr-bootstrapper/WebVRBootstrapper" + jsExt)}
+      style #frontBuffer { background-image:url(screenshot.jpg); }
       script(type="text/javascript").
         WebVRBootstrapper(!{ manifest }, function (startDownload) {
-          var b = document.querySelector("progress");
+          var p = document.querySelector("progress"),
+            c = document.getElementById("fullScreenButtonContainer");
           function addButton(display, i) {
             var btn = document.createElement("button");
             btn.type = "button";
             btn.appendChild(document.createTextNode(display.displayName));
-            btn.addEventListener("click", env.goFullScreen.bind(env, i));
-            document.getElementById("fullScreenButtonContainer").appendChild(btn);
+            btn.addEventListener("click", function(i){
+              env.goFullScreen(i);
+            }.bind(null, i), false);
+            c.appendChild(btn);
           }
           startDownload(function (n, m) {
-            b.max = m;
-            b.value = n;
+            p.max = m;
+            p.value = n;
           }, function (displays) {
-            b.style.display = "none";
+            p.style.display = "none";
             displays.forEach(addButton);
           });
         });
@@ -65,5 +70,17 @@ html
     block main
       canvas#frontBuffer
       progress
-      #fullScreenButtonContainer
+      #controls
+        #fullScreenButtonContainer
+        #loginForm(style="display:none")
+          a#closeButton close
+          #emailRow(style="display:none")
+            input#email(type="email", placeholder="Email (name@server.domain)")
+          #userNameRow
+            input#userName(type="text", placeholder="Username")
+          #passwordRow
+            input#password(type="password", placeholder="Password")
+          #loginRow
+            button#switchMode.signupButton Sign up
+            button#connect.loginButton Log in
     <!-- end main.jade main block -->
