@@ -284,10 +284,8 @@ the torch on to Safari in all of its many useless incarnations."
     0.25,
     0.333333,
     0.5,
-    1];
-  if (!isMobile) {
-    Primrose.RESOLUTION_SCALES.push(2);
-  }
+    1
+  ];
 
   pliny.enumeration({
     parent: "Primrose",
