@@ -913,13 +913,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var keyDown = (evt) => {
-        if (!lockedToEditor() && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
-          if (evt.keyCode === Primrose.Keys.E) {
-            blankEye = true;
-            evt.preventDefault();
-          }
-        }
-        else if (this.currentControl) {
+        if (lockedToEditor()) {
           var elem = this.currentControl.focusedElement;
           if (elem) {
             if (elem.execCommand) {
