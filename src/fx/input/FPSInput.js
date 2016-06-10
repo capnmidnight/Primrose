@@ -23,6 +23,7 @@ Primrose.Input.FPSInput = (function () {
       };
 
       this.managers = [
+        new Primrose.Input.Media(),
         new Primrose.Input.VR(),
         // keyboard should always run on the window
         new Primrose.Input.Keyboard(window, {
@@ -114,6 +115,21 @@ Primrose.Input.FPSInput = (function () {
         })];
 
       this.managers.forEach((mgr) => this[mgr.name] = mgr);
+    }
+    
+    init() {
+
+      pliny.method({
+        parent: "Primrose.Input.FPSInput",
+        name: "init",
+        returns: "Promise",
+        description: "Initializes the VR and Media systems, retrieving the list of devices."
+      });
+
+      return Promise.all([
+        this.VR.init(),
+        this.Media.init()
+      ]);
     }
 
     zero() {
