@@ -19,6 +19,7 @@ var idSpec = location.search.match(/id=(\w+)/),
     useFog: true,
     fullScreenIcon: "../doc/models/monitor.obj",
     VRIcon: "../doc/models/cardboard.obj",
+    audioIcon: "../doc/models/microphone.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
   users = {},

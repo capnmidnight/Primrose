@@ -565,14 +565,13 @@ Primrose.BrowserEnvironment = (function () {
         modelFiles = {
           monitor: this.options.fullScreenIcon,
           cardboard: this.options.VRIcon,
+          microphone: this.options.audioIcon,
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
         icons = null,
-        iconModels = {
-          "Standard Monitor": null,
-        },
+        iconModels = {},
         resolutionScale = 1,
         factories = {
           button: Primrose.Controls.Button2D,
@@ -690,6 +689,10 @@ Primrose.BrowserEnvironment = (function () {
           }
           else {
             iconModels["Google Cardboard"] = brick(0xffffff, 0.1, 0.1, 0.1);
+          }
+
+          if (models.microphone) {
+            iconModels["audioinput"] = new Primrose.ModelLoader(models.microphone);
           }
 
           iconModels["Test Icon"] =

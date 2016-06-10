@@ -51,8 +51,7 @@ Primrose.Input.Media = (function () {
           getUserMediaFallthrough(opt)
             .then(console.log.bind(console, fmt("Connected to camera at mode $1.", mode)))
             .catch((err) => {
-              console.error(fmt("Failed to connect at mode $1. Reason: $2", mode,
-                err));
+              console.error(fmt("Failed to connect at mode $1. Reason: $2", mode, err));
               tryModesFirstThen(source, err, i + 1);
             });
         }
