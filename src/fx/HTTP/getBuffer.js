@@ -26,6 +26,4 @@
       console.error.bind(console, \"error loading\")\n"}
   ]
 });
-Primrose.HTTP.getBuffer = function (url, options) {
-  return Primrose.HTTP.get("arraybuffer", url, options);
-};
+Primrose.HTTP.getBuffer = (url, options) => Primrose.HTTP.get("arraybuffer", url, options);

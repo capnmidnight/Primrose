@@ -10,6 +10,4 @@
     { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." },
   ]
 });
-Primrose.HTTP.post = function (type, url, options) {
-  return Primrose.HTTP.XHR("POST", type, url, options);
-};
+Primrose.HTTP.post = (type, url, options) => Primrose.HTTP.XHR("POST", type, url, options);

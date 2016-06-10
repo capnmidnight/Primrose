@@ -24,6 +24,4 @@
 > Object {field1: 1, field2: \"Field2\"}"}
   ]
 });
-Primrose.HTTP.getObject = function (url, options) {
-  return Primrose.HTTP.get("json", url, options);
-};
+Primrose.HTTP.getObject = (url, options) => Primrose.HTTP.get("json", url, options);

@@ -23,6 +23,4 @@
 > \"Object {field1: 1, field2: \\\"Field2\\\"}\""}
   ]
 });
-Primrose.HTTP.getText = function (url, options) {
-  return Primrose.HTTP.get("text", url, options);
-};
+Primrose.HTTP.getText = (url, options) => Primrose.HTTP.get("text", url, options);

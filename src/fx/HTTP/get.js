@@ -24,6 +24,4 @@
 > Object {field1: 1, field2: \"Field2\"}"}
   ]
 });
-Primrose.HTTP.get = function (type, url, options) {
-  return Primrose.HTTP.XHR("GET", type || "text", url, options);
-};
+Primrose.HTTP.get = (type, url, options) => Primrose.HTTP.XHR("GET", type || "text", url, options);

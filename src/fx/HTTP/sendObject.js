@@ -9,6 +9,4 @@
     { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }
   ]
 });
-Primrose.HTTP.sendObject = function (url, options) {
-  return Primrose.HTTP.post("json", url, options);
-};
+Primrose.HTTP.sendObject = (url, options) => Primrose.HTTP.post("json", url, options);
