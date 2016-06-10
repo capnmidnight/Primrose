@@ -632,7 +632,7 @@ Primrose.BrowserEnvironment = (function () {
         this.registerPickableObject(icon);
       };
 
-      var makeIcon = (display, i) => {
+      var makeDisplayIcon = (display, i) => {
         var isVR = !(display instanceof StandardMonitorPolyfill),
           icon = (iconModels[display.displayName] || iconModels["Google Cardboard"]).clone(),
           geom = icon.children[0] && icon.children[0].geometry || icon.geometry,
@@ -1160,7 +1160,7 @@ Primrose.BrowserEnvironment = (function () {
         allReady
           .then(() => {
             icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
-              .map(makeIcon);
+              .map(makeDisplayIcon);
             icons.forEach(putIconInScene);
             this.audio.start();
             lt = performance.now() * MILLISECONDS_TO_SECONDS;
