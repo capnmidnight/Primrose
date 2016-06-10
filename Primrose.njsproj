@@ -83,6 +83,7 @@
     <Content Include="templates\main.jade" />
     <Content Include="templates\withFramework.jade" />
     <Compile Include="src\fx\Random\color.js" />
+    <Compile Include="src\fx\text\IconManager.js" />
     <Compile Include="test\Basic.js" />
     <Compile Include="test\Grammar.js" />
     <Compile Include="test\Point.js" />
