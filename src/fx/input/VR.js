@@ -18,36 +18,15 @@ Primrose.Input.VR = (function () {
         });
       }
 
-      var listeners = {
-        vrdeviceconnected: [],
-        vrdevicelost: []
-      };
-
-      this.addEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          listeners[event].push(handler);
-        }
-        if (event === "vrdeviceconnected") {
-          Object.keys(this.displays).forEach(handler);
-        }
-      };
-
-      this.displays = [];
+      this.displays = null;
       this._transforms = [];
       this.transforms = null;
       this.currentDisplayIndex = -1;
       this.currentPose = null;
 
-      function onConnected(id) {
-        for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
-          listeners.vrdeviceconnected[i](id);
-        }
-      }
-
       function enumerateVRDisplays(displays) {
         console.log("Displays found:", displays.length);
         this.displays = displays;
-        this.displays.forEach(onConnected);
         return this.displays;
       }
 
