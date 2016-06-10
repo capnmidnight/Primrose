@@ -227,7 +227,7 @@
     <Compile Include="src\fx\HTTP\post.js" />
     <Compile Include="src\fx\HTTP\sendObject.js" />
     <Compile Include="src\fx\HTTP\XHR.js" />
-    <Compile Include="src\fx\input\Camera.js" />
+    <Compile Include="src\fx\input\Media.js" />
     <Compile Include="src\fx\input\FPSInput.js" />
     <Compile Include="src\fx\input\Gamepad.js" />
     <Compile Include="src\fx\input\Keyboard.js" />
