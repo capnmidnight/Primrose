@@ -115,20 +115,9 @@ Primrose.Input.FPSInput = (function () {
         })];
 
       this.managers.forEach((mgr) => this[mgr.name] = mgr);
-    }
-    
-    init() {
-
-      pliny.method({
-        parent: "Primrose.Input.FPSInput",
-        name: "init",
-        returns: "Promise",
-        description: "Initializes the VR and Media systems, retrieving the list of devices."
-      });
-
-      return Promise.all([
-        this.VR.init(),
-        this.Media.init()
+      this.ready = Promise.all([
+        this.VR.ready,
+        this.Media.ready
       ]);
     }
 

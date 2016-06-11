@@ -15,22 +15,18 @@ Primrose.Input.Media = (function () {
     name: "Media",
     description: "Get access to audio and video sources connected to the computer."
   });
-  class MediaInput {
+  class Media {
     constructor(options) {
-
-      this.options = patch(options, MediaInput.DEFAULTS);
+      this.options = patch(options, Media.DEFAULTS);
+      this.name = "Media";
       this.devices = null;
 
-      function enumerateMediaDevices(devices) {
+      console.info("Checking for media sources...");
+      this.ready = navigator.mediaDevices.enumerateDevices().then((devices) => {
         console.log("Media devices found:", devices.length);
         this.devices = devices;
         return this.devices;
-      }
-
-      this.init = () => {
-        console.info("Checking for media sources...");
-        return navigator.mediaDevices.enumerateDevices().then(enumerateMediaDevices.bind(this));
-      };
+      });
 
       var getUserMediaFallthrough = (vidOpt) => new Promise((resolve, reject) => {
         navigator.getUserMedia({ video: vidOpt }, resolve, reject);
@@ -73,7 +69,7 @@ Primrose.Input.Media = (function () {
     }
   }
 
-  MediaInput.DEFAULTS = {
+  Media.DEFAULTS = {
     videoModes: [
       { w: 320, h: 240 },
       { w: 640, h: 480 },
@@ -81,5 +77,5 @@ Primrose.Input.Media = (function () {
     ]
   };
 
-  return MediaInput;
+  return Media;
 })();

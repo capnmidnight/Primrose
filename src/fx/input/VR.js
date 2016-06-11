@@ -24,16 +24,12 @@ Primrose.Input.VR = (function () {
       this.currentDisplayIndex = -1;
       this.currentPose = null;
 
-      function enumerateVRDisplays(displays) {
+      console.info("Checking for displays...");
+      this.ready = navigator.getVRDisplays().then((displays) => {
         console.log("Displays found:", displays.length);
         this.displays = displays;
         return this.displays;
-      }
-
-      this.init = function () {
-        console.info("Checking for displays...");
-        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this));
-      };
+      });
     }
 
     requestPresent(opts) {
