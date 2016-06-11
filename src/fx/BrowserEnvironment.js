@@ -25,7 +25,7 @@ Primrose.BrowserEnvironment = (function () {
   class BrowserEnvironment {
     constructor(name, options) {
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
-      
+
       if (this.options.foregroundColor === undefined || this.options.foregroundColor === null) {
         this.options.foregroundColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
       }
@@ -563,15 +563,11 @@ Primrose.BrowserEnvironment = (function () {
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         modelFiles = {
-          monitor: this.options.fullScreenIcon,
-          cardboard: this.options.VRIcon,
-          microphone: this.options.audioIcon,
           scene: this.options.sceneModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
-        icons = null,
-        iconModels = {},
+        iconManager = new Primrose.IconManager(this.options),
         resolutionScale = 1,
         factories = {
           button: Primrose.Controls.Button2D,
@@ -631,37 +627,6 @@ Primrose.BrowserEnvironment = (function () {
         this.registerPickableObject(icon);
       };
 
-      var makeDisplayIcon = (display, i) => {
-        var isVR = !(display instanceof StandardMonitorPolyfill),
-          icon = (iconModels[display.displayName] || iconModels["Google Cardboard"]).clone(),
-          geom = icon.children[0] && icon.children[0].geometry || icon.geometry,
-          titleText = textured(text3D(0.05, display.displayName), this.options.foregroundColor),
-          funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), this.options.foregroundColor);
-
-        icon.name = (display.displayName + "Icon").replace(/ /g, "");
-        icon.addEventListener("click", this.goFullScreen.bind(this, i), false);
-
-        geom.computeBoundingBox();
-
-        put(funcText)
-          .on(icon)
-          .rot(0, 90 * Math.PI / 180, 0)
-          .at(0, geom.boundingBox.max.y + 0.01, funcText.geometry.boundingSphere.radius);
-
-
-        put(titleText)
-          .on(icon)
-          .rot(0, 90 * Math.PI / 180, 0)
-          .at(0, geom.boundingBox.min.y - titleText.geometry.boundingBox.max.y - 0.01, titleText.geometry.boundingSphere.radius);
-
-        put(icon)
-          .on(this.scene)
-          .rot(0, 270 * Math.PI / 180, 0);
-
-        this.registerPickableObject(icon);
-        return icon;
-      };
-
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
           window.text3D = function (font, size, text) {
@@ -679,26 +644,6 @@ Primrose.BrowserEnvironment = (function () {
           if (models.scene) {
             buildScene(models.scene);
           }
-
-          if (models.monitor) {
-            iconModels["Standard Monitor"] = new Primrose.ModelLoader(models.monitor);
-          }
-
-          if (models.cardboard) {
-            iconModels["Google Cardboard"] = new Primrose.ModelLoader(models.cardboard);
-          }
-          else {
-            iconModels["Google Cardboard"] = brick(0xffffff, 0.1, 0.1, 0.1);
-          }
-
-          if (models.microphone) {
-            iconModels["audioinput"] = new Primrose.ModelLoader(models.microphone);
-          }
-
-          iconModels["Test Icon"] =
-            iconModels["Oculus Rift DK2, Oculus VR"] =
-            iconModels["Device Motion API"] =
-            iconModels["Google, Inc. Cardboard v1"] = iconModels["Google Cardboard"];
 
           if (models.button) {
             this.buttonFactory = new Primrose.ButtonFactory(
@@ -829,7 +774,7 @@ Primrose.BrowserEnvironment = (function () {
           txtRepeatS: dim * 5,
           txtRepeatT: dim * 5
         });
-        if(this.options.sceneModel !== undefined){
+        if (this.options.sceneModel !== undefined) {
           this.ground.position.y = -0.02;
         }
         this.ground.rotation.x = -Math.PI / 2;
@@ -974,9 +919,11 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
-        icons.forEach((icon) => {
-          icon.visible = !isFullScreenMode();
-          icon.disabled = isFullScreenMode();
+        iconManager.icons.forEach((icon) => {
+          if (icon.displayName) {
+            icon.visible = !isFullScreenMode();
+            icon.disabled = isFullScreenMode();
+          }
         });
       };
 
@@ -1086,10 +1033,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("lockpointer", setPointerLock, false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
-        return this.input.VR.init().then(() => {
-          this.input.VR.displays[0].DOMElement = this.renderer.domElement;
-          this.input.VR.connect(0);
-        });
+        return this.input.ready;
       });
 
 
@@ -1151,20 +1095,26 @@ Primrose.BrowserEnvironment = (function () {
 
       var allReady = Promise.all([
         modelsReady,
+        iconManager.ready,
         audioReady,
         documentReady
-      ])
-        .then(() => {
-          this.renderer.domElement.style.cursor = "default";
-          fire("ready");
-        });
+      ]).then(() => {
+        this.renderer.domElement.style.cursor = "default";
+        this.input.VR.displays[0].DOMElement = this.renderer.domElement;
+        this.input.VR.connect(0);
+        iconManager.append(this.input.VR && this.input.VR.displays ||
+          [{ displayName: "Test Icon" }])
+          .forEach((icon, i) => icon.addEventListener("click", this.goFullScreen.bind(this, i), false));
+        //iconManager.append(this.input.Media && this.input.Media.devices ||
+        //  [{ kind: "audioinput", deviceId: "4AEB1201-50CD-4A57-8F0D-420504A8822F", groupId: "{42E0225C-F020-4914-9933-604C44A2D86F" }])
+        //  .forEach((icon, i) => { });
+        iconManager.icons.forEach(putIconInScene);
+        fire("ready");
+      });
 
       this.start = () => {
         allReady
           .then(() => {
-            icons = (this.input.VR && this.input.VR.displays || [{ displayName: "Test Icon" }])
-              .map(makeDisplayIcon);
-            icons.forEach(putIconInScene);
             this.audio.start();
             lt = performance.now() * MILLISECONDS_TO_SECONDS;
             RAF(animate);
