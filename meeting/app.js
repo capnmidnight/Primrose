@@ -84,6 +84,18 @@ function listUsers(newUsers) {
   newUsers.forEach(addUser);
 }
 
+function logAudio(name, stream) {
+  if (stream) {
+    console.log(name, stream);
+    const A = (id) => stream.addEventListener(id, console.log.bind(console, name + "." + id));
+    A("active");
+    A("inactive");
+    A("addtrack");
+    A("removetrack");
+    A("ended");
+  }
+}
+
 function addUser(state) {
   var key = state[0],
     avatar = avatarFactory.clone();
@@ -104,11 +116,17 @@ function addUser(state) {
   users[key] = avatar;
   updateUser(state);
   console.log("Connecting from %s to %s", userName, key);
-  avatar.peer = new Primrose.WebRTCSocket(socket, userName, key);
-  avatar.peer.ready
-    .then((audio) => env.audio.create3DMediaStream(0, 0, 0, audio))
-    .then((stream) => avatar.audio = stream)
-    .then(console.log.bind(console, "audio stream"));
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .catch(console.warn.bind(console, "Can't get audio"))
+    .then((outAudio) => {
+      logAudio("out", outAudio);
+      avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, env.audio.context, outAudio);
+      avatar.peer.ready
+        .then((inAudio) => {
+          logAudio("in", inAudio);
+          avatar.audio = env.audio.create3DMediaStream(0, 0, 0, inAudio);
+        });
+    });
 }
 
 function receiveChat(evt) {

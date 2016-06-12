@@ -137,6 +137,7 @@ Primrose.Output.Audio3D = (function () {
     }
 
     create3DMediaStream(x, y, z, stream) {
+      console.log(stream);
       var snd = {
         source: this.context.createMediaStreamSource(stream),
         volume: this.context.createGain(),

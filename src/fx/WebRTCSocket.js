@@ -24,7 +24,7 @@ Primrose.WebRTCSocket = (function () {
     description: "[under construction]"
   });
   class WebRTCSocket {
-    constructor(proxyServer, userName, toUserName) {
+    constructor(proxyServer, userName, toUserName, audioCtx, outAudio) {
       this.rtc = null;
 
       const descriptionCreated = (description) => this.rtc.setLocalDescription(description, proxyServer.emit.bind(proxyServer, description.type, description)),
@@ -49,40 +49,40 @@ Primrose.WebRTCSocket = (function () {
 
       window.addEventListener("unload", this.close);
       this.ready = new Promise((resolve, reject) => {
-        proxyServer.on("user", (evt) => navigator.mediaDevices.getUserMedia({ audio: true })
-          .catch(console.warn.bind(console, "Can't get audio"))
-          .then((audio) => {
-            this.rtc = new RTCPeerConnection({
-              iceServers: [
-                { url: "stun:stun.l.google.com:19302" },
-                { url: "stun:stun1.l.google.com:19302" },
-                { url: "stun:stun2.l.google.com:19302" },
-                { url: "stun:stun3.l.google.com:19302" },
-                { url: "stun:stun4.l.google.com:19302" }
-              ]
-            });
+        proxyServer.on("user", (evt) => {
+          console.log("user", evt);
+          this.rtc = new RTCPeerConnection({
+            iceServers: [
+              { url: "stun:stun.l.google.com:19302" },
+              { url: "stun:stun1.l.google.com:19302" },
+              { url: "stun:stun2.l.google.com:19302" },
+              { url: "stun:stun3.l.google.com:19302" },
+              { url: "stun:stun4.l.google.com:19302" }
+            ]
+          });
 
-            proxyServer.on("offer", (offer) => descriptionReceived(offer, () => this.rtc.createAnswer(descriptionCreated, reject)));
-            proxyServer.on("ice", (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)));
-            proxyServer.on("answer", (answer) => descriptionReceived(answer, () => { }));
+          proxyServer.on("offer", (offer) => descriptionReceived(offer, () => this.rtc.createAnswer(descriptionCreated, reject)));
+          proxyServer.on("ice", (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)));
+          proxyServer.on("answer", (answer) => descriptionReceived(answer, () => { }));
 
-            this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, reject);
+          this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, reject);
 
-            this.rtc.onicecandidate = (evt) => {
-              if (evt.candidate) {
-                proxyServer.emit("ice", evt.candidate);
-              }
-            };
-
-            this.rtc.onaddstream = (evt) => resolve(evt.stream);
-
-            if (audio) {
-              console.log("adding audio", audio);
-              this.rtc.addStream(audio);
+          this.rtc.onicecandidate = (evt) => {
+            if (evt.candidate) {
+              proxyServer.emit("ice", evt.candidate);
             }
-          }));
+          };
 
-        proxyServer.emit("peer", toUserName);
+          this.rtc.onaddstream = (evt) => resolve(evt.stream);
+          console.log("Have input audio?", outAudio);
+          if (outAudio) {
+            console.log("adding audio", outAudio);
+            var remote = audioCtx.createMediaStreamDestination(outAudio);
+            this.rtc.addStream(remote.stream);
+          }
+        });
+
+        setTimeout(proxyServer.emit.bind(proxyServer, "peer", toUserName), 250);
       });
     }
   }
