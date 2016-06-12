@@ -172,7 +172,6 @@ function lostConnection() {
 
 function addDevice(index) {
   console.log("addDevice", arguments);
-  //socket.emit("peer", index);
 }
 
 function setDeviceIndex(index) {
