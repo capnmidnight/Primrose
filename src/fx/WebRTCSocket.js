@@ -1,236 +1,91 @@
-Primrose.WebRTCSocket = ( function () {
+Primrose.WebRTCSocket = (function () {
 
   /* polyfills */
-  Window.prototype.RTCPeerConnection =
-      Window.prototype.RTCPeerConnection ||
-      Window.prototype.webkitRTCPeerConnection ||
-      Window.prototype.mozRTCPeerConnection ||
-      function () {
-      };
+  window.RTCPeerConnection =
+    window.RTCPeerConnection ||
+    window.webkitRTCPeerConnection ||
+    window.mozRTCPeerConnection;
 
-  Window.prototype.RTCIceCandidate =
-      Window.prototype.RTCIceCandidate ||
-      Window.prototype.mozRTCIceCandidate ||
-      function () {
-      };
+  window.RTCIceCandidate =
+    window.RTCIceCandidate ||
+    window.mozRTCIceCandidate;
 
-  Window.prototype.RTCSessionDescription =
-      Window.prototype.RTCSessionDescription ||
-      Window.prototype.mozRTCSessionDescription ||
-      function () {
-      };
+  window.RTCSessionDescription =
+    window.RTCSessionDescription ||
+    window.mozRTCSessionDescription;
+
+  if (!navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia = (constraint) => new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject));
+  }
 
   pliny.class({
     parent: "Primrose",
     name: "WebRTCSocket",
     description: "[under construction]"
-  } );
-  function WebRTCSocket ( proxyServer ) {
-    var socket,
-        peers = [ ],
-        channels = [ ],
-        listeners = {},
-        myIndex = null;
+  });
+  class WebRTCSocket {
+    constructor(proxyServer, userName, toUserName) {
+      this.rtc = null;
 
-    function descriptionCreated ( myIndex, theirIndex, description ) {
-      description.fromIndex = myIndex;
-      description.toIndex = theirIndex;
-      peers[theirIndex].setLocalDescription( description, function () {
-        socket.emit( description.type, description );
-      } );
-    }
+      const descriptionCreated = (description) => this.rtc.setLocalDescription(description, proxyServer.emit.bind(proxyServer, description.type, description)),
+        descriptionReceived = (description, thunk) => this.rtc.setRemoteDescription(new RTCSessionDescription(description), thunk);
 
-    function descriptionReceived ( theirIndex, description, thunk ) {
-      if ( description.fromIndex === theirIndex ) {
-        var remote = new RTCSessionDescription( description );
-        peers[theirIndex].setRemoteDescription( remote, thunk );
+      if (typeof (proxyServer) === "string") {
+        proxyServer = io.connect(proxyServer, {
+          "reconnect": true,
+          "reconnection delay": 1000,
+          "max reconnection attempts": 60
+        });
       }
-    }
-
-    if ( typeof ( proxyServer ) === "string" ) {
-      socket = io.connect( proxyServer, {
-        "reconnect": true,
-        "reconnection delay": 1000,
-        "max reconnection attempts": 60
-      } );
-    }
-    else if ( proxyServer && proxyServer.on && proxyServer.emit ) {
-      socket = proxyServer;
-    }
-    else {
-      console.error( "proxy error", socket );
-      throw new Error( "need a socket" );
-    }
-
-    function setChannelEvents ( index ) {
-
-      channels[index].addEventListener( "open", function () {
-        if ( listeners.open ) {
-          for ( var i = 0; i < listeners.open.length; ++i ) {
-            var l = listeners.open[i];
-            if ( l ) {
-              l.call( this );
-            }
-          }
-        }
-      }, false );
-
-      channels[index].addEventListener( "message", function ( evt ) {
-        var args = JSON.parse( evt.data ),
-            key = args.shift();
-        if ( listeners[key] ) {
-          for ( var i = 0; i < listeners[key].length; ++i ) {
-            var l = listeners[key][i];
-            if ( l ) {
-              l.apply( this, args );
-            }
-          }
-        }
-      }, false );
-
-      function connectionLost () {
-        channels[index] = null;
-        peers[index] = null;
-        var closed = ( channels.filter( function ( c ) {
-          return c;
-        } ).length === 0 );
-        if ( closed && listeners.close ) {
-          for ( var i = 0; i < listeners.close.length; ++i ) {
-            var l = listeners.close[i];
-            if ( l ) {
-              l.call( this );
-            }
-          }
-        }
+      else if (proxyServer && proxyServer.on && proxyServer.emit) {
+        proxyServer = proxyServer;
+      }
+      else {
+        console.error("proxy error", proxyServer);
+        throw new Error("need a socket");
       }
 
-      channels[index].addEventListener( "error", connectionLost, false );
-      channels[index].addEventListener( "close", connectionLost, false );
-    }
+      this.close = () => this.rtc.close();
 
-    this.on = function ( evt, thunk ) {
-      if ( !listeners[evt] ) {
-        listeners[evt] = [ ];
-      }
-      listeners[evt].push( thunk );
-    };
+      window.addEventListener("unload", this.close);
+      this.ready = new Promise((resolve, reject) => {
+        proxyServer.on("user", (evt) => navigator.mediaDevices.getUserMedia({ audio: true })
+          .catch(console.warn.bind(console, "Can't get audio"))
+          .then((audio) => {
+            this.rtc = new RTCPeerConnection({
+              iceServers: [
+                { url: "stun:stun.l.google.com:19302" },
+                { url: "stun:stun1.l.google.com:19302" },
+                { url: "stun:stun2.l.google.com:19302" },
+                { url: "stun:stun3.l.google.com:19302" },
+                { url: "stun:stun4.l.google.com:19302" }
+              ]
+            });
 
-    this.emit = function ( args ) {
-      var data = JSON.stringify( args );
-      for ( var i = 0; i < channels.length; ++i ) {
-        var channel = channels[i];
-        if ( channel && channel.readyState === "open" ) {
-          channel.send( data );
-        }
-      }
-    };
+            proxyServer.on("offer", (offer) => descriptionReceived(offer, () => this.rtc.createAnswer(descriptionCreated, reject)));
+            proxyServer.on("ice", (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)));
+            proxyServer.on("answer", (answer) => descriptionReceived(answer, () => { }));
 
-    this.close = function () {
-      channels.forEach( function ( channel ) {
-        if ( channel && channel.readyState === "open" ) {
-          channel.close();
-        }
-      } );
-      peers.forEach( function ( peer ) {
-        if ( peer ) {
-          peer.close();
-        }
-      } );
-    };
+            this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, reject);
 
-    window.addEventListener( "unload", this.close.bind( this ) );
-
-    this.connect = function ( connectionKey ) {
-      socket.emit( "handshake", "peer" );
-
-      socket.on( "handshakeComplete", function ( name ) {
-        if ( name === "peer" ) {
-          socket.emit( "joinRequest", connectionKey );
-        }
-      } );
-    };
-
-    socket.on( "user", function ( index, theirIndex ) {
-      try {
-        if ( myIndex === null ) {
-          myIndex = index;
-        }
-        if ( !peers[theirIndex] ) {
-          var peer = new RTCPeerConnection( {
-            iceServers: [
-              "stun.l.google.com:19302",
-              "stun1.l.google.com:19302",
-              "stun2.l.google.com:19302",
-              "stun3.l.google.com:19302",
-              "stun4.l.google.com:19302"
-            ].map( function ( o ) {
-              return {url: "stun:" + o};
-            } )
-          } );
-
-          peers[theirIndex] = peer;
-
-          peer.addEventListener( "icecandidate", function ( evt ) {
-            if ( evt.candidate ) {
-              evt.candidate.fromIndex = myIndex;
-              evt.candidate.toIndex = theirIndex;
-              socket.emit( "ice", evt.candidate );
-            }
-          }, false );
-
-          socket.on( "ice", function ( ice ) {
-            if ( ice.fromIndex === theirIndex ) {
-              peers[theirIndex].addIceCandidate( new RTCIceCandidate( ice ) );
-            }
-          } );
-
-          if ( myIndex < theirIndex ) {
-            peer.addEventListener( "negotiationneeded", function ( evt ) {
-              peer.createOffer(
-                  descriptionCreated.bind( this, myIndex, theirIndex ),
-                  console.error.bind( console, "createOffer error" ) );
-            } );
-
-            var channel = peer.createDataChannel( "data-channel-" + myIndex +
-                "-to-" + theirIndex, {
-                  id: myIndex,
-                  ordered: false,
-                  maxRetransmits: 0
-                } );
-            channels[theirIndex] = channel;
-            setChannelEvents( theirIndex );
-
-            socket.on( "answer", function ( answer ) {
-              if ( answer.fromIndex === theirIndex ) {
-                descriptionReceived( theirIndex, answer );
+            this.rtc.onicecandidate = (evt) => {
+              if (evt.candidate) {
+                proxyServer.emit("ice", evt.candidate);
               }
-            } );
-          }
-          else {
-            peer.addEventListener( "datachannel", function ( evt ) {
-              if ( evt.channel.id === theirIndex ) {
-                channels[evt.channel.id] = evt.channel;
-                setChannelEvents( theirIndex );
-              }
-            }, false );
+            };
 
-            socket.on( "offer", function ( offer ) {
-              if ( offer.fromIndex === theirIndex ) {
-                descriptionReceived( theirIndex, offer, function () {
-                  peers[theirIndex].createAnswer(
-                      descriptionCreated,
-                      console.error.bind( console, "createAnswer error" ) );
-                } );
-              }
-            } );
-          }
-        }
-      }
-      catch ( exp ) {
-        console.error( exp );
-      }
-    } );
+            this.rtc.onaddstream = (evt) => resolve(evt.stream);
+
+            if (audio) {
+              console.log("adding audio", audio);
+              this.rtc.addStream(audio);
+            }
+          }));
+
+        proxyServer.emit("peer", toUserName);
+      });
+    }
   }
   return WebRTCSocket;
-} )();
+})();
 

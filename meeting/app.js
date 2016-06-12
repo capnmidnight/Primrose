@@ -103,6 +103,12 @@ function addUser(state) {
   env.scene.add(avatar);
   users[key] = avatar;
   updateUser(state);
+  console.log("Connecting from %s to %s", userName, key);
+  avatar.peer = new Primrose.WebRTCSocket(socket, userName, key);
+  avatar.peer.ready
+    .then((audio) => env.audio.create3DMediaStream(0, 0, 0, audio))
+    .then((stream) => avatar.audio = stream)
+    .then(console.log.bind(console, "audio stream"));
 }
 
 function receiveChat(evt) {
