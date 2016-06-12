@@ -62,7 +62,7 @@ function showSignup(state) {
   ctrls2D.switchMode.innerHTML = state ? "Log in" : "Sign up";
   ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
   ctrls2D.connect.innerHTML = state ? "Sign up" : "Log in";
-  ctrls2D.connect.className = state ? "signupButton" : "loginButton" ;
+  ctrls2D.connect.className = state ? "signupButton" : "loginButton";
 
   ctrls3D.signup.style.display = state ? "" : "none";
   ctrls3D.login.style.display = state ? "none" : "";
