@@ -1,71 +1,52 @@
 "use strict";
 
-const APP_KEY = "Primrose:Meeting:test",
-  USER_PATTERN = /Primrose:Meeting:\w+:(\w+)/;
-
-function logAudio(name, stream) {
-  console.log(name, stream);
-  if (stream) {
-    for (var key in stream) {
-      if (key.indexOf("on") === 0) {
-        stream.addEventListener(key.substring(2), console.log.bind(console, name + "." + key));
-      }
-    }
-  }
-}
-
-var idSpec = location.search.match(/id=(\w+)/),
+var MEETING_ID_PATTERN = /\bid=(\w+)/,
+  USER_NAME_PATTERN = /Primrose:Meeting:\w+:(\w+)/,
+  idSpec = location.search.match(MEETING_ID_PATTERN),
   meetingID = idSpec && idSpec[1] || "public",
+  appKey = "Primrose:Meeting:" + meetingID,
   ctrls2D = Primrose.DOM.findEverything(),
   audio = new Primrose.Output.Audio3D(),
   micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(readyAudioOutputDevice)
     .catch(console.warn.bind(console, "Can't get audio")),
-  userNameMatch = document.cookie.match(USER_PATTERN),
+  userNameSpec = document.cookie.match(USER_NAME_PATTERN),
+  userName = userNameSpec && userNameSpec[1] || "",
   users = {},
-  socket,
-  userName;
+  socket;
 
-if (userNameMatch && userNameMatch.length === 2) {
-  userName = userNameMatch[1];
-}
+ctrls2D.switchMode.addEventListener("click", showSignup);
+ctrls2D.connect.addEventListener("click", authenticate);
+ctrls2D.loginForm.style.display = "";
+ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
+ctrls2D.userName.value = userName;
+ctrls2D.password.value = "ppyptky7";
+
+showSignup(userName.length === 0);
 
 function readyAudioOutputDevice(device) {
-  logAudio("out audio", device);
   return device;
 }
 
 function readyAudioOutputStream(device){
   var node = audio.context.createMediaStreamSource(device);
-  logAudio("out audio node", node);
-
   var gain = audio.context.createGain();
-  logAudio("out audio gain", gain);
-  node.connect(gain);
-
   var stream = audio.context.createMediaStreamDestination();
-  logAudio("out audio stream", stream);
+
+  node.connect(gain);
   gain.connect(stream);
 
   return stream.stream;
 }
 
 function readyAudioInputStream(inAudio) {
-  logAudio("in audio", inAudio);
-
   var stream = audio.context.createMediaStreamSource(inAudio);
-  logAudio("in audio stream", stream);
-
   var gain = audio.context.createGain();
-  logAudio("in audio gain", gain);
   stream.connect(gain);
-
   gain.connect(audio.mainVolume);
 }
 
 function readyAudioInputElement(inAudio) {
-  logAudio("in audio", inAudio);
-
   var element = new Audio();
   if (isFirefox) {
     element.srcObject = inAudio;
@@ -84,7 +65,7 @@ function addUser(state) {
   var key = state[0],
     avatar = {};
   users[key] = avatar;
-  console.log("Connecting from %s to %s", userName, key);
+  console.log("Connecting from %s to %s", userName, key); 
   micReady.then((outAudio) => {
     avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
@@ -92,15 +73,6 @@ function addUser(state) {
       .catch(console.error.bind(console, "error"));
   });
 }
-
-ctrls2D.switchMode.addEventListener("click", showSignup);
-ctrls2D.connect.addEventListener("click", authenticate);
-ctrls2D.loginForm.style.display = "";
-ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
-ctrls2D.userName.value = userName;
-ctrls2D.password.value = "ppyptky7";
-
-showSignup(document.cookie.indexOf(APP_KEY) === -1);
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -118,7 +90,7 @@ function listUsers(newUsers) {
   ctrls2D.loginForm.style.display = "none";
   ctrls2D.controls.style.width = "initial";
 
-  document.cookie = APP_KEY + ":" + userName;
+  document.cookie = appKey + ":" + userName;
 
   Object.keys(users).forEach(removeUser);
   newUsers.forEach(addUser);
@@ -165,8 +137,6 @@ function authenticate() {
   socket.emit(verb, {
     userName: userName,
     email: email,
-    app: "Meeting:test"
+    app: appKey.replace("Primrose:", "")
   });
 }
-
-ctrls2D.frontBuffer.style.cursor = "default";
