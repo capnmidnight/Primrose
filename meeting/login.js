@@ -1,18 +1,7 @@
 "use strict";
 
-const APP_KEY = "Primrose:Meeting:test";
-
-var idSpec = location.search.match(/id=(\w+)/),
-  meetingID = idSpec && idSpec[1] || "public",
-  ctrls2D = Primrose.DOM.findEverything(),
-  audio = new Primrose.Output.Audio3D(),
-  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    .then(readyAudioDevice)
-    .catch(console.warn.bind(console, "Can't get audio")),
-  users = {},
-  socket,
-  userName;
-
+const APP_KEY = "Primrose:Meeting:test",
+  USER_PATTERN = /Primrose:Meeting:\w+:(\w+)/;
 
 function logAudio(name, stream) {
   console.log(name, stream);
@@ -25,9 +14,28 @@ function logAudio(name, stream) {
   }
 }
 
-function readyAudioDevice(device) {
-  logAudio("out audio", device);
+var idSpec = location.search.match(/id=(\w+)/),
+  meetingID = idSpec && idSpec[1] || "public",
+  ctrls2D = Primrose.DOM.findEverything(),
+  audio = new Primrose.Output.Audio3D(),
+  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(readyAudioOutputDevice)
+    .catch(console.warn.bind(console, "Can't get audio")),
+  userNameMatch = document.cookie.match(USER_PATTERN),
+  users = {},
+  socket,
+  userName;
 
+if (userNameMatch && userNameMatch.length === 2) {
+  userName = userNameMatch[1];
+}
+
+function readyAudioOutputDevice(device) {
+  logAudio("out audio", device);
+  return device;
+}
+
+function readyAudioOutputStream(device){
   var node = audio.context.createMediaStreamSource(device);
   logAudio("out audio node", node);
 
@@ -42,27 +50,45 @@ function readyAudioDevice(device) {
   return stream.stream;
 }
 
+function readyAudioInputStream(inAudio) {
+  logAudio("in audio", inAudio);
+
+  var stream = audio.context.createMediaStreamSource(inAudio);
+  logAudio("in audio stream", stream);
+
+  var gain = audio.context.createGain();
+  logAudio("in audio gain", gain);
+  stream.connect(gain);
+
+  gain.connect(audio.mainVolume);
+}
+
+function readyAudioInputElement(inAudio) {
+  logAudio("in audio", inAudio);
+
+  var element = new Audio();
+  if (isFirefox) {
+    element.srcObject = inAudio;
+  }
+  else {
+    element.src = URL.createObjectURL(inAudio);
+  }
+
+  element.controls = true;
+  element.autoplay = true;
+  element.crossOrigin = "anonymous";
+  document.body.appendChild(element);
+}
+
 function addUser(state) {
   var key = state[0],
     avatar = {};
   users[key] = avatar;
   console.log("Connecting from %s to %s", userName, key);
   micReady.then((outAudio) => {
-    logAudio("out", outAudio);
     avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
-      .then((inAudio) => {
-        logAudio("in audio", inAudio);
-
-        var stream = audio.context.createMediaStreamSource(inAudio);
-        logAudio("in audio stream", stream);
-
-        var gain = audio.context.createGain();
-        logAudio("in audio gain", gain);
-        stream.connect(gain);
-
-        gain.connect(audio.mainVolume);
-      })
+      .then(readyAudioInputElement)
       .catch(console.error.bind(console, "error"));
   });
 }
@@ -71,12 +97,10 @@ ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", authenticate);
 ctrls2D.loginForm.style.display = "";
 ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
-ctrls2D.userName.value = "sean";
+ctrls2D.userName.value = userName;
 ctrls2D.password.value = "ppyptky7";
 
 showSignup(document.cookie.indexOf(APP_KEY) === -1);
-
-document.cookie = APP_KEY;
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -93,6 +117,8 @@ function showSignup(state) {
 function listUsers(newUsers) {
   ctrls2D.loginForm.style.display = "none";
   ctrls2D.controls.style.width = "initial";
+
+  document.cookie = APP_KEY + ":" + userName;
 
   Object.keys(users).forEach(removeUser);
   newUsers.forEach(addUser);

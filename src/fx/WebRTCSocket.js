@@ -25,6 +25,18 @@ Primrose.WebRTCSocket = (function () {
   navigator.mediaDevices = navigator.mediaDevices || {};
   navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || function (constraint) { return new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject)); }
 
+  let ICE_SERVERS = [
+    { url: "stun:stun.l.google.com:19302" },
+    { url: "stun:stun1.l.google.com:19302" },
+    { url: "stun:stun2.l.google.com:19302" },
+    { url: "stun:stun3.l.google.com:19302" },
+    { url: "stun:stun4.l.google.com:19302" }
+  ];
+
+  if (isFirefox) {
+    ICE_SERVERS = [{ urls: ICE_SERVERS.map((s) => s.url) }];
+  }
+
   function preferOpus(description) {
     var sdp = description.sdp;
     var sdpLines = sdp.split('\r\n');
@@ -100,7 +112,7 @@ Primrose.WebRTCSocket = (function () {
     constructor(proxyServer, userName, toUserName, outAudio) {
       this.rtc = null;
 
-      const descriptionCreated = (description) => this.rtc.setLocalDescription(preferOpus(description)).then(proxyServer.emit.bind(proxyServer, description.type, description)),
+      const descriptionCreated = (description) => this.rtc.setLocalDescription(description).then(proxyServer.emit.bind(proxyServer, description.type, description)),
         descriptionReceived = (description) => this.rtc.setRemoteDescription(new RTCSessionDescription(description));
 
       if (typeof (proxyServer) === "string") {
@@ -118,29 +130,28 @@ Primrose.WebRTCSocket = (function () {
         throw new Error("need a socket");
       }
 
-      this.close = () => this.rtc.close();
+      this.close = () => this.rtc && this.rtc.close();
 
       window.addEventListener("unload", this.close);
       this.ready = new Promise((resolve, reject) => {
         const onUser = (evt) => {
           console.log("user", evt);
           this.rtc = new RTCPeerConnection({
-            iceServers: [
-              { url: "stun:stun.l.google.com:19302" },
-              { url: "stun:stun1.l.google.com:19302" },
-              { url: "stun:stun2.l.google.com:19302" },
-              { url: "stun:stun3.l.google.com:19302" },
-              { url: "stun:stun4.l.google.com:19302" }
-            ]
+            iceServers: ICE_SERVERS
           });
 
           const addStream = () => {
             if (outAudio) {
-              this.rtc.addStream(outAudio);
+              if (isFirefox) {
+                outAudio.getAudioTracks().forEach((track)=> this.rtc.addTrack(track, outAudio));
+              }
+              else {
+                this.rtc.addStream(outAudio);
+              }
             }
           },
             onOffer = (offer) => descriptionReceived(offer).then(() => this.rtc.createAnswer(descriptionCreated, onError)).catch(onError),
-            onIce = (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)).catch(onError),
+            onIce = (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)),
             onAnswer = (answer) => descriptionReceived(answer).then(() => {
             }).catch(onError),
             done = (thunk, obj) => {
@@ -150,7 +161,12 @@ Primrose.WebRTCSocket = (function () {
               proxyServer.off("answer", onAnswer);
               this.rtc.onnegotiationneeded = null;
               this.rtc.onicecandidate = null;
-              this.rtc.onaddstream = null;
+              if (isFirefox) {
+                this.rtc.ontrack = null;
+              }
+              else {
+                this.rtc.onaddstream = null;
+              }
               thunk(obj);
             },
             onError = (err) => done(reject, err);
@@ -167,12 +183,23 @@ Primrose.WebRTCSocket = (function () {
             }
           };
 
-          this.rtc.onaddstream = (evt) => {
-            if (userName >= toUserName) {
-              addStream();
+          if (isFirefox) {
+            this.rtc.ontrack = (evt) => {
+              if (userName >= toUserName) {
+                addStream();
+              }
+              resolve(evt.streams[0]);
             }
-            resolve(evt.stream);
           }
+          else {
+            this.rtc.onaddstream = (evt) => {
+              if (userName >= toUserName) {
+                addStream();
+              }
+              resolve(evt.stream);
+            }
+          }
+
           if (userName < toUserName) {
             addStream();
           }
@@ -180,6 +207,7 @@ Primrose.WebRTCSocket = (function () {
 
         proxyServer.on("user", onUser);
 
+        logAudio("out", outAudio);
         setTimeout(() => proxyServer.emit("peer", toUserName), 250);
       });
     }
