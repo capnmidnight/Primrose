@@ -58,6 +58,7 @@ Primrose.Output.Audio3D = (function () {
           right.elements[14] = mz;
         };
         this.isAvailable = true;
+        this.start();
       }
       catch (exp) {
         console.error(exp);
@@ -138,15 +139,27 @@ Primrose.Output.Audio3D = (function () {
 
     create3DMediaStream(x, y, z, stream) {
       console.log(stream);
-      var snd = {
-        source: this.context.createMediaStreamSource(stream),
-        volume: this.context.createGain(),
-        panner: this.context.createPanner()
+      var element = document.createElement("audio"),
+        snd = {
+        audio: element,
+        source: this.context.createMediaElementSource(element),
+        //volume: this.context.createGain(),
+        //panner: this.context.createPanner()
       };
-
+      if (isChrome) {
+        element.src = URL.createObjectURL(stream);
+      }
+      else {
+        element.srcObject = stream;
+      }
+      element.autoplay = true;
+      element.controls = true;
+      element.muted = true;
       snd.source.connect(this.mainVolume);
-
-      snd.panner.setPosition(x, y, z);
+      //snd.source.connect(snd.volume):
+      //snd.volume.connect(snd.panner);
+      //snd.panner.connect(this.mainVolume);
+      //snd.panner.setPosition(x, y, z);
       return snd;
     }
 

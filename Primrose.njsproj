@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Content Include="meeting\test.html" />
     <Content Include="package.json" />
     <Content Include="tsd.json" />
     <Content Include="CHANGELOG.md" />
@@ -26,6 +27,7 @@
     <Content Include="LICENSE.md" />
     <Content Include="README.md" />
     <Compile Include="gulpfile.js" />
+    <Compile Include="meeting\login.js" />
     <Compile Include="Primrose.js" />
     <Compile Include="Primrose.min.js" />
     <Compile Include="PrimroseDependencies.js" />

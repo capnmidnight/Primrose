@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Minimum viable WebRTC</title>
+    <link type="text/css" rel="stylesheet" href="../doc/demoUI.css">
+    <script type="text/javascript" src="../node_modules/socket.io-client/socket.io.js"></script>
+    <script type="text/javascript" src="../node_modules/jshashes/hashes.js"></script>
+    <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
+    <script type="text/javascript" src="../node_modules/three/three.js"></script>
+    <script type="text/javascript" src="../src/app.js"></script>
+    <script type="text/javascript" src="../src/fx/WebRTCSocket.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
+    <script type="text/javascript" src="login.js" defer></script>
+
+    <style>
+        #frontBuffer {
+            background-image: url(screenshot.jpg);
+        }
+    </style>
+</head>
+<body id="frontBuffer">
+    <div id="controls">
+        <div id="fullScreenButtonContainer"></div>
+        <div id="loginForm" style="display:none">
+            <a id="closeButton">close</a>
+            <div id="emailRow" style="display:none">
+                <input id="email" type="email" placeholder="Email (name@server.domain)">
+            </div>
+            <div id="userNameRow">
+                <input id="userName" type="text" placeholder="Username">
+            </div>
+            <div id="passwordRow">
+                <input id="password" type="password" placeholder="Password">
+            </div>
+            <div id="loginRow">
+                <button class="signupButton" id="switchMode">Sign up</button>
+                <button class="loginButton" id="connect">Log in</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

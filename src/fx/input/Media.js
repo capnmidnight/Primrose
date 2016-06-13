@@ -1,15 +1,5 @@
 Primrose.Input.Media = (function () {
-
-  /* polyfill */
-  Navigator.prototype.getUserMedia =
-    Navigator.prototype.getUserMedia ||
-    Navigator.prototype.webkitGetUserMedia ||
-    Navigator.prototype.mozGetUserMedia ||
-    Navigator.prototype.msGetUserMedia ||
-    Navigator.prototype.oGetUserMedia ||
-    function () {
-    };
-
+  
   pliny.class({
     parent: "Primrose.Input",
     name: "Media",

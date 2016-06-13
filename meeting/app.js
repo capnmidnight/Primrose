@@ -22,6 +22,21 @@ var idSpec = location.search.match(/id=(\w+)/),
     audioIcon: "../doc/models/microphone.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
+  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    .then((device) => {
+      var video = document.createElement("video");
+      video.autoplay = true;
+      video.muted = true;
+      document.body.appendChild(video);
+      if (isChrome) {
+        video.src = URL.createObjectURL(device);
+      }
+      else {
+        video.srcObject = device;
+      }
+      return device;
+    })
+    .catch(console.warn.bind(console, "Can't get audio")),
   users = {},
   socket,
   avatarFactory,
@@ -86,13 +101,11 @@ function listUsers(newUsers) {
 
 function logAudio(name, stream) {
   if (stream) {
-    console.log(name, stream);
-    const A = (id) => stream.addEventListener(id, console.log.bind(console, name + "." + id));
-    A("active");
-    A("inactive");
-    A("addtrack");
-    A("removetrack");
-    A("ended");
+    for (var key in stream) {
+      if (key.indexOf("on") === 0) {
+        stream.addEventListener(key.substring(2), console.log.bind(console, name + "." + key));
+      }
+    }
   }
 }
 
@@ -116,17 +129,17 @@ function addUser(state) {
   users[key] = avatar;
   updateUser(state);
   console.log("Connecting from %s to %s", userName, key);
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .catch(console.warn.bind(console, "Can't get audio"))
-    .then((outAudio) => {
-      logAudio("out", outAudio);
-      avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, env.audio.context, outAudio);
-      avatar.peer.ready
-        .then((inAudio) => {
-          logAudio("in", inAudio);
-          avatar.audio = env.audio.create3DMediaStream(0, 0, 0, inAudio);
-        });
-    });
+  micReady.then((outAudio) => {
+    logAudio("out", outAudio);
+    avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, env.audio.context, outAudio);
+    avatar.peer.ready
+      .then((inAudio) => {
+        logAudio("in", inAudio);
+        avatar.audio = env.audio.create3DMediaStream(0, 0, 0, inAudio);
+        logAudio(avatar.audio.audio);
+        console.log(avatar.audio);
+      });
+  });
 }
 
 function receiveChat(evt) {
