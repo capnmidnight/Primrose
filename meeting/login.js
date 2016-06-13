@@ -8,7 +8,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   ctrls2D = Primrose.DOM.findEverything(),
   audio = new Primrose.Output.Audio3D(),
   micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    .then(readyAudioOutputDevice)
+    .then(readyAudioOutputStream)
     .catch(console.warn.bind(console, "Can't get audio")),
   userNameSpec = document.cookie.match(USER_NAME_PATTERN),
   userName = userNameSpec && userNameSpec[1] || "",
@@ -21,12 +21,9 @@ ctrls2D.loginForm.style.display = "";
 ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
 ctrls2D.userName.value = userName;
 ctrls2D.password.value = "ppyptky7";
+ctrls2D.frontBuffer.style.cursor = "default";
 
 showSignup(userName.length === 0);
-
-function readyAudioOutputDevice(device) {
-  return device;
-}
 
 function readyAudioOutputStream(device){
   var node = audio.context.createMediaStreamSource(device);
@@ -40,13 +37,6 @@ function readyAudioOutputStream(device){
 }
 
 function readyAudioInputStream(inAudio) {
-  var stream = audio.context.createMediaStreamSource(inAudio);
-  var gain = audio.context.createGain();
-  stream.connect(gain);
-  gain.connect(audio.mainVolume);
-}
-
-function readyAudioInputElement(inAudio) {
   var element = new Audio();
   if (isFirefox) {
     element.srcObject = inAudio;
@@ -55,7 +45,7 @@ function readyAudioInputElement(inAudio) {
     element.src = URL.createObjectURL(inAudio);
   }
 
-  element.controls = true;
+  element.controls = false;
   element.autoplay = true;
   element.crossOrigin = "anonymous";
   document.body.appendChild(element);
@@ -69,7 +59,7 @@ function addUser(state) {
   micReady.then((outAudio) => {
     avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
-      .then(readyAudioInputElement)
+      .then(readyAudioInputStream)
       .catch(console.error.bind(console, "error"));
   });
 }

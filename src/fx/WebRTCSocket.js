@@ -183,6 +183,8 @@ Primrose.WebRTCSocket = (function () {
             }
           };
 
+          const goFirst = userName >= toUserName;
+
           if (isFirefox) {
             this.rtc.ontrack = (evt) => {
               if (userName >= toUserName) {
@@ -193,21 +195,20 @@ Primrose.WebRTCSocket = (function () {
           }
           else {
             this.rtc.onaddstream = (evt) => {
-              if (userName >= toUserName) {
+              if (!goFirst) {
                 addStream();
               }
               resolve(evt.stream);
             }
           }
 
-          if (userName < toUserName) {
+          if (goFirst) {
             addStream();
           }
         };
 
         proxyServer.on("user", onUser);
 
-        logAudio("out", outAudio);
         setTimeout(() => proxyServer.emit("peer", toUserName), 250);
       });
     }
