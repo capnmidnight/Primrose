@@ -12,11 +12,8 @@ html, body, #frontBuffer, progress, #controls {
 html, body, #frontBuffer, #controls {
     padding: 0;
     margin: 0;
-    height: 100%;
     width: 100%;
-}
-
-progress, #controls {
+    height: 100%;
 }
 
 progress {
@@ -24,9 +21,8 @@ progress {
     width: calc(100% - 2em);
 }
 
-#controls{
+#controls {
     padding: 1em;
-    width: 100%;
 }
 
 #frontBuffer {
@@ -36,13 +32,13 @@ progress {
     cursor: wait;
 }
 
-body, input, button { 
-    font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif
+body, input, button {
+    font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif;
 }
 
-body > h1 {
-    display: none;
-}
+    body > h1 {
+        display: none;
+    }
 
 button {
     padding: 10px 16px;
@@ -53,7 +49,7 @@ button {
     border-radius: 5px;
 }
 
-#loginForm{
+#loginForm {
     position: absolute;
     height: 100%;
     top: 0;
@@ -66,24 +62,24 @@ button {
     transform: translate(-50%, 0);
 }
 
-#loginForm > div > input {
-    width: calc(100% - 10px);
-    padding: 10px;
-    border: none;
-    margin: 5px;
-    background-color: #4e4e4e;
-    color: white;
-}
+    #loginForm > div > input {
+        width: calc(100% - 10px);
+        padding: 10px;
+        border: none;
+        margin: 5px;
+        background-color: #4e4e4e;
+        color: white;
+    }
 
 #loginRow {
     display: flex;
 }
 
-#loginRow > button {
-    width: 50%;
-    margin: 5px;
-    background-color: transparent;
-}
+    #loginRow > button {
+        width: 50%;
+        margin: 5px;
+        background-color: transparent;
+    }
 
 #switchMode {
     color: white;
@@ -96,7 +92,7 @@ button {
     font-weight: bold;
 }
 
-#closeButton{
+#closeButton {
     color: white;
-    float:right;
+    float: right;
 }
