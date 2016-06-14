@@ -200,7 +200,7 @@ function removeUser(key) {
   env.scene.remove(avatar);
   avatar.peer.close();
   avatar.audioElement.muted = true;
-  avatar.audioElement.stop();
+  avatar.audioElement.pause();
   document.body.remove(avatar.audioElement);
   delete users[key];
 }
