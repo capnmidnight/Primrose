@@ -112,9 +112,6 @@ Primrose.WebRTCSocket = (function () {
     constructor(proxyServer, userName, toUserName, outAudio) {
       this.rtc = null;
 
-      const descriptionCreated = (description) => this.rtc.setLocalDescription(description).then(proxyServer.emit.bind(proxyServer, description.type, description)),
-        descriptionReceived = (description) => this.rtc.setRemoteDescription(new RTCSessionDescription(description));
-
       if (typeof (proxyServer) === "string") {
         proxyServer = io.connect(proxyServer, {
           "reconnect": true,
@@ -136,24 +133,24 @@ Primrose.WebRTCSocket = (function () {
       this.ready = new Promise((resolve, reject) => {
         const onUser = (evt) => {
           console.log("user", evt);
-          this.rtc = new RTCPeerConnection({
-            iceServers: ICE_SERVERS
-          });
+          this.rtc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
-          const addStream = () => {
-            if (outAudio) {
-              if (isFirefox) {
-                outAudio.getAudioTracks().forEach((track)=> this.rtc.addTrack(track, outAudio));
+          const goFirst = userName < toUserName,
+            descriptionCreated = (description) => this.rtc.setLocalDescription(description).then(proxyServer.emit.bind(proxyServer, description.type, description)).catch(onError),
+            descriptionReceived = (description) => this.rtc.setRemoteDescription(new RTCSessionDescription(description)).catch(onError),
+            addStream = () => {
+              if (outAudio) {
+                if (isFirefox) {
+                  outAudio.getAudioTracks().forEach((track) => this.rtc.addTrack(track, outAudio));
+                }
+                else {
+                  this.rtc.addStream(outAudio);
+                }
               }
-              else {
-                this.rtc.addStream(outAudio);
-              }
-            }
-          },
+            },
             onOffer = (offer) => descriptionReceived(offer).then(() => this.rtc.createAnswer(descriptionCreated, onError)).catch(onError),
-            onIce = (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)),
-            onAnswer = (answer) => descriptionReceived(answer).then(() => {
-            }).catch(onError),
+            onIce = (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)).catch(onError),
+            onAnswer = (answer) => descriptionReceived(answer).catch(onError),
             done = (thunk, obj) => {
               proxyServer.off("user", onUser);
               proxyServer.off("offer", onOffer);
@@ -169,21 +166,22 @@ Primrose.WebRTCSocket = (function () {
               }
               thunk(obj);
             },
-            onError = (err) => done(reject, err);
+            onError = (err) => {
+              console.error("RTC Setup Error", err);
+              done(reject, err);
+            };
 
           proxyServer.on("offer", onOffer);
           proxyServer.on("ice", onIce);
           proxyServer.on("answer", onAnswer);
 
-          this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, onError);
+          this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, onError).catch(onError);
 
           this.rtc.onicecandidate = (evt) => {
             if (evt.candidate) {
               proxyServer.emit("ice", evt.candidate);
             }
           };
-
-          const goFirst = userName >= toUserName;
 
           if (isFirefox) {
             this.rtc.ontrack = (evt) => {
