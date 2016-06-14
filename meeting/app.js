@@ -197,12 +197,16 @@ function updateUser(state) {
 }
 
 function removeUser(key) {
+  console.log("User %s logging off.", key);
   var avatar = users[key];
   env.scene.remove(avatar);
-  avatar.peer.close();
-  avatar.audioElement.muted = true;
-  avatar.audioElement.pause();
-  document.body.remove(avatar.audioElement);
+  if (avatar.peer) {
+    avatar.peer.close();
+    if (avatar.audioElement) {
+      avatar.audioElement.pause();
+      document.body.removeChild(avatar.audioElement);
+    }
+  }
   delete users[key];
 }
 
