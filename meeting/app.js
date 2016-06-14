@@ -126,10 +126,10 @@ function addUser(state) {
   users[key] = avatar;
   updateUser(state);
   console.log("Connecting from %s to %s", userName, key);
-  micReady.then((outAudio) => {
+  return micReady.then(function (outAudio) {
     avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
-      .then((inAudio) => {
+      .then(function (inAudio) {
         avatar.audioElement = new Audio();
         if (isFirefox) {
           avatar.audioElement.srcObject = inAudio;
