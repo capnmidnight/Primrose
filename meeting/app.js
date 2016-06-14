@@ -88,6 +88,7 @@ function listUsers(newUsers) {
     = ctrls2D.loginForm.style.display
     = "none";
   ctrls2D.controls.style.width = "initial";
+  ctrls2D.controls.style.height = "initial";
 
   document.cookie = appKey + ":" + userName;
 
