@@ -93,7 +93,10 @@ function listUsers(newUsers) {
   document.cookie = appKey + ":" + userName;
 
   Object.keys(users).forEach(removeUser);
-  newUsers.forEach(addUser);
+  var promise = Promise.resolve();
+  while (newUsers.length > 0) {
+    promise = promise.then(addUser(newUsers.shift()));
+  }
 }
 
 function logAudio(name, stream) {
