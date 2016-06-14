@@ -259,9 +259,11 @@ gulp.task("concat:dependencies", ["build:logger", "build:pliny"], function () {
     "node_modules/promise-polyfill/promise.js",
     "node_modules/lavu-details-polyfill/lib/index.min.js",
     "node_modules/socket.io-client/socket.io.js",
+    "node_modules/jshashes/hashes.js",
     "node_modules/three/three.js",
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js",
+    "node_modules/three/examples/js/loaders/FBXLoader.js",
     "node_modules/html2canvas/dist/html2canvas.js"
   ]), "PrimroseDependencies");
 });

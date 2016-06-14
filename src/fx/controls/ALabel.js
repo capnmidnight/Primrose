@@ -18,10 +18,6 @@ Primrose.Controls.Label = (function () {
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
       ////////////////////////////////////////////////////////////////////////
-
-      if (typeof options === "string") {
-        this.options = { value: this.options };
-      }
       super(patch(options, {
         id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
       }));

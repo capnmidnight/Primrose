@@ -8818,6 +8818,1772 @@ function toArray(list, index) {
 },{}]},{},[31])(31)
 });
 
+/**
+ * jshashes - https://github.com/h2non/jshashes
+ * Released under the "New BSD" license
+ *
+ * Algorithms specification:
+ *
+ * MD5 - http://www.ietf.org/rfc/rfc1321.txt
+ * RIPEMD-160 - http://homes.esat.kuleuven.be/~bosselae/ripemd160.html
+ * SHA1   - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
+ * SHA256 - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
+ * SHA512 - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
+ * HMAC - http://www.ietf.org/rfc/rfc2104.txt
+ */
+(function() {
+  var Hashes;
+
+  function utf8Encode(str) {
+    var x, y, output = '',
+      i = -1,
+      l;
+
+    if (str && str.length) {
+      l = str.length;
+      while ((i += 1) < l) {
+        /* Decode utf-16 surrogate pairs */
+        x = str.charCodeAt(i);
+        y = i + 1 < l ? str.charCodeAt(i + 1) : 0;
+        if (0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF) {
+          x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
+          i += 1;
+        }
+        /* Encode output as utf-8 */
+        if (x <= 0x7F) {
+          output += String.fromCharCode(x);
+        } else if (x <= 0x7FF) {
+          output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F),
+            0x80 | (x & 0x3F));
+        } else if (x <= 0xFFFF) {
+          output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F),
+            0x80 | ((x >>> 6) & 0x3F),
+            0x80 | (x & 0x3F));
+        } else if (x <= 0x1FFFFF) {
+          output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07),
+            0x80 | ((x >>> 12) & 0x3F),
+            0x80 | ((x >>> 6) & 0x3F),
+            0x80 | (x & 0x3F));
+        }
+      }
+    }
+    return output;
+  }
+
+  function utf8Decode(str) {
+    var i, ac, c1, c2, c3, arr = [],
+      l;
+    i = ac = c1 = c2 = c3 = 0;
+
+    if (str && str.length) {
+      l = str.length;
+      str += '';
+
+      while (i < l) {
+        c1 = str.charCodeAt(i);
+        ac += 1;
+        if (c1 < 128) {
+          arr[ac] = String.fromCharCode(c1);
+          i += 1;
+        } else if (c1 > 191 && c1 < 224) {
+          c2 = str.charCodeAt(i + 1);
+          arr[ac] = String.fromCharCode(((c1 & 31) << 6) | (c2 & 63));
+          i += 2;
+        } else {
+          c2 = str.charCodeAt(i + 1);
+          c3 = str.charCodeAt(i + 2);
+          arr[ac] = String.fromCharCode(((c1 & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+          i += 3;
+        }
+      }
+    }
+    return arr.join('');
+  }
+
+  /**
+   * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+   * to work around bugs in some JS interpreters.
+   */
+
+  function safe_add(x, y) {
+    var lsw = (x & 0xFFFF) + (y & 0xFFFF),
+      msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xFFFF);
+  }
+
+  /**
+   * Bitwise rotate a 32-bit number to the left.
+   */
+
+  function bit_rol(num, cnt) {
+    return (num << cnt) | (num >>> (32 - cnt));
+  }
+
+  /**
+   * Convert a raw string to a hex string
+   */
+
+  function rstr2hex(input, hexcase) {
+    var hex_tab = hexcase ? '0123456789ABCDEF' : '0123456789abcdef',
+      output = '',
+      x, i = 0,
+      l = input.length;
+    for (; i < l; i += 1) {
+      x = input.charCodeAt(i);
+      output += hex_tab.charAt((x >>> 4) & 0x0F) + hex_tab.charAt(x & 0x0F);
+    }
+    return output;
+  }
+
+  /**
+   * Encode a string as utf-16
+   */
+
+  function str2rstr_utf16le(input) {
+    var i, l = input.length,
+      output = '';
+    for (i = 0; i < l; i += 1) {
+      output += String.fromCharCode(input.charCodeAt(i) & 0xFF, (input.charCodeAt(i) >>> 8) & 0xFF);
+    }
+    return output;
+  }
+
+  function str2rstr_utf16be(input) {
+    var i, l = input.length,
+      output = '';
+    for (i = 0; i < l; i += 1) {
+      output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF, input.charCodeAt(i) & 0xFF);
+    }
+    return output;
+  }
+
+  /**
+   * Convert an array of big-endian words to a string
+   */
+
+  function binb2rstr(input) {
+    var i, l = input.length * 32,
+      output = '';
+    for (i = 0; i < l; i += 8) {
+      output += String.fromCharCode((input[i >> 5] >>> (24 - i % 32)) & 0xFF);
+    }
+    return output;
+  }
+
+  /**
+   * Convert an array of little-endian words to a string
+   */
+
+  function binl2rstr(input) {
+    var i, l = input.length * 32,
+      output = '';
+    for (i = 0; i < l; i += 8) {
+      output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
+    }
+    return output;
+  }
+
+  /**
+   * Convert a raw string to an array of little-endian words
+   * Characters >255 have their high-byte silently ignored.
+   */
+
+  function rstr2binl(input) {
+    var i, l = input.length * 8,
+      output = Array(input.length >> 2),
+      lo = output.length;
+    for (i = 0; i < lo; i += 1) {
+      output[i] = 0;
+    }
+    for (i = 0; i < l; i += 8) {
+      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (i % 32);
+    }
+    return output;
+  }
+
+  /**
+   * Convert a raw string to an array of big-endian words
+   * Characters >255 have their high-byte silently ignored.
+   */
+
+  function rstr2binb(input) {
+    var i, l = input.length * 8,
+      output = Array(input.length >> 2),
+      lo = output.length;
+    for (i = 0; i < lo; i += 1) {
+      output[i] = 0;
+    }
+    for (i = 0; i < l; i += 8) {
+      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (24 - i % 32);
+    }
+    return output;
+  }
+
+  /**
+   * Convert a raw string to an arbitrary string encoding
+   */
+
+  function rstr2any(input, encoding) {
+    var divisor = encoding.length,
+      remainders = Array(),
+      i, q, x, ld, quotient, dividend, output, full_length;
+
+    /* Convert to an array of 16-bit big-endian values, forming the dividend */
+    dividend = Array(Math.ceil(input.length / 2));
+    ld = dividend.length;
+    for (i = 0; i < ld; i += 1) {
+      dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
+    }
+
+    /**
+     * Repeatedly perform a long division. The binary array forms the dividend,
+     * the length of the encoding is the divisor. Once computed, the quotient
+     * forms the dividend for the next step. We stop when the dividend is zerHashes.
+     * All remainders are stored for later use.
+     */
+    while (dividend.length > 0) {
+      quotient = Array();
+      x = 0;
+      for (i = 0; i < dividend.length; i += 1) {
+        x = (x << 16) + dividend[i];
+        q = Math.floor(x / divisor);
+        x -= q * divisor;
+        if (quotient.length > 0 || q > 0) {
+          quotient[quotient.length] = q;
+        }
+      }
+      remainders[remainders.length] = x;
+      dividend = quotient;
+    }
+
+    /* Convert the remainders to the output string */
+    output = '';
+    for (i = remainders.length - 1; i >= 0; i--) {
+      output += encoding.charAt(remainders[i]);
+    }
+
+    /* Append leading zero equivalents */
+    full_length = Math.ceil(input.length * 8 / (Math.log(encoding.length) / Math.log(2)));
+    for (i = output.length; i < full_length; i += 1) {
+      output = encoding[0] + output;
+    }
+    return output;
+  }
+
+  /**
+   * Convert a raw string to a base-64 string
+   */
+
+  function rstr2b64(input, b64pad) {
+    var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
+      output = '',
+      len = input.length,
+      i, j, triplet;
+    b64pad = b64pad || '=';
+    for (i = 0; i < len; i += 3) {
+      triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
+      for (j = 0; j < 4; j += 1) {
+        if (i * 8 + j * 6 > input.length * 8) {
+          output += b64pad;
+        } else {
+          output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
+        }
+      }
+    }
+    return output;
+  }
+
+  Hashes = {
+    /**
+     * @property {String} version
+     * @readonly
+     */
+    VERSION: '1.0.5',
+    /**
+     * @member Hashes
+     * @class Base64
+     * @constructor
+     */
+    Base64: function() {
+      // private properties
+      var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
+        pad = '=', // default pad according with the RFC standard
+        url = false, // URL encoding support @todo
+        utf8 = true; // by default enable UTF-8 support encoding
+
+      // public method for encoding
+      this.encode = function(input) {
+        var i, j, triplet,
+          output = '',
+          len = input.length;
+
+        pad = pad || '=';
+        input = (utf8) ? utf8Encode(input) : input;
+
+        for (i = 0; i < len; i += 3) {
+          triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
+          for (j = 0; j < 4; j += 1) {
+            if (i * 8 + j * 6 > len * 8) {
+              output += pad;
+            } else {
+              output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
+            }
+          }
+        }
+        return output;
+      };
+
+      // public method for decoding
+      this.decode = function(input) {
+        // var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        var i, o1, o2, o3, h1, h2, h3, h4, bits, ac,
+          dec = '',
+          arr = [];
+        if (!input) {
+          return input;
+        }
+
+        i = ac = 0;
+        input = input.replace(new RegExp('\\' + pad, 'gi'), ''); // use '='
+        //input += '';
+
+        do { // unpack four hexets into three octets using index points in b64
+          h1 = tab.indexOf(input.charAt(i += 1));
+          h2 = tab.indexOf(input.charAt(i += 1));
+          h3 = tab.indexOf(input.charAt(i += 1));
+          h4 = tab.indexOf(input.charAt(i += 1));
+
+          bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
+
+          o1 = bits >> 16 & 0xff;
+          o2 = bits >> 8 & 0xff;
+          o3 = bits & 0xff;
+          ac += 1;
+
+          if (h3 === 64) {
+            arr[ac] = String.fromCharCode(o1);
+          } else if (h4 === 64) {
+            arr[ac] = String.fromCharCode(o1, o2);
+          } else {
+            arr[ac] = String.fromCharCode(o1, o2, o3);
+          }
+        } while (i < input.length);
+
+        dec = arr.join('');
+        dec = (utf8) ? utf8Decode(dec) : dec;
+
+        return dec;
+      };
+
+      // set custom pad string
+      this.setPad = function(str) {
+        pad = str || pad;
+        return this;
+      };
+      // set custom tab string characters
+      this.setTab = function(str) {
+        tab = str || tab;
+        return this;
+      };
+      this.setUTF8 = function(bool) {
+        if (typeof bool === 'boolean') {
+          utf8 = bool;
+        }
+        return this;
+      };
+    },
+
+    /**
+     * CRC-32 calculation
+     * @member Hashes
+     * @method CRC32
+     * @static
+     * @param {String} str Input String
+     * @return {String}
+     */
+    CRC32: function(str) {
+      var crc = 0,
+        x = 0,
+        y = 0,
+        table, i, iTop;
+      str = utf8Encode(str);
+
+      table = [
+        '00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 ',
+        '79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 ',
+        '84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F ',
+        '63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD ',
+        'A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC ',
+        '51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 ',
+        'B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 ',
+        '06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 ',
+        'E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 ',
+        '12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 ',
+        'D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 ',
+        '33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 ',
+        'CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 ',
+        '9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E ',
+        '7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D ',
+        '806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 ',
+        '60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA ',
+        'AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 ',
+        '5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 ',
+        'B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 ',
+        '05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 ',
+        'F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA ',
+        '11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 ',
+        'D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F ',
+        '30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E ',
+        'C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D'
+      ].join('');
+
+      crc = crc ^ (-1);
+      for (i = 0, iTop = str.length; i < iTop; i += 1) {
+        y = (crc ^ str.charCodeAt(i)) & 0xFF;
+        x = '0x' + table.substr(y * 9, 8);
+        crc = (crc >>> 8) ^ x;
+      }
+      // always return a positive number (that's what >>> 0 does)
+      return (crc ^ (-1)) >>> 0;
+    },
+    /**
+     * @member Hashes
+     * @class MD5
+     * @constructor
+     * @param {Object} [config]
+     *
+     * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+     * Digest Algorithm, as defined in RFC 1321.
+     * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * See <http://pajhome.org.uk/crypt/md5> for more infHashes.
+     */
+    MD5: function(options) {
+      /**
+       * Private config properties. You may need to tweak these to be compatible with
+       * the server-side, but the defaults work in most cases.
+       * See {@link Hashes.MD5#method-setUpperCase} and {@link Hashes.SHA1#method-setUpperCase}
+       */
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase
+        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=', // base-64 pad character. Defaults to '=' for strict RFC compliance
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true; // enable/disable utf8 encoding
+
+      // privileged (public) methods
+      this.hex = function(s) {
+        return rstr2hex(rstr(s, utf8), hexcase);
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s, utf8), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d), hexcase);
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };
+      /**
+       * Perform a simple self-test to see if the VM is working
+       * @return {String} Hexadecimal hash sample
+       */
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      /**
+       * Enable/disable uppercase hexadecimal returned string
+       * @param {Boolean}
+       * @return {Object} this
+       */
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      /**
+       * Defines a base64 pad string
+       * @param {String} Pad
+       * @return {Object} this
+       */
+      this.setPad = function(a) {
+        b64pad = a || b64pad;
+        return this;
+      };
+      /**
+       * Defines a base64 pad string
+       * @param {Boolean}
+       * @return {Object} [this]
+       */
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };
+
+      // private methods
+
+      /**
+       * Calculate the MD5 of a raw string
+       */
+
+      function rstr(s) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binl2rstr(binl(rstr2binl(s), s.length * 8));
+      }
+
+      /**
+       * Calculate the HMAC-MD5, of a key and some data (raw strings)
+       */
+
+      function rstr_hmac(key, data) {
+        var bkey, ipad, opad, hash, i;
+
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+        bkey = rstr2binl(key);
+        if (bkey.length > 16) {
+          bkey = binl(bkey, key.length * 8);
+        }
+
+        ipad = Array(16), opad = Array(16);
+        for (i = 0; i < 16; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+        hash = binl(ipad.concat(rstr2binl(data)), 512 + data.length * 8);
+        return binl2rstr(binl(opad.concat(hash), 512 + 128));
+      }
+
+      /**
+       * Calculate the MD5 of an array of little-endian words, and a bit length.
+       */
+
+      function binl(x, len) {
+        var i, olda, oldb, oldc, oldd,
+          a = 1732584193,
+          b = -271733879,
+          c = -1732584194,
+          d = 271733878;
+
+        /* append padding */
+        x[len >> 5] |= 0x80 << ((len) % 32);
+        x[(((len + 64) >>> 9) << 4) + 14] = len;
+
+        for (i = 0; i < x.length; i += 16) {
+          olda = a;
+          oldb = b;
+          oldc = c;
+          oldd = d;
+
+          a = md5_ff(a, b, c, d, x[i + 0], 7, -680876936);
+          d = md5_ff(d, a, b, c, x[i + 1], 12, -389564586);
+          c = md5_ff(c, d, a, b, x[i + 2], 17, 606105819);
+          b = md5_ff(b, c, d, a, x[i + 3], 22, -1044525330);
+          a = md5_ff(a, b, c, d, x[i + 4], 7, -176418897);
+          d = md5_ff(d, a, b, c, x[i + 5], 12, 1200080426);
+          c = md5_ff(c, d, a, b, x[i + 6], 17, -1473231341);
+          b = md5_ff(b, c, d, a, x[i + 7], 22, -45705983);
+          a = md5_ff(a, b, c, d, x[i + 8], 7, 1770035416);
+          d = md5_ff(d, a, b, c, x[i + 9], 12, -1958414417);
+          c = md5_ff(c, d, a, b, x[i + 10], 17, -42063);
+          b = md5_ff(b, c, d, a, x[i + 11], 22, -1990404162);
+          a = md5_ff(a, b, c, d, x[i + 12], 7, 1804603682);
+          d = md5_ff(d, a, b, c, x[i + 13], 12, -40341101);
+          c = md5_ff(c, d, a, b, x[i + 14], 17, -1502002290);
+          b = md5_ff(b, c, d, a, x[i + 15], 22, 1236535329);
+
+          a = md5_gg(a, b, c, d, x[i + 1], 5, -165796510);
+          d = md5_gg(d, a, b, c, x[i + 6], 9, -1069501632);
+          c = md5_gg(c, d, a, b, x[i + 11], 14, 643717713);
+          b = md5_gg(b, c, d, a, x[i + 0], 20, -373897302);
+          a = md5_gg(a, b, c, d, x[i + 5], 5, -701558691);
+          d = md5_gg(d, a, b, c, x[i + 10], 9, 38016083);
+          c = md5_gg(c, d, a, b, x[i + 15], 14, -660478335);
+          b = md5_gg(b, c, d, a, x[i + 4], 20, -405537848);
+          a = md5_gg(a, b, c, d, x[i + 9], 5, 568446438);
+          d = md5_gg(d, a, b, c, x[i + 14], 9, -1019803690);
+          c = md5_gg(c, d, a, b, x[i + 3], 14, -187363961);
+          b = md5_gg(b, c, d, a, x[i + 8], 20, 1163531501);
+          a = md5_gg(a, b, c, d, x[i + 13], 5, -1444681467);
+          d = md5_gg(d, a, b, c, x[i + 2], 9, -51403784);
+          c = md5_gg(c, d, a, b, x[i + 7], 14, 1735328473);
+          b = md5_gg(b, c, d, a, x[i + 12], 20, -1926607734);
+
+          a = md5_hh(a, b, c, d, x[i + 5], 4, -378558);
+          d = md5_hh(d, a, b, c, x[i + 8], 11, -2022574463);
+          c = md5_hh(c, d, a, b, x[i + 11], 16, 1839030562);
+          b = md5_hh(b, c, d, a, x[i + 14], 23, -35309556);
+          a = md5_hh(a, b, c, d, x[i + 1], 4, -1530992060);
+          d = md5_hh(d, a, b, c, x[i + 4], 11, 1272893353);
+          c = md5_hh(c, d, a, b, x[i + 7], 16, -155497632);
+          b = md5_hh(b, c, d, a, x[i + 10], 23, -1094730640);
+          a = md5_hh(a, b, c, d, x[i + 13], 4, 681279174);
+          d = md5_hh(d, a, b, c, x[i + 0], 11, -358537222);
+          c = md5_hh(c, d, a, b, x[i + 3], 16, -722521979);
+          b = md5_hh(b, c, d, a, x[i + 6], 23, 76029189);
+          a = md5_hh(a, b, c, d, x[i + 9], 4, -640364487);
+          d = md5_hh(d, a, b, c, x[i + 12], 11, -421815835);
+          c = md5_hh(c, d, a, b, x[i + 15], 16, 530742520);
+          b = md5_hh(b, c, d, a, x[i + 2], 23, -995338651);
+
+          a = md5_ii(a, b, c, d, x[i + 0], 6, -198630844);
+          d = md5_ii(d, a, b, c, x[i + 7], 10, 1126891415);
+          c = md5_ii(c, d, a, b, x[i + 14], 15, -1416354905);
+          b = md5_ii(b, c, d, a, x[i + 5], 21, -57434055);
+          a = md5_ii(a, b, c, d, x[i + 12], 6, 1700485571);
+          d = md5_ii(d, a, b, c, x[i + 3], 10, -1894986606);
+          c = md5_ii(c, d, a, b, x[i + 10], 15, -1051523);
+          b = md5_ii(b, c, d, a, x[i + 1], 21, -2054922799);
+          a = md5_ii(a, b, c, d, x[i + 8], 6, 1873313359);
+          d = md5_ii(d, a, b, c, x[i + 15], 10, -30611744);
+          c = md5_ii(c, d, a, b, x[i + 6], 15, -1560198380);
+          b = md5_ii(b, c, d, a, x[i + 13], 21, 1309151649);
+          a = md5_ii(a, b, c, d, x[i + 4], 6, -145523070);
+          d = md5_ii(d, a, b, c, x[i + 11], 10, -1120210379);
+          c = md5_ii(c, d, a, b, x[i + 2], 15, 718787259);
+          b = md5_ii(b, c, d, a, x[i + 9], 21, -343485551);
+
+          a = safe_add(a, olda);
+          b = safe_add(b, oldb);
+          c = safe_add(c, oldc);
+          d = safe_add(d, oldd);
+        }
+        return Array(a, b, c, d);
+      }
+
+      /**
+       * These functions implement the four basic operations the algorithm uses.
+       */
+
+      function md5_cmn(q, a, b, x, s, t) {
+        return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s), b);
+      }
+
+      function md5_ff(a, b, c, d, x, s, t) {
+        return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
+      }
+
+      function md5_gg(a, b, c, d, x, s, t) {
+        return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
+      }
+
+      function md5_hh(a, b, c, d, x, s, t) {
+        return md5_cmn(b ^ c ^ d, a, b, x, s, t);
+      }
+
+      function md5_ii(a, b, c, d, x, s, t) {
+        return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
+      }
+    },
+    /**
+     * @member Hashes
+     * @class Hashes.SHA1
+     * @param {Object} [config]
+     * @constructor
+     *
+     * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined in FIPS 180-1
+     * Version 2.2 Copyright Paul Johnston 2000 - 2009.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     */
+    SHA1: function(options) {
+      /**
+       * Private config properties. You may need to tweak these to be compatible with
+       * the server-side, but the defaults work in most cases.
+       * See {@link Hashes.MD5#method-setUpperCase} and {@link Hashes.SHA1#method-setUpperCase}
+       */
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase
+        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=', // base-64 pad character. Defaults to '=' for strict RFC compliance
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true; // enable/disable utf8 encoding
+
+      // public methods
+      this.hex = function(s) {
+        return rstr2hex(rstr(s, utf8), hexcase);
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s, utf8), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s, utf8), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d));
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };
+      /**
+       * Perform a simple self-test to see if the VM is working
+       * @return {String} Hexadecimal hash sample
+       * @public
+       */
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      /**
+       * @description Enable/disable uppercase hexadecimal returned string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {string} Pad
+       * @return {Object} this
+       * @public
+       */
+      this.setPad = function(a) {
+        b64pad = a || b64pad;
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };
+
+      // private methods
+
+      /**
+       * Calculate the SHA-512 of a raw string
+       */
+
+      function rstr(s) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binb2rstr(binb(rstr2binb(s), s.length * 8));
+      }
+
+      /**
+       * Calculate the HMAC-SHA1 of a key and some data (raw strings)
+       */
+
+      function rstr_hmac(key, data) {
+        var bkey, ipad, opad, i, hash;
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+        bkey = rstr2binb(key);
+
+        if (bkey.length > 16) {
+          bkey = binb(bkey, key.length * 8);
+        }
+        ipad = Array(16), opad = Array(16);
+        for (i = 0; i < 16; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+        hash = binb(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
+        return binb2rstr(binb(opad.concat(hash), 512 + 160));
+      }
+
+      /**
+       * Calculate the SHA-1 of an array of big-endian words, and a bit length
+       */
+
+      function binb(x, len) {
+        var i, j, t, olda, oldb, oldc, oldd, olde,
+          w = Array(80),
+          a = 1732584193,
+          b = -271733879,
+          c = -1732584194,
+          d = 271733878,
+          e = -1009589776;
+
+        /* append padding */
+        x[len >> 5] |= 0x80 << (24 - len % 32);
+        x[((len + 64 >> 9) << 4) + 15] = len;
+
+        for (i = 0; i < x.length; i += 16) {
+          olda = a,
+          oldb = b;
+          oldc = c;
+          oldd = d;
+          olde = e;
+
+          for (j = 0; j < 80; j += 1) {
+            if (j < 16) {
+              w[j] = x[i + j];
+            } else {
+              w[j] = bit_rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
+            }
+            t = safe_add(safe_add(bit_rol(a, 5), sha1_ft(j, b, c, d)),
+              safe_add(safe_add(e, w[j]), sha1_kt(j)));
+            e = d;
+            d = c;
+            c = bit_rol(b, 30);
+            b = a;
+            a = t;
+          }
+
+          a = safe_add(a, olda);
+          b = safe_add(b, oldb);
+          c = safe_add(c, oldc);
+          d = safe_add(d, oldd);
+          e = safe_add(e, olde);
+        }
+        return Array(a, b, c, d, e);
+      }
+
+      /**
+       * Perform the appropriate triplet combination function for the current
+       * iteration
+       */
+
+      function sha1_ft(t, b, c, d) {
+        if (t < 20) {
+          return (b & c) | ((~b) & d);
+        }
+        if (t < 40) {
+          return b ^ c ^ d;
+        }
+        if (t < 60) {
+          return (b & c) | (b & d) | (c & d);
+        }
+        return b ^ c ^ d;
+      }
+
+      /**
+       * Determine the appropriate additive constant for the current iteration
+       */
+
+      function sha1_kt(t) {
+        return (t < 20) ? 1518500249 : (t < 40) ? 1859775393 :
+          (t < 60) ? -1894007588 : -899497514;
+      }
+    },
+    /**
+     * @class Hashes.SHA256
+     * @param {config}
+     *
+     * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2
+     * Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     * Also http://anmar.eu.org/projects/jssha2/
+     */
+    SHA256: function(options) {
+      /**
+       * Private properties configuration variables. You may need to tweak these to be compatible with
+       * the server-side, but the defaults work in most cases.
+       * @see this.setUpperCase() method
+       * @see this.setPad() method
+       */
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase  */
+        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
+        /* base-64 pad character. Default '=' for strict RFC compliance   */
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
+        /* enable/disable utf8 encoding */
+        sha256_K;
+
+      /* privileged (public) methods */
+      this.hex = function(s) {
+        return rstr2hex(rstr(s, utf8));
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s, utf8), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s, utf8), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d));
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };
+      /**
+       * Perform a simple self-test to see if the VM is working
+       * @return {String} Hexadecimal hash sample
+       * @public
+       */
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      /**
+       * Enable/disable uppercase hexadecimal returned string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {string} Pad
+       * @return {Object} this
+       * @public
+       */
+      this.setPad = function(a) {
+        b64pad = a || b64pad;
+        return this;
+      };
+      /**
+       * Defines a base64 pad string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };
+
+      // private methods
+
+      /**
+       * Calculate the SHA-512 of a raw string
+       */
+
+      function rstr(s, utf8) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binb2rstr(binb(rstr2binb(s), s.length * 8));
+      }
+
+      /**
+       * Calculate the HMAC-sha256 of a key and some data (raw strings)
+       */
+
+      function rstr_hmac(key, data) {
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+        var hash, i = 0,
+          bkey = rstr2binb(key),
+          ipad = Array(16),
+          opad = Array(16);
+
+        if (bkey.length > 16) {
+          bkey = binb(bkey, key.length * 8);
+        }
+
+        for (; i < 16; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+
+        hash = binb(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
+        return binb2rstr(binb(opad.concat(hash), 512 + 256));
+      }
+
+      /*
+       * Main sha256 function, with its support functions
+       */
+
+      function sha256_S(X, n) {
+        return (X >>> n) | (X << (32 - n));
+      }
+
+      function sha256_R(X, n) {
+        return (X >>> n);
+      }
+
+      function sha256_Ch(x, y, z) {
+        return ((x & y) ^ ((~x) & z));
+      }
+
+      function sha256_Maj(x, y, z) {
+        return ((x & y) ^ (x & z) ^ (y & z));
+      }
+
+      function sha256_Sigma0256(x) {
+        return (sha256_S(x, 2) ^ sha256_S(x, 13) ^ sha256_S(x, 22));
+      }
+
+      function sha256_Sigma1256(x) {
+        return (sha256_S(x, 6) ^ sha256_S(x, 11) ^ sha256_S(x, 25));
+      }
+
+      function sha256_Gamma0256(x) {
+        return (sha256_S(x, 7) ^ sha256_S(x, 18) ^ sha256_R(x, 3));
+      }
+
+      function sha256_Gamma1256(x) {
+        return (sha256_S(x, 17) ^ sha256_S(x, 19) ^ sha256_R(x, 10));
+      }
+
+      function sha256_Sigma0512(x) {
+        return (sha256_S(x, 28) ^ sha256_S(x, 34) ^ sha256_S(x, 39));
+      }
+
+      function sha256_Sigma1512(x) {
+        return (sha256_S(x, 14) ^ sha256_S(x, 18) ^ sha256_S(x, 41));
+      }
+
+      function sha256_Gamma0512(x) {
+        return (sha256_S(x, 1) ^ sha256_S(x, 8) ^ sha256_R(x, 7));
+      }
+
+      function sha256_Gamma1512(x) {
+        return (sha256_S(x, 19) ^ sha256_S(x, 61) ^ sha256_R(x, 6));
+      }
+
+      sha256_K = [
+        1116352408, 1899447441, -1245643825, -373957723, 961987163, 1508970993, -1841331548, -1424204075, -670586216, 310598401, 607225278, 1426881987,
+        1925078388, -2132889090, -1680079193, -1046744716, -459576895, -272742522,
+        264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, -1740746414, -1473132947, -1341970488, -1084653625, -958395405, -710438585,
+        113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291,
+        1695183700, 1986661051, -2117940946, -1838011259, -1564481375, -1474664885, -1035236496, -949202525, -778901479, -694614492, -200395387, 275423344,
+        430227734, 506948616, 659060556, 883997877, 958139571, 1322822218,
+        1537002063, 1747873779, 1955562222, 2024104815, -2067236844, -1933114872, -1866530822, -1538233109, -1090935817, -965641998
+      ];
+
+      function binb(m, l) {
+        var HASH = [1779033703, -1150833019, 1013904242, -1521486534,
+          1359893119, -1694144372, 528734635, 1541459225
+        ];
+        var W = new Array(64);
+        var a, b, c, d, e, f, g, h;
+        var i, j, T1, T2;
+
+        /* append padding */
+        m[l >> 5] |= 0x80 << (24 - l % 32);
+        m[((l + 64 >> 9) << 4) + 15] = l;
+
+        for (i = 0; i < m.length; i += 16) {
+          a = HASH[0];
+          b = HASH[1];
+          c = HASH[2];
+          d = HASH[3];
+          e = HASH[4];
+          f = HASH[5];
+          g = HASH[6];
+          h = HASH[7];
+
+          for (j = 0; j < 64; j += 1) {
+            if (j < 16) {
+              W[j] = m[j + i];
+            } else {
+              W[j] = safe_add(safe_add(safe_add(sha256_Gamma1256(W[j - 2]), W[j - 7]),
+                sha256_Gamma0256(W[j - 15])), W[j - 16]);
+            }
+
+            T1 = safe_add(safe_add(safe_add(safe_add(h, sha256_Sigma1256(e)), sha256_Ch(e, f, g)),
+              sha256_K[j]), W[j]);
+            T2 = safe_add(sha256_Sigma0256(a), sha256_Maj(a, b, c));
+            h = g;
+            g = f;
+            f = e;
+            e = safe_add(d, T1);
+            d = c;
+            c = b;
+            b = a;
+            a = safe_add(T1, T2);
+          }
+
+          HASH[0] = safe_add(a, HASH[0]);
+          HASH[1] = safe_add(b, HASH[1]);
+          HASH[2] = safe_add(c, HASH[2]);
+          HASH[3] = safe_add(d, HASH[3]);
+          HASH[4] = safe_add(e, HASH[4]);
+          HASH[5] = safe_add(f, HASH[5]);
+          HASH[6] = safe_add(g, HASH[6]);
+          HASH[7] = safe_add(h, HASH[7]);
+        }
+        return HASH;
+      }
+
+    },
+
+    /**
+     * @class Hashes.SHA512
+     * @param {config}
+     *
+     * A JavaScript implementation of the Secure Hash Algorithm, SHA-512, as defined in FIPS 180-2
+     * Version 2.2 Copyright Anonymous Contributor, Paul Johnston 2000 - 2009.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     */
+    SHA512: function(options) {
+      /**
+       * Private properties configuration variables. You may need to tweak these to be compatible with
+       * the server-side, but the defaults work in most cases.
+       * @see this.setUpperCase() method
+       * @see this.setPad() method
+       */
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false,
+        /* hexadecimal output case format. false - lowercase; true - uppercase  */
+        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
+        /* base-64 pad character. Default '=' for strict RFC compliance   */
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
+        /* enable/disable utf8 encoding */
+        sha512_k;
+
+      /* privileged (public) methods */
+      this.hex = function(s) {
+        return rstr2hex(rstr(s));
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d));
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };
+      /**
+       * Perform a simple self-test to see if the VM is working
+       * @return {String} Hexadecimal hash sample
+       * @public
+       */
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      /**
+       * @description Enable/disable uppercase hexadecimal returned string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {string} Pad
+       * @return {Object} this
+       * @public
+       */
+      this.setPad = function(a) {
+        b64pad = a || b64pad;
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };
+
+      /* private methods */
+
+      /**
+       * Calculate the SHA-512 of a raw string
+       */
+
+      function rstr(s) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binb2rstr(binb(rstr2binb(s), s.length * 8));
+      }
+      /*
+       * Calculate the HMAC-SHA-512 of a key and some data (raw strings)
+       */
+
+      function rstr_hmac(key, data) {
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+
+        var hash, i = 0,
+          bkey = rstr2binb(key),
+          ipad = Array(32),
+          opad = Array(32);
+
+        if (bkey.length > 32) {
+          bkey = binb(bkey, key.length * 8);
+        }
+
+        for (; i < 32; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+
+        hash = binb(ipad.concat(rstr2binb(data)), 1024 + data.length * 8);
+        return binb2rstr(binb(opad.concat(hash), 1024 + 512));
+      }
+
+      /**
+       * Calculate the SHA-512 of an array of big-endian dwords, and a bit length
+       */
+
+      function binb(x, len) {
+        var j, i, l,
+          W = new Array(80),
+          hash = new Array(16),
+          //Initial hash values
+          H = [
+            new int64(0x6a09e667, -205731576),
+            new int64(-1150833019, -2067093701),
+            new int64(0x3c6ef372, -23791573),
+            new int64(-1521486534, 0x5f1d36f1),
+            new int64(0x510e527f, -1377402159),
+            new int64(-1694144372, 0x2b3e6c1f),
+            new int64(0x1f83d9ab, -79577749),
+            new int64(0x5be0cd19, 0x137e2179)
+          ],
+          T1 = new int64(0, 0),
+          T2 = new int64(0, 0),
+          a = new int64(0, 0),
+          b = new int64(0, 0),
+          c = new int64(0, 0),
+          d = new int64(0, 0),
+          e = new int64(0, 0),
+          f = new int64(0, 0),
+          g = new int64(0, 0),
+          h = new int64(0, 0),
+          //Temporary variables not specified by the document
+          s0 = new int64(0, 0),
+          s1 = new int64(0, 0),
+          Ch = new int64(0, 0),
+          Maj = new int64(0, 0),
+          r1 = new int64(0, 0),
+          r2 = new int64(0, 0),
+          r3 = new int64(0, 0);
+
+        if (sha512_k === undefined) {
+          //SHA512 constants
+          sha512_k = [
+            new int64(0x428a2f98, -685199838), new int64(0x71374491, 0x23ef65cd),
+            new int64(-1245643825, -330482897), new int64(-373957723, -2121671748),
+            new int64(0x3956c25b, -213338824), new int64(0x59f111f1, -1241133031),
+            new int64(-1841331548, -1357295717), new int64(-1424204075, -630357736),
+            new int64(-670586216, -1560083902), new int64(0x12835b01, 0x45706fbe),
+            new int64(0x243185be, 0x4ee4b28c), new int64(0x550c7dc3, -704662302),
+            new int64(0x72be5d74, -226784913), new int64(-2132889090, 0x3b1696b1),
+            new int64(-1680079193, 0x25c71235), new int64(-1046744716, -815192428),
+            new int64(-459576895, -1628353838), new int64(-272742522, 0x384f25e3),
+            new int64(0xfc19dc6, -1953704523), new int64(0x240ca1cc, 0x77ac9c65),
+            new int64(0x2de92c6f, 0x592b0275), new int64(0x4a7484aa, 0x6ea6e483),
+            new int64(0x5cb0a9dc, -1119749164), new int64(0x76f988da, -2096016459),
+            new int64(-1740746414, -295247957), new int64(-1473132947, 0x2db43210),
+            new int64(-1341970488, -1728372417), new int64(-1084653625, -1091629340),
+            new int64(-958395405, 0x3da88fc2), new int64(-710438585, -1828018395),
+            new int64(0x6ca6351, -536640913), new int64(0x14292967, 0xa0e6e70),
+            new int64(0x27b70a85, 0x46d22ffc), new int64(0x2e1b2138, 0x5c26c926),
+            new int64(0x4d2c6dfc, 0x5ac42aed), new int64(0x53380d13, -1651133473),
+            new int64(0x650a7354, -1951439906), new int64(0x766a0abb, 0x3c77b2a8),
+            new int64(-2117940946, 0x47edaee6), new int64(-1838011259, 0x1482353b),
+            new int64(-1564481375, 0x4cf10364), new int64(-1474664885, -1136513023),
+            new int64(-1035236496, -789014639), new int64(-949202525, 0x654be30),
+            new int64(-778901479, -688958952), new int64(-694614492, 0x5565a910),
+            new int64(-200395387, 0x5771202a), new int64(0x106aa070, 0x32bbd1b8),
+            new int64(0x19a4c116, -1194143544), new int64(0x1e376c08, 0x5141ab53),
+            new int64(0x2748774c, -544281703), new int64(0x34b0bcb5, -509917016),
+            new int64(0x391c0cb3, -976659869), new int64(0x4ed8aa4a, -482243893),
+            new int64(0x5b9cca4f, 0x7763e373), new int64(0x682e6ff3, -692930397),
+            new int64(0x748f82ee, 0x5defb2fc), new int64(0x78a5636f, 0x43172f60),
+            new int64(-2067236844, -1578062990), new int64(-1933114872, 0x1a6439ec),
+            new int64(-1866530822, 0x23631e28), new int64(-1538233109, -561857047),
+            new int64(-1090935817, -1295615723), new int64(-965641998, -479046869),
+            new int64(-903397682, -366583396), new int64(-779700025, 0x21c0c207),
+            new int64(-354779690, -840897762), new int64(-176337025, -294727304),
+            new int64(0x6f067aa, 0x72176fba), new int64(0xa637dc5, -1563912026),
+            new int64(0x113f9804, -1090974290), new int64(0x1b710b35, 0x131c471b),
+            new int64(0x28db77f5, 0x23047d84), new int64(0x32caab7b, 0x40c72493),
+            new int64(0x3c9ebe0a, 0x15c9bebc), new int64(0x431d67c4, -1676669620),
+            new int64(0x4cc5d4be, -885112138), new int64(0x597f299c, -60457430),
+            new int64(0x5fcb6fab, 0x3ad6faec), new int64(0x6c44198c, 0x4a475817)
+          ];
+        }
+
+        for (i = 0; i < 80; i += 1) {
+          W[i] = new int64(0, 0);
+        }
+
+        // append padding to the source string. The format is described in the FIPS.
+        x[len >> 5] |= 0x80 << (24 - (len & 0x1f));
+        x[((len + 128 >> 10) << 5) + 31] = len;
+        l = x.length;
+        for (i = 0; i < l; i += 32) { //32 dwords is the block size
+          int64copy(a, H[0]);
+          int64copy(b, H[1]);
+          int64copy(c, H[2]);
+          int64copy(d, H[3]);
+          int64copy(e, H[4]);
+          int64copy(f, H[5]);
+          int64copy(g, H[6]);
+          int64copy(h, H[7]);
+
+          for (j = 0; j < 16; j += 1) {
+            W[j].h = x[i + 2 * j];
+            W[j].l = x[i + 2 * j + 1];
+          }
+
+          for (j = 16; j < 80; j += 1) {
+            //sigma1
+            int64rrot(r1, W[j - 2], 19);
+            int64revrrot(r2, W[j - 2], 29);
+            int64shr(r3, W[j - 2], 6);
+            s1.l = r1.l ^ r2.l ^ r3.l;
+            s1.h = r1.h ^ r2.h ^ r3.h;
+            //sigma0
+            int64rrot(r1, W[j - 15], 1);
+            int64rrot(r2, W[j - 15], 8);
+            int64shr(r3, W[j - 15], 7);
+            s0.l = r1.l ^ r2.l ^ r3.l;
+            s0.h = r1.h ^ r2.h ^ r3.h;
+
+            int64add4(W[j], s1, W[j - 7], s0, W[j - 16]);
+          }
+
+          for (j = 0; j < 80; j += 1) {
+            //Ch
+            Ch.l = (e.l & f.l) ^ (~e.l & g.l);
+            Ch.h = (e.h & f.h) ^ (~e.h & g.h);
+
+            //Sigma1
+            int64rrot(r1, e, 14);
+            int64rrot(r2, e, 18);
+            int64revrrot(r3, e, 9);
+            s1.l = r1.l ^ r2.l ^ r3.l;
+            s1.h = r1.h ^ r2.h ^ r3.h;
+
+            //Sigma0
+            int64rrot(r1, a, 28);
+            int64revrrot(r2, a, 2);
+            int64revrrot(r3, a, 7);
+            s0.l = r1.l ^ r2.l ^ r3.l;
+            s0.h = r1.h ^ r2.h ^ r3.h;
+
+            //Maj
+            Maj.l = (a.l & b.l) ^ (a.l & c.l) ^ (b.l & c.l);
+            Maj.h = (a.h & b.h) ^ (a.h & c.h) ^ (b.h & c.h);
+
+            int64add5(T1, h, s1, Ch, sha512_k[j], W[j]);
+            int64add(T2, s0, Maj);
+
+            int64copy(h, g);
+            int64copy(g, f);
+            int64copy(f, e);
+            int64add(e, d, T1);
+            int64copy(d, c);
+            int64copy(c, b);
+            int64copy(b, a);
+            int64add(a, T1, T2);
+          }
+          int64add(H[0], H[0], a);
+          int64add(H[1], H[1], b);
+          int64add(H[2], H[2], c);
+          int64add(H[3], H[3], d);
+          int64add(H[4], H[4], e);
+          int64add(H[5], H[5], f);
+          int64add(H[6], H[6], g);
+          int64add(H[7], H[7], h);
+        }
+
+        //represent the hash as an array of 32-bit dwords
+        for (i = 0; i < 8; i += 1) {
+          hash[2 * i] = H[i].h;
+          hash[2 * i + 1] = H[i].l;
+        }
+        return hash;
+      }
+
+      //A constructor for 64-bit numbers
+
+      function int64(h, l) {
+        this.h = h;
+        this.l = l;
+        //this.toString = int64toString;
+      }
+
+      //Copies src into dst, assuming both are 64-bit numbers
+
+      function int64copy(dst, src) {
+        dst.h = src.h;
+        dst.l = src.l;
+      }
+
+      //Right-rotates a 64-bit number by shift
+      //Won't handle cases of shift>=32
+      //The function revrrot() is for that
+
+      function int64rrot(dst, x, shift) {
+        dst.l = (x.l >>> shift) | (x.h << (32 - shift));
+        dst.h = (x.h >>> shift) | (x.l << (32 - shift));
+      }
+
+      //Reverses the dwords of the source and then rotates right by shift.
+      //This is equivalent to rotation by 32+shift
+
+      function int64revrrot(dst, x, shift) {
+        dst.l = (x.h >>> shift) | (x.l << (32 - shift));
+        dst.h = (x.l >>> shift) | (x.h << (32 - shift));
+      }
+
+      //Bitwise-shifts right a 64-bit number by shift
+      //Won't handle shift>=32, but it's never needed in SHA512
+
+      function int64shr(dst, x, shift) {
+        dst.l = (x.l >>> shift) | (x.h << (32 - shift));
+        dst.h = (x.h >>> shift);
+      }
+
+      //Adds two 64-bit numbers
+      //Like the original implementation, does not rely on 32-bit operations
+
+      function int64add(dst, x, y) {
+        var w0 = (x.l & 0xffff) + (y.l & 0xffff);
+        var w1 = (x.l >>> 16) + (y.l >>> 16) + (w0 >>> 16);
+        var w2 = (x.h & 0xffff) + (y.h & 0xffff) + (w1 >>> 16);
+        var w3 = (x.h >>> 16) + (y.h >>> 16) + (w2 >>> 16);
+        dst.l = (w0 & 0xffff) | (w1 << 16);
+        dst.h = (w2 & 0xffff) | (w3 << 16);
+      }
+
+      //Same, except with 4 addends. Works faster than adding them one by one.
+
+      function int64add4(dst, a, b, c, d) {
+        var w0 = (a.l & 0xffff) + (b.l & 0xffff) + (c.l & 0xffff) + (d.l & 0xffff);
+        var w1 = (a.l >>> 16) + (b.l >>> 16) + (c.l >>> 16) + (d.l >>> 16) + (w0 >>> 16);
+        var w2 = (a.h & 0xffff) + (b.h & 0xffff) + (c.h & 0xffff) + (d.h & 0xffff) + (w1 >>> 16);
+        var w3 = (a.h >>> 16) + (b.h >>> 16) + (c.h >>> 16) + (d.h >>> 16) + (w2 >>> 16);
+        dst.l = (w0 & 0xffff) | (w1 << 16);
+        dst.h = (w2 & 0xffff) | (w3 << 16);
+      }
+
+      //Same, except with 5 addends
+
+      function int64add5(dst, a, b, c, d, e) {
+        var w0 = (a.l & 0xffff) + (b.l & 0xffff) + (c.l & 0xffff) + (d.l & 0xffff) + (e.l & 0xffff),
+          w1 = (a.l >>> 16) + (b.l >>> 16) + (c.l >>> 16) + (d.l >>> 16) + (e.l >>> 16) + (w0 >>> 16),
+          w2 = (a.h & 0xffff) + (b.h & 0xffff) + (c.h & 0xffff) + (d.h & 0xffff) + (e.h & 0xffff) + (w1 >>> 16),
+          w3 = (a.h >>> 16) + (b.h >>> 16) + (c.h >>> 16) + (d.h >>> 16) + (e.h >>> 16) + (w2 >>> 16);
+        dst.l = (w0 & 0xffff) | (w1 << 16);
+        dst.h = (w2 & 0xffff) | (w3 << 16);
+      }
+    },
+    /**
+     * @class Hashes.RMD160
+     * @constructor
+     * @param {Object} [config]
+     *
+     * A JavaScript implementation of the RIPEMD-160 Algorithm
+     * Version 2.2 Copyright Jeremy Lin, Paul Johnston 2000 - 2009.
+     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+     * See http://pajhome.org.uk/crypt/md5 for details.
+     * Also http://www.ocf.berkeley.edu/~jjlin/jsotp/
+     */
+    RMD160: function(options) {
+      /**
+       * Private properties configuration variables. You may need to tweak these to be compatible with
+       * the server-side, but the defaults work in most cases.
+       * @see this.setUpperCase() method
+       * @see this.setPad() method
+       */
+      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false,
+        /* hexadecimal output case format. false - lowercase; true - uppercase  */
+        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
+        /* base-64 pad character. Default '=' for strict RFC compliance   */
+        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
+        /* enable/disable utf8 encoding */
+        rmd160_r1 = [
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+          7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
+          3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
+          1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
+          4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13
+        ],
+        rmd160_r2 = [
+          5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
+          6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
+          15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
+          8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
+          12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
+        ],
+        rmd160_s1 = [
+          11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
+          7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
+          11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
+          11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
+          9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6
+        ],
+        rmd160_s2 = [
+          8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
+          9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
+          9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
+          15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
+          8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
+        ];
+
+      /* privileged (public) methods */
+      this.hex = function(s) {
+        return rstr2hex(rstr(s, utf8));
+      };
+      this.b64 = function(s) {
+        return rstr2b64(rstr(s, utf8), b64pad);
+      };
+      this.any = function(s, e) {
+        return rstr2any(rstr(s, utf8), e);
+      };
+      this.raw = function(s) {
+        return rstr(s, utf8);
+      };
+      this.hex_hmac = function(k, d) {
+        return rstr2hex(rstr_hmac(k, d));
+      };
+      this.b64_hmac = function(k, d) {
+        return rstr2b64(rstr_hmac(k, d), b64pad);
+      };
+      this.any_hmac = function(k, d, e) {
+        return rstr2any(rstr_hmac(k, d), e);
+      };
+      /**
+       * Perform a simple self-test to see if the VM is working
+       * @return {String} Hexadecimal hash sample
+       * @public
+       */
+      this.vm_test = function() {
+        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
+      };
+      /**
+       * @description Enable/disable uppercase hexadecimal returned string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUpperCase = function(a) {
+        if (typeof a === 'boolean') {
+          hexcase = a;
+        }
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {string} Pad
+       * @return {Object} this
+       * @public
+       */
+      this.setPad = function(a) {
+        if (typeof a !== 'undefined') {
+          b64pad = a;
+        }
+        return this;
+      };
+      /**
+       * @description Defines a base64 pad string
+       * @param {boolean}
+       * @return {Object} this
+       * @public
+       */
+      this.setUTF8 = function(a) {
+        if (typeof a === 'boolean') {
+          utf8 = a;
+        }
+        return this;
+      };
+
+      /* private methods */
+
+      /**
+       * Calculate the rmd160 of a raw string
+       */
+
+      function rstr(s) {
+        s = (utf8) ? utf8Encode(s) : s;
+        return binl2rstr(binl(rstr2binl(s), s.length * 8));
+      }
+
+      /**
+       * Calculate the HMAC-rmd160 of a key and some data (raw strings)
+       */
+
+      function rstr_hmac(key, data) {
+        key = (utf8) ? utf8Encode(key) : key;
+        data = (utf8) ? utf8Encode(data) : data;
+        var i, hash,
+          bkey = rstr2binl(key),
+          ipad = Array(16),
+          opad = Array(16);
+
+        if (bkey.length > 16) {
+          bkey = binl(bkey, key.length * 8);
+        }
+
+        for (i = 0; i < 16; i += 1) {
+          ipad[i] = bkey[i] ^ 0x36363636;
+          opad[i] = bkey[i] ^ 0x5C5C5C5C;
+        }
+        hash = binl(ipad.concat(rstr2binl(data)), 512 + data.length * 8);
+        return binl2rstr(binl(opad.concat(hash), 512 + 160));
+      }
+
+      /**
+       * Convert an array of little-endian words to a string
+       */
+
+      function binl2rstr(input) {
+        var i, output = '',
+          l = input.length * 32;
+        for (i = 0; i < l; i += 8) {
+          output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
+        }
+        return output;
+      }
+
+      /**
+       * Calculate the RIPE-MD160 of an array of little-endian words, and a bit length.
+       */
+
+      function binl(x, len) {
+        var T, j, i, l,
+          h0 = 0x67452301,
+          h1 = 0xefcdab89,
+          h2 = 0x98badcfe,
+          h3 = 0x10325476,
+          h4 = 0xc3d2e1f0,
+          A1, B1, C1, D1, E1,
+          A2, B2, C2, D2, E2;
+
+        /* append padding */
+        x[len >> 5] |= 0x80 << (len % 32);
+        x[(((len + 64) >>> 9) << 4) + 14] = len;
+        l = x.length;
+
+        for (i = 0; i < l; i += 16) {
+          A1 = A2 = h0;
+          B1 = B2 = h1;
+          C1 = C2 = h2;
+          D1 = D2 = h3;
+          E1 = E2 = h4;
+          for (j = 0; j <= 79; j += 1) {
+            T = safe_add(A1, rmd160_f(j, B1, C1, D1));
+            T = safe_add(T, x[i + rmd160_r1[j]]);
+            T = safe_add(T, rmd160_K1(j));
+            T = safe_add(bit_rol(T, rmd160_s1[j]), E1);
+            A1 = E1;
+            E1 = D1;
+            D1 = bit_rol(C1, 10);
+            C1 = B1;
+            B1 = T;
+            T = safe_add(A2, rmd160_f(79 - j, B2, C2, D2));
+            T = safe_add(T, x[i + rmd160_r2[j]]);
+            T = safe_add(T, rmd160_K2(j));
+            T = safe_add(bit_rol(T, rmd160_s2[j]), E2);
+            A2 = E2;
+            E2 = D2;
+            D2 = bit_rol(C2, 10);
+            C2 = B2;
+            B2 = T;
+          }
+
+          T = safe_add(h1, safe_add(C1, D2));
+          h1 = safe_add(h2, safe_add(D1, E2));
+          h2 = safe_add(h3, safe_add(E1, A2));
+          h3 = safe_add(h4, safe_add(A1, B2));
+          h4 = safe_add(h0, safe_add(B1, C2));
+          h0 = T;
+        }
+        return [h0, h1, h2, h3, h4];
+      }
+
+      // specific algorithm methods
+
+      function rmd160_f(j, x, y, z) {
+        return (0 <= j && j <= 15) ? (x ^ y ^ z) :
+          (16 <= j && j <= 31) ? (x & y) | (~x & z) :
+          (32 <= j && j <= 47) ? (x | ~y) ^ z :
+          (48 <= j && j <= 63) ? (x & z) | (y & ~z) :
+          (64 <= j && j <= 79) ? x ^ (y | ~z) :
+          'rmd160_f: j out of range';
+      }
+
+      function rmd160_K1(j) {
+        return (0 <= j && j <= 15) ? 0x00000000 :
+          (16 <= j && j <= 31) ? 0x5a827999 :
+          (32 <= j && j <= 47) ? 0x6ed9eba1 :
+          (48 <= j && j <= 63) ? 0x8f1bbcdc :
+          (64 <= j && j <= 79) ? 0xa953fd4e :
+          'rmd160_K1: j out of range';
+      }
+
+      function rmd160_K2(j) {
+        return (0 <= j && j <= 15) ? 0x50a28be6 :
+          (16 <= j && j <= 31) ? 0x5c4dd124 :
+          (32 <= j && j <= 47) ? 0x6d703ef3 :
+          (48 <= j && j <= 63) ? 0x7a6d76e9 :
+          (64 <= j && j <= 79) ? 0x00000000 :
+          'rmd160_K2: j out of range';
+      }
+    }
+  };
+
+  // exposes Hashes
+  (function(window, undefined) {
+    var freeExports = false;
+    if (typeof exports === 'object') {
+      freeExports = exports;
+      if (exports && typeof global === 'object' && global && global === global.global) {
+        window = global;
+      }
+    }
+
+    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+      // define as an anonymous module, so, through path mapping, it can be aliased
+      define(function() {
+        return Hashes;
+      });
+    } else if (freeExports) {
+      // in Node.js or RingoJS v0.8.0+
+      if (typeof module === 'object' && module && module.exports === freeExports) {
+        module.exports = Hashes;
+      }
+      // in Narwhal or RingoJS v0.7.0-
+      else {
+        freeExports.Hashes = Hashes;
+      }
+    } else {
+      // in a browser or Rhino
+      window.Hashes = Hashes;
+    }
+  }(this));
+}()); // IIFE
+
 var self = self || {};// File:src/Three.js
 
 /**
@@ -51321,6 +53087,2771 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 };
 
 THREE.EventDispatcher.prototype.apply( THREE.MTLLoader.prototype );
+
+/**
+ * @author yamahigashi https://github.com/yamahigashi
+ *
+ * This loader loads FBX file in *ASCII and version 7 format*.
+ *
+ * Support
+ *  - mesh
+ *  - skinning
+ *  - normal / uv
+ *
+ *  Not Support
+ *  - material
+ *  - texture
+ *  - morph
+ */
+
+( function() {
+
+	THREE.FBXLoader = function ( showStatus, manager ) {
+
+		THREE.Loader.call( this, showStatus );
+		this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+		this.textureLoader = null;
+		this.textureBasePath = null;
+
+	};
+
+	THREE.FBXLoader.prototype = Object.create( THREE.Loader.prototype );
+
+	THREE.FBXLoader.prototype.constructor = THREE.FBXLoader;
+
+	THREE.FBXLoader.prototype.load = function ( url, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new THREE.XHRLoader( scope.manager );
+		// loader.setCrossOrigin( this.crossOrigin );
+		loader.load( url, function ( text ) {
+
+			if ( ! scope.isFbxFormatASCII( text ) ) {
+
+				console.warn( 'FBXLoader: !!! FBX Binary format not supported !!!' );
+
+			} else if ( ! scope.isFbxVersionSupported( text ) ) {
+
+				console.warn( 'FBXLoader: !!! FBX Version below 7 not supported !!!' );
+
+			} else {
+
+				scope.textureBasePath = scope.extractUrlBase( url );
+				onLoad( scope.parse( text ) );
+
+			}
+
+		}, onProgress, onError );
+
+	};
+
+	THREE.FBXLoader.prototype.setCrossOrigin = function ( value ) {
+
+		this.crossOrigin = value;
+
+	};
+
+	THREE.FBXLoader.prototype.isFbxFormatASCII = function ( body ) {
+
+		CORRECT = [ 'K', 'a', 'y', 'd', 'a', 'r', 'a', '\\', 'F', 'B', 'X', '\\', 'B', 'i', 'n', 'a', 'r', 'y', '\\', '\\' ];
+
+		var cursor = 0;
+		var read = function ( offset ) {
+
+			var result = body[ offset - 1 ];
+			body = body.slice( cursor + offset );
+			cursor ++;
+			return result;
+
+		};
+
+		for ( var i = 0; i < CORRECT.length; ++ i ) {
+
+			num = read( 1 );
+			if ( num == CORRECT[ i ] ) {
+
+				return false;
+
+			}
+
+		}
+
+		return true;
+
+	};
+
+	THREE.FBXLoader.prototype.isFbxVersionSupported = function ( body ) {
+
+		var versionExp = /FBXVersion: (\d+)/;
+		match = body.match( versionExp );
+		if ( match ) {
+
+			var version = parseInt( match[ 1 ] );
+			console.log( 'FBXLoader: FBX version ' + version );
+			return version >= 7000;
+
+		}
+		return false;
+
+	};
+
+	THREE.FBXLoader.prototype.parse = function ( text ) {
+
+		var scope = this;
+
+		console.time( 'FBXLoader' );
+
+		console.time( 'FBXLoader: TextParser' );
+		var nodes = new FBXParser().parse( text );
+		console.timeEnd( 'FBXLoader: TextParser' );
+
+		console.time( 'FBXLoader: ObjectParser' );
+		scope.hierarchy = ( new Bones() ).parseHierarchy( nodes );
+		scope.weights	= ( new Weights() ).parse( nodes, scope.hierarchy );
+		scope.animations = ( new Animation() ).parse( nodes, scope.hierarchy );
+		scope.textures = ( new Textures() ).parse( nodes, scope.hierarchy );
+		console.timeEnd( 'FBXLoader: ObjectParser' );
+
+		console.time( 'FBXLoader: GeometryParser' );
+		geometries = this.parseGeometries( nodes );
+		console.timeEnd( 'FBXLoader: GeometryParser' );
+
+		var container = new THREE.Group();
+
+		for ( var i = 0; i < geometries.length; ++ i ) {
+
+			if ( geometries[ i ] === undefined ) {
+
+				continue;
+
+			}
+
+			container.add( geometries[ i ] );
+
+			//wireframe = new THREE.WireframeHelper( geometries[i], 0x00ff00 );
+			//container.add( wireframe );
+
+			//vnh = new THREE.VertexNormalsHelper( geometries[i], 0.6 );
+			//container.add( vnh );
+
+			//skh = new THREE.SkeletonHelper( geometries[i] );
+			//container.add( skh );
+
+			// container.add( new THREE.BoxHelper( geometries[i] ) );
+
+		}
+
+		console.timeEnd( 'FBXLoader' );
+		return container;
+
+	};
+
+	THREE.FBXLoader.prototype.parseGeometries = function ( node ) {
+
+		// has not geo, return []
+		if ( ! ( 'Geometry' in node.Objects.subNodes ) ) {
+
+			return [];
+
+		}
+
+		// has many
+		var geoCount = 0;
+		for ( var geo in node.Objects.subNodes.Geometry ) {
+
+			if ( geo.match( /^\d+$/ ) ) {
+
+				geoCount ++;
+
+			}
+
+		}
+
+		var res = [];
+		if ( geoCount > 0 ) {
+
+			for ( geo in node.Objects.subNodes.Geometry ) {
+
+				if ( node.Objects.subNodes.Geometry[ geo ].attrType === 'Mesh' ) {
+
+					res.push( this.parseGeometry( node.Objects.subNodes.Geometry[ geo ], node ) );
+
+				}
+
+			}
+
+		} else {
+
+			res.push( this.parseGeometry( node.Objects.subNodes.Geometry, node ) );
+
+		}
+
+		return res;
+
+	};
+
+	THREE.FBXLoader.prototype.parseGeometry = function ( node, nodes ) {
+
+		geo = ( new Geometry() ).parse( node );
+		geo.addBones( this.hierarchy.hierarchy );
+
+		//*
+		var geometry = new THREE.BufferGeometry();
+		geometry.name = geo.name;
+		geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geo.vertices ), 3 ) );
+
+		if ( geo.normals !== undefined && geo.normals.length > 0 ) {
+
+			geometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geo.normals ), 3 ) );
+
+		}
+
+		if ( geo.uvs !== undefined && geo.uvs.length > 0 ) {
+
+			geometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geo.uvs ), 2 ) );
+
+		}
+
+		if ( geo.indices !== undefined && geo.indices.length > 65535 ) {
+
+			geometry.setIndex( new THREE.BufferAttribute( new Uint32Array( geo.indices ), 1 ) );
+
+		} else if ( geo.indices !== undefined ) {
+
+			geometry.setIndex( new THREE.BufferAttribute( new Uint16Array( geo.indices ), 1 ) );
+
+		}
+
+		geometry.verticesNeedUpdate = true;
+		geometry.computeBoundingSphere();
+		geometry.computeBoundingBox();
+
+		// TODO: texture & material support
+		var texture;
+		var texs = this.textures.getById( nodes.searchConnectionParent( geo.id ) );
+		if ( texs !== undefined && texs.length > 0 ) {
+
+			if ( this.textureLoader === null ) {
+
+				this.textureLoader = new THREE.TextureLoader();
+
+			}
+			texture = this.textureLoader.load( this.textureBasePath + '/' + texs[ 0 ].fileName );
+
+		}
+
+		var material;
+		if ( texture !== undefined ) {
+
+			material = new THREE.MeshBasicMaterial( { map: texture } );
+
+		} else {
+
+			material = new THREE.MeshBasicMaterial( { color: 0x3300ff } );
+
+		}
+
+		geometry = new THREE.Geometry().fromBufferGeometry( geometry );
+		geometry.bones = geo.bones;
+		geometry.skinIndices = this.weights.skinIndices;
+		geometry.skinWeights = this.weights.skinWeights;
+
+		var mesh = null;
+		if ( geo.bones === undefined || geo.skins === undefined || this.animations === undefined || this.animations.length === 0 ) {
+
+			mesh = new THREE.Mesh( geometry, material );
+
+		} else {
+
+			material.skinning = true;
+			mesh = new THREE.SkinnedMesh( geometry, material );
+			this.addAnimation( mesh, this.weights.matrices, this.animations );
+
+		}
+
+		return mesh;
+
+	};
+
+	THREE.FBXLoader.prototype.addAnimation = function ( mesh, matrices, animations ) {
+
+		var animationdata = { "name": 'animationtest', "fps": 30, "length": animations.length, "hierarchy": [] };
+
+		for ( var i = 0; i < mesh.geometry.bones.length; ++ i ) {
+
+			var name = mesh.geometry.bones[ i ].name;
+			name = name.replace( /.*:/, '' );
+			animationdata.hierarchy.push( { parent: mesh.geometry.bones[ i ].parent, name: name, keys: [] } );
+
+		}
+
+		var hasCurve = function ( animNode, attr ) {
+
+			if ( animNode === undefined ) {
+
+				return false;
+
+			}
+
+			var attrNode;
+			switch ( attr ) {
+
+				case 'S':
+					if ( animNode.S === undefined ) {
+
+						return false;
+
+					}
+					attrNode = animNode.S;
+					break;
+
+				case 'R':
+					if ( animNode.R === undefined ) {
+
+						return false;
+
+					}
+					attrNode = animNode.R;
+					break;
+
+				case 'T':
+					if ( animNode.T === undefined ) {
+
+						return false;
+
+					}
+					attrNode = animNode.T;
+					break;
+			}
+
+			if ( attrNode.curves.x === undefined ) {
+
+				return false;
+
+			}
+
+			if ( attrNode.curves.y === undefined ) {
+
+				return false;
+
+			}
+
+			if ( attrNode.curves.z === undefined ) {
+
+				return false;
+
+			}
+
+			return true;
+
+		};
+
+		var hasKeyOnFrame = function ( attrNode, frame ) {
+
+			var x = isKeyExistOnFrame( attrNode.curves.x, frame );
+			var y = isKeyExistOnFrame( attrNode.curves.y, frame );
+			var z = isKeyExistOnFrame( attrNode.curves.z, frame );
+
+			return x && y && z;
+
+		};
+
+		var isKeyExistOnFrame = function ( curve, frame ) {
+
+			var value = curve.values[ frame ];
+			return value !== undefined;
+
+		};
+
+
+		var genKey = function ( animNode, bone ) {
+
+			// key initialize with its bone's bind pose at first
+			var key = {};
+			key.time = frame / animations.fps; // TODO:
+			key.pos = bone.pos;
+			key.rot = bone.rotq;
+			key.scl = bone.scl;
+
+			if ( animNode === undefined ) {
+
+				return key;
+
+			}
+
+			try {
+
+				if ( hasCurve( animNode, 'T' ) && hasKeyOnFrame( animNode.T, frame ) ) {
+
+					var pos = new THREE.Vector3(
+						animNode.T.curves.x.values[ frame ],
+						animNode.T.curves.y.values[ frame ],
+						animNode.T.curves.z.values[ frame ] );
+					key.pos = [ pos.x, pos.y, pos.z ];
+
+				} else {
+
+					delete key.pos;
+
+				}
+
+				if ( hasCurve( animNode, 'R' ) && hasKeyOnFrame( animNode.R, frame ) ) {
+
+					var rx = degToRad( animNode.R.curves.x.values[ frame ] );
+					var ry = degToRad( animNode.R.curves.y.values[ frame ] );
+					var rz = degToRad( animNode.R.curves.z.values[ frame ] );
+					var eul = new THREE.Vector3( rx, ry, rz );
+					var rot = quatFromVec( eul.x, eul.y, eul.z );
+					key.rot = [ rot.x, rot.y, rot.z, rot.w ];
+
+				} else {
+
+					delete key.rot;
+
+				}
+
+				if ( hasCurve( animNode, 'S' ) && hasKeyOnFrame( animNode.S, frame ) ) {
+
+					var scl = new THREE.Vector3(
+						animNode.S.curves.x.values[ frame ],
+						animNode.S.curves.y.values[ frame ],
+						animNode.S.curves.z.values[ frame ] );
+					key.scl = [ scl.x, scl.y, scl.z ];
+
+				} else {
+
+					delete key.scl;
+
+				}
+
+			} catch ( e ) {
+
+				// curve is not full plotted
+				console.log( bone );
+				console.log( e );
+
+			}
+
+			return key;
+
+		};
+
+		var bones = mesh.geometry.bones;
+		for ( frame = 0; frame < animations.frames; frame ++ ) {
+
+
+			for ( i = 0; i < bones.length; i ++ ) {
+
+				var bone = bones[ i ];
+				var animNode = animations.curves[ i ];
+
+				for ( var j = 0; j < animationdata.hierarchy.length; j ++ ) {
+
+					if ( animationdata.hierarchy[ j ].name === bone.name ) {
+
+						animationdata.hierarchy[ j ].keys.push( genKey( animNode, bone ) );
+
+					}
+
+				}
+
+			}
+
+		}
+
+		if ( mesh.geometry.animations === undefined ) {
+
+			mesh.geometry.animations = [];
+
+		}
+
+		mesh.geometry.animations.push( THREE.AnimationClip.parseAnimation( animationdata, mesh.geometry.bones ) );
+
+	};
+
+	THREE.FBXLoader.prototype.parseMaterials = function ( node ) {
+
+		// has not mat, return []
+		if ( ! ( 'Material' in node.subNodes ) ) {
+
+			return [];
+
+		}
+
+		// has many
+		var matCount = 0;
+		for ( var mat in node.subNodes.Materials ) {
+
+			if ( mat.match( /^\d+$/ ) ) {
+
+				matCount ++;
+
+			}
+
+		}
+
+		var res = [];
+		if ( matCount > 0 ) {
+
+			for ( mat in node.subNodes.Material ) {
+
+				res.push( parseMaterial( node.subNodes.Material[ mat ] ) );
+
+			}
+
+		} else {
+
+			res.push( parseMaterial( node.subNodes.Material ) );
+
+		}
+
+		return res;
+
+	};
+
+	// TODO
+	THREE.FBXLoader.prototype.parseMaterial = function ( node ) {
+
+	};
+
+
+	THREE.FBXLoader.prototype.loadFile = function ( url, onLoad, onProgress, onError, responseType ) {
+
+		var loader = new THREE.XHRLoader( this.manager );
+
+		loader.setResponseType( responseType );
+
+		var request = loader.load( url, function ( result ) {
+
+			onLoad( result );
+
+		}, onProgress, onError );
+
+		return request;
+
+	};
+
+	THREE.FBXLoader.prototype.loadFileAsBuffer = function ( url, onload, onProgress, onError ) {
+
+		this.loadFile( url, onLoad, onProgress, onError, 'arraybuffer' );
+
+	};
+
+	THREE.FBXLoader.prototype.loadFileAsText = function ( url, onLoad, onProgress, onError ) {
+
+		this.loadFile( url, onLoad, onProgress, onError, 'text' );
+
+	};
+
+
+	/* ----------------------------------------------------------------- */
+
+	function FBXNodes() {}
+
+	FBXNodes.prototype.add = function ( key, val ) {
+
+		this[ key ] = val;
+
+	};
+
+	FBXNodes.prototype.searchConnectionParent = function ( id ) {
+
+		if ( this.__cache_search_connection_parent === undefined ) {
+
+			this.__cache_search_connection_parent = [];
+
+		}
+
+		if ( this.__cache_search_connection_parent[ id ] !== undefined ) {
+
+			return this.__cache_search_connection_parent[ id ];
+
+		} else {
+
+			this.__cache_search_connection_parent[ id ] = [];
+
+		}
+
+		var conns = this.Connections.properties.connections;
+
+		var results = [];
+		for ( var i = 0; i < conns.length; ++ i ) {
+
+			if ( conns[ i ][ 0 ] == id ) {
+
+				// 0 means scene root
+				var res = conns[ i ][ 1 ] === 0 ? - 1 : conns[ i ][ 1 ];
+				results.push( res );
+
+			}
+
+		}
+
+		if ( results.length > 0 ) {
+
+			this.__cache_search_connection_parent[ id ] = this.__cache_search_connection_parent[ id ].concat( results );
+			return results;
+
+		} else {
+
+			this.__cache_search_connection_parent[ id ] = [ - 1 ];
+			return [ - 1 ];
+
+		}
+
+	};
+
+	FBXNodes.prototype.searchConnectionChildren = function ( id ) {
+
+		if ( this.__cache_search_connection_children === undefined ) {
+
+			this.__cache_search_connection_children = [];
+
+		}
+
+		if ( this.__cache_search_connection_children[ id ] !== undefined ) {
+
+			return this.__cache_search_connection_children[ id ];
+
+		} else {
+
+			this.__cache_search_connection_children[ id ] = [];
+
+		}
+
+		var conns = this.Connections.properties.connections;
+
+		var res = [];
+		for ( var i = 0; i < conns.length; ++ i ) {
+
+			if ( conns[ i ][ 1 ] == id ) {
+
+				// 0 means scene root
+				res.push( conns[ i ][ 0 ] === 0 ? - 1 : conns[ i ][ 0 ] );
+				// there may more than one kid, then search to the end
+
+			}
+
+		}
+
+		if ( res.length > 0 ) {
+
+			this.__cache_search_connection_children[ id ] = this.__cache_search_connection_children[ id ].concat( res );
+			return res;
+
+		} else {
+
+			this.__cache_search_connection_children[ id ] = [ - 1 ];
+			return [ - 1 ];
+
+		}
+
+	};
+
+	FBXNodes.prototype.searchConnectionType = function ( id, to ) {
+
+		var key = id + ',' + to; // TODO: to hash
+		if ( this.__cache_search_connection_type === undefined ) {
+
+			this.__cache_search_connection_type = '';
+
+		}
+
+		if ( this.__cache_search_connection_type[ key ] !== undefined ) {
+
+			return this.__cache_search_connection_type[ key ];
+
+		} else {
+
+			this.__cache_search_connection_type[ key ] = '';
+
+		}
+
+		var conns = this.Connections.properties.connections;
+
+		for ( var i = 0; i < conns.length; ++ i ) {
+
+			if ( conns[ i ][ 0 ] == id && conns[ i ][ 1 ] == to ) {
+
+				// 0 means scene root
+				this.__cache_search_connection_type[ key ] = conns[ i ][ 2 ];
+				return conns[ i ][ 2 ];
+
+			}
+
+		}
+
+		this.__cache_search_connection_type[ id ] = null;
+		return null;
+
+	};
+
+	function FBXParser() {}
+
+	FBXParser.prototype = {
+
+		// constructor: FBXParser,
+
+		// ------------ node stack manipulations ----------------------------------
+
+		getPrevNode: function () {
+
+			return this.nodeStack[ this.currentIndent - 2 ];
+
+		},
+
+		getCurrentNode: function () {
+
+			return this.nodeStack[ this.currentIndent - 1 ];
+
+		},
+
+		getCurrentProp: function () {
+
+			return this.currentProp;
+
+		},
+
+		pushStack: function ( node ) {
+
+			this.nodeStack.push( node );
+			this.currentIndent += 1;
+
+		},
+
+		popStack: function () {
+
+			this.nodeStack.pop();
+			this.currentIndent -= 1;
+
+		},
+
+		setCurrentProp: function ( val, name ) {
+
+			this.currentProp = val;
+			this.currentPropName = name;
+
+		},
+
+		// ----------parse ---------------------------------------------------
+		parse: function ( text ) {
+
+			this.currentIndent = 0;
+			this.allNodes = new FBXNodes();
+			this.nodeStack = [];
+			this.currentProp = [];
+			this.currentPropName = '';
+
+			var split = text.split( "\n" );
+			for ( var line in split ) {
+
+				var l = split[ line ];
+
+				// short cut
+				if ( l.match( /^[\s\t]*;/ ) ) {
+
+					continue;
+
+				} // skip comment line
+				if ( l.match( /^[\s\t]*$/ ) ) {
+
+					continue;
+
+				} // skip empty line
+
+				// beginning of node
+				var beginningOfNodeExp = new RegExp( "^\\t{" + this.currentIndent + "}(\\w+):(.*){", '' );
+				match = l.match( beginningOfNodeExp );
+				if ( match ) {
+
+					var nodeName = match[ 1 ].trim().replace( /^"/, '' ).replace( /"$/, "" );
+					var nodeAttrs = match[ 2 ].split( ',' ).map( function ( element ) {
+
+						return element.trim().replace( /^"/, '' ).replace( /"$/, '' );
+
+					} );
+
+					this.parseNodeBegin( l, nodeName, nodeAttrs || null );
+					continue;
+
+				}
+
+				// node's property
+				var propExp = new RegExp( "^\\t{" + ( this.currentIndent ) + "}(\\w+):[\\s\\t\\r\\n](.*)" );
+				match = l.match( propExp );
+				if ( match ) {
+
+					var propName = match[ 1 ].replace( /^"/, '' ).replace( /"$/, "" ).trim();
+					var propValue = match[ 2 ].replace( /^"/, '' ).replace( /"$/, "" ).trim();
+
+					this.parseNodeProperty( l, propName, propValue );
+					continue;
+
+				}
+
+				// end of node
+				var endOfNodeExp = new RegExp( "^\\t{" + ( this.currentIndent - 1 ) + "}}" );
+				if ( l.match( endOfNodeExp ) ) {
+
+					this.nodeEnd();
+					continue;
+
+				}
+
+				// for special case,
+				//
+				//	  Vertices: *8670 {
+				//		  a: 0.0356229953467846,13.9599733352661,-0.399196773.....(snip)
+				// -0.0612030513584614,13.960485458374,-0.409748703241348,-0.10.....
+				// 0.12490539252758,13.7450733184814,-0.454119384288788,0.09272.....
+				// 0.0836158767342567,13.5432004928589,-0.435397416353226,0.028.....
+				//
+				// these case the lines must contiue with previous line
+				if ( l.match( /^[^\s\t}]/ ) ) {
+
+					this.parseNodePropertyContinued( l );
+
+				}
+
+			}
+
+			return this.allNodes;
+
+		},
+
+		parseNodeBegin: function ( line, nodeName, nodeAttrs ) {
+
+			// var nodeName = match[1];
+			var node = { 'name': nodeName, properties: {}, 'subNodes': {} };
+			var attrs = this.parseNodeAttr( nodeAttrs );
+			var currentNode = this.getCurrentNode();
+
+			// a top node
+			if ( this.currentIndent === 0 ) {
+
+				this.allNodes.add( nodeName, node );
+
+			} else {
+
+				// a subnode
+
+				// already exists subnode, then append it
+				if ( nodeName in currentNode.subNodes ) {
+
+					var tmp = currentNode.subNodes[ nodeName ];
+
+					// console.log( "duped entry found\nkey: " + nodeName + "\nvalue: " + propValue );
+					if ( this.isFlattenNode( currentNode.subNodes[ nodeName ] ) ) {
+
+
+						if ( attrs.id === '' ) {
+
+							currentNode.subNodes[ nodeName ] = [];
+							currentNode.subNodes[ nodeName ].push( tmp );
+
+						} else {
+
+							currentNode.subNodes[ nodeName ] = {};
+							currentNode.subNodes[ nodeName ][ tmp.id ] = tmp;
+
+						}
+
+					}
+
+					if ( attrs.id === '' ) {
+
+						currentNode.subNodes[ nodeName ].push( node );
+
+					} else {
+
+						currentNode.subNodes[ nodeName ][ attrs.id ] = node;
+
+					}
+
+				} else {
+
+					currentNode.subNodes[ nodeName ] = node;
+
+				}
+
+			}
+
+			// for this		  ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+			// NodeAttribute: 1001463072, "NodeAttribute::", "LimbNode" {
+			if ( nodeAttrs ) {
+
+				node.id = attrs.id;
+				node.attrName = attrs.name;
+				node.attrType = attrs.type;
+
+			}
+
+			this.pushStack( node );
+
+		},
+
+		parseNodeAttr: function ( attrs ) {
+
+			var id = attrs[ 0 ];
+
+			if ( attrs[ 0 ] !== "" ) {
+
+				id = parseInt( attrs[ 0 ] );
+
+				if ( isNaN( id ) ) {
+
+					// PolygonVertexIndex: *16380 {
+					id = attrs[ 0 ];
+
+				}
+
+			}
+
+			var name;
+			var type;
+			if ( attrs.length > 1 ) {
+
+				name = attrs[ 1 ].replace( /^(\w+)::/, '' );
+				type = attrs[ 2 ];
+
+			}
+
+			return { id: id, name: name || '', type: type || '' };
+
+		},
+
+		parseNodeProperty: function ( line, propName, propValue ) {
+
+			var currentNode = this.getCurrentNode();
+			var parentName = currentNode.name;
+
+			// special case parent node's is like "Properties70"
+			// these chilren nodes must treat with careful
+			if ( parentName !== undefined ) {
+
+				var propMatch = parentName.match( /Properties(\d)+/ );
+				if ( propMatch ) {
+
+					this.parseNodeSpecialProperty( line, propName, propValue );
+					return;
+
+				}
+
+			}
+
+			// special case Connections
+			if ( propName == 'C' ) {
+
+				var connProps = propValue.split( ',' ).slice( 1 );
+				var from = parseInt( connProps[ 0 ] );
+				var to = parseInt( connProps[ 1 ] );
+
+				var rest = propValue.split( ',' ).slice( 3 );
+
+				propName = 'connections';
+				propValue = [ from, to ];
+				propValue = propValue.concat( rest );
+
+				if ( currentNode.properties[ propName ] === undefined ) {
+
+					currentNode.properties[ propName ] = [];
+
+				}
+
+			}
+
+			// special case Connections
+			if ( propName == 'Node' ) {
+
+				var id = parseInt( propValue );
+				currentNode.properties.id = id;
+				currentNode.id = id;
+
+			}
+
+			// already exists in properties, then append this
+			if ( propName in currentNode.properties ) {
+
+				// console.log( "duped entry found\nkey: " + propName + "\nvalue: " + propValue );
+				if ( Array.isArray( currentNode.properties[ propName ] ) ) {
+
+					currentNode.properties[ propName ].push( propValue );
+
+				} else {
+
+					currentNode.properties[ propName ] += propValue;
+
+				}
+
+			} else {
+
+				// console.log( propName + ":  " + propValue );
+				if ( Array.isArray( currentNode.properties[ propName ] ) ) {
+
+					currentNode.properties[ propName ].push( propValue );
+
+				} else {
+
+					currentNode.properties[ propName ] = propValue;
+
+				}
+
+			}
+
+			this.setCurrentProp( currentNode.properties, propName );
+
+		},
+
+		// TODO:
+		parseNodePropertyContinued: function ( line ) {
+
+			this.currentProp[ this.currentPropName ] += line;
+
+		},
+
+		parseNodeSpecialProperty: function ( line, propName, propValue ) {
+
+			// split this
+			// P: "Lcl Scaling", "Lcl Scaling", "", "A",1,1,1
+			// into array like below
+			// ["Lcl Scaling", "Lcl Scaling", "", "A", "1,1,1" ]
+			var props = propValue.split( '",' ).map( function ( element ) {
+
+				return element.trim().replace( /^\"/, '' ).replace( /\s/, '_' );
+
+			} );
+
+			var innerPropName = props[ 0 ];
+			var innerPropType1 = props[ 1 ];
+			var innerPropType2 = props[ 2 ];
+			var innerPropFlag = props[ 3 ];
+			var innerPropValue = props[ 4 ];
+
+			/*
+			if ( innerPropValue === undefined ) {
+				innerPropValue = props[3];
+			}
+			*/
+
+			// cast value in its type
+			switch ( innerPropType1 ) {
+
+				case "int":
+					innerPropValue = parseInt( innerPropValue );
+					break;
+
+				case "double":
+					innerPropValue = parseFloat( innerPropValue );
+					break;
+
+				case "ColorRGB":
+				case "Vector3D":
+					var tmp = innerPropValue.split( ',' );
+					innerPropValue = new THREE.Vector3( tmp[ 0 ], tmp[ 1 ], tmp[ 2 ] );
+					break;
+
+			}
+
+			// CAUTION: these props must append to parent's parent
+			this.getPrevNode().properties[ innerPropName ] = {
+
+				'type': innerPropType1,
+				'type2': innerPropType2,
+				'flag': innerPropFlag,
+				'value': innerPropValue
+
+			};
+
+			this.setCurrentProp( this.getPrevNode().properties, innerPropName );
+
+		},
+
+		nodeEnd: function ( line ) {
+
+			this.popStack();
+
+		},
+
+		/* ---------------------------------------------------------------- */
+		/*		util													  */
+		isFlattenNode: function ( node ) {
+
+			return ( 'subNodes' in node && 'properties' in node ) ? true : false;
+
+		}
+
+	};
+
+	function FBXAnalyzer() {}
+
+	FBXAnalyzer.prototype = {
+
+	};
+
+
+	// generate skinIndices, skinWeights
+	//	  @skinIndices: per vertex data, this represents the bone indexes affects that vertex
+	//	  @skinWeights: per vertex data, this represents the Weight Values affects that vertex
+	//	  @matrices:	per `bones` data
+	function Weights() {
+
+		this.skinIndices = [];
+		this.skinWeights = [];
+
+		this.matrices	= [];
+
+	}
+
+
+	Weights.prototype.parseCluster = function ( node, id, entry ) {
+
+		var _p = node.searchConnectionParent( id );
+		var _indices = toInt( entry.subNodes.Indexes.properties.a.split( ',' ) );
+		var _weights = toFloat( entry.subNodes.Weights.properties.a.split( ',' ) );
+		var _transform = toMat44( toFloat( entry.subNodes.Transform.properties.a.split( ',' ) ) );
+		var _link = toMat44( toFloat( entry.subNodes.TransformLink.properties.a.split( ',' ) ) );
+
+		return {
+
+			'parent': _p,
+			'id': parseInt( id ),
+			'indices': _indices,
+			'weights': _weights,
+			'transform': _transform,
+			'transformlink': _link,
+			'linkMode': entry.properties.Mode
+
+		};
+
+	};
+
+	Weights.prototype.parse = function ( node, bones ) {
+
+		this.skinIndices = [];
+		this.skinWeights = [];
+
+		this.matrices = [];
+
+		var deformers = node.Objects.subNodes.Deformer;
+
+		var clusters = {};
+		for ( var id in deformers ) {
+
+			if ( deformers[ id ].attrType === 'Cluster' ) {
+
+				if ( ! ( 'Indexes' in deformers[ id ].subNodes ) ) {
+
+					continue;
+
+				}
+
+				//clusters.push( this.parseCluster( node, id, deformers[id] ) );
+				var cluster = this.parseCluster( node, id, deformers[ id ] );
+				var boneId = node.searchConnectionChildren( cluster.id )[ 0 ];
+				clusters[ boneId ] = cluster;
+
+			}
+
+		}
+
+
+		// this clusters is per Bone data, thus we make this into per vertex data
+		var weights = [];
+		var hi = bones.hierarchy;
+		for ( var b = 0; b < hi.length; ++ b ) {
+
+			var bid = hi[ b ].internalId;
+			if ( clusters[ bid ] === undefined ) {
+
+				//console.log( bid );
+				this.matrices.push( new THREE.Matrix4() );
+				continue;
+
+			}
+
+			var clst = clusters[ bid ];
+			// store transform matrix per bones
+			this.matrices.push( clst.transform );
+			//this.matrices.push( clst.transformlink );
+			for ( var v = 0; v < clst.indices.length; ++ v ) {
+
+				if ( weights[ clst.indices[ v ] ] === undefined ) {
+
+					weights[ clst.indices[ v ] ] = {};
+					weights[ clst.indices[ v ] ].joint = [];
+					weights[ clst.indices[ v ] ].weight = [];
+
+				}
+
+				// indices
+				var affect = node.searchConnectionChildren( clst.id );
+
+				if ( affect.length > 1 ) {
+
+					console.warn( "FBXLoader: node " + clst.id + " have many weight kids: " + affect );
+
+				}
+				weights[ clst.indices[ v ] ].joint.push( bones.getBoneIdfromInternalId( node, affect[ 0 ] ) );
+
+				// weight value
+				weights[ clst.indices[ v ] ].weight.push( clst.weights[ v ] );
+
+			}
+
+		}
+
+		// normalize the skin weights
+		// TODO -  this might be a good place to choose greatest 4 weights
+		for ( var i = 0; i < weights.length; i ++ ) {
+
+			var indicies = new THREE.Vector4(
+				weights[ i ].joint[ 0 ] ? weights[ i ].joint[ 0 ] : 0,
+				weights[ i ].joint[ 1 ] ? weights[ i ].joint[ 1 ] : 0,
+				weights[ i ].joint[ 2 ] ? weights[ i ].joint[ 2 ] : 0,
+				weights[ i ].joint[ 3 ] ? weights[ i ].joint[ 3 ] : 0 );
+
+			var weight = new THREE.Vector4(
+				weights[ i ].weight[ 0 ] ? weights[ i ].weight[ 0 ] : 0,
+				weights[ i ].weight[ 1 ] ? weights[ i ].weight[ 1 ] : 0,
+				weights[ i ].weight[ 2 ] ? weights[ i ].weight[ 2 ] : 0,
+				weights[ i ].weight[ 3 ] ? weights[ i ].weight[ 3 ] : 0 );
+
+			this.skinIndices.push( indicies );
+			this.skinWeights.push( weight );
+
+		}
+
+		//console.log( this );
+		return this;
+
+	};
+
+	function Bones() {
+
+		// returns bones hierarchy tree.
+		//	  [
+		//		  {
+		//			  "parent": id,
+		//			  "name": name,
+		//			  "pos": pos,
+		//			  "rotq": quat
+		//		  },
+		//		  ...
+		//		  {},
+		//		  ...
+		//	  ]
+		//
+		/* sample response
+
+		   "bones" : [
+			{"parent":-1, "name":"Fbx01",			"pos":[-0.002,	 98.739,   1.6e-05],	 "rotq":[0, 0, 0, 1]},
+			{"parent":0,  "name":"Fbx01_Pelvis",	 "pos":[0.00015963, 0,		7.33107e-08], "rotq":[0, 0, 0, 1]},
+			{"parent":1,  "name":"Fbx01_Spine",	  "pos":[6.577e-06,  10.216,   0.0106811],   "rotq":[0, 0, 0, 1]},
+			{"parent":2,  "name":"Fbx01_R_Thigh",	"pos":[14.6537,	-10.216,  -0.00918758], "rotq":[0, 0, 0, 1]},
+			{"parent":3,  "name":"Fbx01_R_Calf",	 "pos":[-3.70047,	 -42.9681,	 -7.78158],	 "rotq":[0, 0, 0, 1]},
+			{"parent":4,  "name":"Fbx01_R_Foot",	 "pos":[-2.0696,	  -46.0488,	 9.42052],	  "rotq":[0, 0, 0, 1]},
+			{"parent":5,  "name":"Fbx01_R_Toe0",	 "pos":[-0.0234785,   -9.46233,	 -15.3187],	 "rotq":[0, 0, 0, 1]},
+			{"parent":2,  "name":"Fbx01_L_Thigh",	"pos":[-14.6537,	 -10.216,	  -0.00918314],  "rotq":[0, 0, 0, 1]},
+			{"parent":7,  "name":"Fbx01_L_Calf",	 "pos":[3.70037,	  -42.968,	  -7.78155],	 "rotq":[0, 0, 0, 1]},
+			{"parent":8,  "name":"Fbx01_L_Foot",	 "pos":[2.06954,	  -46.0488,	 9.42052],	  "rotq":[0, 0, 0, 1]},
+			{"parent":9,  "name":"Fbx01_L_Toe0",	 "pos":[0.0234566,	-9.46235,	 -15.3187],	 "rotq":[0, 0, 0, 1]},
+			{"parent":2,  "name":"Fbx01_Spine1",	 "pos":[-2.97523e-05, 11.5892,	  -9.81027e-05], "rotq":[0, 0, 0, 1]},
+			{"parent":11, "name":"Fbx01_Spine2",	 "pos":[-2.91292e-05, 11.4685,	  8.27126e-05],  "rotq":[0, 0, 0, 1]},
+			{"parent":12, "name":"Fbx01_Spine3",	 "pos":[-4.48857e-05, 11.5783,	  8.35108e-05],  "rotq":[0, 0, 0, 1]},
+			{"parent":13, "name":"Fbx01_Neck",	   "pos":[1.22987e-05,  11.5582,	  -0.0044775],   "rotq":[0, 0, 0, 1]},
+			{"parent":14, "name":"Fbx01_Head",	   "pos":[-3.50709e-05, 6.62915,	  -0.00523254],  "rotq":[0, 0, 0, 1]},
+			{"parent":15, "name":"Fbx01_R_Eye",	  "pos":[3.31681,	  12.739,	   -10.5267],	 "rotq":[0, 0, 0, 1]},
+			{"parent":15, "name":"Fbx01_L_Eye",	  "pos":[-3.32038,	 12.7391,	  -10.5267],	 "rotq":[0, 0, 0, 1]},
+			{"parent":15, "name":"Jaw",			  "pos":[-0.0017738,   7.43481,	  -4.08114],	 "rotq":[0, 0, 0, 1]},
+			{"parent":14, "name":"Fbx01_R_Clavicle", "pos":[3.10919,	  2.46577,	  -0.0115284],   "rotq":[0, 0, 0, 1]},
+			{"parent":19, "name":"Fbx01_R_UpperArm", "pos":[16.014,	   4.57764e-05,  3.10405],	  "rotq":[0, 0, 0, 1]},
+			{"parent":20, "name":"Fbx01_R_Forearm",  "pos":[22.7068,	  -1.66322,	 -2.13803],	 "rotq":[0, 0, 0, 1]},
+			{"parent":21, "name":"Fbx01_R_Hand",	 "pos":[25.5881,	  -0.80249,	 -6.37307],	 "rotq":[0, 0, 0, 1]},
+			...
+			{"parent":27, "name":"Fbx01_R_Finger32", "pos":[2.15572,	  -0.548737,	-0.539604],	"rotq":[0, 0, 0, 1]},
+			{"parent":22, "name":"Fbx01_R_Finger2",  "pos":[9.79318,	  0.132553,	 -2.97845],	 "rotq":[0, 0, 0, 1]},
+			{"parent":29, "name":"Fbx01_R_Finger21", "pos":[2.74037,	  0.0483093,	-0.650531],	"rotq":[0, 0, 0, 1]},
+			{"parent":55, "name":"Fbx01_L_Finger02", "pos":[-1.65308,	 -1.43208,	 -1.82885],	 "rotq":[0, 0, 0, 1]}
+			]
+		*/
+		this.hierarchy = [];
+
+	}
+
+	Bones.prototype.parseHierarchy = function ( node ) {
+
+		var objects = node.Objects;
+		var models = objects.subNodes.Model;
+
+		var bones = [];
+		for ( var id in models ) {
+
+			if ( models[ id ].attrType === undefined ) {
+
+				continue;
+
+			}
+			bones.push( models[ id ] );
+
+		}
+
+		this.hierarchy = [];
+		for ( var i = 0; i < bones.length; ++ i ) {
+
+			var bone = bones[ i ];
+
+			var p = node.searchConnectionParent( bone.id )[ 0 ];
+			var t = [ 0.0, 0.0, 0.0 ];
+			var r = [ 0.0, 0.0, 0.0, 1.0 ];
+			var s = [ 1.0, 1.0, 1.0 ];
+
+			if ( 'Lcl_Translation' in bone.properties ) {
+
+				t = toFloat( bone.properties.Lcl_Translation.value.split( ',' ) );
+
+			}
+
+			if ( 'Lcl_Rotation' in bone.properties ) {
+
+				r = toRad( toFloat( bone.properties.Lcl_Rotation.value.split( ',' ) ) );
+				var q = new THREE.Quaternion();
+				q.setFromEuler( new THREE.Euler( r[ 0 ], r[ 1 ], r[ 2 ], 'ZYX' ) );
+				r = [ q.x, q.y, q.z, q.w ];
+
+			}
+
+			if ( 'Lcl_Scaling' in bone.properties ) {
+
+				s = toFloat( bone.properties.Lcl_Scaling.value.split( ',' ) );
+
+			}
+
+			// replace unsafe character
+			var name = bone.attrName;
+			name = name.replace( /:/, '' );
+			name = name.replace( /_/, '' );
+			name = name.replace( /-/, '' );
+			this.hierarchy.push( { "parent": p, "name": name, "pos": t, "rotq": r, "scl": s, "internalId": bone.id } );
+
+		}
+
+		this.reindexParentId();
+
+		this.restoreBindPose( node );
+
+		return this;
+
+	};
+
+	Bones.prototype.reindexParentId = function () {
+
+		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
+
+			for ( var ii = 0; ii < this.hierarchy.length; ++ ii ) {
+
+				if ( this.hierarchy[ h ].parent == this.hierarchy[ ii ].internalId ) {
+
+					this.hierarchy[ h ].parent = ii;
+					break;
+
+				}
+
+			}
+
+		}
+
+	};
+
+	Bones.prototype.restoreBindPose = function ( node ) {
+
+		var bindPoseNode = node.Objects.subNodes.Pose;
+		if ( bindPoseNode === undefined ) {
+
+			return;
+
+		}
+
+		var poseNode = bindPoseNode.subNodes.PoseNode;
+		var localMatrices = {}; // store local matrices, modified later( initialy world space )
+		var worldMatrices = {}; // store world matrices
+
+		for ( var i = 0; i < poseNode.length; ++ i ) {
+
+			var rawMatLcl = toMat44( poseNode[ i ].subNodes.Matrix.properties.a.split( ',' ) );
+			var rawMatWrd = toMat44( poseNode[ i ].subNodes.Matrix.properties.a.split( ',' ) );
+
+			localMatrices[ poseNode[ i ].id ] = rawMatLcl;
+			worldMatrices[ poseNode[ i ].id ] = rawMatWrd;
+
+		}
+
+		for ( var h = 0; h < this.hierarchy.length; ++ h ) {
+
+			var bone = this.hierarchy[ h ];
+			var inId = bone.internalId;
+
+			if ( worldMatrices[ inId ] === undefined ) {
+
+				// has no bind pose node, possibly be mesh
+				// console.log( bone );
+				continue;
+
+			}
+
+			var t = new THREE.Vector3( 0, 0, 0 );
+			var r = new THREE.Quaternion();
+			var s = new THREE.Vector3( 1, 1, 1 );
+
+			var parentId;
+			var parentNodes = node.searchConnectionParent( inId );
+			for ( var pn = 0; pn < parentNodes.length; ++ pn ) {
+
+				if ( this.isBoneNode( parentNodes[ pn ] ) ) {
+
+					parentId = parentNodes[ pn ];
+					break;
+
+				}
+
+			}
+
+			if ( parentId !== undefined && localMatrices[ parentId ] !== undefined ) {
+
+				// convert world space matrix into local space
+				var inv = new THREE.Matrix4();
+				inv.getInverse( worldMatrices[ parentId ] );
+				inv.multiply( localMatrices[ inId ] );
+				localMatrices[ inId ] = inv;
+
+			} else {
+				//console.log( bone );
+			}
+
+			localMatrices[ inId ].decompose( t, r, s );
+			bone.pos = [ t.x, t.y, t.z ];
+			bone.rotq = [ r.x, r.y, r.z, r.w ];
+			bone.scl = [ s.x, s.y, s.z ];
+
+		}
+
+	};
+
+	Bones.prototype.searchRealId = function ( internalId ) {
+
+		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
+
+			if ( internalId == this.hierarchy[ h ].internalId ) {
+
+				return h;
+
+			}
+
+		}
+
+		// console.warn( 'FBXLoader: notfound internalId in bones: ' + internalId);
+		return - 1;
+
+	};
+
+	Bones.prototype.getByInternalId = function ( internalId ) {
+
+		for ( var h = 0; h < this.hierarchy.length; h ++ ) {
+
+			if ( internalId == this.hierarchy[ h ].internalId ) {
+
+				return this.hierarchy[ h ];
+
+			}
+
+		}
+
+		return null;
+
+	};
+
+	Bones.prototype.isBoneNode = function ( id ) {
+
+		for ( var i = 0; i < this.hierarchy.length; ++ i ) {
+
+			if ( id === this.hierarchy[ i ].internalId ) {
+
+				return true;
+
+			}
+
+		}
+		return false;
+
+	};
+
+	Bones.prototype.getBoneIdfromInternalId = function ( node, id ) {
+
+		if ( node.__cache_get_boneid_from_internalid === undefined ) {
+
+			node.__cache_get_boneid_from_internalid = [];
+
+		}
+
+		if ( node.__cache_get_boneid_from_internalid[ id ] !== undefined ) {
+
+			return node.__cache_get_boneid_from_internalid[ id ];
+
+		}
+
+		for ( var i = 0; i < this.hierarchy.length; ++ i ) {
+
+			if ( this.hierarchy[ i ].internalId == id ) {
+
+				var res = i;
+				node.__cache_get_boneid_from_internalid[ id ] = i;
+				return i;
+
+			}
+
+		}
+
+		// console.warn( 'FBXLoader: bone internalId(' + id + ') not found in bone hierarchy' );
+		return - 1;
+
+	};
+
+
+	function Geometry() {
+
+		this.node = null;
+		this.name = null;
+		this.id = null;
+
+		this.vertices = [];
+		this.indices = [];
+		this.normals = [];
+		this.uvs = [];
+
+		this.bones = [];
+		this.skins = null;
+
+	}
+
+	Geometry.prototype.parse = function ( geoNode ) {
+
+		this.node = geoNode;
+		this.name = geoNode.attrName;
+		this.id = geoNode.id;
+
+		this.vertices = this.getVertices();
+
+		if ( this.vertices === undefined ) {
+
+			console.log( 'FBXLoader: Geometry.parse(): pass' + this.node.id );
+			return;
+
+		}
+
+		this.indices = this.getPolygonVertexIndices();
+		this.uvs = ( new UV() ).parse( this.node, this );
+		this.normals = ( new Normal() ).parse( this.node, this );
+
+		if ( this.getPolygonTopologyMax() > 3 ) {
+
+			this.indices = this.convertPolyIndicesToTri(
+								this.indices, this.getPolygonTopologyArray() );
+
+		}
+
+		return this;
+
+	};
+
+
+	Geometry.prototype.getVertices = function () {
+
+		if ( this.node.__cache_vertices ) {
+
+			return this.node.__cache_vertices;
+
+		}
+
+		if ( this.node.subNodes.Vertices === undefined ) {
+
+			console.warn( 'this.node: ' + this.node.attrName + "(" + this.node.id + ") does not have Vertices" );
+			this.node.__cache_vertices = undefined;
+			return null;
+
+		}
+
+		var rawTextVert	= this.node.subNodes.Vertices.properties.a;
+		var vertices = rawTextVert.split( ',' ).map( function ( element ) {
+
+			return parseFloat( element );
+
+		} );
+
+		this.node.__cache_vertices = vertices;
+		return this.node.__cache_vertices;
+
+	};
+
+	Geometry.prototype.getPolygonVertexIndices = function () {
+
+		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
+
+			return this.node.__cache_indices;
+
+		}
+
+		if ( this.node.subNodes === undefined ) {
+
+			console.error( 'this.node.subNodes undefined' );
+			console.log( this.node );
+			return;
+
+		}
+
+		if ( this.node.subNodes.PolygonVertexIndex === undefined ) {
+
+			console.warn( 'this.node: ' + this.node.attrName + "(" + this.node.id + ") does not have PolygonVertexIndex " );
+			this.node.__cache_indices = undefined;
+			return;
+
+		}
+
+		var rawTextIndices = this.node.subNodes.PolygonVertexIndex.properties.a;
+		var indices = rawTextIndices.split( ',' );
+
+		var currentTopo = 1;
+		var topologyN = null;
+		var topologyArr = [];
+
+		// The indices that make up the polygon are in order and a negative index
+		// means that it’s the last index of the polygon. That index needs
+		// to be made positive and then you have to subtract 1 from it!
+		for ( var i = 0; i < indices.length; ++ i ) {
+
+			var tmpI = parseInt( indices[ i ] );
+			// found n
+			if ( tmpI < 0 ) {
+
+				if ( currentTopo > topologyN ) {
+
+					topologyN = currentTopo;
+
+				}
+
+				indices[ i ] = tmpI ^ - 1;
+				topologyArr.push( currentTopo );
+				currentTopo = 1;
+
+			} else {
+
+				indices[ i ] = tmpI;
+				currentTopo ++;
+
+			}
+
+		}
+
+		if ( topologyN === null ) {
+
+			console.warn( "FBXLoader: topology N not found: " + this.node.attrName );
+			console.warn( this.node );
+			topologyN = 3;
+
+		}
+
+		this.node.__cache_poly_topology_max = topologyN;
+		this.node.__cache_poly_topology_arr = topologyArr;
+		this.node.__cache_indices = indices;
+
+		return this.node.__cache_indices;
+
+	};
+
+	Geometry.prototype.getPolygonTopologyMax = function () {
+
+		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
+
+			return this.node.__cache_poly_topology_max;
+
+		}
+
+		this.getPolygonVertexIndices( this.node );
+		return this.node.__cache_poly_topology_max;
+
+	};
+
+	Geometry.prototype.getPolygonTopologyArray = function () {
+
+		if ( this.node.__cache_indices && this.node.__cache_poly_topology_max ) {
+
+			return this.node.__cache_poly_topology_arr;
+
+		}
+
+		this.getPolygonVertexIndices( this.node );
+		return this.node.__cache_poly_topology_arr;
+
+	};
+
+	// a - d
+	// |   |
+	// b - c
+	//
+	// [( a, b, c, d ) ...........
+	// [( a, b, c ), (a, c, d )....
+	Geometry.prototype.convertPolyIndicesToTri = function ( indices, strides ) {
+
+		var res = [];
+
+		var i = 0;
+		var tmp = [];
+		var currentPolyNum = 0;
+		var currentStride = 0;
+
+		while ( i < indices.length ) {
+
+			currentStride = strides[ currentPolyNum ];
+
+			// CAUTIN: NG over 6gon
+			for ( var j = 0; j <= ( currentStride - 3 ); j ++ ) {
+
+				res.push( indices[ i ] );
+				res.push( indices[ i + ( currentStride - 2 - j ) ] );
+				res.push( indices[ i + ( currentStride - 1 - j ) ] );
+
+			}
+
+			currentPolyNum ++;
+			i += currentStride;
+
+		}
+
+		return res;
+
+	};
+
+	Geometry.prototype.addBones = function ( bones ) {
+
+		this.bones = bones;
+
+	};
+
+
+	function UV() {
+
+		this.uv = null;
+		this.map = null;
+		this.ref = null;
+		this.node = null;
+		this.index = null;
+
+	}
+
+	UV.prototype.getUV = function ( node ) {
+
+		if ( this.node && this.uv && this.map && this.ref ) {
+
+			return this.uv;
+
+		} else {
+
+			return this._parseText( node );
+
+		}
+
+	};
+
+	UV.prototype.getMap = function ( node ) {
+
+		if ( this.node && this.uv && this.map && this.ref ) {
+
+			return this.map;
+
+		} else {
+
+			this._parseText( node );
+			return this.map;
+
+		}
+
+	};
+
+	UV.prototype.getRef = function ( node ) {
+
+		if ( this.node && this.uv && this.map && this.ref ) {
+
+			return this.ref;
+
+		} else {
+
+			this._parseText( node );
+			return this.ref;
+
+		}
+
+	};
+
+	UV.prototype.getIndex = function ( node ) {
+
+		if ( this.node && this.uv && this.map && this.ref ) {
+
+			return this.index;
+
+		} else {
+
+			this._parseText( node );
+			return this.index;
+
+		}
+
+	};
+
+	UV.prototype.getNode = function ( topnode ) {
+
+		if ( this.node !== null ) {
+
+			return this.node;
+
+		}
+
+		this.node = topnode.subNodes.LayerElementUV;
+		return this.node;
+
+	};
+
+	UV.prototype._parseText = function ( node ) {
+
+		var uvNode = this.getNode( node );
+		if ( uvNode === undefined ) {
+
+			// console.log( node.attrName + "(" + node.id + ")" + " has no LayerElementUV." );
+			return [];
+
+		}
+
+		var count = 0;
+		var x = '';
+		for ( var n in uvNode ) {
+
+			if ( n.match( /^\d+$/ ) ) {
+
+				count ++;
+				x = n;
+
+			}
+
+		}
+
+		if ( count > 0 ) {
+
+			console.warn( 'multi uv not supported' );
+			uvNode = uvNode[ n ];
+
+		}
+
+		var uvIndex = uvNode.subNodes.UVIndex.properties.a;
+		var uvs = uvNode.subNodes.UV.properties.a;
+		var uvMap = uvNode.properties.MappingInformationType;
+		var uvRef = uvNode.properties.ReferenceInformationType;
+
+
+		this.uv	= toFloat( uvs.split( ',' ) );
+		this.index = toInt( uvIndex.split( ',' ) );
+
+		this.map = uvMap; // TODO: normalize notation shaking... FOR BLENDER
+		this.ref = uvRef;
+
+		return this.uv;
+
+	};
+
+	UV.prototype.parse = function ( node, geo ) {
+
+		this.uvNode = this.getNode( node );
+
+		this.uv = this.getUV( node );
+		var mappingType = this.getMap( node );
+		var refType = this.getRef( node );
+		var indices = this.getIndex( node );
+
+		var strides = geo.getPolygonTopologyArray();
+
+		// it means that there is a normal for every vertex of every polygon of the model.
+		// For example, if the models has 8 vertices that make up four quads, then there
+		// will be 16 normals (one normal * 4 polygons * 4 vertices of the polygon). Note
+		// that generally a game engine needs the vertices to have only one normal defined.
+		// So, if you find a vertex has more tha one normal, you can either ignore the normals
+		// you find after the first, or calculate the mean from all of them (normal smoothing).
+		//if ( mappingType == "ByPolygonVertex" ){
+		switch ( mappingType ) {
+
+			case "ByPolygonVertex":
+
+				switch ( refType ) {
+
+					// Direct
+					// The this.uv are in order.
+					case "Direct":
+						this.uv = this.parseUV_ByPolygonVertex_Direct( this.uv, indices, strides, 2 );
+						break;
+
+					// IndexToDirect
+					// The order of the this.uv is given by the uvsIndex property.
+					case "IndexToDirect":
+						this.uv = this.parseUV_ByPolygonVertex_IndexToDirect( this.uv, indices );
+						break;
+
+				}
+
+				// convert from by polygon(vert) data into by verts data
+				this.uv = mapByPolygonVertexToByVertex( this.uv, geo.getPolygonVertexIndices( node ), 2 );
+				break;
+
+			case "ByPolygon":
+
+				switch ( refType ) {
+
+					// Direct
+					// The this.uv are in order.
+					case "Direct":
+						this.uv = this.parseUV_ByPolygon_Direct();
+						break;
+
+					// IndexToDirect
+					// The order of the this.uv is given by the uvsIndex property.
+					case "IndexToDirect":
+						this.uv = this.parseUV_ByPolygon_IndexToDirect();
+						break;
+
+				}
+				break;
+		}
+
+		return this.uv;
+
+	};
+
+	UV.prototype.parseUV_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
+
+		return parse_Data_ByPolygonVertex_Direct( node, indices, strides, itemSize );
+
+	};
+
+	UV.prototype.parseUV_ByPolygonVertex_IndexToDirect = function ( node, indices ) {
+
+		return parse_Data_ByPolygonVertex_IndexToDirect( node, indices, 2 );
+
+	};
+
+	UV.prototype.parseUV_ByPolygon_Direct = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	UV.prototype.parseUV_ByPolygon_IndexToDirect = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	UV.prototype.parseUV_ByVertex_Direct = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+
+	function Normal() {
+
+		this.normal = null;
+		this.map	= null;
+		this.ref	= null;
+		this.node = null;
+		this.index = null;
+
+	}
+
+	Normal.prototype.getNormal = function ( node ) {
+
+		if ( this.node && this.normal && this.map && this.ref ) {
+
+			return this.normal;
+
+		} else {
+
+			this._parseText( node );
+			return this.normal;
+
+		}
+
+	};
+
+	// mappingType: possible variant
+	//	  ByPolygon
+	//	  ByPolygonVertex
+	//	  ByVertex (or also ByVertice, as the Blender exporter writes)
+	//	  ByEdge
+	//	  AllSame
+	//	var mappingType = node.properties.MappingInformationType;
+	Normal.prototype.getMap = function ( node ) {
+
+		if ( this.node && this.normal && this.map && this.ref ) {
+
+			return this.map;
+
+		} else {
+
+			this._parseText( node );
+			return this.map;
+
+		}
+
+	};
+
+	// refType: possible variants
+	//	  Direct
+	//	  IndexToDirect (or Index for older versions)
+	// var refType	 = node.properties.ReferenceInformationType;
+	Normal.prototype.getRef = function ( node ) {
+
+		if ( this.node && this.normal && this.map && this.ref ) {
+
+			return this.ref;
+
+		} else {
+
+			this._parseText( node );
+			return this.ref;
+
+		}
+
+	};
+
+	Normal.prototype.getNode = function ( node ) {
+
+		if ( this.node ) {
+
+			return this.node;
+
+		}
+
+		this.node = node.subNodes.LayerElementNormal;
+		return this.node;
+
+	};
+
+	Normal.prototype._parseText = function ( node ) {
+
+		var normalNode = this.getNode( node );
+
+		if ( normalNode === undefined ) {
+
+			console.warn( 'node: ' + node.attrName + "(" + node.id + ") does not have LayerElementNormal" );
+			return;
+
+		}
+
+		var mappingType = normalNode.properties.MappingInformationType;
+		var refType = normalNode.properties.ReferenceInformationType;
+
+		var rawTextNormals = normalNode.subNodes.Normals.properties.a;
+		this.normal = toFloat( rawTextNormals.split( ',' ) );
+
+		// TODO: normalize notation shaking, vertex / vertice... blender...
+		this.map	= mappingType;
+		this.ref	= refType;
+
+	};
+
+	Normal.prototype.parse = function ( topnode, geo ) {
+
+		var normals = this.getNormal( topnode );
+		var normalNode = this.getNode( topnode );
+		var mappingType = this.getMap( topnode );
+		var refType = this.getRef( topnode );
+
+		var indices = geo.getPolygonVertexIndices( topnode );
+		var strides = geo.getPolygonTopologyArray( topnode );
+
+		// it means that there is a normal for every vertex of every polygon of the model.
+		// For example, if the models has 8 vertices that make up four quads, then there
+		// will be 16 normals (one normal * 4 polygons * 4 vertices of the polygon). Note
+		// that generally a game engine needs the vertices to have only one normal defined.
+		// So, if you find a vertex has more tha one normal, you can either ignore the normals
+		// you find after the first, or calculate the mean from all of them (normal smoothing).
+		//if ( mappingType == "ByPolygonVertex" ){
+		switch ( mappingType ) {
+
+			case "ByPolygonVertex":
+
+				switch ( refType ) {
+
+					// Direct
+					// The normals are in order.
+					case "Direct":
+						normals = this.parseNormal_ByPolygonVertex_Direct( normals, indices, strides, 3 );
+						break;
+
+					// IndexToDirect
+					// The order of the normals is given by the NormalsIndex property.
+					case "IndexToDirect":
+						normals = this.parseNormal_ByPolygonVertex_IndexToDirect();
+						break;
+
+				}
+				break;
+
+			case "ByPolygon":
+
+				switch ( refType ) {
+
+					// Direct
+					// The normals are in order.
+					case "Direct":
+						normals = this.parseNormal_ByPolygon_Direct();
+						break;
+
+					// IndexToDirect
+					// The order of the normals is given by the NormalsIndex property.
+					case "IndexToDirect":
+						normals = this.parseNormal_ByPolygon_IndexToDirect();
+						break;
+
+				}
+				break;
+		}
+
+		return normals;
+
+	};
+
+	Normal.prototype.parseNormal_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
+
+		return parse_Data_ByPolygonVertex_Direct( node, indices, strides, itemSize );
+
+	};
+
+	Normal.prototype.parseNormal_ByPolygonVertex_IndexToDirect = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	Normal.prototype.parseNormal_ByPolygon_Direct = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	Normal.prototype.parseNormal_ByPolygon_IndexToDirect = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	Normal.prototype.parseNormal_ByVertex_Direct = function ( node ) {
+
+		console.warn( "not implemented" );
+		return node;
+
+	};
+
+	function AnimationCurve() {
+
+		this.version = null;
+
+		this.id = null;
+		this.internalId = null;
+		this.times = null;
+		this.values = null;
+
+		this.attrFlag = null; // tangeant
+		this.attrData = null; // slope, weight
+
+	}
+
+	AnimationCurve.prototype.fromNode = function ( curveNode ) {
+
+		this.id = curveNode.id;
+		this.internalId = curveNode.id;
+		this.times = curveNode.subNodes.KeyTime.properties.a;
+		this.values = curveNode.subNodes.KeyValueFloat.properties.a;
+
+		this.attrFlag = curveNode.subNodes.KeyAttrFlags.properties.a;
+		this.attrData = curveNode.subNodes.KeyAttrDataFloat.properties.a;
+
+		this.times = toFloat( this.times.split(	',' ) );
+		this.values = toFloat( this.values.split( ',' ) );
+		this.attrData = toFloat( this.attrData.split( ',' ) );
+		this.attrFlag = toInt( this.attrFlag.split( ',' ) );
+
+		this.times = this.times.map( function ( element ) {
+
+			return FBXTimeToSeconds( element );
+
+		} );
+
+		return this;
+
+	};
+
+	AnimationCurve.prototype.getLength = function () {
+
+		return this.times[ this.times.length - 1 ];
+
+	};
+
+	function AnimationNode() {
+
+		this.id = null;
+		this.attr = null; // S, R, T
+		this.attrX = false;
+		this.attrY = false;
+		this.attrZ = false;
+		this.internalId = null;
+		this.containerInternalId = null; // bone, null etc Id
+		this.containerBoneId = null; // bone, null etc Id
+		this.curveIdx = null; // AnimationCurve's indices
+		this.curves = [];	// AnimationCurve refs
+
+	}
+
+	AnimationNode.prototype.fromNode = function ( allNodes, node, bones ) {
+
+		this.id = node.id;
+		this.attr = node.attrName;
+		this.internalId = node.id;
+
+		if ( this.attr.match( /S|R|T/ ) ) {
+
+			for ( var attrKey in node.properties ) {
+
+				if ( attrKey.match( /X/ ) ) {
+
+					this.attrX = true;
+
+				}
+				if ( attrKey.match( /Y/ ) ) {
+
+					this.attrY = true;
+
+				}
+				if ( attrKey.match( /Z/ ) ) {
+
+					this.attrZ = true;
+
+				}
+
+			}
+
+		} else {
+
+			// may be deform percent nodes
+			return null;
+
+		}
+
+		this.containerIndices = allNodes.searchConnectionParent( this.id );
+		this.curveIdx	= allNodes.searchConnectionChildren( this.id );
+
+		for ( var i = this.containerIndices.length - 1; i >= 0; -- i ) {
+
+			var boneId = bones.searchRealId( this.containerIndices[ i ] );
+			if ( boneId >= 0 ) {
+
+				this.containerBoneId = boneId;
+				this.containerId = this.containerIndices [ i ];
+
+			}
+
+			if ( boneId >= 0 ) {
+
+				break;
+
+			}
+
+		}
+		// this.containerBoneId = bones.searchRealId( this.containerIndices );
+
+		return this;
+
+	};
+
+	AnimationNode.prototype.setCurve = function ( curve ) {
+
+		this.curves.push( curve );
+
+	};
+
+	function Animation() {
+
+		this.curves = {};
+		this.length = 0.0;
+		this.fps	= 30.0;
+		this.frames = 0.0;
+
+	}
+
+	Animation.prototype.parse = function ( node, bones ) {
+
+		var rawNodes = node.Objects.subNodes.AnimationCurveNode;
+		var rawCurves = node.Objects.subNodes.AnimationCurve;
+
+		// first: expand AnimationCurveNode into curve nodes
+		var curveNodes = [];
+		for ( var key in rawNodes ) {
+
+			if ( key.match( /\d+/ ) ) {
+
+				var a = ( new AnimationNode() ).fromNode( node, rawNodes[ key ], bones );
+				curveNodes.push( a );
+
+			}
+
+		}
+
+		// second: gen dict, mapped by internalId
+		var tmp = {};
+		for ( var i = 0; i < curveNodes.length; ++ i ) {
+
+			if ( curveNodes[ i ] === null ) {
+
+				continue;
+
+			}
+
+			tmp[ curveNodes[ i ].id ] = curveNodes[ i ];
+
+		}
+
+		// third: insert curves into the dict
+		var ac = [];
+		var max = 0.0;
+		for ( key in rawCurves ) {
+
+			if ( key.match( /\d+/ ) ) {
+
+				var c = ( new AnimationCurve() ).fromNode( rawCurves[ key ] );
+				ac.push( c );
+				max = c.getLength() ? c.getLength() : max;
+
+				var parentId = node.searchConnectionParent( c.id )[ 0 ];
+				var axis = node.searchConnectionType( c.id, parentId );
+
+				if ( axis.match( /X/ ) ) {
+
+					axis = 'x';
+
+				}
+				if ( axis.match( /Y/ ) ) {
+
+					axis = 'y';
+
+				}
+				if ( axis.match( /Z/ ) ) {
+
+					axis = 'z';
+
+				}
+
+				tmp[ parentId ].curves[ axis ] = c;
+
+			}
+
+		}
+
+		// forth:
+		for ( var t in tmp ) {
+
+			var id = tmp[ t ].containerBoneId;
+			if ( this.curves[ id ] === undefined ) {
+
+				this.curves[ id ] = {};
+
+			}
+
+			this.curves[ id ][ tmp[ t ].attr ] = tmp[ t ];
+
+		}
+
+		this.length = max;
+		this.frames = this.length * this.fps;
+
+		return this;
+
+	};
+
+
+	function Textures() {
+
+		this.textures = [];
+		this.perGeoMap = {};
+
+	}
+
+	Textures.prototype.add = function ( tex ) {
+
+		if ( this.textures === undefined ) {
+
+			this.textures = [];
+
+		}
+
+		this.textures.push( tex );
+
+		for ( var i = 0; i < tex.parentIds.length; ++ i ) {
+
+			if ( this.perGeoMap[ tex.parentIds[ i ] ] === undefined ) {
+
+				this.perGeoMap[ tex.parentIds[ i ] ] = [];
+
+			}
+
+			this.perGeoMap[ tex.parentIds[ i ] ].push( this.textures[ this.textures.length - 1 ] );
+
+		}
+
+	};
+
+	Textures.prototype.parse = function ( node, bones ) {
+
+		var rawNodes = node.Objects.subNodes.Texture;
+
+		for ( var n in rawNodes ) {
+
+			var tex = ( new Texture() ).parse( rawNodes[ n ], node );
+			this.add( tex );
+
+		}
+
+		return this;
+
+	};
+
+	Textures.prototype.getById = function ( id ) {
+
+		return this.perGeoMap[ id ];
+
+	};
+
+	function Texture() {
+
+		this.fileName = "";
+		this.name = "";
+		this.id = null;
+		this.parentIds = [];
+
+	}
+
+	Texture.prototype.parse = function ( node, nodes ) {
+
+		this.id = node.id;
+		this.name = node.attrName;
+		this.fileName = this.parseFileName( node.properties.FileName );
+
+		this.parentIds = this.searchParents( this.id, nodes );
+
+		return this;
+
+	};
+
+	// TODO: support directory
+	Texture.prototype.parseFileName = function ( fname ) {
+
+		if ( fname === undefined ) {
+
+			return "";
+
+		}
+
+		// ignore directory structure, flatten path
+		var splitted = fname.split( /[\\\/]/ );
+		if ( splitted.length > 0 ) {
+
+			return splitted[ splitted.length - 1 ];
+
+		} else {
+
+			return fname;
+
+		}
+
+	};
+
+	Texture.prototype.searchParents = function ( id, nodes ) {
+
+		var p = nodes.searchConnectionParent( id );
+
+		return p;
+
+	};
+
+
+	/* --------------------------------------------------------------------- */
+	/* --------------------------------------------------------------------- */
+	/* --------------------------------------------------------------------- */
+	/* --------------------------------------------------------------------- */
+
+	function loadTextureImage( texture, url ) {
+
+		var loader = new THREE.ImageLoader();
+
+		loader.load( url, function ( image ) {
+
+
+		} );
+
+		loader.load( url, function ( image ) {
+
+			texture.image = image;
+			texture.needUpdate = true;
+			console.log( 'tex load done' );
+
+		},
+
+		// Function called when download progresses
+			function ( xhr ) {
+
+				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+			},
+
+			// Function called when download errors
+			function ( xhr ) {
+
+				console.log( 'An error happened' );
+
+			}
+		);
+
+	}
+
+	// LayerElementUV: 0 {
+	// 	Version: 101
+	//	Name: "Texture_Projection"
+	//	MappingInformationType: "ByPolygonVertex"
+	//	ReferenceInformationType: "IndexToDirect"
+	//	UV: *1746 {
+	//	UVIndex: *7068 {
+	//
+	//	The order of the uvs is given by the UVIndex property.
+	function parse_Data_ByPolygonVertex_IndexToDirect( node, indices, itemSize ) {
+
+		var res = [];
+
+		for ( var i = 0; i < indices.length; ++ i ) {
+
+			for ( var j = 0; j < itemSize; ++ j ) {
+
+				res.push( node[ ( indices[ i ] * itemSize ) + j ] );
+
+			}
+
+		}
+
+		return res;
+
+	}
+
+
+	// what want:　normal per vertex, order vertice
+	// i have: normal per polygon
+	// i have: indice per polygon
+	parse_Data_ByPolygonVertex_Direct = function ( node, indices, strides, itemSize ) {
+
+		// *21204 > 3573
+		// Geometry: 690680816, "Geometry::", "Mesh" {
+		//  Vertices: *3573 {
+		//  PolygonVertexIndex: *7068 {
+
+		var tmp = [];
+		var currentIndex = 0;
+
+		// first: sort to per vertex
+		for ( var i = 0; i < indices.length; ++ i ) {
+
+			tmp[ indices[ i ] ] = [];
+
+			// TODO: duped entry? blend or something?
+			for ( var s = 0; s < itemSize; ++ s ) {
+
+				tmp[ indices[ i ] ][ s ] = node[ currentIndex + s ];
+
+			}
+
+			currentIndex += itemSize;
+
+		}
+
+		// second: expand x,y,z into serial array
+		var res = [];
+		for ( var jj = 0; jj < tmp.length; ++ jj ) {
+
+			if ( tmp[ jj ] === undefined ) {
+
+				continue;
+
+			}
+
+			for ( var t = 0; t < itemSize; ++ t ) {
+
+				if ( tmp[ jj ][ t ] === undefined ) {
+
+					continue;
+
+				}
+				res.push( tmp[ jj ][ t ] );
+
+			}
+
+		}
+
+		return res;
+
+	};
+
+	// convert from by polygon(vert) data into by verts data
+	function mapByPolygonVertexToByVertex( data, indices, stride ) {
+
+		var tmp = {};
+		var res = [];
+		var max = 0;
+
+		for ( var i = 0; i < indices.length; ++ i ) {
+
+			if ( indices[ i ] in tmp ) {
+
+				continue;
+
+			}
+
+			tmp[ indices[ i ] ] = {};
+
+			for ( var j = 0; j < stride; ++ j ) {
+
+				tmp[ indices[ i ] ][ j ] = data[ i * stride + j ];
+
+			}
+
+			max = max < indices[ i ] ? indices[ i ] : max;
+
+		}
+
+		try {
+
+			for ( i = 0; i <= max; i ++ ) {
+
+				for ( var s = 0; s < stride; s ++ ) {
+
+					res.push( tmp[ i ][ s ] );
+
+				}
+
+			}
+
+		} catch ( e ) {
+			//console.log( max );
+			//console.log( tmp );
+			//console.log( i );
+			//console.log( e );
+		}
+
+		return res;
+
+	}
+
+	// AUTODESK uses broken clock. i guess
+	var FBXTimeToSeconds = function ( adskTime ) {
+
+		return adskTime / 46186158000;
+
+	};
+
+	degToRad = function ( degrees ) {
+
+		return degrees * Math.PI / 180;
+
+	};
+
+	radToDeg = function ( radians ) {
+
+		return radians * 180 / Math.PI;
+
+	};
+
+	quatFromVec = function ( x, y, z ) {
+
+		var euler = new THREE.Euler( x, y, z, 'ZYX' );
+		var quat = new THREE.Quaternion();
+		quat.setFromEuler( euler );
+
+		return quat;
+
+	};
+
+
+	// extend Array.prototype ?  ....uuuh
+	toInt = function ( arr ) {
+
+		return arr.map( function ( element ) {
+
+			return parseInt( element );
+
+		} );
+
+	};
+
+	toFloat = function ( arr ) {
+
+		return arr.map( function ( element ) {
+
+			return parseFloat( element );
+
+		} );
+
+	};
+
+	toRad = function ( arr ) {
+
+		return arr.map( function ( element ) {
+
+			return degToRad( element );
+
+		} );
+
+	};
+
+	toMat44 = function ( arr ) {
+
+		var mat = new THREE.Matrix4();
+		mat.set(
+			arr[ 0 ], arr[ 4 ], arr[ 8 ], arr[ 12 ],
+			arr[ 1 ], arr[ 5 ], arr[ 9 ], arr[ 13 ],
+			arr[ 2 ], arr[ 6 ], arr[ 10 ], arr[ 14 ],
+			arr[ 3 ], arr[ 7 ], arr[ 11 ], arr[ 15 ]
+		);
+
+		/*
+		mat.set(
+			arr[ 0], arr[ 1], arr[ 2], arr[ 3],
+			arr[ 4], arr[ 5], arr[ 6], arr[ 7],
+			arr[ 8], arr[ 9], arr[10], arr[11],
+			arr[12], arr[13], arr[14], arr[15]
+		);
+		// */
+
+		return mat;
+
+	};
+
+} )();
 
 /*
   html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>

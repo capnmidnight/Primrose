@@ -22,8 +22,12 @@ Primrose.WebRTCSocket = (function () {
     navigator.msGetUserMedia ||
     navigator.oGetUserMedia;
 
-  navigator.mediaDevices = navigator.mediaDevices || {};
-  navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || function (constraint) { return new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject)); }
+  if (!navigator.mediaDevices) {
+    navigator.mediaDevices = {};
+  }
+  if (!navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia = function (constraint) { return new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject)); }
+  }
 
   let ICE_SERVERS = [
     { url: "stun:stun.l.google.com:19302" },
