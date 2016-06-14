@@ -1,7 +1,7 @@
 "use strict";
 
 var MEETING_ID_PATTERN = /\bid=(\w+)/,
-  USER_NAME_PATTERN = /Primrose:Meeting:\w+:(\w+)/,
+  USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   NETWORK_DT = 0.25,
   idSpec = location.hash.match(MEETING_ID_PATTERN),
   meetingID = idSpec && idSpec[1] || (Math.random() * Math.log(Number.MAX_VALUE)).toString(36),
@@ -14,7 +14,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
     login: new Primrose.X.LoginForm(),
     signup: new Primrose.X.SignupForm()
   },
-  env = new Primrose.BrowserEnvironment("Meeting:" + meetingID, {
+  env = new Primrose.BrowserEnvironment(appKey, {
     autoScaleQuality: false,
     autoRescaleQuality: false,
     quality: Primrose.Quality.HIGH,
@@ -92,7 +92,7 @@ function listUsers(newUsers) {
   ctrls2D.controls.style.width = "initial";
   ctrls2D.controls.style.height = "initial";
 
-  document.cookie = appKey + ":" + userName;
+  document.cookie = "Primrose:user:" + userName;
 
   Object.keys(users).forEach(removeUser);
   var promise = Promise.resolve();
@@ -279,7 +279,7 @@ function authenticate() {
   socket.emit(verb, {
     userName: userName,
     email: email,
-    app: env.id
+    app: appKey
   });
 }
 
