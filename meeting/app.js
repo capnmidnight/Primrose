@@ -1,6 +1,12 @@
-var idSpec = location.search.match(/id=(\w+)/),
-  meetingID = idSpec && idSpec[1] || "public",
+"use strict";
+
+var MEETING_ID_PATTERN = /\bid=(\w+)/,
+  USER_NAME_PATTERN = /Primrose:Meeting:\w+:(\w+)/,
   NETWORK_DT = 0.25,
+  idSpec = location.search.match(MEETING_ID_PATTERN),
+  meetingID = idSpec && idSpec[1] || "public",
+  appKey = "Primrose:Meeting:" + meetingID,
+  audio = new Primrose.Output.Audio3D(),
   lastNetworkUpdate = 0,
   state = [0, 0, 0, 0, 0, 0, 0, 1],
   ctrls2D = Primrose.DOM.findEverything(),
@@ -22,34 +28,25 @@ var idSpec = location.search.match(/id=(\w+)/),
     audioIcon: "../doc/models/microphone.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
-  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-    .then((device) => {
-      var video = document.createElement("video");
-      video.autoplay = true;
-      video.muted = true;
-      document.body.appendChild(video);
-      if (isChrome) {
-        video.src = URL.createObjectURL(device);
-      }
-      else {
-        video.srcObject = device;
-      }
-      return device;
-    })
+  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .catch(console.warn.bind(console, "Can't get audio")),
   users = {},
   socket,
   avatarFactory,
-  userName,
+  userNameSpec = document.cookie.match(USER_NAME_PATTERN),
+  userName = userNameSpec && userNameSpec[1] || "",
   deviceIndex;
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
 ctrls2D.loginForm.style.display = "";
+ctrls2D.userName.value = userName;
 ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
 
 ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
 ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);
+
+showSignup(userName.length === 0);
 
 setTimeout(function () {
   ctrls3D.signup.userName.value = ctrls3D.login.userName.value = ctrls2D.userName.value;
@@ -64,9 +61,6 @@ ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login,
 
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
-
-showSignup(document.cookie.indexOf("Primrose") === -1);
-document.cookie = "Primrose";
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -94,6 +88,8 @@ function listUsers(newUsers) {
     = ctrls2D.loginForm.style.display
     = "none";
   ctrls2D.controls.style.width = "initial";
+
+  document.cookie = appKey + ":" + userName;
 
   Object.keys(users).forEach(removeUser);
   newUsers.forEach(addUser);
@@ -130,15 +126,23 @@ function addUser(state) {
   updateUser(state);
   console.log("Connecting from %s to %s", userName, key);
   micReady.then((outAudio) => {
-    logAudio("out", outAudio);
-    avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, env.audio.context, outAudio);
+    avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
       .then((inAudio) => {
-        logAudio("in", inAudio);
-        avatar.audio = env.audio.create3DMediaStream(0, 0, 0, inAudio);
-        logAudio(avatar.audio.audio);
-        console.log(avatar.audio);
-      });
+        avatar.audioElement = new Audio();
+        if (isFirefox) {
+          avatar.audioElement.srcObject = inAudio;
+        }
+        else {
+          avatar.audioElement.src = URL.createObjectURL(inAudio);
+        }
+
+        avatar.audioElement.controls = false;
+        avatar.audioElement.autoplay = true;
+        avatar.audioElement.crossOrigin = "anonymous";
+        document.body.appendChild(avatar.audioElement);
+      })
+      .catch(console.error.bind(console, "error"));
   });
 }
 
@@ -192,7 +196,12 @@ function updateUser(state) {
 }
 
 function removeUser(key) {
-  env.scene.remove(users[key]);
+  var avatar = users[key];
+  env.scene.remove(avatar);
+  avatar.peer.close();
+  avatar.audioElement.muted = true;
+  avatar.audioElement.stop();
+  document.body.remove(avatar.audioElement);
   delete users[key];
 }
 
