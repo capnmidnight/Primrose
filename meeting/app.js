@@ -143,72 +143,141 @@ function logAudio(name, stream) {
   }
 }
 
+class RemoteUser{
+  constructor(userName, modelFactory, nameMaterial){
+    this.userName = userName;
+    this.head = null;
+    this.dHeadQuaternion = null;    this.avatar = modelFactory.clone();
+    
+    this.avatar.traverse((obj) => {
+      if (obj.name === "AvatarBelt") {
+        textured(obj, Primrose.Random.color());
+      }
+      else if (obj.name === "AvatarHead") {
+        this.head = obj;
+      }
+    });
+
+    this.dHeading = 0;
+    this.velocity = new THREE.Vector3();
+    this.time = 0;
+
+    this.nameObject = textured(text3D(0.1, userName), nameMaterial);
+    var bounds = this.nameObject.geometry.boundingBox.max;
+    this.nameObject.rotation.set(Math.PI / 2, -Math.PI / 2, 0);
+    this.nameObject.position.set(0, bounds.x / 2, bounds.y);
+    if(this.head){
+      this.head.add(this.nameObject);
+      this.dHeadQuaternion = new THREE.Quaternion();
+    }
+    else{
+      this.avatar.add(this.nameObject);
+      name.position.y += env.avatarHeight;
+    }
+
+    this.peerConnection = null;
+    this.audioElement = null;
+    this.audioStream = null;
+    this.gain = null;
+    this.panner = null;
+  }
+
+  peer(peeringSocket, microphone, localUserName, ctx){
+    console.log("Connecting from %s to %s", localUserName, this.userName);
+    return microphone.then((outAudio) => {
+      this.peerConnection = new Primrose.WebRTCSocket(peeringSocket, localUserName, this.userName, outAudio);
+      this.peerConnection.ready
+        .then((inAudio) => {
+          this.audioElement = new Audio();
+          setAudioStream(this.audioElement, inAudio);
+          this.audioElement.controls = false;
+          this.audioElement.autoplay = true;
+          this.audioElement.crossOrigin = "anonymous";
+          document.body.appendChild(this.audioElement);
+
+          this.audioStream = ctx.createMediaStreamSource(inAudio);
+          this.gain = ctx.createGain();
+          this.panner = ctx.createPanner();
+
+          this.audioStream.connect(this.gain);
+          this.gain.connect(this.panner);
+          this.panner.connect(env.audio.mainVolume);
+
+          this.panner.coneInnerAngle = 180;
+          this.panner.coneOuterAngle = 360;
+          this.panner.coneOuterGain = 0.1;
+          this.panner.panningModel = "HRTF";
+          this.panner.distanceModel = "exponential";
+        })
+        .catch(console.error.bind(console, "error"));
+    });
+  }
+
+  unpeer(){
+    if (this.peerConnection) {
+      this.peerConnection.close();
+      if (this.audioElement) {
+        document.body.removeChild(this.audioElement);
+        if(this.panner){
+          this.panner.disconnect();
+          this.gain.disconnect();
+          this.audioStream.disconnect();
+        }
+      }
+    }
+  }
+
+  update(dt){
+    this.time += dt;
+    if (this.time >= NETWORK_DT) {
+      this.velocity.multiplyScalar(0.5);
+      this.dHeading *= 0.5;
+      this.dHeadQuaternion.x *= 0.5;
+      this.dHeadQuaternion.y *= 0.5;
+      this.dHeadQuaternion.z *= 0.5;
+      this.dHeadQuaternion.w *= 0.5;
+    }
+    this.avatar.position.add(this.velocity.clone().multiplyScalar(dt));
+    this.avatar.rotation.y += this.dHeading * dt;
+    this.head.quaternion.x += this.dHeadQuaternion.x * dt;
+    this.head.quaternion.y += this.dHeadQuaternion.y * dt;
+    this.head.quaternion.z += this.dHeadQuaternion.z * dt;
+    this.head.quaternion.w += this.dHeadQuaternion.w * dt;
+    if(this.panner){
+      this.panner.setPosition(this.avatar.position.x, this.avatar.position.y, this.avatar.position.z);
+      this.panner.setOrientation(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
+    }
+  }
+
+  set state(v){
+    this.time = 0;
+
+    this.dHeading = (v[1] - this.avatar.rotation.y) / NETWORK_DT;
+
+    this.velocity.set(v[2], v[3], v[4]);
+    this.velocity.sub(this.avatar.position);
+    this.velocity.multiplyScalar(1 / NETWORK_DT);
+
+    this.dHeadQuaternion.set(v[7], v[5], v[6], v[8]);
+    this.dHeadQuaternion.x -= this.head.quaternion.x;
+    this.dHeadQuaternion.y -= this.head.quaternion.y;
+    this.dHeadQuaternion.z -= this.head.quaternion.z;
+    this.dHeadQuaternion.w -= this.head.quaternion.w;
+    this.dHeadQuaternion.x /= NETWORK_DT;
+    this.dHeadQuaternion.y /= NETWORK_DT;
+    this.dHeadQuaternion.z /= NETWORK_DT;
+    this.dHeadQuaternion.w /= NETWORK_DT;
+  }
+}
+
 function addUser(state) {
   var key = state[0],
-    avatar = avatarFactory.clone(),
-    name = textured(text3D(0.1, key), env.options.foregroundColor),
-    bounds = name.geometry.boundingBox.max;
-  
-  avatar.traverse(function (obj) {
-    if (obj.name === "AvatarBelt") {
-      textured(obj, Primrose.Random.color());
-    }
-    else if (obj.name === "AvatarHead") {
-      avatar.head = obj;
-    }
-  });
-
-  avatar.dHeading = 0;
-  avatar.name = key;
-  avatar.velocity = new THREE.Vector3();
-  avatar.time = 0;
-
-  name.rotation.set(0, Math.PI, 0);
-  name.position.set(bounds.x / 2, bounds.y, 0);
-  if(avatar.head){
-    avatar.head.add(name);
-    avatar.head.dQuaternion = new THREE.Quaternion();
-  }
-  else{
-    avatar.add(name);
-    name.position.y += env.avatarHeight;
-  }
-
-  env.scene.add(avatar);
-
-  users[key] = avatar;
-
+    user = new RemoteUser(key, avatarFactory, env.options.foregroundColor);
+  users[key] = user;
+  env.scene.add(user.avatar);
   updateUser(state);
-
-  console.log("Connecting from %s to %s", userName, key);
-  return micReady.then(function (outAudio) {
-    avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
-    avatar.peer.ready
-      .then(function (inAudio) {
-        avatar.audioElement = new Audio();
-        setAudioStream(avatar.audioElement, inAudio);
-        avatar.audioElement.controls = false;
-        avatar.audioElement.autoplay = true;
-        avatar.audioElement.crossOrigin = "anonymous";
-        document.body.appendChild(avatar.audioElement);
-
-        var ctx = env.audio.context;
-        avatar.audioStream = ctx.createMediaStreamSource(inAudio);
-        avatar.gain = ctx.createGain();
-        avatar.panner = ctx.createPanner();
-
-        avatar.audioStream.connect(avatar.gain);
-        avatar.gain.connect(avatar.panner);
-        avatar.panner.connect(env.audio.mainVolume);
-
-        avatar.panner.coneInnerAngle = 180;
-        avatar.panner.coneOuterAngle = 360;
-        avatar.panner.coneOuterGain = 0.1;
-        avatar.panner.panningModel = "HRTF";
-        avatar.panner.distanceModel = "exponential";
-      })
-      .catch(console.error.bind(console, "error"));
-  });
+  console.log(user);
+  return user.peer(socket, micReady, userName, env.audio.context);
 }
 
 function receiveChat(evt) {
@@ -218,25 +287,9 @@ function receiveChat(evt) {
 function updateUser(state) {
   var key = state[0];
   if (key !== userName) {
-    var avatar = users[key];
-    if (avatar) {
-      avatar.time = 0;
-
-      avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
-
-      avatar.velocity.set(state[2], state[3], state[4]);
-      avatar.velocity.sub(avatar.position);
-      avatar.velocity.multiplyScalar(1 / NETWORK_DT);
-
-      avatar.head.dQuaternion.set(state[7], state[5], state[6], state[8]);
-      avatar.head.dQuaternion.x -= avatar.head.quaternion.x;
-      avatar.head.dQuaternion.y -= avatar.head.quaternion.y;
-      avatar.head.dQuaternion.z -= avatar.head.quaternion.z;
-      avatar.head.dQuaternion.w -= avatar.head.quaternion.w;
-      avatar.head.dQuaternion.x /= NETWORK_DT;
-      avatar.head.dQuaternion.y /= NETWORK_DT;
-      avatar.head.dQuaternion.z /= NETWORK_DT;
-      avatar.head.dQuaternion.w /= NETWORK_DT;
+    var user = users[key];
+    if (user) {
+      user.state = state;
     }
     else {
       console.error("Unknown user", key);
@@ -256,20 +309,10 @@ function updateUser(state) {
 
 function removeUser(key) {
   console.log("User %s logging off.", key);
-  var avatar = users[key];
-  if(avatar){
-    env.scene.remove(avatar);
-    if (avatar.peer) {
-      avatar.peer.close();
-      if (avatar.audioElement) {
-        document.body.removeChild(avatar.audioElement);
-        if(avatar.panner){
-          avatar.panner.disconnect();
-          avatar.gain.disconnect();
-          avatar.audioStream.disconnect();
-        }
-      }
-    }
+  var user = users[key];
+  if(user){
+    user.unpeer();
+    env.scene.add(user.avatar);
     delete users[key];
   }
 }
@@ -385,25 +428,7 @@ function update(dt) {
     }
   }
   for (var key in users) {
-    var avatar = users[key];
-    avatar.time += dt;
-    if (avatar.time >= NETWORK_DT) {
-      avatar.velocity.multiplyScalar(0.5);
-      avatar.dHeading *= 0.5;
-      avatar.head.dQuaternion.x *= 0.5;
-      avatar.head.dQuaternion.y *= 0.5;
-      avatar.head.dQuaternion.z *= 0.5;
-      avatar.head.dQuaternion.w *= 0.5;
-    }
-    avatar.position.add(avatar.velocity.clone().multiplyScalar(dt));
-    avatar.rotation.y += avatar.dHeading * dt;
-    avatar.head.quaternion.x += avatar.head.dQuaternion.x * dt;
-    avatar.head.quaternion.y += avatar.head.dQuaternion.y * dt;
-    avatar.head.quaternion.z += avatar.head.dQuaternion.z * dt;
-    avatar.head.quaternion.w += avatar.head.dQuaternion.w * dt;
-    if(avatar.panner){
-      avatar.panner.setPosition(avatar.position.x, avatar.position.y, avatar.position.z);
-      avatar.panner.setOrientation(Math.sin(avatar.rotation.y), 0, Math.cos(avatar.rotation.y));
-    }
+    var user = users[key];
+    user.update(dt);
   }
 }
