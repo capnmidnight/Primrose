@@ -29,6 +29,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   }),
   micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(setAudioStream.bind(null, ctrls2D.localAudio))
     .catch(console.warn.bind(console, "Can't get audio")),
   users = {},
   socket,
@@ -43,7 +44,7 @@ ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
 ctrls2D.loginForm.style.display = "";
 ctrls2D.userName.value = userName;
-ctrls2D.closeButton.href = "javascript:ctrls2D.loginForm.style.display = 'none',ctrls2D.controls.style.width = 'initial',undefined";
+ctrls2D.closeButton.href = location.hash;
 
 ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
 ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);
@@ -60,9 +61,24 @@ ctrls3D.login.addEventListener("signup", showSignup.bind(null, true), false);
 ctrls3D.signup.addEventListener("login", showSignup.bind(null, false), false);
 ctrls3D.signup.addEventListener("signup", setLoginValues.bind(null, ctrls3D.signup, ctrls3D.login, ctrls2D), false);
 ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login, ctrls3D.signup, ctrls2D), false);
+ctrls2D.closeButton.addEventListener("click", function(){
+  ctrls2D.loginForm.style.display = "none";
+  ctrls2D.controls.style.width = "initial";
+}, false);
 
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
+
+function setAudioStream(element, stream){
+  if(isFirefox){
+    element.srcObject = stream;
+  }
+  else{
+    element.src = URL.createObjectURL(stream);
+  }
+  element.muted = true;
+  return stream;
+}
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -113,10 +129,10 @@ function logAudio(name, stream) {
 
 function addUser(state) {
   var key = state[0],
-    avatar = avatarFactory.clone();
-  avatar.name = key;
-  avatar.velocity = new THREE.Vector3();
-  avatar.time = 0;
+    avatar = avatarFactory.clone(),
+    name = textured(text3D(0.1, key), env.options.foregroundColor),
+    bounds = name.geometry.boundingBox.max;
+  
   avatar.traverse(function (obj) {
     if (obj.name === "AvatarBelt") {
       textured(obj, Primrose.Random.color());
@@ -125,28 +141,55 @@ function addUser(state) {
       avatar.head = obj;
     }
   });
-  avatar.head.dQuaternion = new THREE.Quaternion();
+
   avatar.dHeading = 0;
+  avatar.name = key;
+  avatar.velocity = new THREE.Vector3();
+  avatar.time = 0;
+
+  name.rotation.set(0, Math.PI, 0);
+  name.position.set(bounds.x / 2, bounds.y, 0);
+  if(avatar.head){
+    avatar.head.add(name);
+    avatar.head.dQuaternion = new THREE.Quaternion();
+  }
+  else{
+    avatar.add(name);
+    name.position.y += env.avatarHeight;
+  }
+
   env.scene.add(avatar);
+
   users[key] = avatar;
+
   updateUser(state);
+
   console.log("Connecting from %s to %s", userName, key);
   return micReady.then(function (outAudio) {
     avatar.peer = new Primrose.WebRTCSocket(socket, userName, key, outAudio);
     avatar.peer.ready
       .then(function (inAudio) {
         avatar.audioElement = new Audio();
-        if (isFirefox) {
-          avatar.audioElement.srcObject = inAudio;
-        }
-        else {
-          avatar.audioElement.src = URL.createObjectURL(inAudio);
-        }
-
+        setAudioStream(avatar.audioElement, inAudio);
         avatar.audioElement.controls = false;
         avatar.audioElement.autoplay = true;
         avatar.audioElement.crossOrigin = "anonymous";
         document.body.appendChild(avatar.audioElement);
+
+        var ctx = env.audio.context;
+        avatar.audioStream = ctx.createMediaStreamSource(inAudio);
+        avatar.gain = ctx.createGain();
+        avatar.panner = ctx.createPanner();
+
+        avatar.audioStream.connect(avatar.gain);
+        avatar.gain.connect(avatar.panner);
+        avatar.panner.connect(env.audio.mainVolume);
+
+        avatar.panner.coneInnerAngle = 180;
+        avatar.panner.coneOuterAngle = 360;
+        avatar.panner.coneOuterGain = 0.1;
+        avatar.panner.panningModel = "HRTF";
+        avatar.panner.distanceModel = "exponential";
       })
       .catch(console.error.bind(console, "error"));
   });
@@ -162,12 +205,6 @@ function updateUser(state) {
     var avatar = users[key];
     if (avatar) {
       avatar.time = 0;
-
-      var name = textured(text3D(0.1, key), env.options.foregroundColor),
-        bounds = name.geometry.boundingBox.max;
-      name.rotation.set(0, Math.PI, 0);
-      name.position.set(bounds.x / 2, env.avatarHeight + bounds.y, 0);
-      avatar.add(name);
 
       avatar.dHeading = (state[1] - avatar.rotation.y) / NETWORK_DT;
 
@@ -247,8 +284,10 @@ function setLoginValues(formA, formB, formC) {
   }
 
   if (!socket) {
-    var protocol = location.protocol.replace("http", "ws");
-    socket = io.connect(protocol + "//" + location.hostname);
+    var protocol = location.protocol.replace("http", "ws"),
+      path = protocol + "//" + location.hostname;
+    console.log("connecting to: %s", path);
+    socket = io.connect(path);
     socket.on("signupFailed", authFailed("signup"));
     socket.on("loginFailed", authFailed("login"));
     socket.on("userList", listUsers);
@@ -340,5 +379,9 @@ function update(dt) {
     avatar.head.quaternion.y += avatar.head.dQuaternion.y * dt;
     avatar.head.quaternion.z += avatar.head.dQuaternion.z * dt;
     avatar.head.quaternion.w += avatar.head.dQuaternion.w * dt;
+    if(avatar.panner){
+      avatar.panner.setPosition(avatar.position.x, avatar.position.y, avatar.position.z);
+      avatar.panner.setOrientation(Math.sin(avatar.rotation.y), 0, Math.cos(avatar.rotation.y));
+    }
   }
 }

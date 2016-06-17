@@ -6,8 +6,51 @@ KEY:
 * [**Nightly** - The nightly development builds of Mozilla Firefox](https://nightly.mozilla.org/)
 * [**Firefox** - The latest release version of Mozilla Firefox](https://www.mozilla.org/en-US/firefox/products/)
 * [**Gear VR** - The "Samsung Internet for Gear VR" app in the Samsung Store on the Gear VR](http://developer.samsung.com/technical-doc/view.do?v=T000000270L)
-* **Windows** - Windows 8.1 and Windows 10.
+* **Windows** - Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
+
+## v0.25.0
+
+* Features
+  * New `disableDefaultLighting` option for `BrowserEnvironment` to use in cases of models with baked-lighting in their textures.
+  * Abstract `Form` control. Subclassed it to make `Login` and `Signup` forms.
+  * `BrowserEnvironment` now keeps track of its name.
+  * New `meeting` demo.
+    * Basic support for log-in.
+    * Peer-2-peer connection for audio.
+    * Avatars.
+    * Auto-room ID setup.
+    * Still need to sink the functionality into `BrowserEnvironment`.
+  * `textured()` function now provides `side` option for specifying polygon siding model. Use THREE.BackSide, THREE.FrontSide, or THREE.DoubleSide.
+  * Added a small interpolation to head orientation on mobile devices to make them run a little smoother.
+  * New `antialias` option for `BrowserEnvironment`.
+  * New `Primrose.Random.color()` function.
+* Defect fixes
+  * Make `Surface`s usable as textures with the `textured()` function.
+  * `ready` event now fires when `BrowserEnvironment` actually *is* done loading.
+  * Made `Label`s render more reliably.
+  * Got rid of super-sampling, because it screws up the HTC Vive.
+  * Removed manual eye-blanking, because it was stupid.
+* Admin
+  * Updated documentation for `Entity`.
+  * `Form`s don't expose their underlying mesh directly now.
+  * Fixed documentation of return types for the randomizer functions.
+* Open issues
+  * Windows
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+  * Android
+    * Nightly
+      * HMD support is broken (Le sigh. I think I'm just going to wait for Mozilla to upgrade to WebVR 1.0)
+      * Low frame rate in fullscreen mode.
+    * Firefox
+      * Device Orientation fallback has some problems with drift.
+      * Image inverts under certain tilt conditions.
+      * Low frame rate in fullscreen mode.
+    * Gear VR - Works as far as Primrose is concerned, but Samsung's browser for Gear VR currently has a number of defects:
+      * Orientation tracking is pretty bad, making the overall experience very bad.
+      * The touchpad doesn't work, so interactions are not working.
+      * Attaching a Bluetooth keyboard seems to make the browser unable to enter fullscreen mode.
 
 ## v0.24.1 - 2016/05/25
 

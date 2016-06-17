@@ -480,10 +480,8 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
-        if (!isMobile) {
-          this.audio.setPlayer(this.camera);
-        }
-
+        this.audio.setPlayer(this.camera);
+        
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           if (blankEye) {
             eyeCounter = 1 - eyeCounter;
