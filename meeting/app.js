@@ -1,6 +1,7 @@
 "use strict";
 
 var MEETING_ID_PATTERN = /\bid=(\w+)/,
+  TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
   USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   NETWORK_DT = 0.25,
   idSpec = location.search.match(MEETING_ID_PATTERN),
@@ -35,7 +36,9 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   users = {},
   socket,
   avatarFactory,
-  userNameSpec = document.cookie.match(USER_NAME_PATTERN),
+  testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
+  isTest = !!testUserNameSpec,
+  userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
   userName = userNameSpec && userNameSpec[1] || "",
   deviceIndex;
 
@@ -52,6 +55,9 @@ ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctr
 ctrls2D.loginForm.style.display = "";
 ctrls2D.userName.value = userName;
 ctrls2D.closeButton.href = location.hash;
+if(isTest){
+  ctrls2D.password.value = "ppyptky7";
+}
 
 ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
 ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);
