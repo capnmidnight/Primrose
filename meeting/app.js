@@ -254,18 +254,21 @@ function updateUser(state) {
 function removeUser(key) {
   console.log("User %s logging off.", key);
   var avatar = users[key];
-  env.scene.remove(avatar);
-  if (avatar.peer) {
-    avatar.peer.close();
-    if (avatar.audioElement) {
-      avatar.audioElement.pause();
-      document.body.removeChild(avatar.audioElement);
-      avatar.panner.disconnect();
-      avatar.gain.disconnect();
-      avatar.stream.disconnect();
+  if(avatar){
+    env.scene.remove(avatar);
+    if (avatar.peer) {
+      avatar.peer.close();
+      if (avatar.audioElement) {
+        document.body.removeChild(avatar.audioElement);
+        if(avatar.panner){
+          avatar.panner.disconnect();
+          avatar.gain.disconnect();
+          avatar.stream.disconnect();
+        }
+      }
     }
+    delete users[key];
   }
-  delete users[key];
 }
 
 function authFailed(name) {
