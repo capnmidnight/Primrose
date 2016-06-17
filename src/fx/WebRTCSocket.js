@@ -26,7 +26,7 @@ Primrose.WebRTCSocket = (function () {
     navigator.mediaDevices = {};
   }
   if (!navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia = function (constraint) { return new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject)); }
+    navigator.mediaDevices.getUserMedia = (constraint) => new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject));
   }
 
   let ICE_SERVERS = [
