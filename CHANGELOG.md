@@ -9,6 +9,12 @@ KEY:
 * **Windows** - Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.25.1
+* Features
+  * Spatialized audio in `meeting` demo.
+* Defect fixes
+  * Fixed multiplayer server on primrosevr.com.
+
 ## v0.25.0
 
 * Features

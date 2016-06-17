@@ -247,6 +247,9 @@ function removeUser(key) {
     if (avatar.audioElement) {
       avatar.audioElement.pause();
       document.body.removeChild(avatar.audioElement);
+      avatar.panner.disconnect();
+      avatar.gain.disconnect();
+      avatar.stream.disconnect();
     }
   }
   delete users[key];
