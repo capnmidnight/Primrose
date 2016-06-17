@@ -128,6 +128,9 @@ function listUsers(newUsers) {
   while (newUsers.length > 0) {
     promise = promise.then(addUser(newUsers.shift()));
   }
+  promise.then(function(){
+    console.log("All users added");
+  });
 }
 
 function logAudio(name, stream) {
