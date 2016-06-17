@@ -263,7 +263,7 @@ function removeUser(key) {
         if(avatar.panner){
           avatar.panner.disconnect();
           avatar.gain.disconnect();
-          avatar.stream.disconnect();
+          avatar.audioStream.disconnect();
         }
       }
     }
