@@ -59,12 +59,14 @@ Primrose.RemoteUser = (function(){
         ]
       });
 
-      
-      console.log("Connecting from %s to %s", localUserName, this.userName);
+
       return microphone.then((outAudio) => {
         this.peerConnection = new Primrose.WebRTCSocket(peeringSocket, localUserName, this.userName, outAudio);
         this.peerConnection.ready
           .then((inAudio) => {
+          	if(!inAudio){
+          		throw new Error("Didn't get an audio channel for " + this.userName);
+          	}
             this.audioElement = new Audio();
             setAudioStream(this.audioElement, inAudio);
             this.audioElement.controls = false;
