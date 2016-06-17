@@ -3,7 +3,8 @@
 var MEETING_ID_PATTERN = /\bid=(\w+)/,
   USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   NETWORK_DT = 0.25,
-  idSpec = location.hash.match(MEETING_ID_PATTERN),
+  idSpec = location.search.match(MEETING_ID_PATTERN),
+  hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", ""),
   appKey = "Primrose:Meeting:" + meetingID,
   audio = new Primrose.Output.Audio3D(),
@@ -38,7 +39,13 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   userName = userNameSpec && userNameSpec[1] || "",
   deviceIndex;
 
-location.hash = "id=" + meetingID;
+if(!hasMeetingID){
+  var state = "?id=" + meetingID;
+  if(isTest){
+    state += "&u=" + userName;
+  }
+  history.pushState(null, "Room ID: " + meetingID, state);
+}
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
