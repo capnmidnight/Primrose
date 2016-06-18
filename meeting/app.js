@@ -54,9 +54,6 @@ ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctr
 ctrls2D.loginForm.style.display = "";
 ctrls2D.userName.value = userName;
 ctrls2D.closeButton.href = location.hash;
-if(isTest){
-  ctrls2D.password.value = "ppyptky7";
-}
 
 ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
 ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);

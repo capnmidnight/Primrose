@@ -31,7 +31,7 @@ Primrose.Text.Controls.TextInput = function () {
     function TextInput(options) {
       _classCallCheck(this, TextInput);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this, overwrite(patch(options, {
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this, copyObject(patch(options, {
         id: "Primrose.Text.Controls.TextInput[" + COUNTER++ + "]",
         padding: 5
       }), {
@@ -42,7 +42,7 @@ Primrose.Text.Controls.TextInput = function () {
         tabWidth: 1,
         tokenizer: Primrose.Text.Grammars.PlainText,
         commands: Primrose.Text.CommandPacks.TextInput
-      })));
+      }, true)));
 
       _this.passwordCharacter = _this.options.passwordCharacter;
       return _this;

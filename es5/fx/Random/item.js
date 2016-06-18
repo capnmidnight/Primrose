@@ -5,7 +5,7 @@ pliny.function({
   name: "item",
   description: "Returns a random element from an array.",
   parameters: [{ name: "arr", type: "Array", description: "The array form which to pick items." }],
-  returns: "One of the elements of the array, at random.",
+  returns: "Any",
   examples: [{
     name: "Select a random element from an array.", description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
 \n\

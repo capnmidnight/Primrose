@@ -11,18 +11,5 @@ pliny.function({
     var base2 = hub();" }]
 });
 function hub() {
-  var obj = new THREE.Object3D();
-  obj.addToBrowserEnvironment = function (env, scene) {
-    scene.add(obj);
-    obj.appendChild = function (child) {
-      if (child.addToBrowserEnvironment) {
-        return child.addToBrowserEnvironment(env, obj);
-      } else {
-        obj.add(child);
-        env.registerPickableObject(child);
-        return child;
-      }
-    };
-  };
-  return obj;
+  return new THREE.Object3D();
 }

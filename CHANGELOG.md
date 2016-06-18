@@ -9,7 +9,14 @@ KEY:
 * **Windows** - Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.25.2
+
+* Defect fixes
+  * More than two users can be in the same room at one time.
+  * Users can leave and return to a room without crashing the room.
+
 ## v0.25.1
+
 * Features
   * Spatialized audio in `meeting` demo.
 * Defect fixes

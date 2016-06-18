@@ -39,16 +39,18 @@ Primrose.Surface = function () {
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Surface).call(this));
 
-      options = patch(options, {
-        id: "Primrose.Surface[" + COUNTER++ + "]"
+      _this.options = patch(options, {
+        id: "Primrose.Surface[" + COUNTER++ + "]",
+        bounds: new Primrose.Text.Rectangle()
       });
       _this.listeners.move = [];
-      _this.bounds = options.bounds || new Primrose.Text.Rectangle();
+      _this.bounds = _this.options.bounds;
       _this.canvas = null;
       _this.context = null;
       _this._opacity = 1;
 
       _this.style = {};
+
       Object.defineProperties(_this.style, {
         width: {
           get: function get() {
@@ -118,18 +120,18 @@ Primrose.Surface = function () {
         }
       });
 
-      if (options.id instanceof Surface) {
+      if (_this.options.id instanceof Surface) {
         throw new Error("Object is already a Surface. Please don't try to wrap them.");
-      } else if (options.id instanceof CanvasRenderingContext2D) {
-        _this.context = options.id;
+      } else if (_this.options.id instanceof CanvasRenderingContext2D) {
+        _this.context = _this.options.id;
         _this.canvas = _this.context.canvas;
-      } else if (options.id instanceof HTMLCanvasElement) {
-        _this.canvas = options.id;
-      } else if (typeof options.id === "string" || options.id instanceof String) {
-        _this.canvas = document.getElementById(options.id);
+      } else if (_this.options.id instanceof HTMLCanvasElement) {
+        _this.canvas = _this.options.id;
+      } else if (typeof _this.options.id === "string" || _this.options.id instanceof String) {
+        _this.canvas = document.getElementById(_this.options.id);
         if (_this.canvas === null) {
           _this.canvas = document.createElement("canvas");
-          _this.canvas.id = options.id;
+          _this.canvas.id = _this.options.id;
         } else if (_this.canvas.tagName !== "CANVAS") {
           _this.canvas = null;
         }
@@ -137,9 +139,9 @@ Primrose.Surface = function () {
 
       if (_this.canvas === null) {
         pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
-        console.error(_typeof(options.id));
-        console.error(options.id);
-        throw new Error(options.id + " does not refer to a valid canvas element.");
+        console.error(_typeof(_this.options.id));
+        console.error(_this.options.id);
+        throw new Error(_this.options.id + " does not refer to a valid canvas element.");
       }
 
       _this.id = _this.canvas.id;
@@ -207,6 +209,11 @@ Primrose.Surface = function () {
           bounds.top += this.bounds.top;
           this.parent.invalidate(bounds);
         }
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        this.invalidate();
       }
     }, {
       key: "resize",

@@ -33,7 +33,7 @@ Primrose.Input.FPSInput = function () {
         pointerend: []
       };
 
-      this.managers = [new Primrose.Input.VR(),
+      this.managers = [new Primrose.Input.Media(), new Primrose.Input.VR(),
       // keyboard should always run on the window
       new Primrose.Input.Keyboard(window, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
@@ -48,6 +48,7 @@ Primrose.Input.FPSInput = function () {
           buttons: [Primrose.Keys.D, Primrose.Keys.RIGHTARROW]
         },
         strafe: { commands: ["strafeLeft", "strafeRight"] },
+        boost: { buttons: [Primrose.Keys.E], scale: 0.2 },
         driveForward: {
           buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
         },
@@ -109,6 +110,7 @@ Primrose.Input.FPSInput = function () {
       this.managers.forEach(function (mgr) {
         return _this[mgr.name] = mgr;
       });
+      this.ready = Promise.all([this.VR.ready, this.Media.ready]);
     }
 
     _createClass(FPSInput, [{

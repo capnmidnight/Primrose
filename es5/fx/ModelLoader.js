@@ -12,18 +12,19 @@ Primrose.ModelLoader = function () {
   // The JSON format object loader is not always included in the Three.js distribution,
   // so we have to first check for it.
   var loaders = {
-    ".json": THREE.ObjectLoader && new THREE.ObjectLoader(),
-    ".fbx": THREE.FBXLoader && new THREE.FBXLoader(),
-    ".mtl": THREE.MTLLoader && new THREE.MTLLoader(),
-    ".obj": THREE.OBJLoader && new THREE.OBJLoader(),
-    ".stl": THREE.STLLoader && new THREE.STLLoader(),
-    ".typeface.js": THREE.FontLoader && new THREE.FontLoader()
+    ".json": THREE.ObjectLoader,
+    ".fbx": THREE.FBXLoader,
+    ".mtl": THREE.MTLLoader,
+    ".obj": THREE.OBJLoader,
+    ".stl": THREE.STLLoader,
+    ".typeface.js": THREE.FontLoader
   },
       mime = {
     "text/prs.wavefront-obj": "obj",
     "text/prs.wavefront-mtl": "mtl"
   },
-      EXTENSION_PATTERN = /(\.(\w+))+$/,
+      PATH_PATTERN = /((?:[^/]+\/)+)(\w+)(\.(?:\w+))$/,
+      EXTENSION_PATTERN = /(\.(?:\w+))+$/,
       NAME_PATTERN = /([^/]+)\.\w+$/;
 
   // Sometimes, the properties that export out of Blender and into Three.js don't
@@ -201,7 +202,7 @@ Useful for one-time use models.\n\
       return Promise.reject("File path `" + src + "` does not have a file extension, and a type was not provided as a parameter, so we can't determine the type.");
     } else {
       extension = extension.toLowerCase();
-      var Loader = loaders[extension];
+      var Loader = new loaders[extension]();
       if (!Loader) {
         return Promise.reject("There is no loader type for the file extension: " + extension);
       } else {
@@ -209,16 +210,20 @@ Useful for one-time use models.\n\
             elemID = name + "_" + extension.toLowerCase(),
             elem = document.getElementById(elemID),
             promise = Promise.resolve();
-
         if (extension === ".obj") {
           var newPath = src.replace(EXTENSION_PATTERN, ".mtl");
           promise = promise.then(function () {
             return ModelLoader.loadObject(newPath, "mtl", progress);
-          });
-          promise = promise.then(function (materials) {
+          }).then(function (materials) {
             materials.preload();
             Loader.setMaterials(materials);
           });
+        } else if (extension === ".mtl") {
+          var match = src.match(PATH_PATTERN),
+              dir = match[1];
+          src = match[2] + match[3];
+          Loader.setBaseUrl(dir);
+          Loader.setPath(dir);
         }
 
         if (elem) {

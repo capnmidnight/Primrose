@@ -9,28 +9,18 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.VR = function () {
+  var SLERP_A = isMobile ? 0.1 : 0,
+      SLERP_B = 1 - SLERP_A;
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
     description: "| [under construction]"
   });
-  pliny.value({
-    parent: "Primrose.Input.VR",
-    name: "Version",
-    type: "Number",
-    baseClass: "Primrose.InputProcessor",
-    description: "returns the version of WebVR that is supported (if any). Values:\n\
-  - 0: no WebVR support\n\
-  - 0.1: Device Orientation-based WebVR\n\
-  - 0.4: Mozilla-prefixed Legacy WebVR API\n\
-  - 0.5: Legacy WebVR API\n\
-  - 1.0: Provisional WebVR API 1.0"
-  });
 
   var VR = function (_Primrose$InputProces) {
     _inherits(VR, _Primrose$InputProces);
 
-    function VR(commands, socket, elem, selectedIndex) {
+    function VR(commands, socket) {
       _classCallCheck(this, VR);
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VR).call(this, "VR", commands, socket));
@@ -44,47 +34,18 @@ Primrose.Input.VR = function () {
         });
       }
 
-      var listeners = {
-        vrdeviceconnected: [],
-        vrdevicelost: []
-      };
-
-      _this.addEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          listeners[event].push(handler);
-        }
-        if (event === "vrdeviceconnected") {
-          Object.keys(this.displays).forEach(handler);
-        }
-      };
-
-      _this.displays = [];
+      _this.displays = null;
       _this._transforms = [];
       _this.transforms = null;
       _this.currentDisplayIndex = -1;
       _this.currentPose = null;
 
-      function onConnected(id) {
-        for (var i = 0; i < listeners.vrdeviceconnected.length; ++i) {
-          listeners.vrdeviceconnected[i](id);
-        }
-      }
-
-      function enumerateVRDisplays(displays) {
+      console.info("Checking for displays...");
+      _this.ready = navigator.getVRDisplays().then(function (displays) {
         console.log("Displays found:", displays.length);
-        this.displays = displays;
-        this.displays.forEach(onConnected);
-
-        if (typeof selectedIndex === "number" && 0 <= selectedIndex && selectedIndex < this.displays.length) {
-          this.connect(selectedIndex);
-          return this.currentDisplay;
-        }
-      }
-
-      _this.init = function () {
-        console.info("Checking for displays...");
-        return navigator.getVRDisplays().then(enumerateVRDisplays.bind(this));
-      };
+        _this.displays = displays;
+        return _this.displays;
+      });
       return _this;
     }
 
@@ -146,7 +107,12 @@ Primrose.Input.VR = function () {
       key: "getOrientation",
       value: function getOrientation(value) {
         value = value || new THREE.Quaternion();
-        value.set(this.getValue("headRX"), this.getValue("headRY"), this.getValue("headRZ"), this.getValue("headRW"));
+        var x = this.getValue("headRX"),
+            y = this.getValue("headRY"),
+            z = this.getValue("headRZ"),
+            w = this.getValue("headRW");
+
+        value.set(value.x * SLERP_A + x * SLERP_B, value.y * SLERP_A + y * SLERP_B, value.z * SLERP_A + z * SLERP_B, value.w * SLERP_A + w * SLERP_B);
         return value;
       }
     }, {
@@ -169,21 +135,6 @@ Primrose.Input.VR = function () {
       key: "currentDisplay",
       get: function get() {
         return this.displays[this.currentDisplayIndex];
-      }
-    }], [{
-      key: "Version",
-      get: function get() {
-        if (navigator.getVRDisplays) {
-          return 1.0;
-        } else if (navigator.getVRDevices) {
-          return 0.5;
-        } else if (navigator.mozGetVRDevices) {
-          return 0.4;
-        } else if (isMobile) {
-          return 0.1;
-        } else {
-          return 0;
-        }
       }
     }]);
 

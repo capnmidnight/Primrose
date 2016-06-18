@@ -3,7 +3,7 @@
 pliny.function({
   parent: "Primrose.HTTP",
   name: "getText",
-  description: "Get plain text from a server.",
+  description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
   returns: "Promise",
   parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
   examples: [{
