@@ -286,7 +286,10 @@ function update(dt) {
         env.player.qHead.x,
         env.player.qHead.y,
         env.player.qHead.z,
-        env.player.qHead.w
+        env.player.qHead.w,
+        env.input.VR.getValue("headX"),
+        env.input.VR.getValue("headY") + env.avatarHeight,
+        env.input.VR.getValue("headZ")
       ];
       for (var i = 0; i < newState.length; ++i) {
         if (state[i] !== newState[i]) {

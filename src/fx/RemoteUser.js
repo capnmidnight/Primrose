@@ -14,7 +14,10 @@ Primrose.RemoteUser = (function(){
     constructor(userName, modelFactory, nameMaterial){
       this.userName = userName;
       this.head = null;
-      this.dHeadQuaternion = null;    this.avatar = modelFactory.clone();
+      this.hmd = null;
+      this.dHeadQuaternion = null;
+      this.dHeadPosition = null;
+      this.avatar = modelFactory.clone();
       
       this.avatar.traverse((obj) => {
         if (obj.name === "AvatarBelt") {
@@ -22,6 +25,9 @@ Primrose.RemoteUser = (function(){
         }
         else if (obj.name === "AvatarHead") {
           this.head = obj;
+        }
+        else if(obj.name === "AvatarHMD"){
+          this.hmd = obj;
         }
       });
 
@@ -31,11 +37,12 @@ Primrose.RemoteUser = (function(){
 
       this.nameObject = textured(text3D(0.1, userName), nameMaterial);
       var bounds = this.nameObject.geometry.boundingBox.max;
-      this.nameObject.rotation.set(Math.PI / 2, -Math.PI / 2, 0);
-      this.nameObject.position.set(0, bounds.x / 2, bounds.y);
+      this.nameObject.rotation.set(Math.PI / 2, 0, 0);
+      this.nameObject.position.set(-bounds.x / 2, 0, bounds.y);
       if(this.head){
         this.head.add(this.nameObject);
         this.dHeadQuaternion = new THREE.Quaternion();
+        this.dHeadPosition = new THREE.Vector3();
       }
 
       this.peerConnection = null;
@@ -123,7 +130,6 @@ Primrose.RemoteUser = (function(){
         ]
       });
 
-
       this.time += dt;
       if (this.time >= RemoteUser.NETWORK_DT) {
         this.velocity.multiplyScalar(0.5);
@@ -132,6 +138,9 @@ Primrose.RemoteUser = (function(){
         this.dHeadQuaternion.y *= 0.5;
         this.dHeadQuaternion.z *= 0.5;
         this.dHeadQuaternion.w *= 0.5;
+        this.dHeadPosition.x *= 0.5;
+        this.dHeadPosition.y *= 0.5;
+        this.dHeadPosition.z *= 0.5;
       }
       this.avatar.position.add(this.velocity.clone().multiplyScalar(dt));
       this.avatar.rotation.y += this.dHeading * dt;
@@ -139,6 +148,9 @@ Primrose.RemoteUser = (function(){
       this.head.quaternion.y += this.dHeadQuaternion.y * dt;
       this.head.quaternion.z += this.dHeadQuaternion.z * dt;
       this.head.quaternion.w += this.dHeadQuaternion.w * dt;
+      this.head.position.x += this.dHeadPosition.x * dt;
+      this.head.position.y += this.dHeadPosition.y * dt;
+      this.head.position.z += this.dHeadPosition.z * dt;
       if(this.panner){
         this.panner.setPosition(this.avatar.position.x, this.avatar.position.y, this.avatar.position.z);
         this.panner.setOrientation(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
@@ -173,6 +185,14 @@ Primrose.RemoteUser = (function(){
       this.dHeadQuaternion.y /= RemoteUser.NETWORK_DT;
       this.dHeadQuaternion.z /= RemoteUser.NETWORK_DT;
       this.dHeadQuaternion.w /= RemoteUser.NETWORK_DT;
+
+      this.dHeadPosition.set(v[9], v[11], v[10]);
+      this.dHeadPosition.x -= this.head.position.x;
+      this.dHeadPosition.y -= this.head.position.y;
+      this.dHeadPosition.z -= this.head.position.z;
+      this.dHeadPosition.x /= RemoteUser.NETWORK_DT;
+      this.dHeadPosition.y /= RemoteUser.NETWORK_DT;
+      this.dHeadPosition.z /= RemoteUser.NETWORK_DT;
     }
   }
 
