@@ -148,7 +148,6 @@ function addUser(state) {
   users[key] = user;
   env.scene.add(user.avatar);
   updateUser(state);
-  console.log(user);
   return user.peer(socket, micReady, userName, env.audio);
 }
 
