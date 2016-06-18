@@ -50,6 +50,14 @@ Primrose.RemoteUser = (function(){
       this.audioStream = null;
       this.gain = null;
       this.panner = null;
+      this.analyser = null;
+    }
+
+    static chain(){
+      const args = Array.prototype.slice.call(arguments);
+      for(let i = 0; i < args.length - 1; ++i){
+        args[i].connect(args[i + 1]);
+      }
     }
 
     peer(peeringSocket, microphone, localUserName, audio){
@@ -84,16 +92,24 @@ Primrose.RemoteUser = (function(){
             this.audioStream = audio.context.createMediaStreamSource(inAudio);
             this.gain = audio.context.createGain();
             this.panner = audio.context.createPanner();
+            this.analyser = audio.context.createAnalyser();
 
-            this.audioStream.connect(this.gain);
-            this.gain.connect(this.panner);
-            this.panner.connect(audio.mainVolume);
-
+            RemoteUser.chain(
+              this.audioStream,
+              this.gain,
+              this.analyser,
+              this.panner,
+              audio.mainVolume);
             this.panner.coneInnerAngle = 180;
             this.panner.coneOuterAngle = 360;
             this.panner.coneOuterGain = 0.1;
             this.panner.panningModel = "HRTF";
             this.panner.distanceModel = "exponential";
+
+            this.buffer = new Uint8Array(this.analyser.frequencyBinCount);
+            this.analyser.fftSize = 2048;
+            this.analyser.getByteTimeDomainData(this.buffer);
+            console.log(this.buffer);
           })
           .catch(console.error.bind(console, "error"));
       });
