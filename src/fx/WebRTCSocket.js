@@ -406,11 +406,13 @@ Primrose.WebRTCSocket = (function () {
     }
 
     close(){
+      
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "close",
         description: "shut down the peer connection, if it was succesful in being created."
       });
+
       if(this.rtc){
         this.rtc.close();
       }

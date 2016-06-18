@@ -109,6 +109,7 @@ function showSignup(state) {
   }
 }
 
+var listUserPromise = Promise.resolve();
 function listUsers(newUsers) {
   ctrls3D.signup.style.display
     = ctrls3D.login.style.display
@@ -120,9 +121,8 @@ function listUsers(newUsers) {
   document.cookie = "Primrose:user:" + userName;
 
   Object.keys(users).forEach(removeUser);
-  var promise = Promise.resolve();
   while (newUsers.length > 0) {
-    promise = promise.then(addUser(newUsers.shift()));
+    addUser(newUsers.shift());
   }
   promise.then(function(){
     console.log("All users added");
@@ -140,12 +140,14 @@ function logAudio(name, stream) {
 }
 
 function addUser(state) {
-  var key = state[0],
-    user = new Primrose.RemoteUser(key, avatarFactory, env.options.foregroundColor);
-  users[key] = user;
+  var toUserName = state[0],
+  user = new Primrose.RemoteUser(toUserName, avatarFactory, env.options.foregroundColor);
+  users[toUserName] = user;
   env.scene.add(user.avatar);
   updateUser(state);
-  return user.peer(socket, micReady, userName, env.audio);
+  listUserPromise = listUserPromise
+    .then(() => user.peer(socket, micReady, userName, env.audio))
+    .catch((exp) => console.error("Couldn't load user: " + name));
 }
 
 function receiveChat(evt) {
