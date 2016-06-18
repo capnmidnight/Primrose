@@ -107,13 +107,33 @@ Primrose.WebRTCSocket = (function () {
     return sdpLines;
   }
 
+  let INSTANCE_COUNT = 0;
+
   pliny.class({
     parent: "Primrose",
     name: "WebRTCSocket",
     description: "[under construction]"
   });
   class WebRTCSocket {
-    constructor(proxyServer, userName, toUserName, outAudio) {
+    constructor(proxyServer, fromUserName, toUserName, outAudio) {
+
+      let attemptCount = 0,
+        messageNumber = 0;
+      const instanceNumber = ++INSTANCE_COUNT,
+        print = function(name, format){
+          if(false){
+            const args = Array.prototype.slice.call(arguments, 2);
+            format = "[%s:%s:%s] " + format;
+            args.unshift(INSTANCE_COUNT);
+            args.unshift(instanceNumber);
+            args.unshift(++messageNumber);
+            args.unshift(format);
+            console[name].apply(console, args);
+          }
+        },
+        log = print.bind(null, "log"),
+        error = print.bind(null, "error");
+
       this.rtc = null;
 
       if (typeof (proxyServer) === "string") {
@@ -127,21 +147,67 @@ Primrose.WebRTCSocket = (function () {
         proxyServer = proxyServer;
       }
       else {
-        console.error("proxy error", proxyServer);
+        error("proxy error", proxyServer);
         throw new Error("need a socket");
       }
 
       window.addEventListener("unload", this.close);
-      this.ready = new Promise((resolve, reject) => {
-        const onUser = (evt) => {
-          console.log("user", evt);
-          if(evt.fromUserName === toUserName) {
-            this.rtc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
-            const goFirst = userName < toUserName,
-              descriptionCreated = (description) => this.rtc.setLocalDescription(description).then(proxyServer.emit.bind(proxyServer, description.type, description)).catch(onError),
-              descriptionReceived = (description) => this.rtc.setRemoteDescription(new RTCSessionDescription(description)).catch(onError),
+      this.ready = new Promise((resolve, reject) => {
+
+        const progress = {
+          offer: {
+            received: false,
+            created: false
+          },
+          answer: {
+            received: false,
+            created: false
+          }
+        }, complete = () => {
+          return progress.offer.received &&
+          progress.offer.created && 
+          progress.answer.received && 
+          progress.answer.created;
+        }, isExpected = (tag, obj) => {
+          log(tag, obj.fromUserName, toUserName, "||", obj.toUserName, fromUserName, "complete?", complete());
+          return obj.fromUserName === toUserName && obj.toUserName === fromUserName && !complete();
+        };
+
+        const onUser = (evt) => {
+          if(isExpected("new user", evt)) {
+            this.rtc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+            const check = (obj) => {
+                if(complete()){
+                  done(resolve, this.stream, null);
+                } 
+                return obj;
+              },
+              wrap = (item) => {
+                return {
+                  fromUserName,
+                  toUserName,
+                  item
+                };
+              },
+              goFirst = fromUserName < toUserName,
+              descriptionCreated = (description) => {
+                progress[description.type].created = true;
+                return this.rtc.setLocalDescription(description)
+                  .then(()=> proxyServer.emit(description.type, wrap(description)))
+                  .then(check)
+                  .catch(onError);
+              },
+              descriptionReceived = (description) => {
+                if(isExpected(description.item.type, description)){
+                  progress[description.item.type].received = true;
+                  return this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
+                    .then(check)
+                    .catch(onError);
+                }
+              },
               addStream = () => {
+                log("adding stream", outAudio);
                 if (outAudio) {
                   if (isFirefox) {
                     outAudio.getAudioTracks().forEach((track) => this.rtc.addTrack(track, outAudio));
@@ -151,14 +217,33 @@ Primrose.WebRTCSocket = (function () {
                   }
                 }
               },
-              onOffer = (offer) => descriptionReceived(offer).then(() => this.rtc.createAnswer(descriptionCreated, onError)).catch(onError),
-              onIce = (ice) => this.rtc.addIceCandidate(new RTCIceCandidate(ice)).catch(onError),
-              onAnswer = (answer) => descriptionReceived(answer).catch(onError),
-              done = (thunk, obj) => {
+              onOffer = (offer) => {
+                log("offer", offer);
+                var promise = descriptionReceived(offer);
+                if(promise){
+                  return promise.then(() => this.rtc.createAnswer())
+                  .then(descriptionCreated)
+                  .catch(onError);
+                }
+              },
+              onIce = (ice) => {
+                if(isExpected("ice", ice)){
+                  return this.rtc.addIceCandidate(new RTCIceCandidate(ice.item))
+                    .catch(onError);
+                }
+              },
+              done = (thunk, obj, exp) => {
+                if(exp){
+                  error("Fatal error. Turning off event handlers.", thunk, exp);
+                }
+                else{
+                  log("All done. Turning off event handlers.", thunk, obj);
+                }
                 proxyServer.off("user", onUser);
                 proxyServer.off("offer", onOffer);
                 proxyServer.off("ice", onIce);
-                proxyServer.off("answer", onAnswer);
+                proxyServer.off("answer", descriptionReceived);
+                this.rtc.onsignalingstatechange = null;
                 this.rtc.onnegotiationneeded = null;
                 this.rtc.onicecandidate = null;
                 if (isFirefox) {
@@ -167,43 +252,42 @@ Primrose.WebRTCSocket = (function () {
                 else {
                   this.rtc.onaddstream = null;
                 }
-                thunk(obj);
+                return thunk(obj);
               },
-              onError = (err) => {
-                console.error("RTC Setup Error", err);
-                done(reject, err);
+              onError = (exp) => done(reject, null, exp),
+              onStream = (stream) => {
+                this.stream = stream;
+                if (!goFirst) {
+                  log("Creating the second stream");
+                  addStream();
+                }
               };
 
             proxyServer.on("offer", onOffer);
             proxyServer.on("ice", onIce);
-            proxyServer.on("answer", onAnswer);
+            proxyServer.on("answer", descriptionReceived);
 
-            this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer(descriptionCreated, onError).catch(onError);
+            this.rtc.onsignalingstatechange = (evt) => log("[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
+
+            this.rtc.onnegotiationneeded = (evt) => this.rtc.createOffer()
+              .then(descriptionCreated)
+              .catch(onError);
 
             this.rtc.onicecandidate = (evt) => {
               if (evt.candidate) {
-                proxyServer.emit("ice", evt.candidate);
+                proxyServer.emit("ice", wrap(evt.candidate));
               }
             };
 
             if (isFirefox) {
-              this.rtc.ontrack = (evt) => {
-                if (userName >= toUserName) {
-                  addStream();
-                }
-                resolve(evt.streams[0]);
-              }
+              this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
             }
             else {
-              this.rtc.onaddstream = (evt) => {
-                if (!goFirst) {
-                  addStream();
-                }
-                resolve(evt.stream);
-              }
+              this.rtc.onaddstream = (evt) => onStream(evt.stream);
             }
 
             if (goFirst) {
+              log("Creating the first stream");
               addStream();
             }
           }
