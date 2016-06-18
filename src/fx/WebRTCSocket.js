@@ -29,6 +29,10 @@ Primrose.WebRTCSocket = (function () {
     navigator.mediaDevices.getUserMedia = (constraint) => new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject));
   }
 
+  // some useful information: 
+  // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
+  // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
+  // - https://github.com/coturn/rfc5766-turn-server/
   let ICE_SERVERS = [
     { url: "stun:stun.l.google.com:19302" },
     { url: "stun:stun1.l.google.com:19302" },
@@ -406,7 +410,7 @@ Primrose.WebRTCSocket = (function () {
     }
 
     close(){
-      
+
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "close",
