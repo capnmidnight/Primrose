@@ -176,6 +176,6 @@ Primrose.RemoteUser = (function(){
     }
   }
 
-  RemoteUser.NETWORK_DT = 0.25;
+  RemoteUser.NETWORK_DT = 0.10;
   return RemoteUser;
 })();
