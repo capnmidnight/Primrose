@@ -45,7 +45,7 @@ Primrose.RemoteUser = (function(){
         this.dHeadPosition = new THREE.Vector3();
       }
 
-      this.peerConnection = null;
+      this.audioChannel = null;
       this.audioElement = null;
       this.audioStream = null;
       this.gain = null;
@@ -76,20 +76,20 @@ Primrose.RemoteUser = (function(){
 
 
       return microphone.then((outAudio) => {
-        this.peerConnection = new Primrose.WebRTCSocket(peeringSocket, localUserName, this.userName, outAudio);
-        this.peerConnection.ready
-          .then((inAudio) => {
-          	if(!inAudio){
+        this.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, this.userName, outAudio);
+        this.audioChannel.ready
+          .then(() => {
+          	if(!this.audioChannel.inAudio){
           		throw new Error("Didn't get an audio channel for " + this.userName);
           	}
             this.audioElement = new Audio();
-            setAudioStream(this.audioElement, inAudio);
+            setAudioStream(this.audioElement, this.audioChannel.inAudio);
             this.audioElement.controls = false;
             this.audioElement.autoplay = true;
             this.audioElement.crossOrigin = "anonymous";
             document.body.appendChild(this.audioElement);
 
-            this.audioStream = audio.context.createMediaStreamSource(inAudio);
+            this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
             this.gain = audio.context.createGain();
             this.panner = audio.context.createPanner();
             this.analyser = audio.context.createAnalyser();
@@ -123,8 +123,8 @@ Primrose.RemoteUser = (function(){
       });
 
 
-      if (this.peerConnection) {
-        this.peerConnection.close();
+      if (this.audioChannel) {
+        this.audioChannel.close();
         if (this.audioElement) {
           document.body.removeChild(this.audioElement);
           if(this.panner){
