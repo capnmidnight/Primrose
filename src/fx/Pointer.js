@@ -2,13 +2,14 @@ Primrose.Pointer = (function(){
   "use strict";
 
   const POINTER_RADIUS = 0.02,
-    POINTER_RESCALE = 20,
+    POINTER_RESCALE = 5,
+    TELEPORT_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
-    DISTANCE = new THREE.Vector3(0, 0, 0),
     MAX_SELECT_DISTANCE = 2,
     MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
     MAX_MOVE_DISTANCE = 5,
-    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE;
+    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+    moveTo = new THREE.Vector3(0, 0, 0);
 
   class Pointer{
 
@@ -16,7 +17,7 @@ Primrose.Pointer = (function(){
       this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
         emissive: 0x3f3f3f
       });
-      this.groundMesh = textured(sphere(POINTER_RADIUS * POINTER_RESCALE, 32, 3), 0x00ff00, {
+      this.groundMesh = textured(sphere(TELEPORT_RADIUS, 32, 3), 0x00ff00, {
         emissive: 0x3f3f3f
       });
       this.groundMesh.visible = false;
@@ -45,44 +46,41 @@ Primrose.Pointer = (function(){
 
     registerHit(currentHit, player, isGround){
       var fp = currentHit.facePoint,
-        fn = currentHit.faceNormal,
         moveMesh = this.mesh;
 
-      DISTANCE.set(
-        fp[0] + fn[0] * POINTER_RADIUS,
-        fp[1] + fn[1] * POINTER_RADIUS,
-        fp[2] + fn[2] * POINTER_RADIUS)
+      moveTo.fromArray(fp)
         .sub(player.position);
 
+      this.groundMesh.visible = isGround;
 
       if(isGround){
-        this.mesh.material.color.setRGB(1, 1, 0);
-        this.mesh.scale.set(1, 1, 1);
-        var distSq = DISTANCE.x * DISTANCE.x + DISTANCE.z * DISTANCE.z;
+        var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
         moveMesh = this.groundMesh;
-        this.mesh.visible = false;
-        if(distSq > MAX_MOVE_DISTANCE_SQ){
-          var dist = Math.sqrt(distSq);
-          DISTANCE.x *= MAX_MOVE_DISTANCE / dist;
-          DISTANCE.z *= MAX_MOVE_DISTANCE / dist;
-          this.mesh.visible = true;
+        this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
+        if(this.mesh.visible){
+          this.mesh.material.color.setRGB(1, 1, 0);
+          this.mesh.scale.set(1, 1, 1);
+          var dist = Math.sqrt(distSq),
+            factor = MAX_MOVE_DISTANCE / dist,
+            y = moveTo.y;
+          moveTo.multiplyScalar(factor);
+          this.mesh.material.color.setRGB(1, 1, 0);
+          this.mesh.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
+          this.mesh.position.copy(player.position).add(moveTo);
+          moveTo.y = y;
         }
+        this.groundMesh.position.copy(player.position).add(moveTo);
       }
-      else{
-        this.groundMesh.visible = false;
-        if(DISTANCE.lengthSq() > MAX_SELECT_DISTANCE_SQ) {
-          return;
-        }
+      else if(moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
         this.mesh.scale.set(0.5, 1, 0.5);
+        this.mesh.material.color.setRGB(0, 1, 0);
+        this.mesh.position.copy(player.position).add(moveTo);
       }
-
-      moveMesh.visible = true;
-      moveMesh.position.copy(player.position).add(DISTANCE);
-      moveMesh.material.color.setRGB(0, 1, 0);
     }
 
     reset(){
       this.groundMesh.visible = false;
+      this.mesh.visible = true;
       this.mesh.material.color.setRGB(1, 0, 0);
       this.mesh.scale.set(1, 1, 1);
     }
