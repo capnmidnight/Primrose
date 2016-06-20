@@ -13,15 +13,8 @@ Primrose.Pointer = (function(){
   class Pointer{
 
     constructor(scene){
-      this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
-        emissive: 0x3f0000,
-        opacity: 0.75
-      });
-
-      this.groundMesh = textured(sphere(POINTER_RADIUS * POINTER_RESCALE, 10, 10), 0x00ff00, {
-        emissive: 0x003f00,
-        opacity: 0.75
-      });
+      this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000);
+      this.groundMesh = textured(sphere(POINTER_RADIUS * POINTER_RESCALE, 32, 3), 0x00ff00);
       this.groundMesh.visible = false;
       this.groundMesh.scale.set(1, 0.1, 1);
 
@@ -60,7 +53,7 @@ Primrose.Pointer = (function(){
 
       if(isGround){
         this.mesh.material.color.setRGB(1, 1, 0);
-        this.mesh.material.emissive.setRGB(0.25, 0.25, 0);
+        //this.mesh.material.emissive.setRGB(0.25, 0.25, 0);
         this.mesh.scale.set(1, 1, 1);
         var distSq = DISTANCE.x * DISTANCE.x + DISTANCE.z * DISTANCE.z;
         moveMesh = this.groundMesh;
@@ -83,13 +76,13 @@ Primrose.Pointer = (function(){
       moveMesh.visible = true;
       moveMesh.position.copy(player.position).add(DISTANCE);
       moveMesh.material.color.setRGB(0, 1, 0);
-      moveMesh.material.emissive.setRGB(0.25, 0.25, 0.25);
+      //moveMesh.material.emissive.setRGB(0.25, 0.25, 0.25);
     }
 
     reset(){
       this.groundMesh.visible = false;
       this.mesh.material.color.setRGB(1, 0, 0);
-      this.mesh.material.emissive.setRGB(0.25, 0, 0);
+      //this.mesh.material.emissive.setRGB(0.25, 0, 0);
       this.mesh.scale.set(1, 1, 1);
     }
   }
