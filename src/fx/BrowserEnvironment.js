@@ -888,6 +888,7 @@ Primrose.BrowserEnvironment = (function () {
                 window.addEventListener("vrdisplaypresentchange", adder, false);
               }
 
+              this.renderer.domElement.focus();
               return elem;
             });
         }
