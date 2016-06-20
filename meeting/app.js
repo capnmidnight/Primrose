@@ -68,10 +68,7 @@ ctrls3D.login.addEventListener("signup", showSignup.bind(null, true), false);
 ctrls3D.signup.addEventListener("login", showSignup.bind(null, false), false);
 ctrls3D.signup.addEventListener("signup", setLoginValues.bind(null, ctrls3D.signup, ctrls3D.login, ctrls2D), false);
 ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login, ctrls3D.signup, ctrls2D), false);
-ctrls2D.closeButton.addEventListener("click", function(){
-  ctrls2D.loginForm.style.display = "none";
-  ctrls2D.controls.style.width = "initial";
-}, false);
+ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
@@ -107,14 +104,20 @@ function showSignup(state) {
   }
 }
 
-var listUserPromise = Promise.resolve();
-function listUsers(newUsers) {
-  ctrls3D.signup.style.display
-    = ctrls3D.login.style.display
-    = ctrls2D.loginForm.style.display
-    = "none";
+function hideLoginForm(){
+  ctrls2D.loginForm.style.display = "none";
   ctrls2D.controls.style.width = "initial";
   ctrls2D.controls.style.height = "initial";
+  ctrls2D.frontBuffer.focus();
+}
+
+var listUserPromise = Promise.resolve();
+function listUsers(newUsers) {
+  hideLoginForm();
+
+  ctrls3D.signup.style.display
+    = ctrls3D.login.style.display
+    = "none";
 
   document.cookie = "Primrose:user:" + userName;
 

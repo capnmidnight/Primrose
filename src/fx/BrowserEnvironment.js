@@ -858,26 +858,41 @@ Primrose.BrowserEnvironment = (function () {
       // Manage full-screen state
       //
       this.goFullScreen = (index) => {
-        setPointerLock();
-        this.input.VR.connect(index);
-        return this.input.VR.requestPresent([{ source: this.renderer.domElement }])
-          .then((elem) => {
-            if (WebVRBootstrapper.Version === 1 && isMobile) {
-              var remover = () => {
-                this.input.VR.currentDisplay.exitPresent();
-                window.removeEventListener("vrdisplaypresentchange", remover);
-              };
+        if(index === undefined || typeof(index) !== "number"){
+          index = this.input.VR.currentDisplayIndex;
+        }
+        var promise = setPointerLock();
+        if(index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()){
+          var promises = [promise];
 
-              var adder = () => {
-                window.addEventListener("vrdisplaypresentchange", remover, false);
-                window.removeEventListener("vrdisplaypresentchange", adder);
-              };
+          if(isFullScreenMode()){
+            promises.push(this.input.VR.currentDisplay.exitPresent());
+          }
 
-              window.addEventListener("vrdisplaypresentchange", adder, false);
-            }
+          this.input.VR.connect(index);
 
-            return elem;
-          });
+          promises.push(this.input.VR.requestPresent([{ source: this.renderer.domElement }]));
+          promise = Promise.all(promises)
+            .then((elem) => {
+              if (WebVRBootstrapper.Version === 1 && isMobile) {
+                var remover = () => {
+                  this.input.VR.currentDisplay.exitPresent();
+                  window.removeEventListener("vrdisplaypresentchange", remover);
+                };
+
+                var adder = () => {
+                  window.addEventListener("vrdisplaypresentchange", remover, false);
+                  window.removeEventListener("vrdisplaypresentchange", adder);
+                };
+
+                window.addEventListener("vrdisplaypresentchange", adder, false);
+              }
+
+              return elem;
+            });
+        }
+
+        return promise;
       };
 
 
@@ -994,6 +1009,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
         this.input.addEventListener("zero", this.zero, false);
         this.input.addEventListener("lockpointer", setPointerLock, false);
+        this.input.addEventListener("fullscreen", this.goFullScreen.bind(this), false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
         return this.input.ready;

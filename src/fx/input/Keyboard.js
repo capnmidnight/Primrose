@@ -17,7 +17,9 @@ Primrose.Input.Keyboard = ( function () {
     constructor(DOMElement, commands, socket) {
       super("Keyboard", commands, socket);
       DOMElement = DOMElement || window;
-
+      if(DOMElement instanceof HTMLCanvasElement && (DOMElement.tabIndex === null || DOMElement.tabIndex === -1)){
+        DOMElement.tabIndex = 1;
+      }
       function execute(stateChange, event) {
         this.setButton(event.keyCode, stateChange);
         this.update();
