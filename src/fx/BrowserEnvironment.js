@@ -9,9 +9,6 @@ Primrose.BrowserEnvironment = (function () {
   var MILLISECONDS_TO_SECONDS = 0.001,
     RIGHT = new THREE.Vector3(1, 0, 0),
     UP = new THREE.Vector3(0, 1, 0),
-    FORWARD = new THREE.Vector3(0, 0, -1),
-    POINTER_RADIUS = 0.02,
-    POINTER_RESCALE = 10,
     FORWARDED_EVENTS = [
       "keydown", "keyup", "keypress",
       "mousedown", "mouseup", "mousemove", "wheel",
@@ -221,7 +218,7 @@ Primrose.BrowserEnvironment = (function () {
         movePlayer(dt);
         moveSky();
         moveGround();
-        movePointer();
+        this.pointer.move(lockedToEditor(), this.inVR, qHeading, this.camera, this.player);
         resolvePicking();
         checkQuality();
         fire("update", dt);
@@ -301,19 +298,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var movePointer = () => {
-        this.pointer.position.copy(FORWARD);
-        if (this.inVR && !isMobile) {
-          this.pointer.position.applyQuaternion(qHeading);
-        }
-        if (!lockedToEditor() || isMobile) {
-          this.pointer.position.add(this.camera.position);
-          this.pointer.position.applyQuaternion(this.camera.quaternion);
-        }
-        this.pointer.position.applyQuaternion(this.player.quaternion);
-        this.pointer.position.add(this.player.position);
-      };
-
       var pointerStart = (name) => {
         if (!(name === "keyboard" && lockedToEditor())) {
           if (currentHit) {
@@ -333,7 +317,7 @@ Primrose.BrowserEnvironment = (function () {
                 this.currentControl.focus();
               }
               else if (object === this.ground) {
-                this.player.position.copy(this.pointer.position);
+                this.player.position.copy(this.pointer.groundMesh.position);
                 this.player.position.y = this.avatarHeight;
                 this.player.isOnGround = false;
               }
@@ -395,23 +379,9 @@ Primrose.BrowserEnvironment = (function () {
 
         var lastButtons = this.input.getValue("dButtons");
         if (currentHit) {
-          var fp = currentHit.facePoint,
-            fn = currentHit.faceNormal,
-            object = this.pickableObjects[currentHit.objectID];
-          this.pointer.position.set(
-            fp[0] + fn[0] * POINTER_RADIUS,
-            fp[1] + fn[1] * POINTER_RADIUS,
-            fp[2] + fn[2] * POINTER_RADIUS);
+          var object = this.pickableObjects[currentHit.objectID];
 
-          if (object === this.ground) {
-            this.pointer.scale.set(POINTER_RESCALE * 0.5, POINTER_RESCALE, POINTER_RESCALE * 0.5);
-          }
-          else {
-            this.pointer.scale.set(0.5, 1, 0.5);
-          }
-
-          this.pointer.material.color.setRGB(0, 1, 0);
-          this.pointer.material.emissive.setRGB(0.25, 0.25, 0.25);
+          this.pointer.registerHit(currentHit, this.player, object === this.ground);
 
           if (object) {
             var buttons = this.input.getValue("buttons"),
@@ -434,9 +404,7 @@ Primrose.BrowserEnvironment = (function () {
           }
         }
         else {
-          this.pointer.material.color.setRGB(1, 0, 0);
-          this.pointer.material.emissive.setRGB(0.25, 0, 0);
-          this.pointer.scale.set(1, 1, 1);
+          this.pointer.reset();
         }
       };
 
@@ -481,7 +449,7 @@ Primrose.BrowserEnvironment = (function () {
         }
 
         this.audio.setPlayer(this.camera);
-        
+
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           if (blankEye) {
             eyeCounter = 1 - eyeCounter;
@@ -736,10 +704,6 @@ Primrose.BrowserEnvironment = (function () {
       this.player.heading = 0;
       this.player.qHead = new THREE.Quaternion();
 
-      this.pointer = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
-        emissive: 0x3f0000,
-        opacity: 0.75
-      });
 
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
@@ -749,6 +713,8 @@ Primrose.BrowserEnvironment = (function () {
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
+
+      this.pointer = new Primrose.Pointer(this.scene);
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
       if (this.options.skyTexture !== undefined) {
@@ -784,7 +750,6 @@ Primrose.BrowserEnvironment = (function () {
       this.camera.add(this.nose);
       this.player.add(this.camera);
       this.scene.add(this.player);
-      this.scene.add(this.pointer);
 
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
