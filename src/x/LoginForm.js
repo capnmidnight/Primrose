@@ -1,4 +1,6 @@
 ﻿Primrose.X.LoginForm = (function () {
+  "use strict";
+
   var COUNTER = 0;
   
   const WIDTH = 512,

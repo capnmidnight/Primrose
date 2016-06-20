@@ -1,4 +1,5 @@
 Primrose.InputProcessor = (function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose",

@@ -1,4 +1,5 @@
 Primrose.Output.Music = ( function () {
+  "use strict";
 
   /* polyfill */
   Window.prototype.AudioContext =

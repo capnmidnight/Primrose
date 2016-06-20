@@ -1,5 +1,5 @@
-
 Primrose.Text.Controls.PlainText = ( function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose.Text.Controls",

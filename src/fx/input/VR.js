@@ -1,4 +1,6 @@
 Primrose.Input.VR = (function () {
+  "use strict";
+  
   const SLERP_A = isMobile ? 0.1 : 0,
     SLERP_B = 1 - SLERP_A;
   pliny.class({

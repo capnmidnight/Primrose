@@ -1,4 +1,5 @@
 Primrose.Projector = (function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose",

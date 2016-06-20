@@ -1,4 +1,6 @@
 Primrose.Angle = ( function ( ) {
+  "use strict";
+  
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;
   pliny.class({

@@ -1,4 +1,5 @@
 Primrose.Network.DataChannel = (function () {
+  "use strict";
 
   let INSTANCE_COUNT = 0;
 

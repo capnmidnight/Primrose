@@ -1,4 +1,5 @@
 Primrose.Input.Media = (function () {
+  "use strict";
   
   pliny.class({
     parent: "Primrose.Input",

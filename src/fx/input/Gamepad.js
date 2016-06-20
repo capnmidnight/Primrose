@@ -1,5 +1,5 @@
 Primrose.Input.Gamepad = (function () {
-
+  "use strict";
 
   pliny.class({
     parent: "Primrose.Input",

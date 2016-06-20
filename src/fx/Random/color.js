@@ -1,10 +1,12 @@
-﻿pliny.function({
-  parent: "Primrose.Random",
-  name: "color",
-  description: "Returns a random hex RGB number to be used as a color.",
-  returns: "Number",
-  examples: [
-    {
+﻿Primrose.Random.color = (function(){
+  "use strict";
+  
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "color",
+    description: "Returns a random hex RGB number to be used as a color.",
+    returns: "Number",
+    examples: [{
       name: "Generate a random color.",
       description: "To generate colors at random, call the `Primrose.Random.color()` function:\n\
 \n\
@@ -26,10 +28,13 @@
 > 38541a\n\
 > 5a19db\n\
 > 5f5c50"}]
+  });
+  function color () {
+    var r = Primrose.Random.int(0, 256),
+      g = Primrose.Random.int(0, 256),
+      b = Primrose.Random.int(0, 256);
+    return r << 16 | g << 8 | b;
+  };
+
+  return color;
 });
-Primrose.Random.color = function () {
-  var r = Primrose.Random.int(0, 256),
-    g = Primrose.Random.int(0, 256),
-    b = Primrose.Random.int(0, 256);
-  return r << 16 | g << 8 | b;
-};

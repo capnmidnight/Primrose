@@ -1,5 +1,6 @@
 Primrose.Text.CodePages.FR_AZERTY = ( function () {
   "use strict";
+  
   var CodePage = Primrose.Text.CodePage;
   
   pliny.record({

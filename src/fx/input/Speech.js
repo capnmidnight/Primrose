@@ -1,4 +1,5 @@
 Primrose.Input.Speech = ( function () {
+  "use strict";
   
 ////
 //   Class: SpeechInput

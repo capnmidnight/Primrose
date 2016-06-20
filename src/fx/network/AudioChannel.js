@@ -1,4 +1,5 @@
 Primrose.Network.AudioChannel = (function () {
+  "use strict";
 
   if (!navigator.mediaDevices) {
     navigator.mediaDevices = {};

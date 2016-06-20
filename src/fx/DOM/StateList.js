@@ -1,4 +1,6 @@
 Primrose.DOM.StateList = ( function () {
+  "use strict";
+  
   pliny.class({
     parent: "Primrose.DOM",
     name: "StateList",

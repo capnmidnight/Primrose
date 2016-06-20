@@ -1,4 +1,6 @@
 Primrose.RemoteUser = (function(){
+  "use strict";
+  
   pliny.class({
     parent: "Primrose",
     name: "RemoteUser",

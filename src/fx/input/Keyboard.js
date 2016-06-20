@@ -1,4 +1,5 @@
 Primrose.Input.Keyboard = ( function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose.Input",

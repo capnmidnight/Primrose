@@ -1,4 +1,6 @@
 ﻿Primrose.Controls.Form = (function () {
+  "use strict";
+  
   var COUNTER = 0;
   pliny.class({
     parent: "Primrose.Controls",

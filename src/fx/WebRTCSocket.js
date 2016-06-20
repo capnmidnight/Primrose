@@ -1,4 +1,5 @@
 Primrose.WebRTCSocket = (function () {
+  "use strict";
 
   /* polyfills */
   window.RTCPeerConnection =

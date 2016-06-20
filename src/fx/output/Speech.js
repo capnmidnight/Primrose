@@ -1,4 +1,6 @@
 Primrose.Output.Speech = ( function ( ) {
+  "use strict";
+  
   function pickRandomOption ( options, key, min, max ) {
     if ( options[key] === undefined ) {
       options[key] = min + ( max - min ) * Math.random( );

@@ -1,4 +1,6 @@
-﻿pliny.function({
+﻿Primrose.Random.item = (function(){
+  "use strict";
+pliny.function({
   parent: "Primrose.Random",
   name: "item",
   description: "Returns a random element from an array.",
@@ -37,6 +39,5 @@
 > two"}
   ]
 });
-Primrose.Random.item = function (arr) {
-  return arr[Primrose.Random.int(arr.length)];
-};
+  return (arr) => arr[Primrose.Random.int(arr.length)];
+})();

@@ -1,4 +1,5 @@
 Primrose.Input.Touch = ( function () {
+  "use strict";
   
   pliny.class({
     parent: "Primrose.Input",

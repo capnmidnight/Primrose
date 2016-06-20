@@ -1,4 +1,6 @@
 Primrose.Controls.Button3D = ( function () {
+  "use strict";
+  
   pliny.class({
     parent: "Primrose",
     name: "Button",

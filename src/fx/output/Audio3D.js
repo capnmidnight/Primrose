@@ -1,4 +1,5 @@
 Primrose.Output.Audio3D = (function () {
+  "use strict";
 
   // polyfill
   Window.prototype.AudioContext =

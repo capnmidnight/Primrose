@@ -1,4 +1,6 @@
 Primrose.Input.LeapMotion = ( function () {
+  "use strict";
+  
   function processFingerParts ( i ) {
     return LeapMotion.FINGER_PARTS.map( function ( p ) {
       return "FINGER" + i + p.toUpperCase();

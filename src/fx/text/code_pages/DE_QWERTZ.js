@@ -1,5 +1,6 @@
 Primrose.Text.CodePages.DE_QWERTZ = (function () {
   "use strict";
+  
   var CodePage = Primrose.Text.CodePage;
   
   pliny.record({
