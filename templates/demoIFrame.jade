@@ -4,7 +4,7 @@ html
     meta(charset="utf-8")
     block viewport
       meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1")
-      
+
     meta(name="web-app-capable", content="yes")
     meta(name="theme-color", content="black")
     meta(name="apple-mobile-web-app-capable", content="yes")
@@ -18,15 +18,15 @@ html
     meta(name="twitter:site", content="@Primrose_VR")
 
     meta(property="og:site_name", content="Primrose VR")
-    
+
     meta(property="og:description", content="Primrose: Framework for WebVR Applications")
     meta(name="twitter:description", content="Primrose: Framework for WebVR Applications")
     meta(property="og:url", content="http://www.primrosevr.com/" + filePath)
-    
+
     <!-- start main.jade meta block -->
     block meta
     <!-- end main.jade meta block -->
-    
+
     <!-- start main.jade title block -->
     block title
       meta(property="og:title", content="Primrose VR: WebVR Application Framework")
@@ -74,7 +74,7 @@ html
       #controls
         #fullScreenButtonContainer
         #loginForm(style="display:none")
-          a#closeButton close
+          a#closeButton(href="#") close
           #emailRow(style="display:none")
             input#email(type="email", placeholder="Email (name@server.domain)")
           #userNameRow
