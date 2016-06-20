@@ -1,6 +1,5 @@
-"use strict";
-
 Primrose.IconManager = (function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose",
