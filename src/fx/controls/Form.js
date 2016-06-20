@@ -3,8 +3,8 @@
   pliny.class({
     parent: "Primrose.Controls",
     name: "Form",
-    description: "A basic 2D form control, with its own mesh to use as a frame.",
-    baseClass: "Primrose.Entity"
+    baseClass: "Primrose.Entity",
+    description: "A basic 2D form control, with its own mesh to use as a frame."
   });
   class Form extends Primrose.Surface {
 

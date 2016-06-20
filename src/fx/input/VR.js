@@ -4,6 +4,7 @@ Primrose.Input.VR = (function () {
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
   class VR extends Primrose.InputProcessor {
