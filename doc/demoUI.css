@@ -57,6 +57,10 @@ button {
   border-radius: 5px;
 }
 
+input:disabled, button:disabled {
+  opacity: 0.25;
+}
+
 #loginForm {
   position: absolute;
   height: 100%;

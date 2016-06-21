@@ -11,6 +11,9 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   lastNetworkUpdate = 0,
   state = [0, 0, 0, 0, 0, 0, 0, 1],
   ctrls2D = Primrose.DOM.findEverything(),
+  loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function(name){
+    return ctrls2D[name];
+  }),
   env = new Primrose.BrowserEnvironment(appKey, {
     autoScaleQuality: false,
     autoRescaleQuality: false,
@@ -88,6 +91,9 @@ function hideLoginForm(){
 
 var listUserPromise = Promise.resolve();
 function listUsers(newUsers) {
+  ctrls2D.errorMessage.innerHTML = "";
+  ctrls2D.errorMessage.style.display = "none";
+  disableLogin(false);
   hideLoginForm();
 
   document.cookie = "Primrose:user:" + userName;
@@ -157,6 +163,7 @@ function errorMessage(message){
   }
   ctrls2D.errorMessage.innerHTML = message;
   ctrls2D.errorMessage.style.display = "block";
+  disableLogin(false);
 }
 
 function authFailed(name) {
@@ -176,6 +183,12 @@ function addDevice(index) {
 
 function setDeviceIndex(index) {
   deviceIndex = index;
+}
+
+function disableLogin(v){
+  loginControls.forEach(function(ctrl){
+    ctrl.disabled = v;
+  });
 }
 
 function authenticate() {
@@ -203,7 +216,7 @@ function authenticate() {
     email = ctrls2D.email.value;
 
   userName = ctrls2D.userName.value.toLocaleUpperCase();
-
+  disableLogin(true);
   if(userName.length === 0){
     errorMessage("You must provide a user name.");
   }
