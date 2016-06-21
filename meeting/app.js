@@ -175,10 +175,23 @@ function removeUser(key) {
   }
 }
 
+var ERROR_MESSAGES = {
+  login: "We couldn't log you in right now because ",
+  signup: "We couldn't sign you up right now because "
+}
+
+function errorMessage(message){
+  if(!ctrls2D.loginForm.style.width){
+    ctrls2D.loginForm.style.width = ctrls2D.loginForm.clientWidth + "px";
+  }
+  ctrls2D.errorMessage.innerHTML = message;
+  ctrls2D.errorMessage.style.display = "block";
+}
+
 function authFailed(name) {
   return function (reason) {
-    console.error(name + " failed", reason);
     showSignup(name === "signup");
+    errorMessage(ERROR_MESSAGES[name] + reason.replace(/\[USER\]/g, ctrls2D.userName.value));
   }
 }
 
@@ -222,6 +235,7 @@ function setLoginValues(formA, formB, formC) {
     socket.on("userLeft", removeUser);
     socket.on("logoutComplete", showSignup.bind(null, false));
     socket.on("connection_lost", lostConnection);
+    socket.on("errorDetail", console.error.bind(console));
   }
 
   authenticate();
@@ -234,15 +248,23 @@ function authenticate() {
 
   userName = ctrls3D.signup.userName.value.toLocaleUpperCase();
 
-  socket.once("salt", function (salt) {
-    var hash = new Hashes.SHA256().hex(salt + password)
-    socket.emit("hash", hash);
-  });
-  socket.emit(verb, {
-    userName: userName,
-    email: email,
-    app: appKey
-  });
+  if(userName.length === 0){
+    errorMessage("You must provide a user name.");
+  }
+  else if(password.length === 0){
+    errorMessage("You must provide a password.");
+  }
+  else{
+    socket.once("salt", function (salt) {
+      var hash = new Hashes.SHA256().hex(salt + password)
+      socket.emit("hash", hash);
+    });
+    socket.emit(verb, {
+      userName: userName,
+      email: email,
+      app: appKey
+    });
+  }
 }
 
 function environmentReady() {
