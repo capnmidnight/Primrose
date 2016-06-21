@@ -11,10 +11,6 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   lastNetworkUpdate = 0,
   state = [0, 0, 0, 0, 0, 0, 0, 1],
   ctrls2D = Primrose.DOM.findEverything(),
-  ctrls3D = {
-    login: new Primrose.X.LoginForm(),
-    signup: new Primrose.X.SignupForm()
-  },
   env = new Primrose.BrowserEnvironment(appKey, {
     autoScaleQuality: false,
     autoRescaleQuality: false,
@@ -50,24 +46,11 @@ if(!hasMeetingID){
 }
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
-ctrls2D.connect.addEventListener("click", setLoginValues.bind(null, ctrls2D, ctrls3D.signup, ctrls3D.login));
+ctrls2D.connect.addEventListener("click", authenticate);
 ctrls2D.userName.value = userName;
-
-ctrls3D.login.position.set(0, env.avatarHeight, -0.5);
-ctrls3D.signup.position.set(0, env.avatarHeight, -0.5);
 
 showSignup(userName.length === 0);
 
-setTimeout(function () {
-  ctrls3D.signup.userName.value = ctrls3D.login.userName.value = ctrls2D.userName.value;
-  ctrls3D.signup.password.value = ctrls3D.login.password.value = ctrls2D.password.value;
-  ctrls3D.signup.email.value = ctrls2D.email.value;
-}, 250);
-
-ctrls3D.login.addEventListener("signup", showSignup.bind(null, true), false);
-ctrls3D.signup.addEventListener("login", showSignup.bind(null, false), false);
-ctrls3D.signup.addEventListener("signup", setLoginValues.bind(null, ctrls3D.signup, ctrls3D.login, ctrls2D), false);
-ctrls3D.login.addEventListener("login", setLoginValues.bind(null, ctrls3D.login, ctrls3D.signup, ctrls2D), false);
 ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 
 env.addEventListener("ready", environmentReady);
@@ -94,14 +77,6 @@ function showSignup(state) {
   ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
   ctrls2D.connect.innerHTML = state ? "Sign up" : "Log in";
   ctrls2D.connect.className = state ? "signupButton" : "loginButton";
-
-  ctrls3D.signup.style.display = state ? "" : "none";
-  ctrls3D.login.style.display = state ? "none" : "";
-
-  if (state) {
-    ctrls3D.signup.userName.value = ctrls3D.login.userName.value;
-    ctrls3D.signup.password.value = ctrls3D.login.password.value;
-  }
 }
 
 function hideLoginForm(){
@@ -114,10 +89,6 @@ function hideLoginForm(){
 var listUserPromise = Promise.resolve();
 function listUsers(newUsers) {
   hideLoginForm();
-
-  ctrls3D.signup.style.display
-    = ctrls3D.login.style.display
-    = "none";
 
   document.cookie = "Primrose:user:" + userName;
 
@@ -207,18 +178,7 @@ function setDeviceIndex(index) {
   deviceIndex = index;
 }
 
-function setLoginValues(formA, formB, formC) {
-  formB.userName.value = formC.userName.value = formA.userName.value;
-  formB.password.value = formC.password.value = formA.password.value;
-  if (formA.email) {
-    if (formB.email) {
-      formB.email.value = formA.email.value;
-    }
-    if (formC.email) {
-      formC.email.value = formA.email.value;
-    }
-  }
-
+function authenticate() {
   if (!socket) {
     var protocol = location.protocol.replace("http", "ws"),
       path = protocol + "//" + location.hostname;
@@ -238,15 +198,11 @@ function setLoginValues(formA, formB, formC) {
     socket.on("errorDetail", console.error.bind(console));
   }
 
-  authenticate();
-}
+  var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
+    password = ctrls2D.password.value,
+    email = ctrls2D.email.value;
 
-function authenticate() {
-  var verb = ctrls3D.signup.style.display === "none" ? "login" : "signup",
-    password = ctrls3D.signup.password.value,
-    email = ctrls3D.signup.email.value;
-
-  userName = ctrls3D.signup.userName.value.toLocaleUpperCase();
+  userName = ctrls2D.userName.value.toLocaleUpperCase();
 
   if(userName.length === 0){
     errorMessage("You must provide a user name.");
@@ -269,8 +225,6 @@ function authenticate() {
 
 function environmentReady() {
   ctrls2D.loginForm.style.display = "";
-  env.appendChild(ctrls3D.login);
-  env.appendChild(ctrls3D.signup);
 
   env.scene.traverse(function (obj) {
     if (obj.name.indexOf("LightPanel") === 0) {
