@@ -50,7 +50,7 @@ Primrose.IconManager = (function () {
         titleText = textured(text3D(0.05, display.displayName), this.options.foregroundColor),
         funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), this.options.foregroundColor);
 
-      icon.name = (display.displayName + "Icon").replace(/ /g, "");
+      icon.name = ("Display" + display.displayName + "Icon").replace(/ /g, "");
 
       geom.computeBoundingBox();
 

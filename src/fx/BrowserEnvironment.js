@@ -898,12 +898,24 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var showHideButtons = () => {
+        var hide = isFullScreenMode();
         iconManager.icons.forEach((icon) => {
-          if (icon.displayName) {
-            icon.visible = !isFullScreenMode();
-            icon.disabled = isFullScreenMode();
+          if (icon.name.indexOf("Display") === 0) {
+            icon.visible = !hide;
+            icon.disabled = hide;
           }
         });
+        var elem = this.renderer.domElement.nextElementSibling;
+        while(elem){
+          if(hide){
+            elem.dataset.originaldisplay = elem.style.display;
+            elem.style.display = "none";
+          }
+          else{
+            elem.style.display = elem.dataset.originaldisplay;
+          }
+          elem = elem.nextElementSibling;
+        }
       };
 
       if (isMobile) {
