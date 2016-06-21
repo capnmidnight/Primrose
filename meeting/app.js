@@ -127,16 +127,6 @@ function listUsers(newUsers) {
   }
 }
 
-function logAudio(name, stream) {
-  if (stream) {
-    for (var key in stream) {
-      if (key.indexOf("on") === 0) {
-        stream.addEventListener(key.substring(2), console.log.bind(console, name + "." + key));
-      }
-    }
-  }
-}
-
 function addUser(state) {
   var toUserName = state[0],
   user = new Primrose.RemoteUser(toUserName, avatarFactory, env.options.foregroundColor);
