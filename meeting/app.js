@@ -189,6 +189,7 @@ function disableLogin(v){
   loginControls.forEach(function(ctrl){
     ctrl.disabled = v;
   });
+  document.body.style.cursor = v ? "wait" : "";
 }
 
 function authenticate() {
