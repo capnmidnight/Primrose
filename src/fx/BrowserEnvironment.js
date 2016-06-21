@@ -926,14 +926,14 @@ Primrose.BrowserEnvironment = (function () {
         window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
       }
 
+      window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
+      FullScreen.addChangeListener(modifyScreen, false);
+
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive) {
           this.input.VR.currentDisplay.exitPresent();
         }
       }, false);
-
-      window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
-      FullScreen.addChangeListener(modifyScreen, false);
 
       var isFullScreenMode = () => FullScreen.isActive || this.input.VR.currentDisplay.isPresenting;
 
