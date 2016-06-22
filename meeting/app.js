@@ -51,6 +51,25 @@ ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
 
+function showSignup(state) {
+  if (typeof state !== "boolean") {
+    state = ctrls2D.emailRow.style.display === "none";
+  }
+
+  ctrls2D.emailRow.style.display = state ? "" : "none";
+  ctrls2D.switchMode.innerHTML = state ? "Log in" : "Sign up";
+  ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
+  ctrls2D.connect.innerHTML = state ? "Sign up" : "Log in";
+  ctrls2D.connect.className = state ? "signupButton" : "loginButton";
+}
+
+function hideLoginForm(){
+  ctrls2D.loginForm.style.display = "none";
+  ctrls2D.controls.style.width = "initial";
+  ctrls2D.controls.style.height = "initial";
+  ctrls2D.frontBuffer.focus();
+}
+
 var micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(setAudioStream.bind(null, ctrls2D.localAudio))
     .catch(console.warn.bind(console, "Can't get audio")),
@@ -69,25 +88,6 @@ function setAudioStream(element, stream){
   }
   element.muted = true;
   return stream;
-}
-
-function showSignup(state) {
-  if (typeof state !== "boolean") {
-    state = ctrls2D.emailRow.style.display === "none";
-  }
-
-  ctrls2D.emailRow.style.display = state ? "" : "none";
-  ctrls2D.switchMode.innerHTML = state ? "Log in" : "Sign up";
-  ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
-  ctrls2D.connect.innerHTML = state ? "Sign up" : "Log in";
-  ctrls2D.connect.className = state ? "signupButton" : "loginButton";
-}
-
-function hideLoginForm(){
-  ctrls2D.loginForm.style.display = "none";
-  ctrls2D.controls.style.width = "initial";
-  ctrls2D.controls.style.height = "initial";
-  ctrls2D.frontBuffer.focus();
 }
 
 var listUserPromise = Promise.resolve();

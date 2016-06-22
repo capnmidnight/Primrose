@@ -1276,6 +1276,8 @@ Primrose.BrowserEnvironment = (function () {
     ambientSound: null,
     // HTML5 canvas element, if one had already been created.
     canvasElement: "frontBuffer",
+    // HTML5 audio element, if one had already been created.
+    audioElement: "localAudio",
     // THREE.js renderer, if one had already been created.
     renderer: null,
     // A WebGL context to use, if one had already been created.
