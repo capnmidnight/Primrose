@@ -1,4 +1,302 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="web-app-capable" content="yes"><meta name="theme-color" content="black"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="description" content="A WebVR application framework."><meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Primrose_VR"><meta property="og:site_name" content="Primrose VR"><meta property="og:description" content="Primrose: Framework for WebVR Applications"><meta name="twitter:description" content="Primrose: Framework for WebVR Applications"><meta property="og:url" content="http://www.primrosevr.com/doc/faq.html"><!-- start main.jade meta block --><meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg"><meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><!-- start documentation.jade title block --><meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation"><meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation"><title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append --><script type="text/javascript" src="../PrimroseDependencies.min.js"></script><script type="text/javascript" src="../Primrose.min.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append --><link rel="stylesheet" type="text/css" href="style.min.css"><script type="text/javascript" src="../PrimroseDocumentation.min.js"></script><!-- end documentation.jade head append --></head><body><header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose32.png" alt="logo" title="Primrose logo"></a><nav role="navigation"><ul><li><a href="../#intro">intro/</a></li><li><a href="../#webvr">webvr/</a></li><li><a href="../doc/">doc/</a></li><li><a href="../#dev">download/</a></li><li><a href="../#teamInfo">team/</a></li><li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li></ul></nav></header><!-- start main.jade banner block --><!-- end main.jade banner block -->
-<!-- start main.jade main block --><!-- start documentation.jade main block --><main><div id="top"></div><div id="contents"><details open><input id="docSearch" type="search" placeholder="Filter"><summary>Table of contents</summary><nav><ul><li><h2>Project</h2><ul><li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li><li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li><li><a href="index.html#LICENSE.md">LICENSE</a></li><li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li><li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li></ul></li><li><h2>Examples</h2><ul><li data-name="Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Commodore PET and Oregon Trail</a></li><li data-name="Live programming in Virtual Reality"><a href="../doc/editorVR.html">Live programming in Virtual Reality</a></li><li data-name="Empty"><a href="../doc/empty.html">Empty</a></li><li data-name="Jabber Yabs"><a href="../doc/jabbers.html">Jabber Yabs</a></li><li data-name="Drum Machine"><a href="../doc/music.html">Drum Machine</a></li><li data-name="Pacman"><a href="../doc/pacman.html">Pacman</a></li><li data-name="Procedurally generated room"><a href="../doc/temple.html">Procedurally generated room</a></li></ul></li><li><h2>Pages</h2><ul><li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li><li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li><li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li><li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li><li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li><li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li><li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li></ul></li><li><h2>Tutorials</h2><ul><li data-name="Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Basic Lighting</a></li><li data-name="Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Build a Basic Drum Machine</a></li><li data-name="Display Images and Video"><a class="incomplete" href="../doc/video.html">Display Images and Video</a></li><li data-name="Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Building and Saving a Scene in Primrose</a></li><li data-name="Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Building Basic Scenes in Blender</a></li><li data-name="More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">More Advanced Scenes in Blender</a></li><li data-name="Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Build a 3D Integrated Development Environment</a></li><li data-name="Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Setup a Multiplayer Server</a></li></ul></li></ul></nav></details></div><div id="documentation"><section><article><!-- start documentation.jade documentation block --><!-- 2--><h1>Frequently Asked Questions</h1><h2>"What is Primrose?"</h2><ul><li>Primrose is a web development framework for building virtual reality experiences in the web browser.</li><li>Primrose is a rapid application development tool for prototyping VR user interfaces.</li><li>Primrose is a 3D chatroom.</li><li>Primrose is a live-programming environment.</li><li>Primrose is a collection of best-practices for building VR applications.</li><li>Primrose is a collaborative editing tool.</li><li>Primrose is a tool for building collaborative tools.</li><li>Primrose is a system for networking real-world devices together and presenting them in one virtual environment.</li><li>Primrose is love.</li></ul><p>Primrose is all of these things.</p><h2>"What is not Primrose?"</h2><p>Primrose is not a fully-featured game development framework. The purpose of Primrose is to explore productivity applications. VR is very taxing on graphics resources, which can leave the business-need of the application starved. Thus, graphics fidelity in Primrose is kept simple so as to ensure compatability with older devices.</p><h2>"But what do you do with it?"</h2><p>The tools that Primrose provides are meant to enable experimentation with the VR form, to try out new ideas in user interface design and figure out what works best in VR. As different types of interactions become common and accepted as best-practice in the VR community, they will be added to Primrose as part of the basic building blocks of development.</p><p>To that end, Primrose focuses on a small subset of what could be possible with VR. It provides a physical world--think of it like a desert wasteland, to be used as a blank canvas--in which the user stands and freely moves about to interact with objects directly. While we recognize that VR can potentially present far more diverse experiences than strictly literal interpretations of time and space, we feel that this limitation helps focus the user towards productive goals.</p><h2>"What License does Primrose use?"</h2><p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may readily be used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software">FOSS</a> projects.</p><h2>"Why did you choose the GPL over the LGPL or MIT for the license"?</h2><p>It's my general opinion that the interpreted nature of JavaScript means that it is always a source code release to the user that satisfies the GPL, as it does not get compiled to a byte code before going to the client, and even minified code can be reversed.</p><p>There is a lot of FUD surrounding the GPL, making <a href="http://greendrake.info/#nfy0" target="_blank">using the GPL for JavaScript libraries a controversial topic</a>. But if certain companies are irrationally fearful of the GPL and don't think it is compatible with their work, then I would prefer they don't use it, rather than use it, benefit financially from it, and have no incentive to provide any benefit back to me.</p><p>I've put a lot of work into Primrose. In open sourcing it and making it available to the world to use, all that I ask is for you to do the same.</p><p>It's important to remember that the GPL does not restrict use. Indeed, it's entire purpose is to make restrictions on use impossible. As long as you are in development, not distributing your project to other people, there is no need to do anything involving licensing. The GPL's only restrictions apply to distribution. This means that if you feel that:</p><ul><li>minification is not a true source release, or future compiling to WASM constitutes a binary release that does not satisfy the GPL,</li><li>you can only make a financial return if you close your client-side source because your server-side code does not add significant value to your project,</li><li>Primrose still adds significant value to your project that you cannot remove it, and</li><li>you are ready to release your project to the public.</li></ul><p>Then you can always pick up the phone and negotiate an arrangement that allows you to keep your client-side source code closed.</p><h2>"What is WebVR?"</h2><p>WebVR is a draft standard for presenting content in commonly available web browsers on virtual reality hardware. See <a href="#WhatisWebVR?">What is WebVR?</a> for more information.</p><h2>"But the resolution on the Oculus Rift DK2 is awful!"</h2><p>This is certainly a problem, but there isn't much to do about it, and we believe it will not be a problem in the near future. We are developing Primrose to be able to develop other products to be ready at that time.</p><h2>"How do I contribute to Primrose?"</h2><p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request. This will serve as your copyright assignment.</p><h2>"Why not use Unity/Unreal Engine?"</h2><p>Unity and Unreal Engine are game development engines that are focused on game development concerns. As such, they are primarily centered on the 3D content pipeline and native, desktop applications performance. These concerns do not mesh well with the fast-paced environment of web development.</p><p>The tooling and data formats that Unity and Unreal Engine use are largely proprietary, or resistant to integration with other, open-source tools. We feel that web development works best when it is freely available to everyone. Free as in beer. Free as in freedom.</p><p>Finally, we believe that the web browser makes for an excellent deployment platform. Everyone has a web browser on their laptops and phones. Targeting the web browser allows us to skip large concerns for how to build cross-platform applications. </p><h2>"But didn't Mozilla abandon Canvas for <a href="https://mozillalabs.com/en-US/skywriter/">Bespin/SkyWriter</a>?"</h2><p>Mozilla abandoned Bespin as a project *entirely*, choosing to adopt Ace for convenience and time-cost purposes instead. Also, their requirements had no need for the text to be an image. We specifically need an image to use as a texture on 3D objects. Primrose fulfills a different purpose than Bespin.</p><h2>"Why not <a href="http://ace.c9.io/#nav=about">Ace</a>/<a href="https://codemirror.net/">CodeMirror</a>?"</h2><p>There are a few browser-based source code editor projects that render to DOM elements, with Ace and CodeMirror probably being the most popular. All solutions involving overlaying of HTML elements on top of a base Canvas element do not composite well in WebGL contexts. This may work fine in 2D, where elements are built in layers, but in 3D the HTML Element is not a part the scene and does not participate in depth buffering. The text will always be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene.</p><h2>"Why not <a href="https://github.com/danielearwicker/carota">Carota</a>?"</h2><p>Carota is a fine project, but it is intended for rich-text editing. We don't want the user to be in control of the styling of a document, unless they are specifically changing the styling of a theme to apply to the syntax-highlighted text.</p><h2>"Why not <a href="http://kra.hn/projects/live-programming-with-three-and-webvr">CodeChisel3D</a> or <a href="http://www.lutzroeder.com/html5/textor/">Textor</a>?"</h2><p>We didn't know about CodeChisel3D or Textor at the time that we started this project. CodeChisel3D is based on an adapted version of Ace called <a href="https://github.com/rksm/three-codeeditor">Three-CodeEditor</a>. Textor is another from-scratch text editor, written in TypeScript, that draws directly to Canvas. They both look like a fine projects. Primrose is meant to be more than just a text editor. It's a general-purpose application framework for building productivity apps.</p><h2>"Why the name Primrose?"</h2><p>There is a lot that goes in to naming a project. You want the project name to be memorable, concise, easy to pronounce, and not conjure bad feelings in potential user's minds. A bad name makes it hard for people to talk about your project, and you don't want to discourage people form talking about your project.</p><p>With that in mind, we tried to imagine ourselves as a member of a development team, sitting in an office somewhere, trying to convince her coworkers to use our software. How does the phrase, "what if we used &lt;Insert Name Here>?" sound in the context of the meeting? A lot of potential names got thrown out just for being too hard to pronounce, too generic-sounding, or not something you'd want to say out loud in a professional setting.</p><p>It's kind of hard to have negative connotations about a plant, especially a little one. Also, there is some precedent in software to name projects after plants.</p><ul><li>Oak was the original name of the Java programming language.</li><li>NetBeans is an Integrated Development Environment, that gets its name from the fact that coffee has been grown on the island of Java for over 300 years.</li><li>IBM has a modeling suite named Rational Rose.</li><li>There used to be an accounting suite named Peachtree that is now named Sage; from one plant name to another.</li><li>Mint is used by two different companies:</li><li>A personal finance tool that got bought out by Intuit, and</li><li><a href="http://www.linuxmint.com">A distribution of Linux</a> (that we run here at Primrose LLC) based on Ubuntu.</li><li>PEAR is a PHP framework.</li><li>RaspberryPi is a small computer.</li><li>There's a whole company named Apple.</li><li>One of my favorite companies in the world is <a href="http://www.adafruit.com">AdaFruit</a></li></ul><p>So the name Primrose is largely arbitrary, a combination of making lists of plant names that sounded nice, coupled with web searching for them to figure out if they had already been taken. Primrose basically won out over Marigold, because we finally felt that a logo for a primrose flower would be easier to make than a logo for a marigold flower.</p><!-- end documentation.jade documentation block --></article></section></div></main><!-- end documentation.jade main block --><!-- end main.jade main block -->
-<!-- start main.jade footer block --><script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block --></body></html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="A WebVR application framework.">
+    <meta name="keywords" content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Primrose_VR">
+    <meta property="og:site_name" content="Primrose VR">
+    <meta property="og:description" content="Primrose: Framework for WebVR Applications">
+    <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
+    <meta property="og:url" content="http://www.primrosevr.com/doc/faq.html"><!-- start main.jade meta block -->
+    <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
+<!-- start main.jade title block --><!-- start documentation.jade title block -->
+    <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
+    <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
+    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append -->
+    <script type="text/javascript" src="../node_modules/logger/logger.js"></script>
+    <script type="text/javascript" src="../node_modules/marked/marked.min.js"></script>
+    <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
+    <script type="text/javascript" src="../node_modules/socket.io-client/socket.io.js"></script>
+    <script type="text/javascript" src="../node_modules/jshashes/hashes.js"></script>
+    <script type="text/javascript" src="../node_modules/three/three.js"></script>
+    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
+    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
+    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/FBXLoader.js"></script>
+    <script type="text/javascript" src="../node_modules/html2canvas/dist/html2canvas.js"></script>
+    <script type="text/javascript" src="../src/app.js"></script>
+    <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
+    <script type="text/javascript" src="../src/base/axis.js"></script>
+    <script type="text/javascript" src="../src/base/box.js"></script>
+    <script type="text/javascript" src="../src/base/brick.js"></script>
+    <script type="text/javascript" src="../src/base/cache.js"></script>
+    <script type="text/javascript" src="../src/base/clone.js"></script>
+    <script type="text/javascript" src="../src/base/cloud.js"></script>
+    <script type="text/javascript" src="../src/base/copyObject.js"></script>
+    <script type="text/javascript" src="../src/base/cylinder.js"></script>
+    <script type="text/javascript" src="../src/base/emit.js"></script>
+    <script type="text/javascript" src="../src/base/findProperty.js"></script>
+    <script type="text/javascript" src="../src/base/fmt.js"></script>
+    <script type="text/javascript" src="../src/base/forms.js"></script>
+    <script type="text/javascript" src="../src/base/hub.js"></script>
+    <script type="text/javascript" src="../src/base/light.js"></script>
+    <script type="text/javascript" src="../src/base/patch.js"></script>
+    <script type="text/javascript" src="../src/base/put.js"></script>
+    <script type="text/javascript" src="../src/base/quad.js"></script>
+    <script type="text/javascript" src="../src/base/range.js"></script>
+    <script type="text/javascript" src="../src/base/shell.js"></script>
+    <script type="text/javascript" src="../src/base/sphere.js"></script>
+    <script type="text/javascript" src="../src/base/textured.js"></script>
+    <script type="text/javascript" src="../src/base/v3.js"></script>
+    <script type="text/javascript" src="../src/fx/Angle.js"></script>
+    <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
+    <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
+    <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/StateList.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
+    <script type="text/javascript" src="../src/fx/Entity.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/XHR.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/get.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getBuffer.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getObject.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
+    <script type="text/javascript" src="../src/fx/IconManager.js"></script>
+    <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
+    <script type="text/javascript" src="../src/fx/Keys.js"></script>
+    <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
+    <script type="text/javascript" src="../src/fx/Pointer.js"></script>
+    <script type="text/javascript" src="../src/fx/Projector.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/ID.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/color.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/int.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/item.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/number.js"></script>
+    <script type="text/javascript" src="../src/fx/Random/steps.js"></script>
+    <script type="text/javascript" src="../src/fx/RemoteUser.js"></script>
+    <script type="text/javascript" src="../src/fx/Surface.js"></script>
+    <script type="text/javascript" src="../src/fx/WebRTCSocket.js"></script>
+    <script type="text/javascript" src="../src/fx/Workerize.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Button3D.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Form.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/HtmlDoc.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
+    <script type="text/javascript" src="../src/fx/controls/VUMeter.js"></script>
+    <script type="text/javascript" src="../src/fx/input/FPSInput.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Gamepad.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Keyboard.js"></script>
+    <script type="text/javascript" src="../src/fx/input/LeapMotion.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Location.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Media.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Motion.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Mouse.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Touch.js"></script>
+    <script type="text/javascript" src="../src/fx/input/VR.js"></script>
+    <script type="text/javascript" src="../src/fx/network/AudioChannel.js"></script>
+    <script type="text/javascript" src="../src/fx/network/DataChannel.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
+    <script type="text/javascript" src="../src/fx/output/HapticGlove.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Music.js"></script>
+    <script type="text/javascript" src="../src/fx/output/Speech.js"></script>
+    <script type="text/javascript" src="../src/fx/text/CodePage.js"></script>
+    <script type="text/javascript" src="../src/fx/text/CommandPack.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Cursor.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Grammar.js"></script>
+    <script type="text/javascript" src="../src/fx/text/OperatingSystem.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Point.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Rectangle.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Rule.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Size.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Terminal.js"></script>
+    <script type="text/javascript" src="../src/fx/text/Token.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/DE_QWERTZ.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/EN_UKX.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/EN_US.js"></script>
+    <script type="text/javascript" src="../src/fx/text/code_pages/FR_AZERTY.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/BasicTextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/TextEditor.js"></script>
+    <script type="text/javascript" src="../src/fx/text/command_packs/TextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/PlainText.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/TextBox.js"></script>
+    <script type="text/javascript" src="../src/fx/text/controls/TextInput.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/Basic.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/JavaScript.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/PlainText.js"></script>
+    <script type="text/javascript" src="../src/fx/text/grammars/TestResults.js"></script>
+    <script type="text/javascript" src="../src/fx/text/operating_systems/OSX.js"></script>
+    <script type="text/javascript" src="../src/fx/text/operating_systems/Windows.js"></script>
+    <script type="text/javascript" src="../src/fx/text/themes/Dark.js"></script>
+    <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script>
+    <script type="text/javascript" src="../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
+    <script type="text/javascript" src="../src/x/LoginForm.js"></script>
+    <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
+  </head>
+  <body>
+    <header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose32.png" alt="logo" title="Primrose logo"></a>
+      <nav role="navigation">
+        <ul>
+          <li><a href="../#intro">intro/</a></li>
+          <li><a href="../#webvr">webvr/</a></li>
+          <li><a href="../doc/">doc/</a></li>
+          <li><a href="../#dev">download/</a></li>
+          <li><a href="../#teamInfo">team/</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+        </ul>
+      </nav>
+    </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
+<!-- start main.jade main block --><!-- start documentation.jade main block -->
+    <main>
+      <div id="top"></div>
+      <div id="contents">
+        <details open>
+          <input id="docSearch" type="search" placeholder="Filter">
+          <summary>Table of contents</summary>
+          <nav>
+            <ul>
+              <li>
+                <h2>Project</h2>
+                <ul>
+                  <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li>
+                  <li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li>
+                  <li><a href="index.html#LICENSE.md">LICENSE</a></li>
+                  <li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li>
+                  <li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Examples</h2>
+                <ul>
+                  <li data-name="Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Commodore PET and Oregon Trail</a></li>
+                  <li data-name="Live programming in Virtual Reality"><a href="../doc/editorVR.html">Live programming in Virtual Reality</a></li>
+                  <li data-name="Empty"><a href="../doc/empty.html">Empty</a></li>
+                  <li data-name="Jabber Yabs"><a href="../doc/jabbers.html">Jabber Yabs</a></li>
+                  <li data-name="Drum Machine"><a href="../doc/music.html">Drum Machine</a></li>
+                  <li data-name="Pacman"><a href="../doc/pacman.html">Pacman</a></li>
+                  <li data-name="Procedurally generated room"><a href="../doc/temple.html">Procedurally generated room</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Pages</h2>
+                <ul>
+                  <li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li>
+                  <li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li>
+                  <li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li>
+                  <li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li>
+                  <li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li>
+                  <li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li>
+                  <li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li>
+                </ul>
+              </li>
+              <li>
+                <h2>Tutorials</h2>
+                <ul>
+                  <li data-name="Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Basic Lighting</a></li>
+                  <li data-name="Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Build a Basic Drum Machine</a></li>
+                  <li data-name="Display Images and Video"><a class="incomplete" href="../doc/video.html">Display Images and Video</a></li>
+                  <li data-name="Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Building and Saving a Scene in Primrose</a></li>
+                  <li data-name="Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Building Basic Scenes in Blender</a></li>
+                  <li data-name="More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">More Advanced Scenes in Blender</a></li>
+                  <li data-name="Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Build a 3D Integrated Development Environment</a></li>
+                  <li data-name="Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Setup a Multiplayer Server</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </details>
+      </div>
+      <div id="documentation">
+        <section>
+          <article><!-- start documentation.jade documentation block -->
+            <!-- 2-->
+            <h1>Frequently Asked Questions</h1>
+            <h2>"What is Primrose?"</h2>
+            <ul>
+              <li>Primrose is a web development framework for building virtual reality experiences in the web browser.</li>
+              <li>Primrose is a rapid application development tool for prototyping VR user interfaces.</li>
+              <li>Primrose is a 3D chatroom.</li>
+              <li>Primrose is a live-programming environment.</li>
+              <li>Primrose is a collection of best-practices for building VR applications.</li>
+              <li>Primrose is a collaborative editing tool.</li>
+              <li>Primrose is a tool for building collaborative tools.</li>
+              <li>Primrose is a system for networking real-world devices together and presenting them in one virtual environment.</li>
+              <li>Primrose is love.</li>
+            </ul>
+            <p>Primrose is all of these things.</p>
+            <h2>"What is not Primrose?"</h2>
+            <p>Primrose is not a fully-featured game development framework. The purpose of Primrose is to explore productivity applications. VR is very taxing on graphics resources, which can leave the business-need of the application starved. Thus, graphics fidelity in Primrose is kept simple so as to ensure compatability with older devices.</p>
+            <h2>"But what do you do with it?"</h2>
+            <p>The tools that Primrose provides are meant to enable experimentation with the VR form, to try out new ideas in user interface design and figure out what works best in VR. As different types of interactions become common and accepted as best-practice in the VR community, they will be added to Primrose as part of the basic building blocks of development.</p>
+            <p>To that end, Primrose focuses on a small subset of what could be possible with VR. It provides a physical world--think of it like a desert wasteland, to be used as a blank canvas--in which the user stands and freely moves about to interact with objects directly. While we recognize that VR can potentially present far more diverse experiences than strictly literal interpretations of time and space, we feel that this limitation helps focus the user towards productive goals.</p>
+            <h2>"What License does Primrose use?"</h2>
+            <p>Primrose is free, open source software (<a href="https://github.com/capnmidnight/Primrose/blob/master/LICENSE.md">GPLv3</a>) and may readily be used with other <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software">FOSS</a> projects.</p>
+            <h2>"Why did you choose the GPL over the LGPL or MIT for the license"?</h2>
+            <p>It's my general opinion that the interpreted nature of JavaScript means that it is always a source code release to the user that satisfies the GPL, as it does not get compiled to a byte code before going to the client, and even minified code can be reversed.</p>
+            <p>There is a lot of FUD surrounding the GPL, making <a href="http://greendrake.info/#nfy0" target="_blank">using the GPL for JavaScript libraries a controversial topic</a>. But if certain companies are irrationally fearful of the GPL and don't think it is compatible with their work, then I would prefer they don't use it, rather than use it, benefit financially from it, and have no incentive to provide any benefit back to me.</p>
+            <p>I've put a lot of work into Primrose. In open sourcing it and making it available to the world to use, all that I ask is for you to do the same.</p>
+            <p>It's important to remember that the GPL does not restrict use. Indeed, it's entire purpose is to make restrictions on use impossible. As long as you are in development, not distributing your project to other people, there is no need to do anything involving licensing. The GPL's only restrictions apply to distribution. This means that if you feel that:</p>
+            <ul>
+              <li>minification is not a true source release, or future compiling to WASM constitutes a binary release that does not satisfy the GPL,</li>
+              <li>you can only make a financial return if you close your client-side source because your server-side code does not add significant value to your project,</li>
+              <li>Primrose still adds significant value to your project that you cannot remove it, and</li>
+              <li>you are ready to release your project to the public.</li>
+            </ul>
+            <p>Then you can always pick up the phone and negotiate an arrangement that allows you to keep your client-side source code closed.</p>
+            <h2>"What is WebVR?"</h2>
+            <p>WebVR is a draft standard for presenting content in commonly available web browsers on virtual reality hardware. See <a href="#WhatisWebVR?">What is WebVR?</a> for more information.</p>
+            <h2>"But the resolution on the Oculus Rift DK2 is awful!"</h2>
+            <p>This is certainly a problem, but there isn't much to do about it, and we believe it will not be a problem in the near future. We are developing Primrose to be able to develop other products to be ready at that time.</p>
+            <h2>"How do I contribute to Primrose?"</h2>
+            <p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the <a href="https://github.com/capnmidnight/Primrose/blob/master/CONTRIBUTORS.md">CONTRIBUTORS.md</a> file with your pull request. This will serve as your copyright assignment.</p>
+            <h2>"Why not use Unity/Unreal Engine?"</h2>
+            <p>Unity and Unreal Engine are game development engines that are focused on game development concerns. As such, they are primarily centered on the 3D content pipeline and native, desktop applications performance. These concerns do not mesh well with the fast-paced environment of web development.</p>
+            <p>The tooling and data formats that Unity and Unreal Engine use are largely proprietary, or resistant to integration with other, open-source tools. We feel that web development works best when it is freely available to everyone. Free as in beer. Free as in freedom.</p>
+            <p>Finally, we believe that the web browser makes for an excellent deployment platform. Everyone has a web browser on their laptops and phones. Targeting the web browser allows us to skip large concerns for how to build cross-platform applications. </p>
+            <h2>"But didn't Mozilla abandon Canvas for <a href="https://mozillalabs.com/en-US/skywriter/">Bespin/SkyWriter</a>?"</h2>
+            <p>Mozilla abandoned Bespin as a project *entirely*, choosing to adopt Ace for convenience and time-cost purposes instead. Also, their requirements had no need for the text to be an image. We specifically need an image to use as a texture on 3D objects. Primrose fulfills a different purpose than Bespin.</p>
+            <h2>"Why not <a href="http://ace.c9.io/#nav=about">Ace</a>/<a href="https://codemirror.net/">CodeMirror</a>?"</h2>
+            <p>There are a few browser-based source code editor projects that render to DOM elements, with Ace and CodeMirror probably being the most popular. All solutions involving overlaying of HTML elements on top of a base Canvas element do not composite well in WebGL contexts. This may work fine in 2D, where elements are built in layers, but in 3D the HTML Element is not a part the scene and does not participate in depth buffering. The text will always be a 2D element masquerading in a 3D world, never overlapping properly with other objects in the scene.</p>
+            <h2>"Why not <a href="https://github.com/danielearwicker/carota">Carota</a>?"</h2>
+            <p>Carota is a fine project, but it is intended for rich-text editing. We don't want the user to be in control of the styling of a document, unless they are specifically changing the styling of a theme to apply to the syntax-highlighted text.</p>
+            <h2>"Why not <a href="http://kra.hn/projects/live-programming-with-three-and-webvr">CodeChisel3D</a> or <a href="http://www.lutzroeder.com/html5/textor/">Textor</a>?"</h2>
+            <p>We didn't know about CodeChisel3D or Textor at the time that we started this project. CodeChisel3D is based on an adapted version of Ace called <a href="https://github.com/rksm/three-codeeditor">Three-CodeEditor</a>. Textor is another from-scratch text editor, written in TypeScript, that draws directly to Canvas. They both look like a fine projects. Primrose is meant to be more than just a text editor. It's a general-purpose application framework for building productivity apps.</p>
+            <h2>"Why the name Primrose?"</h2>
+            <p>There is a lot that goes in to naming a project. You want the project name to be memorable, concise, easy to pronounce, and not conjure bad feelings in potential user's minds. A bad name makes it hard for people to talk about your project, and you don't want to discourage people form talking about your project.</p>
+            <p>With that in mind, we tried to imagine ourselves as a member of a development team, sitting in an office somewhere, trying to convince her coworkers to use our software. How does the phrase, "what if we used &lt;Insert Name Here>?" sound in the context of the meeting? A lot of potential names got thrown out just for being too hard to pronounce, too generic-sounding, or not something you'd want to say out loud in a professional setting.</p>
+            <p>It's kind of hard to have negative connotations about a plant, especially a little one. Also, there is some precedent in software to name projects after plants.</p>
+            <ul>
+              <li>Oak was the original name of the Java programming language.</li>
+              <li>NetBeans is an Integrated Development Environment, that gets its name from the fact that coffee has been grown on the island of Java for over 300 years.</li>
+              <li>IBM has a modeling suite named Rational Rose.</li>
+              <li>There used to be an accounting suite named Peachtree that is now named Sage; from one plant name to another.</li>
+              <li>Mint is used by two different companies:</li>
+              <li>A personal finance tool that got bought out by Intuit, and</li>
+              <li><a href="http://www.linuxmint.com">A distribution of Linux</a> (that we run here at Primrose LLC) based on Ubuntu.</li>
+              <li>PEAR is a PHP framework.</li>
+              <li>RaspberryPi is a small computer.</li>
+              <li>There's a whole company named Apple.</li>
+              <li>One of my favorite companies in the world is <a href="http://www.adafruit.com">AdaFruit</a></li>
+            </ul>
+            <p>So the name Primrose is largely arbitrary, a combination of making lists of plant names that sounded nice, coupled with web searching for them to figure out if they had already been taken. Primrose basically won out over Marigold, because we finally felt that a logo for a primrose flower would be easier to make than a logo for a marigold flower.</p><!-- end documentation.jade documentation block -->
+          </article>
+        </section>
+      </div>
+    </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
+<!-- start main.jade footer block -->
+    <script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block -->
+  </body>
+</html>
