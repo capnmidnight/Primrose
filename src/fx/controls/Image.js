@@ -11,7 +11,7 @@ Primrose.Controls.Image = (function () {
     baseClass: "Primrose.Surface",
     description: "A simple 2D image to put on a Surface.",
     parameters: [
-      { name: "options", type: "Object", description: "Named parameters for creating the Button." }
+      { name: "options", type: "Object", description: "Named parameters for creating the Image." }
     ]
   });
   class Image extends Primrose.Surface {
