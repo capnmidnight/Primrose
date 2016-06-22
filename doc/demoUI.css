@@ -12,6 +12,9 @@ html, body, #frontBuffer, progress, #controls {
 html, body, #frontBuffer, #controls {
   padding: 0;
   margin: 0;
+}
+
+html, body, #frontBuffer {
   width: 100%;
   height: 100%;
 }

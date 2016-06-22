@@ -64,6 +64,8 @@ function showSignup(state) {
     state = ctrls2D.emailRow.style.display === "none";
   }
 
+  ctrls2D.controls.style.width = "100%";
+  ctrls2D.controls.style.height = "100%";
   ctrls2D.emailRow.style.display = state ? "" : "none";
   ctrls2D.switchMode.innerHTML = state ? "Log in" : "Sign up";
   ctrls2D.switchMode.className = state ? "loginButton" : "signupButton";
