@@ -262,6 +262,14 @@ Primrose.BrowserEnvironment = (function () {
       var movePlayer = (dt) => {
 
         this.input.update();
+        
+        for(var i = 0; i < motionControllers.length; ++i){
+          var m = motionControllers[i];
+          m.getPosition(m.mesh.position);
+          m.mesh.position.y += this.options.avatarHeight;
+          m.getOrientation(m.mesh.quaternion);
+        }
+
         this.player.heading = this.input.getValue("heading");
         var pitch = this.input.getValue("pitch"),
           strafe = this.input.getValue("strafe"),
@@ -591,11 +599,18 @@ Primrose.BrowserEnvironment = (function () {
           .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
           .catch(console.warn.bind(console, "Can't get audio")),
         users = {},
+        motionControllers = [],
         socket,
         lastNetworkUpdate = 0,
         oldState = [],
         deviceIndex,
         listUserPromise = Promise.resolve();
+
+      var newMotionController = (mgr) => {
+        motionControllers.push(mgr);
+        mgr.mesh = textured(box(0.1), 0x0000ff);
+        this.scene.add(mgr.mesh);
+      };
 
       function listUsers(newUsers) {
         Object.keys(users).forEach(removeUser);
@@ -1217,6 +1232,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("fullscreen", this.goFullScreen.bind(this), false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
+        this.input.addEventListener("motioncontroller", newMotionController, false);
         return this.input.ready;
       });
 

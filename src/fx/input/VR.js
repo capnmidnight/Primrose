@@ -3,7 +3,7 @@ Primrose.Input.VR = (function () {
   
   const SLERP_A = isMobile ? 0.1 : 0,
     SLERP_B = 1 - SLERP_A,
-    tempQuat = [], tempPos = [];
+    tempQuat = [];
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",

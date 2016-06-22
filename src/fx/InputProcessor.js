@@ -23,7 +23,7 @@ Primrose.InputProcessor = (function () {
       });
     }
 
-    constructor(name, commands, socket) {
+    constructor(name, commands, socket, axisNames) {
       this.name = name;
       this.commands = {};
       this.commandNames = [];
@@ -83,7 +83,7 @@ Primrose.InputProcessor = (function () {
         this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
       }
 
-      this.axisNames = Primrose.Input[name] && Primrose.Input[name].AXES || [];
+      this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
 
       for (var i = 0; i < this.axisNames.length; ++i) {
         this.inputState.axes[i] = 0;

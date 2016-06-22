@@ -1,176 +1,189 @@
 Primrose.Input.Gamepad = (function () {
   "use strict";
 
+  navigator.getGamepads = navigator.getGamepads ||
+    navigator.webkitGetGamepads;
+
+  const listeners = {
+    gamepadconnected: [],
+    gamepaddisconnected: []
+  },
+    currentPadIDs = [],
+    currentPads = [],
+    currentManagers = {};
+
   pliny.class({
     parent: "Primrose.Input",
     name: "Gamepad",
-    description: "| [under construction]",
     baseClass: "Primrose.InputProcessor",
     parameters: [
-      { name: "", type: "", description: "" },
-      { name: "", type: "", description: "" },
-      { name: "", type: "", description: "" },
-      { name: "", type: "", description: "" }
-    ]
+      { name: "name", type: "string", description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account." },
+      { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." },
+      { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }
+    ],
+    description: "An input processor for Gamepads, including those with positional data."
   });
   class Gamepad extends Primrose.InputProcessor {
-    constructor(commands, socket, gpid) {
-      super("Gamepad", commands, socket);
-      var connectedGamepads = [],
-        listeners = {
-          gamepadconnected: [],
-          gamepaddisconnected: []
-        };
+    static ID(pad){
+      return (pad.id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+    }
 
-      this.checkDevice = function (pad) {
-        var i;
-        for (i = 0; i < pad.buttons.length; ++i) {
-          this.setButton(i, pad.buttons[i].pressed);
-        }
-        for (i = 0; i < pad.axes.length; ++i) {
-          this.setAxis(Gamepad.AXES[i], pad.axes[i]);
-        }
-      };
+    static poll(){
+      var maybePads = navigator.getGamepads(),
+        pads = [],
+        padIDs = [],
+        newPads = [],
+        oldPads = [],
+        i;
 
-      this.poll = function () {
-        var pads,
-          currentPads = [],
-          i;
-
-        if (!pads || pads.length === 0) {
-          if (navigator.getGamepads) {
-            pads = navigator.getGamepads();
-          }
-          else if (navigator.webkitGetGamepads) {
-            pads = navigator.webkitGetGamepads();
-          }
-        }
-        if (pads) {
-          for (i = 0; i < pads.length; ++i) {
-            var pad = pads[i];
-            if (pad) {
-              if (!gpid) {
-                gpid = pad.id;
-              }
-              if (connectedGamepads.indexOf(pad.id) === -1) {
-                connectedGamepads.push(pad.id);
-                onConnected(pad.id);
-              }
-              if (pad.id === gpid) {
-                this.checkDevice(pad);
-              }
-              currentPads.push(pad.id);
+      if (maybePads) {
+        for (i = 0; i < maybePads.length; ++i) {
+          var maybePad = maybePads[i];
+          if (maybePad) {
+            var padID = Gamepad.ID(maybePad),
+              padIdx = currentPadIDs.indexOf(padID);
+            pads.push(maybePad);
+            padIDs.push(padID);
+            if(padIdx === -1){
+              newPads.push(maybePad);
+              currentPadIDs.push(padID);
+              currentPads.push(maybePad);
+              delete currentManagers[padID];
+            }
+            else{
+              currentPads[padIdx] = maybePad;
             }
           }
         }
+      }
 
-        for (i = connectedGamepads.length - 1; i >= 0; --i) {
-          if (currentPads.indexOf(connectedGamepads[i]) === -1) {
-            onDisconnected(connectedGamepads[i]);
-            connectedGamepads.splice(i, 1);
-          }
+      for(i = currentPadIDs.length - 1; i >= 0; --i){
+        var padID = currentPadIDs[i],
+          mgr = currentManagers[padID],
+          pad = currentPads[i];
+        if(padIDs.indexOf(padID) === -1){
+          oldPads.push(padID);
+          currentPads.splice(i, 1);
+          currentPadIDs.splice(i, 1);
         }
-      };
-
-      function add(arr, val) {
-        if (arr.indexOf(val) === -1) {
-          arr.push(val);
+        else if(mgr){
+          mgr.checkDevice(pad);
         }
       }
 
-      function remove(arr, val) {
-        var index = arr.indexOf(val);
-        if (index > -1) {
-          arr.splice(index, 1);
-        }
-      }
+      newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
+      oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+    }
 
-      function sendAll(arr, id) {
-        for (var i = 0; i < arr.length; ++i) {
-          arr[i](id);
-        }
-      }
+    static get pads(){
+      return currentPads;
+    }
 
-      function onConnected(id) {
-        sendAll(listeners.gamepadconnected, id);
-      }
+    static get listeners(){
+      return listeners;
+    }
 
-      function onDisconnected(id) {
-        sendAll(listeners.gamepaddisconnected, id);
-      }
-
-      this.getErrorMessage = function () {
-        return errorMessage;
-      };
-
-      this.setGamepad = function (id) {
-        gpid = id;
-        this.inPhysicalUse = true;
-      };
-
-      this.clearGamepad = function () {
-        gpid = null;
-        this.inPhysicalUse = false;
-      };
-
-      this.isGamepadSet = function () {
-        return !!gpid;
-      };
-
-      this.getConnectedGamepads = function () {
-        return connectedGamepads.slice();
-      };
-
-      this.addEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          listeners[event].push(handler);
-        }
-        if (event === "gamepadconnected") {
-          connectedGamepads.forEach(onConnected);
-        }
-      };
-
-      this.removeEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          remove(listeners[event], handler);
-        }
-      };
-
-      try {
-        this.update();
-        this.available = true;
-      }
-      catch (exp) {
-        console.error(exp);
-        this.avaliable = false;
-        this.errorMessage = exp;
+    static addEventListener(evt, thunk){
+      if(listeners[evt]){
+        listeners[evt].push(thunk);
       }
     }
+
+    constructor(pad, axisOffset, commands, socket) {
+      var padID = Gamepad.ID(pad);
+      super(padID, commands, socket, Gamepad.AXES);
+      currentManagers[padID] = this;
+
+      this.currentPose = {
+        position: [0, 0, 0],
+        orientation: [0, 0, 0, 1]
+      };
+
+      this.currentPad = pad;
+      this.axisOffset = axisOffset;
+    }
+
+    checkDevice (pad) {
+      var i;
+      this.currentPad = pad;
+      for (i = 0; i < pad.buttons.length; ++i) {
+        this.setButton(i, pad.buttons[i].pressed);
+        this.setButton(i + pad.buttons.length, pad.buttons[i].touched);
+      }
+      for (i = 0; i < pad.axes.length; ++i) {
+        var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
+        this.setAxis(axisName, pad.axes[i]);
+      }
+
+      this.currentPose = pad.pose;
+    }
+
+    vibrate(){
+      if(this.currentPad && this.currentPad.vibrate){
+        this.currentPad.vibrate.apply(this.currentPad, arguments);
+      }
+    }
+
+    getOrientation(value) {
+      value = value || new THREE.Quaternion();
+      var o = this.currentPose && this.currentPose.orientation;
+      if(o){            
+        value.fromArray(o);
+      }
+      return value;
+    }
+
+    getPosition(value){
+      value = value || new THREE.Vector3();
+      var p = this.currentPose && this.currentPose.position;
+      if(p){
+        value.fromArray(p);
+      }
+      return value;
+    }
   }
-  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY"]);
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z"]);
+
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
+  Gamepad.XBOX_BUTTONS = {
+    A: 1,
+    B: 2,
+    X: 3,
+    Y: 4,
+    leftBumper: 5,
+    rightBumper: 6,
+    leftTrigger: 7,
+    rightTrigger: 8,
+    back: 9,
+    start: 10,
+    leftStick: 11,
+    rightStick: 12,
+    up: 13,
+    down: 14,
+    left: 15,
+    right: 16
+  };
+
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "VIVE_BUTTONS",
+    description: "Labeled names for each of the different control buttons of the HTC Vive Motion Controllers."
+  });
+  Gamepad.VIVE_BUTTONS = {
+    TOUCHPAD_PRESSED: 0,
+    TRIGGER_PRESSED: 1,
+    GRIP_PRESSED: 2,
+    MENU_PRESSED: 3,
+
+    TOUCHPAD_TOUCHED: 4,
+    //TRIGGER_TOUCHED: 5, // doesn't ever actually trigger in the current version of Chromium - STM 6/22/2016
+    GRIP_TOUCHED: 6,
+    MENU_TOUCHED: 7
+  };
+
   return Gamepad;
 })();
-
-pliny.enumeration({
-  parent: "Primrose.Input.Gamepad",
-  name: "XBOX_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller."
-});
-Primrose.Input.Gamepad.XBOX_BUTTONS = {
-  A: 1,
-  B: 2,
-  X: 3,
-  Y: 4,
-  leftBumper: 5,
-  rightBumper: 6,
-  leftTrigger: 7,
-  rightTrigger: 8,
-  back: 9,
-  start: 10,
-  leftStick: 11,
-  rightStick: 12,
-  up: 13,
-  down: 14,
-  left: 15,
-  right: 16
-};
