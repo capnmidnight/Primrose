@@ -15,7 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var setFalse = (evt) => evt.returnValue = false;
+var setFalse = (evt) => evt.returnValue = false,
+  identity = (obj) => obj;
 
 window.Primrose = (function () {
   "use strict";
