@@ -9,6 +9,32 @@ KEY:
 * **Windows** - Windows 10.
 * **Android** - Android 6.0.1 running on the Samsung Galaxy S7
 
+## v0.25.3
+
+* Features
+  * HMD position is now visible in remote users, in addition to the previous orientation, for users that have the data available.
+  * Better pointer graphics, indicating to the user better what is about to happen.
+    * Ground pointer is now a flat disk, with the cursor ball above it.
+    * Ground pointer is limited to a max distance away of 5 meters.
+  * New [`Primrose.Random.ID()`](#Primrose_Random_ID) function.
+  * BrowserEnvironment can now manage the login process on its own. Client apps don't need to know how it works, they just pass on a user name and password.
+* Defect Fixes
+  * When first logging in, if adding one of the remote users fails, it now doesn't prevent the other users from attempting to load.
+  * The login form no longer shows before the 3D models have parsed. This was causing an issue where people logging in very quickly were receiving a list of users and attempting to create an avatar out of a model that didn't yet exist.
+  * The "close" link on the login form no longer causes the page to reload.
+  * Typing in 2D forms on top of the BrowserEnvironment canvas no longer causes pointerlock to trigger.
+  * Fixed issue where display selector buttons weren't being hidden after entering VR mode.
+  * Login form is no longer editable after "log in" or "sign up" have been clicked.
+  * A wait cursor now appears during the authentication process.
+* Admin
+  * Better documentation for WebRTCSocket
+  * Separate Audio and Data WebRTC handlers that use a base WebRTCSocket class
+  * Moved IconManager to it's correct location
+  * Got strict about "use strict".
+  * Removed the 3D loggin form from the meeting demo, because it was kind of a pain in the ass.
+
+
+
 ## v0.25.2
 
 * Defect fixes
@@ -160,7 +186,7 @@ KEY:
 
 
 
-  
+
 
 
 ## v0.23.4 - 2016/05/11
@@ -188,8 +214,8 @@ This was an intermediate release, specifically focused on carving the primrosevr
 
 * Features
   * Made the editor in the "editorVR" demo follow the user, so it's easier to find.
-  * Auto quality scaling: 
-    * If the animation falls under 45FPS, the resolution of the rendering is automatically degraded. 
+  * Auto quality scaling:
+    * If the animation falls under 45FPS, the resolution of the rendering is automatically degraded.
     * On desktop, if the animation hits 60+FPS, the resolution of the rendering is automatically upgraded. Mobile devices are too volatile to do this reliably.
     * In the "editorVR" demo, if you hit the minimum quality setting and the rendering is still slow
       * your live-coded script is canceled,
@@ -223,7 +249,7 @@ This was an intermediate release, specifically focused on carving the primrosevr
   * Changed "EditorVR" demo to use logging proxy to display console.log calls, rather than supplying its own log function.
   * If user touches a demo on a mobile device, it automatically jumps to fullscreen.
   * If user touches a demo on Gear VR, it automatically jumps to VR mode.
-  * Muting audio when the tab loses focus. 
+  * Muting audio when the tab loses focus.
   * Upgraded to Three.js r76. Well, I didn't have to do anything other than bump the version number.
 * Defect fixes
   * Fixed some broken links in the Documentation.
@@ -400,7 +426,7 @@ It's going to be nothing but documentation for a while.
   * Prevent `alert()`, `confirm()`, and `prompt()` while in full screen mode.
   * Fixed issue where multiple newline characters in a row were only incrementing the row display once, causing blank lines of text to get truncated.
 * Admin
-  * Use `grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference. 
+  * Use `grammar("JavaScript");` at the top of your code blocks to indicate syntax highlighting preference.
   * This CHANGELOG page.
   * More documentation
 
