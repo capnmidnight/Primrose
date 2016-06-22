@@ -550,7 +550,6 @@ Primrose.BrowserEnvironment = (function () {
           }
         };
 
-
       this.createElement = (type) => {
         if (factories[type]) {
           return factories[type].create();
@@ -949,7 +948,31 @@ Primrose.BrowserEnvironment = (function () {
 
       var isFullScreenMode = () => FullScreen.isActive || this.input.VR.currentDisplay.isPresenting;
 
-      BrowserEnvironment.createSurrogate.call(this);
+
+      var clipboardOperation = (name, evt) => {
+        if (this.currentControl) {
+          this.currentControl[name + "SelectedText"](evt);
+          if (!evt.returnValue) {
+            evt.preventDefault();
+          }
+          this._surrogate.style.display = "none";
+          this.currentControl.canvas.focus();
+        }
+      };
+
+      // the `surrogate` textarea makes clipboard events possible
+      this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
+      this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", this._surrogate);
+      this._surrogateContainer.style.position = "absolute";
+      this._surrogateContainer.style.overflow = "hidden";
+      this._surrogateContainer.style.width = 0;
+      this._surrogateContainer.style.height = 0;
+      this._surrogate.addEventListener("beforecopy", setFalse, false);
+      this._surrogate.addEventListener("copy", clipboardOperation.bind(this, "copy"), false);
+      this._surrogate.addEventListener("beforecut", setFalse, false);
+      this._surrogate.addEventListener("cut", clipboardOperation.bind(this, "cut"), false);
+      document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
+
 
       this.operatingSystem = this.options.os;
       this.codePage = this.options.language;
@@ -1212,33 +1235,6 @@ Primrose.BrowserEnvironment = (function () {
           this._codePage = Primrose.Text.CodePages.EN_US;
         }
       }
-    }
-
-    static createSurrogate() {
-
-      var clipboardOperation = (name, evt) => {
-        if (this.currentControl) {
-          this.currentControl[name + "SelectedText"](evt);
-          if (!evt.returnValue) {
-            evt.preventDefault();
-          }
-          this._surrogate.style.display = "none";
-          this.currentControl.canvas.focus();
-        }
-      };
-
-      // the `surrogate` textarea makes clipboard events possible
-      this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
-      this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", this._surrogate);
-      this._surrogateContainer.style.position = "absolute";
-      this._surrogateContainer.style.overflow = "hidden";
-      this._surrogateContainer.style.width = 0;
-      this._surrogateContainer.style.height = 0;
-      this._surrogate.addEventListener("beforecopy", setFalse, false);
-      this._surrogate.addEventListener("copy", clipboardOperation.bind(this, "copy"), false);
-      this._surrogate.addEventListener("beforecut", setFalse, false);
-      this._surrogate.addEventListener("cut", clipboardOperation.bind(this, "cut"), false);
-      document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
     }
   }
 
