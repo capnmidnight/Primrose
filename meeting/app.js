@@ -24,23 +24,13 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
     backgroundColor: 0x000000,
     disableDefaultLighting: true,
     sceneModel: "../doc/models/meeting/meetingroom.obj",
+    avatarModel: "../doc/models/avatar.json",
     useFog: true,
     fullScreenIcon: "../doc/models/monitor.obj",
     VRIcon: "../doc/models/cardboard.obj",
     audioIcon: "../doc/models/microphone.obj",
     font: "../doc/fonts/helvetiker_regular.typeface.js"
-  }),
-  micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    .then(setAudioStream.bind(null, ctrls2D.localAudio))
-    .catch(console.warn.bind(console, "Can't get audio")),
-  users = {},
-  socket,
-  avatarFactory,
-  testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
-  isTest = !!testUserNameSpec,
-  userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
-  userName = userNameSpec && userNameSpec[1] || "",
-  deviceIndex;
+  });
 
 if(!hasMeetingID){
   var state = "?id=" + meetingID;
@@ -60,6 +50,16 @@ ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 
 env.addEventListener("ready", environmentReady);
 env.addEventListener("update", update);
+
+var micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(setAudioStream.bind(null, ctrls2D.localAudio))
+    .catch(console.warn.bind(console, "Can't get audio")),
+  users = {},
+  socket,
+  lastNetworkUpdate = 0,
+  oldState = [],
+  avatarFactory,
+  deviceIndex
 
 function setAudioStream(element, stream){
   if(isFirefox){
@@ -273,9 +273,9 @@ function update(dt) {
         env.input.VR.getValue("headZ")
       ];
       for (var i = 0; i < newState.length; ++i) {
-        if (state[i] !== newState[i]) {
+        if (oldState[i] !== newState[i]) {
           socket.emit("userState", newState);
-          state = newState;
+          oldState = newState;
           break;
         }
       }
