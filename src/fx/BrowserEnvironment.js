@@ -530,6 +530,7 @@ Primrose.BrowserEnvironment = (function () {
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
         modelFiles = {
           scene: this.options.sceneModel,
+          avatar: this.options.avatarModel,
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
@@ -541,6 +542,7 @@ Primrose.BrowserEnvironment = (function () {
           div: Primrose.Controls.HtmlDoc,
           section: Primrose.Surface,
           textarea: Primrose.Text.Controls.TextBox,
+          avatar: null,
           pre: {
             create: () => new Primrose.Text.Controls.TextBox({
               tokenizer: Primrose.Text.Grammars.PlainText,
@@ -549,6 +551,8 @@ Primrose.BrowserEnvironment = (function () {
             })
           }
         };
+
+      this.factories = factories;
 
       this.createElement = (type) => {
         if (factories[type]) {
@@ -608,6 +612,10 @@ Primrose.BrowserEnvironment = (function () {
 
           if (models.scene) {
             buildScene(models.scene);
+          }
+
+          if(models.avatar){
+            factories.avatar = new Primrose.ModelLoader(models.avatar);
           }
 
           if (models.button) {

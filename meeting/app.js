@@ -58,7 +58,6 @@ var micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false }
   socket,
   lastNetworkUpdate = 0,
   oldState = [],
-  avatarFactory,
   deviceIndex
 
 function setAudioStream(element, stream){
@@ -108,7 +107,7 @@ function listUsers(newUsers) {
 
 function addUser(state) {
   var toUserName = state[0],
-  user = new Primrose.RemoteUser(toUserName, avatarFactory, env.options.foregroundColor);
+  user = new Primrose.RemoteUser(toUserName, env.factories.avatar, env.options.foregroundColor);
   users[toUserName] = user;
   env.scene.add(user.avatar);
   updateUser(state);
@@ -247,11 +246,6 @@ function environmentReady() {
       obj.material.emissive.setRGB(1, 1, 1);
     }
   });
-
-  Primrose.ModelLoader.loadModel("../doc/models/avatar.json")
-    .then(function (avatarModel) {
-      avatarFactory = avatarModel;
-    });
 }
 
 function update(dt) {
