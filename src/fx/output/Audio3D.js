@@ -77,6 +77,12 @@ Primrose.Output.Audio3D = (function () {
       }
     }
 
+    static chain(){
+      const args = Array.prototype.slice.call(arguments);
+      for(let i = 0; i < args.length - 1; ++i){
+        args[i].connect(args[i + 1]);
+      }
+    }
 
     start() {
       this.mainVolume.connect(this.context.destination);

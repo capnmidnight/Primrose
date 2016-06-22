@@ -1,6 +1,6 @@
 Primrose.RemoteUser = (function(){
   "use strict";
-  
+
   pliny.class({
     parent: "Primrose",
     name: "RemoteUser",
@@ -20,7 +20,7 @@ Primrose.RemoteUser = (function(){
       this.dHeadQuaternion = null;
       this.dHeadPosition = null;
       this.avatar = modelFactory.clone();
-      
+
       this.avatar.traverse((obj) => {
         if (obj.name === "AvatarBelt") {
           textured(obj, Primrose.Random.color());
@@ -52,14 +52,7 @@ Primrose.RemoteUser = (function(){
       this.audioStream = null;
       this.gain = null;
       this.panner = null;
-      this.analyser = null;
-    }
-
-    static chain(){
-      const args = Array.prototype.slice.call(arguments);
-      for(let i = 0; i < args.length - 1; ++i){
-        args[i].connect(args[i + 1]);
-      }
+      this.analyzer = null;
     }
 
     peer(peeringSocket, microphone, localUserName, audio){
@@ -94,12 +87,15 @@ Primrose.RemoteUser = (function(){
             this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
             this.gain = audio.context.createGain();
             this.panner = audio.context.createPanner();
-            this.analyser = audio.context.createAnalyser();
+            this.analyzer = audio.context.createAnalyser();
+            this.vu = new Primrose.Controls.VUMeter(this.analyzer);
 
-            RemoteUser.chain(
+            textured(this.hmd, this.vu);
+
+            Primrose.Output.Audio3D.chain(
               this.audioStream,
               this.gain,
-              this.analyser,
+              this.analyzer,
               this.panner,
               audio.mainVolume);
             this.panner.coneInnerAngle = 180;
@@ -107,11 +103,6 @@ Primrose.RemoteUser = (function(){
             this.panner.coneOuterGain = 0.1;
             this.panner.panningModel = "HRTF";
             this.panner.distanceModel = "exponential";
-
-            this.buffer = new Uint8Array(this.analyser.frequencyBinCount);
-            this.analyser.fftSize = 2048;
-            this.analyser.getByteTimeDomainData(this.buffer);
-            console.log(this.buffer);
           })
           .catch(console.error.bind(console, "error"));
       });
@@ -147,7 +138,9 @@ Primrose.RemoteUser = (function(){
           {name: "dt", type: "Number", description: "The amount of time since the last update to the user."}
         ]
       });
-
+      if(this.vu){
+        this.vu.render();
+      }
       this.time += dt;
       if (this.time >= RemoteUser.NETWORK_DT) {
         this.velocity.multiplyScalar(0.5);
