@@ -9,7 +9,7 @@ Primrose.Input.VR = (function () {
     name: "VR",
     baseClass: "Primrose.InputProcessor",
     parameters: [
-      { name: "commands", type: "Array", description: "An array of input command descriptions." },
+      { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." },
       { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }
     ],
     description: "An input manager for gamepad devices."
