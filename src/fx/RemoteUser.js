@@ -87,15 +87,10 @@ Primrose.RemoteUser = (function(){
             this.audioStream = audio.context.createMediaStreamSource(this.audioChannel.inAudio);
             this.gain = audio.context.createGain();
             this.panner = audio.context.createPanner();
-            this.analyzer = audio.context.createAnalyser();
-            this.vu = new Primrose.Controls.VUMeter(this.analyzer);
-
-            textured(this.hmd, this.vu);
 
             Primrose.Output.Audio3D.chain(
               this.audioStream,
               this.gain,
-              this.analyzer,
               this.panner,
               audio.mainVolume);
             this.panner.coneInnerAngle = 180;
@@ -138,9 +133,7 @@ Primrose.RemoteUser = (function(){
           {name: "dt", type: "Number", description: "The amount of time since the last update to the user."}
         ]
       });
-      if(this.vu){
-        this.vu.render();
-      }
+
       this.time += dt;
       if (this.time >= RemoteUser.NETWORK_DT) {
         this.velocity.multiplyScalar(0.5);
