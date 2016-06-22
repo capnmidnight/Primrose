@@ -188,29 +188,6 @@ Primrose.Input.FPSInput = (function () {
       }
       return value;
     }
-
-    getVector3(x, y, z, value) {
-      value = value || new THREE.Vector3();
-      value.set(0, 0, 0);
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          mgr.addVector3(x, y, z, value);
-        }
-      }
-      return value;
-    }
-
-    getVector3s(x, y, z, values) {
-      values = values || [];
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          values[i] = mgr.getVector3(x, y, z, values[i]);
-        }
-      }
-      return values;
-    }
   }
 
   return FPSInput;

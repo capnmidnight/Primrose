@@ -240,9 +240,9 @@ Primrose.BrowserEnvironment = (function () {
               this.player.qHead.y,
               this.player.qHead.z,
               this.player.qHead.w,
-              this.input.VR.getValue("headX"),
-              this.input.VR.getValue("headY") + this.avatarHeight,
-              this.input.VR.getValue("headZ")
+              this.input.VR.currentPose.position[0],
+              this.input.VR.currentPose.position[1] + this.avatarHeight,
+              this.input.VR.currentPose.position[2]
             ];
             for (var i = 0; i < newState.length; ++i) {
               if (oldState[i] !== newState[i]) {
@@ -461,7 +461,7 @@ Primrose.BrowserEnvironment = (function () {
               v = st.viewport,
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
-            this.input.getVector3("headX", "headY", "headZ", this.camera.position);
+            this.input.VR.getPosition(this.camera.position);
             this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);
             vEye.applyMatrix4(st.translation);

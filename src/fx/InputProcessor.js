@@ -515,22 +515,6 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    getVector3(x, y, z, value) {
-      value = value || new THREE.Vector3();
-      value.set(
-        this.getValue(x),
-        this.getValue(y),
-        this.getValue(z));
-      return value;
-    }
-
-    addVector3(x, y, z, value) {
-      value.x += this.getValue(x);
-      value.y += this.getValue(y);
-      value.z += this.getValue(z);
-      return value;
-    }
-
     isDown(name) {
       return (this.enabled || (this.receiving && this.socketReady)) &&
         this.isEnabled(name) &&
