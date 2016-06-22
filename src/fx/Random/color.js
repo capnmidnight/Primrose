@@ -1,6 +1,6 @@
 ﻿Primrose.Random.color = (function(){
   "use strict";
-  
+
   pliny.function({
     parent: "Primrose.Random",
     name: "color",
@@ -37,4 +37,4 @@
   };
 
   return color;
-});
+})();
