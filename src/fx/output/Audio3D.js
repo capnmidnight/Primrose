@@ -77,6 +77,17 @@ Primrose.Output.Audio3D = (function () {
       }
     }
 
+    static setAudioStream(element, stream){
+      if(isFirefox){
+        element.srcObject = stream;
+      }
+      else{
+        element.src = URL.createObjectURL(stream);
+      }
+      element.muted = true;
+      return stream;
+    }
+
     static chain(){
       const args = Array.prototype.slice.call(arguments);
       for(let i = 0; i < args.length - 1; ++i){

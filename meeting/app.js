@@ -40,16 +40,24 @@ if(!hasMeetingID){
   history.pushState(null, "Room ID: " + meetingID, state);
 }
 
-ctrls2D.switchMode.addEventListener("click", showSignup);
-ctrls2D.connect.addEventListener("click", doLogin);
 ctrls2D.userName.value = userName;
 
 showSignup(userName.length === 0);
 
+ctrls2D.switchMode.addEventListener("click", showSignup);
+ctrls2D.connect.addEventListener("click", doLogin);
+ctrls2D.userName.addEventListener("keyup", doLogin);
+ctrls2D.password.addEventListener("keyup", doLogin);
 ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
-
 env.addEventListener("ready", environmentReady);
-env.addEventListener("update", update);
+env.addEventListener("authorizationfailed", authFailed);
+env.addEventListener("authorizationsucceeded", loggedIn);
+env.addEventListener("loggedout", showSignup.bind(null, false));
+
+function authFailed(evt) {
+  showSignup(evt.verb === "signup");
+  errorMessage(ERROR_MESSAGES[evt.verb] + evt.reason.replace(/\[USER\]/g, ctrls2D.userName.value));
+}
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -70,7 +78,7 @@ function hideLoginForm(){
   ctrls2D.frontBuffer.focus();
 }
 
-function loggedIn(newUsers) {
+function loggedIn() {
   ctrls2D.errorMessage.innerHTML = "";
   ctrls2D.errorMessage.style.display = "none";
   disableLogin(false);
@@ -93,13 +101,6 @@ function errorMessage(message){
   disableLogin(false);
 }
 
-function authFailed(name) {
-  return function (reason) {
-    showSignup(name === "signup");
-    errorMessage(ERROR_MESSAGES[name] + reason.replace(/\[USER\]/g, ctrls2D.userName.value));
-  }
-}
-
 function disableLogin(v){
   loginControls.forEach(function(ctrl){
     ctrl.disabled = v;
@@ -117,179 +118,23 @@ function environmentReady() {
   });
 }
 
-function doLogin() {
-  var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
-    password = ctrls2D.password.value,
-    email = ctrls2D.email.value;
+function doLogin(evt) {
+  if(evt.type !== "keyup" || evt.keyCode === 13){
+    var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
+      password = ctrls2D.password.value,
+      email = ctrls2D.email.value;
 
-  userName = ctrls2D.userName.value.toLocaleUpperCase();
-  disableLogin(true);
+    userName = ctrls2D.userName.value.toLocaleUpperCase();
+    disableLogin(true);
 
-  if(userName.length === 0){
-    errorMessage("You must provide a user name.");
-  }
-  else if(password.length === 0){
-    errorMessage("You must provide a password.");
-  }
-  else{
-    authenticate(verb, userName, password, email);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-
-var micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    .then(setAudioStream.bind(null, ctrls2D.localAudio))
-    .catch(console.warn.bind(console, "Can't get audio")),
-  users = {},
-  socket,
-  lastNetworkUpdate = 0,
-  oldState = [],
-  deviceIndex
-
-function setAudioStream(element, stream){
-  if(isFirefox){
-    element.srcObject = stream;
-  }
-  else{
-    element.src = URL.createObjectURL(stream);
-  }
-  element.muted = true;
-  return stream;
-}
-
-var listUserPromise = Promise.resolve();
-function listUsers(newUsers) {
-  Object.keys(users).forEach(removeUser);
-  while (newUsers.length > 0) {
-    addUser(newUsers.shift());
-  }
-}
-
-function addUser(state) {
-  var toUserName = state[0],
-  user = new Primrose.RemoteUser(toUserName, env.factories.avatar, env.options.foregroundColor);
-  users[toUserName] = user;
-  env.scene.add(user.avatar);
-  updateUser(state);
-  listUserPromise = listUserPromise
-    .then(() => user.peer(socket, micReady, userName, env.audio))
-    .catch((exp) => console.error("Couldn't load user: " + name));
-}
-
-function receiveChat(evt) {
-  console.log("chat", evt);
-}
-
-function updateUser(state) {
-  var key = state[0];
-  if (key !== userName) {
-    var user = users[key];
-    if (user) {
-      user.state = state;
+    if(userName.length === 0){
+      errorMessage("You must provide a user name.");
     }
-    else {
-      console.error("Unknown user", key);
+    else if(password.length === 0){
+      errorMessage("You must provide a password.");
     }
-  }
-  else if (deviceIndex > 0) {
-    env.player.heading = state[1];
-    env.player.position.x = state[2];
-    env.player.position.y = state[3] + env.avatarHeight;
-    env.player.position.z = state[4];
-    env.player.qHead.x = state[5];
-    env.player.qHead.y = state[6];
-    env.player.qHead.z = state[7];
-    env.player.qHead.w = state[8];
-  }
-}
-
-function removeUser(key) {
-  console.log("User %s logging off.", key);
-  var user = users[key];
-  if(user){
-    user.unpeer();
-    env.scene.remove(user.avatar);
-    delete users[key];
-  }
-}
-
-function lostConnection() {
-  deviceIndex = null;
-}
-
-function addDevice(index) {
-  console.log("addDevice", index);
-}
-
-function setDeviceIndex(index) {
-  deviceIndex = index;
-}
-
-function authenticate(verb, userName, password, email){
-  if (!socket) {
-    var protocol = location.protocol.replace("http", "ws"),
-      path = protocol + "//" + location.hostname;
-    console.log("connecting to: %s", path);
-    socket = io.connect(path);
-    socket.on("signupFailed", authFailed("signup"));
-    socket.on("loginFailed", authFailed("login"));
-    socket.on("userList", listUsers);
-    socket.on("userList", loggedIn);
-    socket.on("userJoin", addUser);
-    socket.on("deviceAdded", addDevice);
-    socket.on("deviceIndex", setDeviceIndex);
-    socket.on("chat", receiveChat);
-    socket.on("userState", updateUser);
-    socket.on("userLeft", removeUser);
-    socket.on("logoutComplete", showSignup.bind(null, false));
-    socket.on("connection_lost", lostConnection);
-    socket.on("errorDetail", console.error.bind(console));
-  }
-
-  socket.once("salt", function (salt) {
-    var hash = new Hashes.SHA256().hex(salt + password)
-    socket.emit("hash", hash);
-  });
-  socket.emit(verb, {
-    userName: userName,
-    email: email,
-    app: appKey
-  });
-}
-
-function update(dt) {
-  if (socket && deviceIndex === 0) {
-    lastNetworkUpdate += dt;
-    if (lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
-      lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-      var newState = [
-        env.player.heading,
-        env.player.position.x,
-        env.player.position.y - env.avatarHeight,
-        env.player.position.z,
-        env.player.qHead.x,
-        env.player.qHead.y,
-        env.player.qHead.z,
-        env.player.qHead.w,
-        env.input.VR.getValue("headX"),
-        env.input.VR.getValue("headY") + env.avatarHeight,
-        env.input.VR.getValue("headZ")
-      ];
-      for (var i = 0; i < newState.length; ++i) {
-        if (oldState[i] !== newState[i]) {
-          socket.emit("userState", newState);
-          oldState = newState;
-          break;
-        }
-      }
+    else{
+      env.authenticate(verb, userName, password, email);
     }
-  }
-  for (var key in users) {
-    var user = users[key];
-    user.update(dt);
   }
 }

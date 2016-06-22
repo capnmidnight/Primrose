@@ -216,13 +216,48 @@ Primrose.BrowserEnvironment = (function () {
         lt = t;
 
         movePlayer(dt);
+        updateNetwork(dt);
         moveSky();
         moveGround();
         this.pointer.move(lockedToEditor(), this.inVR, qHeading, this.camera, this.player);
         resolvePicking();
         checkQuality();
+
         fire("update", dt);
       };
+
+      var updateNetwork = (dt) => {
+        if (socket && deviceIndex === 0) {
+          lastNetworkUpdate += dt;
+          if (lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
+            lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
+            var newState = [
+              this.player.heading,
+              this.player.position.x,
+              this.player.position.y - this.avatarHeight,
+              this.player.position.z,
+              this.player.qHead.x,
+              this.player.qHead.y,
+              this.player.qHead.z,
+              this.player.qHead.w,
+              this.input.VR.getValue("headX"),
+              this.input.VR.getValue("headY") + this.avatarHeight,
+              this.input.VR.getValue("headZ")
+            ];
+            for (var i = 0; i < newState.length; ++i) {
+              if (oldState[i] !== newState[i]) {
+                socket.emit("userState", newState);
+                oldState = newState;
+                break;
+              }
+            }
+          }
+        }
+        for (var key in users) {
+          var user = users[key];
+          user.update(dt);
+        }
+      }
 
       var movePlayer = (dt) => {
 
@@ -550,7 +585,125 @@ Primrose.BrowserEnvironment = (function () {
               readOnly: true
             })
           }
-        };
+        },
+        localAudio = Primrose.DOM.cascadeElement(this.options.audioElement, "audio", HTMLAudioElement),
+        micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
+          .catch(console.warn.bind(console, "Can't get audio")),
+        users = {},
+        socket,
+        lastNetworkUpdate = 0,
+        oldState = [],
+        deviceIndex,
+        listUserPromise = Promise.resolve();
+
+      function listUsers(newUsers) {
+        Object.keys(users).forEach(removeUser);
+        while (newUsers.length > 0) {
+          addUser(newUsers.shift());
+        }
+        fire("authorizationsucceeded");
+      }
+
+      var addUser = (state) => {
+        var toUserName = state[0],
+        user = new Primrose.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
+        users[toUserName] = user;
+        this.scene.add(user.avatar);
+        updateUser(state);
+        listUserPromise = listUserPromise
+          .then(() => user.peer(socket, micReady, userName, this.audio))
+          .catch((exp) => console.error("Couldn't load user: " + name));
+      };
+
+      function receiveChat(evt) {
+        console.log("chat", evt);
+      }
+
+      var updateUser = (state) => {
+        var key = state[0];
+        if (key !== userName) {
+          var user = users[key];
+          if (user) {
+            user.state = state;
+          }
+          else {
+            console.error("Unknown user", key);
+          }
+        }
+        else if (deviceIndex > 0) {
+          this.player.heading = state[1];
+          this.player.position.x = state[2];
+          this.player.position.y = state[3] + this.avatarHeight;
+          this.player.position.z = state[4];
+          this.player.qHead.x = state[5];
+          this.player.qHead.y = state[6];
+          this.player.qHead.z = state[7];
+          this.player.qHead.w = state[8];
+        }
+      };
+
+      var removeUser = (key) => {
+        console.log("User %s logging off.", key);
+        var user = users[key];
+        if(user){
+          user.unpeer();
+          this.scene.remove(user.avatar);
+          delete users[key];
+        }
+      }
+
+      function lostConnection() {
+        deviceIndex = null;
+      }
+
+      function addDevice(index) {
+        console.log("addDevice", index);
+      }
+
+      function setDeviceIndex(index) {
+        deviceIndex = index;
+      }
+
+      function authFailed(verb) {
+        return function (reason) {
+          fire("authorizationfailed", {
+            verb,
+            reason
+          });
+        }
+      }
+
+      this.authenticate = (verb, userName, password, email) => {
+        if (!socket) {
+          var protocol = location.protocol.replace("http", "ws"),
+            path = protocol + "//" + location.hostname;
+          console.log("connecting to: %s", path);
+          socket = io.connect(path);
+          socket.on("signupFailed", authFailed("signup"));
+          socket.on("loginFailed", authFailed("login"));
+          socket.on("userList", listUsers);
+          socket.on("userJoin", addUser);
+          socket.on("deviceAdded", addDevice);
+          socket.on("deviceIndex", setDeviceIndex);
+          socket.on("chat", receiveChat);
+          socket.on("userState", updateUser);
+          socket.on("userLeft", removeUser);
+          socket.on("logoutComplete", fire.bind(this, "loggedout"));
+          socket.on("connection_lost", lostConnection);
+          socket.on("errorDetail", console.error.bind(console));
+        }
+
+        socket.once("salt", function (salt) {
+          var hash = new Hashes.SHA256().hex(salt + password)
+          socket.emit("hash", hash);
+        });
+        socket.emit(verb, {
+          userName: userName,
+          email: email,
+          app: appKey
+        });
+      }
 
       this.factories = factories;
 
@@ -662,7 +815,10 @@ Primrose.BrowserEnvironment = (function () {
         gazecancel: [],
         pointerstart: [],
         pointermove: [],
-        pointerend: []
+        pointerend: [],
+        authorizationfailed: [],
+        authorizationsucceeded: [],
+        loggedout: []
       };
 
       this.audio = new Primrose.Output.Audio3D();
