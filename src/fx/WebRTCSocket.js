@@ -15,7 +15,7 @@ Primrose.WebRTCSocket = (function () {
     window.RTCSessionDescription ||
     window.mozRTCSessionDescription;
 
-  // some useful information: 
+  // some useful information:
   // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
   // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
   // - https://github.com/coturn/rfc5766-turn-server/
@@ -29,7 +29,7 @@ Primrose.WebRTCSocket = (function () {
 
   if (isFirefox) {
     ICE_SERVERS = [{ urls: ICE_SERVERS.map((s) => s.url) }];
-  }  
+  }
 
   let INSTANCE_COUNT = 0;
 
@@ -53,7 +53,7 @@ Primrose.WebRTCSocket = (function () {
       // need to debug the WebRTC workflow.
       let attemptCount = 0,
         messageNumber = 0;
-      const ENABLE_DEBUGGING = true,
+      const ENABLE_DEBUGGING = false,
         instanceNumber = ++INSTANCE_COUNT,
         print = function(name, format){
           if(ENABLE_DEBUGGING){
@@ -126,7 +126,7 @@ Primrose.WebRTCSocket = (function () {
         type: "RTCPeerConnection",
         description: "The raw RTCPeerConnection that got negotiated."
       });
-      const rtc = new RTCPeerConnection({ 
+      const rtc = new RTCPeerConnection({
         // Indicate to the API what servers should be used to figure out NAT traversal.
         iceServers: ICE_SERVERS
       });
@@ -175,11 +175,11 @@ Primrose.WebRTCSocket = (function () {
           if(this.complete){
             done();
             resolve();
-          } 
+          }
           return obj;
         };
 
-        // When an offer or an answer is received, it's pretty much the same exact processing. Either 
+        // When an offer or an answer is received, it's pretty much the same exact processing. Either
         // type of object gets checked to see if it was expected, then unwrapped.
         const descriptionReceived = (description) => {
           // Check to see if we expected this sort of message from this user.
@@ -250,7 +250,7 @@ Primrose.WebRTCSocket = (function () {
         // This really long event handler is not really the start of the process. Skip ahead to `proxyServer.on("user", onUser)`
         const onUser = (evt) => {
           // When a user is joining a room with more than one user currently, already in the room, they will have to
-          // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so 
+          // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so
           // we have to make sure the message we here is the one meant for this particular instance of the socket manager.
           if(this.isExpected("new user", evt)) {
 
@@ -298,7 +298,7 @@ Primrose.WebRTCSocket = (function () {
 
         // Okay, now go back to onUser
       });
-    }            
+    }
 
     createOffer(){
       return this.rtc.createOffer();
@@ -365,9 +365,9 @@ Primrose.WebRTCSocket = (function () {
         toIndex = obj.toUserIndex === this.fromUserIndex,
         isExpected = incomplete && fromUser && fromIndex && toUser && toIndex;
 
-      this._log("[%s->%s] I %s || FROM %s==%s (%s), %s==%s (%s) || TO %s==%s (%s), %s==%s (%s)", 
-        tag, isExpected, 
-        incomplete, 
+      this._log("[%s->%s] I %s || FROM %s==%s (%s), %s==%s (%s) || TO %s==%s (%s), %s==%s (%s)",
+        tag, isExpected,
+        incomplete,
         obj.fromUserName, this.toUserName, fromUser,
         obj.fromUserIndex, this.toUserIndex, fromIndex,
         obj.toUserName, this.fromUserName, toUser,
@@ -414,7 +414,7 @@ Primrose.WebRTCSocket = (function () {
         description: "Override this method in subClasses to trigger the peering process."
       });
 
-      throw new Error("Not implemented");      
+      throw new Error("Not implemented");
     }
   }
 
