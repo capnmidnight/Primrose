@@ -16,7 +16,6 @@ Primrose.RemoteUser = (function(){
     constructor(userName, modelFactory, nameMaterial){
       this.userName = userName;
       this.head = null;
-      this.hmd = null;
       this.dHeadQuaternion = null;
       this.dHeadPosition = null;
       this.avatar = modelFactory.clone();
@@ -27,9 +26,6 @@ Primrose.RemoteUser = (function(){
         }
         else if (obj.name === "AvatarHead") {
           this.head = obj;
-        }
-        else if(obj.name === "AvatarHMD"){
-          this.hmd = obj;
         }
       });
 
@@ -110,7 +106,6 @@ Primrose.RemoteUser = (function(){
         description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
       });
 
-
       if (this.audioChannel) {
         this.audioChannel.close();
         if (this.audioElement) {
@@ -170,7 +165,6 @@ Primrose.RemoteUser = (function(){
           {name: "v", type: "Array", description: "The raw state array from the network (includes the un-read first username field)."}
         ]
       });
-
 
       this.time = 0;
 
