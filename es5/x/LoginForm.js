@@ -9,6 +9,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.X.LoginForm = function () {
+  "use strict";
+
   var COUNTER = 0;
 
   var WIDTH = 512,
@@ -17,8 +19,8 @@ Primrose.X.LoginForm = function () {
   pliny.class({
     parent: "Primrose.X",
     name: "LoginForm",
-    description: "A basic authentication form.",
-    baseClass: "Primrose.Controls.Form"
+    baseClass: "Primrose.Controls.Form",
+    description: "A basic authentication form."
   });
 
   var LoginForm = function (_Primrose$Controls$Fo) {

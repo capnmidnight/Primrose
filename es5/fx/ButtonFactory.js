@@ -1,6 +1,7 @@
 "use strict";
 
 Primrose.ButtonFactory = function () {
+  "use strict";
 
   var buttonCount = 0;
 

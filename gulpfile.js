@@ -115,8 +115,8 @@ function pugConfiguration(options, defaultData) {
     return [f, fs.lstatSync(f).size];
   }
   var frameworkFiles = defaultData.frameworkFiles.map(getFileDescrip);
-  return gulp.src(["*.jade", "*.pug", 
-    "templates/doc/**/*.jade", "templates/doc/**/*.pug", 
+  return gulp.src(["*.jade", "*.pug",
+    "templates/doc/**/*.jade", "templates/doc/**/*.pug",
     "templates/meeting/**/*.jade", "templates/meeting/**/*.pug"], { base: "./" })
     .pipe(rename(function (p) {
       p.extname = "";
@@ -294,9 +294,9 @@ gulp.task("archive", ["jsmin"], function () {
     .pipe(gulp.dest("archive"));
 });
 
-X("makeQuickstartManifest", "cd quickstart && node ../node_modules/webvr-bootstrapper/WebVRBootstrapper.min.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
+X("makeQuickstartManifest", "cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
 
-X("makeMeetingManifest", "cd meeting && node ../node_modules/webvr-bootstrapper/WebVRBootstrapper.min.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
+X("makeMeetingManifest", "cd meeting && node ../../WebVR-Bootstrapper/index.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
 
 gulp.task("copy:herettp", ["build:herettp"], function(){
   return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe"])

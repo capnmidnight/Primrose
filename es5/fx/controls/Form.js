@@ -9,12 +9,14 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Controls.Form = function () {
+  "use strict";
+
   var COUNTER = 0;
   pliny.class({
     parent: "Primrose.Controls",
     name: "Form",
-    description: "A basic 2D form control, with its own mesh to use as a frame.",
-    baseClass: "Primrose.Entity"
+    baseClass: "Primrose.Entity",
+    description: "A basic 2D form control, with its own mesh to use as a frame."
   });
 
   var Form = function (_Primrose$Surface) {

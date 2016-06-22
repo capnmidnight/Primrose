@@ -1,8 +1,10 @@
 "use strict";
 
 Primrose.Output.Music = function () {
+  "use strict";
 
   /* polyfill */
+
   Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
   var PIANO_BASE = Math.pow(2, 1 / 12),

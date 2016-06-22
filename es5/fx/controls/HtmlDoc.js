@@ -16,8 +16,8 @@ Primrose.Controls.HtmlDoc = function () {
   pliny.class({
     parent: "Primrose.Controls",
     name: "HtmlDoc",
-    description: "A rendering of an HTML document.",
     baseClass: "Primrose.Surface",
+    description: "A rendering of an HTML document.",
     parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Document." }]
   });
 

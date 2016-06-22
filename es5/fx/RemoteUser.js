@@ -5,6 +5,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Primrose.RemoteUser = function () {
+  "use strict";
+
   pliny.class({
     parent: "Primrose",
     name: "RemoteUser",
@@ -20,7 +22,9 @@ Primrose.RemoteUser = function () {
 
       this.userName = userName;
       this.head = null;
-      this.dHeadQuaternion = null;this.avatar = modelFactory.clone();
+      this.dHeadQuaternion = null;
+      this.dHeadPosition = null;
+      this.avatar = modelFactory.clone();
 
       this.avatar.traverse(function (obj) {
         if (obj.name === "AvatarBelt") {
@@ -36,18 +40,20 @@ Primrose.RemoteUser = function () {
 
       this.nameObject = textured(text3D(0.1, userName), nameMaterial);
       var bounds = this.nameObject.geometry.boundingBox.max;
-      this.nameObject.rotation.set(Math.PI / 2, -Math.PI / 2, 0);
-      this.nameObject.position.set(0, bounds.x / 2, bounds.y);
+      this.nameObject.rotation.set(Math.PI / 2, 0, 0);
+      this.nameObject.position.set(-bounds.x / 2, 0, bounds.y);
       if (this.head) {
         this.head.add(this.nameObject);
         this.dHeadQuaternion = new THREE.Quaternion();
+        this.dHeadPosition = new THREE.Vector3();
       }
 
-      this.peerConnection = null;
+      this.audioChannel = null;
       this.audioElement = null;
       this.audioStream = null;
       this.gain = null;
       this.panner = null;
+      this.analyzer = null;
     }
 
     _createClass(RemoteUser, [{
@@ -64,26 +70,23 @@ Primrose.RemoteUser = function () {
         });
 
         return microphone.then(function (outAudio) {
-          _this2.peerConnection = new Primrose.WebRTCSocket(peeringSocket, localUserName, _this2.userName, outAudio);
-          _this2.peerConnection.ready.then(function (inAudio) {
-            if (!inAudio) {
+          _this2.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, _this2.userName, outAudio);
+          _this2.audioChannel.ready.then(function () {
+            if (!_this2.audioChannel.inAudio) {
               throw new Error("Didn't get an audio channel for " + _this2.userName);
             }
             _this2.audioElement = new Audio();
-            setAudioStream(_this2.audioElement, inAudio);
+            Primrose.Output.Audio3D.setAudioStream(_this2.audioElement, _this2.audioChannel.inAudio);
             _this2.audioElement.controls = false;
             _this2.audioElement.autoplay = true;
             _this2.audioElement.crossOrigin = "anonymous";
             document.body.appendChild(_this2.audioElement);
 
-            _this2.audioStream = audio.context.createMediaStreamSource(inAudio);
+            _this2.audioStream = audio.context.createMediaStreamSource(_this2.audioChannel.inAudio);
             _this2.gain = audio.context.createGain();
             _this2.panner = audio.context.createPanner();
 
-            _this2.audioStream.connect(_this2.gain);
-            _this2.gain.connect(_this2.panner);
-            _this2.panner.connect(audio.mainVolume);
-
+            Primrose.Output.Audio3D.chain(_this2.audioStream, _this2.gain, _this2.panner, audio.mainVolume);
             _this2.panner.coneInnerAngle = 180;
             _this2.panner.coneOuterAngle = 360;
             _this2.panner.coneOuterGain = 0.1;
@@ -101,8 +104,8 @@ Primrose.RemoteUser = function () {
           description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
         });
 
-        if (this.peerConnection) {
-          this.peerConnection.close();
+        if (this.audioChannel) {
+          this.audioChannel.close();
           if (this.audioElement) {
             document.body.removeChild(this.audioElement);
             if (this.panner) {
@@ -131,6 +134,9 @@ Primrose.RemoteUser = function () {
           this.dHeadQuaternion.y *= 0.5;
           this.dHeadQuaternion.z *= 0.5;
           this.dHeadQuaternion.w *= 0.5;
+          this.dHeadPosition.x *= 0.5;
+          this.dHeadPosition.y *= 0.5;
+          this.dHeadPosition.z *= 0.5;
         }
         this.avatar.position.add(this.velocity.clone().multiplyScalar(dt));
         this.avatar.rotation.y += this.dHeading * dt;
@@ -138,6 +144,9 @@ Primrose.RemoteUser = function () {
         this.head.quaternion.y += this.dHeadQuaternion.y * dt;
         this.head.quaternion.z += this.dHeadQuaternion.z * dt;
         this.head.quaternion.w += this.dHeadQuaternion.w * dt;
+        this.head.position.x += this.dHeadPosition.x * dt;
+        this.head.position.y += this.dHeadPosition.y * dt;
+        this.head.position.z += this.dHeadPosition.z * dt;
         if (this.panner) {
           this.panner.setPosition(this.avatar.position.x, this.avatar.position.y, this.avatar.position.z);
           this.panner.setOrientation(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
@@ -170,6 +179,14 @@ Primrose.RemoteUser = function () {
         this.dHeadQuaternion.y /= RemoteUser.NETWORK_DT;
         this.dHeadQuaternion.z /= RemoteUser.NETWORK_DT;
         this.dHeadQuaternion.w /= RemoteUser.NETWORK_DT;
+
+        this.dHeadPosition.set(v[9], v[11], v[10]);
+        this.dHeadPosition.x -= this.head.position.x;
+        this.dHeadPosition.y -= this.head.position.y;
+        this.dHeadPosition.z -= this.head.position.z;
+        this.dHeadPosition.x /= RemoteUser.NETWORK_DT;
+        this.dHeadPosition.y /= RemoteUser.NETWORK_DT;
+        this.dHeadPosition.z /= RemoteUser.NETWORK_DT;
       }
     }]);
 

@@ -5,8 +5,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Primrose.Output.Audio3D = function () {
+  "use strict";
 
   // polyfill
+
   Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
 
   pliny.class({
@@ -286,6 +288,25 @@ Primrose.Output.Audio3D = function () {
         });
         snd.source.start(0);
         return snd;
+      }
+    }], [{
+      key: "setAudioStream",
+      value: function setAudioStream(element, stream) {
+        if (isFirefox) {
+          element.srcObject = stream;
+        } else {
+          element.src = URL.createObjectURL(stream);
+        }
+        element.muted = true;
+        return stream;
+      }
+    }, {
+      key: "chain",
+      value: function chain() {
+        var args = Array.prototype.slice.call(arguments);
+        for (var i = 0; i < args.length - 1; ++i) {
+          args[i].connect(args[i + 1]);
+        }
       }
     }]);
 

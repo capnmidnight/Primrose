@@ -1,6 +1,8 @@
 "use strict";
 
 Primrose.Workerize = function () {
+  "use strict";
+
   pliny.class({
     parent: "Primrose",
     name: "Workerize",

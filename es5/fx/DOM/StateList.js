@@ -3,6 +3,8 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Primrose.DOM.StateList = function () {
+  "use strict";
+
   pliny.class({
     parent: "Primrose.DOM",
     name: "StateList",

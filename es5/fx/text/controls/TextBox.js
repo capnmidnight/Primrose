@@ -245,37 +245,6 @@ Primrose.Text.Controls.TextBox = function () {
         this._scrolling = false;
       }
     }, {
-      key: "bindEvents",
-      value: function bindEvents(elem) {
-        var _this2 = this;
-
-        if (elem instanceof HTMLCanvasElement && (elem.tabindex === undefined || elem.tabindex === null)) {
-          elem.tabindex = 0;
-        }
-
-        BrowserEnvironment.createSurrogate.call(this);
-
-        elem.addEventListener("wheel", this.readWheel.bind(this), false);
-        elem.addEventListener("mousedown", this.mouseButtonDown.bind(this), false);
-        elem.addEventListener("mousemove", this.mouseMove.bind(this), false);
-        elem.addEventListener("mouseup", this.mouseButtonUp.bind(this), false);
-        elem.addEventListener("touchstart", this.touchStart.bind(this), false);
-        elem.addEventListener("touchmove", this.touchMove.bind(this), false);
-        elem.addEventListener("touchend", this.touchEnd.bind(this), false);
-        elem.addEventListener("keydown", this.keyDown.bind(this), false);
-        elem.addEventListener("beforepaste", function (evt) {
-          return evt.returnValue = false;
-        }, false);
-        elem.addEventListener("paste", this.readClipboard.bind(this), false);
-        elem.addEventListener("keydown", function (evt) {
-          var os = isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows;
-          if (_this2.focused && os.isClipboardReadingEvent(evt)) {
-            _this2._surrogate.style.display = "block";
-            _this2._surrogate.focus();
-          }
-        }, true);
-      }
-    }, {
       key: "copySelectedText",
       value: function copySelectedText(evt) {
         if (this.focused && this.frontCursor.i !== this.backCursor.i) {

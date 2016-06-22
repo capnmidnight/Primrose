@@ -9,11 +9,14 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Primrose.Input.VR = function () {
+  "use strict";
+
   var SLERP_A = isMobile ? 0.1 : 0,
       SLERP_B = 1 - SLERP_A;
   pliny.class({
     parent: "Primrose.Input",
     name: "VR",
+    baseClass: "Primrose.InputProcessor",
     description: "| [under construction]"
   });
 

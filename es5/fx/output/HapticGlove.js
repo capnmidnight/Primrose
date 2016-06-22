@@ -1,6 +1,7 @@
 "use strict";
 
 Primrose.Output.HapticGlove = function () {
+  "use strict";
 
   pliny.class({
     parent: "Primrose.Output",

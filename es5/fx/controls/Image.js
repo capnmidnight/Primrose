@@ -18,9 +18,9 @@ Primrose.Controls.Image = function () {
   pliny.class({
     parent: "Primrose.Controls",
     name: "Image",
-    description: "A simple 2D image to put on a Surface.",
     baseClass: "Primrose.Surface",
-    parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Button." }]
+    description: "A simple 2D image to put on a Surface.",
+    parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Image." }]
   });
 
   var Image = function (_Primrose$Surface) {

@@ -1,6 +1,7 @@
 "use strict";
 
 Primrose.Text.Grammars.Basic = function () {
+  // we don't use strict here because this grammar includes an interpreter that uses `eval()`
 
   pliny.value({
     parent: "Primrose.Text.Grammars",

@@ -1,13 +1,16 @@
 "use strict";
 
-pliny.function({
-  parent: "Primrose.Random",
-  name: "item",
-  description: "Returns a random element from an array.",
-  parameters: [{ name: "arr", type: "Array", description: "The array form which to pick items." }],
-  returns: "Any",
-  examples: [{
-    name: "Select a random element from an array.", description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
+Primrose.Random.item = function () {
+  "use strict";
+
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "item",
+    description: "Returns a random element from an array.",
+    parameters: [{ name: "arr", type: "Array", description: "The array form which to pick items." }],
+    returns: "Any",
+    examples: [{
+      name: "Select a random element from an array.", description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
 \n\
 ## Code:\n\
 \n\
@@ -34,7 +37,8 @@ pliny.function({
 > four  \n\
 > three  \n\
 > two" }]
-});
-Primrose.Random.item = function (arr) {
-  return arr[Primrose.Random.int(arr.length)];
-};
+  });
+  return function (arr) {
+    return arr[Primrose.Random.int(arr.length)];
+  };
+}();
