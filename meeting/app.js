@@ -11,7 +11,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   isTest = !!testUserNameSpec,
   userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
   userName = userNameSpec && userNameSpec[1] || "",
-  
+
   ctrls2D = Primrose.DOM.findEverything(),
   loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function(name){
     return ctrls2D[name];
@@ -41,7 +41,7 @@ if(!hasMeetingID){
 }
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
-ctrls2D.connect.addEventListener("click", authenticate);
+ctrls2D.connect.addEventListener("click", doLogin);
 ctrls2D.userName.value = userName;
 
 showSignup(userName.length === 0);
@@ -70,6 +70,77 @@ function hideLoginForm(){
   ctrls2D.frontBuffer.focus();
 }
 
+function loggedIn(newUsers) {
+  ctrls2D.errorMessage.innerHTML = "";
+  ctrls2D.errorMessage.style.display = "none";
+  disableLogin(false);
+  hideLoginForm();
+
+  document.cookie = "Primrose:user:" + userName;
+}
+
+var ERROR_MESSAGES = {
+  login: "We couldn't log you in right now because ",
+  signup: "We couldn't sign you up right now because "
+}
+
+function errorMessage(message){
+  if(!ctrls2D.loginForm.style.width){
+    ctrls2D.loginForm.style.width = ctrls2D.loginForm.clientWidth + "px";
+  }
+  ctrls2D.errorMessage.innerHTML = message;
+  ctrls2D.errorMessage.style.display = "block";
+  disableLogin(false);
+}
+
+function authFailed(name) {
+  return function (reason) {
+    showSignup(name === "signup");
+    errorMessage(ERROR_MESSAGES[name] + reason.replace(/\[USER\]/g, ctrls2D.userName.value));
+  }
+}
+
+function disableLogin(v){
+  loginControls.forEach(function(ctrl){
+    ctrl.disabled = v;
+  });
+  document.body.style.cursor = v ? "wait" : "";
+}
+
+function environmentReady() {
+  ctrls2D.loginForm.style.display = "";
+
+  env.scene.traverse(function (obj) {
+    if (obj.name.indexOf("LightPanel") === 0) {
+      obj.material.emissive.setRGB(1, 1, 1);
+    }
+  });
+}
+
+function doLogin() {
+  var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
+    password = ctrls2D.password.value,
+    email = ctrls2D.email.value;
+
+  userName = ctrls2D.userName.value.toLocaleUpperCase();
+  disableLogin(true);
+
+  if(userName.length === 0){
+    errorMessage("You must provide a user name.");
+  }
+  else if(password.length === 0){
+    errorMessage("You must provide a password.");
+  }
+  else{
+    authenticate(verb, userName, password, email);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
 var micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(setAudioStream.bind(null, ctrls2D.localAudio))
     .catch(console.warn.bind(console, "Can't get audio")),
@@ -92,13 +163,6 @@ function setAudioStream(element, stream){
 
 var listUserPromise = Promise.resolve();
 function listUsers(newUsers) {
-  ctrls2D.errorMessage.innerHTML = "";
-  ctrls2D.errorMessage.style.display = "none";
-  disableLogin(false);
-  hideLoginForm();
-
-  document.cookie = "Primrose:user:" + userName;
-
   Object.keys(users).forEach(removeUser);
   while (newUsers.length > 0) {
     addUser(newUsers.shift());
@@ -153,47 +217,19 @@ function removeUser(key) {
   }
 }
 
-var ERROR_MESSAGES = {
-  login: "We couldn't log you in right now because ",
-  signup: "We couldn't sign you up right now because "
-}
-
-function errorMessage(message){
-  if(!ctrls2D.loginForm.style.width){
-    ctrls2D.loginForm.style.width = ctrls2D.loginForm.clientWidth + "px";
-  }
-  ctrls2D.errorMessage.innerHTML = message;
-  ctrls2D.errorMessage.style.display = "block";
-  disableLogin(false);
-}
-
-function authFailed(name) {
-  return function (reason) {
-    showSignup(name === "signup");
-    errorMessage(ERROR_MESSAGES[name] + reason.replace(/\[USER\]/g, ctrls2D.userName.value));
-  }
-}
-
 function lostConnection() {
   deviceIndex = null;
 }
 
 function addDevice(index) {
-  console.log("addDevice", arguments);
+  console.log("addDevice", index);
 }
 
 function setDeviceIndex(index) {
   deviceIndex = index;
 }
 
-function disableLogin(v){
-  loginControls.forEach(function(ctrl){
-    ctrl.disabled = v;
-  });
-  document.body.style.cursor = v ? "wait" : "";
-}
-
-function authenticate() {
+function authenticate(verb, userName, password, email){
   if (!socket) {
     var protocol = location.protocol.replace("http", "ws"),
       path = protocol + "//" + location.hostname;
@@ -202,6 +238,7 @@ function authenticate() {
     socket.on("signupFailed", authFailed("signup"));
     socket.on("loginFailed", authFailed("login"));
     socket.on("userList", listUsers);
+    socket.on("userList", loggedIn);
     socket.on("userJoin", addUser);
     socket.on("deviceAdded", addDevice);
     socket.on("deviceIndex", setDeviceIndex);
@@ -213,38 +250,14 @@ function authenticate() {
     socket.on("errorDetail", console.error.bind(console));
   }
 
-  var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
-    password = ctrls2D.password.value,
-    email = ctrls2D.email.value;
-
-  userName = ctrls2D.userName.value.toLocaleUpperCase();
-  disableLogin(true);
-  if(userName.length === 0){
-    errorMessage("You must provide a user name.");
-  }
-  else if(password.length === 0){
-    errorMessage("You must provide a password.");
-  }
-  else{
-    socket.once("salt", function (salt) {
-      var hash = new Hashes.SHA256().hex(salt + password)
-      socket.emit("hash", hash);
-    });
-    socket.emit(verb, {
-      userName: userName,
-      email: email,
-      app: appKey
-    });
-  }
-}
-
-function environmentReady() {
-  ctrls2D.loginForm.style.display = "";
-
-  env.scene.traverse(function (obj) {
-    if (obj.name.indexOf("LightPanel") === 0) {
-      obj.material.emissive.setRGB(1, 1, 1);
-    }
+  socket.once("salt", function (salt) {
+    var hash = new Hashes.SHA256().hex(salt + password)
+    socket.emit("hash", hash);
+  });
+  socket.emit(verb, {
+    userName: userName,
+    email: email,
+    app: appKey
   });
 }
 
