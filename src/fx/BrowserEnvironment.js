@@ -679,7 +679,12 @@ Primrose.BrowserEnvironment = (function () {
           var protocol = location.protocol.replace("http", "ws"),
             path = protocol + "//" + location.hostname;
           console.log("connecting to: %s", path);
-          socket = io.connect(path);
+          socket = io(path);
+          socket.on("connect_error", function(evt){
+            socket.close();
+            socket = null;
+            authFailed(verb)("an error occured while connecting to the server.");
+          });
           socket.on("signupFailed", authFailed("signup"));
           socket.on("loginFailed", authFailed("login"));
           socket.on("userList", listUsers);
