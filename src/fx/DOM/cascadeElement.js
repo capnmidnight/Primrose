@@ -4,6 +4,12 @@
   pliny.function({
     parent: "Primrose.DOM",
     name: "cascadeElement",
+    returns: "Element",
+    parameters: [
+      { name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate" },
+      { name: "tag", type: "String", description: "The HTML tag name of the element we are finding/creating/validating." },
+      { name: "DOMClass", type: "Class", description: "The class Function that is the type of element that we are frobnicating."
+    }],
     description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
     * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
     * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
@@ -11,12 +17,6 @@
     * returning the DOM element back if it's good,\n\
     * or throwing an error if it is not\n\
   * If `id` is null, creates the DOM element to match the expected type.",
-    parameters: [
-      { name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate" },
-      { name: "tag", type: "String", description: "The HTML tag name of the element we are finding/creating/validating." },
-      { name: "DOMClass", type: "Class", description: "The class Function that is the type of element that we are frobnicating." }
-    ],
-    returns: "DOM element",
     examples: [{
       name: "Get an element by ID that already exists.", description: "Assuming the following HTML snippet:\n\
 \n\
