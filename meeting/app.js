@@ -7,15 +7,17 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || Primrose.Random.ID(),
   appKey = "Primrose:Meeting:" + meetingID,
-  audio = new Primrose.Output.Audio3D(),
-  lastNetworkUpdate = 0,
-  state = [0, 0, 0, 0, 0, 0, 0, 1],
+  testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
+  isTest = !!testUserNameSpec,
+  userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
+  userName = userNameSpec && userNameSpec[1] || "",
+  
   ctrls2D = Primrose.DOM.findEverything(),
   loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function(name){
     return ctrls2D[name];
   }),
   env = new Primrose.BrowserEnvironment(appKey, {
-    autoScaleQuality: false,
+    autoScaleQuality: true,
     autoRescaleQuality: false,
     quality: Primrose.Quality.HIGH,
     groundTexture: 0x000000,
