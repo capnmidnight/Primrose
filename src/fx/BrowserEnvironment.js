@@ -215,7 +215,8 @@ Primrose.BrowserEnvironment = (function () {
           i, j;
         lt = t;
         
-        toScene = toScene || this.input.VR.toScene;
+        toScene = this.input.VR.toScene;
+        this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
         movePlayer(dt);
         this.network.update(dt);
         moveSky();
