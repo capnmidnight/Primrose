@@ -80,7 +80,7 @@ var docFiles = recurseDirectory("templates/doc")
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
-    bootstrapFiles: ["node_modules/webvr-bootstrapper/WebVRBootstrapper.js"],
+    bootstrapFiles: ["../WebVR-Bootstrapper/WebVRBootstrapper.js"],
     frameworkFiles: [
       "node_modules/logger/logger.js",
       "node_modules/marked/marked.min.js",
@@ -310,7 +310,7 @@ gulp.task("copy:herettp", ["build:herettp"], function(){
 gulp.task("copy:quickstart", ["copy:herettp", "build:bootstrapper", "makeQuickstartManifest", "makeMeetingManifest"], function () {
   return gulp.src([
     "StartHere*",
-    "node_modules/webvr-bootstrapper/WebVRBootstrapper.min.js",
+    "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
     "Primrose*.min.js",
     "doc/models/monitor.*",
     "doc/models/cardboard.*",
