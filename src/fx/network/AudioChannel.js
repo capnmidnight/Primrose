@@ -175,10 +175,10 @@ Primrose.Network.AudioChannel = (function () {
           this.progress.answer.received);        
       }
 
-      return this.progress.offer.received &&
+      return super.complete || (this.progress.offer.received &&
         this.progress.offer.created && 
         this.progress.answer.received && 
-        this.progress.answer.created;
+        this.progress.answer.created);
     }
 
     teardown() {      

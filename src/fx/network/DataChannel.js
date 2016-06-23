@@ -53,8 +53,9 @@ Primrose.Network.DataChannel = (function () {
           this.progress.offer.created,
           this.progress.answer.received);        
       }
-      return this.goFirst && this.progress.offer.created && this.progress.answer.received ||
-        !this.goFirst && this.progress.offer.recieved && this.progress.answer.created;
+      return super.complete || 
+        (this.goFirst && this.progress.offer.created && this.progress.answer.received ||
+        !this.goFirst && this.progress.offer.recieved && this.progress.answer.created);
     }
 
     teardown(){

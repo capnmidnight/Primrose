@@ -404,7 +404,7 @@ Primrose.WebRTCSocket = (function () {
         description: "Override this method in subClasses to indicate when the peering process is complete. The peering process is complete when all offers are answered."
       });
 
-      throw new Error("Not implemented.");
+      return !this.rtc || this.rtc.signalingState === "closed";
     }
 
     issueRequest(){
