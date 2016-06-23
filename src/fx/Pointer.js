@@ -38,17 +38,11 @@ Primrose.Pointer = (function(){
       this.setStage(0, 0);
     }
 
-    move(lockedToEditor, inVR, qHeading, camera, player){
+    move(obj){
+      this.mesh.matrixWorld.identity();
       this.mesh.position.copy(FORWARD);
-      if (inVR && !isMobile) {
-        this.mesh.position.applyQuaternion(qHeading);
-      }
-      if (!lockedToEditor || isMobile) {
-        this.mesh.position.add(camera.position);
-        this.mesh.position.applyQuaternion(camera.quaternion);
-      }
-      this.mesh.position.applyQuaternion(player.quaternion);
-      this.mesh.position.add(player.position);
+      this.mesh.updateMatrix();
+      this.mesh.applyMatrix(obj.matrixWorld);
     }
 
     get position(){

@@ -45,8 +45,6 @@ Primrose.BrowserEnvironment = (function () {
 
       this.zero = () => {
         if (!lockedToEditor()) {
-          this.player.realPosition.set(0, 0, 0);
-          this.player.velocity.set(0, 0, 0);
           this.input.zero();
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
@@ -221,11 +219,68 @@ Primrose.BrowserEnvironment = (function () {
         this.network.update(dt);
         moveSky();
         moveGround();
-        this.pointer.move(lockedToEditor(), this.inVR, qHeading, this.camera, this.player);
+        this.pointer.move(this.player, this.projector);
         resolvePicking();
         checkQuality();
 
         emit.call(this, "update", dt);
+      };
+
+      var updatePickableObjects = => {
+        if(this.projector.ready){
+          projector.ready = false;
+          var arr = [],
+            del = [];
+          for (var key in this.pickableObjects) {
+            var obj = this.pickableObjects[key],
+              p = createPickableObject(obj);
+            if (p) {
+              arr.push(p);
+              if (p.inScene === false) {
+                del.push(key);
+              }
+            }
+          }
+
+          if (arr.length > 0) {
+            this.projector.updateObjects(arr);
+          }
+          for (var i = 0; i < del.length; ++i) {
+            delete this.pickableObjects[del[i]];
+          }          
+        }
+      };
+
+      var resolvePicking = () => {
+        if (currentHit) {
+          var lastButtons = this.input.getValue("dButtons");
+          var object = this.pickableObjects[currentHit.objectID];
+
+          this.pointer.registerHit(currentHit, this.player, object === this.ground);
+
+          if (object) {
+            var buttons = this.input.getValue("buttons"),
+              clickChanged = lastButtons !== 0,
+              control = object.button || object.surface;
+
+            if (!lockedToEditor()) {
+              buttons |= this.input.Keyboard.getValue("select");
+              clickChanged = clickChanged || this.input.Keyboard.getValue("dSelect") !== 0;
+            }
+
+            if (!clickChanged && buttons > 0) {
+              if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+                emit.call(this, "pointermove", currentHit);
+              }
+              if (this.currentControl && currentHit.point) {
+                this.currentControl.moveUV(currentHit.point);
+              }
+            }
+          }
+        }
+        else {
+          this.pointer.reset();
+        }
       };
 
       var movePlayer = (dt) => {
@@ -254,9 +309,9 @@ Primrose.BrowserEnvironment = (function () {
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-              Math.floor(this.player.position.x),
+              Math.floor(this.vehicle.position.x),
               0,
-              this.player.position.z);
+              this.vehicle.position.z);
           this.ground.material.needsUpdate = true;
         }
       };
@@ -280,9 +335,9 @@ Primrose.BrowserEnvironment = (function () {
                 this.currentControl.focus();
               }
               else if (object === this.ground) {
-                this.player.realPosition.copy(this.pointer.groundMesh.position);
-                this.player.realPosition.y = 0;
-                this.player.isOnGround = false;
+                this.vehicle.position.copy(this.pointer.groundMesh.position);
+                this.vehicle.position.y = 0;
+                this.vehicle.isOnGround = false;
               }
 
               if (this.currentControl) {
@@ -308,66 +363,6 @@ Primrose.BrowserEnvironment = (function () {
               this.currentControl.endPointer();
             }
           }
-        }
-      };
-
-      var resolvePicking = () => {
-
-        if (this.projector.ready) {
-          this.projector.ready = false;
-          var arr = [],
-            del = [];
-          for (var key in this.pickableObjects) {
-            var obj = this.pickableObjects[key],
-              p = createPickableObject(obj);
-            if (p) {
-              arr.push(p);
-              if (p.inScene === false) {
-                del.push(key);
-              }
-            }
-          }
-
-          if (arr.length > 0) {
-            this.projector.updateObjects(arr);
-          }
-          for (var i = 0; i < del.length; ++i) {
-            delete this.pickableObjects[del[i]];
-          }
-
-          this.projector.projectPointer([
-            this.pointer.position.toArray(),
-            transformForPicking(this.player)]);
-        }
-
-        var lastButtons = this.input.getValue("dButtons");
-        if (currentHit) {
-          var object = this.pickableObjects[currentHit.objectID];
-
-          this.pointer.registerHit(currentHit, this.player, object === this.ground);
-
-          if (object) {
-            var buttons = this.input.getValue("buttons"),
-              clickChanged = lastButtons !== 0,
-              control = object.button || object.surface;
-
-            if (!lockedToEditor()) {
-              buttons |= this.input.Keyboard.getValue("select");
-              clickChanged = clickChanged || this.input.Keyboard.getValue("dSelect") !== 0;
-            }
-
-            if (!clickChanged && buttons > 0) {
-              if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-                emit.call(this, "pointermove", currentHit);
-              }
-              if (this.currentControl && currentHit.point) {
-                this.currentControl.moveUV(currentHit.point);
-              }
-            }
-          }
-        }
-        else {
-          this.pointer.reset();
         }
       };
 
@@ -412,10 +407,7 @@ Primrose.BrowserEnvironment = (function () {
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
-          this.camera.position.set(0, 0, 0);
-          this.camera.quaternion.set(0, 0, 0, 1);
-          this.camera.updateMatrix();
-          this.camera.matrix.multiply(this.player.matrix);
+          this.camera.matrixWorld.copy(this.player.matrixWorld);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
@@ -479,7 +471,6 @@ Primrose.BrowserEnvironment = (function () {
         currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion(),
-        qHeading = new THREE.Quaternion(),
         vEye = new THREE.Vector3(),
         vBody = new THREE.Vector3(),
         skin = Primrose.Random.item(Primrose.SKIN_VALUES),
@@ -674,10 +665,13 @@ Primrose.BrowserEnvironment = (function () {
 
       this.player = new THREE.Object3D();
       this.player.name = "Player";
-      this.player.velocity = new THREE.Vector3();
-      this.player.realPosition = new THREE.Vector3();
-      this.player.isOnGround = true;
-      this.player.heading = 0;
+
+      this.vehicle = new THREE.Object3D();
+      this.vehicle.name = "PlayerVehicle";
+      this.vehicle.velocity = new THREE.Vector3();
+      this.vehicle.isOnGround = true;
+      this.vehicle.heading = 0;
+
 
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
@@ -723,7 +717,8 @@ Primrose.BrowserEnvironment = (function () {
 
       this.camera.add(this.nose);
       this.player.add(this.camera);
-      this.scene.add(this.player);
+      this.vehicle.add(this.player);
+      this.scene.add(this.vehicle);
 
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
