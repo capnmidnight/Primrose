@@ -6,7 +6,7 @@ var GRASS = "../images/grass.png",
   CODE_KEY = "Pacman code",
 
   env = new Primrose.BrowserEnvironment("Pacman", {
-    quality: Primrose.Quality.VERYLOW,
+    quality: Primrose.Quality.HIGH,
     autoScaleQuality: false,
     autoRescaleQuality: false,
     backgroundColor: 0x000000,
@@ -84,7 +84,7 @@ env.addEventListener("update", function (dt) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(env.player.position);
+  editorCenter.position.copy(env.vehicle.position);
 
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
@@ -163,7 +163,7 @@ function pacman() {
       C(row[x] | 0, x, y);
     }
   }
-
+  console.log("Here we go");
   L("../models/ghost.obj").then(function (ghost) {
     ghosts = colors.map(function (color, i) {
       var g = ghost.clone(),
@@ -204,10 +204,10 @@ function pacman() {
     if (ghosts) {
       ghosts.forEach(function (g) {
         g.position.add(g.velocity.clone().multiplyScalar(dt));
-        collisionCheck(dt, g, env.player);
+        collisionCheck(dt, g, env.vehicle);
       });
     }
-    collisionCheck(dt, env.player, null);
+    collisionCheck(dt, env.vehicle, null);
   }
 }
 
