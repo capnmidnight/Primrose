@@ -12,7 +12,8 @@ Primrose.BrowserEnvironment = (function () {
     FORWARDED_EVENTS = [
       "keydown", "keyup", "keypress",
       "mousedown", "mouseup", "mousemove", "wheel",
-      "touchstart", "touchend", "touchmove"];
+      "touchstart", "touchend", "touchmove"
+    ];
 
   pliny.class({
     parent: "Primrose",
@@ -28,8 +29,6 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.id = name;
-
-      var fire = emit.bind(this);
 
       this.addEventListener = (event, thunk, bubbles) => {
         if (this.listeners[event]) {
@@ -216,48 +215,15 @@ Primrose.BrowserEnvironment = (function () {
         lt = t;
 
         movePlayer(dt);
-        updateNetwork(dt);
+        this.network.update(dt);
         moveSky();
         moveGround();
         this.pointer.move(lockedToEditor(), this.inVR, qHeading, this.camera, this.player);
         resolvePicking();
         checkQuality();
 
-        fire("update", dt);
+        emit.call(this, "update", dt);
       };
-
-      var updateNetwork = (dt) => {
-        if (socket && deviceIndex === 0) {
-          lastNetworkUpdate += dt;
-          if (lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
-            lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-            var newState = [
-              this.player.heading,
-              this.player.position.x,
-              this.player.position.y - this.avatarHeight,
-              this.player.position.z,
-              this.player.qHead.x,
-              this.player.qHead.y,
-              this.player.qHead.z,
-              this.player.qHead.w,
-              this.input.VR.currentPose.position[0],
-              this.input.VR.currentPose.position[1] + this.avatarHeight,
-              this.input.VR.currentPose.position[2]
-            ];
-            for (var i = 0; i < newState.length; ++i) {
-              if (oldState[i] !== newState[i]) {
-                socket.emit("userState", newState);
-                oldState = newState;
-                break;
-              }
-            }
-          }
-        }
-        for (var key in users) {
-          var user = users[key];
-          user.update(dt);
-        }
-      }
 
       var movePlayer = (dt) => {
 
@@ -347,7 +313,7 @@ Primrose.BrowserEnvironment = (function () {
             var object = this.pickableObjects[currentHit.objectID];
             if (object) {
               var control = object.button || object.surface;
-              fire("pointerstart", currentHit);
+              emit.call(this, "pointerstart", currentHit);
               emit.call(object, "click");
 
               if (this.currentControl && this.currentControl !== control) {
@@ -382,7 +348,7 @@ Primrose.BrowserEnvironment = (function () {
           var object = this.pickableObjects[currentHit.objectID];
           if (object) {
             var control = object.button || object.surface;
-            fire("pointerend", lastHit);
+            emit.call(this, "pointerend", lastHit);
 
             if (this.currentControl) {
               this.currentControl.endPointer();
@@ -438,7 +404,7 @@ Primrose.BrowserEnvironment = (function () {
 
             if (!clickChanged && buttons > 0) {
               if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-                fire("pointermove", currentHit);
+                emit.call(this, "pointermove", currentHit);
               }
               if (this.currentControl && currentHit.point) {
                 this.currentControl.moveUV(currentHit.point);
@@ -469,7 +435,8 @@ Primrose.BrowserEnvironment = (function () {
               v = st.viewport,
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
-            this.input.VR.getPosition(this.camera.position);
+            this.input.VR.getPosition(this.player.pHead);
+            this.camera.position.copy(this.player.pHead);
             this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);
             vEye.applyMatrix4(st.translation);
@@ -598,132 +565,13 @@ Primrose.BrowserEnvironment = (function () {
         micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
           .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
           .catch(console.warn.bind(console, "Can't get audio")),
-        users = {},
-        motionControllers = [],
-        socket,
-        lastNetworkUpdate = 0,
-        oldState = [],
-        deviceIndex,
-        listUserPromise = Promise.resolve();
+        motionControllers = [];
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
         mgr.mesh = textured(box(0.1), 0x0000ff);
         this.scene.add(mgr.mesh);
       };
-
-      function listUsers(newUsers) {
-        Object.keys(users).forEach(removeUser);
-        while (newUsers.length > 0) {
-          addUser(newUsers.shift());
-        }
-        fire("authorizationsucceeded");
-      }
-
-      var addUser = (state) => {
-        var toUserName = state[0],
-        user = new Primrose.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
-        users[toUserName] = user;
-        this.scene.add(user.avatar);
-        updateUser(state);
-        listUserPromise = listUserPromise
-          .then(() => user.peer(socket, micReady, userName, this.audio))
-          .catch((exp) => console.error("Couldn't load user: " + name));
-      };
-
-      function receiveChat(evt) {
-        console.log("chat", evt);
-      }
-
-      var updateUser = (state) => {
-        var key = state[0];
-        if (key !== userName) {
-          var user = users[key];
-          if (user) {
-            user.state = state;
-          }
-          else {
-            console.error("Unknown user", key);
-          }
-        }
-        else if (deviceIndex > 0) {
-          this.player.heading = state[1];
-          this.player.position.x = state[2];
-          this.player.position.y = state[3] + this.avatarHeight;
-          this.player.position.z = state[4];
-          this.player.qHead.x = state[5];
-          this.player.qHead.y = state[6];
-          this.player.qHead.z = state[7];
-          this.player.qHead.w = state[8];
-        }
-      };
-
-      var removeUser = (key) => {
-        console.log("User %s logging off.", key);
-        var user = users[key];
-        if(user){
-          user.unpeer();
-          this.scene.remove(user.avatar);
-          delete users[key];
-        }
-      }
-
-      function lostConnection() {
-        deviceIndex = null;
-      }
-
-      function addDevice(index) {
-        console.log("addDevice", index);
-      }
-
-      function setDeviceIndex(index) {
-        deviceIndex = index;
-      }
-
-      function authFailed(verb) {
-        return function (reason) {
-          fire("authorizationfailed", {
-            verb,
-            reason
-          });
-        }
-      }
-
-      this.authenticate = (verb, userName, password, email) => {
-        if (!socket) {
-          var protocol = location.protocol.replace("http", "ws"),
-            path = protocol + "//" + location.hostname;
-          console.log("connecting to: %s", path);
-          socket = io(path);
-          socket.on("connect_error", function(evt){
-            socket.close();
-            socket = null;
-            authFailed(verb)("an error occured while connecting to the server.");
-          });
-          socket.on("signupFailed", authFailed("signup"));
-          socket.on("loginFailed", authFailed("login"));
-          socket.on("userList", listUsers);
-          socket.on("userJoin", addUser);
-          socket.on("deviceAdded", addDevice);
-          socket.on("deviceIndex", setDeviceIndex);
-          socket.on("chat", receiveChat);
-          socket.on("userState", updateUser);
-          socket.on("userLeft", removeUser);
-          socket.on("logoutComplete", fire.bind(this, "loggedout"));
-          socket.on("connection_lost", lostConnection);
-          socket.on("errorDetail", console.error.bind(console));
-        }
-
-        socket.once("salt", function (salt) {
-          var hash = new Hashes.SHA256().hex(salt + password)
-          socket.emit("hash", hash);
-        });
-        socket.emit(verb, {
-          userName: userName,
-          email: email,
-          app: appKey
-        });
-      }
 
       this.factories = factories;
 
@@ -886,7 +734,7 @@ Primrose.BrowserEnvironment = (function () {
       this.player.isOnGround = true;
       this.player.heading = 0;
       this.player.qHead = new THREE.Quaternion();
-
+      this.player.pHead = new THREE.Vector3();
 
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
@@ -937,6 +785,17 @@ Primrose.BrowserEnvironment = (function () {
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
       }
+      
+
+      var protocol = location.protocol.replace("http", "ws"),
+        path = protocol + "//" + location.hostname;
+      this.network = new Primrose.NetworkManager(path, this.player, micReady, this.audio, factories, this.options);
+      this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
+      this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
+      this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
+      this.network.addEventListener("authorizationfailed", emit.bind(this, "authorizationfailed"));
+
+      this.authenticate = this.network.authenticate.bind(this.network, this.id);
 
       var buildScene = (sceneGraph) => {
         sceneGraph.buttons = [];
@@ -988,20 +847,20 @@ Primrose.BrowserEnvironment = (function () {
           dt = lt - currentHit.startTime;
           if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
             currentHit.gazeFired = true;
-            fire("gazecomplete", currentHit);
+            emit.call(this, "gazecomplete", currentHit);
           }
         }
         else {
           if (lastHit) {
             dt = lt - lastHit.startTime;
             if (dt < this.options.gazeLength) {
-              fire("gazecancel", lastHit);
+              emit.call(this, "gazecancel", lastHit);
             }
           }
           if (currentHit) {
             currentHit.startTime = lt;
             currentHit.gazeFired = false;
-            fire("gazestart", currentHit);
+            emit.call(this, "gazestart", currentHit);
           }
         }
       };
@@ -1309,7 +1168,7 @@ Primrose.BrowserEnvironment = (function () {
         //  [{ kind: "audioinput", deviceId: "4AEB1201-50CD-4A57-8F0D-420504A8822F", groupId: "{42E0225C-F020-4914-9933-604C44A2D86F" }])
         //  .forEach((icon, i) => { });
         iconManager.icons.forEach(putIconInScene);
-        fire("ready");
+        emit.call(this, "ready");
       });
 
       this.start = () => {
