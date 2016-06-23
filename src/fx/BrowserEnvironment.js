@@ -45,7 +45,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.zero = () => {
         if (!lockedToEditor()) {
-          this.player.position.set(0, this.avatarHeight, 0);
+          this.player.realPosition.set(0, 0, 0);
           this.player.velocity.set(0, 0, 0);
           this.input.zero();
           if (this.quality === Primrose.Quality.NONE) {
@@ -209,11 +209,13 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+      var toScene;
       var update = (t) => {
         var dt = t - lt,
           i, j;
         lt = t;
-
+        
+        toScene = toScene || this.input.VR.toScene;
         movePlayer(dt);
         this.network.update(dt);
         moveSky();
@@ -226,71 +228,20 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var movePlayer = (dt) => {
-
         this.input.update();
         
         for(var i = 0; i < motionControllers.length; ++i){
           var m = motionControllers[i];
           m.getPosition(m.mesh.position);
-          m.mesh.position.y += this.options.avatarHeight;
           m.getOrientation(m.mesh.quaternion);
+          m.mesh.updateMatrix();
+          m.mesh.applyMatrix(toScene.matrix);
         }
 
-        this.player.heading = this.input.getValue("heading");
-        var pitch = this.input.getValue("pitch"),
-          strafe = this.input.getValue("strafe"),
-          drive = this.input.getValue("drive"),
-          boost = this.input.getValue("boost");
-
-        this.input.VR.getOrientation(this.player.qHead);
-
-        qPitch.setFromAxisAngle(RIGHT, pitch);
-
-        if (!lockedToEditor()) {
-          if (this.player.velocity.y === 0 && boost > 0) {
-            this.player.isOnGround = false;
-          }
-
-          this.player.velocity.y += boost;
-        }
-
-        if (!this.player.isOnGround) {
-          this.player.velocity.y -= this.options.gravity * dt;
-        }
-        else if (!lockedToEditor()) {
-          this.player.velocity.set(strafe, 0, drive)
-            .normalize()
-            .multiplyScalar(this.walkSpeed);
-
-          qHeading.setFromAxisAngle(UP, currentHeading);
-          this.player.velocity.applyQuaternion(this.player.qHead);
-          this.player.velocity.y = 0;
-          this.player.velocity.applyQuaternion(qHeading);
-        }
-        this.player.position.add(vBody.copy(this.player.velocity).multiplyScalar(dt));
-
-        if (!this.player.isOnGround && this.player.position.y < this.avatarHeight) {
-          this.player.isOnGround = true;
-          this.player.position.y = this.avatarHeight;
-          this.player.velocity.y = 0;
-        }
-
-        if (this.inVR) {
-          var dHeading = this.player.heading - currentHeading;
-          if (!lockedToEditor() && Math.abs(dHeading) > Math.PI / 5) {
-            var dh = Math.sign(dHeading) * Math.PI / 100;
-            currentHeading += dh;
-            this.player.heading -= dh;
-            dHeading = this.player.heading - currentHeading;
-          }
-          this.player.quaternion.setFromAxisAngle(UP, currentHeading);
-          qHeading.setFromAxisAngle(UP, dHeading).multiply(qPitch);
-        }
-        else {
-          currentHeading = this.player.heading;
-          this.player.quaternion.setFromAxisAngle(UP, currentHeading);
-          this.player.quaternion.multiply(qPitch);
-        }
+        this.input.VR.getOrientation(this.player.quaternion);
+        this.input.VR.getPosition(this.player.position);
+        this.player.updateMatrix();
+        this.player.applyMatrix(toScene.matrix);
       };
 
       var moveSky = () => {
@@ -301,8 +252,10 @@ Primrose.BrowserEnvironment = (function () {
 
       var moveGround = () => {
         if (this.ground) {
-          this.ground.position.x = Math.floor(this.player.position.x);
-          this.ground.position.z = Math.floor(this.player.position.z);
+          this.ground.position.set(
+              Math.floor(this.player.position.x),
+              0,
+              this.player.position.z);
           this.ground.material.needsUpdate = true;
         }
       };
@@ -326,8 +279,8 @@ Primrose.BrowserEnvironment = (function () {
                 this.currentControl.focus();
               }
               else if (object === this.ground) {
-                this.player.position.copy(this.pointer.groundMesh.position);
-                this.player.position.y = this.avatarHeight;
+                this.player.realPosition.copy(this.pointer.groundMesh.position);
+                this.player.realPosition.y = 0;
                 this.player.isOnGround = false;
               }
 
@@ -424,8 +377,6 @@ Primrose.BrowserEnvironment = (function () {
         render();
       };
 
-
-      var eyeCounter = 0, blankEye = false;
       var render = () => {
         if (this.inVR && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
@@ -435,14 +386,9 @@ Primrose.BrowserEnvironment = (function () {
               v = st.viewport,
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
-            this.input.VR.getPosition(this.player.pHead);
-            this.camera.position.copy(this.player.pHead);
             this.camera.projectionMatrix.copy(st.projection);
-            vEye.set(0, 0, 0);
-            vEye.applyMatrix4(st.translation);
-            vEye.applyQuaternion(this.player.qHead);
-            this.camera.position.add(vEye);
-            this.camera.quaternion.copy(this.player.qHead);
+            this.camera.matrixWorld.copy(this.player.matrixWorld);
+            this.camera.translateOnAxis(st.translation, 1);
             if (this.options.useNose) {
               this.nose.visible = true;
               this.nose.position.set(side * -0.12, -0.12, -0.15);
@@ -461,16 +407,14 @@ Primrose.BrowserEnvironment = (function () {
         this.audio.setPlayer(this.camera);
 
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
-          if (blankEye) {
-            eyeCounter = 1 - eyeCounter;
-            Primrose.Entity.eyeBlankAll(eyeCounter);
-          }
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
           this.camera.position.set(0, 0, 0);
-          this.camera.quaternion.copy(this.player.qHead);
+          this.camera.quaternion.set(0, 0, 0, 1);
+          this.camera.updateMatrix();
+          this.camera.matrix.multiply(this.player.matrix);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
@@ -729,12 +673,10 @@ Primrose.BrowserEnvironment = (function () {
 
       this.player = new THREE.Object3D();
       this.player.name = "Player";
-      this.player.position.set(0, this.avatarHeight, 0);
       this.player.velocity = new THREE.Vector3();
+      this.player.realPosition = new THREE.Vector3();
       this.player.isOnGround = true;
       this.player.heading = 0;
-      this.player.qHead = new THREE.Quaternion();
-      this.player.pHead = new THREE.Vector3();
 
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
@@ -888,11 +830,6 @@ Primrose.BrowserEnvironment = (function () {
       var keyUp = (evt) => {
         if (this.currentControl && this.currentControl.keyUp) {
           this.currentControl.keyUp(evt);
-        }
-        else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
-          if (evt.keyCode === Primrose.Keys.E) {
-            blankEye = false;
-          }
         }
       };
 
@@ -1085,7 +1022,7 @@ Primrose.BrowserEnvironment = (function () {
         this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
 
-        this.input = new Primrose.Input.FPSInput(this.renderer.domElement);
+        this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
         this.input.addEventListener("lockpointer", setPointerLock, false);
         this.input.addEventListener("fullscreen", this.goFullScreen.bind(this), false);
@@ -1290,7 +1227,7 @@ Primrose.BrowserEnvironment = (function () {
     useNose: false,
     useLeap: false,
     useFog: false,
-    avatarHeight: 1.75,
+    avatarHeight: 1.65,
     walkSpeed: 2,
     // The acceleration applied to falling objects.
     gravity: 9.8,

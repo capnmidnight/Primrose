@@ -15,7 +15,7 @@ Primrose.Input.VR = (function () {
     description: "An input manager for gamepad devices."
   });
   class VR extends Primrose.InputProcessor {
-    constructor(commands, socket) {
+    constructor(avatarHeight, commands, socket) {
       super("VR", commands, socket);
 
       this.displays = null;
@@ -26,6 +26,8 @@ Primrose.Input.VR = (function () {
         position: [0, 0, 0],
         orientation: [0, 0, 0, 1]
       };
+      this.movePlayer = new THREE.Matrix4();
+      this.avatarHeight = avatarHeight;
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays().then((displays) => {
@@ -33,6 +35,24 @@ Primrose.Input.VR = (function () {
         this.displays = displays;
         return this.displays;
       });
+    }
+
+    get toScene(){
+      let x = 0, z = 0;
+      var stage = this.currentDisplay && this.currentDisplay.stageParameters;
+      if(stage){
+        this.movePlayer.fromArray(stage.sittingToStandingTransform);
+        x = stage.sizeX;
+        z = stage.sizeZ;
+      }
+      else{
+        this.movePlayer.makeTranslation(0, this.avatarHeight, 0);
+      }
+      return {
+        matrix: this.movePlayer,
+        sizeX: x,
+        sizeZ: z
+      }
     }
 
     requestPresent(opts) {

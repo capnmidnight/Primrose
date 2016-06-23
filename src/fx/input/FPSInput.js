@@ -12,7 +12,7 @@ Primrose.Input.FPSInput = (function () {
     description: "| [under construction]"
   });
   class FPSInput {
-    constructor(DOMElement) {
+    constructor(DOMElement, avatarHeight) {
       DOMElement = DOMElement || window;
 
       this.listeners = {
@@ -28,7 +28,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.Media());
 
-      this.add(new Primrose.Input.VR());
+      this.add(new Primrose.Input.VR(avatarHeight));
 
       this.add(new Primrose.Input.Keyboard(DOMElement, {
         lockPointer: {
