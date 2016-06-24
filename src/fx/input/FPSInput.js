@@ -26,8 +26,6 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
 
-      this.add(new Primrose.Input.Media());
-
       this.add(new Primrose.Input.VR(avatarHeight));
 
       this.add(new Primrose.Input.Keyboard(DOMElement, {
