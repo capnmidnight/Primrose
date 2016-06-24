@@ -301,9 +301,15 @@ Primrose.BrowserEnvironment = (function () {
         this.player.updateMatrix();
         this.player.applyMatrix(toScene.matrix);
 
-        this.input.getVector2("strafe", "drive", tempVelocity);
-        tempVelocity.multiplyScalar(dt);
+        this.input.getQuaternion2("pitch", "heading", this.vehicle.quaternion);
+        this.input.getVector2("strafe", "drive", this.vehicle.velocity);
+        tempVelocity
+          .copy(this.vehicle.velocity)
+          .multiplyScalar(dt);
+        tempVelocity.applyQuaternion(this.vehicle.quaternion);
         this.vehicle.position.add(tempVelocity);
+        this.vehicle.position.y = this.player.position.y;
+        this.player.position.y = 0;
       };
 
       var moveSky = () => {
