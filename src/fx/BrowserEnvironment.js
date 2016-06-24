@@ -212,7 +212,7 @@ Primrose.BrowserEnvironment = (function () {
         var dt = t - lt,
           i, j;
         lt = t;
-        
+
         toScene = this.input.VR.toScene;
         this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
         movePlayer(dt);
@@ -226,7 +226,7 @@ Primrose.BrowserEnvironment = (function () {
         emit.call(this, "update", dt);
       };
 
-      var updatePickableObjects = => {
+      var updatePickableObjects = () => {
         if(this.projector.ready){
           projector.ready = false;
           var arr = [],
@@ -247,7 +247,7 @@ Primrose.BrowserEnvironment = (function () {
           }
           for (var i = 0; i < del.length; ++i) {
             delete this.pickableObjects[del[i]];
-          }          
+          }
         }
       };
 
@@ -285,7 +285,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var movePlayer = (dt) => {
         this.input.update();
-        
+
         for(var i = 0; i < motionControllers.length; ++i){
           var m = motionControllers[i];
           m.getPosition(m.mesh.position);
@@ -723,7 +723,7 @@ Primrose.BrowserEnvironment = (function () {
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
       }
-      
+
 
       var protocol = location.protocol.replace("http", "ws"),
         path = protocol + "//" + location.hostname;
