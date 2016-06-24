@@ -127,7 +127,7 @@ Primrose.Input.Gamepad = (function () {
     getOrientation(value) {
       value = value || new THREE.Quaternion();
       var o = this.currentPose && this.currentPose.orientation;
-      if(o){            
+      if(o){
         value.fromArray(o);
       }
       return value;
@@ -146,26 +146,50 @@ Primrose.Input.Gamepad = (function () {
 
   pliny.enumeration({
     parent: "Primrose.Input.Gamepad",
-    name: "XBOX_BUTTONS",
+    name: "XBOX_360_BUTTONS",
     description: "Labeled names for each of the different control features of the Xbox 360 controller."
   });
-  Gamepad.XBOX_BUTTONS = {
+  Gamepad.XBOX_360_BUTTONS = {
     A: 1,
     B: 2,
     X: 3,
     Y: 4,
-    leftBumper: 5,
-    rightBumper: 6,
-    leftTrigger: 7,
-    rightTrigger: 8,
-    back: 9,
-    start: 10,
-    leftStick: 11,
-    rightStick: 12,
-    up: 13,
-    down: 14,
-    left: 15,
-    right: 16
+    LEFT_BUMPER: 5,
+    RIGHT_BUMPER: 6,
+    LEFT_TRIGGER: 7,
+    RIGHT_TRIGGER: 8,
+    BACK: 9,
+    START: 10,
+    LEFT_STICK: 11,
+    RIGHT_STICK: 12,
+    UP_DPAD: 13,
+    DOWN_DPAD: 14,
+    LEFT_DPAD: 15,
+    RIGHT_DPAD: 16
+  };
+
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_ONE_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
+  Gamepad.XBOX_ONE_BUTTONS = {
+    A: 1,
+    B: 2,
+    X: 3,
+    Y: 4,
+    LEFT_BUMPER: 5,
+    RIGHT_BUMPER: 6,
+    LEFT_TRIGGER: 7,
+    RIGHT_TRIGGER: 8,
+    BACK: 9,
+    START: 10,
+    LEFT_STICK: 11,
+    RIGHT_STICK: 12,
+    UP_DPAD: 13,
+    DOWN_DPAD: 14,
+    LEFT_DPAD: 15,
+    RIGHT_DPAD: 16
   };
 
   pliny.enumeration({
