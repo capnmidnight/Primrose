@@ -323,7 +323,7 @@ Primrose.BrowserEnvironment = (function () {
           this.ground.position.set(
               Math.floor(this.vehicle.position.x),
               0,
-              this.vehicle.position.z);
+              Math.floor(this.vehicle.position.z));
           this.ground.material.needsUpdate = true;
         }
       };
