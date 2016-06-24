@@ -136,7 +136,7 @@ Primrose.Input.FPSInput = (function () {
         else {
           padCommands = {
             pointer: {
-              buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+              buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.A],
               commandDown: emit.bind(this, "pointerstart"),
               commandUp: emit.bind(this, "pointerend")
             },
@@ -221,6 +221,32 @@ Primrose.Input.FPSInput = (function () {
           }
         });
       }
+    }
+
+    getVector2(xValueName, zValueName, vector){
+      pliny.method({
+        parent: "Primrose.FPSInput",
+        name: "getVector2",
+        returns: "THREE.Vector3",
+        paramters: [
+          { name: "xValueName", type: "String", description: "The name of the value to retrieve for the X axis."},
+          { name: "zValueName", type: "String", description: "The name of the value to retrieve for the Z axis."},
+          { name: "vector", type: "THREE.Vector3", optional: true, description: "A vector to which to output the axis value. If no vector is provided, one will be created."}
+        ]
+      });
+
+      var x = 0, z = 0;
+
+      vector = vector || THREE.Vector3();
+
+      for(var i = 0; i < this.managers.length; ++i){
+        var mgr = this.managers[i];
+        x += mgr.getValue(xValueName);
+        z += mgr.getValue(zValueName);
+      }
+
+      vector.set(x, 0, z);
+      return vector;
     }
 
     getValue(name) {
