@@ -283,6 +283,8 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+      const tempVelocity = new THREE.Vector3();
+
       var movePlayer = (dt) => {
         this.input.update();
 
@@ -298,6 +300,10 @@ Primrose.BrowserEnvironment = (function () {
         this.input.VR.getPosition(this.player.position);
         this.player.updateMatrix();
         this.player.applyMatrix(toScene.matrix);
+
+        this.input.getVector2("strafe", "drive", tempVelocity);
+        tempVelocity.multiplyScalar(dt);
+        this.vehicle.position.add(tempVelocity);
       };
 
       var moveSky = () => {
