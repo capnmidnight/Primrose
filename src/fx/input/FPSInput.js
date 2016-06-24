@@ -4,7 +4,8 @@ Primrose.Input.FPSInput = (function () {
   const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
     AXIS_PREFIXES = ["L", "R"];
 
-  var temp = new THREE.Quaternion();
+  var temp = new THREE.Quaternion(),
+    euler = new THREE.Euler();
 
   pliny.class({
     parent: "Primrose.Input",
@@ -221,6 +222,34 @@ Primrose.Input.FPSInput = (function () {
           }
         });
       }
+    }
+
+    getQuaternion2(xValueName, yValueName, quaternion){
+      pliny.method({
+        parent: "Primrose.FPSInput",
+        name: "getQuaternion2",
+        returns: "THREE.Vector3",
+        paramters: [
+          { name: "xValueName", type: "String", description: "The name of the value to retrieve for the X axis."},
+          { name: "yValueName", type: "String", description: "The name of the value to retrieve for the Y axis."},
+          { name: "quaternion", type: "THREE.Quatnerion", optional: true, description: "A quaternion to which to output the axis value. If no quaternion is provided, one will be created."}
+        ]
+      });
+
+      var x = 0, y = 0, mgr;
+
+      quaternion = quaternion || THREE.Quaternion();
+
+      for(var i = 0; i < this.managers.length; ++i){
+        mgr = this.managers[i];
+        x += mgr.getValue(xValueName);
+        y += mgr.getValue(yValueName);
+      }
+
+      euler.set(x, y, 0, "YXZ");
+      quaternion.setFromEuler(euler);
+
+      return quaternion;
     }
 
     getVector2(xValueName, zValueName, vector){
