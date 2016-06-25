@@ -13,6 +13,7 @@ Primrose.NetworkManager = (function(){
     constructor(serverAddress, player, microphone, audio, factories, options){
       this.path = serverAddress;
       this.player = player;
+      this.vehicle = player.parent;
       this.microphone = microphone;
       this.audio = audio;
       this.factories = factories;
@@ -43,12 +44,12 @@ Primrose.NetworkManager = (function(){
         this.lastNetworkUpdate += dt;
         if (this.lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-          var newState = [ this.player.heading ];
-          this.player.position.toArray(newState, newState.length);
-          this.player.qHead.toArray(newState, newState.length);
-          this.player.pHead.toArray(newState, newState.length);
-          newState[2] -= this.options.avatarHeight;
-          newState[9] += this.options.avatarHeight;
+          var newState = [ ],
+            add = (v) => v.toArray(newState, newState.length);
+          add(this.vehicle.quaternion);
+          add(this.vehicle.position);
+          add(this.player.quaternion);
+          add(this.player.position);
           for (var i = 0; i < newState.length; ++i) {
             if (this.oldState[i] !== newState[i]) {
               this.socket.emit("userState", newState);
