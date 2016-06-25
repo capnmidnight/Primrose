@@ -209,13 +209,14 @@ Primrose.BrowserEnvironment = (function () {
         lt = t;
 
         toScene = this.input.VR.toScene;
-        this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
+
         movePlayer(dt);
-        this.network.update(dt);
         moveSky();
         moveGround();
+        this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
         this.pointer.move(this.player, this.projector);
         resolvePicking();
+        this.network.update(dt);
         checkQuality();
 
         emit.call(this, "update", dt);
