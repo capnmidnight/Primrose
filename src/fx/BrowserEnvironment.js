@@ -22,13 +22,10 @@ Primrose.BrowserEnvironment = (function () {
   });
   class BrowserEnvironment {
     constructor(name, options) {
-      this.options = patch(options, BrowserEnvironment.DEFAULTS);
-
-      if (this.options.foregroundColor === undefined || this.options.foregroundColor === null) {
-        this.options.foregroundColor = complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
-      }
-
       this.id = name;
+
+      this.options = patch(options, BrowserEnvironment.DEFAULTS);
+      this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
 
       this.addEventListener = (event, thunk, bubbles) => {
         if (this.listeners[event]) {
@@ -39,9 +36,7 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var lockedToEditor = () => {
-        return this.currentControl && this.currentControl.lockMovement;
-      };
+      var lockedToEditor = () => this.currentControl && this.currentControl.lockMovement;
 
       this.zero = () => {
         if (!lockedToEditor()) {
