@@ -103,7 +103,9 @@ Primrose.Input.VR = (function () {
     }
 
     get currentDisplay() {
-      return this.displays[this.currentDisplayIndex];
+      return 0 <= this.currentDisplayIndex &&
+        this.currentDisplayIndex < this.displays.length &&
+        this.displays[this.currentDisplayIndex];
     }
 
     connect(selectedIndex) {
