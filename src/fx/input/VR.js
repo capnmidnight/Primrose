@@ -29,8 +29,39 @@ Primrose.Input.VR = (function () {
       this.movePlayer = new THREE.Matrix4();
       this.avatarHeight = avatarHeight;
 
+      function addTargetFPS(d){
+        return new Promise((resolve, reject) => {
+          var lastT = null,
+          count = 0,
+          maxFPS = 0,
+          check = (t) => {
+            if(lastT !== null){
+              maxFPS = Math.max(maxFPS, Math.round(1000 / (t - lastT)));
+            }
+            if(count < 10){
+              ++count;
+              lastT = t;
+              d.requestAnimationFrame(check);
+            }
+            else{
+              d.targetFrameRate = maxFPS;
+              resolve();
+            }
+          };
+
+          d.requestAnimationFrame(check);
+        });
+      }
+
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays().then((displays) => {
+        var head = Promise.resolve();
+        for(var i = 0; i < displays.length; ++i){
+          head = head.then(addTargetFPS.bind(null, displays[i]));
+        }
+        return head.then(() => displays);
+      }).then((displays) => {
+        console.log("Target frame rates:\n\t", displays.map((d) => `${d.displayName}: ${d.targetFrameRate}fps`).join("\n\t"));
         console.log("Displays found:", displays.length);
         this.displays = displays;
         return this.displays;
