@@ -33,6 +33,7 @@ var gulp = require("gulp"),
   pliny = require("pliny"),
   pug = require("gulp-pug"),
   rename = require("gulp-rename"),
+  stylus = require("gulp-stylus"),
   uglify = require("gulp-uglify"),
   sourceFiles = recurseDirectory("src"),
   hasHereTTP = fs.existsSync("../VR.sln"),
@@ -272,12 +273,20 @@ function pugDebugES5() {
 gulp.task("pug:debug:es5", ["babel"], pugDebugES5);
 gulp.task("just:pug:debug:es5", pugDebugES5);
 
-gulp.task("cssmin", function () {
+gulp.task("stylus", function(){
+  return gulp.src(["!node_modules/**/*.styl", "**/*.styl"], { base: "./" })
+  .pipe(stylus())
+  .pipe(gulp.dest("./"));
+});
+
+function cssMin() {
   return gulp.src(["doc/**/*.css", "!doc/**/*.min.css"], { base: "./doc" })
     .pipe(rename({ suffix: ".min" }))
     .pipe(cssmin())
     .pipe(gulp.dest("./doc"));
-});
+}
+gulp.task("cssmin", ["stylus"], cssMin);
+gulp.task("just:cssmin", cssMin);
 
 gulp.task("pug:debug:es6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
