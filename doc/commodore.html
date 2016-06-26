@@ -265,10 +265,12 @@ env.addEventListener(&quot;ready&quot;, function () {
   [&quot;CaseBottom&quot;, &quot;CaseInset&quot;, &quot;CaseTitle&quot;, &quot;CaseTop&quot;,
     &quot;Feet&quot;, &quot;Keyboard&quot;, &quot;KeyboardBezel&quot;,
     &quot;MonitorCase&quot;, &quot;MonitorInset&quot;, &quot;Screen&quot;,
-    &quot;TapeDeck&quot;, &quot;TapeDeckControls&quot;, &quot;TapeDeckDoor&quot;, &quot;TapeDeckInset&quot;]
-    .map(function (name) {
+    &quot;TapeDeck&quot;, &quot;TapeDeckControls&quot;, &quot;TapeDeckDoor&quot;, &quot;TapeDeckInset&quot;
+  ]
+  .map(function (name) {
       return env.scene[name];
-    }).forEach(function (obj) {
+    })
+    .forEach(function (obj) {
       obj.position.y += env.avatarHeight * 0.9;
       obj.position.z -= 3;
     });

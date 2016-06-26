@@ -236,7 +236,8 @@ var GRASS = &quot;../images/grass.png&quot;,
   HEIGHT = 11,
   DEPTH = 100,
   MIDX = WIDTH / 2,
-  MIDY = HEIGHT / 2, MIDZ = DEPTH / 2,
+  MIDY = HEIGHT / 2,
+  MIDZ = DEPTH / 2,
   ball = null,
   t = 0,
   dx = 7,
@@ -323,16 +324,16 @@ env.addEventListener(&quot;update&quot;, function (dt) {
   ball.position.x += dx * dt;
   ball.position.y += dy * dt;
   ball.position.z += dz * dt;
-  if (ball.position.x &lt; 0 &amp;&amp; dx &lt; 0
-    || WIDTH &lt;= ball.position.x &amp;&amp; dx &gt; 0) {
+  if (ball.position.x &lt; 0 &amp;&amp; dx &lt; 0 ||
+    WIDTH &lt;= ball.position.x &amp;&amp; dx &gt; 0) {
     dx *= -1;
   }
-  if (ball.position.y &lt; 1 &amp;&amp; dy &lt; 0
-    || HEIGHT &lt;= ball.position.y &amp;&amp; dy &gt; 0) {
+  if (ball.position.y &lt; 1 &amp;&amp; dy &lt; 0 ||
+    HEIGHT &lt;= ball.position.y &amp;&amp; dy &gt; 0) {
     dy *= -1;
   }
-  if (ball.position.z &lt; 0 &amp;&amp; dz &lt; 0
-    || DEPTH &lt;= ball.position.z &amp;&amp; dz &gt; 0) {
+  if (ball.position.z &lt; 0 &amp;&amp; dz &lt; 0 ||
+    DEPTH &lt;= ball.position.z &amp;&amp; dz &gt; 0) {
     dz *= -1;
   }
 });</pre><!-- end documentation.jade documentation block -->
