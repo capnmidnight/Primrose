@@ -9,10 +9,9 @@ Primrose.Text.OperatingSystems.Windows = (function () {
     parent: "Primrose.Text.OperatingSystems",
     name: "OSX",
     description: "| [under construction]"
-  } );
+  });
   return new Primrose.Text.OperatingSystem(
-      "Windows", "CTRL", "CTRL", "CTRL_y",
-      "", "HOME", "END",
-      "CTRL", "HOME", "END");
+    "Windows", "CTRL", "CTRL", "CTRL_y",
+    "", "HOME", "END",
+    "CTRL", "HOME", "END");
 })();
-

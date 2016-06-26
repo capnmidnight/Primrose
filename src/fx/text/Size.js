@@ -1,29 +1,30 @@
-Primrose.Text.Size = (function ( ) {
+Primrose.Text.Size = (function () {
   "use strict";
 
   pliny.class({
     parent: "Primrose.Text",
-    name: "Size",
-    description: "| [under construction]"
-  } );
-  function Size ( width, height ) {
-    this.set( width || 0, height || 0 );
+      name: "Size",
+      description: "| [under construction]"
+  });
+
+  function Size(width, height) {
+    this.set(width || 0, height || 0);
   }
 
-  Size.prototype.set = function ( width, height ) {
+  Size.prototype.set = function (width, height) {
     this.width = width;
     this.height = height;
   };
 
-  Size.prototype.copy = function ( s ) {
-    if ( s ) {
+  Size.prototype.copy = function (s) {
+    if (s) {
       this.width = s.width;
       this.height = s.height;
     }
   };
 
   Size.prototype.clone = function () {
-    return new Size( this.width, this.height );
+    return new Size(this.width, this.height);
   };
 
   Size.prototype.toString = function () {
@@ -31,5 +32,4 @@ Primrose.Text.Size = (function ( ) {
   };
 
   return Size;
-} )();
-
+})();

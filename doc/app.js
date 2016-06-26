@@ -1,17 +1,20 @@
 function scroller(id) {
-  document.getElementById(id).scrollIntoView({
-    block: "top",
-    behavior: "smooth"
-  });
+  document.getElementById(id)
+    .scrollIntoView({
+      block: "top",
+      behavior: "smooth"
+    });
 }
 
 var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
+
 function replacePreBlocks() {
   var doc = document.querySelector("#documentation"),
     codeBlocks = doc.querySelectorAll("pre");
   for (var i = 0; i < codeBlocks.length; ++i) {
     var b = codeBlocks[i],
-      txt = (b.textContent || b.innerText).trim(),
+      txt = (b.textContent || b.innerText)
+      .trim(),
       grammarSpec = txt.match(GRAMMAR_TEST),
       tokenizer = Primrose.Text.Grammars.PlainText;
     if (grammarSpec) {
@@ -252,7 +255,8 @@ function replacePreBlocks() {
     showHash();
     search.call(docSearch);
     if (isMobile) {
-      document.querySelector("#contents > details").open = false;
+      document.querySelector("#contents > details")
+        .open = false;
     }
   }
 

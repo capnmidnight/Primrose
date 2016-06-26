@@ -60,4 +60,3 @@ Primrose.Text.CommandPacks.TextEditor = (function () {
       }
     });
 })();
-

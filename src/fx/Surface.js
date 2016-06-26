@@ -1,17 +1,22 @@
-﻿Primrose.Surface = (function () {
+Primrose.Surface = (function () {
   "use strict";
 
   var COUNTER = 0;
 
   pliny.class({
     parent: "Primrose",
-    name: "Surface",
-    description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
-    baseClass: "Primrose.Entity",
-    parameters: [
-      { name: "options.id", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
-      { name: "options.bounds", type: "Primrose.Text.Rectangle", description: "The size and location of the surface to create." }
-    ]
+      name: "Surface",
+      description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+      baseClass: "Primrose.Entity",
+      parameters: [{
+        name: "options.id",
+        type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+        description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+      }, {
+        name: "options.bounds",
+        type: "Primrose.Text.Rectangle",
+        description: "The size and location of the surface to create."
+      }]
   });
   class Surface extends Primrose.Entity {
 
@@ -35,42 +40,70 @@
 
       Object.defineProperties(this.style, {
         width: {
-          get: () => { return this.bounds.width; },
+          get: () => {
+            return this.bounds.width;
+          },
           set: (v) => {
             this.bounds.width = v;
             this.resize();
           }
         },
         height: {
-          get: () => { return this.bounds.height; },
-          set: (v) => { 
+          get: () => {
+            return this.bounds.height;
+          },
+          set: (v) => {
             this.bounds.height = v;
             this.resize();
           }
         },
         left: {
-          get: () => { return this.bounds.left; },
-          set: (v) => { this.bounds.left = v; }
+          get: () => {
+            return this.bounds.left;
+          },
+          set: (v) => {
+            this.bounds.left = v;
+          }
         },
         top: {
-          get: () => { return this.bounds.top; },
-          set: (v) => { this.bounds.top = v; }
+          get: () => {
+            return this.bounds.top;
+          },
+          set: (v) => {
+            this.bounds.top = v;
+          }
         },
         opacity: {
-          get: () => { return this._opacity; },
-          set: (v) => { this._opacity = v; }
+          get: () => {
+            return this._opacity;
+          },
+          set: (v) => {
+            this._opacity = v;
+          }
         },
         fontSize: {
-          get: () => { return this.fontSize; },
-          set: (v) => { this.fontSize = v; }
+          get: () => {
+            return this.fontSize;
+          },
+          set: (v) => {
+            this.fontSize = v;
+          }
         },
         backgroundColor: {
-          get: () => { return this.backgroundColor; },
-          set: (v) => { this.backgroundColor = v; }
+          get: () => {
+            return this.backgroundColor;
+          },
+          set: (v) => {
+            this.backgroundColor = v;
+          }
         },
         color: {
-          get: () => { return this.color; },
-          set: (v) => { this.color = v; }
+          get: () => {
+            return this.color;
+          },
+          set: (v) => {
+            this.color = v;
+          }
         }
       });
 
@@ -97,7 +130,11 @@
       }
 
       if (this.canvas === null) {
-        pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
+        pliny.error({
+          name: "Invalid element",
+          type: "Error",
+          description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+        });
         console.error(typeof (this.options.id));
         console.error(this.options.id);
         throw new Error(this.options.id + " does not refer to a valid canvas element.");
@@ -170,7 +207,7 @@
       }
     }
 
-    render(){
+    render() {
       this.invalidate();
     }
 
@@ -303,7 +340,11 @@
           if (!this.focused) {
             this.focus();
           }
-          emit.call(this, "click", { target, x, y });
+          emit.call(this, "click", {
+            target,
+            x,
+            y
+          });
           if (target !== this) {
             target.startPointer(x - this.bounds.left, y - this.bounds.top);
           }
@@ -317,7 +358,11 @@
     movePointer(x, y) {
       var target = this._findChild(x, y, (child, x2, y2) => child.startPointer(x2, y2));
       if (target) {
-        emit.call(this, "move", { target, x, y });
+        emit.call(this, "move", {
+          target,
+          x,
+          y
+        });
         if (target !== this) {
           target.movePointer(x - this.bounds.left, y - this.bounds.top);
         }

@@ -5,9 +5,8 @@ Primrose.Text.Grammars.PlainText = (function () {
     parent: "Primrose.Text.Grammars",
     name: "PlainText",
     description: "| [under construction]"
-  } );
+  });
   return new Primrose.Text.Grammar("PlainText", [
     ["newlines", /(?:\r\n|\r|\n)/]
   ]);
 })();
-

@@ -5,13 +5,18 @@ Primrose.Controls.VUMeter = (function () {
 
   pliny.class({
     parent: "Primrose.Controls",
-    name: "VUMeter",
-    baseClass: "Primrose.Surface",
-    description: "A visualization of audio data.",
-    parameters: [
-      { name: "analyzer", type: "MediaStream", description: "The audio stream to analyze."},
-      { name: "options", type: "Object", description: "Named parameters for creating the Button." }
-    ]
+      name: "VUMeter",
+      baseClass: "Primrose.Surface",
+      description: "A visualization of audio data.",
+      parameters: [{
+        name: "analyzer",
+        type: "MediaStream",
+        description: "The audio stream to analyze."
+      }, {
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the Button."
+      }]
   });
   class VUMeter extends Primrose.Surface {
 
@@ -22,7 +27,9 @@ Primrose.Controls.VUMeter = (function () {
 
       options = options || {};
       if (typeof options === "string") {
-        options = { value: options };
+        options = {
+          value: options
+        };
       }
 
       super(patch(options, {
@@ -59,7 +66,7 @@ Primrose.Controls.VUMeter = (function () {
       this.context.lineWidth = 2;
       this.context.strokeStyle = this.options.foregroundColor;
       this.context.beginPath();
-      for(var i = 0; i < this.buffer.length; ++i){
+      for (var i = 0; i < this.buffer.length; ++i) {
         var x = i * this.bounds.width / this.buffer.length,
           y = this.buffer[i] * this.bounds.height / 256,
           func = i > 0 ? "lineTo" : "moveTo";
@@ -73,4 +80,3 @@ Primrose.Controls.VUMeter = (function () {
 
   return VUMeter;
 })();
-

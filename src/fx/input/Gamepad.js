@@ -5,30 +5,41 @@ Primrose.Input.Gamepad = (function () {
     navigator.webkitGetGamepads;
 
   const listeners = {
-    gamepadconnected: [],
-    gamepaddisconnected: []
-  },
+      gamepadconnected: [],
+      gamepaddisconnected: []
+    },
     currentPadIDs = [],
     currentPads = [],
     currentManagers = {};
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "Gamepad",
-    baseClass: "Primrose.InputProcessor",
-    parameters: [
-      { name: "name", type: "string", description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account." },
-      { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." },
-      { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }
-    ],
-    description: "An input processor for Gamepads, including those with positional data."
+      name: "Gamepad",
+      baseClass: "Primrose.InputProcessor",
+      parameters: [{
+        name: "name",
+        type: "string",
+        description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
+      }, {
+        name: "commands",
+        type: "Array",
+        optional: true,
+        description: "An array of input command descriptions."
+      }, {
+        name: "socket",
+        type: "WebSocket",
+        optional: true,
+        description: "A socket over which to transmit device state for device fusion."
+      }],
+      description: "An input processor for Gamepads, including those with positional data."
   });
   class Gamepad extends Primrose.InputProcessor {
-    static ID(pad){
-      return (pad.id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+    static ID(pad) {
+      return (pad.id + "_" + (pad.index || 0))
+        .replace(/\s+/g, "_");
     }
 
-    static poll(){
+    static poll() {
       var maybePads = navigator.getGamepads(),
         pads = [],
         padIDs = [],
@@ -44,29 +55,29 @@ Primrose.Input.Gamepad = (function () {
               padIdx = currentPadIDs.indexOf(padID);
             pads.push(maybePad);
             padIDs.push(padID);
-            if(padIdx === -1){
+            if (padIdx === -1) {
               newPads.push(maybePad);
               currentPadIDs.push(padID);
               currentPads.push(maybePad);
               delete currentManagers[padID];
             }
-            else{
+            else {
               currentPads[padIdx] = maybePad;
             }
           }
         }
       }
 
-      for(i = currentPadIDs.length - 1; i >= 0; --i){
+      for (i = currentPadIDs.length - 1; i >= 0; --i) {
         var padID = currentPadIDs[i],
           mgr = currentManagers[padID],
           pad = currentPads[i];
-        if(padIDs.indexOf(padID) === -1){
+        if (padIDs.indexOf(padID) === -1) {
           oldPads.push(padID);
           currentPads.splice(i, 1);
           currentPadIDs.splice(i, 1);
         }
-        else if(mgr){
+        else if (mgr) {
           mgr.checkDevice(pad);
         }
       }
@@ -75,16 +86,16 @@ Primrose.Input.Gamepad = (function () {
       oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
     }
 
-    static get pads(){
+    static get pads() {
       return currentPads;
     }
 
-    static get listeners(){
+    static get listeners() {
       return listeners;
     }
 
-    static addEventListener(evt, thunk){
-      if(listeners[evt]){
+    static addEventListener(evt, thunk) {
+      if (listeners[evt]) {
         listeners[evt].push(thunk);
       }
     }
@@ -103,7 +114,7 @@ Primrose.Input.Gamepad = (function () {
       this.axisOffset = axisOffset;
     }
 
-    checkDevice (pad) {
+    checkDevice(pad) {
       var i;
       this.currentPad = pad;
       for (i = 0; i < pad.buttons.length; ++i) {
@@ -118,8 +129,8 @@ Primrose.Input.Gamepad = (function () {
       this.currentPose = pad.pose;
     }
 
-    vibrate(){
-      if(this.currentPad && this.currentPad.vibrate){
+    vibrate() {
+      if (this.currentPad && this.currentPad.vibrate) {
         this.currentPad.vibrate.apply(this.currentPad, arguments);
       }
     }
@@ -127,16 +138,16 @@ Primrose.Input.Gamepad = (function () {
     getOrientation(value) {
       value = value || new THREE.Quaternion();
       var o = this.currentPose && this.currentPose.orientation;
-      if(o){
+      if (o) {
         value.fromArray(o);
       }
       return value;
     }
 
-    getPosition(value){
+    getPosition(value) {
       value = value || new THREE.Vector3();
       var p = this.currentPose && this.currentPose.position;
-      if(p){
+      if (p) {
         value.fromArray(p);
       }
       return value;

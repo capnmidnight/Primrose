@@ -9,8 +9,8 @@ Primrose.Input.FPSInput = (function () {
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "FPSInput",
-    description: "| [under construction]"
+      name: "FPSInput",
+      description: "| [under construction]"
   });
   class FPSInput {
     constructor(DOMElement, avatarHeight) {
@@ -41,75 +41,149 @@ Primrose.Input.FPSInput = (function () {
           commandDown: emit.bind(this, "fullscreen")
         },
         strafeLeft: {
-          buttons: [
-            -Primrose.Keys.A,
-            -Primrose.Keys.LEFTARROW]
+          buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
         },
         strafeRight: {
           buttons: [
             Primrose.Keys.D,
-            Primrose.Keys.RIGHTARROW]
+            Primrose.Keys.RIGHTARROW
+          ]
         },
-        strafe: { commands: ["strafeLeft", "strafeRight"] },
-        boost: { buttons: [ Primrose.Keys.E ], scale: 0.2 },
+        strafe: {
+          commands: ["strafeLeft", "strafeRight"]
+        },
+        boost: {
+          buttons: [Primrose.Keys.E],
+          scale: 0.2
+        },
         driveForward: {
-          buttons: [
-            -Primrose.Keys.W,
-            -Primrose.Keys.UPARROW]
+          buttons: [-Primrose.Keys.W, -Primrose.Keys.UPARROW]
         },
         driveBack: {
           buttons: [
             Primrose.Keys.S,
-            Primrose.Keys.DOWNARROW]
+            Primrose.Keys.DOWNARROW
+          ]
         },
-        drive: { commands: ["driveForward", "driveBack"] },
-        select: { buttons: [Primrose.Keys.ENTER] },
-        dSelect: { buttons: [Primrose.Keys.ENTER], delta: true },
+        drive: {
+          commands: ["driveForward", "driveBack"]
+        },
+        select: {
+          buttons: [Primrose.Keys.ENTER]
+        },
+        dSelect: {
+          buttons: [Primrose.Keys.ENTER],
+          delta: true
+        },
         zero: {
           buttons: [Primrose.Keys.Z],
-          metaKeys: [
-            -Primrose.Keys.CTRL,
-            -Primrose.Keys.ALT,
-            -Primrose.Keys.SHIFT,
-            -Primrose.Keys.META
-          ],
+          metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
           commandUp: emit.bind(this, "zero")
         }
       }));
 
       this.add(new Primrose.Input.Mouse(DOMElement, {
-        lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
+        lockPointer: {
+          buttons: [Primrose.Keys.ANY],
+          commandDown: emit.bind(this, "lockpointer")
+        },
         pointer: {
           buttons: [Primrose.Keys.ANY],
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
-        buttons: { axes: [Primrose.Input.Mouse.BUTTONS] },
-        dButtons: { axes: [Primrose.Input.Mouse.BUTTONS], delta: true },
-        pointerX: { axes: [Primrose.Input.Mouse.X] },
-        pointerY: { axes: [Primrose.Input.Mouse.Y] },
-        dx: { axes: [-Primrose.Input.Mouse.X], delta: true, scale: 0.005, min: -5, max: 5 },
-        heading: { commands: ["dx"], integrate: true },
-        dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
-        pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
-        pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
+        buttons: {
+          axes: [Primrose.Input.Mouse.BUTTONS]
+        },
+        dButtons: {
+          axes: [Primrose.Input.Mouse.BUTTONS],
+          delta: true
+        },
+        pointerX: {
+          axes: [Primrose.Input.Mouse.X]
+        },
+        pointerY: {
+          axes: [Primrose.Input.Mouse.Y]
+        },
+        dx: {
+          axes: [-Primrose.Input.Mouse.X],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        dy: {
+          axes: [-Primrose.Input.Mouse.Y],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        },
+        pointerPitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.25,
+          max: Math.PI * 0.25
+        }
       }));
 
       this.add(new Primrose.Input.Touch(DOMElement, {
-        lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
+        lockPointer: {
+          buttons: [Primrose.Keys.ANY],
+          commandUp: emit.bind(this, "lockpointer")
+        },
         pointer: {
           buttons: [Primrose.Keys.ANY],
           commandDown: emit.bind(this, "pointerstart"),
           commandUp: emit.bind(this, "pointerend")
         },
-        buttons: { axes: [Primrose.Input.Touch.FINGERS] },
-        dButtons: { axes: [Primrose.Input.Touch.FINGERS], delta: true },
-        pointerX: { axes: [Primrose.Input.Touch.X0] },
-        pointerY: { axes: [Primrose.Input.Touch.Y0] },
-        dx: { axes: [-Primrose.Input.Touch.X0], delta: true, scale: 0.005, min: -5, max: 5 },
-        heading: { commands: ["dx"], integrate: true },
-        dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
-        pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
+        buttons: {
+          axes: [Primrose.Input.Touch.FINGERS]
+        },
+        dButtons: {
+          axes: [Primrose.Input.Touch.FINGERS],
+          delta: true
+        },
+        pointerX: {
+          axes: [Primrose.Input.Touch.X0]
+        },
+        pointerY: {
+          axes: [Primrose.Input.Touch.Y0]
+        },
+        dx: {
+          axes: [-Primrose.Input.Touch.X0],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        dy: {
+          axes: [-Primrose.Input.Touch.Y0],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
       }));
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
@@ -118,7 +192,7 @@ Primrose.Input.FPSInput = (function () {
           padCommands = null,
           controllerNumber = 0;
 
-        if(isMotion){
+        if (isMotion) {
           padCommands = {
             pointer: {
               buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
@@ -127,9 +201,9 @@ Primrose.Input.FPSInput = (function () {
             }
           };
 
-          for(var i = 0; i < this.managers.length; ++i){
+          for (var i = 0; i < this.managers.length; ++i) {
             var mgr = this.managers[i];
-            if(mgr.currentPad && mgr.currentPad.id === pad.id){
+            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
               ++controllerNumber;
             }
           }
@@ -141,17 +215,34 @@ Primrose.Input.FPSInput = (function () {
               commandDown: emit.bind(this, "pointerstart"),
               commandUp: emit.bind(this, "pointerend")
             },
-            strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
-            drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
-            heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
-            dheading: { commands: ["heading"], delta: true },
-            pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
+            strafe: {
+              axes: [Primrose.Input.Gamepad.LSX],
+              deadzone: 0.2
+            },
+            drive: {
+              axes: [Primrose.Input.Gamepad.LSY],
+              deadzone: 0.2
+            },
+            heading: {
+              axes: [-Primrose.Input.Gamepad.RSX],
+              deadzone: 0.2,
+              integrate: true
+            },
+            dheading: {
+              commands: ["heading"],
+              delta: true
+            },
+            pitch: {
+              axes: [-Primrose.Input.Gamepad.RSY],
+              deadzone: 0.2,
+              integrate: true
+            }
           };
         }
         var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
         this.add(mgr);
 
-        if(isMotion){
+        if (isMotion) {
           emit.call(this, "motioncontroller", mgr);
         }
       });
@@ -163,19 +254,19 @@ Primrose.Input.FPSInput = (function () {
         .filter(identity));
     }
 
-    remove(id){
+    remove(id) {
       var mgr = this[id],
         mgrIdx = this.managers.indexOf(mgr);
-      if(mgrIdx > -1){
+      if (mgrIdx > -1) {
         this.managers.splice(mgrIdx, 1);
         delete this[id];
       }
       console.log("removed", mgr);
     }
 
-    add(mgr){
-      for(var i = this.managers.length - 1; i >= 0; --i){
-        if(this.managers[i].name === mgr.name){
+    add(mgr) {
+      for (var i = this.managers.length - 1; i >= 0; --i) {
+        if (this.managers[i].name === mgr.name) {
           this.managers.splice(i, 1);
         }
       }
@@ -224,23 +315,34 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    getQuaternion2(xValueName, yValueName, quaternion){
+    getQuaternion2(xValueName, yValueName, quaternion) {
       pliny.method({
         parent: "Primrose.FPSInput",
         name: "getQuaternion2",
         returns: "THREE.Vector3",
-        paramters: [
-          { name: "xValueName", type: "String", description: "The name of the value to retrieve for the X axis."},
-          { name: "yValueName", type: "String", description: "The name of the value to retrieve for the Y axis."},
-          { name: "quaternion", type: "THREE.Quatnerion", optional: true, description: "A quaternion to which to output the axis value. If no quaternion is provided, one will be created."}
-        ]
+        paramters: [{
+          name: "xValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the X axis."
+        }, {
+          name: "yValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the Y axis."
+        }, {
+          name: "quaternion",
+          type: "THREE.Quatnerion",
+          optional: true,
+          description: "A quaternion to which to output the axis value. If no quaternion is provided, one will be created."
+        }]
       });
 
-      var x = 0, y = 0, mgr;
+      var x = 0,
+        y = 0,
+        mgr;
 
       quaternion = quaternion || THREE.Quaternion();
 
-      for(var i = 0; i < this.managers.length; ++i){
+      for (var i = 0; i < this.managers.length; ++i) {
         mgr = this.managers[i];
         x += mgr.getValue(xValueName);
         y += mgr.getValue(yValueName);
@@ -252,23 +354,33 @@ Primrose.Input.FPSInput = (function () {
       return quaternion;
     }
 
-    getVector2(xValueName, zValueName, vector){
+    getVector2(xValueName, zValueName, vector) {
       pliny.method({
         parent: "Primrose.FPSInput",
         name: "getVector2",
         returns: "THREE.Vector3",
-        paramters: [
-          { name: "xValueName", type: "String", description: "The name of the value to retrieve for the X axis."},
-          { name: "zValueName", type: "String", description: "The name of the value to retrieve for the Z axis."},
-          { name: "vector", type: "THREE.Vector3", optional: true, description: "A vector to which to output the axis value. If no vector is provided, one will be created."}
-        ]
+        paramters: [{
+          name: "xValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the X axis."
+        }, {
+          name: "zValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the Z axis."
+        }, {
+          name: "vector",
+          type: "THREE.Vector3",
+          optional: true,
+          description: "A vector to which to output the axis value. If no vector is provided, one will be created."
+        }]
       });
 
-      var x = 0, z = 0;
+      var x = 0,
+        z = 0;
 
       vector = vector || THREE.Vector3();
 
-      for(var i = 0; i < this.managers.length; ++i){
+      for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         x += mgr.getValue(xValueName);
         z += mgr.getValue(zValueName);

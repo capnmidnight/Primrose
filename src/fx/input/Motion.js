@@ -3,9 +3,9 @@ Primrose.Input.Motion = (function () {
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "Motion",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "Motion",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
   class Motion extends Primrose.InputProcessor {
     constructor(commands, socket) {
@@ -48,7 +48,8 @@ Primrose.Input.Motion = (function () {
     "HEADING", "PITCH", "ROLL",
     "D_HEADING", "D_PITCH", "D_ROLL",
     "headAX", "headAY", "headAZ",
-    "headRX", "headRY", "headRZ", "headRW"]);
+    "headRX", "headRY", "headRZ", "headRW"
+  ]);
 
   function makeTransform(s, eye) {
     var sw = Math.max(screen.width, screen.height),
@@ -58,7 +59,8 @@ Primrose.Input.Motion = (function () {
       i = (eye + 1) / 2;
 
     if (window.THREE) {
-      s.transform = new THREE.Matrix4().makeTranslation(eye * 0.034, 0, 0);
+      s.transform = new THREE.Matrix4()
+        .makeTranslation(eye * 0.034, 0, 0);
     }
     s.viewport = {
       x: i * w,
@@ -79,4 +81,3 @@ Primrose.Input.Motion = (function () {
 
   return Motion;
 })();
-

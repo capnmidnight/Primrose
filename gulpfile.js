@@ -20,6 +20,7 @@
 
 var gulp = require("gulp"),
   babel = require("gulp-babel"),
+  beautify = require("gulp-beautify"),
   concat = require("gulp-concat"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
@@ -33,8 +34,14 @@ var gulp = require("gulp"),
   pug = require("gulp-pug"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
-  sourceFiles = recurseDirectory("src")
+  sourceFiles = recurseDirectory("src"),
+  hasHereTTP = fs.existsSync("../VR.sln"),
+  hasWebVRBootstrapper = fs.existsSync("../WebVR-Bootstrapper"),
+  hasLogger = fs.existsSync("../logger"),
+  hasPliny = fs.existsSync("../pliny");
+
 sourceFiles.sort();
+
 var docFiles = recurseDirectory("templates/doc")
     .filter(function (f) {
       return /.jade$/.test(f);
@@ -80,7 +87,7 @@ var docFiles = recurseDirectory("templates/doc")
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
-    bootstrapFiles: ["../WebVR-Bootstrapper/WebVRBootstrapper.js"],
+    bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/WebVRBootstrapper.js"] : [],
     frameworkFiles: [
       "node_modules/logger/logger.js",
       "node_modules/marked/marked.min.js",
@@ -191,22 +198,79 @@ function X(name, cmd, deps){
   });
 }
 
-X("build:herettp", "msbuild ../VR.sln /t:Build /p:Configuration=Release;Platform=x86");
-X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
-X("build:logger", "cd ../logger && gulp");
-X("build:pliny", "cd ../pliny && gulp");
+if(hasHereTTP){
+  X("build:herettp", "msbuild ../VR.sln /t:Build /p:Configuration=Release;Platform=x86");
 
-gulp.task("pug:release", ["cssmin", "jsmin"], function () {
+  function copyHereTTP(){
+    return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe"])
+      .pipe(rename(function (path) {
+        path.basename += "-WINDOWS";
+        return path;
+      }))
+      .pipe(gulp.dest("."));
+  }
+  gulp.task("copy:herettp", ["build:herettp"], copyHereTTP);
+  gulp.task("just:copy:herettp", copyHereTTP);
+}
+
+if(hasWebVRBootstrapper){
+  X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
+
+  X("build:manifest:quickstart", "cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
+
+  X("build:manifest:meeting", "cd meeting && node ../../WebVR-Bootstrapper/index.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
+
+  var quickstartDependencies = [
+    "build:manifest:quickstart",
+    "build:manifest:meeting",
+    "build:bootstrapper"
+  ];
+
+  if(hasHereTTP){
+    quickstartDependencies.push("copy:herettp");
+  }
+
+  function copyQuickstart() {
+    var toCopy = [
+      "StartHere*",
+      "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
+      "Primrose*.min.js",
+      "doc/models/monitor.*",
+      "doc/models/cardboard.*",
+      "doc/fonts/helvetiker_regular.typeface.js",
+      "doc/audio/wind.ogg",
+      "!**/*.blend"];
+
+    return gulp.src(toCopy)
+      .pipe(gulp.dest("quickstart"));
+  }
+  gulp.task("copy:quickstart", quickstartDependencies, copyQuickstart);
+  gulp.task("just:copy:quickstart", copyQuickstart);
+}
+
+if(hasLogger){
+  X("build:logger", "cd ../logger && gulp");
+}
+
+if(hasPliny){
+  X("build:pliny", "cd ../pliny && gulp");
+}
+
+function pugRelease() {
   return pugConfiguration({}, {
     jsExt: ".min.js",
     cssExt: ".min.css",
     frameworkFiles: ["PrimroseDependencies.min.js", "Primrose.min.js"]
   });
-});
+}
+gulp.task("pug:release", ["cssmin", "jsmin"], pugRelease);
+gulp.task("just:pug:release", pugRelease);
 
-gulp.task("pug:debug:es5", ["babel"], function () {
+function pugDebugES5() {
   return pugConfiguration({ pretty: true }, debugDataES5);
-});
+}
+gulp.task("pug:debug:es5", ["babel"], pugDebugES5);
+gulp.task("just:pug:debug:es5", pugDebugES5);
 
 gulp.task("cssmin", function () {
   return gulp.src(["doc/**/*.css", "!doc/**/*.min.css"], { base: "./doc" })
@@ -219,22 +283,37 @@ gulp.task("pug:debug:es6", function () {
   return pugConfiguration({ pretty: true }, debugDataES6);
 });
 
-gulp.task("jshint", function () {
+gulp.task("beautify", function(){
+  return gulp.src(["src/**/*.js", "doc/**/*.js"], { base: "./" })
+    .pipe(beautify({
+      indent_size: 2,
+      brace_style: "end-expand",
+      space_after_anon_function: true,
+      break_chained_methods: true
+    }))
+    .pipe(gulp.dest("./"));
+});
+
+function jsHint() {
   return gulp.src(sourceFiles)
     .pipe(jshint({
       multistr: true,
       esnext: true
     }));
-});
+}
+gulp.task("jshint", ["beautify"], jsHint);
+gulp.task("just:jshint", jsHint);
 
-gulp.task("babel", ["jshint"], function () {
+function runBabel() {
   return gulp.src("src/**/*.js", { base: "./src" })
     .pipe(babel({
       sourceMap: false,
       presets: ["es2015"]
     }))
     .pipe(gulp.dest("./es5"));
-});
+}
+gulp.task("babel", ["jshint"], runBabel);
+gulp.task("just:babel", runBabel);
 
 function concatenate(stream, name, f) {
   var s = stream.pipe(concat(name + ".js", { newLine: "\n" }));
@@ -244,15 +323,32 @@ function concatenate(stream, name, f) {
   return s.pipe(gulp.dest("./"));
 }
 
-gulp.task("concat:primrose", ["jshint"], function () {
+function concatPrimrose() {
   return concatenate(gulp.src(sourceFiles)
     .pipe(babel({
       sourceMap: false,
       presets: ["es2015"]
     })), "Primrose", "\nPrimrose.VERSION = \"v" + pkg.version + "\";\nconsole.info(\"Using Primrose v" + pkg.version + ". Find out more at http://www.primrosevr.com\");");
-});
+}
+gulp.task("concat:primrose", ["jshint"], concatPrimrose);
+gulp.task("just:concat:primrose", concatPrimrose);
 
-gulp.task("concat:dependencies", ["build:logger", "build:pliny"], function () {
+var concatDependenciesDependecies = [];
+
+if(hasLogger){
+  concatDependenciesDependecies.push("build:logger");
+}
+
+if(hasPliny){
+  concatDependenciesDependecies.push("build:pliny");
+  function buildDocumentation(callback) {
+    pliny.carve("Primrose.js", "PrimroseDocumentation.js", callback);
+  }
+  gulp.task("build:documentation", ["concat:primrose"], buildDocumentation);
+  gulp.task("just:build:documentation", buildDocumentation);
+}
+
+function concatDependencies() {
   return concatenate(gulp.src([
     "node_modules/logger/logger.js",
     "node_modules/marked/marked.min.js",
@@ -267,21 +363,24 @@ gulp.task("concat:dependencies", ["build:logger", "build:pliny"], function () {
     "node_modules/three/examples/js/loaders/FBXLoader.js",
     "node_modules/html2canvas/dist/html2canvas.js"
   ]), "PrimroseDependencies");
-});
+}
+gulp.task("concat:dependencies", concatDependenciesDependecies, concatDependencies);
+gulp.task("just:concat:dependencies", concatDependencies);
 
-gulp.task("carveDocumentation", ["concat:primrose"], function (callback) {
-  pliny.carve("Primrose.js", "PrimroseDocumentation.js", callback);
-});
-
-gulp.task("jsmin", ["carveDocumentation", "concat:dependencies"], function () {
+var jsMinDependencies = ["concat:dependencies"];
+if(hasPliny){
+  jsMinDependencies.push("build:documentation");
+}
+function jsMin() {
   return gulp.src(["Primrose*.js", "!*.min.js"])
     .pipe(rename({ suffix: ".min" }))
     .pipe(uglify())
     .pipe(gulp.dest("./"));
-});
+}
+gulp.task("jsmin", jsMinDependencies, jsMin);
+gulp.task("just:jsmin", jsMin);
 
-
-gulp.task("archive", ["jsmin"], function () {
+function archive() {
   return gulp.src(["Primrose*.js", "!PrimroseDependencies*"])
     .pipe(rename(function (file) {
       if (file.basename.indexOf(".min") > -1) {
@@ -292,33 +391,9 @@ gulp.task("archive", ["jsmin"], function () {
       return file;
     }))
     .pipe(gulp.dest("archive"));
-});
-
-X("makeQuickstartManifest", "cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
-
-X("makeMeetingManifest", "cd meeting && node ../../WebVR-Bootstrapper/index.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
-
-gulp.task("copy:herettp", ["build:herettp"], function(){
-  return gulp.src(["../HereTTP/bin/x86/Release/StartHere.exe"])
-    .pipe(rename(function (path) {
-      path.basename += "-WINDOWS";
-      return path;
-    }))
-    .pipe(gulp.dest("."));
-});
-
-gulp.task("copy:quickstart", ["copy:herettp", "build:bootstrapper", "makeQuickstartManifest", "makeMeetingManifest"], function () {
-  return gulp.src([
-    "StartHere*",
-    "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
-    "Primrose*.min.js",
-    "doc/models/monitor.*",
-    "doc/models/cardboard.*",
-    "doc/fonts/helvetiker_regular.typeface.js",
-    "doc/audio/wind.ogg",
-    "!**/*.blend"])
-    .pipe(gulp.dest("quickstart"));
-});
+}
+gulp.task("archive", ["jsmin"], archive);
+gulp.task("just:archive", archive);
 
 gulp.task("debug", ["jshint", "pug:debug:es6"]);
 gulp.task("default", ["debug"]);

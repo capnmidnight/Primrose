@@ -7,13 +7,18 @@ Primrose.Text.Controls.TextBox = (function () {
 
   pliny.class({
     parent: "Primrose.Text.Controls",
-    name: "TextBox",
-    description: "Syntax highlighting textbox control.",
-    baseClass: "Primrose.Surface",
-    parameters: [
-      { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
-      { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }
-    ]
+      name: "TextBox",
+      description: "Syntax highlighting textbox control.",
+      baseClass: "Primrose.Surface",
+      parameters: [{
+        name: "idOrCanvasOrContext",
+        type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+        description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+      }, {
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the TextBox."
+      }]
   });
   class TextBox extends Primrose.Surface {
 
@@ -31,7 +36,9 @@ Primrose.Text.Controls.TextBox = (function () {
       ////////////////////////////////////////////////////////////////////////
 
       if (typeof options === "string") {
-        this.options = { value: this.options };
+        this.options = {
+          value: this.options
+        };
       }
       else {
         this.options = options || {};
@@ -51,7 +58,8 @@ Primrose.Text.Controls.TextBox = (function () {
         "SkipLeft", "SkipRight",
         "Up", "Down",
         "Home", "End",
-        "FullHome", "FullEnd"].map(makeCursorCommand.bind(this));
+        "FullHome", "FullEnd"
+      ].map(makeCursorCommand.bind(this));
 
       ////////////////////////////////////////////////////////////////////////
       // initialization
@@ -164,7 +172,9 @@ Primrose.Text.Controls.TextBox = (function () {
       var lines = txt.split("\n");
       this.pushUndo(lines);
       this.render();
-      emit.call(this, "change", { target: this });
+      emit.call(this, "change", {
+        target: this
+      });
     }
 
     get selectedText() {
@@ -409,9 +419,9 @@ Primrose.Text.Controls.TextBox = (function () {
       if (commandName && this.focused && !this.readOnly) {
         var altCommandName = browser + "_" + commandName,
           func = this.commandPack[altCommandName] ||
-            this.commandPack[commandName] ||
-            codePage[altCommandName] ||
-            codePage[commandName];
+          this.commandPack[commandName] ||
+          codePage[altCommandName] ||
+          codePage[commandName];
 
         if (func instanceof String || typeof func === "string") {
           console.log("okay");
@@ -466,7 +476,8 @@ Primrose.Text.Controls.TextBox = (function () {
         // to two decimal places on systems that return integer values from
         // measureText.
         this.character.width = this.context.measureText(
-          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width /
+            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+          .width /
           100;
       }
       this.render();
@@ -628,7 +639,9 @@ Primrose.Text.Controls.TextBox = (function () {
     performLayout() {
 
       // group the tokens into rows
-      this._tokenRows = [[]];
+      this._tokenRows = [
+        []
+      ];
       this._tokenHashes = [""];
       this.lines = [""];
       var currentRowWidth = 0;
@@ -705,8 +718,7 @@ Primrose.Text.Controls.TextBox = (function () {
       this._bgfx[clearFunc](0, 0, this.imageWidth, this.imageHeight);
       this._bgfx.save();
       this._bgfx.translate(
-        (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding,
-        -this.scroll.y * this.character.height + this.padding);
+        (this.gridBounds.x - this.scroll.x) * this.character.width + this.padding, -this.scroll.y * this.character.height + this.padding);
 
 
       // draw the current row highlighter
@@ -1007,4 +1019,3 @@ Primrose.Text.Controls.TextBox = (function () {
 
   return TextBox;
 })();
-

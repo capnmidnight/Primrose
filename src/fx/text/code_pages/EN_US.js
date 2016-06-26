@@ -1,13 +1,13 @@
 Primrose.Text.CodePages.EN_US = (function () {
   "use strict";
-  
+
   var CodePage = Primrose.Text.CodePage;
-  
+
   pliny.record({
     parent: "Primrose.Text.CodePages",
     name: "EN_US",
     description: "| [under construction]"
-  } );
+  });
   return new CodePage("English: USA", "en-US", {
     NORMAL: {
       "32": " ",
@@ -63,4 +63,3 @@ Primrose.Text.CodePages.EN_US = (function () {
     }
   });
 })();
-

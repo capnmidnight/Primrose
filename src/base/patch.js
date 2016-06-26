@@ -1,13 +1,19 @@
-﻿pliny.function({
+pliny.function({
   name: "patch",
-  parameters: [
-    { name: "obj1", type: "Object", description: "The object to which to copy values that don't yet exist in the object." },
-    { name: "obj2", type: "Object", description: "The object from which to copy values to obj1, if obj1 does not already have a value in place." }
-  ],
+  parameters: [{
+    name: "obj1",
+    type: "Object",
+    description: "The object to which to copy values that don't yet exist in the object."
+  }, {
+    name: "obj2",
+    type: "Object",
+    description: "The object from which to copy values to obj1, if obj1 does not already have a value in place."
+  }],
   returns: "Object - the obj1 parameter, with the values copied from obj2",
   description: "Copies values into Object A from Object B, skipping any value names that already exist in Object A.",
   examples: [{
-    name: "Set default values.", description: "The `patch` function is intended to copy default values onto a user-supplied 'options' object, without clobbering the values they have provided.\n\
+    name: "Set default values.",
+    description: "The `patch` function is intended to copy default values onto a user-supplied 'options' object, without clobbering the values they have provided.\n\
     var obj1 = {\n\
       a: 1,\n\
       b: 2,\n\
@@ -27,6 +33,7 @@
     console.assert(obj3.e === 6); // the `e` property did not exist in obj1"
   }]
 });
+
 function patch(obj1, obj2) {
   obj1 = obj1 || {};
   for (var k in obj2) {

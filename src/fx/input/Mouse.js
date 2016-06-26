@@ -3,15 +3,15 @@ Primrose.Input.Mouse = (function () {
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "Mouse",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "Mouse",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
   class Mouse extends Primrose.InputProcessor {
     constructor(DOMElement, commands, socket) {
       super("Mouse", commands, socket);
       DOMElement = DOMElement || window;
-      
+
       DOMElement.addEventListener("mousedown", (event) => {
         this.setButton(event.button, true);
         this.BUTTONS = event.buttons << 10;
@@ -114,7 +114,7 @@ Primrose.Input.Mouse = (function () {
           tearDown();
           resolve();
         }
-        else {      
+        else {
           // Timeout wating on the pointer lock to happen, for systems like iOS that
           // don't properly support it, even though they say they do.
           timeout = setTimeout(() => {
@@ -132,7 +132,8 @@ Primrose.Input.Mouse = (function () {
         }
         else if (Mouse.Lock.isActive) {
           return true;
-        } else {
+        }
+        else {
           elem[requestMethodName]();
         }
       });
@@ -167,4 +168,3 @@ Primrose.Input.Mouse = (function () {
 
   return Mouse;
 })();
-

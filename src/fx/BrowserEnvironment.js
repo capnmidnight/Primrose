@@ -2,8 +2,7 @@ Primrose.BrowserEnvironment = (function () {
   "use strict";
 
   if (typeof THREE === "undefined") {
-    return function () {
-    };
+    return function () {};
   }
 
   var MILLISECONDS_TO_SECONDS = 0.001,
@@ -17,15 +16,16 @@ Primrose.BrowserEnvironment = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "BrowserEnvironment",
-    description: "Make a Virtual Reality app in your web browser!"
+      name: "BrowserEnvironment",
+      description: "Make a Virtual Reality app in your web browser!"
   });
   class BrowserEnvironment {
     constructor(name, options) {
       this.id = name;
 
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
-      this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor)).getHex();
+      this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
+        .getHex();
 
       this.addEventListener = (event, thunk, bubbles) => {
         if (this.listeners[event]) {
@@ -56,7 +56,8 @@ Primrose.BrowserEnvironment = (function () {
         }
         var id = geomObj.uuid,
           mLeft = new THREE.Matrix4(),
-          mRight = new THREE.Matrix4().identity(),
+          mRight = new THREE.Matrix4()
+          .identity(),
           mSwap,
           inScene = false,
           lastBag = objectHistory[id],
@@ -223,7 +224,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var updatePickableObjects = () => {
-        if(this.projector.ready){
+        if (this.projector.ready) {
           projector.ready = false;
           var arr = [],
             del = [];
@@ -284,7 +285,7 @@ Primrose.BrowserEnvironment = (function () {
       var movePlayer = (dt) => {
         this.input.update();
 
-        for(var i = 0; i < motionControllers.length; ++i){
+        for (var i = 0; i < motionControllers.length; ++i) {
           var m = motionControllers[i];
           m.getPosition(m.mesh.position);
           m.getOrientation(m.mesh.quaternion);
@@ -317,9 +318,9 @@ Primrose.BrowserEnvironment = (function () {
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-              Math.floor(this.vehicle.position.x),
-              0,
-              Math.floor(this.vehicle.position.z));
+            Math.floor(this.vehicle.position.x),
+            0,
+            Math.floor(this.vehicle.position.z));
           this.ground.material.needsUpdate = true;
         }
       };
@@ -506,9 +507,12 @@ Primrose.BrowserEnvironment = (function () {
           }
         },
         localAudio = Primrose.DOM.cascadeElement(this.options.audioElement, "audio", HTMLAudioElement),
-        micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-          .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
-          .catch(console.warn.bind(console, "Can't get audio")),
+        micReady = navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false
+        })
+        .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
+        .catch(console.warn.bind(console, "Can't get audio")),
         motionControllers = [];
 
       var newMotionController = (mgr) => {
@@ -579,7 +583,7 @@ Primrose.BrowserEnvironment = (function () {
             buildScene(models.scene);
           }
 
-          if(models.avatar){
+          if (models.avatar) {
             factories.avatar = new Primrose.ModelLoader(models.avatar);
           }
 
@@ -645,7 +649,8 @@ Primrose.BrowserEnvironment = (function () {
               console.log(ocean.source);
               ocean.source.start();
             }
-          }).catch(console.error.bind(console, "Audio3D loadSource"));
+          })
+          .catch(console.error.bind(console, "Audio3D loadSource"));
       }
       else {
         audioReady = Promise.resolve();
@@ -701,8 +706,9 @@ Primrose.BrowserEnvironment = (function () {
             9,
             Math.PI * 2,
             Math.PI),
-          this.options.skyTexture,
-          { unshaded: true });
+          this.options.skyTexture, {
+            unshaded: true
+          });
         this.sky.name = "Sky";
         this.scene.add(this.sky);
       }
@@ -841,20 +847,22 @@ Primrose.BrowserEnvironment = (function () {
       // Manage full-screen state
       //
       this.goFullScreen = (index) => {
-        if(index === undefined || typeof(index) !== "number"){
+        if (index === undefined || typeof (index) !== "number") {
           index = this.input.VR.currentDisplayIndex;
         }
         var promise = setPointerLock();
-        if(index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()){
+        if (index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()) {
           var promises = [promise];
 
-          if(isFullScreenMode()){
+          if (isFullScreenMode()) {
             promises.push(this.input.VR.currentDisplay.exitPresent());
           }
 
           this.input.VR.connect(index);
 
-          promises.push(this.input.VR.requestPresent([{ source: this.renderer.domElement }]));
+          promises.push(this.input.VR.requestPresent([{
+            source: this.renderer.domElement
+          }]));
           promise = Promise.all(promises)
             .then((elem) => {
               if (WebVRBootstrapper.Version === 1 && isMobile) {
@@ -889,12 +897,12 @@ Primrose.BrowserEnvironment = (function () {
           }
         });
         var elem = this.renderer.domElement.nextElementSibling;
-        while(elem){
-          if(hide){
+        while (elem) {
+          if (hide) {
             elem.dataset.originaldisplay = elem.style.display;
             elem.style.display = "none";
           }
-          else{
+          else {
             elem.style.display = elem.dataset.originaldisplay;
           }
           elem = elem.nextElementSibling;
@@ -971,9 +979,9 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setPointerLock = () => {
-        return ((Primrose.Input.Mouse.Lock.isActive || isMobile)
-          ? Promise.resolve()
-          : Primrose.Input.Mouse.Lock.request(this.renderer.domElement));
+        return ((Primrose.Input.Mouse.Lock.isActive || isMobile) ?
+          Promise.resolve() :
+          Primrose.Input.Mouse.Lock.request(this.renderer.domElement));
       };
 
       var withCurrentControl = (name) => {
@@ -1038,7 +1046,8 @@ Primrose.BrowserEnvironment = (function () {
 
 
       var quality = -1,
-        frameCount = 0, frameTime = 0,
+        frameCount = 0,
+        frameTime = 0,
         NUM_FRAMES = 10,
         LEAD_TIME = 2000,
         lastQualityChange = 0,
@@ -1094,23 +1103,25 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var allReady = Promise.all([
-        modelsReady,
-        iconManager.ready,
-        audioReady,
-        documentReady
-      ]).then(() => {
-        this.renderer.domElement.style.cursor = "default";
-        this.input.VR.displays[0].DOMElement = this.renderer.domElement;
-        this.input.VR.connect(0);
-        iconManager.append(this.input.VR && this.input.VR.displays ||
-          [{ displayName: "Test Icon" }])
-          .forEach((icon, i) => icon.addEventListener("click", this.goFullScreen.bind(this, i), false));
-        //iconManager.append(this.input.Media && this.input.Media.devices ||
-        //  [{ kind: "audioinput", deviceId: "4AEB1201-50CD-4A57-8F0D-420504A8822F", groupId: "{42E0225C-F020-4914-9933-604C44A2D86F" }])
-        //  .forEach((icon, i) => { });
-        iconManager.icons.forEach(putIconInScene);
-        emit.call(this, "ready");
-      });
+          modelsReady,
+          iconManager.ready,
+          audioReady,
+          documentReady
+        ])
+        .then(() => {
+          this.renderer.domElement.style.cursor = "default";
+          this.input.VR.displays[0].DOMElement = this.renderer.domElement;
+          this.input.VR.connect(0);
+          iconManager.append(this.input.VR && this.input.VR.displays || [{
+              displayName: "Test Icon"
+            }])
+            .forEach((icon, i) => icon.addEventListener("click", this.goFullScreen.bind(this, i), false));
+          //iconManager.append(this.input.Media && this.input.Media.devices ||
+          //  [{ kind: "audioinput", deviceId: "4AEB1201-50CD-4A57-8F0D-420504A8822F", groupId: "{42E0225C-F020-4914-9933-604C44A2D86F" }])
+          //  .forEach((icon, i) => { });
+          iconManager.icons.forEach(putIconInScene);
+          emit.call(this, "ready");
+        });
 
       this.start = () => {
         allReady
@@ -1153,14 +1164,14 @@ Primrose.BrowserEnvironment = (function () {
 
       this.quality = this.options.quality;
 
-      if (window.alert.toString().indexOf("native code") > -1) {
+      if (window.alert.toString()
+        .indexOf("native code") > -1) {
         // overwrite the native alert functions so they can't be called while in
         // fullscreen VR mode.
 
         var rerouteDialog = (oldFunction, newFunction) => {
           if (!newFunction) {
-            newFunction = function () {
-            };
+            newFunction = function () {};
           }
           return function () {
             if (isFullScreenMode()) {
@@ -1275,4 +1286,3 @@ Primrose.BrowserEnvironment = (function () {
 
   return BrowserEnvironment;
 })();
-

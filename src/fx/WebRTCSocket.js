@@ -19,31 +19,51 @@ Primrose.WebRTCSocket = (function () {
   // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
   // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
   // - https://github.com/coturn/rfc5766-turn-server/
-  let ICE_SERVERS = [
-    { url: "stun:stun.l.google.com:19302" },
-    { url: "stun:stun1.l.google.com:19302" },
-    { url: "stun:stun2.l.google.com:19302" },
-    { url: "stun:stun3.l.google.com:19302" },
-    { url: "stun:stun4.l.google.com:19302" }
-  ];
+  let ICE_SERVERS = [{
+    url: "stun:stun.l.google.com:19302"
+  }, {
+    url: "stun:stun1.l.google.com:19302"
+  }, {
+    url: "stun:stun2.l.google.com:19302"
+  }, {
+    url: "stun:stun3.l.google.com:19302"
+  }, {
+    url: "stun:stun4.l.google.com:19302"
+  }];
 
   if (isFirefox) {
-    ICE_SERVERS = [{ urls: ICE_SERVERS.map((s) => s.url) }];
+    ICE_SERVERS = [{
+      urls: ICE_SERVERS.map((s) => s.url)
+    }];
   }
 
   let INSTANCE_COUNT = 0;
 
   pliny.class({
     parent: "Primrose",
-    name: "WebRTCSocket",
-    description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
-    parameters: [
-      {name: "proxyServer", type: "WebSocket", description: "A connection over which to negotiate the peering."},
-      {name: "fromUserName", type: "String", description: "The name of the local user, from which the peering is being initiated."},
-      {name: "fromUserIndex", type: "Number", description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."},
-      {name: "toUserName", type: "String", description: "The name of the remote user, to which the peering is being requested."},
-      {name: "toUserIndex", type: "Number", description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."}
-    ]
+      name: "WebRTCSocket",
+      description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+      parameters: [{
+        name: "proxyServer",
+        type: "WebSocket",
+        description: "A connection over which to negotiate the peering."
+      }, {
+        name: "fromUserName",
+        type: "String",
+        description: "The name of the local user, from which the peering is being initiated."
+      }, {
+        name: "fromUserIndex",
+        type: "Number",
+        description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+      }, {
+        name: "toUserName",
+        type: "String",
+        description: "The name of the remote user, to which the peering is being requested."
+      }, {
+        name: "toUserIndex",
+        type: "Number",
+        description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+      }]
   });
   class WebRTCSocket {
     // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
@@ -55,8 +75,8 @@ Primrose.WebRTCSocket = (function () {
         messageNumber = 0;
       const ENABLE_DEBUGGING = false,
         instanceNumber = ++INSTANCE_COUNT,
-        print = function(name, format){
-          if(ENABLE_DEBUGGING){
+        print = function (name, format) {
+          if (ENABLE_DEBUGGING) {
             const args = Array.prototype.slice.call(arguments, 2);
             format = "[%s:%s:%s] " + format;
             args.unshift(INSTANCE_COUNT);
@@ -141,8 +161,14 @@ Primrose.WebRTCSocket = (function () {
         description: "The connection over which to negotiate the peering."
       });
       const progress = {
-        offer: { created: false, received: false },
-        answer: {created: false, recieved: false }
+        offer: {
+          created: false,
+          received: false
+        },
+        answer: {
+          created: false,
+          recieved: false
+        }
       };
       Object.defineProperty(this, "progress", {
         get: () => progress
@@ -172,7 +198,7 @@ Primrose.WebRTCSocket = (function () {
         // A pass-through function to include in the promise stream to see if the channels have all been
         // set up correctly and ready to go.
         const check = (obj) => {
-          if(this.complete){
+          if (this.complete) {
             done();
             resolve();
           }
@@ -183,7 +209,7 @@ Primrose.WebRTCSocket = (function () {
         // type of object gets checked to see if it was expected, then unwrapped.
         const descriptionReceived = (description) => {
           // Check to see if we expected this sort of message from this user.
-          if(this.isExpected(description.item.type, description)){
+          if (this.isExpected(description.item.type, description)) {
 
             this.recordProgress(description.item, "received");
 
@@ -191,11 +217,11 @@ Primrose.WebRTCSocket = (function () {
             // or an answer.
             return this.rtc.setRemoteDescription(new RTCSessionDescription(description.item))
 
-              // check to see if we're done.
-              .then(check)
+            // check to see if we're done.
+            .then(check)
 
-              // and if there are any errors, bomb out and shut everything down.
-              .catch(onError);
+            // and if there are any errors, bomb out and shut everything down.
+            .catch(onError);
           }
         };
 
@@ -209,14 +235,14 @@ Primrose.WebRTCSocket = (function () {
           // or an answer.
           return this.rtc.setLocalDescription(description)
 
-            // Let the remote user know what happened.
-            .then(()=> this.proxyServer.emit(description.type, this.wrap(description)))
+          // Let the remote user know what happened.
+          .then(() => this.proxyServer.emit(description.type, this.wrap(description)))
 
-            // check to see if we're done.
-            .then(check)
+          // check to see if we're done.
+          .then(check)
 
-            // and if there are any errors, bomb out and shut everything down.
-            .catch(onError);
+          // and if there are any errors, bomb out and shut everything down.
+          .catch(onError);
         };
 
         // A catch-all error handler to shot down the world if an error we couldn't handle happens.
@@ -230,9 +256,9 @@ Primrose.WebRTCSocket = (function () {
         const onOffer = (offer) => {
           this._log("offer", offer);
           var promise = descriptionReceived(offer);
-          if(promise){
+          if (promise) {
             return promise.then(() => this.rtc.createAnswer())
-            .then(descriptionCreated);
+              .then(descriptionCreated);
           }
         };
 
@@ -240,7 +266,7 @@ Primrose.WebRTCSocket = (function () {
         // with enough information for the remote user to be able to connect to it.
         const onIce = (ice) => {
           // Check to see if we expected this sort of message from this user.
-          if(this.isExpected("ice", ice)){
+          if (this.isExpected("ice", ice)) {
             // And if so, store it in our database of possibilities.
             return this.rtc.addIceCandidate(new RTCIceCandidate(ice.item))
               .catch(onError);
@@ -252,7 +278,7 @@ Primrose.WebRTCSocket = (function () {
           // When a user is joining a room with more than one user currently, already in the room, they will have to
           // make several connection in sequence. The Socket.IO event handlers don't seem to reliably turn off, so
           // we have to make sure the message we here is the one meant for this particular instance of the socket manager.
-          if(this.isExpected("new user", evt)) {
+          if (this.isExpected("new user", evt)) {
 
             // When an answer is recieved, it's much simpler than receiving an offer. We just mark the progress and
             // check to see if we're done.
@@ -300,19 +326,24 @@ Primrose.WebRTCSocket = (function () {
       });
     }
 
-    createOffer(){
+    createOffer() {
       return this.rtc.createOffer();
     }
 
-    recordProgress(description, method){
+    recordProgress(description, method) {
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "recordProgress",
         description: "mark that we made progress towards our goals.",
-        parameters: [
-          {name: "description", type: "RTCSessionDescription", description: "An answer or offer object."},
-          {name: "method", type: "String", description: "Whether or not the description had been 'created' or 'received' here." }
-        ]
+        parameters: [{
+          name: "description",
+          type: "RTCSessionDescription",
+          description: "An answer or offer object."
+        }, {
+          name: "method",
+          type: "String",
+          description: "Whether or not the description had been 'created' or 'received' here."
+        }]
       });
       this.progress[description.type][method] = true;
     }
@@ -327,15 +358,17 @@ Primrose.WebRTCSocket = (function () {
       return this.fromUserName < this.toUserName;
     }
 
-    wrap (item) {
+    wrap(item) {
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "wrap",
         returns: "Object",
         description: "Provides the context into a message so that the remote user can tell if the message `this.isExpected()`",
-        parameters: [
-          {name: "item", type: "Object", description: "The object to wrap."}
-        ]
+        parameters: [{
+          name: "item",
+          type: "Object",
+          description: "The object to wrap."
+        }]
       });
       return {
         fromUserName: this.fromUserName,
@@ -352,10 +385,15 @@ Primrose.WebRTCSocket = (function () {
         name: "isExpected",
         returns: "Boolean",
         description: "A test to see if we were expecting a particular message. Sometimes the messages get criss-crossed on the negotiation server, and this just makes sure we don't cause an error.",
-        parameters: [
-          {name: "tag", type: "String", description: "A name for the operation being tested."},
-          {name: "obj", type: "Object", description: "The object within the operating being tested."}
-        ]
+        parameters: [{
+          name: "tag",
+          type: "String",
+          description: "A name for the operation being tested."
+        }, {
+          name: "obj",
+          type: "Object",
+          description: "The object within the operating being tested."
+        }]
       });
 
       const incomplete = !this.complete,
@@ -376,7 +414,7 @@ Primrose.WebRTCSocket = (function () {
       return isExpected;
     }
 
-    close(){
+    close() {
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "close",
@@ -386,7 +424,7 @@ Primrose.WebRTCSocket = (function () {
       this.rtc.close();
     }
 
-    teardown(){
+    teardown() {
       pliny.method({
         parent: "Primrose.WebRTCSocket",
         name: "teardown",
@@ -396,7 +434,7 @@ Primrose.WebRTCSocket = (function () {
       throw new Error("Not implemented.");
     }
 
-    get complete () {
+    get complete() {
       pliny.property({
         parent: "Primrose.WebRTCSocket",
         name: "complete",
@@ -407,7 +445,7 @@ Primrose.WebRTCSocket = (function () {
       return !this.rtc || this.rtc.signalingState === "closed";
     }
 
-    issueRequest(){
+    issueRequest() {
       pliny.property({
         parent: "Primrose.WebRTCSocket",
         name: "issueRequest",
@@ -420,4 +458,3 @@ Primrose.WebRTCSocket = (function () {
 
   return WebRTCSocket;
 })();
-

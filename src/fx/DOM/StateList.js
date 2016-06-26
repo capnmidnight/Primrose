@@ -1,10 +1,10 @@
-Primrose.DOM.StateList = ( function () {
+Primrose.DOM.StateList = (function () {
   "use strict";
-  
+
   pliny.class({
     parent: "Primrose.DOM",
-    name: "StateList",
-    description: "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.\n\
+      name: "StateList",
+      description: "The StateList is a set of objects that can be mapped to DOM elements in such a way to alter their state. The UI presents a drop down list and the select action changes the various controls as the state set dictates. It's a way of streamlining the altering of UI state by select list.\n\
 \n\
 The states paramareter should be an array of State objects that take the form of:\n\
     { \n\
@@ -14,7 +14,7 @@ The states paramareter should be an array of State objects that take the form of
         ctrlName2: {attributeName3: value3, attributeName4: value4 }\n\
       }\n\
     }"
-  } );
+  });
   class StateList {
     constructor(id, ctrls, states, callback, parent) {
       var select = Primrose.DOM.cascadeElement(id, "select", HTMLSelectElement);
@@ -56,5 +56,4 @@ The states paramareter should be an array of State objects that take the form of
   }
 
   return StateList;
-} )();
-
+})();

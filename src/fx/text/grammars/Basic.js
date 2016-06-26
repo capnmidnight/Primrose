@@ -267,7 +267,7 @@ Primrose.Text.Grammars.Basic = (function () {
               for (j = 1; j < sizes.length; ++j) {
                 var size = sizes[j];
                 for (var k = 0,
-                  l = queue.length; k < l; ++k) {
+                    l = queue.length; k < l; ++k) {
                   var arr = queue.shift();
                   for (var m = 0; m < arr.length; ++m) {
                     arr[m] = new Array(size);
@@ -548,7 +548,8 @@ Primrose.Text.Grammars.Basic = (function () {
     }
 
     function loadCodeFile(line) {
-      loadFile(evaluate(line)).then(next);
+      loadFile(evaluate(line))
+        .then(next);
       return false;
     }
 
@@ -584,7 +585,8 @@ Primrose.Text.Grammars.Basic = (function () {
     }
 
     function defineFunction(line) {
-      var name = line.shift().value;
+      var name = line.shift()
+        .value;
       var signature = "";
       var body = "";
       var fillSig = true;
@@ -654,4 +656,3 @@ Primrose.Text.Grammars.Basic = (function () {
   };
   return basicGrammar;
 })();
-

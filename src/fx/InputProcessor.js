@@ -3,8 +3,8 @@ Primrose.InputProcessor = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "InputProcessor",
-    description: "| [under construction]"
+      name: "InputProcessor",
+      description: "| [under construction]"
   });
   class InputProcessor {
 
@@ -303,13 +303,16 @@ Primrose.InputProcessor = (function () {
     }
 
     makeStateSnapshot() {
-      var state = "", i = 0, l = Object.keys(this.commands).length;
+      var state = "",
+        i = 0,
+        l = Object.keys(this.commands)
+        .length;
       for (var name in this.commands) {
         var cmd = this.commands[name];
         if (cmd.state) {
-          state += (i << 2)
-            | (cmd.state.pressed ? 0x1 : 0)
-            | (cmd.state.fireAgain ? 0x2 : 0) + ":" +
+          state += (i << 2) |
+            (cmd.state.pressed ? 0x1 : 0) |
+            (cmd.state.fireAgain ? 0x2 : 0) + ":" +
             cmd.state.value;
           if (i < l - 1) {
             state += "|";
@@ -500,8 +503,8 @@ Primrose.InputProcessor = (function () {
 
     getValue(name) {
       return ((this.enabled || (this.receiving && this.socketReady)) &&
-        this.isEnabled(name) &&
-        this.commands[name].state.value) ||
+          this.isEnabled(name) &&
+          this.commands[name].state.value) ||
         this.getAxis(name) || 0;
     }
 
@@ -529,4 +532,3 @@ Primrose.InputProcessor = (function () {
   }
   return InputProcessor;
 })();
-

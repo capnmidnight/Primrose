@@ -15,8 +15,8 @@ Primrose.Text.OperatingSystem = (function () {
 
   pliny.class({
     parent: "Primrose.Text",
-    name: "OperatingSystem",
-    description: "| [under construction]"
+      name: "OperatingSystem",
+      description: "| [under construction]"
   });
   class OperatingSystem {
     constructor(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
@@ -75,11 +75,10 @@ Primrose.Text.OperatingSystem = (function () {
         }
 
         commandName += "_" + codePage.keyNames[key];
-        
+
         return this[commandName] || commandName;
       }
     }
   }
   return OperatingSystem;
 })();
-

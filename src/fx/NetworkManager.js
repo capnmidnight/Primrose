@@ -1,16 +1,21 @@
-Primrose.NetworkManager = (function(){
+Primrose.NetworkManager = (function () {
   "use strict";
 
   pliny.class({
     parent: "Primrose",
-    name: "NetworkManager",
-    parameters: [
-      { name: "serverAddress", type: "String", description: "The address of the WebSocket server that manages multiplayer and device fusion connections."},
-      { name: "player", type: "THREE.Object3D", description: "The object that represents the player in the scene."}
-    ]
+      name: "NetworkManager",
+      parameters: [{
+        name: "serverAddress",
+        type: "String",
+        description: "The address of the WebSocket server that manages multiplayer and device fusion connections."
+      }, {
+        name: "player",
+        type: "THREE.Object3D",
+        description: "The object that represents the player in the scene."
+      }]
   });
-  class NetworkManager{
-    constructor(serverAddress, player, microphone, audio, factories, options){
+  class NetworkManager {
+    constructor(serverAddress, player, microphone, audio, factories, options) {
       this.path = serverAddress;
       this.player = player;
       this.vehicle = player.parent;
@@ -39,12 +44,12 @@ Primrose.NetworkManager = (function(){
       }
     }
 
-    update(dt){
+    update(dt) {
       if (this.socket && this.deviceIndex === 0) {
         this.lastNetworkUpdate += dt;
         if (this.lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-          var newState = [ ],
+          var newState = [],
             add = (v) => v.toArray(newState, newState.length);
           add(this.vehicle.quaternion);
           add(this.vehicle.position);
@@ -65,7 +70,7 @@ Primrose.NetworkManager = (function(){
       }
     }
 
-    authenticate(appKey, verb, userName, password, email){
+    authenticate(appKey, verb, userName, password, email) {
       this.attemptedUserName = userName;
       if (!this.socket) {
         console.log("connecting to: %s", this.path);
@@ -81,12 +86,13 @@ Primrose.NetworkManager = (function(){
         this.socket.on("userState", this.updateUser.bind(this));
         this.socket.on("userLeft", this.removeUser.bind(this));
         this.socket.on("logoutComplete", emit.bind(this, "loggedout"));
-        this.socket.on("connection_lost",this.lostConnection.bind(this));
+        this.socket.on("connection_lost", this.lostConnection.bind(this));
         this.socket.on("errorDetail", console.error.bind(console));
       }
 
       this.socket.once("salt", (salt) => {
-        var hash = new Hashes.SHA256().hex(salt + password)
+        var hash = new Hashes.SHA256()
+          .hex(salt + password)
         this.socket.emit("hash", hash);
       });
       this.socket.emit(verb, {
@@ -99,12 +105,12 @@ Primrose.NetworkManager = (function(){
     connectionError(verb, evt) {
       this.socket.close();
       this.socket = null;
-      this.authFailed(verb)("an error occured while connecting to the server.");      
+      this.authFailed(verb)("an error occured while connecting to the server.");
     }
 
-    addUser(state){
+    addUser(state) {
       var toUserName = state[0],
-      user = new Primrose.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
+        user = new Primrose.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
       this.users[toUserName] = user;
       this.updateUser(state);
       this.listUserPromise = this.listUserPromise
@@ -113,10 +119,10 @@ Primrose.NetworkManager = (function(){
       emit.call(this, "addavatar", user.avatar);
     }
 
-    removeUser(key){
+    removeUser(key) {
       console.log("User %s logging off.", key);
       var user = this.users[key];
-      if(user){
+      if (user) {
         user.unpeer();
         delete this.users[key];
         emit.call(this, "removeavatar", user.avatar);
@@ -125,7 +131,8 @@ Primrose.NetworkManager = (function(){
 
     listUsers(newUsers) {
       this.userName = this.attemptedUserName;
-      Object.keys(this.users).forEach(this.removeUser.bind(this));
+      Object.keys(this.users)
+        .forEach(this.removeUser.bind(this));
       while (newUsers.length > 0) {
         this.addUser(newUsers.shift());
       }
@@ -136,7 +143,7 @@ Primrose.NetworkManager = (function(){
       console.log("chat", evt);
     }
 
-    updateUser(state){
+    updateUser(state) {
       var key = state[0];
       if (key !== this.userName) {
         var user = this.users[key];
@@ -184,5 +191,5 @@ Primrose.NetworkManager = (function(){
     }
   }
 
-  return NetworkManager; 
+  return NetworkManager;
 })();

@@ -5,13 +5,18 @@ Primrose.Controls.Label = (function () {
 
   pliny.class({
     parent: "Primrose.Controls",
-    name: "Label",
-    description: "A simple label of text to put on a Surface.",
-    baseClass: "Primrose.Surface",
-    parameters: [
-      { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
-      { name: "options", type: "Object", description: "Named parameters for creating the Button." }
-    ]
+      name: "Label",
+      description: "A simple label of text to put on a Surface.",
+      baseClass: "Primrose.Surface",
+      parameters: [{
+        name: "idOrCanvasOrContext",
+        type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+        description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+      }, {
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the Button."
+      }]
   });
   class Label extends Primrose.Surface {
     constructor(options) {
@@ -82,7 +87,8 @@ Primrose.Controls.Label = (function () {
       // to two decimal places on systems that return integer values from
       // measureText.
       this.character.width = this.context.measureText(
-        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM").width /
+          "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+        .width /
         100;
     }
 
@@ -152,11 +158,9 @@ Primrose.Controls.Label = (function () {
       }
     }
 
-    renderCanvasTrim() {
-    }
+    renderCanvasTrim() {}
   }
 
 
   return Label;
 })();
-

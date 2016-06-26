@@ -1,12 +1,12 @@
-Primrose.Text.Terminal = (function(){
+Primrose.Text.Terminal = (function () {
   "use strict";
 
   pliny.class({
     parent: "Primrose.Text",
-    name: "Terminal",
-    description: "| [under construction]"
+      name: "Terminal",
+      description: "| [under construction]"
   });
-  class Terminal{
+  class Terminal {
     constructor(inputEditor, outputEditor) {
       outputEditor = outputEditor || inputEditor;
 

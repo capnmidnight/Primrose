@@ -1,13 +1,13 @@
-﻿Primrose.Entity = (function () {
+Primrose.Entity = (function () {
   "use strict";
-  
+
   var entityKeys = [],
-  entities = new WeakMap();
+    entities = new WeakMap();
 
   pliny.class({
     parent: "Primrose",
-    name: "Entity",
-    description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
+      name: "Entity",
+      description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
   });
   class Entity {
 
@@ -16,9 +16,11 @@
         parent: "Primrose.Entity",
         name: "registerEntity",
         description: "Register an entity to be able to receive eyeBlank events.",
-        parameters: [
-          { name: "e", type: "Primrose.Entity", description: "The entity to register." }
-        ]
+        parameters: [{
+          name: "e",
+          type: "Primrose.Entity",
+          description: "The entity to register."
+        }]
       });
       entities.set(e.id, e);
       entityKeys.push(e.id);
@@ -35,12 +37,15 @@
         parent: "Primrose.Entity",
         name: "eyeBlankAll",
         description: "Trigger the eyeBlank event for all registered entities.",
-        parameters: [
-          { name: "eye", type: "Number", description: "The eye to switch to: -1 for left, +1 for right."}
-        ],
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }],
       });
       entityKeys.forEach((id) => {
-        entities.get(id).eyeBlank(eye);
+        entities.get(id)
+          .eyeBlank(eye);
       });
     }
 
@@ -177,10 +182,15 @@
         parent: "Primrose.Entity",
         name: "addEventListener",
         description: "Adding an event listener registers a function as being ready to receive events.",
-        parameters: [
-        { name: "evt", type: "String", description: "The name of the event for which we are listening." },
-        { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }
-        ],
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event for which we are listening."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The callback to fire when the event occurs."
+        }],
         examples: [{
           name: "Add an event listener.",
           description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
@@ -201,10 +211,15 @@
         parent: "Primrose.Entity",
         name: "removeEventListener",
         description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
-        parameters: [
-        { name: "evt", type: "String", description: "The name of the event from which we are removing." },
-        { name: "thunk", type: "Function", description: "The callback to remove." }
-        ],
+        parameters: [{
+          name: "evt",
+          type: "String",
+          description: "The name of the event from which we are removing."
+        }, {
+          name: "thunk",
+          type: "Function",
+          description: "The callback to remove."
+        }],
         examples: [{
           name: "Remove an event listener.",
           description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
@@ -254,9 +269,11 @@
     }"
         }]
       });
-      if(this.focusable){
+      if (this.focusable) {
         this.focused = true;
-        emit.call(this, "focus", { target: this });
+        emit.call(this, "focus", {
+          target: this
+        });
       }
     }
 
@@ -289,14 +306,16 @@
     }"
         }]
       });
-      if(this.focused){
+      if (this.focused) {
         this.focused = false;
         for (var i = 0; i < this.children.length; ++i) {
           if (this.children[i].focused) {
             this.children[i].blur();
           }
         }
-        emit.call(this, "blur", { target: this });
+        emit.call(this, "blur", {
+          target: this
+        });
       }
     }
 
@@ -305,9 +324,11 @@
         parent: "Primrose.Entity",
         name: "appendChild",
         description: "Adds an Entity as a child entity of this entity.",
-        parameters: [
-        {name: "child", type: "Primrose.Entity", description: "The object to add. Will only succeed if `child.parent` is not set to a value." }
-        ],
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+        }],
         examples: [{
           name: "Add an entity to another entity",
           description: "Entities can be arranged in parent-child relationships.\n\
@@ -332,9 +353,11 @@
         parent: "Primrose.Entity",
         name: "removeChild",
         description: "Removes an Entity from another Entity of this entity.",
-        parameters: [
-        { name: "child", type: "Primrose.Entity", description: "The object to remove. Will only succeed if `child.parent` is this object." }
-        ],
+        parameters: [{
+          name: "child",
+          type: "Primrose.Entity",
+          description: "The object to remove. Will only succeed if `child.parent` is this object."
+        }],
         examples: [{
           name: "Remove an entity from another entity",
           description: "Entities can be arranged in parent-child relationships.\n\
@@ -397,13 +420,13 @@
       });
       var result = null,
         head = this;
-      while(head && head.focused){
+      while (head && head.focused) {
         result = head;
         var children = head.children;
         head = null;
-        for(var i = 0; i < children.length; ++i){
+        for (var i = 0; i < children.length; ++i) {
           var child = children[i];
-          if(child.focused){
+          if (child.focused) {
             head = child;
           }
         }
@@ -415,9 +438,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "eyeBlank",
-        parameters: [
-          { name: "eye", type: "Number", description: "The eye to switch to: -1 for left, +1 for right."}
-        ],
+        parameters: [{
+          name: "eye",
+          type: "Number",
+          description: "The eye to switch to: -1 for left, +1 for right."
+        }],
         description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
       });
       for (var i = 0; i < this.children.length; ++i) {
@@ -436,9 +461,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "startDOMPointer",
-        parameters: [
-          { name: "evt", type: "Event", description: "The pointer event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
         description: "Hooks up to the window's `mouseDown` and `touchStart` events and propagates it to any of its focused children."
       });
       for (var i = 0; i < this.children.length; ++i) {
@@ -450,9 +477,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "moveDOMPointer",
-        parameters: [
-          { name: "evt", type: "Event", description: "The pointer event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
         description: "Hooks up to the window's `mouseMove` and `touchMove` events and propagates it to any of its focused children."
       });
       this._forFocusedChild("moveDOMPointer", evt);
@@ -462,9 +491,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "startUV",
-        parameters: [
-          { name: "evt", type: "Event", description: "The pointer event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
         description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
       });
       this._forFocusedChild("startUV", evt);
@@ -474,9 +505,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "moveUV",
-        parameters: [
-          { name: "evt", type: "Event", description: "The pointer event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The pointer event to read"
+        }],
         description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
       });
       this._forFocusedChild("moveUV", evt);
@@ -495,9 +528,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "keyDown",
-        parameters: [
-          { name: "evt", type: "Event", description: "The key event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
         description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("keyDown", evt);
@@ -507,9 +542,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "keyUp",
-        parameters: [
-          { name: "evt", type: "Event", description: "The key event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The key event to read"
+        }],
         description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("keyUp", evt);
@@ -519,9 +556,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "readClipboard",
-        parameters: [
-          { name: "evt", type: "Event", description: "The clipboard event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
         description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("readClipboard", evt);
@@ -531,9 +570,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "copySelectedText",
-        parameters: [
-          { name: "evt", type: "Event", description: "The clipboard event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
         description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("copySelectedText", evt);
@@ -543,9 +584,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "cutSelectedText",
-        parameters: [
-          { name: "evt", type: "Event", description: "The clipboard event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The clipboard event to read"
+        }],
         description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("cutSelectedText", evt);
@@ -555,9 +598,11 @@
       pliny.method({
         parent: "Primrose.Entity",
         name: "readWheel",
-        parameters: [
-          { name: "evt", type: "Event", description: "The wheel event to read"}
-        ],
+        parameters: [{
+          name: "evt",
+          type: "Event",
+          description: "The wheel event to read"
+        }],
         description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
       });
       this._forFocusedChild("readWheel", evt);

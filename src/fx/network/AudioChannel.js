@@ -84,20 +84,31 @@ Primrose.Network.AudioChannel = (function () {
 
   pliny.class({
     parent: "Primrose.Network",
-    name: "AudioChannel",
-    baseClass: "Primrose.WebRTCSocket",
-    description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
-    parameters: [
-      {name: "proxyServer", type: "WebSocket", description: "A connection over which to negotiate the peering."},
-      {name: "fromUserName", type: "String", description: "The name of the local user, from which the peering is being initiated."},
-      {name: "toUserName", type: "String", description: "The name of the remote user, to which the peering is being requested."},
-      {name: "outAudio", type: "MediaStream", description: "An audio stream from the local user to send to the remote user."},
-    ]
+      name: "AudioChannel",
+      baseClass: "Primrose.WebRTCSocket",
+      description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+      parameters: [{
+        name: "proxyServer",
+        type: "WebSocket",
+        description: "A connection over which to negotiate the peering."
+      }, {
+        name: "fromUserName",
+        type: "String",
+        description: "The name of the local user, from which the peering is being initiated."
+      }, {
+        name: "toUserName",
+        type: "String",
+        description: "The name of the remote user, to which the peering is being requested."
+      }, {
+        name: "outAudio",
+        type: "MediaStream",
+        description: "An audio stream from the local user to send to the remote user."
+      }, ]
   });
   class AudioChannel extends Primrose.WebRTCSocket {
     constructor(proxyServer, fromUserName, toUserName, outAudio) {
       super(proxyServer, fromUserName, 0, toUserName, 0);
-      
+
       pliny.property({
         parent: "Primrose.Network.AudioChannel",
         name: "outAudio",
@@ -117,7 +128,7 @@ Primrose.Network.AudioChannel = (function () {
       this.inAudio = null;
     }
 
-    issueRequest(){
+    issueRequest() {
       // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
       //  version of the API) and Chrome.
       const addStream = () => {
@@ -126,7 +137,8 @@ Primrose.Network.AudioChannel = (function () {
         // Make sure we actually have audio to send to the remote.
         if (this.outAudio) {
           if (isFirefox) {
-            this.outAudio.getAudioTracks().forEach((track) => this.rtc.addTrack(track, this.outAudio));
+            this.outAudio.getAudioTracks()
+              .forEach((track) => this.rtc.addTrack(track, this.outAudio));
           }
           else {
             this.rtc.addStream(this.outAudio);
@@ -160,28 +172,28 @@ Primrose.Network.AudioChannel = (function () {
 
     // The peering process is complete when all offers are answered.
     get complete() {
-      if(this.goFirst){
+      if (this.goFirst) {
         this._log("[First]: OC %s -> AR %s -> OR %s -> AC %s.",
           this.progress.offer.created,
           this.progress.answer.received,
           this.progress.offer.received,
           this.progress.answer.created);
       }
-      else{
+      else {
         this._log("[Second]: OR %s -> AC %s -> OC %s -> AR %s.",
           this.progress.offer.received,
           this.progress.answer.created,
           this.progress.offer.created,
-          this.progress.answer.received);        
+          this.progress.answer.received);
       }
 
       return super.complete || (this.progress.offer.received &&
-        this.progress.offer.created && 
-        this.progress.answer.received && 
+        this.progress.offer.created &&
+        this.progress.answer.received &&
         this.progress.answer.created);
     }
 
-    teardown() {      
+    teardown() {
       if (isFirefox) {
         this.rtc.ontrack = null;
       }
@@ -190,7 +202,7 @@ Primrose.Network.AudioChannel = (function () {
       }
     }
 
-    createOffer(){
+    createOffer() {
       return super.createOffer()
         .then(preferOpus);
     }
@@ -198,4 +210,3 @@ Primrose.Network.AudioChannel = (function () {
 
   return AudioChannel;
 })();
-

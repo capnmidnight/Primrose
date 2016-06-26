@@ -7,12 +7,14 @@ Primrose.Controls.Image = (function () {
 
   pliny.class({
     parent: "Primrose.Controls",
-    name: "Image",
-    baseClass: "Primrose.Surface",
-    description: "A simple 2D image to put on a Surface.",
-    parameters: [
-      { name: "options", type: "Object", description: "Named parameters for creating the Image." }
-    ]
+      name: "Image",
+      baseClass: "Primrose.Surface",
+      description: "A simple 2D image to put on a Surface.",
+      parameters: [{
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the Image."
+      }]
   });
   class Image extends Primrose.Surface {
 
@@ -27,7 +29,9 @@ Primrose.Controls.Image = (function () {
 
       options = options || {};
       if (typeof options === "string") {
-        options = { value: options };
+        options = {
+          value: options
+        };
       }
 
       super(patch(options, {
@@ -67,7 +71,8 @@ Primrose.Controls.Image = (function () {
     }
 
     get src() {
-      return this.getImage(this._currentImageIndex).src;
+      return this.getImage(this._currentImageIndex)
+        .src;
     }
 
     set src(v) {
@@ -85,55 +90,60 @@ Primrose.Controls.Image = (function () {
         i = 0;
       }
       return new Promise((resolve, reject) => {
-        if (imageCache[src]) {
-          resolve(imageCache[src]);
-        }
-        else if (src) {
-          var temp = new HTMLImage();
-          temp.addEventListener("load", () => {
-            imageCache[src] = temp;
+          if (imageCache[src]) {
             resolve(imageCache[src]);
-          }, false);
-          temp.addEventListener("error", () => {
-            reject("error loading image");
-          }, false);
-          temp.src = src;
-        }
-        else {
-          reject("Image was null");
-        }
-      }).then((img) => {
-        this.setImage(i, img);
-        return img;
-      }).catch((err) => {
-        console.error("Failed to load image " + src);
-        console.error(err);
-        this.setImage(i, null);
-      });
+          }
+          else if (src) {
+            var temp = new HTMLImage();
+            temp.addEventListener("load", () => {
+              imageCache[src] = temp;
+              resolve(imageCache[src]);
+            }, false);
+            temp.addEventListener("error", () => {
+              reject("error loading image");
+            }, false);
+            temp.src = src;
+          }
+          else {
+            reject("Image was null");
+          }
+        })
+        .then((img) => {
+          this.setImage(i, img);
+          return img;
+        })
+        .catch((err) => {
+          console.error("Failed to load image " + src);
+          console.error(err);
+          this.setImage(i, null);
+        });
     }
 
     loadStereoImage(src) {
-      return this.loadImage(src).then((img) => {
-        var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
-          a = new Primrose.Surface({
-            id: this.id + "-left",
-            bounds: bounds
-          }),
-          b = new Primrose.Surface({
-            id: this.id + "-right",
-            bounds: bounds
-          });
-        a.context.drawImage(img, 0, 0);
-        b.context.drawImage(img, -bounds.width, 0);
-        this.setImage(0, a.canvas);
-        this.setImage(1, b.canvas);
-        this.bounds.width = bounds.width;
-        this.bounds.height = bounds.height;
-        this.render();
+      return this.loadImage(src)
+        .then((img) => {
+          var bounds = new Primrose.Text.Rectangle(0, 0, img.width / 2, img.height),
+            a = new Primrose.Surface({
+              id: this.id + "-left",
+              bounds: bounds
+            }),
+            b = new Primrose.Surface({
+              id: this.id + "-right",
+              bounds: bounds
+            });
+          a.context.drawImage(img, 0, 0);
+          b.context.drawImage(img, -bounds.width, 0);
+          this.setImage(0, a.canvas);
+          this.setImage(1, b.canvas);
+          this.bounds.width = bounds.width;
+          this.bounds.height = bounds.height;
+          this.render();
 
-        emit.call(this, "load", { target: this });
-        return this;
-      });
+          emit.call(this, "load", {
+            target: this
+          });
+          return this;
+        });
     }
 
     get image() {
@@ -187,4 +197,3 @@ Primrose.Controls.Image = (function () {
 
   return Image;
 })();
-

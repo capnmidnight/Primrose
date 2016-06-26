@@ -1,4 +1,4 @@
-Primrose.Pointer = (function(){
+Primrose.Pointer = (function () {
   "use strict";
 
   const POINTER_RADIUS = 0.02,
@@ -11,9 +11,9 @@ Primrose.Pointer = (function(){
     MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
     moveTo = new THREE.Vector3(0, 0, 0);
 
-  class Pointer{
+  class Pointer {
 
-    constructor(scene){
+    constructor(scene) {
       this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
         emissive: 0x3f0000
       });
@@ -38,27 +38,27 @@ Primrose.Pointer = (function(){
       this.setStage(0, 0);
     }
 
-    move(obj){
+    move(obj) {
       this.mesh.matrixWorld.identity();
       this.mesh.position.copy(FORWARD);
       this.mesh.updateMatrix();
       this.mesh.applyMatrix(obj.matrixWorld);
     }
 
-    get position(){
+    get position() {
       return this.mesh.position;
     }
 
-    setStage(sizeX, sizeZ){
-      if(sizeX !== this.stageX || sizeZ !== this.sizeZ){
+    setStage(sizeX, sizeZ) {
+      if (sizeX !== this.stageX || sizeZ !== this.sizeZ) {
         this.stageX = sizeX;
         this.stageZ = sizeZ;
-        if(this.stageX * this.stageZ === 0){
+        if (this.stageX * this.stageZ === 0) {
           this.groundMesh = this.disk;
           this.stage.visible = false;
           this.disk.visible = true;
         }
-        else{
+        else {
           var scene = this.stage.parent;
           scene.remove(this.stage);
           this.stage = textured(box(this.stageX, 2.5, this.stageZ), 0x00ff00, {
@@ -74,7 +74,7 @@ Primrose.Pointer = (function(){
       }
     }
 
-    registerHit(currentHit, player, isGround){
+    registerHit(currentHit, player, isGround) {
       var fp = currentHit.facePoint,
         moveMesh = this.mesh;
 
@@ -83,11 +83,11 @@ Primrose.Pointer = (function(){
 
       this.groundMesh.visible = isGround;
 
-      if(isGround){
+      if (isGround) {
         var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
         moveMesh = this.groundMesh;
         this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
-        if(this.mesh.visible){
+        if (this.mesh.visible) {
           this.mesh.scale.set(1, 1, 1);
           var dist = Math.sqrt(distSq),
             factor = MAX_MOVE_DISTANCE / dist,
@@ -96,21 +96,24 @@ Primrose.Pointer = (function(){
           this.mesh.material.color.setRGB(1, 1, 0);
           this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
           this.mesh.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
-          this.mesh.position.copy(player.position).add(moveTo);
+          this.mesh.position.copy(player.position)
+            .add(moveTo);
           moveTo.y = y;
         }
-        this.groundMesh.position.copy(player.position).add(moveTo);
+        this.groundMesh.position.copy(player.position)
+          .add(moveTo);
         this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
-      else if(moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
+      else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
         this.mesh.scale.set(0.5, 1, 0.5);
         this.mesh.material.color.setRGB(0, 1, 0);
         this.mesh.material.emissive.setRGB(0, 0.5, 0);
-        this.mesh.position.copy(player.position).add(moveTo);
+        this.mesh.position.copy(player.position)
+          .add(moveTo);
       }
     }
 
-    reset(){
+    reset() {
       this.groundMesh.visible = false;
       this.mesh.visible = true;
       this.mesh.material.color.setRGB(1, 0, 0);

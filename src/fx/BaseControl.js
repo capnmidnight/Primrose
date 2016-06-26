@@ -17,8 +17,8 @@ Primrose.BaseControl = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "BaseControl",
-    description: "The BaseControl class is the parent class for all 3D controls.\n\
+      name: "BaseControl",
+      description: "The BaseControl class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
 performs basic conversions from DOM elements to the internal Control format."
   });
@@ -27,10 +27,15 @@ performs basic conversions from DOM elements to the internal Control format."
     parent: "Primrose.BaseControl",
     name: "addEventListener",
     description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [
-      { name: "evt", type: "String", description: "The name of the event for which we are listening." },
-      { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }
-    ],
+    parameters: [{
+      name: "evt",
+      type: "String",
+      description: "The name of the event for which we are listening."
+    }, {
+      name: "thunk",
+      type: "Function",
+      description: "The callback to fire when the event occurs."
+    }],
     examples: [{
       name: "Add an event listener.",
       description: "The `addEventListener()` method operates nearly identically\n\
@@ -107,9 +112,11 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     parent: "Primrose.BaseControl",
     name: "copyElement",
     description: "Copies properties from a DOM element that the control is supposed to match.",
-    parameters: [
-      { name: "elem", type: "Element", description: "The element--e.g. a button or textarea--to copy." }
-    ],
+    parameters: [{
+      name: "elem",
+      type: "Element",
+      description: "The element--e.g. a button or textarea--to copy."
+    }],
     examples: [{
       name: "Rough concept",
       description: "The class is not used directly. Its methods would be used in a base\n\
@@ -122,8 +129,7 @@ to a 3D element on-the-fly.\n\
     var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
       my3DButton = new Primrose.Controls.Button3D();\n\
     my3DButton.copyElement(myDOMButton);"
-    }
-    ]
+    }]
   });
 
   class BaseControl {
@@ -161,12 +167,16 @@ to a 3D element on-the-fly.\n\
 
     focus() {
       this.focused = true;
-      emit.call(this, "focus", { target: this });
+      emit.call(this, "focus", {
+        target: this
+      });
     }
 
     blur() {
       this.focused = false;
-      emit.call(this, "blur", { target: this });
+      emit.call(this, "blur", {
+        target: this
+      });
     }
 
     copyElement(elem) {
@@ -182,7 +192,8 @@ to a 3D element on-the-fly.\n\
         match = ROTATE_PATTERN.exec(elem.style.transform);
         if (match) {
           this.quaternion.setFromAxisAngle(
-            new THREE.Vector3().set(
+            new THREE.Vector3()
+            .set(
               parseFloat(match[1]),
               parseFloat(match[2]),
               parseFloat(match[3])),

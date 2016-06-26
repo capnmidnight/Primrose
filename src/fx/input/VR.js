@@ -6,13 +6,20 @@ Primrose.Input.VR = (function () {
     tempQuat = [];
   pliny.class({
     parent: "Primrose.Input",
-    name: "VR",
-    baseClass: "Primrose.InputProcessor",
-    parameters: [
-      { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." },
-      { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }
-    ],
-    description: "An input manager for gamepad devices."
+      name: "VR",
+      baseClass: "Primrose.InputProcessor",
+      parameters: [{
+        name: "commands",
+        type: "Array",
+        optional: true,
+        description: "An array of input command descriptions."
+      }, {
+        name: "socket",
+        type: "WebSocket",
+        optional: true,
+        description: "A socket over which to transmit device state for device fusion."
+      }],
+      description: "An input manager for gamepad devices."
   });
   class VR extends Primrose.InputProcessor {
     constructor(avatarHeight, commands, socket) {
@@ -30,22 +37,24 @@ Primrose.Input.VR = (function () {
       this.avatarHeight = avatarHeight;
 
       console.info("Checking for displays...");
-      this.ready = navigator.getVRDisplays().then((displays) => {
-        console.log("Displays found:", displays.length);
-        this.displays = displays;
-        return this.displays;
-      });
+      this.ready = navigator.getVRDisplays()
+        .then((displays) => {
+          console.log("Displays found:", displays.length);
+          this.displays = displays;
+          return this.displays;
+        });
     }
 
-    get toScene(){
-      let x = 0, z = 0;
+    get toScene() {
+      let x = 0,
+        z = 0;
       var stage = this.currentDisplay && this.currentDisplay.stageParameters;
-      if(stage){
+      if (stage) {
         this.movePlayer.fromArray(stage.sittingToStandingTransform);
         x = stage.sizeX;
         z = stage.sizeZ;
       }
-      else{
+      else {
         this.movePlayer.makeTranslation(0, this.avatarHeight, 0);
       }
       return {
@@ -74,9 +83,9 @@ Primrose.Input.VR = (function () {
     getOrientation(value) {
       value = value || new THREE.Quaternion();
       var o = this.currentPose && this.currentPose.orientation;
-      if(o){
+      if (o) {
         value.toArray(tempQuat);
-        for(var i = 0; i < o.length; ++i){
+        for (var i = 0; i < o.length; ++i) {
           tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
         }
         value.fromArray(tempQuat);
@@ -84,10 +93,10 @@ Primrose.Input.VR = (function () {
       return value;
     }
 
-    getPosition(value){
+    getPosition(value) {
       value = value || new THREE.Vector3();
       var p = this.currentPose && this.currentPose.position;
-      if(p){
+      if (p) {
         value.fromArray(p);
       }
       return value;
@@ -116,4 +125,3 @@ Primrose.Input.VR = (function () {
 
   return VR;
 })();
-

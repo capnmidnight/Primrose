@@ -1,16 +1,16 @@
-﻿Primrose.X.LoginForm = (function () {
+Primrose.X.LoginForm = (function () {
   "use strict";
 
   var COUNTER = 0;
-  
+
   const WIDTH = 512,
     HEIGHT = 150;
 
   pliny.class({
     parent: "Primrose.X",
-    name: "LoginForm",
-    baseClass: "Primrose.Controls.Form",
-    description: "A basic authentication form."
+      name: "LoginForm",
+      baseClass: "Primrose.Controls.Form",
+      description: "A basic authentication form."
   });
   class LoginForm extends Primrose.Controls.Form {
 
@@ -26,7 +26,7 @@
 
       this.listeners.login = [];
       this.listeners.signup = [];
-      
+
       this.labelUserName = new Primrose.Controls.Label({
         id: this.id + "-labelUserName",
         bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
@@ -70,8 +70,12 @@
         value: "Login"
       });
 
-      this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", { target: this }), false);
-      this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", { target: this }), false);
+      this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
+        target: this
+      }), false);
+      this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
+        target: this
+      }), false);
 
       this.appendChild(this.labelUserName);
       this.appendChild(this.userName);

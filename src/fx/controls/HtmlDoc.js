@@ -5,12 +5,14 @@ Primrose.Controls.HtmlDoc = (function () {
 
   pliny.class({
     parent: "Primrose.Controls",
-    name: "HtmlDoc",
-    baseClass: "Primrose.Surface",
-    description: "A rendering of an HTML document.",
-    parameters: [
-      { name: "options", type: "Object", description: "Named parameters for creating the Document." }
-    ]
+      name: "HtmlDoc",
+      baseClass: "Primrose.Surface",
+      description: "A rendering of an HTML document.",
+      parameters: [{
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the Document."
+      }]
   });
   class HtmlDoc extends Primrose.Surface {
 
@@ -27,7 +29,9 @@ Primrose.Controls.HtmlDoc = (function () {
       ////////////////////////////////////////////////////////////////////////
 
       if (typeof options === "string") {
-        this.options = { element: this.options };
+        this.options = {
+          element: this.options
+        };
       }
       else {
         this.options = options || {};
@@ -99,4 +103,3 @@ Primrose.Controls.HtmlDoc = (function () {
 
   return HtmlDoc;
 })();
-

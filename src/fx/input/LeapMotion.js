@@ -1,28 +1,30 @@
-Primrose.Input.LeapMotion = ( function () {
+Primrose.Input.LeapMotion = (function () {
   "use strict";
-  
-  function processFingerParts ( i ) {
-    return LeapMotion.FINGER_PARTS.map( function ( p ) {
+
+  function processFingerParts(i) {
+    return LeapMotion.FINGER_PARTS.map(function (p) {
       return "FINGER" + i + p.toUpperCase();
-    } );
+    });
   }
 
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "LeapMotionInput",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "LeapMotionInput",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
   class LeapMotion extends Primrose.InputProcessor {
     constructor(commands, socket) {
       super("LeapMotion", commands, socket);
 
       this.isStreaming = false;
-      this.controller = new Leap.Controller({ enableGestures: true });
+      this.controller = new Leap.Controller({
+        enableGestures: true
+      });
     }
 
-    E (e, f) {
+    E(e, f) {
       if (f) {
         this.controller.on(e, f);
       }
@@ -32,7 +34,7 @@ Primrose.Input.LeapMotion = ( function () {
       }
     }
 
-    start (gameUpdateLoop) {
+    start(gameUpdateLoop) {
       if (this.isEnabled()) {
         var canceller = null,
           startAlternate = null;
@@ -60,7 +62,7 @@ Primrose.Input.LeapMotion = ( function () {
       }
     }
 
-    setState (gameUpdateLoop, frame) {
+    setState(gameUpdateLoop, frame) {
       var prevFrame = this.controller.history.get(1),
         i,
         j;
@@ -100,15 +102,15 @@ Primrose.Input.LeapMotion = ( function () {
     }
   }
 
-  LeapMotion.COMPONENTS = [ "X", "Y", "Z" ];
-  
+  LeapMotion.COMPONENTS = ["X", "Y", "Z"];
+
   LeapMotion.NUM_HANDS = 2;
-  
+
   LeapMotion.NUM_FINGERS = 10;
-  
-  LeapMotion.FINGER_PARTS = [ "tip", "dip", "pip", "mcp", "carp" ];
-  
-  Primrose.InputProcessor.defineAxisProperties(LeapMotion, [ "X0", "Y0", "Z0",
+
+  LeapMotion.FINGER_PARTS = ["tip", "dip", "pip", "mcp", "carp"];
+
+  Primrose.InputProcessor.defineAxisProperties(LeapMotion, ["X0", "Y0", "Z0",
     "X1", "Y1", "Z1",
     "FINGER0TIPX", "FINGER0TIPY",
     "FINGER0DIPX", "FINGER0DIPY",
@@ -159,9 +161,10 @@ Primrose.Input.LeapMotion = ( function () {
     "FINGER9DIPX", "FINGER9DIPY",
     "FINGER9PIPX", "FINGER9PIPY",
     "FINGER9MCPX", "FINGER9MCPY",
-    "FINGER9CARPX", "FINGER9CARPY" ]);
+    "FINGER9CARPX", "FINGER9CARPY"
+  ]);
 
   LeapMotion.CONNECTION_TIMEOUT = 5000;
-  
+
   return LeapMotion;
-} )();
+})();

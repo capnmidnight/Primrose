@@ -1,11 +1,11 @@
-Primrose.Text.Themes.Default = ( function ( ) {
+Primrose.Text.Themes.Default = (function () {
   "use strict";
-  
+
   pliny.record({
     parent: "Primrose.Text.Themes",
     name: "Default",
     description: "| [under construction]"
-  } );
+  });
   return {
     name: "Light",
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -51,5 +51,4 @@ Primrose.Text.Themes.Default = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();
-
+})();

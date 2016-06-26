@@ -1,15 +1,15 @@
-Primrose.Text.CodePages.FR_AZERTY = ( function () {
+Primrose.Text.CodePages.FR_AZERTY = (function () {
   "use strict";
-  
+
   var CodePage = Primrose.Text.CodePage;
-  
+
   pliny.record({
     parent: "Primrose.Text.CodePages",
     name: "FR_AZERTY",
     description: "| [under construction]"
-  } );
-  return new CodePage( "Français: AZERTY", "fr", {
-    deadKeys: [ 221, 50, 55 ],
+  });
+  return new CodePage("Français: AZERTY", "fr", {
+    deadKeys: [221, 50, 55],
     NORMAL: {
       "32": " ",
       "48": "à",
@@ -30,7 +30,7 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
       "192": "ù",
       "219": ")",
       "220": "*",
-      "221": CodePage.DEAD( 1 ),
+      "221": CodePage.DEAD(1),
       "222": "²",
       "223": "!",
       "226": "<"
@@ -60,12 +60,12 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
     },
     CTRLALT: {
       "48": "@",
-      "50": CodePage.DEAD( 2 ),
+      "50": CodePage.DEAD(2),
       "51": "#",
       "52": "{",
       "53": "[",
       "54": "|",
-      "55": CodePage.DEAD( 3 ),
+      "55": CodePage.DEAD(3),
       "56": "\\",
       "57": "^",
       "69": "€",
@@ -95,6 +95,5 @@ Primrose.Text.CodePages.FR_AZERTY = ( function () {
       "79": "ò",
       "85": "ù"
     }
-  } );
-} )();
-
+  });
+})();

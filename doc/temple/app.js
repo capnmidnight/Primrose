@@ -7,7 +7,8 @@ var GRASS = "../images/grass.png",
   HEIGHT = 11,
   DEPTH = 100,
   MIDX = WIDTH / 2,
-  MIDY = HEIGHT / 2, MIDZ = DEPTH / 2,
+  MIDY = HEIGHT / 2,
+  MIDZ = DEPTH / 2,
   ball = null,
   t = 0,
   dx = 7,
@@ -94,16 +95,16 @@ env.addEventListener("update", function (dt) {
   ball.position.x += dx * dt;
   ball.position.y += dy * dt;
   ball.position.z += dz * dt;
-  if (ball.position.x < 0 && dx < 0
-    || WIDTH <= ball.position.x && dx > 0) {
+  if (ball.position.x < 0 && dx < 0 ||
+    WIDTH <= ball.position.x && dx > 0) {
     dx *= -1;
   }
-  if (ball.position.y < 1 && dy < 0
-    || HEIGHT <= ball.position.y && dy > 0) {
+  if (ball.position.y < 1 && dy < 0 ||
+    HEIGHT <= ball.position.y && dy > 0) {
     dy *= -1;
   }
-  if (ball.position.z < 0 && dz < 0
-    || DEPTH <= ball.position.z && dz > 0) {
+  if (ball.position.z < 0 && dz < 0 ||
+    DEPTH <= ball.position.z && dz > 0) {
     dz *= -1;
   }
 });

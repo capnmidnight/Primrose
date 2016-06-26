@@ -1,16 +1,16 @@
-﻿Primrose.Controls.Form = (function () {
+Primrose.Controls.Form = (function () {
   "use strict";
-  
+
   var COUNTER = 0;
   pliny.class({
     parent: "Primrose.Controls",
-    name: "Form",
-    baseClass: "Primrose.Entity",
-    description: "A basic 2D form control, with its own mesh to use as a frame."
+      name: "Form",
+      baseClass: "Primrose.Entity",
+      description: "A basic 2D form control, with its own mesh to use as a frame."
   });
   class Form extends Primrose.Surface {
 
-    static create(){
+    static create() {
       return new Form();
     }
 
@@ -39,37 +39,37 @@
       });
     }
 
-    addToBrowserEnvironment(env, scene){
+    addToBrowserEnvironment(env, scene) {
       scene.add(this._mesh);
       env.registerPickableObject(this._mesh);
       return this._mesh;
     }
 
-    get position(){
+    get position() {
       return this._mesh.position;
     }
 
-    get visible(){
+    get visible() {
       return this._mesh.visible;
     }
 
-    set visible(v){
+    set visible(v) {
       this._mesh.visible = v;
     }
 
-    get disabled(){
+    get disabled() {
       return this._mesh.disabled;
     }
 
-    set disabled(v){
+    set disabled(v) {
       this._mesh.disabled = v;
     }
 
-    get enabled(){
+    get enabled() {
       return !this.disabled;
     }
 
-    set enabled(v){
+    set enabled(v) {
       this.disabled = !v;
     }
 

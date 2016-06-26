@@ -1,13 +1,13 @@
-Primrose.Input.Location = ( function () {
+Primrose.Input.Location = (function () {
   "use strict";
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "Location",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "Location",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
-  class Location extends Primrose.InputProcessor{
+  class Location extends Primrose.InputProcessor {
     constructor(commands, socket, options) {
       super("Location", commands, socket);
 
@@ -24,7 +24,7 @@ Primrose.Input.Location = ( function () {
       }
     }
 
-    setState (location) {
+    setState(location) {
       for (var p in location.coords) {
         var k = p.toUpperCase();
         if (Location.AXES.indexOf(k) > -1) {
@@ -44,4 +44,4 @@ Primrose.Input.Location = ( function () {
   };
 
   return Location;
-} )();
+})();

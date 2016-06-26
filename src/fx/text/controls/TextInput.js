@@ -5,13 +5,18 @@ Primrose.Text.Controls.TextInput = (function () {
 
   pliny.class({
     parent: "Primrose.Text.Controls",
-    name: "TextInput",
-    description: "plain text input box.",
-    baseClass: "Primrose.Text.Controls.TextBox",
-    parameters: [
-      { name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." },
-      { name: "options", type: "Object", description: "Named parameters for creating the TextInput." }
-    ]
+      name: "TextInput",
+      description: "plain text input box.",
+      baseClass: "Primrose.Text.Controls.TextBox",
+      parameters: [{
+        name: "idOrCanvasOrContext",
+        type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+        description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+      }, {
+        name: "options",
+        type: "Object",
+        description: "Named parameters for creating the TextInput."
+      }]
   });
   class TextInput extends Primrose.Text.Controls.TextBox {
     constructor(options) {
@@ -66,4 +71,3 @@ Primrose.Text.Controls.TextInput = (function () {
 
   return TextInput;
 })();
-

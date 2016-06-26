@@ -1,4 +1,4 @@
-﻿Primrose.X.SignupForm = (function () {
+Primrose.X.SignupForm = (function () {
   "use strict";
 
   const WIDTH = 512,
@@ -8,9 +8,9 @@
 
   pliny.class({
     parent: "Primrose.X",
-    name: "SignupForm",
-    baseClass: "Primrose.Controls.Form",
-    description: "A basic registration form."
+      name: "SignupForm",
+      baseClass: "Primrose.Controls.Form",
+      description: "A basic registration form."
   });
   class SignupForm extends Primrose.Controls.Form {
     constructor() {
@@ -80,8 +80,12 @@
         value: "Sign up"
       });
 
-      this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", { target: this }), false);
-      this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", { target: this }), false);
+      this.loginButton.addEventListener("click", (evt) => emit.call(this, "login", {
+        target: this
+      }), false);
+      this.signupButton.addEventListener("click", (evt) => emit.call(this, "signup", {
+        target: this
+      }), false);
 
       this.appendChild(this.labelUserName);
       this.appendChild(this.userName);

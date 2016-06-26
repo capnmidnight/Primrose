@@ -13,4 +13,3 @@ Primrose.Text.CommandPacks.TextInput = (function () {
   });
   return new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
 })();
-

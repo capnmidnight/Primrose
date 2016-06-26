@@ -1,13 +1,13 @@
 Primrose.Text.CodePages.DE_QWERTZ = (function () {
   "use strict";
-  
+
   var CodePage = Primrose.Text.CodePage;
-  
+
   pliny.record({
     parent: "Primrose.Text.CodePages",
     name: "DE_QWERTZ",
     description: "| [under construction]"
-  } );
+  });
   return new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
@@ -126,4 +126,3 @@ Primrose.Text.CodePages.DE_QWERTZ = (function () {
     }
   });
 })();
-

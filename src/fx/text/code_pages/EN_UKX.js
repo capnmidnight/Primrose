@@ -1,12 +1,12 @@
 Primrose.Text.CodePages.EN_UKX = (function () {
   "use strict";
   var CodePage = Primrose.Text.CodePage;
-  
+
   pliny.record({
     parent: "Primrose.Text.CodePages",
     name: "EN_UKX",
     description: "| [under construction]"
-  } );
+  });
   return new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
@@ -56,7 +56,8 @@ Primrose.Text.CodePages.EN_UKX = (function () {
       "221": "]",
       "222": "#",
       "223": "`"
-    }, SHIFT: {
+    },
+    SHIFT: {
       "32": " ",
       "48": ")",
       "49": "!",
@@ -87,4 +88,3 @@ Primrose.Text.CodePages.EN_UKX = (function () {
     }
   });
 })();
-

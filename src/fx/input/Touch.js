@@ -1,11 +1,11 @@
-Primrose.Input.Touch = ( function () {
+Primrose.Input.Touch = (function () {
   "use strict";
-  
+
   pliny.class({
     parent: "Primrose.Input",
-    name: "Touch",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "Touch",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
   class Touch extends Primrose.InputProcessor {
     constructor(DOMElement, commands, socket) {
@@ -51,11 +51,10 @@ Primrose.Input.Touch = ( function () {
 
   var axes = ["FINGERS"];
   for (var i = 0; i < Touch.NUM_FINGERS; ++i) {
-    axes.push( "X" + i );
-    axes.push( "Y" + i );
+    axes.push("X" + i);
+    axes.push("Y" + i);
   }
 
   Primrose.InputProcessor.defineAxisProperties(Touch, axes);
   return Touch;
-} )();
-
+})();

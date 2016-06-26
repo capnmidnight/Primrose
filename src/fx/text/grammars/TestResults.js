@@ -5,7 +5,7 @@ Primrose.Text.Grammars.TestResults = (function () {
     parent: "Primrose.Text.Grammars",
     name: "TestResults",
     description: "| [under construction]"
-  } );
+  });
   return new Primrose.Text.Grammar("TestResults", [
     ["newlines", /(?:\r\n|\r|\n)/, true],
     ["numbers", /(\[)(o+)/, true],
@@ -19,4 +19,3 @@ Primrose.Text.Grammars.TestResults = (function () {
     ["strings", /        \w+/, true]
   ]);
 })();
-

@@ -1,12 +1,12 @@
-Primrose.Output.Speech = ( function ( ) {
+Primrose.Output.Speech = (function () {
   "use strict";
-  
-  function pickRandomOption ( options, key, min, max ) {
-    if ( options[key] === undefined ) {
-      options[key] = min + ( max - min ) * Math.random( );
+
+  function pickRandomOption(options, key, min, max) {
+    if (options[key] === undefined) {
+      options[key] = min + (max - min) * Math.random();
     }
     else {
-      options[key] = Math.min( max, Math.max( min, options[key] ) );
+      options[key] = Math.min(max, Math.max(min, options[key]));
     }
     return options[key];
   }
@@ -14,28 +14,28 @@ Primrose.Output.Speech = ( function ( ) {
   try {
     pliny.class({
       parent: "Primrose.Output",
-      name: "Speech",
-      description: "| [under construction]"
-    } );
-    return function ( options ) {
+        name: "Speech",
+        description: "| [under construction]"
+    });
+    return function (options) {
       options = options || {};
-      var voices = speechSynthesis.getVoices( )
-          .filter( function ( v ) {
-            return v.default || v.localService;
-          }.bind( this ) );
+      var voices = speechSynthesis.getVoices()
+        .filter(function (v) {
+          return v.default || v.localService;
+        }.bind(this));
 
       var voice = voices[
-          Math.floor( pickRandomOption( options, "voice", 0, voices.length ) )];
+        Math.floor(pickRandomOption(options, "voice", 0, voices.length))];
 
-      this.speak = function ( txt, callback ) {
-        var msg = new SpeechSynthesisUtterance( );
+      this.speak = function (txt, callback) {
+        var msg = new SpeechSynthesisUtterance();
         msg.voice = voice;
-        msg.volume = pickRandomOption( options, "volume", 1, 1 );
-        msg.rate = pickRandomOption( options, "rate", 0.1, 5 );
-        msg.pitch = pickRandomOption( options, "pitch", 0, 2 );
+        msg.volume = pickRandomOption(options, "volume", 1, 1);
+        msg.rate = pickRandomOption(options, "rate", 0.1, 5);
+        msg.pitch = pickRandomOption(options, "pitch", 0, 2);
         msg.text = txt;
         msg.onend = callback;
-        speechSynthesis.speak( msg );
+        speechSynthesis.speak(msg);
       };
     };
   }
@@ -45,13 +45,11 @@ Primrose.Output.Speech = ( function ( ) {
     // in case of error, return a shim that lets us continue unabated
     pliny.class({
       parent: "Primrose.Output",
-      name: "Speech",
-      description: "| [under construction]"
-    } );
-    return function ( ) {
-      this.speak = function ( ) {
-      };
+        name: "Speech",
+        description: "| [under construction]"
+    });
+    return function () {
+      this.speak = function () {};
     };
   }
-} )( );
-
+})();

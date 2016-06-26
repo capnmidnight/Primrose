@@ -1,11 +1,19 @@
 pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
-  parameters: [
-    { name: "verts", type: "Array", description: "An array of `THREE.Vector3`s to turn into a `THREE.Points` object." },
-    { name: "c", type: "Number", description: "A hexadecimal color value to use when creating the `THREE.PointsMaterial` to go with the point cloud." },
-    { name: "s", type: "Number", description: "A numeric size value to use when creating the `THREE.PointsMaterial` to go with the point cloud." }
-  ],
+  parameters: [{
+    name: "verts",
+    type: "Array",
+    description: "An array of `THREE.Vector3`s to turn into a `THREE.Points` object."
+  }, {
+    name: "c",
+    type: "Number",
+    description: "A hexadecimal color value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
+  }, {
+    name: "s",
+    type: "Number",
+    description: "A numeric size value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
+  }],
   returns: "THREE.Points",
   examples: [{
     name: "Create randomized \"dust\".",
@@ -31,15 +39,18 @@ The results should look like this:\n\
 \n\
 <img src=\"images/cloud.jpg\">"
   }]
-} );
-function cloud ( verts, c, s ) {
+});
+
+function cloud(verts, c, s) {
   var geom = new THREE.Geometry();
-  for ( var i = 0; i < verts.length; ++i ) {
-    geom.vertices.push( verts[i] );
+  for (var i = 0; i < verts.length; ++i) {
+    geom.vertices.push(verts[i]);
   }
   var mat = cache(
     `PointsMaterial(${c}, ${s})`,
-    () => new THREE.PointsMaterial({ color: c, size: s }));
-  return new THREE.Points( geom, mat );
+    () => new THREE.PointsMaterial({
+      color: c,
+      size: s
+    }));
+  return new THREE.Points(geom, mat);
 }
-

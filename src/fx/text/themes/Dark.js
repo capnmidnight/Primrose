@@ -1,11 +1,11 @@
-Primrose.Text.Themes.Dark = ( function ( ) {
+Primrose.Text.Themes.Dark = (function () {
   "use strict";
-  
+
   pliny.record({
     parent: "Primrose.Text.Themes",
     name: "Dark",
     description: "| [under construction]"
-  } );
+  });
   return {
     name: "Dark",
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -51,5 +51,4 @@ Primrose.Text.Themes.Dark = ( function ( ) {
       fontStyle: "underline italic"
     }
   };
-} )();
-
+})();

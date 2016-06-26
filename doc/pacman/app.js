@@ -112,7 +112,8 @@ function getSourceCode(skipReload) {
   // we use the script from a saved function and assume
   // it has been formatted with 2 spaces per-line.
   if (src === defaultDemo) {
-    var lines = src.replace("\r\n", "\n").split("\n");
+    var lines = src.replace("\r\n", "\n")
+      .split("\n");
     lines.pop();
     lines.shift();
     for (var i = 0; i < lines.length; ++i) {
@@ -164,28 +165,30 @@ function pacman() {
     }
   }
   console.log("Here we go");
-  L("../models/ghost.obj").then(function (ghost) {
-    ghosts = colors.map(function (color, i) {
-      var g = ghost.clone(),
-        body = g.children[0];
-      textured(body, color);
-      scene.appendChild(g);
-      g.position.set(i * 3 - 4, 0, -5);
-      g.velocity = v3(0, 0, 0);
-      g.velocity.x = R(-1, 2);
-      if (g.velocity.x === 0 && g.velocity.z === 0) {
-        g.velocity.z = R(-1, 2);
-      }
-      return g;
+  L("../models/ghost.obj")
+    .then(function (ghost) {
+      ghosts = colors.map(function (color, i) {
+        var g = ghost.clone(),
+          body = g.children[0];
+        textured(body, color);
+        scene.appendChild(g);
+        g.position.set(i * 3 - 4, 0, -5);
+        g.velocity = v3(0, 0, 0);
+        g.velocity.x = R(-1, 2);
+        if (g.velocity.x === 0 && g.velocity.z === 0) {
+          g.velocity.z = R(-1, 2);
+        }
+        return g;
+      });
     });
-  });
 
   function collisionCheck(dt, a, t) {
     var x = Math.floor((a.position.x + W / 2 + 1) / T),
       y = Math.floor((a.position.z + H / 2 + 1) / T),
       row = map[y],
       tile = row && row[x] | 0;
-    var v = a.velocity.clone().multiplyScalar(-dt * 1.5);
+    var v = a.velocity.clone()
+      .multiplyScalar(-dt * 1.5);
     if (tile > 0) {
       if (t || a.isOnGround) {
         a.position.add(v);
@@ -193,8 +196,7 @@ function pacman() {
       if (t) {
         a.velocity.set(
           a.velocity.z,
-          0,
-          -a.velocity.x
+          0, -a.velocity.x
         );
       }
     }
@@ -203,7 +205,8 @@ function pacman() {
   return function (dt) {
     if (ghosts) {
       ghosts.forEach(function (g) {
-        g.position.add(g.velocity.clone().multiplyScalar(dt));
+        g.position.add(g.velocity.clone()
+          .multiplyScalar(dt));
         collisionCheck(dt, g, env.vehicle);
       });
     }

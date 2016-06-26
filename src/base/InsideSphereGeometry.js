@@ -1,15 +1,35 @@
-﻿pliny.class({
+pliny.class({
   name: "InsideSphereGeometry",
-  parameters: [
-    { name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." },
-    { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." },
-    { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." },
-    { name: "phiStart", type: "Number", description: "The angle in radians around the Y-axis at which the sphere starts." },
-    { name: "phiLength", type: "Number", description: "The change of angle in radians around the Y-axis to which the sphere ends." },
-    { name: "thetaStart", type: "Number", description: "The angle in radians around the Z-axis at which the sphere starts." },
-    { name: "thetaLength", type: "Number", description: "The change of angle in radians around the Z-axis to which the sphere ends." }
-  ],
-  description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+    parameters: [{
+      name: "radius",
+      type: "Number",
+      description: "How far the sphere should extend away from a center point."
+    }, {
+      name: "widthSegments",
+      type: "Number",
+      description: "The number of faces wide in which to slice the geometry."
+    }, {
+      name: "heightSegments",
+      type: "Number",
+      description: "The number of faces tall in which to slice the geometry."
+    }, {
+      name: "phiStart",
+      type: "Number",
+      description: "The angle in radians around the Y-axis at which the sphere starts."
+    }, {
+      name: "phiLength",
+      type: "Number",
+      description: "The change of angle in radians around the Y-axis to which the sphere ends."
+    }, {
+      name: "thetaStart",
+      type: "Number",
+      description: "The angle in radians around the Z-axis at which the sphere starts."
+    }, {
+      name: "thetaLength",
+      type: "Number",
+      description: "The change of angle in radians around the Z-axis to which the sphere ends."
+    }],
+    description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
 more accurately, it's a Sphere where the face winding order is reversed, so that\n\
 textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
 note exactly helpful.\n\
@@ -18,6 +38,7 @@ Say you want a to model the sky as a sphere, or the inside of a helmet. You don'
 care anything about the outside of this sphere, only the inside. You would use\n\
 InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 });
+
 function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
   "use strict";
 
@@ -124,7 +145,8 @@ function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, p
         this.faceVertexUvs[0].push([uv1, uv2, uv4]);
 
         this.faces.push(new THREE.Face3(v2, v3, v4, [n2.clone(), n3,
-          n4.clone()]));
+          n4.clone()
+        ]));
         this.faceVertexUvs[0].push([uv2.clone(), uv3, uv4.clone()]);
 
       }

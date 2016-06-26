@@ -51,11 +51,12 @@ function Jabber(w, h, s) {
 
   eye(-1, body);
   eye(1, body);
-  
+
   body.rotation.y = Math.PI;
   body.update = function (dt) {
     velocity.y -= env.options.gravity * dt;
-    body.position.add(v.copy(velocity).multiplyScalar(dt));
+    body.position.add(v.copy(velocity)
+      .multiplyScalar(dt));
     if (velocity.x > 0 && body.position.x >= w ||
       velocity.x < 0 && body.position.x <= -w) {
       velocity.x *= -1;
@@ -68,7 +69,8 @@ function Jabber(w, h, s) {
       velocity.y = 0;
       body.position.y = 1;
     }
-    v.copy(body.position).sub(env.player.position);
+    v.copy(body.position)
+      .sub(env.player.position);
     var d = v.length();
     if (d < 3) {
       body.lookAt(env.player.position);
@@ -81,7 +83,8 @@ function Jabber(w, h, s) {
       velocity.add(v.multiplyScalar((3 - d) / 100));
     }
     else {
-      body.lookAt(v.copy(velocity).add(body.position));
+      body.lookAt(v.copy(velocity)
+        .add(body.position));
     }
   };
   body.jump = function (normal) {

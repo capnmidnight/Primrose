@@ -5,13 +5,12 @@ Primrose.Output.Audio3D = (function () {
   Window.prototype.AudioContext =
     Window.prototype.AudioContext ||
     Window.prototype.webkitAudioContext ||
-    function () {
-    };
+    function () {};
 
   pliny.class({
     parent: "Primrose.Output",
-    name: "Audio3D",
-    description: "| [under construction]"
+      name: "Audio3D",
+      description: "| [under construction]"
   });
   class Audio3D {
     constructor() {
@@ -23,8 +22,10 @@ Primrose.Output.Audio3D = (function () {
 
         var vec = new THREE.Vector3(),
           up = new THREE.Vector3(),
-          left = new THREE.Matrix4().identity(),
-          right = new THREE.Matrix4().identity(),
+          left = new THREE.Matrix4()
+          .identity(),
+          right = new THREE.Matrix4()
+          .identity(),
           swap = null;
 
         this.setVelocity = this.context.listener.setVelocity.bind(this.context.listener);
@@ -65,32 +66,28 @@ Primrose.Output.Audio3D = (function () {
         console.error(exp);
         console.error("AudioContext not available.");
         this.isAvailable = false;
-        this.setPlayer = function () {
-        };
-        this.setVelocity = function () {
-        };
-        this.start = function () {
-        };
-        this.stop = function () {
-        };
+        this.setPlayer = function () {};
+        this.setVelocity = function () {};
+        this.start = function () {};
+        this.stop = function () {};
         this.error = exp;
       }
     }
 
-    static setAudioStream(element, stream){
-      if(isFirefox){
+    static setAudioStream(element, stream) {
+      if (isFirefox) {
         element.srcObject = stream;
       }
-      else{
+      else {
         element.src = URL.createObjectURL(stream);
       }
       element.muted = true;
       return stream;
     }
 
-    static chain(){
+    static chain() {
       const args = Array.prototype.slice.call(arguments);
-      for(let i = 0; i < args.length - 1; ++i){
+      for (let i = 0; i < args.length - 1; ++i) {
         args[i].connect(args[i + 1]);
       }
     }
@@ -159,11 +156,11 @@ Primrose.Output.Audio3D = (function () {
       console.log(stream);
       var element = document.createElement("audio"),
         snd = {
-        audio: element,
-        source: this.context.createMediaElementSource(element),
-        //volume: this.context.createGain(),
-        //panner: this.context.createPanner()
-      };
+          audio: element,
+          source: this.context.createMediaElementSource(element),
+          //volume: this.context.createGain(),
+          //panner: this.context.createPanner()
+        };
       if (isChrome) {
         element.src = URL.createObjectURL(stream);
       }
@@ -200,10 +197,16 @@ Primrose.Output.Audio3D = (function () {
         parent: "Primrose.Output.Audio3D",
         name: "loadSound",
         returns: "Promise<MediaElementAudioSourceNode>",
-        parameters: [
-          { name: "sources", type: "String|Array<String>", description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag." },
-          { name: "loop", type: "Boolean", optional: true, description: "indicate that the sound should be played on loop." }
-        ],
+        parameters: [{
+          name: "sources",
+          type: "String|Array<String>",
+          description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
+        }, {
+          name: "loop",
+          type: "Boolean",
+          optional: true,
+          description: "indicate that the sound should be played on loop."
+        }],
         description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
         examples: [{
           name: "Load a single audio file.",
@@ -215,8 +218,8 @@ Primrose.Output.Audio3D = (function () {
       node.connect(audio.context.destination);\n\
     });"
         }, {
-            name: "Load a single audio file from a list of options.",
-            description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+          name: "Load a single audio file from a list of options.",
+          description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
 \n\
     grammar(\"JavaScript\");\n\
     var audio = new Primrose.Output.Audio3D();\n\
@@ -227,9 +230,9 @@ Primrose.Output.Audio3D = (function () {
     ]).then(function(node){\n\
       node.connect(audio.context.destination);\n\
     });"
-          }, {
-            name: "Load an ambient audio file that should be looped.",
-            description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+        }, {
+          name: "Load an ambient audio file that should be looped.",
+          description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
 \n\
     grammar(\"JavaScript\");\n\
     var audio = new Primrose.Output.Audio3D();\n\
@@ -240,7 +243,7 @@ Primrose.Output.Audio3D = (function () {
     ], true).then(function(node){\n\
       node.connect(audio.context.destination);\n\
     });"
-          }]
+        }]
       });
 
       return new Promise((resolve, reject) => {
@@ -251,10 +254,11 @@ Primrose.Output.Audio3D = (function () {
         audio.autoplay = true;
         audio.loop = loop;
         sources.map((src) => {
-          var source = document.createElement("source");
-          source.src = src;
-          return source;
-        }).forEach(audio.appendChild.bind(audio));
+            var source = document.createElement("source");
+            source.src = src;
+            return source;
+          })
+          .forEach(audio.appendChild.bind(audio));
         audio.oncanplay = () => {
           if (this.context) {
             audio.oncanplay = null;
@@ -272,11 +276,13 @@ Primrose.Output.Audio3D = (function () {
     }
 
     load3DSound(src, loop, x, y, z) {
-      return this.loadSource(src, loop).then(this.create3DSound.bind(this, x, y, z));
+      return this.loadSource(src, loop)
+        .then(this.create3DSound.bind(this, x, y, z));
     }
 
     loadFixedSound(src, loop) {
-      return this.loadSource(src, loop).then(this.createFixedSound.bind(this));
+      return this.loadSource(src, loop)
+        .then(this.createFixedSound.bind(this));
     }
 
     playBufferImmediate(buffer, volume) {
@@ -293,4 +299,3 @@ Primrose.Output.Audio3D = (function () {
 
   return Audio3D;
 })();
-

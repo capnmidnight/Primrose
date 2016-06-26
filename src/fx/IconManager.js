@@ -3,22 +3,27 @@ Primrose.IconManager = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "IconManager",
-    description: "Handles the loading and instantiation of icons in 3D space.",
-    parameters: [
-      { name: "options", type: "Object", description: "Options for the model files and type constructors for each of the icon types." },
-      { name: "options", type: "Object", description: "Options for the model files and type constructors for each of the icon types." },
-    ]
+      name: "IconManager",
+      description: "Handles the loading and instantiation of icons in 3D space.",
+      parameters: [{
+        name: "options",
+        type: "Object",
+        description: "Options for the model files and type constructors for each of the icon types."
+      }, {
+        name: "options",
+        type: "Object",
+        description: "Options for the model files and type constructors for each of the icon types."
+      }, ]
   });
   class IconManager {
     constructor(options) {
       this.options = patch(options, IconManager.DEFAULTS);
       this.iconModels = {};
       this.ready = Primrose.ModelLoader.loadObjects({
-        fullScreenIcon: this.options.fullScreenIcon,
-        VRIcon: this.options.VRIcon,
-        audioIcon: this.options.audioIcon
-      })
+          fullScreenIcon: this.options.fullScreenIcon,
+          VRIcon: this.options.VRIcon,
+          audioIcon: this.options.audioIcon
+        })
         .then((models) => {
           if (models.fullScreenIcon) {
             this.iconModels["Standard Monitor"] = new Primrose.ModelLoader(models.fullScreenIcon);
@@ -45,12 +50,14 @@ Primrose.IconManager = (function () {
 
     makeDisplayIcon(display, i) {
       var isVR = !(display instanceof StandardMonitorPolyfill),
-        icon = (this.iconModels[display.displayName] || this.iconModels["Google Cardboard"]).clone(),
+        icon = (this.iconModels[display.displayName] || this.iconModels["Google Cardboard"])
+        .clone(),
         geom = icon.children[0] && icon.children[0].geometry || icon.geometry,
         titleText = textured(text3D(0.05, display.displayName), this.options.foregroundColor),
         funcText = textured(text3D(0.05, isVR ? "VR" : "Fullscreen"), this.options.foregroundColor);
 
-      icon.name = ("Display" + display.displayName + "Icon").replace(/ /g, "");
+      icon.name = ("Display" + display.displayName + "Icon")
+        .replace(/ /g, "");
 
       geom.computeBoundingBox();
 
@@ -80,8 +87,7 @@ Primrose.IconManager = (function () {
     }
   }
 
-  IconManager.DEFAULTS = {
-  };
+  IconManager.DEFAULTS = {};
 
   return IconManager;
 })();

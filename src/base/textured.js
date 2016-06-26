@@ -1,4 +1,4 @@
-﻿pliny.function({
+pliny.function({
   name: "textured",
   description: "| [under construction]"
 });
@@ -42,15 +42,16 @@ var textured = (function () {
       txt = null;
     }
     else {
-      var txtID = (txt.id || txt).toString(),
+      var txtID = (txt.id || txt)
+        .toString(),
         textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
         materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.wireframe}, ${options.emissive})`;
       material = cache(materialDescription, () => {
         var materialOptions = {
-          transparent: options.opacity < 1,
-          opacity: options.opacity,
-          side: options.side || THREE.FrontSide
-        },
+            transparent: options.opacity < 1,
+            opacity: options.opacity,
+            side: options.side || THREE.FrontSide
+          },
           MaterialType = THREE.MeshStandardMaterial;
 
         if (options.unshaded) {

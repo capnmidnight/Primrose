@@ -1,4 +1,4 @@
-﻿pliny.function({
+pliny.function({
   name: "put",
   description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
 \n\
@@ -7,7 +7,11 @@
 * .rot(x, y, z) - set the rotation for the object.\n\
 * .scale(x, y, z) - set the scale for the object.\n\
 * .obj() - return the naked object, if not all of the transformations are desired.",
-  parameters: [{ name: "object", type: "Object", description: "The object to manipulate." }],
+  parameters: [{
+    name: "object",
+    type: "Object",
+    description: "The object to manipulate."
+  }],
   returns: "Object",
   examples: [{
     name: "Put an object on a scene at a specific location.",
@@ -18,14 +22,15 @@
       .obj();"
   }]
 });
+
 function put(object) {
   var box = {
-    on: null,
-    at: null,
-    rot: null,
-    scale: null,
-    obj: () => object
-  },
+      on: null,
+      at: null,
+      rot: null,
+      scale: null,
+      obj: () => object
+    },
     on = function (scene) {
       if (scene.appendChild) {
         scene.appendChild(object);

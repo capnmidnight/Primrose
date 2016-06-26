@@ -1,12 +1,13 @@
-Primrose.Text.CodePage = ( function ( ) {
+Primrose.Text.CodePage = (function () {
   "use strict";
 
   pliny.class({
     parent: "Primrose.Text",
-    name: "CodePage",
-    description: "| [under construction]"
-  } );
-  function CodePage ( name, lang, options ) {
+      name: "CodePage",
+      description: "| [under construction]"
+  });
+
+  function CodePage(name, lang, options) {
     this.name = name;
     this.language = lang;
 
@@ -72,7 +73,7 @@ Primrose.Text.CodePage = ( function ( ) {
     copyObject(commands, options);
 
     var char, code, cmdName;
-    for ( var i = 0; i <= 9; ++i ) {
+    for (var i = 0; i <= 9; ++i) {
       code = Primrose.Keys["NUMPAD" + i];
       commands.NORMAL[code] = i.toString();
     }
@@ -95,7 +96,7 @@ Primrose.Text.CodePage = ( function ( ) {
     function overwriteText(txt, prim, lines) {
       prim.selectedText = txt;
     }
-    
+
     for (var type in commands) {
       var codes = commands[type];
       if (typeof (codes) === "object") {
@@ -123,12 +124,11 @@ Primrose.Text.CodePage = ( function ( ) {
     }
   }
 
-  CodePage.DEAD = function ( key ) {
-    return function ( prim ) {
-      prim.setDeadKeyState( "DEAD" + key );
+  CodePage.DEAD = function (key) {
+    return function (prim) {
+      prim.setDeadKeyState("DEAD" + key);
     };
   };
 
   return CodePage;
-} ) ();
-
+})();

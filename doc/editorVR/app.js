@@ -242,7 +242,8 @@ function getSourceCode(skipReload) {
   // we use the script from a saved function and assume
   // it has been formatted with 2 spaces per-line.
   if (src === defaultDemo) {
-    var lines = src.replace("\r\n", "\n").split("\n");
+    var lines = src.replace("\r\n", "\n")
+      .split("\n");
     lines.pop();
     lines.shift();
     for (var i = 0; i < lines.length; ++i) {
@@ -263,9 +264,9 @@ function testDemo(scene) {
     t = 0,
     R = Primrose.Random,
     start = put(hub())
-      .on(scene)
-      .at(-MIDX, 0, -DEPTH - 2)
-      .obj();
+    .on(scene)
+    .at(-MIDX, 0, -DEPTH - 2)
+    .obj();
 
   var balls = [];
 
@@ -273,8 +274,8 @@ function testDemo(scene) {
     balls.push(put(brick(DECK))
       .on(start)
       .at(R.int(WIDTH),
-          R.int(HEIGHT),
-          R.int(DEPTH))
+        R.int(HEIGHT),
+        R.int(DEPTH))
       .obj());
 
     balls[i].velocity = v3(
@@ -289,15 +290,16 @@ function testDemo(scene) {
       var ball = balls[i],
         p = ball.position,
         v = ball.velocity;
-      p.add(v.clone().multiplyScalar(dt));
+      p.add(v.clone()
+        .multiplyScalar(dt));
       if (p.x < 0 && v.x < 0 || WIDTH <= p.x && v.x > 0) {
         v.x *= -1;
       }
       if (p.y < 1 && v.y < 0 || HEIGHT <= p.y && v.y > 0) {
         v.y *= -1;
       }
-      if (p.z < 0 && v.z < 0
-        || DEPTH <= p.z && v.z > 0) {
+      if (p.z < 0 && v.z < 0 ||
+        DEPTH <= p.z && v.z > 0) {
         v.z *= -1;
       }
     }
