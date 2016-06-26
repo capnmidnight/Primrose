@@ -404,7 +404,7 @@ function archive() {
 gulp.task("archive", ["jsmin"], archive);
 gulp.task("just:archive", archive);
 
-gulp.task("debug", ["jshint", "pug:debug:es6"]);
+gulp.task("debug", ["jshint", "pug:debug:es6", "stylus"]);
 gulp.task("default", ["debug"]);
-gulp.task("stage", ["babel", "pug:debug:es5"]);
+gulp.task("stage", ["babel", "pug:debug:es5", "stylus"]);
 gulp.task("release", ["pug:release", "copy:quickstart", "archive", "babel"]);
