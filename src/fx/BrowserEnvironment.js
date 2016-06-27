@@ -216,7 +216,11 @@ Primrose.BrowserEnvironment = (function () {
         moveSky();
         moveGround();
         this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
-        this.pointer.move(this.player, this.projector);
+        var segment = this.pointer.move(this.vehicle);
+        if(this.projector.ready){
+          this.projector.ready = false;
+          this.projector.projectPointer(segment);
+        }
         resolvePicking();
         this.network.update(dt);
         checkQuality();

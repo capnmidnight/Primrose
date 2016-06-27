@@ -2500,8 +2500,8 @@ Primrose.Projector = (function () {
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
     this.d = new THREE.Vector3();
-    this.f = new THREE.Vector3();
-    this.p = new THREE.Vector3();
+    this.from = new THREE.Vector3();
+    this.to = new THREE.Vector3();
     this.m = new THREE.Matrix4();
     this.listeners = {
       hit: []
@@ -2627,11 +2627,11 @@ Primrose.Projector = (function () {
   };
 
   Projector.prototype.projectPointer = function (args) {
-    var p = args[0],
-      from = args[1],
+    var from = args[0],
+      to = args[1],
       value = null;
-    this.p.fromArray(p);
-    this.f.fromArray(from);
+    this.to.fromArray(to);
+    this.from.fromArray(from);
 
     for (var i = 0; i < this.objectIDs.length; ++i) {
       var objID = this.objectIDs[i],
@@ -2640,6 +2640,7 @@ Primrose.Projector = (function () {
         var verts = this._getVerts(obj),
           faces = obj.geometry.faces,
           uvs = obj.geometry.uvs;
+
         for (var j = 0; j < faces.length; ++j) {
           var face = faces[j],
             v0 = verts[face[0] % verts.length],
@@ -2647,7 +2648,7 @@ Primrose.Projector = (function () {
             v2 = verts[face[2] % verts.length];
           this.a.subVectors(v1, v0);
           this.b.subVectors(v2, v0);
-          this.c.subVectors(this.p, this.f);
+          this.c.subVectors(this.to, this.from);
           this.m.set(
             this.a.x, this.b.x, -this.c.x, 0,
             this.a.y, this.b.y, -this.c.y, 0,
@@ -2655,12 +2656,12 @@ Primrose.Projector = (function () {
             0, 0, 0, 1);
           if (Math.abs(this.m.determinant()) > 1e-10) {
             this.m.getInverse(this.m);
-            this.d.subVectors(this.f, v0)
+            this.d.subVectors(this.from, v0)
               .applyMatrix4(this.m);
             if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
               this.c.multiplyScalar(this.d.z)
-                .add(this.f);
-              var dist = Math.sign(this.d.z) * this.p.distanceTo(this.c);
+                .add(this.from);
+              var dist = Math.sign(this.d.z) * this.to.distanceTo(this.c);
               if (!value || dist < value.distance) {
                 value = {
                   objectID: objID,
