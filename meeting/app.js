@@ -1,21 +1,31 @@
 "use strict";
 
 var MEETING_ID_PATTERN = /\bid=(\w+)/,
-  TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
-  USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   idSpec = location.search.match(MEETING_ID_PATTERN),
   hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || Primrose.Random.ID(),
   appKey = "Primrose:Meeting:" + meetingID,
+
+
+  ////////////////////////////////////////////////////////////////////////
+  ///////     setting up test user accounts    ///////////////////////////
+  ////////////////////////////////////////////////////////////////////////
+  TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
+  USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
   isTest = !!testUserNameSpec,
   userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
   userName = userNameSpec && userNameSpec[1] || "",
+  ////////////////////////////////////////////////////////////////////////
+  ///////     end setting up test user accounts    ///////////////////////
+  ////////////////////////////////////////////////////////////////////////
+
 
   ctrls2D = Primrose.DOM.findEverything(),
   loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function (name) {
     return ctrls2D[name];
   }),
+
   env = new Primrose.BrowserEnvironment(appKey, {
     autoScaleQuality: true,
     autoRescaleQuality: false,
@@ -25,7 +35,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
     disableDefaultLighting: true,
     sceneModel: "../doc/models/meeting/meetingroom.obj",
     avatarModel: "../doc/models/avatar.json",
-    useFog: true,
+    useFog: false,
     fullScreenIcon: "../doc/models/monitor.obj",
     VRIcon: "../doc/models/cardboard.obj",
     audioIcon: "../doc/models/microphone.obj",
@@ -49,10 +59,13 @@ ctrls2D.connect.addEventListener("click", doLogin);
 ctrls2D.userName.addEventListener("keyup", doLogin);
 ctrls2D.password.addEventListener("keyup", doLogin);
 ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
+
+
 env.addEventListener("ready", environmentReady);
 env.addEventListener("authorizationfailed", authFailed);
 env.addEventListener("authorizationsucceeded", loggedIn);
 env.addEventListener("loggedout", showSignup.bind(null, false));
+
 
 function authFailed(evt) {
   showSignup(evt.verb === "signup");
