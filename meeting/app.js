@@ -13,7 +13,7 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   userName = userNameSpec && userNameSpec[1] || "",
 
   ctrls2D = Primrose.DOM.findEverything(),
-  loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function(name){
+  loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function (name) {
     return ctrls2D[name];
   }),
   env = new Primrose.BrowserEnvironment(appKey, {
@@ -32,9 +32,9 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   });
 
-if(!hasMeetingID){
+if (!hasMeetingID) {
   var state = "?id=" + meetingID;
-  if(isTest){
+  if (isTest) {
     state += "&u=" + userName;
   }
   history.pushState(null, "Room ID: " + meetingID, state);
@@ -73,7 +73,7 @@ function showSignup(state) {
   ctrls2D.connect.className = state ? "signupButton" : "loginButton";
 }
 
-function hideLoginForm(){
+function hideLoginForm() {
   ctrls2D.loginForm.style.display = "none";
   ctrls2D.controls.style.width = "initial";
   ctrls2D.controls.style.height = "initial";
@@ -94,8 +94,8 @@ var ERROR_MESSAGES = {
   signup: "We couldn't sign you up right now because "
 }
 
-function errorMessage(message){
-  if(!ctrls2D.loginForm.style.width){
+function errorMessage(message) {
+  if (!ctrls2D.loginForm.style.width) {
     ctrls2D.loginForm.style.width = ctrls2D.loginForm.clientWidth + "px";
   }
   ctrls2D.errorMessage.innerHTML = message;
@@ -103,8 +103,8 @@ function errorMessage(message){
   disableLogin(false);
 }
 
-function disableLogin(v){
-  loginControls.forEach(function(ctrl){
+function disableLogin(v) {
+  loginControls.forEach(function (ctrl) {
     ctrl.disabled = v;
   });
   document.body.style.cursor = v ? "wait" : "";
@@ -121,7 +121,7 @@ function environmentReady() {
 }
 
 function doLogin(evt) {
-  if(evt.type !== "keyup" || evt.keyCode === 13){
+  if (evt.type !== "keyup" || evt.keyCode === 13) {
     var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
       password = ctrls2D.password.value,
       email = ctrls2D.email.value;
@@ -129,13 +129,13 @@ function doLogin(evt) {
     userName = ctrls2D.userName.value.toLocaleUpperCase();
     disableLogin(true);
 
-    if(userName.length === 0){
+    if (userName.length === 0) {
       errorMessage("You must provide a user name.");
     }
-    else if(password.length === 0){
+    else if (password.length === 0) {
       errorMessage("You must provide a password.");
     }
-    else{
+    else {
       env.authenticate(verb, userName, password, email);
     }
   }
