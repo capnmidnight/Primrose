@@ -40,6 +40,7 @@ Primrose.BrowserEnvironment = (function () {
 
       this.zero = () => {
         if (!lockedToEditor()) {
+          playerHeight = null;
           this.input.zero();
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
@@ -305,9 +306,14 @@ Primrose.BrowserEnvironment = (function () {
           .multiplyScalar(dt);
         tempVelocity.applyQuaternion(this.vehicle.quaternion);
         this.vehicle.position.add(tempVelocity);
-        this.vehicle.position.y = this.player.position.y;
-        this.player.position.y = 0;
+        if(playerHeight === null){
+          playerHeight = this.player.position.y;
+        }
+        this.vehicle.position.y = playerHeight;
+        this.player.position.y -= playerHeight;
       };
+
+      var playerHeight = null;
 
       var moveSky = () => {
         if (this.sky) {
