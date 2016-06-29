@@ -258,7 +258,7 @@ Primrose.BrowserEnvironment = (function () {
           var lastButtons = this.input.getValue("dButtons");
           var object = this.pickableObjects[currentHit.objectID];
 
-          this.pointer.registerHit(currentHit, this.player, object === this.ground);
+          this.pointer.registerHit(currentHit, this.vehicle, object === this.ground);
 
           if (object) {
             var buttons = this.input.getValue("buttons"),
@@ -321,7 +321,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var moveSky = () => {
         if (this.sky) {
-          this.sky.position.copy(this.player.position);
+          this.sky.position.copy(this.vehicle.position);
         }
       };
 
@@ -856,45 +856,57 @@ Primrose.BrowserEnvironment = (function () {
       //
       // Manage full-screen state
       //
-      this.goFullScreen = (index) => {
-        if (index === undefined || typeof (index) !== "number") {
-          index = this.input.VR.currentDisplayIndex;
-        }
+      var fullScreenRunning = false;
+      this.goFullScreen = (index, evt) => {
+        if(!fullScreenRunning){
+          fullScreenRunning = true;
+          var promise = Promise.resolve();
 
-        if (index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()) {
-          if (isFullScreenMode()) {
-            this.input.VR.currentDisplay.exitPresent();
+          if (index === undefined || typeof (index) !== "number") {
+            index = this.input.VR.currentDisplayIndex;
           }
 
-          this.input.VR.connect(index);
+          if (index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()) {
+            if (isFullScreenMode()) {
+              promise = promise.then(()=>this.input.VR.currentDisplay.exitPresent());
+            }
 
-          var promise = this.input.VR.requestPresent([{
-            source: this.renderer.domElement
-          }]);
+            if (index !== this.input.VR.currentDisplayIndex){
+              this.input.VR.connect(index);
+            }
 
-          this.renderer.domElement.focus();
+            this.renderer.domElement.focus();
 
-          if (WebVRBootstrapper.Version === 1 && isMobile) {
-            promise = promise.then((elem) => {
-                var remover = () => {
-                  this.input.VR.currentDisplay.exitPresent();
-                  window.removeEventListener("vrdisplaypresentchange", remover);
-                };
+            promise = promise.then(()=>this.input.VR.requestPresent([{
+              source: this.renderer.domElement
+            }]));
 
-                var adder = () => {
-                  window.addEventListener("vrdisplaypresentchange", remover, false);
-                  window.removeEventListener("vrdisplaypresentchange", adder);
-                };
+            if (WebVRBootstrapper.Version === 1 && isMobile) {
+              promise = promise.then((elem) => {
+                  var remover = () => {
+                    this.input.VR.currentDisplay.exitPresent();
+                    window.removeEventListener("vrdisplaypresentchange", remover);
+                  };
 
-                window.addEventListener("vrdisplaypresentchange", adder, false);
-              return elem;
-            });
+                  var adder = () => {
+                    window.addEventListener("vrdisplaypresentchange", remover, false);
+                    window.removeEventListener("vrdisplaypresentchange", adder);
+                  };
+
+                  window.addEventListener("vrdisplaypresentchange", adder, false);
+                return elem;
+              });
+            }
           }
+
+          if (!(Primrose.Input.Mouse.Lock.isActive || isMobile)) {
+            promise = promise.then(()=>Primrose.Input.Mouse.Lock.request(this.renderer.domElement)); 
+          }
+
+          return promise
+            .catch(console.error.bind(console, "Fullscreen Error"))
+            .then(()=>fullScreenRunning= false);
         }
-
-        setPointerLock();
-
-        return promise;
       };
 
 
@@ -988,14 +1000,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var setPointerLock = () => {
-        if(isFullScreenMode()){
-          return ((Primrose.Input.Mouse.Lock.isActive || isMobile) ?
-            Promise.resolve() :
-            Primrose.Input.Mouse.Lock.request(this.renderer.domElement));
-        }
-      };
-
       var withCurrentControl = (name) => {
         return (evt) => {
           if (this.currentControl) {
@@ -1048,8 +1052,7 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
-        this.input.addEventListener("fullscreen", this.goFullScreen.bind(this), false);
-        this.input.addEventListener("lockpointer", setPointerLock, false);
+        this.input.addEventListener("fullscreen", this.goFullScreen.bind(this, 0), false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);

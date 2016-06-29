@@ -19,7 +19,6 @@ Primrose.Input.FPSInput = (function () {
       this.listeners = {
         zero: [],
         fullscreen: [],
-        lockpointer: [],
         pointerstart: [],
         pointerend: [],
         motioncontroller: []
@@ -34,11 +33,6 @@ Primrose.Input.FPSInput = (function () {
           buttons: [Primrose.Keys.F],
           repetitions: 1,
           commandDown: emit.bind(this, "fullscreen")
-        },
-        lockPointer: {
-          buttons: [Primrose.Keys.ANY, -Primrose.Keys.F],
-          repetitions: 1,
-          commandDown: emit.bind(this, "lockpointer")
         },
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
@@ -83,9 +77,9 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       this.add(new Primrose.Input.Mouse(DOMElement, {
-        lockPointer: {
+        fullScreen: {
           buttons: [Primrose.Keys.ANY],
-          commandDown: emit.bind(this, "lockpointer")
+          commandDown: emit.bind(this, "fullscreen")
         },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -138,9 +132,9 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       this.add(new Primrose.Input.Touch(DOMElement, {
-        lockPointer: {
+        fullScreen: {
           buttons: [Primrose.Keys.ANY],
-          commandUp: emit.bind(this, "lockpointer")
+          commandUp: emit.bind(this, "fullscreen")
         },
         pointer: {
           buttons: [Primrose.Keys.ANY],
