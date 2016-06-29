@@ -1,5 +1,6 @@
 "use strict";
 var env = new Primrose.BrowserEnvironment("My Primrose VR Application", {
+  autoRescaleQuality: true,
   skyTexture: "../images/bg.jpg",
   groundTexture: "../images/deck.png",
   fullScreenIcon: "../models/monitor.obj",

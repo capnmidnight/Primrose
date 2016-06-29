@@ -25,14 +25,14 @@ Primrose.Pointer = (function () {
       //   line: true
       // });
 
-      if(length === undefined){
+      if (length === undefined) {
         length = LASER_LENGTH;
       }
 
       this.mesh = textured(box(0.01, 0.01, length), 0xff0000, {
-         emissive: 0x3f0000
+        emissive: 0x3f0000
       });
-      this.mesh.geometry.vertices.forEach((v)=>{
+      this.mesh.geometry.vertices.forEach((v) => {
         v.z -= length * 0.5 + 0.5;
       });
 
@@ -138,7 +138,7 @@ Primrose.Pointer = (function () {
       this.groundMesh.visible = false;
       this.mesh.visible = true;
       this.mesh.material.color.setRGB(1, 0, 0);
-      if(this.mesh.material.emissive){
+      if (this.mesh.material.emissive) {
         this.mesh.material.emissive.setRGB(0.5, 0, 0);
       }
       //this.mesh.scale.set(1, 1, 1);

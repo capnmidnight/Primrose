@@ -18,8 +18,8 @@ Primrose.Input.FPSInput = (function () {
 
       this.listeners = {
         zero: [],
-        lockpointer: [],
         fullscreen: [],
+        lockpointer: [],
         pointerstart: [],
         pointerend: [],
         motioncontroller: []
@@ -30,15 +30,15 @@ Primrose.Input.FPSInput = (function () {
       this.add(new Primrose.Input.VR(avatarHeight));
 
       this.add(new Primrose.Input.Keyboard(DOMElement, {
-        lockPointer: {
-          buttons: [Primrose.Keys.ANY, -Primrose.Keys.F],
-          repetitions: 1,
-          commandDown: emit.bind(this, "lockpointer")
-        },
         fullScreen: {
           buttons: [Primrose.Keys.F],
           repetitions: 1,
           commandDown: emit.bind(this, "fullscreen")
+        },
+        lockPointer: {
+          buttons: [Primrose.Keys.ANY, -Primrose.Keys.F],
+          repetitions: 1,
+          commandDown: emit.bind(this, "lockpointer")
         },
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
