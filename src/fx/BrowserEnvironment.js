@@ -204,19 +204,18 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var toScene;
+      var stage;
       var update = (t) => {
         var dt = t - lt,
           i, j;
         lt = t;
 
-        toScene = this.input.VR.toScene;
+        stage = this.input.VR.stage;
 
         movePlayer(dt);
         moveSky();
         moveGround();
-        this.pointer.setStage(toScene.sizeX, toScene.sizeZ);
-        var segment = this.pointer.move(this.vehicle);
+        var segment = this.pointer.update(stage);
         if (this.projector.ready) {
           this.projector.ready = false;
           this.projector.projectPointer(segment);
@@ -258,7 +257,7 @@ Primrose.BrowserEnvironment = (function () {
           var lastButtons = this.input.getValue("dButtons");
           var object = this.pickableObjects[currentHit.objectID];
 
-          this.pointer.registerHit(currentHit, this.vehicle, object === this.ground);
+          this.pointer.registerHit(currentHit, object === this.ground);
 
           if (object) {
             var buttons = this.input.getValue("buttons"),
@@ -295,13 +294,13 @@ Primrose.BrowserEnvironment = (function () {
           m.getPosition(m.mesh.position);
           m.getOrientation(m.mesh.quaternion);
           m.mesh.updateMatrix();
-          m.mesh.applyMatrix(toScene.matrix);
+          m.mesh.applyMatrix(stage.matrix);
         }
 
         this.input.VR.getOrientation(this.player.quaternion);
         this.input.VR.getPosition(this.player.position);
         this.player.updateMatrix();
-        this.player.applyMatrix(toScene.matrix);
+        this.player.applyMatrix(stage.matrix);
 
         this.input.getQuaternion2("pitch", "heading", this.vehicle.quaternion);
         this.input.getVector2("strafe", "drive", this.vehicle.velocity);
@@ -704,7 +703,7 @@ Primrose.BrowserEnvironment = (function () {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
 
-      this.pointer = new Primrose.Pointer(this.scene);
+      this.pointer = new Primrose.Pointer(this.scene, this.vehicle);
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
       if (this.options.skyTexture !== undefined) {
@@ -876,7 +875,7 @@ Primrose.BrowserEnvironment = (function () {
             }
 
             this.renderer.domElement.focus();
-
+            console.log(evt);
             promise = promise.then(()=>this.input.VR.requestPresent([{
               source: this.renderer.domElement
             }]));

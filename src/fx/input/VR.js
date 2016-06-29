@@ -45,7 +45,7 @@ Primrose.Input.VR = (function () {
         });
     }
 
-    get toScene() {
+    get stage() {
       let x = 0,
         z = 0;
       var stage = this.currentDisplay && this.currentDisplay.stageParameters;

@@ -15,19 +15,12 @@ Primrose.Pointer = (function () {
 
   class Pointer {
 
-    constructor(scene, length) {
-      // this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
-      //   emissive: 0x3f0000
-      // });
-
-      // this.mesh = textured(makeGeom(v3(0, 0, -0.1), v3(0, 0, -5)), 0xff0000, {
-      //   lineWidth: 5,
-      //   line: true
-      // });
-
+    constructor(scene, fromObj, length) {
       if (length === undefined) {
         length = LASER_LENGTH;
       }
+
+      this.fromObj = fromObj;
 
       this.mesh = textured(box(0.01, 0.01, length), 0xff0000, {
         emissive: 0x3f0000
@@ -56,13 +49,14 @@ Primrose.Pointer = (function () {
       this.setStage(0, 0);
     }
 
-    move(obj) {
+    update(stage) {
+      this.setStage(stage.sizeX, stage.sizeZ);
       this.mesh.position.set(0, 0, 0);
       this.mesh.quaternion.set(0, 0, 0, 1);
       this.mesh.updateMatrix();
-      this.mesh.applyMatrix(obj.matrixWorld);
+      this.mesh.applyMatrix(this.fromObj.matrixWorld);
       FORWARD.set(0, 0, -1);
-      FORWARD.applyMatrix4(obj.matrixWorld);
+      FORWARD.applyMatrix4(this.fromObj.matrixWorld);
       return [this.mesh.position.toArray(), FORWARD.toArray()];
     }
 
@@ -91,12 +85,12 @@ Primrose.Pointer = (function () {
       }
     }
 
-    registerHit(currentHit, fromObj, isGround) {
+    registerHit(currentHit, isGround) {
       var fp = currentHit.facePoint,
         moveMesh = this.mesh;
 
       moveTo.fromArray(fp)
-        .sub(fromObj.position);
+        .sub(this.fromObj.position);
 
       this.groundMesh.visible = isGround;
 
@@ -116,7 +110,7 @@ Primrose.Pointer = (function () {
           this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
         }
         this.groundMesh.position
-          .copy(fromObj.position)
+          .copy(this.fromObj.position)
           .add(moveTo);
         this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
