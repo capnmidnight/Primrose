@@ -25,8 +25,8 @@ Primrose.Input.Keyboard = (function () {
       }]
   });
   class Keyboard extends Primrose.InputProcessor {
-    constructor(DOMElement, commands, socket) {
-      super("Keyboard", commands, socket);
+    constructor(DOMElement, parent, commands, socket) {
+      super("Keyboard", parent, commands, socket);
       DOMElement = DOMElement || window;
       if (DOMElement instanceof HTMLCanvasElement && (DOMElement.tabIndex === null || DOMElement.tabIndex === -1)) {
         DOMElement.tabIndex = 1;

@@ -77,7 +77,6 @@
     <script type="text/javascript" src="../src/fx/Keys.js"></script>
     <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
     <script type="text/javascript" src="../src/fx/NetworkManager.js"></script>
-    <script type="text/javascript" src="../src/fx/Pointer.js"></script>
     <script type="text/javascript" src="../src/fx/Projector.js"></script>
     <script type="text/javascript" src="../src/fx/Random/ID.js"></script>
     <script type="text/javascript" src="../src/fx/Random/color.js"></script>
@@ -229,6 +228,7 @@
             <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 &quot;use strict&quot;;
 var env = new Primrose.BrowserEnvironment(&quot;My Primrose VR Application&quot;, {
+  autoRescaleQuality: true,
   skyTexture: &quot;../images/bg.jpg&quot;,
   groundTexture: &quot;../images/deck.png&quot;,
   fullScreenIcon: &quot;../models/monitor.obj&quot;,

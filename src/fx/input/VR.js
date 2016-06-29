@@ -27,7 +27,7 @@ Primrose.Input.VR = (function () {
   });
   class VR extends Primrose.InputProcessor {
     constructor(avatarHeight, commands, socket) {
-      super("VR", commands, socket);
+      super("VR", null, commands, socket);
 
       this.displays = null;
       this._transforms = [];

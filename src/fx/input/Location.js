@@ -9,7 +9,7 @@ Primrose.Input.Location = (function () {
   });
   class Location extends Primrose.InputProcessor {
     constructor(commands, socket, options) {
-      super("Location", commands, socket);
+      super("Location", null, commands, socket);
 
       this.options = patch(options, Location.DEFAULTS);
 

@@ -16,7 +16,7 @@ Primrose.Input.LeapMotion = (function () {
   });
   class LeapMotion extends Primrose.InputProcessor {
     constructor(commands, socket) {
-      super("LeapMotion", commands, socket);
+      super("LeapMotion", null, commands, socket);
 
       this.isStreaming = false;
       this.controller = new Leap.Controller({

@@ -27,7 +27,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.VR(avatarHeight));
 
-      this.add(new Primrose.Input.Keyboard(DOMElement, {
+      this.add(new Primrose.Input.Keyboard(DOMElement, null, {
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
         },
@@ -70,7 +70,7 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
-      this.add(new Primrose.Input.Mouse(DOMElement, {
+      this.add(new Primrose.Input.Mouse(DOMElement, this.Keyboard, {
         pointer: {
           buttons: [Primrose.Keys.ANY],
           commandDown: emit.bind(this, "pointerstart"),
@@ -121,7 +121,7 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
-      this.add(new Primrose.Input.Touch(DOMElement, {
+      this.add(new Primrose.Input.Touch(DOMElement, null, {
         fullScreen: {
           buttons: [Primrose.Keys.ANY],
           commandUp: emit.bind(this, "fullscreen")
@@ -174,7 +174,9 @@ Primrose.Input.FPSInput = (function () {
         var pose = pad.pose,
           isMotion = pad.id === "OpenVR Gamepad",
           padCommands = null,
-          controllerNumber = 0;
+          controllerNumber = 0,
+          socket = null,
+          parent = null;
 
         if (isMotion) {
           padCommands = {
@@ -193,6 +195,7 @@ Primrose.Input.FPSInput = (function () {
           }
         }
         else {
+          parent = this.Mouse;
           padCommands = {
             pointer: {
               buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.A],
@@ -223,8 +226,12 @@ Primrose.Input.FPSInput = (function () {
             }
           };
         }
-        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
-        this.add(mgr);
+
+        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands, socket, parent);
+
+        if(parent === this.Mouse){
+          this.Keyboard.parent = mgr;
+        }
 
         if (isMotion) {
           emit.call(this, "motioncontroller", mgr);
@@ -273,17 +280,16 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    update() {
+    update(dt, stage) {
       Primrose.Input.Gamepad.poll();
+      var segments = [];
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          if (mgr.poll) {
-            mgr.poll();
-          }
-          mgr.update();
+          segments.push(mgr.update(dt, stage));
         }
       }
+      return segments;
     }
 
     addEventListener(evt, thunk, bubbles) {
@@ -392,19 +398,6 @@ Primrose.Input.FPSInput = (function () {
         var mgr = this.managers[i];
         if (mgr.enabled) {
           value += mgr.getValue(name);
-        }
-      }
-      return value;
-    }
-
-    getLatestValue(name) {
-      var value = 0,
-        maxT = Number.MIN_VALUE;
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled && mgr.lastT > maxT) {
-          maxT = mgr.lastT;
-          value = mgr.getValue(name);
         }
       }
       return value;

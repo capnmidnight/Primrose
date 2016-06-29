@@ -217,11 +217,6 @@ Primrose.BrowserEnvironment = (function () {
         movePlayer(dt);
         moveSky();
         moveGround();
-        var segment = this.pointer.update(stage);
-        if (this.projector.ready) {
-          this.projector.ready = false;
-          this.projector.projectPointer(segment);
-        }
         resolvePicking();
         this.network.update(dt);
         checkQuality();
@@ -289,7 +284,11 @@ Primrose.BrowserEnvironment = (function () {
       const tempVelocity = new THREE.Vector3();
 
       var movePlayer = (dt) => {
-        this.input.update();
+        var segments = this.input.update(dt, stage);
+        if (this.projector.ready) {
+          this.projector.ready = false;
+          this.projector.projectPointer(segments);
+        }
 
         for (var i = 0; i < motionControllers.length; ++i) {
           var m = motionControllers[i];
@@ -359,7 +358,7 @@ Primrose.BrowserEnvironment = (function () {
                 this.currentControl.focus();
               }
               else if (object === this.ground) {
-                this.vehicle.position.copy(this.pointer.groundMesh.position);
+                this.vehicle.position.copy(this.groundMesh.position);
                 this.vehicle.position.y = 0;
                 this.vehicle.isOnGround = false;
               }
@@ -397,11 +396,11 @@ Primrose.BrowserEnvironment = (function () {
         render();
       };
 
-      var render = () => {   
+      var render = () => {
         if (this.input.VR.isPresenting && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
           var trans = this.input.VR.transforms;
-          for (var i = 0; trans && i < trans.length; ++i) { 
+          for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,
               side = (2 * i) - 1;
@@ -413,14 +412,14 @@ Primrose.BrowserEnvironment = (function () {
             this.nose.visible = true;
             this.nose.position.set(side * -0.12, -0.12, -0.15);
             this.nose.rotation.z = side * 0.7;
-          } 
+          }
           this.renderer.setViewport(
             v.left * resolutionScale,
             v.top * resolutionScale,
             v.width * resolutionScale,
             v.height * resolutionScale);
           this.renderer.render(this.scene, this.camera);     }
-          this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);   
+          this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
         this.audio.setPlayer(this.camera);
@@ -531,8 +530,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.mesh = textured(box(0.1), 0x0000ff);
-        this.scene.add(mgr.mesh);
+        mgr.makePointer(scene);
       };
 
       this.factories = factories;
@@ -690,16 +688,6 @@ Primrose.BrowserEnvironment = (function () {
 
       this.projector = new Primrose.Workerize(Primrose.Projector);
 
-      this.player = new THREE.Object3D();
-      this.player.name = "Player";
-
-      this.vehicle = new THREE.Object3D();
-      this.vehicle.name = "PlayerVehicle";
-      this.vehicle.velocity = new THREE.Vector3();
-      this.vehicle.isOnGround = true;
-      this.vehicle.heading = 0;
-
-
       this.nose = textured(sphere(0.05, 10, 10), skin);
       this.nose.name = "Nose";
       this.nose.scale.set(0.5, 1, 1);
@@ -708,8 +696,6 @@ Primrose.BrowserEnvironment = (function () {
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
-
-      this.pointer = new Primrose.Pointer(this.scene, this.vehicle);
 
       this.camera = new THREE.PerspectiveCamera(75, 1, this.options.nearPlane, this.options.nearPlane + this.options.drawDistance);
       if (this.options.skyTexture !== undefined) {
@@ -744,24 +730,10 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.camera.add(this.nose);
-      this.player.add(this.camera);
-      this.vehicle.add(this.player);
-      this.scene.add(this.vehicle);
 
       if (this.passthrough) {
         this.camera.add(this.passthrough.mesh);
       }
-
-
-      var protocol = location.protocol.replace("http", "ws"),
-        path = protocol + "//" + location.hostname;
-      this.network = new Primrose.NetworkManager(path, this.player, micReady, this.audio, factories, this.options);
-      this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
-      this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
-      this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
-      this.network.addEventListener("authorizationfailed", emit.bind(this, "authorizationfailed"));
-
-      this.authenticate = this.network.authenticate.bind(this.network, this.id);
 
       var buildScene = (sceneGraph) => {
         sceneGraph.buttons = [];
@@ -1021,12 +993,31 @@ Primrose.BrowserEnvironment = (function () {
         this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
         this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
+
+
+        this.VR.makePointer(scene);
+        this.player = this.VR.mesh;
+        this.player.add(this.camera);
+
+        this.Mouse.makePointer(scene);
+        this.vehicle = this.Mouse.mesh;
+        this.vehicle.add(this.player);
+
+        var protocol = location.protocol.replace("http", "ws"),
+        path = protocol + "//" + location.hostname;
+        this.network = new Primrose.NetworkManager(path, this.player, micReady, this.audio, factories, this.options);
+        this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
+        this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
+        this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
+        this.network.addEventListener("authorizationfailed", emit.bind(this, "authorizationfailed"));
+
+        this.authenticate = this.network.authenticate.bind(this.network, this.id);
+
         return this.input.ready;
       });
 

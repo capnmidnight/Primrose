@@ -8,8 +8,8 @@ Primrose.Input.Mouse = (function () {
       description: "| [under construction]"
   });
   class Mouse extends Primrose.InputProcessor {
-    constructor(DOMElement, commands, socket) {
-      super("Mouse", commands, socket);
+    constructor(DOMElement, parent, commands, socket) {
+      super("Mouse", parent, commands, socket);
       DOMElement = DOMElement || window;
 
       DOMElement.addEventListener("mousedown", (event) => {

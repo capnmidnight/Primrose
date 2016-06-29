@@ -57,7 +57,7 @@ Primrose.Input.Speech = (function () {
   });
   class Speech extends Primrose.InputProcessor {
     constructor(commands, socket) {
-      super("Speech", commands, socket);
+      super("Speech", null, commands, socket);
       var running = false,
         recognition = null,
         errorMessage = null;

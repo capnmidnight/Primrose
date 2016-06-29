@@ -8,8 +8,8 @@ Primrose.Input.Touch = (function () {
       description: "| [under construction]"
   });
   class Touch extends Primrose.InputProcessor {
-    constructor(DOMElement, commands, socket) {
-      super("Touch", commands, socket);
+    constructor(DOMElement, parent, commands, socket) {
+      super("Touch", parent, commands, socket);
       DOMElement = DOMElement || window;
 
       function setState(stateChange, setAxis, event) {

@@ -1,6 +1,15 @@
 Primrose.InputProcessor = (function () {
   "use strict";
 
+  const TELEPORT_RADIUS = 0.4,
+    FORWARD = new THREE.Vector3(0, 0, -1),
+    MAX_SELECT_DISTANCE = 2,
+    MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
+    MAX_MOVE_DISTANCE = 5,
+    MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+    LASER_LENGTH = 1,
+    moveTo = new THREE.Vector3(0, 0, 0);
+
   pliny.class({
     parent: "Primrose",
       name: "InputProcessor",
@@ -23,8 +32,9 @@ Primrose.InputProcessor = (function () {
       });
     }
 
-    constructor(name, commands, socket, axisNames) {
+    constructor(name, parent, commands, socket, axisNames) {
       this.name = name;
+      this.parent = parent;
       this.commands = {};
       this.commandNames = [];
       this.socket = socket;
@@ -44,7 +54,12 @@ Primrose.InputProcessor = (function () {
         meta: false
       };
       this.lastState = "";
-      this.lastT = performance.now();
+
+      this.mesh = null;
+      this.disk = null;
+      this.stage = null;
+      this.stageX = null;
+      this.stageZ = null;
 
       var readMetaKeys = (event) => {
         for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
@@ -88,7 +103,78 @@ Primrose.InputProcessor = (function () {
       for (var i = 0; i < this.axisNames.length; ++i) {
         this.inputState.axes[i] = 0;
       }
+    }
 
+    registerHit(currentHit, isGround) {
+      var fp = currentHit.facePoint,
+        moveMesh = this.mesh;
+
+      moveTo.fromArray(fp)
+        .sub(this.fromObj.position);
+
+      this.groundMesh.visible = isGround;
+
+      if (isGround) {
+        var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
+        moveMesh = this.groundMesh;
+        this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
+        if (distSq > MAX_MOVE_DISTANCE_SQ) {
+          var dist = Math.sqrt(distSq),
+            factor = MAX_MOVE_DISTANCE / dist,
+            y = moveTo.y;
+          moveTo.y = 0;
+          moveTo.multiplyScalar(factor);
+          moveTo.y = y;
+
+          this.mesh.material.color.setRGB(1, 1, 0);
+          this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
+        }
+        this.groundMesh.position
+          .copy(this.fromObj.position)
+          .add(moveTo);
+        this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
+      }
+      else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
+        this.mesh.material.color.setRGB(0, 1, 0);
+        this.mesh.material.emissive.setRGB(0, 0.5, 0);
+      }
+    }
+
+    reset() {
+      this.groundMesh.visible = false;
+      this.mesh.visible = true;
+      this.mesh.material.color.setRGB(1, 0, 0);
+      if (this.mesh.material.emissive) {
+        this.mesh.material.emissive.setRGB(0.5, 0, 0);
+      }
+    }
+
+    makePointer(scene){
+
+      this.mesh = textured(box(0.01, 0.01, LASER_LENGTH), 0xff0000, {
+        emissive: 0x3f0000
+      });
+      this.mesh.geometry.vertices.forEach((v) => {
+        v.z -= LASER_LENGTH * 0.5 + 0.5;
+      });
+
+      this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
+        emissive: 0x003f00
+      });
+      this.disk.geometry.computeBoundingBox();
+
+      this.disk.scale.set(1, 0.1, 1);
+
+      this.stage = textured(box(), 0x00ff00, {
+        wireframe: true,
+        emissive: 0x003f00
+      });
+
+      this.setStage(0, 0);
+
+      scene.add(this.mesh);
+      scene.add(this.disk);
+      scene.add(this.stage);
     }
 
     addCommand(name, cmd) {
@@ -154,10 +240,12 @@ Primrose.InputProcessor = (function () {
       return output;
     }
 
-    update() {
-      var t = performance.now() / 1000,
-        dt = t - this.lastT;
-      this.lastT = t;
+    poll(){
+      // Intentionally empty. Override in child classes.
+    }
+
+    update(dt, stage) {
+      this.poll();
       if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
         for (var name in this.commands) {
           var cmd = this.commands[name];
@@ -284,6 +372,46 @@ Primrose.InputProcessor = (function () {
         }
 
         this.fireCommands();
+      }
+
+      this.setStage(stage.sizeX, stage.sizeZ);
+
+      this.mesh.position.set(0, 0, 0);
+      this.mesh.quaternion.set(0, 0, 0, 1);
+      this.mesh.updateMatrix();
+      FORWARD.set(0, 0, -1);
+
+      var head = this.fromObj;
+      while(head){
+        this.mesh.applyMatrix(head.matrixWorld);
+        FORWARD.applyMatrix4(head.matrixWorld);
+        head = head.parent;
+      }
+      return [this.mesh.position.toArray(), FORWARD.toArray()];
+    }
+
+    setStage(sizeX, sizeZ) {
+      if (sizeX !== this.stageX || sizeZ !== this.sizeZ) {
+        this.stageX = sizeX;
+        this.stageZ = sizeZ;
+        if (this.stageX * this.stageZ === 0) {
+          this.groundMesh = this.disk;
+          this.stage.visible = false;
+          this.disk.visible = true;
+        }
+        else {
+          var scene = this.stage.parent;
+          scene.remove(this.stage);
+          this.stage = textured(box(this.stageX, 2.5, this.stageZ), 0x00ff00, {
+            wireframe: true,
+            emissive: 0x003f00
+          });
+          this.stage.geometry.computeBoundingBox();
+          scene.add(this.stage);
+          this.groundMesh = this.stage;
+          this.stage.visible = true;
+          this.disk.visible = false;
+        }
       }
     }
 

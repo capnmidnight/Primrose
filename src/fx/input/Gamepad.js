@@ -100,9 +100,9 @@ Primrose.Input.Gamepad = (function () {
       }
     }
 
-    constructor(pad, axisOffset, commands, socket) {
+    constructor(pad, axisOffset, commands, socket, parent) {
       var padID = Gamepad.ID(pad);
-      super(padID, commands, socket, Gamepad.AXES);
+      super(padID, parent, commands, socket, Gamepad.AXES);
       currentManagers[padID] = this;
 
       this.currentPose = {

@@ -9,7 +9,7 @@ Primrose.Input.Motion = (function () {
   });
   class Motion extends Primrose.InputProcessor {
     constructor(commands, socket) {
-      super("Motion", commands, socket);
+      super("Motion", null, commands, socket);
       var corrector = new MotionCorrector(),
         a = new THREE.Quaternion(),
         b = new THREE.Quaternion(),
