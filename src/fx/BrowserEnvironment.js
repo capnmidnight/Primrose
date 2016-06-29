@@ -809,6 +809,7 @@ Primrose.BrowserEnvironment = (function () {
           if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
             currentHit.gazeFired = true;
             emit.call(this, "gazecomplete", currentHit);
+            emit.call(this.pickableObjects[currentHit.objectID], "click");
           }
         }
         else {
