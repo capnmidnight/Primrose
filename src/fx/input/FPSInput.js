@@ -18,7 +18,6 @@ Primrose.Input.FPSInput = (function () {
 
       this.listeners = {
         zero: [],
-        fullscreen: [],
         pointerstart: [],
         pointerend: [],
         motioncontroller: []
@@ -29,11 +28,6 @@ Primrose.Input.FPSInput = (function () {
       this.add(new Primrose.Input.VR(avatarHeight));
 
       this.add(new Primrose.Input.Keyboard(DOMElement, {
-        fullScreen: {
-          buttons: [Primrose.Keys.F],
-          repetitions: 1,
-          commandDown: emit.bind(this, "fullscreen")
-        },
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
         },
@@ -77,10 +71,6 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       this.add(new Primrose.Input.Mouse(DOMElement, {
-        fullScreen: {
-          buttons: [Primrose.Keys.ANY],
-          commandDown: emit.bind(this, "fullscreen")
-        },
         pointer: {
           buttons: [Primrose.Keys.ANY],
           commandDown: emit.bind(this, "pointerstart"),
@@ -309,7 +299,7 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    getQuaternion2(xValueName, yValueName, quaternion) {
+    getQuaternion(xValueName, yValueName, zValueName, quaternion) {
       pliny.method({
         parent: "Primrose.FPSInput",
         name: "getQuaternion2",
@@ -323,6 +313,10 @@ Primrose.Input.FPSInput = (function () {
           type: "String",
           description: "The name of the value to retrieve for the Y axis."
         }, {
+          name: "zValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the Z axis."
+        }, {
           name: "quaternion",
           type: "THREE.Quatnerion",
           optional: true,
@@ -332,6 +326,7 @@ Primrose.Input.FPSInput = (function () {
 
       var x = 0,
         y = 0,
+        z = 0,
         mgr;
 
       quaternion = quaternion || THREE.Quaternion();
@@ -340,15 +335,16 @@ Primrose.Input.FPSInput = (function () {
         mgr = this.managers[i];
         x += mgr.getValue(xValueName);
         y += mgr.getValue(yValueName);
+        z += mgr.getValue(zValueName);
       }
 
-      euler.set(x, y, 0, "YXZ");
+      euler.set(x, y, z, "YXZ");
       quaternion.setFromEuler(euler);
 
       return quaternion;
     }
 
-    getVector2(xValueName, zValueName, vector) {
+    getVector(xValueName, yValueName, zValueName, vector) {
       pliny.method({
         parent: "Primrose.FPSInput",
         name: "getVector2",
@@ -357,6 +353,10 @@ Primrose.Input.FPSInput = (function () {
           name: "xValueName",
           type: "String",
           description: "The name of the value to retrieve for the X axis."
+        }, {
+          name: "yValueName",
+          type: "String",
+          description: "The name of the value to retrieve for the Y axis."
         }, {
           name: "zValueName",
           type: "String",
@@ -370,6 +370,7 @@ Primrose.Input.FPSInput = (function () {
       });
 
       var x = 0,
+        y = 0,
         z = 0;
 
       vector = vector || THREE.Vector3();
@@ -377,10 +378,11 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         x += mgr.getValue(xValueName);
+        y += mgr.getValue(yValueName);
         z += mgr.getValue(zValueName);
       }
 
-      vector.set(x, 0, z);
+      vector.set(x, y, z);
       return vector;
     }
 

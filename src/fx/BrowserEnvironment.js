@@ -42,6 +42,8 @@ Primrose.BrowserEnvironment = (function () {
         if (!lockedToEditor()) {
           playerHeight = null;
           this.input.zero();
+          this.vehicle.position.set(0, 0, 0);
+          this.vehicle.quaternion.set(0, 0, 0, 1);
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
           }
@@ -302,8 +304,13 @@ Primrose.BrowserEnvironment = (function () {
         this.player.updateMatrix();
         this.player.applyMatrix(stage.matrix);
 
-        this.input.getQuaternion2("pitch", "heading", this.vehicle.quaternion);
-        this.input.getVector2("strafe", "drive", this.vehicle.velocity);
+        if(this.input.VR.isPresenting){
+          this.input.getQuaternion(null, "heading", null, this.vehicle.quaternion);
+        }
+        else{
+          this.input.getQuaternion("pitch", "heading", null, this.vehicle.quaternion);
+        }
+        this.input.getVector("strafe", null, "drive", this.vehicle.velocity);
         tempVelocity
           .copy(this.vehicle.velocity)
           .multiplyScalar(dt);
@@ -390,36 +397,35 @@ Primrose.BrowserEnvironment = (function () {
         render();
       };
 
-      var render = () => {
-        if (this.inVR && this.input.VR.currentPose) {
+      var render = () => {   
+        if (this.input.VR.isPresenting && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
           var trans = this.input.VR.transforms;
-          for (var i = 0; trans && i < trans.length; ++i) {
+          for (var i = 0; trans && i < trans.length; ++i) { 
             var st = trans[i],
               v = st.viewport,
               side = (2 * i) - 1;
-            Primrose.Entity.eyeBlankAll(i);
-            this.camera.projectionMatrix.copy(st.projection);
-            this.camera.matrixWorld.copy(this.player.matrixWorld);
-            this.camera.translateOnAxis(st.translation, 1);
-            if (this.options.useNose) {
-              this.nose.visible = true;
-              this.nose.position.set(side * -0.12, -0.12, -0.15);
-              this.nose.rotation.z = side * 0.7;
-            }
-            this.renderer.setViewport(
-              v.left * resolutionScale,
-              v.top * resolutionScale,
-              v.width * resolutionScale,
-              v.height * resolutionScale);
-            this.renderer.render(this.scene, this.camera);
-          }
-          this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
+          Primrose.Entity.eyeBlankAll(i);
+          this.camera.projectionMatrix.copy(st.projection);
+          this.camera.matrixWorld.copy(this.player.matrixWorld);
+          this.camera.translateOnAxis(st.translation, 2);
+          if (this.options.useNose) {
+            this.nose.visible = true;
+            this.nose.position.set(side * -0.12, -0.12, -0.15);
+            this.nose.rotation.z = side * 0.7;
+          } 
+          this.renderer.setViewport(
+            v.left * resolutionScale,
+            v.top * resolutionScale,
+            v.width * resolutionScale,
+            v.height * resolutionScale);
+          this.renderer.render(this.scene, this.camera);     }
+          this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);   
         }
 
         this.audio.setPlayer(this.camera);
 
-        if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+        if (!this.input.VR.isPresenting || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
@@ -432,7 +438,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setOrientationLock = () => {
-        if (isFullScreenMode()) {
+        if (this.input.VR.isPresenting) {
           var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
           if (type.indexOf("landscape") === -1) {
             type = "landscape-primary";
@@ -808,7 +814,7 @@ Primrose.BrowserEnvironment = (function () {
           if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
             currentHit.gazeFired = true;
             emit.call(this, "gazecomplete", currentHit);
-            emit.call(this.pickableObjects[currentHit.objectID], "click");
+            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
           }
         }
         else {
@@ -857,60 +863,29 @@ Primrose.BrowserEnvironment = (function () {
       //
       var fullScreenRunning = false;
       this.goFullScreen = (index, evt) => {
-        if(!fullScreenRunning){
+        console.log("goFullScreen", fullScreenRunning, index, evt);
+        if(!fullScreenRunning && evt !== "Gaze"){
           fullScreenRunning = true;
-          var promise = Promise.resolve();
-
-          if (index === undefined || typeof (index) !== "number") {
-            index = this.input.VR.currentDisplayIndex;
-          }
-
-          if (index !== this.input.VR.currentDisplayIndex || !isFullScreenMode()) {
-            if (isFullScreenMode()) {
-              promise = promise.then(()=>this.input.VR.currentDisplay.exitPresent());
-            }
-
-            if (index !== this.input.VR.currentDisplayIndex){
-              this.input.VR.connect(index);
-            }
-
+          setPointerLock();
+          this.input.VR.connect(index);
+          this.input.VR.requestPresent([{
+            source: this.renderer.domElement
+          }]).catch()
+          .then(() =>{
             this.renderer.domElement.focus();
-            console.log(evt);
-            promise = promise.then(()=>this.input.VR.requestPresent([{
-              source: this.renderer.domElement
-            }]));
-
-            if (WebVRBootstrapper.Version === 1 && isMobile) {
-              promise = promise.then((elem) => {
-                  var remover = () => {
-                    this.input.VR.currentDisplay.exitPresent();
-                    window.removeEventListener("vrdisplaypresentchange", remover);
-                  };
-
-                  var adder = () => {
-                    window.addEventListener("vrdisplaypresentchange", remover, false);
-                    window.removeEventListener("vrdisplaypresentchange", adder);
-                  };
-
-                  window.addEventListener("vrdisplaypresentchange", adder, false);
-                return elem;
-              });
-            }
-          }
-
-          if (!(Primrose.Input.Mouse.Lock.isActive || isMobile)) {
-            promise = promise.then(()=>Primrose.Input.Mouse.Lock.request(this.renderer.domElement)); 
-          }
-
-          return promise
-            .catch(console.error.bind(console, "Fullscreen Error"))
-            .then(()=>fullScreenRunning= false);
+            fullScreenRunning = false;
+          });
         }
       };
 
+      var setPointerLock = () => {
+        if(!(Primrose.Input.Mouse.Lock.isActive || isMobile)) {
+          Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
+        }
+      };
 
       var showHideButtons = () => {
-        var hide = isFullScreenMode();
+        var hide = this.input.VR.isPresenting;
         iconManager.icons.forEach((icon) => {
           if (icon.name.indexOf("Display") === 0) {
             icon.visible = !hide;
@@ -935,31 +910,29 @@ Primrose.BrowserEnvironment = (function () {
           window.addEventListener("vrdisplaypresentchange", (evt) => {
             if (window.VRDisplay && this.input.VR.currentDisplay instanceof VRDisplay) {
               setOrientationLock();
-              showHideButtons();
             }
           }, false);
         }
         FullScreen.addChangeListener((evt) => {
           if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
             setOrientationLock();
-            showHideButtons();
           }
         }, false);
       }
-      else {
-        window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
-      }
 
+      window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
       window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
       FullScreen.addChangeListener(modifyScreen, false);
 
       Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive) {
-          this.input.VR.currentDisplay.exitPresent();
+          this.input.VR.cancel();
+          this.input.VR.connect(0);
+          this.input.VR.resetTransforms(
+            this.options.nearPlane,
+            this.options.nearPlane + this.options.drawDistance);
         }
       }, false);
-
-      var isFullScreenMode = () => FullScreen.isActive || this.input.VR.currentDisplay.isPresenting;
 
 
       var clipboardOperation = (name, evt) => {
@@ -1051,7 +1024,6 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
-        this.input.addEventListener("fullscreen", this.goFullScreen.bind(this, 0), false);
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
@@ -1158,9 +1130,6 @@ Primrose.BrowserEnvironment = (function () {
         hasOrientation: {
           get: () => this.input.VR.currentDisplay && this.input.VR.currentDisplay.hasOrientation
         },
-        inVR: {
-          get: () => this.input.VR.transforms && this.input.VR.transforms.length > 1
-        },
         displays: {
           get: () => this.input.VR.displays || []
         },
@@ -1188,7 +1157,7 @@ Primrose.BrowserEnvironment = (function () {
             newFunction = function () {};
           }
           return function () {
-            if (isFullScreenMode()) {
+            if (this.input.VR.isPresenting) {
               newFunction();
             }
             else {

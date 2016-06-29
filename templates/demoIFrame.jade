@@ -53,7 +53,7 @@ html
             btn.type = "button";
             btn.appendChild(document.createTextNode(display.displayName));
             btn.addEventListener("click", function(i){
-              env.goFullScreen(i);
+              env.goFullScreen(i, "Button");
             }.bind(null, i), false);
             c.appendChild(btn);
           }

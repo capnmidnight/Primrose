@@ -30,8 +30,8 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.appendChild(document.createTextNode(display.displayName));
-          btn.addEventListener("click", function(i){
-            env.goFullScreen(i);
+          btn.addEventListener("click", function(i, evt){
+            env.goFullScreen(i, evt);
           }.bind(null, i), false);
           c.appendChild(btn);
         }

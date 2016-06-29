@@ -3,6 +3,10 @@ Primrose.Input.VR = (function () {
 
   const SLERP_A = isMobile ? 0.1 : 0,
     SLERP_B = 1 - SLERP_A,
+    DEFAULT_POSE = {
+      position: [0, 0, 0],
+      orientation: [0, 0, 0, 1]
+    },
     tempQuat = [];
   pliny.class({
     parent: "Primrose.Input",
@@ -29,10 +33,7 @@ Primrose.Input.VR = (function () {
       this._transforms = [];
       this.transforms = null;
       this.currentDisplayIndex = -1;
-      this.currentPose = {
-        position: [0, 0, 0],
-        orientation: [0, 0, 0, 1]
-      };
+      this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
       this.avatarHeight = avatarHeight;
 
@@ -72,6 +73,20 @@ Primrose.Input.VR = (function () {
         return this.currentDisplay.requestPresent(opts)
           .then((elem) => elem || opts[0].source);
       }
+    }
+
+    cancel(){
+      var promise = null;
+      if(this.currentDisplayIndex > -1 && this.currentDisplay.isPresenting){
+        promise = this.currentDisplay.exitPresent();
+      }
+      else{
+        promise = Promise.resolve();
+      }
+      return promise.then(() => {
+        this.currentDisplayIndex = -1;
+        this.transforms = null;
+      });
     }
 
     poll() {
@@ -117,8 +132,12 @@ Primrose.Input.VR = (function () {
         this.displays[this.currentDisplayIndex];
     }
 
+    get isPresenting(){
+      return this.currentDisplay && this.currentDisplay.isPresenting;
+    }
+
     connect(selectedIndex) {
-      this.currentPose = null;
+      this.currentPose = selectedIndex === 0 ? DEFAULT_POSE : null;
       this.currentDisplayIndex = selectedIndex;
     }
   }

@@ -74,7 +74,8 @@ Primrose.Input.Mouse = (function () {
     changeEventName = findProperty(document, ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"]),
     errorEventName = findProperty(document, ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"]),
     requestMethodName = findProperty(document.documentElement, ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"]),
-    exitMethodName = findProperty(document, ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+    exitMethodName = findProperty(document, ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]),
+    changeTimeout = null;
 
   changeEventName = changeEventName && changeEventName.substring(2);
   errorEventName = errorEventName && errorEventName.substring(2);
@@ -88,11 +89,14 @@ Primrose.Input.Mouse = (function () {
       return new Promise((resolve, reject) => {
         var onPointerLock,
           onPointerLockError,
-          timeout,
-          tearDown = () => {
-            if (timeout) {
-              clearTimeout(timeout);
+          stop = () => {
+            if (changeTimeout !== null) {
+              clearTimeout(changeTimeout);
+              changeTimeout = null;
             }
+          },
+          tearDown = () => {
+            stop();
             Mouse.Lock.removeChangeListener(onPointerLock);
             Mouse.Lock.removeErrorListener(onPointerLockError);
           };
@@ -117,7 +121,8 @@ Primrose.Input.Mouse = (function () {
         else {
           // Timeout wating on the pointer lock to happen, for systems like iOS that
           // don't properly support it, even though they say they do.
-          timeout = setTimeout(() => {
+          stop();
+          changeTimeout = setTimeout(() => {
             tearDown();
             reject("Pointer Lock state did not change in allotted time");
           }, 1000);
