@@ -36,7 +36,7 @@ Primrose.Pointer = (function () {
         v.z -= length * 0.5 + 0.5;
       });
 
-      this.disk = textured(sphere(TELEPORT_RADIUS, 32, 3), 0x00ff00, {
+      this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
         emissive: 0x003f00
       });
       this.disk.geometry.computeBoundingBox();
@@ -66,10 +66,6 @@ Primrose.Pointer = (function () {
       return [this.mesh.position.toArray(), FORWARD.toArray()];
     }
 
-    get position() {
-      return this.mesh.position;
-    }
-
     setStage(sizeX, sizeZ) {
       if (sizeX !== this.stageX || sizeZ !== this.sizeZ) {
         this.stageX = sizeX;
@@ -95,42 +91,38 @@ Primrose.Pointer = (function () {
       }
     }
 
-    registerHit(currentHit, player, isGround) {
+    registerHit(currentHit, fromObj, isGround) {
       var fp = currentHit.facePoint,
         moveMesh = this.mesh;
 
       moveTo.fromArray(fp)
-        .sub(player.position);
+        .sub(fromObj.position);
 
       this.groundMesh.visible = isGround;
 
       if (isGround) {
         var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
         moveMesh = this.groundMesh;
-        this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
-        if (this.mesh.visible) {
-          //this.mesh.scale.set(1, 1, 1);
+        //this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
+        if (distSq > MAX_MOVE_DISTANCE_SQ) {
           var dist = Math.sqrt(distSq),
             factor = MAX_MOVE_DISTANCE / dist,
             y = moveTo.y;
+          moveTo.y = 0;
           moveTo.multiplyScalar(factor);
+          moveTo.y = y;
+
           this.mesh.material.color.setRGB(1, 1, 0);
           this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
-          // this.mesh.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
-          // this.mesh.position.copy(player.position)
-          //   .add(moveTo);
-          moveTo.y = y;
         }
-        this.groundMesh.position.copy(player.position)
+        this.groundMesh.position
+          .copy(fromObj.position)
           .add(moveTo);
         this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
       else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
         this.mesh.material.color.setRGB(0, 1, 0);
         this.mesh.material.emissive.setRGB(0, 0.5, 0);
-        // this.mesh.position.copy(player.position)
-        //   .add(moveTo);
-        // this.mesh.scale.set(0.5, 1, 0.5);
       }
     }
 
@@ -141,7 +133,6 @@ Primrose.Pointer = (function () {
       if (this.mesh.material.emissive) {
         this.mesh.material.emissive.setRGB(0.5, 0, 0);
       }
-      //this.mesh.scale.set(1, 1, 1);
     }
   }
 
