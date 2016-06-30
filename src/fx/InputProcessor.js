@@ -145,11 +145,13 @@ Primrose.InputProcessor = (function () {
     }
 
     reset() {
-      this.groundMesh.visible = false;
-      this.mesh.visible = true;
-      this.mesh.material.color.setRGB(1, 0, 0);
-      if (this.mesh.material.emissive) {
-        this.mesh.material.emissive.setRGB(0.5, 0, 0);
+      if(this.mesh){
+        this.groundMesh.visible = false;
+        this.mesh.visible = true;
+        this.mesh.material.color.setRGB(1, 0, 0);
+        if (this.mesh.material.emissive) {
+          this.mesh.material.emissive.setRGB(0.5, 0, 0);
+        }
       }
     }
 

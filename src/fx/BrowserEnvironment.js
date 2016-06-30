@@ -283,11 +283,11 @@ Primrose.BrowserEnvironment = (function () {
 
       var resolvePicking = () => {
         if (currentHits) {
-          for (var k in currentHits) {
-            var currentHit = currentHits[k];
+          for(var i = 0; i < this.input.managers.length; ++i){
+            var mgr = this.input.managers[i],
+              currentHit = currentHits[mgr.name];
             if (currentHit) {
-              var lastHit = lastHit && lastHit[k],
-                mgr = this.input[k],
+              var lastHit = lastHit && lastHit[mgr.name],
                 lastButtons = mgr.getValue("dButtons"),
                 object = this.pickableObjects[currentHit.objectID];
 
@@ -309,7 +309,7 @@ Primrose.BrowserEnvironment = (function () {
               }
             }
             else {
-              this.input.Mouse.reset();
+              mgr.reset();
             }
           }
         }
