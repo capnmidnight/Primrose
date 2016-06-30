@@ -175,7 +175,7 @@ Primrose.Input.FPSInput = (function () {
           padCommands = null,
           controllerNumber = 0;
 
-        if(pad.id.indexOf("Unknown") !== 0){
+        if (pad.id.indexOf("Unknown") !== 0) {
           if (isMotion) {
             padCommands = {
               pointer: {
@@ -230,7 +230,7 @@ Primrose.Input.FPSInput = (function () {
           if (isMotion) {
             emit.call(this, "motioncontroller", mgr);
           }
-          else{
+          else {
             this.Keyboard.parent = mgr;
             emit.call(this, "gamepad", mgr);
           }
@@ -285,7 +285,10 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          segments.push(mgr.update(dt, stage));
+          var seg = mgr.update(dt, stage);
+          if(seg){
+            segments.push(seg);
+          }
         }
       }
       return segments;
@@ -304,17 +307,17 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    set inVR(v){
-      for(var i = 0; i < this.managers.length; ++i){
+    set inVR(v) {
+      for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].inVR = v;
       }
     }
 
-    set playerHeight(playerHeight){
-      for(var i = 0; i < this.managers.length; ++i){
+    set playerHeight(playerHeight) {
+      for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if(mgr.mesh){
-          mgr.mesh.position.y -= playerHeight;
+        if (mgr.mesh) {
+          mgr.playerHeight = playerHeight;
         }
       }
     }

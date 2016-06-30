@@ -139,7 +139,7 @@ Primrose.Input.Gamepad = (function () {
       }
     }
 
-    updateVelocity(){
+    updateVelocity() {
       var p = this.currentPose && this.currentPose.position;
       if (!p) {
         this.mesh.velocity.set(
@@ -150,14 +150,14 @@ Primrose.Input.Gamepad = (function () {
       }
     }
 
-    updateOrientation() {
+    updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
         this.mesh.quaternion.fromArray(o);
       }
-      else{
+      else {
         EULER.set(
-          this.inVR ? 0 : this.getValue("pitch"),
+          excludePitch || this.inVR ? 0 : this.getValue("pitch"),
           this.getValue("heading"),
           0,
           "YXZ"

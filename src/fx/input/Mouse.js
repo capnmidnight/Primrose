@@ -61,30 +61,33 @@ Primrose.Input.Mouse = (function () {
       }, false);
     }
 
-    updatePosition() {
-    }
+    updatePosition() {}
 
-    updateVelocity(){
-      this.mesh.velocity.set(0, 0, 0);
-      var head = this;
-      while(head){
-        this.mesh.velocity.x += head.getValue("strafe");
-        this.mesh.velocity.z += head.getValue("drive");
+    updateVelocity() {
+      var head = this,
+        x = 0,
+        z = 0;
+      while (head) {
+        x += head.getValue("strafe");
+        z += head.getValue("drive");
         head = head.parent;
       }
+
+      this.mesh.velocity.x = x;
+      this.mesh.velocity.z = z;
     }
 
-    updateOrientation() {
+    updateOrientation(excludePitch) {
       var p = 0,
         h = 0;
       var head = this;
-      while(head){
+      while (head) {
         p += head.getValue("pitch");
         h += head.getValue("heading");
         head = head.parent;
       }
       EULER.set(
-        this.inVR ? 0 : p,
+        excludePitch || this.inVR ? 0 : p,
         h,
         0,
         "YXZ"

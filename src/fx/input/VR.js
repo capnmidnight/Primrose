@@ -35,7 +35,7 @@ Primrose.Input.VR = (function () {
       this.currentDisplayIndex = -1;
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
-      this.avatarHeight = avatarHeight;
+      this.defaultAvatarHeight = avatarHeight;
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()
@@ -56,7 +56,7 @@ Primrose.Input.VR = (function () {
         z = stage.sizeZ;
       }
       else {
-        this.movePlayer.makeTranslation(0, this.avatarHeight, 0);
+        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
       }
       return {
         matrix: this.movePlayer,
@@ -102,11 +102,11 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    updateVelocity(){
+    updateVelocity() {
 
     }
 
-    updateOrientation() {
+    updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
         this.mesh.quaternion.toArray(tempQuat);

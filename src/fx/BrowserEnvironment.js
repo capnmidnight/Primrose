@@ -206,13 +206,10 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var stage;
       var update = (t) => {
         var dt = t - lt,
           i, j;
         lt = t;
-
-        stage = this.input.VR.stage;
 
         movePlayer(dt);
         moveSky();
@@ -252,43 +249,43 @@ Primrose.BrowserEnvironment = (function () {
       var lastHits = null,
         currentHits = null,
         handleHit = (h) => {
-        var dt;
-        this.projector.ready = true;
-        lastHits = currentHits;
-        currentHits = h;
+          var dt;
+          this.projector.ready = true;
+          lastHits = currentHits;
+          currentHits = h;
 
-        var currentHit = currentHits.VR,
-          lastHit = lastHits && lastHits.VR;
-        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-          currentHit.startTime = lastHit.startTime;
-          currentHit.gazeFired = lastHit.gazeFired;
-          dt = lt - currentHit.startTime;
-          if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
-            currentHit.gazeFired = true;
-            emit.call(this, "gazecomplete", currentHit);
-            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
-          }
-        }
-        else {
-          if (lastHit) {
-            dt = lt - lastHit.startTime;
-            if (dt < this.options.gazeLength) {
-              emit.call(this, "gazecancel", lastHit);
+          var currentHit = currentHits.VR,
+            lastHit = lastHits && lastHits.VR;
+          if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+            currentHit.startTime = lastHit.startTime;
+            currentHit.gazeFired = lastHit.gazeFired;
+            dt = lt - currentHit.startTime;
+            if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
+              currentHit.gazeFired = true;
+              emit.call(this, "gazecomplete", currentHit);
+              emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
             }
           }
-          if (currentHit) {
-            currentHit.startTime = lt;
-            currentHit.gazeFired = false;
-            emit.call(this, "gazestart", currentHit);
+          else {
+            if (lastHit) {
+              dt = lt - lastHit.startTime;
+              if (dt < this.options.gazeLength) {
+                emit.call(this, "gazecancel", lastHit);
+              }
+            }
+            if (currentHit) {
+              currentHit.startTime = lt;
+              currentHit.gazeFired = false;
+              emit.call(this, "gazestart", currentHit);
+            }
           }
-        }
-      };
+        };
 
       var resolvePicking = () => {
         if (currentHits) {
-          for(var k in currentHits){
+          for (var k in currentHits) {
             var currentHit = currentHits[k];
-            if(currentHit){
+            if (currentHit) {
               var lastHit = lastHit && lastHit[k],
                 mgr = this.input[k],
                 lastButtons = mgr.getValue("dButtons"),
@@ -320,8 +317,8 @@ Primrose.BrowserEnvironment = (function () {
 
       var pointerStart = (name) => {
         if (!(name === "keyboard" && lockedToEditor())) {
-          if(currentHits){
-            for(var k in currentHits){
+          if (currentHits) {
+            for (var k in currentHits) {
               var currentHit = currentHits[k];
               if (currentHit) {
                 var object = this.pickableObjects[currentHit.objectID];
@@ -340,7 +337,7 @@ Primrose.BrowserEnvironment = (function () {
                   }
                   else if (object === this.ground) {
                     this.vehicle.position.copy(this.input[k].groundMesh.position);
-                    this.vehicle.position.y = 0;
+                    this.vehicle.position.y = this.avatarHeight;
                     this.vehicle.isOnGround = false;
                   }
 
@@ -361,8 +358,8 @@ Primrose.BrowserEnvironment = (function () {
       var pointerEnd = (name) => {
         if (!(name === "keyboard" && lockedToEditor())) {
 
-          if(currentHits){
-            for(var k in currentHits){
+          if (currentHits) {
+            for (var k in currentHits) {
               var currentHit = currentHits[k],
                 lastHit = lastHits && lastHits[k];
               if (currentHit) {
@@ -372,7 +369,7 @@ Primrose.BrowserEnvironment = (function () {
                   if (this.currentControl) {
                     this.currentControl.endPointer();
                   }
-                  if(lastHit){
+                  if (lastHit) {
                     emit.call(this, "pointerend", lastHit);
                   }
                   emit.call(object, "click");
@@ -384,19 +381,28 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       const tempVelocity = new THREE.Vector3();
-
+      const printPos = (obj) => obj.position.toArray().join(", ");
       var movePlayer = (dt) => {
-        var segments = this.input.update(dt, stage).filter(identity);
-        if (this.projector.ready) {
-          this.projector.ready = false;
-          this.projector.projectPointers(segments);
+        var segments = this.input.update(dt, this.input.VR.stage);
+        if(!this.vehicle.isOnGround){
+          this.vehicle.velocity.y -= this.options.gravity * dt;
+        }
+
+        if(this.vehicle.position.y < this.avatarHeight){
+          this.vehicle.velocity.y = 0;
+          this.vehicle.position.y = this.avatarHeight;
+          this.vehicle.isOnGround = true;
         }
 
         if (playerHeight === null) {
           playerHeight = this.player.position.y;
+          this.input.playerHeight = playerHeight;
         }
-        this.input.playerHeight = playerHeight;
-        this.vehicle.position.y = playerHeight;
+
+        if (this.projector.ready) {
+          this.projector.ready = false;
+          this.projector.projectPointers(segments);
+        }
       };
 
       var playerHeight = null;
@@ -800,7 +806,7 @@ Primrose.BrowserEnvironment = (function () {
       this.timer = 0;
       var RAF = (callback) => {
         currentTimerObject = this.input.VR.currentDisplay || window;
-        if(this.timer !== null){
+        if (this.timer !== null) {
           this.timer = currentTimerObject.requestAnimationFrame(callback);
         }
       };
@@ -836,7 +842,6 @@ Primrose.BrowserEnvironment = (function () {
       //
       var fullScreenRunning = false;
       this.goFullScreen = (index, evt) => {
-        console.log("goFullScreen", fullScreenRunning, index, evt);
         if (!fullScreenRunning && evt !== "Gaze") {
           fullScreenRunning = true;
           setPointerLock();
@@ -1013,7 +1018,7 @@ Primrose.BrowserEnvironment = (function () {
         this.vehicle = this.input.Mouse.mesh;
         this.vehicle.add(this.player);
 
-        if(this.options.serverPath === undefined){
+        if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }

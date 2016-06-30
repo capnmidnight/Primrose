@@ -2628,7 +2628,7 @@ Primrose.Projector = (function () {
 
   Projector.prototype.projectPointers = function (args) {
     var results = {};
-    for(var n = 0; n < args.length; ++n){
+    for (var n = 0; n < args.length; ++n) {
       var pack = args[n],
         name = pack[0],
         from = pack[1],
@@ -2695,7 +2695,7 @@ Primrose.Projector = (function () {
           }
         }
       }
-      if(value){
+      if (value) {
         results[name] = value;
       }
     }

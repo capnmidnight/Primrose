@@ -54,6 +54,7 @@ Primrose.InputProcessor = (function () {
         meta: false
       };
       this.lastState = "";
+      this.playerHeight = 0;
 
       this.mesh = null;
       this.disk = null;
@@ -67,6 +68,8 @@ Primrose.InputProcessor = (function () {
           var m = Primrose.Keys.MODIFIER_KEYS[i];
           this.inputState[m] = event[m + "Key"];
         }
+
+        // TODO: this update needs to pass dt and stage
         this.update();
       };
 
@@ -376,18 +379,25 @@ Primrose.InputProcessor = (function () {
         this.fireCommands();
       }
 
-      if(this.mesh && stage){
+      if (this.mesh && stage) {
         this.setStage(stage.sizeX, stage.sizeZ);
 
-        this.updateOrientation();
-        this.updatePosition();
+        this.updateOrientation(true);
         this.updateVelocity();
-        this.mesh.position.add(moveTo
+
+        moveTo
           .copy(this.mesh.velocity)
           .multiplyScalar(dt)
-          .applyQuaternion(this.mesh.quaternion));
+          .applyQuaternion(this.mesh.quaternion);
+
+        this.updateOrientation(false);
+        this.updatePosition();
+
+        this.mesh.position.add(moveTo);
         this.mesh.updateMatrix();
         this.mesh.applyMatrix(stage.matrix);
+        this.mesh.position.y -= this.playerHeight;
+
         FORWARD.set(0, 0, -1);
         FORWARD.applyMatrix4(this.mesh.matrixWorld)
 
@@ -399,7 +409,7 @@ Primrose.InputProcessor = (function () {
       throw new Error(this.name + " updateOrientation not implemented");
     }
 
-    updateVelocity(){
+    updateVelocity() {
       throw new Error(this.name + " updateVelocity not implemented");
     }
 
