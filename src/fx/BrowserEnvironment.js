@@ -441,7 +441,7 @@ Primrose.BrowserEnvironment = (function () {
             Primrose.Entity.eyeBlankAll(i);
             this.camera.projectionMatrix.copy(st.projection);
             this.camera.matrixWorld.copy(this.player.matrixWorld);
-            this.camera.translateOnAxis(st.translation, 2);
+            this.camera.translateOnAxis(st.translation, 1);
             if (this.options.useNose) {
               this.nose.visible = true;
               this.nose.position.set(side * -0.12, -0.12, -0.15);
@@ -453,6 +453,7 @@ Primrose.BrowserEnvironment = (function () {
               v.width * resolutionScale,
               v.height * resolutionScale);
             this.renderer.render(this.scene, this.camera);
+            this.camera.translateOnAxis(st.translation, -1);
           }
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
