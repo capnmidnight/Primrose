@@ -2,9 +2,8 @@ Primrose.Input.FPSInput = (function () {
   "use strict";
 
   const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
-    AXIS_PREFIXES = ["L", "R"];
-
-  var temp = new THREE.Quaternion(),
+    AXIS_PREFIXES = ["L", "R"],
+    temp = new THREE.Quaternion(),
     euler = new THREE.Euler();
 
   pliny.class({
@@ -20,7 +19,8 @@ Primrose.Input.FPSInput = (function () {
         zero: [],
         pointerstart: [],
         pointerend: [],
-        motioncontroller: []
+        motioncontroller: [],
+        gamepad: []
       };
 
       this.managers = [];
@@ -171,70 +171,69 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
-        var pose = pad.pose,
-          isMotion = pad.id === "OpenVR Gamepad",
+        var isMotion = pad.id === "OpenVR Gamepad",
           padCommands = null,
-          controllerNumber = 0,
-          socket = null,
-          parent = null;
+          controllerNumber = 0;
 
-        if (isMotion) {
-          padCommands = {
-            pointer: {
-              buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
-              commandDown: emit.bind(this, "pointerstart"),
-              commandUp: emit.bind(this, "pointerend")
-            }
-          };
+        if(pad.id.indexOf("Unknown") !== 0){
+          if (isMotion) {
+            padCommands = {
+              pointer: {
+                buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
+                commandDown: emit.bind(this, "pointerstart"),
+                commandUp: emit.bind(this, "pointerend")
+              }
+            };
 
-          for (var i = 0; i < this.managers.length; ++i) {
-            var mgr = this.managers[i];
-            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-              ++controllerNumber;
+            for (var i = 0; i < this.managers.length; ++i) {
+              var mgr = this.managers[i];
+              if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+                ++controllerNumber;
+              }
             }
           }
-        }
-        else {
-          parent = this.Mouse;
-          padCommands = {
-            pointer: {
-              buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.A],
-              commandDown: emit.bind(this, "pointerstart"),
-              commandUp: emit.bind(this, "pointerend")
-            },
-            strafe: {
-              axes: [Primrose.Input.Gamepad.LSX],
-              deadzone: 0.2
-            },
-            drive: {
-              axes: [Primrose.Input.Gamepad.LSY],
-              deadzone: 0.2
-            },
-            heading: {
-              axes: [-Primrose.Input.Gamepad.RSX],
-              deadzone: 0.2,
-              integrate: true
-            },
-            dheading: {
-              commands: ["heading"],
-              delta: true
-            },
-            pitch: {
-              axes: [-Primrose.Input.Gamepad.RSY],
-              deadzone: 0.2,
-              integrate: true
-            }
-          };
-        }
+          else {
+            padCommands = {
+              pointer: {
+                buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.A],
+                commandDown: emit.bind(this, "pointerstart"),
+                commandUp: emit.bind(this, "pointerend")
+              },
+              strafe: {
+                axes: [Primrose.Input.Gamepad.LSX],
+                deadzone: 0.2
+              },
+              drive: {
+                axes: [Primrose.Input.Gamepad.LSY],
+                deadzone: 0.2
+              },
+              heading: {
+                axes: [-Primrose.Input.Gamepad.RSX],
+                deadzone: 0.2,
+                integrate: true
+              },
+              dheading: {
+                commands: ["heading"],
+                delta: true
+              },
+              pitch: {
+                axes: [-Primrose.Input.Gamepad.RSY],
+                deadzone: 0.2,
+                integrate: true
+              }
+            };
+          }
 
-        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands, socket, parent);
+          var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
+          this.add(mgr);
 
-        if(parent === this.Mouse){
-          this.Keyboard.parent = mgr;
-        }
-
-        if (isMotion) {
-          emit.call(this, "motioncontroller", mgr);
+          if (isMotion) {
+            emit.call(this, "motioncontroller", mgr);
+          }
+          else{
+            this.Keyboard.parent = mgr;
+            emit.call(this, "gamepad", mgr);
+          }
         }
       });
 
@@ -305,6 +304,21 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
+    set inVR(v){
+      for(var i = 0; i < this.managers.length; ++i){
+        this.managers[i].inVR = v;
+      }
+    }
+
+    set playerHeight(playerHeight){
+      for(var i = 0; i < this.managers.length; ++i){
+        var mgr = this.managers[i];
+        if(mgr.mesh){
+          mgr.mesh.position.y -= playerHeight;
+        }
+      }
+    }
+
     getQuaternion(xValueName, yValueName, zValueName, quaternion) {
       pliny.method({
         parent: "Primrose.FPSInput",
@@ -324,7 +338,7 @@ Primrose.Input.FPSInput = (function () {
           description: "The name of the value to retrieve for the Z axis."
         }, {
           name: "quaternion",
-          type: "THREE.Quatnerion",
+          type: "THREE.Quaternion",
           optional: true,
           description: "A quaternion to which to output the axis value. If no quaternion is provided, one will be created."
         }]
@@ -379,7 +393,7 @@ Primrose.Input.FPSInput = (function () {
         y = 0,
         z = 0;
 
-      vector = vector || THREE.Vector3();
+      vector = vector || new THREE.Vector3();
 
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];

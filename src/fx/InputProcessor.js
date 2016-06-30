@@ -57,9 +57,10 @@ Primrose.InputProcessor = (function () {
 
       this.mesh = null;
       this.disk = null;
-      this.stage = null;
+      this.stageGrid = null;
       this.stageX = null;
       this.stageZ = null;
+      this.inVR = false;
 
       var readMetaKeys = (event) => {
         for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
@@ -110,7 +111,7 @@ Primrose.InputProcessor = (function () {
         moveMesh = this.mesh;
 
       moveTo.fromArray(fp)
-        .sub(this.fromObj.position);
+        .sub(this.mesh.position);
 
       this.groundMesh.visible = isGround;
 
@@ -130,7 +131,7 @@ Primrose.InputProcessor = (function () {
           this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
         }
         this.groundMesh.position
-          .copy(this.fromObj.position)
+          .copy(this.mesh.position)
           .add(moveTo);
         this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
@@ -149,7 +150,7 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    makePointer(scene){
+    makePointer(scene) {
 
       this.mesh = textured(box(0.01, 0.01, LASER_LENGTH), 0xff0000, {
         emissive: 0x3f0000
@@ -157,6 +158,7 @@ Primrose.InputProcessor = (function () {
       this.mesh.geometry.vertices.forEach((v) => {
         v.z -= LASER_LENGTH * 0.5 + 0.5;
       });
+      this.mesh.velocity = new THREE.Vector3();
 
       this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
         emissive: 0x003f00
@@ -165,7 +167,7 @@ Primrose.InputProcessor = (function () {
 
       this.disk.scale.set(1, 0.1, 1);
 
-      this.stage = textured(box(), 0x00ff00, {
+      this.stageGrid = textured(box(), 0x00ff00, {
         wireframe: true,
         emissive: 0x003f00
       });
@@ -174,7 +176,7 @@ Primrose.InputProcessor = (function () {
 
       scene.add(this.mesh);
       scene.add(this.disk);
-      scene.add(this.stage);
+      scene.add(this.stageGrid);
     }
 
     addCommand(name, cmd) {
@@ -240,7 +242,7 @@ Primrose.InputProcessor = (function () {
       return output;
     }
 
-    poll(){
+    poll() {
       // Intentionally empty. Override in child classes.
     }
 
@@ -374,20 +376,35 @@ Primrose.InputProcessor = (function () {
         this.fireCommands();
       }
 
-      this.setStage(stage.sizeX, stage.sizeZ);
+      if(this.mesh && stage){
+        this.setStage(stage.sizeX, stage.sizeZ);
 
-      this.mesh.position.set(0, 0, 0);
-      this.mesh.quaternion.set(0, 0, 0, 1);
-      this.mesh.updateMatrix();
-      FORWARD.set(0, 0, -1);
+        this.updateOrientation();
+        this.updatePosition();
+        this.updateVelocity();
+        this.mesh.position.add(moveTo
+          .copy(this.mesh.velocity)
+          .multiplyScalar(dt)
+          .applyQuaternion(this.mesh.quaternion));
+        this.mesh.updateMatrix();
+        this.mesh.applyMatrix(stage.matrix);
+        FORWARD.set(0, 0, -1);
+        FORWARD.applyMatrix4(this.mesh.matrixWorld)
 
-      var head = this.fromObj;
-      while(head){
-        this.mesh.applyMatrix(head.matrixWorld);
-        FORWARD.applyMatrix4(head.matrixWorld);
-        head = head.parent;
+        return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
-      return [this.mesh.position.toArray(), FORWARD.toArray()];
+    }
+
+    updateOrientation() {
+      throw new Error(this.name + " updateOrientation not implemented");
+    }
+
+    updateVelocity(){
+      throw new Error(this.name + " updateVelocity not implemented");
+    }
+
+    updatePosition() {
+      throw new Error(this.name + " updatePosition not implemented");
     }
 
     setStage(sizeX, sizeZ) {
@@ -396,20 +413,20 @@ Primrose.InputProcessor = (function () {
         this.stageZ = sizeZ;
         if (this.stageX * this.stageZ === 0) {
           this.groundMesh = this.disk;
-          this.stage.visible = false;
+          this.stageGrid.visible = false;
           this.disk.visible = true;
         }
         else {
-          var scene = this.stage.parent;
-          scene.remove(this.stage);
-          this.stage = textured(box(this.stageX, 2.5, this.stageZ), 0x00ff00, {
+          var scene = this.stageGrid.parent;
+          scene.remove(this.stageGrid);
+          this.stageGrid = textured(box(this.stageX, 2.5, this.stageZ), 0x00ff00, {
             wireframe: true,
             emissive: 0x003f00
           });
-          this.stage.geometry.computeBoundingBox();
-          scene.add(this.stage);
-          this.groundMesh = this.stage;
-          this.stage.visible = true;
+          this.stageGrid.geometry.computeBoundingBox();
+          scene.add(this.stageGrid);
+          this.groundMesh = this.stageGrid;
+          this.stageGrid.visible = true;
           this.disk.visible = false;
         }
       }

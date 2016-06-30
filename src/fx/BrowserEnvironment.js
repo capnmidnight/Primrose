@@ -249,77 +249,154 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var resolvePicking = () => {
-        if (currentHit) {
-          var lastButtons = this.input.getValue("dButtons");
-          var object = this.pickableObjects[currentHit.objectID];
+      var lastHits = null,
+        currentHits = null,
+        handleHit = (h) => {
+        var dt;
+        this.projector.ready = true;
+        lastHits = currentHits;
+        currentHits = h;
 
-          this.pointer.registerHit(currentHit, object === this.ground);
-
-          if (object) {
-            var buttons = this.input.getValue("buttons"),
-              clickChanged = lastButtons !== 0,
-              control = object.button || object.surface;
-
-            if (!lockedToEditor()) {
-              buttons |= this.input.Keyboard.getValue("select");
-              clickChanged = clickChanged || this.input.Keyboard.getValue("dSelect") !== 0;
+        var currentHit = currentHits.VR,
+          lastHit = lastHits && lastHits.VR;
+        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+          currentHit.startTime = lastHit.startTime;
+          currentHit.gazeFired = lastHit.gazeFired;
+          dt = lt - currentHit.startTime;
+          if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
+            currentHit.gazeFired = true;
+            emit.call(this, "gazecomplete", currentHit);
+            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+          }
+        }
+        else {
+          if (lastHit) {
+            dt = lt - lastHit.startTime;
+            if (dt < this.options.gazeLength) {
+              emit.call(this, "gazecancel", lastHit);
             }
+          }
+          if (currentHit) {
+            currentHit.startTime = lt;
+            currentHit.gazeFired = false;
+            emit.call(this, "gazestart", currentHit);
+          }
+        }
+      };
 
-            if (!clickChanged && buttons > 0) {
-              if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-                emit.call(this, "pointermove", currentHit);
+      var resolvePicking = () => {
+        if (currentHits) {
+          for(var k in currentHits){
+            var currentHit = currentHits[k];
+            if(currentHit){
+              var lastHit = lastHit && lastHit[k],
+                mgr = this.input[k],
+                lastButtons = mgr.getValue("dButtons"),
+                object = this.pickableObjects[currentHit.objectID];
+
+              mgr.registerHit(currentHit, object === this.ground);
+
+              if (object) {
+                var buttons = this.input.getValue("buttons"),
+                  clickChanged = lastButtons !== 0,
+                  control = object.button || object.surface;
+
+                if (!clickChanged && buttons > 0) {
+                  if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+                    emit.call(this, "pointermove", currentHit);
+                  }
+                  if (this.currentControl && currentHit.point) {
+                    this.currentControl.moveUV(currentHit.point);
+                  }
+                }
               }
-              if (this.currentControl && currentHit.point) {
-                this.currentControl.moveUV(currentHit.point);
+            }
+            else {
+              this.input.Mouse.reset();
+            }
+          }
+        }
+      };
+
+      var pointerStart = (name) => {
+        if (!(name === "keyboard" && lockedToEditor())) {
+          if(currentHits){
+            for(var k in currentHits){
+              var currentHit = currentHits[k];
+              if (currentHit) {
+                var object = this.pickableObjects[currentHit.objectID];
+                if (object) {
+                  var control = object.button || object.surface;
+                  emit.call(this, "pointerstart", currentHit);
+
+                  if (this.currentControl && this.currentControl !== control) {
+                    this.currentControl.blur();
+                    this.currentControl = null;
+                  }
+
+                  if (!this.currentControl && control) {
+                    this.currentControl = control;
+                    this.currentControl.focus();
+                  }
+                  else if (object === this.ground) {
+                    this.vehicle.position.copy(this.input[k].groundMesh.position);
+                    this.vehicle.position.y = 0;
+                    this.vehicle.isOnGround = false;
+                  }
+
+                  if (this.currentControl) {
+                    this.currentControl.startUV(currentHit.point);
+                  }
+                }
+              }
+              else if (this.currentControl) {
+                this.currentControl.blur();
+                this.currentControl = null;
               }
             }
           }
         }
-        else {
-          this.pointer.reset();
+      };
+
+      var pointerEnd = (name) => {
+        if (!(name === "keyboard" && lockedToEditor())) {
+
+          if(currentHits){
+            for(var k in currentHits){
+              var currentHit = currentHits[k],
+                lastHit = lastHits && lastHits[k];
+              if (currentHit) {
+                var object = this.pickableObjects[currentHit.objectID];
+                if (object) {
+                  var control = object.button || object.surface;
+                  if (this.currentControl) {
+                    this.currentControl.endPointer();
+                  }
+                  if(lastHit){
+                    emit.call(this, "pointerend", lastHit);
+                  }
+                  emit.call(object, "click");
+                }
+              }
+            }
+          }
         }
       };
 
       const tempVelocity = new THREE.Vector3();
 
       var movePlayer = (dt) => {
-        var segments = this.input.update(dt, stage);
+        var segments = this.input.update(dt, stage).filter(identity);
         if (this.projector.ready) {
           this.projector.ready = false;
-          this.projector.projectPointer(segments);
+          this.projector.projectPointers(segments);
         }
 
-        for (var i = 0; i < motionControllers.length; ++i) {
-          var m = motionControllers[i];
-          m.getPosition(m.mesh.position);
-          m.getOrientation(m.mesh.quaternion);
-          m.mesh.updateMatrix();
-          m.mesh.applyMatrix(stage.matrix);
-        }
-
-        this.input.VR.getOrientation(this.player.quaternion);
-        this.input.VR.getPosition(this.player.position);
-        this.player.updateMatrix();
-        this.player.applyMatrix(stage.matrix);
-
-        if(this.input.VR.isPresenting){
-          this.input.getQuaternion(null, "heading", null, this.vehicle.quaternion);
-        }
-        else{
-          this.input.getQuaternion("pitch", "heading", null, this.vehicle.quaternion);
-        }
-        this.input.getVector("strafe", null, "drive", this.vehicle.velocity);
-        tempVelocity
-          .copy(this.vehicle.velocity)
-          .multiplyScalar(dt);
-        tempVelocity.applyQuaternion(this.vehicle.quaternion);
-        this.vehicle.position.add(tempVelocity);
         if (playerHeight === null) {
           playerHeight = this.player.position.y;
         }
+        this.input.playerHeight = playerHeight;
         this.vehicle.position.y = playerHeight;
-        this.player.position.y -= playerHeight;
       };
 
       var playerHeight = null;
@@ -340,91 +417,43 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var pointerStart = (name) => {
-        if (!(name === "keyboard" && lockedToEditor())) {
-          if (currentHit) {
-            var object = this.pickableObjects[currentHit.objectID];
-            if (object) {
-              var control = object.button || object.surface;
-              emit.call(this, "pointerstart", currentHit);
-
-              if (this.currentControl && this.currentControl !== control) {
-                this.currentControl.blur();
-                this.currentControl = null;
-              }
-
-              if (!this.currentControl && control) {
-                this.currentControl = control;
-                this.currentControl.focus();
-              }
-              else if (object === this.ground) {
-                this.vehicle.position.copy(this.groundMesh.position);
-                this.vehicle.position.y = 0;
-                this.vehicle.isOnGround = false;
-              }
-
-              if (this.currentControl) {
-                this.currentControl.startUV(currentHit.point);
-              }
-            }
-          }
-          else if (this.currentControl) {
-            this.currentControl.blur();
-            this.currentControl = null;
-          }
-        }
-      };
-
-      var pointerEnd = (name) => {
-        if (!(name === "keyboard" && lockedToEditor()) && currentHit) {
-          var object = this.pickableObjects[currentHit.objectID];
-          if (object) {
-            var control = object.button || object.surface;
-            if (this.currentControl) {
-              this.currentControl.endPointer();
-            }
-            emit.call(this, "pointerend", lastHit);
-            emit.call(object, "click");
-          }
-        }
-      };
-
       var animate = (t) => {
         WebVRBootstrapper.dispalyPresentChangeCheck();
-        RAF(animate);
         update(t * MILLISECONDS_TO_SECONDS);
         render();
+        RAF(animate);
       };
 
       var render = () => {
-        if (this.input.VR.isPresenting && this.input.VR.currentPose) {
+        if (this.inVR && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
           var trans = this.input.VR.transforms;
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,
               side = (2 * i) - 1;
-          Primrose.Entity.eyeBlankAll(i);
-          this.camera.projectionMatrix.copy(st.projection);
-          this.camera.matrixWorld.copy(this.player.matrixWorld);
-          this.camera.translateOnAxis(st.translation, 2);
-          if (this.options.useNose) {
-            this.nose.visible = true;
-            this.nose.position.set(side * -0.12, -0.12, -0.15);
-            this.nose.rotation.z = side * 0.7;
+            Primrose.Entity.eyeBlankAll(i);
+            this.camera.projectionMatrix.copy(st.projection);
+            this.camera.matrixWorld.copy(this.player.matrixWorld);
+            this.camera.translateOnAxis(st.translation, 2);
+            if (this.options.useNose) {
+              this.nose.visible = true;
+              this.nose.position.set(side * -0.12, -0.12, -0.15);
+              this.nose.rotation.z = side * 0.7;
+            }
+            this.renderer.setViewport(
+              v.left * resolutionScale,
+              v.top * resolutionScale,
+              v.width * resolutionScale,
+              v.height * resolutionScale);
+            this.renderer.render(this.scene, this.camera);
           }
-          this.renderer.setViewport(
-            v.left * resolutionScale,
-            v.top * resolutionScale,
-            v.width * resolutionScale,
-            v.height * resolutionScale);
-          this.renderer.render(this.scene, this.camera);     }
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
         this.audio.setPlayer(this.camera);
 
-        if (!this.input.VR.isPresenting || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+        if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
@@ -437,7 +466,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var setOrientationLock = () => {
-        if (this.input.VR.isPresenting) {
+        if (this.inVR) {
           var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
           if (type.indexOf("landscape") === -1) {
             type = "landscape-primary";
@@ -489,8 +518,6 @@ Primrose.BrowserEnvironment = (function () {
       //
 
       var lt = 0,
-        lastHit = null,
-        currentHit = null,
         currentHeading = 0,
         qPitch = new THREE.Quaternion(),
         vEye = new THREE.Vector3(),
@@ -526,11 +553,12 @@ Primrose.BrowserEnvironment = (function () {
         })
         .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
         .catch(console.warn.bind(console, "Can't get audio")),
-        motionControllers = [];
+        motionControllers = [],
+        gamepads = [];
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(scene);
+        mgr.makePointer(this.vehicle);
       };
 
       this.factories = factories;
@@ -769,38 +797,11 @@ Primrose.BrowserEnvironment = (function () {
         .at(0, 10, 10);
 
       var currentTimerObject = null;
+      this.timer = 0;
       var RAF = (callback) => {
         currentTimerObject = this.input.VR.currentDisplay || window;
-        this.timer = currentTimerObject.requestAnimationFrame(callback);
-      };
-
-      var handleHit = (h) => {
-        var dt;
-        this.projector.ready = true;
-        lastHit = currentHit;
-        currentHit = h;
-        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-          currentHit.startTime = lastHit.startTime;
-          currentHit.gazeFired = lastHit.gazeFired;
-          dt = lt - currentHit.startTime;
-          if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
-            currentHit.gazeFired = true;
-            emit.call(this, "gazecomplete", currentHit);
-            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
-          }
-        }
-        else {
-          if (lastHit) {
-            dt = lt - lastHit.startTime;
-            if (dt < this.options.gazeLength) {
-              emit.call(this, "gazecancel", lastHit);
-            }
-          }
-          if (currentHit) {
-            currentHit.startTime = lt;
-            currentHit.gazeFired = false;
-            emit.call(this, "gazestart", currentHit);
-          }
+        if(this.timer !== null){
+          this.timer = currentTimerObject.requestAnimationFrame(callback);
         }
       };
 
@@ -836,28 +837,31 @@ Primrose.BrowserEnvironment = (function () {
       var fullScreenRunning = false;
       this.goFullScreen = (index, evt) => {
         console.log("goFullScreen", fullScreenRunning, index, evt);
-        if(!fullScreenRunning && evt !== "Gaze"){
+        if (!fullScreenRunning && evt !== "Gaze") {
           fullScreenRunning = true;
           setPointerLock();
           this.input.VR.connect(index);
           this.input.VR.requestPresent([{
-            source: this.renderer.domElement
-          }]).catch()
-          .then(() =>{
-            this.renderer.domElement.focus();
-            fullScreenRunning = false;
-          });
+              source: this.renderer.domElement
+            }])
+            .catch()
+            .then(() => {
+              this.renderer.domElement.focus();
+              fullScreenRunning = false;
+            });
         }
       };
 
       var setPointerLock = () => {
-        if(!(Primrose.Input.Mouse.Lock.isActive || isMobile)) {
+        if (!(Primrose.Input.Mouse.Lock.isActive || isMobile)) {
           Primrose.Input.Mouse.Lock.request(this.renderer.domElement);
         }
       };
 
       var showHideButtons = () => {
-        var hide = this.input.VR.isPresenting;
+        var hide = this.inVR;
+
+        this.input.inVR = this.inVR;
         iconManager.icons.forEach((icon) => {
           if (icon.name.indexOf("Display") === 0) {
             icon.visible = !hide;
@@ -998,19 +1002,22 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("pointerstart", pointerStart, false);
         this.input.addEventListener("pointerend", pointerEnd, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
+        this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
 
 
-        this.VR.makePointer(scene);
-        this.player = this.VR.mesh;
+        this.input.VR.makePointer(this.scene);
+        this.player = this.input.VR.mesh;
         this.player.add(this.camera);
 
-        this.Mouse.makePointer(scene);
-        this.vehicle = this.Mouse.mesh;
+        this.input.Mouse.makePointer(this.scene);
+        this.vehicle = this.input.Mouse.mesh;
         this.vehicle.add(this.player);
 
-        var protocol = location.protocol.replace("http", "ws"),
-        path = protocol + "//" + location.hostname;
-        this.network = new Primrose.NetworkManager(path, this.player, micReady, this.audio, factories, this.options);
+        if(this.options.serverPath === undefined){
+          var protocol = location.protocol.replace("http", "ws");
+          this.options.serverPath = protocol + "//" + location.hostname;
+        }
+        this.network = new Primrose.NetworkManager(this.options.serverPath, this.player, micReady, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
         this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
@@ -1118,8 +1125,11 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       Object.defineProperties(this, {
-        hasOrientation: {
-          get: () => this.input.VR.currentDisplay && this.input.VR.currentDisplay.hasOrientation
+        inVR: {
+          get: () => {
+            var cd = this.input.VR.currentDisplay;
+            return cd && cd.isPresenting && cd.capabilities.hasOrientation;
+          }
         },
         displays: {
           get: () => this.input.VR.displays || []
@@ -1148,7 +1158,7 @@ Primrose.BrowserEnvironment = (function () {
             newFunction = function () {};
           }
           return function () {
-            if (this.input.VR.isPresenting) {
+            if (this.inVR) {
               newFunction();
             }
             else {

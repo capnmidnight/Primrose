@@ -75,12 +75,12 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    cancel(){
+    cancel() {
       var promise = null;
-      if(this.currentDisplayIndex > -1 && this.currentDisplay.isPresenting){
+      if (this.currentDisplayIndex > -1 && this.currentDisplay.isPresenting) {
         promise = this.currentDisplay.exitPresent();
       }
-      else{
+      else {
         promise = Promise.resolve();
       }
       return promise.then(() => {
@@ -95,26 +95,26 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    getOrientation(value) {
-      value = value || new THREE.Quaternion();
+    updatePosition() {
+      var p = this.currentPose && this.currentPose.position;
+      if (p) {
+        this.mesh.position.fromArray(p);
+      }
+    }
+
+    updateVelocity(){
+
+    }
+
+    updateOrientation() {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
-        value.toArray(tempQuat);
+        this.mesh.quaternion.toArray(tempQuat);
         for (var i = 0; i < o.length; ++i) {
           tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
         }
-        value.fromArray(tempQuat);
+        this.mesh.quaternion.fromArray(tempQuat);
       }
-      return value;
-    }
-
-    getPosition(value) {
-      value = value || new THREE.Vector3();
-      var p = this.currentPose && this.currentPose.position;
-      if (p) {
-        value.fromArray(p);
-      }
-      return value;
     }
 
     resetTransforms(near, far) {
@@ -132,7 +132,7 @@ Primrose.Input.VR = (function () {
         this.displays[this.currentDisplayIndex];
     }
 
-    get isPresenting(){
+    get isPresenting() {
       return this.currentDisplay && this.currentDisplay.isPresenting;
     }
 

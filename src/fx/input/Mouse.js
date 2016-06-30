@@ -1,6 +1,8 @@
 Primrose.Input.Mouse = (function () {
   "use strict";
 
+  const EULER = new THREE.Euler();
+
   pliny.class({
     parent: "Primrose.Input",
       name: "Mouse",
@@ -10,6 +12,7 @@ Primrose.Input.Mouse = (function () {
   class Mouse extends Primrose.InputProcessor {
     constructor(DOMElement, parent, commands, socket) {
       super("Mouse", parent, commands, socket);
+
       DOMElement = DOMElement || window;
 
       DOMElement.addEventListener("mousedown", (event) => {
@@ -56,6 +59,37 @@ Primrose.Input.Mouse = (function () {
         event.preventDefault();
         this.update();
       }, false);
+    }
+
+    updatePosition() {
+    }
+
+    updateVelocity(){
+      this.mesh.velocity.set(0, 0, 0);
+      var head = this;
+      while(head){
+        this.mesh.velocity.x += head.getValue("strafe");
+        this.mesh.velocity.z += head.getValue("drive");
+        head = head.parent;
+      }
+    }
+
+    updateOrientation() {
+      var p = 0,
+        h = 0;
+      var head = this;
+      while(head){
+        p += head.getValue("pitch");
+        h += head.getValue("heading");
+        head = head.parent;
+      }
+      EULER.set(
+        this.inVR ? 0 : p,
+        h,
+        0,
+        "YXZ"
+      );
+      this.mesh.quaternion.setFromEuler(EULER);
     }
 
     setLocation(x, y) {

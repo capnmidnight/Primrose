@@ -1,6 +1,8 @@
 Primrose.Input.Gamepad = (function () {
   "use strict";
 
+  const EULER = new THREE.Euler();
+
   navigator.getGamepads = navigator.getGamepads ||
     navigator.webkitGetGamepads;
 
@@ -105,11 +107,6 @@ Primrose.Input.Gamepad = (function () {
       super(padID, parent, commands, socket, Gamepad.AXES);
       currentManagers[padID] = this;
 
-      this.currentPose = {
-        position: [0, 0, 0],
-        orientation: [0, 0, 0, 1]
-      };
-
       this.currentPad = pad;
       this.axisOffset = axisOffset;
     }
@@ -135,22 +132,38 @@ Primrose.Input.Gamepad = (function () {
       }
     }
 
-    getOrientation(value) {
-      value = value || new THREE.Quaternion();
-      var o = this.currentPose && this.currentPose.orientation;
-      if (o) {
-        value.fromArray(o);
-      }
-      return value;
-    }
-
-    getPosition(value) {
-      value = value || new THREE.Vector3();
+    updatePosition() {
       var p = this.currentPose && this.currentPose.position;
       if (p) {
-        value.fromArray(p);
+        this.mesh.position.fromArray(p);
       }
-      return value;
+    }
+
+    updateVelocity(){
+      var p = this.currentPose && this.currentPose.position;
+      if (!p) {
+        this.mesh.velocity.set(
+          this.getValue("strafe"),
+          0,
+          this.getValue("drive")
+        );
+      }
+    }
+
+    updateOrientation() {
+      var o = this.currentPose && this.currentPose.orientation;
+      if (o) {
+        this.mesh.quaternion.fromArray(o);
+      }
+      else{
+        EULER.set(
+          this.inVR ? 0 : this.getValue("pitch"),
+          this.getValue("heading"),
+          0,
+          "YXZ"
+        );
+        this.mesh.quaternion.setFromEuler(EULER);
+      }
     }
   }
   Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z"]);
