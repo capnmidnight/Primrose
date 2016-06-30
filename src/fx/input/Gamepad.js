@@ -135,14 +135,14 @@ Primrose.Input.Gamepad = (function () {
     updatePosition() {
       var p = this.currentPose && this.currentPose.position;
       if (p) {
-        this.mesh.position.fromArray(p);
+        this.position.fromArray(p);
       }
     }
 
     updateVelocity() {
       var p = this.currentPose && this.currentPose.position;
       if (!p) {
-        this.mesh.velocity.set(
+        this.velocity.set(
           this.getValue("strafe"),
           0,
           this.getValue("drive")

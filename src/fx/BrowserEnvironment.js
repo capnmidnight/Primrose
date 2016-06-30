@@ -40,10 +40,11 @@ Primrose.BrowserEnvironment = (function () {
 
       this.zero = () => {
         if (!lockedToEditor()) {
-          playerHeight = null;
           this.input.zero();
           this.vehicle.position.set(0, 0, 0);
+          this.vehicle.velocity.set(0, 0, 0);
           this.vehicle.quaternion.set(0, 0, 0, 1);
+          this.vehicle.isOnGround = false;
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
           }
@@ -337,7 +338,6 @@ Primrose.BrowserEnvironment = (function () {
                   }
                   else if (object === this.ground) {
                     this.vehicle.position.copy(this.input[k].groundMesh.position);
-                    this.vehicle.position.y = this.avatarHeight;
                     this.vehicle.isOnGround = false;
                   }
 
@@ -384,19 +384,11 @@ Primrose.BrowserEnvironment = (function () {
       const printPos = (obj) => obj.position.toArray().join(", ");
       var movePlayer = (dt) => {
         var segments = this.input.update(dt, this.input.VR.stage);
-        if(!this.vehicle.isOnGround){
-          this.vehicle.velocity.y -= this.options.gravity * dt;
-        }
-
-        if(this.vehicle.position.y < this.avatarHeight){
+        this.vehicle.velocity.y -= this.options.gravity * dt;
+        if(this.vehicle.position.y < 0){
           this.vehicle.velocity.y = 0;
-          this.vehicle.position.y = this.avatarHeight;
+          this.vehicle.position.y = 0;
           this.vehicle.isOnGround = true;
-        }
-
-        if (playerHeight === null) {
-          playerHeight = this.player.position.y;
-          this.input.playerHeight = playerHeight;
         }
 
         if (this.projector.ready) {
@@ -404,8 +396,6 @@ Primrose.BrowserEnvironment = (function () {
           this.projector.projectPointers(segments);
         }
       };
-
-      var playerHeight = null;
 
       var moveSky = () => {
         if (this.sky) {
@@ -440,7 +430,7 @@ Primrose.BrowserEnvironment = (function () {
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
             this.camera.projectionMatrix.copy(st.projection);
-            this.camera.matrixWorld.copy(this.player.matrixWorld);
+            this.camera.matrixWorld.copy(this.player.mesh.matrixWorld);
             this.camera.translateOnAxis(st.translation, 1);
             if (this.options.useNose) {
               this.nose.visible = true;
@@ -465,7 +455,7 @@ Primrose.BrowserEnvironment = (function () {
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
-          this.camera.matrixWorld.copy(this.player.matrixWorld);
+          this.camera.matrixWorld.copy(this.player.mesh.matrixWorld);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
@@ -565,7 +555,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(this.vehicle);
+        mgr.makePointer(this.vehicle.mesh);
       };
 
       this.factories = factories;
@@ -1010,14 +1000,8 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("motioncontroller", newMotionController, false);
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
 
-
-        this.input.VR.makePointer(this.scene);
-        this.player = this.input.VR.mesh;
-        this.player.add(this.camera);
-
         this.input.Mouse.makePointer(this.scene);
-        this.vehicle = this.input.Mouse.mesh;
-        this.vehicle.add(this.player);
+        this.input.VR.makePointer(this.vehicle.mesh);
 
         if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");
@@ -1033,7 +1017,6 @@ Primrose.BrowserEnvironment = (function () {
 
         return this.input.ready;
       });
-
 
       var quality = -1,
         frameCount = 0,
@@ -1131,6 +1114,12 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       Object.defineProperties(this, {
+        vehicle: {
+          get: () => this.input.Mouse
+        },
+        player: {
+          get: () => this.input.VR
+        },
         inVR: {
           get: () => this.input.VR.currentDisplay && this.input.VR.hasOrientation
         },

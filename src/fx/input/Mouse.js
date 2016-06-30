@@ -73,8 +73,8 @@ Primrose.Input.Mouse = (function () {
         head = head.parent;
       }
 
-      this.mesh.velocity.x = x;
-      this.mesh.velocity.z = z;
+      this.velocity.x = x;
+      this.velocity.z = z;
     }
 
     updateOrientation(excludePitch) {

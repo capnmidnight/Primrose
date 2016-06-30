@@ -54,8 +54,9 @@ Primrose.InputProcessor = (function () {
         meta: false
       };
       this.lastState = "";
-      this.playerHeight = 0;
 
+      this.position = null;
+      this.velocity = null;
       this.mesh = null;
       this.disk = null;
       this.stageGrid = null;
@@ -114,7 +115,7 @@ Primrose.InputProcessor = (function () {
         moveMesh = this.mesh;
 
       moveTo.fromArray(fp)
-        .sub(this.mesh.position);
+        .sub(this.position);
 
       this.groundMesh.visible = isGround;
 
@@ -134,7 +135,7 @@ Primrose.InputProcessor = (function () {
           this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
         }
         this.groundMesh.position
-          .copy(this.mesh.position)
+          .copy(this.position)
           .add(moveTo);
         this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
@@ -156,6 +157,8 @@ Primrose.InputProcessor = (function () {
     }
 
     makePointer(scene) {
+      this.position = new THREE.Vector3();
+      this.velocity = new THREE.Vector3();
 
       this.mesh = textured(box(0.01, 0.01, LASER_LENGTH), 0xff0000, {
         emissive: 0x3f0000
@@ -163,7 +166,6 @@ Primrose.InputProcessor = (function () {
       this.mesh.geometry.vertices.forEach((v) => {
         v.z -= LASER_LENGTH * 0.5 + 0.5;
       });
-      this.mesh.velocity = new THREE.Vector3();
 
       this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
         emissive: 0x003f00
@@ -388,21 +390,20 @@ Primrose.InputProcessor = (function () {
         this.updateVelocity();
 
         moveTo
-          .copy(this.mesh.velocity)
+          .copy(this.velocity)
           .multiplyScalar(dt)
           .applyQuaternion(this.mesh.quaternion);
 
         this.updateOrientation(false);
         this.updatePosition();
 
-        this.mesh.position.add(moveTo);
+        this.position.add(moveTo);
+        this.mesh.position.copy(this.position);
         this.mesh.updateMatrix();
         this.mesh.applyMatrix(stage.matrix);
-        this.mesh.position.y -= this.playerHeight;
 
-        FORWARD.set(0, 0, -1);
-        FORWARD.applyMatrix4(this.mesh.matrixWorld)
-
+        FORWARD.set(0, 0, -1)
+          .applyMatrix4(this.mesh.matrixWorld);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
     }

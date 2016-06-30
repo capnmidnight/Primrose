@@ -313,15 +313,6 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    set playerHeight(playerHeight) {
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.mesh) {
-          mgr.playerHeight = playerHeight;
-        }
-      }
-    }
-
     getQuaternion(xValueName, yValueName, zValueName, quaternion) {
       pliny.method({
         parent: "Primrose.FPSInput",

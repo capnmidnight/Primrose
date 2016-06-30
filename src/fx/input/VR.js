@@ -105,7 +105,7 @@ Primrose.Input.VR = (function () {
     updatePosition() {
       var p = this.currentPose && this.currentPose.position;
       if (p) {
-        this.mesh.position.fromArray(p);
+        this.position.fromArray(p);
       }
     }
 
