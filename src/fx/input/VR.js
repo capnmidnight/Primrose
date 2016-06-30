@@ -29,7 +29,7 @@ Primrose.Input.VR = (function () {
     constructor(avatarHeight, commands, socket) {
       super("VR", null, commands, socket);
 
-      this.displays = null;
+      this.displays = [];
       this._transforms = [];
       this.transforms = null;
       this.currentDisplayIndex = -1;
@@ -41,7 +41,7 @@ Primrose.Input.VR = (function () {
       this.ready = navigator.getVRDisplays()
         .then((displays) => {
           console.log("Displays found:", displays.length);
-          this.displays = displays;
+          this.displays.push.apply(this.displays, displays);
           return this.displays;
         });
     }

@@ -1131,13 +1131,10 @@ Primrose.BrowserEnvironment = (function () {
 
       Object.defineProperties(this, {
         inVR: {
-          get: () => {
-            var cd = this.input.VR.currentDisplay;
-            return cd && cd.isPresenting && cd.capabilities.hasOrientation;
-          }
+          get: () => this.input.VR.currentDisplay && this.input.VR.hasOrientation
         },
         displays: {
-          get: () => this.input.VR.displays || []
+          get: () => this.input.VR.displays
         },
         quality: {
           get: () => quality,
