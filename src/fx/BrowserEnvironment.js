@@ -43,7 +43,7 @@ Primrose.BrowserEnvironment = (function () {
           this.input.zero();
           this.vehicle.position.set(0, 0, 0);
           this.vehicle.velocity.set(0, 0, 0);
-          this.vehicle.quaternion.set(0, 0, 0, 1);
+          this.vehicle.mesh.quaternion.set(0, 0, 0, 1);
           this.vehicle.isOnGround = false;
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
@@ -284,7 +284,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var resolvePicking = () => {
         if (currentHits) {
-          for(var i = 0; i < this.input.managers.length; ++i){
+          for (var i = 0; i < this.input.managers.length; ++i) {
             var mgr = this.input.managers[i],
               currentHit = currentHits[mgr.name];
             if (currentHit) {
@@ -381,15 +381,20 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       const tempVelocity = new THREE.Vector3();
-      const printPos = (obj) => obj.position.toArray().join(", ");
+      const printPos = (obj) => obj.position.toArray()
+        .join(", ");
       var movePlayer = (dt) => {
-        var segments = this.input.update(dt, this.input.VR.stage);
-        this.vehicle.velocity.y -= this.options.gravity * dt;
-        if(this.vehicle.position.y < 0){
-          this.vehicle.velocity.y = 0;
-          this.vehicle.position.y = 0;
-          this.vehicle.isOnGround = true;
+        this.vehicle.stage = this.input.VR.stageParameters;
+        if(!this.vehicle.isOnGround){
+          this.vehicle.velocity.y -= this.options.gravity * dt;
+          if (this.vehicle.position.y < 0) {
+            this.vehicle.velocity.y = 0;
+            this.vehicle.position.y = 0;
+            this.vehicle.isOnGround = true;
+          }
         }
+
+        var segments = this.input.update(dt);
 
         if (this.projector.ready) {
           this.projector.ready = false;
@@ -555,7 +560,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(this.vehicle.mesh);
+        mgr.makePointer(this.player.mesh);
       };
 
       this.factories = factories;
@@ -1002,6 +1007,7 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input.Mouse.makePointer(this.scene);
         this.input.VR.makePointer(this.vehicle.mesh);
+        this.player.mesh.add(this.camera);
 
         if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");
@@ -1018,8 +1024,7 @@ Primrose.BrowserEnvironment = (function () {
         return this.input.ready;
       });
 
-      var quality = -1,
-        frameCount = 0,
+      var frameCount = 0,
         frameTime = 0,
         NUM_FRAMES = 10,
         LEAD_TIME = 2000,
@@ -1089,9 +1094,6 @@ Primrose.BrowserEnvironment = (function () {
               displayName: "Test Icon"
             }])
             .forEach((icon, i) => icon.addEventListener("click", this.goFullScreen.bind(this, i), false));
-          //iconManager.append(this.input.Media && this.input.Media.devices ||
-          //  [{ kind: "audioinput", deviceId: "4AEB1201-50CD-4A57-8F0D-420504A8822F", groupId: "{42E0225C-F020-4914-9933-604C44A2D86F" }])
-          //  .forEach((icon, i) => { });
           iconManager.icons.forEach(putIconInScene);
           emit.call(this, "ready");
         });
@@ -1114,23 +1116,11 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       Object.defineProperties(this, {
-        vehicle: {
-          get: () => this.input.Mouse
-        },
-        player: {
-          get: () => this.input.VR
-        },
-        inVR: {
-          get: () => this.input.VR.currentDisplay && this.input.VR.hasOrientation
-        },
-        displays: {
-          get: () => this.input.VR.displays
-        },
         quality: {
-          get: () => quality,
+          get: () => this.options.quality,
           set: (v) => {
             if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
-              quality = v;
+              this.options.quality = v;
               resolutionScale = Primrose.RESOLUTION_SCALES[v];
             }
             allReady.then(modifyScreen);
@@ -1149,7 +1139,7 @@ Primrose.BrowserEnvironment = (function () {
           if (!newFunction) {
             newFunction = function () {};
           }
-          return function () {
+          return () => {
             if (this.inVR) {
               newFunction();
             }
@@ -1165,6 +1155,23 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.start();
+    }
+
+
+    get vehicle() {
+      return this.input.Mouse;
+    }
+
+    get player() {
+      return this.input.VR;
+    }
+
+    get inVR() {
+      return this.input.VR.currentDisplay && this.input.VR.hasOrientation;
+    }
+
+    get displays() {
+      return this.input.VR.displays;
     }
 
     get operatingSystem() {

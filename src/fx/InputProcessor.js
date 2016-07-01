@@ -60,9 +60,9 @@ Primrose.InputProcessor = (function () {
       this.mesh = null;
       this.disk = null;
       this.stageGrid = null;
-      this.stageX = null;
-      this.stageZ = null;
+      this._stage = null;
       this.inVR = false;
+      this.lastT = performance.now();
 
       var readMetaKeys = (event) => {
         for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
@@ -70,7 +70,6 @@ Primrose.InputProcessor = (function () {
           this.inputState[m] = event[m + "Key"];
         }
 
-        // TODO: this update needs to pass dt and stage
         this.update();
       };
 
@@ -137,7 +136,6 @@ Primrose.InputProcessor = (function () {
         this.groundMesh.position
           .copy(this.position)
           .add(moveTo);
-        this.groundMesh.position.y -= this.groundMesh.geometry.boundingBox.min.y;
       }
       else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
         this.mesh.material.color.setRGB(0, 1, 0);
@@ -171,15 +169,17 @@ Primrose.InputProcessor = (function () {
         emissive: 0x003f00
       });
       this.disk.geometry.computeBoundingBox();
+      this.disk.geometry.vertices.forEach((v)=> v.y -= this.disk.geometry.boundingBox.min.y);
+      this.disk.geometry.computeBoundingBox();
 
       this.disk.scale.set(1, 0.1, 1);
+
+      this.groundMesh = this.disk;
 
       this.stageGrid = textured(box(), 0x00ff00, {
         wireframe: true,
         emissive: 0x003f00
       });
-
-      this.setStage(0, 0);
 
       scene.add(this.mesh);
       scene.add(this.disk);
@@ -253,7 +253,10 @@ Primrose.InputProcessor = (function () {
       // Intentionally empty. Override in child classes.
     }
 
-    update(dt, stage) {
+    update() {
+      var t = performance.now(),
+        dt = (t - this.lastT) / 1000;
+      this.lastT = t;
       this.poll();
       if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
         for (var name in this.commands) {
@@ -383,8 +386,7 @@ Primrose.InputProcessor = (function () {
         this.fireCommands();
       }
 
-      if (this.mesh && stage) {
-        this.setStage(stage.sizeX, stage.sizeZ);
+      if (this.mesh) {
 
         this.updateOrientation(true);
         this.updateVelocity();
@@ -400,7 +402,10 @@ Primrose.InputProcessor = (function () {
         this.position.add(moveTo);
         this.mesh.position.copy(this.position);
         this.mesh.updateMatrix();
-        this.mesh.applyMatrix(stage.matrix);
+
+        if(this.stage){
+          this.mesh.applyMatrix(this.stage.matrix);
+        }
 
         FORWARD.set(0, 0, -1)
           .applyMatrix4(this.mesh.matrixWorld);
@@ -420,11 +425,14 @@ Primrose.InputProcessor = (function () {
       throw new Error(this.name + " updatePosition not implemented");
     }
 
-    setStage(sizeX, sizeZ) {
-      if (sizeX !== this.stageX || sizeZ !== this.sizeZ) {
-        this.stageX = sizeX;
-        this.stageZ = sizeZ;
-        if (this.stageX * this.stageZ === 0) {
+    get stage() {
+      return this._stage;
+    }
+
+    set stage(s) {
+      if (!this._stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+        this._stage = s;
+        if (this.stage.sizeX * this.stage.sizeZ === 0) {
           this.groundMesh = this.disk;
           this.stageGrid.visible = false;
           this.disk.visible = true;
@@ -432,7 +440,7 @@ Primrose.InputProcessor = (function () {
         else {
           var scene = this.stageGrid.parent;
           scene.remove(this.stageGrid);
-          this.stageGrid = textured(box(this.stageX, 2.5, this.stageZ), 0x00ff00, {
+          this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
             wireframe: true,
             emissive: 0x003f00
           });

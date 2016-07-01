@@ -46,7 +46,7 @@ Primrose.Input.VR = (function () {
         });
     }
 
-    get stage() {
+    get stageParameters() {
       let x = 0,
         z = 0;
       var stage = this.currentDisplay && this.currentDisplay.stageParameters;
@@ -95,8 +95,8 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    update(dt, stage){
-      super.update(dt, stage);
+    update() {
+      super.update();
       if(this.groundMesh.visible !== this.hasOrientation){
         this.groundMesh.visible = this.hasOrientation;
       }
@@ -143,7 +143,7 @@ Primrose.Input.VR = (function () {
       return this.currentDisplay && this.currentDisplay.isPresenting;
     }
 
-    get hasOrientation(){
+    get hasOrientation() {
       return this.currentDisplay && this.currentDisplay.capabilities.hasOrientation;
     }
 

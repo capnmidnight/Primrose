@@ -279,14 +279,14 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    update(dt, stage) {
+    update() {
       Primrose.Input.Gamepad.poll();
       var segments = [];
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          var seg = mgr.update(dt, stage);
-          if(seg){
+          var seg = mgr.update();
+          if (seg) {
             segments.push(seg);
           }
         }
