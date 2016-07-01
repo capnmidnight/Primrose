@@ -95,11 +95,12 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    update() {
-      super.update();
-      if(this.groundMesh.visible !== this.hasOrientation){
-        this.groundMesh.visible = this.hasOrientation;
-      }
+    get showPointer(){
+      return super.showPointer && this.hasOrientation;
+    }
+
+    set showPointer(v){
+      super.showPointer = v;
     }
 
     updatePosition() {
