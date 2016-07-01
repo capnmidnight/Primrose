@@ -61,7 +61,7 @@ env.addEventListener("ready", function () {
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = "EditorFrameMesh";
-  editorFrameMesh.position.set(0, 0, 0);
+  editorFrameMesh.position.set(0, env.avatarHeight, 0);
   editorFrameMesh.visible = false;
   editorFrameMesh.disabled = true;
 }, false);

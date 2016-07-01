@@ -103,7 +103,7 @@ env.addEventListener("ready", function () {
 
   editorFrameMesh = editorCenter.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
-  editorFrameMesh.position.set(0, 0, 0);
+  editorFrameMesh.position.set(0, env.avatarHeight, 0);
 
   documentation = env.createElement("div");
   documentation.id = "Documentation";
