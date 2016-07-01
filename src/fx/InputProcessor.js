@@ -58,6 +58,7 @@ Primrose.InputProcessor = (function () {
 
       this.position = null;
       this.velocity = null;
+      this.euler = null;
       this.mesh = null;
       this.disk = null;
       this.stageGrid = null;
@@ -311,7 +312,7 @@ Primrose.InputProcessor = (function () {
         this.fireCommands();
       }
 
-      if (this.showPointer) {
+      if (this.mesh) {
         return this.updatePointer(dt);
       }
     }
@@ -328,6 +329,7 @@ Primrose.InputProcessor = (function () {
       this.showPointer = true;
       this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
+      this.euler = new THREE.Euler();
       this.mesh = textured(box(0.01, 0.01, LASER_LENGTH), 0xff0000, {
         emissive: 0x3f0000
       });

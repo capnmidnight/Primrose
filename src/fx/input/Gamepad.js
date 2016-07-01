@@ -1,8 +1,6 @@
 Primrose.Input.Gamepad = (function () {
   "use strict";
 
-  const EULER = new THREE.Euler();
-
   navigator.getGamepads = navigator.getGamepads ||
     navigator.webkitGetGamepads;
 
@@ -156,13 +154,13 @@ Primrose.Input.Gamepad = (function () {
         this.mesh.quaternion.fromArray(o);
       }
       else {
-        EULER.set(
-          excludePitch || this.inVR ? 0 : this.getValue("pitch"),
+        this.euler.set(
+          this.getValue("pitch"),
           this.getValue("heading"),
           0,
           "YXZ"
         );
-        this.mesh.quaternion.setFromEuler(EULER);
+        this.mesh.quaternion.setFromEuler(this.euler);
       }
     }
   }

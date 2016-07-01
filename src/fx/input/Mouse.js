@@ -1,8 +1,6 @@
 Primrose.Input.Mouse = (function () {
   "use strict";
 
-  const EULER = new THREE.Euler();
-
   pliny.class({
     parent: "Primrose.Input",
       name: "Mouse",
@@ -61,7 +59,8 @@ Primrose.Input.Mouse = (function () {
       }, false);
     }
 
-    updatePosition() {}
+    updatePosition() {
+    }
 
     updateVelocity() {
       var head = this,
@@ -86,13 +85,8 @@ Primrose.Input.Mouse = (function () {
         h += head.getValue("heading");
         head = head.parent;
       }
-      EULER.set(
-        excludePitch || this.inVR ? 0 : p,
-        h,
-        0,
-        "YXZ"
-      );
-      this.quaternion.setFromEuler(EULER);
+      this.euler.set(excludePitch ? 0 : p, h, 0, "YXZ");
+      this.mesh.quaternion.setFromEuler(this.euler);
     }
 
     setLocation(x, y) {

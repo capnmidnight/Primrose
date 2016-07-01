@@ -129,11 +129,25 @@ Primrose.Input.VR = (function () {
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
-        this.quaternion.toArray(tempQuat);
+        this.originalQuat.toArray(tempQuat);
         for (var i = 0; i < o.length; ++i) {
           tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
         }
-        this.quaternion.fromArray(tempQuat);
+        this.originalQuat.fromArray(tempQuat);
+        this.parent.euler.toArray(tempQuat);
+        tempQuat[2] = 0;
+        if(this.inVR){
+          tempQuat[0] = 0;
+          var da = tempQuat[1] - this.euler.y;
+          tempQuat[1] = this.euler.y;
+          if(Math.abs(da) > this.rotationAngle){
+            tempQuat[1] += Math.sign(da) * this.rotationAngle;
+          }
+        }
+        this.euler.fromArray(tempQuat);
+        quat.setFromEuler(this.euler);
+        quat.multiply(this.originalQuat);
+        this.quaternion.copy(quat);
       }
     }
 
@@ -163,6 +177,10 @@ Primrose.Input.VR = (function () {
     connect(selectedIndex) {
       this.currentPose = selectedIndex === 0 ? DEFAULT_POSE : null;
       this.currentDisplayIndex = selectedIndex;
+      if(0 <= selectedIndex && selectedIndex <= this.displays.length){
+        var params = this.currentDisplay.getEyeParameters("left").fieldOfView;
+        this.rotationAngle = Math.PI * (params.leftDegrees + params.rightDegrees) / 360;
+      }
     }
   }
 
