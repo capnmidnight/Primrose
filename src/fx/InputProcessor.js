@@ -334,7 +334,7 @@ Primrose.InputProcessor = (function () {
         emissive: 0x3f0000
       });
       this.mesh.geometry.vertices.forEach((v) => {
-        v.z -= LASER_LENGTH * 0.5 + 0.5;
+        v.z -= LASER_LENGTH * 0.5;
       });
 
       this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
@@ -374,46 +374,51 @@ Primrose.InputProcessor = (function () {
       this.mesh.position.copy(this.position);
       this.mesh.updateMatrix();
 
-      this.mesh.matrixWorld.copy(this.mesh.matrixWorld);
-
       if(this.stage){
         this.mesh.applyMatrix(this.stage.matrix);
       }
+    }
 
-      FORWARD.set(0, 0, -1)
-        .applyMatrix4(this.mesh.matrixWorld);
-      return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+    get segment(){
+      if(this.showPointer){
+        FORWARD.set(0, 0, -1)
+          .applyMatrix4(this.mesh.matrixWorld);
+        return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+      }
     }
 
     registerHit(currentHit, isGround) {
-      var fp = currentHit.facePoint;
+      if(this.showPointer){
+        var fp = currentHit.facePoint;
 
-      moveTo.fromArray(fp)
-        .sub(this.position);
+        moveTo.fromArray(fp)
+          .sub(this.position);
 
-      this.groundMesh.visible = isGround;
-      if (isGround) {
-        var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
-        this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ && this.showPointer;
-        if (distSq > MAX_MOVE_DISTANCE_SQ) {
-          var dist = Math.sqrt(distSq),
-            factor = MAX_MOVE_DISTANCE / dist,
-            y = moveTo.y;
-          moveTo.y = 0;
-          moveTo.multiplyScalar(factor);
-          moveTo.y = y;
-
-          this.mesh.material.color.setRGB(1, 1, 0);
-          this.mesh.material.emissive.setRGB(0.5, 0.5, 0);
+        this.groundMesh.visible = isGround;
+        if (isGround) {
+          var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
+          this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ && this.showPointer;
+          if (distSq > MAX_MOVE_DISTANCE_SQ) {
+            var dist = Math.sqrt(distSq),
+              factor = MAX_MOVE_DISTANCE / dist,
+              y = moveTo.y;
+            moveTo.y = 0;
+            moveTo.multiplyScalar(factor);
+            moveTo.y = y;
+            textured(this.mesh, 0xffff00, {
+              emissive: 0x7f7f00
+            });
+          }
+          this.groundMesh.position
+            .copy(this.position)
+            .add(moveTo);
         }
-        this.groundMesh.position
-          .copy(this.position)
-          .add(moveTo);
-      }
-      else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
-        this.mesh.visible = this.showPointer;
-        this.mesh.material.color.setRGB(0, 1, 0);
-        this.mesh.material.emissive.setRGB(0, 0.5, 0);
+        else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
+          this.mesh.visible = this.showPointer;
+          textured(this.mesh, 0x00ff00, {
+            emissive: 0x007f00
+          });
+        }
       }
     }
 
@@ -421,10 +426,9 @@ Primrose.InputProcessor = (function () {
       if(this.mesh){
         this.groundMesh.visible = false;
         this.mesh.visible = this.showPointer;
-        this.mesh.material.color.setRGB(1, 0, 0);
-        if (this.mesh.material.emissive) {
-          this.mesh.material.emissive.setRGB(0.5, 0, 0);
-        }
+        textured(this.mesh, 0xff0000, {
+          emissive: 0x7f0000
+        });
       }
     }
 

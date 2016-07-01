@@ -24,8 +24,6 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
 
-      this.add(new Primrose.Input.VR(avatarHeight));
-
       this.add(new Primrose.Input.Keyboard(DOMElement, null, {
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
@@ -274,12 +272,18 @@ Primrose.Input.FPSInput = (function () {
 
     update() {
       Primrose.Input.Gamepad.poll();
+      for (var i = 0; i < this.managers.length; ++i) {
+        var mgr = this.managers[i];
+        if (mgr.enabled) {
+          mgr.update();
+        }
+      }
       var segments = [];
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
-          var seg = mgr.update();
-          if (seg) {
+          var seg = mgr.segment;
+          if(seg){
             segments.push(seg);
           }
         }
