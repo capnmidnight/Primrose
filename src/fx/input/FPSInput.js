@@ -1,10 +1,6 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
-  const AXIS_PREFIXES = ["L", "R"],
-    temp = new THREE.Quaternion(),
-    euler = new THREE.Euler();
-
   pliny.class({
     parent: "Primrose.Input",
       name: "FPSInput",
@@ -308,93 +304,6 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].inVR = v;
       }
-    }
-
-    getQuaternion(xValueName, yValueName, zValueName, quaternion) {
-      pliny.method({
-        parent: "Primrose.FPSInput",
-        name: "getQuaternion2",
-        returns: "THREE.Vector3",
-        paramters: [{
-          name: "xValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the X axis."
-        }, {
-          name: "yValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the Y axis."
-        }, {
-          name: "zValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the Z axis."
-        }, {
-          name: "quaternion",
-          type: "THREE.Quaternion",
-          optional: true,
-          description: "A quaternion to which to output the axis value. If no quaternion is provided, one will be created."
-        }]
-      });
-
-      var x = 0,
-        y = 0,
-        z = 0,
-        mgr;
-
-      quaternion = quaternion || THREE.Quaternion();
-
-      for (var i = 0; i < this.managers.length; ++i) {
-        mgr = this.managers[i];
-        x += mgr.getValue(xValueName);
-        y += mgr.getValue(yValueName);
-        z += mgr.getValue(zValueName);
-      }
-
-      euler.set(x, y, z, "YXZ");
-      quaternion.setFromEuler(euler);
-
-      return quaternion;
-    }
-
-    getVector(xValueName, yValueName, zValueName, vector) {
-      pliny.method({
-        parent: "Primrose.FPSInput",
-        name: "getVector2",
-        returns: "THREE.Vector3",
-        paramters: [{
-          name: "xValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the X axis."
-        }, {
-          name: "yValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the Y axis."
-        }, {
-          name: "zValueName",
-          type: "String",
-          description: "The name of the value to retrieve for the Z axis."
-        }, {
-          name: "vector",
-          type: "THREE.Vector3",
-          optional: true,
-          description: "A vector to which to output the axis value. If no vector is provided, one will be created."
-        }]
-      });
-
-      var x = 0,
-        y = 0,
-        z = 0;
-
-      vector = vector || new THREE.Vector3();
-
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        x += mgr.getValue(xValueName);
-        y += mgr.getValue(yValueName);
-        z += mgr.getValue(zValueName);
-      }
-
-      vector.set(x, y, z);
-      return vector;
     }
 
     getValue(name) {
