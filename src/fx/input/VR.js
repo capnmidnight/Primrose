@@ -89,6 +89,13 @@ Primrose.Input.VR = (function () {
       });
     }
 
+    zero(){
+      super.zero();
+      if (this.currentDisplay) {
+        this.currentDisplay.resetPose();
+      }
+    }
+
     poll() {
       if (this.currentDisplay) {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;

@@ -1,7 +1,8 @@
 Primrose.InputProcessor = (function () {
   "use strict";
 
-  const TELEPORT_RADIUS = 0.4,
+  const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
+    TELEPORT_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
     MAX_SELECT_DISTANCE = 2,
     MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
@@ -438,10 +439,15 @@ Primrose.InputProcessor = (function () {
     }
 
     zero(){
-      this.position.set(0, 0, 0);
-      this.velocity.set(0, 0, 0);
-      this.quaternion.set(0, 0, 0, 1);
-      this.isOnGround = false;
+      for (var i = 0; this.enabled && i < SETTINGS_TO_ZERO.length; ++i) {
+        this.setValue(SETTINGS_TO_ZERO[i], 0);
+      }
+      if(this.showPointer){
+        this.position.set(0, 0, 0);
+        this.velocity.set(0, 0, 0);
+        this.quaternion.set(0, 0, 0, 1);
+        this.isOnGround = false;
+      }
     }
 
     add(obj){

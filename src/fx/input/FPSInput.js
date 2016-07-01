@@ -1,8 +1,7 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
-  const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
-    AXIS_PREFIXES = ["L", "R"],
+  const AXIS_PREFIXES = ["L", "R"],
     temp = new THREE.Quaternion(),
     euler = new THREE.Euler();
 
@@ -265,17 +264,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     zero() {
-      if (this.vr && this.vr.currentDisplay) {
-        this.vr.currentDisplay.resetPose();
-      }
-      if (this.motion) {
-        this.motion.zeroAxes();
-      }
       for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        for (var j = 0; mgr.enabled && j < SETTINGS_TO_ZERO.length; ++j) {
-          mgr.setValue(SETTINGS_TO_ZERO[j], 0);
-        }
+        this.managers[i].zero();
       }
     }
 
