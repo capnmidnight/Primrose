@@ -92,7 +92,7 @@ Primrose.Input.Mouse = (function () {
         0,
         "YXZ"
       );
-      this.mesh.quaternion.setFromEuler(EULER);
+      this.quaternion.setFromEuler(EULER);
     }
 
     setLocation(x, y) {

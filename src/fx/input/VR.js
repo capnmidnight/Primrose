@@ -116,11 +116,11 @@ Primrose.Input.VR = (function () {
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
-        this.mesh.quaternion.toArray(tempQuat);
+        this.quaternion.toArray(tempQuat);
         for (var i = 0; i < o.length; ++i) {
           tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
         }
-        this.mesh.quaternion.fromArray(tempQuat);
+        this.quaternion.fromArray(tempQuat);
       }
     }
 

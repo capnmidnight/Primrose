@@ -41,10 +41,7 @@ Primrose.BrowserEnvironment = (function () {
       this.zero = () => {
         if (!lockedToEditor()) {
           this.input.zero();
-          this.vehicle.position.set(0, 0, 0);
-          this.vehicle.velocity.set(0, 0, 0);
-          this.vehicle.mesh.quaternion.set(0, 0, 0, 1);
-          this.vehicle.isOnGround = false;
+          this.vehicle.zero();
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
           }
@@ -435,7 +432,7 @@ Primrose.BrowserEnvironment = (function () {
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
             this.camera.projectionMatrix.copy(st.projection);
-            this.camera.matrixWorld.copy(this.player.mesh.matrixWorld);
+            this.camera.matrixWorld.copy(this.player.matrixWorld);
             this.camera.translateOnAxis(st.translation, 1);
             if (this.options.useNose) {
               this.nose.visible = true;
@@ -460,7 +457,7 @@ Primrose.BrowserEnvironment = (function () {
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
-          this.camera.matrixWorld.copy(this.player.mesh.matrixWorld);
+          this.camera.matrixWorld.copy(this.player.matrixWorld);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
@@ -560,7 +557,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(this.player.mesh);
+        mgr.makePointer(this.player);
       };
 
       this.factories = factories;
@@ -1006,8 +1003,8 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
 
         this.input.Mouse.makePointer(this.scene);
-        this.input.VR.makePointer(this.vehicle.mesh);
-        this.player.mesh.add(this.camera);
+        this.input.VR.makePointer(this.vehicle);
+        this.player.add(this.camera);
 
         if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");

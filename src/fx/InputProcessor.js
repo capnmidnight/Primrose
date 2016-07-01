@@ -425,6 +425,25 @@ Primrose.InputProcessor = (function () {
       throw new Error(this.name + " updatePosition not implemented");
     }
 
+    zero(){
+      this.position.set(0, 0, 0);
+      this.velocity.set(0, 0, 0);
+      this.quaternion.set(0, 0, 0, 1);
+      this.isOnGround = false;
+    }
+
+    add(obj){
+      this.obj.add(obj);
+    }
+
+    get matrixWorld() {
+      return this.obj.matrixWorld;
+    }
+
+    get quaternion() {
+      return this.obj.quaternion;
+    }
+
     get stage() {
       return this._stage;
     }
