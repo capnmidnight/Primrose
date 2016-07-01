@@ -26,8 +26,8 @@ Primrose.Input.VR = (function () {
       description: "An input manager for gamepad devices."
   });
   class VR extends Primrose.InputProcessor {
-    constructor(avatarHeight, commands, socket) {
-      super("VR", null, commands, socket);
+    constructor(avatarHeight, parent, socket) {
+      super("VR", parent, null, socket);
 
       this.displays = [];
       this._transforms = [];
@@ -115,6 +115,9 @@ Primrose.Input.VR = (function () {
       if (p) {
         this.position.fromArray(p);
       }
+      this.position.x += this.parent.position.x;
+      this.position.z += this.parent.position.z;
+      this.parent.mesh.position.y = this.mesh.position.y;
     }
 
     updateVelocity() {

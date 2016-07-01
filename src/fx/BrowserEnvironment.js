@@ -556,7 +556,7 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(this.player);
+        mgr.makePointer(this.scene);
       };
 
       this.factories = factories;
@@ -1002,7 +1002,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
 
         this.input.Mouse.makePointer(this.scene);
-        this.input.VR.makePointer(this.vehicle);
+        this.input.VR.makePointer(this.scene);
         this.player.add(this.camera);
 
         if (this.options.serverPath === undefined) {

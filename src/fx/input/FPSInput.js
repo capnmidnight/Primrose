@@ -120,6 +120,8 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
+      this.add(new Primrose.Input.VR(avatarHeight, this.Mouse));
+
       this.add(new Primrose.Input.Touch(DOMElement, null, {
         fullScreen: {
           buttons: [Primrose.Keys.ANY],
@@ -227,6 +229,7 @@ Primrose.Input.FPSInput = (function () {
           this.add(mgr);
 
           if (isMotion) {
+            mgr.parent = this.VR;
             emit.call(this, "motioncontroller", mgr);
           }
           else {
