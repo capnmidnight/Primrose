@@ -7,7 +7,8 @@ Primrose.Input.VR = (function () {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
-    tempQuat = [];
+    tempQuat = [],
+    quat = new THREE.Quaternion();
   pliny.class({
     parent: "Primrose.Input",
       name: "VR",
@@ -36,6 +37,7 @@ Primrose.Input.VR = (function () {
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
+      this.originalQuat = new THREE.Quaternion();
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()

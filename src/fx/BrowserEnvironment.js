@@ -380,7 +380,7 @@ Primrose.BrowserEnvironment = (function () {
       const printPos = (obj) => obj.position.toArray()
         .join(", ");
       var movePlayer = (dt) => {
-        this.vehicle.stage = this.input.VR.stageParameters;
+        this.player.stage = this.input.VR.stageParameters;
         if(!this.vehicle.isOnGround){
           this.vehicle.velocity.y -= this.options.gravity * dt;
           if (this.vehicle.position.y < 0) {
