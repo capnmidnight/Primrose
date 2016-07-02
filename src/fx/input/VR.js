@@ -112,6 +112,11 @@ Primrose.Input.VR = (function () {
       super.showPointer = v;
     }
 
+    update(){
+      super.update();
+      this.parent.mesh.applyMatrix(this.stage.matrix);
+    }
+
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
@@ -144,9 +149,9 @@ Primrose.Input.VR = (function () {
         this.position.fromArray(p);
       }
       this.position.applyQuaternion(this.parentHeading);
+
       this.position.x += this.parent.position.x;
       this.position.z += this.parent.position.z;
-      this.parent.mesh.applyMatrix(this.stage.matrix);
     }
 
     updateVelocity() {
