@@ -112,20 +112,6 @@ Primrose.Input.VR = (function () {
       super.showPointer = v;
     }
 
-    updatePosition() {
-      var p = this.currentPose && this.currentPose.position;
-      if (p) {
-        this.position.fromArray(p);
-      }
-      this.position.x += this.parent.position.x;
-      this.position.z += this.parent.position.z;
-      this.parent.mesh.position.y = this.mesh.position.y;
-    }
-
-    updateVelocity() {
-
-    }
-
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
@@ -149,6 +135,21 @@ Primrose.Input.VR = (function () {
         quat.multiply(this.originalQuat);
         this.quaternion.copy(quat);
       }
+    }
+
+    updatePosition() {
+      var p = this.currentPose && this.currentPose.position;
+      if (p) {
+        this.position.fromArray(p);
+      }
+      this.position.applyQuaternion(this.parentHeading);
+      this.position.x += this.parent.position.x;
+      this.position.z += this.parent.position.z;
+      this.parent.mesh.applyMatrix(this.stage.matrix);
+    }
+
+    updateVelocity() {
+
     }
 
     resetTransforms(near, far) {
