@@ -839,8 +839,9 @@ Primrose.BrowserEnvironment = (function () {
           setPointerLock();
           this.input.VR.connect(index);
           this.input.VR.requestPresent([{
-              source: this.renderer.domElement
-            }])
+            source: this.renderer.domElement
+          }])
+            .then(() => this.input.VR.currentDisplay.resetPose())
             .catch()
             .then(() => {
               this.renderer.domElement.focus();
