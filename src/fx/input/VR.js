@@ -7,8 +7,7 @@ Primrose.Input.VR = (function () {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
-    tempQuat = [],
-    quat = new THREE.Quaternion();
+    tempQuat = [];
   pliny.class({
     parent: "Primrose.Input",
       name: "VR",
@@ -38,6 +37,7 @@ Primrose.Input.VR = (function () {
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
       this.originalQuat = new THREE.Quaternion();
+      this.parentHeading = new THREE.Quaternion();
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()
@@ -131,9 +131,9 @@ Primrose.Input.VR = (function () {
           }
         }
         this.euler.fromArray(tempQuat);
-        quat.setFromEuler(this.euler);
-        quat.multiply(this.originalQuat);
-        this.quaternion.copy(quat);
+        this.parentHeading.setFromEuler(this.euler);
+        this.parentHeading.multiply(this.originalQuat);
+        this.quaternion.copy(this.parentHeading);
       }
     }
 
