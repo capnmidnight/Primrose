@@ -274,6 +274,9 @@ Primrose.Input.FPSInput = (function () {
           mgr.update();
         }
       }
+    }
+
+    get segments(){
       var segments = [];
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];

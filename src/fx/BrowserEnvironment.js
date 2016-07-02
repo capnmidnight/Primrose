@@ -56,8 +56,7 @@ Primrose.BrowserEnvironment = (function () {
         }
         var id = geomObj.uuid,
           mLeft = new THREE.Matrix4(),
-          mRight = new THREE.Matrix4()
-          .identity(),
+          mRight = new THREE.Matrix4().identity(),
           mSwap,
           inScene = false,
           lastBag = objectHistory[id],
@@ -218,31 +217,6 @@ Primrose.BrowserEnvironment = (function () {
         emit.call(this, "update", dt);
       };
 
-      var updatePickableObjects = () => {
-        if (this.projector.ready) {
-          projector.ready = false;
-          var arr = [],
-            del = [];
-          for (var key in this.pickableObjects) {
-            var obj = this.pickableObjects[key],
-              p = createPickableObject(obj);
-            if (p) {
-              arr.push(p);
-              if (p.inScene === false) {
-                del.push(key);
-              }
-            }
-          }
-
-          if (arr.length > 0) {
-            this.projector.updateObjects(arr);
-          }
-          for (var i = 0; i < del.length; ++i) {
-            delete this.pickableObjects[del[i]];
-          }
-        }
-      };
-
       var lastHits = null,
         currentHits = null,
         handleHit = (h) => {
@@ -281,38 +255,15 @@ Primrose.BrowserEnvironment = (function () {
       var resolvePicking = () => {
         if (currentHits) {
           for (var i = 0; i < this.input.managers.length; ++i) {
-            var mgr = this.input.managers[i],
-              currentHit = currentHits[mgr.name];
-            if (currentHit) {
-              var lastHit = lastHit && lastHit[mgr.name],
-                lastButtons = mgr.getValue("dButtons"),
-                object = this.pickableObjects[currentHit.objectID];
-
-              mgr.registerHit(currentHit, object === this.ground);
-
-              if (object) {
-                var buttons = this.input.getValue("buttons"),
-                  clickChanged = lastButtons !== 0,
-                  control = object.button || object.surface;
-
-                if (!clickChanged && buttons > 0) {
-                  if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-                    emit.call(this, "pointermove", currentHit);
-                  }
-                  if (this.currentControl && currentHit.point) {
-                    this.currentControl.moveUV(currentHit.point);
-                  }
-                }
-              }
-            }
-            else {
-              mgr.reset();
-            }
+            this.input.managers[i].registerHit(currentHits, lastHits, this.pickableObjects, this.currentControl);
           }
         }
       };
 
       var pointerStart = (name) => {
+        var blurCurrentControl = !!this.currentControl,
+          currentControl = this.currentControl;
+        this.currentControl = null;
         if (!(name === "keyboard" && lockedToEditor())) {
           if (currentHits) {
             for (var k in currentHits) {
@@ -323,9 +274,8 @@ Primrose.BrowserEnvironment = (function () {
                   var control = object.button || object.surface;
                   emit.call(this, "pointerstart", currentHit);
 
-                  if (this.currentControl && this.currentControl !== control) {
-                    this.currentControl.blur();
-                    this.currentControl = null;
+                  if (currentControl && currentControl === control) {
+                    blurCurrentControl = false;
                   }
 
                   if (!this.currentControl && control) {
@@ -342,12 +292,12 @@ Primrose.BrowserEnvironment = (function () {
                   }
                 }
               }
-              else if (this.currentControl) {
-                this.currentControl.blur();
-                this.currentControl = null;
-              }
             }
           }
+        }
+
+        if(blurCurrentControl){
+          currentControl.blur();
         }
       };
 
@@ -390,11 +340,31 @@ Primrose.BrowserEnvironment = (function () {
           }
         }
 
-        var segments = this.input.update(dt);
+        this.input.update(dt);
 
         if (this.projector.ready) {
           this.projector.ready = false;
-          this.projector.projectPointers(segments);
+          var arr = [],
+            del = [];
+          for (var key in this.pickableObjects) {
+            var obj = this.pickableObjects[key],
+              p = createPickableObject(obj);
+            if (p) {
+              arr.push(p);
+              if (p.inScene === false) {
+                del.push(key);
+              }
+            }
+          }
+
+          if (arr.length > 0) {
+            this.projector.updateObjects(arr);
+          }
+          for (var i = 0; i < del.length; ++i) {
+            delete this.pickableObjects[del[i]];
+          }
+
+          this.projector.projectPointers(this.input.segments);
         }
       };
 
@@ -857,7 +827,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var showHideButtons = () => {
-        var hide = this.inVR;
+        var hide = this.input.VR.isPresenting;
 
         this.input.inVR = this.inVR;
         iconManager.icons.forEach((icon) => {
@@ -1253,16 +1223,6 @@ Primrose.BrowserEnvironment = (function () {
     // THREE.js scene, if one had already been created.
     scene: null
   };
-
-  function transformForPicking(obj) {
-    var p = obj.position.clone();
-    obj = obj.parent;
-    while (obj !== null) {
-      p.applyMatrix4(obj.matrix);
-      obj = obj.parent;
-    }
-    return p.toArray();
-  }
 
   return BrowserEnvironment;
 })();

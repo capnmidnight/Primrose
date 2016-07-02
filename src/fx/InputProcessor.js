@@ -8,7 +8,8 @@ Primrose.InputProcessor = (function () {
     MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
     MAX_MOVE_DISTANCE = 5,
     MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
-    LASER_LENGTH = 1,
+    LASER_WIDTH = 0.01,
+    LASER_LENGTH = 3 * LASER_WIDTH,
     moveTo = new THREE.Vector3(0, 0, 0);
 
   pliny.class({
@@ -330,11 +331,11 @@ Primrose.InputProcessor = (function () {
       this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
       this.euler = new THREE.Euler();
-      this.mesh = textured(box(0.01, 0.01, LASER_LENGTH), 0xff0000, {
+      this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), 0xff0000, {
         emissive: 0x3f0000
       });
       this.mesh.geometry.vertices.forEach((v) => {
-        v.z -= LASER_LENGTH * 0.5;
+        v.z -= LASER_LENGTH * 0.5 + 0.5;
       });
 
       this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
@@ -387,35 +388,55 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    registerHit(currentHit, isGround) {
+    registerHit(currentHits, lastHits, objects, currentControl) {
       if(this.showPointer){
-        var fp = currentHit.facePoint;
+        var currentHit = currentHits[this.name],
+            lastHit = lastHits && lastHits[this.name];
+        if (currentHit) {
+          var object = objects[currentHit.objectID],
+            fp = currentHit.facePoint,
+            isGround = object && object.name === "Ground";
 
-        moveTo.fromArray(fp)
-          .sub(this.position);
+          moveTo.fromArray(fp)
+            .sub(this.position);
 
-        this.groundMesh.visible = isGround;
-        if (isGround) {
-          var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
-          if (distSq > MAX_MOVE_DISTANCE_SQ) {
-            var dist = Math.sqrt(distSq),
-              factor = MAX_MOVE_DISTANCE / dist,
-              y = moveTo.y;
-            moveTo.y = 0;
-            moveTo.multiplyScalar(factor);
-            moveTo.y = y;
-            textured(this.mesh, 0xffff00, {
-              emissive: 0x7f7f00
+          this.groundMesh.visible = isGround;
+          if (isGround) {
+            var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
+            if (distSq > MAX_MOVE_DISTANCE_SQ) {
+              var dist = Math.sqrt(distSq),
+                factor = MAX_MOVE_DISTANCE / dist,
+                y = moveTo.y;
+              moveTo.y = 0;
+              moveTo.multiplyScalar(factor);
+              moveTo.y = y;
+              textured(this.mesh, 0xffff00, {
+                emissive: 0x7f7f00
+              });
+            }
+            this.groundMesh.position
+              .copy(this.position)
+              .add(moveTo);
+          }
+          else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
+            textured(this.mesh, 0x00ff00, {
+              emissive: 0x007f00
             });
           }
-          this.groundMesh.position
-            .copy(this.position)
-            .add(moveTo);
+
+          if (object && currentControl && currentHit.point) {
+            var buttons = this.getValue("buttons"),
+              lastButtons = this.getValue("dButtons"),
+              clickChanged = lastButtons !== 0,
+              control = object.button || object.surface;
+
+            if (!clickChanged && buttons > 0) {
+              currentControl.moveUV(currentHit.point);
+            }
+          }
         }
-        else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
-          textured(this.mesh, 0x00ff00, {
-            emissive: 0x007f00
-          });
+        else {
+          this.reset();
         }
       }
     }
