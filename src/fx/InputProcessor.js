@@ -397,7 +397,6 @@ Primrose.InputProcessor = (function () {
         this.groundMesh.visible = isGround;
         if (isGround) {
           var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
-          this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ && this.showPointer;
           if (distSq > MAX_MOVE_DISTANCE_SQ) {
             var dist = Math.sqrt(distSq),
               factor = MAX_MOVE_DISTANCE / dist,
@@ -414,7 +413,6 @@ Primrose.InputProcessor = (function () {
             .add(moveTo);
         }
         else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
-          this.mesh.visible = this.showPointer;
           textured(this.mesh, 0x00ff00, {
             emissive: 0x007f00
           });
