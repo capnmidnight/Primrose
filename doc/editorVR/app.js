@@ -33,12 +33,9 @@ var GRASS = "../images/grass.png",
 
   scriptUpdateTimeout,
   lastScript = null,
-  scriptAnimate = null,
-
-  editorCenter = hub();
+  scriptAnimate = null;
 
 env.addEventListener("ready", function () {
-  env.appendChild(editorCenter);
   env.scene.add(subScene);
 
   stereoImage = env.createElement("img");
@@ -101,7 +98,7 @@ env.addEventListener("ready", function () {
   editorFrame.appendChild(editor);
   editorFrame.appendChild(button1);
 
-  editorFrameMesh = editorCenter.appendChild(editorFrame);
+  editorFrameMesh = env.appendChild(editorFrame);
   editorFrameMesh.name = "MyWindow";
   editorFrameMesh.position.set(0, env.avatarHeight, 0);
 
@@ -126,8 +123,6 @@ env.addEventListener("update", function (dt) {
   if (!scriptUpdateTimeout) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
-
-  editorCenter.position.copy(env.player.position);
 
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
