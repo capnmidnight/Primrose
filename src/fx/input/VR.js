@@ -132,8 +132,9 @@ Primrose.Input.VR = (function () {
         }
         this.euler.fromArray(tempQuat);
         this.parentHeading.setFromEuler(this.euler);
-        this.parentHeading.multiply(this.originalQuat);
-        this.quaternion.copy(this.parentHeading);
+        this.quaternion
+          .copy(this.parentHeading)
+          .multiply(this.originalQuat);
       }
     }
 
