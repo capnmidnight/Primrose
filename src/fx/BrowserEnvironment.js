@@ -264,12 +264,13 @@ Primrose.BrowserEnvironment = (function () {
         var blurCurrentControl = !!this.currentControl,
           currentControl = this.currentControl;
         this.currentControl = null;
-        if (!(name === "keyboard" && lockedToEditor())) {
+        if (!(name === "Keyboard" && lockedToEditor())) {
           if (currentHits) {
             for (var k in currentHits) {
               var currentHit = currentHits[k];
               if (currentHit) {
-                var object = this.pickableObjects[currentHit.objectID];
+                var object = this.pickableObjects[currentHit.objectID],
+                  done = false;
                 if (object) {
                   var control = object.button || object.surface;
                   emit.call(this, "pointerstart", currentHit);
@@ -281,14 +282,21 @@ Primrose.BrowserEnvironment = (function () {
                   if (!this.currentControl && control) {
                     this.currentControl = control;
                     this.currentControl.focus();
+                    done = true;
                   }
                   else if (object === this.ground) {
                     this.vehicle.position.copy(this.input[k].groundMesh.position);
                     this.vehicle.isOnGround = false;
+                    done = true;
                   }
 
                   if (this.currentControl) {
                     this.currentControl.startUV(currentHit.point);
+                    done = true;
+                  }
+
+                  if(done){
+                    break;
                   }
                 }
               }
