@@ -147,6 +147,8 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
+      this.add(new Primrose.Input.VR(avatarHeight, isMobile ? this.Touch : this.Mouse));
+
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var isMotion = pad.id === "OpenVR Gamepad",
           padCommands = null,
@@ -251,10 +253,7 @@ Primrose.Input.FPSInput = (function () {
     update() {
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          mgr.update();
-        }
+        this.managers[i].update();
       }
     }
 
