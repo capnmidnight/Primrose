@@ -76,12 +76,6 @@ Primrose.Input.FPSInput = (function () {
           axes: [Primrose.Input.Mouse.BUTTONS],
           delta: true
         },
-        pointerX: {
-          axes: [Primrose.Input.Mouse.X]
-        },
-        pointerY: {
-          axes: [Primrose.Input.Mouse.Y]
-        },
         dx: {
           axes: [-Primrose.Input.Mouse.X],
           delta: true,
@@ -132,12 +126,6 @@ Primrose.Input.FPSInput = (function () {
         dButtons: {
           axes: [Primrose.Input.Touch.FINGERS],
           delta: true
-        },
-        pointerX: {
-          axes: [Primrose.Input.Touch.X0]
-        },
-        pointerY: {
-          axes: [Primrose.Input.Touch.Y0]
         },
         dx: {
           axes: [-Primrose.Input.Touch.X0],
@@ -276,13 +264,13 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    get segments(){
+    get segments() {
       var segments = [];
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         if (mgr.enabled) {
           var seg = mgr.segment;
-          if(seg){
+          if (seg) {
             segments.push(seg);
           }
         }
