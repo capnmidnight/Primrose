@@ -13,8 +13,6 @@ var GRASS = "../images/grass.png",
     skyTexture: DECK,
     ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
     font: "../fonts/helvetiker_regular.typeface.js"
   }),
 

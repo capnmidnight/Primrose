@@ -3,8 +3,6 @@ var env = new Primrose.BrowserEnvironment("My Primrose VR Application", {
   autoRescaleQuality: true,
   skyTexture: "../images/bg.jpg",
   groundTexture: "../images/deck.png",
-  fullScreenIcon: "../models/monitor.obj",
-  VRIcon: "../models/cardboard.obj",
   font: "../fonts/helvetiker_regular.typeface.js"
 });
 

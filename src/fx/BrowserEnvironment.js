@@ -505,7 +505,6 @@ Primrose.BrowserEnvironment = (function () {
           button: this.options.button && typeof this.options.button.model === "string" && this.options.button.model,
           font: this.options.font
         },
-        iconManager = new Primrose.IconManager(this.options),
         resolutionScale = 1,
         factories = {
           button: Primrose.Controls.Button2D,
@@ -568,18 +567,6 @@ Primrose.BrowserEnvironment = (function () {
         rgb.setHSL(hsl.h, hsl.s, hsl.l);
         return rgb;
       }
-
-      var putIconInScene = (icon, i, arr) => {
-        var arm = hub();
-        arm.add(icon);
-        icon.position.z = -1;
-        put(arm)
-          .on(this.scene)
-          .at(0, this.options.avatarHeight, 0);
-        var wedge = 75 / arr.length;
-        arm.rotation.set(0, Math.PI * wedge * ((arr.length - 1) * 0.5 - i) / 180, 0);
-        this.registerPickableObject(icon);
-      };
 
       var modelsReady = Primrose.ModelLoader.loadObjects(modelFiles)
         .then((models) => {
@@ -838,12 +825,6 @@ Primrose.BrowserEnvironment = (function () {
         var hide = this.input.VR.isPresenting;
 
         this.input.inVR = this.inVR;
-        iconManager.icons.forEach((icon) => {
-          if (icon.name.indexOf("Display") === 0) {
-            icon.visible = !hide;
-            icon.disabled = hide;
-          }
-        });
         var elem = this.renderer.domElement.nextElementSibling;
         while (elem) {
           if (hide) {
@@ -1057,7 +1038,6 @@ Primrose.BrowserEnvironment = (function () {
 
       var allReady = Promise.all([
           modelsReady,
-          iconManager.ready,
           audioReady,
           documentReady
         ])
@@ -1065,11 +1045,6 @@ Primrose.BrowserEnvironment = (function () {
           this.renderer.domElement.style.cursor = "default";
           this.input.VR.displays[0].DOMElement = this.renderer.domElement;
           this.input.VR.connect(0);
-          iconManager.append(this.input.VR && this.input.VR.displays || [{
-              displayName: "Test Icon"
-            }])
-            .forEach((icon, i) => icon.addEventListener("click", this.goFullScreen.bind(this, i), false));
-          iconManager.icons.forEach(putIconInScene);
           emit.call(this, "ready");
         });
 

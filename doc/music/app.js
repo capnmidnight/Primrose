@@ -3,12 +3,10 @@ var env = new Primrose.BrowserEnvironment(
   // hook it up to the Multiplayer Server.
   "Music", {
     // This file references a Three.js JSON-formatted scene
-    // file, which basically describes a room or level in 
-    // which the user will walk around, on which we can 
+    // file, which basically describes a room or level in
+    // which the user will walk around, on which we can
     // create additional objects.
     sceneModel: "../models/holodeck.json",
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
     font: "../fonts/helvetiker_regular.typeface.js",
     // One of our GUI controls is configured here.
     button: {
@@ -24,7 +22,7 @@ var env = new Primrose.BrowserEnvironment(
     }
   });
 
-// Once Primrose has setup the WebGL context, setup Three.js, 
+// Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.

@@ -17,8 +17,6 @@ var GRASS = "../images/grass.png",
   env = new Primrose.BrowserEnvironment("AncientTemple", {
     skyTexture: "../images/bg2.jpg",
     groundTexture: ROCK,
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
     font: "../fonts/helvetiker_regular.typeface.js"
   });
 

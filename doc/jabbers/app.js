@@ -10,8 +10,6 @@ var WIDTH = 100,
   env = new Primrose.BrowserEnvironment("Jabber Yabs", {
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/grass.png",
-    fullScreenIcon: "../models/monitor.obj",
-    VRIcon: "../models/cardboard.obj",
     font: "../fonts/helvetiker_regular.typeface.js"
   });
 
@@ -95,7 +93,7 @@ function Jabber(w, h, s) {
   return body;
 }
 
-// Once Primrose has setup the WebGL context, setup Three.js, 
+// Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the "ready" event is fired,
 // indicating that we may make additional changes to the scene now.
