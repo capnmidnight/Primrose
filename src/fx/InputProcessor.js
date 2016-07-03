@@ -176,16 +176,11 @@ Primrose.InputProcessor = (function () {
       return output;
     }
 
-    poll() {
-      // Intentionally empty. Override in child classes.
-    }
-
     update() {
       if(this.enabled){
         var t = performance.now(),
           dt = (t - this.lastT) / 1000;
         this.lastT = t;
-        this.poll();
         if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
           for (var name in this.commands) {
             var cmd = this.commands[name];

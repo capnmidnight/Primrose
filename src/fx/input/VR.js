@@ -98,12 +98,6 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    poll() {
-      if (this.currentDisplay) {
-        this.currentPose = this.currentDisplay.getPose() || this.currentPose;
-      }
-    }
-
     get showPointer(){
       return super.showPointer && this.hasOrientation;
     }
@@ -112,8 +106,11 @@ Primrose.Input.VR = (function () {
       super.showPointer = v;
     }
 
-    update(){
-      super.update();
+    updatePointer(dt){
+      if (this.currentDisplay) {
+        this.currentPose = this.currentDisplay.getPose() || this.currentPose;
+      }
+      super.updatePointer(dt);
       this.parent.mesh.applyMatrix(this.stage.matrix);
     }
 
