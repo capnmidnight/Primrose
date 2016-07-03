@@ -111,10 +111,6 @@ Primrose.Input.FPSInput = (function () {
       this.add(new Primrose.Input.VR(avatarHeight, this.Mouse));
 
       this.add(new Primrose.Input.Touch(DOMElement, null, {
-        fullScreen: {
-          buttons: [Primrose.Keys.ANY],
-          commandUp: emit.bind(this, "fullscreen")
-        },
         pointer: {
           buttons: [Primrose.Keys.ANY],
           commandDown: emit.bind(this, "pointerstart"),
