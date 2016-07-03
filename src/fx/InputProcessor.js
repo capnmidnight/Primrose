@@ -437,7 +437,7 @@ Primrose.InputProcessor = (function () {
               .copy(this.position)
               .add(moveTo);
           }
-          else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
+          else{
             textured(this.mesh, 0x00ff00, {
               emissive: 0x007f00
             });
