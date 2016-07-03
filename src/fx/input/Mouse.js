@@ -17,13 +17,11 @@ Primrose.Input.Mouse = (function () {
       DOMElement.addEventListener("mousedown", (event) => {
         this.setButton(event.button, true);
         this.BUTTONS = event.buttons << 10;
-        this.update();
       }, false);
 
       DOMElement.addEventListener("mouseup", (event) => {
         this.setButton(event.button, false);
         this.BUTTONS = event.buttons << 10;
-        this.update();
       }, false);
 
       DOMElement.addEventListener("mousemove", (event) => {
@@ -41,7 +39,6 @@ Primrose.Input.Mouse = (function () {
         else {
           this.setLocation(event.layerX, event.layerY);
         }
-        this.update();
       }, false);
 
       DOMElement.addEventListener("wheel", (event) => {
@@ -60,8 +57,7 @@ Primrose.Input.Mouse = (function () {
       }, false);
     }
 
-    updatePosition() {
-    }
+    updatePosition() {}
 
     updateVelocity() {
       var head = this,

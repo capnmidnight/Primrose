@@ -39,16 +39,16 @@ Primrose.Input.LeapMotion = (function () {
         var canceller = null,
           startAlternate = null;
         if (gameUpdateLoop) {
-          var alternateLooper = function (t) {
+          var alternateLooper = (t) => {
             requestAnimationFrame(alternateLooper);
             gameUpdateLoop(t);
           };
           startAlternate = requestAnimationFrame.bind(window, alternateLooper);
           var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
-          canceller = function () {
+          canceller = () => {
             clearTimeout(timeout);
             this.isStreaming = true;
-          }.bind(this);
+          };
           this.E("deviceStreaming", canceller);
           this.E("streamingStarted", canceller);
           this.E("streamingStopped", startAlternate);

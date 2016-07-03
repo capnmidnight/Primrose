@@ -195,10 +195,7 @@ Then we can create and use an automatically workerized version of it as follows.
     });
     this.listeners = {};
 
-
-    this.worker.onmessage = function (e) {
-      emit.call(this, e.data[0], e.data[1]);
-    }.bind(this);
+    this.worker.onmessage = (e) => emit.call(this, e.data[0], e.data[1]);
 
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,

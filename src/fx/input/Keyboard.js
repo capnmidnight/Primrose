@@ -34,7 +34,6 @@ Primrose.Input.Keyboard = (function () {
 
       function execute(stateChange, event) {
         this.setButton(event.keyCode, stateChange);
-        this.update();
       }
 
       DOMElement.addEventListener("keydown", execute.bind(this, true), false);

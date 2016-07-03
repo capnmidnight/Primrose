@@ -12,8 +12,6 @@ Primrose.Input.FPSInput = (function () {
 
       this.listeners = {
         zero: [],
-        pointerstart: [],
-        pointerend: [],
         motioncontroller: [],
         gamepad: []
       };
@@ -64,11 +62,6 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       this.add(new Primrose.Input.Touch(DOMElement, this.Keyboard, {
-        pointer: {
-          buttons: [Primrose.Keys.ANY],
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
         buttons: {
           axes: [Primrose.Input.Touch.FINGERS]
         },
@@ -103,11 +96,6 @@ Primrose.Input.FPSInput = (function () {
       }));
 
       this.add(new Primrose.Input.Mouse(DOMElement, this.Keyboard, {
-        pointer: {
-          buttons: [Primrose.Keys.ANY],
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
         buttons: {
           axes: [Primrose.Input.Mouse.BUTTONS]
         },
@@ -150,17 +138,24 @@ Primrose.Input.FPSInput = (function () {
       this.add(new Primrose.Input.VR(avatarHeight, isMobile ? this.Touch : this.Mouse));
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
-        var isMotion = pad.id === "OpenVR Gamepad",
+        var padID = Primrose.Input.Gamepad.ID(pad),
+          isMotion = padID === "OpenVR Gamepad",
           padCommands = null,
           controllerNumber = 0;
 
-        if (pad.id.indexOf("Unknown") !== 0) {
+        if (padID !== "Unknown" && padID !== "Rift") {
           if (isMotion) {
             padCommands = {
-              pointer: {
-                buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
-                commandDown: emit.bind(this, "pointerstart"),
-                commandUp: emit.bind(this, "pointerend")
+              buttons: {
+                axes: [Primrose.Input.Gamepad.BUTTONS]
+              },
+              dButtons: {
+                axes: [Primrose.Input.Gamepad.BUTTONS],
+                delta: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
+                commandUp: emit.bind(this, "zero")
               }
             };
 
@@ -173,10 +168,12 @@ Primrose.Input.FPSInput = (function () {
           }
           else {
             padCommands = {
-              pointer: {
-                buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.A],
-                commandDown: emit.bind(this, "pointerstart"),
-                commandUp: emit.bind(this, "pointerend")
+              buttons: {
+                axes: [Primrose.Input.Gamepad.BUTTONS]
+              },
+              dButtons: {
+                axes: [Primrose.Input.Gamepad.BUTTONS],
+                delta: true
               },
               strafe: {
                 axes: [Primrose.Input.Gamepad.LSX],
@@ -191,7 +188,7 @@ Primrose.Input.FPSInput = (function () {
                 deadzone: 0.2,
                 integrate: true
               },
-              dheading: {
+              dHeading: {
                 commands: ["heading"],
                 delta: true
               },
@@ -199,6 +196,10 @@ Primrose.Input.FPSInput = (function () {
                 axes: [-Primrose.Input.Gamepad.RSY],
                 deadzone: 0.2,
                 integrate: true
+              },
+              zero: {
+                buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
+                commandUp: emit.bind(this, "zero")
               }
             };
           }

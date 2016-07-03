@@ -56,7 +56,8 @@ Primrose.BrowserEnvironment = (function () {
         }
         var id = geomObj.uuid,
           mLeft = new THREE.Matrix4(),
-          mRight = new THREE.Matrix4().identity(),
+          mRight = new THREE.Matrix4()
+          .identity(),
           mSwap,
           inScene = false,
           lastBag = objectHistory[id],
@@ -202,134 +203,129 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
+      var lastHits = null,
+        currentHits = {},
+        handleHit = (h) => {
+          var dt;
+          this.projector.ready = true;
+          lastHits = currentHits;
+          currentHits = h;
+        };
+
       var update = (t) => {
         var dt = t - lt,
           i, j;
         lt = t;
 
         movePlayer(dt);
+        resolvePicking();
         moveSky();
         moveGround();
-        resolvePicking();
         this.network.update(dt);
         checkQuality();
 
         emit.call(this, "update", dt);
       };
 
-      var lastHits = null,
-        currentHits = null,
-        handleHit = (h) => {
-          var dt;
-          this.projector.ready = true;
-          lastHits = currentHits;
-          currentHits = h;
-
-          var currentHit = currentHits.VR,
-            lastHit = lastHits && lastHits.VR;
-          if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-            currentHit.startTime = lastHit.startTime;
-            currentHit.gazeFired = lastHit.gazeFired;
-            dt = lt - currentHit.startTime;
-            if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
-              currentHit.gazeFired = true;
-              emit.call(this, "gazecomplete", currentHit);
-              emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+      var resolvePicking = () => {
+        var currentHit = currentHits.VR,
+          lastHit = lastHits && lastHits.VR;
+        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+          currentHit.startTime = lastHit.startTime;
+          currentHit.gazeFired = lastHit.gazeFired;
+          dt = lt - currentHit.startTime;
+          if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
+            currentHit.gazeFired = true;
+            emit.call(this, "gazecomplete", currentHit);
+            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+          }
+        }
+        else {
+          if (lastHit) {
+            dt = lt - lastHit.startTime;
+            if (dt < this.options.gazeLength) {
+              emit.call(this, "gazecancel", lastHit);
             }
           }
-          else {
-            if (lastHit) {
-              dt = lt - lastHit.startTime;
-              if (dt < this.options.gazeLength) {
-                emit.call(this, "gazecancel", lastHit);
+          if (currentHit) {
+            currentHit.startTime = lt;
+            currentHit.gazeFired = false;
+            emit.call(this, "gazestart", currentHit);
+          }
+        }
+
+        for (var i = 0; i < this.input.managers.length; ++i) {
+          var evt = this.input.managers[i].registerHit(currentHits, this.pickableObjects);
+          if (evt) {
+            if (evt.changed) {
+              if (evt.buttons) {
+                pointerStart(evt);
+              }
+              else {
+                pointerEnd(evt);
               }
             }
-            if (currentHit) {
-              currentHit.startTime = lt;
-              currentHit.gazeFired = false;
-              emit.call(this, "gazestart", currentHit);
+            else {
+              pointerMove(evt);
             }
-          }
-        };
-
-      var resolvePicking = () => {
-        if (currentHits) {
-          for (var i = 0; i < this.input.managers.length; ++i) {
-            this.input.managers[i].registerHit(currentHits, lastHits, this.pickableObjects, this.currentControl);
           }
         }
       };
 
-      var pointerStart = (name) => {
+      var pointerStart = (evt) => {
         var blurCurrentControl = !!this.currentControl,
           currentControl = this.currentControl;
         this.currentControl = null;
-        if (!(name === "Keyboard" && lockedToEditor())) {
-          if (currentHits) {
-            for (var k in currentHits) {
-              var currentHit = currentHits[k];
-              if (currentHit) {
-                var object = this.pickableObjects[currentHit.objectID],
-                  done = false;
-                if (object) {
-                  var control = object.button || object.surface;
-                  emit.call(this, "pointerstart", currentHit);
+        if (!(evt.name === "Keyboard" && lockedToEditor())) {
+          if (evt.object) {
+            var control = evt.object.button || evt.object.surface;
+            emit.call(this, "pointerstart", evt.point);
 
-                  if (currentControl && currentControl === control) {
-                    blurCurrentControl = false;
-                  }
+            if (currentControl && currentControl === control) {
+              blurCurrentControl = false;
+            }
 
-                  if (!this.currentControl && control) {
-                    this.currentControl = control;
-                    this.currentControl.focus();
-                    done = true;
-                  }
-                  else if (object === this.ground) {
-                    this.vehicle.position.copy(this.input[k].groundMesh.position);
-                    this.vehicle.isOnGround = false;
-                    done = true;
-                  }
+            if (!this.currentControl && control) {
+              this.currentControl = control;
+              this.currentControl.focus();
+            }
+            else if (evt.object === this.ground) {
+              this.vehicle.position.copy(this.input[evt.name].groundMesh.position);
+              this.vehicle.isOnGround = false;
+            }
 
-                  if (this.currentControl) {
-                    this.currentControl.startUV(currentHit.point);
-                    done = true;
-                  }
-
-                  if(done){
-                    break;
-                  }
-                }
-              }
+            if (this.currentControl) {
+              this.currentControl.startUV(evt.point);
             }
           }
         }
 
-        if(blurCurrentControl){
+        if (blurCurrentControl) {
           currentControl.blur();
         }
       };
 
-      var pointerEnd = (name) => {
-        if (!(name === "keyboard" && lockedToEditor())) {
+      var pointerMove = (evt) => {
+        if (evt.object && this.currentControl && evt.point) {
+          var control = evt.object.button || evt.object.surface;
+          if (!evt.changed && evt.buttons > 0) {
+            this.currentControl.moveUV(evt.point);
+          }
+        }
+      };
 
-          if (currentHits) {
-            for (var k in currentHits) {
-              var currentHit = currentHits[k],
-                lastHit = lastHits && lastHits[k];
-              if (currentHit) {
-                var object = this.pickableObjects[currentHit.objectID];
-                if (object) {
-                  var control = object.button || object.surface;
-                  if (this.currentControl) {
-                    this.currentControl.endPointer();
-                  }
-                  if (lastHit) {
-                    emit.call(this, "pointerend", lastHit);
-                  }
-                  emit.call(object, "click");
-                }
-              }
+      var pointerEnd = (evt) => {
+        if (!(evt.name === "Keyboard" && lockedToEditor())) {
+          var lastHit = lastHits && lastHits[evt.name];
+          if (evt.object) {
+            var control = evt.object.button || evt.object.surface;
+            if (this.currentControl) {
+              this.currentControl.endPointer();
             }
+            if (lastHit) {
+              emit.call(this, "pointerend", lastHit);
+            }
+            emit.call(evt.object, "click");
           }
         }
       };
@@ -339,7 +335,7 @@ Primrose.BrowserEnvironment = (function () {
         .join(", ");
       var movePlayer = (dt) => {
         this.player.stage = this.input.VR.stageParameters;
-        if(!this.vehicle.isOnGround){
+        if (!this.vehicle.isOnGround) {
           this.vehicle.velocity.y -= this.options.gravity * dt;
           if (this.vehicle.position.y < 0) {
             this.vehicle.velocity.y = 0;
@@ -804,8 +800,8 @@ Primrose.BrowserEnvironment = (function () {
           setPointerLock();
           this.input.VR.connect(index);
           this.input.VR.requestPresent([{
-            source: this.renderer.domElement
-          }])
+              source: this.renderer.domElement
+            }])
             .then(() => this.input.VR.currentDisplay.resetPose())
             .catch()
             .then(() => {
@@ -956,8 +952,6 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
-        this.input.addEventListener("pointerstart", pointerStart, false);
-        this.input.addEventListener("pointerend", pointerEnd, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
 

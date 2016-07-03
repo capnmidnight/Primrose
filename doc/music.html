@@ -60,7 +60,6 @@
     <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
     <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
     <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/StateList.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
@@ -72,7 +71,6 @@
     <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
-    <script type="text/javascript" src="../src/fx/IconManager.js"></script>
     <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
     <script type="text/javascript" src="../src/fx/Keys.js"></script>
     <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
@@ -231,12 +229,10 @@ var env = new Primrose.BrowserEnvironment(
   // hook it up to the Multiplayer Server.
   &quot;Music&quot;, {
     // This file references a Three.js JSON-formatted scene
-    // file, which basically describes a room or level in 
-    // which the user will walk around, on which we can 
+    // file, which basically describes a room or level in
+    // which the user will walk around, on which we can
     // create additional objects.
     sceneModel: &quot;../models/holodeck.json&quot;,
-    fullScreenIcon: &quot;../models/monitor.obj&quot;,
-    VRIcon: &quot;../models/cardboard.obj&quot;,
     font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
     // One of our GUI controls is configured here.
     button: {
@@ -252,7 +248,7 @@ var env = new Primrose.BrowserEnvironment(
     }
   });
 
-// Once Primrose has setup the WebGL context, setup Three.js, 
+// Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
 // the basic scene hierarchy out of it, the &quot;ready&quot; event is fired,
 // indicating that we may make additional changes to the scene now.

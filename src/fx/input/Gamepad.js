@@ -35,8 +35,21 @@ Primrose.Input.Gamepad = (function () {
   });
   class Gamepad extends Primrose.InputProcessor {
     static ID(pad) {
-      return (pad.id + "_" + (pad.index || 0))
+      var id = (pad.id + "_" + (pad.index || 0))
         .replace(/\s+/g, "_");
+      if(id === "OpenVR Gamepad"){
+        id = "Vive";
+      }
+      else if(id.indexOf("Xbox") === 0){
+        id = "Gamepad";
+      }
+      else if(id.indexOf("Rift") === 0){
+        id = "Rift";
+      }
+      else if(id.indexOf("Unknown") === 0){
+        id = "Unknown";
+      }
+      return id;
     }
 
     static poll() {
@@ -110,12 +123,17 @@ Primrose.Input.Gamepad = (function () {
     }
 
     checkDevice(pad) {
-      var i;
+      var i, buttonMap = 0;
       this.currentPad = pad;
       for (i = 0; i < pad.buttons.length; ++i) {
-        this.setButton(i, pad.buttons[i].pressed);
-        this.setButton(i + pad.buttons.length, pad.buttons[i].touched);
+        var btn = pad.buttons[i];
+        this.setButton(i, btn.pressed);
+        if(btn.pressed){
+          buttonMap |= 0x1 << i;
+        }
+        this.setButton(i + pad.buttons.length, btn.touched);
       }
+      this.setAxis("BUTTONS", buttonMap);
       for (i = 0; i < pad.axes.length; ++i) {
         var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
         this.setAxis(axisName, pad.axes[i]);
@@ -164,7 +182,7 @@ Primrose.Input.Gamepad = (function () {
       }
     }
   }
-  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z"]);
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
   pliny.enumeration({
     parent: "Primrose.Input.Gamepad",

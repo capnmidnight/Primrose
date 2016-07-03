@@ -17,9 +17,7 @@ Primrose.Input.Location = (function () {
       if (this.available) {
         navigator.geolocation.watchPosition(
           this.setState.bind(this),
-          function () {
-            this.available = false;
-          }.bind(this),
+          () => this.available = false,
           this.options);
       }
     }

@@ -73,29 +73,27 @@ Primrose.InputProcessor = (function () {
           var m = Primrose.Keys.MODIFIER_KEYS[i];
           this.inputState[m] = event[m + "Key"];
         }
-
-        this.update();
       };
 
       window.addEventListener("keydown", readMetaKeys, false);
       window.addEventListener("keyup", readMetaKeys, false);
 
       if (socket) {
-        socket.on("open", function () {
+        socket.on("open", () => {
           this.socketReady = true;
           this.inPhysicalUse = !this.receiving;
-        }.bind(this));
-        socket.on(name, function (cmdState) {
+        });
+        socket.on(name, (cmdState) => {
           if (this.receiving) {
             this.inPhysicalUse = false;
             this.decodeStateSnapshot(cmdState);
             this.fireCommands();
           }
-        }.bind(this));
-        socket.on("close", function () {
+        });
+        socket.on("close", () => {
           this.inPhysicalUse = true;
           this.socketReady = false;
-        }.bind(this));
+        });
       }
 
       for (var cmdName in commands) {
@@ -149,14 +147,14 @@ Primrose.InputProcessor = (function () {
         axes: this.maybeClone(cmd.axes),
         commands: cmd.commands && cmd.commands.slice() || [],
         buttons: this.maybeClone(cmd.buttons),
-        metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map(function (k) {
+        metaKeys: this.maybeClone(cmd.metaKeys && cmd.metaKeys.map((k) => {
           for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
             var m = Primrose.Keys.MODIFIER_KEYS[i];
             if (Math.abs(k) === Primrose.Keys[m.toLocaleUpperCase()]) {
               return Math.sign(k) * (i + 1);
             }
           }
-        }.bind(this))),
+        })),
         commandDown: cmd.commandDown,
         commandUp: cmd.commandUp
       };
@@ -177,7 +175,7 @@ Primrose.InputProcessor = (function () {
     }
 
     update() {
-      if(this.enabled){
+      if (this.enabled) {
         var t = performance.now(),
           dt = (t - this.lastT) / 1000;
         this.lastT = t;
@@ -315,11 +313,11 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    get showPointer(){
+    get showPointer() {
       return this._showPointer;
     }
 
-    set showPointer(v){
+    set showPointer(v) {
       this._showPointer = v;
     }
 
@@ -339,7 +337,7 @@ Primrose.InputProcessor = (function () {
         emissive: 0x003f00
       });
       this.disk.geometry.computeBoundingBox();
-      this.disk.geometry.vertices.forEach((v)=> v.y -= this.disk.geometry.boundingBox.min.y);
+      this.disk.geometry.vertices.forEach((v) => v.y -= this.disk.geometry.boundingBox.min.y);
       this.disk.geometry.computeBoundingBox();
 
       this.disk.scale.set(1, 0.1, 1);
@@ -356,7 +354,7 @@ Primrose.InputProcessor = (function () {
       scene.add(this.stageGrid);
     }
 
-    updatePointer(dt){
+    updatePointer(dt) {
       this.updateOrientation(true);
       this.updateVelocity();
 
@@ -372,28 +370,51 @@ Primrose.InputProcessor = (function () {
       this.mesh.position.copy(this.position);
       this.mesh.updateMatrix();
 
-      if(this.stage){
+      if (this.stage) {
         this.mesh.applyMatrix(this.stage.matrix);
       }
     }
 
-    get segment(){
-      if(this.showPointer){
+    get segment() {
+      if (this.showPointer) {
         FORWARD.set(0, 0, -1)
           .applyMatrix4(this.mesh.matrixWorld);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
     }
 
-    registerHit(currentHits, lastHits, objects, currentControl) {
-      this.reset();
-      if(this.showPointer){
-        var currentHit = currentHits[this.name],
-            lastHit = lastHits && lastHits[this.name];
+    registerHit(currentHits, objects) {
+      var object,
+        buttons = 0,
+        lastButtons = 0,
+        changed,
+        point,
+        head = this;
+
+      while (head) {
+        buttons += head.getValue("buttons");
+        lastButtons += head.getValue("dButtons");
+        head = head.parent;
+      }
+
+      changed = lastButtons !== 0;
+
+      if (this.mesh) {
+        this.groundMesh.visible = false;
+        this.mesh.visible = this.showPointer;
+        textured(this.mesh, 0xff0000, {
+          emissive: 0x7f0000
+        });
+      }
+
+      if (this.showPointer) {
+        var currentHit = currentHits[this.name];
         if (currentHit) {
-          var object = objects[currentHit.objectID],
-            fp = currentHit.facePoint,
+          object = objects[currentHit.objectID];
+          var fp = currentHit.facePoint,
             isGround = object && object.name === "Ground";
+
+          point = currentHit.point;
 
           moveTo.fromArray(fp)
             .sub(this.position);
@@ -421,28 +442,15 @@ Primrose.InputProcessor = (function () {
               emissive: 0x007f00
             });
           }
-
-          if (object && currentControl && currentHit.point) {
-            var buttons = this.getValue("buttons"),
-              lastButtons = this.getValue("dButtons"),
-              clickChanged = lastButtons !== 0,
-              control = object.button || object.surface;
-
-            if (!clickChanged && buttons > 0) {
-              currentControl.moveUV(currentHit.point);
-            }
-          }
         }
-      }
-    }
 
-    reset() {
-      if(this.mesh){
-        this.groundMesh.visible = false;
-        this.mesh.visible = this.showPointer;
-        textured(this.mesh, 0xff0000, {
-          emissive: 0x7f0000
-        });
+        return {
+          name: this.name,
+          changed: changed,
+          buttons: buttons,
+          object: object,
+          point: point
+        };
       }
     }
 
@@ -458,11 +466,11 @@ Primrose.InputProcessor = (function () {
       throw new Error(this.name + " updatePosition not implemented");
     }
 
-    zero(){
+    zero() {
       for (var i = 0; this.enabled && i < SETTINGS_TO_ZERO.length; ++i) {
         this.setValue(SETTINGS_TO_ZERO[i], 0);
       }
-      if(this.showPointer){
+      if (this.showPointer) {
         this.position.set(0, 0, 0);
         this.velocity.set(0, 0, 0);
         this.quaternion.set(0, 0, 0, 1);
@@ -470,7 +478,7 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    add(obj){
+    add(obj) {
       this.mesh.add(obj);
     }
 

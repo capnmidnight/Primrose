@@ -149,7 +149,7 @@ Primrose.ModelLoader = (function () {
   ModelLoader.prototype.clone = function () {
     var obj = this.template.clone();
 
-    obj.traverse(function (child) {
+    obj.traverse((child) => {
       if (child instanceof THREE.SkinnedMesh) {
         obj.animation = new THREE.Animation(child, child.geometry.animation);
         if (!this.template.originalAnimationData && obj.animation.data) {
@@ -159,7 +159,7 @@ Primrose.ModelLoader = (function () {
           obj.animation.data = this.template.originalAnimationData;
         }
       }
-    }.bind(this));
+    });
 
     setProperties(obj);
     return obj;

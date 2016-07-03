@@ -91,22 +91,22 @@ Primrose.Input.VR = (function () {
       });
     }
 
-    zero(){
+    zero() {
       super.zero();
       if (this.currentDisplay) {
         this.currentDisplay.resetPose();
       }
     }
 
-    get showPointer(){
+    get showPointer() {
       return super.showPointer && this.hasOrientation;
     }
 
-    set showPointer(v){
+    set showPointer(v) {
       super.showPointer = v;
     }
 
-    updatePointer(dt){
+    updatePointer(dt) {
       if (this.currentDisplay) {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;
       }
@@ -124,11 +124,11 @@ Primrose.Input.VR = (function () {
         this.originalQuat.fromArray(tempQuat);
         this.parent.euler.toArray(tempQuat);
         tempQuat[2] = 0;
-        if(this.inVR){
+        if (this.inVR) {
           tempQuat[0] = 0;
           var da = tempQuat[1] - this.euler.y;
           tempQuat[1] = this.euler.y;
-          if(Math.abs(da) > this.rotationAngle){
+          if (Math.abs(da) > this.rotationAngle) {
             tempQuat[1] += Math.sign(da) * this.rotationAngle;
           }
         }
@@ -181,8 +181,9 @@ Primrose.Input.VR = (function () {
     connect(selectedIndex) {
       this.currentPose = selectedIndex === 0 ? DEFAULT_POSE : null;
       this.currentDisplayIndex = selectedIndex;
-      if(0 <= selectedIndex && selectedIndex <= this.displays.length){
-        var params = this.currentDisplay.getEyeParameters("left").fieldOfView;
+      if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
+        var params = this.currentDisplay.getEyeParameters("left")
+          .fieldOfView;
         this.rotationAngle = Math.PI * (params.leftDegrees + params.rightDegrees) / 360;
       }
     }
