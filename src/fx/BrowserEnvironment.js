@@ -257,75 +257,62 @@ Primrose.BrowserEnvironment = (function () {
         for (var i = 0; i < this.input.managers.length; ++i) {
           var evt = this.input.managers[i].registerHit(currentHits, this.pickableObjects);
           if (evt) {
+            var object = evt.object,
+              control = object && (object.button || object.surface);
             if (evt.changed) {
               if (evt.buttons) {
-                pointerStart(evt);
+                var blurCurrentControl = !!this.currentControl,
+                  currentControl = this.currentControl;
+                this.currentControl = null;
+                if (!(evt.name === "Keyboard" && lockedToEditor())) {
+                  if (object) {
+                    emit.call(this, "pointerstart", evt.point);
+
+                    if (currentControl && currentControl === control) {
+                      blurCurrentControl = false;
+                    }
+
+                    if (!this.currentControl && control) {
+                      this.currentControl = control;
+                      this.currentControl.focus();
+                    }
+                    else if (object === this.ground) {
+                      this.vehicle.position.copy(this.input[evt.name].groundMesh.position);
+                      this.vehicle.isOnGround = false;
+                    }
+
+                    if (this.currentControl) {
+                      this.currentControl.startUV(evt.point);
+                    }
+                  }
+                }
+
+                if (blurCurrentControl) {
+                  currentControl.blur();
+                }
               }
               else {
-                pointerEnd(evt);
+                if (!lockedToEditor()) {
+                  var lastHit = lastHits && lastHits[evt.name];
+                  if (object) {
+                    if (this.currentControl) {
+                      this.currentControl.endPointer();
+                    }
+                    if (lastHit) {
+                      emit.call(this, "pointerend", lastHit);
+                    }
+                    emit.call(object, "click");
+                  }
+                }
               }
             }
             else {
-              pointerMove(evt);
+              if (object && this.currentControl && evt.point) {
+                if (!evt.changed && evt.buttons > 0) {
+                  this.currentControl.moveUV(evt.point);
+                }
+              }
             }
-          }
-        }
-      };
-
-      var pointerStart = (evt) => {
-        var blurCurrentControl = !!this.currentControl,
-          currentControl = this.currentControl;
-        this.currentControl = null;
-        if (!(evt.name === "Keyboard" && lockedToEditor())) {
-          if (evt.object) {
-            var control = evt.object.button || evt.object.surface;
-            emit.call(this, "pointerstart", evt.point);
-
-            if (currentControl && currentControl === control) {
-              blurCurrentControl = false;
-            }
-
-            if (!this.currentControl && control) {
-              this.currentControl = control;
-              this.currentControl.focus();
-            }
-            else if (evt.object === this.ground) {
-              this.vehicle.position.copy(this.input[evt.name].groundMesh.position);
-              this.vehicle.isOnGround = false;
-            }
-
-            if (this.currentControl) {
-              this.currentControl.startUV(evt.point);
-            }
-          }
-        }
-
-        if (blurCurrentControl) {
-          currentControl.blur();
-        }
-      };
-
-      var pointerMove = (evt) => {
-        if (evt.object && this.currentControl && evt.point) {
-          var control = evt.object.button || evt.object.surface;
-          if (!evt.changed && evt.buttons > 0) {
-            this.currentControl.moveUV(evt.point);
-          }
-        }
-      };
-
-      var pointerEnd = (evt) => {
-        if (!(evt.name === "Keyboard" && lockedToEditor())) {
-          var lastHit = lastHits && lastHits[evt.name];
-          if (evt.object) {
-            var control = evt.object.button || evt.object.surface;
-            if (this.currentControl) {
-              this.currentControl.endPointer();
-            }
-            if (lastHit) {
-              emit.call(this, "pointerend", lastHit);
-            }
-            emit.call(evt.object, "click");
           }
         }
       };
