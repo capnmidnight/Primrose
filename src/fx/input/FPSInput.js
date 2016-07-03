@@ -63,6 +63,45 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
+      this.add(new Primrose.Input.Touch(DOMElement, this.Keyboard, {
+        pointer: {
+          buttons: [Primrose.Keys.ANY],
+          commandDown: emit.bind(this, "pointerstart"),
+          commandUp: emit.bind(this, "pointerend")
+        },
+        buttons: {
+          axes: [Primrose.Input.Touch.FINGERS]
+        },
+        dButtons: {
+          axes: [Primrose.Input.Touch.FINGERS],
+          delta: true
+        },
+        dx: {
+          axes: [-Primrose.Input.Touch.X0],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        heading: {
+          commands: ["dx"],
+          integrate: true
+        },
+        dy: {
+          axes: [-Primrose.Input.Touch.Y0],
+          delta: true,
+          scale: 0.005,
+          min: -5,
+          max: 5
+        },
+        pitch: {
+          commands: ["dy"],
+          integrate: true,
+          min: -Math.PI * 0.5,
+          max: Math.PI * 0.5
+        }
+      }));
+
       this.add(new Primrose.Input.Mouse(DOMElement, this.Keyboard, {
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -89,53 +128,6 @@ Primrose.Input.FPSInput = (function () {
         },
         dy: {
           axes: [-Primrose.Input.Mouse.Y],
-          delta: true,
-          scale: 0.005,
-          min: -5,
-          max: 5
-        },
-        pitch: {
-          commands: ["dy"],
-          integrate: true,
-          min: -Math.PI * 0.5,
-          max: Math.PI * 0.5
-        },
-        pointerPitch: {
-          commands: ["dy"],
-          integrate: true,
-          min: -Math.PI * 0.25,
-          max: Math.PI * 0.25
-        }
-      }));
-
-      this.add(new Primrose.Input.VR(avatarHeight, this.Mouse));
-
-      this.add(new Primrose.Input.Touch(DOMElement, null, {
-        pointer: {
-          buttons: [Primrose.Keys.ANY],
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
-        buttons: {
-          axes: [Primrose.Input.Touch.FINGERS]
-        },
-        dButtons: {
-          axes: [Primrose.Input.Touch.FINGERS],
-          delta: true
-        },
-        dx: {
-          axes: [-Primrose.Input.Touch.X0],
-          delta: true,
-          scale: 0.005,
-          min: -5,
-          max: 5
-        },
-        heading: {
-          commands: ["dx"],
-          integrate: true
-        },
-        dy: {
-          axes: [-Primrose.Input.Touch.Y0],
           delta: true,
           scale: 0.005,
           min: -5,
