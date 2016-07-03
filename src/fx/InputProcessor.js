@@ -389,6 +389,7 @@ Primrose.InputProcessor = (function () {
     }
 
     registerHit(currentHits, lastHits, objects, currentControl) {
+      this.reset();
       if(this.showPointer){
         var currentHit = currentHits[this.name],
             lastHit = lastHits && lastHits[this.name];
@@ -434,9 +435,6 @@ Primrose.InputProcessor = (function () {
               currentControl.moveUV(currentHit.point);
             }
           }
-        }
-        else {
-          this.reset();
         }
       }
     }

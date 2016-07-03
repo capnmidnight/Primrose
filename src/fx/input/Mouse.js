@@ -10,6 +10,7 @@ Primrose.Input.Mouse = (function () {
   class Mouse extends Primrose.InputProcessor {
     constructor(DOMElement, parent, commands, socket) {
       super("Mouse", parent, commands, socket);
+      this.timer = null;
 
       DOMElement = DOMElement || window;
 
@@ -26,6 +27,12 @@ Primrose.Input.Mouse = (function () {
       }, false);
 
       DOMElement.addEventListener("mousemove", (event) => {
+        this.showPointer = true;
+        if(this.timer){
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+        this.timer = setTimeout(()=>this.showPointer = false, 1000);
         this.BUTTONS = event.buttons << 10;
         if (Mouse.Lock.isActive) {
           var mx = event.movementX,
