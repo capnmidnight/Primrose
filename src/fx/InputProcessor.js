@@ -56,6 +56,9 @@ Primrose.InputProcessor = (function () {
         meta: false
       };
       this.lastState = "";
+      this.listeners = {
+        teleport: []
+      }
 
       this.position = null;
       this.velocity = null;
@@ -67,6 +70,7 @@ Primrose.InputProcessor = (function () {
       this.inVR = false;
       this.lastT = performance.now();
       this._showPointer = false;
+      this._currentControl = null;
 
       var readMetaKeys = (event) => {
         for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
@@ -128,6 +132,12 @@ Primrose.InputProcessor = (function () {
       };
       this.commands[name] = cmd;
       this.commandNames.push(name);
+    }
+
+    addEventListener(evt, thunk, bubbles) {
+      if (this.listeners[evt]) {
+        this.listeners[evt].push(thunk);
+      }
     }
 
     cloneCommand(cmd) {
@@ -313,6 +323,18 @@ Primrose.InputProcessor = (function () {
       }
     }
 
+    set currentControl(v){
+      var head = this;
+      while(head){
+        head._currentControl = v;
+        head = head.parent;
+      }
+    }
+
+    get currentControl(){
+      return this._currentControl;
+    }
+
     get showPointer() {
       return this._showPointer;
     }
@@ -383,38 +405,43 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    registerHit(currentHits, objects) {
-      var object,
-        buttons = 0,
-        lastButtons = 0,
-        changed,
-        point,
-        head = this;
-
-      while (head) {
-        buttons += head.getValue("buttons");
-        lastButtons += head.getValue("dButtons");
-        head = head.parent;
-      }
-
-      changed = lastButtons !== 0;
-
-      if (this.mesh) {
-        this.groundMesh.visible = false;
-        this.mesh.visible = this.showPointer;
-        textured(this.mesh, 0xff0000, {
-          emissive: 0x7f0000
-        });
-      }
-
+    resolvePicking(currentHits, lastHits, objects) {
       if (this.showPointer) {
-        var currentHit = currentHits[this.name];
+        var buttons = 0,
+          dButtons = 0,
+          currentHit = currentHits[this.name],
+          lastHit = lastHits && lastHits[this.name],
+          head = this,
+          isGround = false,
+          object,
+          control,
+          point;
+
+        while (head) {
+          buttons += head.getValue("buttons");
+          dButtons += head.getValue("dButtons");
+          head = head.parent;
+        }
+
+        var changed = dButtons !== 0;
+
+        // reset the mesh color to the base value
+        if (this.mesh) {
+          this.groundMesh.visible = false;
+          this.mesh.visible = this.showPointer;
+          textured(this.mesh, 0xff0000, {
+            emissive: 0x7f0000
+          });
+        }
+
         if (currentHit) {
           object = objects[currentHit.objectID];
-          var fp = currentHit.facePoint,
-            isGround = object && object.name === "Ground";
+          isGround = object && object.name === "Ground";
+
+          var fp = currentHit.facePoint;
 
           point = currentHit.point;
+          control = object && (object.button || object.surface);
 
           moveTo.fromArray(fp)
             .sub(this.position);
@@ -444,13 +471,41 @@ Primrose.InputProcessor = (function () {
           }
         }
 
-        return {
-          name: this.name,
-          changed: changed,
-          buttons: buttons,
-          object: object,
-          point: point
-        };
+        if (changed) {
+          if (buttons) {
+            var blurCurrentControl = !!this.currentControl,
+              currentControl = this.currentControl;
+            this.currentControl = null;
+
+            if (object) {
+              if (currentControl && currentControl === control) {
+                blurCurrentControl = false;
+              }
+
+              if (!this.currentControl && control) {
+                this.currentControl = control;
+                this.currentControl.focus();
+              }
+              else if (isGround) {
+                emit.call(this, "teleport", this.groundMesh.position);
+              }
+
+              if (this.currentControl) {
+                this.currentControl.startUV(point);
+              }
+            }
+
+            if (blurCurrentControl) {
+              currentControl.blur();
+            }
+          }
+          else if (this.currentControl) {
+            this.currentControl.endPointer();
+          }
+        }
+        else if (!changed && buttons > 0 && this.currentControl && point) {
+          this.currentControl.moveUV(point);
+        }
       }
     }
 
@@ -464,6 +519,17 @@ Primrose.InputProcessor = (function () {
 
     updatePosition() {
       throw new Error(this.name + " updatePosition not implemented");
+    }
+
+    get lockedToEditor(){
+      var head = this;
+      while(head){
+        if(this.currentControl && this.currentControl.lockMovement){
+          return true;
+        }
+        head = head.parent;
+      }
+      return false;
     }
 
     zero() {

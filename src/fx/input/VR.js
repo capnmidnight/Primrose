@@ -7,7 +7,8 @@ Primrose.Input.VR = (function () {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
-    tempQuat = [];
+    tempQuat = [],
+    GAZE_LENGTH = 3000;
   pliny.class({
     parent: "Primrose.Input",
       name: "VR",
@@ -152,6 +153,38 @@ Primrose.Input.VR = (function () {
     }
 
     updateVelocity() {
+
+    }
+
+    resolvePicking(currentHits, lastHits, objects){
+      super.resolvePicking(currentHits, lastHits, objects);
+
+      var currentHit = currentHits.VR,
+          lastHit = lastHits && lastHits.VR,
+          dt, lt;
+        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
+          currentHit.startTime = lastHit.startTime;
+          currentHit.gazeFired = lastHit.gazeFired;
+          dt = lt - currentHit.startTime;
+          if (dt >= GAZE_LENGTH && !currentHit.gazeFired) {
+            currentHit.gazeFired = true;
+            emit.call(this, "gazecomplete", currentHit);
+            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
+          }
+        }
+        else {
+          if (lastHit) {
+            dt = lt - lastHit.startTime;
+            if (dt < GAZE_LENGTH) {
+              emit.call(this, "gazecancel", lastHit);
+            }
+          }
+          if (currentHit) {
+            currentHit.startTime = lt;
+            currentHit.gazeFired = false;
+            emit.call(this, "gazestart", currentHit);
+          }
+        }
 
     }
 

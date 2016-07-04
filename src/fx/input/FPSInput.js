@@ -18,7 +18,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
 
-      this.add(new Primrose.Input.Keyboard(DOMElement, null, {
+      this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
         },
@@ -272,16 +272,31 @@ Primrose.Input.FPSInput = (function () {
       return segments;
     }
 
+    get lockedToEditor() {
+      for(var i = 0; i < this.managers.length; ++i){
+        var mgr = this.managers[i];
+        if(mgr.lockedToEditor){
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    resolvePicking(currentHits, lastHits, pickableObjects) {
+      for (var i = 0; i < this.managers.length; ++i) {
+        this.managers[i].resolvePicking(currentHits, lastHits, pickableObjects);
+      }
+    }
+
     addEventListener(evt, thunk, bubbles) {
       if (this.listeners[evt]) {
         this.listeners[evt].push(thunk);
       }
       else {
-        this.managers.forEach(function (mgr) {
-          if (mgr.addEventListener) {
-            mgr.addEventListener(evt, thunk, bubbles);
-          }
-        });
+        for (var i = 0; i < this.managers.length; ++i) {
+          this.managers[i].addEventListener(evt, thunk, bubbles);
+        }
       }
     }
 

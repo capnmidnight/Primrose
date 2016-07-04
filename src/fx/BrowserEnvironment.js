@@ -36,10 +36,8 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var lockedToEditor = () => this.currentControl && this.currentControl.lockMovement;
-
       this.zero = () => {
-        if (!lockedToEditor()) {
+        if (!this.input.lockedToEditor) {
           this.input.zero();
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;
@@ -218,7 +216,7 @@ Primrose.BrowserEnvironment = (function () {
         lt = t;
 
         movePlayer(dt);
-        resolvePicking();
+        this.input.resolvePicking(currentHits, lastHits, this.pickableObjects);
         moveSky();
         moveGround();
         this.network.update(dt);
@@ -227,99 +225,6 @@ Primrose.BrowserEnvironment = (function () {
         emit.call(this, "update", dt);
       };
 
-      var resolvePicking = () => {
-        var currentHit = currentHits.VR,
-          lastHit = lastHits && lastHits.VR;
-        if (lastHit && currentHit && lastHit.objectID === currentHit.objectID) {
-          currentHit.startTime = lastHit.startTime;
-          currentHit.gazeFired = lastHit.gazeFired;
-          dt = lt - currentHit.startTime;
-          if (dt >= this.options.gazeLength && !currentHit.gazeFired) {
-            currentHit.gazeFired = true;
-            emit.call(this, "gazecomplete", currentHit);
-            emit.call(this.pickableObjects[currentHit.objectID], "click", "Gaze");
-          }
-        }
-        else {
-          if (lastHit) {
-            dt = lt - lastHit.startTime;
-            if (dt < this.options.gazeLength) {
-              emit.call(this, "gazecancel", lastHit);
-            }
-          }
-          if (currentHit) {
-            currentHit.startTime = lt;
-            currentHit.gazeFired = false;
-            emit.call(this, "gazestart", currentHit);
-          }
-        }
-
-        for (var i = 0; i < this.input.managers.length; ++i) {
-          var evt = this.input.managers[i].registerHit(currentHits, this.pickableObjects);
-          if (evt) {
-            var object = evt.object,
-              control = object && (object.button || object.surface);
-            if (evt.changed) {
-              if (evt.buttons) {
-                var blurCurrentControl = !!this.currentControl,
-                  currentControl = this.currentControl;
-                this.currentControl = null;
-                if (!(evt.name === "Keyboard" && lockedToEditor())) {
-                  if (object) {
-                    emit.call(this, "pointerstart", evt.point);
-
-                    if (currentControl && currentControl === control) {
-                      blurCurrentControl = false;
-                    }
-
-                    if (!this.currentControl && control) {
-                      this.currentControl = control;
-                      this.currentControl.focus();
-                    }
-                    else if (object === this.ground) {
-                      this.vehicle.position.copy(this.input[evt.name].groundMesh.position);
-                      this.vehicle.isOnGround = false;
-                    }
-
-                    if (this.currentControl) {
-                      this.currentControl.startUV(evt.point);
-                    }
-                  }
-                }
-
-                if (blurCurrentControl) {
-                  currentControl.blur();
-                }
-              }
-              else {
-                if (!lockedToEditor()) {
-                  var lastHit = lastHits && lastHits[evt.name];
-                  if (object) {
-                    if (this.currentControl) {
-                      this.currentControl.endPointer();
-                    }
-                    if (lastHit) {
-                      emit.call(this, "pointerend", lastHit);
-                    }
-                    emit.call(object, "click");
-                  }
-                }
-              }
-            }
-            else {
-              if (object && this.currentControl && evt.point) {
-                if (!evt.changed && evt.buttons > 0) {
-                  this.currentControl.moveUV(evt.point);
-                }
-              }
-            }
-          }
-        }
-      };
-
-      const tempVelocity = new THREE.Vector3();
-      const printPos = (obj) => obj.position.toArray()
-        .join(", ");
       var movePlayer = (dt) => {
         this.player.stage = this.input.VR.stageParameters;
         if (!this.vehicle.isOnGround) {
@@ -358,6 +263,8 @@ Primrose.BrowserEnvironment = (function () {
           this.projector.projectPointers(this.input.segments);
         }
       };
+
+      this.movePlayer = (position) => this.vehicle.position.copy(position);
 
       var moveSky = () => {
         if (this.sky) {
@@ -606,7 +513,6 @@ Primrose.BrowserEnvironment = (function () {
       //
       // Initialize public properties
       //
-      this.currentControl = null;
       this.avatarHeight = this.options.avatarHeight;
       this.walkSpeed = this.options.walkSpeed;
       this.listeners = {
@@ -751,32 +657,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var keyDown = (evt) => {
-        if (lockedToEditor()) {
-          var elem = this.currentControl.focusedElement;
-          if (elem) {
-            if (elem.execCommand) {
-              var oldDeadKeyState = this.operatingSystem._deadKeyState;
-              if (elem.execCommand(this._browser, this.codePage, this.operatingSystem.makeCommandName(evt, this.codePage))) {
-                evt.preventDefault();
-              }
-              if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-                this.operatingSystem._deadKeyState = "";
-              }
-            }
-            else {
-              elem.keyDown(evt);
-            }
-          }
-        }
-      };
-
-      var keyUp = (evt) => {
-        if (this.currentControl && this.currentControl.keyUp) {
-          this.currentControl.keyUp(evt);
-        }
-      };
-
       //
       // Manage full-screen state
       //
@@ -850,64 +730,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       }, false);
 
-
-      var clipboardOperation = (name, evt) => {
-        if (this.currentControl) {
-          this.currentControl[name + "SelectedText"](evt);
-          if (!evt.returnValue) {
-            evt.preventDefault();
-          }
-          this._surrogate.style.display = "none";
-          this.currentControl.canvas.focus();
-        }
-      };
-
-      // the `surrogate` textarea makes clipboard events possible
-      this._surrogate = Primrose.DOM.cascadeElement("primrose-surrogate-textarea", "textarea", HTMLTextAreaElement);
-      this._surrogateContainer = Primrose.DOM.makeHidingContainer("primrose-surrogate-textarea-container", this._surrogate);
-      this._surrogateContainer.style.position = "absolute";
-      this._surrogateContainer.style.overflow = "hidden";
-      this._surrogateContainer.style.width = 0;
-      this._surrogateContainer.style.height = 0;
-      this._surrogate.addEventListener("beforecopy", setFalse, false);
-      this._surrogate.addEventListener("copy", clipboardOperation.bind(this, "copy"), false);
-      this._surrogate.addEventListener("beforecut", setFalse, false);
-      this._surrogate.addEventListener("cut", clipboardOperation.bind(this, "cut"), false);
-      document.body.insertBefore(this._surrogateContainer, document.body.children[0]);
-
-
-      this.operatingSystem = this.options.os;
-      this.codePage = this.options.language;
-
-
-      var focusClipboard = (evt) => {
-        var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
-        if (cmdName === "CUT" || cmdName === "COPY") {
-          this._surrogate.style.display = "block";
-          this._surrogate.focus();
-        }
-      };
-
-      var withCurrentControl = (name) => {
-        return (evt) => {
-          if (this.currentControl) {
-            if (this.currentControl[name]) {
-              this.currentControl[name](evt);
-            }
-            else {
-              console.warn("Couldn't find %s on %o", name, this.currentControl);
-            }
-          }
-        };
-      };
-
-      this._browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
-      window.addEventListener("keydown", keyDown, false);
-      window.addEventListener("keyup", keyUp, false);
-      window.addEventListener("keydown", focusClipboard, true);
-      window.addEventListener("beforepaste", setFalse, false);
-      window.addEventListener("paste", withCurrentControl("readClipboard"), false);
-      window.addEventListener("wheel", withCurrentControl("readWheel"), false);
       window.addEventListener("resize", modifyScreen, false);
       window.addEventListener("blur", this.stop, false);
       window.addEventListener("focus", this.start, false);
@@ -939,8 +761,15 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
         this.input.addEventListener("zero", this.zero, false);
+        this.input.addEventListener("teleport", this.movePlayer, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
+        window.addEventListener("paste", this.input.Keyboard.withCurrentControl("readClipboard"), false);
+        window.addEventListener("wheel", this.input.Keyboard.withCurrentControl("readWheel"), false);
+
+
+        this.input.Keyboard.operatingSystem = this.options.os;
+        this.input.Keyboard.codePage = this.options.language;
 
         this.input.Mouse.makePointer(this.scene);
         this.input.VR.makePointer(this.scene);
@@ -1103,48 +932,6 @@ Primrose.BrowserEnvironment = (function () {
 
     get displays() {
       return this.input.VR.displays;
-    }
-
-    get operatingSystem() {
-      return this._operatingSystem;
-    }
-
-    set operatingSystem(os) {
-      this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
-    }
-
-    get codePage() {
-      return this._codePage;
-    }
-
-    set codePage(cp) {
-      var key,
-        code,
-        char,
-        name;
-      this._codePage = cp;
-      if (!this._codePage) {
-        var lang = (navigator.languages && navigator.languages[0]) ||
-          navigator.language ||
-          navigator.userLanguage ||
-          navigator.browserLanguage;
-
-        if (!lang || lang === "en") {
-          lang = "en-US";
-        }
-
-        for (key in Primrose.Text.CodePages) {
-          cp = Primrose.Text.CodePages[key];
-          if (cp.language === lang) {
-            this._codePage = cp;
-            break;
-          }
-        }
-
-        if (!this._codePage) {
-          this._codePage = Primrose.Text.CodePages.EN_US;
-        }
-      }
     }
   }
 
