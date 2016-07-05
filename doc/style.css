@@ -12,7 +12,7 @@ html, body{
 body, button, input{
   font-family: Lato, sans-serif;
   color: #374346;
-  font-size: 14pt;
+  /* font-size: 14pt; */
   background-color: white;
 }
 
@@ -94,10 +94,18 @@ ul {
   list-style: circle;
 }
 
-header, main {
+header, main, footer {
   padding-left: 15em;
   padding-right: 15em;
   padding-top: 1em;
+}
+
+footer {
+  margin-top: 1em;
+  position: fixed;
+  bottom: 0;
+  margin-bottom: 1em;
+  width: 100%;
 }
 
 header{
