@@ -4,7 +4,7 @@ html
     meta(charset="utf-8")
     block viewport
       meta(name="viewport", content="width=device-width, initial-scale=1.0")
-      
+
     meta(name="web-app-capable", content="yes")
     meta(name="theme-color", content="black")
     meta(name="apple-mobile-web-app-capable", content="yes")
@@ -18,17 +18,17 @@ html
     meta(name="twitter:site", content="@Primrose_VR")
 
     meta(property="og:site_name", content="Primrose VR")
-    
+
     meta(property="og:description", content="Primrose: Framework for WebVR Applications")
     meta(name="twitter:description", content="Primrose: Framework for WebVR Applications")
     meta(property="og:url", content="http://www.primrosevr.com/" + filePath)
-    
+
     <!-- start main.jade meta block -->
     block meta
       meta(name="twitter:image", content="http://www.primrosevr.com/images/screenshot.jpg")
       meta(property="og:image", content="http://www.primrosevr.com/images/screenshot.jpg" )
     <!-- end main.jade meta block -->
-    
+
     <!-- start main.jade title block -->
     block title
       meta(property="og:title", content="Primrose VR: WebVR Application Framework")
@@ -38,19 +38,17 @@ html
 
     block head
   body
-  
+
     header(role="banner")
       a#logo(href= fileRoot)
         img(src= fileRoot + "doc/images/primrose32.png", alt="logo", title="Primrose logo")
 
       nav(role="navigation")
         ul
-          li: a(href= fileRoot + "#intro") intro/
-          li: a(href= fileRoot + "#webvr") webvr/
-          li: a(href= fileRoot + "doc/") doc/
-          li: a(href= fileRoot + "#dev") download/
-          li: a(href= fileRoot + "#teamInfo") team/
-          li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") src/
+          li: a(href= fileRoot + "doc/") Docs
+          li: a(href= fileRoot + "doc/faq.html") FAQ
+          li: a(href= fileRoot + "community/") Community
+          li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") Github
 
     <!-- start main.jade banner block -->
     block banner
@@ -59,7 +57,7 @@ html
     <!-- start main.jade main block -->
     block main
     <!-- end main.jade main block -->
-    
+
     <!-- start main.jade footer block -->
-    block footer    
+    block footer
     <!-- end main.jade footer block -->
