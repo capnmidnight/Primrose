@@ -10,7 +10,10 @@ html, body{
   height: 100%;
 }
 body, button, input{
-  font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+  font-family: Lato, sans-serif;
+  color: #374346;
+  font-size: 14pt;
+  background-color: white;
 }
 
 #documentation nav {
@@ -32,7 +35,7 @@ button {
   margin-left: -1em;
 }
 
-code, header a {  
+code {
   font-family: 'Consolas', 'Apple Menlo', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
 }
 
@@ -43,7 +46,7 @@ code, kbd{
 
 kbd, tt{
   color: #EEF6F8;
-  background-color: #853B9E;  
+  background-color: #853B9E;
 }
 
 
@@ -91,16 +94,35 @@ ul {
   list-style: circle;
 }
 
+header, main {
+  padding-left: 15em;
+  padding-right: 15em;
+  padding-top: 1em;
+}
+
 header{
   left: 0;
   top: 0;
   width: 100%;
-  background-color: white;
+  height: 10em;
+  background-color: #ec2471;
+  background-image: radial-gradient(circle farthest-corner at 50% 50%, #ec2471 0%, #87518F);
   border-bottom: solid 1px #ccc;
+  color:#f1f1ef;
+}
+
+header, header h1 {
+  font-weight: 100;
 }
 
 #logo {
-  margin: 0.25em 1em;
+}
+
+header h1 {
+  text-transform: uppercase;
+  color: #f1f1ef;
+  margin-bottom: 1em;
+  display: block;
 }
 
 header * {
@@ -108,16 +130,20 @@ header * {
   padding: 0;
   margin: 0;
   vertical-align: middle;
-}      
+}
+
+header > nav {
+  float:right;
+}
 
 header > nav > ul {
   list-style: none;
 }
-header a {
+header > nav > ul > li > a {
   border: none;
   height: auto;
   padding: 0.25em 1em;
-  text-decoration: underline;
+  color: #f1f1ef;
 }
 
 
@@ -128,30 +154,12 @@ main{
   bottom: 0;
 }
 
-h2, h3, h4{
+h2, h3, h4, summary{
   text-transform: capitalize;
 }
 
 #documentation a[target="_blank"]::after{
   content: " \21d7";
-}
-
-#documentation article h1 {
-  font-size: 2em;
-  text-transform: none;
-}
-
-#documentation article h2 {
-  color: #2b81af;
-}
-
-#documentation article h3 {
-  color: #853B9E;
-}
-
-
-#documentation article div h1, #documentation article div h2, #documentation article div h3, #documentation article div h4, #documentation article div h5, #documentation article div h6 {
-  font-size: 80%;
 }
 
 ol.signatureParameters, ol.signatureParameters > li {
@@ -201,24 +209,17 @@ body > div {
 }
 
 #contents {
-  position: relative;
   display: inline-block;
-  background-color: white;
-  padding: 1em;
   line-height: 1.5;
   width:  360px;
   vertical-align: top;
+  margin-right: 2em;
 }
 
 #documentation {
-  position: relative;
   display: inline-block;
-  left: 0em;
-  width: calc(80% - 20em);
+  max-width: calc(100% - 370px - 2em);
   min-width:  360px;
-  max-width: 1000px;
-  vertical-align: top;
-  padding: 1em;
 }
 
 @media(max-width:720px){
@@ -256,6 +257,7 @@ article > blockquote {
 
 a {
   text-decoration: none;
+  color: #374346;
 }
 
 blockquote a {
@@ -263,7 +265,6 @@ blockquote a {
 }
 
 #contents a {
-  color: black;
 }
 
 #contents a.incomplete{
@@ -271,13 +272,13 @@ blockquote a {
 }
 
 #contents a.selected{
-  background-color: #F7DBEC;
-  padding: 0.25em;
-  padding-left: 0.5em;
-  display: inline-block;
+  color: #ec2471;
+  font-weight: bold;
+  /* padding-left: 0.5em; */
+  /* display: inline-block; */
 }
 #contents a.incomplete.selected{
-  background-color: #6D0444;
+  color: #f1afc9;
 }
 
 #contents h2, #contents h3{
@@ -304,23 +305,35 @@ blockquote a {
   list-style: none;
 }
 
-#contents ul, #contents li{        
+#contents ul, #contents li{
   padding: 0;
-  margin: 0;
 }
+
 
 #docSearch{
   padding: 0.5em;
   margin-top: 1em;
 }
 
+details {
+  margin-left: -1em;
+  padding-left: 0;
+}
+
 details > summary {
   margin-top: 1em;
-  margin-bottom: -1em;  
 }
 
 details > summary:focus {
   outline: none;
+}
+
+details > ul {
+  margin-left: 1.5em;
+}
+
+details > ul > li {
+  margin: 0.5em;
 }
 
 table{
