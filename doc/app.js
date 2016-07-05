@@ -77,48 +77,6 @@ function replacePreBlocks() {
     }
   }
 
-  function createShortcuts() {
-    var headers = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
-
-    // We want 3 or more headers because A) the first header is the page title,
-    // and B) we don't want to handle the trivial situation of only one section.
-    if (headers.length > 2) {
-      var curLevel = 0,
-        lists = [],
-        root = document.createElement("nav"),
-        elem = root;
-
-      // Start at 1 to skip the page title.
-      for (var i = 1; i < headers.length; ++i) {
-        var h = headers[i],
-          level = parseFloat(h.tagName.match(/\d/)[0]) - 1,
-          txt = h.innerText || h.textContent;
-
-        if (level > curLevel) {
-          var list = document.createElement("ul");
-          elem.appendChild(list);
-          lists.push(list);
-          ++curLevel;
-        }
-        else if (level < curLevel) {
-          lists.pop();
-          --curLevel;
-        }
-
-        var curList = lists[lists.length - 1],
-          link = document.createElement("a"),
-          elem = document.createElement("li");
-        link.appendChild(document.createTextNode(txt));
-        link.href = "javascript:scroller(\"header" + i + "\")";
-        h.id = "header" + i;
-        elem.appendChild(link);
-        curList.appendChild(elem);
-      }
-
-      headers[1].parentElement.insertBefore(root, headers[1]);
-    }
-  }
-
   function showHash(evt) {
     var page = document.location.hash,
       promise = null;
@@ -140,7 +98,6 @@ function replacePreBlocks() {
         doc.innerHTML = html;
         replacePreBlocks();
         fixLinks();
-        createShortcuts();
         if (evt) {
           scroller("documentation");
         }
