@@ -6,6 +6,7 @@ function scroller(id) {
 }
 
 var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
+
 function replacePreBlocks() {
   var doc = document.querySelector("#documentation"),
     codeBlocks = doc.querySelectorAll("pre");
@@ -19,8 +20,11 @@ function replacePreBlocks() {
       tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
       txt = txt.replace(GRAMMAR_TEST, "");
     }
-
+    if(Primrose.Text.Themes.Default.regular.backColor){
+      delete Primrose.Text.Themes.Default.regular.backColor;
+    }
     b.innerHTML = tokenizer.toHTML(txt);
+    b.className = "code-listing";
   }
 }
 

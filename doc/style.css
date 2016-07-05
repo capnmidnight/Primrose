@@ -341,3 +341,10 @@ td{
 td:nth-child(2){
   text-align: right;
 }
+
+.code-listing{
+  background-color: #f1f1ef;
+  padding: 1em;
+  padding-left: 2em;
+  border-left: solid 3px #ec2471;
+}
