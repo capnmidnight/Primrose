@@ -36,14 +36,11 @@ function replacePreBlocks() {
     };
 
   var groupings = {
-    examples: [],
     namespaces: [pliny.database],
     classes: [],
     methods: [],
     events: [],
-    functions: [],
-    enumerations: [],
-    records: []
+    functions: []
   };
 
   var editors = [];
@@ -176,7 +173,6 @@ function replacePreBlocks() {
   function renderDocs() {
     buildDocumentation();
     // Build the menu.
-    groupings.examples = pliny.database.examples || [];
     var output = "";
     for (var g in groupings) {
       if (g !== "methods" && g !== "events") {
@@ -201,18 +197,18 @@ function replacePreBlocks() {
           }
         });
 
-        output += "<li><h2>" + g + "</h2><ul>";
+        output += "<li><details><summary>" + g + "</summary><ul>";
         for (var i = 0; i < group.length; ++i) {
           var obj = group[i],
             id = "#" + obj.id.trim(),
             doc = docoCache[id];
-          output += "<li data-name=\"" + obj.fullName + "\"><a href=\"" + id + "\"";
+          output += "<li><a href=\"" + id + "\"";
           if (doc && doc.indexOf("[under construction]") > -1) {
             output += " class=\"incomplete\"";
           }
           output += ">" + obj.fullName + "</a></li>";
         }
-        output += "</ul></li>";
+        output += "</details></ul></li>";
       }
     }
     nav.innerHTML += output;
