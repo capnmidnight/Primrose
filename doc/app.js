@@ -137,7 +137,7 @@ function replacePreBlocks() {
       var id = "#" + head.id.trim(),
         elem = document.querySelector("a[href='" + id + "']");
       if(elem){
-        if(!sectionOpen){
+        if(!isMobile && !sectionOpen){
           elem.parentElement.parentElement.parentElement.setAttribute("open", "");
           sectionOpen = true;
         }
@@ -217,10 +217,6 @@ function replacePreBlocks() {
     }
     nav.innerHTML += output;
     showHash();
-    if (isMobile) {
-      document.querySelector("#contents > details").open = false;
-    }
-
   }
 
   // Setup the navigation events
