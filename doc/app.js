@@ -86,7 +86,7 @@ function replacePreBlocks() {
       promise = null;
     if (/\.md$/.test(page)) {
       promise = Primrose.HTTP
-        .getText("/" + page.substring(1))
+        .getText("../" + page.substring(1))
         .then(pliny.markdown);
     }
     else {
