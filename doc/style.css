@@ -35,7 +35,6 @@ kbd, tt{
   background-color: #853B9E;
 }
 
-
 tt{
   display: block;
   white-space: pre-wrap;
@@ -52,6 +51,12 @@ code{
 
 a > code {
   background-color: #EEF6F8;
+}
+
+hr{
+width: 10em;
+display: inline-block;
+border: solid 1px #ec2471;
 }
 
 #loading, #progressBar {
@@ -112,6 +117,10 @@ header *, footer * {
   vertical-align: middle;
 }
 
+main {
+  margin-bottom: 5em;
+}
+
 footer {
   position: fixed;
   bottom: 0;
@@ -146,7 +155,7 @@ nav > ul {
 h2, h3, h4, summary{
 }
 
-#documentation a[target="_blank"]::after{
+main a[target="_blank"]::after {
   content: " \21d7";
 }
 
@@ -231,6 +240,10 @@ article > blockquote {
 
 a {
   text-decoration: none;
+  color: #ec2471;
+}
+
+#contents a, footer a {
   color: #374346;
 }
 

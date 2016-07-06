@@ -1,32 +1,26 @@
-﻿extends withFramework.jade
-
-block title
-  <!-- start documentation.jade title block -->
-  meta(property="og:title", content="Primrose VR: WebVR Application Framework Documentation")
-  meta(name="twitter:title", content="Primrose VR: WebVR Application Framework Documentation")
-  title Primrose VR: WebVR Application Framework Documentation
-  <!-- end documentation.jade title block -->
+﻿extends documentationBase.jade
 
 append head
   <!-- start documentation.jade head append -->
-  link(rel="stylesheet", type="text/css", href= "style" + cssExt)
   if !debug
     script(type="text/javascript", src= fileRoot + "PrimroseDocumentation.min.js")
   <!-- end documentation.jade head append -->
+
 append header
   h1 Documentation
+
 block main
   <!-- start documentation.jade main block -->
-  main
-    #top
-    #contents
-      nav
-        ul
-          li: a(href=fileRoot + "doc/setup.html") Installation &amp; Setup
-    #documentation: section: article
-      <!-- start documentation.jade documentation block -->
-      block document
-      <!-- end documentation.jade documentation block -->
+  #top
+  #contents
+    nav
+      ul
+        li: a(href=fileRoot + "doc/setup.html") Installation &amp; Setup
+  #documentation: section: article
+    <!-- start documentation.jade documentation block -->
+    block document
+    <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
+
 append footer
   script(type="text/javascript", async, defer, src="app.js")
