@@ -1,6 +1,6 @@
 # 9: LICENSE
 
-https://www.github.com/capnmidnight/Primrose
+<a href="https://www.github.com/NotionTheory/Primrose" target="_blank">https://www.github.com/NotionTheory/Primrose</a>
 Copyright (c) 2015 Sean T. McBeth
 All rights reserved.
 
@@ -8,7 +8,7 @@ All rights reserved.
 
 *Version 3, 29 June 2007*
 
-Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+Copyright (C) 2007 Free Software Foundation, Inc. <a href="http://fsf.org/" target="_blank">http://fsf.org/</a>
 Everyone is permitted to copy and distribute verbatim copies
 of this license document, but changing it is not allowed.
 
@@ -657,11 +657,11 @@ might be different; for a GUI interface, you would use an "about box".
 You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU GPL, see
-<http://www.gnu.org/licenses/>.
+<a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.
 
 The GNU General Public License does not permit incorporating your program
 into proprietary programs.  If your program is a subroutine library, you
 may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
-<http://www.gnu.org/philosophy/why-not-lgpl.html>.
+<a href="http://www.gnu.org/philosophy/why-not-lgpl.html" target="_blank">http://www.gnu.org/philosophy/why-not-lgpl.html</a>.

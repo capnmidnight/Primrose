@@ -53,7 +53,7 @@ a > code {
   background-color: #EEF6F8;
 }
 
-hr{
+main > hr{
   width: 3em;
   display: inline-block;
   border: solid 1px #ec2471;

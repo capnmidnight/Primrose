@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/doc/server.html"><!-- start main.jade meta block -->
+    <meta property="og:url" content="http://www.primrosevr.com/doc/readme.html"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
 <!-- start main.jade title block --><!-- start detailPage.jade title block -->
@@ -144,7 +144,7 @@
     <script type="text/javascript" src="../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
     <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append --><!-- start detailPage.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end detailPage.jade head append --><!-- start documentation.jade head append --><!-- end documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end detailPage.jade head append -->
   </head>
   <body>
     <header role="banner"><a href="../">
@@ -157,26 +157,66 @@
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
-      <h1>Documentation</h1>
+      <h1>README</h1>
     </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
 <!-- start main.jade main block -->
-    <main><!-- start documentation.jade main block -->
-      <div id="top"></div>
-      <div id="contents">
-        <nav>
-          <ul>
-            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
-          </ul>
-        </nav>
-      </div>
-      <div id="documentation">
-        <section>
-          <article><!-- start documentation.jade documentation block -->
-            <!-- 19-->
-            <h1>Tutorial: Setup a Multiplayer Server</h1>[under construction]<!-- end documentation.jade documentation block -->
-          </article>
-        </section>
-      </div><!-- end documentation.jade main block -->
+    <main><h1 id="primrose-vr-productive-virtual-reality">Primrose VR: Productive Virtual Reality</h1>
+<p>The Primrose Framework helps web developers create virtual reality experiences within standard web browsers on desktop and mobile devices alike. Through its common interaction space, design tools, interface objects, and user experience best-practices, users and developers collaborate to create interactive multimedia and productivity applications.</p>
+<h2 id="example">Example</h2>
+<pre><code>// different operating systems have different keyboard shortcuts.
+var modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
+    modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
+    execKey = isOSX ? &quot;E&quot; : &quot;SPACE&quot;,
+
+    // a place to stow an object we will modify out of the loaded scene file
+    terminal = null,
+
+    // setup the VR environment
+    app = new Primrose.BrowserEnvironment( &quot;Commodore&quot;, {
+      sceneModel: &quot;commodore_pet.json&quot;,
+      skyTexture: &quot;images/bg2.jpg&quot;,
+      groundTexture: &quot;images/deck.png&quot;
+    } );
+
+function isExecuteCommand ( evt ) {
+  return evt[modA] &amp;&amp; evt[modB] &amp;&amp; evt.keyCode === Primrose.Keys[execKey];
+}
+
+app.addEventListener( &quot;keydown&quot;, function ( evt ) {
+  if ( terminal.running &amp;&amp;
+      terminal.waitingForInput &amp;&amp;
+      evt.keyCode === Primrose.Keys.ENTER ) {
+    terminal.sendInput( evt );
+  }
+  else if ( !terminal.running &amp;&amp;
+      isExecuteCommand( evt ) ) {
+    terminal.execute();
+  }
+} );
+
+app.addEventListener( &quot;ready&quot;, function () {
+
+  // A hack to reposition the objects in the scene because the model file is a little janky
+  app.scene.traverse( function ( obj ) {
+    if ( obj.name &amp;&amp; obj.parent &amp;&amp; obj.parent.uuid === app.scene.uuid ) {
+      obj.position.y += app.avatarHeight * 0.9;
+      obj.position.z -= 1;
+    }
+  } );
+
+  // the `convertToEditor` method makes an editor out of existing geometry.
+  var editor = app.convertToEditor( app.scene.Screen );
+  editor.padding = 10;
+  terminal = new Primrose.Text.Terminal( app.scene.Screen.textarea );
+  terminal.loadFile( &quot;oregon.bas&quot; );
+} );
+</code></pre><h2 id="issues">Issues</h2>
+<p>The issues list is not here on Github, it&#39;s on <a href="https://trello.com/b/NVZsaC1P/primrosevr">Trello</a>.</p>
+<h2 id="licensing">Licensing</h2>
+<p>Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.</p>
+<h2 id="contributions">Contributions</h2>
+<p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.</p>
+
     </main><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
     <footer>
@@ -191,7 +231,6 @@
           </ul>
         </nav><a class="icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a>
       </div>
-      <script type="text/javascript" async defer src="app.js"></script>
     </footer><!-- end main.jade footer block -->
   </body>
 </html>
