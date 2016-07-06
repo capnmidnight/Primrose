@@ -13,6 +13,8 @@ append head
   if !debug
     script(type="text/javascript", src= fileRoot + "PrimroseDocumentation.min.js")
   <!-- end documentation.jade head append -->
+append header
+  h1 Documentation
 block main
   <!-- start documentation.jade main block -->
   main
@@ -27,8 +29,4 @@ block main
       <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
 append footer
-  footer
-    | About License Changelog Slack
-    a(href="http://www.notiontheory.com", target="_blank") Made (with love) by NotionTheory
-    span Twitter Github
   script(type="text/javascript", async, defer, src="app.js")

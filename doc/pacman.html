@@ -147,77 +147,27 @@
     <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
   </head>
   <body>
-    <header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose32.png" alt="logo" title="Primrose logo"></a>
+    <header role="banner"><a href="../">
+        <h1>PrimroseVR</h1></a>
       <nav role="navigation">
         <ul>
-          <li><a href="../#intro">intro/</a></li>
-          <li><a href="../#webvr">webvr/</a></li>
-          <li><a href="../doc/">doc/</a></li>
-          <li><a href="../#dev">download/</a></li>
-          <li><a href="../#teamInfo">team/</a></li>
-          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+          <li><a href="../doc/">Docs</a></li>
+          <li><a href="../doc/faq.html">FAQ</a></li>
+          <li><a href="../community/">Community</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
+      <h1>Documentation</h1>
     </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
 <!-- start main.jade main block --><!-- start documentation.jade main block -->
     <main>
       <div id="top"></div>
       <div id="contents">
-        <details open>
-          <input id="docSearch" type="search" placeholder="Filter">
-          <summary>Table of contents</summary>
-          <nav>
-            <ul>
-              <li>
-                <h2>Project</h2>
-                <ul>
-                  <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li>
-                  <li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li>
-                  <li><a href="index.html#LICENSE.md">LICENSE</a></li>
-                  <li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li>
-                  <li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Examples</h2>
-                <ul>
-                  <li data-name="Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Commodore PET and Oregon Trail</a></li>
-                  <li data-name="Live programming in Virtual Reality"><a href="../doc/editorVR.html">Live programming in Virtual Reality</a></li>
-                  <li data-name="Empty"><a href="../doc/empty.html">Empty</a></li>
-                  <li data-name="Jabber Yabs"><a href="../doc/jabbers.html">Jabber Yabs</a></li>
-                  <li data-name="Drum Machine"><a href="../doc/music.html">Drum Machine</a></li>
-                  <li data-name="Pacman"><a href="../doc/pacman.html">Pacman</a></li>
-                  <li data-name="Procedurally generated room"><a href="../doc/temple.html">Procedurally generated room</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Pages</h2>
-                <ul>
-                  <li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li>
-                  <li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li>
-                  <li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li>
-                  <li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li>
-                  <li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li>
-                  <li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li>
-                  <li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Tutorials</h2>
-                <ul>
-                  <li data-name="Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Basic Lighting</a></li>
-                  <li data-name="Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Build a Basic Drum Machine</a></li>
-                  <li data-name="Display Images and Video"><a class="incomplete" href="../doc/video.html">Display Images and Video</a></li>
-                  <li data-name="Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Building and Saving a Scene in Primrose</a></li>
-                  <li data-name="Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Building Basic Scenes in Blender</a></li>
-                  <li data-name="More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">More Advanced Scenes in Blender</a></li>
-                  <li data-name="Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Build a 3D Integrated Development Environment</a></li>
-                  <li data-name="Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Setup a Multiplayer Server</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
-        </details>
+        <nav>
+          <ul>
+            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
+          </ul>
+        </nav>
       </div>
       <div id="documentation">
         <section>
@@ -523,6 +473,19 @@ function clrscr() {
       </div>
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
-    <script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block -->
+    <footer>
+      <div id="footerWrapper">
+        <nav>
+          <ul>
+            <li><a href="../doc/about.html">About</a></li>
+            <li><a href="../doc/#LICENSE.md">License</a></li>
+            <li><a href="../doc/#CHANGELOG.md">Changelog</a></li>
+            <li><a href="https://notiontheory.slack.com" target="_blank">Slack</a></li>
+            <li><a href="http://www.notiontheory.com" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></li>
+          </ul>
+        </nav><a class="icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a>
+      </div>
+      <script type="text/javascript" async defer src="app.js"></script>
+    </footer><!-- end main.jade footer block -->
   </body>
 </html>

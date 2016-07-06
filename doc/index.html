@@ -147,8 +147,8 @@
     <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
   </head>
   <body>
-    <header role="banner">
-      <a id="logo" href="../"><h1>PrimroseVR</h1></a>
+    <header role="banner"><a href="../">
+        <h1>PrimroseVR</h1></a>
       <nav role="navigation">
         <ul>
           <li><a href="../doc/">Docs</a></li>
@@ -194,9 +194,9 @@
             <p>In the <code>app.js</code> file, you'll find the relevant scripts to edit to make your own VR applications. The template project starts out fairly empty.</p>
             <pre><code>grammar("JavaScript");
 var app = new Primrose.BrowserEnvironment( "My Primrose VR Application", {
-  skyTexture: "bg.jpg",
-  groundTexture: "deck.png"
-} );
+    skyTexture: "bg.jpg",
+    groundTexture: "deck.png"
+  } );
 
 app.addEventListener( "ready", function () {
   // Perform any post-initialization setup. Once this event fires, the Primrose
@@ -227,12 +227,18 @@ app.addEventListener( "update", function ( dt ) {
     </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
     <footer>
-    <a href="../doc/about.html">About</a>
-    <a href="https://localhost/Primrose/doc/index.html#LICENSE.md">License</a>
-    <a href="https://localhost/Primrose/doc/index.html#LICENSE.md">Changelog</a>
-    <a href="https://localhost/Primrose/doc/#LICENSE.md">Slack
-    <a href="http://www.notiontheory.com" target="_blank">Made (with love) by NotionTheory</a>
-    <span>Twitter Github</span>
-    <script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block -->
+      <div id="footerWrapper">
+        <nav>
+          <ul>
+            <li><a href="../doc/about.html">About</a></li>
+            <li><a href="../doc/#LICENSE.md">License</a></li>
+            <li><a href="../doc/#CHANGELOG.md">Changelog</a></li>
+            <li><a href="https://notiontheory.slack.com" target="_blank">Slack</a></li>
+            <li><a href="http://www.notiontheory.com" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></li>
+          </ul>
+        </nav><a class="icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a>
+      </div>
+      <script type="text/javascript" async defer src="app.js"></script>
+    </footer><!-- end main.jade footer block -->
   </body>
 </html>

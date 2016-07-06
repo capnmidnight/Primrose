@@ -40,8 +40,7 @@ html
   body
 
     header(role="banner")
-      a#logo(href= fileRoot)
-        img(src= fileRoot + "doc/images/primrose32.png", alt="logo", title="Primrose logo")
+      a(href= fileRoot): h1 PrimroseVR
 
       nav(role="navigation")
         ul
@@ -49,6 +48,8 @@ html
           li: a(href= fileRoot + "doc/faq.html") FAQ
           li: a(href= fileRoot + "community/") Community
           li: a(href="https://github.com/capnmidnight/Primrose/", target="_blank") Github
+
+      block header
 
     <!-- start main.jade banner block -->
     block banner
