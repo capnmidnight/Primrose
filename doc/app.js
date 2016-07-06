@@ -40,11 +40,18 @@ function replacePreBlocks() {
     };
 
   var groupings = {
-    namespaces: [pliny.database],
-    classes: [],
-    methods: [],
-    events: [],
-    functions: []
+    namespaces: {
+      label: "Namespaces",
+      items: [pliny.database]
+    },
+    classes: {
+      label: "Classes",
+      items: []
+    },
+    functions: {
+      label: "Functions",
+      items: []
+    }
   };
 
   var editors = [];
@@ -119,7 +126,7 @@ function replacePreBlocks() {
             group = groupings[key];
           for (var i = 0; i < collection.length; ++i) {
             var obj = collection[i];
-            group.push(obj);
+            group.items.push(obj);
             docoCache["#" + obj.id.trim()] = pliny.formats.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>";
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
@@ -136,41 +143,39 @@ function replacePreBlocks() {
     // Build the menu.
     var output = "";
     for (var g in groupings) {
-      if (g !== "methods" && g !== "events") {
-        var group = groupings[g];
-        group.sort(function (a, b) {
-          var c = a.fullName,
-            d = b.fullName;
-          if (c === "[Global]") {
-            c = "A" + c;
-          }
-          if (d === "[Global]") {
-            d = "A" + d;
-          }
-          if (c > d) {
-            return 1;
-          }
-          else if (c < d) {
-            return -1;
-          }
-          else {
-            return 0;
-          }
-        });
-
-        output += "<li><details><summary>" + g + "</summary><ul>";
-        for (var i = 0; i < group.length; ++i) {
-          var obj = group[i],
-            id = "#" + obj.id.trim(),
-            doc = docoCache[id];
-          output += "<li><a href=\"" + id + "\"";
-          if (doc && doc.indexOf("[under construction]") > -1) {
-            output += " class=\"incomplete\"";
-          }
-          output += ">" + obj.fullName + "</a></li>";
+      var group = groupings[g];
+      group.items.sort(function (a, b) {
+        var c = a.fullName,
+          d = b.fullName;
+        if (c === "[Global]") {
+          c = "A" + c;
         }
-        output += "</details></ul></li>";
+        if (d === "[Global]") {
+          d = "A" + d;
+        }
+        if (c > d) {
+          return 1;
+        }
+        else if (c < d) {
+          return -1;
+        }
+        else {
+          return 0;
+        }
+      });
+
+      output += "<li><details><summary>" + group.label + "</summary><ul>";
+      for (var i = 0; i < group.items.length; ++i) {
+        var obj = group.items[i],
+          id = "#" + obj.id.trim(),
+          doc = docoCache[id];
+        output += "<li><a href=\"" + id + "\"";
+        if (doc && doc.indexOf("[under construction]") > -1) {
+          output += " class=\"incomplete\"";
+        }
+        output += ">" + obj.fullName + "</a></li>";
       }
+      output += "</details></ul></li>";
     }
     nav.innerHTML += output;
     showHash();
