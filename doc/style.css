@@ -287,11 +287,6 @@ blockquote a {
   padding: 0;
 }
 
-details {
-  margin-left: -1em;
-  padding-left: 0;
-}
-
 details > summary {
   margin-top: 1em;
 }
@@ -355,6 +350,10 @@ td:nth-child(2){
 
 
 @media(min-width: 641px){
+
+  details {
+    margin-left: -1em;
+  }
 
   header > nav {
     float:right;
