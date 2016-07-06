@@ -51,7 +51,14 @@ function replacePreBlocks() {
     functions: {
       label: "Functions",
       items: []
-    }
+    },
+    examples: { items: [] },
+    methods: { items: [] },
+    properties: { items: [] },
+    events: { items: [] },
+    records: { items: [] },
+    enumerations: { items: [] },
+    values: { items: [] }
   };
 
   var editors = [];
@@ -95,6 +102,9 @@ function replacePreBlocks() {
       promise = Primrose.HTTP
         .getText("../" + page.substring(1))
         .then(pliny.markdown);
+    }
+    else if(!docoCache[page]){
+      promise = Promise.reject("Item `" + page + "` does not exist in docoCache.");
     }
     else {
       promise = Promise.resolve(docoCache[page].toString());
@@ -144,44 +154,47 @@ function replacePreBlocks() {
     var output = "";
     for (var g in groupings) {
       var group = groupings[g];
-      group.items.sort(function (a, b) {
-        var c = a.fullName,
-          d = b.fullName;
-        if (c === "[Global]") {
-          c = "A" + c;
-        }
-        if (d === "[Global]") {
-          d = "A" + d;
-        }
-        if (c > d) {
-          return 1;
-        }
-        else if (c < d) {
-          return -1;
-        }
-        else {
-          return 0;
-        }
-      });
+      if(group.label){
+        group.items.sort(function (a, b) {
+          var c = a.fullName,
+            d = b.fullName;
+          if (c === "[Global]") {
+            c = "A" + c;
+          }
+          if (d === "[Global]") {
+            d = "A" + d;
+          }
+          if (c > d) {
+            return 1;
+          }
+          else if (c < d) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        });
 
-      output += "<li><details><summary>" + group.label + "</summary><ul>";
-      for (var i = 0; i < group.items.length; ++i) {
-        var obj = group.items[i],
-          id = "#" + obj.id.trim(),
-          doc = docoCache[id];
-        output += "<li><a href=\"" + id + "\"";
-        if (doc && doc.indexOf("[under construction]") > -1) {
-          output += " class=\"incomplete\"";
+        output += "<li><details><summary>" + group.label + "</summary><ul>";
+        for (var i = 0; i < group.items.length; ++i) {
+          var obj = group.items[i],
+            id = "#" + obj.id.trim(),
+            doc = docoCache[id];
+          output += "<li><a href=\"" + id + "\"";
+          if (doc && doc.indexOf("[under construction]") > -1) {
+            output += " class=\"incomplete\"";
+          }
+          output += ">" + obj.fullName + "</a></li>";
         }
-        output += ">" + obj.fullName + "</a></li>";
+        output += "</details></ul></li>";
       }
-      output += "</details></ul></li>";
     }
     nav.innerHTML += output;
     showHash();
     if (isMobile) {
       document.querySelector("#contents > details").open = false;
     }
+
   }
 
   // Setup the navigation events
