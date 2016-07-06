@@ -90,17 +90,16 @@ header, main, footer, #documentation iframe, #footerWrapper {
 }
 
 header, main, footer {
-  padding-left: 15em;
-  padding-right: 15em;
   background-color: white;
 }
 
 header, main, #footerWrapper {
-  padding-top: 1em;
+  padding-top: 0.5em;
 }
 
 #footerWrapper {
   border-top: solid 2px #ccc;
+  display: inline-block;
 }
 
 header {
@@ -115,16 +114,14 @@ header *, footer * {
   padding: 0;
   margin: 0;
   vertical-align: middle;
+  float: left;
 }
 
 main {
   margin-bottom: 5em;
 }
 
-footer {
-  position: fixed;
-  bottom: 0;
-}
+footer {position: fixed;bottom: 0;}
 
 header, header h1 {
   font-weight: 100;
@@ -134,22 +131,16 @@ header, header h1, header > nav > ul > li > a {
   color: #f1f1ef;
 }
 
-header > nav > ul > li > a, #footerWrapper > nav > ul > li > a {
-  padding: 0.25em 1em;
-}
-
 header h1 {
   text-transform: uppercase;
   margin-bottom: 1em;
   display: block;
+  float:  left;
+  clear:  left;
 }
 
 main h1 {
   font-style: italic;
-}
-
-header > nav {
-  float:right;
 }
 
 nav > ul {
@@ -220,7 +211,8 @@ body > div {
 #documentation {
   display: inline-block;
   max-width: calc(100% - 370px - 2em);
-  min-width:  360px;
+  min-width: 340px;
+  /* overflow: scroll; */
 }
 
 #documentation img {
@@ -349,7 +341,8 @@ td:nth-child(2){
   background-size: 100%;
   width: 32px;
   height: 32px;
-  margin-left: 1em;
+  /* margin-left: 1em; */
+  margin-bottom: 0.5em;
 }
 
 .github {
@@ -358,4 +351,58 @@ td:nth-child(2){
 
 .twitter {
   background-position-y: 50%;
+}
+
+
+@media(min-width: 641px){
+
+  header > nav {
+    float:right;
+  }
+
+  header, main, footer {
+    padding-left: 15em;
+    padding-right: 15em;
+  }
+
+  header > nav > ul > li > a, #footerWrapper > a {
+    padding: 0.25em 1em;
+  }
+}
+
+@media(max-width: 640px){
+
+  header > nav {
+    float: right;
+  }
+
+  header, main, footer {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
+  header > nav > ul > li > a {
+    padding: 4px 14px;
+  }
+
+  #footerWrapper > a {
+    margin-left: 0.5em;
+    vertical-align: top;
+  }
+}
+
+@media(max-width: 360px){
+
+  header > nav {
+    float: none;
+  }
+
+  header h1 {
+    margin-bottom: 0px;
+    font-size: 31px;
+  }
+
+  #documentation{
+    max-width: 346px;
+  }
 }

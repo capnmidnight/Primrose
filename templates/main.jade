@@ -63,14 +63,12 @@ html
     <!-- start main.jade footer block -->
     footer
       #footerWrapper
-        nav
-          ul
-            li: a(href= fileRoot + "doc/readme.html") About
-            li: a(href= fileRoot + "doc/license.html") License
-            li: a(href= fileRoot + "doc/changelog.html") Changelog
-            li: a(href="https://notiontheory.typeform.com/to/QzZmAD", target="_blank") Slack
-            li: a(href="http://www.notiontheory.com/team", target="_blank", style="color:#ec2471") Made (with love) by NotionTheory
+        a(href= fileRoot + "doc/readme.html") About
+        a(href= fileRoot + "doc/license.html") License
+        a(href= fileRoot + "doc/changelog.html") Changelog
+        a(href="https://notiontheory.typeform.com/to/QzZmAD", target="_blank") Slack
         a.icon.github(href="https://www.github.com/NotionTheory/Primrose", target="_blank") &nbsp;
         a.icon.twitter(href="https://www.twitter.com/Primrose_VR", target="_blank") &nbsp;
+        a(href="http://www.notiontheory.com/team", target="_blank", style="color:#ec2471") Made (with love) by NotionTheory
       block footer
     <!-- end main.jade footer block -->

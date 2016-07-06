@@ -624,7 +624,7 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    {one line to give the program's name and a brief idea of what it does.}
+    {a line to give the program's name and a brief idea of what it does}
     Copyright (C) {year}  {name of author}
 
     This program is free software: you can redistribute it and/or modify
@@ -646,9 +646,9 @@ If the program does terminal interaction, make it output a short
 notice like this when it starts in an interactive mode:
 
     {project}  Copyright (C) {year}  {fullname}
-    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w`.
-    This is free software, and you are welcome to redistribute it
-    under certain conditions; type `show c` for details.
+    This program comes with ABSOLUTELY NO WARRANTY; for details
+    type `show w`. This is free software, and you are welcome to
+    redistribute it under certain conditions; type `show c` for details.
 
 The hypothetical commands `show w` and `show c` should show the appropriate
 parts of the General Public License.  Of course, your program's commands
