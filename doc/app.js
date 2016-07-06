@@ -35,21 +35,30 @@ function replacePreBlocks() {
     doc = document.querySelector("#documentation"),
     main = document.querySelector("main"),
     docoCache = {
-      "": doc.innerHTML,
-      "#Global": pliny.formats.html.format(pliny.database)
+      "": {
+        obj: null,
+        doc: doc.innerHTML
+      },
+      "#Global": {
+        obj: pliny.database,
+        doc: pliny.formats.html.format(pliny.database)
+      }
     };
 
   var groupings = {
     namespaces: {
       label: "Namespaces",
+      fieldType: "namespace",
       items: [pliny.database]
     },
     classes: {
       label: "Classes",
+      fieldType: "class",
       items: []
     },
     functions: {
       label: "Functions",
+      fieldType: "functions",
       items: []
     },
     examples: { items: [] },
@@ -80,19 +89,6 @@ function replacePreBlocks() {
         link.target = "_blank";
       }
     }
-    links = nav.querySelectorAll("a");
-    for (var i = 0; i < links.length; ++i) {
-      var link = links[i],
-        url = new URL(link.href);
-      if (url.host === document.location.host && url.pathname === document.location.pathname) {
-        if (url.hash === document.location.hash && !link.classList.contains("selected")) {
-          link.classList.add("selected");
-        }
-        else if (url.hash !== document.location.hash && link.classList.contains("selected")) {
-          link.classList.remove("selected");
-        }
-      }
-    }
   }
 
   function showHash(evt) {
@@ -107,7 +103,13 @@ function replacePreBlocks() {
       promise = Promise.reject("Item `" + page + "` does not exist in docoCache.");
     }
     else {
-      promise = Promise.resolve(docoCache[page].toString());
+      var p = docoCache[page],
+        sections = document.querySelectorAll("#contents > nav > ul > li > details");
+      for(var i = 0; i < sections.length; ++i){
+        sections[i].removeAttribute("open");
+      }
+      openSection(p.obj);
+      promise = Promise.resolve(p.doc);
     }
 
     promise
@@ -125,6 +127,27 @@ function replacePreBlocks() {
       });
   }
 
+  function openSection(head){
+    var links = document.querySelectorAll(".selected"),
+      sectionOpen = false;
+    for(var i = 0; i < links.length; ++i){
+      links[i].classList.remove("selected");
+    }
+    while(head){
+      var id = "#" + head.id.trim(),
+        elem = document.querySelector("a[href='" + id + "']");
+      if(elem){
+        if(!sectionOpen){
+          elem.parentElement.parentElement.parentElement.setAttribute("open", "");
+          sectionOpen = true;
+        }
+        elem.classList.add("selected");
+      }
+
+      head = head.parent && pliny.get(head.parent);
+    }
+  }
+
   // Walk the documentation database, grouping different objects by type.
   function buildDocumentation() {
     var stack = [pliny.database];
@@ -137,7 +160,10 @@ function replacePreBlocks() {
           for (var i = 0; i < collection.length; ++i) {
             var obj = collection[i];
             group.items.push(obj);
-            docoCache["#" + obj.id.trim()] = pliny.formats.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>";
+            docoCache["#" + obj.id.trim()] = {
+              obj: obj,
+              doc: pliny.formats.html.format(obj) + "<a href=\"javascript:scroller('top')\">top</a>"
+            };
             // This is called "trampolining", and is basically a way of performing
             // recursion in languages that do not support automatic tail recursion.
             // Which is ECMAScript 5. Supposedly it's coming in ECMAScript 6. Whatever.
@@ -175,11 +201,11 @@ function replacePreBlocks() {
           }
         });
 
-        output += "<li><details><summary>" + group.label + "</summary><ul>";
+        output += "<li><details id=" + group.fieldType + "><summary>" + group.label + "</summary><ul>";
         for (var i = 0; i < group.items.length; ++i) {
           var obj = group.items[i],
             id = "#" + obj.id.trim(),
-            doc = docoCache[id];
+            doc = docoCache[id].doc;
           output += "<li><a href=\"" + id + "\"";
           if (doc && doc.indexOf("[under construction]") > -1) {
             output += " class=\"incomplete\"";
