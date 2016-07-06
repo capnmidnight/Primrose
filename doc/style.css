@@ -369,3 +369,21 @@ td:nth-child(2){
   padding-left: 2em;
   border-left: solid 3px #ec2471;
 }
+
+.icon {
+  display: inline-block;
+  float: right;
+  background-image: url(images/icons.png);
+  background-size: 100%;
+  width: 32px;
+  height: 32px;
+  margin-left: 1em;
+}
+
+.github {
+  background-position-y: 62%;
+}
+
+.twitter {
+  background-position-y: 50%;
+}
