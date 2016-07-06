@@ -15,7 +15,7 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/doc/jabbers.html"><!-- start main.jade meta block -->
+    <meta property="og:url" content="http://www.primrosevr.com/doc/readme.html"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
 <!-- start main.jade title block --><!-- start detailPage.jade title block -->
@@ -60,6 +60,7 @@
     <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
     <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
     <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
+    <script type="text/javascript" src="../src/fx/DOM/StateList.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
     <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
@@ -71,10 +72,11 @@
     <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
+    <script type="text/javascript" src="../src/fx/IconManager.js"></script>
     <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
     <script type="text/javascript" src="../src/fx/Keys.js"></script>
     <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
-    <script type="text/javascript" src="../src/fx/NetworkManager.js"></script>
+    <script type="text/javascript" src="../src/fx/Pointer.js"></script>
     <script type="text/javascript" src="../src/fx/Projector.js"></script>
     <script type="text/javascript" src="../src/fx/Random/ID.js"></script>
     <script type="text/javascript" src="../src/fx/Random/color.js"></script>
@@ -98,6 +100,7 @@
     <script type="text/javascript" src="../src/fx/input/Keyboard.js"></script>
     <script type="text/javascript" src="../src/fx/input/LeapMotion.js"></script>
     <script type="text/javascript" src="../src/fx/input/Location.js"></script>
+    <script type="text/javascript" src="../src/fx/input/Media.js"></script>
     <script type="text/javascript" src="../src/fx/input/Motion.js"></script>
     <script type="text/javascript" src="../src/fx/input/Mouse.js"></script>
     <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
@@ -141,7 +144,7 @@
     <script type="text/javascript" src="../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
     <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append --><!-- start detailPage.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end detailPage.jade head append --><!-- start documentation.jade head append --><!-- end documentation.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end detailPage.jade head append -->
   </head>
   <body>
     <header role="banner"><a href="../">
@@ -154,148 +157,70 @@
           <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
-      <h1>Documentation</h1>
+      <h1>README</h1>
     </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
 <!-- start main.jade main block -->
-    <main><!-- start documentation.jade main block -->
-      <div id="top"></div>
-      <div id="contents">
-        <nav>
-          <ul>
-            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
-          </ul>
-        </nav>
-      </div>
-      <div id="documentation">
-        <section>
-          <article><!-- start documentation.jade documentation block --><!-- start demo.jade banner block -->
-            <h1>Jabber Yabs</h1>
-            <p>Click on the image below to lock mouse cursor to demo. <a href="../doc/jabbers" target="_blank">Open demo in new window</a>.</p>
-            <iframe id="demo" src="../doc/jabbers" role="application" allowfullscreen></iframe>
-            <h2>Source</h2>
-            <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
-var WIDTH = 100,
-  HEIGHT = 6,
-  DEPTH = 100,
-  MIDX = WIDTH / 2,
-  MIDY = HEIGHT / 2,
-  MIDZ = DEPTH / 2,
-  t = 0,
-  jabs = {},
-  R = Primrose.Random,
-  env = new Primrose.BrowserEnvironment(&quot;Jabber Yabs&quot;, {
-    skyTexture: &quot;../images/bg2.jpg&quot;,
-    groundTexture: &quot;../images/grass.png&quot;,
-    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;
-  });
+    <main><h1 id="primrose-vr-productive-virtual-reality">Primrose VR: Productive Virtual Reality</h1>
+<p>The Primrose Framework helps web developers create virtual reality experiences within standard web browsers on desktop and mobile devices alike. Through its common interaction space, design tools, interface objects, and user experience best-practices, users and developers collaborate to create interactive multimedia and productivity applications.</p>
+<h2 id="example">Example</h2>
+<pre><code>// different operating systems have different keyboard shortcuts.
+var modA = isOSX ? &quot;metaKey&quot; : &quot;ctrlKey&quot;,
+    modB = isOSX ? &quot;altKey&quot; : &quot;shiftKey&quot;,
+    execKey = isOSX ? &quot;E&quot; : &quot;SPACE&quot;,
 
-// and clicking on the objects in the scene
-function makeJabJump(evt) {
-  if (jabs[evt.objectID]) {
-    jabs[evt.objectID].jump(evt.faceNormal);
-  }
-}
-env.addEventListener(&quot;gazecomplete&quot;, makeJabJump);
-env.addEventListener(&quot;pointerend&quot;, makeJabJump);
+    // a place to stow an object we will modify out of the loaded scene file
+    terminal = null,
 
-function eye(side, body) {
-  var ball = put(textured(sphere(0.05, 6, 3), 0xffffff))
-    .on(body)
-    .at(side * 0.07, 0.05, 0.16)
-    .obj();
-  put(textured(sphere(0.01, 3, 2), 0))
-    .on(ball)
-    .at(0, 0, 0.045);
-  return ball;
+    // setup the VR environment
+    app = new Primrose.BrowserEnvironment( &quot;Commodore&quot;, {
+      sceneModel: &quot;commodore_pet.json&quot;,
+      skyTexture: &quot;images/bg2.jpg&quot;,
+      groundTexture: &quot;images/deck.png&quot;
+    } );
+
+function isExecuteCommand ( evt ) {
+  return evt[modA] &amp;&amp; evt[modB] &amp;&amp; evt.keyCode === Primrose.Keys[execKey];
 }
 
-function Jabber(w, h, s) {
-  var skin = R.item(Primrose.SKIN_VALUES),
-    body = textured(sphere(0.2, 14, 7), skin),
-    velocity = v3(
-      R.number(-s, s),
-      0,
-      R.number(-s, s)),
-    v = v3(0, 0, 0);
-
-  body.position.set(
-    R.number(-w, w),
-    1,
-    R.number(-h, h))
-
-  eye(-1, body);
-  eye(1, body);
-
-  body.rotation.y = Math.PI;
-  body.update = function (dt) {
-    velocity.y -= env.options.gravity * dt;
-    body.position.add(v.copy(velocity)
-      .multiplyScalar(dt));
-    if (velocity.x &gt; 0 &amp;&amp; body.position.x &gt;= w ||
-      velocity.x &lt; 0 &amp;&amp; body.position.x &lt;= -w) {
-      velocity.x *= -1;
-    }
-    if (velocity.z &gt; 0 &amp;&amp; body.position.z &gt;= h ||
-      velocity.z &lt; 0 &amp;&amp; body.position.z &lt;= -h) {
-      velocity.z *= -1;
-    }
-    if (velocity.y &lt; 0 &amp;&amp; body.position.y &lt; 1) {
-      velocity.y = 0;
-      body.position.y = 1;
-    }
-    v.copy(body.position)
-      .sub(env.player.position);
-    var d = v.length();
-    if (d &lt; 3) {
-      body.lookAt(env.player.position);
-      body.position.set(
-        R.number(-0.01, 0.01),
-        R.number(-0.01, 0.01),
-        R.number(-0.01, 0.01));
-      v.divideScalar(d);
-      v.y = 0;
-      velocity.add(v.multiplyScalar((3 - d) / 100));
-    }
-    else {
-      body.lookAt(v.copy(velocity)
-        .add(body.position));
-    }
-  };
-  body.jump = function (normal) {
-    v.fromArray(normal);
-    v.y = env.options.gravity / 2;
-    velocity.add(v);
-  };
-  return body;
-}
-
-// Once Primrose has setup the WebGL context, setup Three.js,
-// downloaded and validated all of model files, and constructed
-// the basic scene hierarchy out of it, the &quot;ready&quot; event is fired,
-// indicating that we may make additional changes to the scene now.
-env.addEventListener(&quot;ready&quot;, function () {
-  for (var i = 0; i &lt; 25; ++i) {
-    var jab = Jabber(
-      MIDX / 5,
-      MIDZ / 5, 1);
-    jabs[jab.uuid] = jab;
-    env.appendChild(jab);
+app.addEventListener( &quot;keydown&quot;, function ( evt ) {
+  if ( terminal.running &amp;&amp;
+      terminal.waitingForInput &amp;&amp;
+      evt.keyCode === Primrose.Keys.ENTER ) {
+    terminal.sendInput( evt );
   }
-});
-
-env.addEventListener(&quot;update&quot;, function (dt) {
-  for (var id in jabs) {
-    jabs[id].update(dt);
+  else if ( !terminal.running &amp;&amp;
+      isExecuteCommand( evt ) ) {
+    terminal.execute();
   }
-});</pre><!-- end documentation.jade documentation block -->
-          </article>
-        </section>
-      </div><!-- end documentation.jade main block -->
+} );
+
+app.addEventListener( &quot;ready&quot;, function () {
+
+  // A hack to reposition the objects in the scene because the model file is a little janky
+  app.scene.traverse( function ( obj ) {
+    if ( obj.name &amp;&amp; obj.parent &amp;&amp; obj.parent.uuid === app.scene.uuid ) {
+      obj.position.y += app.avatarHeight * 0.9;
+      obj.position.z -= 1;
+    }
+  } );
+
+  // the `convertToEditor` method makes an editor out of existing geometry.
+  var editor = app.convertToEditor( app.scene.Screen );
+  editor.padding = 10;
+  terminal = new Primrose.Text.Terminal( app.scene.Screen.textarea );
+  terminal.loadFile( &quot;oregon.bas&quot; );
+} );
+</code></pre><h2 id="issues">Issues</h2>
+<p>The issues list is not here on Github, it&#39;s on <a href="https://trello.com/b/NVZsaC1P/primrosevr">Trello</a>.</p>
+<h2 id="licensing">Licensing</h2>
+<p>Primrose is free, open source software (GPLv3) and may readily bewith other FOSS projects.</p>
+<h2 id="contributions">Contributions</h2>
+<p>To simplify licensing issues, contributions to Primrose require a copyright assignment to me, Sean T. McBeth. Please include your name and email address in the CONTRIBUTORS.md file with your pull request. This will serve as your copyright assignment.</p>
+
     </main><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
     <footer>
       <div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div>
-      <script type="text/javascript" async defer src="app.js"></script>
     </footer><!-- end main.jade footer block -->
   </body>
 </html>

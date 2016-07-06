@@ -1,5 +1,3 @@
-# CHANGELOG
-
 KEY:
 * [**Chromium** - The WebVR-enabled builds of Chromium provided by Brandon Jones](https://webvr.info/get-chrome/).
 * [**Chrome** - The latest release version of Google Chrome](https://www.google.com/chrome/)
@@ -16,7 +14,7 @@ KEY:
   * Better pointer graphics, indicating to the user better what is about to happen.
     * Ground pointer is now a flat disk, with the cursor ball above it.
     * Ground pointer is limited to a max distance away of 5 meters.
-  * New [`Primrose.Random.ID()`](#Primrose_Random_ID) function.
+  * New [`Primrose.Random.ID()`](index.html#Primrose_Random_ID) function.
   * BrowserEnvironment can now manage the login process on its own. Client apps don't need to know how it works, they just pass on a user name and password.
 * Defect Fixes
   * When first logging in, if adding one of the remote users fails, it now doesn't prevent the other users from attempting to load.
@@ -291,22 +289,22 @@ Seriously though, I got really busy and just never got around to making a produc
   * New 2D GUI system, drawn to HTML Canvas elements and used as textures on 3D elements.
     * Surfaces can be sub-classed to more specific controls.
     * Surfaces can be children of other Surfaces, to render in subsections of the parent Surface.
-    * [`Primrose.Entity`](#Primrose_Entity) is anything that can hold children.
-    * [`Primrose.Surface`](#Primrose_Surface) is any Entity that has an HTML Canvas driving it.
-    * [`Primrose.Controls.Label`](#Primrose_Controls_Label) is a 2D text label. Labels can align text left, center, or right.
-    * [`Primrose.Controls.Button2D`](#Primrose_Controls_Button2D) is a 2D button. It's essentially a label with a border and a different appearance on-mouse-down, so it also supports text alignment.
-    * [`Primrose.Controls.Image`](#Primrose_Controls_Image) is a 2D or stereoscopic image. When viewing a stereo image on a 2D monitor, hit the E key on your keyboard to manually cause an eye-blank event and swap the left/right images being displayed.
-    * Converted [`Primrose.Text.Controls.TextBox`](#Primrose_Text_Controls_TextBox) to be a Surface.
-    * [`Primrose.Text.Controls.TextInput`](#Primrose_Text_Controls_TextInput) is a single-line text input control. It's essentially a `Primrose.Text.Controls.TextBox` that is constrained to a single line and only PlainText grammar. It can optionally have a character set as a password-blanking character.
-  * [`patch()`](#patch) function takes two objects-as-hashMaps. Any keys in the second hashMap that are missing in first will get added.
+    * [`Primrose.Entity`](index.html#Primrose_Entity) is anything that can hold children.
+    * [`Primrose.Surface`](index.html#Primrose_Surface) is any Entity that has an HTML Canvas driving it.
+    * [`Primrose.Controls.Label`](index.html#Primrose_Controls_Label) is a 2D text label. Labels can align text left, center, or right.
+    * [`Primrose.Controls.Button2D`](index.html#Primrose_Controls_Button2D) is a 2D button. It's essentially a label with a border and a different appearance on-mouse-down, so it also supports text alignment.
+    * [`Primrose.Controls.Image`](index.html#Primrose_Controls_Image) is a 2D or stereoscopic image. When viewing a stereo image on a 2D monitor, hit the E key on your keyboard to manually cause an eye-blank event and swap the left/right images being displayed.
+    * Converted [`Primrose.Text.Controls.TextBox`](index.html#Primrose_Text_Controls_TextBox) to be a Surface.
+    * [`Primrose.Text.Controls.TextInput`](index.html#Primrose_Text_Controls_TextInput) is a single-line text input control. It's essentially a `Primrose.Text.Controls.TextBox` that is constrained to a single line and only PlainText grammar. It can optionally have a character set as a password-blanking character.
+  * [`patch()`](index.html#patch) function takes two objects-as-hashMaps. Any keys in the second hashMap that are missing in first will get added.
   * Textures, Materials, and Geometries now get cached to save a bunch of GPU memory.
-  * Redesigned how [`textured()`](#textured) works. Optional parameters now go in an options object-nee-hashMap as the last parameter to the function.
+  * Redesigned how [`textured()`](index.html#textured) works. Optional parameters now go in an options object-nee-hashMap as the last parameter to the function.
   * Option for `textured()` to display objects as wireframes.
   * Only dirty parts of images render now (roughly speaking), saving some draw time.
   * Converted HTTP request handling and many other things over to using Promises instead of explicit callbacks.
   * For WebVR API 1.0 scenarios, now rendering a non-stereo view on the monitor outside of the HMD.
   * Documentation pages are now statically generated, for anything that is not based on the live documentation of the framework itself (e.g. tutorials).
-  * Added values to [`Primrose.Keys`](#Primrose_Keys):
+  * Added values to [`Primrose.Keys`](index.html#Primrose_Keys):
     * `ANY`, with value 0, a catch-all for any particular key on the keyboard (or button on the mouse, for that matter).
     * `VOLUME_DOWN`, with value 174, for keyboards with media controls. Useful with certain types of Bluetooth gamepads that emulate keyboards.
     * `VOLUME_UP`, with value 175, see above.
@@ -319,10 +317,10 @@ Seriously though, I got really busy and just never got around to making a produc
   * Changed from THREE.MeshLambertMaterial to THREE.MeshBasicMaterial, which looks nicer, more modern.
   * Basic support for GearVR, though GearVR doesn't work well for any WebVR demos yet.
   * Made user input udpates from from their actual event handlers, so application code can do "user-interaction required" API calls like `requestFullscreen` or `requestPointerLock`.
-  * Unified all selection-type events in [`Primrose.Input.FPSInput`](#Primrose_Input_FPSInput) so that `Primrose.BrowserEnvironment` could be simplified to use a pointer-events-like interface.
+  * Unified all selection-type events in [`Primrose.Input.FPSInput`](index.html#Primrose_Input_FPSInput) so that `Primrose.BrowserEnvironment` could be simplified to use a pointer-events-like interface.
   * Automatically select the first available gamepad for use, rather than bugging the user with a `confirm()` dialog.
   * New monitor and Google Cardboard 3D icons for triggering fullscreen or presentation mode. Demos are now 100% 3D interface, no 2D interface left.
-  * Added support for OBJ files (and their associated MTL files, just make sure they have the same base filename and live in the same path) in [`Primrose.ModelLoader`](#Primrose_ModelLoader).
+  * Added support for OBJ files (and their associated MTL files, just make sure they have the same base filename and live in the same path) in [`Primrose.ModelLoader`](index.html#Primrose_ModelLoader).
   * Created option to disable clickable objects separately from making them invisible, to support being able to make invisible, but clickable objects.
   * Garbage collect pickable objects when they get removed from a scene.
   * Re-enabled ambient audio.
@@ -462,55 +460,55 @@ It's going to be nothing but documentation for a while.
 * Features
   * None
 * Defect fixes
-  * Creating a [`Primrose.BrowserEnvironment`](#Primrose_BrowserEnvironment) no longer spams the console with an inconsequential error (because the error is fixed!).
+  * Creating a [`Primrose.BrowserEnvironment`](index.html#Primrose_BrowserEnvironment) no longer spams the console with an inconsequential error (because the error is fixed!).
   * Code samples on documentation page now resize with the page.
   * Cleaner font rendering.
-  * Fixed a typo where [`Primrose.SKIN_VALUES`](#Primrose_SKIN_VALUES) was called `Primrose.SKINS_VALUES`.
+  * Fixed a typo where [`Primrose.SKIN_VALUES`](index.html#Primrose_SKIN_VALUES) was called `Primrose.SKINS_VALUES`.
   * Long descriptions get shortened now, when displayed as part of a list of features on a parent object.
   * Better Markdown document parsing.
   * All functions and classes should now be included in documentation (though details not yet written).
 * Admin
   * Documentation page can now load Markdown documents.
-  * [`Primrose.ModelLoader`](#Primrose_ModelLoader) documentation.
+  * [`Primrose.ModelLoader`](index.html#Primrose_ModelLoader) documentation.
   * Auto-generate `target="_blank"` for links that go away from the documentation page.
   * Incomplete documents rendered with greyed-out links (though they are also viewable).
   * semi-repsonsive layout for documentation page.
   * Styling for KBD, CODE, and BLOCKQUOTE blocks.
-  * ["Installation and Setup"](#InstallationandSetup) documentation.
-  * ["Frequently Asked Question"](#FrequentlyAskedQuestions) documentation.
+  * ["Installation and Setup"](index.html#InstallationandSetup) documentation.
+  * ["Frequently Asked Question"](index.html#FrequentlyAskedQuestions) documentation.
 
 ## v0.20.2 - 2016/02/01
 
 * Features
   * None
 * Defect fixes
-  * Simplified [`pliny`](#WritingnewdocumentationwithPliny) interface.
+  * Simplified [`pliny`](index.html#WritingnewdocumentationwithPliny) interface.
   * Cleaned up dependencies.
   * Set NPM startup script.
   * Better use of screen width for documentation page.
 * Admin
-  * [Getting Started](#) documentation.
-  * [`Primrose.Text.Grammar`](#Primrose_Text_Grammar) documentation.
+  * [Getting Started](index.html#) documentation.
+  * [`Primrose.Text.Grammar`](index.html#Primrose_Text_Grammar) documentation.
   * Issue traction in documentation.
   * Tons of new issue tickets.
-  * [`fmt()`](#fmt) documentation.
-  * [`px()`](#px) documentation.
-  * [`pct()`](#pct) documentation.
-  * [`ems()`](#ems) documentation.
-  * New [`rems()`](#rems) function.
-  * New [`vws()`](#vws) function.
-  * [`hsl()`](#hsl) documentation.
-  * [`rgb()`](#rgb) documentation.
-  * [`rgba()`](#rgba) documentation.
-  * [`hsl()`](#hsl) documentation.
-  * [`hsla()`](#hsla) documentation.
+  * [`fmt()`](index.html#fmt) documentation.
+  * [`px()`](index.html#px) documentation.
+  * [`pct()`](index.html#pct) documentation.
+  * [`ems()`](index.html#ems) documentation.
+  * New [`rems()`](index.html#rems) function.
+  * New [`vws()`](index.html#vws) function.
+  * [`hsl()`](index.html#hsl) documentation.
+  * [`rgb()`](index.html#rgb) documentation.
+  * [`rgba()`](index.html#rgba) documentation.
+  * [`hsl()`](index.html#hsl) documentation.
+  * [`hsla()`](index.html#hsla) documentation.
   * Table styling for enumeration values.
-  * [`Primrose.DOM`](#Primrose_DOM) documentation.
-  * [`getSetting()`](#getSetting) documentation.
-  * [`setSetting()`](#setSetting) documentation.
-  * [`deleteSetting()`](#deleteSetting) documentation.
-  * [`readForm()`](#readForm) documentation.
-  * [`writeForm()`](#writeForm) documentation.
+  * [`Primrose.DOM`](index.html#Primrose_DOM) documentation.
+  * [`getSetting()`](index.html#getSetting) documentation.
+  * [`setSetting()`](index.html#setSetting) documentation.
+  * [`deleteSetting()`](index.html#deleteSetting) documentation.
+  * [`readForm()`](index.html#readForm) documentation.
+  * [`writeForm()`](index.html#writeForm) documentation.
   * Hashed issue ID.
   * Issue count in issue header.
 

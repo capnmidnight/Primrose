@@ -18,10 +18,10 @@
     <meta property="og:url" content="http://www.primrosevr.com/doc/editorVRManual.html"><!-- start main.jade meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
     <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><!-- start documentation.jade title block -->
+<!-- start main.jade title block --><!-- start detailPage.jade title block -->
     <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
-    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end documentation.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append -->
+    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end detailPage.jade title block --><!-- end main.jade title block --><!-- start withFramework.jade head append -->
     <script type="text/javascript" src="../node_modules/logger/logger.js"></script>
     <script type="text/javascript" src="../node_modules/marked/marked.min.js"></script>
     <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
@@ -140,89 +140,38 @@
     <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script>
     <script type="text/javascript" src="../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
     <script type="text/javascript" src="../src/x/LoginForm.js"></script>
-    <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append --><!-- start documentation.jade head append -->
-    <link rel="stylesheet" type="text/css" href="style.css"><!-- end documentation.jade head append -->
+    <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append --><!-- start detailPage.jade head append -->
+    <link rel="stylesheet" type="text/css" href="style.css"><!-- end detailPage.jade head append --><!-- start documentation.jade head append --><!-- end documentation.jade head append -->
   </head>
   <body>
-    <header role="banner"><a id="logo" href="../"><img src="../doc/images/primrose32.png" alt="logo" title="Primrose logo"></a>
+    <header role="banner"><a href="../">
+        <h1>PrimroseVR</h1></a>
       <nav role="navigation">
         <ul>
-          <li><a href="../#intro">intro/</a></li>
-          <li><a href="../#webvr">webvr/</a></li>
-          <li><a href="../doc/">doc/</a></li>
-          <li><a href="../#dev">download/</a></li>
-          <li><a href="../#teamInfo">team/</a></li>
-          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">src/</a></li>
+          <li><a href="../doc/">Docs</a></li>
+          <li><a href="../doc/faq.html">FAQ</a></li>
+          <li><a href="../doc/community.html">Community</a></li>
+          <li><a href="https://github.com/capnmidnight/Primrose/" target="_blank">Github</a></li>
         </ul>
       </nav>
+      <h1>Documentation</h1>
     </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
-<!-- start main.jade main block --><!-- start documentation.jade main block -->
-    <main>
+<!-- start main.jade main block -->
+    <main><!-- start documentation.jade main block -->
       <div id="top"></div>
       <div id="contents">
-        <details open>
-          <input id="docSearch" type="search" placeholder="Filter">
-          <summary>Table of contents</summary>
-          <nav>
-            <ul>
-              <li>
-                <h2>Project</h2>
-                <ul>
-                  <li><a href="https://www.github.com/capnmidnight/Primrose" target="_blank">Source code on GitHub</a></li>
-                  <li><a href="https://trello.com/b/NVZsaC1P/primrosevr" target="_blank">Issues on Trello</a></li>
-                  <li><a href="index.html#LICENSE.md">LICENSE</a></li>
-                  <li><a href="index.html#CHANGELOG.md">CHANGELOG</a></li>
-                  <li><a href="index.html#CONTRIBUTORS.md">CONTRIBUTORS</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Examples</h2>
-                <ul>
-                  <li data-name="Commodore PET and Oregon Trail"><a href="../doc/commodore.html">Commodore PET and Oregon Trail</a></li>
-                  <li data-name="Live programming in Virtual Reality"><a href="../doc/editorVR.html">Live programming in Virtual Reality</a></li>
-                  <li data-name="Empty"><a href="../doc/empty.html">Empty</a></li>
-                  <li data-name="Jabber Yabs"><a href="../doc/jabbers.html">Jabber Yabs</a></li>
-                  <li data-name="Drum Machine"><a href="../doc/music.html">Drum Machine</a></li>
-                  <li data-name="Pacman"><a href="../doc/pacman.html">Pacman</a></li>
-                  <li data-name="Procedurally generated room"><a href="../doc/temple.html">Procedurally generated room</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Pages</h2>
-                <ul>
-                  <li data-name="Getting started"><a href="../doc/index.html">Getting started</a></li>
-                  <li data-name="Installation and Setup"><a href="../doc/setup.html">Installation and Setup</a></li>
-                  <li data-name="Frequently Asked Questions"><a href="../doc/faq.html">Frequently Asked Questions</a></li>
-                  <li data-name="Using the VR Development Environment"><a href="../doc/editorVRManual.html">Using the VR Development Environment</a></li>
-                  <li data-name="Head Mounted Displays"><a class="incomplete" href="../doc/hmd.html">Head Mounted Displays</a></li>
-                  <li data-name="What is WebVR?"><a class="incomplete" href="../doc/webvr.html">What is WebVR?</a></li>
-                  <li data-name="Synchronizing your Smartphone and PC"><a class="incomplete" href="../doc/sync.html">Synchronizing your Smartphone and PC</a></li>
-                </ul>
-              </li>
-              <li>
-                <h2>Tutorials</h2>
-                <ul>
-                  <li data-name="Basic Lighting"><a class="incomplete" href="../doc/lighting.html">Basic Lighting</a></li>
-                  <li data-name="Build a Basic Drum Machine"><a class="incomplete" href="../doc/drum.html">Build a Basic Drum Machine</a></li>
-                  <li data-name="Display Images and Video"><a class="incomplete" href="../doc/video.html">Display Images and Video</a></li>
-                  <li data-name="Building and Saving a Scene in Primrose"><a class="incomplete" href="../doc/export.html">Building and Saving a Scene in Primrose</a></li>
-                  <li data-name="Building Basic Scenes in Blender"><a class="incomplete" href="../doc/blenderBeginner.html">Building Basic Scenes in Blender</a></li>
-                  <li data-name="More Advanced Scenes in Blender"><a class="incomplete" href="../doc/blenderAdvanced.html">More Advanced Scenes in Blender</a></li>
-                  <li data-name="Build a 3D Integrated Development Environment"><a class="incomplete" href="../doc/editorVRTutorial.html">Build a 3D Integrated Development Environment</a></li>
-                  <li data-name="Setup a Multiplayer Server"><a class="incomplete" href="../doc/server.html">Setup a Multiplayer Server</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
-        </details>
+        <nav>
+          <ul>
+            <li><a href="../doc/setup.html">Installation &amp; Setup</a></li>
+          </ul>
+        </nav>
       </div>
       <div id="documentation">
         <section>
           <article><!-- start documentation.jade documentation block -->
-            <!-- 3-->
             <h1>Using the VR Development Environment</h1>
             <p>Primrose is not just a web development framework. It also provides a virtual reality, live-programming environment for rapid prototyping and exploratory programming. You can try out the <a href="../doc/editorVR.html">VR Editor</a> now.</p>
-            <blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment: 
+            <blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment:
               <ul>
                 <li>Navigation Mode - mouse clicks and keyboard events move your body around the environment.</li>
                 <li>Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, but do not cause changes in your body's location.</li>
@@ -282,9 +231,9 @@
             <h3>Canceling Edit Mode without Navigating</h3>
             <p>If there is no object under the Selection Sphere, it will turn red and shrink in size. If you are currently in Editing Mode, activating the Selection Sphere at this point will put you in Navigation Mode. If you are already in Navigation Mode, activating the Selection Sphere will have no effect.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor4.jpg">
             <h2>Scripting</h2>
-            <p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script. </p>
+            <p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script.</p>
             <h3>Setup and Animation</h3>
-            <p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene. </p>
+            <p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene.</p>
             <p>At the end, you return a function that Primrose can use to update and animate your scene. That function will receive a single parameter <code>dt</code>, which is the amount of time in milliseconds that has elapsed since the last time the update function ran.</p>
             <p>In other words:</p>
             <pre><code>grammar("JavaScript");
@@ -368,8 +317,7 @@ function update ( dt ) {
                   <li><a href="#light"><code>light(color, [intensity, [distance, [decay</code></a>])]] - create a light</li>
                 </ul>
               </li>
-              <li>
-                 Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
+              <li>Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
                 <ul>
                   <li><a href="#box"><code>box(width, height, length)</code></a> - short-cut function for creating a THREE.BoxGeometry object.</li>
                   <li><a href="#cylinder"><code>cylinder(radiusTop, radiusBottom, height, rS, hS, openEnded, thetaStart, thetaEnd)</code></a> - short-cut function for creating a THREE.CylinderGeometry object.</li>
@@ -378,8 +326,7 @@ function update ( dt ) {
                   <li><a href="#sphere"><code>sphere(r, slices, rings)</code></a> - short-cut function for creating a THREE.BufferedSphereGeometry object.</li>
                 </ul>
               </li>
-              <li>
-                 Other utility functions.
+              <li>Other utility functions.
                 <ul>
                   <li><a href="#fmt"><code>fmt(template, arg1, arg2, ...)</code></a> - string formatting.</li>
                   <li><a href="#log"><code>log(str)</code></a> - write out debugging output to the console.</li>
@@ -413,9 +360,12 @@ function update ( dt ) {
             </ul><!-- end documentation.jade documentation block -->
           </article>
         </section>
-      </div>
-    </main><!-- end documentation.jade main block --><!-- end main.jade main block -->
+      </div><!-- end documentation.jade main block -->
+    </main><!-- end main.jade main block -->
 <!-- start main.jade footer block -->
-    <script type="text/javascript" async defer src="app.js"></script><!-- end main.jade footer block -->
+    <footer>
+      <div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div>
+      <script type="text/javascript" async defer src="app.js"></script>
+    </footer><!-- end main.jade footer block -->
   </body>
 </html>

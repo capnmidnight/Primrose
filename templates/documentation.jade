@@ -1,53 +1,26 @@
-﻿extends withFramework.jade
+﻿extends documentationBase.jade
 
-block title
-  <!-- start documentation.jade title block -->
-  meta(property="og:title", content="Primrose VR: WebVR Application Framework Documentation")
-  meta(name="twitter:title", content="Primrose VR: WebVR Application Framework Documentation")
-  title Primrose VR: WebVR Application Framework Documentation
-  <!-- end documentation.jade title block -->
-  
 append head
   <!-- start documentation.jade head append -->
-  link(rel="stylesheet", type="text/css", href= "style" + cssExt)
   if !debug
     script(type="text/javascript", src= fileRoot + "PrimroseDocumentation.min.js")
   <!-- end documentation.jade head append -->
-mixin fileList(name)
-  li
-    h2= name
-    ul
-      each file in docFiles
-        if(file.type === name)
-          if(file.incomplete)
-            li(data-name=file.title): a.incomplete(href=fileRoot + file.fileName)= file.title
-          else
-            li(data-name=file.title): a(href=fileRoot + file.fileName)= file.title
+
+append header
+  h1 Documentation
+
 block main
   <!-- start documentation.jade main block -->
-  main
-    #top
-    #contents
-      details(open)
-        input#docSearch(type="search", placeholder="Filter")
-        summary Table of contents
-        nav
-          ul
-            li
-              h2 Project
-              ul
-                li: a(href="https://www.github.com/capnmidnight/Primrose", target="_blank") Source code on GitHub
-                li: a(href="https://trello.com/b/NVZsaC1P/primrosevr", target="_blank") Issues on Trello
-                li: a(href="index.html#LICENSE.md") LICENSE
-                li: a(href="index.html#CHANGELOG.md") CHANGELOG
-                li: a(href="index.html#CONTRIBUTORS.md") CONTRIBUTORS
-            +fileList("Examples")
-            +fileList("Pages")
-            +fileList("Tutorials")
-    #documentation: section: article
-      <!-- start documentation.jade documentation block -->
-      block document
-      <!-- end documentation.jade documentation block -->
+  #top
+  #contents
+    nav
+      ul
+        li: a(href=fileRoot + "doc/setup.html") Installation &amp; Setup
+  #documentation: section: article
+    <!-- start documentation.jade documentation block -->
+    block document
+    <!-- end documentation.jade documentation block -->
   <!-- end documentation.jade main block -->
+
 append footer
   script(type="text/javascript", async, defer, src="app.js")
