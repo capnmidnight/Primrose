@@ -1,4 +1,4 @@
-# 9: LICENSE
+# LICENSE
 
 <a href="https://www.github.com/NotionTheory/Primrose" target="_blank">https://www.github.com/NotionTheory/Primrose</a>
 Copyright (c) 2015 Sean T. McBeth

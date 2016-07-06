@@ -172,10 +172,9 @@
       <div id="documentation">
         <section>
           <article><!-- start documentation.jade documentation block -->
-            <!-- 3-->
             <h1>Using the VR Development Environment</h1>
             <p>Primrose is not just a web development framework. It also provides a virtual reality, live-programming environment for rapid prototyping and exploratory programming. You can try out the <a href="../doc/editorVR.html">VR Editor</a> now.</p>
-            <blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment: 
+            <blockquote>NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment:
               <ul>
                 <li>Navigation Mode - mouse clicks and keyboard events move your body around the environment.</li>
                 <li>Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, but do not cause changes in your body's location.</li>
@@ -235,9 +234,9 @@
             <h3>Canceling Edit Mode without Navigating</h3>
             <p>If there is no object under the Selection Sphere, it will turn red and shrink in size. If you are currently in Editing Mode, activating the Selection Sphere at this point will put you in Navigation Mode. If you are already in Navigation Mode, activating the Selection Sphere will have no effect.</p><img alt="screenshot" title="Cursor Sphere" src="images/editorVR/cursor4.jpg">
             <h2>Scripting</h2>
-            <p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script. </p>
+            <p>The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script.</p>
             <h3>Setup and Animation</h3>
-            <p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene. </p>
+            <p>The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene.</p>
             <p>At the end, you return a function that Primrose can use to update and animate your scene. That function will receive a single parameter <code>dt</code>, which is the amount of time in milliseconds that has elapsed since the last time the update function ran.</p>
             <p>In other words:</p>
             <pre><code>grammar("JavaScript");
@@ -321,8 +320,7 @@ function update ( dt ) {
                   <li><a href="#light"><code>light(color, [intensity, [distance, [decay</code></a>])]] - create a light</li>
                 </ul>
               </li>
-              <li>
-                 Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
+              <li>Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
                 <ul>
                   <li><a href="#box"><code>box(width, height, length)</code></a> - short-cut function for creating a THREE.BoxGeometry object.</li>
                   <li><a href="#cylinder"><code>cylinder(radiusTop, radiusBottom, height, rS, hS, openEnded, thetaStart, thetaEnd)</code></a> - short-cut function for creating a THREE.CylinderGeometry object.</li>
@@ -331,8 +329,7 @@ function update ( dt ) {
                   <li><a href="#sphere"><code>sphere(r, slices, rings)</code></a> - short-cut function for creating a THREE.BufferedSphereGeometry object.</li>
                 </ul>
               </li>
-              <li>
-                 Other utility functions.
+              <li>Other utility functions.
                 <ul>
                   <li><a href="#fmt"><code>fmt(template, arg1, arg2, ...)</code></a> - string formatting.</li>
                   <li><a href="#log"><code>log(str)</code></a> - write out debugging output to the console.</li>

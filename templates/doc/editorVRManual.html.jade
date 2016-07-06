@@ -1,12 +1,11 @@
 extends ../templates/documentation.jade
 block document
-  // 3
   h1 Using the VR Development Environment
-  
+
   p Primrose is not just a web development framework. It also provides a virtual reality, live-programming environment for rapid prototyping and exploratory programming. You can try out the #[a(href= fileRoot + "doc/editorVR.html") VR Editor] now.
 
   blockquote
-    | NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment: 
+    | NOTE: there are two separate interaction modes in the VR Editor. You switch between these modes by clicking on different objects in the environment:
     ul
       li Navigation Mode - mouse clicks and keyboard events move your body around the environment.
       li Editing Mode - mouse clicks and keyboard events edit text within the Code Editor, but do not cause changes in your body's location.
@@ -99,11 +98,11 @@ block document
 
   h2 Scripting
 
-  p The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script. 
+  p The Code Editor window will have a demo script loaded in it at first. When you edit code, Primrose will wait for you to stop typing for a second and then run your script automatically. In the background, Primrose is inserting the code you write inside of a function. That function provides a clean workspace for you to write your code, so that any variables you create won't clobber the values defined outside of your script.
 
   h3 Setup and Animation
 
-  p The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene. 
+  p The layout of your script is very simple. At the top level, you can create any variables you want. Use this section as your one-time setup for your script. Create whatever Three.js objects you want, and add them to your scene.
 
   p At the end, you return a function that Primrose can use to update and animate your scene. That function will receive a single parameter #[code dt], which is the amount of time in milliseconds that has elapsed since the last time the update function ran.
 
@@ -192,7 +191,7 @@ block document
         li #[a(href="#cloud") #[code cloud(verts, color, size)]] - create a point-cloud
         li #[a(href="#hub") #[code hub()]] - create a node in the scene graph in which you can group other objects.
         li #[a(href="#light") #[code light(color, [intensity, [distance, [decay]]])]] - create a light
-    li 
+    li
       | Geometries in need of texturing. The objects need to be bound with a material on a 3D object before they can be used in the scene.
       ul
         li #[a(href="#box") #[code box(width, height, length)]] - short-cut function for creating a THREE.BoxGeometry object.
@@ -200,7 +199,7 @@ block document
         li #[a(href="#quad") #[code quad(width, height, s, t)]] - create a single rectangle.
         li #[a(href="#shell") #[code shell(r, slices, rings, phi, theta)]] - create a section of an inside-out sphere.
         li #[a(href="#sphere") #[code sphere(r, slices, rings)]] - short-cut function for creating a THREE.BufferedSphereGeometry object.
-    li 
+    li
       | Other utility functions.
       ul
         li #[a(href="#fmt") #[code fmt(template, arg1, arg2, ...)]] - string formatting.

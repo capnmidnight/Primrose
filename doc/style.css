@@ -144,6 +144,10 @@ header h1 {
   display: block;
 }
 
+main h1 {
+  font-style: italic;
+}
+
 header > nav {
   float:right;
 }

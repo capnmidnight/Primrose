@@ -1,5 +1,3 @@
-# CHANGELOG
-
 KEY:
 * [**Chromium** - The WebVR-enabled builds of Chromium provided by Brandon Jones](https://webvr.info/get-chrome/).
 * [**Chrome** - The latest release version of Google Chrome](https://www.google.com/chrome/)
