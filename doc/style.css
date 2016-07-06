@@ -144,7 +144,6 @@ nav > ul {
 }
 
 h2, h3, h4, summary{
-  text-transform: capitalize;
 }
 
 #documentation a[target="_blank"]::after{
