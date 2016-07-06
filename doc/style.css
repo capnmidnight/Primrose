@@ -54,9 +54,9 @@ a > code {
 }
 
 hr{
-width: 10em;
-display: inline-block;
-border: solid 1px #ec2471;
+  width: 3em;
+  display: inline-block;
+  border: solid 1px #ec2471;
 }
 
 #loading, #progressBar {
