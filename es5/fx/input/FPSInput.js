@@ -7,7 +7,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 Primrose.Input.FPSInput = function () {
   "use strict";
 
-  var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+  var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
+      AXIS_PREFIXES = ["L", "R"];
 
   var temp = new THREE.Quaternion();
 
@@ -30,10 +31,17 @@ Primrose.Input.FPSInput = function () {
         lockpointer: [],
         fullscreen: [],
         pointerstart: [],
-        pointerend: []
+        pointerend: [],
+        motioncontroller: []
       };
 
-      this.managers = [new Primrose.Input.Media(), new Primrose.Input.VR(), new Primrose.Input.Keyboard(DOMElement, {
+      this.managers = [];
+
+      this.add(new Primrose.Input.Media());
+
+      this.add(new Primrose.Input.VR());
+
+      this.add(new Primrose.Input.Keyboard(DOMElement, {
         lockPointer: {
           buttons: [Primrose.Keys.ANY, -Primrose.Keys.F],
           repetitions: 1,
@@ -66,7 +74,9 @@ Primrose.Input.FPSInput = function () {
           metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
           commandUp: emit.bind(this, "zero")
         }
-      }), new Primrose.Input.Mouse(DOMElement, {
+      }));
+
+      this.add(new Primrose.Input.Mouse(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -82,7 +92,9 @@ Primrose.Input.FPSInput = function () {
         dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
         pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
-      }), new Primrose.Input.Touch(DOMElement, {
+      }));
+
+      this.add(new Primrose.Input.Touch(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -97,26 +109,81 @@ Primrose.Input.FPSInput = function () {
         heading: { commands: ["dx"], integrate: true },
         dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
-      }), new Primrose.Input.Gamepad({
-        pointer: {
-          buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
-        strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
-        drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
-        heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
-        dheading: { commands: ["heading"], delta: true },
-        pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
-      })];
+      }));
 
-      this.managers.forEach(function (mgr) {
-        return _this[mgr.name] = mgr;
+      Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
+        var pose = pad.pose,
+            isMotion = pad.id === "OpenVR Gamepad",
+            padCommands = null,
+            controllerNumber = 0;
+
+        if (isMotion) {
+          padCommands = {
+            pointer: {
+              buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
+              commandDown: emit.bind(_this, "pointerstart"),
+              commandUp: emit.bind(_this, "pointerend")
+            }
+          };
+
+          for (var i = 0; i < _this.managers.length; ++i) {
+            var mgr = _this.managers[i];
+            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+              ++controllerNumber;
+            }
+          }
+        } else {
+          padCommands = {
+            pointer: {
+              buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+              commandDown: emit.bind(_this, "pointerstart"),
+              commandUp: emit.bind(_this, "pointerend")
+            },
+            strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
+            drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
+            heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
+            dheading: { commands: ["heading"], delta: true },
+            pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
+          };
+        }
+        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
+        _this.add(mgr);
+
+        if (isMotion) {
+          emit.call(_this, "motioncontroller", mgr);
+        }
       });
-      this.ready = Promise.all([this.VR.ready, this.Media.ready]);
+
+      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+
+      this.ready = Promise.all(this.managers.map(function (mgr) {
+        return mgr.ready;
+      }).filter(identity));
     }
 
     _createClass(FPSInput, [{
+      key: "remove",
+      value: function remove(id) {
+        var mgr = this[id],
+            mgrIdx = this.managers.indexOf(mgr);
+        if (mgrIdx > -1) {
+          this.managers.splice(mgrIdx, 1);
+          delete this[id];
+        }
+        console.log("removed", mgr);
+      }
+    }, {
+      key: "add",
+      value: function add(mgr) {
+        for (var i = this.managers.length - 1; i >= 0; --i) {
+          if (this.managers[i].name === mgr.name) {
+            this.managers.splice(i, 1);
+          }
+        }
+        this.managers.push(mgr);
+        this[mgr.name] = mgr;
+      }
+    }, {
       key: "zero",
       value: function zero() {
         if (this.vr && this.vr.currentDisplay) {
@@ -135,6 +202,7 @@ Primrose.Input.FPSInput = function () {
     }, {
       key: "update",
       value: function update() {
+        Primrose.Input.Gamepad.poll();
         for (var i = 0; i < this.managers.length; ++i) {
           var mgr = this.managers[i];
           if (mgr.enabled) {
@@ -183,31 +251,6 @@ Primrose.Input.FPSInput = function () {
           }
         }
         return value;
-      }
-    }, {
-      key: "getVector3",
-      value: function getVector3(x, y, z, value) {
-        value = value || new THREE.Vector3();
-        value.set(0, 0, 0);
-        for (var i = 0; i < this.managers.length; ++i) {
-          var mgr = this.managers[i];
-          if (mgr.enabled) {
-            mgr.addVector3(x, y, z, value);
-          }
-        }
-        return value;
-      }
-    }, {
-      key: "getVector3s",
-      value: function getVector3s(x, y, z, values) {
-        values = values || [];
-        for (var i = 0; i < this.managers.length; ++i) {
-          var mgr = this.managers[i];
-          if (mgr.enabled) {
-            values[i] = mgr.getVector3(x, y, z, values[i]);
-          }
-        }
-        return values;
       }
     }]);
 

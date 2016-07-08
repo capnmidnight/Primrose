@@ -157,8 +157,6 @@ Primrose.Output.Audio3D = function () {
           audio: element,
           source: this.context.createMediaElementSource(element)
         };
-        //volume: this.context.createGain(),
-        //panner: this.context.createPanner()
         if (isChrome) {
           element.src = URL.createObjectURL(stream);
         } else {

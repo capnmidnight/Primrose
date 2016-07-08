@@ -19,6 +19,9 @@
 
 var setFalse = function setFalse(evt) {
   return evt.returnValue = false;
+},
+    identity = function identity(obj) {
+  return obj;
 };
 
 window.Primrose = function () {

@@ -124,7 +124,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       }
     }
 
-    Grammar.prototype.toHTML = function (txt) {
+    Grammar.prototype.toHTML = function (txt, theme) {
+      theme = theme || Primrose.Text.Themes.Default;
       var tokenRows = this.tokenize(txt),
           temp = document.createElement("div");
       for (var y = 0; y < tokenRows.length; ++y) {
@@ -133,13 +134,13 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         if (t.type === "newlines") {
           temp.appendChild(document.createElement("br"));
         } else {
-          var style = Primrose.Text.Themes.Default[t.type] || {},
+          var style = theme[t.type] || {},
               elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || Primrose.Text.Themes.Default.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || Primrose.Text.Themes.Default.regular.fontStyle || "";
-          elem.style.color = style.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || Primrose.Text.Themes.Default.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || Primrose.Text.Themes.Default.fontFamily;
+          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+          elem.style.color = style.foreColor || theme.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
           elem.appendChild(document.createTextNode(t.value));
           temp.appendChild(elem);
         }

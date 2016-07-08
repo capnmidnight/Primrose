@@ -238,7 +238,7 @@ Primrose.BrowserEnvironment = function () {
           lastNetworkUpdate += dt;
           if (lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
             lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-            var newState = [_this.player.heading, _this.player.position.x, _this.player.position.y - _this.avatarHeight, _this.player.position.z, _this.player.qHead.x, _this.player.qHead.y, _this.player.qHead.z, _this.player.qHead.w, _this.input.VR.getValue("headX"), _this.input.VR.getValue("headY") + _this.avatarHeight, _this.input.VR.getValue("headZ")];
+            var newState = [_this.player.heading, _this.player.position.x, _this.player.position.y - _this.avatarHeight, _this.player.position.z, _this.player.qHead.x, _this.player.qHead.y, _this.player.qHead.z, _this.player.qHead.w, _this.input.VR.currentPose.position[0], _this.input.VR.currentPose.position[1] + _this.avatarHeight, _this.input.VR.currentPose.position[2]];
             for (var i = 0; i < newState.length; ++i) {
               if (oldState[i] !== newState[i]) {
                 socket.emit("userState", newState);
@@ -257,6 +257,14 @@ Primrose.BrowserEnvironment = function () {
       var movePlayer = function movePlayer(dt) {
 
         _this.input.update();
+
+        for (var i = 0; i < motionControllers.length; ++i) {
+          var m = motionControllers[i];
+          m.getPosition(m.mesh.position);
+          m.mesh.position.y += _this.options.avatarHeight;
+          m.getOrientation(m.mesh.quaternion);
+        }
+
         _this.player.heading = _this.input.getValue("heading");
         var pitch = _this.input.getValue("pitch"),
             strafe = _this.input.getValue("strafe"),
@@ -447,7 +455,7 @@ Primrose.BrowserEnvironment = function () {
                 v = st.viewport,
                 side = 2 * i - 1;
             Primrose.Entity.eyeBlankAll(i);
-            _this.input.getVector3("headX", "headY", "headZ", _this.camera.position);
+            _this.input.VR.getPosition(_this.camera.position);
             _this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);
             vEye.applyMatrix4(st.translation);
@@ -568,11 +576,18 @@ Primrose.BrowserEnvironment = function () {
           localAudio = Primrose.DOM.cascadeElement(this.options.audioElement, "audio", HTMLAudioElement),
           micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio)).catch(console.warn.bind(console, "Can't get audio")),
           users = {},
+          motionControllers = [],
           socket,
           lastNetworkUpdate = 0,
           oldState = [],
           deviceIndex,
           listUserPromise = Promise.resolve();
+
+      var newMotionController = function newMotionController(mgr) {
+        motionControllers.push(mgr);
+        mgr.mesh = textured(box(0.1), 0x0000ff);
+        _this.scene.add(mgr.mesh);
+      };
 
       function listUsers(newUsers) {
         Object.keys(users).forEach(removeUser);
@@ -656,7 +671,12 @@ Primrose.BrowserEnvironment = function () {
           var protocol = location.protocol.replace("http", "ws"),
               path = protocol + "//" + location.hostname;
           console.log("connecting to: %s", path);
-          socket = io.connect(path);
+          socket = io(path);
+          socket.on("connect_error", function (evt) {
+            socket.close();
+            socket = null;
+            authFailed(verb)("an error occured while connecting to the server.");
+          });
           socket.on("signupFailed", authFailed("signup"));
           socket.on("loginFailed", authFailed("login"));
           socket.on("userList", listUsers);
@@ -1152,6 +1172,7 @@ Primrose.BrowserEnvironment = function () {
         _this.input.addEventListener("fullscreen", _this.goFullScreen.bind(_this), false);
         _this.input.addEventListener("pointerstart", pointerStart, false);
         _this.input.addEventListener("pointerend", pointerEnd, false);
+        _this.input.addEventListener("motioncontroller", newMotionController, false);
         return _this.input.ready;
       });
 
