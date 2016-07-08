@@ -176,7 +176,8 @@ footer {
 }
 
 header,
-header h1 {
+header h1,
+main h1 {
   font-weight: 300;
 }
 
@@ -195,7 +196,6 @@ header h1 {
 
 main h1 {
   font-style: italic;
-  font-weight:  100;
 }
 
 nav > ul {
