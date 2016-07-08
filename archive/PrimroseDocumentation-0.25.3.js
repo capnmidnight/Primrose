@@ -2426,17 +2426,22 @@ Then we can create and use an automatically workerized version of it as follows.
   pliny.class({
     parent: "Primrose.Input",
     name: "Gamepad",
-    description: "| [under construction]",
     baseClass: "Primrose.InputProcessor",
-    parameters: [{ name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }, { name: "", type: "", description: "" }]
+    parameters: [{ name: "name", type: "string", description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account." }, { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." }, { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }],
+    description: "An input processor for Gamepads, including those with positional data."
   });
 
   pliny.enumeration({
-  parent: "Primrose.Input.Gamepad",
-  name: "XBOX_BUTTONS",
-  description: "Labeled names for each of the different control features of the Xbox 360 controller."
-});
-pliny.class({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "VIVE_BUTTONS",
+    description: "Labeled names for each of the different control buttons of the HTC Vive Motion Controllers."
+  });
+  pliny.class({
     parent: "Primrose.Input",
     name: "Keyboard",
     baseClass: "Primrose.InputProcessor",
@@ -2496,7 +2501,8 @@ pliny.class({
     parent: "Primrose.Input",
     name: "VR",
     baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+    parameters: [{ name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." }, { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }],
+    description: "An input manager for gamepad devices."
   });
 
   pliny.class({

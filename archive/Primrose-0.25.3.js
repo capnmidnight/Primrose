@@ -19,6 +19,9 @@
 
 var setFalse = function setFalse(evt) {
   return evt.returnValue = false;
+},
+    identity = function identity(obj) {
+  return obj;
 };
 
 window.Primrose = function () {
@@ -1168,7 +1171,7 @@ Primrose.BrowserEnvironment = function () {
           lastNetworkUpdate += dt;
           if (lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
             lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
-            var newState = [_this.player.heading, _this.player.position.x, _this.player.position.y - _this.avatarHeight, _this.player.position.z, _this.player.qHead.x, _this.player.qHead.y, _this.player.qHead.z, _this.player.qHead.w, _this.input.VR.getValue("headX"), _this.input.VR.getValue("headY") + _this.avatarHeight, _this.input.VR.getValue("headZ")];
+            var newState = [_this.player.heading, _this.player.position.x, _this.player.position.y - _this.avatarHeight, _this.player.position.z, _this.player.qHead.x, _this.player.qHead.y, _this.player.qHead.z, _this.player.qHead.w, _this.input.VR.currentPose.position[0], _this.input.VR.currentPose.position[1] + _this.avatarHeight, _this.input.VR.currentPose.position[2]];
             for (var i = 0; i < newState.length; ++i) {
               if (oldState[i] !== newState[i]) {
                 socket.emit("userState", newState);
@@ -1187,6 +1190,14 @@ Primrose.BrowserEnvironment = function () {
       var movePlayer = function movePlayer(dt) {
 
         _this.input.update();
+
+        for (var i = 0; i < motionControllers.length; ++i) {
+          var m = motionControllers[i];
+          m.getPosition(m.mesh.position);
+          m.mesh.position.y += _this.options.avatarHeight;
+          m.getOrientation(m.mesh.quaternion);
+        }
+
         _this.player.heading = _this.input.getValue("heading");
         var pitch = _this.input.getValue("pitch"),
             strafe = _this.input.getValue("strafe"),
@@ -1377,7 +1388,7 @@ Primrose.BrowserEnvironment = function () {
                 v = st.viewport,
                 side = 2 * i - 1;
             Primrose.Entity.eyeBlankAll(i);
-            _this.input.getVector3("headX", "headY", "headZ", _this.camera.position);
+            _this.input.VR.getPosition(_this.camera.position);
             _this.camera.projectionMatrix.copy(st.projection);
             vEye.set(0, 0, 0);
             vEye.applyMatrix4(st.translation);
@@ -1498,11 +1509,18 @@ Primrose.BrowserEnvironment = function () {
           localAudio = Primrose.DOM.cascadeElement(this.options.audioElement, "audio", HTMLAudioElement),
           micReady = navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio)).catch(console.warn.bind(console, "Can't get audio")),
           users = {},
+          motionControllers = [],
           socket,
           lastNetworkUpdate = 0,
           oldState = [],
           deviceIndex,
           listUserPromise = Promise.resolve();
+
+      var newMotionController = function newMotionController(mgr) {
+        motionControllers.push(mgr);
+        mgr.mesh = textured(box(0.1), 0x0000ff);
+        _this.scene.add(mgr.mesh);
+      };
 
       function listUsers(newUsers) {
         Object.keys(users).forEach(removeUser);
@@ -1586,7 +1604,12 @@ Primrose.BrowserEnvironment = function () {
           var protocol = location.protocol.replace("http", "ws"),
               path = protocol + "//" + location.hostname;
           console.log("connecting to: %s", path);
-          socket = io.connect(path);
+          socket = io(path);
+          socket.on("connect_error", function (evt) {
+            socket.close();
+            socket = null;
+            authFailed(verb)("an error occured while connecting to the server.");
+          });
           socket.on("signupFailed", authFailed("signup"));
           socket.on("loginFailed", authFailed("login"));
           socket.on("userList", listUsers);
@@ -2082,6 +2105,7 @@ Primrose.BrowserEnvironment = function () {
         _this.input.addEventListener("fullscreen", _this.goFullScreen.bind(_this), false);
         _this.input.addEventListener("pointerstart", pointerStart, false);
         _this.input.addEventListener("pointerend", pointerEnd, false);
+        _this.input.addEventListener("motioncontroller", newMotionController, false);
         return _this.input.ready;
       });
 
@@ -2925,7 +2949,7 @@ Primrose.InputProcessor = function () {
       }
     }]);
 
-    function InputProcessor(name, commands, socket) {
+    function InputProcessor(name, commands, socket, axisNames) {
       var _this = this;
 
       _classCallCheck(this, InputProcessor);
@@ -2989,7 +3013,7 @@ Primrose.InputProcessor = function () {
         this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
       }
 
-      this.axisNames = Primrose.Input[name] && Primrose.Input[name].AXES || [];
+      this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
 
       for (var i = 0; i < this.axisNames.length; ++i) {
         this.inputState.axes[i] = 0;
@@ -3443,21 +3467,6 @@ Primrose.InputProcessor = function () {
         } else if (this.commands[name] && !this.commands[name].disabled) {
           this.commands[name].state.value = value;
         }
-      }
-    }, {
-      key: "getVector3",
-      value: function getVector3(x, y, z, value) {
-        value = value || new THREE.Vector3();
-        value.set(this.getValue(x), this.getValue(y), this.getValue(z));
-        return value;
-      }
-    }, {
-      key: "addVector3",
-      value: function addVector3(x, y, z, value) {
-        value.x += this.getValue(x);
-        value.y += this.getValue(y);
-        value.z += this.getValue(z);
-        return value;
       }
     }, {
       key: "isDown",
@@ -8108,7 +8117,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 Primrose.Input.FPSInput = function () {
   "use strict";
 
-  var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"];
+  var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
+      AXIS_PREFIXES = ["L", "R"];
 
   var temp = new THREE.Quaternion();
 
@@ -8125,10 +8135,17 @@ Primrose.Input.FPSInput = function () {
         lockpointer: [],
         fullscreen: [],
         pointerstart: [],
-        pointerend: []
+        pointerend: [],
+        motioncontroller: []
       };
 
-      this.managers = [new Primrose.Input.Media(), new Primrose.Input.VR(), new Primrose.Input.Keyboard(DOMElement, {
+      this.managers = [];
+
+      this.add(new Primrose.Input.Media());
+
+      this.add(new Primrose.Input.VR());
+
+      this.add(new Primrose.Input.Keyboard(DOMElement, {
         lockPointer: {
           buttons: [Primrose.Keys.ANY, -Primrose.Keys.F],
           repetitions: 1,
@@ -8161,7 +8178,9 @@ Primrose.Input.FPSInput = function () {
           metaKeys: [-Primrose.Keys.CTRL, -Primrose.Keys.ALT, -Primrose.Keys.SHIFT, -Primrose.Keys.META],
           commandUp: emit.bind(this, "zero")
         }
-      }), new Primrose.Input.Mouse(DOMElement, {
+      }));
+
+      this.add(new Primrose.Input.Mouse(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandDown: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -8177,7 +8196,9 @@ Primrose.Input.FPSInput = function () {
         dy: { axes: [-Primrose.Input.Mouse.Y], delta: true, scale: 0.005, min: -5, max: 5 },
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 },
         pointerPitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.25, max: Math.PI * 0.25 }
-      }), new Primrose.Input.Touch(DOMElement, {
+      }));
+
+      this.add(new Primrose.Input.Touch(DOMElement, {
         lockPointer: { buttons: [Primrose.Keys.ANY], commandUp: emit.bind(this, "lockpointer") },
         pointer: {
           buttons: [Primrose.Keys.ANY],
@@ -8192,26 +8213,81 @@ Primrose.Input.FPSInput = function () {
         heading: { commands: ["dx"], integrate: true },
         dy: { axes: [-Primrose.Input.Touch.Y0], delta: true, scale: 0.005, min: -5, max: 5 },
         pitch: { commands: ["dy"], integrate: true, min: -Math.PI * 0.5, max: Math.PI * 0.5 }
-      }), new Primrose.Input.Gamepad({
-        pointer: {
-          buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
-          commandDown: emit.bind(this, "pointerstart"),
-          commandUp: emit.bind(this, "pointerend")
-        },
-        strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
-        drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
-        heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
-        dheading: { commands: ["heading"], delta: true },
-        pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
-      })];
+      }));
 
-      this.managers.forEach(function (mgr) {
-        return _this[mgr.name] = mgr;
+      Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
+        var pose = pad.pose,
+            isMotion = pad.id === "OpenVR Gamepad",
+            padCommands = null,
+            controllerNumber = 0;
+
+        if (isMotion) {
+          padCommands = {
+            pointer: {
+              buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.TRIGGER_PRESSED],
+              commandDown: emit.bind(_this, "pointerstart"),
+              commandUp: emit.bind(_this, "pointerend")
+            }
+          };
+
+          for (var i = 0; i < _this.managers.length; ++i) {
+            var mgr = _this.managers[i];
+            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+              ++controllerNumber;
+            }
+          }
+        } else {
+          padCommands = {
+            pointer: {
+              buttons: [Primrose.Input.Gamepad.XBOX_BUTTONS.A],
+              commandDown: emit.bind(_this, "pointerstart"),
+              commandUp: emit.bind(_this, "pointerend")
+            },
+            strafe: { axes: [Primrose.Input.Gamepad.LSX], deadzone: 0.2 },
+            drive: { axes: [Primrose.Input.Gamepad.LSY], deadzone: 0.2 },
+            heading: { axes: [-Primrose.Input.Gamepad.RSX], deadzone: 0.2, integrate: true },
+            dheading: { commands: ["heading"], delta: true },
+            pitch: { axes: [-Primrose.Input.Gamepad.RSY], deadzone: 0.2, integrate: true }
+          };
+        }
+        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
+        _this.add(mgr);
+
+        if (isMotion) {
+          emit.call(_this, "motioncontroller", mgr);
+        }
       });
-      this.ready = Promise.all([this.VR.ready, this.Media.ready]);
+
+      Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
+
+      this.ready = Promise.all(this.managers.map(function (mgr) {
+        return mgr.ready;
+      }).filter(identity));
     }
 
     _createClass(FPSInput, [{
+      key: "remove",
+      value: function remove(id) {
+        var mgr = this[id],
+            mgrIdx = this.managers.indexOf(mgr);
+        if (mgrIdx > -1) {
+          this.managers.splice(mgrIdx, 1);
+          delete this[id];
+        }
+        console.log("removed", mgr);
+      }
+    }, {
+      key: "add",
+      value: function add(mgr) {
+        for (var i = this.managers.length - 1; i >= 0; --i) {
+          if (this.managers[i].name === mgr.name) {
+            this.managers.splice(i, 1);
+          }
+        }
+        this.managers.push(mgr);
+        this[mgr.name] = mgr;
+      }
+    }, {
       key: "zero",
       value: function zero() {
         if (this.vr && this.vr.currentDisplay) {
@@ -8230,6 +8306,7 @@ Primrose.Input.FPSInput = function () {
     }, {
       key: "update",
       value: function update() {
+        Primrose.Input.Gamepad.poll();
         for (var i = 0; i < this.managers.length; ++i) {
           var mgr = this.managers[i];
           if (mgr.enabled) {
@@ -8279,31 +8356,6 @@ Primrose.Input.FPSInput = function () {
         }
         return value;
       }
-    }, {
-      key: "getVector3",
-      value: function getVector3(x, y, z, value) {
-        value = value || new THREE.Vector3();
-        value.set(0, 0, 0);
-        for (var i = 0; i < this.managers.length; ++i) {
-          var mgr = this.managers[i];
-          if (mgr.enabled) {
-            mgr.addVector3(x, y, z, value);
-          }
-        }
-        return value;
-      }
-    }, {
-      key: "getVector3s",
-      value: function getVector3s(x, y, z, values) {
-        values = values || [];
-        for (var i = 0; i < this.managers.length; ++i) {
-          var mgr = this.managers[i];
-          if (mgr.enabled) {
-            values[i] = mgr.getVector3(x, y, z, values[i]);
-          }
-        }
-        return values;
-      }
     }]);
 
     return FPSInput;
@@ -8312,6 +8364,8 @@ Primrose.Input.FPSInput = function () {
   return FPSInput;
 }();
 "use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -8322,169 +8376,191 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 Primrose.Input.Gamepad = function () {
   "use strict";
 
+  navigator.getGamepads = navigator.getGamepads || navigator.webkitGetGamepads;
+
+  var listeners = {
+    gamepadconnected: [],
+    gamepaddisconnected: []
+  },
+      currentPadIDs = [],
+      currentPads = [],
+      currentManagers = {};
+
   var Gamepad = function (_Primrose$InputProces) {
     _inherits(Gamepad, _Primrose$InputProces);
 
-    function Gamepad(commands, socket, gpid) {
-      _classCallCheck(this, Gamepad);
-
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, "Gamepad", commands, socket));
-
-      var connectedGamepads = [],
-          listeners = {
-        gamepadconnected: [],
-        gamepaddisconnected: []
-      };
-
-      _this.checkDevice = function (pad) {
-        var i;
-        for (i = 0; i < pad.buttons.length; ++i) {
-          this.setButton(i, pad.buttons[i].pressed);
-        }
-        for (i = 0; i < pad.axes.length; ++i) {
-          this.setAxis(Gamepad.AXES[i], pad.axes[i]);
-        }
-      };
-
-      _this.poll = function () {
-        var pads,
-            currentPads = [],
+    _createClass(Gamepad, null, [{
+      key: "ID",
+      value: function ID(pad) {
+        return (pad.id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+      }
+    }, {
+      key: "poll",
+      value: function poll() {
+        var maybePads = navigator.getGamepads(),
+            pads = [],
+            padIDs = [],
+            newPads = [],
+            oldPads = [],
             i;
 
-        if (!pads || pads.length === 0) {
-          if (navigator.getGamepads) {
-            pads = navigator.getGamepads();
-          } else if (navigator.webkitGetGamepads) {
-            pads = navigator.webkitGetGamepads();
-          }
-        }
-        if (pads) {
-          for (i = 0; i < pads.length; ++i) {
-            var pad = pads[i];
-            if (pad) {
-              if (!gpid) {
-                gpid = pad.id;
+        if (maybePads) {
+          for (i = 0; i < maybePads.length; ++i) {
+            var maybePad = maybePads[i];
+            if (maybePad) {
+              var padID = Gamepad.ID(maybePad),
+                  padIdx = currentPadIDs.indexOf(padID);
+              pads.push(maybePad);
+              padIDs.push(padID);
+              if (padIdx === -1) {
+                newPads.push(maybePad);
+                currentPadIDs.push(padID);
+                currentPads.push(maybePad);
+                delete currentManagers[padID];
+              } else {
+                currentPads[padIdx] = maybePad;
               }
-              if (connectedGamepads.indexOf(pad.id) === -1) {
-                connectedGamepads.push(pad.id);
-                onConnected(pad.id);
-              }
-              if (pad.id === gpid) {
-                this.checkDevice(pad);
-              }
-              currentPads.push(pad.id);
             }
           }
         }
 
-        for (i = connectedGamepads.length - 1; i >= 0; --i) {
-          if (currentPads.indexOf(connectedGamepads[i]) === -1) {
-            onDisconnected(connectedGamepads[i]);
-            connectedGamepads.splice(i, 1);
+        for (i = currentPadIDs.length - 1; i >= 0; --i) {
+          var padID = currentPadIDs[i],
+              mgr = currentManagers[padID],
+              pad = currentPads[i];
+          if (padIDs.indexOf(padID) === -1) {
+            oldPads.push(padID);
+            currentPads.splice(i, 1);
+            currentPadIDs.splice(i, 1);
+          } else if (mgr) {
+            mgr.checkDevice(pad);
           }
         }
-      };
 
-      function add(arr, val) {
-        if (arr.indexOf(val) === -1) {
-          arr.push(val);
+        newPads.forEach(emit.bind(Gamepad, "gamepadconnected"));
+        oldPads.forEach(emit.bind(Gamepad, "gamepaddisconnected"));
+      }
+    }, {
+      key: "addEventListener",
+      value: function addEventListener(evt, thunk) {
+        if (listeners[evt]) {
+          listeners[evt].push(thunk);
         }
       }
-
-      function remove(arr, val) {
-        var index = arr.indexOf(val);
-        if (index > -1) {
-          arr.splice(index, 1);
-        }
+    }, {
+      key: "pads",
+      get: function get() {
+        return currentPads;
       }
-
-      function sendAll(arr, id) {
-        for (var i = 0; i < arr.length; ++i) {
-          arr[i](id);
-        }
+    }, {
+      key: "listeners",
+      get: function get() {
+        return listeners;
       }
+    }]);
 
-      function onConnected(id) {
-        sendAll(listeners.gamepadconnected, id);
-      }
+    function Gamepad(pad, axisOffset, commands, socket) {
+      _classCallCheck(this, Gamepad);
 
-      function onDisconnected(id) {
-        sendAll(listeners.gamepaddisconnected, id);
-      }
+      var padID = Gamepad.ID(pad);
 
-      _this.getErrorMessage = function () {
-        return errorMessage;
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, padID, commands, socket, Gamepad.AXES));
+
+      currentManagers[padID] = _this;
+
+      _this.currentPose = {
+        position: [0, 0, 0],
+        orientation: [0, 0, 0, 1]
       };
 
-      _this.setGamepad = function (id) {
-        gpid = id;
-        this.inPhysicalUse = true;
-      };
-
-      _this.clearGamepad = function () {
-        gpid = null;
-        this.inPhysicalUse = false;
-      };
-
-      _this.isGamepadSet = function () {
-        return !!gpid;
-      };
-
-      _this.getConnectedGamepads = function () {
-        return connectedGamepads.slice();
-      };
-
-      _this.addEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          listeners[event].push(handler);
-        }
-        if (event === "gamepadconnected") {
-          connectedGamepads.forEach(onConnected);
-        }
-      };
-
-      _this.removeEventListener = function (event, handler, bubbles) {
-        if (listeners[event]) {
-          remove(listeners[event], handler);
-        }
-      };
-
-      try {
-        _this.update();
-        _this.available = true;
-      } catch (exp) {
-        console.error(exp);
-        _this.avaliable = false;
-        _this.errorMessage = exp;
-      }
+      _this.currentPad = pad;
+      _this.axisOffset = axisOffset;
       return _this;
     }
+
+    _createClass(Gamepad, [{
+      key: "checkDevice",
+      value: function checkDevice(pad) {
+        var i;
+        this.currentPad = pad;
+        for (i = 0; i < pad.buttons.length; ++i) {
+          this.setButton(i, pad.buttons[i].pressed);
+          this.setButton(i + pad.buttons.length, pad.buttons[i].touched);
+        }
+        for (i = 0; i < pad.axes.length; ++i) {
+          var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
+          this.setAxis(axisName, pad.axes[i]);
+        }
+
+        this.currentPose = pad.pose;
+      }
+    }, {
+      key: "vibrate",
+      value: function vibrate() {
+        if (this.currentPad && this.currentPad.vibrate) {
+          this.currentPad.vibrate.apply(this.currentPad, arguments);
+        }
+      }
+    }, {
+      key: "getOrientation",
+      value: function getOrientation(value) {
+        value = value || new THREE.Quaternion();
+        var o = this.currentPose && this.currentPose.orientation;
+        if (o) {
+          value.fromArray(o);
+        }
+        return value;
+      }
+    }, {
+      key: "getPosition",
+      value: function getPosition(value) {
+        value = value || new THREE.Vector3();
+        var p = this.currentPose && this.currentPose.position;
+        if (p) {
+          value.fromArray(p);
+        }
+        return value;
+      }
+    }]);
 
     return Gamepad;
   }(Primrose.InputProcessor);
 
-  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY"]);
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z"]);
+
+  Gamepad.XBOX_BUTTONS = {
+    A: 1,
+    B: 2,
+    X: 3,
+    Y: 4,
+    leftBumper: 5,
+    rightBumper: 6,
+    leftTrigger: 7,
+    rightTrigger: 8,
+    back: 9,
+    start: 10,
+    leftStick: 11,
+    rightStick: 12,
+    up: 13,
+    down: 14,
+    left: 15,
+    right: 16
+  };
+
+  Gamepad.VIVE_BUTTONS = {
+    TOUCHPAD_PRESSED: 0,
+    TRIGGER_PRESSED: 1,
+    GRIP_PRESSED: 2,
+    MENU_PRESSED: 3,
+
+    TOUCHPAD_TOUCHED: 4,
+    //TRIGGER_TOUCHED: 5, // doesn't ever actually trigger in the current version of Chromium - STM 6/22/2016
+    GRIP_TOUCHED: 6,
+    MENU_TOUCHED: 7
+  };
+
   return Gamepad;
 }();
-
-Primrose.Input.Gamepad.XBOX_BUTTONS = {
-  A: 1,
-  B: 2,
-  X: 3,
-  Y: 4,
-  leftBumper: 5,
-  rightBumper: 6,
-  leftTrigger: 7,
-  rightTrigger: 8,
-  back: 9,
-  start: 10,
-  leftStick: 11,
-  rightStick: 12,
-  up: 13,
-  down: 14,
-  left: 15,
-  right: 16
-};
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -9361,7 +9437,8 @@ Primrose.Input.VR = function () {
   "use strict";
 
   var SLERP_A = isMobile ? 0.1 : 0,
-      SLERP_B = 1 - SLERP_A;
+      SLERP_B = 1 - SLERP_A,
+      tempQuat = [];
   var VR = function (_Primrose$InputProces) {
     _inherits(VR, _Primrose$InputProces);
 
@@ -9370,20 +9447,14 @@ Primrose.Input.VR = function () {
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VR).call(this, "VR", commands, socket));
 
-      if (commands === undefined || commands === null) {
-        commands = VR.AXES.map(function (a) {
-          return {
-            name: a,
-            axes: [Primrose.Input.VR[a]]
-          };
-        });
-      }
-
       _this.displays = null;
       _this._transforms = [];
       _this.transforms = null;
       _this.currentDisplayIndex = -1;
-      _this.currentPose = null;
+      _this.currentPose = {
+        position: [0, 0, 0],
+        orientation: [0, 0, 0, 1]
+      };
 
       console.info("Checking for displays...");
       _this.ready = navigator.getVRDisplays().then(function (displays) {
@@ -9409,55 +9480,31 @@ Primrose.Input.VR = function () {
       key: "poll",
       value: function poll() {
         if (this.currentDisplay) {
-          var pose = this.currentDisplay.getPose();
-          if (pose) {
-            this.currentPose = pose;
-
-            if (pose.position) {
-              this.headX = pose.position[0];
-              this.headY = pose.position[1];
-              this.headZ = pose.position[2];
-            }
-            if (pose.linearVelocity) {
-              this.headVX = pose.linearVelocity[0];
-              this.headVY = pose.linearVelocity[1];
-              this.headVZ = pose.linearVelocity[2];
-            }
-            if (pose.linearAcceleration) {
-              this.headAX = pose.linearAcceleration[0];
-              this.headAY = pose.linearAcceleration[1];
-              this.headAZ = pose.linearAcceleration[2];
-            }
-
-            if (pose.orientation) {
-              this.headRX = pose.orientation[0];
-              this.headRY = pose.orientation[1];
-              this.headRZ = pose.orientation[2];
-              this.headRW = pose.orientation[3];
-            }
-            if (pose.angularVelocity) {
-              this.headRVX = pose.angularVelocity[0];
-              this.headRVY = pose.angularVelocity[1];
-              this.headRVZ = pose.angularVelocity[2];
-            }
-            if (pose.angularAcceleration) {
-              this.headRAX = pose.angularAcceleration[0];
-              this.headRAY = pose.angularAcceleration[1];
-              this.headRAZ = pose.angularAcceleration[2];
-            }
-          }
+          this.currentPose = this.currentDisplay.getPose() || this.currentPose;
         }
       }
     }, {
       key: "getOrientation",
       value: function getOrientation(value) {
         value = value || new THREE.Quaternion();
-        var x = this.getValue("headRX"),
-            y = this.getValue("headRY"),
-            z = this.getValue("headRZ"),
-            w = this.getValue("headRW");
-
-        value.set(value.x * SLERP_A + x * SLERP_B, value.y * SLERP_A + y * SLERP_B, value.z * SLERP_A + z * SLERP_B, value.w * SLERP_A + w * SLERP_B);
+        var o = this.currentPose && this.currentPose.orientation;
+        if (o) {
+          value.toArray(tempQuat);
+          for (var i = 0; i < o.length; ++i) {
+            tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
+          }
+          value.fromArray(tempQuat);
+        }
+        return value;
+      }
+    }, {
+      key: "getPosition",
+      value: function getPosition(value) {
+        value = value || new THREE.Vector3();
+        var p = this.currentPose && this.currentPose.position;
+        if (p) {
+          value.fromArray(p);
+        }
         return value;
       }
     }, {
@@ -9485,8 +9532,6 @@ Primrose.Input.VR = function () {
 
     return VR;
   }(Primrose.InputProcessor);
-
-  Primrose.InputProcessor.defineAxisProperties(VR, ["headX", "headY", "headZ", "headVX", "headVY", "headVZ", "headAX", "headAY", "headAZ", "headRX", "headRY", "headRZ", "headRW", "headRVX", "headRVY", "headRVZ", "headRAX", "headRAY", "headRAZ"]);
 
   return VR;
 }();
@@ -9903,8 +9948,6 @@ Primrose.Output.Audio3D = function () {
           audio: element,
           source: this.context.createMediaElementSource(element)
         };
-        //volume: this.context.createGain(),
-        //panner: this.context.createPanner()
         if (isChrome) {
           element.src = URL.createObjectURL(stream);
         } else {
@@ -10712,7 +10755,8 @@ Primrose.Text.Grammar = function () {
       }
     }
 
-    Grammar.prototype.toHTML = function (txt) {
+    Grammar.prototype.toHTML = function (txt, theme) {
+      theme = theme || Primrose.Text.Themes.Default;
       var tokenRows = this.tokenize(txt),
           temp = document.createElement("div");
       for (var y = 0; y < tokenRows.length; ++y) {
@@ -10721,13 +10765,13 @@ Primrose.Text.Grammar = function () {
         if (t.type === "newlines") {
           temp.appendChild(document.createElement("br"));
         } else {
-          var style = Primrose.Text.Themes.Default[t.type] || {},
+          var style = theme[t.type] || {},
               elem = document.createElement("span");
-          elem.style.fontWeight = style.fontWeight || Primrose.Text.Themes.Default.regular.fontWeight;
-          elem.style.fontStyle = style.fontStyle || Primrose.Text.Themes.Default.regular.fontStyle || "";
-          elem.style.color = style.foreColor || Primrose.Text.Themes.Default.regular.foreColor;
-          elem.style.backgroundColor = style.backColor || Primrose.Text.Themes.Default.regular.backColor;
-          elem.style.fontFamily = style.fontFamily || Primrose.Text.Themes.Default.fontFamily;
+          elem.style.fontWeight = style.fontWeight || theme.regular.fontWeight;
+          elem.style.fontStyle = style.fontStyle || theme.regular.fontStyle || "";
+          elem.style.color = style.foreColor || theme.regular.foreColor;
+          elem.style.backgroundColor = style.backColor || theme.regular.backColor;
+          elem.style.fontFamily = style.fontFamily || theme.fontFamily;
           elem.appendChild(document.createTextNode(t.value));
           temp.appendChild(elem);
         }
