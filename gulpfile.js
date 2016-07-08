@@ -33,50 +33,11 @@ var gulp = require("gulp"),
   pug = require("gulp-pug"),
   rename = require("gulp-rename"),
   uglify = require("gulp-uglify"),
-  sourceFiles = recurseDirectory("src")
+  sourceFiles = recurseDirectory("src");
+
 sourceFiles.sort();
-var docFiles = recurseDirectory("templates/doc")
-    .filter(function (f) {
-      return /.jade$/.test(f);
-    })
-    .map(function (f, i) {
-      var file = fs.readFileSync(f, "utf-8").toString(),
-        // This regex looks for an H1 tag in the document. The H1 tag will be parsed
-        // to use as the link text in the menu.
-        headerSpec = /(?:\b(\d+)\r\n\s*)?h1 (?:(?:(\w+): )?([^\r\n]+))/,
-        match = file.match(headerSpec);
-      // Only pages that have an H1 tag are going to be included in the menu.
-      if (match) {
-        var fileName = f.replace(/\\/g, "/").replace(/^templates\/(.+)\.jade$/, "$1"),
-          index = i,
-          type = (match[2] || "Page") + "s";
 
-        // there is an optional item index value that can be inserted before the page
-        // title H1, to define how the pages are sorted.
-        if (match[1]) {
-          index = parseFloat(match[1]);
-        }
-
-        if (type === "Examples") {
-          fileName = fileName.replace("/index", "");
-        }
-
-        var obj = {
-          fileName: fileName,
-          index: index,
-          type: type,
-          title: match[3],
-          incomplete: /\[under construction\]/.test(file)
-        };
-
-        return obj;
-      }
-    })
-    // discard any matches that didn't have an H1 header.
-    .filter(function (f) {
-      return f;
-    }),
-  debugDataES6 = {
+var debugDataES6 = {
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
@@ -95,10 +56,6 @@ var docFiles = recurseDirectory("templates/doc")
       .concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
-
-docFiles.sort(function (a, b) {
-  return a.index - b.index;
-});
 
 debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
   return f.replace(/^src\//, "es5/");
@@ -141,13 +98,6 @@ function pugConfiguration(options, defaultData) {
 
       var fileRoot = parts.join("");
 
-      for (var i = 0; i < docFiles.length; ++i) {
-        var d = docFiles[i];
-        if (d.fileName === name) {
-          demoTitle = d.title;
-        }
-      }
-
       var fxFiles = frameworkFiles;
       if (fs.existsSync(scriptName)) {
         fxFiles = fxFiles.concat([getFileDescrip(scriptName)]);
@@ -161,7 +111,6 @@ function pugConfiguration(options, defaultData) {
         filePath: name,
         fileRoot: fileRoot,
         fileName: shortName,
-        docFiles: docFiles,
         manifest: JSON.stringify(fxFiles.map(function (f) {
           return [
             fileRoot + f[0],
