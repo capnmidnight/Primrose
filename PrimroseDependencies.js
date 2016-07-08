@@ -494,7 +494,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 }).call(function () {
   return this || (typeof window !== "undefined" ? window : global);
 }());
-/* 
+/*
  * Copyright (C) 2016 Sean T. McBeth
  *
  * This program is free software: you can redistribute it and/or modify
@@ -541,10 +541,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   (function (module, require) {
 
-    //////////////////////////////////////////////////////////////////////////////
-    // Pliny's author is not smart enough to figure out how to make it possible //
-    // to use it to document itself, so here's a bunch of comments.             //
-    //////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Pliny's author is not smart enough to figure out how to make it        //
+    // possible to use it to document itself, so here's a bunch of comments.  //
+    ////////////////////////////////////////////////////////////////////////////
 
     var markdown = require("marked");
 
@@ -992,7 +992,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         } else if (value instanceof Array) {
           output += this.formatArray(obj, propertyName, value);
         } else if (propertyName === "parent") {
-          output += "<p>Contained in <a href=\"index.html#" + pliny.get(value).id + "\">" + value + "</a></p>";
+          output += "<p>Contained in <a href=\"index.html#" + pliny.get(value).id + "\"><code>" + value + "</code></a></p>";
         } else if (propertyName === "description") {
           output += markdown(value);
         } else if (propertyName === "returns") {
