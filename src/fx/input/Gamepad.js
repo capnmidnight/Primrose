@@ -37,16 +37,16 @@ Primrose.Input.Gamepad = (function () {
     static ID(pad) {
       var id = (pad.id + "_" + (pad.index || 0))
         .replace(/\s+/g, "_");
-      if(id === "OpenVR Gamepad"){
+      if (id === "OpenVR Gamepad") {
         id = "Vive";
       }
-      else if(id.indexOf("Xbox") === 0){
+      else if (id.indexOf("Xbox") === 0) {
         id = "Gamepad";
       }
-      else if(id.indexOf("Rift") === 0){
+      else if (id.indexOf("Rift") === 0) {
         id = "Rift";
       }
-      else if(id.indexOf("Unknown") === 0){
+      else if (id.indexOf("Unknown") === 0) {
         id = "Unknown";
       }
       return id;
@@ -128,7 +128,7 @@ Primrose.Input.Gamepad = (function () {
       for (i = 0; i < pad.buttons.length; ++i) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
-        if(btn.pressed){
+        if (btn.pressed) {
           buttonMap |= 0x1 << i;
         }
         this.setButton(i + pad.buttons.length, btn.touched);

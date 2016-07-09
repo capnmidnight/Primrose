@@ -1,8 +1,9 @@
 function scroller(id) {
-  document.getElementById(id).scrollIntoView({
-    block: "top",
-    behavior: "smooth"
-  });
+  document.getElementById(id)
+    .scrollIntoView({
+      block: "top",
+      behavior: "smooth"
+    });
 }
 
 var GRAMMAR_TEST = /^grammar\("(\w+)"\);\r?\n/;
@@ -12,7 +13,8 @@ function replacePreBlocks() {
     codeBlocks = doc.querySelectorAll("pre");
   for (var i = 0; i < codeBlocks.length; ++i) {
     var b = codeBlocks[i],
-      txt = (b.textContent || b.innerText).trim(),
+      txt = (b.textContent || b.innerText)
+      .trim(),
       grammarSpec = txt.match(GRAMMAR_TEST),
       tokenizer = Primrose.Text.Grammars.PlainText;
     if (grammarSpec) {
@@ -20,7 +22,7 @@ function replacePreBlocks() {
       tokenizer = Primrose.Text.Grammars[grammarName] || tokenizer;
       txt = txt.replace(GRAMMAR_TEST, "");
     }
-    if(Primrose.Text.Themes.Default.regular.backColor){
+    if (Primrose.Text.Themes.Default.regular.backColor) {
       delete Primrose.Text.Themes.Default.regular.backColor;
     }
     b.innerHTML = tokenizer.toHTML(txt);
@@ -61,13 +63,27 @@ function replacePreBlocks() {
       fieldType: "functions",
       items: []
     },
-    examples: { items: [] },
-    methods: { items: [] },
-    properties: { items: [] },
-    events: { items: [] },
-    records: { items: [] },
-    enumerations: { items: [] },
-    values: { items: [] }
+    examples: {
+      items: []
+    },
+    methods: {
+      items: []
+    },
+    properties: {
+      items: []
+    },
+    events: {
+      items: []
+    },
+    records: {
+      items: []
+    },
+    enumerations: {
+      items: []
+    },
+    values: {
+      items: []
+    }
   };
 
   var editors = [];
@@ -99,13 +115,13 @@ function replacePreBlocks() {
         .getText("../" + page.substring(1))
         .then(pliny.markdown);
     }
-    else if(!docoCache[page]){
+    else if (!docoCache[page]) {
       promise = Promise.reject("Item `" + page + "` does not exist in docoCache.");
     }
     else {
       var p = docoCache[page],
         sections = document.querySelectorAll("#contents > nav > ul > li > details");
-      for(var i = 0; i < sections.length; ++i){
+      for (var i = 0; i < sections.length; ++i) {
         sections[i].removeAttribute("open");
       }
       openSection(p.obj);
@@ -127,17 +143,17 @@ function replacePreBlocks() {
       });
   }
 
-  function openSection(head){
+  function openSection(head) {
     var links = document.querySelectorAll(".selected"),
       sectionOpen = false;
-    for(var i = 0; i < links.length; ++i){
+    for (var i = 0; i < links.length; ++i) {
       links[i].classList.remove("selected");
     }
-    while(head){
+    while (head) {
       var id = "#" + head.id.trim(),
         elem = document.querySelector("a[href='" + id + "']");
-      if(elem){
-        if(!isMobile && !sectionOpen){
+      if (elem) {
+        if (!isMobile && !sectionOpen) {
           elem.parentElement.parentElement.parentElement.setAttribute("open", "");
           sectionOpen = true;
         }
@@ -180,7 +196,7 @@ function replacePreBlocks() {
     var output = "";
     for (var g in groupings) {
       var group = groupings[g];
-      if(group.label){
+      if (group.label) {
         group.items.sort(function (a, b) {
           var c = a.fullName,
             d = b.fullName;

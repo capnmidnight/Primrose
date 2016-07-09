@@ -34,8 +34,7 @@ var gulp = require("gulp"),
   concat = require("gulp-concat"),
   cssmin = require("gulp-cssmin"),
   data = require("gulp-data"),
-  exec = require("child_process")
-  .exec,
+  exec = require("child_process").exec,
   footer = require("gulp-footer"),
   fs = require("fs"),
   jshint = require("gulp-jshint"),
@@ -46,6 +45,23 @@ var gulp = require("gulp"),
   rename = require("gulp-rename"),
   stylus = require("gulp-stylus"),
   uglify = require("gulp-uglify"),
+  jsFiles = [
+    "src/**/*.js",
+    "doc/**/*.js"
+  ],
+  stylusFiles = ["doc/**/*.styl"],
+  pugFiles = [
+    "*.jade",
+    "*.pug",
+    // */**/* is not a typo. I don't want to recurse through the templates folder,
+    // I only want to recurse through the child folders of the templates folder.
+    "templates/*/**/*.jade",
+    "templates/*/**/*.pug"
+  ],
+  hasHereTTP = fs.existsSync("../VR.sln"),
+  hasWebVRBootstrapper = fs.existsSync("../WebVR-Bootstrapper"),
+  hasLogger = fs.existsSync("../logger"),
+  hasPliny = fs.existsSync("../pliny"),
   sourceFiles = recurseDirectory("src");
 
 sourceFiles.sort();
@@ -56,18 +72,18 @@ var debugDataES6 = {
     cssExt: ".css",
     bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/WebVRBootstrapper.js"] : [],
     frameworkFiles: [
-        "node_modules/logger/logger.js",
-        "node_modules/marked/marked.min.js",
-        "node_modules/pliny/pliny.js",
-        "node_modules/socket.io-client/socket.io.js",
-        "node_modules/jshashes/hashes.js",
-        "node_modules/three/three.js",
-        "node_modules/three/examples/js/loaders/OBJLoader.js",
-        "node_modules/three/examples/js/loaders/MTLLoader.js",
-        "node_modules/three/examples/js/loaders/FBXLoader.js",
-        "node_modules/html2canvas/dist/html2canvas.js"
-      ]
-      .concat(sourceFiles)
+      "node_modules/logger/logger.js",
+      "node_modules/marked/marked.min.js",
+      "node_modules/pliny/pliny.js",
+      "node_modules/socket.io-client/socket.io.js",
+      "node_modules/jshashes/hashes.js",
+      "node_modules/three/three.js",
+      "node_modules/three/examples/js/loaders/OBJLoader.js",
+      "node_modules/three/examples/js/loaders/MTLLoader.js",
+      "node_modules/three/examples/js/loaders/FBXLoader.js",
+      "node_modules/html2canvas/dist/html2canvas.js"
+    ]
+    .concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
 

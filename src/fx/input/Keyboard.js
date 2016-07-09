@@ -37,12 +37,12 @@ Primrose.Input.Keyboard = (function () {
         if (!this.lockedToEditor) {
           this.setButton(evt.keyCode, stateChange);
         }
-        else if(evt.type === "keyup"){
+        else if (evt.type === "keyup") {
           if (this.currentControl && this.currentControl.keyUp) {
             this.currentControl.keyUp(evt);
           }
         }
-        else if(evt.type === "keydown"){
+        else if (evt.type === "keydown") {
           var elem = this.currentControl.focusedElement;
           if (elem) {
             if (elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
@@ -63,7 +63,7 @@ Primrose.Input.Keyboard = (function () {
         }
       }
 
-      function focusClipboard(evt){
+      function focusClipboard(evt) {
         if (this.lockedToEditor) {
           var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
           if (cmdName === "CUT" || cmdName === "COPY") {
@@ -73,7 +73,7 @@ Primrose.Input.Keyboard = (function () {
         }
       }
 
-      function clipboardOperation (evt) {
+      function clipboardOperation(evt) {
         if (this.currentControl) {
           this.currentControl[evt.type + "SelectedText"](evt);
           if (!evt.returnValue) {
@@ -117,19 +117,19 @@ Primrose.Input.Keyboard = (function () {
       };
     }
 
-    get operatingSystem(){
+    get operatingSystem() {
       return this._operatingSystem;
     }
 
-    set operatingSystem(os){
+    set operatingSystem(os) {
       this._operatingSystem = os || (isOSX ? Primrose.Text.OperatingSystems.OSX : Primrose.Text.OperatingSystems.Windows);
     }
 
-    get codePage(){
+    get codePage() {
       return this._codePage;
     }
 
-    set codePage(cp){
+    set codePage(cp) {
       var key,
         code,
         char,

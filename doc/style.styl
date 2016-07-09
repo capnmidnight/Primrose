@@ -1,306 +1,521 @@
-*
-  box-sizing: border-box
+* {
+  box-sizing: border-box;
+}
 
 html,
-body
-  position: absolute
-  margin: 0
-  padding: 0
-  width: 100%
-  height: 100%
+body {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
 body,
 button,
-input
-  font-family: -apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif
+input {
+  font-family: Lato, sans-serif;
+  color: #374346;
+  background-color: #fff;
+}
 
-#documentation nav
-  border: dashed 3px #853b9e
+#logo > img {
+  max-width: 200px;
+}
 
-#documentation nav,
-#documentation nav a
-  color: #853b9e
+#cta {
+  display: block;
+}
 
-button
-  padding: 0.5em
-  margin-right: 0.25em
+button {
+  padding: 0.75em 1.5em;
+  margin-right: 3em;
+  margin-bottom:  1em;
+  margin-top: 1em;
+  border: 0;
+  background-color: #374346;
+  color: #f1f1ef;
+  text-transform: uppercase;
+  font-size: 100%;
+  box-shadow: -5px 5px 43px #343436;
+  width: 15em;
+}
 
-#documentation nav > ul::before
-  content: "In this document:"
-  font-size: 125%
-  font-weight: bold
-  margin-left: -1em
+button::after {
+  content: "\27F6";
+  padding-left: 1em;
+  font-size: 105%;
+}
+
+#intro > div {
+  display: inline-block;
+  vertical-align: top;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+code {
+  font-family: 'Consolas', 'Apple Menlo', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace;
+}
 
 code,
-header a
-  font-family: 'Consolas', 'Apple Menlo', 'DejaVu Sans Mono', 'Lucida Console', 'Courier New', monospace
-
-code,
-kbd
-  display: inline-block
-  padding: 0.25em
+kbd {
+  display: inline-block;
+  padding: 0.25em;
+}
 
 kbd,
-tt
-  color: #eef6f8
-  background-color: #853b9e
+tt {
+  color: #eef6f8;
+  background-color: #853b9e;
+}
 
-tt
-  display: block
-  white-space: pre-wrap
-  padding: 1em
+tt {
+  display: block;
+  white-space: pre-wrap;
+  padding: 1em;
+}
 
-tt > a
-  color: inherit
+tt > a {
+  color: inherit;
+}
 
-code
-  color: #853b9e
+code {
+  color: #853b9e;
+}
 
-a > code
-  background-color: #eef6f8
+a > code {
+  background-color: #eef6f8;
+}
+
+main > hr {
+  width: 3em;
+  display: inline-block;
+  border: solid 1px #ec2471;
+}
 
 #loading,
-#progressBar
-  position: absolute
-  height: 100%
-  top: 0
-  left: 0
-  font-size: 12vw
-  padding: 7vw
-  background-color: rgba(0,0,0,0.75)
+#progressBar {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  font-size: 12vw;
+  padding: 7vw;
+  background-color: rgba(0,0,0,0.75);
+}
 
-#loading
-  color: #fff
-  width: 100%
+#loading {
+  color: #fff;
+}
 
-#progressBar
-  background-color: rgba(255,255,255,0.75)
-  color: #fff
-  width: 0
-  overflow: hidden
+#progressBar {
+  background-color: rgba(255,255,255,0.75);
+  color: #fff;
+  width: 0;
+  overflow: hidden;
+}
 
-ul
-  list-style: circle
+ul {
+  list-style: circle;
+}
 
-header
-  left: 0
-  top: 0
-  width: 100%
-  background-color: #fff
-  border-bottom: solid 1px #ccc
+html,
+body,
+header,
+main,
+footer,
+#documentation iframe,
+#footerWrapper,
+#loading,
+#cta,
+#frontBuffer {
+  width: 100%;
+}
 
-#logo
-  margin: 0.25em 1em
+#frontBuffer {
+  border: none;
+  margin-top: 3em;
+}
 
-header *
-  display: inline-block
-  padding: 0
-  margin: 0
-  vertical-align: middle
+header,
+main,
+footer {
+  background-color: #fff;
+}
 
-header > nav > ul
-  list-style: none
+header,
+main,
+#footerWrapper {
+  padding-top: 0.5em;
+}
 
-header a
-  border: none
-  height: auto
-  padding: 0.25em 1em
-  text-decoration: underline
+#footerWrapper {
+  border-top: solid 2px #ccc;
+  display: inline-block;
+}
 
-main
-  display: inline-block
-  top: 4em
-  width: 100%
-  bottom: 0
+header {
+  background-color: #ec2471;
+  background-image: radial-gradient(circle farthest-corner at 50% 50%, #ec2471 0%, #87518f);
+  border-bottom: solid 1px #ccc;
+  padding-top:  1.5em;
+}
 
-h2,
-h3,
-h4
-  text-transform: capitalize
+header *,
+footer * {
+  display: inline-block;
+}
 
-#documentation a[target="_blank"]::after
-  content: " \21d7"
+main {
+  margin-bottom: 5em;
+}
 
-#documentation article h1
-  font-size: 2em
-  text-transform: none
+footer {
+  position: fixed;
+  bottom: 0;
+}
 
-#documentation article h2
-  color: #2b81af
+header,
+header h1,
+main h1 {
+  font-weight: 300;
+}
 
-#documentation article h3
-  color: #853b9e
+header,
+header h1,
+header > nav > ul > li > a {
+  color: #f1f1ef;
+}
 
-#documentation article div h1,
-#documentation article div h2,
-#documentation article div h3,
-#documentation article div h4,
-#documentation article div h5,
-#documentation article div h6
-  font-size: 80%
+header h1 {
+  margin-bottom: 1em;
+  display: block;
+  clear: left;
+  font-size: 270%;
+}
+
+main h1 {
+  font-style: italic;
+}
+
+nav > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+main a[target="_blank"]::after {
+  content: " \21d7";
+}
 
 ol.signatureParameters,
-ol.signatureParameters > li
-  display: inline
-  padding: 0
-  margin: 0
+ol.signatureParameters > li {
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
 
-ol.signatureParameters::before
-  content: "("
+ol.signatureParameters::before {
+  content: "(";
+}
 
-ol.signatureParameters::after
-  content: ")"
+ol.signatureParameters::after {
+  content: ")";
+}
 
-ol.signatureParameters > li::after
-  content: ", "
+ol.signatureParameters > li::after {
+  content: ", ";
+}
 
-ol.signatureParameters > li:last-child::after
-  content: ""
+ol.signatureParameters > li:last-child::after {
+  content: "";
+}
 
-.type::before
-  content: "["
+.type::before {
+  content: "[";
+}
 
-.type::after
-  content: "]"
+.type::after {
+  content: "]";
+}
 
 dt,
-dd
-  display: inline
-  padding: 0
-  margin: 0
+dd {
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
 
-dl
-  margin: 0
+dl {
+  margin: 0;
+}
 
-dd::before
-  content: " - "
+dd::before {
+  content: " - ";
+}
 
-.enumeration .values > li
-  padding: 0
+.enumeration .values > li {
+  padding: 0;
+}
 
-body > div
-  position: absolute
-  top: 49px
+body > div {
+  position: absolute;
+  top: 49px;
+}
 
-#contents
-  position: relative
-  display: inline-block
-  background-color: #fff
-  padding: 1em
-  line-height: 1.5
-  width: 360px
-  vertical-align: top
+#contents {
+  display: inline-block;
+  line-height: 1.5;
+  width: 360px;
+  vertical-align: top;
+  margin-right: 2em;
+}
 
-#documentation
-  position: relative
-  display: inline-block
-  left: 0em
-  width: calc(80% - 20em)
-  min-width: 360px
-  max-width: 1000px
-  vertical-align: top
-  padding: 1em
+#documentation {
+  display: inline-block;
+  max-width: calc(100% - 370px - 2em);
+  min-width: 340px;
+}
 
-@media (max-width: 720px)
-  #contents,
-  #documentation
-    width: 100%
+#documentation img {
+  max-width: 100%;
+}
 
-  #contents > h1:first-child,
-  #contents > input[type="search"]
-    display: inline-block
+#documentation iframe {
+  height: 20em;
+  border: none;
+}
 
-  #contents > input[type="search"]
-    font-size: 150%
-    margin-left: 2em
+article > blockquote {
+  border: dashed 5px #00f;
+  color: #00f;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 105%;
+  padding: 1em;
+  margin: 2em;
+}
 
-#documentation img
-  max-width: 100%
+a {
+  text-decoration: none;
+  color: #ec2471;
+}
 
-#documentation iframe
-  width: 100%
-  height: 20em
-  border: none
+#contents a,
+footer a {
+  color: #374346;
+}
 
-article > blockquote
-  border: dashed 5px #00f
-  color: #00f
-  font-weight: bold
-  font-style: italic
-  font-size: 105%
-  padding: 1em
-  margin: 2em
+blockquote a {
+  text-decoration: underline;
+}
 
-a
-  text-decoration: none
+#contents a.incomplete {
+  color: #c0c0c0;
+}
 
-blockquote a
-  text-decoration: underline
+#contents a.selected {
+  color: #ec2471;
+  font-weight: bold;
+}
 
-#contents a
-  color: #000
-
-#contents a.incomplete
-  color: #c0c0c0
-
-#contents a.selected
-  background-color: #f7dbec
-  padding: 0.25em
-  padding-left: 0.5em
-  display: inline-block
-
-#contents a.incomplete.selected
-  background-color: #6d0444
+#contents a.incomplete.selected {
+  color: #f1afc9;
+}
 
 #contents h2,
-#contents h3
-  font-size: 100%
-  font-weight: normal
-  text-align: left
-  padding: 0
-  margin: 0
+#contents h3 {
+  font-size: 100%;
+  font-weight: normal;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+}
 
 #contents h2,
-#contents h2 > a
-  color: #853b9e
+#contents h2 > a {
+  color: #853b9e;
+}
 
-#contents h2
-  padding-top: 1.5em
+#contents h2 {
+  padding-top: 1.5em;
+}
 
-#contents h3
-  color: #2b81af
-
-#contents ul
-  list-style: none
+#contents h3 {
+  color: #2b81af;
+}
 
 #contents ul,
-#contents li
-  padding: 0
-  margin: 0
+#contents li {
+  padding: 0;
+}
 
-#docSearch
-  padding: 0.5em
-  margin-top: 1em
+details > summary {
+  margin-top: 1em;
+}
 
-details > summary
-  margin-top: 1em
-  margin-bottom: -1em
+details > summary:focus {
+  outline: none;
+}
 
-details > summary:focus
-  outline: none
+details > ul {
+  margin-left: 1.5em;
+}
 
-table
-  border: 0
-  border-collapse: collapse
+details > ul > li {
+  margin: 0.5em;
+}
 
-tr:nth-child(even)
-  background-color: rgba(204,204,204,0.26)
+table {
+  border: 0;
+  border-collapse: collapse;
+}
 
-td
-  padding: 5px
-  border-collapse: collapse
-  text-align: left
+tr:nth-child(even) {
+  background-color: rgba(204,204,204,0.26);
+}
 
-td:nth-child(2)
-  text-align: right
+td {
+  padding: 5px;
+  border-collapse: collapse;
+  text-align: left;
+}
 
+td:nth-child(2) {
+  text-align: right;
+}
+
+.code-listing {
+  background-color: #f1f1ef;
+  padding: 1em;
+  padding-left: 2em;
+  border-left: solid 3px #ec2471;
+}
+
+.icon {
+  display: inline-block;
+  background-image: url("images/icons.png");
+  background-size: 100%;
+  margin-bottom: 0.5em;
+  vertical-align: middle;
+}
+
+footer .icon {
+  float: right;
+}
+
+.small.icon {
+  width: 32px;
+  height: 32px;
+}
+
+.large.icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 0.5em;
+}
+
+.github {
+  background-position-y: 50%;
+}
+
+.twitter {
+  background-position-y: 40%;
+}
+
+.geom1 {
+  background-position-y: 90%;
+}
+
+.geom2 {
+  background-position-y: 100%;
+}
+
+@media (min-width: 641px) {
+
+  details {
+    margin-left: -1em;
+  }
+
+  header > nav {
+    float: right;
+  }
+
+  header,
+  main,
+  footer {
+    padding-left: 15em;
+    padding-right: 15em;
+  }
+
+  header > nav > ul > li > a,
+  #footerWrapper > a {
+    padding: 0.25em 1em;
+  }
+
+  #intro > div {
+    width: 45%;
+    margin-right: 4.5%;
+  }
+
+  #frontBuffer {
+    height: 40vw;
+  }
+}
+
+@media (max-width: 640px) {
+  header > nav {
+    float: right;
+  }
+
+  header,
+  main,
+  footer {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
+  header > nav > ul > li > a {
+    padding: 4px 14px;
+  }
+
+  #footerWrapper > a, header > nav > ul > li > a {
+    font-size: 100%;
+  }
+
+  #footerWrapper > a {
+    margin-left: 0.5em;
+    vertical-align: top;
+  }
+
+}
+
+@media (max-width: 360px) {
+  header > nav {
+    float: none;
+  }
+
+  header h1 {
+    font-size: 26px;
+  }
+
+  #documentation {
+    max-width: 346px;
+  }
+
+  #logo {
+    margin-bottom: 1em;
+  }
+
+  header button {
+    margin: ;
+  }
+
+  #frontBuffer {
+    height: 60vw;
+  }
+
+  #footerWrapper > a, header > nav > ul > li > a {
+    font-size: 83%;
+  }
+}

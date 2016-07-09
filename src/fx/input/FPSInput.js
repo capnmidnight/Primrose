@@ -273,9 +273,9 @@ Primrose.Input.FPSInput = (function () {
     }
 
     get lockedToEditor() {
-      for(var i = 0; i < this.managers.length; ++i){
+      for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if(mgr.lockedToEditor){
+        if (mgr.lockedToEditor) {
           return true;
         }
       }

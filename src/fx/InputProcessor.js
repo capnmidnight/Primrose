@@ -323,15 +323,15 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    set currentControl(v){
+    set currentControl(v) {
       var head = this;
-      while(head){
+      while (head) {
         head._currentControl = v;
         head = head.parent;
       }
     }
 
-    get currentControl(){
+    get currentControl() {
       return this._currentControl;
     }
 
@@ -464,7 +464,7 @@ Primrose.InputProcessor = (function () {
               .copy(this.position)
               .add(moveTo);
           }
-          else{
+          else {
             textured(this.mesh, 0x00ff00, {
               emissive: 0x007f00
             });
@@ -521,10 +521,10 @@ Primrose.InputProcessor = (function () {
       throw new Error(this.name + " updatePosition not implemented");
     }
 
-    get lockedToEditor(){
+    get lockedToEditor() {
       var head = this;
-      while(head){
-        if(this.currentControl && this.currentControl.lockMovement){
+      while (head) {
+        if (this.currentControl && this.currentControl.lockMovement) {
           return true;
         }
         head = head.parent;
