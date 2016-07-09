@@ -36,11 +36,17 @@ html
       title Primrose VR: WebVR Application Framework
     <!-- end main.jade title block -->
 
+    link(type="text/css", rel="stylesheet", href= fileRoot + "doc/style" + cssExt)
+
     block head
+
+    script(type="text/javascript", src= fileRoot + "ga.js")
   body
 
     header(role="banner")
-      a(href= fileRoot): h1 PrimroseVR
+      a#logo(href= fileRoot)
+        img(src= fileRoot + "doc/images/primrose40.png", alt="logo", title="Primrose logo")
+
 
       nav(role="navigation")
         ul
@@ -67,8 +73,8 @@ html
         a(href= fileRoot + "doc/license.html") License
         a(href= fileRoot + "doc/changelog.html") Changelog
         a(href="https://notiontheory.typeform.com/to/QzZmAD", target="_blank") Slack
-        a.icon.github(href="https://www.github.com/NotionTheory/Primrose", target="_blank") &nbsp;
-        a.icon.twitter(href="https://www.twitter.com/Primrose_VR", target="_blank") &nbsp;
+        a.small.icon.github(href="https://www.github.com/NotionTheory/Primrose", target="_blank") &nbsp;
+        a.small.icon.twitter(href="https://www.twitter.com/Primrose_VR", target="_blank") &nbsp;
         a(href="http://www.notiontheory.com/team", target="_blank", style="color:#ec2471") Made (with love) by NotionTheory
       block footer
     <!-- end main.jade footer block -->

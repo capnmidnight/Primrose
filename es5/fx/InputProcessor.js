@@ -32,7 +32,7 @@ Primrose.InputProcessor = function () {
       }
     }]);
 
-    function InputProcessor(name, commands, socket) {
+    function InputProcessor(name, commands, socket, axisNames) {
       var _this = this;
 
       _classCallCheck(this, InputProcessor);
@@ -96,7 +96,7 @@ Primrose.InputProcessor = function () {
         this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
       }
 
-      this.axisNames = Primrose.Input[name] && Primrose.Input[name].AXES || [];
+      this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
 
       for (var i = 0; i < this.axisNames.length; ++i) {
         this.inputState.axes[i] = 0;
@@ -550,21 +550,6 @@ Primrose.InputProcessor = function () {
         } else if (this.commands[name] && !this.commands[name].disabled) {
           this.commands[name].state.value = value;
         }
-      }
-    }, {
-      key: "getVector3",
-      value: function getVector3(x, y, z, value) {
-        value = value || new THREE.Vector3();
-        value.set(this.getValue(x), this.getValue(y), this.getValue(z));
-        return value;
-      }
-    }, {
-      key: "addVector3",
-      value: function addVector3(x, y, z, value) {
-        value.x += this.getValue(x);
-        value.y += this.getValue(y);
-        value.z += this.getValue(z);
-        return value;
       }
     }, {
       key: "isDown",
