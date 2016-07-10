@@ -1,9 +1,7 @@
 Primrose.Input.VR = (function () {
   "use strict";
 
-  const SLERP_A = isMobile ? 0.1 : 0,
-    SLERP_B = 1 - SLERP_A,
-    DEFAULT_POSE = {
+  const DEFAULT_POSE = {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
@@ -37,7 +35,6 @@ Primrose.Input.VR = (function () {
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
-      this.originalQuat = new THREE.Quaternion();
       this.parentHeading = new THREE.Quaternion();
 
       console.info("Checking for displays...");
@@ -112,17 +109,18 @@ Primrose.Input.VR = (function () {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;
       }
       super.updatePointer(dt);
-      this.parent.mesh.applyMatrix(this.stage.matrix);
+      if(this.parent.mesh){
+        this.parent.mesh.applyMatrix(this.stage.matrix);
+      }
     }
 
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
-        this.originalQuat.toArray(tempQuat);
-        for (var i = 0; i < o.length; ++i) {
-          tempQuat[i] = tempQuat[i] * SLERP_A + o[i] * SLERP_B;
-        }
-        this.originalQuat.fromArray(tempQuat);
+        this.quaternion.copy(o);
+      }
+
+      if(this.parent.mesh){
         this.parent.euler.toArray(tempQuat);
         tempQuat[2] = 0;
         if (this.inVR) {
@@ -135,9 +133,7 @@ Primrose.Input.VR = (function () {
         }
         this.euler.fromArray(tempQuat);
         this.parentHeading.setFromEuler(this.euler);
-        this.quaternion
-          .copy(this.parentHeading)
-          .multiply(this.originalQuat);
+        this.quaternion.multiply(this.parentHeading);
       }
     }
 
@@ -146,10 +142,11 @@ Primrose.Input.VR = (function () {
       if (p) {
         this.position.fromArray(p);
       }
-      this.position.applyQuaternion(this.parentHeading);
-
-      this.position.x += this.parent.position.x;
-      this.position.z += this.parent.position.z;
+      if(this.parent.mesh){
+        this.position.applyQuaternion(this.parentHeading);
+        this.position.x += this.parent.position.x;
+        this.position.z += this.parent.position.z;
+      }
     }
 
     updateVelocity() {

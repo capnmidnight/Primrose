@@ -317,7 +317,13 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
-        this.audio.setPlayer(this.camera);
+        try{
+          this.audio.setPlayer(this.camera);
+        }
+        catch(exp){
+          this.stop();
+          console.log(this.player, exp);
+        }
 
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           this.nose.visible = false;
