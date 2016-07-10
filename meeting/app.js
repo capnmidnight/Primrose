@@ -88,8 +88,13 @@ function showSignup(state) {
 
 function hideLoginForm() {
   ctrls2D.loginForm.style.display = "none";
-  ctrls2D.controls.style.width = "initial";
-  ctrls2D.controls.style.height = "initial";
+  var s = ctrls2D.controls.style;
+  s.width = "initial";
+  s.height = "initial";
+  s.top = "initial";
+  s.left = "initial";
+  s.bottom = 0;
+  s.right = 0;
   ctrls2D.frontBuffer.focus();
 }
 
