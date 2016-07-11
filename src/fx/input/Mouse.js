@@ -74,9 +74,9 @@ Primrose.Input.Mouse = (function () {
     }
 
     updateOrientation(excludePitch) {
-      var p = 0,
+      var head = this,
+        p = 0,
         h = 0;
-      var head = this;
       while (head) {
         p += head.getValue("pitch");
         h += head.getValue("heading");

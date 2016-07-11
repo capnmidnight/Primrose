@@ -5,7 +5,8 @@ Primrose.Input.VR = (function () {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
-    tempQuat = [],
+    eulerParts = [],
+    swapQuaternion = new THREE.Quaternion(),
     GAZE_LENGTH = 3000;
   pliny.class({
     parent: "Primrose.Input",
@@ -121,19 +122,21 @@ Primrose.Input.VR = (function () {
       }
 
       if (this.parent.mesh) {
-        this.parent.euler.toArray(tempQuat);
-        tempQuat[2] = 0;
-        if (this.inVR) {
-          tempQuat[0] = 0;
-          var da = tempQuat[1] - this.euler.y;
-          tempQuat[1] = this.euler.y;
+        this.parent.euler.toArray(eulerParts);
+        eulerParts[2] = 0;
+        if(this.inVR) {
+          eulerParts[0] = 0;
+          var da = eulerParts[1] - this.euler.y;
+          eulerParts[1] = this.euler.y;
           if (Math.abs(da) > this.rotationAngle) {
-            tempQuat[1] += Math.sign(da) * this.rotationAngle;
+            eulerParts[1] += Math.sign(da) * this.rotationAngle;
           }
         }
-        this.euler.fromArray(tempQuat);
+        this.euler.fromArray(eulerParts);
         this.parentHeading.setFromEuler(this.euler);
-        this.quaternion.multiply(this.parentHeading);
+        swapQuaternion.copy(this.quaternion);
+        this.quaternion.copy(this.parentHeading)
+          .multiply(swapQuaternion);
       }
     }
 

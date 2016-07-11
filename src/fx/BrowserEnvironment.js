@@ -290,6 +290,9 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var render = () => {
+        this.camera.position.set(0, 0, 0);
+        this.camera.quaternion.set(0, 0, 0, 1);
+
         if (this.inVR && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
           var trans = this.input.VR.transforms;
@@ -299,7 +302,6 @@ Primrose.BrowserEnvironment = (function () {
               side = (2 * i) - 1;
             Primrose.Entity.eyeBlankAll(i);
             this.camera.projectionMatrix.copy(st.projection);
-            this.camera.matrixWorld.copy(this.player.matrixWorld);
             this.camera.translateOnAxis(st.translation, 1);
             if (this.options.useNose) {
               this.nose.visible = true;
@@ -317,14 +319,13 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
-        this.audio.setPlayer(this.camera);
+        this.audio.setPlayer(this.player.mesh);
 
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
           this.camera.updateProjectionMatrix();
-          this.camera.matrixWorld.copy(this.player.matrixWorld);
           this.renderer.clear(true, true, true);
           this.renderer.setViewport(0, 0, this.renderer.domElement.width, this.renderer.domElement.height);
           this.renderer.render(this.scene, this.camera);
