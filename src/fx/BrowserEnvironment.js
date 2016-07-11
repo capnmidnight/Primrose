@@ -317,13 +317,7 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
-        try {
-          this.audio.setPlayer(this.camera);
-        }
-        catch (exp) {
-          this.stop();
-          console.log(this.player, exp);
-        }
+        this.audio.setPlayer(this.camera);
 
         if (!this.inVR || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
           this.nose.visible = false;
@@ -777,7 +771,12 @@ Primrose.BrowserEnvironment = (function () {
         this.input.Keyboard.operatingSystem = this.options.os;
         this.input.Keyboard.codePage = this.options.language;
 
-        this.input.Mouse.makePointer(this.scene);
+        if(isMobile){
+          this.input.Touch.makePointer(this.scene);
+        }
+        else{
+          this.input.Mouse.makePointer(this.scene);
+        }
         this.input.VR.makePointer(this.scene);
         this.player.add(this.camera);
 
@@ -925,7 +924,7 @@ Primrose.BrowserEnvironment = (function () {
 
 
     get vehicle() {
-      return this.input.Mouse;
+      return isMobile ? this.input.Touch : this.input.Mouse;
     }
 
     get player() {

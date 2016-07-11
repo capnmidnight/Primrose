@@ -117,7 +117,7 @@ Primrose.Input.VR = (function () {
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
-        this.quaternion.copy(o);
+        this.quaternion.fromArray(o);
       }
 
       if (this.parent.mesh) {
@@ -142,6 +142,7 @@ Primrose.Input.VR = (function () {
       if (p) {
         this.position.fromArray(p);
       }
+
       if (this.parent.mesh) {
         this.position.applyQuaternion(this.parentHeading);
         this.position.x += this.parent.position.x;

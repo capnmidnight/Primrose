@@ -347,6 +347,7 @@ Primrose.InputProcessor = (function () {
       this.showPointer = true;
       this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
+      this.quaternion = new THREE.Quaternion();
       this.euler = new THREE.Euler();
       this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), 0xff0000, {
         emissive: 0x3f0000
@@ -390,11 +391,12 @@ Primrose.InputProcessor = (function () {
 
       this.position.add(moveTo);
       this.mesh.position.copy(this.position);
-      this.mesh.updateMatrix();
-
       if (this.stage) {
-        this.mesh.applyMatrix(this.stage.matrix);
+        this.mesh.position.applyMatrix4(this.stage.matrix);
       }
+
+      this.mesh.quaternion.copy(this.quaternion);
+      this.mesh.updateMatrixWorld();
     }
 
     get segment() {
@@ -550,10 +552,6 @@ Primrose.InputProcessor = (function () {
 
     get matrixWorld() {
       return this.mesh.matrixWorld;
-    }
-
-    get quaternion() {
-      return this.mesh.quaternion;
     }
 
     get stage() {
