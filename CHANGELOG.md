@@ -515,4 +515,4 @@ It's going to be nothing but documentation for a while.
 
 ## Other
 
-If you want to know more, check the [Git commit log](https://github.com/capnmidnight/Primrose/commits/dev). I'm not going to rewrite the entire thing here.
+If you want to know more, check the [Git commit log](https://github.com/NotionTheory/Primrose/commits/dev). I'm not going to rewrite the entire thing here.

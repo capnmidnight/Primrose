@@ -317,10 +317,10 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
         }
 
-        try{
+        try {
           this.audio.setPlayer(this.camera);
         }
-        catch(exp){
+        catch (exp) {
           this.stop();
           console.log(this.player, exp);
         }

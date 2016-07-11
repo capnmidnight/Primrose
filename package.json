@@ -10,9 +10,9 @@
   "homepage": "https://www.primrosevr.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/capnmidnight/Primrose.git"
+    "url": "https://github.com/NotionTheory/Primrose.git"
   },
-  "bugs": "https://github.com/capnmidnight/Primrose/issues",
+  "bugs": "https://trello.com/b/NVZsaC1P/primrose-development-tasks",
   "files": [
     "LICENSE.md",
     "README.md",
