@@ -343,14 +343,15 @@ Primrose.InputProcessor = (function () {
       this._showPointer = v;
     }
 
-    makePointer(scene) {
+    makePointer(scene, color) {
+      color = color || 0xff0000;
       this.showPointer = true;
       this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
       this.quaternion = new THREE.Quaternion();
       this.euler = new THREE.Euler();
-      this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), 0xff0000, {
-        emissive: 0x3f0000
+      this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), color, {
+        emissive: color >> 1
       });
       this.mesh.geometry.vertices.forEach((v) => {
         v.z -= LASER_LENGTH * 0.5 + 0.5;
