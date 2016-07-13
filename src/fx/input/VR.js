@@ -124,7 +124,7 @@ Primrose.Input.VR = (function () {
       if (this.parent.mesh) {
         this.parent.euler.toArray(eulerParts);
         eulerParts[2] = 0;
-        if(this.inVR) {
+        if (this.inVR) {
           eulerParts[0] = 0;
           var da = eulerParts[1] - this.euler.y;
           eulerParts[1] = this.euler.y;

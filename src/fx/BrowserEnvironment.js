@@ -772,10 +772,10 @@ Primrose.BrowserEnvironment = (function () {
         this.input.Keyboard.operatingSystem = this.options.os;
         this.input.Keyboard.codePage = this.options.language;
 
-        if(isMobile){
+        if (isMobile) {
           this.input.Touch.makePointer(this.scene);
         }
-        else{
+        else {
           this.input.Mouse.makePointer(this.scene);
         }
         this.input.VR.makePointer(this.scene);
