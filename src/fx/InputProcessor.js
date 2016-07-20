@@ -406,7 +406,8 @@ Primrose.InputProcessor = (function () {
     get segment() {
       if (this.showPointer) {
         FORWARD.set(0, 0, -1)
-          .applyMatrix4(this.mesh.matrixWorld);
+          .applyQuaternion(this.quaternion)
+          .add(this.mesh.position);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
     }
