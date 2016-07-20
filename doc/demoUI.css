@@ -1,4 +1,4 @@
-﻿* {
+* {
   box-sizing: border-box;
 }
 
@@ -9,7 +9,7 @@
   padding: 1em;
 }
 
-html, body, #frontBuffer, progress, #controls {
+html, body, #frontBuffer, progress {
   position: absolute;
   border: 0;
   left: 0;
