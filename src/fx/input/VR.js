@@ -30,8 +30,7 @@ Primrose.Input.VR = (function () {
       super("VR", parent, null, socket);
 
       this.displays = [];
-      this._transforms = [];
-      this.transforms = null;
+      this._transformers = [];
       this.currentDisplayIndex = -1;
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
@@ -191,10 +190,10 @@ Primrose.Input.VR = (function () {
 
     getTransforms(near, far) {
       if (this.currentDisplay) {
-        if (!this._transforms[this.currentDisplayIndex]) {
-          this._transforms[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
+        if (!this._transformers[this.currentDisplayIndex]) {
+          this._transformers[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
         }
-        return this._transforms[this.currentDisplayIndex].getTransforms(near, far);
+        return this._transformers[this.currentDisplayIndex].getTransforms(near, far);
       }
     }
 

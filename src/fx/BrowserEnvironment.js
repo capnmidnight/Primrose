@@ -393,7 +393,6 @@ Primrose.BrowserEnvironment = (function () {
 
           this.renderer.domElement.width = canvasWidth;
           this.renderer.domElement.height = canvasHeight;
-          console.log(canvasWidth, canvasHeight);
           if (!this.timer) {
             render();
           }
