@@ -78,7 +78,7 @@ Primrose.Input.VR = (function () {
 
     cancel() {
       var promise = null;
-      if (this.currentDisplayIndex > -1 && this.currentDisplay.isPresenting) {
+      if (this.isPresenting) {
         promise = this.currentDisplay.exitPresent();
       }
       else {

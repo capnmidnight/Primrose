@@ -332,26 +332,43 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var setOrientationLock = () => {
-        if (this.inVR) {
-          var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-          if (type.indexOf("landscape") === -1) {
-            type = "landscape-primary";
+      var wasLocked = false;
+      var setOrientationLock = (evt) => {
+        var isFullScreen = this.inVR && this.input.VR.isPresenting;
+        try{
+          if (isFullScreen) {
+            if(!wasLocked){
+              var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+              if (type.indexOf("landscape") === -1) {
+                type = "landscape-primary";
+              }
+              if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock(type)
+                  .then(() => wasLocked = true)
+                  .catch(() => wasLocked = false);
+              }
+              else if (screen.mozLockOrientation) {
+                wasLocked = screen.mozLockOrientation(type);
+              }
+              else{
+                wasLocked = false;
+              }
+            }
           }
-          if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock(type);
-          }
-          else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation(type);
+          else {
+            if(wasLocked){
+              if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+              }
+              else if (screen.mozUnlockOrientation) {
+                screen.mozUnlockOrientation();
+              }
+              wasLocked = false;
+            }
           }
         }
-        else {
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
-          else if (screen.mozUnlockOrientation) {
-            screen.mozUnlockOrientation();
-          }
+        catch(exp){
+          console.error(exp);
         }
       };
 
@@ -706,15 +723,17 @@ Primrose.BrowserEnvironment = (function () {
         if (WebVRBootstrapper.Version >= 1) {
           window.addEventListener("vrdisplaypresentchange", (evt) => {
             if (window.VRDisplay && this.input.VR.currentDisplay instanceof VRDisplay) {
-              setOrientationLock();
+              setOrientationLock(evt);
             }
           }, false);
         }
-        FullScreen.addChangeListener((evt) => {
-          if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
-            setOrientationLock();
-          }
-        }, false);
+        else{
+          FullScreen.addChangeListener((evt) => {
+            if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
+              setTimeout(setOrientationLock, 0, evt);
+            }
+          }, false);
+        }
       }
 
       window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
