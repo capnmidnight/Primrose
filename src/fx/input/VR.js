@@ -189,12 +189,12 @@ Primrose.Input.VR = (function () {
 
     }
 
-    resetTransforms(near, far) {
+    getTransforms(near, far) {
       if (this.currentDisplay) {
         if (!this._transforms[this.currentDisplayIndex]) {
           this._transforms[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
         }
-        this.transforms = this._transforms[this.currentDisplayIndex].getTransforms(near, far);
+        return this._transforms[this.currentDisplayIndex].getTransforms(near, far);
       }
     }
 

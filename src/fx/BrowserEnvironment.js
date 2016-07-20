@@ -295,7 +295,10 @@ Primrose.BrowserEnvironment = (function () {
 
         if (this.inVR && this.input.VR.currentPose) {
           this.renderer.clear(true, true, true);
-          var trans = this.input.VR.transforms;
+
+          var trans = this.input.VR.getTransforms(
+            this.options.nearPlane,
+            this.options.nearPlane + this.options.drawDistance);
           for (var i = 0; trans && i < trans.length; ++i) {
             var st = trans[i],
               v = st.viewport,
@@ -373,11 +376,10 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var modifyScreen = () => {
-        this.input.VR.resetTransforms(
+        var p = this.input.VR.getTransforms(
           this.options.nearPlane,
           this.options.nearPlane + this.options.drawDistance);
 
-        var p = this.input.VR.transforms;
         if (p) {
           var canvasWidth = 0,
             canvasHeight = 0;
@@ -391,6 +393,7 @@ Primrose.BrowserEnvironment = (function () {
 
           this.renderer.domElement.width = canvasWidth;
           this.renderer.domElement.height = canvasHeight;
+          console.log(canvasWidth, canvasHeight);
           if (!this.timer) {
             render();
           }
