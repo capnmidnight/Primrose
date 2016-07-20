@@ -70,7 +70,7 @@ var debugDataES6 = {
     debug: true,
     jsExt: ".js",
     cssExt: ".css",
-    bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/WebVRBootstrapper.js"] : [],
+    bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/webvr-bootstrapper.js"] : [],
     frameworkFiles: [
       "node_modules/logger/logger.js",
       "node_modules/marked/marked.min.js",
@@ -198,9 +198,9 @@ if (hasHereTTP) {
 if (hasWebVRBootstrapper) {
   X("build:bootstrapper", "cd ../WebVR-Bootstrapper && gulp");
 
-  X("build:manifest:quickstart", "cd quickstart && node ../../WebVR-Bootstrapper/index.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
+  X("build:manifest:quickstart", "cd quickstart && node ../../WebVR-Bootstrapper/webvr-bootstrapper.js PrimroseDependencies.min.js Primrose.min.js PrimroseDocumentation.min.js app.js", ["jsmin"]);
 
-  X("build:manifest:meeting", "cd meeting && node ../../WebVR-Bootstrapper/index.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
+  X("build:manifest:meeting", "cd meeting && node ../../WebVR-Bootstrapper/webvr-bootstrapper.js ../PrimroseDependencies.min.js ../Primrose.min.js ../doc/models/meeting/meetingroom.obj ../doc/models/meeting/meetingroom.mtl ../doc/models/meeting/BackdropTexture.png ../doc/models/meeting/Chair1Texture.png ../doc/models/meeting/Chair2Texture.png ../doc/models/meeting/Chair3Texture.png ../doc/models/meeting/Chair4Texture.png ../doc/models/meeting/Cup1Texture.png ../doc/models/meeting/Cup2Texture.png ../doc/models/meeting/Cup3Texture.png ../doc/models/meeting/Cup4Texture.png ../doc/models/meeting/Cup5Texture.png ../doc/models/meeting/LampshadeTexture.png ../doc/models/meeting/RoomTexture.png ../doc/models/meeting/TableTexture.png ../doc/models/meeting/monitor.obj ../doc/models/monitor.mtl ../doc/models/cardboard.obj ../doc/models/cardboard.mtl ../doc/models/microphone.obj ../doc/models/microphone.mtl ../doc/fonts/helvetiker_regular.typeface.js ../doc/models/avatar.json app.js");
 
   var quickstartDependencies = [
     "build:manifest:quickstart",
@@ -215,7 +215,7 @@ if (hasWebVRBootstrapper) {
   function copyQuickstart() {
     var toCopy = [
       "StartHere*",
-      "../WebVR-Bootstrapper/WebVRBootstrapper.min.js",
+      "../WebVR-Bootstrapper/webvr-bootstrapper.min.js",
       "Primrose*.min.js",
       "doc/models/monitor.*",
       "doc/models/cardboard.*",
