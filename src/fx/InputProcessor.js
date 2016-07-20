@@ -67,6 +67,8 @@ Primrose.InputProcessor = (function () {
       this.disk = null;
       this.stageGrid = null;
       this._stage = null;
+      this.color = null;
+      this.minorColor = null;
       this.inVR = false;
       this.lastT = performance.now();
       this._showPointer = false;
@@ -343,22 +345,23 @@ Primrose.InputProcessor = (function () {
       this._showPointer = v;
     }
 
-    makePointer(scene, color) {
-      color = color || 0xff0000;
+    makePointer(scene, color = 0xff0000, minorColor = 0x7f0000) {
+      this.color = color;
+      this.minorColor = minorColor;
       this.showPointer = true;
       this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
       this.quaternion = new THREE.Quaternion();
       this.euler = new THREE.Euler();
-      this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), color, {
-        emissive: color >> 1
+      this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
+        emissive: this.minorColor
       });
       this.mesh.geometry.vertices.forEach((v) => {
         v.z -= LASER_LENGTH * 0.5 + 0.5;
       });
 
-      this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), 0x00ff00, {
-        emissive: 0x003f00
+      this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), this.color, {
+        emissive: this.minorColor
       });
       this.disk.geometry.computeBoundingBox();
       this.disk.geometry.vertices.forEach((v) => v.y -= this.disk.geometry.boundingBox.min.y);
@@ -368,9 +371,9 @@ Primrose.InputProcessor = (function () {
 
       this.groundMesh = this.disk;
 
-      this.stageGrid = textured(box(), 0x00ff00, {
+      this.stageGrid = textured(box(), this.color, {
         wireframe: true,
-        emissive: 0x003f00
+        emissive: this.minorColor
       });
 
       scene.add(this.mesh);
@@ -429,13 +432,11 @@ Primrose.InputProcessor = (function () {
         var changed = dButtons !== 0;
 
         // reset the mesh color to the base value
-        if (this.mesh) {
-          this.groundMesh.visible = false;
-          this.mesh.visible = this.showPointer;
-          textured(this.mesh, 0xff0000, {
-            emissive: 0x7f0000
-          });
-        }
+        this.groundMesh.visible = false;
+        this.mesh.visible = this.showPointer;
+        textured(this.mesh, this.color, {
+          emissive: this.minorColor
+        });
 
         if (currentHit) {
           object = objects[currentHit.objectID];
