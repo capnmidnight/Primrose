@@ -33,7 +33,7 @@ Primrose.Input.Touch = (function () {
         touches = event.touches;
 
         var fingerState = 0;
-        for(i = 0; i < touches.length; ++i){
+        for (i = 0; i < touches.length; ++i) {
           fingerState |= 1 << t.identifier;
         }
         this.FINGERS = fingerState;
@@ -76,7 +76,7 @@ Primrose.Input.Touch = (function () {
 
   }
 
-  if(navigator.maxTouchPoints){
+  if (navigator.maxTouchPoints) {
     var axes = ["FINGERS"];
     for (var i = 0; i < navigator.maxTouchPoints; ++i) {
       axes.push("X" + i);

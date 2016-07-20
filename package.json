@@ -49,13 +49,14 @@
     "highlighting"
   ],
   "dependencies": {
+    "bare-bones-logger": "^1.0.2",
     "html2canvas": "^0.5.0-beta4",
     "jshashes": "^1.0.5",
     "lavu-details-polyfill": "^0.1.0",
     "leapjs": "^0.6.4",
-    "bare-bones-logger": "^1.0.2",
     "pliny": "^3.2.0",
     "promise-polyfill": "^5.1.0",
+    "replay-telemetry-webvr": "^1.0.0",
     "socket.io-client": "^1.4.4",
     "three": "^0.76.1",
     "webvr-bootstrapper": "^1.0.0"
