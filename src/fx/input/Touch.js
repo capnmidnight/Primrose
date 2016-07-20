@@ -13,9 +13,11 @@ Primrose.Input.Touch = (function () {
       DOMElement = DOMElement || window;
 
       function setState(stateChange, setAxis, event) {
-        var touches = event.changedTouches;
-        for (var i = 0; i < touches.length; ++i) {
-          var t = touches[i];
+        var touches = event.changedTouches,
+          i = 0,
+          t = null;
+        for (i = 0; i < touches.length; ++i) {
+          t = touches[i];
 
           if (setAxis) {
             this.setAxis("X" + t.identifier, t.pageX);
@@ -27,18 +29,15 @@ Primrose.Input.Touch = (function () {
           }
 
           this.setButton("FINGER" + t.identifier, stateChange);
-
-          var mask = 1 << t.identifier;
-          if (stateChange) {
-            this.FINGERS |= mask;
-          }
-          else {
-            mask = ~mask;
-            this.FINGERS &= mask;
-          }
         }
+        touches = event.touches;
+
+        var fingerState = 0;
+        for(i = 0; i < touches.length; ++i){
+          fingerState |= 1 << t.identifier;
+        }
+        this.FINGERS = fingerState;
         event.preventDefault();
-        this.update();
       }
 
       DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
@@ -77,14 +76,14 @@ Primrose.Input.Touch = (function () {
 
   }
 
-  Touch.NUM_FINGERS = 10;
+  if(navigator.maxTouchPoints){
+    var axes = ["FINGERS"];
+    for (var i = 0; i < navigator.maxTouchPoints; ++i) {
+      axes.push("X" + i);
+      axes.push("Y" + i);
+    }
 
-  var axes = ["FINGERS"];
-  for (var i = 0; i < Touch.NUM_FINGERS; ++i) {
-    axes.push("X" + i);
-    axes.push("Y" + i);
+    Primrose.InputProcessor.defineAxisProperties(Touch, axes);
   }
-
-  Primrose.InputProcessor.defineAxisProperties(Touch, axes);
   return Touch;
 })();

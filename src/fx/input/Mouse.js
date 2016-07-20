@@ -53,7 +53,6 @@ Primrose.Input.Mouse = (function () {
           this.Z += event.deltaY;
         }
         event.preventDefault();
-        this.update();
       }, false);
     }
 
