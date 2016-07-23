@@ -70,7 +70,13 @@ Primrose.Input.VR = (function () {
         return Promise.reject("No display");
       }
       else {
-        return this.currentDisplay.requestPresent(opts)
+        console.log("requesting", opts);
+        var layers = opts;
+        if(window.VRDisplay && isChrome && isMobile && this.currentDisplay instanceof VRDisplay && opts instanceof Array){
+          layers = layers[0];
+        }
+        return this.currentDisplay.requestPresent(layers)
+          .catch((exp)=>console.error("what happened?", exp))
           .then((elem) => elem || opts[0].source);
       }
     }
@@ -119,6 +125,9 @@ Primrose.Input.VR = (function () {
       if (o) {
         this.quaternion.fromArray(o);
       }
+      else{
+        this.quaternion.set(0, 0, 0, 1);
+      }
 
       if (this.parent.mesh) {
         this.parent.euler.toArray(eulerParts);
@@ -143,6 +152,9 @@ Primrose.Input.VR = (function () {
       var p = this.currentPose && this.currentPose.position;
       if (p) {
         this.position.fromArray(p);
+      }
+      else{
+        this.position.set(0, 0, 0);
       }
 
       if (this.parent.mesh) {
@@ -215,12 +227,13 @@ Primrose.Input.VR = (function () {
       this.currentPose = selectedIndex === 0 ? DEFAULT_POSE : null;
       this.currentDisplayIndex = selectedIndex;
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
-        var params = this.currentDisplay.getEyeParameters("left")
-          .fieldOfView;
-        this.rotationAngle = Math.PI * (params.leftDegrees + params.rightDegrees) / 360;
+        var params = this.currentDisplay.getEyeParameters("left"),
+          fov = params.fieldOfView;
+        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
       }
     }
   }
+
 
   return VR;
 })();

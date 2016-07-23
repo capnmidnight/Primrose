@@ -9,6 +9,13 @@
   padding: 1em;
 }
 
+@media screen
+  and (max-device-width: 750px) {
+  #fullScreenButtonContainer{
+    top: 0;
+  }
+}
+
 html, body, #frontBuffer, progress {
   position: absolute;
   border: 0;
