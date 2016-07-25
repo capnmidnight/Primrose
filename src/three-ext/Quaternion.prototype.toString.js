@@ -19,5 +19,13 @@
       }
       return "{" + parts.join(", ") + "}";
     };
+
+    THREE.Quaternion.prototype.debug = function (label, digits) {
+      var val = this.toString(digits);
+      if (val !== this.lastVal) {
+        this.lastVal = val;
+        console.log(label, val);
+      }
+    };
   }
 })();

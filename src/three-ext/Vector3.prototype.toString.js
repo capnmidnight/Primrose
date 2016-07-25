@@ -26,6 +26,6 @@
         this.lastVal = val;
         console.log(label, val);
       }
-    }
+    };
   }
 })();
