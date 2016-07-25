@@ -102,6 +102,14 @@ Primrose.Input.VR = (function () {
       }
     }
 
+    update(dt){
+      super.update(dt);
+
+      if (this.currentDisplay) {
+        this.currentPose = this.currentDisplay.getPose() || this.currentPose;
+      }
+    }
+
     get showPointer() {
       return super.showPointer && this.hasOrientation;
     }

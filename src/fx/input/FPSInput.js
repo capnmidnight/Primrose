@@ -281,9 +281,6 @@ Primrose.Input.FPSInput = (function () {
       }
 
       this.updatePointer(this.Mouse, dt);
-      if (this.VR.currentDisplay) {
-        this.VR.currentPose = this.VR.currentDisplay.getPose() || this.VR.currentPose;
-      }
       this.updatePointer(this.VR, dt);
       if (this.head.parent.mesh) {
         this.head.parent.mesh.applyMatrix(this.head.stage.matrix);
