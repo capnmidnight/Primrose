@@ -220,6 +220,9 @@ Primrose.Input.FPSInput = (function () {
 
       Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
 
+      this.stage = isMobile ? this.Touch : this.Mouse;
+      this.player = this.VR;
+
       this.ready = Promise.all(this.managers
         .map((mgr) => mgr.ready)
         .filter(identity));

@@ -226,13 +226,13 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var movePlayer = (dt) => {
-        this.player.stage = this.input.VR.stageParameters;
-        if (!this.stage.isOnGround) {
-          this.stage.velocity.y -= this.options.gravity * dt;
-          if (this.stage.position.y < 0) {
-            this.stage.velocity.y = 0;
-            this.stage.position.y = 0;
-            this.stage.isOnGround = true;
+        this.input.player.stage = this.input.VR.stageParameters;
+        if (!this.input.stage.isOnGround) {
+          this.input.stage.velocity.y -= this.options.gravity * dt;
+          if (this.input.stage.position.y < 0) {
+            this.input.stage.velocity.y = 0;
+            this.input.stage.position.y = 0;
+            this.input.stage.isOnGround = true;
           }
         }
 
@@ -264,20 +264,20 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this.movePlayer = (position) => this.stage.position.copy(position);
+      this.movePlayer = (position) => this.input.stage.position.copy(position);
 
       var moveSky = () => {
         if (this.sky) {
-          this.sky.position.copy(this.stage.position);
+          this.sky.position.copy(this.input.stage.position);
         }
       };
 
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-            Math.floor(this.stage.position.x),
+            Math.floor(this.input.stage.position.x),
             0,
-            Math.floor(this.stage.position.z));
+            Math.floor(this.input.stage.position.z));
           this.ground.material.needsUpdate = true;
         }
       };
@@ -290,7 +290,7 @@ Primrose.BrowserEnvironment = (function () {
       var render = () => {
         this.camera.position.set(0, 0, 0);
         this.camera.quaternion.set(0, 0, 0, 1);
-        this.audio.setPlayer(this.player.mesh);
+        this.audio.setPlayer(this.input.player.mesh);
         if (this.input.VR.isPresenting) {
           this.renderer.clear(true, true, true);
 
@@ -786,20 +786,15 @@ Primrose.BrowserEnvironment = (function () {
         this.input.Keyboard.operatingSystem = this.options.os;
         this.input.Keyboard.codePage = this.options.language;
 
-        if (isMobile) {
-          this.input.Touch.makePointer(this.scene);
-        }
-        else {
-          this.input.Mouse.makePointer(this.scene);
-        }
-        this.input.VR.makePointer(this.scene);
-        this.player.add(this.camera);
+        this.input.stage.makePointer(this.scene);
+        this.input.player.makePointer(this.scene);
+        this.input.player.add(this.camera);
 
         if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }
-        this.network = new Primrose.Network.Manager(this.options.serverPath, this.player, this.stage, micReady, this.audio, factories, this.options);
+        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input.player, this.input.stage, micReady, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", addAvatar);
         this.network.addEventListener("removeavatar", removeAvatar);
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
@@ -935,15 +930,6 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.start();
-    }
-
-
-    get stage() {
-      return isMobile ? this.input.Touch : this.input.Mouse;
-    }
-
-    get player() {
-      return this.input.VR;
     }
 
     get inVR() {
