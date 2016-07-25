@@ -484,18 +484,6 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    updateOrientation() {
-      throw new Error(this.name + " updateOrientation not implemented");
-    }
-
-    updateVelocity() {
-      throw new Error(this.name + " updateVelocity not implemented");
-    }
-
-    updatePosition() {
-      throw new Error(this.name + " updatePosition not implemented");
-    }
-
     get lockedToEditor() {
       var head = this;
       while (head) {
