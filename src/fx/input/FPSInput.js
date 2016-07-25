@@ -205,16 +205,15 @@ Primrose.Input.FPSInput = (function () {
           }
 
           var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
-          this.add(mgr)
-          ;mgr.addEventListener("teleport", (position) => this.moveStage(position));
+          this.add(mgr);
+          mgr.addEventListener("teleport", (position) => this.moveStage(position));
 
           if (isMotion) {
             mgr.parent = this.VR;
-            emit.call(this, "motioncontroller", mgr);
+            mgr.makePointer(this.options.scene);
           }
           else {
             this.Keyboard.parent = mgr;
-            emit.call(this, "gamepad", mgr);
           }
         }
       });
@@ -222,7 +221,10 @@ Primrose.Input.FPSInput = (function () {
       Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
 
       this.stage = isMobile ? this.Touch : this.Mouse;
+      this.stage.makePointer(this.options.scene);
+
       this.player = this.VR;
+      this.player.makePointer(this.options.scene);
 
       this.managers.forEach((mgr) => mgr.addEventListener("teleport", (position) => this.moveStage(position)));
 

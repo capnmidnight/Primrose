@@ -427,7 +427,6 @@ Primrose.BrowserEnvironment = (function () {
 
       var newMotionController = (mgr) => {
         motionControllers.push(mgr);
-        mgr.makePointer(this.scene);
       };
 
       this.factories = factories;
@@ -576,7 +575,7 @@ Primrose.BrowserEnvironment = (function () {
       this.nose.name = "Nose";
       this.nose.scale.set(0.5, 1, 1);
 
-      this.scene = this.options.scene || new THREE.Scene();
+      this.options.scene = this.scene = this.options.scene || new THREE.Scene();
       if (this.options.useFog) {
         this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
       }
@@ -773,8 +772,6 @@ Primrose.BrowserEnvironment = (function () {
         this.input.Keyboard.operatingSystem = this.options.os;
         this.input.Keyboard.codePage = this.options.language;
 
-        this.input.stage.makePointer(this.scene);
-        this.input.player.makePointer(this.scene);
         this.input.player.add(this.camera);
 
         if (this.options.serverPath === undefined) {
