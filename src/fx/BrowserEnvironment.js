@@ -712,18 +712,15 @@ Primrose.BrowserEnvironment = (function () {
         }
       }
 
-      window.addEventListener("vrdisplaypresentchange", showHideButtons, false);
-      window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
-      FullScreen.addChangeListener(modifyScreen, false);
-
-      PointerLock.addChangeListener((evt) => {
-        if (!Primrose.Input.Mouse.Lock.isActive) {
-          this.input.VR.cancel();
-          this.input.VR.connect(0);
-          this.input.VR.resetTransforms(
-            this.options.nearPlane,
-            this.options.nearPlane + this.options.drawDistance);
-        }
+      window.addEventListener("vrenter", (evt) => {
+        showHideButtons();
+        modifyScreen();          
+      });
+      window.addEventListener("vrexit", (evt) => {
+        this.input.VR.cancel();
+        this.input.VR.connect(0);
+        showHideButtons();
+        modifyScreen();
       }, false);
 
       window.addEventListener("resize", modifyScreen, false);
