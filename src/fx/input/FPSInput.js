@@ -275,6 +275,11 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
+      for (var i = 0; i < this.managers.length; ++i) {
+        if(this.managers[i].mesh){
+          this.managers[i].updatePointer(dt);
+        }
+      }
     }
 
     get segments() {

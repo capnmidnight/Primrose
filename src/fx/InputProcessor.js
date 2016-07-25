@@ -314,10 +314,6 @@ Primrose.InputProcessor = (function () {
 
           this.fireCommands();
         }
-
-        if (this.mesh) {
-          return this.updatePointer(dt);
-        }
       }
     }
 
