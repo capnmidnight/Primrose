@@ -1,9 +1,9 @@
-Primrose.NetworkManager = (function () {
+Primrose.Network.Manager = (function () {
   "use strict";
 
   pliny.class({
-    parent: "Primrose",
-      name: "NetworkManager",
+    parent: "Primrose.Network",
+      name: "Manager",
       parameters: [{
         name: "serverAddress",
         type: "String",
@@ -12,16 +12,28 @@ Primrose.NetworkManager = (function () {
         name: "player",
         type: "THREE.Object3D",
         description: "The object that represents the player in the scene."
+      }, {
+        name: "microphone",
+        type: "MediaStream",
+        description: "A WebRTC media stream of audio from the local machine."
+      }, {
+        name: "audio",
+        type: "Primrose.Output.Audio3D",
+        description: "The audio manager being used in the current Environment."
+      }, {
+        name: "avatarFactory",
+        type: "Primrose.ModelLoader",
+        description: "Model factory for creating avatars for new remote users."
       }]
   });
-  class NetworkManager {
-    constructor(serverAddress, player, microphone, audio, factories, options) {
+  class Manager extends Primrose.CustomEventEmitter {
+    constructor(serverAddress, player, microphone, audio, avatarFactory, options) {
       this.path = serverAddress;
       this.player = player;
       this.vehicle = player.parent;
       this.microphone = microphone;
       this.audio = audio;
-      this.factories = factories;
+      this.avatarFactory = avatarFactory;
       this.options = options;
       this.lastNetworkUpdate = 0;
       this.oldState = [];
@@ -30,25 +42,13 @@ Primrose.NetworkManager = (function () {
       this.socket = null;
       this.userName = null;
       this.attemptedUserName = null;
-      this.listeners = {
-        authorizationsucceeded: [],
-        authorizationfailed: [],
-        addavatar: [],
-        removeavatar: []
-      };
-    }
-
-    addEventListener(event, thunk) {
-      if (this.listeners[event]) {
-        this.listeners[event].push(thunk);
-      }
     }
 
     update(dt) {
       if (this.socket && this.deviceIndex === 0) {
         this.lastNetworkUpdate += dt;
-        if (this.lastNetworkUpdate >= Primrose.RemoteUser.NETWORK_DT) {
-          this.lastNetworkUpdate -= Primrose.RemoteUser.NETWORK_DT;
+        if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
+          this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
           var newState = [],
             add = (v) => v.toArray(newState, newState.length);
           add(this.vehicle.quaternion);
@@ -85,7 +85,7 @@ Primrose.NetworkManager = (function () {
         this.socket.on("chat", this.receiveChat.bind(this));
         this.socket.on("userState", this.updateUser.bind(this));
         this.socket.on("userLeft", this.removeUser.bind(this));
-        this.socket.on("logoutComplete", emit.bind(this, "loggedout"));
+        this.socket.on("logoutComplete", this.emit.bind(this, "loggedout"));
         this.socket.on("connection_lost", this.lostConnection.bind(this));
         this.socket.on("errorDetail", console.error.bind(console));
       }
@@ -110,13 +110,13 @@ Primrose.NetworkManager = (function () {
 
     addUser(state) {
       var toUserName = state[0],
-        user = new Primrose.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
+        user = new Primrose.Network.RemoteUser(toUserName, this.avatarFactory, this.options.foregroundColor);
       this.users[toUserName] = user;
       this.updateUser(state);
       this.listUserPromise = this.listUserPromise
         .then(() => user.peer(this.socket, this.microphone, this.userName, this.audio))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
-      emit.call(this, "addavatar", user.avatar);
+      this.emit("addavatar", user.avatar);
     }
 
     removeUser(key) {
@@ -125,7 +125,7 @@ Primrose.NetworkManager = (function () {
       if (user) {
         user.unpeer();
         delete this.users[key];
-        emit.call(this, "removeavatar", user.avatar);
+        this.emit("removeavatar", user.avatar);
       }
     }
 
@@ -136,7 +136,7 @@ Primrose.NetworkManager = (function () {
       while (newUsers.length > 0) {
         this.addUser(newUsers.shift());
       }
-      emit.call(this, "authorizationsucceeded");
+      this.emit("authorizationsucceeded");
     }
 
     receiveChat(evt) {
@@ -183,7 +183,7 @@ Primrose.NetworkManager = (function () {
 
     authFailed(verb) {
       return (reason) => {
-        emit.call(this, "authorizationfailed", {
+        this.emit("authorizationfailed", {
           verb,
           reason
         });
@@ -191,5 +191,5 @@ Primrose.NetworkManager = (function () {
     }
   }
 
-  return NetworkManager;
+  return Manager;
 })();

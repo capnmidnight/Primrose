@@ -25,31 +25,6 @@ performs basic conversions from DOM elements to the internal Control format."
 
   pliny.method({
     parent: "Primrose.BaseControl",
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [{
-      name: "evt",
-      type: "String",
-      description: "The name of the event for which we are listening."
-    }, {
-      name: "thunk",
-      type: "Function",
-      description: "The callback to fire when the event occurs."
-    }],
-    examples: [{
-      name: "Add an event listener.",
-      description: "The `addEventListener()` method operates nearly identically\n\
-to the method of the same name on DOM elements.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var txt = new Primrose.Text.Controls.TextBox();\n\
-    txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-    txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-    }]
-  });
-
-  pliny.method({
-    parent: "Primrose.BaseControl",
     name: "focus",
     description: "Sets the focus property of the control, does not change the focus property of any other control.",
     examples: [{
@@ -132,7 +107,7 @@ to a 3D element on-the-fly.\n\
     }]
   });
 
-  class BaseControl {
+  class BaseControl extends Primrose.CustomEventEmitter {
     constructor() {
       pliny.property({
         name: "controlID",
@@ -147,27 +122,11 @@ to a 3D element on-the-fly.\n\
         description: "Flag indicating this control has received focus. You should theoretically only read it."
       });
       this.focused = false;
-
-      pliny.property({
-        name: "listeners",
-        type: "Object",
-        description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl may add such arrays to this object. By default, includes listeners for focus and blur events."
-      });
-      this.listeners = {
-        focus: [],
-        blur: []
-      };
-    }
-
-    addEventListener(event, func) {
-      if (this.listeners[event]) {
-        this.listeners[event].push(func);
-      }
     }
 
     focus() {
       this.focused = true;
-      emit.call(this, "focus", {
+      this.emit("focus", {
         target: this
       });
     }

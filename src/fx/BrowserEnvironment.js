@@ -338,9 +338,9 @@ Primrose.BrowserEnvironment = (function () {
       var wasLocked = false;
       var setOrientationLock = (evt) => {
         var isFullScreen = this.inVR && this.input.VR.isPresenting;
-        try{
+        try {
           if (isFullScreen) {
-            if(!wasLocked){
+            if (!wasLocked) {
               var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
               if (type.indexOf("landscape") === -1) {
                 type = "landscape-primary";
@@ -353,13 +353,13 @@ Primrose.BrowserEnvironment = (function () {
               else if (screen.mozLockOrientation) {
                 wasLocked = screen.mozLockOrientation(type);
               }
-              else{
+              else {
                 wasLocked = false;
               }
             }
           }
           else {
-            if(wasLocked){
+            if (wasLocked) {
               if (screen.orientation && screen.orientation.unlock) {
                 screen.orientation.unlock();
               }
@@ -370,7 +370,7 @@ Primrose.BrowserEnvironment = (function () {
             }
           }
         }
-        catch(exp){
+        catch (exp) {
           console.error(exp);
         }
       };
@@ -729,7 +729,7 @@ Primrose.BrowserEnvironment = (function () {
             }
           }, false);
         }
-        else{
+        else {
           FullScreen.addChangeListener((evt) => {
             if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
               setTimeout(setOrientationLock, 0, evt);
@@ -806,7 +806,7 @@ Primrose.BrowserEnvironment = (function () {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }
-        this.network = new Primrose.NetworkManager(this.options.serverPath, this.player, micReady, this.audio, factories, this.options);
+        this.network = new Primrose.Network.Manager(this.options.serverPath, this.player, micReady, this.audio, factories.avatar, this.options);
         this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
         this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));

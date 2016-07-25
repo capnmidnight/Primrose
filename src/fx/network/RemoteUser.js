@@ -1,8 +1,8 @@
-Primrose.RemoteUser = (function () {
+Primrose.Network.RemoteUser = (function () {
   "use strict";
 
   pliny.class({
-    parent: "Primrose",
+    parent: "Primrose.Network",
       name: "RemoteUser",
       description: "A networked user.",
       parameters: [{
@@ -14,7 +14,7 @@ Primrose.RemoteUser = (function () {
         type: "Primrose.ModelLoader",
         description: "The factory for creating avatars for the user."
       }, {
-        name: "nameMateria",
+        name: "nameMaterial",
         type: "Number",
         description: "The color to use with `textured()` to set as the material for the NAME object that will float above the user's avatar."
       }]
