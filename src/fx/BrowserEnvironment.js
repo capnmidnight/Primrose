@@ -774,7 +774,7 @@ Primrose.BrowserEnvironment = (function () {
         this.renderer.domElement.addEventListener('webglcontextlost', this.stop, false);
         this.renderer.domElement.addEventListener('webglcontextrestored', this.start, false);
 
-        this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options.avatarHeight);
+        this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
         this.input.addEventListener("zero", this.zero, false);
         this.input.addEventListener("teleport", this.movePlayer, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);

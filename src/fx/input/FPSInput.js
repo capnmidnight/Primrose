@@ -7,9 +7,9 @@ Primrose.Input.FPSInput = (function () {
       description: "| [under construction]"
   });
   class FPSInput {
-    constructor(DOMElement, avatarHeight) {
+    constructor(DOMElement, options) {
       DOMElement = DOMElement || window;
-
+      this.options = options;
       this.listeners = {
         zero: [],
         motioncontroller: [],
@@ -135,7 +135,7 @@ Primrose.Input.FPSInput = (function () {
         }
       }));
 
-      this.add(new Primrose.Input.VR(avatarHeight, isMobile ? this.Touch : this.Mouse));
+      this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
