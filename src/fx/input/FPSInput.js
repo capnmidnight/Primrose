@@ -225,8 +225,8 @@ Primrose.Input.FPSInput = (function () {
       this.stage = isMobile ? this.Touch : this.Mouse;
       this.stage.makePointer(this.options.scene);
 
-      this.player = this.VR;
-      this.player.makePointer(this.options.scene);
+      this.head = this.VR;
+      this.head.makePointer(this.options.scene);
 
       this.managers.forEach((mgr) => mgr.addEventListener("teleport", (position) => this.moveStage(position)));
 
@@ -266,7 +266,7 @@ Primrose.Input.FPSInput = (function () {
     }
 
     update(dt) {
-      this.player.updateStage();
+      this.head.updateStage();
       if (!this.stage.isOnGround) {
         this.stage.velocity.y -= this.options.gravity * dt;
         if (this.stage.position.y < 0) {
@@ -285,8 +285,8 @@ Primrose.Input.FPSInput = (function () {
         this.VR.currentPose = this.VR.currentDisplay.getPose() || this.VR.currentPose;
       }
       this.updatePointer(this.VR, dt);
-      if (this.player.parent.mesh) {
-        this.player.parent.mesh.applyMatrix(this.player.stage.matrix);
+      if (this.head.parent.mesh) {
+        this.head.parent.mesh.applyMatrix(this.head.stage.matrix);
       }
     }
 

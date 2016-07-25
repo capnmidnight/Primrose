@@ -278,7 +278,7 @@ Primrose.BrowserEnvironment = (function () {
       var render = () => {
         this.camera.position.set(0, 0, 0);
         this.camera.quaternion.set(0, 0, 0, 1);
-        this.audio.setPlayer(this.input.player.mesh);
+        this.audio.setPlayer(this.input.head.mesh);
         if (this.input.VR.isPresenting) {
           this.renderer.clear(true, true, true);
 
@@ -764,7 +764,7 @@ Primrose.BrowserEnvironment = (function () {
         this.input.Keyboard.operatingSystem = this.options.os;
         this.input.Keyboard.codePage = this.options.language;
 
-        this.input.player.add(this.camera);
+        this.input.head.add(this.camera);
 
         if (this.options.serverPath === undefined) {
           var protocol = location.protocol.replace("http", "ws");

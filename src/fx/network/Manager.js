@@ -52,8 +52,8 @@ Primrose.Network.Manager = (function () {
           var newState = [];
           this.localUser.stage.position.toArray(newState, 0);
           this.localUser.stage.quaternion.toArray(newState, 3);
-          this.localUser.player.mesh.position.toArray(newState, 7);
-          this.localUser.player.mesh.quaternion.toArray(newState, 10);
+          this.localUser.head.mesh.position.toArray(newState, 7);
+          this.localUser.head.mesh.quaternion.toArray(newState, 10);
           for (var i = 0; i < newState.length; ++i) {
             if (this.oldState[i] !== newState[i]) {
               this.socket.emit("userState", newState);
@@ -83,8 +83,8 @@ Primrose.Network.Manager = (function () {
       else if (this.deviceIndex > 0) {
         this.localUser.stage.position.fromArray(state, 1);
         this.localUser.stage.quaternion.fromArray(state, 4);
-        this.localUser.player.position.fromArray(state, 8);
-        this.localUser.player.quaternion.fromArray(state, 11);
+        this.localUser.head.position.fromArray(state, 8);
+        this.localUser.head.quaternion.fromArray(state, 11);
       }
     }
 
