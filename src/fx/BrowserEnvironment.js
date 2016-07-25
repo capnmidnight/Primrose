@@ -254,8 +254,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this.movePlayer = (position) => this.input.stage.position.copy(position);
-
       var moveSky = () => {
         if (this.sky) {
           this.sky.position.copy(this.input.stage.position);
@@ -766,7 +764,6 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
         this.input.addEventListener("zero", this.zero, false);
-        this.input.addEventListener("teleport", this.movePlayer, false);
         this.input.addEventListener("motioncontroller", newMotionController, false);
         this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
         window.addEventListener("paste", this.input.Keyboard.withCurrentControl("readClipboard"), false);

@@ -205,7 +205,8 @@ Primrose.Input.FPSInput = (function () {
           }
 
           var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
-          this.add(mgr);
+          this.add(mgr)
+          ;mgr.addEventListener("teleport", (position) => this.moveStage(position));
 
           if (isMotion) {
             mgr.parent = this.VR;
@@ -223,9 +224,15 @@ Primrose.Input.FPSInput = (function () {
       this.stage = isMobile ? this.Touch : this.Mouse;
       this.player = this.VR;
 
+      this.managers.forEach((mgr) => mgr.addEventListener("teleport", (position) => this.moveStage(position)));
+
       this.ready = Promise.all(this.managers
         .map((mgr) => mgr.ready)
         .filter(identity));
+    }
+
+    moveStage(position){
+      this.stage.position.copy(position);
     }
 
     remove(id) {
