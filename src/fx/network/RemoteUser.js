@@ -22,12 +22,10 @@ Primrose.Network.RemoteUser = (function () {
   class RemoteUser {
 
     constructor(userName, modelFactory, nameMaterial) {
-      this.userName = userName;
-      this.head = null;
-      this.dHeadQuaternion = null;
-      this.dHeadPosition = null;
-      this.avatar = modelFactory.clone();
+      this.time = 0;
 
+      this.userName = userName;
+      this.avatar = modelFactory.clone();
       this.avatar.traverse((obj) => {
         if (obj.name === "AvatarBelt") {
           textured(obj, Primrose.Random.color());
@@ -37,19 +35,51 @@ Primrose.Network.RemoteUser = (function () {
         }
       });
 
-      this.dHeading = 0;
-      this.velocity = new THREE.Vector3();
-      this.time = 0;
-
       this.nameObject = textured(text3D(0.1, userName), nameMaterial);
       var bounds = this.nameObject.geometry.boundingBox.max;
       this.nameObject.rotation.set(Math.PI / 2, 0, 0);
       this.nameObject.position.set(-bounds.x / 2, 0, bounds.y);
-      if (this.head) {
-        this.head.add(this.nameObject);
-        this.dHeadQuaternion = new THREE.Quaternion();
-        this.dHeadPosition = new THREE.Vector3();
-      }
+      this.head.add(this.nameObject);
+
+      this.dStagePosition = new THREE.Vector3();
+      this.dStageQuaternion = new THREE.Quaternion();
+      this.dHeadPosition = new THREE.Vector3();
+      this.dHeadQuaternion = new THREE.Quaternion();
+
+      this.lastStagePosition = new THREE.Vector3();
+      this.lastStageQuaternion = new THREE.Quaternion();
+      this.lastHeadPosition = new THREE.Vector3();
+      this.lastHeadQuaternion = new THREE.Quaternion();
+
+      this.stagePosition = {
+        arr1: [],
+        arr2: [],
+        last: this.lastStagePosition,
+        delta: this.dStagePosition,
+        curr: this.avatar.position
+      };
+      this.stageQuaternion = {
+        arr1: [],
+        arr2: [],
+        last: this.lastStageQuaternion,
+        delta: this.dStageQuaternion,
+        curr: this.avatar.quaternion
+      };
+
+      this.headPosition = {
+        arr1: [],
+        arr2: [],
+        last: this.lastHeadPosition,
+        delta: this.dHeadPosition,
+        curr: this.head.position
+      };
+      this.headQuaternion = {
+        arr1: [],
+        arr2: [],
+        last: this.lastHeadQuaternion,
+        delta: this.dHeadQuaternion,
+        curr: this.head.quaternion
+      };
 
       this.audioChannel = null;
       this.audioElement = null;
@@ -138,6 +168,30 @@ Primrose.Network.RemoteUser = (function () {
       }
     }
 
+    _updateV(v, dt, fade) {
+      v.curr.toArray(v.arr1);
+      v.delta.toArray(v.arr2);
+      for (var i = 0; i < v.arr1.length; ++i) {
+        if (fade) {
+          v.arr2[i] *= RemoteUser.FADE_FACTOR;
+        }
+        v.arr1[i] += v.arr2[i] * dt;
+      }
+
+      v.curr.fromArray(v.arr1);
+      v.delta.fromArray(v.arr2);
+    }
+
+    _predict(v, state, off) {
+      v.delta.fromArray(state, off);
+      v.delta.toArray(v.arr1);
+      v.curr.toArray(v.arr2);
+      for (var i = 0; i < v.arr1.length; ++i) {
+        v.arr1[i] = (v.arr1[i] - v.arr2[i]) * RemoteUser.NETWORK_DT_INV;
+      }
+      v.delta.fromArray(v.arr1);
+    }
+
     update(dt) {
       pliny.method({
         parent: "Pliny.RemoteUser",
@@ -151,30 +205,14 @@ Primrose.Network.RemoteUser = (function () {
       });
 
       this.time += dt;
-      if (this.time >= RemoteUser.NETWORK_DT) {
-        this.velocity.multiplyScalar(0.5);
-        this.dHeading *= 0.5;
-        this.dHeadQuaternion.x *= 0.5;
-        this.dHeadQuaternion.y *= 0.5;
-        this.dHeadQuaternion.z *= 0.5;
-        this.dHeadQuaternion.w *= 0.5;
-        this.dHeadPosition.x *= 0.5;
-        this.dHeadPosition.y *= 0.5;
-        this.dHeadPosition.z *= 0.5;
-      }
-      this.avatar.position.add(this.velocity.clone()
-        .multiplyScalar(dt));
-      this.avatar.rotation.y += this.dHeading * dt;
-      this.head.quaternion.x += this.dHeadQuaternion.x * dt;
-      this.head.quaternion.y += this.dHeadQuaternion.y * dt;
-      this.head.quaternion.z += this.dHeadQuaternion.z * dt;
-      this.head.quaternion.w += this.dHeadQuaternion.w * dt;
-      this.head.position.x += this.dHeadPosition.x * dt;
-      this.head.position.y += this.dHeadPosition.y * dt;
-      this.head.position.z += this.dHeadPosition.z * dt;
+      var fade = this.time >= RemoteUser.NETWORK_DT;
+      this._updateV(this.stagePosition, dt, fade);
+      this._updateV(this.stageQuaternion, dt, fade);
+      this._updateV(this.headPosition, dt, fade);
+      this._updateV(this.headQuaternion, dt, fade);
       if (this.panner) {
         this.panner.setPosition(this.avatar.position.x, this.avatar.position.y, this.avatar.position.z);
-        this.panner.setOrientation(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
+        this.panner.setQuaternion(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
       }
     }
 
@@ -191,33 +229,15 @@ Primrose.Network.RemoteUser = (function () {
       });
 
       this.time = 0;
-
-      this.dHeading = (v[1] - this.avatar.rotation.y) / RemoteUser.NETWORK_DT;
-
-      this.velocity.set(v[2], v[3], v[4]);
-      this.velocity.sub(this.avatar.position);
-      this.velocity.multiplyScalar(1 / RemoteUser.NETWORK_DT);
-
-      this.dHeadQuaternion.set(v[7], v[5], v[6], v[8]);
-      this.dHeadQuaternion.x -= this.head.quaternion.x;
-      this.dHeadQuaternion.y -= this.head.quaternion.y;
-      this.dHeadQuaternion.z -= this.head.quaternion.z;
-      this.dHeadQuaternion.w -= this.head.quaternion.w;
-      this.dHeadQuaternion.x /= RemoteUser.NETWORK_DT;
-      this.dHeadQuaternion.y /= RemoteUser.NETWORK_DT;
-      this.dHeadQuaternion.z /= RemoteUser.NETWORK_DT;
-      this.dHeadQuaternion.w /= RemoteUser.NETWORK_DT;
-
-      this.dHeadPosition.set(v[9], v[11], v[10]);
-      this.dHeadPosition.x -= this.head.position.x;
-      this.dHeadPosition.y -= this.head.position.y;
-      this.dHeadPosition.z -= this.head.position.z;
-      this.dHeadPosition.x /= RemoteUser.NETWORK_DT;
-      this.dHeadPosition.y /= RemoteUser.NETWORK_DT;
-      this.dHeadPosition.z /= RemoteUser.NETWORK_DT;
+      this._predict(this.stagePosition, v, 1);
+      this._predict(this.stageQuaternion, v, 4);
+      this._predict(this.headPosition, v, 8);
+      this._predict(this.headQuaternion, v, 11);
     }
   }
 
+  RemoteUser.FADE_FACTOR = 0.5;
   RemoteUser.NETWORK_DT = 0.10;
+  RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
   return RemoteUser;
 })();

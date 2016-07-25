@@ -227,12 +227,12 @@ Primrose.BrowserEnvironment = (function () {
 
       var movePlayer = (dt) => {
         this.player.stage = this.input.VR.stageParameters;
-        if (!this.vehicle.isOnGround) {
-          this.vehicle.velocity.y -= this.options.gravity * dt;
-          if (this.vehicle.position.y < 0) {
-            this.vehicle.velocity.y = 0;
-            this.vehicle.position.y = 0;
-            this.vehicle.isOnGround = true;
+        if (!this.stage.isOnGround) {
+          this.stage.velocity.y -= this.options.gravity * dt;
+          if (this.stage.position.y < 0) {
+            this.stage.velocity.y = 0;
+            this.stage.position.y = 0;
+            this.stage.isOnGround = true;
           }
         }
 
@@ -264,20 +264,20 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      this.movePlayer = (position) => this.vehicle.position.copy(position);
+      this.movePlayer = (position) => this.stage.position.copy(position);
 
       var moveSky = () => {
         if (this.sky) {
-          this.sky.position.copy(this.vehicle.position);
+          this.sky.position.copy(this.stage.position);
         }
       };
 
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-            Math.floor(this.vehicle.position.x),
+            Math.floor(this.stage.position.x),
             0,
-            Math.floor(this.vehicle.position.z));
+            Math.floor(this.stage.position.z));
           this.ground.material.needsUpdate = true;
         }
       };
@@ -683,9 +683,19 @@ Primrose.BrowserEnvironment = (function () {
           this.input.VR.requestPresent([{
               source: this.renderer.domElement
             }])
-            .catch((exp) => console.error("whaat", exp))
+            .catch((exp) => console.error("whaaat", exp))
             .then(() => this.renderer.domElement.focus());
         }
+      };
+
+      var addAvatar = (user) => {
+        this.scene.add(user.avatar);
+        this.scene.add(user.head);
+      };
+
+      var removeAvatar = (user) => {
+        this.scene.remove(user.avatar);
+        this.scene.remove(user.head);
       };
 
       var showHideButtons = () => {
@@ -725,7 +735,7 @@ Primrose.BrowserEnvironment = (function () {
       window.addEventListener("vrdisplaypresentchange", modifyScreen, false);
       FullScreen.addChangeListener(modifyScreen, false);
 
-      Primrose.Input.Mouse.Lock.addChangeListener((evt) => {
+      PointerLock.addChangeListener((evt) => {
         if (!Primrose.Input.Mouse.Lock.isActive) {
           this.input.VR.cancel();
           this.input.VR.connect(0);
@@ -789,9 +799,9 @@ Primrose.BrowserEnvironment = (function () {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }
-        this.network = new Primrose.Network.Manager(this.options.serverPath, this.player, micReady, this.audio, factories.avatar, this.options);
-        this.network.addEventListener("addavatar", this.scene.add.bind(this.scene));
-        this.network.addEventListener("removeavatar", this.scene.remove.bind(this.scene));
+        this.network = new Primrose.Network.Manager(this.options.serverPath, this.player, this.stage, micReady, this.audio, factories, this.options);
+        this.network.addEventListener("addavatar", addAvatar);
+        this.network.addEventListener("removeavatar", removeAvatar);
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
         this.network.addEventListener("authorizationfailed", emit.bind(this, "authorizationfailed"));
 
@@ -928,7 +938,7 @@ Primrose.BrowserEnvironment = (function () {
     }
 
 
-    get vehicle() {
+    get stage() {
       return isMobile ? this.input.Touch : this.input.Mouse;
     }
 

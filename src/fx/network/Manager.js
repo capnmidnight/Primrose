@@ -9,9 +9,13 @@ Primrose.Network.Manager = (function () {
         type: "String",
         description: "The address of the WebSocket server that manages multiplayer and device fusion connections."
       }, {
-        name: "player",
+        name: "head",
         type: "THREE.Object3D",
-        description: "The object that represents the player in the scene."
+        description: "The object that represents the player's head in the scene."
+      }, {
+        name: "stage",
+        type: "THREE.Object3D",
+        description: "The object that represents the chunk of the scene in which the user sits."
       }, {
         name: "microphone",
         type: "MediaStream",
@@ -21,19 +25,20 @@ Primrose.Network.Manager = (function () {
         type: "Primrose.Output.Audio3D",
         description: "The audio manager being used in the current Environment."
       }, {
-        name: "avatarFactory",
+        name: "factories",
         type: "Primrose.ModelLoader",
         description: "Model factory for creating avatars for new remote users."
       }]
   });
-  class Manager extends Primrose.CustomEventEmitter {
-    constructor(serverAddress, player, microphone, audio, avatarFactory, options) {
+  class Manager extends Primrose.AbstractEventEmitter {
+    constructor(serverAddress, head, stage, microphone, audio, factories, options) {
+      super();
       this.path = serverAddress;
-      this.player = player;
-      this.vehicle = player.parent;
+      this.head = head;
+      this.stage = stage;
       this.microphone = microphone;
       this.audio = audio;
-      this.avatarFactory = avatarFactory;
+      this.factories = factories;
       this.options = options;
       this.lastNetworkUpdate = 0;
       this.oldState = [];
@@ -49,12 +54,11 @@ Primrose.Network.Manager = (function () {
         this.lastNetworkUpdate += dt;
         if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
-          var newState = [],
-            add = (v) => v.toArray(newState, newState.length);
-          add(this.vehicle.quaternion);
-          add(this.vehicle.position);
-          add(this.player.quaternion);
-          add(this.player.position);
+          var newState = [];
+          this.stage.position.toArray(newState, 0);
+          this.stage.quaternion.toArray(newState, 3);
+          this.head.mesh.position.toArray(newState, 7);
+          this.head.mesh.quaternion.toArray(newState, 10);
           for (var i = 0; i < newState.length; ++i) {
             if (this.oldState[i] !== newState[i]) {
               this.socket.emit("userState", newState);
@@ -110,13 +114,13 @@ Primrose.Network.Manager = (function () {
 
     addUser(state) {
       var toUserName = state[0],
-        user = new Primrose.Network.RemoteUser(toUserName, this.avatarFactory, this.options.foregroundColor);
+        user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
       this.users[toUserName] = user;
       this.updateUser(state);
       this.listUserPromise = this.listUserPromise
         .then(() => user.peer(this.socket, this.microphone, this.userName, this.audio))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
-      this.emit("addavatar", user.avatar);
+      this.emit("addavatar", user);
     }
 
     removeUser(key) {
@@ -125,7 +129,7 @@ Primrose.Network.Manager = (function () {
       if (user) {
         user.unpeer();
         delete this.users[key];
-        this.emit("removeavatar", user.avatar);
+        this.emit("removeavatar", user);
       }
     }
 
@@ -155,17 +159,10 @@ Primrose.Network.Manager = (function () {
         }
       }
       else if (this.deviceIndex > 0) {
-        this.player.heading = state[1];
-        this.player.position.x = state[2];
-        this.player.position.y = state[3];
-        this.player.position.z = state[4];
-        this.player.qHead.x = state[5];
-        this.player.qHead.y = state[6];
-        this.player.qHead.z = state[7];
-        this.player.qHead.w = state[8];
-        this.player.pHead.x = state[9];
-        this.player.pHead.y = state[10];
-        this.player.pHead.z = state[11];
+        this.stage.position.fromArray(state, 1);
+        this.stage.quaternion.fromArray(state, 4);
+        this.head.position.fromArray(state, 8);
+        this.head.quaternion.fromArray(state, 11);
       }
     }
 

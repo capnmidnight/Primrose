@@ -107,7 +107,7 @@ to a 3D element on-the-fly.\n\
     }]
   });
 
-  class BaseControl extends Primrose.CustomEventEmitter {
+  class BaseControl extends Primrose.AbstractEventEmitter {
     constructor() {
       pliny.property({
         name: "controlID",

@@ -72,11 +72,11 @@ Primrose.Input.VR = (function () {
       else {
         console.log("requesting", opts);
         var layers = opts;
-        if(window.VRDisplay && isChrome && isMobile && this.currentDisplay instanceof VRDisplay && opts instanceof Array){
+        if (window.VRDisplay && isChrome && isMobile && this.currentDisplay instanceof VRDisplay && opts instanceof Array) {
           layers = layers[0];
         }
         return this.currentDisplay.requestPresent(layers)
-          .catch((exp)=>console.error("what happened?", exp))
+          .catch((exp) => console.error("what happened?", exp))
           .then((elem) => elem || opts[0].source);
       }
     }
@@ -125,7 +125,7 @@ Primrose.Input.VR = (function () {
       if (o) {
         this.quaternion.fromArray(o);
       }
-      else{
+      else {
         this.quaternion.set(0, 0, 0, 1);
       }
 
@@ -153,7 +153,7 @@ Primrose.Input.VR = (function () {
       if (p) {
         this.position.fromArray(p);
       }
-      else{
+      else {
         this.position.set(0, 0, 0);
       }
 
