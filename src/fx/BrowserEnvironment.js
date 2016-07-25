@@ -421,13 +421,7 @@ Primrose.BrowserEnvironment = (function () {
           video: false
         })
         .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
-        .catch(console.warn.bind(console, "Can't get audio")),
-        motionControllers = [],
-        gamepads = [];
-
-      var newMotionController = (mgr) => {
-        motionControllers.push(mgr);
-      };
+        .catch(console.warn.bind(console, "Can't get audio"));
 
       this.factories = factories;
 
@@ -763,8 +757,6 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input = new Primrose.Input.FPSInput(this.renderer.domElement, this.options);
         this.input.addEventListener("zero", this.zero, false);
-        this.input.addEventListener("motioncontroller", newMotionController, false);
-        this.input.addEventListener("gamepad", gamepads.push.bind(gamepads), false);
         window.addEventListener("paste", this.input.Keyboard.withCurrentControl("readClipboard"), false);
         window.addEventListener("wheel", this.input.Keyboard.withCurrentControl("readWheel"), false);
 
