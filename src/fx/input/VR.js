@@ -46,7 +46,7 @@ Primrose.Input.VR = (function () {
         });
     }
 
-    get stageParameters() {
+    updateStage() {
       let x = 0,
         z = 0;
       var stage = this.currentDisplay && this.currentDisplay.stageParameters;
@@ -58,7 +58,7 @@ Primrose.Input.VR = (function () {
       else {
         this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
       }
-      return {
+      this.stage = {
         matrix: this.movePlayer,
         sizeX: x,
         sizeZ: z
