@@ -20,9 +20,9 @@
       return "<" + parts.join(", ") + ">";
     };
 
-    THREE.Vector3.prototype.debug = function(label, digits){
+    THREE.Vector3.prototype.debug = function (label, digits) {
       var val = this.toString(digits);
-      if(val !== this.lastVal){
+      if (val !== this.lastVal) {
         this.lastVal = val;
         console.log(label, val);
       }

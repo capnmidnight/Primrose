@@ -110,16 +110,6 @@ Primrose.Input.VR = (function () {
       super.showPointer = v;
     }
 
-    updatePointer(dt) {
-      if (this.currentDisplay) {
-        this.currentPose = this.currentDisplay.getPose() || this.currentPose;
-      }
-      super.updatePointer(dt);
-      if (this.parent.mesh) {
-        this.parent.mesh.applyMatrix(this.stage.matrix);
-      }
-    }
-
     updateOrientation(excludePitch) {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {

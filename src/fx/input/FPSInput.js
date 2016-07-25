@@ -1,6 +1,8 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
+  const VELOCITY = new THREE.Vector3();
+
   pliny.class({
     parent: "Primrose.Input",
       name: "FPSInput",
@@ -233,7 +235,7 @@ Primrose.Input.FPSInput = (function () {
         .filter(identity));
     }
 
-    moveStage(position){
+    moveStage(position) {
       this.stage.position.copy(position);
     }
 
@@ -277,11 +279,37 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
-      for (var i = 0; i < this.managers.length; ++i) {
-        if(this.managers[i].mesh){
-          this.managers[i].updatePointer(dt);
-        }
+
+      this.updatePointer(this.Mouse, dt);
+      if (this.VR.currentDisplay) {
+        this.VR.currentPose = this.VR.currentDisplay.getPose() || this.VR.currentPose;
       }
+      this.updatePointer(this.VR, dt);
+      if (this.player.parent.mesh) {
+        this.player.parent.mesh.applyMatrix(this.player.stage.matrix);
+      }
+    }
+
+    updatePointer(mgr, dt) {
+      mgr.updateOrientation(true);
+      mgr.updateVelocity();
+
+      VELOCITY
+        .copy(mgr.velocity)
+        .multiplyScalar(dt)
+        .applyQuaternion(mgr.quaternion);
+
+      mgr.updateOrientation(false);
+
+      mgr.updatePosition();
+      mgr.position.add(VELOCITY);
+      mgr.mesh.position.copy(mgr.position);
+      if (mgr.stage) {
+        mgr.mesh.position.applyMatrix4(mgr.stage.matrix);
+      }
+
+      mgr.mesh.quaternion.copy(mgr.quaternion);
+      mgr.mesh.updateMatrixWorld();
     }
 
     get segments() {

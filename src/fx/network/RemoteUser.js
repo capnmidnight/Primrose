@@ -235,7 +235,7 @@ Primrose.Network.RemoteUser = (function () {
       this._predict(this.headQuaternion, v, 11);
     }
 
-    toString(digits){
+    toString(digits) {
       return this.stagePosition.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
     }
   }

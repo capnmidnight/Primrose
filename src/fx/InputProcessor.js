@@ -373,28 +373,6 @@ Primrose.InputProcessor = (function () {
       scene.add(this.stageGrid);
     }
 
-    updatePointer(dt) {
-      this.updateOrientation(true);
-      this.updateVelocity();
-
-      moveTo
-        .copy(this.velocity)
-        .multiplyScalar(dt)
-        .applyQuaternion(this.quaternion);
-
-      this.updateOrientation(false);
-
-      this.updatePosition();
-      this.position.add(moveTo);
-      this.mesh.position.copy(this.position);
-      if (this.stage) {
-        this.mesh.position.applyMatrix4(this.stage.matrix);
-      }
-
-      this.mesh.quaternion.copy(this.quaternion);
-      this.mesh.updateMatrixWorld();
-    }
-
     get segment() {
       if (this.showPointer) {
         FORWARD.set(0, 0, -1)
