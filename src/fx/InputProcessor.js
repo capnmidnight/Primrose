@@ -391,8 +391,8 @@ Primrose.InputProcessor = (function () {
         .applyQuaternion(this.quaternion);
 
       this.updateOrientation(false);
-      this.updatePosition();
 
+      this.updatePosition();
       this.position.add(moveTo);
       this.mesh.position.copy(this.position);
       if (this.stage) {

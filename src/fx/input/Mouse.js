@@ -26,7 +26,7 @@ Primrose.Input.Mouse = (function () {
 
       DOMElement.addEventListener("mousemove", (event) => {
         this.BUTTONS = event.buttons << 10;
-        if (Mouse.Lock.isActive) {
+        if (PointerLock.isActive) {
           var mx = event.movementX,
             my = event.movementY;
 
@@ -95,106 +95,6 @@ Primrose.Input.Mouse = (function () {
       this.Y += dy;
     }
   }
-
-
-  var elementName = findProperty(document, ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"]),
-    changeEventName = findProperty(document, ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"]),
-    errorEventName = findProperty(document, ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"]),
-    requestMethodName = findProperty(document.documentElement, ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"]),
-    exitMethodName = findProperty(document, ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]),
-    changeTimeout = null;
-
-  changeEventName = changeEventName && changeEventName.substring(2);
-  errorEventName = errorEventName && errorEventName.substring(2);
-
-  Mouse.Lock = {
-    addChangeListener: (thunk, bubbles) => document.addEventListener(changeEventName, thunk, bubbles),
-    removeChangeListener: (thunk) => document.removeEventListener(changeEventName, thunk),
-    addErrorListener: (thunk, bubbles) => document.addEventListener(errorEventName, thunk, bubbles),
-    removeErrorListener: (thunk) => document.removeEventListener(errorEventName, thunk),
-    withChange: (act) => {
-      return new Promise((resolve, reject) => {
-        var onPointerLock,
-          onPointerLockError,
-          stop = () => {
-            if (changeTimeout !== null) {
-              clearTimeout(changeTimeout);
-              changeTimeout = null;
-            }
-          },
-          tearDown = () => {
-            stop();
-            Mouse.Lock.removeChangeListener(onPointerLock);
-            Mouse.Lock.removeErrorListener(onPointerLockError);
-          };
-
-        onPointerLock = () => {
-          setTimeout(tearDown);
-          resolve(Mouse.Lock.element);
-        };
-
-        onPointerLockError = (evt) => {
-          setTimeout(tearDown);
-          reject(evt);
-        };
-
-        Mouse.Lock.addChangeListener(onPointerLock, false);
-        Mouse.Lock.addErrorListener(onPointerLockError, false);
-
-        if (act()) {
-          tearDown();
-          resolve();
-        }
-        else {
-          // Timeout wating on the pointer lock to happen, for systems like iOS that
-          // don't properly support it, even though they say they do.
-          stop();
-          changeTimeout = setTimeout(() => {
-            tearDown();
-            reject("Pointer Lock state did not change in allotted time");
-          }, 1000);
-        }
-      });
-    },
-    request: (elem) => {
-      return Mouse.Lock.withChange(() => {
-        if (!requestMethodName) {
-          console.error("No Pointer Lock API support.");
-          throw new Error("No Pointer Lock API support.");
-        }
-        else if (Mouse.Lock.isActive) {
-          return true;
-        }
-        else {
-          elem[requestMethodName]();
-        }
-      });
-    },
-    exit: () => {
-      return Mouse.Lock.withChange(() => {
-        if (!exitMethodName) {
-          console.error("No Pointer Lock API support.");
-          throw new Error("No Pointer Lock API support.");
-        }
-        else if (!Mouse.Lock.isActive) {
-          return true;
-        }
-        else {
-          document[exitMethodName]();
-        }
-      });
-    }
-  };
-
-  Object.defineProperties(Mouse.Lock, {
-    element: {
-      get: () => document[elementName]
-    },
-    isActive: {
-      get: () => !!Mouse.Lock.element
-    }
-  });
-
 
   Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);
 
