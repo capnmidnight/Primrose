@@ -770,7 +770,7 @@ Primrose.BrowserEnvironment = (function () {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }
-        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input.player, this.input.stage, micReady, this.audio, factories, this.options);
+        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input, micReady, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", addAvatar);
         this.network.addEventListener("removeavatar", removeAvatar);
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));

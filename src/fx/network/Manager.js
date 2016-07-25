@@ -9,13 +9,9 @@ Primrose.Network.Manager = (function () {
         type: "String",
         description: "The address of the WebSocket server that manages multiplayer and device fusion connections."
       }, {
-        name: "head",
-        type: "THREE.Object3D",
-        description: "The object that represents the player's head in the scene."
-      }, {
-        name: "stage",
-        type: "THREE.Object3D",
-        description: "The object that represents the chunk of the scene in which the user sits."
+        name: "localUser",
+        type: "Primrose.Input.FPSInput",
+        description: "The object that represents the player's location in the scene."
       }, {
         name: "microphone",
         type: "MediaStream",
@@ -31,11 +27,10 @@ Primrose.Network.Manager = (function () {
       }]
   });
   class Manager extends Primrose.AbstractEventEmitter {
-    constructor(serverAddress, head, stage, microphone, audio, factories, options) {
+    constructor(serverAddress, localUser, microphone, audio, factories, options) {
       super();
       this.path = serverAddress;
-      this.head = head;
-      this.stage = stage;
+      this.localUser = localUser;
       this.microphone = microphone;
       this.audio = audio;
       this.factories = factories;
@@ -55,10 +50,10 @@ Primrose.Network.Manager = (function () {
         if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
           var newState = [];
-          this.stage.position.toArray(newState, 0);
-          this.stage.quaternion.toArray(newState, 3);
-          this.head.mesh.position.toArray(newState, 7);
-          this.head.mesh.quaternion.toArray(newState, 10);
+          this.localUser.stage.position.toArray(newState, 0);
+          this.localUser.stage.quaternion.toArray(newState, 3);
+          this.localUser.player.mesh.position.toArray(newState, 7);
+          this.localUser.player.mesh.quaternion.toArray(newState, 10);
           for (var i = 0; i < newState.length; ++i) {
             if (this.oldState[i] !== newState[i]) {
               this.socket.emit("userState", newState);
@@ -159,10 +154,10 @@ Primrose.Network.Manager = (function () {
         }
       }
       else if (this.deviceIndex > 0) {
-        this.stage.position.fromArray(state, 1);
-        this.stage.quaternion.fromArray(state, 4);
-        this.head.position.fromArray(state, 8);
-        this.head.quaternion.fromArray(state, 11);
+        this.localUser.stage.position.fromArray(state, 1);
+        this.localUser.stage.quaternion.fromArray(state, 4);
+        this.localUser.player.position.fromArray(state, 8);
+        this.localUser.player.quaternion.fromArray(state, 11);
       }
     }
 
