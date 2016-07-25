@@ -25,8 +25,8 @@ Primrose.Network.RemoteUser = (function () {
       this.time = 0;
 
       this.userName = userName;
-      this.avatar = modelFactory.clone();
-      this.avatar.traverse((obj) => {
+      this.stage = modelFactory.clone();
+      this.stage.traverse((obj) => {
         if (obj.name === "AvatarBelt") {
           textured(obj, Primrose.Random.color());
         }
@@ -56,14 +56,14 @@ Primrose.Network.RemoteUser = (function () {
         arr2: [],
         last: this.lastStagePosition,
         delta: this.dStagePosition,
-        curr: this.avatar.position
+        curr: this.stage.position
       };
       this.stageQuaternion = {
         arr1: [],
         arr2: [],
         last: this.lastStageQuaternion,
         delta: this.dStageQuaternion,
-        curr: this.avatar.quaternion
+        curr: this.stage.quaternion
       };
 
       this.headPosition = {
@@ -211,8 +211,8 @@ Primrose.Network.RemoteUser = (function () {
       this._updateV(this.headPosition, dt, fade);
       this._updateV(this.headQuaternion, dt, fade);
       if (this.panner) {
-        this.panner.setPosition(this.avatar.position.x, this.avatar.position.y, this.avatar.position.z);
-        this.panner.setQuaternion(Math.sin(this.avatar.rotation.y), 0, Math.cos(this.avatar.rotation.y));
+        this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
+        this.panner.setQuaternion(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
       }
     }
 

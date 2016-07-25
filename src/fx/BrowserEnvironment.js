@@ -670,12 +670,12 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var addAvatar = (user) => {
-        this.scene.add(user.avatar);
+        this.scene.add(user.stage);
         this.scene.add(user.head);
       };
 
       var removeAvatar = (user) => {
-        this.scene.remove(user.avatar);
+        this.scene.remove(user.stage);
         this.scene.remove(user.head);
       };
 
