@@ -70,7 +70,6 @@ Primrose.InputProcessor = (function () {
       this.color = null;
       this.minorColor = null;
       this.inVR = false;
-      this.lastT = performance.now();
       this._showPointer = false;
       this._currentControl = null;
 
@@ -186,11 +185,8 @@ Primrose.InputProcessor = (function () {
       return output;
     }
 
-    update() {
+    update(dt) {
       if (this.enabled) {
-        var t = performance.now(),
-          dt = (t - this.lastT) / 1000;
-        this.lastT = t;
         if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
           for (var name in this.commands) {
             var cmd = this.commands[name];

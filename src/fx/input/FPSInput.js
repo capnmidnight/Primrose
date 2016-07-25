@@ -273,7 +273,7 @@ Primrose.Input.FPSInput = (function () {
       }
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].update();
+        this.managers[i].update(dt);
       }
     }
 
