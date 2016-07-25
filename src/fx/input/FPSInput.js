@@ -280,7 +280,31 @@ Primrose.Input.FPSInput = (function () {
         this.managers[i].update(dt);
       }
 
+
+      var head = this.stage,
+        p = 0,
+        h = 0,
+        dx = 0,
+        dz = 0;
+      while (head) {
+        p += head.getValue("pitch");
+        h += head.getValue("heading");
+        dx += head.getValue("strafe");
+        dz += head.getValue("drive");
+        head = head.parent;
+      }
+
+      this.stage.euler.set(0, h, 0, "YXZ");
+      this.stage.quaternion.setFromEuler(this.stage.euler);
+      this.stage.velocity.x = dx;
+      this.stage.velocity.z = dz;
+      VELOCITY
+        .copy(this.stage.velocity)
+        .multiplyScalar(dt)
+        .applyQuaternion(this.stage.quaternion);
       this.updatePointer(this.Mouse, dt);
+
+      this.head.updateOrientation(true);
       this.updatePointer(this.VR, dt);
       if (this.head.parent.mesh) {
         this.head.parent.mesh.applyMatrix(this.head.stage.matrix);
@@ -288,15 +312,7 @@ Primrose.Input.FPSInput = (function () {
     }
 
     updatePointer(mgr, dt) {
-      mgr.updateOrientation(true);
-      mgr.updateVelocity();
-
-      VELOCITY
-        .copy(mgr.velocity)
-        .multiplyScalar(dt)
-        .applyQuaternion(mgr.quaternion);
-
-      mgr.updateOrientation(false);
+      mgr.updateOrientation();
 
       mgr.updatePosition();
       mgr.position.add(VELOCITY);

@@ -58,21 +58,7 @@ Primrose.Input.Mouse = (function () {
 
     updatePosition() {}
 
-    updateVelocity() {
-      var head = this,
-        x = 0,
-        z = 0;
-      while (head) {
-        x += head.getValue("strafe");
-        z += head.getValue("drive");
-        head = head.parent;
-      }
-
-      this.velocity.x = x;
-      this.velocity.z = z;
-    }
-
-    updateOrientation(excludePitch) {
+    updateOrientation() {
       var head = this,
         p = 0,
         h = 0;
@@ -81,7 +67,7 @@ Primrose.Input.Mouse = (function () {
         h += head.getValue("heading");
         head = head.parent;
       }
-      this.euler.set(excludePitch ? 0 : p, h, 0, "YXZ");
+      this.euler.set(p, h, 0, "YXZ");
       this.quaternion.setFromEuler(this.euler);
     }
 

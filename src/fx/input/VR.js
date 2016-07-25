@@ -118,7 +118,7 @@ Primrose.Input.VR = (function () {
       super.showPointer = v;
     }
 
-    updateOrientation(excludePitch) {
+    updateOrientation() {
       var o = this.currentPose && this.currentPose.orientation;
       if (o) {
         this.quaternion.fromArray(o);
@@ -160,10 +160,6 @@ Primrose.Input.VR = (function () {
         this.position.x += this.parent.position.x;
         this.position.z += this.parent.position.z;
       }
-    }
-
-    updateVelocity() {
-
     }
 
     resolvePicking(currentHits, lastHits, objects) {
