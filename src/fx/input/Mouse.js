@@ -56,21 +56,6 @@ Primrose.Input.Mouse = (function () {
       }, false);
     }
 
-    updatePosition() {}
-
-    updateOrientation() {
-      var head = this,
-        p = 0,
-        h = 0;
-      while (head) {
-        p += head.getValue("pitch");
-        h += head.getValue("heading");
-        head = head.parent;
-      }
-      this.euler.set(p, h, 0, "YXZ");
-      this.quaternion.setFromEuler(this.euler);
-    }
-
     setLocation(x, y) {
       this.X = x;
       this.Y = y;

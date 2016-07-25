@@ -60,17 +60,13 @@ Primrose.InputProcessor = (function () {
         teleport: []
       }
 
-      this.position = null;
-      this.velocity = null;
       this.euler = null;
       this.mesh = null;
       this.disk = null;
       this.stageGrid = null;
-      this._stage = null;
       this.color = null;
       this.minorColor = null;
       this.inVR = false;
-      this._showPointer = false;
       this._currentControl = null;
 
       var readMetaKeys = (event) => {
@@ -329,21 +325,10 @@ Primrose.InputProcessor = (function () {
       return this._currentControl;
     }
 
-    get showPointer() {
-      return this._showPointer;
-    }
-
-    set showPointer(v) {
-      this._showPointer = v;
-    }
-
     makePointer(scene, color = 0xff0000, minorColor = 0x7f0000) {
       this.color = color;
       this.minorColor = minorColor;
-      this.showPointer = true;
-      this.position = new THREE.Vector3();
       this.velocity = new THREE.Vector3();
-      this.quaternion = new THREE.Quaternion();
       this.euler = new THREE.Euler();
       this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
         emissive: this.minorColor
@@ -374,16 +359,16 @@ Primrose.InputProcessor = (function () {
     }
 
     get segment() {
-      if (this.showPointer) {
+      if (this.mesh) {
         FORWARD.set(0, 0, -1)
-          .applyQuaternion(this.quaternion)
+          .applyQuaternion(this.mesh.quaternion)
           .add(this.mesh.position);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
     }
 
     resolvePicking(currentHits, lastHits, objects) {
-      if (this.showPointer) {
+      if (this.mesh) {
         var buttons = 0,
           dButtons = 0,
           currentHit = currentHits[this.name],
@@ -404,7 +389,7 @@ Primrose.InputProcessor = (function () {
 
         // reset the mesh color to the base value
         this.groundMesh.visible = false;
-        this.mesh.visible = this.showPointer;
+        this.mesh.visible = true;
         textured(this.mesh, this.color, {
           emissive: this.minorColor
         });
@@ -419,7 +404,7 @@ Primrose.InputProcessor = (function () {
           control = object && (object.button || object.surface);
 
           moveTo.fromArray(fp)
-            .sub(this.position);
+            .sub(this.mesh.position);
 
           this.groundMesh.visible = isGround;
           if (isGround) {
@@ -436,7 +421,7 @@ Primrose.InputProcessor = (function () {
               });
             }
             this.groundMesh.position
-              .copy(this.position)
+              .copy(this.mesh.position)
               .add(moveTo);
           }
           else {
@@ -499,10 +484,10 @@ Primrose.InputProcessor = (function () {
       for (var i = 0; this.enabled && i < SETTINGS_TO_ZERO.length; ++i) {
         this.setValue(SETTINGS_TO_ZERO[i], 0);
       }
-      if (this.showPointer) {
-        this.position.set(0, 0, 0);
+      if (this.mesh) {
         this.velocity.set(0, 0, 0);
-        this.quaternion.set(0, 0, 0, 1);
+        this.mesh.position.set(0, 0, 0);
+        this.mesh.quaternion.set(0, 0, 0, 1);
         this.isOnGround = false;
       }
     }
@@ -513,34 +498,6 @@ Primrose.InputProcessor = (function () {
 
     get matrixWorld() {
       return this.mesh.matrixWorld;
-    }
-
-    get stage() {
-      return this._stage;
-    }
-
-    set stage(s) {
-      if (!this._stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
-        this._stage = s;
-        if (this.stage.sizeX * this.stage.sizeZ === 0) {
-          this.groundMesh = this.disk;
-          this.stageGrid.visible = false;
-          this.disk.visible = this.showPointer;
-        }
-        else {
-          var scene = this.stageGrid.parent;
-          scene.remove(this.stageGrid);
-          this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
-            wireframe: true,
-            emissive: 0x003f00
-          });
-          this.stageGrid.geometry.computeBoundingBox();
-          scene.add(this.stageGrid);
-          this.groundMesh = this.stageGrid;
-          this.stageGrid.visible = this.showPointer;
-          this.disk.visible = false;
-        }
-      }
     }
 
     fireCommands() {

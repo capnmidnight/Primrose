@@ -5,8 +5,6 @@ Primrose.Input.VR = (function () {
       position: [0, 0, 0],
       orientation: [0, 0, 0, 1]
     },
-    eulerParts = [],
-    swapQuaternion = new THREE.Quaternion(),
     GAZE_LENGTH = 3000;
   pliny.class({
     parent: "Primrose.Input",
@@ -36,6 +34,7 @@ Primrose.Input.VR = (function () {
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
       this.parentHeading = new THREE.Quaternion();
+      this.stage = null;
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()
@@ -58,10 +57,33 @@ Primrose.Input.VR = (function () {
       else {
         this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
       }
-      this.stage = {
+
+      var s = {
         matrix: this.movePlayer,
         sizeX: x,
         sizeZ: z
+      };
+
+      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+        this.stage = s;
+        if (this.stage.sizeX * this.stage.sizeZ === 0) {
+          this.groundMesh = this.disk;
+          this.stageGrid.visible = false;
+          this.disk.visible = this.hasOrientation;
+        }
+        else {
+          var scene = this.stageGrid.parent;
+          scene.remove(this.stageGrid);
+          this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
+            wireframe: true,
+            emissive: 0x003f00
+          });
+          this.stageGrid.geometry.computeBoundingBox();
+          scene.add(this.stageGrid);
+          this.groundMesh = this.stageGrid;
+          this.stageGrid.visible = this.hasOrientation;
+          this.disk.visible = false;
+        }
       }
     }
 
@@ -102,63 +124,11 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    update(dt){
+    update(dt) {
       super.update(dt);
 
       if (this.currentDisplay) {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;
-      }
-    }
-
-    get showPointer() {
-      return super.showPointer && this.hasOrientation;
-    }
-
-    set showPointer(v) {
-      super.showPointer = v;
-    }
-
-    updateOrientation() {
-      var o = this.currentPose && this.currentPose.orientation;
-      if (o) {
-        this.quaternion.fromArray(o);
-      }
-      else {
-        this.quaternion.set(0, 0, 0, 1);
-      }
-
-      if (this.parent.mesh) {
-        this.parent.euler.toArray(eulerParts);
-        eulerParts[2] = 0;
-        if (this.inVR) {
-          eulerParts[0] = 0;
-          var da = eulerParts[1] - this.euler.y;
-          eulerParts[1] = this.euler.y;
-          if (Math.abs(da) > this.rotationAngle) {
-            eulerParts[1] += Math.sign(da) * this.rotationAngle;
-          }
-        }
-        this.euler.fromArray(eulerParts);
-        this.parentHeading.setFromEuler(this.euler);
-        swapQuaternion.copy(this.quaternion);
-        this.quaternion.copy(this.parentHeading)
-          .multiply(swapQuaternion);
-      }
-    }
-
-    updatePosition() {
-      var p = this.currentPose && this.currentPose.position;
-      if (p) {
-        this.position.fromArray(p);
-      }
-      else {
-        this.position.set(0, 0, 0);
-      }
-
-      if (this.parent.mesh) {
-        this.position.applyQuaternion(this.parentHeading);
-        this.position.x += this.parent.position.x;
-        this.position.z += this.parent.position.z;
       }
     }
 

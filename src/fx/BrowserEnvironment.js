@@ -256,16 +256,16 @@ Primrose.BrowserEnvironment = (function () {
 
       var moveSky = () => {
         if (this.sky) {
-          this.sky.position.copy(this.input.stage.position);
+          this.sky.position.copy(this.input.stage.mesh.position);
         }
       };
 
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-            Math.floor(this.input.stage.position.x),
+            Math.floor(this.input.stage.mesh.position.x),
             0,
-            Math.floor(this.input.stage.position.z));
+            Math.floor(this.input.stage.mesh.position.z));
           this.ground.material.needsUpdate = true;
         }
       };

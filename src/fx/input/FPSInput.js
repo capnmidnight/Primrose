@@ -1,7 +1,9 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
-  const VELOCITY = new THREE.Vector3();
+  const VELOCITY = new THREE.Vector3(),
+    swapQuaternion = new THREE.Quaternion(),
+    eulerParts = [];
 
   pliny.class({
     parent: "Primrose.Input",
@@ -19,6 +21,7 @@ Primrose.Input.FPSInput = (function () {
       };
 
       this.managers = [];
+      this.inVR = false;
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -236,7 +239,7 @@ Primrose.Input.FPSInput = (function () {
     }
 
     moveStage(position) {
-      this.stage.position.copy(position);
+      this.stage.mesh.position.copy(position);
     }
 
     remove(id) {
@@ -257,6 +260,7 @@ Primrose.Input.FPSInput = (function () {
       }
       this.managers.push(mgr);
       this[mgr.name] = mgr;
+      mgr.inVR = this.inVR;
     }
 
     zero() {
@@ -266,63 +270,82 @@ Primrose.Input.FPSInput = (function () {
     }
 
     update(dt) {
-      this.head.updateStage();
-      if (!this.stage.isOnGround) {
-        this.stage.velocity.y -= this.options.gravity * dt;
-        if (this.stage.position.y < 0) {
-          this.stage.velocity.y = 0;
-          this.stage.position.y = 0;
-          this.stage.isOnGround = true;
-        }
-      }
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
 
 
+      // get the linear movement from the mouse/keyboard/gamepad
       var head = this.stage,
-        p = 0,
-        h = 0,
+        pitch = 0,
+        heading = 0,
         dx = 0,
         dz = 0;
       while (head) {
-        p += head.getValue("pitch");
-        h += head.getValue("heading");
+        pitch += head.getValue("pitch");
+        heading += head.getValue("heading");
         dx += head.getValue("strafe");
         dz += head.getValue("drive");
         head = head.parent;
       }
 
-      this.stage.euler.set(0, h, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(this.stage.euler);
+      // move stage according to heading and thrust
+      this.stage.euler.set(0, heading, 0, "YXZ");
+      this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
       this.stage.velocity.x = dx;
       this.stage.velocity.z = dz;
-      VELOCITY
+      if (!this.stage.isOnGround) {
+        this.stage.velocity.y -= this.options.gravity * dt;
+        if (this.stage.mesh.position.y < 0) {
+          this.stage.velocity.y = 0;
+          this.stage.mesh.position.y = 0;
+          this.stage.isOnGround = true;
+        }
+      }
+      this.stage.mesh.position.add(VELOCITY
         .copy(this.stage.velocity)
         .multiplyScalar(dt)
-        .applyQuaternion(this.stage.quaternion);
-      this.updatePointer(this.Mouse, dt);
+        .applyQuaternion(this.stage.mesh.quaternion));
 
-      this.head.updateOrientation(true);
-      this.updatePointer(this.VR, dt);
-      if (this.head.parent.mesh) {
-        this.head.parent.mesh.applyMatrix(this.head.stage.matrix);
+      var orient = this.head.currentPose && this.head.currentPose.orientation,
+        pos = this.head.currentPose && this.head.currentPose.position;
+      if (orient) {
+        this.head.mesh.quaternion.fromArray(orient);
       }
-    }
-
-    updatePointer(mgr, dt) {
-      mgr.updateOrientation();
-
-      mgr.updatePosition();
-      mgr.position.add(VELOCITY);
-      mgr.mesh.position.copy(mgr.position);
-      if (mgr.stage) {
-        mgr.mesh.position.applyMatrix4(mgr.stage.matrix);
+      else {
+        this.head.mesh.quaternion.set(0, 0, 0, 1);
+      }
+      if (pos) {
+        this.head.mesh.position.fromArray(pos);
+      }
+      else {
+        this.head.mesh.position.set(0, 0, 0);
       }
 
-      mgr.mesh.quaternion.copy(mgr.quaternion);
-      mgr.mesh.updateMatrixWorld();
+      this.head.mesh.position.applyQuaternion(this.head.mesh.quaternion);
+      this.head.mesh.position.x += this.stage.mesh.position.x;
+      this.head.mesh.position.z += this.stage.mesh.position.z;
+
+      if (this.inVR) {
+        swapQuaternion.copy(this.head.mesh.quaternion);
+        this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
+          .multiply(swapQuaternion);
+      }
+
+      this.stage.euler.set(pitch, heading, 0, "YXZ");
+      this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
+
+
+      if (!this.inVR) {
+        swapQuaternion.copy(this.head.mesh.quaternion);
+        this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
+          .multiply(swapQuaternion);
+      }
+      this.stage.mesh.updateMatrix();
+      this.head.mesh.updateMatrix();
+      this.head.updateStage();
+      this.head.mesh.applyMatrix(this.head.stage.matrix);
     }
 
     get segments() {
@@ -368,9 +391,14 @@ Primrose.Input.FPSInput = (function () {
     }
 
     set inVR(v) {
+      this._inVR = v;
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].inVR = v;
       }
+    }
+
+    get inVR() {
+      return this._inVR;
     }
   }
 
