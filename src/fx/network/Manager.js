@@ -69,6 +69,25 @@ Primrose.Network.Manager = (function () {
       }
     }
 
+    updateUser(state) {
+      var key = state[0];
+      if (key !== this.userName) {
+        var user = this.users[key];
+        if (user) {
+          user.state = state;
+        }
+        else {
+          console.error("Unknown user", key);
+        }
+      }
+      else if (this.deviceIndex > 0) {
+        this.localUser.stage.position.fromArray(state, 1);
+        this.localUser.stage.quaternion.fromArray(state, 4);
+        this.localUser.player.position.fromArray(state, 8);
+        this.localUser.player.quaternion.fromArray(state, 11);
+      }
+    }
+
     authenticate(appKey, verb, userName, password, email) {
       this.attemptedUserName = userName;
       if (!this.socket) {
@@ -140,25 +159,6 @@ Primrose.Network.Manager = (function () {
 
     receiveChat(evt) {
       console.log("chat", evt);
-    }
-
-    updateUser(state) {
-      var key = state[0];
-      if (key !== this.userName) {
-        var user = this.users[key];
-        if (user) {
-          user.state = state;
-        }
-        else {
-          console.error("Unknown user", key);
-        }
-      }
-      else if (this.deviceIndex > 0) {
-        this.localUser.stage.position.fromArray(state, 1);
-        this.localUser.stage.quaternion.fromArray(state, 4);
-        this.localUser.player.position.fromArray(state, 8);
-        this.localUser.player.quaternion.fromArray(state, 11);
-      }
     }
 
     lostConnection() {
