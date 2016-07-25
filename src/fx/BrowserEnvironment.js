@@ -226,16 +226,6 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var movePlayer = (dt) => {
-        this.input.player.updateStage();
-        if (!this.input.stage.isOnGround) {
-          this.input.stage.velocity.y -= this.options.gravity * dt;
-          if (this.input.stage.position.y < 0) {
-            this.input.stage.velocity.y = 0;
-            this.input.stage.position.y = 0;
-            this.input.stage.isOnGround = true;
-          }
-        }
-
         this.input.update(dt);
 
         if (this.projector.ready) {

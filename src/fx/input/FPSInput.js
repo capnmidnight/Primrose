@@ -254,7 +254,16 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    update() {
+    update(dt) {
+      this.player.updateStage();
+      if (!this.stage.isOnGround) {
+        this.stage.velocity.y -= this.options.gravity * dt;
+        if (this.stage.position.y < 0) {
+          this.stage.velocity.y = 0;
+          this.stage.position.y = 0;
+          this.stage.isOnGround = true;
+        }
+      }
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update();
