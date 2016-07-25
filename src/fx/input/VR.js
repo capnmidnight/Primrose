@@ -85,6 +85,8 @@ Primrose.Input.VR = (function () {
           this.disk.visible = false;
         }
       }
+
+      this.mesh.applyMatrix(this.stage.matrix);
     }
 
     requestPresent(opts) {

@@ -22,6 +22,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
       this.inVR = false;
+      this.newState = [];
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -333,6 +334,11 @@ Primrose.Input.FPSInput = (function () {
           .multiply(swapQuaternion);
       }
 
+
+      this.newState = [];
+      this.stage.mesh.position.toArray(this.newState, 0);
+      this.stage.mesh.quaternion.toArray(this.newState, 3);
+
       this.stage.euler.set(pitch, heading, 0, "YXZ");
       this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
 
@@ -345,7 +351,9 @@ Primrose.Input.FPSInput = (function () {
       this.stage.mesh.updateMatrix();
       this.head.mesh.updateMatrix();
       this.head.updateStage();
-      this.head.mesh.applyMatrix(this.head.stage.matrix);
+
+      this.head.mesh.position.toArray(this.newState, 7);
+      this.head.mesh.quaternion.toArray(this.newState, 10);
     }
 
     get segments() {

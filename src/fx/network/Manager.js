@@ -49,15 +49,10 @@ Primrose.Network.Manager = (function () {
         this.lastNetworkUpdate += dt;
         if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
-          var newState = [];
-          this.localUser.stage.position.toArray(newState, 0);
-          this.localUser.stage.quaternion.toArray(newState, 3);
-          this.localUser.head.mesh.position.toArray(newState, 7);
-          this.localUser.head.mesh.quaternion.toArray(newState, 10);
-          for (var i = 0; i < newState.length; ++i) {
-            if (this.oldState[i] !== newState[i]) {
-              this.socket.emit("userState", newState);
-              this.oldState = newState;
+          for (var i = 0; i < this.localUser.newState.length; ++i) {
+            if (this.oldState[i] !== this.localUser.newState[i]) {
+              this.socket.emit("userState", this.localUser.newState);
+              this.oldState = this.localUser.newState;
               break;
             }
           }
@@ -81,10 +76,10 @@ Primrose.Network.Manager = (function () {
         }
       }
       else if (this.deviceIndex > 0) {
-        this.localUser.stage.position.fromArray(state, 1);
-        this.localUser.stage.quaternion.fromArray(state, 4);
-        this.localUser.head.position.fromArray(state, 8);
-        this.localUser.head.quaternion.fromArray(state, 11);
+        this.localUser.stage.mesh.position.fromArray(state, 1);
+        this.localUser.stage.mesh.quaternion.fromArray(state, 4);
+        this.localUser.head.mesh.position.fromArray(state, 8);
+        this.localUser.head.mesh.quaternion.fromArray(state, 11);
       }
     }
 
