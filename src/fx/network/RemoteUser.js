@@ -234,6 +234,10 @@ Primrose.Network.RemoteUser = (function () {
       this._predict(this.headPosition, v, 8);
       this._predict(this.headQuaternion, v, 11);
     }
+
+    toString(digits){
+      return this.stagePosition.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+    }
   }
 
   RemoteUser.FADE_FACTOR = 0.5;
