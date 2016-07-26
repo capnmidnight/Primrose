@@ -714,7 +714,7 @@ Primrose.BrowserEnvironment = (function () {
 
       window.addEventListener("vrenter", (evt) => {
         showHideButtons();
-        modifyScreen();          
+        modifyScreen();
       });
       window.addEventListener("vrexit", (evt) => {
         this.input.VR.cancel();
