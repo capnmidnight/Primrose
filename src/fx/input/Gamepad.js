@@ -35,8 +35,7 @@ Primrose.Input.Gamepad = (function () {
   });
   class Gamepad extends Primrose.InputProcessor {
     static ID(pad) {
-      var id = (pad.id + "_" + (pad.index || 0))
-        .replace(/\s+/g, "_");
+      var id = pad.id;
       if (id === "OpenVR Gamepad") {
         id = "Vive";
       }
@@ -49,6 +48,8 @@ Primrose.Input.Gamepad = (function () {
       else if (id.indexOf("Unknown") === 0) {
         id = "Unknown";
       }
+      id = (id + "_" + (pad.index || 0))
+        .replace(/\s+/g, "_")
       return id;
     }
 
