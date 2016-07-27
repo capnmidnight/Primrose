@@ -695,34 +695,33 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      if (isMobile) {
-        if (WebVRBootstrapper.Version >= 1) {
-          window.addEventListener("vrdisplaypresentchange", (evt) => {
-            if (window.VRDisplay && this.input.VR.currentDisplay instanceof VRDisplay) {
-              setOrientationLock(evt);
-            }
-          }, false);
-        }
-        else {
-          FullScreen.addChangeListener((evt) => {
-            if (!window.VRDisplay || !(this.input.VR.currentDisplay instanceof VRDisplay)) {
-              setTimeout(setOrientationLock, 0, evt);
-            }
-          }, false);
+      var fixPointerLock = () => {
+        if(this.input.VR.isPresenting && !PointerLock.isActive) {
+          PointerLock.request(this.input.VR.currentCanvas);
         }
       }
 
-      window.addEventListener("vrenter", (evt) => {
+      window.addEventListener("keydown", (evt) => {
+        if(this.input.VR.isPresenting) {
+          if(evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+            this.input.VR.cancel();
+          }
+          else{
+            fixPointerLock();
+          }
+        }
+      });
+
+      window.addEventListener("mousedown", fixPointerLock);
+
+
+      window.addEventListener("vrdisplaypresentchange", (evt) => {
+        if(!this.input.VR.currentDisplay.isPresenting){
+          this.input.VR.cancel();
+        }
         showHideButtons();
         modifyScreen();
       });
-      window.addEventListener("vrexit", (evt) => {
-        this.input.VR.cancel();
-        this.input.VR.connect(0);
-        showHideButtons();
-        modifyScreen();
-      }, false);
-
       window.addEventListener("resize", modifyScreen, false);
       window.addEventListener("blur", this.stop, false);
       window.addEventListener("focus", this.start, false);

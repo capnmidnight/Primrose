@@ -80,8 +80,8 @@ return function (dt) {
     ghosts.forEach(function (g) {
       g.position.add(g.velocity.clone()
         .multiplyScalar(dt));
-      collisionCheck(dt, g, env.player);
+      collisionCheck(dt, g, env.head);
     });
   }
-  collisionCheck(dt, env.player, null);
+  collisionCheck(dt, env.head, null);
 }

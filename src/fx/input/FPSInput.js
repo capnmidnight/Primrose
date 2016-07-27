@@ -382,9 +382,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].resolvePicking(currentHits, lastHits, pickableObjects);
-      }
+      this.stage.resolvePicking(currentHits, lastHits, pickableObjects);
+      this.head.resolvePicking(currentHits, lastHits, pickableObjects);
     }
 
     addEventListener(evt, thunk, bubbles) {

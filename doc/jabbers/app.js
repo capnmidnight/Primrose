@@ -68,10 +68,10 @@ function Jabber(w, h, s) {
       body.position.y = 1;
     }
     v.copy(body.position)
-      .sub(env.player.position);
+      .sub(env.head.position);
     var d = v.length();
     if (d < 3) {
-      body.lookAt(env.player.position);
+      body.lookAt(env.head.position);
       body.position.set(
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),

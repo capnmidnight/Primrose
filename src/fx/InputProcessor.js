@@ -496,10 +496,6 @@ Primrose.InputProcessor = (function () {
       this.mesh.add(obj);
     }
 
-    get matrixWorld() {
-      return this.mesh.matrixWorld;
-    }
-
     fireCommands() {
       if (this.ready && !this.paused) {
         for (var name in this.commands) {

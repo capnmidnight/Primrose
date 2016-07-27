@@ -101,22 +101,22 @@ Primrose.Input.VR = (function () {
         }
         return this.currentDisplay.requestPresent(layers)
           .catch((exp) => console.error("what happened?", exp))
-          .then((elem) => elem || opts[0].source);
+          .then((elem) => elem || opts[0].source)
+          .then(PointerLock.request);
       }
     }
 
-    cancel() {
-      var promise = null;
+    cancel(){
+      var promise = null;;
       if (this.isPresenting) {
         promise = this.currentDisplay.exitPresent();
       }
       else {
         promise = Promise.resolve();
       }
-      return promise.then(() => {
-        this.currentDisplayIndex = -1;
-        this.transforms = null;
-      });
+      return promise
+        .then(PointerLock.exit)
+        .then(() => this.connect(0));
     }
 
     zero() {
@@ -181,12 +181,20 @@ Primrose.Input.VR = (function () {
         this.displays[this.currentDisplayIndex];
     }
 
+    get isPolyfilled(){
+      return this.currentDisplay && this.currentDisplay.isPolyfilled;
+    }
+
     get isPresenting() {
       return this.currentDisplay && this.currentDisplay.isPresenting;
     }
 
     get hasOrientation() {
       return this.currentDisplay && this.currentDisplay.capabilities.hasOrientation;
+    }
+
+    get currentCanvas(){
+      return this.isPresenting && this.currentDisplay.getLayers()[0].source;
     }
 
     connect(selectedIndex) {
