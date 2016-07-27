@@ -367,7 +367,7 @@ Primrose.InputProcessor = (function () {
       return this.mesh && this.mesh.quaternion;
     }
 
-    makePointer(scene, color = 0xff0000, minorColor = 0x7f0000) {
+    makePointer(scene, color = 0xff0000, minorColor = 0x7f0000, isHand = false) {
       this.color = color;
       this.minorColor = minorColor;
       this.velocity = new THREE.Vector3();
@@ -398,6 +398,11 @@ Primrose.InputProcessor = (function () {
       scene.add(this.mesh);
       scene.add(this.disk);
       scene.add(this.stageGrid);
+      if(isHand){
+        this.mesh.add(textured(box(0.1, 0.025, 0.2), this.color, {
+          emissive: this.minorColor
+        }));
+      }
     }
 
     get segment() {

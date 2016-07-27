@@ -148,7 +148,7 @@ Primrose.Input.FPSInput = (function () {
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
-          isMotion = padID === "OpenVR Gamepad",
+          isMotion = padID.indexOf("Vive") === 0,
           padCommands = null,
           controllerNumber = 0;
 
@@ -219,7 +219,7 @@ Primrose.Input.FPSInput = (function () {
 
           if (isMotion) {
             mgr.parent = this.VR;
-            mgr.makePointer(this.options.scene);
+            mgr.makePointer(this.options.scene, 0x0000ff, 0x00007f, true);
             this.motionDevices.push(mgr);
           }
           else {
@@ -231,10 +231,10 @@ Primrose.Input.FPSInput = (function () {
       Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
 
       this.stage = isMobile ? this.Touch : this.Mouse;
-      this.stage.makePointer(this.options.scene);
+      this.stage.makePointer(this.options.scene, 0xff0000, 0x7f0000);
 
       this.head = this.VR;
-      this.head.makePointer(this.options.scene);
+      this.head.makePointer(this.options.scene, 0x00ff00, 0x007f00);
 
       this.managers.forEach((mgr) => mgr.addEventListener("teleport", (position) => this.moveStage(position)));
 
@@ -339,8 +339,8 @@ Primrose.Input.FPSInput = (function () {
           .multiply(swapQuaternion);
       }
 
-      this.stage.stage = this.head.stage;
-      this.stage.updateStage();
+      // this.stage.stage = this.head.stage;
+      // this.stage.updateStage();
 
       this.head.mesh.position.toArray(this.newState, 7);
       this.head.mesh.quaternion.toArray(this.newState, 10);
@@ -370,7 +370,13 @@ Primrose.Input.FPSInput = (function () {
 
       mgr.mesh.position.x += this.stage.mesh.position.x;
       mgr.mesh.position.z += this.stage.mesh.position.z;
+
+      if(mgr !== this.head){
+        mgr.stage = this.head.stage;
+      }
       mgr.updateStage();
+      mgr.mesh.updateMatrix();
+      mgr.mesh.applyMatrix(mgr.stage.matrix);
     }
 
     get segments() {
@@ -400,7 +406,9 @@ Primrose.Input.FPSInput = (function () {
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
       this.stage.resolvePicking(currentHits, lastHits, pickableObjects);
-      this.head.resolvePicking(currentHits, lastHits, pickableObjects);
+      for(const mgr of this.motionDevices){
+        mgr.resolvePicking(currentHits, lastHits, pickableObjects);
+      }
     }
 
     addEventListener(evt, thunk, bubbles) {

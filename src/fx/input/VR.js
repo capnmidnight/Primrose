@@ -67,9 +67,6 @@ Primrose.Input.VR = (function () {
       }
 
       super.updateStage();
-
-      this.mesh.updateMatrix();
-      this.mesh.applyMatrix(this.stage.matrix);
     }
 
     requestPresent(opts) {
