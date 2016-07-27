@@ -100,12 +100,10 @@ Primrose.Input.VR = (function () {
       }
       else {
         let layers = opts;
-        if(!(layers instanceof Array)){
+        if (!(layers instanceof Array)) {
           layers = [layers];
         }
-        for(const layer of layers){
-          layer.vrDistort = true;
-        }
+
         if (!this.currentDisplay.isPolyfilled && isChrome && isMobile) {
           layers = layers[0];
         }
