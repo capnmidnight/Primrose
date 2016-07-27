@@ -273,9 +273,18 @@ Primrose.Input.FPSInput = (function () {
     update(dt) {
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].update(dt);
+        var mgr = this.managers[i];
+        mgr.update(dt);
       }
 
+      var status = this.managers
+        .filter((mgr) => mgr.inPhysicalUse)
+        .map((mgr) => mgr.name)
+        .join(", ");
+      if(status !== this.lastStatus){
+        console.log(status.toString(2));
+        this.lastStatus = status;
+      }
 
       // get the linear movement from the mouse/keyboard/gamepad
       var head = this.stage,

@@ -46,7 +46,7 @@ Primrose.InputProcessor = (function () {
       this.transmitting = true;
       this.receiving = true;
       this.socketReady = false;
-      this.inPhysicalUse = true;
+      this.inPhysicalUse = false;
       this.inputState = {
         buttons: [],
         axes: [],

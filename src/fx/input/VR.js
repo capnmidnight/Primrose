@@ -99,9 +99,14 @@ Primrose.Input.VR = (function () {
         return Promise.reject("No display");
       }
       else {
-        console.log("requesting", opts);
-        var layers = opts;
-        if (window.VRDisplay && isChrome && isMobile && this.currentDisplay instanceof VRDisplay && opts instanceof Array) {
+        let layers = opts;
+        if(!(layers instanceof Array)){
+          layers = [layers];
+        }
+        for(const layer of layers){
+          layer.vrDistort = true;
+        }
+        if (!this.currentDisplay.isPolyfilled && isChrome && isMobile) {
           layers = layers[0];
         }
         return this.currentDisplay.requestPresent(layers)
@@ -136,6 +141,7 @@ Primrose.Input.VR = (function () {
 
       if (this.currentDisplay) {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;
+        this.inPhysicalUse = this.isPresenting && !!this.currentPose;
       }
     }
 
