@@ -43,32 +43,6 @@ Primrose.Input.VR = (function () {
         });
     }
 
-    updateStage() {
-      let x = 0,
-        z = 0;
-      var stage = this.currentDisplay && this.currentDisplay.stageParameters;
-      if (stage) {
-        this.movePlayer.fromArray(stage.sittingToStandingTransform);
-        x = stage.sizeX;
-        z = stage.sizeZ;
-      }
-      else {
-        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
-      }
-
-      var s = {
-        matrix: this.movePlayer,
-        sizeX: x,
-        sizeZ: z
-      };
-
-      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
-        this.stage = s;
-      }
-
-      super.updateStage();
-    }
-
     requestPresent(opts) {
       if (!this.currentDisplay) {
         return Promise.reject("No display");
@@ -116,6 +90,28 @@ Primrose.Input.VR = (function () {
       if (this.currentDisplay) {
         this.currentPose = this.currentDisplay.getPose() || this.currentPose;
         this.inPhysicalUse = this.isPresenting && !!this.currentPose;
+      }
+
+      let x = 0,
+        z = 0;
+      var stage = this.currentDisplay && this.currentDisplay.stageParameters;
+      if (stage) {
+        this.movePlayer.fromArray(stage.sittingToStandingTransform);
+        x = stage.sizeX;
+        z = stage.sizeZ;
+      }
+      else {
+        this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+      }
+
+      var s = {
+        matrix: this.movePlayer,
+        sizeX: x,
+        sizeZ: z
+      };
+
+      if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
+        this.stage = s;
       }
     }
 
