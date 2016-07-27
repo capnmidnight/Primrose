@@ -680,9 +680,9 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var showHideButtons = () => {
-        this.input.inVR = this.inVR;
         var hide = this.input.VR.isPresenting,
           elem = this.renderer.domElement.nextElementSibling;
+        this.input.inVR = hide;
         while (elem) {
           if (hide) {
             elem.dataset.originaldisplay = elem.style.display;
@@ -696,17 +696,17 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       var fixPointerLock = () => {
-        if(this.input.VR.isPresenting && !PointerLock.isActive) {
+        if (this.input.VR.isPresenting && !PointerLock.isActive) {
           PointerLock.request(this.input.VR.currentCanvas);
         }
       }
 
       window.addEventListener("keydown", (evt) => {
-        if(this.input.VR.isPresenting) {
-          if(evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
+        if (this.input.VR.isPresenting) {
+          if (evt.keyCode === Primrose.Keys.ESCAPE && !this.input.VR.isPolyfilled) {
             this.input.VR.cancel();
           }
-          else{
+          else {
             fixPointerLock();
           }
         }
@@ -716,7 +716,7 @@ Primrose.BrowserEnvironment = (function () {
 
 
       window.addEventListener("vrdisplaypresentchange", (evt) => {
-        if(!this.input.VR.currentDisplay.isPresenting){
+        if (!this.input.VR.currentDisplay.isPresenting) {
           this.input.VR.cancel();
         }
         showHideButtons();
