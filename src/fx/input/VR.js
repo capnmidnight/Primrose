@@ -33,8 +33,6 @@ Primrose.Input.VR = (function () {
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
-      this.parentHeading = new THREE.Quaternion();
-      this.stage = null;
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()
@@ -43,10 +41,6 @@ Primrose.Input.VR = (function () {
           this.displays.push.apply(this.displays, displays);
           return this.displays;
         });
-    }
-
-    get hasStage(){
-      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
     updateStage() {
@@ -70,25 +64,9 @@ Primrose.Input.VR = (function () {
 
       if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
         this.stage = s;
-        if (this.stage.sizeX * this.stage.sizeZ === 0) {
-          this.groundMesh = this.disk;
-          this.stageGrid.visible = false;
-          this.disk.visible = this.hasOrientation;
-        }
-        else {
-          var scene = this.stageGrid.parent;
-          scene.remove(this.stageGrid);
-          this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
-            wireframe: true,
-            emissive: 0x003f00
-          });
-          this.stageGrid.geometry.computeBoundingBox();
-          scene.add(this.stageGrid);
-          this.groundMesh = this.stageGrid;
-          this.stageGrid.visible = this.hasOrientation;
-          this.disk.visible = false;
-        }
       }
+
+      super.updateStage();
 
       this.mesh.updateMatrix();
       this.mesh.applyMatrix(this.stage.matrix);
@@ -114,7 +92,7 @@ Primrose.Input.VR = (function () {
       }
     }
 
-    cancel(){
+    cancel() {
       let promise = null;
       if (this.isPresenting) {
         promise = this.currentDisplay.exitPresent();
@@ -122,6 +100,7 @@ Primrose.Input.VR = (function () {
       else {
         promise = Promise.resolve();
       }
+
       return promise
         .then(PointerLock.exit)
         .then(() => this.connect(0));
@@ -190,7 +169,7 @@ Primrose.Input.VR = (function () {
         this.displays[this.currentDisplayIndex];
     }
 
-    get isPolyfilled(){
+    get isPolyfilled() {
       return this.currentDisplay && this.currentDisplay.isPolyfilled;
     }
 
@@ -202,7 +181,7 @@ Primrose.Input.VR = (function () {
       return this.currentDisplay && this.currentDisplay.capabilities.hasOrientation;
     }
 
-    get currentCanvas(){
+    get currentCanvas() {
       return this.isPresenting && this.currentDisplay.getLayers()[0].source;
     }
 

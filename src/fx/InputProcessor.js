@@ -62,6 +62,9 @@ Primrose.InputProcessor = (function () {
 
       this.euler = null;
       this.mesh = null;
+      this.stage = null;
+      this.lastStageWidth = null;
+      this.lastStageDepth = null;
       this.disk = null;
       this.stageGrid = null;
       this.color = null;
@@ -309,6 +312,38 @@ Primrose.InputProcessor = (function () {
           }
 
           this.fireCommands();
+        }
+      }
+    }
+
+    get hasStage() {
+      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
+    }
+
+    updateStage() {
+      if (this.mesh) {
+        if (!this.hasStage) {
+          this.groundMesh = this.disk;
+          this.stageGrid.visible = false;
+          this.disk.visible = true;
+        }
+        else {
+          if (this.stage.sizeX !== this.lastStageWidth ||
+            this.stage.sizeZ !== this.lastStageDepth) {
+            var scene = this.stageGrid.parent;
+            scene.remove(this.stageGrid);
+            this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
+              wireframe: true,
+              emissive: 0x003f00
+            });
+            this.stageGrid.geometry.computeBoundingBox();
+            scene.add(this.stageGrid);
+            this.lastStageWidth = this.stage.sizeX;
+            this.lastStageDepth = this.stage.sizeZ;
+          }
+          this.groundMesh = this.stageGrid;
+          this.stageGrid.visible = this.hasOrientation;
+          this.disk.visible = false;
         }
       }
     }
