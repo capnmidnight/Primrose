@@ -23,6 +23,7 @@ Primrose.Input.FPSInput = (function () {
       this.managers = [];
       this.inVR = false;
       this.newState = [];
+      this.motionDevices = [];
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -143,6 +144,8 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
 
+      this.motionDevices.push(this.VR);
+
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
           isMotion = padID === "OpenVR Gamepad",
@@ -217,6 +220,7 @@ Primrose.Input.FPSInput = (function () {
           if (isMotion) {
             mgr.parent = this.VR;
             mgr.makePointer(this.options.scene);
+            this.motionDevices.push(mgr);
           }
           else {
             this.Keyboard.parent = mgr;
@@ -282,7 +286,7 @@ Primrose.Input.FPSInput = (function () {
         .map((mgr) => mgr.name)
         .join(", ");
       if(status !== this.lastStatus){
-        console.log(status.toString(2));
+        console.log(status);
         this.lastStatus = status;
       }
 
@@ -318,31 +322,9 @@ Primrose.Input.FPSInput = (function () {
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.mesh.quaternion));
 
-      var orient = this.head.currentPose && this.head.currentPose.orientation,
-        pos = this.head.currentPose && this.head.currentPose.position;
-      if (orient) {
-        this.head.mesh.quaternion.fromArray(orient);
+      for(const mgr of this.motionDevices){
+        this.updateMotionObject(mgr);
       }
-      else {
-        this.head.mesh.quaternion.set(0, 0, 0, 1);
-      }
-      if (pos) {
-        this.head.mesh.position.fromArray(pos);
-      }
-      else {
-        this.head.mesh.position.set(0, 0, 0);
-      }
-
-      if (this.inVR) {
-        swapQuaternion.copy(this.head.mesh.quaternion);
-        this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
-          .multiply(swapQuaternion);
-        this.head.mesh.position.applyQuaternion(this.stage.mesh.quaternion);
-      }
-
-      this.head.mesh.position.x += this.stage.mesh.position.x;
-      this.head.mesh.position.z += this.stage.mesh.position.z;
-
 
       this.newState = [];
       this.stage.mesh.position.toArray(this.newState, 0);
@@ -353,16 +335,42 @@ Primrose.Input.FPSInput = (function () {
 
 
       if (!this.inVR) {
-        swapQuaternion.copy(this.head.mesh.quaternion);
         this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
           .multiply(swapQuaternion);
       }
-      this.stage.mesh.updateMatrix();
-      this.head.mesh.updateMatrix();
-      this.head.updateStage();
+
+      this.stage.stage = this.head.stage;
+      this.stage.updateStage();
 
       this.head.mesh.position.toArray(this.newState, 7);
       this.head.mesh.quaternion.toArray(this.newState, 10);
+    }
+
+    updateMotionObject(mgr){
+      var orient = mgr.currentPose && mgr.currentPose.orientation,
+        pos = mgr.currentPose && mgr.currentPose.position;
+      if (orient) {
+        mgr.mesh.quaternion.fromArray(orient);
+      }
+      else {
+        mgr.mesh.quaternion.set(0, 0, 0, 1);
+      }
+      if (pos) {
+        mgr.mesh.position.fromArray(pos);
+      }
+      else {
+        mgr.mesh.position.set(0, 0, 0);
+      }
+
+      swapQuaternion.copy(mgr.mesh.quaternion);
+      mgr.mesh.quaternion
+        .copy(this.stage.mesh.quaternion)
+        .multiply(swapQuaternion);
+      mgr.mesh.position.applyQuaternion(this.stage.mesh.quaternion);
+
+      mgr.mesh.position.x += this.stage.mesh.position.x;
+      mgr.mesh.position.z += this.stage.mesh.position.z;
+      mgr.updateStage();
     }
 
     get segments() {
