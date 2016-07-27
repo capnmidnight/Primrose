@@ -85,7 +85,7 @@ Primrose.DOM.cascadeElement = (function () {
     }]
   });
 
-  function cascadeElement(id, tag, DOMClass) {
+  function cascadeElement(id, tag, DOMClass, add) {
     var elem = null;
     if (id === null) {
       elem = document.createElement(tag);
@@ -99,6 +99,9 @@ Primrose.DOM.cascadeElement = (function () {
       if (elem === null) {
         elem = document.createElement(tag);
         elem.id = id;
+        if (add) {
+          document.body.appendChild(elem);
+        }
       }
       else if (elem.tagName !== tag.toUpperCase()) {
         elem = null;

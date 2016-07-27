@@ -123,7 +123,7 @@ Primrose.Network.RemoteUser = (function () {
               throw new Error("Didn't get an audio channel for " + this.userName);
             }
             this.audioElement = new Audio();
-            Primrose.Output.Audio3D.setAudioStream(this.audioElement, this.audioChannel.inAudio);
+            Primrose.Output.Audio3D.setAudioStream(this.audioChannel.inAudio);
             this.audioElement.controls = false;
             this.audioElement.autoplay = true;
             this.audioElement.crossOrigin = "anonymous";

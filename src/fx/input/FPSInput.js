@@ -283,7 +283,7 @@ Primrose.Input.FPSInput = (function () {
         .filter((mgr) => mgr.inPhysicalUse)
         .map((mgr) => mgr.name)
         .join(", ");
-      if(status !== this.lastStatus){
+      if (status !== this.lastStatus) {
         console.log(status);
         this.lastStatus = status;
       }
@@ -320,7 +320,7 @@ Primrose.Input.FPSInput = (function () {
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.mesh.quaternion));
 
-      for(const mgr of this.motionDevices){
+      for (const mgr of this.motionDevices) {
         this.updateMotionObject(mgr);
       }
 
@@ -341,7 +341,7 @@ Primrose.Input.FPSInput = (function () {
       this.head.mesh.quaternion.toArray(this.newState, 10);
     }
 
-    updateMotionObject(mgr){
+    updateMotionObject(mgr) {
       var orient = mgr.currentPose && mgr.currentPose.orientation,
         pos = mgr.currentPose && mgr.currentPose.position;
       if (orient) {
@@ -366,7 +366,7 @@ Primrose.Input.FPSInput = (function () {
       mgr.mesh.position.x += this.stage.mesh.position.x;
       mgr.mesh.position.z += this.stage.mesh.position.z;
 
-      if(mgr !== this.head){
+      if (mgr !== this.head) {
         mgr.stage = this.head.stage;
       }
 
@@ -401,7 +401,7 @@ Primrose.Input.FPSInput = (function () {
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
       this.stage.resolvePicking(currentHits, lastHits, pickableObjects);
-      for(const mgr of this.motionDevices){
+      for (const mgr of this.motionDevices) {
         mgr.resolvePicking(currentHits, lastHits, pickableObjects);
       }
     }

@@ -67,7 +67,7 @@ Primrose.Input.VR = (function () {
           .then((elem) => PointerLock.request(elem)
             .catch((exp) => console.warn(exp)));
 
-        if(this.isNativeMobileWebVR){
+        if (this.isNativeMobileWebVR) {
           promise = promise.then(Orientation.lock)
             .catch((exp) => alert(exp));
         }
@@ -85,7 +85,7 @@ Primrose.Input.VR = (function () {
         promise = Promise.resolve();
       }
 
-      if(this.isNativeMobileWebVR){
+      if (this.isNativeMobileWebVR) {
         promise = promise.then(Orientation.unlock);
       }
 

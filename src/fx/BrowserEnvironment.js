@@ -375,12 +375,11 @@ Primrose.BrowserEnvironment = (function () {
             })
           }
         },
-        localAudio = Primrose.DOM.cascadeElement(this.options.audioElement, "audio", HTMLAudioElement),
         micReady = navigator.mediaDevices.getUserMedia({
           audio: true,
           video: false
         })
-        .then(Primrose.Output.Audio3D.setAudioStream.bind(null, localAudio))
+        .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
         .catch(console.warn.bind(console, "Can't get audio"));
 
       this.factories = factories;
@@ -902,8 +901,6 @@ Primrose.BrowserEnvironment = (function () {
     ambientSound: null,
     // HTML5 canvas element, if one had already been created.
     canvasElement: "frontBuffer",
-    // HTML5 audio element, if one had already been created.
-    audioElement: "localAudio",
     // THREE.js renderer, if one had already been created.
     renderer: null,
     // A WebGL context to use, if one had already been created.

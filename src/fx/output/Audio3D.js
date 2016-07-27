@@ -74,14 +74,18 @@ Primrose.Output.Audio3D = (function () {
       }
     }
 
-    static setAudioStream(element, stream) {
+    static setAudioStream(stream) {
+      const audioElementCount = document.querySelectorAll("audio")
+        .length,
+        element = Primrose.DOM.cascadeElement("audioStream" + audioElementCount, "audio", HTMLAudioElement, true);
+      element.autoplay = true;
       if (isFirefox) {
         element.srcObject = stream;
       }
       else {
         element.src = URL.createObjectURL(stream);
       }
-      element.muted = true;
+      element.setAttribute("muted", "");
       return stream;
     }
 

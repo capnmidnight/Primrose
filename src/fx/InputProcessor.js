@@ -361,7 +361,7 @@ Primrose.InputProcessor = (function () {
 
       scene.add(this.mesh);
       scene.add(this.disk);
-      if(isHand){
+      if (isHand) {
         this.mesh.add(textured(box(0.1, 0.025, 0.2), this.color, {
           emissive: this.minorColor
         }));
