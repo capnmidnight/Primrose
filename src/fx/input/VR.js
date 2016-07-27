@@ -45,6 +45,10 @@ Primrose.Input.VR = (function () {
         });
     }
 
+    get hasStage(){
+      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
+    }
+
     updateStage() {
       let x = 0,
         z = 0;
@@ -86,6 +90,7 @@ Primrose.Input.VR = (function () {
         }
       }
 
+      this.mesh.updateMatrix();
       this.mesh.applyMatrix(this.stage.matrix);
     }
 
@@ -107,7 +112,7 @@ Primrose.Input.VR = (function () {
     }
 
     cancel(){
-      var promise = null;;
+      let promise = null;
       if (this.isPresenting) {
         promise = this.currentDisplay.exitPresent();
       }

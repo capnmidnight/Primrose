@@ -82,8 +82,6 @@ env.addEventListener("update", function (dt) {
     scriptUpdateTimeout = setTimeout(updateScript, 500);
   }
 
-  editorCenter.position.copy(env.vehicle.position);
-
   if (scriptAnimate) {
     // If quality has degraded, it's likely because the user bombed on a script.
     // Let's help them not lose their lunch.
@@ -205,10 +203,10 @@ function pacman() {
       ghosts.forEach(function (g) {
         g.position.add(g.velocity.clone()
           .multiplyScalar(dt));
-        collisionCheck(dt, g, env.vehicle);
+        collisionCheck(dt, g, env.input.stage);
       });
     }
-    collisionCheck(dt, env.vehicle, null);
+    collisionCheck(dt, env.input.stage, null);
   }
 }
 

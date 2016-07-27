@@ -324,15 +324,15 @@ Primrose.Input.FPSInput = (function () {
         this.head.mesh.position.set(0, 0, 0);
       }
 
-      this.head.mesh.position.applyQuaternion(this.head.mesh.quaternion);
-      this.head.mesh.position.x += this.stage.mesh.position.x;
-      this.head.mesh.position.z += this.stage.mesh.position.z;
-
       if (this.inVR) {
         swapQuaternion.copy(this.head.mesh.quaternion);
         this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
           .multiply(swapQuaternion);
+        this.head.mesh.position.applyQuaternion(this.stage.mesh.quaternion);
       }
+
+      this.head.mesh.position.x += this.stage.mesh.position.x;
+      this.head.mesh.position.z += this.stage.mesh.position.z;
 
 
       this.newState = [];

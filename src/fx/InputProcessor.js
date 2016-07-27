@@ -325,6 +325,14 @@ Primrose.InputProcessor = (function () {
       return this._currentControl;
     }
 
+    get position() {
+      return this.mesh && this.mesh.position;
+    }
+
+    get quaternion() {
+      return this.mesh && this.mesh.quaternion;
+    }
+
     makePointer(scene, color = 0xff0000, minorColor = 0x7f0000) {
       this.color = color;
       this.minorColor = minorColor;
