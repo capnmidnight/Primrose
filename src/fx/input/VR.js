@@ -43,6 +43,10 @@ Primrose.Input.VR = (function () {
         });
     }
 
+    get isNativeMobileWebVR() {
+      return !this.currentDisplay.isPolyfilled && isChrome && isMobile;
+    }
+
     requestPresent(opts) {
       if (!this.currentDisplay) {
         return Promise.reject("No display");
@@ -53,13 +57,22 @@ Primrose.Input.VR = (function () {
           layers = [layers];
         }
 
-        if (!this.currentDisplay.isPolyfilled && isChrome && isMobile) {
+        if (this.isNativeMobileWebVR) {
           layers = layers[0];
         }
-        return this.currentDisplay.requestPresent(layers)
+
+        var promise = this.currentDisplay.requestPresent(layers)
           .catch((exp) => console.error("what happened?", exp))
           .then((elem) => elem || opts[0].source)
-          .then(PointerLock.request);
+          .then((elem) => PointerLock.request(elem)
+            .catch((exp) => console.warn(exp)));
+
+        if(this.isNativeMobileWebVR){
+          promise = promise.then(Orientation.lock)
+            .catch((exp) => alert(exp));
+        }
+
+        return promise;
       }
     }
 
@@ -70,6 +83,10 @@ Primrose.Input.VR = (function () {
       }
       else {
         promise = Promise.resolve();
+      }
+
+      if(this.isNativeMobileWebVR){
+        promise = promise.then(Orientation.unlock);
       }
 
       return promise
