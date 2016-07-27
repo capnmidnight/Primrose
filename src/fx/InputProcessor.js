@@ -66,7 +66,6 @@ Primrose.InputProcessor = (function () {
       this.lastStageWidth = null;
       this.lastStageDepth = null;
       this.disk = null;
-      this.stageGrid = null;
       this.color = null;
       this.minorColor = null;
       this._currentControl = null;
@@ -319,34 +318,6 @@ Primrose.InputProcessor = (function () {
       return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
-    updateStage() {
-      if (this.mesh) {
-        if (!this.hasStage) {
-          this.groundMesh = this.disk;
-          this.stageGrid.visible = false;
-          this.disk.visible = true;
-        }
-        else {
-          if (this.stage.sizeX !== this.lastStageWidth ||
-            this.stage.sizeZ !== this.lastStageDepth) {
-            var scene = this.stageGrid.parent;
-            scene.remove(this.stageGrid);
-            this.stageGrid = textured(box(this.stage.sizeX, 2.5, this.stage.sizeZ), 0x00ff00, {
-              wireframe: true,
-              emissive: 0x003f00
-            });
-            this.stageGrid.geometry.computeBoundingBox();
-            scene.add(this.stageGrid);
-            this.lastStageWidth = this.stage.sizeX;
-            this.lastStageDepth = this.stage.sizeZ;
-          }
-          this.groundMesh = this.stageGrid;
-          this.stageGrid.visible = this.hasOrientation;
-          this.disk.visible = false;
-        }
-      }
-    }
-
     set currentControl(v) {
       var head = this;
       while (head) {
@@ -388,16 +359,8 @@ Primrose.InputProcessor = (function () {
 
       this.disk.scale.set(1, 0.1, 1);
 
-      this.groundMesh = this.disk;
-
-      this.stageGrid = textured(box(), this.color, {
-        wireframe: true,
-        emissive: this.minorColor
-      });
-
       scene.add(this.mesh);
       scene.add(this.disk);
-      scene.add(this.stageGrid);
       if(isHand){
         this.mesh.add(textured(box(0.1, 0.025, 0.2), this.color, {
           emissive: this.minorColor
@@ -435,7 +398,7 @@ Primrose.InputProcessor = (function () {
         var changed = dButtons !== 0;
 
         // reset the mesh color to the base value
-        this.groundMesh.visible = false;
+        this.disk.visible = false;
         this.mesh.visible = true;
         textured(this.mesh, this.color, {
           emissive: this.minorColor
@@ -453,7 +416,7 @@ Primrose.InputProcessor = (function () {
           moveTo.fromArray(fp)
             .sub(this.mesh.position);
 
-          this.groundMesh.visible = isGround;
+          this.disk.visible = isGround;
           if (isGround) {
             var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
             if (distSq > MAX_MOVE_DISTANCE_SQ) {
@@ -467,7 +430,7 @@ Primrose.InputProcessor = (function () {
                 emissive: 0x7f7f00
               });
             }
-            this.groundMesh.position
+            this.disk.position
               .copy(this.mesh.position)
               .add(moveTo);
           }
@@ -494,7 +457,7 @@ Primrose.InputProcessor = (function () {
                 this.currentControl.focus();
               }
               else if (isGround) {
-                emit.call(this, "teleport", this.groundMesh.position);
+                emit.call(this, "teleport", this.disk.position);
               }
 
               if (this.currentControl) {

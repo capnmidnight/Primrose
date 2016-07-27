@@ -339,9 +339,6 @@ Primrose.Input.FPSInput = (function () {
           .multiply(swapQuaternion);
       }
 
-      // this.stage.stage = this.head.stage;
-      // this.stage.updateStage();
-
       this.head.mesh.position.toArray(this.newState, 7);
       this.head.mesh.quaternion.toArray(this.newState, 10);
     }
@@ -374,9 +371,9 @@ Primrose.Input.FPSInput = (function () {
       if(mgr !== this.head){
         mgr.stage = this.head.stage;
       }
-      mgr.updateStage();
+
       mgr.mesh.updateMatrix();
-      mgr.mesh.applyMatrix(mgr.stage.matrix);
+      mgr.mesh.applyMatrix(this.VR.stage.matrix);
     }
 
     get segments() {
