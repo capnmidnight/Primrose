@@ -147,40 +147,6 @@ Primrose.Input.Gamepad = (function () {
         this.currentPad.vibrate.apply(this.currentPad, arguments);
       }
     }
-
-    updatePosition() {
-      var p = this.currentPose && this.currentPose.position;
-      if (p) {
-        this.position.fromArray(p);
-      }
-    }
-
-    updateVelocity() {
-      var p = this.currentPose && this.currentPose.position;
-      if (!p) {
-        this.velocity.set(
-          this.getValue("strafe"),
-          0,
-          this.getValue("drive")
-        );
-      }
-    }
-
-    updateOrientation(excludePitch) {
-      var o = this.currentPose && this.currentPose.orientation;
-      if (o) {
-        this.mesh.quaternion.fromArray(o);
-      }
-      else {
-        this.euler.set(
-          this.getValue("pitch"),
-          this.getValue("heading"),
-          0,
-          "YXZ"
-        );
-        this.mesh.quaternion.setFromEuler(this.euler);
-      }
-    }
   }
   Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
