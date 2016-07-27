@@ -21,7 +21,6 @@ Primrose.Input.FPSInput = (function () {
       };
 
       this.managers = [];
-      this.inVR = false;
       this.newState = [];
       this.motionDevices = [];
 
@@ -265,7 +264,6 @@ Primrose.Input.FPSInput = (function () {
       }
       this.managers.push(mgr);
       this[mgr.name] = mgr;
-      mgr.inVR = this.inVR;
     }
 
     zero() {
@@ -334,7 +332,7 @@ Primrose.Input.FPSInput = (function () {
       this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
 
 
-      if (!this.inVR) {
+      if (!this.VR.isPresenting || !this.VR.hasOrientation) {
         this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
           .multiply(swapQuaternion);
       }

@@ -319,46 +319,6 @@ Primrose.BrowserEnvironment = (function () {
         }
       };
 
-      var wasLocked = false;
-      var setOrientationLock = (evt) => {
-        var isFullScreen = this.inVR && this.input.VR.isPresenting;
-        try {
-          if (isFullScreen) {
-            if (!wasLocked) {
-              var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
-              if (type.indexOf("landscape") === -1) {
-                type = "landscape-primary";
-              }
-              if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock(type)
-                  .then(() => wasLocked = true)
-                  .catch(() => wasLocked = false);
-              }
-              else if (screen.mozLockOrientation) {
-                wasLocked = screen.mozLockOrientation(type);
-              }
-              else {
-                wasLocked = false;
-              }
-            }
-          }
-          else {
-            if (wasLocked) {
-              if (screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-              }
-              else if (screen.mozUnlockOrientation) {
-                screen.mozUnlockOrientation();
-              }
-              wasLocked = false;
-            }
-          }
-        }
-        catch (exp) {
-          console.error(exp);
-        }
-      };
-
       var modifyScreen = () => {
         var p = this.input.VR.getTransforms(
           this.options.nearPlane,
@@ -682,7 +642,6 @@ Primrose.BrowserEnvironment = (function () {
       var showHideButtons = () => {
         var hide = this.input.VR.isPresenting,
           elem = this.renderer.domElement.nextElementSibling;
-        this.input.inVR = hide;
         while (elem) {
           if (hide) {
             elem.dataset.originaldisplay = elem.style.display;
