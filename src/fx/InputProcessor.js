@@ -69,7 +69,6 @@ Primrose.InputProcessor = (function () {
       this.stageGrid = null;
       this.color = null;
       this.minorColor = null;
-      this.inVR = false;
       this._currentControl = null;
 
       var readMetaKeys = (event) => {

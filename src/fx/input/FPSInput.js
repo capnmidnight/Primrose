@@ -413,17 +413,6 @@ Primrose.Input.FPSInput = (function () {
         }
       }
     }
-
-    set inVR(v) {
-      this._inVR = v;
-      for (var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].inVR = v;
-      }
-    }
-
-    get inVR() {
-      return this._inVR;
-    }
   }
 
   return FPSInput;
