@@ -13,10 +13,6 @@ Primrose.Network.Manager = (function () {
         type: "Primrose.Input.FPSInput",
         description: "The object that represents the player's location in the scene."
       }, {
-        name: "microphone",
-        type: "MediaStream",
-        description: "A WebRTC media stream of audio from the local machine."
-      }, {
         name: "audio",
         type: "Primrose.Output.Audio3D",
         description: "The audio manager being used in the current Environment."
@@ -27,11 +23,10 @@ Primrose.Network.Manager = (function () {
       }]
   });
   class Manager extends Primrose.AbstractEventEmitter {
-    constructor(serverAddress, localUser, microphone, audio, factories, options) {
+    constructor(serverAddress, localUser, audio, factories, options) {
       super();
       this.path = serverAddress;
       this.localUser = localUser;
-      this.microphone = microphone;
       this.audio = audio;
       this.factories = factories;
       this.options = options;
@@ -42,6 +37,7 @@ Primrose.Network.Manager = (function () {
       this.socket = null;
       this.userName = null;
       this.attemptedUserName = null;
+      this.microphone = null;
     }
 
     update(dt) {
@@ -84,6 +80,14 @@ Primrose.Network.Manager = (function () {
     }
 
     authenticate(appKey, verb, userName, password, email) {
+      if(this.microphone === null){
+        this.microphone = navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false
+        })
+        .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
+        .catch(console.warn.bind(console, "Can't get audio"))
+      }
       this.attemptedUserName = userName;
       if (!this.socket) {
         console.log("connecting to: %s", this.path);

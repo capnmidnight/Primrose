@@ -374,13 +374,7 @@ Primrose.BrowserEnvironment = (function () {
               readOnly: true
             })
           }
-        },
-        micReady = navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: false
-        })
-        .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
-        .catch(console.warn.bind(console, "Can't get audio"));
+        };
 
       this.factories = factories;
 
@@ -724,7 +718,7 @@ Primrose.BrowserEnvironment = (function () {
           var protocol = location.protocol.replace("http", "ws");
           this.options.serverPath = protocol + "//" + location.hostname;
         }
-        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input, micReady, this.audio, factories, this.options);
+        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", addAvatar);
         this.network.addEventListener("removeavatar", removeAvatar);
         this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
