@@ -355,14 +355,14 @@ Primrose.Input.FPSInput = (function () {
 
       // if we're not using an HMD, then update the view according to the mouse
       if (this.VR.hasOrientation) {
-        this.head.showPointer = !this.Mouse.inPhysicalUse;
-        this.Mouse.showPointer = this.Mouse.inPhysicalUse;
+        this.stage.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse;
+        this.head.showPointer = !this.stage.showPointer;
       }
       else {
         this.head.quaternion.copy(this.stage.quaternion)
           .multiply(this.head.poseQuaternion);
         this.head.showPointer = false;
-        this.Mouse.showPointer = true;
+        this.stage.showPointer = true;
       }
 
       // record the position of the head of the user

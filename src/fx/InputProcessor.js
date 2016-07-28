@@ -381,14 +381,15 @@ Primrose.InputProcessor = (function () {
     resolvePicking(currentHits, lastHits, objects) {
       if (this.mesh) {
 
-        // reset the mesh color to the base value
         this.disk.visible = false;
-        this.mesh.visible = true;
-        textured(this.mesh, this.color, {
-          emissive: this.minorColor
-        });
+        this.mesh.visible = false;
 
         if (this.showPointer) {
+          // reset the mesh color to the base value
+          textured(this.mesh, this.color, {
+            emissive: this.minorColor
+          });
+          this.mesh.visible = true;
           var buttons = 0,
             dButtons = 0,
             currentHit = currentHits[this.name],
