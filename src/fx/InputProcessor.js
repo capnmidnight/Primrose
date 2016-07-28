@@ -2,7 +2,7 @@ Primrose.InputProcessor = (function () {
   "use strict";
 
   const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
-    TELEPORT_RADIUS = 0.4,
+    TELEPORT_PAD_RADIUS = 0.4,
     FORWARD = new THREE.Vector3(0, 0, -1),
     MAX_SELECT_DISTANCE = 2,
     MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
@@ -343,7 +343,7 @@ Primrose.InputProcessor = (function () {
         v.z -= LASER_LENGTH * 0.5 + 0.5;
       });
 
-      this.disk = textured(sphere(TELEPORT_RADIUS, 128, 3), this.color, {
+      this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), this.color, {
         emissive: this.minorColor
       });
       this.disk.geometry.computeBoundingBox();
