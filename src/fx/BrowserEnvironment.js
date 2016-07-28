@@ -264,7 +264,7 @@ Primrose.BrowserEnvironment = (function () {
         if (this.ground) {
           this.ground.position.set(
             Math.floor(this.input.head.position.x),
-            0,
+            -0.02,
             Math.floor(this.input.head.position.z));
           this.ground.material.needsUpdate = true;
         }
