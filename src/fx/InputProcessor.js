@@ -60,7 +60,6 @@ Primrose.InputProcessor = (function () {
         teleport: []
       }
 
-      this.euler = null;
       this.mesh = null;
       this.disk = null;
       this.color = null;
@@ -345,7 +344,6 @@ Primrose.InputProcessor = (function () {
       this.color = color;
       this.minorColor = minorColor;
       this.velocity = new THREE.Vector3();
-      this.euler = new THREE.Euler();
       this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
         emissive: this.minorColor
       });

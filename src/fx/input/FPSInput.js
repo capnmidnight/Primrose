@@ -3,6 +3,7 @@ Primrose.Input.FPSInput = (function () {
 
   const VELOCITY = new THREE.Vector3(),
     swapQuaternion = new THREE.Quaternion(),
+    euler = new THREE.Euler(),
     eulerParts = [],
     CARRY_OVER = new THREE.Vector3();
 
@@ -306,8 +307,8 @@ Primrose.Input.FPSInput = (function () {
 
       // move stage according to heading and thrust
       this.stage.position.copy(CARRY_OVER);
-      this.stage.euler.set(0, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(this.stage.euler);
+      euler.set(0, heading, 0, "YXZ");
+      this.stage.quaternion.setFromEuler(euler);
       this.stage.velocity.x = dx;
       this.stage.velocity.z = dz;
       if (!this.stage.isOnGround) {
@@ -336,8 +337,8 @@ Primrose.Input.FPSInput = (function () {
       this.stage.quaternion.toArray(this.newState, 3);
 
       // move the mouse pointer into place
-      this.stage.euler.set(pitch, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(this.stage.euler);
+      euler.set(pitch, heading, 0, "YXZ");
+      this.stage.quaternion.setFromEuler(euler);
       CARRY_OVER.copy(this.stage.position);
       this.stage.position.copy(this.head.position);
 
