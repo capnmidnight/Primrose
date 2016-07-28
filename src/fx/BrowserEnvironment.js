@@ -856,10 +856,6 @@ Primrose.BrowserEnvironment = (function () {
       this.start();
     }
 
-    get inVR() {
-      return this.input.VR.currentDisplay && this.input.VR.hasOrientation;
-    }
-
     get displays() {
       return this.input.VR.displays;
     }
