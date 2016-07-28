@@ -664,6 +664,12 @@ Primrose.BrowserEnvironment = (function () {
         }
       });
 
+      PointerLock.addChangeListener((evt) => {
+        if(this.input.VR.isPresenting && !PointerLock.isActive){
+          this.input.VR.cancel();
+        }
+      });
+
       window.addEventListener("mousedown", fixPointerLock);
 
 
