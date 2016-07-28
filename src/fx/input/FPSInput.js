@@ -3,7 +3,8 @@ Primrose.Input.FPSInput = (function () {
 
   const VELOCITY = new THREE.Vector3(),
     swapQuaternion = new THREE.Quaternion(),
-    eulerParts = [];
+    eulerParts = [],
+    CARRY_OVER = new THREE.Vector3();
 
   pliny.class({
     parent: "Primrose.Input",
@@ -214,7 +215,7 @@ Primrose.Input.FPSInput = (function () {
 
           var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
           this.add(mgr);
-          mgr.addEventListener("teleport", (position) => this.moveStage(position));
+          mgr.addEventListener("teleport", (evt) => this.moveStage(evt));
 
           if (isMotion) {
             mgr.parent = this.VR;
@@ -242,8 +243,9 @@ Primrose.Input.FPSInput = (function () {
         .filter(identity));
     }
 
-    moveStage(position) {
-      this.stage.mesh.position.copy(position);
+    moveStage(evt) {
+      console.log(evt.name, evt.position.toString(3));
+      CARRY_OVER.copy(evt.position);
     }
 
     remove(id) {
@@ -303,75 +305,70 @@ Primrose.Input.FPSInput = (function () {
       }
 
       // move stage according to heading and thrust
+      this.stage.position.copy(CARRY_OVER);
       this.stage.euler.set(0, heading, 0, "YXZ");
-      this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
+      this.stage.quaternion.setFromEuler(this.stage.euler);
       this.stage.velocity.x = dx;
       this.stage.velocity.z = dz;
       if (!this.stage.isOnGround) {
         this.stage.velocity.y -= this.options.gravity * dt;
-        if (this.stage.mesh.position.y < 0) {
+        if (this.stage.position.y < 0) {
           this.stage.velocity.y = 0;
-          this.stage.mesh.position.y = 0;
+          this.stage.position.y = 0;
           this.stage.isOnGround = true;
         }
       }
-      this.stage.mesh.position.add(VELOCITY
+
+      this.stage.position.add(VELOCITY
         .copy(this.stage.velocity)
         .multiplyScalar(dt)
-        .applyQuaternion(this.stage.mesh.quaternion));
+        .applyQuaternion(this.stage.quaternion));
 
+
+      // update the pointers
       for (const mgr of this.motionDevices) {
         this.updateMotionObject(mgr);
       }
 
+      // record the position on the ground of the user
       this.newState = [];
-      this.stage.mesh.position.toArray(this.newState, 0);
-      this.stage.mesh.quaternion.toArray(this.newState, 3);
+      this.stage.position.toArray(this.newState, 0);
+      this.stage.quaternion.toArray(this.newState, 3);
 
+      // move the mouse pointer into place
       this.stage.euler.set(pitch, heading, 0, "YXZ");
-      this.stage.mesh.quaternion.setFromEuler(this.stage.euler);
+      this.stage.quaternion.setFromEuler(this.stage.euler);
+      CARRY_OVER.copy(this.stage.position);
+      this.stage.position.copy(this.head.position);
 
-
-      if (!this.VR.isPresenting || !this.VR.hasOrientation) {
-        this.head.mesh.quaternion.copy(this.stage.mesh.quaternion)
-          .multiply(swapQuaternion);
+      // if we're not using an HMD, then update the view according to the mouse
+      if (!this.VR.hasOrientation) {
+        this.head.quaternion.copy(this.stage.quaternion)
+          .multiply(this.head.poseQuaternion);
+        this.head.showPointer = false;
+        this.Mouse.showPointer = true;
+      }
+      else{
+        this.head.showPointer = true;
+        this.Mouse.showPointer = this.Mouse.inPhysicalUse;
       }
 
-      this.head.mesh.position.toArray(this.newState, 7);
-      this.head.mesh.quaternion.toArray(this.newState, 10);
+      // record the position of the head of the user
+      this.head.position.toArray(this.newState, 7);
+      this.head.quaternion.toArray(this.newState, 10);
     }
 
     updateMotionObject(mgr) {
-      var orient = mgr.currentPose && mgr.currentPose.orientation,
-        pos = mgr.currentPose && mgr.currentPose.position;
-      if (orient) {
-        mgr.mesh.quaternion.fromArray(orient);
-      }
-      else {
-        mgr.mesh.quaternion.set(0, 0, 0, 1);
-      }
-      if (pos) {
-        mgr.mesh.position.fromArray(pos);
-      }
-      else {
-        mgr.mesh.position.set(0, 0, 0);
-      }
+      mgr.quaternion
+        .copy(this.stage.quaternion)
+        .multiply(mgr.poseQuaternion);
 
-      swapQuaternion.copy(mgr.mesh.quaternion);
-      mgr.mesh.quaternion
-        .copy(this.stage.mesh.quaternion)
-        .multiply(swapQuaternion);
-      mgr.mesh.position.applyQuaternion(this.stage.mesh.quaternion);
+      mgr.position.copy(mgr.posePosition)
+        .applyQuaternion(this.stage.quaternion)
+        .add(this.stage.position);
 
-      mgr.mesh.position.x += this.stage.mesh.position.x;
-      mgr.mesh.position.z += this.stage.mesh.position.z;
-
-      if (mgr !== this.head) {
-        mgr.stage = this.head.stage;
-      }
-
-      mgr.mesh.updateMatrix();
-      mgr.mesh.applyMatrix(this.VR.stage.matrix);
+      mgr.updateMatrix();
+      mgr.applyMatrix(this.VR.stage.matrix);
     }
 
     get segments() {
@@ -400,8 +397,7 @@ Primrose.Input.FPSInput = (function () {
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
-      this.stage.resolvePicking(currentHits, lastHits, pickableObjects);
-      for (const mgr of this.motionDevices) {
+      for (const mgr of this.managers) {
         mgr.resolvePicking(currentHits, lastHits, pickableObjects);
       }
     }
