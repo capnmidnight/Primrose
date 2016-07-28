@@ -263,8 +263,7 @@ Primrose.BrowserEnvironment = (function () {
       var moveGround = () => {
         if (this.ground) {
           this.ground.position.set(
-            Math.floor(this.input.head.position.x),
-            -0.02,
+            Math.floor(this.input.head.position.x), -0.02,
             Math.floor(this.input.head.position.z));
           this.ground.material.needsUpdate = true;
         }
@@ -665,7 +664,7 @@ Primrose.BrowserEnvironment = (function () {
       });
 
       PointerLock.addChangeListener((evt) => {
-        if(this.input.VR.isPresenting && !PointerLock.isActive){
+        if (this.input.VR.isPresenting && !PointerLock.isActive) {
           this.input.VR.cancel();
         }
       });

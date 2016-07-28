@@ -144,7 +144,7 @@ Primrose.Input.VR = (function () {
       return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
-    get currentPose(){
+    get currentPose() {
       return this.currentDevice && this.currentDevice.getPose();
     }
 

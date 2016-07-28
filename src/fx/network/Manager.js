@@ -80,13 +80,13 @@ Primrose.Network.Manager = (function () {
     }
 
     authenticate(appKey, verb, userName, password, email) {
-      if(this.microphone === null){
+      if (this.microphone === null) {
         this.microphone = navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: false
-        })
-        .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
-        .catch(console.warn.bind(console, "Can't get audio"))
+            audio: true,
+            video: false
+          })
+          .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
+          .catch(console.warn.bind(console, "Can't get audio"))
       }
       this.attemptedUserName = userName;
       if (!this.socket) {

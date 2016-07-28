@@ -327,12 +327,12 @@ Primrose.Input.FPSInput = (function () {
         .applyQuaternion(this.stage.quaternion));
 
       // figure out the stage orientation.
-      if(this.VR.hasOrientation){
+      if (this.VR.hasOrientation) {
         var newHeading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
         euler.set(0, newHeading, 0, "YXZ");
         swapQuaternion.setFromEuler(euler);
       }
-      else{
+      else {
         swapQuaternion.copy(this.stage.quaternion);
       }
 
@@ -358,7 +358,7 @@ Primrose.Input.FPSInput = (function () {
         this.head.showPointer = !this.Mouse.inPhysicalUse;
         this.Mouse.showPointer = this.Mouse.inPhysicalUse;
       }
-      else{
+      else {
         this.head.quaternion.copy(this.stage.quaternion)
           .multiply(this.head.poseQuaternion);
         this.head.showPointer = false;

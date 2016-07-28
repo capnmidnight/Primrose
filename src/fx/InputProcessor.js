@@ -14,8 +14,8 @@ Primrose.InputProcessor = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "InputProcessor",
-    description: "| [under construction]"
+      name: "InputProcessor",
+      description: "| [under construction]"
   });
   class InputProcessor {
 
@@ -331,11 +331,11 @@ Primrose.InputProcessor = (function () {
       return this.mesh && this.mesh.quaternion;
     }
 
-    updateMatrix(){
+    updateMatrix() {
       return this.mesh && this.mesh.updateMatrix();
     }
 
-    applyMatrix(m){
+    applyMatrix(m) {
       return this.mesh && this.mesh.applyMatrix(m);
     }
 
@@ -372,8 +372,8 @@ Primrose.InputProcessor = (function () {
     get segment() {
       if (this.showPointer) {
         FORWARD.set(0, 0, -1)
-        .applyQuaternion(this.mesh.quaternion)
-        .add(this.mesh.position);
+          .applyQuaternion(this.mesh.quaternion)
+          .add(this.mesh.position);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
       }
     }
@@ -388,16 +388,16 @@ Primrose.InputProcessor = (function () {
           emissive: this.minorColor
         });
 
-        if(this.showPointer) {
+        if (this.showPointer) {
           var buttons = 0,
-          dButtons = 0,
-          currentHit = currentHits[this.name],
-          lastHit = lastHits && lastHits[this.name],
-          head = this,
-          isGround = false,
-          object,
-          control,
-          point;
+            dButtons = 0,
+            currentHit = currentHits[this.name],
+            lastHit = lastHits && lastHits[this.name],
+            head = this,
+            isGround = false,
+            object,
+            control,
+            point;
 
           while (head) {
             buttons += head.getValue("buttons");
@@ -417,15 +417,15 @@ Primrose.InputProcessor = (function () {
             control = object && (object.button || object.surface);
 
             moveTo.fromArray(fp)
-            .sub(this.mesh.position);
+              .sub(this.mesh.position);
 
             this.disk.visible = isGround;
             if (isGround) {
               var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
               if (distSq > MAX_MOVE_DISTANCE_SQ) {
                 var dist = Math.sqrt(distSq),
-                factor = MAX_MOVE_DISTANCE / dist,
-                y = moveTo.y;
+                  factor = MAX_MOVE_DISTANCE / dist,
+                  y = moveTo.y;
                 moveTo.y = 0;
                 moveTo.multiplyScalar(factor);
                 moveTo.y = y;
@@ -434,8 +434,8 @@ Primrose.InputProcessor = (function () {
                 });
               }
               this.disk.position
-              .copy(this.mesh.position)
-              .add(moveTo);
+                .copy(this.mesh.position)
+                .add(moveTo);
             }
             else {
               textured(this.mesh, 0x00ff00, {
@@ -447,7 +447,7 @@ Primrose.InputProcessor = (function () {
           if (changed) {
             if (buttons) {
               var blurCurrentControl = !!this.currentControl,
-              currentControl = this.currentControl;
+                currentControl = this.currentControl;
               this.currentControl = null;
 
               if (object) {
@@ -530,16 +530,16 @@ Primrose.InputProcessor = (function () {
 
     makeStateSnapshot() {
       var state = "",
-      i = 0,
-      l = Object.keys(this.commands)
-      .length;
+        i = 0,
+        l = Object.keys(this.commands)
+        .length;
       for (var name in this.commands) {
         var cmd = this.commands[name];
         if (cmd.state) {
           state += (i << 2) |
-          (cmd.state.pressed ? 0x1 : 0) |
-          (cmd.state.fireAgain ? 0x2 : 0) + ":" +
-          cmd.state.value;
+            (cmd.state.pressed ? 0x1 : 0) |
+            (cmd.state.fireAgain ? 0x2 : 0) + ":" +
+            cmd.state.value;
           if (i < l - 1) {
             state += "|";
           }
@@ -558,11 +558,11 @@ Primrose.InputProcessor = (function () {
       var records = snapshot.split("|");
       for (var i = 0; i < records.length; ++i) {
         var record = records[i],
-        parts = record.split(":"),
-        cmdIndex = parseInt(parts[0], 10),
-        pressed = (cmdIndex & 0x1) !== 0,
-        fireAgain = (flags & 0x2) !== 0,
-        flags = parseInt(parts[2], 10);
+          parts = record.split(":"),
+          cmdIndex = parseInt(parts[0], 10),
+          pressed = (cmdIndex & 0x1) !== 0,
+          fireAgain = (flags & 0x2) !== 0,
+          flags = parseInt(parts[2], 10);
         cmdIndex >>= 2;
         name = this.commandNames(cmdIndex);
         cmd = this.commands[name];
@@ -646,7 +646,7 @@ Primrose.InputProcessor = (function () {
     removeFromArray(key, name, value) {
       if (this.commands[name] && this.commands[name][key]) {
         var arr = this.commands[name][key],
-        n = arr.indexOf(value);
+          n = arr.indexOf(value);
         if (n > -1) {
           arr.splice(n, 1);
         }
@@ -656,7 +656,7 @@ Primrose.InputProcessor = (function () {
     invertInArray(key, name, value) {
       if (this.commands[name] && this.commands[name][key]) {
         var arr = this.commands[name][key],
-        n = arr.indexOf(value);
+          n = arr.indexOf(value);
         if (n > -1) {
           arr[n] *= -1;
         }
@@ -729,9 +729,9 @@ Primrose.InputProcessor = (function () {
 
     getValue(name) {
       return ((this.enabled || (this.receiving && this.socketReady)) &&
-        this.isEnabled(name) &&
-        this.commands[name].state.value) ||
-      this.getAxis(name) || 0;
+          this.isEnabled(name) &&
+          this.commands[name].state.value) ||
+        this.getAxis(name) || 0;
     }
 
     setValue(name, value) {
@@ -746,14 +746,14 @@ Primrose.InputProcessor = (function () {
 
     isDown(name) {
       return (this.enabled || (this.receiving && this.socketReady)) &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
+        this.isEnabled(name) &&
+        this.commands[name].state.pressed;
     }
 
     isUp(name) {
       return (this.enabled || (this.receiving && this.socketReady)) &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
+        this.isEnabled(name) &&
+        this.commands[name].state.pressed;
     }
   }
   return InputProcessor;

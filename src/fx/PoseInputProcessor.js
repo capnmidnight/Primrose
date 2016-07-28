@@ -8,12 +8,12 @@ Primrose.PoseInputProcessor = (function () {
 
   pliny.class({
     parent: "Primrose",
-    name: "PoseInputProcessor",
-    baseClass: "Primrose.InputProcessor",
-    description: "| [under construction]"
+      name: "PoseInputProcessor",
+      baseClass: "Primrose.InputProcessor",
+      description: "| [under construction]"
   });
   class PoseInputProcessor extends Primrose.InputProcessor {
-    constructor(name, parent, commands, socket, axisNames){
+    constructor(name, parent, commands, socket, axisNames) {
       super(name, parent, commands, socket, axisNames);
 
       this.currentDevice = null;
@@ -22,7 +22,7 @@ Primrose.PoseInputProcessor = (function () {
       this.poseQuaternion = new THREE.Quaternion();
     }
 
-    update(dt){
+    update(dt) {
       super.update(dt);
 
       if (this.currentDevice) {
@@ -46,7 +46,7 @@ Primrose.PoseInputProcessor = (function () {
       }
     }
 
-    get currentPose(){
+    get currentPose() {
       throw new Exception("currentPose must be implemented in child class");
     }
   }
