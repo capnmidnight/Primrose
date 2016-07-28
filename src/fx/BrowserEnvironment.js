@@ -305,10 +305,10 @@ Primrose.BrowserEnvironment = (function () {
             this.renderer.render(this.scene, this.camera);
             this.camera.translateOnAxis(st.translation, -1);
           }
-          this.input.VR.currentDisplay.submitFrame(this.input.VR.currentPose);
+          this.input.VR.currentDevice.submitFrame(this.input.VR.currentPose);
         }
 
-        if (!this.input.VR.isPresenting || (this.input.VR.currentDisplay.capabilities.hasExternalDisplay && !this.options.disableMirroring)) {
+        if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {
           this.nose.visible = false;
           this.camera.fov = this.options.defaultFOV;
           this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
@@ -601,7 +601,7 @@ Primrose.BrowserEnvironment = (function () {
       var currentTimerObject = null;
       this.timer = 0;
       var RAF = (callback) => {
-        currentTimerObject = this.input.VR.currentDisplay || window;
+        currentTimerObject = this.input.VR.currentDevice || window;
         if (this.timer !== null) {
           this.timer = currentTimerObject.requestAnimationFrame(callback);
         }
@@ -668,7 +668,7 @@ Primrose.BrowserEnvironment = (function () {
 
 
       window.addEventListener("vrdisplaypresentchange", (evt) => {
-        if (!this.input.VR.currentDisplay.isPresenting) {
+        if (!this.input.VR.isPresenting) {
           this.input.VR.cancel();
         }
         showHideButtons();

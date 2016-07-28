@@ -8,14 +8,14 @@ Primrose.Input.Gamepad = (function () {
       gamepadconnected: [],
       gamepaddisconnected: []
     },
-    currentPadIDs = [],
-    currentPads = [],
+    currentDeviceIDs = [],
+    currentDevices = [],
     currentManagers = {};
 
   pliny.class({
     parent: "Primrose.Input",
       name: "Gamepad",
-      baseClass: "Primrose.InputProcessor",
+      baseClass: "Primrose.PoseInputProcessor",
       parameters: [{
         name: "name",
         type: "string",
@@ -33,7 +33,7 @@ Primrose.Input.Gamepad = (function () {
       }],
       description: "An input processor for Gamepads, including those with positional data."
   });
-  class Gamepad extends Primrose.InputProcessor {
+  class Gamepad extends Primrose.PoseInputProcessor {
     static ID(pad) {
       var id = pad.id;
       if (id === "OpenVR Gamepad") {
@@ -66,30 +66,30 @@ Primrose.Input.Gamepad = (function () {
           var maybePad = maybePads[i];
           if (maybePad) {
             var padID = Gamepad.ID(maybePad),
-              padIdx = currentPadIDs.indexOf(padID);
+              padIdx = currentDeviceIDs.indexOf(padID);
             pads.push(maybePad);
             padIDs.push(padID);
             if (padIdx === -1) {
               newPads.push(maybePad);
-              currentPadIDs.push(padID);
-              currentPads.push(maybePad);
+              currentDeviceIDs.push(padID);
+              currentDevices.push(maybePad);
               delete currentManagers[padID];
             }
             else {
-              currentPads[padIdx] = maybePad;
+              currentDevices[padIdx] = maybePad;
             }
           }
         }
       }
 
-      for (i = currentPadIDs.length - 1; i >= 0; --i) {
-        var padID = currentPadIDs[i],
+      for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
+        var padID = currentDeviceIDs[i],
           mgr = currentManagers[padID],
-          pad = currentPads[i];
+          pad = currentDevices[i];
         if (padIDs.indexOf(padID) === -1) {
           oldPads.push(padID);
-          currentPads.splice(i, 1);
-          currentPadIDs.splice(i, 1);
+          currentDevices.splice(i, 1);
+          currentDeviceIDs.splice(i, 1);
         }
         else if (mgr) {
           mgr.checkDevice(pad);
@@ -101,7 +101,7 @@ Primrose.Input.Gamepad = (function () {
     }
 
     static get pads() {
-      return currentPads;
+      return currentDevices;
     }
 
     static get listeners() {
@@ -119,13 +119,13 @@ Primrose.Input.Gamepad = (function () {
       super(padID, parent, commands, socket, Gamepad.AXES);
       currentManagers[padID] = this;
 
-      this.currentPad = pad;
+      this.currentDevice = pad;
       this.axisOffset = axisOffset;
     }
 
     checkDevice(pad) {
       var i, buttonMap = 0;
-      this.currentPad = pad;
+      this.currentDevice = pad;
       for (i = 0; i < pad.buttons.length; ++i) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
@@ -139,13 +139,15 @@ Primrose.Input.Gamepad = (function () {
         var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
         this.setAxis(axisName, pad.axes[i]);
       }
+    }
 
-      this.currentPose = pad.pose;
+    get currentPose() {
+      return this.currentDevice && this.currentDevice.pose;
     }
 
     vibrate() {
-      if (this.currentPad && this.currentPad.vibrate) {
-        this.currentPad.vibrate.apply(this.currentPad, arguments);
+      if (this.currentDevice && this.currentDevice.vibrate) {
+        this.currentDevice.vibrate.apply(this.currentDevice, arguments);
       }
     }
   }

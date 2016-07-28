@@ -9,7 +9,7 @@ Primrose.Input.VR = (function () {
   pliny.class({
     parent: "Primrose.Input",
       name: "VR",
-      baseClass: "Primrose.InputProcessor",
+      baseClass: "Primrose.PoseInputProcessor",
       parameters: [{
         name: "commands",
         type: "Array",
@@ -23,14 +23,13 @@ Primrose.Input.VR = (function () {
       }],
       description: "An input manager for gamepad devices."
   });
-  class VR extends Primrose.InputProcessor {
+  class VR extends Primrose.PoseInputProcessor {
     constructor(avatarHeight, parent, socket) {
       super("VR", parent, null, socket);
 
       this.displays = [];
       this._transformers = [];
-      this.currentDisplayIndex = -1;
-      this.currentPose = DEFAULT_POSE;
+      this.currentDeviceIndex = -1;
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
       this.stage = null;
@@ -47,11 +46,22 @@ Primrose.Input.VR = (function () {
     }
 
     get isNativeMobileWebVR() {
-      return !this.currentDisplay.isPolyfilled && isChrome && isMobile;
+      return !this.currentDevice.isPolyfilled && isChrome && isMobile;
+    }
+
+    connect(selectedIndex) {
+      this.currentDevice = null;
+      this.currentDeviceIndex = selectedIndex;
+      if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
+        this.currentDevice = this.displays[selectedIndex];
+        var params = this.currentDevice.getEyeParameters("left"),
+          fov = params.fieldOfView;
+        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
+      }
     }
 
     requestPresent(opts) {
-      if (!this.currentDisplay) {
+      if (!this.currentDevice) {
         return Promise.reject("No display");
       }
       else {
@@ -64,7 +74,7 @@ Primrose.Input.VR = (function () {
           layers = layers[0];
         }
 
-        var promise = this.currentDisplay.requestPresent(layers)
+        var promise = this.currentDevice.requestPresent(layers)
           .catch((exp) => console.error("what happened?", exp))
           .then((elem) => elem || opts[0].source)
           .then((elem) => PointerLock.request(elem)
@@ -82,7 +92,7 @@ Primrose.Input.VR = (function () {
     cancel() {
       let promise = null;
       if (this.isPresenting) {
-        promise = this.currentDisplay.exitPresent();
+        promise = this.currentDevice.exitPresent();
       }
       else {
         promise = Promise.resolve();
@@ -99,22 +109,17 @@ Primrose.Input.VR = (function () {
 
     zero() {
       super.zero();
-      if (this.currentDisplay) {
-        this.currentDisplay.resetPose();
+      if (this.currentDevice) {
+        this.currentDevice.resetPose();
       }
     }
 
     update(dt) {
       super.update(dt);
 
-      if (this.currentDisplay) {
-        this.currentPose = this.currentDisplay.getPose() || this.currentPose;
-        this.inPhysicalUse = this.isPresenting && !!this.currentPose;
-      }
-
       let x = 0,
         z = 0;
-      var stage = this.currentDisplay && this.currentDisplay.stageParameters;
+      var stage = this.currentDevice && this.currentDevice.stageParameters;
       if (stage) {
         this.movePlayer.fromArray(stage.sittingToStandingTransform);
         x = stage.sizeX;
@@ -137,6 +142,10 @@ Primrose.Input.VR = (function () {
 
     get hasStage() {
       return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
+    }
+
+    get currentPose(){
+      return this.currentDevice && this.currentDevice.getPose();
     }
 
     resolvePicking(currentHits, lastHits, objects) {
@@ -172,44 +181,32 @@ Primrose.Input.VR = (function () {
     }
 
     getTransforms(near, far) {
-      if (this.currentDisplay) {
-        if (!this._transformers[this.currentDisplayIndex]) {
-          this._transformers[this.currentDisplayIndex] = new ViewCameraTransform(this.currentDisplay);
+      if (this.currentDevice) {
+        if (!this._transformers[this.currentDeviceIndex]) {
+          this._transformers[this.currentDeviceIndex] = new ViewCameraTransform(this.currentDevice);
         }
-        return this._transformers[this.currentDisplayIndex].getTransforms(near, far);
+        return this._transformers[this.currentDeviceIndex].getTransforms(near, far);
       }
     }
 
-    get currentDisplay() {
-      return 0 <= this.currentDisplayIndex &&
-        this.currentDisplayIndex < this.displays.length &&
-        this.displays[this.currentDisplayIndex];
+    get canMirror() {
+      return this.currentDevice && this.currentDevice.capabilities.hasExternalDisplay;
     }
 
     get isPolyfilled() {
-      return this.currentDisplay && this.currentDisplay.isPolyfilled;
+      return this.currentDevice && this.currentDevice.isPolyfilled;
     }
 
     get isPresenting() {
-      return this.currentDisplay && this.currentDisplay.isPresenting;
+      return this.currentDevice && this.currentDevice.isPresenting;
     }
 
     get hasOrientation() {
-      return this.currentDisplay && this.currentDisplay.capabilities.hasOrientation;
+      return this.currentDevice && this.currentDevice.capabilities.hasOrientation;
     }
 
     get currentCanvas() {
-      return this.isPresenting && this.currentDisplay.getLayers()[0].source;
-    }
-
-    connect(selectedIndex) {
-      this.currentPose = selectedIndex === 0 ? DEFAULT_POSE : null;
-      this.currentDisplayIndex = selectedIndex;
-      if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
-        var params = this.currentDisplay.getEyeParameters("left"),
-          fov = params.fieldOfView;
-        this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
-      }
+      return this.isPresenting && this.currentDevice.getLayers()[0].source;
     }
   }
 
