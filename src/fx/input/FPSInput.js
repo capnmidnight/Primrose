@@ -5,7 +5,8 @@ Primrose.Input.FPSInput = (function () {
     swapQuaternion = new THREE.Quaternion(),
     euler = new THREE.Euler(),
     eulerParts = [],
-    CARRY_OVER = new THREE.Vector3();
+    CARRY_OVER = new THREE.Vector3(),
+    WEDGE = Math.PI / 3;
 
   pliny.class({
     parent: "Primrose.Input",
@@ -325,10 +326,20 @@ Primrose.Input.FPSInput = (function () {
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.quaternion));
 
+      // figure out the stage orientation.
+      if(this.VR.hasOrientation){
+        var newHeading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
+        euler.set(0, newHeading, 0, "YXZ");
+        swapQuaternion.setFromEuler(euler);
+      }
+      else{
+        swapQuaternion.copy(this.stage.quaternion);
+      }
+
 
       // update the pointers
       for (const mgr of this.motionDevices) {
-        this.updateMotionObject(mgr);
+        this.updateMotionObject(mgr, swapQuaternion);
       }
 
       // record the position on the ground of the user
@@ -359,15 +370,17 @@ Primrose.Input.FPSInput = (function () {
       this.head.quaternion.toArray(this.newState, 10);
     }
 
-    updateMotionObject(mgr) {
+    updateMotionObject(mgr, stageQuat) {
+      // move the pointer onto the stage
       mgr.quaternion
-        .copy(this.stage.quaternion)
+        .copy(stageQuat)
         .multiply(mgr.poseQuaternion);
 
       mgr.position.copy(mgr.posePosition)
-        .applyQuaternion(this.stage.quaternion)
+        .applyQuaternion(stageQuat)
         .add(this.stage.position);
 
+      // adjust for the player's height
       mgr.updateMatrix();
       mgr.applyMatrix(this.VR.stage.matrix);
     }
