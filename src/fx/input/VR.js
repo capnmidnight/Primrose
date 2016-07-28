@@ -33,6 +33,9 @@ Primrose.Input.VR = (function () {
       this.currentPose = DEFAULT_POSE;
       this.movePlayer = new THREE.Matrix4();
       this.defaultAvatarHeight = avatarHeight;
+      this.stage = null;
+      this.lastStageWidth = null;
+      this.lastStageDepth = null;
 
       console.info("Checking for displays...");
       this.ready = navigator.getVRDisplays()
@@ -130,6 +133,10 @@ Primrose.Input.VR = (function () {
       if (!this.stage || s.sizeX !== this.stage.sizeX || s.sizeZ !== this.stage.sizeZ) {
         this.stage = s;
       }
+    }
+
+    get hasStage() {
+      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
     resolvePicking(currentHits, lastHits, objects) {

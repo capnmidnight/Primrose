@@ -62,9 +62,6 @@ Primrose.InputProcessor = (function () {
 
       this.euler = null;
       this.mesh = null;
-      this.stage = null;
-      this.lastStageWidth = null;
-      this.lastStageDepth = null;
       this.disk = null;
       this.color = null;
       this.minorColor = null;
@@ -312,10 +309,6 @@ Primrose.InputProcessor = (function () {
           this.fireCommands();
         }
       }
-    }
-
-    get hasStage() {
-      return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
     set currentControl(v) {
