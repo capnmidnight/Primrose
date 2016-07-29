@@ -37,7 +37,7 @@ Primrose.BrowserEnvironment = (function () {
       };
 
       this.zero = () => {
-        if (!this.input.lockedToEditor) {
+        if (!this.input.lockMovement) {
           this.input.zero();
           if (this.quality === Primrose.Quality.NONE) {
             this.quality = Primrose.Quality.HIGH;

@@ -34,7 +34,7 @@ Primrose.Input.Keyboard = (function () {
       this._codePage = null;
 
       function execute(stateChange, evt) {
-        if (!this.lockedToEditor) {
+        if (!this.lockMovement) {
           this.setButton(evt.keyCode, stateChange);
         }
         else if (evt.type === "keyup") {
@@ -64,7 +64,7 @@ Primrose.Input.Keyboard = (function () {
       }
 
       function focusClipboard(evt) {
-        if (this.lockedToEditor) {
+        if (this.lockMovement) {
           var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
           if (cmdName === "CUT" || cmdName === "COPY") {
             surrogate.style.display = "block";

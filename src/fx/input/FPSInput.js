@@ -25,7 +25,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
       this.newState = [];
-      this.motionDevices = [];
+      this.pointers = [];
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -146,7 +146,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
 
-      this.motionDevices.push(this.VR);
+      this.pointers.push(this.VR);
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
@@ -222,7 +222,7 @@ Primrose.Input.FPSInput = (function () {
           if (isMotion) {
             mgr.parent = this.VR;
             mgr.makePointer(this.options.scene, 0x0000ff, 0x00007f, true);
-            this.motionDevices.push(mgr);
+            this.pointers.push(mgr);
           }
           else {
             this.Keyboard.parent = mgr;
@@ -246,8 +246,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     moveStage(evt) {
-      console.log(evt.name, evt.position.toString(3));
-      CARRY_OVER.copy(evt.position);
+      CARRY_OVER.x += evt.position.x - this.head.position.x;
+      CARRY_OVER.z += evt.position.z - this.head.position.z;
     }
 
     remove(id) {
@@ -337,8 +337,8 @@ Primrose.Input.FPSInput = (function () {
 
 
       // update the pointers
-      for(var i = 0; i < this.motionDevices.length; ++i) {
-        this.updateMotionObject(this.motionDevices[i], swapQuaternion);
+      for(var i = 0; i < this.pointers.length; ++i) {
+        this.updateMotionObject(this.pointers[i], swapQuaternion);
       }
 
       // record the position on the ground of the user
@@ -398,10 +398,10 @@ Primrose.Input.FPSInput = (function () {
       return segments;
     }
 
-    get lockedToEditor() {
+    get lockMovement() {
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if (mgr.lockedToEditor) {
+        if (mgr.lockMovement) {
           return true;
         }
       }
