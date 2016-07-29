@@ -24,8 +24,8 @@ Primrose.AbstractEventEmitter = (function () {
 
     emit(name, obj) {
       if (this._handlers[name]) {
-        for (const thunk of this._handlers[name]) {
-          thunk(obj);
+        for(var i = 0; i < this._handlers[name].length; ++i) {
+          this._handlers[name][i](obj);
         }
       }
     }

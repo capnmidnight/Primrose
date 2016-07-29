@@ -279,8 +279,7 @@ Primrose.Input.FPSInput = (function () {
     update(dt) {
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        mgr.update(dt);
+        this.managers[i].update(dt);
       }
 
       var status = this.managers
@@ -338,8 +337,8 @@ Primrose.Input.FPSInput = (function () {
 
 
       // update the pointers
-      for (const mgr of this.motionDevices) {
-        this.updateMotionObject(mgr, swapQuaternion);
+      for(var i = 0; i < this.motionDevices.length; ++i) {
+        this.updateMotionObject(this.motionDevices[i], swapQuaternion);
       }
 
       // record the position on the ground of the user
@@ -411,8 +410,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
-      for (const mgr of this.managers) {
-        mgr.resolvePicking(currentHits, lastHits, pickableObjects);
+      for(var i = 0; i < this.managers.length; ++i) {
+        this.managers[i].resolvePicking(currentHits, lastHits, pickableObjects);
       }
     }
 
