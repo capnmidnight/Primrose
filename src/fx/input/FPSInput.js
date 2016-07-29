@@ -399,10 +399,10 @@ Primrose.Input.FPSInput = (function () {
       return segments;
     }
 
-    get lockedToEditor() {
+    get lockMovement() {
       for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
-        if (mgr.lockedToEditor) {
+        if (mgr.lockMovement) {
           return true;
         }
       }

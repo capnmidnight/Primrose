@@ -487,7 +487,7 @@ Primrose.InputProcessor = (function () {
       }
     }
 
-    get lockedToEditor() {
+    get lockMovement() {
       var head = this;
       while (head) {
         if (this.currentControl && this.currentControl.lockMovement) {
