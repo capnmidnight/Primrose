@@ -25,7 +25,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
       this.newState = [];
-      this.motionDevices = [];
+      this.pointers = [];
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -146,7 +146,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
 
-      this.motionDevices.push(this.VR);
+      this.pointers.push(this.VR);
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
@@ -222,7 +222,7 @@ Primrose.Input.FPSInput = (function () {
           if (isMotion) {
             mgr.parent = this.VR;
             mgr.makePointer(this.options.scene, 0x0000ff, 0x00007f, true);
-            this.motionDevices.push(mgr);
+            this.pointers.push(mgr);
           }
           else {
             this.Keyboard.parent = mgr;
@@ -338,8 +338,8 @@ Primrose.Input.FPSInput = (function () {
 
 
       // update the pointers
-      for (const mgr of this.motionDevices) {
-        this.updateMotionObject(mgr, swapQuaternion);
+      for(var i = 0; i < this.pointers.length; ++i)
+        this.updateMotionObject(this.pointers[i], swapQuaternion);
       }
 
       // record the position on the ground of the user
