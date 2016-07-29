@@ -212,10 +212,17 @@ Primrose.BrowserEnvironment = (function () {
 
       var update = (t) => {
         var dt = t - lt,
-          i, j;
+          i, j, avatarHeight = this.options.avatarHeight;
         lt = t;
 
-        movePlayer(dt);
+        if(this.input.VR.stage){
+          this.scene.applyMatrix(this.input.VR.stage.matrix);
+          avatarHeight = this.scene.position.y;
+          this.scene.position.y = 0;
+          this.scene.updateMatrix();
+        }
+
+        movePlayer(dt, avatarHeight);
         this.input.resolvePicking(currentHits, lastHits, this.pickableObjects);
         moveSky();
         moveGround();
@@ -225,8 +232,8 @@ Primrose.BrowserEnvironment = (function () {
         emit.call(this, "update", dt);
       };
 
-      var movePlayer = (dt) => {
-        this.input.update(dt);
+      var movePlayer = (dt, avatarHeight) => {
+        this.input.update(dt, avatarHeight);
 
         if (this.projector.ready) {
           this.projector.ready = false;

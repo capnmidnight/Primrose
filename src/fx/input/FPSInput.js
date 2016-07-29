@@ -245,11 +245,6 @@ Primrose.Input.FPSInput = (function () {
         .filter(identity));
     }
 
-    moveStage(evt) {
-      CARRY_OVER.x += evt.position.x - this.head.position.x;
-      CARRY_OVER.z += evt.position.z - this.head.position.z;
-    }
-
     remove(id) {
       var mgr = this[id],
         mgrIdx = this.managers.indexOf(mgr);
@@ -276,7 +271,7 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    update(dt) {
+    update(dt, avatarHeight) {
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
@@ -338,7 +333,7 @@ Primrose.Input.FPSInput = (function () {
 
       // update the pointers
       for(var i = 0; i < this.pointers.length; ++i) {
-        this.updateMotionObject(this.pointers[i], swapQuaternion);
+        this.updateMotionObject(this.pointers[i], swapQuaternion, avatarHeight);
       }
 
       // record the position on the ground of the user
@@ -369,7 +364,7 @@ Primrose.Input.FPSInput = (function () {
       this.head.quaternion.toArray(this.newState, 10);
     }
 
-    updateMotionObject(mgr, stageQuat) {
+    updateMotionObject(mgr, stageQuat, avatarHeight) {
       // move the pointer onto the stage
       mgr.quaternion
         .copy(stageQuat)
@@ -380,8 +375,14 @@ Primrose.Input.FPSInput = (function () {
         .add(this.stage.position);
 
       // adjust for the player's height
-      mgr.updateMatrix();
-      mgr.applyMatrix(this.VR.stage.matrix);
+      mgr.position.y += avatarHeight;
+    }
+
+    moveStage(evt) {
+      VELOCITY.copy(evt.position)
+        .sub(this.head.position);
+      CARRY_OVER.x += VELOCITY.x;
+      CARRY_OVER.z += VELOCITY.z;
     }
 
     get segments() {
