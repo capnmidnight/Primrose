@@ -246,8 +246,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     moveStage(evt) {
-      console.log(evt.name, evt.position.toString(3));
-      CARRY_OVER.copy(evt.position);
+      CARRY_OVER.x += evt.position.x - this.head.position.x;
+      CARRY_OVER.z += evt.position.z - this.head.position.z;
     }
 
     remove(id) {
