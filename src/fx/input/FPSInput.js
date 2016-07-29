@@ -272,6 +272,10 @@ Primrose.Input.FPSInput = (function () {
     }
 
     update(dt, avatarHeight) {
+      this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
+      if(this.Gamepad_0){
+        this.Gamepad_0.enabled = !this.VR.hasStage;
+      }
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
@@ -349,8 +353,8 @@ Primrose.Input.FPSInput = (function () {
 
       // if we're not using an HMD, then update the view according to the mouse
       if (this.VR.hasOrientation) {
-        this.stage.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse;
-        this.head.showPointer = !this.stage.showPointer;
+        this.stage.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse && !this.VR.hasStage;
+        this.head.showPointer = !this.stage.showPointer && !this.VR.hasStage;
       }
       else {
         this.head.quaternion.copy(this.stage.quaternion)
