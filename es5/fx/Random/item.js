@@ -7,10 +7,15 @@ Primrose.Random.item = function () {
     parent: "Primrose.Random",
     name: "item",
     description: "Returns a random element from an array.",
-    parameters: [{ name: "arr", type: "Array", description: "The array form which to pick items." }],
+    parameters: [{
+      name: "arr",
+      type: "Array",
+      description: "The array form which to pick items."
+    }],
     returns: "Any",
     examples: [{
-      name: "Select a random element from an array.", description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
+      name: "Select a random element from an array.",
+      description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
 \n\
 ## Code:\n\
 \n\
@@ -36,7 +41,8 @@ Primrose.Random.item = function () {
 > five  \n\
 > four  \n\
 > three  \n\
-> two" }]
+> two"
+    }]
   });
   return function (arr) {
     return arr[Primrose.Random.int(arr.length)];

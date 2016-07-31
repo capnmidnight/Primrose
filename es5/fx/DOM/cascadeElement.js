@@ -7,7 +7,18 @@ Primrose.DOM.cascadeElement = function () {
     parent: "Primrose.DOM",
     name: "cascadeElement",
     returns: "Element",
-    parameters: [{ name: "id", type: "(String|Element)", description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate" }, { name: "tag", type: "String", description: "The HTML tag name of the element we are finding/creating/validating." }, { name: "DOMClass", type: "Class", description: "The class Function that is the type of element that we are frobnicating."
+    parameters: [{
+      name: "id",
+      type: "(String|Element)",
+      description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"
+    }, {
+      name: "tag",
+      type: "String",
+      description: "The HTML tag name of the element we are finding/creating/validating."
+    }, {
+      name: "DOMClass",
+      type: "Class",
+      description: "The class Function that is the type of element that we are frobnicating."
     }],
     description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
     * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
@@ -17,7 +28,8 @@ Primrose.DOM.cascadeElement = function () {
     * or throwing an error if it is not\n\
   * If `id` is null, creates the DOM element to match the expected type.",
     examples: [{
-      name: "Get an element by ID that already exists.", description: "Assuming the following HTML snippet:\n\
+      name: "Get an element by ID that already exists.",
+      description: "Assuming the following HTML snippet:\n\
 \n\
     grammar(\"HTML\");\n\
     <div>\n\
@@ -32,8 +44,10 @@ Primrose.DOM.cascadeElement = function () {
 \n\
     grammar(\"JavaScript\");\n\
     var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
-    console.assert(elem.textContent === \"Second element\");" }, {
-      name: "Validate the tag type.", description: "Assuming the following HTML snippet:\n\
+    console.assert(elem.textContent === \"Second element\");"
+    }, {
+      name: "Validate the tag type.",
+      description: "Assuming the following HTML snippet:\n\
 \n\
     grammar(\"HTML\");\n\
     <div>\n\
@@ -48,8 +62,10 @@ Primrose.DOM.cascadeElement = function () {
 \n\
     grammar(\"JavaScript\");\n\
     //The following line of code should cause a runtime error.\n\
-    Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);" }, {
-      name: "Create an element.", description: "Assuming the following HTML snippet:\n\
+    Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
+    }, {
+      name: "Create an element.",
+      description: "Assuming the following HTML snippet:\n\
 \n\
     grammar(\"HTML\");\n\
     <div>\n\
@@ -67,9 +83,11 @@ Primrose.DOM.cascadeElement = function () {
     console.assert(elem.id === \"img2\");\n\
     console.assert(elem.parentElement === null);\n\
     document.body.appendChild(elem);\n\
-    console.assert(elem.parentElement === document.body);" }]
+    console.assert(elem.parentElement === document.body);"
+    }]
   });
-  function cascadeElement(id, tag, DOMClass) {
+
+  function cascadeElement(id, tag, DOMClass, add) {
     var elem = null;
     if (id === null) {
       elem = document.createElement(tag);
@@ -81,13 +99,20 @@ Primrose.DOM.cascadeElement = function () {
       if (elem === null) {
         elem = document.createElement(tag);
         elem.id = id;
+        if (add) {
+          document.body.appendChild(elem);
+        }
       } else if (elem.tagName !== tag.toUpperCase()) {
         elem = null;
       }
     }
 
     if (elem === null) {
-      pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
+      pliny.error({
+        name: "Invalid element",
+        type: "Error",
+        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+      });
       throw new Error(id + " does not refer to a valid " + tag + " element.");
     }
     return elem;

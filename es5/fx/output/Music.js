@@ -19,6 +19,7 @@ Primrose.Output.Music = function () {
     name: "Music",
     description: "| [under construction]"
   });
+
   function Music(context, type, numNotes) {
     this.audio = context || new AudioContext();
     if (this.audio && this.audio.createGain) {

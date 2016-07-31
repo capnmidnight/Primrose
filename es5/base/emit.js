@@ -3,7 +3,16 @@
 pliny.function({
   name: "emit",
   description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",
-  parameters: [{ name: "evt", type: "String", description: "The name of the event to trigger." }, { name: "args", type: "Array", optional: true, description: "Arguments to pass to the event." }],
+  parameters: [{
+    name: "evt",
+    type: "String",
+    description: "The name of the event to trigger."
+  }, {
+    name: "args",
+    type: "Array",
+    optional: true,
+    description: "Arguments to pass to the event."
+  }],
   examples: [{
     name: "Basic usage",
     description: "    grammar(\"JavaScript\");\n\
@@ -29,6 +38,7 @@ pliny.function({
     obj.execute();"
   }]
 });
+
 function emit(evt, args) {
   var handlers = this.listeners && this.listeners[evt] || this._listeners && this._listeners[evt];
   for (var i = 0; handlers && i < handlers.length; ++i) {

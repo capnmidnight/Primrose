@@ -24,15 +24,15 @@ Primrose.Input.Location = function () {
     function Location(commands, socket, options) {
       _classCallCheck(this, Location);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Location).call(this, "Location", commands, socket));
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Location).call(this, "Location", null, commands, socket));
 
       _this.options = patch(options, Location.DEFAULTS);
 
       _this.available = !!navigator.geolocation;
       if (_this.available) {
         navigator.geolocation.watchPosition(_this.setState.bind(_this), function () {
-          this.available = false;
-        }.bind(_this), _this.options);
+          return _this.available = false;
+        }, _this.options);
       }
       return _this;
     }

@@ -8,6 +8,7 @@ Primrose.Text.Rule = function () {
     name: "Rule",
     description: "| [under construction]"
   });
+
   function Rule(name, test) {
     this.name = name;
     this.test = test;

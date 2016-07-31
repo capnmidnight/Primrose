@@ -54,7 +54,9 @@ Primrose.Text.CommandPacks.BasicTextInput = function () {
           prim.scrollIntoView(prim.frontCursor);
         },
         NORMAL_ENTER: function NORMAL_ENTER(prim, tokenRows, currentToken) {
-          emit.call(prim, "change", { target: prim });
+          emit.call(prim, "change", {
+            target: prim
+          });
         },
         NORMAL_DELETE: function NORMAL_DELETE(prim, tokenRows) {
           if (prim.frontCursor.i === prim.backCursor.i) {

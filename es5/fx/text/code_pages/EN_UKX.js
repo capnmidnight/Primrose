@@ -59,7 +59,8 @@ Primrose.Text.CodePages.EN_UKX = function () {
       "221": "]",
       "222": "#",
       "223": "`"
-    }, SHIFT: {
+    },
+    SHIFT: {
       "32": " ",
       "48": ")",
       "49": "!",

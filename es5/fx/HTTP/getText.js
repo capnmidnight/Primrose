@@ -8,7 +8,16 @@ Primrose.HTTP.getText = function () {
     name: "getText",
     description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
     returns: "Promise",
-    parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
     examples: [{
       name: "Make a GET request for plain text.",
       description: "Use this to load arbitrary files and do whatever you want with them.\n\
@@ -22,7 +31,8 @@ Primrose.HTTP.getText = function () {
       console.error.bind(console));\n\
 \n\
 ## Results:\n\
-> \"Object {field1: 1, field2: \\\"Field2\\\"}\"" }]
+> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+    }]
   });
   return function (url, options) {
     return Primrose.HTTP.get("text", url, options);

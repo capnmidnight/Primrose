@@ -8,6 +8,7 @@ Primrose.Projector = function () {
     name: "Projector",
     description: "| [under construction]"
   });
+
   function Projector(isWorker) {
     (function () {
       if (typeof THREE === "undefined") {
@@ -15,13 +16,15 @@ Primrose.Projector = function () {
         // File:src/three.js
 
         /**
-        * This is just the THREE.Matrix4 and THREE.Vector3 classes from Three.js, to
-        * be loaded into a WebWorker so the worker can do math. - STM
-        *
-        * @author mrdoob / http://mrdoob.com/
-        */
+         * This is just the THREE.Matrix4 and THREE.Vector3 classes from Three.js, to
+         * be loaded into a WebWorker so the worker can do math. - STM
+         *
+         * @author mrdoob / http://mrdoob.com/
+         */
 
-        self.THREE = { REVISION: '72dev' };
+        self.THREE = {
+          REVISION: '72dev'
+        };
         // polyfills
 
         if (Math.sign === undefined) {
@@ -51,16 +54,16 @@ Primrose.Projector = function () {
         // File:src/math/Quaternion.js
 
         /**
-        * @author mikael emtinger / http://gomo.se/
-        * @author alteredq / http://alteredqualia.com/
-        * @author WestLangley / http://github.com/WestLangley
-        * @author bhouston / http://exocortex.com
-        *
-        * @param {Number} x
-        * @param {Number} y
-        * @param {Number} z
-        * @param {Number} w
-        */
+         * @author mikael emtinger / http://gomo.se/
+         * @author alteredq / http://alteredqualia.com/
+         * @author WestLangley / http://github.com/WestLangley
+         * @author bhouston / http://exocortex.com
+         *
+         * @param {Number} x
+         * @param {Number} y
+         * @param {Number} z
+         * @param {Number} w
+         */
         THREE.Quaternion = function (x, y, z, w) {
 
           this._x = x || 0;
@@ -458,17 +461,17 @@ Primrose.Projector = function () {
         // File:src/math/Vector3.js
 
         /**
-        * @author mrdoob / http://mrdoob.com/
-        * @author *kile / http://kile.stravaganza.org/
-        * @author philogb / http://blog.thejit.org/
-        * @author mikael emtinger / http://gomo.se/
-        * @author egraether / http://egraether.com/
-        * @author WestLangley / http://github.com/WestLangley
-        *
-        * @param {Number} x
-        * @param {Number} y
-        * @param {Number} z
-        */
+         * @author mrdoob / http://mrdoob.com/
+         * @author *kile / http://kile.stravaganza.org/
+         * @author philogb / http://blog.thejit.org/
+         * @author mikael emtinger / http://gomo.se/
+         * @author egraether / http://egraether.com/
+         * @author WestLangley / http://github.com/WestLangley
+         *
+         * @param {Number} x
+         * @param {Number} y
+         * @param {Number} z
+         */
         THREE.Vector3 = function (x, y, z) {
 
           this.x = x || 0;
@@ -1097,17 +1100,17 @@ Primrose.Projector = function () {
         // File:src/math/Matrix4.js
 
         /**
-        * @author mrdoob / http://mrdoob.com/
-        * @author supereggbert / http://www.paulbrunt.co.uk/
-        * @author philogb / http://blog.thejit.org/
-        * @author jordi_ros / http://plattsoft.com
-        * @author D1plo1d / http://github.com/D1plo1d
-        * @author alteredq / http://alteredqualia.com/
-        * @author mikael emtinger / http://gomo.se/
-        * @author timknip / http://www.floorplanner.com/
-        * @author bhouston / http://exocortex.com
-        * @author WestLangley / http://github.com/WestLangley
-        */
+         * @author mrdoob / http://mrdoob.com/
+         * @author supereggbert / http://www.paulbrunt.co.uk/
+         * @author philogb / http://blog.thejit.org/
+         * @author jordi_ros / http://plattsoft.com
+         * @author D1plo1d / http://github.com/D1plo1d
+         * @author alteredq / http://alteredqualia.com/
+         * @author mikael emtinger / http://gomo.se/
+         * @author timknip / http://www.floorplanner.com/
+         * @author bhouston / http://exocortex.com
+         * @author WestLangley / http://github.com/WestLangley
+         */
 
         THREE.Matrix4 = function () {
           this.elements = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
@@ -1944,9 +1947,9 @@ Primrose.Projector = function () {
 
         };
         /**
-        * @author alteredq / http://alteredqualia.com/
-        * @author mrdoob / http://mrdoob.com/
-        */
+         * @author alteredq / http://alteredqualia.com/
+         * @author mrdoob / http://mrdoob.com/
+         */
 
         THREE.Math = {
           generateUUID: function () {
@@ -2089,8 +2092,8 @@ Primrose.Projector = function () {
     this.b = new THREE.Vector3();
     this.c = new THREE.Vector3();
     this.d = new THREE.Vector3();
-    this.f = new THREE.Vector3();
-    this.p = new THREE.Vector3();
+    this.from = new THREE.Vector3();
+    this.to = new THREE.Vector3();
     this.m = new THREE.Matrix4();
     this.listeners = {
       hit: []
@@ -2209,54 +2212,61 @@ Primrose.Projector = function () {
     }
   };
 
-  Projector.prototype.projectPointer = function (args) {
-    var p = args[0],
-        from = args[1],
-        value = null;
-    this.p.fromArray(p);
-    this.f.fromArray(from);
+  Projector.prototype.projectPointers = function (args) {
+    var results = {};
+    for (var n = 0; n < args.length; ++n) {
+      var pack = args[n],
+          name = pack[0],
+          from = pack[1],
+          to = pack[2],
+          value = null;
+      this.from.fromArray(from);
+      this.to.fromArray(to);
 
-    for (var i = 0; i < this.objectIDs.length; ++i) {
-      var objID = this.objectIDs[i],
-          obj = this.objects[objID];
-      if (!obj.disabled) {
-        var verts = this._getVerts(obj),
-            faces = obj.geometry.faces,
-            uvs = obj.geometry.uvs;
-        for (var j = 0; j < faces.length; ++j) {
-          var face = faces[j],
-              v0 = verts[face[0] % verts.length],
-              v1 = verts[face[1] % verts.length],
-              v2 = verts[face[2] % verts.length];
-          this.a.subVectors(v1, v0);
-          this.b.subVectors(v2, v0);
-          this.c.subVectors(this.p, this.f);
-          this.m.set(this.a.x, this.b.x, -this.c.x, 0, this.a.y, this.b.y, -this.c.y, 0, this.a.z, this.b.z, -this.c.z, 0, 0, 0, 0, 1);
-          if (Math.abs(this.m.determinant()) > 1e-10) {
-            this.m.getInverse(this.m);
-            this.d.subVectors(this.f, v0).applyMatrix4(this.m);
-            if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
-              this.c.multiplyScalar(this.d.z).add(this.f);
-              var dist = Math.sign(this.d.z) * this.p.distanceTo(this.c);
-              if (!value || dist < value.distance) {
-                value = {
-                  objectID: objID,
-                  distance: dist,
-                  faceIndex: j,
-                  facePoint: this.c.toArray(),
-                  faceNormal: this.d.toArray()
-                };
+      for (var i = 0; i < this.objectIDs.length; ++i) {
+        var objID = this.objectIDs[i],
+            obj = this.objects[objID];
+        if (!obj.disabled) {
+          var verts = this._getVerts(obj),
+              faces = obj.geometry.faces,
+              uvs = obj.geometry.uvs;
 
-                if (uvs) {
-                  v0 = uvs[face[0] % uvs.length];
-                  v1 = uvs[face[1] % uvs.length];
-                  v2 = uvs[face[2] % uvs.length];
-                  var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
-                      v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
-                  if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
-                    value.point = [u, v];
-                  } else {
-                    value = null;
+          for (var j = 0; j < faces.length; ++j) {
+            var face = faces[j],
+                v0 = verts[face[0] % verts.length],
+                v1 = verts[face[1] % verts.length],
+                v2 = verts[face[2] % verts.length];
+            this.a.subVectors(v1, v0);
+            this.b.subVectors(v2, v0);
+            this.c.subVectors(this.to, this.from);
+            this.m.set(this.a.x, this.b.x, -this.c.x, 0, this.a.y, this.b.y, -this.c.y, 0, this.a.z, this.b.z, -this.c.z, 0, 0, 0, 0, 1);
+            if (Math.abs(this.m.determinant()) > 1e-10) {
+              this.m.getInverse(this.m);
+              this.d.subVectors(this.from, v0).applyMatrix4(this.m);
+              if (0 <= this.d.x && this.d.x <= 1 && 0 <= this.d.y && this.d.y <= 1 && this.d.z > 0) {
+                this.c.multiplyScalar(this.d.z).add(this.from);
+                var dist = Math.sign(this.d.z) * this.to.distanceTo(this.c);
+                if (!value || dist < value.distance) {
+                  value = {
+                    name: name,
+                    objectID: objID,
+                    distance: dist,
+                    faceIndex: j,
+                    facePoint: this.c.toArray(),
+                    faceNormal: this.d.toArray()
+                  };
+
+                  if (uvs) {
+                    v0 = uvs[face[0] % uvs.length];
+                    v1 = uvs[face[1] % uvs.length];
+                    v2 = uvs[face[2] % uvs.length];
+                    var u = this.d.x * (v1[0] - v0[0]) + this.d.y * (v2[0] - v0[0]) + v0[0],
+                        v = this.d.x * (v1[1] - v0[1]) + this.d.y * (v2[1] - v0[1]) + v0[1];
+                    if (obj.minU <= u && u <= obj.maxU && obj.minV <= v && v < obj.maxV) {
+                      value.point = [u, v];
+                    } else {
+                      value = null;
+                    }
                   }
                 }
               }
@@ -2264,8 +2274,11 @@ Primrose.Projector = function () {
           }
         }
       }
+      if (value) {
+        results[name] = value;
+      }
     }
-    this._emit("hit", value);
+    this._emit("hit", results);
   };
   return Projector;
 }();

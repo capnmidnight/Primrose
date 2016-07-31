@@ -4,100 +4,302 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 Primrose.Pointer = function () {
   "use strict";
 
-  var POINTER_RADIUS = 0.02,
-      POINTER_RESCALE = 5,
-      TELEPORT_RADIUS = 0.4,
+  var TELEPORT_PAD_RADIUS = 0.4,
       FORWARD = new THREE.Vector3(0, 0, -1),
       MAX_SELECT_DISTANCE = 2,
       MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
       MAX_MOVE_DISTANCE = 5,
       MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+      LASER_WIDTH = 0.01,
+      LASER_LENGTH = 3 * LASER_WIDTH,
+      EULER_TEMP = new THREE.Euler(),
       moveTo = new THREE.Vector3(0, 0, 0);
 
-  var Pointer = function () {
-    function Pointer(scene) {
+  pliny.class({
+    parent: "Primrose",
+    name: "Pointer",
+    baseClass: "Primrose.AbstractEventEmitter",
+    description: "A device that points into the scene somewhere, casting a ray at objects for picking operations.",
+    parameters: [{
+      name: "color",
+      type: "Number",
+      description: "The color to use to render the teleport pad and 3D pointer cursor.",
+      optional: true,
+      defaultValue: 0xff0000
+    }, {
+      name: "emission",
+      type: "Number",
+      description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas.",
+      optional: true,
+      defaultValue: 0x7f0000
+    }, {
+      name: "isHand",
+      type: "Boolean",
+      description: "Pass true to add a hand model at the origin of the pointer ray.",
+      optional: true,
+      defaultValue: false
+    }]
+  });
+
+  var Pointer = function (_Primrose$AbstractEve) {
+    _inherits(Pointer, _Primrose$AbstractEve);
+
+    function Pointer(trigger) {
+      var color = arguments.length <= 1 || arguments[1] === undefined ? 0xff0000 : arguments[1];
+      var emission = arguments.length <= 2 || arguments[2] === undefined ? 0x7f0000 : arguments[2];
+      var isHand = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+      var base = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+
       _classCallCheck(this, Pointer);
 
-      this.mesh = textured(sphere(POINTER_RADIUS, 10, 10), 0xff0000, {
-        emissive: 0x3f3f3f
-      });
-      this.groundMesh = textured(sphere(TELEPORT_RADIUS, 32, 3), 0x00ff00, {
-        emissive: 0x3f3f3f
-      });
-      this.groundMesh.visible = false;
-      this.groundMesh.scale.set(1, 0.1, 1);
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Pointer).call(this));
 
-      scene.add(this.mesh);
-      scene.add(this.groundMesh);
+      _this.trigger = trigger;
+      _this._currentControl = null;
+      _this.showPointer = true;
+      _this.color = color;
+      _this.emission = emission;
+      _this.velocity = new THREE.Vector3();
+      _this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), _this.color, {
+        emissive: _this.emission
+      });
+      _this.mesh.geometry.vertices.forEach(function (v) {
+        v.z -= LASER_LENGTH * 0.5 + 0.5;
+      });
+
+      _this.disk = textured(sphere(TELEPORT_PAD_RADIUS, 128, 3), _this.color, {
+        emissive: _this.emission
+      });
+      _this.disk.geometry.computeBoundingBox();
+      _this.disk.geometry.vertices.forEach(function (v) {
+        return v.y -= _this.disk.geometry.boundingBox.min.y;
+      });
+      _this.disk.geometry.computeBoundingBox();
+
+      _this.disk.scale.set(1, 0.1, 1);
+
+      if (base) {
+        _this.mesh.add(textured(box(0.1, 0.025, 0.2), _this.color, {
+          emissive: _this.emission
+        }));
+      }
+      return _this;
     }
 
     _createClass(Pointer, [{
-      key: "move",
-      value: function move(lockedToEditor, inVR, qHeading, camera, player) {
-        this.mesh.position.copy(FORWARD);
-        if (inVR && !isMobile) {
-          this.mesh.position.applyQuaternion(qHeading);
-        }
-        if (!lockedToEditor || isMobile) {
-          this.mesh.position.add(camera.position);
-          this.mesh.position.applyQuaternion(camera.quaternion);
-        }
-        this.mesh.position.applyQuaternion(player.quaternion);
-        this.mesh.position.add(player.position);
+      key: "add",
+      value: function add(obj) {
+        this.mesh.add(obj);
       }
     }, {
-      key: "registerHit",
-      value: function registerHit(currentHit, player, isGround) {
-        var fp = currentHit.facePoint,
-            moveMesh = this.mesh;
-
-        moveTo.fromArray(fp).sub(player.position);
-
-        this.groundMesh.visible = isGround;
-
-        if (isGround) {
-          var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
-          moveMesh = this.groundMesh;
-          this.mesh.visible = distSq > MAX_MOVE_DISTANCE_SQ;
-          if (this.mesh.visible) {
-            this.mesh.material.color.setRGB(1, 1, 0);
-            this.mesh.scale.set(1, 1, 1);
-            var dist = Math.sqrt(distSq),
-                factor = MAX_MOVE_DISTANCE / dist,
-                y = moveTo.y;
-            moveTo.multiplyScalar(factor);
-            this.mesh.material.color.setRGB(1, 1, 0);
-            this.mesh.scale.set(POINTER_RESCALE, POINTER_RESCALE, POINTER_RESCALE);
-            this.mesh.position.copy(player.position).add(moveTo);
-            moveTo.y = y;
+      key: "addToBrowserEnvironment",
+      value: function addToBrowserEnvironment(env, scene) {
+        pliny.method({
+          parent: "Primrose.Pointer",
+          name: "addToBrowserEnvironment",
+          description: "Add this meshes that give the visual representation of the pointer, to the scene.",
+          parameters: [{
+            name: "env",
+            type: "Primrose.BrowserEnvironment",
+            description: "Not used, just here to fulfill a common interface in the framework."
+          }, {
+            name: "scene",
+            type: "THREE.Scene",
+            description: "The scene to which to add the 3D cursor."
+          }]
+        });
+        scene.add(this.mesh);
+        scene.add(this.disk);
+      }
+    }, {
+      key: "updateMatrix",
+      value: function updateMatrix() {
+        return this.mesh.updateMatrix();
+      }
+    }, {
+      key: "applyMatrix",
+      value: function applyMatrix(m) {
+        return this.mesh.applyMatrix(m);
+      }
+    }, {
+      key: "update",
+      value: function update(defaultPosition) {
+        if (this.trigger instanceof Primrose.PoseInputProcessor) {
+          this.position.copy(this.trigger.position);
+          this.quaternion.copy(this.trigger.quaternion);
+        } else {
+          var head = this.trigger,
+              pitch = 0,
+              heading = 0;
+          while (head) {
+            pitch += head.getValue("pitch");
+            heading += head.getValue("heading");
+            head = head.parent;
           }
-          this.groundMesh.position.copy(player.position).add(moveTo);
-        } else if (moveTo.lengthSq() <= MAX_SELECT_DISTANCE_SQ) {
-          this.mesh.scale.set(0.5, 1, 0.5);
-          this.mesh.material.color.setRGB(0, 1, 0);
-          this.mesh.position.copy(player.position).add(moveTo);
+
+          EULER_TEMP.set(pitch, heading, 0, "YXZ");
+          this.quaternion.setFromEuler(EULER_TEMP);
+          this.position.copy(defaultPosition);
         }
       }
     }, {
-      key: "reset",
-      value: function reset() {
-        this.groundMesh.visible = false;
-        this.mesh.visible = true;
-        this.mesh.material.color.setRGB(1, 0, 0);
-        this.mesh.scale.set(1, 1, 1);
+      key: "resolvePicking",
+      value: function resolvePicking(currentHits, lastHits, objects) {
+        this.disk.visible = false;
+        this.mesh.visible = false;
+
+        if (this.trigger.enabled && this.showPointer) {
+          // reset the mesh color to the base value
+          textured(this.mesh, this.color, {
+            emissive: this.minorColor
+          });
+          this.mesh.visible = true;
+          var buttons = 0,
+              dButtons = 0,
+              currentHit = currentHits[this.name],
+              lastHit = lastHits && lastHits[this.name],
+              head = this.trigger,
+              isGround = false,
+              object,
+              control,
+              point;
+
+          while (head) {
+            buttons += head.getValue("buttons");
+            dButtons += head.getValue("dButtons");
+            head = head.parent;
+          }
+
+          var changed = dButtons !== 0;
+
+          if (currentHit) {
+            object = objects[currentHit.objectID];
+            isGround = object && object.name === "Ground";
+
+            var fp = currentHit.facePoint;
+
+            point = currentHit.point;
+            control = object && (object.button || object.surface);
+
+            moveTo.fromArray(fp).sub(this.mesh.position);
+
+            this.disk.visible = isGround;
+            if (isGround) {
+              var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
+              if (distSq > MAX_MOVE_DISTANCE_SQ) {
+                var dist = Math.sqrt(distSq),
+                    factor = MAX_MOVE_DISTANCE / dist,
+                    y = moveTo.y;
+                moveTo.y = 0;
+                moveTo.multiplyScalar(factor);
+                moveTo.y = y;
+                textured(this.mesh, 0xffff00, {
+                  emissive: 0x7f7f00
+                });
+              }
+              this.disk.position.copy(this.mesh.position).add(moveTo);
+            } else {
+              textured(this.mesh, 0x00ff00, {
+                emissive: 0x007f00
+              });
+            }
+          }
+
+          if (changed) {
+            if (buttons) {
+              var blurCurrentControl = !!this.currentControl,
+                  currentControl = this.currentControl;
+              this.currentControl = null;
+
+              if (object) {
+                if (currentControl && currentControl === control) {
+                  blurCurrentControl = false;
+                }
+
+                if (!this.currentControl && control) {
+                  this.currentControl = control;
+                  this.currentControl.focus();
+                } else if (isGround) {
+                  this.emit("teleport", {
+                    name: this.name,
+                    position: this.disk.position
+                  });
+                }
+
+                if (this.currentControl) {
+                  this.currentControl.startUV(point);
+                }
+              }
+
+              if (blurCurrentControl) {
+                currentControl.blur();
+              }
+            } else if (this.currentControl) {
+              this.currentControl.endPointer();
+            }
+          } else if (!changed && buttons > 0 && this.currentControl && point) {
+            this.currentControl.moveUV(point);
+          }
+        }
       }
     }, {
       key: "position",
       get: function get() {
         return this.mesh.position;
       }
+    }, {
+      key: "quaternion",
+      get: function get() {
+        return this.mesh.quaternion;
+      }
+    }, {
+      key: "matrix",
+      get: function get() {
+        return this.mesh.matrix;
+      }
+    }, {
+      key: "currentControl",
+      get: function get() {
+        return this._currentControl;
+      },
+      set: function set(v) {
+        var head = this;
+        while (head) {
+          head._currentControl = v;
+          head = head.parent;
+        }
+      }
+    }, {
+      key: "segment",
+      get: function get() {
+        if (this.showPointer) {
+          FORWARD.set(0, 0, -1).applyQuaternion(this.mesh.quaternion).add(this.mesh.position);
+          return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+        }
+      }
+    }, {
+      key: "lockMovement",
+      get: function get() {
+        var head = this;
+        while (head) {
+          if (this.currentControl && this.currentControl.lockMovement) {
+            return true;
+          }
+          head = head.parent;
+        }
+        return false;
+      }
     }]);
 
     return Pointer;
-  }();
+  }(Primrose.AbstractEventEmitter);
 
   return Pointer;
 }();

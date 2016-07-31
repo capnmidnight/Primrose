@@ -8,6 +8,7 @@ Primrose.Text.Token = function () {
     name: "Token",
     description: "| [under construction]"
   });
+
   function Token(value, type, index, line) {
     this.value = value;
     this.type = type;

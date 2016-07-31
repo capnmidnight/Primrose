@@ -18,7 +18,15 @@ Primrose.Controls.VUMeter = function () {
     name: "VUMeter",
     baseClass: "Primrose.Surface",
     description: "A visualization of audio data.",
-    parameters: [{ name: "analyzer", type: "MediaStream", description: "The audio stream to analyze." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
+    parameters: [{
+      name: "analyzer",
+      type: "MediaStream",
+      description: "The audio stream to analyze."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
   });
 
   var VUMeter = function (_Primrose$Surface) {
@@ -33,7 +41,9 @@ Primrose.Controls.VUMeter = function () {
 
       options = options || {};
       if (typeof options === "string") {
-        options = { value: options };
+        options = {
+          value: options
+        };
       }
 
       ////////////////////////////////////////////////////////////////////////

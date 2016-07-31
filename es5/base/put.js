@@ -9,7 +9,11 @@ pliny.function({
 * .rot(x, y, z) - set the rotation for the object.\n\
 * .scale(x, y, z) - set the scale for the object.\n\
 * .obj() - return the naked object, if not all of the transformations are desired.",
-  parameters: [{ name: "object", type: "Object", description: "The object to manipulate." }],
+  parameters: [{
+    name: "object",
+    type: "Object",
+    description: "The object to manipulate."
+  }],
   returns: "Object",
   examples: [{
     name: "Put an object on a scene at a specific location.",
@@ -20,6 +24,7 @@ pliny.function({
       .obj();"
   }]
 });
+
 function put(object) {
   var box = {
     on: null,

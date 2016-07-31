@@ -20,7 +20,11 @@ Primrose.Controls.Image = function () {
     name: "Image",
     baseClass: "Primrose.Surface",
     description: "A simple 2D image to put on a Surface.",
-    parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Image." }]
+    parameters: [{
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Image."
+    }]
   });
 
   var Image = function (_Primrose$Surface) {
@@ -42,7 +46,9 @@ Primrose.Controls.Image = function () {
 
       options = options || {};
       if (typeof options === "string") {
-        options = { value: options };
+        options = {
+          value: options
+        };
       }
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this, patch(options, {
@@ -140,7 +146,9 @@ Primrose.Controls.Image = function () {
           _this3.bounds.height = bounds.height;
           _this3.render();
 
-          emit.call(_this3, "load", { target: _this3 });
+          emit.call(_this3, "load", {
+            target: _this3
+          });
           return _this3;
         });
       }

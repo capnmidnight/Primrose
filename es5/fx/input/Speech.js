@@ -74,7 +74,7 @@ Primrose.Input.Speech = function () {
     function Speech(commands, socket) {
       _classCallCheck(this, Speech);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Speech).call(this, "Speech", commands, socket));
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Speech).call(this, "Speech", null, commands, socket));
 
       var running = false,
           recognition = null,

@@ -2,13 +2,38 @@
 
 pliny.function({
   name: "shell",
-  parameters: [{ name: "radius", type: "Number", description: "How far the sphere should extend away from a center point." }, { name: "widthSegments", type: "Number", description: "The number of faces wide in which to slice the geometry." }, { name: "heightSegments", type: "Number", description: "The number of faces tall in which to slice the geometry." }, { name: "phi", type: "Number", optional: true, description: "The angle in radians around the Y-axis of the sphere.", default: "80 degrees." }, { name: "thetaStart", type: "Number", optional: true, description: "The angle in radians around the Z-axis of the sphere.", default: "48 degrees." }],
+  parameters: [{
+    name: "radius",
+    type: "Number",
+    description: "How far the sphere should extend away from a center point."
+  }, {
+    name: "widthSegments",
+    type: "Number",
+    description: "The number of faces wide in which to slice the geometry."
+  }, {
+    name: "heightSegments",
+    type: "Number",
+    description: "The number of faces tall in which to slice the geometry."
+  }, {
+    name: "phi",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Y-axis of the sphere.",
+    default: "80 degrees."
+  }, {
+    name: "thetaStart",
+    type: "Number",
+    optional: true,
+    description: "The angle in radians around the Z-axis of the sphere.",
+    default: "48 degrees."
+  }],
   description: "The shell is basically an inside-out sphere. Say you want a to model\n\
 the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
 outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
 case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry).",
   examples: [{
-    name: "Create a sky sphere", description: "To create a sphere that hovers around the user at a\n\
+    name: "Create a sky sphere",
+    description: "To create a sphere that hovers around the user at a\n\
 far distance, showing a sky of some kind, you can use the `shell()` function in\n\
 combination with the [`textured()`](#textured) function. Assuming you have an image\n\
 file to use as the texture, execute code as such:\n\
@@ -36,8 +61,10 @@ file to use as the texture, execute code as such:\n\
       \"skyTexture.jpg\",\n\
       // Specify that the material should be shadeless, i.e. no shadows. This\n\
       // works best for skymaps.\n\
-      {unshaded: true} );" }]
+      {unshaded: true} );"
+  }]
 });
+
 function shell(r, slices, rings, phi, theta) {
   var SLICE = 0.45;
   if (phi === undefined) {

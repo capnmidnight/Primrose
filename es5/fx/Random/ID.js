@@ -9,7 +9,8 @@ Primrose.Random.ID = function () {
     description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
     returns: "String",
     examples: [{
-      name: "Generate 10 random identifiers.", description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
+      name: "Generate 10 random identifiers.",
+      description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
 \n\
 ## Code:\n\
 \n\
@@ -28,7 +29,8 @@ Primrose.Random.ID = function () {
 > 7pbej49fhhd5icimp3krzfr\n\
 > 3vnlovkkvyvmetsjcyirizfr\n\
 > icrehedvz97dpgkusfumzpvi\n\
-> 9p06sytn6dfearuibsnn4s4i" }]
+> 9p06sytn6dfearuibsnn4s4i"
+    }]
   });
   return function () {
     return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");

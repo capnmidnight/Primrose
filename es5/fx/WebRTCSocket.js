@@ -19,12 +19,24 @@ Primrose.WebRTCSocket = function () {
   // - https://www.webrtc-experiment.com/docs/STUN-or-TURN.html
   // - http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#after-signaling-using-ice-to-cope-with-nats-and-firewalls
   // - https://github.com/coturn/rfc5766-turn-server/
-  var ICE_SERVERS = [{ url: "stun:stun.l.google.com:19302" }, { url: "stun:stun1.l.google.com:19302" }, { url: "stun:stun2.l.google.com:19302" }, { url: "stun:stun3.l.google.com:19302" }, { url: "stun:stun4.l.google.com:19302" }];
+  var ICE_SERVERS = [{
+    url: "stun:stun.l.google.com:19302"
+  }, {
+    url: "stun:stun1.l.google.com:19302"
+  }, {
+    url: "stun:stun2.l.google.com:19302"
+  }, {
+    url: "stun:stun3.l.google.com:19302"
+  }, {
+    url: "stun:stun4.l.google.com:19302"
+  }];
 
   if (isFirefox) {
-    ICE_SERVERS = [{ urls: ICE_SERVERS.map(function (s) {
+    ICE_SERVERS = [{
+      urls: ICE_SERVERS.map(function (s) {
         return s.url;
-      }) }];
+      })
+    }];
   }
 
   var INSTANCE_COUNT = 0;
@@ -33,7 +45,27 @@ Primrose.WebRTCSocket = function () {
     parent: "Primrose",
     name: "WebRTCSocket",
     description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
-    parameters: [{ name: "proxyServer", type: "WebSocket", description: "A connection over which to negotiate the peering." }, { name: "fromUserName", type: "String", description: "The name of the local user, from which the peering is being initiated." }, { name: "fromUserIndex", type: "Number", description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation." }, { name: "toUserName", type: "String", description: "The name of the remote user, to which the peering is being requested." }, { name: "toUserIndex", type: "Number", description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation." }]
+    parameters: [{
+      name: "proxyServer",
+      type: "WebSocket",
+      description: "A connection over which to negotiate the peering."
+    }, {
+      name: "fromUserName",
+      type: "String",
+      description: "The name of the local user, from which the peering is being initiated."
+    }, {
+      name: "fromUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+    }, {
+      name: "toUserName",
+      type: "String",
+      description: "The name of the remote user, to which the peering is being requested."
+    }, {
+      name: "toUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+    }]
   });
 
   var WebRTCSocket = function () {
@@ -148,8 +180,14 @@ Primrose.WebRTCSocket = function () {
         description: "The connection over which to negotiate the peering."
       });
       var progress = {
-        offer: { created: false, received: false },
-        answer: { created: false, recieved: false }
+        offer: {
+          created: false,
+          received: false
+        },
+        answer: {
+          created: false,
+          recieved: false
+        }
       };
       Object.defineProperty(this, "progress", {
         get: function get() {
@@ -331,7 +369,15 @@ Primrose.WebRTCSocket = function () {
           parent: "Primrose.WebRTCSocket",
           name: "recordProgress",
           description: "mark that we made progress towards our goals.",
-          parameters: [{ name: "description", type: "RTCSessionDescription", description: "An answer or offer object." }, { name: "method", type: "String", description: "Whether or not the description had been 'created' or 'received' here." }]
+          parameters: [{
+            name: "description",
+            type: "RTCSessionDescription",
+            description: "An answer or offer object."
+          }, {
+            name: "method",
+            type: "String",
+            description: "Whether or not the description had been 'created' or 'received' here."
+          }]
         });
         this.progress[description.type][method] = true;
       }
@@ -343,7 +389,11 @@ Primrose.WebRTCSocket = function () {
           name: "wrap",
           returns: "Object",
           description: "Provides the context into a message so that the remote user can tell if the message `this.isExpected()`",
-          parameters: [{ name: "item", type: "Object", description: "The object to wrap." }]
+          parameters: [{
+            name: "item",
+            type: "Object",
+            description: "The object to wrap."
+          }]
         });
         return {
           fromUserName: this.fromUserName,
@@ -361,7 +411,15 @@ Primrose.WebRTCSocket = function () {
           name: "isExpected",
           returns: "Boolean",
           description: "A test to see if we were expecting a particular message. Sometimes the messages get criss-crossed on the negotiation server, and this just makes sure we don't cause an error.",
-          parameters: [{ name: "tag", type: "String", description: "A name for the operation being tested." }, { name: "obj", type: "Object", description: "The object within the operating being tested." }]
+          parameters: [{
+            name: "tag",
+            type: "String",
+            description: "A name for the operation being tested."
+          }, {
+            name: "obj",
+            type: "Object",
+            description: "The object within the operating being tested."
+          }]
         });
 
         var incomplete = !this.complete,
@@ -429,7 +487,7 @@ Primrose.WebRTCSocket = function () {
           description: "Override this method in subClasses to indicate when the peering process is complete. The peering process is complete when all offers are answered."
         });
 
-        throw new Error("Not implemented.");
+        return !this.rtc || this.rtc.signalingState === "closed";
       }
     }]);
 

@@ -20,7 +20,15 @@ Primrose.Controls.Button2D = function () {
     name: "Button2D",
     description: "A simple button to put on a Surface.",
     baseClass: "Primrose.Controls.Label",
-    parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
   });
 
   var Button2D = function (_Primrose$Controls$La) {
@@ -64,7 +72,9 @@ Primrose.Controls.Button2D = function () {
       value: function endPointer() {
         if (this._activated) {
           this._activated = false;
-          emit.call(this, "click", { target: this });
+          emit.call(this, "click", {
+            target: this
+          });
           this.render();
         }
       }

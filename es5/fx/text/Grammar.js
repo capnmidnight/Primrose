@@ -6,14 +6,23 @@ Primrose.Text.Grammar = function () {
   pliny.class({
     parent: "Primrose.Text",
     name: "Grammar",
-    parameters: [{ name: "name", type: "String", description: "A user-friendly name for the grammar, to be able to include it in an options listing." }, { name: "rules", type: "Array", description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code." }],
+    parameters: [{
+      name: "name",
+      type: "String",
+      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+    }, {
+      name: "rules",
+      type: "Array",
+      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+    }],
     description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
 \n\
 As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
 \n\
 See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
     examples: [{
-      name: "A plain-text \"grammar\".", description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+      name: "A plain-text \"grammar\".",
+      description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
 \n\
 ## Code:\n\
 \n\
@@ -23,8 +32,10 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       \"Plain-text\", [\n\
       // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
       [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
-    ] );" }, {
-      name: "A grammar for BASIC", description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+    ] );"
+    }, {
+      name: "A grammar for BASIC",
+      description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
 \n\
 ## Code:\n\
 \n\
@@ -55,8 +66,10 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
         ],\n\
         // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
         [ \"identifiers\", /\\w+\\$?/ ]\n\
-      ] );" }]
+      ] );"
+    }]
   });
+
   function Grammar(name, rules) {
     pliny.property({
       parent: "Primrose.Text.Grammar",
@@ -151,11 +164,16 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
     pliny.method({
       parent: "Primrose.Text.Grammar",
       name: "tokenize",
-      parameters: [{ name: "text", type: "String", description: "The text to tokenize." }],
+      parameters: [{
+        name: "text",
+        type: "String",
+        description: "The text to tokenize."
+      }],
       returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
       description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
       examples: [{
-        name: 'Tokenize some JavaScript', description: 'Primrose comes with a grammar for JavaScript built in.\n\
+        name: 'Tokenize some JavaScript',
+        description: 'Primrose comes with a grammar for JavaScript built in.\n\
 \n\
 ## Code:\n\
 \n\
@@ -183,7 +201,8 @@ See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.
       { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
       { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
       { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
-    ]' }]
+    ]'
+      }]
     });
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of

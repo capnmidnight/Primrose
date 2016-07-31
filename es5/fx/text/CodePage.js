@@ -10,6 +10,7 @@ Primrose.Text.CodePage = function () {
     name: "CodePage",
     description: "| [under construction]"
   });
+
   function CodePage(name, lang, options) {
     this.name = name;
     this.language = lang;

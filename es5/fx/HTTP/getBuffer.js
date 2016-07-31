@@ -8,7 +8,16 @@ Primrose.HTTP.getBuffer = function () {
     name: "getBuffer",
     description: "Get an ArrayBuffer from a server.",
     returns: "Promise",
-    parameters: [{ name: "url", type: "String", description: "The resource to which the request is being sent." }, { name: "options.progress", type: "Function", optional: true, description: "A callback function to be called as the download from the server progresses." }],
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
     examples: [{
       name: "Make a GET request for an ArrayBuffer.",
       description: "Use this to load audio files and do whatever you want with them.\n\
@@ -25,7 +34,8 @@ Primrose.HTTP.getBuffer = function () {
           console.log.bind(console, \"success\"),\n\
           console.error.bind(console, \"error decoding\"));\n\
       },\n\
-      console.error.bind(console, \"error loading\")\n" }]
+      console.error.bind(console, \"error loading\")\n"
+    }]
   });
   return function (url, options) {
     return Primrose.HTTP.get("arraybuffer", url, options);

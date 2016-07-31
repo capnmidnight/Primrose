@@ -7,6 +7,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 Primrose.InputProcessor = function () {
   "use strict";
 
+  var SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
+      TELEPORT_PAD_RADIUS = 0.4,
+      FORWARD = new THREE.Vector3(0, 0, -1),
+      MAX_SELECT_DISTANCE = 2,
+      MAX_SELECT_DISTANCE_SQ = MAX_SELECT_DISTANCE * MAX_SELECT_DISTANCE,
+      MAX_MOVE_DISTANCE = 5,
+      MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
+      LASER_WIDTH = 0.01,
+      LASER_LENGTH = 3 * LASER_WIDTH,
+      moveTo = new THREE.Vector3(0, 0, 0);
+
   pliny.class({
     parent: "Primrose",
     name: "InputProcessor",
@@ -32,12 +43,13 @@ Primrose.InputProcessor = function () {
       }
     }]);
 
-    function InputProcessor(name, commands, socket, axisNames) {
+    function InputProcessor(name, parent, commands, socket, axisNames) {
       var _this = this;
 
       _classCallCheck(this, InputProcessor);
 
       this.name = name;
+      this.parent = parent;
       this.commands = {};
       this.commandNames = [];
       this.socket = socket;
@@ -47,7 +59,7 @@ Primrose.InputProcessor = function () {
       this.transmitting = true;
       this.receiving = true;
       this.socketReady = false;
-      this.inPhysicalUse = true;
+      this.inPhysicalUse = false;
       this.inputState = {
         buttons: [],
         axes: [],
@@ -57,14 +69,15 @@ Primrose.InputProcessor = function () {
         meta: false
       };
       this.lastState = "";
-      this.lastT = performance.now();
+      this.listeners = {
+        teleport: []
+      };
 
       var readMetaKeys = function readMetaKeys(event) {
         for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
           var m = Primrose.Keys.MODIFIER_KEYS[i];
           _this.inputState[m] = event[m + "Key"];
         }
-        _this.update();
       };
 
       window.addEventListener("keydown", readMetaKeys, false);
@@ -72,20 +85,20 @@ Primrose.InputProcessor = function () {
 
       if (socket) {
         socket.on("open", function () {
-          this.socketReady = true;
-          this.inPhysicalUse = !this.receiving;
-        }.bind(this));
+          _this.socketReady = true;
+          _this.inPhysicalUse = !_this.receiving;
+        });
         socket.on(name, function (cmdState) {
-          if (this.receiving) {
-            this.inPhysicalUse = false;
-            this.decodeStateSnapshot(cmdState);
-            this.fireCommands();
+          if (_this.receiving) {
+            _this.inPhysicalUse = false;
+            _this.decodeStateSnapshot(cmdState);
+            _this.fireCommands();
           }
-        }.bind(this));
+        });
         socket.on("close", function () {
-          this.inPhysicalUse = true;
-          this.socketReady = false;
-        }.bind(this));
+          _this.inPhysicalUse = true;
+          _this.socketReady = false;
+        });
       }
 
       for (var cmdName in commands) {
@@ -124,6 +137,13 @@ Primrose.InputProcessor = function () {
         this.commandNames.push(name);
       }
     }, {
+      key: "addEventListener",
+      value: function addEventListener(evt, thunk, bubbles) {
+        if (this.listeners[evt]) {
+          this.listeners[evt].push(thunk);
+        }
+      }
+    }, {
       key: "cloneCommand",
       value: function cloneCommand(cmd) {
         return {
@@ -149,7 +169,7 @@ Primrose.InputProcessor = function () {
                 return Math.sign(k) * (i + 1);
               }
             }
-          }.bind(this))),
+          })),
           commandDown: cmd.commandDown,
           commandUp: cmd.commandUp
         };
@@ -171,129 +191,135 @@ Primrose.InputProcessor = function () {
       }
     }, {
       key: "update",
-      value: function update() {
-        var t = performance.now() / 1000,
-            dt = t - this.lastT;
-        this.lastT = t;
-        if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
-          for (var name in this.commands) {
-            var cmd = this.commands[name];
-            cmd.state.wasPressed = cmd.state.pressed;
-            cmd.state.pressed = false;
-            if (!cmd.disabled) {
-              var metaKeysSet = true;
+      value: function update(dt) {
+        if (this.enabled) {
+          if (this.ready && this.enabled && this.inPhysicalUse && !this.paused && dt > 0) {
+            for (var name in this.commands) {
+              var cmd = this.commands[name];
+              cmd.state.wasPressed = cmd.state.pressed;
+              cmd.state.pressed = false;
+              if (!cmd.disabled) {
+                var metaKeysSet = true;
 
-              if (cmd.metaKeys) {
-                for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
-                  var m = cmd.metaKeys[n];
-                  metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
-                }
-              }
-
-              if (metaKeysSet) {
-                var pressed = true,
-                    value = 0,
-                    n,
-                    temp,
-                    anyButtons = false;
-
-                for (n in this.inputState.buttons) {
-                  if (this.inputState.buttons[n]) {
-                    anyButtons = true;
-                    break;
+                if (cmd.metaKeys) {
+                  for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+                    var m = cmd.metaKeys[n];
+                    metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
                   }
                 }
 
-                if (cmd.buttons) {
-                  for (n = 0; n < cmd.buttons.length; ++n) {
-                    var btn = cmd.buttons[n],
-                        code = btn.index + 1,
-                        p = code === Primrose.Keys.ANY && anyButtons || !!this.inputState.buttons[code];
-                    temp = p ? btn.sign : 0;
-                    pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+                if (metaKeysSet) {
+                  var pressed = true,
+                      value = 0,
+                      n,
+                      temp,
+                      anyButtons = false;
+
+                  for (n in this.inputState.buttons) {
+                    if (this.inputState.buttons[n]) {
+                      anyButtons = true;
+                      break;
+                    }
+                  }
+
+                  if (cmd.buttons) {
+                    for (n = 0; n < cmd.buttons.length; ++n) {
+                      var btn = cmd.buttons[n],
+                          code = btn.index + 1,
+                          p = code === Primrose.Keys.ANY && anyButtons || !!this.inputState.buttons[code];
+                      temp = p ? btn.sign : 0;
+                      pressed = pressed && (p && !btn.toggle || !p && btn.toggle);
+                      if (Math.abs(temp) > Math.abs(value)) {
+                        value = temp;
+                      }
+                    }
+                  }
+
+                  if (cmd.axes) {
+                    for (n = 0; n < cmd.axes.length; ++n) {
+                      var a = cmd.axes[n];
+                      temp = a.sign * this.inputState.axes[a.index];
+                      if (Math.abs(temp) > Math.abs(value)) {
+                        value = temp;
+                      }
+                    }
+                  }
+
+                  for (n = 0; n < cmd.commands.length; ++n) {
+                    temp = this.getValue(cmd.commands[n]);
                     if (Math.abs(temp) > Math.abs(value)) {
                       value = temp;
                     }
                   }
-                }
 
-                if (cmd.axes) {
-                  for (n = 0; n < cmd.axes.length; ++n) {
-                    var a = cmd.axes[n];
-                    temp = a.sign * this.inputState.axes[a.index];
-                    if (Math.abs(temp) > Math.abs(value)) {
-                      value = temp;
+                  if (cmd.scale !== undefined) {
+                    value *= cmd.scale;
+                  }
+
+                  if (cmd.offset !== undefined) {
+                    value += cmd.offset;
+                  }
+
+                  if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
+                    value = 0;
+                  }
+
+                  if (cmd.integrate) {
+                    value = this.getValue(cmd.name) + value * dt;
+                  } else if (cmd.delta) {
+                    var ov = value;
+                    if (cmd.state.lv !== undefined) {
+                      value = (value - cmd.state.lv) / dt;
                     }
+                    cmd.state.lv = ov;
                   }
-                }
 
-                for (n = 0; n < cmd.commands.length; ++n) {
-                  temp = this.getValue(cmd.commands[n]);
-                  if (Math.abs(temp) > Math.abs(value)) {
-                    value = temp;
+                  if (cmd.min !== undefined) {
+                    value = Math.max(cmd.min, value);
                   }
-                }
 
-                if (cmd.scale !== undefined) {
-                  value *= cmd.scale;
-                }
-
-                if (cmd.offset !== undefined) {
-                  value += cmd.offset;
-                }
-
-                if (cmd.deadzone && Math.abs(value) < cmd.deadzone) {
-                  value = 0;
-                }
-
-                if (cmd.integrate) {
-                  value = this.getValue(cmd.name) + value * dt;
-                } else if (cmd.delta) {
-                  var ov = value;
-                  if (cmd.state.lv !== undefined) {
-                    value = (value - cmd.state.lv) / dt;
+                  if (cmd.max !== undefined) {
+                    value = Math.min(cmd.max, value);
                   }
-                  cmd.state.lv = ov;
+
+                  if (cmd.threshold) {
+                    pressed = pressed && value > cmd.threshold;
+                  }
+
+                  cmd.state.pressed = pressed;
+                  cmd.state.value = value;
                 }
 
-                if (cmd.min !== undefined) {
-                  value = Math.max(cmd.min, value);
+                cmd.state.lt += dt;
+
+                cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
+
+                if (cmd.state.fireAgain) {
+                  cmd.state.lt = 0;
+                  ++cmd.state.repeatCount;
+                } else if (!cmd.state.pressed) {
+                  cmd.state.repeatCount = 0;
                 }
-
-                if (cmd.max !== undefined) {
-                  value = Math.min(cmd.max, value);
-                }
-
-                if (cmd.threshold) {
-                  pressed = pressed && value > cmd.threshold;
-                }
-
-                cmd.state.pressed = pressed;
-                cmd.state.value = value;
-              }
-
-              cmd.state.lt += dt;
-
-              cmd.state.fireAgain = cmd.state.pressed && cmd.state.lt >= cmd.dt && (cmd.repetitions === -1 || cmd.state.repeatCount < cmd.repetitions);
-
-              if (cmd.state.fireAgain) {
-                cmd.state.lt = 0;
-                ++cmd.state.repeatCount;
-              } else if (!cmd.state.pressed) {
-                cmd.state.repeatCount = 0;
               }
             }
-          }
 
-          if (this.socketReady && this.transmitting) {
-            var finalState = this.makeStateSnapshot();
-            if (finalState !== this.lastState) {
-              this.socket.emit(this.name, finalState);
-              this.lastState = finalState;
+            if (this.socketReady && this.transmitting) {
+              var finalState = this.makeStateSnapshot();
+              if (finalState !== this.lastState) {
+                this.socket.emit(this.name, finalState);
+                this.lastState = finalState;
+              }
             }
-          }
 
-          this.fireCommands();
+            this.fireCommands();
+          }
+        }
+      }
+    }, {
+      key: "zero",
+      value: function zero() {
+        for (var i = 0; this.enabled && i < SETTINGS_TO_ZERO.length; ++i) {
+          this.setValue(SETTINGS_TO_ZERO[i], 0);
         }
       }
     }, {

@@ -24,7 +24,7 @@ Primrose.Input.Motion = function () {
     function Motion(commands, socket) {
       _classCallCheck(this, Motion);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Motion).call(this, "Motion", commands, socket));
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Motion).call(this, "Motion", null, commands, socket));
 
       var corrector = new MotionCorrector(),
           a = new THREE.Quaternion(),

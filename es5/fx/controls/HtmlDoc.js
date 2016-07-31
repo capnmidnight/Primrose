@@ -18,7 +18,11 @@ Primrose.Controls.HtmlDoc = function () {
     name: "HtmlDoc",
     baseClass: "Primrose.Surface",
     description: "A rendering of an HTML document.",
-    parameters: [{ name: "options", type: "Object", description: "Named parameters for creating the Document." }]
+    parameters: [{
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Document."
+    }]
   });
 
   var HtmlDoc = function (_Primrose$Surface) {
@@ -43,7 +47,9 @@ Primrose.Controls.HtmlDoc = function () {
       })));
 
       if (typeof options === "string") {
-        _this.options = { element: _this.options };
+        _this.options = {
+          element: _this.options
+        };
       } else {
         _this.options = options || {};
       }

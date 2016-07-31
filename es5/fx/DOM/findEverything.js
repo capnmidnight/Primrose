@@ -13,10 +13,22 @@ Primrose.DOM.findEverything = function () {
   \n\
   > NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
   > you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
-    parameters: [{ name: "elem", type: "Element", optional: true, description: "the root element from which to search.", default: "`document`." }, { name: "obj", type: "Object", optional: true, description: "the object in which to store the element references. If no object is provided, one will be created." }],
+    parameters: [{
+      name: "elem",
+      type: "Element",
+      optional: true,
+      description: "the root element from which to search.",
+      default: "`document`."
+    }, {
+      name: "obj",
+      type: "Object",
+      optional: true,
+      description: "the object in which to store the element references. If no object is provided, one will be created."
+    }],
     returns: "Object",
     examples: [{
-      name: "Get all child elements.", description: "Assuming the following HTML snippet:\n\
+      name: "Get all child elements.",
+      description: "Assuming the following HTML snippet:\n\
   \n\
     grammar(\"HTML\");\n\
     <div>\n\
@@ -38,8 +50,10 @@ Primrose.DOM.findEverything = function () {
 ## Results:\n\
 > first element  \n\
 > Second element  \n\
-> img.png" }]
+> img.png"
+    }]
   });
+
   function findEverything(elem, obj) {
     elem = elem || document;
     obj = obj || {};

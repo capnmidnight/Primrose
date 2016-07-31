@@ -22,7 +22,15 @@ Primrose.Text.Controls.TextBox = function () {
     name: "TextBox",
     description: "Syntax highlighting textbox control.",
     baseClass: "Primrose.Surface",
-    parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the TextBox." }]
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the TextBox."
+    }]
   });
 
   var TextBox = function (_Primrose$Surface) {
@@ -48,7 +56,9 @@ Primrose.Text.Controls.TextBox = function () {
       ////////////////////////////////////////////////////////////////////////
 
       if (typeof options === "string") {
-        _this.options = { value: _this.options };
+        _this.options = {
+          value: _this.options
+        };
       } else {
         _this.options = options || {};
       }
@@ -830,7 +840,9 @@ Primrose.Text.Controls.TextBox = function () {
         var lines = txt.split("\n");
         this.pushUndo(lines);
         this.render();
-        emit.call(this, "change", { target: this });
+        emit.call(this, "change", {
+          target: this
+        });
       }
     }, {
       key: "selectedText",

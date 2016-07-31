@@ -3,7 +3,15 @@
 pliny.function({
   name: "sigfig",
   description: "Formats a decimal number to a certain length of decimal points.",
-  parameters: [{ name: "x", type: "Number", description: "The number to format." }, { name: "y", type: "Number", description: "The number of digits after the decimal point to show." }],
+  parameters: [{
+    name: "x",
+    type: "Number",
+    description: "The number to format."
+  }, {
+    name: "y",
+    type: "Number",
+    description: "The number of digits after the decimal point to show."
+  }],
   returns: "String",
   examples: [{
     name: "A few examples.",
@@ -16,8 +24,10 @@ pliny.function({
     console.assert(sigfig(123.4567, 2) === \"123.46\");\n\
      \n\
     // sigfig will pad extra zeroes.\n\
-    console.assert(sigfig(123.4, 3) === \"123.400\");" }]
+    console.assert(sigfig(123.4, 3) === \"123.400\");"
+  }]
 });
+
 function sigfig(x, y) {
   var p = Math.pow(10, y);
   var v = (Math.round(x * p) / p).toString();
@@ -36,14 +46,22 @@ function sigfig(x, y) {
 
 pliny.function({
   name: "fmt",
-  parameters: [{ name: "template", type: "String", description: "The template string containing dollar-sign delimited value references." }, { name: "varargs...", type: "Any", description: "The values to replace into the template. Generally speaking, the `toString()` method of the object will be called. However, dates have special handling. The precision count indicates the fields of the date to print.\n\
+  parameters: [{
+    name: "template",
+    type: "String",
+    description: "The template string containing dollar-sign delimited value references."
+  }, {
+    name: "varargs...",
+    type: "Any",
+    description: "The values to replace into the template. Generally speaking, the `toString()` method of the object will be called. However, dates have special handling. The precision count indicates the fields of the date to print.\n\
 * $1.0 - prints just the 4-digit year.\n\
 * $1.00 - prints the 2-digit month/4-digit year.\n\
 * $1.000 - prints the result of calling `toLocaleDateString()` on the date value.\n\
 * $1.0000 - prints the result of calling `toLocaleTimeString()` on the date value, plus additional milliseconds value.\n\
 * $1.00000 - same as...\n\
 * $1.000000 - prints the result of calling `toLocaleString()` on the date value.\n\
-* $1.0000000 - prints the result of calling `toLocaleString()` on the date value, plus additional milliseconds value." }],
+* $1.0000000 - prints the result of calling `toLocaleString()` on the date value, plus additional milliseconds value."
+  }],
   returns: "A formatted string.",
   description: "Replaces 1-indexed place holders in a string with the subsequent \n\
 parameters passed to the `fmt()` function, e.g. a \n\ template `\"X: $1, Y: $2\"`\n\
@@ -56,7 +74,8 @@ cannot reference the first position, as zero digit characters are used to indica
 the width to which to pad values.\n\
 \n\
 Numerical precision, with zero-padding, is indicated with a period and trailing zeros.",
-  examples: [{ name: "Basic examples",
+  examples: [{
+    name: "Basic examples",
     description: "\
     grammar(\"JavaScript\");\n\
     console.assert(fmt(\"a: $1, b: $2\", 123, \"Sean\") === \"a: 123, b: Sean\");\n\
@@ -71,7 +90,8 @@ Numerical precision, with zero-padding, is indicated with a period and trailing 
     console.assert(fmt(\"The current date is $1.000.\", new Date() ) === \"The current date is 1/25/2016.\");\n\
     console.assert(fmt(\"The current time is $1.0000.\", new Date() ) === \"The current time is 10:05:28.772 PM.\");\n\
     console.assert(fmt(\"The current date and time is $1.00000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:06 PM.\");\n\
-    console.assert(fmt(\"The current date and time is $1.0000000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:55.667 PM.\");" }]
+    console.assert(fmt(\"The current date and time is $1.0000000.\", new Date() ) === \"The current date and time is 1/25/2016, 10:06:55.667 PM.\");"
+  }]
 });
 var fmt = function () {
 
@@ -147,98 +167,201 @@ var fmt = function () {
 pliny.function({
   name: "px",
   description: "Appends the string \"px\" to the end of a number. Useful for specifying CSS units.",
-  parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS pixel-unit value." }],
+  parameters: [{
+    name: "value",
+    type: "Number",
+    description: "The number to make into a CSS pixel-unit value."
+  }],
   returns: "The number as a string, plus the text \"px\", with no intermediate whitespace.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(px(100.5) === \"100.5px\");" }]
+    console.assert(px(100.5) === \"100.5px\");"
+  }]
 });
 var px = fmt.bind(undefined, "$1px");
 
 pliny.function({
   name: "pct",
   description: "Appends the string \"%\" to the end of a number. Useful for specifying CSS units.",
-  parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS percentage-unit value." }],
+  parameters: [{
+    name: "value",
+    type: "Number",
+    description: "The number to make into a CSS percentage-unit value."
+  }],
   returns: "The number as a string, plus the text \"%\", with no intermediate whitespace.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(pct(100.5) === \"100.5%\");" }]
+    console.assert(pct(100.5) === \"100.5%\");"
+  }]
 });
 var pct = fmt.bind(undefined, "$1%");
 
 pliny.function({
   name: "ems",
   description: "Appends the string \"em\" to the end of a number. Useful for specifying CSS units.",
-  parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS em-unit value." }],
+  parameters: [{
+    name: "value",
+    type: "Number",
+    description: "The number to make into a CSS em-unit value."
+  }],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(ems(100.5) === \"100.5em\");" }]
+    console.assert(ems(100.5) === \"100.5em\");"
+  }]
 });
 var ems = fmt.bind(undefined, "$1em");
 
 pliny.function({
   name: "rems",
   description: "Appends the string \"rem\" to the end of a number. Useful for specifying CSS units.",
-  parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS rem-unit value." }],
+  parameters: [{
+    name: "value",
+    type: "Number",
+    description: "The number to make into a CSS rem-unit value."
+  }],
   returns: "The number as a string, plus the text \"em\", with no intermediate whitespace.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(rems(100.5) === \"100.5rem\");" }]
+    console.assert(rems(100.5) === \"100.5rem\");"
+  }]
 });
 var rems = fmt.bind(undefined, "$1rem");
 
 pliny.function({
   name: "vws",
   description: "Appends the string \"vw\" to the end of a number. Useful for specifying CSS units.",
-  parameters: [{ name: "value", type: "Number", description: "The number to make into a CSS view-width-unit value." }],
+  parameters: [{
+    name: "value",
+    type: "Number",
+    description: "The number to make into a CSS view-width-unit value."
+  }],
   returns: "The number as a string, plus the text \"vw\", with no intermediate whitespace.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(vws(100.5) === \"100.5vw\");" }]
+    console.assert(vws(100.5) === \"100.5vw\");"
+  }]
 });
 var vws = fmt.bind(undefined, "$1vw");
 
 pliny.function({
   name: "rgb",
   description: "Builds a CSS `rbg()` color-value string from three parameters.",
-  parameters: [{ name: "red", type: "Number", description: "The red component, on the range [0, 255]." }, { name: "green", type: "Number", description: "The green component, on the range [0, 255]." }, { name: "blue", type: "Number", description: "The blue component, on the range [0, 255]." }],
+  parameters: [{
+    name: "red",
+    type: "Number",
+    description: "The red component, on the range [0, 255]."
+  }, {
+    name: "green",
+    type: "Number",
+    description: "The green component, on the range [0, 255]."
+  }, {
+    name: "blue",
+    type: "Number",
+    description: "The blue component, on the range [0, 255]."
+  }],
   returns: "The color-value string, e.g. `rgb(120, 230, 64)`.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");" }]
+    console.assert(rgb(120, 230, 64) === \"rgb(120, 230, 64)\");"
+  }]
 });
 var rgb = fmt.bind(undefined, "rgb($1, $2, $3)");
 
 pliny.function({
   name: "rgba",
   description: "Builds a CSS `rbga()` color-value string from three parameters.",
-  parameters: [{ name: "red", type: "Number", description: "The red component, on the range [0, 255]." }, { name: "green", type: "Number", description: "The green component, on the range [0, 255]." }, { name: "blue", type: "Number", description: "The blue component, on the range [0, 255]." }, { name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]." }],
+  parameters: [{
+    name: "red",
+    type: "Number",
+    description: "The red component, on the range [0, 255]."
+  }, {
+    name: "green",
+    type: "Number",
+    description: "The green component, on the range [0, 255]."
+  }, {
+    name: "blue",
+    type: "Number",
+    description: "The blue component, on the range [0, 255]."
+  }, {
+    name: "alpha",
+    type: "Number",
+    description: "The alpha component, on the range [0, 1]."
+  }],
   returns: "The color-value string, e.g. `rgba(120, 230, 64, 0.75)`.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");" }]
+    console.assert(rgba(120, 230, 64, 0.75) === \"rgba(120, 230, 64, 0.75)\");"
+  }]
 });
 var rgba = fmt.bind(undefined, "rgba($1, $2, $3, $4)");
 
 pliny.function({
   name: "hsl",
   description: "Builds a CSS `hsl()` color-value string from three parameters.",
-  parameters: [{ name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240." }, { name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]." }, { name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]." }],
+  parameters: [{
+    name: "hue",
+    type: "Number",
+    description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240."
+  }, {
+    name: "saturation",
+    type: "Number",
+    description: "The saturation percentage, on the range [0, 100]."
+  }, {
+    name: "lightness",
+    type: "Number",
+    description: "The lightness percentage, on the range [0, 100]."
+  }],
   returns: "The color-value string, e.g. `hsl(120, 100, 50)`.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");" }]
+    console.assert(hsl(120, 100, 50) === \"hsl(120, 100%, 50%)\");"
+  }]
 });
 var hsl = fmt.bind(undefined, "hsl($1, $2%, $3%)");
 
 pliny.function({
   name: "hsla",
   description: "Builds a CSS `hsla()` color-value string from three parameters.",
-  parameters: [{ name: "hue", type: "Number", description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240." }, { name: "saturation", type: "Number", description: "The saturation percentage, on the range [0, 100]." }, { name: "lightness", type: "Number", description: "The lightness percentage, on the range [0, 100]." }, { name: "alpha", type: "Number", description: "The alpha component, on the range [0, 1]." }],
+  parameters: [{
+    name: "hue",
+    type: "Number",
+    description: "The hue angle, on the range [0, 360]. By definition, 0 = 360. Values also wrap-around, so -120 = 240."
+  }, {
+    name: "saturation",
+    type: "Number",
+    description: "The saturation percentage, on the range [0, 100]."
+  }, {
+    name: "lightness",
+    type: "Number",
+    description: "The lightness percentage, on the range [0, 100]."
+  }, {
+    name: "alpha",
+    type: "Number",
+    description: "The alpha component, on the range [0, 1]."
+  }],
   returns: "The color-value string, e.g. `hsla(120, 100, 50, 0.25)`.",
-  examples: [{ name: "Basic usage", description: "\
+  examples: [{
+    name: "Basic usage",
+    description: "\
     grammar(\"JavaScript\");\n\
-    console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");" }]
+    console.assert(hsla(120, 100, 50) === \"hsla(120, 100%, 50%, 0.25)\");"
+  }]
 });
 var hsla = fmt.bind(undefined, "hsla($1, $2%, $3%, $4)");

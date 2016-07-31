@@ -27,6 +27,7 @@ Primrose.Text.Cursor = function () {
     name: "Cursor",
     description: "| [under construction]"
   });
+
   function Cursor(i, x, y) {
     this.i = i || 0;
     this.x = x || 0;

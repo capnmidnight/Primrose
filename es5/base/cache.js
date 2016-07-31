@@ -3,7 +3,15 @@
 pliny.function({
   name: "cache",
   description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
-  parameters: [{ name: "hash", type: "String", description: "The hash key for the object to cache or retrieve." }, { name: "makeObject", type: "Function", description: "A function that creates the object we want, if it doesn't already exist in the cache." }],
+  parameters: [{
+    name: "hash",
+    type: "String",
+    description: "The hash key for the object to cache or retrieve."
+  }, {
+    name: "makeObject",
+    type: "Function",
+    description: "A function that creates the object we want, if it doesn't already exist in the cache."
+  }],
   returns: "Object",
   examples: [{
     name: "Basic usage",
@@ -21,7 +29,8 @@ pliny.function({
         c = makeCube(1);\n\
     \n\
     console.assert(a !== b);\n\
-    console.assert(a === c);" }]
+    console.assert(a === c);"
+  }]
 });
 var cache = function () {
   var _cache = {};

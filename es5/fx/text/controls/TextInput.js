@@ -22,7 +22,15 @@ Primrose.Text.Controls.TextInput = function () {
     name: "TextInput",
     description: "plain text input box.",
     baseClass: "Primrose.Text.Controls.TextBox",
-    parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the TextInput." }]
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the TextInput."
+    }]
   });
 
   var TextInput = function (_Primrose$Text$Contro) {

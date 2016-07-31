@@ -1,7 +1,7 @@
 "use strict";
 
 /*
- * Copyright (C) 2015 Sean T. McBeth <sean@seanmcbeth.com>
+ * Copyright (C) 2014 - 2016 Sean T. McBeth <sean@seanmcbeth.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,7 +196,8 @@ device, usually possessing a motion sensor."
     type: "Boolean",
     description: "Flag indicating the current system is a device running the Apple\n\
 iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
-paths necessary to deal with deficiencies in Apple's implementation of web standards." });
+paths necessary to deal with deficiencies in Apple's implementation of web standards."
+  });
   window.isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 
   pliny.value({

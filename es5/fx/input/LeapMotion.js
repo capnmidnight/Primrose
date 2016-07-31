@@ -30,10 +30,12 @@ Primrose.Input.LeapMotion = function () {
     function LeapMotion(commands, socket) {
       _classCallCheck(this, LeapMotion);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LeapMotion).call(this, "LeapMotion", commands, socket));
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LeapMotion).call(this, "LeapMotion", null, commands, socket));
 
       _this.isStreaming = false;
-      _this.controller = new Leap.Controller({ enableGestures: true });
+      _this.controller = new Leap.Controller({
+        enableGestures: true
+      });
       return _this;
     }
 
@@ -49,6 +51,8 @@ Primrose.Input.LeapMotion = function () {
     }, {
       key: "start",
       value: function start(gameUpdateLoop) {
+        var _this2 = this;
+
         if (this.isEnabled()) {
           var canceller = null,
               startAlternate = null;
@@ -59,10 +63,10 @@ Primrose.Input.LeapMotion = function () {
             };
             startAlternate = requestAnimationFrame.bind(window, alternateLooper);
             var timeout = setTimeout(startAlternate, LeapMotion.CONNECTION_TIMEOUT);
-            canceller = function () {
+            canceller = function canceller() {
               clearTimeout(timeout);
-              this.isStreaming = true;
-            }.bind(this);
+              _this2.isStreaming = true;
+            };
             this.E("deviceStreaming", canceller);
             this.E("streamingStarted", canceller);
             this.E("streamingStopped", startAlternate);

@@ -9,15 +9,19 @@ Primrose.Workerize = function () {
     description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
 \n\
 Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
-    parameters: [{ name: "func", type: "Function", description: "The class function to workerize" }],
+    parameters: [{
+      name: "func",
+      type: "Function",
+      description: "The class function to workerize"
+    }],
     examples: [{
       name: "Create a basic workerized class.",
       description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
 * All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
-* All interaction with objects of the class must be through these publically accessible methods. This includes initialization.\n\
-* All methods should take at most a single arguemnt. If you need multiple arguments, pack them into an array.\n\
+* All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
+* All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
 * The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
-* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often ommitted when programming against DOM.\n\
+* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often omitted when programming against DOM.\n\
 \n\
 Assuming the following class:\n\
 \n\
@@ -112,9 +116,13 @@ Then we can create and use an automatically workerized version of it as follows.
         }\n\
       }\n\
     }\n\
-    requestAnimationFrame(paint);" }]
+    requestAnimationFrame(paint);"
+    }]
   });
+
   function Workerize(func) {
+    var _this = this;
+
     // First, rebuild the script that defines the class. Since we're dealing
     // with pre-ES6 browsers, we have to use ES5 syntax in the script, or invoke
     // a conversion at a point post-script reconstruction, pre-workerization.
@@ -177,8 +185,8 @@ Then we can create and use an automatically workerized version of it as follows.
     this.listeners = {};
 
     this.worker.onmessage = function (e) {
-      emit.call(this, e.data[0], e.data[1]);
-    }.bind(this);
+      return emit.call(_this, e.data[0], e.data[1]);
+    };
 
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
@@ -204,7 +212,15 @@ Then we can create and use an automatically workerized version of it as follows.
     parent: "Primrose.Workerize",
     name: "methodShim",
     description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
-    parameters: [{ name: "methodName", type: "String", description: "The method inside the worker context that we want to invoke." }, { name: "args", type: "Array", description: "The arguments that we want to pass to the method that we are calling in the worker context." }]
+    parameters: [{
+      name: "methodName",
+      type: "String",
+      description: "The method inside the worker context that we want to invoke."
+    }, {
+      name: "args",
+      type: "Array",
+      description: "The arguments that we want to pass to the method that we are calling in the worker context."
+    }]
   });
   Workerize.prototype.methodShim = function (eventName, args) {
     this.args[0] = eventName;
@@ -216,7 +232,15 @@ Then we can create and use an automatically workerized version of it as follows.
     parent: "Primrose.Workerize",
     name: "addEventListener",
     description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
-    parameters: [{ name: "evt", type: "String", description: "The name of the event for which we are listening." }, { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }]
+    parameters: [{
+      name: "evt",
+      type: "String",
+      description: "The name of the event for which we are listening."
+    }, {
+      name: "thunk",
+      type: "Function",
+      description: "The callback to fire when the event occurs."
+    }]
   });
   Workerize.prototype.addEventListener = function (evt, thunk) {
     if (!this.listeners[evt]) {
@@ -229,7 +253,15 @@ Then we can create and use an automatically workerized version of it as follows.
     parent: "Primrose.Workerize",
     name: "createWorker",
     description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
-    parameters: [{ name: "script", type: "(String|Function)", description: "A String defining a script, or a Function that can be toString()'d to get it's script." }, { name: "stripFunc", type: "Boolean", description: "Set to true if you want the function to strip the surround function block scope from the script." }],
+    parameters: [{
+      name: "script",
+      type: "(String|Function)",
+      description: "A String defining a script, or a Function that can be toString()'d to get it's script."
+    }, {
+      name: "stripFunc",
+      type: "Boolean",
+      description: "Set to true if you want the function to strip the surround function block scope from the script."
+    }],
     returns: "The WebWorker object."
   });
   Workerize.createWorker = function (script, stripFunc) {

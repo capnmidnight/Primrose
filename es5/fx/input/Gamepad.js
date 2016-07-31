@@ -17,25 +17,50 @@ Primrose.Input.Gamepad = function () {
     gamepadconnected: [],
     gamepaddisconnected: []
   },
-      currentPadIDs = [],
-      currentPads = [],
+      currentDeviceIDs = [],
+      currentDevices = [],
       currentManagers = {};
 
   pliny.class({
     parent: "Primrose.Input",
     name: "Gamepad",
-    baseClass: "Primrose.InputProcessor",
-    parameters: [{ name: "name", type: "string", description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account." }, { name: "commands", type: "Array", optional: true, description: "An array of input command descriptions." }, { name: "socket", type: "WebSocket", optional: true, description: "A socket over which to transmit device state for device fusion." }],
+    baseClass: "Primrose.PoseInputProcessor",
+    parameters: [{
+      name: "name",
+      type: "string",
+      description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
+    }, {
+      name: "commands",
+      type: "Array",
+      optional: true,
+      description: "An array of input command descriptions."
+    }, {
+      name: "socket",
+      type: "WebSocket",
+      optional: true,
+      description: "A socket over which to transmit device state for device fusion."
+    }],
     description: "An input processor for Gamepads, including those with positional data."
   });
 
-  var Gamepad = function (_Primrose$InputProces) {
-    _inherits(Gamepad, _Primrose$InputProces);
+  var Gamepad = function (_Primrose$PoseInputPr) {
+    _inherits(Gamepad, _Primrose$PoseInputPr);
 
     _createClass(Gamepad, null, [{
       key: "ID",
       value: function ID(pad) {
-        return (pad.id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+        var id = pad.id;
+        if (id === "OpenVR Gamepad") {
+          id = "Vive";
+        } else if (id.indexOf("Xbox") === 0) {
+          id = "Gamepad";
+        } else if (id.indexOf("Rift") === 0) {
+          id = "Rift";
+        } else if (id.indexOf("Unknown") === 0) {
+          id = "Unknown";
+        }
+        id = (id + "_" + (pad.index || 0)).replace(/\s+/g, "_");
+        return id;
       }
     }, {
       key: "poll",
@@ -52,29 +77,29 @@ Primrose.Input.Gamepad = function () {
             var maybePad = maybePads[i];
             if (maybePad) {
               var padID = Gamepad.ID(maybePad),
-                  padIdx = currentPadIDs.indexOf(padID);
+                  padIdx = currentDeviceIDs.indexOf(padID);
               pads.push(maybePad);
               padIDs.push(padID);
               if (padIdx === -1) {
                 newPads.push(maybePad);
-                currentPadIDs.push(padID);
-                currentPads.push(maybePad);
+                currentDeviceIDs.push(padID);
+                currentDevices.push(maybePad);
                 delete currentManagers[padID];
               } else {
-                currentPads[padIdx] = maybePad;
+                currentDevices[padIdx] = maybePad;
               }
             }
           }
         }
 
-        for (i = currentPadIDs.length - 1; i >= 0; --i) {
-          var padID = currentPadIDs[i],
+        for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
+          var padID = currentDeviceIDs[i],
               mgr = currentManagers[padID],
-              pad = currentPads[i];
+              pad = currentDevices[i];
           if (padIDs.indexOf(padID) === -1) {
             oldPads.push(padID);
-            currentPads.splice(i, 1);
-            currentPadIDs.splice(i, 1);
+            currentDevices.splice(i, 1);
+            currentDeviceIDs.splice(i, 1);
           } else if (mgr) {
             mgr.checkDevice(pad);
           }
@@ -93,7 +118,7 @@ Primrose.Input.Gamepad = function () {
     }, {
       key: "pads",
       get: function get() {
-        return currentPads;
+        return currentDevices;
       }
     }, {
       key: "listeners",
@@ -102,21 +127,16 @@ Primrose.Input.Gamepad = function () {
       }
     }]);
 
-    function Gamepad(pad, axisOffset, commands, socket) {
+    function Gamepad(pad, axisOffset, commands, socket, parent) {
       _classCallCheck(this, Gamepad);
 
       var padID = Gamepad.ID(pad);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, padID, commands, socket, Gamepad.AXES));
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, padID, parent, commands, socket, Gamepad.AXES));
 
       currentManagers[padID] = _this;
 
-      _this.currentPose = {
-        position: [0, 0, 0],
-        orientation: [0, 0, 0, 1]
-      };
-
-      _this.currentPad = pad;
+      _this.currentDevice = pad;
       _this.axisOffset = axisOffset;
       return _this;
     }
@@ -124,75 +144,88 @@ Primrose.Input.Gamepad = function () {
     _createClass(Gamepad, [{
       key: "checkDevice",
       value: function checkDevice(pad) {
-        var i;
-        this.currentPad = pad;
+        var i,
+            buttonMap = 0;
+        this.currentDevice = pad;
         for (i = 0; i < pad.buttons.length; ++i) {
-          this.setButton(i, pad.buttons[i].pressed);
-          this.setButton(i + pad.buttons.length, pad.buttons[i].touched);
+          var btn = pad.buttons[i];
+          this.setButton(i, btn.pressed);
+          if (btn.pressed) {
+            buttonMap |= 0x1 << i;
+          }
+          this.setButton(i + pad.buttons.length, btn.touched);
         }
+        this.setAxis("BUTTONS", buttonMap);
         for (i = 0; i < pad.axes.length; ++i) {
           var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
           this.setAxis(axisName, pad.axes[i]);
         }
-
-        this.currentPose = pad.pose;
       }
     }, {
       key: "vibrate",
       value: function vibrate() {
-        if (this.currentPad && this.currentPad.vibrate) {
-          this.currentPad.vibrate.apply(this.currentPad, arguments);
+        if (this.currentDevice && this.currentDevice.vibrate) {
+          this.currentDevice.vibrate.apply(this.currentDevice, arguments);
         }
       }
     }, {
-      key: "getOrientation",
-      value: function getOrientation(value) {
-        value = value || new THREE.Quaternion();
-        var o = this.currentPose && this.currentPose.orientation;
-        if (o) {
-          value.fromArray(o);
-        }
-        return value;
-      }
-    }, {
-      key: "getPosition",
-      value: function getPosition(value) {
-        value = value || new THREE.Vector3();
-        var p = this.currentPose && this.currentPose.position;
-        if (p) {
-          value.fromArray(p);
-        }
-        return value;
+      key: "currentPose",
+      get: function get() {
+        return this.currentDevice && this.currentDevice.pose;
       }
     }]);
 
     return Gamepad;
-  }(Primrose.InputProcessor);
+  }(Primrose.PoseInputProcessor);
 
-  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z"]);
+  Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
   pliny.enumeration({
     parent: "Primrose.Input.Gamepad",
-    name: "XBOX_BUTTONS",
+    name: "XBOX_360_BUTTONS",
     description: "Labeled names for each of the different control features of the Xbox 360 controller."
   });
-  Gamepad.XBOX_BUTTONS = {
+  Gamepad.XBOX_360_BUTTONS = {
     A: 1,
     B: 2,
     X: 3,
     Y: 4,
-    leftBumper: 5,
-    rightBumper: 6,
-    leftTrigger: 7,
-    rightTrigger: 8,
-    back: 9,
-    start: 10,
-    leftStick: 11,
-    rightStick: 12,
-    up: 13,
-    down: 14,
-    left: 15,
-    right: 16
+    LEFT_BUMPER: 5,
+    RIGHT_BUMPER: 6,
+    LEFT_TRIGGER: 7,
+    RIGHT_TRIGGER: 8,
+    BACK: 9,
+    START: 10,
+    LEFT_STICK: 11,
+    RIGHT_STICK: 12,
+    UP_DPAD: 13,
+    DOWN_DPAD: 14,
+    LEFT_DPAD: 15,
+    RIGHT_DPAD: 16
+  };
+
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_ONE_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
+  Gamepad.XBOX_ONE_BUTTONS = {
+    A: 1,
+    B: 2,
+    X: 3,
+    Y: 4,
+    LEFT_BUMPER: 5,
+    RIGHT_BUMPER: 6,
+    LEFT_TRIGGER: 7,
+    RIGHT_TRIGGER: 8,
+    BACK: 9,
+    START: 10,
+    LEFT_STICK: 11,
+    RIGHT_STICK: 12,
+    UP_DPAD: 13,
+    DOWN_DPAD: 14,
+    LEFT_DPAD: 15,
+    RIGHT_DPAD: 16
   };
 
   pliny.enumeration({

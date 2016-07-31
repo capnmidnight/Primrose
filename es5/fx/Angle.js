@@ -30,7 +30,11 @@ It also automatically performs degree-to-radian and radian-to-degree conversions
 For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
 \n\
 ![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
-    parameters: [{ name: "initialAngleInDegrees", type: "Number", description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value." }],
+    parameters: [{
+      name: "initialAngleInDegrees",
+      type: "Number",
+      description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
+    }],
     examples: [{
       name: "Basic usage",
       description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\

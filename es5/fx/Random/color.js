@@ -29,8 +29,10 @@ Primrose.Random.color = function () {
 > e986bf\n\
 > 38541a\n\
 > 5a19db\n\
-> 5f5c50" }]
+> 5f5c50"
+    }]
   });
+
   function color() {
     var r = Primrose.Random.int(0, 256),
         g = Primrose.Random.int(0, 256),

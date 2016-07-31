@@ -3,7 +3,19 @@
 pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",
-  parameters: [{ name: "x", type: "Number", description: "The X component of the vector" }, { name: "y", type: "Number", description: "The Y component of the vector" }, { name: "z", type: "Number", description: "The Z component of the vector" }],
+  parameters: [{
+    name: "x",
+    type: "Number",
+    description: "The X component of the vector"
+  }, {
+    name: "y",
+    type: "Number",
+    description: "The Y component of the vector"
+  }, {
+    name: "z",
+    type: "Number",
+    description: "The Z component of the vector"
+  }],
   returns: "THREE.Vector3",
   examples: [{
     name: "Create a vector",
@@ -15,6 +27,7 @@ pliny.function({
     console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
   }]
 });
+
 function v3(x, y, z) {
   return new THREE.Vector3(x, y, z);
 }

@@ -4,14 +4,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 pliny.function({
   name: "getSetting",
-  parameters: [{ name: " name", type: "string", description: "The name of the setting to read." }, { name: "defValue", type: "Object", description: "The default value to return, if the setting is not present in `localStorage`." }],
+  parameters: [{
+    name: " name",
+    type: "string",
+    description: "The name of the setting to read."
+  }, {
+    name: "defValue",
+    type: "Object",
+    description: "The default value to return, if the setting is not present in `localStorage`."
+  }],
   returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
   description: "Retrieves named values out of `localStorage`. The values should\n\
 be valid for passing to `JSON.parse()`. A default value can be specified in the\n\
 function call that should be returned if the value does not exist, or causes an\n\
 error in parsing. Typically, you'd call this function at page-load time after having\n\
 called the [`setSetting()`](#setSetting) function during a previous page session.",
-  examples: [{ name: "Basic usage",
+  examples: [{
+    name: "Basic usage",
     description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
 \n\
@@ -22,8 +31,10 @@ code should persist between reloads whatever the user writes in the text area:\n
     }, false);\n\
     document.addEventListener(\"load\", function(){\n\
       text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);" }]
+    }, false);"
+  }]
 });
+
 function getSetting(name, defValue) {
   if (window.localStorage) {
     var val = window.localStorage.getItem(name);
@@ -42,11 +53,20 @@ function getSetting(name, defValue) {
 
 pliny.function({
   name: "setSetting",
-  parameters: [{ name: " name", type: "string", description: "The name of the setting to set." }, { name: "val", type: "Object", description: "The value to write. It should be useable as a parameter to `JSON.stringify()`." }],
+  parameters: [{
+    name: " name",
+    type: "string",
+    description: "The name of the setting to set."
+  }, {
+    name: "val",
+    type: "Object",
+    description: "The value to write. It should be useable as a parameter to `JSON.stringify()`."
+  }],
   description: "Writes named values to `localStorage`. The values should be valid\n\
 for passing to `JSON.stringify()`. Typically, you'd call this function at page-unload\n\
 time, then call the [`getSetting()`](#getSetting) function during a subsequent page load.",
-  examples: [{ name: "Basic usage",
+  examples: [{
+    name: "Basic usage",
     description: "Assuming a text input element with the id `text1`, the following\n\
 code should persist between reloads whatever the user writes in the text area:\n\
 \n\
@@ -57,8 +77,10 @@ code should persist between reloads whatever the user writes in the text area:\n
     }, false);\n\
     document.addEventListener(\"load\", function(){\n\
       text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
-    }, false);" }]
+    }, false);"
+  }]
 });
+
 function setSetting(name, val) {
   if (window.localStorage && val) {
     try {
@@ -71,7 +93,11 @@ function setSetting(name, val) {
 
 pliny.function({
   name: "deleteSetting",
-  parameters: [{ name: " name", type: "string", description: "The name of the setting to delete." }],
+  parameters: [{
+    name: " name",
+    type: "string",
+    description: "The name of the setting to delete."
+  }],
   description: "Removes an object from localStorage",
   examples: [{
     name: "Basic usage",
@@ -85,6 +111,7 @@ pliny.function({
     console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
   }]
 });
+
 function deleteSetting(name) {
   if (window.localStorage) {
     window.localStorage.removeItem(name);
@@ -93,7 +120,11 @@ function deleteSetting(name) {
 
 pliny.function({
   name: "readForm",
-  parameters: [{ name: "ctrls", type: "Hash of Elements", description: "An array of HTML form elements, aka INPUT, TEXTAREA, SELECT, etc." }],
+  parameters: [{
+    name: "ctrls",
+    type: "Hash of Elements",
+    description: "An array of HTML form elements, aka INPUT, TEXTAREA, SELECT, etc."
+  }],
   returns: "Object",
   description: "Scans through an array of input elements and builds a state object that contains the values the input elements represent. Elements that do not have an ID attribute set, or have an attribute `data-skipcache` set, will not be included.",
   examples: [{
@@ -122,6 +153,7 @@ pliny.function({
     console.assert(ctrls.num.value === \"55\");"
   }]
 });
+
 function readForm(ctrls) {
   var state = {};
   if (ctrls) {
@@ -141,7 +173,15 @@ function readForm(ctrls) {
 
 pliny.function({
   name: "writeForm",
-  parameters: [{ name: "ctrls", type: "Hash of Elements", description: "A hash-collection of HTML input elements that will have their values set." }, { name: "state", type: "Hash object", description: "The values that will be set on the form. Hash keys should match IDs of the elements in the `ctrls` parameter." }],
+  parameters: [{
+    name: "ctrls",
+    type: "Hash of Elements",
+    description: "A hash-collection of HTML input elements that will have their values set."
+  }, {
+    name: "state",
+    type: "Hash object",
+    description: "The values that will be set on the form. Hash keys should match IDs of the elements in the `ctrls` parameter."
+  }],
   description: "Writes out a full set of state values to an HTML input form, wherever keys in the `ctrls` parameter match keys in the `state` parameter.",
   examples: [{
     name: "Basic usage",
@@ -169,6 +209,7 @@ pliny.function({
     console.assert(ctrls.num.value === \"55\");"
   }]
 });
+
 function writeForm(ctrls, state) {
   if (state) {
     for (var name in ctrls) {

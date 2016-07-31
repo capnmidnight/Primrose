@@ -93,10 +93,14 @@ Primrose.X.SignupForm = function () {
       });
 
       _this.loginButton.addEventListener("click", function (evt) {
-        return emit.call(_this, "login", { target: _this });
+        return emit.call(_this, "login", {
+          target: _this
+        });
       }, false);
       _this.signupButton.addEventListener("click", function (evt) {
-        return emit.call(_this, "signup", { target: _this });
+        return emit.call(_this, "signup", {
+          target: _this
+        });
       }, false);
 
       _this.appendChild(_this.labelUserName);

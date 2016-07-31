@@ -8,6 +8,7 @@ Primrose.Text.Point = function () {
     name: "Point",
     description: "| [under construction]"
   });
+
   function Point(x, y) {
     this.set(x || 0, y || 0);
   }

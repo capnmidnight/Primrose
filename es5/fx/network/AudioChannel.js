@@ -98,7 +98,23 @@ Primrose.Network.AudioChannel = function () {
     name: "AudioChannel",
     baseClass: "Primrose.WebRTCSocket",
     description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
-    parameters: [{ name: "proxyServer", type: "WebSocket", description: "A connection over which to negotiate the peering." }, { name: "fromUserName", type: "String", description: "The name of the local user, from which the peering is being initiated." }, { name: "toUserName", type: "String", description: "The name of the remote user, to which the peering is being requested." }, { name: "outAudio", type: "MediaStream", description: "An audio stream from the local user to send to the remote user." }]
+    parameters: [{
+      name: "proxyServer",
+      type: "WebSocket",
+      description: "A connection over which to negotiate the peering."
+    }, {
+      name: "fromUserName",
+      type: "String",
+      description: "The name of the local user, from which the peering is being initiated."
+    }, {
+      name: "toUserName",
+      type: "String",
+      description: "The name of the remote user, to which the peering is being requested."
+    }, {
+      name: "outAudio",
+      type: "MediaStream",
+      description: "An audio stream from the local user to send to the remote user."
+    }]
   });
 
   var AudioChannel = function (_Primrose$WebRTCSocke) {
@@ -205,7 +221,7 @@ Primrose.Network.AudioChannel = function () {
           this._log("[Second]: OR %s -> AC %s -> OC %s -> AR %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received);
         }
 
-        return this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
+        return _get(Object.getPrototypeOf(AudioChannel.prototype), 'complete', this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
       }
     }]);
 

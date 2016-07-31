@@ -18,7 +18,15 @@ Primrose.Controls.Label = function () {
     name: "Label",
     description: "A simple label of text to put on a Surface.",
     baseClass: "Primrose.Surface",
-    parameters: [{ name: "idOrCanvasOrContext", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options", type: "Object", description: "Named parameters for creating the Button." }]
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
   });
 
   var Label = function (_Primrose$Surface) {

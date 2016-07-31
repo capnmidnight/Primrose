@@ -8,6 +8,7 @@ Primrose.Text.Controls.PlainText = function () {
     name: "PlainText",
     description: "| [under construction]"
   });
+
   function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
     text = text.replace(/\r\n/g, "\n");
     var lines = text.split("\n");

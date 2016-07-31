@@ -8,6 +8,7 @@ Primrose.Output.HapticGlove = function () {
     name: "HapticGlove",
     description: "| [under construction]"
   });
+
   function HapticGlove(options) {
 
     options.port = options.port || HapticGlove.DEFAULT_PORT;

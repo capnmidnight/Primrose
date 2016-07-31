@@ -8,8 +8,10 @@ pliny.function({
     description: "\n\
     //these two lines of code perform the same task.\n\
     var base1 = new THREE.Object3D();\n\
-    var base2 = hub();" }]
+    var base2 = hub();"
+  }]
 });
+
 function hub() {
   return new THREE.Object3D();
 }

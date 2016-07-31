@@ -22,7 +22,15 @@ Primrose.Surface = function () {
     name: "Surface",
     description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
     baseClass: "Primrose.Entity",
-    parameters: [{ name: "options.id", type: "String or HTMLCanvasElement or CanvasRenderingContext2D", description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created." }, { name: "options.bounds", type: "Primrose.Text.Rectangle", description: "The size and location of the surface to create." }]
+    parameters: [{
+      name: "options.id",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options.bounds",
+      type: "Primrose.Text.Rectangle",
+      description: "The size and location of the surface to create."
+    }]
   });
 
   var Surface = function (_Primrose$Entity) {
@@ -139,7 +147,11 @@ Primrose.Surface = function () {
       }
 
       if (_this.canvas === null) {
-        pliny.error({ name: "Invalid element", type: "Error", description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation." });
+        pliny.error({
+          name: "Invalid element",
+          type: "Error",
+          description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+        });
         console.error(_typeof(_this.options.id));
         console.error(_this.options.id);
         throw new Error(_this.options.id + " does not refer to a valid canvas element.");
@@ -305,7 +317,11 @@ Primrose.Surface = function () {
             if (!this.focused) {
               this.focus();
             }
-            emit.call(this, "click", { target: target, x: x, y: y });
+            emit.call(this, "click", {
+              target: target,
+              x: x,
+              y: y
+            });
             if (target !== this) {
               target.startPointer(x - this.bounds.left, y - this.bounds.top);
             }
@@ -321,7 +337,11 @@ Primrose.Surface = function () {
           return child.startPointer(x2, y2);
         });
         if (target) {
-          emit.call(this, "move", { target: target, x: x, y: y });
+          emit.call(this, "move", {
+            target: target,
+            x: x,
+            y: y
+          });
           if (target !== this) {
             target.movePointer(x - this.bounds.left, y - this.bounds.top);
           }

@@ -4,6 +4,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 Primrose.BaseControl = function () {
   "use strict";
 
@@ -20,23 +24,6 @@ Primrose.BaseControl = function () {
     description: "The BaseControl class is the parent class for all 3D controls.\n\
 It manages a unique ID for every new control, the focus state of the control, and\n\
 performs basic conversions from DOM elements to the internal Control format."
-  });
-
-  pliny.method({
-    parent: "Primrose.BaseControl",
-    name: "addEventListener",
-    description: "Adding an event listener registers a function as being ready to receive events.",
-    parameters: [{ name: "evt", type: "String", description: "The name of the event for which we are listening." }, { name: "thunk", type: "Function", description: "The callback to fire when the event occurs." }],
-    examples: [{
-      name: "Add an event listener.",
-      description: "The `addEventListener()` method operates nearly identically\n\
-to the method of the same name on DOM elements.\n\
-\n\
-    grammar(\"JavaScript\");\n\
-    var txt = new Primrose.Text.Controls.TextBox();\n\
-    txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
-    txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
-    }]
   });
 
   pliny.method({
@@ -103,7 +90,11 @@ focus between them all, we must coordinate calls between `focus()` and `blur()`.
     parent: "Primrose.BaseControl",
     name: "copyElement",
     description: "Copies properties from a DOM element that the control is supposed to match.",
-    parameters: [{ name: "elem", type: "Element", description: "The element--e.g. a button or textarea--to copy." }],
+    parameters: [{
+      name: "elem",
+      type: "Element",
+      description: "The element--e.g. a button or textarea--to copy."
+    }],
     examples: [{
       name: "Rough concept",
       description: "The class is not used directly. Its methods would be used in a base\n\
@@ -119,53 +110,45 @@ to a 3D element on-the-fly.\n\
     }]
   });
 
-  var BaseControl = function () {
+  var BaseControl = function (_Primrose$AbstractEve) {
+    _inherits(BaseControl, _Primrose$AbstractEve);
+
     function BaseControl() {
       _classCallCheck(this, BaseControl);
+
+      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BaseControl).call(this));
 
       pliny.property({
         name: "controlID",
         type: "Number",
         description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
       });
-      this.controlID = ID++;
+      _this.controlID = ID++;
 
       pliny.property({
         name: "focused",
         type: "Boolean",
         description: "Flag indicating this control has received focus. You should theoretically only read it."
       });
-      this.focused = false;
-
-      pliny.property({
-        name: "listeners",
-        type: "Object",
-        description: "A bag of arrays that hold the callback functions for each event. The child class of BaseControl may add such arrays to this object. By default, includes listeners for focus and blur events."
-      });
-      this.listeners = {
-        focus: [],
-        blur: []
-      };
+      _this.focused = false;
+      return _this;
     }
 
     _createClass(BaseControl, [{
-      key: "addEventListener",
-      value: function addEventListener(event, func) {
-        if (this.listeners[event]) {
-          this.listeners[event].push(func);
-        }
-      }
-    }, {
       key: "focus",
       value: function focus() {
         this.focused = true;
-        emit.call(this, "focus", { target: this });
+        this.emit("focus", {
+          target: this
+        });
       }
     }, {
       key: "blur",
       value: function blur() {
         this.focused = false;
-        emit.call(this, "blur", { target: this });
+        emit.call(this, "blur", {
+          target: this
+        });
       }
     }, {
       key: "copyElement",
@@ -185,7 +168,7 @@ to a 3D element on-the-fly.\n\
     }]);
 
     return BaseControl;
-  }();
+  }(Primrose.AbstractEventEmitter);
 
   return BaseControl;
 }();
