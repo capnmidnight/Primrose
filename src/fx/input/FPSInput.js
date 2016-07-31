@@ -323,6 +323,7 @@ Primrose.Input.FPSInput = (function () {
         .copy(this.velocity)
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.quaternion));
+      CARRY_OVER.copy(this.stage.position);
 
       // figure out the stage orientation.
       if (this.VR.hasOrientation) {
@@ -348,7 +349,6 @@ Primrose.Input.FPSInput = (function () {
       // move the mouse pointer into place
       EULER_TEMP.set(pitch, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(EULER_TEMP);
-      CARRY_OVER.copy(this.stage.position);
       this.stage.position.copy(this.head.position);
 
       // if we're not using an HMD, then update the view according to the mouse
