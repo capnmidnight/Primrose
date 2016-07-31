@@ -300,15 +300,14 @@ Primrose.Input.FPSInput = (function () {
       this.head.position.copy(this.VR.position);
       this.head.quaternion.copy(this.VR.quaternion);
 
-      // move the mouse pointer into place
-      this.mousePointer.position.copy(this.head.position);
+      this.updateMousePointer();
 
-      // if we're not using an HMD, then update the view according to the mouse
       if (this.VR.hasOrientation) {
         this.mousePointer.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse && !this.VR.hasStage;
         this.head.showPointer = !this.mousePointer.showPointer && !this.VR.hasStage;
       }
       else {
+        // if we're not using an HMD, then update the view according to the mouse
         this.head.quaternion.copy(this.mousePointer.quaternion);
         this.head.showPointer = false;
         this.mousePointer.showPointer = true;
@@ -322,23 +321,32 @@ Primrose.Input.FPSInput = (function () {
       this.head.quaternion.toArray(this.newState, 10);
     }
 
-    updateStage(dt){
-      // get the linear movement from the mouse/keyboard/gamepad
+    updateMousePointer(){
       var pitch = 0,
-        heading = 0,
-        strafe = 0,
-        drive = 0;
+        heading = 0;
       for(var i = 0; i < this.managers.length; ++i){
         var mgr = this.managers[i];
         pitch += mgr.getValue("pitch");
         heading += mgr.getValue("heading");
-        strafe += mgr.getValue("strafe");
-        drive += mgr.getValue("drive");
       }
 
       // orient the mouse pointer
       EULER_TEMP.set(pitch, heading, 0, "YXZ");
       this.mousePointer.quaternion.setFromEuler(EULER_TEMP);
+      this.mousePointer.position.copy(this.head.position);
+    }
+
+    updateStage(dt){
+      // get the linear movement from the mouse/keyboard/gamepad
+      var heading = 0,
+        strafe = 0,
+        drive = 0;
+      for(var i = 0; i < this.managers.length; ++i){
+        var mgr = this.managers[i];
+        heading += mgr.getValue("heading");
+        strafe += mgr.getValue("strafe");
+        drive += mgr.getValue("drive");
+      }
 
       // move stage according to heading and thrust
       if (this.VR.hasOrientation) {
@@ -347,6 +355,8 @@ Primrose.Input.FPSInput = (function () {
 
       EULER_TEMP.set(0, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(EULER_TEMP);
+
+      // update the stage's velocity
       this.velocity.x = strafe;
       this.velocity.z = drive;
 
