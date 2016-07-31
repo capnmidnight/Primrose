@@ -1,10 +1,9 @@
 Primrose.Input.FPSInput = (function () {
   "use strict";
 
-  const VELOCITY = new THREE.Vector3(),
-    swapQuaternion = new THREE.Quaternion(),
-    euler = new THREE.Euler(),
-    eulerParts = [],
+  const DISPLACEMENT = new THREE.Vector3(),
+    STAGE_QUATERNION = new THREE.Quaternion(),
+    EULER_TEMP = new THREE.Euler(),
     CARRY_OVER = new THREE.Vector3(),
     WEDGE = Math.PI / 3;
 
@@ -307,8 +306,8 @@ Primrose.Input.FPSInput = (function () {
 
       // move stage according to heading and thrust
       this.stage.position.copy(CARRY_OVER);
-      euler.set(0, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(euler);
+      EULER_TEMP.set(0, heading, 0, "YXZ");
+      this.stage.quaternion.setFromEuler(EULER_TEMP);
       this.velocity.x = dx;
       this.velocity.z = dz;
       if (!this.stage.isOnGround) {
@@ -320,7 +319,7 @@ Primrose.Input.FPSInput = (function () {
         }
       }
 
-      this.stage.position.add(VELOCITY
+      this.stage.position.add(DISPLACEMENT
         .copy(this.velocity)
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.quaternion));
@@ -329,16 +328,16 @@ Primrose.Input.FPSInput = (function () {
       if (this.VR.hasOrientation) {
         var newHeading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
         euler.set(0, newHeading, 0, "YXZ");
-        swapQuaternion.setFromEuler(euler);
+        STAGE_QUATERNION.setFromEuler(euler);
       }
       else {
-        swapQuaternion.copy(this.stage.quaternion);
+        STAGE_QUATERNION.copy(this.stage.quaternion);
       }
 
 
       // update the pointers
       for(var i = 0; i < this.pointers.length; ++i) {
-        this.updateMotionObject(this.pointers[i], swapQuaternion, avatarHeight);
+        this.updateMotionObject(this.pointers[i], STAGE_QUATERNION, avatarHeight);
       }
 
       // record the position on the ground of the user
@@ -384,10 +383,10 @@ Primrose.Input.FPSInput = (function () {
     }
 
     moveStage(evt) {
-      VELOCITY.copy(evt.position)
+      DISPLACEMENT.copy(evt.position)
         .sub(this.head.position);
-      CARRY_OVER.x += VELOCITY.x;
-      CARRY_OVER.z += VELOCITY.z;
+      CARRY_OVER.x += DISPLACEMENT.x;
+      CARRY_OVER.z += DISPLACEMENT.z;
     }
 
     get segments() {
