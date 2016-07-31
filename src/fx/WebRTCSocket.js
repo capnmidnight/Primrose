@@ -77,12 +77,15 @@ Primrose.WebRTCSocket = (function () {
         instanceNumber = ++INSTANCE_COUNT,
         print = function (name, format) {
           if (ENABLE_DEBUGGING) {
-            const args = Array.prototype.slice.call(arguments, 2);
-            format = "[%s:%s:%s] " + format;
-            args.unshift(INSTANCE_COUNT);
-            args.unshift(instanceNumber);
-            args.unshift(++messageNumber);
-            args.unshift(format);
+            const args = [
+              INSTANCE_COUNT,
+              instanceNumber,
+              ++messageNumber,
+              "[%s:%s:%s] " + format
+            ];
+            for(var i = 2; i < arguments.length; ++i){
+              args.push(arguments[i]);
+            }
             console[name].apply(console, args);
           }
         };
