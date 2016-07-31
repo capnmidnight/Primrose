@@ -15,7 +15,14 @@
     THREE.Quaternion.prototype.toString = function (digits) {
       var parts = this.toArray();
       if (digits !== undefined) {
-        parts = parts.map((v) => v.toFixed(digits));
+        for(var i = 0; i < parts.length; ++i){
+          if(parts[i] !== null && parts[i] !== undefined){
+            parts[i] = parts[i].toFixed(digits);
+          }
+          else{
+            parts[i] = "undefined";
+          }
+        }
       }
       return "{" + parts.join(", ") + "}";
     };
