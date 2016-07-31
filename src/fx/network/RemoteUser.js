@@ -133,11 +133,9 @@ Primrose.Network.RemoteUser = (function () {
             this.gain = audio.context.createGain();
             this.panner = audio.context.createPanner();
 
-            Primrose.Output.Audio3D.chain(
-              this.audioStream,
-              this.gain,
-              this.panner,
-              audio.mainVolume);
+            this.audioStream.connect(this.gain);
+            this.gain.connect(this.panner);
+            this.panner.connect(audio.mainVolume);
             this.panner.coneInnerAngle = 180;
             this.panner.coneOuterAngle = 360;
             this.panner.coneOuterGain = 0.1;

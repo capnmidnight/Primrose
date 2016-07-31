@@ -85,7 +85,7 @@ Primrose.Network.Manager = (function () {
             audio: true,
             video: false
           })
-          .then(Primrose.Output.Audio3D.setAudioStream.bind(null))
+          .then(Primrose.Output.Audio3D.setAudioStream)
           .catch(console.warn.bind(console, "Can't get audio"))
       }
       this.attemptedUserName = userName;

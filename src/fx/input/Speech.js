@@ -63,8 +63,7 @@ Primrose.Input.Speech = (function () {
         errorMessage = null;
 
       function warn() {
-        var msg = fmt("Failed to initialize speech engine. Reason: $1",
-          errorMessage.message);
+        var msg = "Failed to initialize speech engine. Reason: " + errorMessage.message;
         console.error(msg);
         return false;
       }
@@ -123,15 +122,15 @@ Primrose.Input.Speech = (function () {
           command = "";
         }.bind(this), true);
 
-        recognition.addEventListener("error", function (event) {
+        recognition.addEventListener("error", function (evt) {
           restart = true;
-          console.log("speech error", event);
+          console.log("speech error", evt);
           running = false;
           command = "speech error";
         }.bind(this), true);
 
-        recognition.addEventListener("end", function () {
-          console.log("speech ended", arguments);
+        recognition.addEventListener("end", function (evt) {
+          console.log("speech ended", evt);
           running = false;
           command = "speech ended";
           if (restart) {
@@ -140,9 +139,9 @@ Primrose.Input.Speech = (function () {
           }
         }.bind(this), true);
 
-        recognition.addEventListener("result", function (event) {
+        recognition.addEventListener("result", function (evt) {
           var newCommand = [];
-          var result = event.results[event.resultIndex];
+          var result = evt.results[evt.resultIndex];
           var max = 0;
           var maxI = -1;
           if (result && result.isFinal) {

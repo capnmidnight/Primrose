@@ -145,9 +145,9 @@ Primrose.Input.Gamepad = (function () {
       return this.currentDevice && this.currentDevice.pose;
     }
 
-    vibrate() {
+    vibrate(pattern) {
       if (this.currentDevice && this.currentDevice.vibrate) {
-        this.currentDevice.vibrate.apply(this.currentDevice, arguments);
+        this.currentDevice.vibrate(pattern);
       }
     }
   }
