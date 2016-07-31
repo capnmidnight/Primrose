@@ -49,6 +49,16 @@ Primrose.PoseInputProcessor = (function () {
     get currentPose() {
       throw new Exception("currentPose must be implemented in child class");
     }
+
+    updateStage(stage){
+      this.quaternion
+        .copy(stage.quaternion)
+        .multiply(this.poseQuaternion);
+
+      this.position.copy(this.posePosition)
+        .applyQuaternion(stage.quaternion)
+        .add(stage.position);
+    }
   }
 
   return PoseInputProcessor;

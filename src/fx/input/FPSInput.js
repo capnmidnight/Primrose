@@ -24,7 +24,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
       this.newState = [];
-      this.pointers = [];
+      this.motionDevices = [];
       this.velocity = new THREE.Vector3();
 
       this.add(new Primrose.Input.Keyboard(null, {
@@ -146,7 +146,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
 
-      this.pointers.push(this.VR);
+      this.motionDevices.push(this.VR);
 
       Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
         var padID = Primrose.Input.Gamepad.ID(pad),
@@ -222,7 +222,7 @@ Primrose.Input.FPSInput = (function () {
           if (isMotion) {
             mgr.parent = this.VR;
             mgr.makePointer(this.options.scene, 0x0000ff, 0x00007f, true);
-            this.pointers.push(mgr);
+            this.motionDevices.push(mgr);
           }
           else {
             this.Keyboard.parent = mgr;
@@ -326,20 +326,23 @@ Primrose.Input.FPSInput = (function () {
       CARRY_OVER.copy(this.stage.position);
 
       // figure out the stage orientation.
+      STAGE_QUATERNION.copy(this.stage.quaternion);
+
       if (this.VR.hasOrientation) {
         var newHeading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
         EULER_TEMP.set(0, newHeading, 0, "YXZ");
-        STAGE_QUATERNION.setFromEuler(EULER_TEMP);
-      }
-      else {
-        STAGE_QUATERNION.copy(this.stage.quaternion);
+        this.stage.quaternion.setFromEuler(EULER_TEMP);
       }
 
+      this.stage.position.y += avatarHeight;
 
-      // update the pointers
-      for(var i = 0; i < this.pointers.length; ++i) {
-        this.updateMotionObject(this.pointers[i], STAGE_QUATERNION, avatarHeight);
+      // update the motionDevices
+      for(var i = 0; i < this.motionDevices.length; ++i) {
+        this.motionDevices[i].updateStage(this.stage);
       }
+
+      this.stage.position.y -= avatarHeight;
+      this.stage.quaternion.copy(STAGE_QUATERNION);
 
       // record the position on the ground of the user
       this.newState = [];
@@ -366,20 +369,6 @@ Primrose.Input.FPSInput = (function () {
       // record the position of the head of the user
       this.head.position.toArray(this.newState, 7);
       this.head.quaternion.toArray(this.newState, 10);
-    }
-
-    updateMotionObject(mgr, stageQuat, avatarHeight) {
-      // move the pointer onto the stage
-      mgr.quaternion
-        .copy(stageQuat)
-        .multiply(mgr.poseQuaternion);
-
-      mgr.position.copy(mgr.posePosition)
-        .applyQuaternion(stageQuat)
-        .add(this.stage.position);
-
-      // adjust for the player's height
-      mgr.position.y += avatarHeight;
     }
 
     moveStage(evt) {
