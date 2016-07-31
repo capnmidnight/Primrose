@@ -298,10 +298,8 @@ Primrose.Input.FPSInput = (function () {
       }
       this.stage.position.y -= avatarHeight;
 
-      this.head.position.copy(this.VR.position);
-      this.head.quaternion.copy(this.VR.quaternion);
-
-      this.updateMousePointer();
+      this.head.update();
+      this.mousePointer.update(this.head.position);
 
       if (this.VR.hasOrientation) {
         this.mousePointer.showPointer = (this.Mouse.inPhysicalUse || (this.Gamepad_0 && this.Gamepad_0.inPhysicalUse)) && !this.Touch.inPhysicalUse && !this.VR.hasStage;
@@ -320,21 +318,6 @@ Primrose.Input.FPSInput = (function () {
       this.stage.quaternion.toArray(this.newState, 3);
       this.head.position.toArray(this.newState, 7);
       this.head.quaternion.toArray(this.newState, 10);
-    }
-
-    updateMousePointer(){
-      var pitch = 0,
-        heading = 0;
-      for(var i = 0; i < this.managers.length; ++i){
-        var mgr = this.managers[i];
-        pitch += mgr.getValue("pitch");
-        heading += mgr.getValue("heading");
-      }
-
-      // orient the mouse pointer
-      EULER_TEMP.set(pitch, heading, 0, "YXZ");
-      this.mousePointer.quaternion.setFromEuler(EULER_TEMP);
-      this.mousePointer.position.copy(this.head.position);
     }
 
     updateStage(dt){

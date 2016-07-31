@@ -9,6 +9,7 @@ Primrose.Pointer = (function () {
     MAX_MOVE_DISTANCE_SQ = MAX_MOVE_DISTANCE * MAX_MOVE_DISTANCE,
     LASER_WIDTH = 0.01,
     LASER_LENGTH = 3 * LASER_WIDTH,
+    EULER_TEMP = new THREE.Euler(),
     moveTo = new THREE.Vector3(0, 0, 0);
 
   pliny.class({
@@ -129,6 +130,27 @@ Primrose.Pointer = (function () {
           .applyQuaternion(this.mesh.quaternion)
           .add(this.mesh.position);
         return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+      }
+    }
+
+    update(defaultPosition){
+      if(this.trigger instanceof Primrose.PoseInputProcessor){
+        this.position.copy(this.trigger.position);
+        this.quaternion.copy(this.trigger.quaternion);
+      }
+      else{
+        var head = this.trigger,
+          pitch = 0,
+          heading = 0;
+        while(head){
+          pitch += head.getValue("pitch");
+          heading += head.getValue("heading");
+          head = head.parent;
+        }
+
+        EULER_TEMP.set(pitch, heading, 0, "YXZ");
+        this.quaternion.setFromEuler(EULER_TEMP);
+        this.position.copy(defaultPosition);
       }
     }
 
