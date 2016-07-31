@@ -343,7 +343,6 @@ Primrose.InputProcessor = (function () {
       this.showPointer = true;
       this.color = color;
       this.minorColor = minorColor;
-      this.velocity = new THREE.Vector3();
       this.mesh = textured(box(LASER_WIDTH, LASER_WIDTH, LASER_LENGTH), this.color, {
         emissive: this.minorColor
       });
@@ -503,7 +502,6 @@ Primrose.InputProcessor = (function () {
         this.setValue(SETTINGS_TO_ZERO[i], 0);
       }
       if (this.mesh) {
-        this.velocity.set(0, 0, 0);
         this.mesh.position.set(0, 0, 0);
         this.mesh.quaternion.set(0, 0, 0, 1);
         this.isOnGround = false;

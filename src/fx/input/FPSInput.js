@@ -26,6 +26,7 @@ Primrose.Input.FPSInput = (function () {
       this.managers = [];
       this.newState = [];
       this.pointers = [];
+      this.velocity = new THREE.Vector3();
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -308,19 +309,19 @@ Primrose.Input.FPSInput = (function () {
       this.stage.position.copy(CARRY_OVER);
       euler.set(0, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(euler);
-      this.stage.velocity.x = dx;
-      this.stage.velocity.z = dz;
+      this.velocity.x = dx;
+      this.velocity.z = dz;
       if (!this.stage.isOnGround) {
-        this.stage.velocity.y -= this.options.gravity * dt;
+        this.velocity.y -= this.options.gravity * dt;
         if (this.stage.position.y < 0) {
-          this.stage.velocity.y = 0;
+          this.velocity.y = 0;
           this.stage.position.y = 0;
           this.stage.isOnGround = true;
         }
       }
 
       this.stage.position.add(VELOCITY
-        .copy(this.stage.velocity)
+        .copy(this.velocity)
         .multiplyScalar(dt)
         .applyQuaternion(this.stage.quaternion));
 
