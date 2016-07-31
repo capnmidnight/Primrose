@@ -54,8 +54,8 @@ Primrose.Controls.HtmlDoc = (function () {
         this._element = Primrose.DOM.cascadeElement(v, "DIV", HTMLDivElement);
         this._element.style.position = "absolute";
         this._element.style.display = "";
-        this._element.style.width = px(this.bounds.width);
-        this._element.style.height = px(this.bounds.height);
+        this._element.style.width = this.bounds.width + "px";
+        this._element.style.height = this.bounds.height + "px";
         document.body.appendChild(Primrose.DOM.makeHidingContainer(this.id + "-hider", this._element));
         this._render();
       }
