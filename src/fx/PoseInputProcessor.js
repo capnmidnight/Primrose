@@ -2,9 +2,9 @@ Primrose.PoseInputProcessor = (function () {
   "use strict";
 
   const DEFAULT_POSE = {
-    position: [0, 0, 0],
-    orientation: [0, 0, 0, 1]
-  },
+      position: [0, 0, 0],
+      orientation: [0, 0, 0, 1]
+    },
     EMPTY_SCALE = new THREE.Vector3();
 
   pliny.class({

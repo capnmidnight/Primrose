@@ -100,7 +100,7 @@ Primrose.Pointer = (function () {
       return this.mesh.quaternion;
     }
 
-    get matrix(){
+    get matrix() {
       return this.mesh.matrix;
     }
 
@@ -133,16 +133,16 @@ Primrose.Pointer = (function () {
       }
     }
 
-    update(defaultPosition){
-      if(this.trigger instanceof Primrose.PoseInputProcessor){
+    update(defaultPosition) {
+      if (this.trigger instanceof Primrose.PoseInputProcessor) {
         this.position.copy(this.trigger.position);
         this.quaternion.copy(this.trigger.quaternion);
       }
-      else{
+      else {
         var head = this.trigger,
           pitch = 0,
           heading = 0;
-        while(head){
+        while (head) {
           pitch += head.getValue("pitch");
           heading += head.getValue("heading");
           head = head.parent;

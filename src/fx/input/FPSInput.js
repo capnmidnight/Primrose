@@ -279,7 +279,7 @@ Primrose.Input.FPSInput = (function () {
 
     update(dt, avatarHeight) {
       this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
-      if(this.Gamepad_0){
+      if (this.Gamepad_0) {
         this.Gamepad_0.enabled = !this.VR.hasStage;
       }
 
@@ -320,12 +320,12 @@ Primrose.Input.FPSInput = (function () {
       this.head.quaternion.toArray(this.newState, 10);
     }
 
-    updateStage(dt){
+    updateStage(dt) {
       // get the linear movement from the mouse/keyboard/gamepad
       var heading = 0,
         strafe = 0,
         drive = 0;
-      for(var i = 0; i < this.managers.length; ++i){
+      for (var i = 0; i < this.managers.length; ++i) {
         var mgr = this.managers[i];
         heading += mgr.getValue("heading");
         strafe += mgr.getValue("strafe");
@@ -390,7 +390,7 @@ Primrose.Input.FPSInput = (function () {
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
-      for(var i = 0; i < this.pointers.length; ++i) {
+      for (var i = 0; i < this.pointers.length; ++i) {
         this.pointers[i].resolvePicking(currentHits, lastHits, pickableObjects);
       }
     }
