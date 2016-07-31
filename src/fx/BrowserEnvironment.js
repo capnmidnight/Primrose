@@ -281,6 +281,7 @@ Primrose.BrowserEnvironment = (function () {
         render();
         RAF(animate);
       };
+
       var render = () => {
         this.camera.position.set(0, 0, 0);
         this.camera.quaternion.set(0, 0, 0, 1);

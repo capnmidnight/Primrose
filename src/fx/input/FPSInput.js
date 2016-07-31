@@ -292,6 +292,7 @@ Primrose.Input.FPSInput = (function () {
 
       // update the motionDevices
       this.stage.position.y += avatarHeight;
+      this.stage.updateMatrix();
       for(var i = 0; i < this.motionDevices.length; ++i) {
         this.motionDevices[i].updateStage(this.stage);
       }

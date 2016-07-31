@@ -4,7 +4,8 @@ Primrose.PoseInputProcessor = (function () {
   const DEFAULT_POSE = {
     position: [0, 0, 0],
     orientation: [0, 0, 0, 1]
-  };
+  },
+    EMPTY_SCALE = new THREE.Vector3();
 
   pliny.class({
     parent: "Primrose",
@@ -22,6 +23,7 @@ Primrose.PoseInputProcessor = (function () {
       this.poseQuaternion = new THREE.Quaternion();
       this.position = new THREE.Vector3();
       this.quaternion = new THREE.Quaternion();
+      this.matrix = new THREE.Matrix4();
     }
 
     update(dt) {
@@ -53,13 +55,10 @@ Primrose.PoseInputProcessor = (function () {
     }
 
     updateStage(stage){
-      this.quaternion
-        .copy(stage.quaternion)
-        .multiply(this.poseQuaternion);
-
-      this.position.copy(this.posePosition)
-        .applyQuaternion(stage.quaternion)
-        .add(stage.position);
+      this.matrix.makeRotationFromQuaternion(this.poseQuaternion);
+      this.matrix.setPosition(this.posePosition);
+      this.matrix.multiplyMatrices(stage.matrix, this.matrix);
+      this.matrix.decompose(this.position, this.quaternion, EMPTY_SCALE);
     }
   }
 
