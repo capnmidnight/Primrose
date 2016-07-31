@@ -20,6 +20,8 @@ Primrose.PoseInputProcessor = (function () {
       this.lastPose = null;
       this.posePosition = new THREE.Vector3();
       this.poseQuaternion = new THREE.Quaternion();
+      this.position = new THREE.Vector3();
+      this.quaternion = new THREE.Quaternion();
     }
 
     update(dt) {

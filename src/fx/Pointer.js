@@ -37,8 +37,9 @@ Primrose.Pointer = (function () {
       }]
   });
   class Pointer extends Primrose.AbstractEventEmitter {
-    constructor(color = 0xff0000, emission = 0x7f0000, isHand = false) {
+    constructor(trigger, color = 0xff0000, emission = 0x7f0000, isHand = false, base = null) {
       super();
+      this.trigger = trigger;
       this._currentControl = null;
       this.showPointer = true;
       this.color = color;
@@ -67,6 +68,10 @@ Primrose.Pointer = (function () {
       }
     }
 
+    add(obj) {
+      this.mesh.add(obj);
+    }
+
     addToBrowserEnvironment(env, scene) {
       pliny.method({
         parent: "Primrose.Pointer",
@@ -90,8 +95,12 @@ Primrose.Pointer = (function () {
       return this.mesh.position;
     }
 
-    get orientation() {
-      return this.mesh.orientation;
+    get quaternion() {
+      return this.mesh.quaternion;
+    }
+
+    get matrix(){
+      return this.mesh.matrix;
     }
 
     updateMatrix() {
@@ -127,7 +136,7 @@ Primrose.Pointer = (function () {
       this.disk.visible = false;
       this.mesh.visible = false;
 
-      if (this.showPointer) {
+      if (this.trigger.enabled && this.showPointer) {
         // reset the mesh color to the base value
         textured(this.mesh, this.color, {
           emissive: this.minorColor
@@ -137,7 +146,7 @@ Primrose.Pointer = (function () {
           dButtons = 0,
           currentHit = currentHits[this.name],
           lastHit = lastHits && lastHits[this.name],
-          head = this,
+          head = this.trigger,
           isGround = false,
           object,
           control,
@@ -204,7 +213,7 @@ Primrose.Pointer = (function () {
                 this.currentControl.focus();
               }
               else if (isGround) {
-                emit.call(this, "teleport", {
+                this.emit("teleport", {
                   name: this.name,
                   position: this.disk.position
                 });

@@ -2,9 +2,7 @@ Primrose.Input.FPSInput = (function () {
   "use strict";
 
   const DISPLACEMENT = new THREE.Vector3(),
-    STAGE_QUATERNION = new THREE.Quaternion(),
     EULER_TEMP = new THREE.Euler(),
-    CARRY_OVER = new THREE.Vector3(),
     WEDGE = Math.PI / 3;
 
   pliny.class({
@@ -24,6 +22,7 @@ Primrose.Input.FPSInput = (function () {
 
       this.managers = [];
       this.newState = [];
+      this.pointers = [];
       this.motionDevices = [];
       this.velocity = new THREE.Vector3();
 
@@ -217,12 +216,15 @@ Primrose.Input.FPSInput = (function () {
 
           var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
           this.add(mgr);
-          mgr.addEventListener("teleport", (evt) => this.moveStage(evt));
 
           if (isMotion) {
             mgr.parent = this.VR;
-            mgr.makePointer(this.options.scene, 0x0000ff, 0x00007f, true);
             this.motionDevices.push(mgr);
+
+            var ptr = new Primrose.Pointer(mgr, 0x0000ff, 0x00007f, true);
+            this.pointers.push(ptr);
+            ptr.addToBrowserEnvironment(null, this.options.scene);
+            ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
           }
           else {
             this.Keyboard.parent = mgr;
@@ -232,13 +234,17 @@ Primrose.Input.FPSInput = (function () {
 
       Primrose.Input.Gamepad.addEventListener("gamepaddisconnected", this.remove.bind(this));
 
-      this.stage = isMobile ? this.Touch : this.Mouse;
-      this.stage.makePointer(this.options.scene, 0xff0000, 0x7f0000);
+      this.stage = new THREE.Object3D();
 
-      this.head = this.VR;
-      this.head.makePointer(this.options.scene, 0x00ff00, 0x007f00);
+      this.mousePointer = new Primrose.Pointer(this.Mouse, 0xff0000, 0x7f0000);
+      this.pointers.push(this.mousePointer);
+      this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-      this.managers.forEach((mgr) => mgr.addEventListener("teleport", (position) => this.moveStage(position)));
+      this.head = new Primrose.Pointer(this.VR, 0x00ff00, 0x007f00);
+      this.pointers.push(this.head);
+      this.head.addToBrowserEnvironment(null, this.options.scene);
+
+      this.pointers.forEach((ptr) => ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position)));
 
       this.ready = Promise.all(this.managers
         .map((mgr) => mgr.ready)
@@ -272,44 +278,78 @@ Primrose.Input.FPSInput = (function () {
     }
 
     update(dt, avatarHeight) {
-      this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
+      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
       if(this.Gamepad_0){
         this.Gamepad_0.enabled = !this.VR.hasStage;
       }
+
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
 
-      var status = this.managers
-        .filter((mgr) => mgr.inPhysicalUse)
-        .map((mgr) => mgr.name)
-        .join(", ");
-      if (status !== this.lastStatus) {
-        console.log(status);
-        this.lastStatus = status;
+      this.updateStage(dt);
+
+      // update the motionDevices
+      this.stage.position.y += avatarHeight;
+      for(var i = 0; i < this.motionDevices.length; ++i) {
+        this.motionDevices[i].updateStage(this.stage);
+      }
+      this.stage.position.y -= avatarHeight;
+
+      this.head.position.copy(this.VR.position);
+      this.head.quaternion.copy(this.VR.quaternion);
+
+      // move the mouse pointer into place
+      this.mousePointer.position.copy(this.head.position);
+
+      // if we're not using an HMD, then update the view according to the mouse
+      if (this.VR.hasOrientation) {
+        this.mousePointer.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse && !this.VR.hasStage;
+        this.head.showPointer = !this.mousePointer.showPointer && !this.VR.hasStage;
+      }
+      else {
+        this.head.quaternion.copy(this.mousePointer.quaternion);
+        this.head.showPointer = false;
+        this.mousePointer.showPointer = true;
       }
 
+      // record the position and orientation of the user
+      this.newState = [];
+      this.stage.position.toArray(this.newState, 0);
+      this.stage.quaternion.toArray(this.newState, 3);
+      this.head.position.toArray(this.newState, 7);
+      this.head.quaternion.toArray(this.newState, 10);
+    }
+
+    updateStage(dt){
       // get the linear movement from the mouse/keyboard/gamepad
-      var head = this.stage,
-        pitch = 0,
+      var pitch = 0,
         heading = 0,
-        dx = 0,
-        dz = 0;
-      while (head) {
-        pitch += head.getValue("pitch");
-        heading += head.getValue("heading");
-        dx += head.getValue("strafe");
-        dz += head.getValue("drive");
-        head = head.parent;
+        strafe = 0,
+        drive = 0;
+      for(var i = 0; i < this.managers.length; ++i){
+        var mgr = this.managers[i];
+        pitch += mgr.getValue("pitch");
+        heading += mgr.getValue("heading");
+        strafe += mgr.getValue("strafe");
+        drive += mgr.getValue("drive");
       }
+
+      // orient the mouse pointer
+      EULER_TEMP.set(pitch, heading, 0, "YXZ");
+      this.mousePointer.quaternion.setFromEuler(EULER_TEMP);
 
       // move stage according to heading and thrust
-      this.stage.position.copy(CARRY_OVER);
+      if (this.VR.hasOrientation) {
+        heading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
+      }
+
       EULER_TEMP.set(0, heading, 0, "YXZ");
       this.stage.quaternion.setFromEuler(EULER_TEMP);
-      this.velocity.x = dx;
-      this.velocity.z = dz;
+      this.velocity.x = strafe;
+      this.velocity.z = drive;
+
       if (!this.stage.isOnGround) {
         this.velocity.y -= this.options.gravity * dt;
         if (this.stage.position.y < 0) {
@@ -319,83 +359,35 @@ Primrose.Input.FPSInput = (function () {
         }
       }
 
-      this.stage.position.add(DISPLACEMENT
+      this.moveStage(DISPLACEMENT
         .copy(this.velocity)
         .multiplyScalar(dt)
-        .applyQuaternion(this.stage.quaternion));
-      CARRY_OVER.copy(this.stage.position);
-
-      // figure out the stage orientation.
-      STAGE_QUATERNION.copy(this.stage.quaternion);
-
-      if (this.VR.hasOrientation) {
-        var newHeading = WEDGE * Math.floor((heading / WEDGE) + 0.5);
-        EULER_TEMP.set(0, newHeading, 0, "YXZ");
-        this.stage.quaternion.setFromEuler(EULER_TEMP);
-      }
-
-      this.stage.position.y += avatarHeight;
-
-      // update the motionDevices
-      for(var i = 0; i < this.motionDevices.length; ++i) {
-        this.motionDevices[i].updateStage(this.stage);
-      }
-
-      this.stage.position.y -= avatarHeight;
-      this.stage.quaternion.copy(STAGE_QUATERNION);
-
-      // record the position on the ground of the user
-      this.newState = [];
-      this.stage.position.toArray(this.newState, 0);
-      this.stage.quaternion.toArray(this.newState, 3);
-
-      // move the mouse pointer into place
-      EULER_TEMP.set(pitch, heading, 0, "YXZ");
-      this.stage.quaternion.setFromEuler(EULER_TEMP);
-      this.stage.position.copy(this.head.position);
-
-      // if we're not using an HMD, then update the view according to the mouse
-      if (this.VR.hasOrientation) {
-        this.stage.showPointer = this.Mouse.inPhysicalUse && !this.Touch.inPhysicalUse && !this.VR.hasStage;
-        this.head.showPointer = !this.stage.showPointer && !this.VR.hasStage;
-      }
-      else {
-        this.head.quaternion.copy(this.stage.quaternion)
-          .multiply(this.head.poseQuaternion);
-        this.head.showPointer = false;
-        this.stage.showPointer = true;
-      }
-
-      // record the position of the head of the user
-      this.head.position.toArray(this.newState, 7);
-      this.head.quaternion.toArray(this.newState, 10);
+        .applyQuaternion(this.stage.quaternion)
+        .add(this.head.position));
     }
 
-    moveStage(evt) {
-      DISPLACEMENT.copy(evt.position)
+    moveStage(position) {
+      DISPLACEMENT.copy(position)
         .sub(this.head.position);
-      CARRY_OVER.x += DISPLACEMENT.x;
-      CARRY_OVER.z += DISPLACEMENT.z;
+      this.stage.position.x += DISPLACEMENT.x;
+      this.stage.position.z += DISPLACEMENT.z;
     }
 
     get segments() {
       var segments = [];
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.enabled) {
-          var seg = mgr.segment;
-          if (seg) {
-            segments.push(seg);
-          }
+      for (var i = 0; i < this.pointers.length; ++i) {
+        var seg = this.pointers[i].segment;
+        if (seg) {
+          segments.push(seg);
         }
       }
       return segments;
     }
 
     get lockMovement() {
-      for (var i = 0; i < this.managers.length; ++i) {
-        var mgr = this.managers[i];
-        if (mgr.lockMovement) {
+      for (var i = 0; i < this.pointers.length; ++i) {
+        var ptr = this.pointers[i];
+        if (ptr.lockMovement) {
           return true;
         }
       }
@@ -404,8 +396,8 @@ Primrose.Input.FPSInput = (function () {
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {
-      for(var i = 0; i < this.managers.length; ++i) {
-        this.managers[i].resolvePicking(currentHits, lastHits, pickableObjects);
+      for(var i = 0; i < this.pointers.length; ++i) {
+        this.pointers[i].resolvePicking(currentHits, lastHits, pickableObjects);
       }
     }
 
