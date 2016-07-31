@@ -25,6 +25,7 @@ Primrose.Input.FPSInput = (function () {
       this.pointers = [];
       this.motionDevices = [];
       this.velocity = new THREE.Vector3();
+      this.matrix = new THREE.Matrix4();
 
       this.add(new Primrose.Input.Keyboard(null, {
         strafeLeft: {
@@ -291,12 +292,11 @@ Primrose.Input.FPSInput = (function () {
       this.updateStage(dt);
 
       // update the motionDevices
-      this.stage.position.y += avatarHeight;
       this.stage.updateMatrix();
-      for(var i = 0; i < this.motionDevices.length; ++i) {
-        this.motionDevices[i].updateStage(this.stage);
+      this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
+      for (var i = 0; i < this.motionDevices.length; ++i) {
+        this.motionDevices[i].updateStage(this.matrix);
       }
-      this.stage.position.y -= avatarHeight;
 
       this.head.update();
       this.mousePointer.update(this.head.position);
