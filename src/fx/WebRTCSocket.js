@@ -83,7 +83,7 @@ Primrose.WebRTCSocket = (function () {
               ++messageNumber,
               "[%s:%s:%s] " + format
             ];
-            for(var i = 2; i < arguments.length; ++i){
+            for (var i = 2; i < arguments.length; ++i) {
               args.push(arguments[i]);
             }
             console[name].apply(console, args);
