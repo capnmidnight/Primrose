@@ -37,27 +37,18 @@ Primrose.Network.RemoteUser = (function () {
 
       this.nameObject = textured(text3D(0.1, userName), nameMaterial);
       var bounds = this.nameObject.geometry.boundingBox.max;
-      this.nameObject.rotation.set(Math.PI / 2, 0, 0);
-      this.nameObject.position.set(-bounds.x / 2, 0, bounds.y);
+      this.nameObject.rotation.set(0, Math.PI, 0);
+      this.nameObject.position.set(bounds.x / 2, bounds.y, 0);
       this.head.add(this.nameObject);
 
-      this.dStagePosition = new THREE.Vector3();
       this.dStageQuaternion = new THREE.Quaternion();
       this.dHeadPosition = new THREE.Vector3();
       this.dHeadQuaternion = new THREE.Quaternion();
 
-      this.lastStagePosition = new THREE.Vector3();
       this.lastStageQuaternion = new THREE.Quaternion();
       this.lastHeadPosition = new THREE.Vector3();
       this.lastHeadQuaternion = new THREE.Quaternion();
 
-      this.stagePosition = {
-        arr1: [],
-        arr2: [],
-        last: this.lastStagePosition,
-        delta: this.dStagePosition,
-        curr: this.stage.position
-      };
       this.stageQuaternion = {
         arr1: [],
         arr2: [],
@@ -204,13 +195,14 @@ Primrose.Network.RemoteUser = (function () {
 
       this.time += dt;
       var fade = this.time >= RemoteUser.NETWORK_DT;
-      this._updateV(this.stagePosition, dt, fade);
-      this._updateV(this.stageQuaternion, dt, fade);
       this._updateV(this.headPosition, dt, fade);
+      this._updateV(this.stageQuaternion, dt, fade);
       this._updateV(this.headQuaternion, dt, fade);
+      this.stage.position.copy(this.headPosition.curr);
+      this.stage.position.y = 0;
       if (this.panner) {
         this.panner.setPosition(this.stage.position.x, this.stage.position.y, this.stage.position.z);
-        this.panner.setQuaternion(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
+        this.panner.setOrientation(Math.sin(this.stage.rotation.y), 0, Math.cos(this.stage.rotation.y));
       }
     }
 
@@ -227,14 +219,13 @@ Primrose.Network.RemoteUser = (function () {
       });
 
       this.time = 0;
-      this._predict(this.stagePosition, v, 1);
+      this._predict(this.headPosition, v, 1);
       this._predict(this.stageQuaternion, v, 4);
-      this._predict(this.headPosition, v, 8);
-      this._predict(this.headQuaternion, v, 11);
+      this._predict(this.headQuaternion, v, 8);
     }
 
     toString(digits) {
-      return this.stagePosition.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
+      return this.stage.position.curr.toString(digits) + " " + this.headPosition.curr.toString(digits);
     }
   }
 

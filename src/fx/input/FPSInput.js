@@ -278,7 +278,7 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
-    update(dt, avatarHeight) {
+    update(dt) {
       this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
       if (this.Gamepad_0) {
         this.Gamepad_0.enabled = !this.VR.hasStage;
@@ -314,10 +314,11 @@ Primrose.Input.FPSInput = (function () {
 
       // record the position and orientation of the user
       this.newState = [];
-      this.stage.position.toArray(this.newState, 0);
+      this.head.updateMatrix();
+      this.stage.updateMatrix();
+      this.head.position.toArray(this.newState, 0);
       this.stage.quaternion.toArray(this.newState, 3);
-      this.head.position.toArray(this.newState, 7);
-      this.head.quaternion.toArray(this.newState, 10);
+      this.head.quaternion.toArray(this.newState, 7);
     }
 
     updateStage(dt) {
