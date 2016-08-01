@@ -215,13 +215,6 @@ Primrose.BrowserEnvironment = (function () {
           i, j, avatarHeight = this.options.avatarHeight;
         lt = t;
 
-        if (this.input.VR.stage) {
-          this.scene.applyMatrix(this.input.VR.stage.matrix);
-          avatarHeight = this.scene.position.y;
-          this.scene.position.y = 0;
-          this.scene.updateMatrix();
-        }
-
         movePlayer(dt, avatarHeight);
         this.input.resolvePicking(currentHits, lastHits, this.pickableObjects);
         moveSky();
