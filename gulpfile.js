@@ -60,7 +60,7 @@ var gulp = require("gulp"),
   ],
   hasHereTTP = fs.existsSync("../VR.sln"),
   hasWebVRBootstrapper = fs.existsSync("../WebVR-Bootstrapper"),
-  hasLogger = fs.existsSync("../logger"),
+  hasLogger = fs.existsSync("../bare-bones-logger"),
   hasPliny = fs.existsSync("../pliny"),
   sourceFiles = recurseDirectory("src");
 
@@ -72,7 +72,7 @@ var debugDataES6 = {
     cssExt: ".css",
     bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/webvr-bootstrapper.js"] : ["node_modules/webvr-bootstrapper/webvr-bootstrapper.js"],
     frameworkFiles: [
-      "node_modules/logger/logger.js",
+      "node_modules/bare-bones-logger/bare-bones-logger.js",
       "node_modules/marked/marked.min.js",
       "node_modules/pliny/pliny.js",
       "node_modules/socket.io-client/socket.io.js",
@@ -232,7 +232,7 @@ if (hasWebVRBootstrapper) {
 }
 
 if (hasLogger) {
-  X("build:logger", "cd ../logger && gulp");
+  X("build:bare-bones-logger", "cd ../bare-bones-logger && gulp");
 }
 
 if (hasPliny) {
@@ -346,7 +346,7 @@ gulp.task("just:concat:primrose", concatPrimrose);
 var concatDependenciesDependecies = [];
 
 if (hasLogger) {
-  concatDependenciesDependecies.push("build:logger");
+  concatDependenciesDependecies.push("build:bare-bones-logger");
 }
 
 if (hasPliny) {
@@ -361,7 +361,7 @@ if (hasPliny) {
 
 function concatDependencies() {
   return concatenate(gulp.src([
-    "node_modules/logger/logger.js",
+    "node_modules/bare-bones-logger/bare-bones-logger.js",
     "node_modules/marked/marked.min.js",
     "node_modules/pliny/pliny.js",
     "node_modules/promise-polyfill/promise.js",
