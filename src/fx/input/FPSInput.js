@@ -27,7 +27,10 @@ Primrose.Input.FPSInput = (function () {
       this.velocity = new THREE.Vector3();
       this.matrix = new THREE.Matrix4();
 
-      this.add(new Primrose.Input.Keyboard(null, {
+      const keyUp = (evt) => this.currentControl && this.currentControl.keyUp && this.currentControl.keyUp(evt);
+      const keyDown = (evt) => this.Keyboard.doTyping(this.currentControl && this.currentControl.focusedElement, evt);
+
+      this.add(new Primrose.Input.Keyboard(this, null, {
         strafeLeft: {
           buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
         },
@@ -69,6 +72,9 @@ Primrose.Input.FPSInput = (function () {
           commandUp: emit.bind(this, "zero")
         }
       }));
+
+      this.Keyboard.addEventListener("keydown", keyDown);
+      this.Keyboard.addEventListener("keyup", keyUp);
 
       this.add(new Primrose.Input.Touch(DOMElement, this.Keyboard, {
         buttons: {
@@ -388,6 +394,15 @@ Primrose.Input.FPSInput = (function () {
       }
 
       return false;
+    }
+
+    get currentControl() {
+      for (var i = 0; i < this.pointers.length; ++i) {
+        var ptr = this.pointers[i];
+        if (ptr.currentControl) {
+          return ptr.currentControl;
+        }
+      }
     }
 
     resolvePicking(currentHits, lastHits, pickableObjects) {

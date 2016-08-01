@@ -25,45 +25,26 @@ Primrose.Input.Keyboard = (function () {
       }]
   });
   class Keyboard extends Primrose.InputProcessor {
-    constructor(parent, commands, socket) {
+    constructor(input, parent, commands, socket) {
       super("Keyboard", parent, commands, socket);
       this.listeners.clipboard = [];
+      this.listeners.keydown = [];
+      this.listeners.keyup = [];
 
       this._operatingSystem = null;
       this.browser = isChrome ? "CHROMIUM" : (isFirefox ? "FIREFOX" : (isIE ? "IE" : (isOpera ? "OPERA" : (isSafari ? "SAFARI" : "UNKNOWN"))));
       this._codePage = null;
 
-      function execute(stateChange, evt) {
-        if (!this.lockMovement) {
-          this.setButton(evt.keyCode, stateChange);
+      const execute = (evt) => {
+        if (!input.lockMovement) {
+          this.setButton(evt.keyCode, evt.type === "keydown");
         }
-        else if (evt.type === "keyup") {
-          if (this.currentControl && this.currentControl.keyUp) {
-            this.currentControl.keyUp(evt);
-          }
+        else{
+          emit.call(this, evt.type, evt);
         }
-        else if (evt.type === "keydown") {
-          var elem = this.currentControl.focusedElement;
-          if (elem) {
-            if (elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
-              var oldDeadKeyState = this.operatingSystem._deadKeyState,
-                cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+      };
 
-              if (elem.execCommand(this.browser, this.codePage, cmdName)) {
-                evt.preventDefault();
-              }
-              if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
-                this.operatingSystem._deadKeyState = "";
-              }
-            }
-            else {
-              elem.keyDown(evt);
-            }
-          }
-        }
-      }
-
-      function focusClipboard(evt) {
+      const focusClipboard = (evt) => {
         if (this.lockMovement) {
           var cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
           if (cmdName === "CUT" || cmdName === "COPY") {
@@ -71,9 +52,9 @@ Primrose.Input.Keyboard = (function () {
             surrogate.focus();
           }
         }
-      }
+      };
 
-      function clipboardOperation(evt) {
+      const clipboardOperation = (evt) => {
         if (this.currentControl) {
           this.currentControl[evt.type + "SelectedText"](evt);
           if (!evt.returnValue) {
@@ -93,15 +74,34 @@ Primrose.Input.Keyboard = (function () {
       surrogateContainer.style.width = 0;
       surrogateContainer.style.height = 0;
       surrogate.addEventListener("beforecopy", setFalse, false);
-      surrogate.addEventListener("copy", clipboardOperation.bind(this), false);
+      surrogate.addEventListener("copy", clipboardOperation, false);
       surrogate.addEventListener("beforecut", setFalse, false);
-      surrogate.addEventListener("cut", clipboardOperation.bind(this), false);
+      surrogate.addEventListener("cut", clipboardOperation, false);
       document.body.insertBefore(surrogateContainer, document.body.children[0]);
 
       window.addEventListener("beforepaste", setFalse, false);
-      window.addEventListener("keydown", focusClipboard.bind(this), true);
-      window.addEventListener("keydown", execute.bind(this, true), false);
-      window.addEventListener("keyup", execute.bind(this, false), false);
+      window.addEventListener("keydown", focusClipboard, true);
+      window.addEventListener("keydown", execute, false);
+      window.addEventListener("keyup", execute, false);
+    }
+
+    doTyping(elem, evt) {
+      if (elem) {
+        if (elem.execCommand && this.operatingSystem && this.browser && this.codePage) {
+          var oldDeadKeyState = this.operatingSystem._deadKeyState,
+            cmdName = this.operatingSystem.makeCommandName(evt, this.codePage);
+
+          if (elem.execCommand(this.browser, this.codePage, cmdName)) {
+            evt.preventDefault();
+          }
+          if (this.operatingSystem._deadKeyState === oldDeadKeyState) {
+            this.operatingSystem._deadKeyState = "";
+          }
+        }
+        else {
+          elem.keyDown(evt);
+        }
+      }
     }
 
     withCurrentControl(name) {

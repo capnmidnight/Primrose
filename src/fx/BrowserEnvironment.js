@@ -19,22 +19,14 @@ Primrose.BrowserEnvironment = (function () {
       name: "BrowserEnvironment",
       description: "Make a Virtual Reality app in your web browser!"
   });
-  class BrowserEnvironment {
+  class BrowserEnvironment extends Primrose.AbstractEventEmitter{
     constructor(name, options) {
+      super();
       this.id = name;
 
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
       this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
         .getHex();
-
-      this.addEventListener = (event, thunk, bubbles) => {
-        if (this.listeners[event]) {
-          this.listeners[event].push(thunk);
-        }
-        else if (FORWARDED_EVENTS.indexOf(event) >= 0) {
-          window.addEventListener(event, thunk, bubbles);
-        }
-      };
 
       this.zero = () => {
         if (!this.input.lockMovement) {
@@ -222,7 +214,7 @@ Primrose.BrowserEnvironment = (function () {
         this.network.update(dt);
         checkQuality();
 
-        emit.call(this, "update", dt);
+        this.emit("update", dt);
       };
 
       var movePlayer = (dt) => {
@@ -465,19 +457,6 @@ Primrose.BrowserEnvironment = (function () {
       //
       this.avatarHeight = this.options.avatarHeight;
       this.walkSpeed = this.options.walkSpeed;
-      this.listeners = {
-        ready: [],
-        update: [],
-        gazestart: [],
-        gazecomplete: [],
-        gazecancel: [],
-        pointerstart: [],
-        pointermove: [],
-        pointerend: [],
-        authorizationfailed: [],
-        authorizationsucceeded: [],
-        loggedout: []
-      };
 
       this.audio = new Primrose.Output.Audio3D();
       var audioReady = null,
@@ -727,8 +706,8 @@ Primrose.BrowserEnvironment = (function () {
         this.network = new Primrose.Network.Manager(this.options.serverPath, this.input, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", addAvatar);
         this.network.addEventListener("removeavatar", removeAvatar);
-        this.network.addEventListener("authorizationsucceeded", emit.bind(this, "authorizationsucceeded"));
-        this.network.addEventListener("authorizationfailed", emit.bind(this, "authorizationfailed"));
+        this.network.addEventListener("authorizationsucceeded", this.emit.bind(this, "authorizationsucceeded"));
+        this.network.addEventListener("authorizationfailed", this.emit.bind(this, "authorizationfailed"));
 
         this.authenticate = this.network.authenticate.bind(this.network, this.id);
 
@@ -800,7 +779,7 @@ Primrose.BrowserEnvironment = (function () {
           this.renderer.domElement.style.cursor = "default";
           this.input.VR.displays[0].DOMElement = this.renderer.domElement;
           this.input.VR.connect(0);
-          emit.call(this, "ready");
+          this.emit("ready");
         });
 
       this.start = () => {
@@ -860,6 +839,24 @@ Primrose.BrowserEnvironment = (function () {
       }
 
       this.start();
+    }
+
+    addEventListener(evt, thunk){
+      if(FORWARDED_EVENTS.indexOf(evt) >= 0){
+        window.addEventListener(evt, thunk, false);
+      }
+      else{
+        super.addEventListener(evt, thunk);
+      }
+    }
+
+    removeEventListener(evt, thunk){
+      if(FORWARDED_EVENTS.indexOf(evt) >= 0){
+        window.removeEventListener(evt, thunk, false);
+      }
+      else{
+        super.removeEventListener(evt, thunk);
+      }
     }
 
     get displays() {
