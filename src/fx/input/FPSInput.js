@@ -304,8 +304,9 @@ Primrose.Input.FPSInput = (function () {
         this.motionDevices[i].updateStage(this.matrix);
       }
 
-      this.head.update();
-      this.mousePointer.update(this.head.position);
+      for(var i = 0; i < this.pointers.length; ++i){
+        this.pointers[i].update(this.head.position);
+      }
 
       if (this.VR.hasOrientation) {
         this.mousePointer.showPointer = (this.Mouse.inPhysicalUse || (this.Gamepad_0 && this.Gamepad_0.inPhysicalUse)) && !this.Touch.inPhysicalUse && !this.VR.hasStage;
