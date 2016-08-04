@@ -39,7 +39,7 @@ Primrose.Input.Keyboard = (function () {
         if (!input.lockMovement) {
           this.setButton(evt.keyCode, evt.type === "keydown");
         }
-        else{
+        else {
           emit.call(this, evt.type, evt);
         }
       };

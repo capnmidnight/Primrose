@@ -5,10 +5,6 @@ Primrose.Network.Manager = (function () {
     parent: "Primrose.Network",
       name: "Manager",
       parameters: [{
-        name: "serverAddress",
-        type: "String",
-        description: "The address of the WebSocket server that manages multiplayer and device fusion connections."
-      }, {
         name: "localUser",
         type: "Primrose.Input.FPSInput",
         description: "The object that represents the player's location in the scene."
@@ -23,9 +19,8 @@ Primrose.Network.Manager = (function () {
       }]
   });
   class Manager extends Primrose.AbstractEventEmitter {
-    constructor(serverAddress, localUser, audio, factories, options) {
+    constructor(localUser, audio, factories, options) {
       super();
-      this.path = serverAddress;
       this.localUser = localUser;
       this.audio = audio;
       this.factories = factories;
@@ -34,9 +29,8 @@ Primrose.Network.Manager = (function () {
       this.oldState = [];
       this.users = {};
       this.listUserPromise = Promise.resolve();
-      this.socket = null;
+      this._socket = null;
       this.userName = null;
-      this.attemptedUserName = null;
       this.microphone = null;
     }
 
@@ -79,8 +73,12 @@ Primrose.Network.Manager = (function () {
       }
     }
 
-    authenticate(appKey, verb, userName, password, email) {
-      if (this.microphone === null) {
+    get socket() {
+      return this._socket;
+    }
+
+    set socket(v) {
+      if (!this.microphone === null) {
         this.microphone = navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
@@ -88,41 +86,19 @@ Primrose.Network.Manager = (function () {
           .then(Primrose.Output.Audio3D.setAudioStream)
           .catch(console.warn.bind(console, "Can't get audio"))
       }
-      this.attemptedUserName = userName;
-      if (!this.socket) {
-        console.log("connecting to: %s", this.path);
-        this.socket = io(this.path);
-        this.socket.on("connect_error", this.connectionError.bind(this, verb));
-        this.socket.on("signupFailed", this.authFailed("signup"));
-        this.socket.on("loginFailed", this.authFailed("login"));
-        this.socket.on("userList", this.listUsers.bind(this));
-        this.socket.on("userJoin", this.addUser.bind(this));
-        this.socket.on("deviceAdded", this.addDevice.bind(this));
-        this.socket.on("deviceIndex", this.setDeviceIndex.bind(this));
-        this.socket.on("chat", this.receiveChat.bind(this));
-        this.socket.on("userState", this.updateUser.bind(this));
-        this.socket.on("userLeft", this.removeUser.bind(this));
-        this.socket.on("logoutComplete", this.emit.bind(this, "loggedout"));
-        this.socket.on("connection_lost", this.lostConnection.bind(this));
-        this.socket.on("errorDetail", console.error.bind(console));
+      if (!this._socket) {
+        this._socket = v;
+        this._socket.on("userList", this.listUsers.bind(this));
+        this._socket.on("userJoin", this.addUser.bind(this));
+        this._socket.on("deviceAdded", this.addDevice.bind(this));
+        this._socket.on("deviceIndex", this.setDeviceIndex.bind(this));
+        this._socket.on("chat", this.receiveChat.bind(this));
+        this._socket.on("userState", this.updateUser.bind(this));
+        this._socket.on("userLeft", this.removeUser.bind(this));
+        this._socket.on("connection_lost", this.lostConnection.bind(this));
+        this._socket.on("userList", this.listUsers.bind(this));
+        this._socket.emit("listUsers");
       }
-
-      this.socket.once("salt", (salt) => {
-        var hash = new Hashes.SHA256()
-          .hex(salt + password)
-        this.socket.emit("hash", hash);
-      });
-      this.socket.emit(verb, {
-        userName: userName,
-        email: email,
-        app: appKey
-      });
-    }
-
-    connectionError(verb, evt) {
-      this.socket.close();
-      this.socket = null;
-      this.authFailed(verb)("an error occured while connecting to the server.");
     }
 
     addUser(state) {
@@ -147,7 +123,6 @@ Primrose.Network.Manager = (function () {
     }
 
     listUsers(newUsers) {
-      this.userName = this.attemptedUserName;
       Object.keys(this.users)
         .forEach(this.removeUser.bind(this));
       while (newUsers.length > 0) {
@@ -170,15 +145,6 @@ Primrose.Network.Manager = (function () {
 
     setDeviceIndex(index) {
       this.deviceIndex = index;
-    }
-
-    authFailed(verb) {
-      return (reason) => {
-        this.emit("authorizationfailed", {
-          verb,
-          reason
-        });
-      }
     }
   }
 

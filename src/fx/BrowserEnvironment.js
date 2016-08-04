@@ -5,21 +5,14 @@ Primrose.BrowserEnvironment = (function () {
     return function () {};
   }
 
-  var MILLISECONDS_TO_SECONDS = 0.001,
-    RIGHT = new THREE.Vector3(1, 0, 0),
-    UP = new THREE.Vector3(0, 1, 0),
-    FORWARDED_EVENTS = [
-      "keydown", "keyup", "keypress",
-      "mousedown", "mouseup", "mousemove", "wheel",
-      "touchstart", "touchend", "touchmove"
-    ];
+  var MILLISECONDS_TO_SECONDS = 0.001;
 
   pliny.class({
     parent: "Primrose",
       name: "BrowserEnvironment",
       description: "Make a Virtual Reality app in your web browser!"
   });
-  class BrowserEnvironment extends Primrose.AbstractEventEmitter{
+  class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     constructor(name, options) {
       super();
       this.id = name;
@@ -699,17 +692,9 @@ Primrose.BrowserEnvironment = (function () {
 
         this.input.head.add(this.camera);
 
-        if (this.options.serverPath === undefined) {
-          var protocol = location.protocol.replace("http", "ws");
-          this.options.serverPath = protocol + "//" + location.hostname;
-        }
-        this.network = new Primrose.Network.Manager(this.options.serverPath, this.input, this.audio, factories, this.options);
+        this.network = new Primrose.Network.Manager(this.input, this.audio, factories, this.options);
         this.network.addEventListener("addavatar", addAvatar);
         this.network.addEventListener("removeavatar", removeAvatar);
-        this.network.addEventListener("authorizationsucceeded", this.emit.bind(this, "authorizationsucceeded"));
-        this.network.addEventListener("authorizationfailed", this.emit.bind(this, "authorizationfailed"));
-
-        this.authenticate = this.network.authenticate.bind(this.network, this.id);
 
         return this.input.ready;
       });
@@ -841,22 +826,12 @@ Primrose.BrowserEnvironment = (function () {
       this.start();
     }
 
-    addEventListener(evt, thunk){
-      if(FORWARDED_EVENTS.indexOf(evt) >= 0){
-        window.addEventListener(evt, thunk, false);
-      }
-      else{
-        super.addEventListener(evt, thunk);
-      }
+    connect(socket, userName) {
+      return this.network && this.network.connect(socket, userName);
     }
 
-    removeEventListener(evt, thunk){
-      if(FORWARDED_EVENTS.indexOf(evt) >= 0){
-        window.removeEventListener(evt, thunk, false);
-      }
-      else{
-        super.removeEventListener(evt, thunk);
-      }
+    disconnect() {
+      return this.network && this.network.disconnect();
     }
 
     get displays() {

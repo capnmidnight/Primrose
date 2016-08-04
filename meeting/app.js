@@ -1,10 +1,17 @@
 "use strict";
 
-var MEETING_ID_PATTERN = /\bid=(\w+)/,
+var ERROR_MESSAGES = {
+    login: "We couldn't log you in right now because ",
+    signup: "We couldn't sign you up right now because "
+  },
+  MEETING_ID_PATTERN = /\bid=(\w+)/,
   idSpec = location.search.match(MEETING_ID_PATTERN),
   hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || Primrose.Random.ID(),
   appKey = "Primrose:Meeting:" + meetingID,
+  protocol = location.protocol.replace("http", "ws"),
+  serverPath = protocol + "//" + location.hostname,
+  socket = null,
 
 
   ////////////////////////////////////////////////////////////////////////
@@ -13,9 +20,14 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
   TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
   USER_NAME_PATTERN = /Primrose:user:(\w+)/,
   testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
-  isTest = !!testUserNameSpec,
+  hasTestUser = !!testUserNameSpec,
   userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
   userName = userNameSpec && userNameSpec[1] || "",
+
+  TEST_PASSWORD_PATTERN = /\bp=(\w+)/,
+  testPasswordSpec = location.search.match(TEST_PASSWORD_PATTERN),
+  hasTestPassword = !!testPasswordSpec,
+  testPassword = testPasswordSpec && testPasswordSpec[1] || null,
   ////////////////////////////////////////////////////////////////////////
   ///////     end setting up test user accounts    ///////////////////////
   ////////////////////////////////////////////////////////////////////////
@@ -44,8 +56,11 @@ var MEETING_ID_PATTERN = /\bid=(\w+)/,
 
 if (!hasMeetingID) {
   var state = "?id=" + meetingID;
-  if (isTest) {
+  if (hasTestUser) {
     state += "&u=" + userName;
+    if(hasTestPassword) {
+      ctrls2D.password.value = testPassword;
+    }
   }
   history.pushState(null, "Room ID: " + meetingID, state);
 }
@@ -55,22 +70,14 @@ ctrls2D.userName.value = userName;
 showSignup(userName.length === 0);
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
-ctrls2D.connect.addEventListener("click", doLogin);
-ctrls2D.userName.addEventListener("keyup", doLogin);
-ctrls2D.password.addEventListener("keyup", doLogin);
+ctrls2D.connect.addEventListener("click", authenticate);
+ctrls2D.userName.addEventListener("keyup", authenticate);
+ctrls2D.password.addEventListener("keyup", authenticate);
 ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 
 
 env.addEventListener("ready", environmentReady);
-env.addEventListener("authorizationfailed", authFailed);
-env.addEventListener("authorizationsucceeded", loggedIn);
-env.addEventListener("loggedout", showSignup.bind(null, false));
 
-
-function authFailed(evt) {
-  showSignup(evt.verb === "signup");
-  errorMessage(ERROR_MESSAGES[evt.verb] + evt.reason.replace(/\[USER\]/g, ctrls2D.userName.value));
-}
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -89,20 +96,6 @@ function showSignup(state) {
 function hideLoginForm() {
   ctrls2D.loginForm.style.display = "none";
   ctrls2D.frontBuffer.focus();
-}
-
-function loggedIn() {
-  ctrls2D.errorMessage.innerHTML = "";
-  ctrls2D.errorMessage.style.display = "none";
-  disableLogin(false);
-  hideLoginForm();
-
-  document.cookie = "Primrose:user:" + userName;
-}
-
-var ERROR_MESSAGES = {
-  login: "We couldn't log you in right now because ",
-  signup: "We couldn't sign you up right now because "
 }
 
 function errorMessage(message) {
@@ -131,7 +124,7 @@ function environmentReady() {
   });
 }
 
-function doLogin(evt) {
+function authenticate(evt) {
   if (evt.type !== "keyup" || evt.keyCode === 13) {
     var verb = ctrls2D.emailRow.style.display === "none" ? "login" : "signup",
       password = ctrls2D.password.value,
@@ -147,7 +140,51 @@ function doLogin(evt) {
       errorMessage("You must provide a password.");
     }
     else {
-      env.authenticate(verb, userName, password, email);
+      if (!socket) {
+        console.log("connecting to: %s", serverPath);
+        socket = io(serverPath);
+        socket.on("connect_error", connectionError.bind(null, verb));
+        socket.on("signupFailed", authFailed("signup"));
+        socket.on("loginFailed", authFailed("login"));
+        socket.on("logoutComplete", showSignup.bind(null, false));
+        socket.on("errorDetail", console.error.bind(console));
+        socket.on("loginComplete", authSucceeded);
+      }
+
+      socket.once("salt", function(salt) {
+        var hash = new Hashes.SHA256()
+          .hex(salt + password)
+        socket.emit("hash", hash);
+      });
+      socket.emit(verb, {
+        userName: userName,
+        email: email,
+        app: appKey
+      });
     }
   }
+}
+
+function connectionError(verb, evt) {
+  socket.close();
+  socket = null;
+  env.disconnect();
+  authFailed(verb)("an error occured while connecting to the server.");
+}
+
+function authFailed(verb) {
+  return function(reason) {
+    showSignup(verb === "signup");
+    errorMessage(ERROR_MESSAGES[verb] + reason.replace(/\[USER\]/g, ctrls2D.userName.value));
+  }
+}
+
+function authSucceeded() {
+  ctrls2D.errorMessage.innerHTML = "";
+  ctrls2D.errorMessage.style.display = "none";
+  disableLogin(false);
+  hideLoginForm();
+
+  document.cookie = "Primrose:user:" + userName;
+  env.connect(userName, socket);
 }
