@@ -1,33 +1,3 @@
-function recurseDirectory(root) {
-  var directoryQueue = [root],
-    files = [];
-  while (directoryQueue.length > 0) {
-    var directory = directoryQueue.shift(),
-      subFiles = fs.readdirSync(directory);
-    for (var j = 0; j < subFiles.length; ++j) {
-      var subFile = path.join(directory, subFiles[j]),
-        stats = fs.lstatSync(subFile);
-      if (stats.isDirectory()) {
-        directoryQueue.push(subFile);
-      }
-      else {
-        files.push(subFile.replace(/\\/g, "/"));
-      }
-    }
-  }
-  return files;
-}
-
-function not(dir, ext) {
-  return "!" + ((dir && dir + "/") || "") + "**/*" + (ext || "");
-}
-
-function watchify(task, files, deps) {
-  gulp.task("watch:" + task, deps || [], function () {
-    return gulp.watch(files, [task]);
-  });
-}
-
 var gulp = require("gulp"),
   babel = require("gulp-babel"),
   beautify = require("gulp-beautify"),
@@ -91,6 +61,36 @@ debugDataES5.frameworkFiles = debugDataES5.frameworkFiles.map(function (f) {
   return f.replace(/^src\//, "es5/");
 });
 
+function recurseDirectory(root) {
+  var directoryQueue = [root],
+    files = [];
+  while (directoryQueue.length > 0) {
+    var directory = directoryQueue.shift(),
+      subFiles = fs.readdirSync(directory);
+    for (var j = 0; j < subFiles.length; ++j) {
+      var subFile = path.join(directory, subFiles[j]),
+        stats = fs.lstatSync(subFile);
+      if (stats.isDirectory()) {
+        directoryQueue.push(subFile);
+      }
+      else {
+        files.push(subFile.replace(/\\/g, "/"));
+      }
+    }
+  }
+  return files;
+}
+
+function not(dir, ext) {
+  return "!" + ((dir && dir + "/") || "") + "**/*" + (ext || "");
+}
+
+function watchify(task, files, deps) {
+  gulp.task("watch:" + task, deps || [], function () {
+    return gulp.watch(files, [task]);
+  });
+}
+
 function echoName(op) {
   return rename(function (dat) {
     console.log("%s: %s%s%s%s", op, dat.dirname, path.sep, dat.basename, dat.extname);
@@ -98,8 +98,8 @@ function echoName(op) {
   });
 }
 
-
 function pugConfiguration(options, defaultData) {
+
   function getFile(fileName) {
     return fs.readFileSync(fileName, "utf-8");
   }
@@ -111,6 +111,7 @@ function pugConfiguration(options, defaultData) {
   function getFileDescrip(f) {
     return [f, fs.lstatSync(f).size];
   }
+
   var frameworkFiles = defaultData.frameworkFiles.map(getFileDescrip);
   return gulp.src(["*.jade", "*.pug",
     "templates/doc/**/*.jade", "templates/doc/**/*.pug",
@@ -151,12 +152,10 @@ function pugConfiguration(options, defaultData) {
         filePath: name,
         fileRoot: fileRoot,
         fileName: shortName,
-        manifest: JSON.stringify(fxFiles.map(function (f) {
-          return [
-            fileRoot + f[0],
-            f[1]
-          ];
-        })),
+        manifest: "[\n" + fxFiles.map((f) => "        " + JSON.stringify([
+          fileRoot + f[0],
+          f[1]
+        ])).join(",\n") + "\n      ]",
         bootstrapFiles: defaultData.bootstrapFiles,
         frameworkFiles: defaultData.frameworkFiles,
         demoScriptName: scriptName,
