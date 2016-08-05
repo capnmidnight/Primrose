@@ -59,13 +59,14 @@ if (!hasMeetingID) {
   if (hasTestUser) {
     state += "&u=" + userName;
     if(hasTestPassword) {
-      ctrls2D.password.value = testPassword;
+      state += "&p=" + testPassword;
     }
   }
   history.pushState(null, "Room ID: " + meetingID, state);
 }
 
 ctrls2D.userName.value = userName;
+ctrls2D.password.value = testPassword;
 
 showSignup(userName.length === 0);
 
