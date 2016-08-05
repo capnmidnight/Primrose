@@ -426,8 +426,9 @@ Primrose.WebRTCSocket = (function () {
         name: "close",
         description: "shut down the peer connection, if it was succesful in being created."
       });
-
-      this.rtc.close();
+      if(this.rtc.signalingState !== "closed") {
+        this.rtc.close();
+      }
     }
 
     teardown() {
