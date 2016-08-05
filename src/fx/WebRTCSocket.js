@@ -251,11 +251,11 @@ Primrose.WebRTCSocket = (function () {
           .catch(onError);
         };
 
-        // A catch-all error handler to shot down the world if an error we couldn't handle happens.
+        // A catch-all error handler to shut down the world if an error we couldn't handle happens.
         const onError = (exp) => {
           this._error(exp);
           done();
-          reject();
+          reject(exp);
         };
 
         // When an offer is received, we need to create an answer in reply.
