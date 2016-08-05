@@ -73,7 +73,7 @@ Primrose.WebRTCSocket = (function () {
       // need to debug the WebRTC workflow.
       let attemptCount = 0,
         messageNumber = 0;
-      const ENABLE_DEBUGGING = true,
+      const ENABLE_DEBUGGING = false,
         instanceNumber = ++INSTANCE_COUNT,
         print = function (name, format) {
           if (ENABLE_DEBUGGING) {
