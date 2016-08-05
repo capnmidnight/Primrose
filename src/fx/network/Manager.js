@@ -35,13 +35,13 @@ Primrose.Network.Manager = (function () {
     }
 
     update(dt) {
-      if (this.socket && this.deviceIndex === 0) {
+      if (this._socket && this.deviceIndex === 0) {
         this.lastNetworkUpdate += dt;
         if (this.lastNetworkUpdate >= Primrose.Network.RemoteUser.NETWORK_DT) {
           this.lastNetworkUpdate -= Primrose.Network.RemoteUser.NETWORK_DT;
           for (var i = 0; i < this.localUser.newState.length; ++i) {
             if (this.oldState[i] !== this.localUser.newState[i]) {
-              this.socket.emit("userState", this.localUser.newState);
+              this._socket.emit("userState", this.localUser.newState);
               this.oldState = this.localUser.newState;
               break;
             }
