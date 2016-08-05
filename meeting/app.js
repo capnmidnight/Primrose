@@ -187,5 +187,5 @@ function authSucceeded() {
   hideLoginForm();
 
   document.cookie = "Primrose:user:" + userName;
-  env.connect(userName, socket);
+  env.connect(socket, userName);
 }
