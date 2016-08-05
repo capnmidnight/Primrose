@@ -28,7 +28,7 @@ Primrose.Network.Manager = (function () {
       this.lastNetworkUpdate = 0;
       this.oldState = [];
       this.users = {};
-      this.listUserPromise = Promise.resolve();
+      this.waitForLastUser = Promise.resolve();
       this._socket = null;
       this.userName = null;
       this.microphone = null;
@@ -104,14 +104,15 @@ Primrose.Network.Manager = (function () {
     }
 
     addUser(state) {
+      console.log("User %s logging on.", state[0]);
       var toUserName = state[0],
         user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
       this.users[toUserName] = user;
       this.updateUser(state);
-      this.listUserPromise = this.listUserPromise
-        .then(() => user.peer(this.socket, this.microphone, this.userName, this.audio))
+      this.waitForLastUser = this.waitForLastUser
+        .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio))
+        .then(() => this.emit("addavatar", user))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
-      this.emit("addavatar", user);
     }
 
     removeUser(key) {
