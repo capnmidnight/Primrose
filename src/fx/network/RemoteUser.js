@@ -108,7 +108,7 @@ Primrose.Network.RemoteUser = (function () {
 
       return microphone.then((outAudio) => {
         this.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, this.userName, outAudio);
-        this.audioChannel.ready
+        return this.audioChannel.ready
           .then(() => {
             if (!this.audioChannel.inAudio) {
               throw new Error("Didn't get an audio channel for " + this.userName);
@@ -132,8 +132,7 @@ Primrose.Network.RemoteUser = (function () {
             this.panner.coneOuterGain = 0.1;
             this.panner.panningModel = "HRTF";
             this.panner.distanceModel = "exponential";
-          })
-          .catch(console.error.bind(console, "error"));
+          });
       });
     }
 
