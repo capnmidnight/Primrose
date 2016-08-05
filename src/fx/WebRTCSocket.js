@@ -73,18 +73,21 @@ Primrose.WebRTCSocket = (function () {
       // need to debug the WebRTC workflow.
       let attemptCount = 0,
         messageNumber = 0;
-      const ENABLE_DEBUGGING = false,
+      const ENABLE_DEBUGGING = true,
         instanceNumber = ++INSTANCE_COUNT,
         print = function (name, format) {
           if (ENABLE_DEBUGGING) {
             const args = [
+              "[%s:%s:%s] " + JSON.stringify(format),
               INSTANCE_COUNT,
               instanceNumber,
-              ++messageNumber,
-              "[%s:%s:%s] " + format
+              ++messageNumber
             ];
+            if(format && format.item && format.item.sdp){
+              console.log(format.item.sdp);
+            }
             for (var i = 2; i < arguments.length; ++i) {
-              args.push(arguments[i]);
+              args.push(JSON.stringify(arguments[i]));
             }
             console[name].apply(console, args);
           }
