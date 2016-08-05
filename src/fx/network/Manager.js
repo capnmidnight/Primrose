@@ -96,7 +96,6 @@ Primrose.Network.Manager = (function () {
         this._socket.on("userState", this.updateUser.bind(this));
         this._socket.on("userLeft", this.removeUser.bind(this));
         this._socket.on("connection_lost", this.lostConnection.bind(this));
-        this._socket.on("userList", this.listUsers.bind(this));
         this._socket.emit("listUsers");
       }
     }
