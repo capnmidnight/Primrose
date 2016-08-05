@@ -304,7 +304,7 @@ Primrose.Input.FPSInput = (function () {
         this.motionDevices[i].updateStage(this.matrix);
       }
 
-      for(var i = 0; i < this.pointers.length; ++i){
+      for (var i = 0; i < this.pointers.length; ++i) {
         this.pointers[i].update(this.head.position);
       }
 
