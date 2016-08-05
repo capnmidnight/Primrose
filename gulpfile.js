@@ -32,7 +32,22 @@ var gulp = require("gulp"),
   hasWebVRBootstrapper = fs.existsSync("../WebVR-Bootstrapper"),
   hasLogger = fs.existsSync("../bare-bones-logger"),
   hasPliny = fs.existsSync("../pliny"),
-  sourceFiles = recurseDirectory("src");
+  sourceFiles = recurseDirectory("src"),
+  libs = [
+    "node_modules/bare-bones-logger/bare-bones-logger.js",
+    "node_modules/marked/marked.min.js",
+    "node_modules/pliny/pliny.js",
+    "node_modules/promise-polyfill/promise.js",
+    "node_modules/lavu-details-polyfill/lib/index.min.js",
+    "node_modules/socket.io-client/socket.io.js",
+    "node_modules/jshashes/hashes.js",
+    "node_modules/three/three.js",
+    "node_modules/three/examples/js/loaders/OBJLoader.js",
+    "node_modules/three/examples/js/loaders/MTLLoader.js",
+    "node_modules/three/examples/js/loaders/FBXLoader.js",
+    "node_modules/html2canvas/dist/html2canvas.js",
+    "namegen.js"
+  ];
 
 sourceFiles.sort();
 
@@ -41,18 +56,7 @@ var debugDataES6 = {
     jsExt: ".js",
     cssExt: ".css",
     bootstrapFiles: hasWebVRBootstrapper ? ["../WebVR-Bootstrapper/webvr-bootstrapper.js"] : ["node_modules/webvr-bootstrapper/webvr-bootstrapper.js"],
-    frameworkFiles: [
-      "node_modules/bare-bones-logger/bare-bones-logger.js",
-      "node_modules/marked/marked.min.js",
-      "node_modules/pliny/pliny.js",
-      "node_modules/socket.io-client/socket.io.js",
-      "node_modules/jshashes/hashes.js",
-      "node_modules/three/three.js",
-      "node_modules/three/examples/js/loaders/OBJLoader.js",
-      "node_modules/three/examples/js/loaders/MTLLoader.js",
-      "node_modules/three/examples/js/loaders/FBXLoader.js",
-      "node_modules/html2canvas/dist/html2canvas.js"
-    ]
+    frameworkFiles: libs
     .concat(sourceFiles)
   },
   debugDataES5 = JSON.parse(JSON.stringify(debugDataES6));
@@ -359,20 +363,7 @@ if (hasPliny) {
 }
 
 function concatDependencies() {
-  return concatenate(gulp.src([
-    "node_modules/bare-bones-logger/bare-bones-logger.js",
-    "node_modules/marked/marked.min.js",
-    "node_modules/pliny/pliny.js",
-    "node_modules/promise-polyfill/promise.js",
-    "node_modules/lavu-details-polyfill/lib/index.min.js",
-    "node_modules/socket.io-client/socket.io.js",
-    "node_modules/jshashes/hashes.js",
-    "node_modules/three/three.js",
-    "node_modules/three/examples/js/loaders/OBJLoader.js",
-    "node_modules/three/examples/js/loaders/MTLLoader.js",
-    "node_modules/three/examples/js/loaders/FBXLoader.js",
-    "node_modules/html2canvas/dist/html2canvas.js"
-  ]), "PrimroseDependencies");
+  return concatenate(gulp.src(libs), "PrimroseDependencies");
 }
 gulp.task("concat:dependencies", concatDependenciesDependecies, concatDependencies);
 gulp.task("just:concat:dependencies", concatDependencies);
