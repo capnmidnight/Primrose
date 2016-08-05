@@ -16,9 +16,9 @@ Primrose.Network.AudioChannel = (function () {
     navigator.mediaDevices.getUserMedia = (constraint) => new Promise((resolve, reject) => navigator.getUserMedia(constraint, resolve, reject));
   }
 
-  var preferOpus = (function(){
+  var preferOpus = (function () {
     function preferOpus(description) {
-      if(ENABLE_OPUS_HACK){
+      if (ENABLE_OPUS_HACK) {
         var sdp = description.sdp;
         var sdpLines = sdp.split('\r\n');
         var mLineIndex = null;

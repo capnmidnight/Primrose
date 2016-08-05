@@ -83,7 +83,7 @@ Primrose.WebRTCSocket = (function () {
               instanceNumber,
               ++messageNumber
             ];
-            if(format && format.item && format.item.sdp){
+            if (format && format.item && format.item.sdp) {
               console.log(format.item.sdp);
             }
             for (var i = 2; i < arguments.length; ++i) {
@@ -426,7 +426,7 @@ Primrose.WebRTCSocket = (function () {
         name: "close",
         description: "shut down the peer connection, if it was succesful in being created."
       });
-      if(this.rtc.signalingState !== "closed") {
+      if (this.rtc.signalingState !== "closed") {
         this.rtc.close();
       }
     }

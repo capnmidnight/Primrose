@@ -97,7 +97,7 @@ Primrose.Network.Manager = (function () {
       }
     }
 
-    disconnect(){
+    disconnect() {
       this.userName = null;
       this._socket.close();
       this._socket = null;
