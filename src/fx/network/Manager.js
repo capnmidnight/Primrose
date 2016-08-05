@@ -73,12 +73,9 @@ Primrose.Network.Manager = (function () {
       }
     }
 
-    get socket() {
-      return this._socket;
-    }
-
-    set socket(v) {
-      if (!this.microphone === null) {
+    connect(socket, userName) {
+      this.userName = userName;
+      if (!this.microphone) {
         this.microphone = navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
@@ -87,7 +84,7 @@ Primrose.Network.Manager = (function () {
           .catch(console.warn.bind(console, "Can't get audio"))
       }
       if (!this._socket) {
-        this._socket = v;
+        this._socket = socket;
         this._socket.on("userList", this.listUsers.bind(this));
         this._socket.on("userJoin", this.addUser.bind(this));
         this._socket.on("deviceAdded", this.addDevice.bind(this));
@@ -98,6 +95,12 @@ Primrose.Network.Manager = (function () {
         this._socket.on("connection_lost", this.lostConnection.bind(this));
         this._socket.emit("listUsers");
       }
+    }
+
+    disconnect(){
+      this.userName = null;
+      this._socket.close();
+      this._socket = null;
     }
 
     addUser(state) {
