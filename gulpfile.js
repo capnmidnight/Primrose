@@ -89,9 +89,9 @@ function not(dir, ext) {
   return "!" + ((dir && dir + "/") || "") + "**/*" + (ext || "");
 }
 
-function watchify(task, files, deps) {
+function watchify(task, files, deps, watchFiles) {
   gulp.task("watch:" + task, deps || [], function () {
-    return gulp.watch(files, [task]);
+    return gulp.watch(watchFiles || files, [task]);
   });
 }
 
@@ -287,7 +287,7 @@ gulp.task("just:pug:debug:es6", function () {
     pretty: true
   }, debugDataES6);
 });
-watchify("just:pug:debug:es6", pugFiles);
+watchify("just:pug:debug:es6", pugFiles, null, [not("node_modules"), "**/*.jade", "**/*.pug"]);
 
 gulp.task("just:beautify", function () {
   return gulp.src(jsFiles, {
@@ -311,7 +311,7 @@ function jsHint() {
 }
 gulp.task("jshint", ["just:beautify"], jsHint);
 gulp.task("just:jshint", jsHint);
-watchify("just:jshint", jsFiles);
+watchify("jshint", jsFiles);
 
 function runBabel() {
   return gulp.src("src/**/*.js", {
@@ -402,6 +402,6 @@ gulp.task("just:archive", archive);
 gulp.task("debug", ["jshint", "just:pug:debug:es6", "just:stylus"]);
 gulp.task("stage", ["babel", "pug:debug:es5", "just:stylus"]);
 gulp.task("release", ["pug:release", "copy:quickstart", "archive", "babel"]);
-gulp.task("watch", ["watch:just:pug:debug:es6", "watch:just:jshint", "watch:just:stylus"]);
+gulp.task("watch", ["watch:just:pug:debug:es6", "watch:jshint", "watch:just:stylus"]);
 
 gulp.task("default", ["debug", "watch"]);

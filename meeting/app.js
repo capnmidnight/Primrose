@@ -8,7 +8,6 @@ var ERROR_MESSAGES = {
   idSpec = location.search.match(MEETING_ID_PATTERN),
   hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || Primrose.Random.ID(),
-  appKey = "Primrose:Meeting:" + meetingID,
   protocol = location.protocol.replace("http", "ws"),
   serverPath = protocol + "//" + location.hostname,
   socket = null,
@@ -38,7 +37,7 @@ var ERROR_MESSAGES = {
     return ctrls2D[name];
   }),
 
-  env = new Primrose.BrowserEnvironment(appKey, {
+  env = new Primrose.BrowserEnvironment(getAppKey(), {
     autoScaleQuality: true,
     autoRescaleQuality: false,
     quality: Primrose.Quality.HIGH,
@@ -54,17 +53,26 @@ var ERROR_MESSAGES = {
     font: "../doc/fonts/helvetiker_regular.typeface.js"
   });
 
-if (!hasMeetingID) {
-  var state = "?id=" + meetingID;
-  if (hasTestUser) {
-    state += "&u=" + userName;
-    if(hasTestPassword) {
-      state += "&p=" + testPassword;
-    }
-  }
-  history.pushState(null, "Room ID: " + meetingID, state);
+function getAppKey() {
+  return "Primrose:Meeting:" + meetingID;
 }
 
+function makeURL() {
+  if (!hasMeetingID) {
+    var state = "?id=" + meetingID;
+    if (hasTestUser) {
+      state += "&u=" + userName;
+      if(hasTestPassword) {
+        state += "&p=" + testPassword;
+      }
+    }
+    history.pushState(null, "Room ID: " + meetingID, state);
+  }
+}
+
+makeURL();
+
+ctrls2D.room.value = meetingID;
 ctrls2D.userName.value = userName;
 ctrls2D.password.value = testPassword;
 
@@ -72,13 +80,12 @@ showSignup(userName.length === 0);
 
 ctrls2D.switchMode.addEventListener("click", showSignup);
 ctrls2D.connect.addEventListener("click", authenticate);
+ctrls2D.room.addEventListener("change", authenticate);
 ctrls2D.userName.addEventListener("keyup", authenticate);
 ctrls2D.password.addEventListener("keyup", authenticate);
 ctrls2D.closeButton.addEventListener("click", hideLoginForm, false);
 
-
 env.addEventListener("ready", environmentReady);
-
 
 function showSignup(state) {
   if (typeof state !== "boolean") {
@@ -131,7 +138,9 @@ function authenticate(evt) {
       password = ctrls2D.password.value,
       email = ctrls2D.email.value;
 
+    meetingID = ctrls2D.room.value.toLocaleUpperCase();
     userName = ctrls2D.userName.value.toLocaleUpperCase();
+    makeURL();
     disableLogin(true);
 
     if (userName.length === 0) {
@@ -160,7 +169,7 @@ function authenticate(evt) {
       socket.emit(verb, {
         userName: userName,
         email: email,
-        app: appKey
+        app: getAppKey()
       });
     }
   }

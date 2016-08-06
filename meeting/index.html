@@ -89,7 +89,7 @@
         ["../src/fx/Random/number.js",1484],
         ["../src/fx/Random/steps.js",1671],
         ["../src/fx/Surface.js",10567],
-        ["../src/fx/WebRTCSocket.js",17726],
+        ["../src/fx/WebRTCSocket.js",17729],
         ["../src/fx/Workerize.js",11915],
         ["../src/fx/controls/ALabel.js",5532],
         ["../src/fx/controls/Button2D.js",1975],
@@ -108,9 +108,9 @@
         ["../src/fx/input/Speech.js",6587],
         ["../src/fx/input/Touch.js",1825],
         ["../src/fx/input/VR.js",6203],
-        ["../src/fx/network/AudioChannel.js",7052],
+        ["../src/fx/network/AudioChannel.js",7056],
         ["../src/fx/network/DataChannel.js",2760],
-        ["../src/fx/network/Manager.js",4951],
+        ["../src/fx/network/Manager.js",4952],
         ["../src/fx/network/RemoteUser.js",8184],
         ["../src/fx/output/Audio3D.js",10284],
         ["../src/fx/output/HapticGlove.js",3290],
@@ -151,7 +151,7 @@
         ["../src/three-ext/Vector3.prototype.toString.js",834],
         ["../src/x/LoginForm.js",2726],
         ["../src/x/SignupForm.js",3232],
-        ["../meeting/app.js",6271]
+        ["../meeting/app.js",6181]
       ], function (startDownload) {
         var p = document.querySelector("progress"),
           c = document.getElementById("fullScreenButtonContainer");
@@ -181,6 +181,9 @@
     <div id="controls">
       <div id="fullScreenButtonContainer"></div>
       <div id="loginForm" style="display:none"><a id="closeButton" href="#">close</a>
+        <div id="roomNameRow">
+          <input id="room" type="text" placeholder="Room name">
+        </div>
         <div id="emailRow" style="display:none">
           <input id="email" type="email" placeholder="Email (name@server.domain)">
         </div>
