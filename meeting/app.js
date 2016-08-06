@@ -4,10 +4,11 @@ var ERROR_MESSAGES = {
     login: "We couldn't log you in right now because ",
     signup: "We couldn't sign you up right now because "
   },
+  names = NameGen.compile("!m!m"),
   MEETING_ID_PATTERN = /\bid=(\w+)/,
   idSpec = location.search.match(MEETING_ID_PATTERN),
   hasMeetingID = !!idSpec,
-  meetingID = idSpec && idSpec[1] || Primrose.Random.ID(),
+  meetingID = idSpec && idSpec[1] || names.toString(),
   protocol = location.protocol.replace("http", "ws"),
   serverPath = protocol + "//" + location.hostname,
   socket = null,
