@@ -4,35 +4,17 @@ var ERROR_MESSAGES = {
     login: "We couldn't log you in right now because ",
     signup: "We couldn't sign you up right now because "
   },
-  names = NameGen.compile("!m!m"),
+  names = NameGen.compile("!mi"),
   MEETING_ID_PATTERN = /\bid=(\w+)/,
   idSpec = location.search.match(MEETING_ID_PATTERN),
   hasMeetingID = !!idSpec,
   meetingID = idSpec && idSpec[1] || names.toString(),
+  USER_NAME_PATTERN = /Primrose:user:(\w+)/,
+  userNameSpec = document.cookie.match(USER_NAME_PATTERN),
+  userName = userNameSpec && userNameSpec[1] || names.toString(),
   protocol = location.protocol.replace("http", "ws"),
   serverPath = protocol + "//" + location.hostname,
   socket = null,
-
-
-  ////////////////////////////////////////////////////////////////////////
-  ///////     setting up test user accounts    ///////////////////////////
-  ////////////////////////////////////////////////////////////////////////
-  TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
-  USER_NAME_PATTERN = /Primrose:user:(\w+)/,
-  testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
-  hasTestUser = !!testUserNameSpec,
-  userNameSpec = testUserNameSpec || document.cookie.match(USER_NAME_PATTERN),
-  userName = userNameSpec && userNameSpec[1] || "",
-
-  TEST_PASSWORD_PATTERN = /\bp=(\w+)/,
-  testPasswordSpec = location.search.match(TEST_PASSWORD_PATTERN),
-  hasTestPassword = !!testPasswordSpec,
-  testPassword = testPasswordSpec && testPasswordSpec[1] || null,
-  ////////////////////////////////////////////////////////////////////////
-  ///////     end setting up test user accounts    ///////////////////////
-  ////////////////////////////////////////////////////////////////////////
-
-
   ctrls2D = Primrose.DOM.findEverything(),
   loginControls = ["email", "password", "userName", "switchMode", "connect"].map(function (name) {
     return ctrls2D[name];
@@ -55,7 +37,7 @@ var ERROR_MESSAGES = {
   });
 
 function getAppKey() {
-  return "Primrose:Meeting:" + meetingID;
+  return "Primrose:Meeting:" + meetingID.toLocaleUpperCase();
 }
 
 function makeURL() {
@@ -75,7 +57,6 @@ makeURL();
 
 ctrls2D.room.value = meetingID;
 ctrls2D.userName.value = userName;
-ctrls2D.password.value = testPassword;
 
 showSignup(userName.length === 0);
 
@@ -139,7 +120,7 @@ function authenticate(evt) {
       password = ctrls2D.password.value,
       email = ctrls2D.email.value;
 
-    meetingID = ctrls2D.room.value.toLocaleUpperCase();
+    meetingID = ctrls2D.room.value;
     userName = ctrls2D.userName.value.toLocaleUpperCase();
     makeURL();
     disableLogin(true);
@@ -199,3 +180,24 @@ function authSucceeded() {
   document.cookie = "Primrose:user:" + userName;
   env.connect(socket, userName);
 }
+
+
+
+////////////////////////////////////////////////////////////////////////
+///////     setting up test user accounts    ///////////////////////////
+////////////////////////////////////////////////////////////////////////
+var TEST_USER_NAME_PATTERN = /\bu=(\w+)/,
+  testUserNameSpec = location.search.match(TEST_USER_NAME_PATTERN),
+  hasTestUser = !!testUserNameSpec,
+  userName = testUserNameSpec && testUserNameSpec[1] || userName,
+  TEST_PASSWORD_PATTERN = /\bp=(\w+)/,
+  testPasswordSpec = location.search.match(TEST_PASSWORD_PATTERN),
+  hasTestPassword = !!testPasswordSpec,
+  testPassword = testPasswordSpec && testPasswordSpec[1] || null;
+ctrls2D.userName.value = userName;
+ctrls2D.password.value = testPassword;
+
+showSignup(userName.length === 0);
+////////////////////////////////////////////////////////////////////////
+///////     end setting up test user accounts    ///////////////////////
+////////////////////////////////////////////////////////////////////////
