@@ -36,7 +36,7 @@
         ["../../node_modules/three/examples/js/loaders/MTLLoader.js",8480],
         ["../../node_modules/three/examples/js/loaders/FBXLoader.js",61101],
         ["../../node_modules/html2canvas/dist/html2canvas.js",126884],
-        ["../../namegen.js",16828],
+        ["../../namegen.js",17391],
         ["../../src/app.js",12917],
         ["../../src/base/InsideSphereGeometry.js",5316],
         ["../../src/base/axis.js",1217],
@@ -79,8 +79,8 @@
         ["../../src/fx/InputProcessor.js",15636],
         ["../../src/fx/Keys.js",3702],
         ["../../src/fx/ModelLoader.js",13991],
-        ["../../src/fx/Pointer.js",7955],
-        ["../../src/fx/PoseInputProcessor.js",1962],
+        ["../../src/fx/Pointer.js",8231],
+        ["../../src/fx/PoseInputProcessor.js",2027],
         ["../../src/fx/Projector.js",81106],
         ["../../src/fx/Random/ID.js",1110],
         ["../../src/fx/Random/color.js",971],
@@ -180,24 +180,12 @@
     <progress></progress>
     <div id="controls">
       <div id="fullScreenButtonContainer"></div>
-      <div id="loginForm" style="display:none"><a id="closeButton" href="#">close</a>
-        <div id="roomNameRow">
-          <input id="room" type="text" placeholder="Room name">
-        </div>
-        <div id="emailRow" style="display:none">
-          <input id="email" type="email" placeholder="Email (name@server.domain)">
-        </div>
-        <div id="userNameRow">
-          <input id="userName" type="text" placeholder="Username">
-        </div>
-        <div id="passwordRow">
-          <input id="password" type="password" placeholder="Password">
-        </div>
-        <div id="loginRow">
-          <button class="signupButton" id="switchMode">Sign up</button>
-          <button class="loginButton" id="connect">Log in</button>
-        </div>
-        <div id="errorMessage"></div>
+      <div id="loginForm" style="display:none">
+        <button class="secondary" id="closeButton">&times;</button>
+        <h1>Create your personal VR meeting room</h1>
+        <input id="userName" type="text" placeholder="Pick a username">
+        <button class="primary" id="connect">&rarr;</button>
+        <div id="errorMessage" style="display:none"></div>
       </div>
     </div><!-- end main.jade main block -->
   </body>

@@ -49,14 +49,6 @@ progress {
   cursor: wait;
 }
 
-#errorMessage {
-  color: salmon;
-  border: dashed 3px salmon;
-  padding: 1em;
-  margin-top: 1em;
-  display: none;
-}
-
 body, input, button {
   font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif;
 }
@@ -66,12 +58,21 @@ body, input, button {
   }
 
 button {
-  padding: 10px 16px;
+  padding: 8.5px 16px;
   font-size: 1rem;
   color: #fff;
-  background-color: #343436;
-  border: solid 3px transparent;
+  border-style: solid;
+  border-width:  0;
   border-radius: 5px;
+  font-weight: bold;
+}
+
+button.primary {
+  background-color: #ec2471;
+}
+
+button.secondary{
+  background-color: #30f3e1;
 }
 
 input:disabled, button:disabled {
@@ -84,44 +85,46 @@ input:disabled, button:disabled {
   top: 0;
   left: 50%;
   background-color: rgba(0, 0, 0, 0.66);
-  max-width: 50%;
-  min-width: 360px;
+  width: 100%;
   margin: 0 auto;
   padding: 3em;
   transform: translate(-50%, 0);
+  color: #ddd;
+  text-align:  center;
 }
 
-  #loginForm > div > input {
-    width: calc(100% - 10px);
+  #loginForm input {
     padding: 10px;
     border: none;
-    margin: 5px;
-    background-color: #4e4e4e;
-    color: white;
+    background-color: white;
+    color: #222;
+    margin: 0;
+    display: inline-block;
+    margin-top: -0.5px;
+    border-top-left-radius:  5px;
+    border-bottom-left-radius:  5px;
   }
 
-#loginRow {
-  display: flex;
+#closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-top-right-radius:  0;
+  border-top-left-radius:  0;
+  border-bottom-right-radius:  0;
+  color: black;
 }
 
-  #loginRow > button {
-    width: 50%;
-    margin: 5px;
-    background-color: transparent;
-  }
-
-#switchMode {
-  color: white;
-  border-color: white;
+#errorMessage {
+  color: #f330d8;
+  border: dashed 3px #f330d8;
+  padding: 1em;
+  margin-top: 1em;
 }
 
 #connect {
-  color: #30f3e1;
-  border-color: #30f3e1;
-  font-weight: bold;
-}
-
-#closeButton {
-  color: white;
-  float: right;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -5px;
+  margin-top:  1px;
 }

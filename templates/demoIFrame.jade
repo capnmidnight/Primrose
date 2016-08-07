@@ -73,17 +73,9 @@ html
       #controls
         #fullScreenButtonContainer
         #loginForm(style="display:none")
-          a#closeButton(href="#") close
-          #roomNameRow
-            input#room(type="text", placeholder="Room name")
-          #emailRow(style="display:none")
-            input#email(type="email", placeholder="Email (name@server.domain)")
-          #userNameRow
-            input#userName(type="text", placeholder="Username")
-          #passwordRow
-            input#password(type="password", placeholder="Password")
-          #loginRow
-            button#switchMode.signupButton Sign up
-            button#connect.loginButton Log in
-          #errorMessage
+          button#closeButton.secondary &times;
+          h1 Create your personal VR meeting room
+          input#userName(type="text", placeholder="Pick a username")
+          button#connect.primary &rarr;
+          #errorMessage(style="display:none")
     <!-- end main.jade main block -->
