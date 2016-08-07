@@ -311,7 +311,6 @@ function jsHint() {
 }
 gulp.task("jshint", ["just:beautify"], jsHint);
 gulp.task("just:jshint", jsHint);
-watchify("jshint", jsFiles);
 
 function runBabel() {
   return gulp.src("src/**/*.js", {
@@ -402,6 +401,6 @@ gulp.task("just:archive", archive);
 gulp.task("debug", ["jshint", "just:pug:debug:es6", "just:stylus"]);
 gulp.task("stage", ["babel", "pug:debug:es5", "just:stylus"]);
 gulp.task("release", ["pug:release", "copy:quickstart", "archive", "babel"]);
-gulp.task("watch", ["watch:just:pug:debug:es6", "watch:jshint", "watch:just:stylus"]);
+gulp.task("watch", ["watch:just:pug:debug:es6", "watch:just:stylus"]);
 
 gulp.task("default", ["debug", "watch"]);

@@ -274,8 +274,9 @@ Primrose.WebRTCSocket = (function () {
           // Check to see if we expected this sort of message from this user.
           if (this.isExpected("ice", ice)) {
             // And if so, store it in our database of possibilities.
-            return this.rtc.addIceCandidate(new RTCIceCandidate(ice.item))
-              .catch(onError);
+            var candidate = new RTCIceCandidate(ice.item);
+            return this.rtc.addIceCandidate(candidate)
+              .catch(this._log);
           }
         };
 

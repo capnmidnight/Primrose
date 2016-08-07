@@ -51,6 +51,7 @@ html
           function addButton(display, i) {
             var btn = document.createElement("button");
             btn.type = "button";
+            btn.className = "secondary";
             btn.appendChild(document.createTextNode(display.displayName));
             btn.addEventListener("click", function(i){
               env.goFullScreen(i, "Button");

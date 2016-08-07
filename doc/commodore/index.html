@@ -65,7 +65,7 @@
         ["../../src/fx/AbstractEventEmitter.js",793],
         ["../../src/fx/Angle.js",4358],
         ["../../src/fx/BaseControl.js",5165],
-        ["../../src/fx/BrowserEnvironment.js",28216],
+        ["../../src/fx/BrowserEnvironment.js",28185],
         ["../../src/fx/ButtonFactory.js",2285],
         ["../../src/fx/DOM/cascadeElement.js",4322],
         ["../../src/fx/DOM/findEverything.js",2278],
@@ -160,6 +160,7 @@
         function addButton(display, i) {
           var btn = document.createElement("button");
           btn.type = "button";
+          btn.className = "secondary";
           btn.appendChild(document.createTextNode(display.displayName));
           btn.addEventListener("click", function(i){
             env.goFullScreen(i, "Button");

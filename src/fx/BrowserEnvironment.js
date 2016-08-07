@@ -13,10 +13,8 @@ Primrose.BrowserEnvironment = (function () {
       description: "Make a Virtual Reality app in your web browser!"
   });
   class BrowserEnvironment extends Primrose.AbstractEventEmitter {
-    constructor(name, options) {
+    constructor(options) {
       super();
-      this.id = name;
-
       this.options = patch(options, BrowserEnvironment.DEFAULTS);
       this.options.foregroundColor = this.options.foregroundColor || complementColor(new THREE.Color(this.options.backgroundColor))
         .getHex();

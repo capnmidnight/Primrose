@@ -11,7 +11,7 @@ var ctrls = Primrose.DOM.findEverything(),
   socket = null,
   meetingID = null,
 
-  env = new Primrose.BrowserEnvironment(meetingID, {
+  env = new Primrose.BrowserEnvironment({
     autoScaleQuality: true,
     autoRescaleQuality: false,
     quality: Primrose.Quality.HIGH,
@@ -52,9 +52,6 @@ function showLoginForm() {
 }
 
 function errorMessage(message) {
-  if (!ctrls.loginForm.style.width) {
-    ctrls.loginForm.style.width = ctrls.loginForm.clientWidth + "px";
-  }
   ctrls.errorMessage.innerHTML = message;
   ctrls.errorMessage.style.display = "block";
   showLoginForm();
@@ -79,13 +76,13 @@ function environmentReady() {
 }
 
 function authenticate(evt) {
-  if (evt.type !== "keyup" || evt.keyCode === 13) {
+  if (!evt || evt.type !== "keyup" || evt.keyCode === 13) {
 
     disableLogin(true);
 
     meetingID = fromField(location.search, /\broom=(\w+)/);
     if(!meetingID){
-      meetingID = "Primrose:Meeting:" + Primrose.Random.ID();
+      meetingID =  Primrose.Random.ID();
       var state = "?room=" + meetingID;
       history.pushState(null, "Room ID: " + meetingID, state);
     }
@@ -98,6 +95,7 @@ function authenticate(evt) {
       console.log("connecting to: %s", serverPath);
       socket = io(serverPath);
       socket.on("connect_error", connectionError);
+      socket.on("reconnect", authenticate);
       socket.on("loginFailed", authFailed);
       socket.on("loginComplete", authSucceeded);
       socket.on("errorDetail", console.error.bind(console));
