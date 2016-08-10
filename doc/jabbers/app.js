@@ -7,7 +7,7 @@ var WIDTH = 100,
   t = 0,
   jabs = {},
   R = Primrose.Random,
-  env = new Primrose.BrowserEnvironment("Jabber Yabs", {
+  env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/grass.png",
     font: "../fonts/helvetiker_regular.typeface.js"

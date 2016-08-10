@@ -1,7 +1,4 @@
-var env = new Primrose.BrowserEnvironment(
-  // We give the application a name here, in case we ever
-  // hook it up to the Multiplayer Server.
-  "Music", {
+var env = new Primrose.BrowserEnvironment({
     // This file references a Three.js JSON-formatted scene
     // file, which basically describes a room or level in
     // which the user will walk around, on which we can

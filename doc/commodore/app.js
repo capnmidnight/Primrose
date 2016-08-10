@@ -8,7 +8,7 @@ var modA = isOSX ? "metaKey" : "ctrlKey",
   terminal = null,
 
   // setup the VR environment
-  env = new Primrose.BrowserEnvironment("Commodore", {
+  env = new Primrose.BrowserEnvironment({
     sceneModel: "../models/commodore_pet.json",
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/deck.png",
@@ -61,7 +61,7 @@ env.addEventListener("ready", function () {
   editor.padding = 10;
 
   terminal = new Primrose.Text.Terminal(editor);
-  terminal.loadFile("commodore/oregon.bas");
+  terminal.loadFile("oregon.bas");
 
   var editorMesh = textured(env.scene.Screen, editor);
   env.registerPickableObject(editorMesh);

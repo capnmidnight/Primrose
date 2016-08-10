@@ -4,7 +4,7 @@ var GRASS = "../images/grass.png",
   WATER = "../images/water.png",
   DECK = "../images/deck.png",
 
-  env = new Primrose.BrowserEnvironment("Editor3D", {
+  env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,

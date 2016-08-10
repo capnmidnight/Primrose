@@ -1,6 +1,6 @@
 THREE.ImageLoader.crossOrigin = "anonymous";
 
-var env = new Primrose.BrowserEnvironment("My Primrose VR Application", {
+var env = new Primrose.BrowserEnvironment({
   skyTexture: "bg.jpg",
   groundTexture: "deck.png",
   fullScreenIcon: "monitor.obj",
