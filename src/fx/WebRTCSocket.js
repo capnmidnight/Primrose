@@ -39,6 +39,14 @@ Primrose.WebRTCSocket = (function () {
 
   let INSTANCE_COUNT = 0;
 
+  function formatTime(t){
+    var ms = t.getMilliseconds().toString();
+    while(ms.length < 3){
+      ms = "0" + ms;
+    }
+    return t.toLocaleTimeString().replace(/(\d+:\d+:\d+)/, (_, g) => g + "." + ms);
+  }
+
   pliny.class({
     parent: "Primrose",
       name: "WebRTCSocket",
@@ -71,17 +79,17 @@ Primrose.WebRTCSocket = (function () {
 
       // These logging constructs are basically off by default, but you will need them if you ever
       // need to debug the WebRTC workflow.
-      let attemptCount = 0,
-        messageNumber = 0;
-      const MAX_LOG_LEVEL = 1,
+      let attemptCount = 0;
+      const MAX_LOG_LEVEL = 0,
         instanceNumber = ++INSTANCE_COUNT,
         print = function (name, level, format) {
           if (level < MAX_LOG_LEVEL) {
+            var t = new Date();
             const args = [
-              "[%s:%s:%s] " + JSON.stringify(format),
+              "[%s:%s %s] " + format,
               INSTANCE_COUNT,
               instanceNumber,
-              ++messageNumber
+              formatTime(t)
             ];
             for (var i = 3; i < arguments.length; ++i) {
               args.push(arguments[i]);
