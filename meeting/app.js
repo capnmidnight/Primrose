@@ -34,7 +34,7 @@ ctrls.connect.addEventListener("click", authenticate);
 env.addEventListener("ready", environmentReady);
 
 
-ctrls.userName.value = fromField(document.cookie, /user=(\w+)/);
+ctrls.userName.value = fromField(location.search, /\buser=(\w+)/) || fromField(document.cookie, /\buser=(\w+)/);
 
 function fromField(field, pattern) {
   var spec = field.match(pattern);
