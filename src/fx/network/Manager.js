@@ -110,9 +110,9 @@ Primrose.Network.Manager = (function () {
         user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
       this.users[toUserName] = user;
       this.updateUser(state);
+      this.emit("addavatar", user);
       this.waitForLastUser = this.waitForLastUser
         .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio))
-        .then(() => this.emit("addavatar", user))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
     }
 
