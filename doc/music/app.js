@@ -1,23 +1,23 @@
 var env = new Primrose.BrowserEnvironment({
-    // This file references a Three.js JSON-formatted scene
-    // file, which basically describes a room or level in
-    // which the user will walk around, on which we can
-    // create additional objects.
-    sceneModel: "../models/holodeck.json",
-    font: "../fonts/helvetiker_regular.typeface.js",
-    // One of our GUI controls is configured here.
-    button: {
-      // This file references another Three.js JSON-formatted
-      // model file, which will be cloned anytime a user
-      // calls createElement("button").
-      model: "../models/smallbutton.json",
-      // Display settings for different states of the button.
-      options: {
-        colorUnpressed: 0x7f0000,
-        colorPressed: 0x007f00
-      }
+  // This file references a Three.js JSON-formatted scene
+  // file, which basically describes a room or level in
+  // which the user will walk around, on which we can
+  // create additional objects.
+  sceneModel: "../models/holodeck.json",
+  font: "../fonts/helvetiker_regular.typeface.js",
+  // One of our GUI controls is configured here.
+  button: {
+    // This file references another Three.js JSON-formatted
+    // model file, which will be cloned anytime a user
+    // calls createElement("button").
+    model: "../models/smallbutton.json",
+    // Display settings for different states of the button.
+    options: {
+      colorUnpressed: 0x7f0000,
+      colorPressed: 0x007f00
     }
-  });
+  }
+});
 
 // Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed
