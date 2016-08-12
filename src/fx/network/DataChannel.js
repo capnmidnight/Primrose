@@ -31,8 +31,8 @@ Primrose.Network.DataChannel = (function () {
       }]
   });
   class DataChannel extends Primrose.WebRTCSocket {
-    constructor(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex) {
-      super(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex);
+    constructor(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+      super(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond);
 
       pliny.property({
         parent: "Primrose.Network.DataChannel",

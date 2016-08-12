@@ -75,7 +75,7 @@ Primrose.WebRTCSocket = (function () {
   });
   class WebRTCSocket {
     // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
-    constructor(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex) {
+    constructor(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
 
       // These logging constructs are basically off by default, but you will need them if you ever
       // need to debug the WebRTC workflow.
@@ -184,6 +184,16 @@ Primrose.WebRTCSocket = (function () {
       };
       Object.defineProperty(this, "progress", {
         get: () => progress
+      });
+
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "goFirst",
+        type: "Boolean",
+        description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. The decision here is arbitrary, but it's easy to keep straight. Users with 'lower' names initiate peering."
+      });
+      Object.defineProperty(this, "goFirst", {
+        get: () => !goSecond
       });
 
       // If the user leaves the page, we want to at least fire off the close signal and perhaps
@@ -361,16 +371,6 @@ Primrose.WebRTCSocket = (function () {
         }]
       });
       this.progress[description.type][method] = true;
-    }
-
-    get goFirst() {
-      pliny.property({
-        parent: "Primrose.WebRTCSocket",
-        name: "goFirst",
-        type: "Boolean",
-        description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. The decision here is arbitrary, but it's easy to keep straight. Users with 'lower' names initiate peering."
-      });
-      return this.fromUserName < this.toUserName;
     }
 
     wrap(item) {

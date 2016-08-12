@@ -80,7 +80,7 @@ Primrose.Network.RemoteUser = (function () {
       this.analyzer = null;
     }
 
-    peer(peeringSocket, microphone, localUserName, audio) {
+    peer(peeringSocket, microphone, localUserName, audio, goSecond) {
       pliny.method({
         parent: "Pliny.RemoteUser",
         name: "peer",
@@ -107,7 +107,7 @@ Primrose.Network.RemoteUser = (function () {
 
 
       return microphone.then((outAudio) => {
-        this.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, this.userName, outAudio);
+        this.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, this.userName, outAudio, goSecond);
         return this.audioChannel.ready
           .then(() => {
             if (!this.audioChannel.inAudio) {

@@ -114,8 +114,8 @@ Primrose.Network.AudioChannel = (function () {
       }, ]
   });
   class AudioChannel extends Primrose.WebRTCSocket {
-    constructor(proxyServer, fromUserName, toUserName, outAudio) {
-      super(proxyServer, fromUserName, 0, toUserName, 0);
+    constructor(proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+      super(proxyServer, fromUserName, 0, toUserName, 0, goSecond);
 
       pliny.property({
         parent: "Primrose.Network.AudioChannel",

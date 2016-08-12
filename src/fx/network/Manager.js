@@ -104,7 +104,7 @@ Primrose.Network.Manager = (function () {
       this._socket = null;
     }
 
-    addUser(state) {
+    addUser(state, goSecond) {
       console.log("User %s logging on.", state[0]);
       var toUserName = state[0],
         user = new Primrose.Network.RemoteUser(toUserName, this.factories.avatar, this.options.foregroundColor);
@@ -112,7 +112,7 @@ Primrose.Network.Manager = (function () {
       this.updateUser(state);
       this.emit("addavatar", user);
       this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio))
+        .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio, goSecond))
         .then(() => console.log("%s is peered with %s", this.userName, toUserName))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
     }
@@ -132,7 +132,7 @@ Primrose.Network.Manager = (function () {
       Object.keys(this.users)
         .forEach(this.removeUser.bind(this));
       while (newUsers.length > 0) {
-        this.addUser(newUsers.shift());
+        this.addUser(newUsers.shift(), true);
       }
       this.emit("authorizationsucceeded");
     }
