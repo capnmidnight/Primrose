@@ -220,6 +220,7 @@ Primrose.WebRTCSocket = (function () {
         // When an offer or an answer is received, it's pretty much the same exact processing. Either
         // type of object gets checked to see if it was expected, then unwrapped.
         const descriptionReceived = (description) => {
+          this._log(1, "description", description);
           // Check to see if we expected this sort of message from this user.
           if (this.isExpected(description.item.type, description)) {
 
@@ -277,6 +278,7 @@ Primrose.WebRTCSocket = (function () {
         // ICE stands for Interactive Connectivity Establishment. It's basically a description of a local end-point,
         // with enough information for the remote user to be able to connect to it.
         const onIce = (ice) => {
+          this._log(1, "ice", ice);
           // Check to see if we expected this sort of message from this user.
           if (this.isExpected("ice", ice)) {
             // And if so, store it in our database of possibilities.

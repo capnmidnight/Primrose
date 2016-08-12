@@ -158,7 +158,7 @@ Primrose.Network.AudioChannel = (function () {
       const onStream = (stream) => {
         this.inAudio = stream;
         if (!this.goFirst) {
-          this._log(0, "Creating the second stream from %s to %s", this.toUserName, this.fromUserName);
+          this._log(0, "Creating the second stream from %s to %s", this.fromUserName, this.toUserName);
           addStream();
         }
       };
