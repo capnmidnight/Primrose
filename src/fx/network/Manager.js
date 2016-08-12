@@ -113,6 +113,7 @@ Primrose.Network.Manager = (function () {
       this.emit("addavatar", user);
       this.waitForLastUser = this.waitForLastUser
         .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio))
+        .then(() => console.log("%s is peered with %s", this.userName, toUserName))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
     }
 
