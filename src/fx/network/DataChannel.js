@@ -45,12 +45,12 @@ Primrose.Network.DataChannel = (function () {
 
     issueRequest() {
       if (goFirst) {
-        this._log("Creating data channel");
+        this._log(0, "Creating data channel");
         this.dataChannel = this.rtc.createDataChannel();
       }
       else {
         this.ondatachannel = (evt) => {
-          this._log("Receving data channel");
+          this._log(0, "Receving data channel");
           this.dataChannel = evt.channel;
         };
       }
@@ -58,12 +58,12 @@ Primrose.Network.DataChannel = (function () {
 
     get complete() {
       if (this.goFirst) {
-        this._log("[First]: OC %s -> AR %s.",
+        this._log(1, "[First]: OC %s -> AR %s.",
           this.progress.offer.created,
           this.progress.answer.received);
       }
       else {
-        this._log("[Second]: OC %s -> AR %s.",
+        this._log(1, "[Second]: OC %s -> AR %s.",
           this.progress.offer.created,
           this.progress.answer.received);
       }

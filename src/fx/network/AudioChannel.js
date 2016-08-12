@@ -140,7 +140,7 @@ Primrose.Network.AudioChannel = (function () {
       // Adding an audio stream to the peer connection is different between Firefox (which supports the latest
       //  version of the API) and Chrome.
       const addStream = () => {
-        this._log("adding stream", this.outAudio);
+        this._log(0, "adding stream", this.outAudio);
 
         // Make sure we actually have audio to send to the remote.
         if (this.outAudio) {
@@ -158,7 +158,7 @@ Primrose.Network.AudioChannel = (function () {
       const onStream = (stream) => {
         this.inAudio = stream;
         if (!this.goFirst) {
-          this._log("Creating the second stream");
+          this._log(0, "Creating the second stream from %s to %s", this.toUserName, this.fromUserName);
           addStream();
         }
       };
@@ -173,7 +173,7 @@ Primrose.Network.AudioChannel = (function () {
 
       // If we're the boss, tell people about it.
       if (this.goFirst) {
-        this._log("Creating the first stream");
+        this._log(0, "Creating the first stream from %s to %s", this.fromUserName, this.toUserName);
         addStream();
       }
     }
@@ -181,14 +181,14 @@ Primrose.Network.AudioChannel = (function () {
     // The peering process is complete when all offers are answered.
     get complete() {
       if (this.goFirst) {
-        this._log("[First]: OC %s -> AR %s -> OR %s -> AC %s.",
+        this._log(1, "[First]: OC %s -> AR %s -> OR %s -> AC %s.",
           this.progress.offer.created,
           this.progress.answer.received,
           this.progress.offer.received,
           this.progress.answer.created);
       }
       else {
-        this._log("[Second]: OR %s -> AC %s -> OC %s -> AR %s.",
+        this._log(1, "[Second]: OR %s -> AC %s -> OC %s -> AR %s.",
           this.progress.offer.received,
           this.progress.answer.created,
           this.progress.offer.created,

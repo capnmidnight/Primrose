@@ -73,28 +73,26 @@ Primrose.WebRTCSocket = (function () {
       // need to debug the WebRTC workflow.
       let attemptCount = 0,
         messageNumber = 0;
-      const ENABLE_DEBUGGING = false,
+      const MAX_LOG_LEVEL = 1,
         instanceNumber = ++INSTANCE_COUNT,
-        print = function (name, format) {
-          if (ENABLE_DEBUGGING) {
+        print = function (name, level, format) {
+          if (level < MAX_LOG_LEVEL) {
             const args = [
               "[%s:%s:%s] " + JSON.stringify(format),
               INSTANCE_COUNT,
               instanceNumber,
               ++messageNumber
             ];
-            if (format && format.item && format.item.sdp) {
-              console.log(format.item.sdp);
-            }
-            for (var i = 2; i < arguments.length; ++i) {
-              args.push(JSON.stringify(arguments[i]));
+            for (var i = 3; i < arguments.length; ++i) {
+              args.push(arguments[i]);
             }
             console[name].apply(console, args);
           }
+          return arguments[3];
         };
 
       this._log = print.bind(null, "log");
-      this._error = print.bind(null, "error");
+      this._error = print.bind(null, "error", 0);
 
       pliny.property({
         parent: "Primrose.WebRTCSocket",
@@ -188,7 +186,7 @@ Primrose.WebRTCSocket = (function () {
       this.ready = new Promise((resolve, reject) => {
 
         const done = () => {
-          this._log("Tearing down event handlers");
+          this._log(2, "Tearing down event handlers");
           this.proxyServer.off("peer", onUser);
           this.proxyServer.off("offer", onOffer);
           this.proxyServer.off("ice", onIce);
@@ -260,7 +258,7 @@ Primrose.WebRTCSocket = (function () {
 
         // When an offer is received, we need to create an answer in reply.
         const onOffer = (offer) => {
-          this._log("offer", offer);
+          this._log(1, "offer", offer);
           var promise = descriptionReceived(offer);
           if (promise) {
             return promise.then(() => this.rtc.createAnswer())
@@ -276,7 +274,7 @@ Primrose.WebRTCSocket = (function () {
             // And if so, store it in our database of possibilities.
             var candidate = new RTCIceCandidate(ice.item);
             return this.rtc.addIceCandidate(candidate)
-              .catch(this._log);
+              .catch(this._error);
           }
         };
 
@@ -294,8 +292,8 @@ Primrose.WebRTCSocket = (function () {
             this.proxyServer.on("ice", onIce);
 
             // This is just for debugging purposes.
-            this.rtc.onsignalingstatechange = (evt) => this._log("[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
-            this.rtc.oniceconnectionstatechange = (evt) => this._log("[%s] ICE Connection/Gathering State: %s/%s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
+            this.rtc.onsignalingstatechange = (evt) => this._log(1, "[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
+            this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection/Gathering State: %s/%s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
 
             // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
             // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
@@ -410,14 +408,14 @@ Primrose.WebRTCSocket = (function () {
         toIndex = obj.toUserIndex === this.fromUserIndex,
         isExpected = incomplete && fromUser && fromIndex && toUser && toIndex;
 
-      this._log("[%s->%s] I %s || FROM %s==%s (%s), %s==%s (%s) || TO %s==%s (%s), %s==%s (%s)",
+      this._log(1, "[%s->%s] I %s || FROM %s==%s (%s), %s==%s (%s) || TO %s==%s (%s), %s==%s (%s)",
         tag, isExpected,
         incomplete,
         obj.fromUserName, this.toUserName, fromUser,
         obj.fromUserIndex, this.toUserIndex, fromIndex,
         obj.toUserName, this.fromUserName, toUser,
         obj.toUserIndex, this.fromUserIndex, toIndex);
-      this._log(obj);
+      this._log(2, obj);
       return isExpected;
     }
 
