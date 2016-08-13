@@ -669,7 +669,7 @@ Primrose.BrowserEnvironment = (function () {
             logarithmicDepthBuffer: false
           });
           this.renderer.autoClear = false;
-          this.renderer.autoSortObjects = true;
+          this.renderer.sortObjects = true;
           this.renderer.setClearColor(this.options.backgroundColor);
           if (!this.renderer.domElement.parentElement) {
             document.body.appendChild(this.renderer.domElement);
