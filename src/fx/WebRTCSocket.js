@@ -190,7 +190,7 @@ Primrose.WebRTCSocket = (function () {
         parent: "Primrose.WebRTCSocket",
         name: "goFirst",
         type: "Boolean",
-        description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. The decision here is arbitrary, but it's easy to keep straight. Users with 'lower' names initiate peering."
+        description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. Users already in the room will initiate peer connections with users that are just joining."
       });
       Object.defineProperty(this, "goFirst", {
         get: () => !goSecond
