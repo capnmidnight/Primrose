@@ -96,6 +96,10 @@ Primrose.Network.AudioChannel = (function () {
       baseClass: "Primrose.WebRTCSocket",
       description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
       parameters: [{
+        name: "extraIceServers",
+        type: "Array",
+        description: "A collection of ICE servers to use on top of the default Google STUN servers."
+      }, {
         name: "proxyServer",
         type: "WebSocket",
         description: "A connection over which to negotiate the peering."
@@ -114,8 +118,8 @@ Primrose.Network.AudioChannel = (function () {
       }, ]
   });
   class AudioChannel extends Primrose.WebRTCSocket {
-    constructor(proxyServer, fromUserName, toUserName, outAudio, goSecond) {
-      super(proxyServer, fromUserName, 0, toUserName, 0, goSecond);
+    constructor(extraIceServers, proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+      super(extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond);
 
       pliny.property({
         parent: "Primrose.Network.AudioChannel",

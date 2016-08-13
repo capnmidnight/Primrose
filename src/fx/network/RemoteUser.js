@@ -80,13 +80,17 @@ Primrose.Network.RemoteUser = (function () {
       this.analyzer = null;
     }
 
-    peer(peeringSocket, microphone, localUserName, audio, goSecond) {
+    peer(extraIceServers, peeringSocket, microphone, localUserName, audio, goSecond) {
       pliny.method({
         parent: "Pliny.RemoteUser",
         name: "peer",
         returns: "Promise",
         description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
         parameters: [{
+          name: "extraIceServers",
+          type: "Array",
+          description: "A collection of ICE servers to use on top of the default Google STUN servers."
+        }, {
           name: "peeringSocket",
           type: "WebSocket",
           description: "A WebSocket over which the peer connection will be negotiated."
@@ -107,7 +111,7 @@ Primrose.Network.RemoteUser = (function () {
 
 
       return microphone.then((outAudio) => {
-        this.audioChannel = new Primrose.Network.AudioChannel(peeringSocket, localUserName, this.userName, outAudio, goSecond);
+        this.audioChannel = new Primrose.Network.AudioChannel(extraIceServers, peeringSocket, localUserName, this.userName, outAudio, goSecond);
         return this.audioChannel.ready
           .then(() => {
             if (!this.audioChannel.inAudio) {

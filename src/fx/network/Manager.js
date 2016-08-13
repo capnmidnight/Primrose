@@ -28,7 +28,13 @@ Primrose.Network.Manager = (function () {
       this.lastNetworkUpdate = 0;
       this.oldState = [];
       this.users = {};
-      this.waitForLastUser = Promise.resolve();
+      this.extraIceServers = [];
+      if(options.webRTC){
+        this.waitForLastUser = options.webRTC.then((obj) => this.extraIceServers.push.apply(this.extraIceServers, obj.iceServers));
+      }
+      else{
+        this.waitForLastUser = Promise.resolve();
+      }
       this._socket = null;
       this.userName = null;
       this.microphone = null;
@@ -112,7 +118,7 @@ Primrose.Network.Manager = (function () {
       this.updateUser(state);
       this.emit("addavatar", user);
       this.waitForLastUser = this.waitForLastUser
-        .then(() => user.peer(this._socket, this.microphone, this.userName, this.audio, goSecond))
+        .then(() => user.peer(this.extraIceServers, this._socket, this.microphone, this.userName, this.audio, goSecond))
         .then(() => console.log("%s is peered with %s", this.userName, toUserName))
         .catch((exp) => console.error("Couldn't load user: " + name, exp));
     }
@@ -128,7 +134,6 @@ Primrose.Network.Manager = (function () {
     }
 
     listUsers(newUsers) {
-      console.log(newUsers);
       Object.keys(this.users)
         .forEach(this.removeUser.bind(this));
       while (newUsers.length > 0) {

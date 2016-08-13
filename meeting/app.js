@@ -24,7 +24,8 @@ var ctrls = Primrose.DOM.findEverything(),
     fullScreenIcon: "../doc/models/monitor.obj",
     VRIcon: "../doc/models/cardboard.obj",
     audioIcon: "../doc/models/microphone.obj",
-    font: "../doc/fonts/helvetiker_regular.typeface.js"
+    font: "../doc/fonts/helvetiker_regular.typeface.js",
+    webRTC: Primrose.HTTP.getObject("/turn")
   });
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);

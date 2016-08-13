@@ -31,12 +31,6 @@ Primrose.WebRTCSocket = (function () {
     url: "stun:stun4.l.google.com:19302"
   }];
 
-  if (isFirefox) {
-    ICE_SERVERS = [{
-      urls: ICE_SERVERS.map((s) => s.url)
-    }];
-  }
-
   let INSTANCE_COUNT = 0;
 
   function formatTime(t) {
@@ -54,6 +48,10 @@ Primrose.WebRTCSocket = (function () {
       name: "WebRTCSocket",
       description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
       parameters: [{
+        name: "extraIceServers",
+        type: "Array",
+        description: "A collection of ICE servers to use on top of the default Google STUN servers."
+      }, {
         name: "proxyServer",
         type: "WebSocket",
         description: "A connection over which to negotiate the peering."
@@ -77,7 +75,7 @@ Primrose.WebRTCSocket = (function () {
   });
   class WebRTCSocket {
     // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
-    constructor(proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
+    constructor(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
 
       // These logging constructs are basically off by default, but you will need them if you ever
       // need to debug the WebRTC workflow.
@@ -154,6 +152,17 @@ Primrose.WebRTCSocket = (function () {
         get: () => toUserIndex
       });
 
+
+
+      const iceServers = ICE_SERVERS.concat(extraIceServers);
+      if (isFirefox) {
+        iceServers = [{
+          urls: iceServers.map((s) => s.url)
+        }];
+      }
+
+      this._log(1, iceServers);
+
       pliny.property({
         parent: "Primrose.WebRTCSocket",
         name: "rtc",
@@ -162,7 +171,7 @@ Primrose.WebRTCSocket = (function () {
       });
       const rtc = new RTCPeerConnection({
         // Indicate to the API what servers should be used to figure out NAT traversal.
-        iceServers: ICE_SERVERS
+        iceServers
       });
       Object.defineProperty(this, "rtc", {
         get: () => rtc
