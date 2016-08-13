@@ -221,7 +221,7 @@ env.addEventListener("keydown", function (evt) {
       editorFrameMesh.disabled = !editorFrameMesh.disabled;
     }
     else if (evt.keyCode === Primrose.Keys.E && editor) {
-      Primrose.HTTP.sendObject("saveScript", {
+      Primrose.HTTP.postObject("saveScript", {
         "Content-Type": "application/json",
         data: {
           fileName: "pacman",

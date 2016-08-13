@@ -69,12 +69,14 @@
     <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
     <script type="text/javascript" src="../src/fx/Entity.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/XHR.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/del.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/delObject.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/get.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/getBuffer.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/getObject.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
     <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/sendObject.js"></script>
+    <script type="text/javascript" src="../src/fx/HTTP/postObject.js"></script>
     <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
     <script type="text/javascript" src="../src/fx/Keys.js"></script>
     <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
@@ -183,25 +185,25 @@
             <h2>Source</h2>
             <pre id="editorContainer">grammar(&quot;JavaScript&quot;);
 var env = new Primrose.BrowserEnvironment({
-    // This file references a Three.js JSON-formatted scene
-    // file, which basically describes a room or level in
-    // which the user will walk around, on which we can
-    // create additional objects.
-    sceneModel: &quot;../models/holodeck.json&quot;,
-    font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
-    // One of our GUI controls is configured here.
-    button: {
-      // This file references another Three.js JSON-formatted
-      // model file, which will be cloned anytime a user
-      // calls createElement(&quot;button&quot;).
-      model: &quot;../models/smallbutton.json&quot;,
-      // Display settings for different states of the button.
-      options: {
-        colorUnpressed: 0x7f0000,
-        colorPressed: 0x007f00
-      }
+  // This file references a Three.js JSON-formatted scene
+  // file, which basically describes a room or level in
+  // which the user will walk around, on which we can
+  // create additional objects.
+  sceneModel: &quot;../models/holodeck.json&quot;,
+  font: &quot;../fonts/helvetiker_regular.typeface.js&quot;,
+  // One of our GUI controls is configured here.
+  button: {
+    // This file references another Three.js JSON-formatted
+    // model file, which will be cloned anytime a user
+    // calls createElement(&quot;button&quot;).
+    model: &quot;../models/smallbutton.json&quot;,
+    // Display settings for different states of the button.
+    options: {
+      colorUnpressed: 0x7f0000,
+      colorPressed: 0x007f00
     }
-  });
+  }
+});
 
 // Once Primrose has setup the WebGL context, setup Three.js,
 // downloaded and validated all of model files, and constructed

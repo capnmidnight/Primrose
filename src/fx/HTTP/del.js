@@ -1,10 +1,10 @@
-Primrose.HTTP.post = (function () {
+Primrose.HTTP.del = (function () {
   "use strict";
 
   pliny.function({
     parent: "Primrose.HTTP",
-    name: "post",
-    description: "Process an HTTP POST request.",
+    name: "del",
+    description: "Process an HTTP DELETE request.",
     returns: "Promise",
     parameters: [{
       name: "type",
@@ -18,7 +18,7 @@ Primrose.HTTP.post = (function () {
     }, {
       name: "options.data",
       type: "Object",
-      description: "The data object to use as the request body payload, if this is a POST request."
+      description: "The data object to use as the request body payload."
     }, {
       name: "options.progress",
       type: "Function",
@@ -26,5 +26,5 @@ Primrose.HTTP.post = (function () {
       description: "A callback function to be called as the download from the server progresses."
     }, ]
   });
-  return (type, url, options) => Primrose.HTTP.XHR("POST", type, url, options);
+  return (type, url, options) => Primrose.HTTP.XHR("DELETE", type, url, options);
 })();

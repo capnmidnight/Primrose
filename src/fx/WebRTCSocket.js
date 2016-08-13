@@ -39,12 +39,14 @@ Primrose.WebRTCSocket = (function () {
 
   let INSTANCE_COUNT = 0;
 
-  function formatTime(t){
-    var ms = t.getMilliseconds().toString();
-    while(ms.length < 3){
+  function formatTime(t) {
+    var ms = t.getMilliseconds()
+      .toString();
+    while (ms.length < 3) {
       ms = "0" + ms;
     }
-    return t.toLocaleTimeString().replace(/(\d+:\d+:\d+)/, (_, g) => g + "." + ms);
+    return t.toLocaleTimeString()
+      .replace(/(\d+:\d+:\d+)/, (_, g) => g + "." + ms);
   }
 
   pliny.class({
