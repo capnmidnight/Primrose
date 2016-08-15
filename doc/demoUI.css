@@ -39,7 +39,6 @@ progress {
 }
 
 #controls {
-  padding: 1em;
 }
 
 #frontBuffer {
@@ -51,6 +50,7 @@ progress {
 
 body, input, button {
   font-family: "Lato", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif;
+  border: none;
 }
 
   body > h1 {
@@ -58,26 +58,37 @@ body, input, button {
   }
 
 button {
-  padding: 8.5px 16px;
-  font-size: 1rem;
-  color: #fff;
-  border-style: solid;
-  border-width:  0;
-  border-radius: 5px;
-  font-weight: bold;
+  font-size: 1.5em;
 }
 
 button.primary {
   background-color: #ec2471;
+  color: white;
+  width: 2.25em;
 }
 
 button.secondary{
   background-color: #30f3e1;
   color:  black;
+  border-radius: 5px;
+  padding: 0.25em 0.6em;
 }
 
 input:disabled, button:disabled {
   opacity: 0.25;
+}
+
+.inputRow {
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: white;
+  display: inline-flex;
+  margin: 5px;
+  color: #222;
+}
+
+#roomNameRow {
+  margin-right: 3.7em;
 }
 
 #loginForm {
@@ -87,7 +98,6 @@ input:disabled, button:disabled {
   left: 50%;
   background-color: rgba(0, 0, 0, 0.66);
   width: 100%;
-  margin: 0 auto;
   padding: 3em;
   transform: translate(-50%, 0);
   color: #ddd;
@@ -95,15 +105,11 @@ input:disabled, button:disabled {
 }
 
   #loginForm input {
-    padding: 10px;
-    border: none;
     background-color: white;
     color: #222;
-    margin: 0;
-    display: inline-block;
-    margin-top: -0.5px;
-    border-top-left-radius:  5px;
-    border-bottom-left-radius:  5px;
+    padding: 0.75em;
+    width: 24em;
+    display: inline-flex;
   }
 
 #closeButton {
@@ -122,9 +128,4 @@ input:disabled, button:disabled {
   margin-top: 1em;
 }
 
-#connect {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin-left: -5px;
-  margin-top:  1px;
-}
+#connect {display: inline-block;

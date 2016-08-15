@@ -188,8 +188,15 @@
       <div id="loginForm" style="display:none">
         <button class="secondary" id="closeButton">&times;</button>
         <h1>Create your personal VR meeting room</h1>
-        <input id="userName" type="text" placeholder="Pick a username">
-        <button class="primary" id="connect">&rarr;</button>
+        <div class="inputRow" id="roomNameRow">
+          <input id="roomName" type="text" placeholder="Pick a room name">
+          <button class="primary" id="randomRoomName">&#x21bb;</button>
+        </div><br>
+        <div class="inputRow" id="userNameRow">
+          <input id="userName" type="text" placeholder="Pick a username">
+          <button class="primary" id="randomUserName">&#x21bb;</button>
+          <button class="primary" id="connect">&rarr;</button>
+        </div>
         <div id="errorMessage" style="display:none"></div>
       </div>
     </div><!-- end main.jade main block -->

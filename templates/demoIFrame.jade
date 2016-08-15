@@ -76,7 +76,13 @@ html
         #loginForm(style="display:none")
           button#closeButton.secondary &times;
           h1 Create your personal VR meeting room
-          input#userName(type="text", placeholder="Pick a username")
-          button#connect.primary &rarr;
+          #roomNameRow.inputRow
+            input#roomName(type="text", placeholder="Pick a room name")
+            button#randomRoomName.primary &#x21bb;
+          br
+          #userNameRow.inputRow
+            input#userName(type="text", placeholder="Pick a username")
+            button#randomUserName.primary &#x21bb;
+            button#connect.primary &rarr;
           #errorMessage(style="display:none")
     <!-- end main.jade main block -->
