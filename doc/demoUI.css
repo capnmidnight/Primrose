@@ -72,6 +72,7 @@ button.secondary{
   color:  black;
   border-radius: 5px;
   padding: 0.25em 0.6em;
+  margin-left: 0.5em;
 }
 
 input:disabled, button:disabled {
