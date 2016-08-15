@@ -67,6 +67,10 @@ button.primary {
   width: 2.25em;
 }
 
+#randomUserName {
+  border-right: dashed 1px #8c0e3e;
+}
+
 button.secondary{
   background-color: #30f3e1;
   color:  black;
