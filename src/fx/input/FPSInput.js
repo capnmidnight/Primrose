@@ -7,8 +7,8 @@ Primrose.Input.FPSInput = (function () {
 
   pliny.class({
     parent: "Primrose.Input",
-      name: "FPSInput",
-      description: "| [under construction]"
+    name: "FPSInput",
+    description: "| [under construction]"
   });
   class FPSInput {
     constructor(DOMElement, options) {
