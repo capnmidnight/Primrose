@@ -38,7 +38,7 @@ Primrose.Pointer = (function () {
       }]
   });
   class Pointer extends Primrose.AbstractEventEmitter {
-    constructor(trigger, color = 0xff0000, emission = 0x7f0000, isHand = false, base = null) {
+    constructor(trigger, color = 0xff0000, emission = 0x7f0000, isHand = false) {
       super();
       this.trigger = trigger;
       this._currentControl = null;
@@ -62,7 +62,7 @@ Primrose.Pointer = (function () {
 
       this.disk.scale.set(1, 0.1, 1);
 
-      if (base) {
+      if (isHand) {
         this.mesh.add(textured(box(0.1, 0.025, 0.2), this.color, {
           emissive: this.emission
         }));

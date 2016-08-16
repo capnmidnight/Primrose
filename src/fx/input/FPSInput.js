@@ -243,11 +243,11 @@ Primrose.Input.FPSInput = (function () {
 
       this.stage = new THREE.Object3D();
 
-      this.mousePointer = new Primrose.Pointer(this.Mouse, 0xff0000, 0x7f0000);
+      this.mousePointer = new Primrose.Pointer(this.Mouse, 0xff0000, 0x7f0000, false);
       this.pointers.push(this.mousePointer);
       this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-      this.head = new Primrose.Pointer(this.VR, 0x00ff00, 0x007f00);
+      this.head = new Primrose.Pointer(this.VR, 0x00ff00, 0x007f00, false);
       this.pointers.push(this.head);
       this.head.addToBrowserEnvironment(null, this.options.scene);
 
