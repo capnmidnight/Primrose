@@ -1,35 +1,35 @@
 "use strict";
 
 var ctrls = Primrose.DOM.findEverything(),
-  loginControls = [
-    ctrls.userName,
-    ctrls.connect
-  ],
-  names = NameGen.compile("!mi"),
-  protocol = location.protocol.replace("http", "ws"),
-  serverPath = protocol + "//" + location.hostname,
-  roomPattern = /\broom=(\w+)/,
-  userPattern = /\buser=(\w+)/,
-  defaultRoomName = null,
-  defaultUserName = null,
-  socket = null,
+loginControls = [
+ctrls.userName,
+ctrls.connect
+],
+names = NameGen.compile("!mi"),
+protocol = location.protocol.replace("http", "ws"),
+serverPath = protocol + "//" + location.hostname,
+roomPattern = /\broom=(\w+)/,
+userPattern = /\buser=(\w+)/,
+defaultRoomName = null,
+defaultUserName = null,
+socket = null,
 
-  env = new Primrose.BrowserEnvironment({
-    autoScaleQuality: true,
-    autoRescaleQuality: false,
-    quality: Primrose.Quality.HIGH,
-    groundTexture: 0x000000,
-    backgroundColor: 0x000000,
-    disableDefaultLighting: true,
-    sceneModel: "../doc/models/meeting/meetingroom.obj",
-    avatarModel: "../doc/models/avatar.json",
-    useFog: false,
-    fullScreenIcon: "../doc/models/monitor.obj",
-    VRIcon: "../doc/models/cardboard.obj",
-    audioIcon: "../doc/models/microphone.obj",
-    font: "../doc/fonts/helvetiker_regular.typeface.js",
-    webRTC: Primrose.HTTP.getObject("/turn")
-  });
+env = new Primrose.BrowserEnvironment({
+  autoScaleQuality: true,
+  autoRescaleQuality: false,
+  quality: Primrose.Quality.HIGH,
+  groundTexture: 0x000000,
+  backgroundColor: 0x000000,
+  disableDefaultLighting: true,
+  sceneModel: "../doc/models/meeting/meetingroom.obj",
+  avatarModel: "../doc/models/avatar.json",
+  useFog: false,
+  fullScreenIcon: "../doc/models/monitor.obj",
+  VRIcon: "../doc/models/cardboard.obj",
+  audioIcon: "../doc/models/microphone.obj",
+  font: "../doc/fonts/helvetiker_regular.typeface.js",
+  webRTC: Primrose.HTTP.getObject("/turn")
+});
 
 ctrls.closeButton.addEventListener("click", hideLoginForm, false);
 ctrls.userName.addEventListener("keyup", authenticate);
@@ -38,7 +38,6 @@ ctrls.randomRoomName.addEventListener("click", setRoomName);
 ctrls.randomUserName.addEventListener("click", setRandomUserName);
 
 window.addEventListener("popstate", setRoomName);
-
 env.addEventListener("ready", environmentReady);
 
 setRoomName();
@@ -75,9 +74,9 @@ function fromField(field, pattern) {
   return spec && spec[1];
 }
 
-function hideLoginForm() {
-  ctrls.loginForm.style.display = "none";
-  ctrls.frontBuffer.focus();
+function hideLoginForm(evt) {
+ ctrls.loginForm.style.display = "none";
+ ctrls.frontBuffer.focus();
 }
 
 function showLoginForm() {
@@ -110,7 +109,7 @@ function environmentReady() {
 }
 
 function authenticate(evt) {
-  if (!evt || evt.type !== "keyup" || evt.keyCode === 13) {
+  if (!evt || evt.type !== "keyup" || evt.keyCode === Primrose.Keys.ENTER) {
 
     disableLogin(true);
 
@@ -149,6 +148,6 @@ function authSucceeded() {
   hideLoginForm();
 
   document.cookie = "user=" + getUserName() +
-    "\nroom=" + getRoomName();
+  "\nroom=" + getRoomName();
   env.connect(socket, ctrls.userName.value);
 }
