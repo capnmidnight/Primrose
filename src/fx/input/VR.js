@@ -156,13 +156,8 @@ Primrose.Input.VR = (function () {
     }
 
     submitFrame() {
-      if(this.currentDevice && this.currentPose) {
-        try {
-          this.currentDevice.submitFrame(this.currentPose);
-        }
-        catch(exp){
-          console.log(this.currentDevice, this.currentPose);
-        }
+      if(this.currentDevice) {
+        this.currentDevice.submitFrame(this.currentPose);
       }
     }
 
