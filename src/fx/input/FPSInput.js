@@ -286,20 +286,20 @@ Primrose.Input.FPSInput = (function () {
     }
 
     get hasMotionControllers() {
-      return this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
-        this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse;
+      return !!(this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
+        this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse);
     }
 
     get hasGamepad() {
-      return this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse;
+      return !!(this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse);
     }
 
     get hasMouse() {
-      return this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse;
+      return !!(this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse);
     }
 
     get hasTouch() {
-      return this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse;
+      return !!(this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse);
     }
 
     submitFrame() {

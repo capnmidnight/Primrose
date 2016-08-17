@@ -33,7 +33,7 @@ Primrose.PoseInputProcessor = (function () {
       if (this.currentDevice) {
         var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
         this.lastPose = pose;
-        this.inPhysicalUse = this.isPresenting && !!this.currentPose;
+        this.inPhysicalUse = !!this.currentPose;
         var orient = this.currentPose && this.currentPose.orientation,
           pos = this.currentPose && this.currentPose.position;
         if (orient) {
