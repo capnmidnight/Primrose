@@ -19,6 +19,7 @@ Primrose.PoseInputProcessor = (function () {
 
       this.currentDevice = null;
       this.lastPose = null;
+      this.currentPose = null;
       this.posePosition = new THREE.Vector3();
       this.poseQuaternion = new THREE.Quaternion();
       this.position = new THREE.Vector3();
@@ -48,10 +49,6 @@ Primrose.PoseInputProcessor = (function () {
           this.posePosition.set(0, 0, 0);
         }
       }
-    }
-
-    get currentPose() {
-      throw new Exception("currentPose must be implemented in child class");
     }
 
     updateStage(stageMatrix) {

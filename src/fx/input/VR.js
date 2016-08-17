@@ -46,14 +46,16 @@ Primrose.Input.VR = (function () {
     }
 
     get isNativeMobileWebVR() {
-      return !this.currentDevice.isPolyfilled && isChrome && isMobile;
+      return !(this.currentDevice && this.currentDevice.isPolyfilled) && isChrome && isMobile;
     }
 
     connect(selectedIndex) {
       this.currentDevice = null;
       this.currentDeviceIndex = selectedIndex;
+      this.currentPose = null;
       if (0 <= selectedIndex && selectedIndex <= this.displays.length) {
         this.currentDevice = this.displays[selectedIndex];
+        this.currentPose = this.currentDevice.getPose();
         var params = this.currentDevice.getEyeParameters("left"),
           fov = params.fieldOfView;
         this.rotationAngle = Math.PI * (fov.leftDegrees + fov.rightDegrees) / 360;
@@ -93,6 +95,9 @@ Primrose.Input.VR = (function () {
       let promise = null;
       if (this.isPresenting) {
         promise = this.currentDevice.exitPresent();
+        this.currentDevice = null;
+        this.currentDeviceIndex = -1;
+        this.currentPose = null;
       }
       else {
         promise = Promise.resolve();
@@ -118,8 +123,14 @@ Primrose.Input.VR = (function () {
       super.update(dt);
 
       let x = 0,
-        z = 0;
-      var stage = this.currentDevice && this.currentDevice.stageParameters;
+        z = 0,
+        stage = null;
+
+      if(this.currentDevice) {
+        this.currentPose = this.currentDevice.getPose();
+        stage = this.currentDevice.stageParameters;
+      }
+
       if (stage) {
         this.movePlayer.fromArray(stage.sittingToStandingTransform);
         x = stage.sizeX;
@@ -144,8 +155,15 @@ Primrose.Input.VR = (function () {
       return this.stage && this.stage.sizeX * this.stage.sizeZ > 0;
     }
 
-    get currentPose() {
-      return this.currentDevice && this.currentDevice.getPose();
+    submitFrame() {
+      if(this.currentDevice && this.currentPose) {
+        try {
+          this.currentDevice.submitFrame(this.currentPose);
+        }
+        catch(exp){
+          console.log(this.currentDevice, this.currentPose);
+        }
+      }
     }
 
     resolvePicking(currentHits, lastHits, objects) {
@@ -177,7 +195,6 @@ Primrose.Input.VR = (function () {
           emit.call(this, "gazestart", currentHit);
         }
       }
-
     }
 
     getTransforms(near, far) {

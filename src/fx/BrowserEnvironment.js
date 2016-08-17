@@ -288,7 +288,7 @@ Primrose.BrowserEnvironment = (function () {
             this.renderer.render(this.scene, this.camera);
             this.camera.translateOnAxis(st.translation, -1);
           }
-          this.input.VR.currentDevice.submitFrame(this.input.VR.currentPose);
+          this.input.submitFrame();
         }
 
         if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {

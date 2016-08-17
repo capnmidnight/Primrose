@@ -126,6 +126,7 @@ Primrose.Input.Gamepad = (function () {
     checkDevice(pad) {
       var i, buttonMap = 0;
       this.currentDevice = pad;
+      this.currentPose = this.currentDevice.pose;
       for (i = 0; i < pad.buttons.length; ++i) {
         var btn = pad.buttons[i];
         this.setButton(i, btn.pressed);
@@ -139,10 +140,6 @@ Primrose.Input.Gamepad = (function () {
         var axisName = this.axisNames[this.axisOffset * pad.axes.length + i];
         this.setAxis(axisName, pad.axes[i]);
       }
-    }
-
-    get currentPose() {
-      return this.currentDevice && this.currentDevice.pose;
     }
 
     vibrate(pattern) {

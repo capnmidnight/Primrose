@@ -228,7 +228,7 @@ Primrose.Input.FPSInput = (function () {
             mgr.parent = this.VR;
             this.motionDevices.push(mgr);
 
-            var ptr = new Primrose.Pointer(mgr, 0x0000ff, 0x00007f, true);
+            var ptr = new Primrose.Pointer(0x0000ff, 0x00007f, true, mgr);
             this.pointers.push(ptr);
             ptr.addToBrowserEnvironment(null, this.options.scene);
             ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
@@ -243,11 +243,11 @@ Primrose.Input.FPSInput = (function () {
 
       this.stage = new THREE.Object3D();
 
-      this.mousePointer = new Primrose.Pointer(this.Mouse, 0xff0000, 0x7f0000, false);
+      this.mousePointer = new Primrose.Pointer(0xff0000, 0x7f0000, false, this.Mouse, this.VR);
       this.pointers.push(this.mousePointer);
       this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-      this.head = new Primrose.Pointer(this.VR, 0x00ff00, 0x007f00, false);
+      this.head = new Primrose.Pointer(0x00ff00, 0x007f00, false, this.VR);
       this.pointers.push(this.head);
       this.head.addToBrowserEnvironment(null, this.options.scene);
 
@@ -284,15 +284,40 @@ Primrose.Input.FPSInput = (function () {
       }
     }
 
+    get hasMotionControllers() {
+      return this.Vive_0 && this.Vive_0.enabled && this.Vive_0.inPhysicalUse ||
+        this.Vive_1 && this.Vive_1.enabled && this.Vive_1.inPhysicalUse;
+    }
+
+    get hasGamepad() {
+      return this.Gamepad_0 && this.Gamepad_0.enabled && this.Gamepad_0.inPhysicalUse;
+    }
+
+    get hasMouse() {
+      return this.Mouse && this.Mouse.enabled && this.Mouse.inPhysicalUse;
+    }
+
+    get hasTouch() {
+      return this.Touch && this.Touch.enabled && this.Touch.inPhysicalUse;
+    }
+
+    submitFrame() {
+      this.VR.submitFrame();
+    }
+
     update(dt) {
-      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.VR.hasStage;
+      this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
       if (this.Gamepad_0) {
-        this.Gamepad_0.enabled = !this.VR.hasStage;
+        this.Gamepad_0.enabled = !this.hasMotionControllers;
       }
 
+      var hadGamepad = this.hasGamepad;
       Primrose.Input.Gamepad.poll();
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
+      }
+      if(!hadGamepad && this.hasGamepad){
+        this.Mouse.inPhysicalUse = false;
       }
 
       this.updateStage(dt);
@@ -305,12 +330,12 @@ Primrose.Input.FPSInput = (function () {
       }
 
       for (var i = 0; i < this.pointers.length; ++i) {
-        this.pointers[i].update(this.head.position);
+        this.pointers[i].update();
       }
 
       if (this.VR.hasOrientation) {
-        this.mousePointer.showPointer = (this.Mouse.inPhysicalUse || (this.Gamepad_0 && this.Gamepad_0.inPhysicalUse)) && !this.Touch.inPhysicalUse && !this.VR.hasStage;
-        this.head.showPointer = !this.mousePointer.showPointer && !this.VR.hasStage;
+        this.mousePointer.showPointer = (this.hasMouse || this.hasGamepad) && !(this.hasTouch || this.hasMotionControllers);
+        this.head.showPointer = !(this.mousePointer.showPointer || this.hasMotionControllers);
       }
       else {
         // if we're not using an HMD, then update the view according to the mouse

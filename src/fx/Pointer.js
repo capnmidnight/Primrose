@@ -20,27 +20,32 @@ Primrose.Pointer = (function () {
       parameters: [{
         name: "color",
         type: "Number",
-        description: "The color to use to render the teleport pad and 3D pointer cursor.",
-        optional: true,
-        defaultValue: 0xff0000
+        description: "The color to use to render the teleport pad and 3D pointer cursor."
       }, {
         name: "emission",
         type: "Number",
-        description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas.",
-        optional: true,
-        defaultValue: 0x7f0000
+        description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas."
       }, {
         name: "isHand",
         type: "Boolean",
-        description: "Pass true to add a hand model at the origin of the pointer ray.",
+        description: "Pass true to add a hand model at the origin of the pointer ray."
+      }, {
+        name: "orientationDevice",
+        type: "Primrose.InputProcessor",
+        description: "The input object that defines the orientation for this pointer."
+      }, {
+        name: "positionDevice",
+        type: "Primrose.PoseInputProcessor",
+        description: "The input object that defines the position for this pointer.",
         optional: true,
-        defaultValue: false
+        defaultValue: null
       }]
   });
   class Pointer extends Primrose.AbstractEventEmitter {
-    constructor(trigger, color = 0xff0000, emission = 0x7f0000, isHand = false) {
+    constructor(color, emission, isHand, orientationDevice, positionDevice = null) {
       super();
-      this.trigger = trigger;
+      this.orientationDevice = orientationDevice;
+      this.positionDevice = positionDevice || orientationDevice;
       this._currentControl = null;
       this.showPointer = true;
       this.color = color;
@@ -133,13 +138,14 @@ Primrose.Pointer = (function () {
       }
     }
 
-    update(defaultPosition) {
-      if (this.trigger instanceof Primrose.PoseInputProcessor) {
-        this.position.copy(this.trigger.position);
-        this.quaternion.copy(this.trigger.quaternion);
+    update() {
+      if (this.orientationDevice instanceof Primrose.PoseInputProcessor) {
+        this.position.copy(this.orientationDevice.position);
+        this.quaternion.copy(this.orientationDevice.quaternion);
       }
       else {
-        var head = this.trigger,
+
+        var head = this.orientationDevice,
           pitch = 0,
           heading = 0;
         while (head) {
@@ -150,7 +156,7 @@ Primrose.Pointer = (function () {
 
         EULER_TEMP.set(pitch, heading, 0, "YXZ");
         this.quaternion.setFromEuler(EULER_TEMP);
-        this.position.copy(defaultPosition);
+        this.position.copy(this.positionDevice.position);
       }
     }
 
@@ -158,7 +164,7 @@ Primrose.Pointer = (function () {
       this.disk.visible = false;
       this.mesh.visible = false;
 
-      if (this.trigger.enabled && this.showPointer) {
+      if (this.orientationDevice.enabled && this.showPointer) {
         // reset the mesh color to the base value
         textured(this.mesh, this.color, {
           emissive: this.minorColor
@@ -168,7 +174,7 @@ Primrose.Pointer = (function () {
           dButtons = 0,
           currentHit = currentHits[this.name],
           lastHit = lastHits && lastHits[this.name],
-          head = this.trigger,
+          head = this.orientationDevice,
           isGround = false,
           object,
           control,
