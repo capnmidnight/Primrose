@@ -582,7 +582,6 @@ Primrose.BrowserEnvironment = (function () {
       //
       this.goFullScreen = (index, evt) => {
         if (evt !== "Gaze") {
-          console.log("connecting", index)
           this.input.VR.connect(index);
           this.input.VR.requestPresent([{
               source: this.renderer.domElement
