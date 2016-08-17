@@ -10,7 +10,7 @@ Primrose.Pointer = (function () {
     LASER_WIDTH = 0.01,
     LASER_LENGTH = 3 * LASER_WIDTH,
     EULER_TEMP = new THREE.Euler(),
-    moveTo = new THREE.Vector3(0, 0, 0);
+    moveBy = new THREE.Vector3(0, 0, 0);
 
   pliny.class({
     parent: "Primrose",
@@ -202,26 +202,26 @@ Primrose.Pointer = (function () {
           point = currentHit.point;
           control = object && (object.button || object.surface);
 
-          moveTo.fromArray(fp)
+          moveBy.fromArray(fp)
             .sub(this.mesh.position);
 
           this.disk.visible = isGround;
           if (isGround) {
-            var distSq = moveTo.x * moveTo.x + moveTo.z * moveTo.z;
+            var distSq = moveBy.x * moveBy.x + moveBy.z * moveBy.z;
             if (distSq > MAX_MOVE_DISTANCE_SQ) {
               var dist = Math.sqrt(distSq),
                 factor = MAX_MOVE_DISTANCE / dist,
-                y = moveTo.y;
-              moveTo.y = 0;
-              moveTo.multiplyScalar(factor);
-              moveTo.y = y;
+                y = moveBy.y;
+              moveBy.y = 0;
+              moveBy.multiplyScalar(factor);
+              moveBy.y = y;
               textured(this.mesh, 0xffff00, {
                 emissive: 0x7f7f00
               });
             }
             this.disk.position
               .copy(this.mesh.position)
-              .add(moveTo);
+              .add(moveBy);
           }
           else {
             textured(this.mesh, 0x00ff00, {
