@@ -18,6 +18,10 @@ Primrose.Pointer = (function () {
       baseClass: "Primrose.AbstractEventEmitter",
       description: "A device that points into the scene somewhere, casting a ray at objects for picking operations.",
       parameters: [{
+        name: "name ",
+        type: "String",
+        description: "A friendly name for this pointer object, to make debugging easier."
+      }, {
         name: "color",
         type: "Number",
         description: "The color to use to render the teleport pad and 3D pointer cursor."
@@ -42,8 +46,9 @@ Primrose.Pointer = (function () {
       }]
   });
   class Pointer extends Primrose.AbstractEventEmitter {
-    constructor(color, emission, isHand, orientationDevice, positionDevice = null) {
+    constructor(name, color, emission, isHand, orientationDevice, positionDevice = null) {
       super();
+      this.name = name;
       this.orientationDevice = orientationDevice;
       this.positionDevice = positionDevice || orientationDevice;
       this._currentControl = null;

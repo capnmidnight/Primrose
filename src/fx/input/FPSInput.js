@@ -228,7 +228,8 @@ Primrose.Input.FPSInput = (function () {
             mgr.parent = this.VR;
             this.motionDevices.push(mgr);
 
-            var ptr = new Primrose.Pointer(0x0000ff, 0x00007f, true, mgr);
+            var shift = (this.motionDevices.length - 2) * 8,
+              ptr = new Primrose.Pointer(padID + "Pointer", 0x0000ff << shift, 0x00007f << shift, true, mgr);
             this.pointers.push(ptr);
             ptr.addToBrowserEnvironment(null, this.options.scene);
             ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
@@ -243,11 +244,11 @@ Primrose.Input.FPSInput = (function () {
 
       this.stage = new THREE.Object3D();
 
-      this.mousePointer = new Primrose.Pointer(0xff0000, 0x7f0000, false, this.Mouse, this.VR);
+      this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, false, this.Mouse, this.VR);
       this.pointers.push(this.mousePointer);
       this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-      this.head = new Primrose.Pointer(0x00ff00, 0x007f00, false, this.VR);
+      this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, false, this.VR);
       this.pointers.push(this.head);
       this.head.addToBrowserEnvironment(null, this.options.scene);
 
