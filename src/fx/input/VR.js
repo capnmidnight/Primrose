@@ -76,15 +76,17 @@ Primrose.Input.VR = (function () {
           layers = layers[0];
         }
 
-        var promise = this.currentDevice.requestPresent(layers)
-          .catch((exp) => console.warn("what happened?", exp))
-          .then((elem) => elem || opts[0].source)
-          .then((elem) => PointerLock.request(elem)
-            .catch((exp) => console.warn(exp)));
+        var elem = opts[0].source,
+          promise = FullScreen.request(elem)
+          .catch((exp) => console.warn("FullScreen", exp))
+          .then(() => PointerLock.request(elem))
+          .catch((exp) => console.warn("PointerLock", exp))
+          .then(() => this.currentDevice.requestPresent(layers))
+          .catch((exp) => console.warn("requstPresent", exp));
 
         if (this.isNativeMobileWebVR) {
           promise = promise.then(Orientation.lock)
-            .catch((exp) => console.warn(exp));
+            .catch((exp) => console.warn("OrientationLock", exp));
         }
 
         return promise;
