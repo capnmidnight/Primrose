@@ -31,7 +31,7 @@ Primrose.Network.Manager = (function () {
       this.extraIceServers = [];
       if (options.webRTC) {
         this.waitForLastUser = options.webRTC.then((obj) => {
-          if(obj) {
+          if (obj) {
             this.extraIceServers.push.apply(this.extraIceServers, obj.iceServers);
           }
         });

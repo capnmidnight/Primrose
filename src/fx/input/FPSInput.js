@@ -7,8 +7,8 @@ Primrose.Input.FPSInput = (function () {
 
   pliny.class({
     parent: "Primrose.Input",
-    name: "FPSInput",
-    description: "| [under construction]"
+      name: "FPSInput",
+      description: "| [under construction]"
   });
   class FPSInput {
     constructor(DOMElement, options) {
@@ -317,7 +317,7 @@ Primrose.Input.FPSInput = (function () {
       for (var i = 0; i < this.managers.length; ++i) {
         this.managers[i].update(dt);
       }
-      if(!hadGamepad && this.hasGamepad){
+      if (!hadGamepad && this.hasGamepad) {
         this.Mouse.inPhysicalUse = false;
       }
 

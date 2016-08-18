@@ -128,7 +128,7 @@ Primrose.Input.VR = (function () {
         z = 0,
         stage = null;
 
-      if(this.currentDevice) {
+      if (this.currentDevice) {
         this.currentPose = this.currentDevice.getPose();
         stage = this.currentDevice.stageParameters;
       }
@@ -158,7 +158,7 @@ Primrose.Input.VR = (function () {
     }
 
     submitFrame() {
-      if(this.currentDevice) {
+      if (this.currentDevice) {
         this.currentDevice.submitFrame(this.currentPose);
       }
     }

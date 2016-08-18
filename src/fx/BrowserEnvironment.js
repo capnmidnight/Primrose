@@ -787,7 +787,10 @@ Primrose.BrowserEnvironment = (function () {
           set: (v) => {
             if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
               this.options.quality = v;
-              WebVRConfig.BUFFER_SCALE = resolutionScale = Primrose.RESOLUTION_SCALES[v];
+              resolutionScale = Primrose.RESOLUTION_SCALES[v];
+              if("WebVRConfig" in window){
+                WebVRConfig.BUFFER_SCALE = resolutionScale;
+              }
             }
             allReady.then(modifyScreen);
           }
