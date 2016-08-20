@@ -65,7 +65,7 @@ window.Primrose = function () {
 
   Primrose.SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
 
-  Primrose.SKIN_VALUES = Primrose.SKINS.map(function (s) {
+  SKINS_VALUES = Primrose.SKINS.map(function (s) {
     return parseInt(s.substring(1), 16);
   });
 
@@ -96,15 +96,15 @@ window.Primrose = function () {
 
   window.isIE = /*@cc_on!@*/false || !!document.documentMode;
 
-  Primrose.RESOLUTION_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
+  Primrose.PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
 
-  Primrose.Quality = {
+  Quality = {
     NONE: 0,
     VERYLOW: 1,
     LOW: 2,
     MEDIUM: 3,
     HIGH: 4,
-    MAXIMUM: Primrose.RESOLUTION_SCALES.length - 1
+    MAXIMUM: Primrose.PIXEL_SCALES.length - 1
   };
 
   return Primrose;
@@ -988,8 +988,8 @@ Primrose.BrowserEnvironment = function () {
           _this.player.position.set(0, _this.avatarHeight, 0);
           _this.player.velocity.set(0, 0, 0);
           _this.input.zero();
-          if (_this.quality === Primrose.Quality.NONE) {
-            _this.quality = Primrose.Quality.HIGH;
+          if (_this.quality === Quality.NONE) {
+            _this.quality = Quality.HIGH;
           }
         }
       };
@@ -1480,7 +1480,7 @@ Primrose.BrowserEnvironment = function () {
           qHeading = new THREE.Quaternion(),
           vEye = new THREE.Vector3(),
           vBody = new THREE.Vector3(),
-          skin = Primrose.Random.item(Primrose.SKIN_VALUES),
+          skin = Primrose.Random.item(SKINS_VALUES),
           modelFiles = {
         scene: this.options.sceneModel,
         avatar: this.options.avatarModel,
@@ -2121,7 +2121,7 @@ Primrose.BrowserEnvironment = function () {
       var checkQuality = function checkQuality() {
         if (_this.options.autoScaleQuality &&
         // don't check quality if we've already hit the bottom of the barrel.
-        _this.quality !== Primrose.Quality.NONE) {
+        _this.quality !== Quality.NONE) {
           if (frameTime < lastQualityChange + LEAD_TIME) {
             // wait a few seconds before testing quality
             frameTime = performance.now();
@@ -2147,7 +2147,7 @@ Primrose.BrowserEnvironment = function () {
               //good speed
               fps >= 60 &&
               // still room to grow
-              _this.quality < Primrose.Quality.MAXIMUM &&
+              _this.quality < Quality.MAXIMUM &&
               // and the last change wasn't a downgrade
               dq2 !== -1) {
                 dq1 = 1;
@@ -2214,9 +2214,9 @@ Primrose.BrowserEnvironment = function () {
             return quality;
           },
           set: function set(v) {
-            if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
+            if (0 <= v && v < Primrose.PIXEL_SCALES.length) {
               quality = v;
-              resolutionScale = Primrose.RESOLUTION_SCALES[v];
+              resolutionScale = Primrose.PIXEL_SCALES[v];
             }
             allReady.then(modifyScreen);
           }
@@ -2295,7 +2295,7 @@ Primrose.BrowserEnvironment = function () {
     antialias: true,
     autoScaleQuality: true,
     autoRescaleQuality: false,
-    quality: Primrose.Quality.MAXIMUM,
+    quality: Quality.MAXIMUM,
     useNose: false,
     useLeap: false,
     useFog: false,
@@ -7254,7 +7254,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-Primrose.Controls.Label = function () {
+Primrose.Controls.AbstractLabel = function () {
   "use strict";
 
   var COUNTER = 0;
@@ -7270,7 +7270,7 @@ Primrose.Controls.Label = function () {
       ///////////////////////////////////////////////////////////////////////
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, patch(options, {
-        id: "Primrose.Controls.Label[" + COUNTER++ + "]"
+        id: "Primrose.Controls.AbstractLabel[" + COUNTER++ + "]"
       })));
       ////////////////////////////////////////////////////////////////////////
       // normalize input parameters
@@ -7492,7 +7492,7 @@ Primrose.Controls.Button2D = function () {
     }]);
 
     return Button2D;
-  }(Primrose.Controls.Label);
+  }(Primrose.Controls.AbstractLabel);
 
   return Button2D;
 }();
@@ -13781,7 +13781,7 @@ Primrose.X.LoginForm = function () {
       _this.listeners.login = [];
       _this.listeners.signup = [];
 
-      _this.labelUserName = new Primrose.Controls.Label({
+      _this.labelUserName = new Primrose.Controls.AbstractLabel({
         id: _this.id + "-labelUserName",
         bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
         fontSize: 32,
@@ -13795,7 +13795,7 @@ Primrose.X.LoginForm = function () {
         fontSize: 32
       });
 
-      _this.labelPassword = new Primrose.Controls.Label({
+      _this.labelPassword = new Primrose.Controls.AbstractLabel({
         id: _this.id + "-labelPassword",
         bounds: new Primrose.Text.Rectangle(0, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
         fontSize: 32,
@@ -13875,7 +13875,7 @@ Primrose.X.SignupForm = function () {
       _this.listeners.login = [];
       _this.listeners.signup = [];
 
-      _this.labelEmail = new Primrose.Controls.Label({
+      _this.labelEmail = new Primrose.Controls.AbstractLabel({
         id: _this.id + "-labelEmail",
         bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
@@ -13889,7 +13889,7 @@ Primrose.X.SignupForm = function () {
         fontSize: 32
       });
 
-      _this.labelUserName = new Primrose.Controls.Label({
+      _this.labelUserName = new Primrose.Controls.AbstractLabel({
         id: _this.id + "-labelUserName",
         bounds: new Primrose.Text.Rectangle(0, HEIGHT / 4, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,
@@ -13903,7 +13903,7 @@ Primrose.X.SignupForm = function () {
         fontSize: 32
       });
 
-      _this.labelPassword = new Primrose.Controls.Label({
+      _this.labelPassword = new Primrose.Controls.AbstractLabel({
         id: _this.id + "-labelPassword",
         bounds: new Primrose.Text.Rectangle(0, HEIGHT / 2, WIDTH / 2, HEIGHT / 4),
         fontSize: 32,

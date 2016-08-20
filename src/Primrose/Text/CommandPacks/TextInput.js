@@ -10,4 +10,4 @@ pliny.record({
   name: "TextInput",
   description: "| [under construction]"
 });
-const TextInput = Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
+const TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");

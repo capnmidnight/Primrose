@@ -34,7 +34,7 @@ function eye(side, body) {
 }
 
 function Jabber(w, h, s) {
-  var skin = R.item(Primrose.SKIN_VALUES),
+  var skin = R.item(SKINS_VALUES),
     body = textured(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),

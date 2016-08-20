@@ -2,7 +2,7 @@
 
 pliny.class({
   parent: "Primrose",
-    name: "Button",
+    name: "Button3D",
     baseClass: "Primrose.BaseControl",
     parameters: [{
       name: "model",
@@ -19,11 +19,11 @@ pliny.class({
     }],
     description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
 });
-class Button extends Primrose.BaseControl {
+class Button3D extends Primrose.BaseControl {
   constructor(model, name, options) {
     super();
 
-    options = patch(options, Button);
+    options = patch(options, Button3D);
     options.minDeflection = Math.cos(options.minDeflection);
     options.colorUnpressed = new THREE.Color(options.colorUnpressed);
     options.colorPressed = new THREE.Color(options.colorPressed);
@@ -109,7 +109,7 @@ class Button extends Primrose.BaseControl {
 pliny.record({
   parent: "Primrose.Controls.Button3D",
   name: "DEFAULTS",
-  description: "Default option values that override undefined options passed to the Button class."
+  description: "Default option values that override undefined options passed to the Button3D class."
 });
 
 
@@ -149,7 +149,7 @@ pliny.value({
   type: "Boolean",
   description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
 });
-Button.DEFAULTS = {
+Button3D.DEFAULTS = {
   maxThrow: 0.1,
   minDeflection: 10,
   colorUnpressed: 0x7f0000,

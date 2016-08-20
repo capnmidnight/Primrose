@@ -1,7 +1,6 @@
 "use strict";
 
 pliny.value({
-  parent: "Primrose",
   name: "SKINS",
   type: "Array of String",
   description: "A selection of color values that closely match skin colors of people."

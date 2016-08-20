@@ -21,8 +21,8 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     this.zero = () => {
       if (!this.input.lockMovement) {
         this.input.zero();
-        if (this.quality === Primrose.Quality.NONE) {
-          this.quality = Primrose.Quality.HIGH;
+        if (this.quality === Quality.NONE) {
+          this.quality = Quality.HIGH;
         }
       }
     };
@@ -274,11 +274,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
           Primrose.Entity.eyeBlankAll(i);
           this.camera.projectionMatrix.copy(st.projection);
           this.camera.translateOnAxis(st.translation, 1);
-          if (this.options.useNose) {
-            this.nose.visible = true;
-            this.nose.position.set(side * -0.12, -0.12, -0.15);
-            this.nose.rotation.z = side * 0.7;
-          }
           this.renderer.setViewport(
             v.left * resolutionScale,
             v.top * resolutionScale,
@@ -291,7 +286,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       }
 
       if (!this.input.VR.isPresenting || (this.input.VR.canMirror && !this.options.disableMirroring)) {
-        this.nose.visible = false;
         this.camera.fov = this.options.defaultFOV;
         this.camera.aspect = this.renderer.domElement.width / this.renderer.domElement.height;
         this.camera.updateProjectionMatrix();
@@ -334,7 +328,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       qPitch = new THREE.Quaternion(),
       vEye = new THREE.Vector3(),
       vBody = new THREE.Vector3(),
-      skin = Primrose.Random.item(Primrose.SKIN_VALUES),
       modelFiles = {
         scene: this.options.sceneModel,
         avatar: this.options.avatarModel,
@@ -487,10 +480,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
 
     this.projector = new Primrose.Workerize(Primrose.Projector);
 
-    this.nose = textured(sphere(0.05, 10, 10), skin);
-    this.nose.name = "Nose";
-    this.nose.scale.set(0.5, 1, 1);
-
     this.options.scene = this.scene = this.options.scene || new THREE.Scene();
     if (this.options.useFog) {
       this.scene.fog = new THREE.FogExp2(this.options.backgroundColor, 2 / this.options.drawDistance);
@@ -527,8 +516,6 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       this.scene.add(this.ground);
       this.registerPickableObject(this.ground);
     }
-
-    this.camera.add(this.nose);
 
     if (this.passthrough) {
       this.camera.add(this.passthrough.mesh);
@@ -706,7 +693,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     var checkQuality = () => {
       if (this.options.autoScaleQuality &&
         // don't check quality if we've already hit the bottom of the barrel.
-        this.quality !== Primrose.Quality.NONE) {
+        this.quality !== Quality.NONE) {
         if (frameTime < lastQualityChange + LEAD_TIME) {
           // wait a few seconds before testing quality
           frameTime = performance.now();
@@ -734,7 +721,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
               //good speed
               fps >= 60 &&
               // still room to grow
-              this.quality < Primrose.Quality.MAXIMUM &&
+              this.quality < Quality.MAXIMUM &&
               // and the last change wasn't a downgrade
               dq2 !== -1) {
               dq1 = 1;
@@ -784,9 +771,9 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       quality: {
         get: () => this.options.quality,
         set: (v) => {
-          if (0 <= v && v < Primrose.RESOLUTION_SCALES.length) {
+          if (0 <= v && v < PIXEL_SCALES.length) {
             this.options.quality = v;
-            resolutionScale = Primrose.RESOLUTION_SCALES[v];
+            resolutionScale = PIXEL_SCALES[v];
             if ("WebVRConfig" in window) {
               WebVRConfig.BUFFER_SCALE = resolutionScale;
             }
@@ -842,8 +829,7 @@ BrowserEnvironment.DEFAULTS = {
   antialias: true,
   autoScaleQuality: true,
   autoRescaleQuality: false,
-  quality: Primrose.Quality.MAXIMUM,
-  useNose: false,
+  quality: Quality.MAXIMUM,
   useLeap: false,
   useFog: false,
   avatarHeight: 1.65,

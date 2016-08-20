@@ -10,13 +10,15 @@ function pickRandomOption(options, key, min, max) {
   return options[key];
 }
 
+var Speech = null;
+
 try {
   pliny.class({
     parent: "Primrose.Output",
       name: "Speech",
       description: "| [under construction]"
   });
-  function Speech(options) {
+  Speech = function(options) {
     options = options || {};
     var voices = speechSynthesis.getVoices()
       .filter(function (v) {
@@ -47,7 +49,7 @@ catch (exp) {
       name: "Speech",
       description: "| [under construction]"
   });
-  function Speech() {
+  Speech = function() {
     this.speak = function () {};
   };
 }

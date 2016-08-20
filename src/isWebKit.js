@@ -7,4 +7,4 @@ pliny.value({
 WebKit browsers have certain issues in common that can be treated together, like\n\
 a common basis for orientation events."
 });
-const isWebKit = isiOS || isOpera || isChrome;
+const isWebKit = !(/iP(hone|od|ad)/.test(navigator.userAgent || "")) || isOpera || isChrome;

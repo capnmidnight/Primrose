@@ -1,7 +1,6 @@
 "use strict";
 
 pliny.enumeration({
-  parent: "Primrose",
   name: "Quality",
   description: "Graphics quality settings."
 });
@@ -11,5 +10,5 @@ const Quality = {
   LOW: 2,
   MEDIUM: 3,
   HIGH: 4,
-  MAXIMUM: Primrose.RESOLUTION_SCALES.length - 1
+  MAXIMUM: PIXEL_SCALES.length - 1
 };

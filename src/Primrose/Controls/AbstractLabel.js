@@ -17,13 +17,13 @@ pliny.class({
       description: "Named parameters for creating the Button."
     }]
 });
-class Label extends Primrose.Surface {
+class AbstractLabel extends Primrose.Surface {
   constructor(options) {
     ////////////////////////////////////////////////////////////////////////
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
     super(patch(options, {
-      id: "Primrose.Controls.Label[" + (COUNTER++) + "]"
+      id: "Primrose.Controls.AbstractLabel[" + (COUNTER++) + "]"
     }));
 
     ////////////////////////////////////////////////////////////////////////

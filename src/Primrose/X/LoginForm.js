@@ -27,7 +27,7 @@ class LoginForm extends Primrose.Controls.Form {
     this.listeners.login = [];
     this.listeners.signup = [];
 
-    this.labelUserName = new Primrose.Controls.Label({
+    this.labelUserName = new Primrose.Controls.AbstractLabel({
       id: this.id + "-labelUserName",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,
@@ -41,7 +41,7 @@ class LoginForm extends Primrose.Controls.Form {
       fontSize: 32
     });
 
-    this.labelPassword = new Primrose.Controls.Label({
+    this.labelPassword = new Primrose.Controls.AbstractLabel({
       id: this.id + "-labelPassword",
       bounds: new Primrose.Text.Rectangle(0, HEIGHT / 3, WIDTH / 2, HEIGHT / 3),
       fontSize: 32,

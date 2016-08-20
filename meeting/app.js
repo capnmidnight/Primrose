@@ -17,7 +17,7 @@ socket = null,
 env = new Primrose.BrowserEnvironment({
   autoScaleQuality: true,
   autoRescaleQuality: false,
-  quality: Primrose.Quality.HIGH,
+  quality: Quality.HIGH,
   groundTexture: 0x000000,
   backgroundColor: 0x000000,
   disableDefaultLighting: true,
