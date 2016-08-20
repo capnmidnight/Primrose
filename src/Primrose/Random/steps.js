@@ -42,6 +42,7 @@ pliny.function({
 > 36"
   }]
 });
-function steps(min, max, steps){
+
+function steps(min, max, steps) {
   return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
 }

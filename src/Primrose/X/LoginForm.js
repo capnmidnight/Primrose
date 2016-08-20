@@ -1,4 +1,3 @@
-
 "use strict";
 
 var COUNTER = 0;

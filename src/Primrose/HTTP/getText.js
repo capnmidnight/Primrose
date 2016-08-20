@@ -31,6 +31,7 @@ pliny.function({
 > \"Object {field1: 1, field2: \\\"Field2\\\"}\""
   }]
 });
-function getText(url, options){
+
+function getText(url, options) {
   return Primrose.HTTP.get("text", url, options);
 }

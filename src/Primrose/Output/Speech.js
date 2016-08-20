@@ -18,7 +18,7 @@ try {
       name: "Speech",
       description: "| [under construction]"
   });
-  Speech = function(options) {
+  Speech = function (options) {
     options = options || {};
     var voices = speechSynthesis.getVoices()
       .filter(function (v) {
@@ -49,7 +49,7 @@ catch (exp) {
       name: "Speech",
       description: "| [under construction]"
   });
-  Speech = function() {
+  Speech = function () {
     this.speak = function () {};
   };
 }

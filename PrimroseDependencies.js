@@ -108,12 +108,6 @@ var logger = function () {
  * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
  * https://github.com/chjj/marked
  */
-(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\s*\1 *(?:\n+|$)/,paragraph:/^/,heading:/^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]||""});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:!this.options.sanitizer&&(cap[1]==="pre"||cap[1]==="script"||cap[1]==="style"),text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:[^_]|__)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?this.options.sanitizer?this.options.sanitizer(cap[0]):escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.text(escape(this.smartypants(cap[0])));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/---/g,"—").replace(/--/g,"–").replace(/(^|[-\u2014/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){if(!this.options.mangle)return text;var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0||prot.indexOf("vbscript:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};Renderer.prototype.text=function(text){return text};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&([#\w]+);/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,sanitizer:null,mangle:true,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
-/**
- * marked - a markdown parser
- * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
- * https://github.com/chjj/marked
- */
 
 ;(function() {
 
@@ -1205,7 +1199,8 @@ function escape(html, encode) {
 }
 
 function unescape(html) {
-  return html.replace(/&([#\w]+);/g, function(_, n) {
+	// explicitly match decimal, hex, and named HTML entities 
+  return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function(_, n) {
     n = n.toLowerCase();
     if (n === 'colon') return ':';
     if (n.charAt(0) === '#') {
@@ -1395,6 +1390,17 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
   return this || (typeof window !== 'undefined' ? window : global);
 }());
 
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.pliny = factory();
+  }
+}(this, function() {
+"use strict";
+
 /*
  * Copyright (C) 2016 Sean T. McBeth
  *
@@ -1412,6 +1418,12 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+////////////////////////////////////////////////////////////////////////////
+// Pliny's author is not smart enough to figure out how to make it        //
+// possible to use it to document itself, so here's a bunch of comments.  //
+////////////////////////////////////////////////////////////////////////////
+
+
 // Pliny is a documentation construction system. You create live documentation
 // objects on code assets with pliny, then you read back those documentation objects
 // with pliny.
@@ -1422,828 +1434,814 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
 // a scholar and hero, who died trying to save people from the eruption of Mount
 // Vesuvius during the destruction of Pompeii. Also, his nephew Gaius Plinius Caecilius Secundus
 // (https://en.wikipedia.org/wiki/Pliny_the_Younger), through whom we know his uncle.
-"use strict";
 
-(function () {
+// Walks through dot-accessors to retrieve an object out of a root object.
+//
+// @param {Object} bag - the root object.
+// @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
+// @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
+function openBag(bag, name) {
+  // Break up the object path
+  return name.split(".")
+  // Recurse through objects until we either run out of objects or find the
+  // one we're looking for.
+  .reduce(function (obj, p) {
+    return obj[p];
+  }, bag);
+}
 
-  // Walks through dot-accessors to retrieve an object out of a root object.
-  //
-  // @param {Object} bag - the root object.
-  // @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
-  // @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
-  function openBag(bag, name) {
-    // Break up the object path
-    return name.split(".")
-    // Recurse through objects until we either run out of objects or find the
-    // one we're looking for.
-    .reduce(function (obj, p) {
-      return obj[p];
-    }, bag);
+var pliny = function (require) {
+  "use strict";
+
+  var markdown = require("marked");
+
+  // The default storage location.
+  var database = {
+    fieldType: "database",
+    fullName: "[Global]",
+    id: "Global",
+    description: "These are the elements in the global namespace."
+  };
+
+  function hash(buf) {
+    var s1 = 1,
+        s2 = 0,
+        buffer = buf.split("").map(function (c) {
+      return c.charCodeAt(0);
+    });
+
+    for (var n = 0; n < buffer.length; ++n) {
+      s1 = (s1 + buffer[n]) % 32771;
+      s2 = (s2 + s1) % 32771;
+    }
+    return s2 << 8 | s1;
   }
 
-  (function (module, require) {
+  // Figures out if the maybeName parameter is a bag or a string path to a bag,
+  // then either gives you back the bag, or finds the bag that the path refers to
+  // and gives you that.
+  //
+  // @param {Object} bag - the root object.
+  // @param {String} maybeName - a period-delimited list of object accessors, naming the object we want to access.
+  // @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
+  function resolveBag(bag, maybeName) {
+    if (typeof maybeName === "string" || maybeName instanceof String) {
+      return openBag(bag, maybeName);
+    } else {
+      return maybeName;
+    }
+  }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Pliny's author is not smart enough to figure out how to make it        //
-    // possible to use it to document itself, so here's a bunch of comments.  //
-    ////////////////////////////////////////////////////////////////////////////
+  /////
+  // Fills in intermediate levels of an object tree to make the full object tree
+  // accessible, in the documentation database.
+  //
+  // @param {String} name - a period-delimited list of object accessors, naming the object we want to fill in.
+  // @param {Object} rootObject - the object on which to fill in values.
+  // @returns {Object} - the leaf-level filled-in object.
+  ///
+  function fillBag(name) {
+    // Start at the top level.
+    var bag = database;
+    if (typeof name !== "undefined" && name.length > 0) {
+      // Break up the object path.
+      var parts = name.split("."),
 
-    var markdown = require("marked");
 
-    // The default storage location.
-    var database = {
-      fieldType: "database",
-      fullName: "[Global]",
-      id: "Global",
-      description: "These are the elements in the global namespace."
-    };
+      // We'll be rebuilding the path as we go, so we can name intermediate objects.
+      path = "",
 
-    function hash(buf) {
-      var s1 = 1,
-          s2 = 0,
-          buffer = buf.split("").map(function (c) {
-        return c.charCodeAt(0);
+
+      // The first time we extend the path, it doesn't get a period seperator.
+      sep = "";
+      // Walk through the object tree.
+      for (var i = 0; i < parts.length; ++i) {
+        // Fill in any missing objects.
+        if (typeof bag[parts[i]] === "undefined") {
+          bag[parts[i]] = {};
+        }
+
+        path += sep + parts[i];
+        sep = ".";
+
+        // Drill down into the tree.
+        bag = bag[parts[i]];
+
+        // If we have a name, and the object hasn't already been named, then we
+        // give it a name.
+        if (path.length > 0 && !bag.name) {
+          bag.name = path;
+        }
+      }
+    }
+    return bag;
+  }
+
+  /////
+  // Reads the documentation metadata and builds up the documentation database.
+  //
+  // @param {String} fieldType - the name of the type of object for which we're reading metadata: function, class, namespace, etc.
+  // @param {String} info - the metadata object the user provided us.
+  ///
+  function analyzeObject(fieldType, info) {
+    // If the user didn't supply a type for the metadata object, we infer it
+    // from context.
+    if (typeof info.fieldType === 'undefined') {
+      info.fieldType = fieldType;
+    }
+
+    // Find out where we're going to store the object in the metadata database and where in the parent object we're going to store the documentation object.
+    var parentBag = fillBag(info.parent || ""),
+        pluralName = fieldType + "s";
+    pluralName = pluralName.replace(/ys$/, "ies").replace(/ss$/, "ses");
+    if (!parentBag[pluralName]) {
+      parentBag[pluralName] = [];
+    }
+    var arr = parentBag[pluralName];
+
+    // Make sure we haven't already stored an object by this name.
+    var found = false;
+    for (var i = 0; i < arr.length; ++i) {
+      if (arr[i].name === info.name) {
+        found = true;
+      }
+    }
+
+    if (!found) {
+      var subArrays = {};
+
+      ["examples", "issues", "comments"].forEach(function (k) {
+        if (typeof info[k] !== "undefined") {
+          subArrays[k] = info[k];
+          delete info[k];
+        }
       });
 
-      for (var n = 0; n < buffer.length; ++n) {
-        s1 = (s1 + buffer[n]) % 32771;
-        s2 = (s2 + s1) % 32771;
+      // After we copy the metadata, we get back the documentation database object
+      // that will store the fuller data we get from other objects.
+      info = copyObjectMetadata(info);
+
+      arr.push(info);
+
+      // Handle other parent-child relationships.
+      if (info.fieldType === "class" && info.baseClass) {
+        if (info.parent === undefined) {
+          info.parent = info.baseClass;
+        }
+        pliny.subClass(info);
       }
-      return s2 << 8 | s1;
-    }
 
-    // Figures out if the maybeName parameter is a bag or a string path to a bag,
-    // then either gives you back the bag, or finds the bag that the path refers to
-    // and gives you that.
-    //
-    // @param {Object} bag - the root object.
-    // @param {String} maybeName - a period-delimited list of object accessors, naming the object we want to access.
-    // @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
-    function resolveBag(bag, maybeName) {
-      if (typeof maybeName === "string" || maybeName instanceof String) {
-        return openBag(bag, maybeName);
-      } else {
-        return maybeName;
-      }
-    }
-
-    /////
-    // Fills in intermediate levels of an object tree to make the full object tree
-    // accessible, in the documentation database.
-    //
-    // @param {String} name - a period-delimited list of object accessors, naming the object we want to fill in.
-    // @param {Object} rootObject - the object on which to fill in values.
-    // @returns {Object} - the leaf-level filled-in object.
-    ///
-    function fillBag(name) {
-      // Start at the top level.
-      var bag = database;
-      if (typeof name !== "undefined" && name.length > 0) {
-        // Break up the object path.
-        var parts = name.split("."),
-
-
-        // We'll be rebuilding the path as we go, so we can name intermediate objects.
-        path = "",
-
-
-        // The first time we extend the path, it doesn't get a period seperator.
-        sep = "";
-        // Walk through the object tree.
-        for (var i = 0; i < parts.length; ++i) {
-          // Fill in any missing objects.
-          if (typeof bag[parts[i]] === "undefined") {
-            bag[parts[i]] = {};
+      for (var k in subArrays) {
+        var subArr = subArrays[k],
+            type = k.substring(0, k.length - 1);
+        for (var i = 0; i < subArr.length; ++i) {
+          if (subArr[i].parent === undefined) {
+            subArr[i].parent = info.fullName.replace(/::/g, ".");
           }
-
-          path += sep + parts[i];
-          sep = ".";
-
-          // Drill down into the tree.
-          bag = bag[parts[i]];
-
-          // If we have a name, and the object hasn't already been named, then we
-          // give it a name.
-          if (path.length > 0 && !bag.name) {
-            bag.name = path;
-          }
+          pliny[type](subArr[i]);
         }
       }
-      return bag;
     }
+  }
 
-    /////
-    // Reads the documentation metadata and builds up the documentation database.
-    //
-    // @param {String} fieldType - the name of the type of object for which we're reading metadata: function, class, namespace, etc.
-    // @param {String} info - the metadata object the user provided us.
-    ///
-    function analyzeObject(fieldType, info) {
-      // If the user didn't supply a type for the metadata object, we infer it
-      // from context.
-      if (typeof info.fieldType === 'undefined') {
-        info.fieldType = fieldType;
+  /////
+  // Copies all of the data the user entered for metadata to the documetation
+  // object in the documentation database.
+  //
+  // @param {String} name - a period-delimited list of object accessors, naming the documentation object we want to create.
+  // @param {Object} info - the metadata object from the user.
+  // @returns the documentation object that we created.
+  ///
+  function copyObjectMetadata(info) {
+    var fullName = (info.parent && info.parent + "." || "") + info.name,
+        bag = fillBag(fullName);
+
+    // Make sure we aren't setting the data for a second time.
+    if (!bag.fieldType) {
+
+      // Copy all the fields! ALL THE FIELDS!
+      // TODO: don't copy metadata directly to bag object. The bag objects are used
+      // as the search path for finding code objects, and some of the metadata field
+      // names might clash with code object field names. Maybe have a new metadata
+      // table.
+      for (var k in info) {
+        bag[k] = info[k];
       }
 
-      // Find out where we're going to store the object in the metadata database and where in the parent object we're going to store the documentation object.
-      var parentBag = fillBag(info.parent || ""),
-          pluralName = fieldType + "s";
-      pluralName = pluralName.replace(/ys$/, "ies").replace(/ss$/, "ses");
-      if (!parentBag[pluralName]) {
-        parentBag[pluralName] = [];
-      }
-      var arr = parentBag[pluralName];
-
-      // Make sure we haven't already stored an object by this name.
-      var found = false;
-      for (var i = 0; i < arr.length; ++i) {
-        if (arr[i].name === info.name) {
-          found = true;
+      // The fullName is used in titles on documentation articles.
+      if (!bag.fullName) {
+        if (bag.fieldType === "issue") {
+          Object.defineProperty(bag, "issueID", {
+            get: function get() {
+              return hash(this.parent + "." + this.name);
+            }
+          });
         }
-      }
+        Object.defineProperty(bag, "fullName", {
+          get: function get() {
+            var output = "";
+            if (this.parent) {
+              output += this.parent;
 
-      if (!found) {
-        var subArrays = {};
-
-        ["examples", "issues", "comments"].forEach(function (k) {
-          if (typeof info[k] !== "undefined") {
-            subArrays[k] = info[k];
-            delete info[k];
+              // Print the seperator between the parent identifier and the name of
+              // the object.
+              if (this.fieldType === "method" || this.fieldType === "property" || this.fieldType === "event") {
+                // Methods, properties, and events aren't invokable from their class
+                // objects, so print them in a different way that doesn't suggest you
+                // can dot-access them. I'm using the typical C++ notation for member
+                // fields here.
+                output += "::";
+              } else if (this.fieldType === "example" || this.fieldType === "issue") {
+                output += ": ";
+              } else {
+                output += ".";
+              }
+            }
+            output += this.name;
+            return output;
           }
         });
+      }
 
-        // After we copy the metadata, we get back the documentation database object
-        // that will store the fuller data we get from other objects.
-        info = copyObjectMetadata(info);
-
-        arr.push(info);
-
-        // Handle other parent-child relationships.
-        if (info.fieldType === "class" && info.baseClass) {
-          if (info.parent === undefined) {
-            info.parent = info.baseClass;
+      // The ID is used to make DOM elements.
+      if (!bag.id) {
+        Object.defineProperty(bag, "id", {
+          get: function get() {
+            return this.fullName.replace(/(\.|:)/g, "_").replace(/ /g, "");
           }
-          pliny.subClass(info);
-        }
+        });
+      }
 
-        for (var k in subArrays) {
-          var subArr = subArrays[k],
-              type = k.substring(0, k.length - 1);
-          for (var i = 0; i < subArr.length; ++i) {
-            if (subArr[i].parent === undefined) {
-              subArr[i].parent = info.fullName.replace(/::/g, ".");
-            }
-            pliny[type](subArr[i]);
-          }
+      // We try to see if the real object exists yet (whether the documentation
+      // before or after the object it is documenting). If it doesn't, then we
+      // wait a small amount of time for the rest of the script to execute and
+      // then pick up where we left off.
+      if (!setContextualHelp(fullName)) {
+        // The setTimeout is to allow the script to continue to load after this
+        // particular function has called, so that more of the script can be
+        // inspected.
+        setTimeout(setContextualHelp, 1, fullName);
+      }
+    }
+    return bag;
+  }
+
+  function setEnumerationValues(name) {
+    var enumeration = null;
+    try {
+      enumeration = require(name);
+    } catch (exp) {
+      enumeration = null;
+    }
+    if (!enumeration) {
+      setTimeout(setEnumerationValues, 1, name);
+    } else {
+      for (var key in enumeration) {
+        var val = enumeration[key];
+        if (enumeration.hasOwnProperty(key) && typeof val === "number") {
+          pliny.value({
+            parent: name,
+            name: key,
+            type: "Number",
+            description: val.toString(),
+            value: val
+          });
         }
       }
     }
+  };
 
-    /////
-    // Copies all of the data the user entered for metadata to the documetation
-    // object in the documentation database.
-    //
-    // @param {String} name - a period-delimited list of object accessors, naming the documentation object we want to create.
-    // @param {Object} info - the metadata object from the user.
-    // @returns the documentation object that we created.
-    ///
-    function copyObjectMetadata(info) {
-      var fullName = (info.parent && info.parent + "." || "") + info.name,
-          bag = fillBag(fullName);
-
-      // Make sure we aren't setting the data for a second time.
-      if (!bag.fieldType) {
-
-        // Copy all the fields! ALL THE FIELDS!
-        // TODO: don't copy metadata directly to bag object. The bag objects are used
-        // as the search path for finding code objects, and some of the metadata field
-        // names might clash with code object field names. Maybe have a new metadata
-        // table.
-        for (var k in info) {
-          bag[k] = info[k];
-        }
-
-        // The fullName is used in titles on documentation articles.
-        if (!bag.fullName) {
-          if (bag.fieldType === "issue") {
-            Object.defineProperty(bag, "issueID", {
-              get: function get() {
-                return hash(this.parent + "." + this.name);
-              }
-            });
+  var scriptPattern = /\bpliny\s*\.\s*(\w+)/gm;
+  /////
+  // Finds the actual object in the scope hierarchy, and looks for contextual scripts that might be defined in this object
+  //
+  // @param {String} name - a period-delimited list of object accessors, naming the real object we want to access.
+  // @returns {Object} - the actual object the name refers to, or undefined if such an object exists.
+  ///
+  function setContextualHelp(name) {
+    // Find the real object
+    var obj = openBag(database, name);
+    if (obj) {
+      if (obj.fieldType === "enumeration") {
+        setEnumerationValues(obj.parent + "." + obj.name);
+      }
+      // Look for contextual scripts
+      if (typeof obj === "function") {
+        var script = obj.toString(),
+            match = null;
+        while (!!(match = scriptPattern.exec(script))) {
+          var fieldType = match[1],
+              start = match.index + match[0].length,
+              fieldInfo = getFieldInfo(script.substring(start));
+          // Shove in the context.
+          if (fieldInfo.parent === undefined) {
+            fieldInfo.parent = name;
           }
-          Object.defineProperty(bag, "fullName", {
-            get: function get() {
-              var output = "";
-              if (this.parent) {
-                output += this.parent;
 
-                // Print the seperator between the parent identifier and the name of
-                // the object.
-                if (this.fieldType === "method" || this.fieldType === "property" || this.fieldType === "event") {
-                  // Methods, properties, and events aren't invokable from their class
-                  // objects, so print them in a different way that doesn't suggest you
-                  // can dot-access them. I'm using the typical C++ notation for member
-                  // fields here.
-                  output += "::";
-                } else if (this.fieldType === "example" || this.fieldType === "issue") {
-                  output += ": ";
-                } else {
-                  output += ".";
-                }
-              }
-              output += this.name;
-              return output;
-            }
-          });
-        }
-
-        // The ID is used to make DOM elements.
-        if (!bag.id) {
-          Object.defineProperty(bag, "id", {
-            get: function get() {
-              return this.fullName.replace(/(\.|:)/g, "_").replace(/ /g, "");
-            }
-          });
-        }
-
-        // We try to see if the real object exists yet (whether the documentation
-        // before or after the object it is documenting). If it doesn't, then we
-        // wait a small amount of time for the rest of the script to execute and
-        // then pick up where we left off.
-        if (!setContextualHelp(fullName)) {
-          // The setTimeout is to allow the script to continue to load after this
-          // particular function has called, so that more of the script can be
-          // inspected.
-          setTimeout(setContextualHelp, 1, fullName);
+          // And follow the normal documentation path.
+          pliny[fieldType].call(null, fieldInfo);
         }
       }
-      return bag;
     }
+    return obj;
+  }
 
-    function setEnumerationValues(name) {
-      var enumeration = null;
-      try {
-        enumeration = require(name);
-      } catch (exp) {
-        enumeration = null;
-      }
-      if (!enumeration) {
-        setTimeout(setEnumerationValues, 1, name);
-      } else {
-        for (var key in enumeration) {
-          var val = enumeration[key];
-          if (enumeration.hasOwnProperty(key) && typeof val === "number") {
-            pliny.value({
-              parent: name,
-              name: key,
-              type: "Number",
-              description: val.toString(),
-              value: val
-            });
-          }
+  /////
+  // When a documentation script is included inside of a function, we need to
+  // read the script and parse out the JSON objects so we can later execute
+  // the documentation function safely, i.e. not use eval().
+  //
+  // @param {String} script - the source code of the containing function.
+  // @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
+  ///
+  function getFieldInfo(script) {
+    var parameters = [],
+        start = 0,
+        scopeLevel = 0,
+        inString = false,
+        stringToken = null;
+
+    // Walk over the script...
+    for (var i = 0; i < script.length; ++i) {
+      // ... a character at a time
+      var c = script.charAt(i);
+
+      // Keep track of whether or not we're in a string. We're looking for any
+      // quotation marks that are either at the beginning of the string or have
+      // not previously been escaped by a backslash...
+      if ((inString && c === stringToken || !inString && (c === '"' || c === "'")) && (i === 0 || script.charAt(i - 1) !== '\\')) {
+        inString = !inString;
+        if (inString) {
+          stringToken = c;
         }
       }
+
+      // ... because only then...
+      if (!inString) {
+        // ... can we change scope level. We're only supporting JSON objects,
+        // so no need to go any further than this.
+        if (c === '(' || c === '{' || c === '[') {
+          ++scopeLevel;
+        } else if (c === ')' || c === '}' || c === ']') {
+          --scopeLevel;
+        }
+      }
+
+      // If we've exited the parameter list, or we're inside the parameter list
+      // and see a comma that is not inside of a string literal...
+      if (scopeLevel === 0 || scopeLevel === 1 && c === ',' && !inString) {
+        // ... save the parameter, skipping the first character because it's always
+        // either the open paren for the parameter list or one of the commas
+        // between parameters.
+        parameters.push(parseParameter(script.substring(start + 1, i).trim()));
+
+        // Advance forward the start of the next token.
+        start = i;
+
+        // If we left the parameter list, we've found all of the parameters and
+        // can quit out of the loop before we get to the end of the script.
+        if (scopeLevel === 0) {
+          break;
+        }
+      }
+    }
+    if (parameters.length !== 1) {
+      throw new Error("There should have only been one parameter to the function");
+    }
+    return parameters[0];
+  }
+
+  ////
+  // useful in cases where a functional system really just needs to check the
+  // value of a collection.
+  ///
+  function identity(v) {
+    return v;
+  }
+
+  /////
+  // When we've found an individual parameter to a documentation function in a
+  // contextual scope, we need to make sure it's valid JSON before we try to
+  // convert it to a real JavaScript object.
+  //
+  // @param {String} script - the subscript portion that refers to a single parameter.
+  // @return {Object} - the value that the string represents, parsed with JSON.parse().
+  ///
+  function parseParameter(script) {
+    // Make sure all hash key labels are surrounded in quotation marks.
+    var stringLiterals = [];
+    var litReplace = function litReplace(str) {
+      var name = "&STRING_LIT" + stringLiterals.length + ";";
+      if (str[0] === "'") {
+        str = str.replace(/\\"/g, "&_DBLQUOTE_;").replace(/\\'/g, "&_SGLQUOTE_;").replace(/"/g, "\\\"").replace(/'/g, "\"").replace(/&_DBLQUOTE_;/g, "\\\"").replace(/&_SGLQUOTE_;/g, "\\'");
+      }
+      stringLiterals.push(str);
+      return name;
     };
+    var litReturn = function litReturn(a, b) {
+      return stringLiterals[b];
+    };
+    var param = script.replace(/'(\\'|[^'])+'/g, litReplace).replace(/"(\\"|[^"])+"/g, litReplace).replace(/\b(\w+)\b\s*:/g, "\"$1\":").replace(/&STRING_LIT(\d+);/g, litReturn).replace(/&STRING_LIT(\d+);/g, litReturn).replace(/\\\r?\n/g, "");
+    return JSON.parse(param);
+  }
 
-    var scriptPattern = /\bpliny\s*\.\s*(\w+)/gm;
+  // A collection of different ways to output documentation data.
+  var formatters = {
     /////
-    // Finds the actual object in the scope hierarchy, and looks for contextual scripts that might be defined in this object
+    // Find a particular object and print out the documentation for it.
     //
-    // @param {String} name - a period-delimited list of object accessors, naming the real object we want to access.
-    // @returns {Object} - the actual object the name refers to, or undefined if such an object exists.
+    // @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
     ///
-    function setContextualHelp(name) {
-      // Find the real object
-      var obj = openBag(database, name);
+    format: function format(name) {
+      var obj = null;
+      if (typeof name === "string" || name instanceof String) {
+        obj = openBag(database, name);
+      } else {
+        obj = name;
+      }
       if (obj) {
-        if (obj.fieldType === "enumeration") {
-          setEnumerationValues(obj.parent + "." + obj.name);
-        }
-        // Look for contextual scripts
-        if (typeof obj === "function") {
-          var script = obj.toString(),
-              match = null;
-          while (!!(match = scriptPattern.exec(script))) {
-            var fieldType = match[1],
-                start = match.index + match[0].length,
-                fieldInfo = getFieldInfo(script.substring(start));
-            // Shove in the context.
-            if (fieldInfo.parent === undefined) {
-              fieldInfo.parent = name;
-            }
+        var output = this.shortDescription(true, obj);
 
-            // And follow the normal documentation path.
-            pliny[fieldType].call(null, fieldInfo);
-          }
-        }
+        // The array defines the order in which they will appear.
+        output += "\n\n" + ["parent", "description", "parameters", "returns", "errors", "namespaces", "classes", "functions", "values", "events", "properties", "methods", "enumerations", "records", "examples", "issues", "comments"].map(formatters.checkAndFormatField.bind(this, obj))
+        // filter out any lines that returned undefined because they didn't exist
+        .filter(identity)
+        // concate them all together
+        .join("\n");
+        return output;
       }
-      return obj;
+    },
+    checkAndFormatField: function checkAndFormatField(obj, prop) {
+      var obj2 = obj[prop];
+      if (obj2) {
+        return this.formatField(obj, prop, obj2);
+      }
     }
-
+  };
+  // Make HTML that can be written out to a page
+  formatters.html = {
+    format: function format(name) {
+      var obj = resolveBag(database, name);
+      return "<section id=\"" + obj.id + "\" class=\"" + obj.fieldType + "\"><article>" + formatters.format.call(formatters.html, obj) + "</article></section>";
+    },
     /////
-    // When a documentation script is included inside of a function, we need to
-    // read the script and parse out the JSON objects so we can later execute
-    // the documentation function safely, i.e. not use eval().
+    // Puts together a string that describes a top-level field out of a documentation
+    // object.
     //
-    // @param {String} script - the source code of the containing function.
-    // @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
+    // @param {Object} obj - the documentation object out of which we're retrieving the field.
+    // @param {String} p - the name of the field we're retrieving out of the documentation object.
+    // @return {String} - a description of the field.
     ///
-    function getFieldInfo(script) {
-      var parameters = [],
-          start = 0,
-          scopeLevel = 0,
-          inString = false,
-          stringToken = null;
-
-      // Walk over the script...
-      for (var i = 0; i < script.length; ++i) {
-        // ... a character at a time
-        var c = script.charAt(i);
-
-        // Keep track of whether or not we're in a string. We're looking for any
-        // quotation marks that are either at the beginning of the string or have
-        // not previously been escaped by a backslash...
-        if ((inString && c === stringToken || !inString && (c === '"' || c === "'")) && (i === 0 || script.charAt(i - 1) !== '\\')) {
-          inString = !inString;
-          if (inString) {
-            stringToken = c;
-          }
-        }
-
-        // ... because only then...
-        if (!inString) {
-          // ... can we change scope level. We're only supporting JSON objects,
-          // so no need to go any further than this.
-          if (c === '(' || c === '{' || c === '[') {
-            ++scopeLevel;
-          } else if (c === ')' || c === '}' || c === ']') {
-            --scopeLevel;
-          }
-        }
-
-        // If we've exited the parameter list, or we're inside the parameter list
-        // and see a comma that is not inside of a string literal...
-        if (scopeLevel === 0 || scopeLevel === 1 && c === ',' && !inString) {
-          // ... save the parameter, skipping the first character because it's always
-          // either the open paren for the parameter list or one of the commas
-          // between parameters.
-          parameters.push(parseParameter(script.substring(start + 1, i).trim()));
-
-          // Advance forward the start of the next token.
-          start = i;
-
-          // If we left the parameter list, we've found all of the parameters and
-          // can quit out of the loop before we get to the end of the script.
-          if (scopeLevel === 0) {
-            break;
-          }
-        }
+    formatField: function formatField(obj, propertyName, value) {
+      var output = "";
+      if (obj.fieldType === "enumeration" && propertyName === "values") {
+        output += this.formatEnumeration(obj, propertyName, value);
+      } else if (value instanceof Array) {
+        output += this.formatArray(obj, propertyName, value);
+      } else if (propertyName === "parent") {
+        output += "<p>Contained in <a href=\"index.html#" + pliny.get(value).id + "\"><code>" + value + "</code></a></p>";
+      } else if (propertyName === "description") {
+        output += markdown(value);
+      } else if (propertyName === "returns") {
+        output += "<h3>Return value</h3>" + markdown(value);
+      } else {
+        output += "<dl><dt>" + propertyName + "</dt><dd>" + value + "</dd></dl>";
       }
-      if (parameters.length !== 1) {
-        throw new Error("There should have only been one parameter to the function");
-      }
-      return parameters[0];
-    }
-
+      return output;
+    },
     ////
-    // useful in cases where a functional system really just needs to check the
-    // value of a collection.
-    ///
-    function identity(v) {
-      return v;
-    }
-
-    /////
-    // When we've found an individual parameter to a documentation function in a
-    // contextual scope, we need to make sure it's valid JSON before we try to
-    // convert it to a real JavaScript object.
+    // Specific fomratting function for Enumerations
     //
-    // @param {String} script - the subscript portion that refers to a single parameter.
-    // @return {Object} - the value that the string represents, parsed with JSON.parse().
+    // @param {Object} obj - the documentation object from which to read an array.
+    // @param {String} arrName - the name of the array to read from the documentation object.
+    // @param {Array} arr - the array from which we're reading values.
+    // @return {String} - the formatted description of the array.
+    formatEnumeration: function formatEnumeration(obj, arrName, arr) {
+      var output = "<table><thead><tr><th>Name</th><th>Value</th><tr><thead><tbody>";
+      for (var i = 0; i < arr.length; ++i) {
+        var e = arr[i];
+        output += "<tr><td>" + e.name + "</td><td>" + e.description + "</td></tr>";
+      }
+      output += "</tbody></table>";
+      return output;
+    },
+    ////
+    // Specific formatting function for Code Example.
+    //
+    // @param {Array} arr - an array of objects defining programming examples.
+    // @return {String} - a summary/details view of the programming examples.
+    examplesFormat: function examplesFormat(obj, arr) {
+      var output = "";
+      for (var i = 0; i < arr.length; ++i) {
+        var ex = arr[i];
+        output += "<div><h3><a href=\"index.html#" + ex.id + "\">" + ex.name + "</a></h3>" + markdown(ex.description) + "</div>";
+      }
+      return output;
+    },
+    ////
+    // Specific formatting function for Issues.
+    //
+    // @param {Array} arr - an array of objects defining issues.
+    // @return {String} - a summary/details view of the issues.
+    issuesFormat: function issuesFormat(obj, arr) {
+      var parts = {
+        open: "",
+        closed: ""
+      };
+      for (var i = 0; i < arr.length; ++i) {
+        var issue = arr[i],
+            str = "<div><h3><a href=\"index.html#" + issue.id + "\">" + issue.issueID + ": " + issue.name + " [" + issue.type + "]</a></h3>" + markdown(issue.description) + "</div>";
+        parts[issue.type] += str;
+      }
+      return parts.open + "<h2>Closed Issues</h2>" + parts.closed;
+    },
+    ////
+    // Specific formatting function for Comments section of Issues.
+    //
+    // @param {Array} arr - an array of objects defining comments.
+    // @return {String} - a summary/details view of the comment.
+    commentsFormat: function commentsFormat(obj, arr) {
+      var output = "";
+      for (var i = 0; i < arr.length; ++i) {
+        var comment = arr[i];
+        output += "<aside><h3>" + comment.name + "</h3>" + markdown(comment.description);
+        if (typeof comment.comments !== "undefined" && comment.comments instanceof Array) {
+          output += this.formatArray(comment, "comments", comment.comments);
+        }
+        output += "</aside>";
+      }
+      return output;
+    },
+    /////
+    // Puts together lists of parameters for function signatures, as well as
+    // lists of properties and methods for classes and the like.
+    //
+    // @param {Object} obj - the documentation object from which to read an array.
+    // @param {String} arrName - the name of the array to read from the documentation object.
+    // @param {Array} arr - the array from which we're reading values.
+    // @return {String} - the formatted description of the array.
     ///
-    function parseParameter(script) {
-      // Make sure all hash key labels are surrounded in quotation marks.
-      var stringLiterals = [];
-      var litReplace = function litReplace(str) {
-        var name = "&STRING_LIT" + stringLiterals.length + ";";
-        if (str[0] === "'") {
-          str = str.replace(/\\"/g, "&_DBLQUOTE_;").replace(/\\'/g, "&_SGLQUOTE_;").replace(/"/g, "\\\"").replace(/'/g, "\"").replace(/&_DBLQUOTE_;/g, "\\\"").replace(/&_SGLQUOTE_;/g, "\\'");
+    formatArray: function formatArray(obj, arrName, arr) {
+      var output = "<h2>";
+      if (obj.fieldType === "class") {
+        if (arrName === "parameters") {
+          output += "constructor ";
+        } else if (arrName === "functions") {
+          output += "static ";
         }
-        stringLiterals.push(str);
-        return name;
-      };
-      var litReturn = function litReturn(a, b) {
-        return stringLiterals[b];
-      };
-      var param = script.replace(/'(\\'|[^'])+'/g, litReplace).replace(/"(\\"|[^"])+"/g, litReplace).replace(/\b(\w+)\b\s*:/g, "\"$1\":").replace(/&STRING_LIT(\d+);/g, litReturn).replace(/&STRING_LIT(\d+);/g, litReturn).replace(/\\\r?\n/g, "");
-      return JSON.parse(param);
+      }
+
+      if (arrName !== "description") {
+        output += arrName;
+      }
+
+      output += "</h2>";
+
+      var formatterName = arrName + "Format";
+      if (this[formatterName]) {
+        output += this[formatterName](obj, arr);
+      } else {
+        output += "<ul class=\"" + arrName + "\">" + arr.map(this.formatArrayElement.bind(this, arrName)).join("") + "</ul>";
+      }
+      return output;
+    },
+    /////
+    // For individual elements of an array, formats the element so it fits well
+    // on the screen. Elements that are supposed to be inline, but have the ability
+    // to be drilled-down into, are truncated if they get to be more than 200
+    // characters wide.
+    //
+    // @param {String} arrName - the name of the array from which we retrieved elements.
+    // @param {String} n - one of the array elements.
+    // @return {String} - the formatted element, including a newline at the end.
+    ///
+    formatArrayElement: function formatArrayElement(arrName, n) {
+      var s = "<li>";
+      if (n.description) {
+        var desc = n.description.match(/^(([^\n](\n[^\n])?)+)\n\n/);
+        if (desc) {
+          desc = desc[1] + "...";
+        } else {
+          desc = n.description;
+        }
+
+        if (n.optional) {
+          desc = "(Optional) " + desc;
+        }
+
+        if (n.default !== undefined) {
+          desc += " Defaults to <code>" + n.default + "</code>.";
+        }
+
+        s += "<dl><dt>" + this.shortDescription(false, n) + "</dt><dd>" + markdown(desc) + "</dd></dl>";
+      } else {
+        s += this.shortDescription(false, n);
+      }
+      s += "</li>";
+      return s;
+    },
+    /////
+    // Describe an object by type, name, and parameters (if it's a function-type object).
+    // @param {Object} p - the documentation object to describe.
+    // @return {String} - the description of the documentation object.
+    ///
+    shortDescription: function shortDescription(topLevel, p) {
+      var output = "",
+          tag = topLevel ? "h1" : "span",
+          isFunction = p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event",
+          isContainer = isFunction || p.fieldType === "class" || p.fieldType === "namespace" || p.fieldType === "enumeration" || p.fieldType === "subClass" || p.fieldType === "record";
+
+      output += "<" + tag + ">";
+      if (isContainer && !topLevel) {
+        output += "<a href=\"index.html#" + p.id + "\">";
+      }
+
+      output += "<code>" + (topLevel && p.fieldType !== "example" && p.fullName || p.name);
+
+      if (p.type) {
+        output += " <span class=\"type\">" + p.type + "</span>";
+      }
+
+      // But functions and classes take parameters, so they get slightly more.
+      if (isFunction) {
+        output += "<ol class=\"signatureParameters\">";
+        if (p.parameters) {
+          output += "<li>" + p.parameters.map(function (p) {
+            return p.name;
+          }).join("</li><li>") + "</li>";
+        }
+        output += "</ol>";
+      }
+
+      if (isContainer && !topLevel) {
+        output += "</a>";
+      }
+
+      return output + "</code></" + tag + ">";
     }
+  };
 
-    // A collection of different ways to output documentation data.
-    var formatters = {
-      /////
-      // Find a particular object and print out the documentation for it.
-      //
-      // @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
-      ///
-      format: function format(name) {
-        var obj = null;
-        if (typeof name === "string" || name instanceof String) {
-          obj = openBag(database, name);
-        } else {
-          obj = name;
-        }
-        if (obj) {
-          var output = this.shortDescription(true, obj);
-
-          // The array defines the order in which they will appear.
-          output += "\n\n" + ["parent", "description", "parameters", "returns", "errors", "namespaces", "classes", "functions", "values", "events", "properties", "methods", "enumerations", "records", "examples", "issues", "comments"].map(formatters.checkAndFormatField.bind(this, obj))
-          // filter out any lines that returned undefined because they didn't exist
-          .filter(identity)
-          // concate them all together
-          .join("\n");
-          return output;
-        }
-      },
-      checkAndFormatField: function checkAndFormatField(obj, prop) {
-        var obj2 = obj[prop];
-        if (obj2) {
-          return this.formatField(obj, prop, obj2);
+  // Output to the Developer console in the browser directly.
+  formatters.console = {
+    format: function format(name) {
+      return formatters.format.call(formatters.console, name);
+    },
+    /////
+    // Puts together a string that describes a top-level field out of a documentation
+    // object.
+    //
+    // @params {Object} obj - the documentation object out of which we're retrieving the field.
+    // @params {String} p - the name of the field we're retrieving out of the documentation object.
+    // @return {String} - a description of the field.
+    ///
+    formatField: function formatField(obj, propertyName, value) {
+      if (value instanceof Array) {
+        return this.formatArray(obj, propertyName, value);
+      } else if (propertyName === "description") {
+        return "\t" + value + "\n";
+      } else {
+        return "\t" + propertyName + ": " + value + "\n";
+      }
+    },
+    /////
+    // Puts together lists of parameters for function signatures, as well as
+    // lists of properties and methods for classes and the like.
+    //
+    // @param {Object} obj - the documentation object from which to read an array.
+    // @param {String} arrName - the name of the array to read from the documentation object.
+    // @return {String} - the formatted description of the array.
+    ///
+    formatArray: function formatArray(obj, arrName, arr) {
+      var output = "\t";
+      if (obj.fieldType === "class") {
+        if (arrName === "parameters") {
+          output += "constructor ";
+        } else if (arrName === "functions") {
+          output += "static ";
         }
       }
-    };
-    // Make HTML that can be written out to a page
-    formatters.html = {
-      format: function format(name) {
-        var obj = resolveBag(database, name);
-        return "<section id=\"" + obj.id + "\" class=\"" + obj.fieldType + "\"><article>" + formatters.format.call(formatters.html, obj) + "</article></section>";
-      },
-      /////
-      // Puts together a string that describes a top-level field out of a documentation
-      // object.
-      //
-      // @param {Object} obj - the documentation object out of which we're retrieving the field.
-      // @param {String} p - the name of the field we're retrieving out of the documentation object.
-      // @return {String} - a description of the field.
-      ///
-      formatField: function formatField(obj, propertyName, value) {
-        var output = "";
-        if (obj.fieldType === "enumeration" && propertyName === "values") {
-          output += this.formatEnumeration(obj, propertyName, value);
-        } else if (value instanceof Array) {
-          output += this.formatArray(obj, propertyName, value);
-        } else if (propertyName === "parent") {
-          output += "<p>Contained in <a href=\"index.html#" + pliny.get(value).id + "\"><code>" + value + "</code></a></p>";
-        } else if (propertyName === "description") {
-          output += markdown(value);
-        } else if (propertyName === "returns") {
-          output += "<h3>Return value</h3>" + markdown(value);
-        } else {
-          output += "<dl><dt>" + propertyName + "</dt><dd>" + value + "</dd></dl>";
-        }
-        return output;
-      },
-      ////
-      // Specific fomratting function for Enumerations
-      //
-      // @param {Object} obj - the documentation object from which to read an array.
-      // @param {String} arrName - the name of the array to read from the documentation object.
-      // @param {Array} arr - the array from which we're reading values.
-      // @return {String} - the formatted description of the array.
-      formatEnumeration: function formatEnumeration(obj, arrName, arr) {
-        var output = "<table><thead><tr><th>Name</th><th>Value</th><tr><thead><tbody>";
-        for (var i = 0; i < arr.length; ++i) {
-          var e = arr[i];
-          output += "<tr><td>" + e.name + "</td><td>" + e.description + "</td></tr>";
-        }
-        output += "</tbody></table>";
-        return output;
-      },
-      ////
-      // Specific formatting function for Code Example.
-      //
-      // @param {Array} arr - an array of objects defining programming examples.
-      // @return {String} - a summary/details view of the programming examples.
-      examplesFormat: function examplesFormat(obj, arr) {
-        var output = "";
-        for (var i = 0; i < arr.length; ++i) {
-          var ex = arr[i];
-          output += "<div><h3><a href=\"index.html#" + ex.id + "\">" + ex.name + "</a></h3>" + markdown(ex.description) + "</div>";
-        }
-        return output;
-      },
-      ////
-      // Specific formatting function for Issues.
-      //
-      // @param {Array} arr - an array of objects defining issues.
-      // @return {String} - a summary/details view of the issues.
-      issuesFormat: function issuesFormat(obj, arr) {
-        var parts = {
-          open: "",
-          closed: ""
-        };
-        for (var i = 0; i < arr.length; ++i) {
-          var issue = arr[i],
-              str = "<div><h3><a href=\"index.html#" + issue.id + "\">" + issue.issueID + ": " + issue.name + " [" + issue.type + "]</a></h3>" + markdown(issue.description) + "</div>";
-          parts[issue.type] += str;
-        }
-        return parts.open + "<h2>Closed Issues</h2>" + parts.closed;
-      },
-      ////
-      // Specific formatting function for Comments section of Issues.
-      //
-      // @param {Array} arr - an array of objects defining comments.
-      // @return {String} - a summary/details view of the comment.
-      commentsFormat: function commentsFormat(obj, arr) {
-        var output = "";
-        for (var i = 0; i < arr.length; ++i) {
-          var comment = arr[i];
-          output += "<aside><h3>" + comment.name + "</h3>" + markdown(comment.description);
-          if (typeof comment.comments !== "undefined" && comment.comments instanceof Array) {
-            output += this.formatArray(comment, "comments", comment.comments);
-          }
-          output += "</aside>";
-        }
-        return output;
-      },
-      /////
-      // Puts together lists of parameters for function signatures, as well as
-      // lists of properties and methods for classes and the like.
-      //
-      // @param {Object} obj - the documentation object from which to read an array.
-      // @param {String} arrName - the name of the array to read from the documentation object.
-      // @param {Array} arr - the array from which we're reading values.
-      // @return {String} - the formatted description of the array.
-      ///
-      formatArray: function formatArray(obj, arrName, arr) {
-        var output = "<h2>";
-        if (obj.fieldType === "class") {
-          if (arrName === "parameters") {
-            output += "constructor ";
-          } else if (arrName === "functions") {
-            output += "static ";
-          }
-        }
 
-        if (arrName !== "description") {
-          output += arrName;
-        }
-
-        output += "</h2>";
-
-        var formatterName = arrName + "Format";
-        if (this[formatterName]) {
-          output += this[formatterName](obj, arr);
-        } else {
-          output += "<ul class=\"" + arrName + "\">" + arr.map(this.formatArrayElement.bind(this, arrName)).join("") + "</ul>";
-        }
-        return output;
-      },
-      /////
-      // For individual elements of an array, formats the element so it fits well
-      // on the screen. Elements that are supposed to be inline, but have the ability
-      // to be drilled-down into, are truncated if they get to be more than 200
-      // characters wide.
-      //
-      // @param {String} arrName - the name of the array from which we retrieved elements.
-      // @param {String} n - one of the array elements.
-      // @return {String} - the formatted element, including a newline at the end.
-      ///
-      formatArrayElement: function formatArrayElement(arrName, n) {
-        var s = "<li>";
-        if (n.description) {
-          var desc = n.description.match(/^(([^\n](\n[^\n])?)+)\n\n/);
-          if (desc) {
-            desc = desc[1] + "...";
-          } else {
-            desc = n.description;
-          }
-
-          if (n.optional) {
-            desc = "(Optional) " + desc;
-          }
-
-          if (n.default !== undefined) {
-            desc += " Defaults to <code>" + n.default + "</code>.";
-          }
-
-          s += "<dl><dt>" + this.shortDescription(false, n) + "</dt><dd>" + markdown(desc) + "</dd></dl>";
-        } else {
-          s += this.shortDescription(false, n);
-        }
-        s += "</li>";
-        return s;
-      },
-      /////
-      // Describe an object by type, name, and parameters (if it's a function-type object).
-      // @param {Object} p - the documentation object to describe.
-      // @return {String} - the description of the documentation object.
-      ///
-      shortDescription: function shortDescription(topLevel, p) {
-        var output = "",
-            tag = topLevel ? "h1" : "span",
-            isFunction = p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event",
-            isContainer = isFunction || p.fieldType === "class" || p.fieldType === "namespace" || p.fieldType === "enumeration" || p.fieldType === "subClass" || p.fieldType === "record";
-
-        output += "<" + tag + ">";
-        if (isContainer && !topLevel) {
-          output += "<a href=\"index.html#" + p.id + "\">";
-        }
-
-        output += "<code>" + (topLevel && p.fieldType !== "example" && p.fullName || p.name);
-
-        if (p.type) {
-          output += " <span class=\"type\">" + p.type + "</span>";
-        }
-
-        // But functions and classes take parameters, so they get slightly more.
-        if (isFunction) {
-          output += "<ol class=\"signatureParameters\">";
-          if (p.parameters) {
-            output += "<li>" + p.parameters.map(function (p) {
-              return p.name;
-            }).join("</li><li>") + "</li>";
-          }
-          output += "</ol>";
-        }
-
-        if (isContainer && !topLevel) {
-          output += "</a>";
-        }
-
-        return output + "</code></" + tag + ">";
+      if (arrName !== "description") {
+        output += arrName + ":\n";
       }
-    };
 
-    // Output to the Developer console in the browser directly.
-    formatters.console = {
-      format: function format(name) {
-        return formatters.format.call(formatters.console, name);
-      },
-      /////
-      // Puts together a string that describes a top-level field out of a documentation
-      // object.
-      //
-      // @params {Object} obj - the documentation object out of which we're retrieving the field.
-      // @params {String} p - the name of the field we're retrieving out of the documentation object.
-      // @return {String} - a description of the field.
-      ///
-      formatField: function formatField(obj, propertyName, value) {
-        if (value instanceof Array) {
-          return this.formatArray(obj, propertyName, value);
-        } else if (propertyName === "description") {
-          return "\t" + value + "\n";
-        } else {
-          return "\t" + propertyName + ": " + value + "\n";
-        }
-      },
-      /////
-      // Puts together lists of parameters for function signatures, as well as
-      // lists of properties and methods for classes and the like.
-      //
-      // @param {Object} obj - the documentation object from which to read an array.
-      // @param {String} arrName - the name of the array to read from the documentation object.
-      // @return {String} - the formatted description of the array.
-      ///
-      formatArray: function formatArray(obj, arrName, arr) {
-        var output = "\t";
-        if (obj.fieldType === "class") {
-          if (arrName === "parameters") {
-            output += "constructor ";
-          } else if (arrName === "functions") {
-            output += "static ";
-          }
-        }
-
-        if (arrName !== "description") {
-          output += arrName + ":\n";
-        }
-
-        if (arr instanceof Array) {
-          output += arr.map(this.formatArrayElement.bind(this, arrName)).join("");
-        } else {
-          output += arr;
-        }
-        return output;
-      },
-      /////
-      // For individual elements of an array, formats the element so it fits well
-      // on the screen. Elements that are supposed to be inline, but have the ability
-      // to be drilled-down into, are truncated if they get to be more than 200
-      // characters wide.
-      //
-      // @param {String} arrName - the name of the array from which we retrieved elements.
-      // @param {String} n - one of the array elements.
-      // @param {Number} i - the index of the element in the array.
-      // @return {String} - the formatted element, including a newline at the end.
-      ///
-      formatArrayElement: function formatArrayElement(arrName, n, i) {
-        var s = "\t\t" + i + ": " + this.shortDescription(false, n);
-        if (n.description) {
-          s += " - " + n.description;
-
-          if (arrName !== "parameters" && arrName !== "properties" && arrName !== "methods" && s.length > 200) {
-            s = s.substring(0, 200) + "...";
-          }
-        }
-        s += "\n";
-        return s;
-      },
-      /////
-      // Describe an object by type, name, and parameters (if it's a function-type object).
-      // @param {Object} p - the documentation object to describe.
-      // @return {String} - the description of the documentation object.
-      ///
-      shortDescription: function shortDescription(topLevel, p) {
-        // This is the basic description that all objects get.
-        var output = "";
-        if (topLevel || p.type) {
-          output += "[" + (p.type || p.fieldType) + "] ";
-        }
-
-        output += topLevel ? p.fullName : p.name;
-
-        // But functions and classes take parameters, so they get slightly more.
-        if (p.fieldType === "function" || p.fieldType === "method") {
-          output += "(";
-          if (p.parameters) {
-            output += p.parameters.map(this.shortDescription.bind(this, false)).join(", ");
-          }
-          output += ")";
-        }
-
-        return output;
+      if (arr instanceof Array) {
+        output += arr.map(this.formatArrayElement.bind(this, arrName)).join("");
+      } else {
+        output += arr;
       }
-    };
+      return output;
+    },
+    /////
+    // For individual elements of an array, formats the element so it fits well
+    // on the screen. Elements that are supposed to be inline, but have the ability
+    // to be drilled-down into, are truncated if they get to be more than 200
+    // characters wide.
+    //
+    // @param {String} arrName - the name of the array from which we retrieved elements.
+    // @param {String} n - one of the array elements.
+    // @param {Number} i - the index of the element in the array.
+    // @return {String} - the formatted element, including a newline at the end.
+    ///
+    formatArrayElement: function formatArrayElement(arrName, n, i) {
+      var s = "\t\t" + i + ": " + this.shortDescription(false, n);
+      if (n.description) {
+        s += " - " + n.description;
 
-    // The namespacing object we're going to return to the importing script.
-    var pliny = formatters.console.format;
-    // Give the user access to the database.
-    pliny.database = database;
-    // Give the user access to all of the formatters.
-    pliny.formats = formatters;
-    // Just get the raw data
-    pliny.get = openBag.bind(null, pliny.database);
-    // Forward on the markdown functionality
-    pliny.markdown = markdown;
-    // Strip pliny calls out of a source file and deposit them into a separate file.
-    pliny.carve = function (source, destination, callback) {
-      var fs = require("fs");
-      fs.readFile(source, "utf-8", function (err, txt) {
-        var matches,
-            left = 0,
-            outputLeft = "",
-            outputRight = "",
-            test = /pliny\.\w+/g;
-        while (matches = test.exec(txt)) {
-          var sub = txt.substring(left, matches.index);
-          outputLeft += sub;
-          var depth = 0,
-              inString = false,
-              found = false;
-          for (left = matches.index + matches.length; left < txt.length; ++left) {
-            if (txt[left] === "\"" && (left === 0 || txt[left - 1] !== "\\")) inString = !inString;
-            if (!inString) {
-              if (txt[left] === "(") {
-                found = true;
-                ++depth;
-              } else if (txt[left] === ")") --depth;
-            }
-            if (depth === 0 && found) break;
-          }
-          while (left < txt.length && /[;\) \r\n]/.test(txt[left])) {
-            left++;
-          }
-
-          outputRight += txt.substring(matches.index, left);
+        if (arrName !== "parameters" && arrName !== "properties" && arrName !== "methods" && s.length > 200) {
+          s = s.substring(0, 200) + "...";
         }
-        outputLeft += txt.substring(left);
-        fs.writeFile(source, outputLeft, function () {
-          fs.writeFile(destination, outputRight, callback);
-        });
+      }
+      s += "\n";
+      return s;
+    },
+    /////
+    // Describe an object by type, name, and parameters (if it's a function-type object).
+    // @param {Object} p - the documentation object to describe.
+    // @return {String} - the description of the documentation object.
+    ///
+    shortDescription: function shortDescription(topLevel, p) {
+      // This is the basic description that all objects get.
+      var output = "";
+      if (topLevel || p.type) {
+        output += "[" + (p.type || p.fieldType) + "] ";
+      }
+
+      output += topLevel ? p.fullName : p.name;
+
+      // But functions and classes take parameters, so they get slightly more.
+      if (p.fieldType === "function" || p.fieldType === "method") {
+        output += "(";
+        if (p.parameters) {
+          output += p.parameters.map(this.shortDescription.bind(this, false)).join(", ");
+        }
+        output += ")";
+      }
+
+      return output;
+    }
+  };
+
+  // The namespacing object we're going to return to the importing script.
+  var pliny = formatters.console.format;
+  // Give the user access to the database.
+  pliny.database = database;
+  // Give the user access to all of the formatters.
+  pliny.formats = formatters;
+  // Just get the raw data
+  pliny.get = openBag.bind(null, pliny.database);
+  // Forward on the markdown functionality
+  pliny.markdown = markdown;
+  // Strip pliny calls out of a source file and deposit them into a separate file.
+  pliny.carve = function (source, destination, callback) {
+    var fs = require("fs");
+    fs.readFile(source, "utf-8", function (err, txt) {
+      var matches,
+          left = 0,
+          outputLeft = "",
+          outputRight = "",
+          test = /pliny\.\w+/g;
+      while (matches = test.exec(txt)) {
+        var sub = txt.substring(left, matches.index);
+        outputLeft += sub;
+        var depth = 0,
+            inString = false,
+            found = false;
+        for (left = matches.index + matches.length; left < txt.length; ++left) {
+          if (txt[left] === "\"" && (left === 0 || txt[left - 1] !== "\\")) inString = !inString;
+          if (!inString) {
+            if (txt[left] === "(") {
+              found = true;
+              ++depth;
+            } else if (txt[left] === ")") --depth;
+          }
+          if (depth === 0 && found) break;
+        }
+        while (left < txt.length && /[;\) \r\n]/.test(txt[left])) {
+          left++;
+        }
+
+        outputRight += txt.substring(matches.index, left);
+      }
+      outputLeft += txt.substring(left);
+      fs.writeFile(source, outputLeft, function () {
+        fs.writeFile(destination, outputRight, callback);
       });
-    };
-
-    // Create documentation functions for each of the supported types of code objects.
-    ["namespace", "event", "function", "value", "class", "property", "method", "enumeration", "record", "subClass", "example", "error", "issue", "comment"].forEach(function (k) {
-      pliny[k] = pliny[k] || analyzeObject.bind(null, k);
     });
+  };
 
-    module.exports = pliny;
-  })(typeof module !== 'undefined' && module || function () {
-    var module = {};
-    Object.defineProperty(module, "exports", {
-      get: function get() {
-        return window["pliny"];
-      },
-      set: function set(v) {
-        window["pliny"] = v;
-      }
-    });
-    return module;
-  }(), typeof module !== 'undefined' && require || openBag.bind(null, window));
-})();
+  // Create documentation functions for each of the supported types of code objects.
+  ["namespace", "event", "function", "value", "class", "property", "method", "enumeration", "record", "subClass", "example", "error", "issue", "comment"].forEach(function (k) {
+    pliny[k] = pliny[k] || analyzeObject.bind(null, k);
+  });
+
+  return pliny;
+}(typeof require !== 'undefined' && require || openBag.bind(null, window));
+return pliny;
+}));
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1hcmtlZC5qcyIsInNyYy9wbGlueS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUN0d0NBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBIiwiZmlsZSI6InBsaW55LmpzIn0=
+
 (function (root) {
 
   // Store setTimeout reference so promise-polyfill will be unaffected by
@@ -2474,8 +2472,248 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
 
 })(this);
 
-!function(e,n){"object"==typeof exports&&"object"==typeof module?module.exports=n():"function"==typeof define&&define.amd?define("index",[],n):"object"==typeof exports?exports.index=n():e.index=n()}(this,function(){return function(e){function n(i){if(t[i])return t[i].exports;var r=t[i]={exports:{},id:i,loaded:!1};return e[i].call(r.exports,r,r.exports,n),r.loaded=!0,r.exports}var t={};return n.m=e,n.c=t,n.p="",n(0)}([function(e,n){"use strict";function t(e){if(Array.isArray(e)){for(var n=0,t=Array(e.length);n<e.length;n++)t[n]=e[n];return t}return Array.from(e)}function i(){if(l)return!1;var e='\n    details, details>summary {\n      display: block;\n    }\n    details > summary {\n      min-height: 1.4em;\n      padding: 0.125em;\n    }\n    details > summary:before {\n      content:"►";\n      font-size: 1em;\n      position: relative;\n      display: inline-block;\n      width: 1em;\n      height: 1em;\n      margin-right: 0.3em;\n      -webkit-transform-origin: 0.4em 0.6em;\n         -moz-transform-origin: 0.4em 0.6em;\n          -ms-transform-origin: 0.4em 0.6em;\n              transform-origin: 0.4em 0.6em;\n    }\n    details[open] > summary:before {\n      content:"▼"\n    }\n    details > *:not(summary) {\n      display: none;\n      opacity: 0;\n    }\n    details[open] > *:not(summary) {\n      display: block;\n      opacity: 1;\n\n      /* If you need to preserve the original display attribute then wrap detail child elements in a div-tag */\n      /* e.g. if you use an element with "display: inline", then wrap it inside a div */\n      /* Too much hassle to make JS preserve original attribute */\n    }\n\n    /* Use this to hide native indicator and use pseudoelement instead\n    summary::-webkit-details-marker {\n      display: none;\n    }\n    */';if(null===document.querySelector("#details-polyfill-css")){var n=document.createElement("style");return n.id="details-polyfill-css",n.textContent=e.replace(/(\/\*([^*]|(\*+[^*\/]))*\*+\/)/gm,"").replace(/\s/gm," "),n.appendChild(document.createTextNode("")),document.head.insertBefore(n,document.head.firstChild),!0}return!1}function r(){var e=arguments.length<=0||void 0===arguments[0]?document:arguments[0];if(l)return!1;var n=!1;return[].concat(t(e.querySelectorAll("details:not("+s+")"))).forEach(function(e){e.classList.add(d);var i=[].concat(t(e.childNodes)).find(function(e){return"summary"===e.nodeName.toLowerCase()});i||(i=document.createElement("summary"),i.textContent="Details",e.insertBefore(i,e.firstChild)),e.firstChild!==i&&(e.removeChild(i),e.insertBefore(i,e.firstChild)),i.tabIndex=0,i.addEventListener("keydown",function(e){if(e.target===i&&(e.keyCode===o||e.keyCode===a)){e.preventDefault(),e.stopPropagation();var n=new MouseEvent("click",{bubbles:!0,cancelable:!0,view:window});i.dispatchEvent(n)}},!0),i.addEventListener("click",function(n){n.target===i&&(e.hasAttribute("open")?e.removeAttribute("open"):e.setAttribute("open","open"))},!0),n=!0}),n}Object.defineProperty(n,"__esModule",{value:!0}),n.polyfillDetails=r;var o=13,a=32,d="is-polyfilled",s="."+d,l="open"in document.createElement("details");window.addEventListener("load",function(){i(),r(document)})}])});
-//# sourceMappingURL=index.min.js.map
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("index", [], factory);
+	else if(typeof exports === 'object')
+		exports["index"] = factory();
+	else
+		root["index"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports) {
+
+	
+	'use strict';
+	
+	/**
+	 * The &lt;details&gt; element specifies additional details that the user can view or hide on demand.
+	 * The &lt;summary&gt; element defines a visible heading for the &lt;details&gt; element.
+	 * The heading can be clicked to view/hide the details.
+	 * The &lt;details&gt; element currently has very limited cross-browser support.
+	 * This polyfill provides support for the &lt;detail&gt; element across all modern browsers,
+	 *
+	 * Code copied/modified/inspired from/by:
+	 *   https://github.com/jordanaustin/Details-Expander
+	 *   https://github.com/chemerisuk/better-details-polyfill
+	 *   http://codepen.io/stevef/pen/jiCBE
+	 *   http://blog.mxstbr.com/2015/06/html-details/
+	 *   http://html5doctor.com/the-details-and-summary-elements/
+	 *   http://zogovic.com/post/21784525226/simple-html5-details-polyfill
+	 *   http://www.sitepoint.com/fixing-the-details-element/
+	 *   https://www.smashingmagazine.com/2014/11/complete-polyfill-html5-details-element/
+	 *   http://mathiasbynens.be/notes/html5-details-jquery
+	 *   https://www.w3.org/TR/2011/WD-html5-author-20110705/the-details-element.html
+	 *   https://www.w3.org/TR/html-aria/#index-aria-group
+	 *   https://www.w3.org/WAI/GL/wiki/Using_aria-expanded_to_indicate_the_state_of_a_collapsible_element
+	 *   https://www.w3.org/TR/wai-aria-practices-1.1/
+	 *   https://www.w3.org/TR/html-aria/#index-aria-group
+	 */
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.polyfillDetails = polyfillDetails;
+	
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
+	var VK_ENTER = 13;
+	var VK_SPACE = 32;
+	var POLYFILL_CLASS = 'is-polyfilled';
+	var POLYFILL_CLASS_NAME = '.' + POLYFILL_CLASS;
+	
+	// For a full featured detection support see Mathias Bynens implementation: http://mathiasbynens.be/notes/html5-details-jquery
+	// No need to suppport Chrome-10, so this should be sufficient
+	var hasNativeDetailsSupport = 'open' in document.createElement('details');
+	
+	function injectCSS() {
+	
+	  if (hasNativeDetailsSupport) {
+	    return false;
+	  }
+	
+	  /*
+	   CSS Modified from: https://github.com/jordanaustin/Details-Expander/blob/master/src/css/main.css
+	    NOTE:
+	   These are defaults meant to mimic the default unstyled browser look.
+	   I highly recommend you style your details tags but don't do it here.
+	   Just overwrite the style. Almost everything can be fully customized.
+	   Anything that shouldn't be overwritten has an !important on it.
+	    Semantic (correct) markup example:
+	    <details role="group" open>
+	   <summary role="button">Show/Hide me</summary>
+	   <p>Some content ..... etc.</p>
+	   </details>
+	     Note: There is no guarantee that the browser's implementation of the <details> element will
+	   respect it's child elements layout when toggeling the details. To preserve the child elements layout,
+	   always wrap the child elements inside a <div>.
+	    <style>
+	   .my-content { display : flex; }
+	   </style
+	   <details role="group">
+	   <summary role="button">Show/Hide me</summary>
+	   <div>
+	   <div class="my-content">
+	   <p>Some content ..... etc.</p>
+	   </div>
+	   </div>
+	   </details>
+	   */
+	
+	  var css = '\n    details, details>summary {\n      display: block;\n    }\n    details > summary {\n      min-height: 1.4em;\n      padding: 0.125em;\n    }\n    details > summary:before {\n      content:"►";\n      font-size: 1em;\n      position: relative;\n      display: inline-block;\n      width: 1em;\n      height: 1em;\n      margin-right: 0.3em;\n      -webkit-transform-origin: 0.4em 0.6em;\n         -moz-transform-origin: 0.4em 0.6em;\n          -ms-transform-origin: 0.4em 0.6em;\n              transform-origin: 0.4em 0.6em;\n    }\n    details[open] > summary:before {\n      content:"▼"\n    }\n    details > *:not(summary) {\n      display: none;\n      opacity: 0;\n    }\n    details[open] > *:not(summary) {\n      display: block;\n      opacity: 1;\n\n      /* If you need to preserve the original display attribute then wrap detail child elements in a div-tag */\n      /* e.g. if you use an element with "display: inline", then wrap it inside a div */\n      /* Too much hassle to make JS preserve original attribute */\n    }\n\n    /* Use this to hide native indicator and use pseudoelement instead\n    summary::-webkit-details-marker {\n      display: none;\n    }\n    */';
+	
+	  if (document.querySelector('#details-polyfill-css') === null) {
+	    var style = document.createElement('style');
+	    style.id = 'details-polyfill-css';
+	    style.textContent = css.replace(/(\/\*([^*]|(\*+[^*\/]))*\*+\/)/gm, '') // remove comments from CSS, see: http://www.sitepoint.com/3-neat-tricks-with-regular-expressions/
+	    .replace(/\s/gm, ' '); // replaces consecutive spaces with a single space
+	
+	    // WebKit hack
+	    style.appendChild(document.createTextNode(''));
+	
+	    // Must be the first stylesheet so it does not override user css
+	    document.head.insertBefore(style, document.head.firstChild);
+	    return true;
+	  }
+	  return false;
+	}
+	
+	/**
+	 * Polyfill for the <details> element
+	 * @param fromEl where to start, default document node
+	 * @returns {boolean} true i any details element has been polyfilled
+	 */
+	function polyfillDetails() {
+	  var fromEl = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+	
+	
+	  if (hasNativeDetailsSupport) {
+	    return false;
+	  }
+	
+	  var result = false;
+	
+	  [].concat(_toConsumableArray(fromEl.querySelectorAll('details:not(' + POLYFILL_CLASS_NAME + ')'))).forEach(function (details) {
+	
+	    details.classList.add(POLYFILL_CLASS); // flag to prevent doing this more than once
+	    var summary = [].concat(_toConsumableArray(details.childNodes)).find(function (n) {
+	      return n.nodeName.toLowerCase() === 'summary';
+	    });
+	
+	    // If there is no child summary element, this polyfill
+	    // should provide its own legend; "Details"
+	    if (!summary) {
+	      summary = document.createElement('summary');
+	      summary.textContent = 'Details';
+	      details.insertBefore(summary, details.firstChild);
+	    }
+	
+	    // <summary> must be the first child of <details>
+	    if (details.firstChild !== summary) {
+	      details.removeChild(summary);
+	      details.insertBefore(summary, details.firstChild);
+	    }
+	
+	    // Should be focusable
+	    summary.tabIndex = 0;
+	
+	    // Events
+	    summary.addEventListener('keydown', function (event) {
+	      if (event.target === summary) {
+	        if (event.keyCode === VK_ENTER || event.keyCode === VK_SPACE) {
+	          event.preventDefault();
+	          event.stopPropagation();
+	
+	          // Trigger mouse click event for any attached listeners.
+	          var evt = new MouseEvent('click', {
+	            bubbles: true,
+	            cancelable: true,
+	            view: window
+	          });
+	          summary.dispatchEvent(evt);
+	        }
+	      }
+	    }, true);
+	
+	    summary.addEventListener('click', function (event) {
+	      if (event.target === summary) {
+	        if (details.hasAttribute('open')) {
+	          details.removeAttribute('open');
+	        } else {
+	          details.setAttribute('open', 'open');
+	        }
+	      }
+	    }, true);
+	
+	    result = true;
+	  });
+	
+	  return result;
+	}
+	
+	/*
+	 document.addEventListener('DOMContentLoaded', () => {
+	 injectCSS();
+	 polyfillDetails(document);
+	 });
+	 */
+	
+	// MDL listens to this event, not DOMContentLoaded
+	window.addEventListener('load', function () {
+	  injectCSS();
+	  polyfillDetails(document);
+	});
+
+/***/ }
+/******/ ])
+});
+;
+//# sourceMappingURL=index.js.map
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 /**

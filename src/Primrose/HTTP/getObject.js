@@ -32,6 +32,7 @@ pliny.function({
 > Object {field1: 1, field2: \"Field2\"}"
   }]
 });
-function getObject(url, options){
+
+function getObject(url, options) {
   return Primrose.HTTP.get("json", url, options);
 }

@@ -25,6 +25,7 @@ pliny.function({
     description: "A callback function to be called as the download from the server progresses."
   }, ]
 });
-function post(type, url, options){
+
+function post(type, url, options) {
   return Primrose.HTTP.XHR("POST", type, url, options);
 }

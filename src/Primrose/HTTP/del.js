@@ -25,6 +25,7 @@ pliny.function({
     description: "A callback function to be called as the download from the server progresses."
   }, ]
 });
+
 function del(type, url, options) {
   return Primrose.HTTP.XHR("DELETE", type, url, options);
 }

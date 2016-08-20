@@ -20,6 +20,7 @@ pliny.function({
     description: "A callback function to be called as the download from the server progresses."
   }]
 });
-function delObject (url, options) {
-  return  Primrose.HTTP.del("json", url, options);
+
+function delObject(url, options) {
+  return Primrose.HTTP.del("json", url, options);
 }

@@ -1,5 +1,5 @@
 "use strict";
 
-function setFalse(evt){
+function setFalse(evt) {
   evt.returnValue = false;
 }

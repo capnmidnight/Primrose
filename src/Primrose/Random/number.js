@@ -38,6 +38,7 @@ pliny.function({
 > -0.9659552359953523"
   }]
 });
-function number (min, max){
+
+function number(min, max) {
   return Math.random() * (max - min) + min;
 }

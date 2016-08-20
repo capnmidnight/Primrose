@@ -40,6 +40,7 @@ pliny.function({
 > two"
   }]
 });
-function item (arr) {
+
+function item(arr) {
   return arr[Primrose.Random.int(arr.length)];
 }

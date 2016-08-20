@@ -17,6 +17,7 @@ pliny.function({
   name: "textured",
   description: "| [under construction]"
 });
+
 function textured(geometry, txt, options) {
   options = options || {};
   if (options.opacity === undefined) {

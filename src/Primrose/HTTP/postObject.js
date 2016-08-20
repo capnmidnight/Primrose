@@ -20,6 +20,7 @@ pliny.function({
     description: "A callback function to be called as the download from the server progresses."
   }]
 });
-function postObject(url, options){
+
+function postObject(url, options) {
   return Primrose.HTTP.post("json", url, options);
 }

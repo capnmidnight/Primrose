@@ -14,7 +14,8 @@ pliny.method({
     description: "The true parent element for `this` object"
   }]
 });
-function addToBrowserEnvironment (env, scene) {
+
+function addToBrowserEnvironment(env, scene) {
   scene.add(this);
   // this has to be done as a lambda expression because it needs to capture the
   // env variable provided in the addToBrowserEnvironment call;

@@ -34,6 +34,7 @@ pliny.function({
     console.error.bind(console, \"error loading\")\n"
   }]
 });
-function getBuffer(url, options){
+
+function getBuffer(url, options) {
   return Primrose.HTTP.get("arraybuffer", url, options);
 }

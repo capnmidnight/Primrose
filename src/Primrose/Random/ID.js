@@ -29,8 +29,9 @@ pliny.function({
 > 9p06sytn6dfearuibsnn4s4i"
   }]
 });
-function ID () {
+
+function ID() {
   return (Math.random() * Math.log(Number.MAX_VALUE))
-  .toString(36)
-  .replace(".", "");
+    .toString(36)
+    .replace(".", "");
 }

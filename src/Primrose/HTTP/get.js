@@ -36,6 +36,7 @@ pliny.function({
 > Object {field1: 1, field2: \"Field2\"}"
   }]
 });
-function get(type, url, options){
+
+function get(type, url, options) {
   return Primrose.HTTP.XHR("GET", type || "text", url, options);
 }

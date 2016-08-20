@@ -66,6 +66,7 @@ pliny.function({
 > 52"
   }]
 });
+
 function int(min, max, power) {
   power = power || 1;
   if (max === undefined) {

@@ -1,5 +1,5 @@
 "use strict";
 
-function identity(obj){
+function identity(obj) {
   return obj;
 }
