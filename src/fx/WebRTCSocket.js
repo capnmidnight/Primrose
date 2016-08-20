@@ -152,9 +152,7 @@ Primrose.WebRTCSocket = (function () {
         get: () => toUserIndex
       });
 
-
-
-      const iceServers = ICE_SERVERS.concat(extraIceServers);
+      var iceServers = ICE_SERVERS.concat(extraIceServers);
       if (isFirefox) {
         iceServers = [{
           urls: iceServers.map((s) => s.url)

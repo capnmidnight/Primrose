@@ -21,161 +21,165 @@
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework">
     <title>Primrose VR: WebVR Application Framework</title><!-- end main.jade title block -->
     <link type="text/css" rel="stylesheet" href="../../doc/demoUI.css">
-    <script type="text/javascript" src="../../../WebVR-Bootstrapper/webvr-bootstrapper.js"></script>
-    <style>#frontBuffer { background-image:url(screenshot.jpg); }</style>
+    <script type="text/javascript" src="../../node_modules/webvr-bootstrapper/webvr-bootstrapper.js"></script>
+    <script type="text/javascript" src="../../node_modules/bare-bones-logger/bare-bones-logger.js"></script>
+    <script type="text/javascript" src="../../node_modules/marked/marked.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/pliny/pliny.js"></script>
+    <script type="text/javascript" src="../../node_modules/promise-polyfill/promise.js"></script>
+    <script type="text/javascript" src="../../node_modules/lavu-details-polyfill/lib/index.min.js"></script>
+    <script type="text/javascript" src="../../node_modules/socket.io-client/socket.io.js"></script>
+    <script type="text/javascript" src="../../node_modules/jshashes/hashes.js"></script>
+    <script type="text/javascript" src="../../node_modules/three/three.js"></script>
+    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
+    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
+    <script type="text/javascript" src="../../node_modules/three/examples/js/loaders/FBXLoader.js"></script>
+    <script type="text/javascript" src="../../node_modules/webvr-polyfill/build/webvr-polyfill.js"></script>
+    <script type="text/javascript" src="../../node_modules/html2canvas/dist/html2canvas.js"></script>
+    <script type="text/javascript" src="../../namegen.js"></script>
+    <script type="text/javascript" src="../../src/app.js"></script>
+    <script type="text/javascript" src="../../src/base/InsideSphereGeometry.js"></script>
+    <script type="text/javascript" src="../../src/base/axis.js"></script>
+    <script type="text/javascript" src="../../src/base/box.js"></script>
+    <script type="text/javascript" src="../../src/base/brick.js"></script>
+    <script type="text/javascript" src="../../src/base/cache.js"></script>
+    <script type="text/javascript" src="../../src/base/clone.js"></script>
+    <script type="text/javascript" src="../../src/base/cloud.js"></script>
+    <script type="text/javascript" src="../../src/base/copyObject.js"></script>
+    <script type="text/javascript" src="../../src/base/cylinder.js"></script>
+    <script type="text/javascript" src="../../src/base/emit.js"></script>
+    <script type="text/javascript" src="../../src/base/findProperty.js"></script>
+    <script type="text/javascript" src="../../src/base/forms.js"></script>
+    <script type="text/javascript" src="../../src/base/hub.js"></script>
+    <script type="text/javascript" src="../../src/base/light.js"></script>
+    <script type="text/javascript" src="../../src/base/patch.js"></script>
+    <script type="text/javascript" src="../../src/base/put.js"></script>
+    <script type="text/javascript" src="../../src/base/quad.js"></script>
+    <script type="text/javascript" src="../../src/base/range.js"></script>
+    <script type="text/javascript" src="../../src/base/shell.js"></script>
+    <script type="text/javascript" src="../../src/base/sphere.js"></script>
+    <script type="text/javascript" src="../../src/base/textured.js"></script>
+    <script type="text/javascript" src="../../src/base/v3.js"></script>
+    <script type="text/javascript" src="../../src/fx/AbstractEventEmitter.js"></script>
+    <script type="text/javascript" src="../../src/fx/Angle.js"></script>
+    <script type="text/javascript" src="../../src/fx/BaseControl.js"></script>
+    <script type="text/javascript" src="../../src/fx/BrowserEnvironment.js"></script>
+    <script type="text/javascript" src="../../src/fx/ButtonFactory.js"></script>
+    <script type="text/javascript" src="../../src/fx/DOM/cascadeElement.js"></script>
+    <script type="text/javascript" src="../../src/fx/DOM/findEverything.js"></script>
+    <script type="text/javascript" src="../../src/fx/DOM/makeHidingContainer.js"></script>
+    <script type="text/javascript" src="../../src/fx/Entity.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/XHR.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/del.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/delObject.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/get.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/getBuffer.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/getObject.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/getText.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/post.js"></script>
+    <script type="text/javascript" src="../../src/fx/HTTP/postObject.js"></script>
+    <script type="text/javascript" src="../../src/fx/InputProcessor.js"></script>
+    <script type="text/javascript" src="../../src/fx/Keys.js"></script>
+    <script type="text/javascript" src="../../src/fx/ModelLoader.js"></script>
+    <script type="text/javascript" src="../../src/fx/Pointer.js"></script>
+    <script type="text/javascript" src="../../src/fx/PoseInputProcessor.js"></script>
+    <script type="text/javascript" src="../../src/fx/Projector.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/ID.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/color.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/int.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/item.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/number.js"></script>
+    <script type="text/javascript" src="../../src/fx/Random/steps.js"></script>
+    <script type="text/javascript" src="../../src/fx/Surface.js"></script>
+    <script type="text/javascript" src="../../src/fx/WebRTCSocket.js"></script>
+    <script type="text/javascript" src="../../src/fx/Workerize.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/ALabel.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/Button2D.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/Button3D.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/Form.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/HtmlDoc.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/Image.js"></script>
+    <script type="text/javascript" src="../../src/fx/controls/VUMeter.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/FPSInput.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Gamepad.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Keyboard.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/LeapMotion.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Location.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Motion.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Mouse.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Speech.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/Touch.js"></script>
+    <script type="text/javascript" src="../../src/fx/input/VR.js"></script>
+    <script type="text/javascript" src="../../src/fx/network/AudioChannel.js"></script>
+    <script type="text/javascript" src="../../src/fx/network/DataChannel.js"></script>
+    <script type="text/javascript" src="../../src/fx/network/Manager.js"></script>
+    <script type="text/javascript" src="../../src/fx/network/RemoteUser.js"></script>
+    <script type="text/javascript" src="../../src/fx/output/Audio3D.js"></script>
+    <script type="text/javascript" src="../../src/fx/output/HapticGlove.js"></script>
+    <script type="text/javascript" src="../../src/fx/output/Music.js"></script>
+    <script type="text/javascript" src="../../src/fx/output/Speech.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/CodePage.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/CommandPack.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Cursor.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Grammar.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/OperatingSystem.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Point.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Rectangle.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Rule.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Size.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Terminal.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/Token.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/code_pages/DE_QWERTZ.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_UKX.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/code_pages/EN_US.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/code_pages/FR_AZERTY.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/command_packs/BasicTextInput.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/command_packs/TextEditor.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/command_packs/TextInput.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/controls/PlainText.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/controls/TextBox.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/controls/TextInput.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/grammars/Basic.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/grammars/JavaScript.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/grammars/PlainText.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/grammars/TestResults.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/operating_systems/OSX.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/operating_systems/Windows.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/themes/Dark.js"></script>
+    <script type="text/javascript" src="../../src/fx/text/themes/Default.js"></script>
+    <script type="text/javascript" src="../../src/three-ext/Matrix4.prototype.toString.js"></script>
+    <script type="text/javascript" src="../../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
+    <script type="text/javascript" src="../../src/three-ext/Quaternion.prototype.toString.js"></script>
+    <script type="text/javascript" src="../../src/three-ext/Vector3.prototype.toString.js"></script>
+    <script type="text/javascript" src="../../src/x/LoginForm.js"></script>
+    <script type="text/javascript" src="../../src/x/SignupForm.js"></script>
     <script type="text/javascript">WebVRBootstrapper([
-        ["../../node_modules/bare-bones-logger/bare-bones-logger.js",3088],
-        ["../../node_modules/marked/marked.min.js",19513],
-        ["../../node_modules/pliny/pliny.js",61722],
-        ["../../node_modules/promise-polyfill/promise.js",5967],
-        ["../../node_modules/lavu-details-polyfill/lib/index.min.js",3229],
-        ["../../node_modules/socket.io-client/socket.io.js",184245],
-        ["../../node_modules/jshashes/hashes.js",59646],
-        ["../../node_modules/three/three.js",1005632],
-        ["../../node_modules/three/examples/js/loaders/OBJLoader.js",14431],
-        ["../../node_modules/three/examples/js/loaders/MTLLoader.js",8480],
-        ["../../node_modules/three/examples/js/loaders/FBXLoader.js",61101],
-        ["../../node_modules/html2canvas/dist/html2canvas.js",126884],
-        ["../../namegen.js",16828],
-        ["../../src/app.js",12917],
-        ["../../src/base/InsideSphereGeometry.js",5316],
-        ["../../src/base/axis.js",1217],
-        ["../../src/base/box.js",1590],
-        ["../../src/base/brick.js",1263],
-        ["../../src/base/cache.js",1386],
-        ["../../src/base/clone.js",783],
-        ["../../src/base/cloud.js",1701],
-        ["../../src/base/copyObject.js",1982],
-        ["../../src/base/cylinder.js",2443],
-        ["../../src/base/emit.js",1290],
-        ["../../src/base/findProperty.js",1104],
-        ["../../src/base/forms.js",7737],
-        ["../../src/base/hub.js",676],
-        ["../../src/base/light.js",1027],
-        ["../../src/base/patch.js",1726],
-        ["../../src/base/put.js",2376],
-        ["../../src/base/quad.js",280],
-        ["../../src/base/range.js",265],
-        ["../../src/base/shell.js",3245],
-        ["../../src/base/sphere.js",246],
-        ["../../src/base/textured.js",5945],
-        ["../../src/base/v3.js",815],
-        ["../../src/fx/AbstractEventEmitter.js",793],
-        ["../../src/fx/Angle.js",4358],
-        ["../../src/fx/BaseControl.js",5165],
-        ["../../src/fx/BrowserEnvironment.js",28095],
-        ["../../src/fx/ButtonFactory.js",2285],
-        ["../../src/fx/DOM/cascadeElement.js",4322],
-        ["../../src/fx/DOM/findEverything.js",2278],
-        ["../../src/fx/DOM/makeHidingContainer.js",1417],
-        ["../../src/fx/Entity.js",19803],
-        ["../../src/fx/HTTP/XHR.js",3658],
-        ["../../src/fx/HTTP/del.js",1067],
-        ["../../src/fx/HTTP/delObject.js",794],
-        ["../../src/fx/HTTP/get.js",1539],
-        ["../../src/fx/HTTP/getBuffer.js",1279],
-        ["../../src/fx/HTTP/getObject.js",1258],
-        ["../../src/fx/HTTP/getText.js",1187],
-        ["../../src/fx/HTTP/post.js",1121],
-        ["../../src/fx/HTTP/postObject.js",791],
-        ["../../src/fx/InputProcessor.js",15636],
-        ["../../src/fx/Keys.js",3702],
-        ["../../src/fx/ModelLoader.js",13991],
-        ["../../src/fx/Pointer.js",8789],
-        ["../../src/fx/PoseInputProcessor.js",1926],
-        ["../../src/fx/Projector.js",81106],
-        ["../../src/fx/Random/ID.js",1110],
-        ["../../src/fx/Random/color.js",971],
-        ["../../src/fx/Random/int.js",2570],
-        ["../../src/fx/Random/item.js",1113],
-        ["../../src/fx/Random/number.js",1484],
-        ["../../src/fx/Random/steps.js",1671],
-        ["../../src/fx/Surface.js",10567],
-        ["../../src/fx/WebRTCSocket.js",18311],
-        ["../../src/fx/Workerize.js",11915],
-        ["../../src/fx/controls/ALabel.js",5532],
-        ["../../src/fx/controls/Button2D.js",1975],
-        ["../../src/fx/controls/Button3D.js",5295],
-        ["../../src/fx/controls/Form.js",1887],
-        ["../../src/fx/controls/HtmlDoc.js",2853],
-        ["../../src/fx/controls/Image.js",5207],
-        ["../../src/fx/controls/VUMeter.js",2553],
-        ["../../src/fx/input/FPSInput.js",13591],
-        ["../../src/fx/input/Gamepad.js",6123],
-        ["../../src/fx/input/Keyboard.js",5068],
-        ["../../src/fx/input/LeapMotion.js",5307],
-        ["../../src/fx/input/Location.js",1189],
-        ["../../src/fx/input/Motion.js",2464],
-        ["../../src/fx/input/Mouse.js",1981],
-        ["../../src/fx/input/Speech.js",6587],
-        ["../../src/fx/input/Touch.js",1825],
-        ["../../src/fx/input/VR.js",6675],
-        ["../../src/fx/network/AudioChannel.js",7397],
-        ["../../src/fx/network/DataChannel.js",2998],
-        ["../../src/fx/network/Manager.js",5428],
-        ["../../src/fx/network/RemoteUser.js",8418],
-        ["../../src/fx/output/Audio3D.js",10284],
-        ["../../src/fx/output/HapticGlove.js",3290],
-        ["../../src/fx/output/Music.js",2534],
-        ["../../src/fx/output/Speech.js",1564],
-        ["../../src/fx/text/CodePage.js",3124],
-        ["../../src/fx/text/CommandPack.js",325],
-        ["../../src/fx/text/Cursor.js",6226],
-        ["../../src/fx/text/Grammar.js",10752],
-        ["../../src/fx/text/OperatingSystem.js",2680],
-        ["../../src/fx/text/Point.js",655],
-        ["../../src/fx/text/Rectangle.js",2209],
-        ["../../src/fx/text/Rule.js",1555],
-        ["../../src/fx/text/Size.js",727],
-        ["../../src/fx/text/Terminal.js",3605],
-        ["../../src/fx/text/Token.js",782],
-        ["../../src/fx/text/code_pages/DE_QWERTZ.js",2430],
-        ["../../src/fx/text/code_pages/EN_UKX.js",1715],
-        ["../../src/fx/text/code_pages/EN_US.js",1231],
-        ["../../src/fx/text/code_pages/FR_AZERTY.js",1896],
-        ["../../src/fx/text/command_packs/BasicTextInput.js",4337],
-        ["../../src/fx/text/command_packs/TextEditor.js",2061],
-        ["../../src/fx/text/command_packs/TextInput.js",439],
-        ["../../src/fx/text/controls/PlainText.js",1943],
-        ["../../src/fx/text/controls/TextBox.js",34288],
-        ["../../src/fx/text/controls/TextInput.js",1952],
-        ["../../src/fx/text/grammars/Basic.js",18325],
-        ["../../src/fx/text/grammars/JavaScript.js",896],
-        ["../../src/fx/text/grammars/PlainText.js",299],
-        ["../../src/fx/text/grammars/TestResults.js",702],
-        ["../../src/fx/text/operating_systems/OSX.js",375],
-        ["../../src/fx/text/operating_systems/Windows.js",491],
-        ["../../src/fx/text/themes/Dark.js",1184],
-        ["../../src/fx/text/themes/Default.js",1187],
-        ["../../src/three-ext/Matrix4.prototype.toString.js",1172],
-        ["../../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js",1978],
-        ["../../src/three-ext/Quaternion.prototype.toString.js",1043],
-        ["../../src/three-ext/Vector3.prototype.toString.js",834],
-        ["../../src/x/LoginForm.js",2726],
-        ["../../src/x/SignupForm.js",3232],
         ["../../doc/temple/app.js",2576]
-      ], function (startDownload) {
-        var p = document.querySelector("progress"),
-          c = document.getElementById("fullScreenButtonContainer");
-        function addButton(display, i) {
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "secondary";
-          btn.appendChild(document.createTextNode(display.displayName));
-          btn.addEventListener("click", function(i){
-            env.goFullScreen(i, "Button");
-          }.bind(null, i), false);
-          c.appendChild(btn);
-        }
-        startDownload(function (n, m) {
-          p.max = m;
-          p.value = n;
-        }, function (displays) {
+      ])
+        .then(function (startDownload) {
+          var p = document.querySelector("progress");
+          return startDownload(function (n, m) {
+            p.max = m;
+            p.value = n;
+          });
+        }).then(function () {
+          var p = document.querySelector("progress");
+          var c = document.getElementById("fullScreenButtonContainer");
           p.style.display = "none";
-          displays.forEach(addButton);
+          navigator.getVRDisplays().then(function(displays){
+            displays.forEach(function(display, i) {
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "secondary";
+              btn.appendChild(document.createTextNode(display.displayName));
+              btn.addEventListener("click", function(i){
+                env.goFullScreen(i, "Button");
+              }.bind(null, i), false);
+              c.appendChild(btn);
+            });
+          });
         });
-      });
     </script>
+    <style>#frontBuffer { background-image:url(screenshot.jpg); }</style>
   </head>
   <body><!-- start main.jade main block -->
     <h1>Example: Procedurally generated room</h1>

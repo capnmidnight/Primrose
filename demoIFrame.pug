@@ -1,0 +1,93 @@
+﻿doctype html
+html
+  head
+    meta(charset="utf-8")
+    block viewport
+      meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1")
+
+    meta(name="web-app-capable", content="yes")
+    meta(name="theme-color", content="black")
+    meta(name="apple-mobile-web-app-capable", content="yes")
+    meta(name="apple-mobile-web-app-status-bar-style", content="black")
+
+    meta(name="description", content="A WebVR application framework.")
+    meta(name="keywords", content="WebGL, WebVR, HTML5, JavaScript, text editor, source code editor, virtual reality, Primrose")
+
+    meta(property="og:type", content="website")
+    meta(name="twitter:card", content="summary_large_image")
+    meta(name="twitter:site", content="@Primrose_VR")
+
+    meta(property="og:site_name", content="Primrose VR")
+
+    meta(property="og:description", content="Primrose: Framework for WebVR Applications")
+    meta(name="twitter:description", content="Primrose: Framework for WebVR Applications")
+    meta(property="og:url", content="http://www.primrosevr.com/" + filePath)
+
+    <!-- start main.pug meta block -->
+    block meta
+    <!-- end main.pug meta block -->
+
+    <!-- start main.pug title block -->
+    block title
+      meta(property="og:title", content="Primrose VR: WebVR Application Framework")
+      meta(name="twitter:title", content="Primrose VR: WebVR Application Framework")
+      title Primrose VR: WebVR Application Framework
+    <!-- end main.pug title block -->
+
+    block head
+      if debug
+        link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
+        for file in bootstrapFiles
+          script(type="text/javascript", src=fileRoot + file)
+        for file in frameworkFiles
+          script(type="text/javascript", src=fileRoot + file)
+      else
+        style !{getFile("doc/demoUI" + cssExt)}
+        script(type="text/javascript").
+          !{getFile("node_modules/webvr-bootstrapper/webvr-bootstrapper" + jsExt)}
+      script(type="text/javascript").
+        WebVRBootstrapper(!{ manifest })
+          .then(function (startDownload) {
+            var p = document.querySelector("progress");
+            return startDownload(function (n, m) {
+              p.max = m;
+              p.value = n;
+            });
+          }).then(function () {
+            var p = document.querySelector("progress");
+            var c = document.getElementById("fullScreenButtonContainer");
+            p.style.display = "none";
+            navigator.getVRDisplays().then(function(displays){
+              displays.forEach(function(display, i) {
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "secondary";
+                btn.appendChild(document.createTextNode(display.displayName));
+                btn.addEventListener("click", function(i){
+                  env.goFullScreen(i, "Button");
+                }.bind(null, i), false);
+                c.appendChild(btn);
+              });
+            });
+          });
+      style #frontBuffer { background-image:url(screenshot.jpg); }
+  body
+    <!-- start main.pug main block -->
+    block main
+      canvas#frontBuffer
+      progress
+      #controls
+        #fullScreenButtonContainer
+        #loginForm(style="display:none")
+          button#closeButton.secondary &times;
+          h1 Create your personal VR meeting room
+          #roomNameRow.inputRow
+            input#roomName(type="text", placeholder="Pick a room name")
+            button#randomRoomName.primary &#x21bb;
+          br
+          #userNameRow.inputRow
+            input#userName(type="text", placeholder="Pick a username")
+            button#randomUserName.primary &#x21bb;
+            button#connect.primary &rarr;
+          #errorMessage(style="display:none")
+    <!-- end main.pug main block -->
