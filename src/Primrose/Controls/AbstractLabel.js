@@ -4,7 +4,7 @@ var COUNTER = 0;
 
 pliny.class({
   parent: "Primrose.Controls",
-    name: "Label",
+    name: "AbstractLabel",
     description: "A simple label of text to put on a Surface.",
     baseClass: "Primrose.Surface",
     parameters: [{

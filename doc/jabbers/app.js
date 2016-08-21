@@ -34,7 +34,7 @@ function eye(side, body) {
 }
 
 function Jabber(w, h, s) {
-  var skin = R.item(SKINS_VALUES),
+  var skin = R.item(Primrose.SKINS_VALUES),
     body = textured(sphere(0.2, 14, 7), skin),
     velocity = v3(
       R.number(-s, s),
@@ -68,10 +68,10 @@ function Jabber(w, h, s) {
       body.position.y = 1;
     }
     v.copy(body.position)
-      .sub(env.head.position);
+      .sub(env.input.head.position);
     var d = v.length();
     if (d < 3) {
-      body.lookAt(env.head.position);
+      body.lookAt(env.input.head.position);
       body.position.set(
         R.number(-0.01, 0.01),
         R.number(-0.01, 0.01),
@@ -86,6 +86,7 @@ function Jabber(w, h, s) {
     }
   };
   body.jump = function (normal) {
+    console.log(normal);
     v.fromArray(normal);
     v.y = env.options.gravity / 2;
     velocity.add(v);

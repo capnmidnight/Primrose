@@ -1,13 +1,5 @@
 "use strict";
 
-// If Three.js hasn't been loaded, then this module doesn't make sense and we
-// can just return a shim to prevent errors from occuring. This is useful in
-// cases where we want to use Primrose in a 2D context, or perhaps use it with
-// a different 3D library, whatever that might be.
-if (typeof (THREE) === "undefined") {
-  return function () {};
-}
-
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {

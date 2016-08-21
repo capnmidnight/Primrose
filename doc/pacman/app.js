@@ -163,6 +163,7 @@ function pacman() {
   console.log("Here we go");
   L("../models/ghost.obj")
     .then(function (ghost) {
+      console.log("ghost", ghost);
       ghosts = colors.map(function (color, i) {
         var g = ghost.clone(),
           body = g.children[0];
@@ -203,14 +204,14 @@ function pacman() {
       ghosts.forEach(function (g) {
         g.position.add(g.velocity.clone()
           .multiplyScalar(dt));
-        collisionCheck(dt, g, env.input.stage);
+        collisionCheck(dt, g, env.input.head);
       });
     }
-    collisionCheck(dt, env.input.stage, null);
+    collisionCheck(dt, env.input.head, null);
   }
 }
 
-env.addEventListener("keydown", function (evt) {
+window.addEventListener("keydown", function (evt) {
   if (evt[modA] && evt[modB]) {
     if (evt.keyCode === Primrose.Keys.E) {
       if (editorFrameMesh.visible && env.currentControl && env.currentControl.focused) {

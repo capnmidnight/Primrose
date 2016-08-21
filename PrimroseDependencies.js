@@ -1,2247 +1,3 @@
-"use strict";
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var logger = function () {
-  "use strict";
-
-  var send = null;
-
-  function cloneArgs(args) {
-    var output = [];
-    for (var i = 0; i < args.length; ++i) {
-      if (_typeof(args[i]) === "object" && !(args[i] instanceof String)) {
-        var obj1 = args[i],
-            obj2 = {};
-        for (var key in obj1) {
-          obj2[key] = obj1[key];
-          if (obj2[key] !== null && obj2[key] !== undefined) {
-            obj2[key] = obj2[key].toString();
-          }
-        }
-        output.push(obj2);
-      } else {
-        output.push(args[i].toString());
-      }
-    }
-    return output;
-  }
-
-  function wrap(name) {
-    var orig = name;
-    while (console[orig]) {
-      orig = "_" + orig;
-    }
-    console[orig] = console[name];
-    return function () {
-      console[orig].apply(console, arguments);
-      send(JSON.stringify({
-        name: name,
-        args: cloneArgs(arguments)
-      }));
-    };
-  }
-
-  var logger = {
-    setup: null,
-    DISABLED: 0,
-    HTTP: 1,
-    WEBSOCKET: 2,
-    DOM: 3,
-    USER: 4
-  };
-
-  logger.setup = function setup(type, target) {
-    if (type !== logger.DISABLED) {
-      if ((type === logger.HTTP || type === logger.WEBSOCKET) && location.protocol === "file:") {
-        console.warn("Can't perform HTTP requests from the file system. Not going to setup the error proxy, but will setup the error catch-all.");
-      } else if (type === logger.HTTP) {
-        send = function send(data) {
-          var req = new XMLHttpRequest();
-          req.open("POST", target);
-          req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-          req.send(data);
-        };
-      } else if (type === logger.WEBSOCKET) {
-        var socket = new WebSocket(target);
-        send = function send(data) {
-          socket.send(data);
-        };
-      } else if (type === logger.DOM) {
-        var output = document.querySelector(target);
-        send = function send(data) {
-          var elem = document.createElement("pre");
-          elem.appendChild(document.createTextNode(data));
-          output.appendChild(elem);
-        };
-      } else if (type === logger.USER) {
-        if (!(target instanceof Function)) {
-          console.warn("The target parameter was expected to be a function, but it was", target);
-        } else {
-          send = target;
-        }
-      }
-
-      if (send !== null) {
-        ["log", "info", "warn", "error"].forEach(function (n) {
-          console[n] = wrap(n);
-        });
-      }
-
-      window.onerror = function (message, source, lineno, colno, error) {
-        console.error(JSON.stringify({
-          time: new Date().toLocaleTimeString(),
-          message: message,
-          source: source,
-          lineno: lineno,
-          colno: colno,
-          error: error.message
-        }));
-      };
-    }
-  };
-
-  return logger;
-}();
-/**
- * marked - a markdown parser
- * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
- * https://github.com/chjj/marked
- */
-
-;(function() {
-
-/**
- * Block-Level Grammar
- */
-
-var block = {
-  newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
-  fences: noop,
-  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
-  nptable: noop,
-  lheading: /^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,
-  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
-  html: /^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,
-  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-  table: noop,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,
-  text: /^[^\n]+/
-};
-
-block.bullet = /(?:[*+-]|\d+\.)/;
-block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
-block.item = replace(block.item, 'gm')
-  (/bull/g, block.bullet)
-  ();
-
-block.list = replace(block.list)
-  (/bull/g, block.bullet)
-  ('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
-  ('def', '\\n+(?=' + block.def.source + ')')
-  ();
-
-block.blockquote = replace(block.blockquote)
-  ('def', block.def)
-  ();
-
-block._tag = '(?!(?:'
-  + 'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code'
-  + '|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo'
-  + '|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b';
-
-block.html = replace(block.html)
-  ('comment', /<!--[\s\S]*?-->/)
-  ('closed', /<(tag)[\s\S]+?<\/\1>/)
-  ('closing', /<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)
-  (/tag/g, block._tag)
-  ();
-
-block.paragraph = replace(block.paragraph)
-  ('hr', block.hr)
-  ('heading', block.heading)
-  ('lheading', block.lheading)
-  ('blockquote', block.blockquote)
-  ('tag', '<' + block._tag)
-  ('def', block.def)
-  ();
-
-/**
- * Normal Block Grammar
- */
-
-block.normal = merge({}, block);
-
-/**
- * GFM Block Grammar
- */
-
-block.gfm = merge({}, block.normal, {
-  fences: /^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\s*\1 *(?:\n+|$)/,
-  paragraph: /^/,
-  heading: /^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/
-});
-
-block.gfm.paragraph = replace(block.paragraph)
-  ('(?!', '(?!'
-    + block.gfm.fences.source.replace('\\1', '\\2') + '|'
-    + block.list.source.replace('\\1', '\\3') + '|')
-  ();
-
-/**
- * GFM + Tables Block Grammar
- */
-
-block.tables = merge({}, block.gfm, {
-  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/
-});
-
-/**
- * Block Lexer
- */
-
-function Lexer(options) {
-  this.tokens = [];
-  this.tokens.links = {};
-  this.options = options || marked.defaults;
-  this.rules = block.normal;
-
-  if (this.options.gfm) {
-    if (this.options.tables) {
-      this.rules = block.tables;
-    } else {
-      this.rules = block.gfm;
-    }
-  }
-}
-
-/**
- * Expose Block Rules
- */
-
-Lexer.rules = block;
-
-/**
- * Static Lex Method
- */
-
-Lexer.lex = function(src, options) {
-  var lexer = new Lexer(options);
-  return lexer.lex(src);
-};
-
-/**
- * Preprocessing
- */
-
-Lexer.prototype.lex = function(src) {
-  src = src
-    .replace(/\r\n|\r/g, '\n')
-    .replace(/\t/g, '    ')
-    .replace(/\u00a0/g, ' ')
-    .replace(/\u2424/g, '\n');
-
-  return this.token(src, true);
-};
-
-/**
- * Lexing
- */
-
-Lexer.prototype.token = function(src, top, bq) {
-  var src = src.replace(/^ +$/gm, '')
-    , next
-    , loose
-    , cap
-    , bull
-    , b
-    , item
-    , space
-    , i
-    , l;
-
-  while (src) {
-    // newline
-    if (cap = this.rules.newline.exec(src)) {
-      src = src.substring(cap[0].length);
-      if (cap[0].length > 1) {
-        this.tokens.push({
-          type: 'space'
-        });
-      }
-    }
-
-    // code
-    if (cap = this.rules.code.exec(src)) {
-      src = src.substring(cap[0].length);
-      cap = cap[0].replace(/^ {4}/gm, '');
-      this.tokens.push({
-        type: 'code',
-        text: !this.options.pedantic
-          ? cap.replace(/\n+$/, '')
-          : cap
-      });
-      continue;
-    }
-
-    // fences (gfm)
-    if (cap = this.rules.fences.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'code',
-        lang: cap[2],
-        text: cap[3] || ''
-      });
-      continue;
-    }
-
-    // heading
-    if (cap = this.rules.heading.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'heading',
-        depth: cap[1].length,
-        text: cap[2]
-      });
-      continue;
-    }
-
-    // table no leading pipe (gfm)
-    if (top && (cap = this.rules.nptable.exec(src))) {
-      src = src.substring(cap[0].length);
-
-      item = {
-        type: 'table',
-        header: cap[1].replace(/^ *| *\| *$/g, '').split(/ *\| */),
-        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-        cells: cap[3].replace(/\n$/, '').split('\n')
-      };
-
-      for (i = 0; i < item.align.length; i++) {
-        if (/^ *-+: *$/.test(item.align[i])) {
-          item.align[i] = 'right';
-        } else if (/^ *:-+: *$/.test(item.align[i])) {
-          item.align[i] = 'center';
-        } else if (/^ *:-+ *$/.test(item.align[i])) {
-          item.align[i] = 'left';
-        } else {
-          item.align[i] = null;
-        }
-      }
-
-      for (i = 0; i < item.cells.length; i++) {
-        item.cells[i] = item.cells[i].split(/ *\| */);
-      }
-
-      this.tokens.push(item);
-
-      continue;
-    }
-
-    // lheading
-    if (cap = this.rules.lheading.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'heading',
-        depth: cap[2] === '=' ? 1 : 2,
-        text: cap[1]
-      });
-      continue;
-    }
-
-    // hr
-    if (cap = this.rules.hr.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'hr'
-      });
-      continue;
-    }
-
-    // blockquote
-    if (cap = this.rules.blockquote.exec(src)) {
-      src = src.substring(cap[0].length);
-
-      this.tokens.push({
-        type: 'blockquote_start'
-      });
-
-      cap = cap[0].replace(/^ *> ?/gm, '');
-
-      // Pass `top` to keep the current
-      // "toplevel" state. This is exactly
-      // how markdown.pl works.
-      this.token(cap, top, true);
-
-      this.tokens.push({
-        type: 'blockquote_end'
-      });
-
-      continue;
-    }
-
-    // list
-    if (cap = this.rules.list.exec(src)) {
-      src = src.substring(cap[0].length);
-      bull = cap[2];
-
-      this.tokens.push({
-        type: 'list_start',
-        ordered: bull.length > 1
-      });
-
-      // Get each top-level item.
-      cap = cap[0].match(this.rules.item);
-
-      next = false;
-      l = cap.length;
-      i = 0;
-
-      for (; i < l; i++) {
-        item = cap[i];
-
-        // Remove the list item's bullet
-        // so it is seen as the next token.
-        space = item.length;
-        item = item.replace(/^ *([*+-]|\d+\.) +/, '');
-
-        // Outdent whatever the
-        // list item contains. Hacky.
-        if (~item.indexOf('\n ')) {
-          space -= item.length;
-          item = !this.options.pedantic
-            ? item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
-            : item.replace(/^ {1,4}/gm, '');
-        }
-
-        // Determine whether the next list item belongs here.
-        // Backpedal if it does not belong in this list.
-        if (this.options.smartLists && i !== l - 1) {
-          b = block.bullet.exec(cap[i + 1])[0];
-          if (bull !== b && !(bull.length > 1 && b.length > 1)) {
-            src = cap.slice(i + 1).join('\n') + src;
-            i = l - 1;
-          }
-        }
-
-        // Determine whether item is loose or not.
-        // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-        // for discount behavior.
-        loose = next || /\n\n(?!\s*$)/.test(item);
-        if (i !== l - 1) {
-          next = item.charAt(item.length - 1) === '\n';
-          if (!loose) loose = next;
-        }
-
-        this.tokens.push({
-          type: loose
-            ? 'loose_item_start'
-            : 'list_item_start'
-        });
-
-        // Recurse.
-        this.token(item, false, bq);
-
-        this.tokens.push({
-          type: 'list_item_end'
-        });
-      }
-
-      this.tokens.push({
-        type: 'list_end'
-      });
-
-      continue;
-    }
-
-    // html
-    if (cap = this.rules.html.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: this.options.sanitize
-          ? 'paragraph'
-          : 'html',
-        pre: !this.options.sanitizer
-          && (cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style'),
-        text: cap[0]
-      });
-      continue;
-    }
-
-    // def
-    if ((!bq && top) && (cap = this.rules.def.exec(src))) {
-      src = src.substring(cap[0].length);
-      this.tokens.links[cap[1].toLowerCase()] = {
-        href: cap[2],
-        title: cap[3]
-      };
-      continue;
-    }
-
-    // table (gfm)
-    if (top && (cap = this.rules.table.exec(src))) {
-      src = src.substring(cap[0].length);
-
-      item = {
-        type: 'table',
-        header: cap[1].replace(/^ *| *\| *$/g, '').split(/ *\| */),
-        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-        cells: cap[3].replace(/(?: *\| *)?\n$/, '').split('\n')
-      };
-
-      for (i = 0; i < item.align.length; i++) {
-        if (/^ *-+: *$/.test(item.align[i])) {
-          item.align[i] = 'right';
-        } else if (/^ *:-+: *$/.test(item.align[i])) {
-          item.align[i] = 'center';
-        } else if (/^ *:-+ *$/.test(item.align[i])) {
-          item.align[i] = 'left';
-        } else {
-          item.align[i] = null;
-        }
-      }
-
-      for (i = 0; i < item.cells.length; i++) {
-        item.cells[i] = item.cells[i]
-          .replace(/^ *\| *| *\| *$/g, '')
-          .split(/ *\| */);
-      }
-
-      this.tokens.push(item);
-
-      continue;
-    }
-
-    // top-level paragraph
-    if (top && (cap = this.rules.paragraph.exec(src))) {
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'paragraph',
-        text: cap[1].charAt(cap[1].length - 1) === '\n'
-          ? cap[1].slice(0, -1)
-          : cap[1]
-      });
-      continue;
-    }
-
-    // text
-    if (cap = this.rules.text.exec(src)) {
-      // Top-level should never reach here.
-      src = src.substring(cap[0].length);
-      this.tokens.push({
-        type: 'text',
-        text: cap[0]
-      });
-      continue;
-    }
-
-    if (src) {
-      throw new
-        Error('Infinite loop on byte: ' + src.charCodeAt(0));
-    }
-  }
-
-  return this.tokens;
-};
-
-/**
- * Inline-Level Grammar
- */
-
-var inline = {
-  escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
-  autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
-  url: noop,
-  tag: /^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,
-  link: /^!?\[(inside)\]\(href\)/,
-  reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
-  nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
-  strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
-  em: /^\b_((?:[^_]|__)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
-  code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
-  br: /^ {2,}\n(?!\s*$)/,
-  del: noop,
-  text: /^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/
-};
-
-inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;
-inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;
-
-inline.link = replace(inline.link)
-  ('inside', inline._inside)
-  ('href', inline._href)
-  ();
-
-inline.reflink = replace(inline.reflink)
-  ('inside', inline._inside)
-  ();
-
-/**
- * Normal Inline Grammar
- */
-
-inline.normal = merge({}, inline);
-
-/**
- * Pedantic Inline Grammar
- */
-
-inline.pedantic = merge({}, inline.normal, {
-  strong: /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
-  em: /^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/
-});
-
-/**
- * GFM Inline Grammar
- */
-
-inline.gfm = merge({}, inline.normal, {
-  escape: replace(inline.escape)('])', '~|])')(),
-  url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
-  del: /^~~(?=\S)([\s\S]*?\S)~~/,
-  text: replace(inline.text)
-    (']|', '~]|')
-    ('|', '|https?://|')
-    ()
-});
-
-/**
- * GFM + Line Breaks Inline Grammar
- */
-
-inline.breaks = merge({}, inline.gfm, {
-  br: replace(inline.br)('{2,}', '*')(),
-  text: replace(inline.gfm.text)('{2,}', '*')()
-});
-
-/**
- * Inline Lexer & Compiler
- */
-
-function InlineLexer(links, options) {
-  this.options = options || marked.defaults;
-  this.links = links;
-  this.rules = inline.normal;
-  this.renderer = this.options.renderer || new Renderer;
-  this.renderer.options = this.options;
-
-  if (!this.links) {
-    throw new
-      Error('Tokens array requires a `links` property.');
-  }
-
-  if (this.options.gfm) {
-    if (this.options.breaks) {
-      this.rules = inline.breaks;
-    } else {
-      this.rules = inline.gfm;
-    }
-  } else if (this.options.pedantic) {
-    this.rules = inline.pedantic;
-  }
-}
-
-/**
- * Expose Inline Rules
- */
-
-InlineLexer.rules = inline;
-
-/**
- * Static Lexing/Compiling Method
- */
-
-InlineLexer.output = function(src, links, options) {
-  var inline = new InlineLexer(links, options);
-  return inline.output(src);
-};
-
-/**
- * Lexing/Compiling
- */
-
-InlineLexer.prototype.output = function(src) {
-  var out = ''
-    , link
-    , text
-    , href
-    , cap;
-
-  while (src) {
-    // escape
-    if (cap = this.rules.escape.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += cap[1];
-      continue;
-    }
-
-    // autolink
-    if (cap = this.rules.autolink.exec(src)) {
-      src = src.substring(cap[0].length);
-      if (cap[2] === '@') {
-        text = cap[1].charAt(6) === ':'
-          ? this.mangle(cap[1].substring(7))
-          : this.mangle(cap[1]);
-        href = this.mangle('mailto:') + text;
-      } else {
-        text = escape(cap[1]);
-        href = text;
-      }
-      out += this.renderer.link(href, null, text);
-      continue;
-    }
-
-    // url (gfm)
-    if (!this.inLink && (cap = this.rules.url.exec(src))) {
-      src = src.substring(cap[0].length);
-      text = escape(cap[1]);
-      href = text;
-      out += this.renderer.link(href, null, text);
-      continue;
-    }
-
-    // tag
-    if (cap = this.rules.tag.exec(src)) {
-      if (!this.inLink && /^<a /i.test(cap[0])) {
-        this.inLink = true;
-      } else if (this.inLink && /^<\/a>/i.test(cap[0])) {
-        this.inLink = false;
-      }
-      src = src.substring(cap[0].length);
-      out += this.options.sanitize
-        ? this.options.sanitizer
-          ? this.options.sanitizer(cap[0])
-          : escape(cap[0])
-        : cap[0]
-      continue;
-    }
-
-    // link
-    if (cap = this.rules.link.exec(src)) {
-      src = src.substring(cap[0].length);
-      this.inLink = true;
-      out += this.outputLink(cap, {
-        href: cap[2],
-        title: cap[3]
-      });
-      this.inLink = false;
-      continue;
-    }
-
-    // reflink, nolink
-    if ((cap = this.rules.reflink.exec(src))
-        || (cap = this.rules.nolink.exec(src))) {
-      src = src.substring(cap[0].length);
-      link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
-      link = this.links[link.toLowerCase()];
-      if (!link || !link.href) {
-        out += cap[0].charAt(0);
-        src = cap[0].substring(1) + src;
-        continue;
-      }
-      this.inLink = true;
-      out += this.outputLink(cap, link);
-      this.inLink = false;
-      continue;
-    }
-
-    // strong
-    if (cap = this.rules.strong.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.strong(this.output(cap[2] || cap[1]));
-      continue;
-    }
-
-    // em
-    if (cap = this.rules.em.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.em(this.output(cap[2] || cap[1]));
-      continue;
-    }
-
-    // code
-    if (cap = this.rules.code.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.codespan(escape(cap[2], true));
-      continue;
-    }
-
-    // br
-    if (cap = this.rules.br.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.br();
-      continue;
-    }
-
-    // del (gfm)
-    if (cap = this.rules.del.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.del(this.output(cap[1]));
-      continue;
-    }
-
-    // text
-    if (cap = this.rules.text.exec(src)) {
-      src = src.substring(cap[0].length);
-      out += this.renderer.text(escape(this.smartypants(cap[0])));
-      continue;
-    }
-
-    if (src) {
-      throw new
-        Error('Infinite loop on byte: ' + src.charCodeAt(0));
-    }
-  }
-
-  return out;
-};
-
-/**
- * Compile Link
- */
-
-InlineLexer.prototype.outputLink = function(cap, link) {
-  var href = escape(link.href)
-    , title = link.title ? escape(link.title) : null;
-
-  return cap[0].charAt(0) !== '!'
-    ? this.renderer.link(href, title, this.output(cap[1]))
-    : this.renderer.image(href, title, escape(cap[1]));
-};
-
-/**
- * Smartypants Transformations
- */
-
-InlineLexer.prototype.smartypants = function(text) {
-  if (!this.options.smartypants) return text;
-  return text
-    // em-dashes
-    .replace(/---/g, '\u2014')
-    // en-dashes
-    .replace(/--/g, '\u2013')
-    // opening singles
-    .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
-    // closing singles & apostrophes
-    .replace(/'/g, '\u2019')
-    // opening doubles
-    .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
-    // closing doubles
-    .replace(/"/g, '\u201d')
-    // ellipses
-    .replace(/\.{3}/g, '\u2026');
-};
-
-/**
- * Mangle Links
- */
-
-InlineLexer.prototype.mangle = function(text) {
-  if (!this.options.mangle) return text;
-  var out = ''
-    , l = text.length
-    , i = 0
-    , ch;
-
-  for (; i < l; i++) {
-    ch = text.charCodeAt(i);
-    if (Math.random() > 0.5) {
-      ch = 'x' + ch.toString(16);
-    }
-    out += '&#' + ch + ';';
-  }
-
-  return out;
-};
-
-/**
- * Renderer
- */
-
-function Renderer(options) {
-  this.options = options || {};
-}
-
-Renderer.prototype.code = function(code, lang, escaped) {
-  if (this.options.highlight) {
-    var out = this.options.highlight(code, lang);
-    if (out != null && out !== code) {
-      escaped = true;
-      code = out;
-    }
-  }
-
-  if (!lang) {
-    return '<pre><code>'
-      + (escaped ? code : escape(code, true))
-      + '\n</code></pre>';
-  }
-
-  return '<pre><code class="'
-    + this.options.langPrefix
-    + escape(lang, true)
-    + '">'
-    + (escaped ? code : escape(code, true))
-    + '\n</code></pre>\n';
-};
-
-Renderer.prototype.blockquote = function(quote) {
-  return '<blockquote>\n' + quote + '</blockquote>\n';
-};
-
-Renderer.prototype.html = function(html) {
-  return html;
-};
-
-Renderer.prototype.heading = function(text, level, raw) {
-  return '<h'
-    + level
-    + ' id="'
-    + this.options.headerPrefix
-    + raw.toLowerCase().replace(/[^\w]+/g, '-')
-    + '">'
-    + text
-    + '</h'
-    + level
-    + '>\n';
-};
-
-Renderer.prototype.hr = function() {
-  return this.options.xhtml ? '<hr/>\n' : '<hr>\n';
-};
-
-Renderer.prototype.list = function(body, ordered) {
-  var type = ordered ? 'ol' : 'ul';
-  return '<' + type + '>\n' + body + '</' + type + '>\n';
-};
-
-Renderer.prototype.listitem = function(text) {
-  return '<li>' + text + '</li>\n';
-};
-
-Renderer.prototype.paragraph = function(text) {
-  return '<p>' + text + '</p>\n';
-};
-
-Renderer.prototype.table = function(header, body) {
-  return '<table>\n'
-    + '<thead>\n'
-    + header
-    + '</thead>\n'
-    + '<tbody>\n'
-    + body
-    + '</tbody>\n'
-    + '</table>\n';
-};
-
-Renderer.prototype.tablerow = function(content) {
-  return '<tr>\n' + content + '</tr>\n';
-};
-
-Renderer.prototype.tablecell = function(content, flags) {
-  var type = flags.header ? 'th' : 'td';
-  var tag = flags.align
-    ? '<' + type + ' style="text-align:' + flags.align + '">'
-    : '<' + type + '>';
-  return tag + content + '</' + type + '>\n';
-};
-
-// span level renderer
-Renderer.prototype.strong = function(text) {
-  return '<strong>' + text + '</strong>';
-};
-
-Renderer.prototype.em = function(text) {
-  return '<em>' + text + '</em>';
-};
-
-Renderer.prototype.codespan = function(text) {
-  return '<code>' + text + '</code>';
-};
-
-Renderer.prototype.br = function() {
-  return this.options.xhtml ? '<br/>' : '<br>';
-};
-
-Renderer.prototype.del = function(text) {
-  return '<del>' + text + '</del>';
-};
-
-Renderer.prototype.link = function(href, title, text) {
-  if (this.options.sanitize) {
-    try {
-      var prot = decodeURIComponent(unescape(href))
-        .replace(/[^\w:]/g, '')
-        .toLowerCase();
-    } catch (e) {
-      return '';
-    }
-    if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0) {
-      return '';
-    }
-  }
-  var out = '<a href="' + href + '"';
-  if (title) {
-    out += ' title="' + title + '"';
-  }
-  out += '>' + text + '</a>';
-  return out;
-};
-
-Renderer.prototype.image = function(href, title, text) {
-  var out = '<img src="' + href + '" alt="' + text + '"';
-  if (title) {
-    out += ' title="' + title + '"';
-  }
-  out += this.options.xhtml ? '/>' : '>';
-  return out;
-};
-
-Renderer.prototype.text = function(text) {
-  return text;
-};
-
-/**
- * Parsing & Compiling
- */
-
-function Parser(options) {
-  this.tokens = [];
-  this.token = null;
-  this.options = options || marked.defaults;
-  this.options.renderer = this.options.renderer || new Renderer;
-  this.renderer = this.options.renderer;
-  this.renderer.options = this.options;
-}
-
-/**
- * Static Parse Method
- */
-
-Parser.parse = function(src, options, renderer) {
-  var parser = new Parser(options, renderer);
-  return parser.parse(src);
-};
-
-/**
- * Parse Loop
- */
-
-Parser.prototype.parse = function(src) {
-  this.inline = new InlineLexer(src.links, this.options, this.renderer);
-  this.tokens = src.reverse();
-
-  var out = '';
-  while (this.next()) {
-    out += this.tok();
-  }
-
-  return out;
-};
-
-/**
- * Next Token
- */
-
-Parser.prototype.next = function() {
-  return this.token = this.tokens.pop();
-};
-
-/**
- * Preview Next Token
- */
-
-Parser.prototype.peek = function() {
-  return this.tokens[this.tokens.length - 1] || 0;
-};
-
-/**
- * Parse Text Tokens
- */
-
-Parser.prototype.parseText = function() {
-  var body = this.token.text;
-
-  while (this.peek().type === 'text') {
-    body += '\n' + this.next().text;
-  }
-
-  return this.inline.output(body);
-};
-
-/**
- * Parse Current Token
- */
-
-Parser.prototype.tok = function() {
-  switch (this.token.type) {
-    case 'space': {
-      return '';
-    }
-    case 'hr': {
-      return this.renderer.hr();
-    }
-    case 'heading': {
-      return this.renderer.heading(
-        this.inline.output(this.token.text),
-        this.token.depth,
-        this.token.text);
-    }
-    case 'code': {
-      return this.renderer.code(this.token.text,
-        this.token.lang,
-        this.token.escaped);
-    }
-    case 'table': {
-      var header = ''
-        , body = ''
-        , i
-        , row
-        , cell
-        , flags
-        , j;
-
-      // header
-      cell = '';
-      for (i = 0; i < this.token.header.length; i++) {
-        flags = { header: true, align: this.token.align[i] };
-        cell += this.renderer.tablecell(
-          this.inline.output(this.token.header[i]),
-          { header: true, align: this.token.align[i] }
-        );
-      }
-      header += this.renderer.tablerow(cell);
-
-      for (i = 0; i < this.token.cells.length; i++) {
-        row = this.token.cells[i];
-
-        cell = '';
-        for (j = 0; j < row.length; j++) {
-          cell += this.renderer.tablecell(
-            this.inline.output(row[j]),
-            { header: false, align: this.token.align[j] }
-          );
-        }
-
-        body += this.renderer.tablerow(cell);
-      }
-      return this.renderer.table(header, body);
-    }
-    case 'blockquote_start': {
-      var body = '';
-
-      while (this.next().type !== 'blockquote_end') {
-        body += this.tok();
-      }
-
-      return this.renderer.blockquote(body);
-    }
-    case 'list_start': {
-      var body = ''
-        , ordered = this.token.ordered;
-
-      while (this.next().type !== 'list_end') {
-        body += this.tok();
-      }
-
-      return this.renderer.list(body, ordered);
-    }
-    case 'list_item_start': {
-      var body = '';
-
-      while (this.next().type !== 'list_item_end') {
-        body += this.token.type === 'text'
-          ? this.parseText()
-          : this.tok();
-      }
-
-      return this.renderer.listitem(body);
-    }
-    case 'loose_item_start': {
-      var body = '';
-
-      while (this.next().type !== 'list_item_end') {
-        body += this.tok();
-      }
-
-      return this.renderer.listitem(body);
-    }
-    case 'html': {
-      var html = !this.token.pre && !this.options.pedantic
-        ? this.inline.output(this.token.text)
-        : this.token.text;
-      return this.renderer.html(html);
-    }
-    case 'paragraph': {
-      return this.renderer.paragraph(this.inline.output(this.token.text));
-    }
-    case 'text': {
-      return this.renderer.paragraph(this.parseText());
-    }
-  }
-};
-
-/**
- * Helpers
- */
-
-function escape(html, encode) {
-  return html
-    .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function unescape(html) {
-	// explicitly match decimal, hex, and named HTML entities 
-  return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function(_, n) {
-    n = n.toLowerCase();
-    if (n === 'colon') return ':';
-    if (n.charAt(0) === '#') {
-      return n.charAt(1) === 'x'
-        ? String.fromCharCode(parseInt(n.substring(2), 16))
-        : String.fromCharCode(+n.substring(1));
-    }
-    return '';
-  });
-}
-
-function replace(regex, opt) {
-  regex = regex.source;
-  opt = opt || '';
-  return function self(name, val) {
-    if (!name) return new RegExp(regex, opt);
-    val = val.source || val;
-    val = val.replace(/(^|[^\[])\^/g, '$1');
-    regex = regex.replace(name, val);
-    return self;
-  };
-}
-
-function noop() {}
-noop.exec = noop;
-
-function merge(obj) {
-  var i = 1
-    , target
-    , key;
-
-  for (; i < arguments.length; i++) {
-    target = arguments[i];
-    for (key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        obj[key] = target[key];
-      }
-    }
-  }
-
-  return obj;
-}
-
-
-/**
- * Marked
- */
-
-function marked(src, opt, callback) {
-  if (callback || typeof opt === 'function') {
-    if (!callback) {
-      callback = opt;
-      opt = null;
-    }
-
-    opt = merge({}, marked.defaults, opt || {});
-
-    var highlight = opt.highlight
-      , tokens
-      , pending
-      , i = 0;
-
-    try {
-      tokens = Lexer.lex(src, opt)
-    } catch (e) {
-      return callback(e);
-    }
-
-    pending = tokens.length;
-
-    var done = function(err) {
-      if (err) {
-        opt.highlight = highlight;
-        return callback(err);
-      }
-
-      var out;
-
-      try {
-        out = Parser.parse(tokens, opt);
-      } catch (e) {
-        err = e;
-      }
-
-      opt.highlight = highlight;
-
-      return err
-        ? callback(err)
-        : callback(null, out);
-    };
-
-    if (!highlight || highlight.length < 3) {
-      return done();
-    }
-
-    delete opt.highlight;
-
-    if (!pending) return done();
-
-    for (; i < tokens.length; i++) {
-      (function(token) {
-        if (token.type !== 'code') {
-          return --pending || done();
-        }
-        return highlight(token.text, token.lang, function(err, code) {
-          if (err) return done(err);
-          if (code == null || code === token.text) {
-            return --pending || done();
-          }
-          token.text = code;
-          token.escaped = true;
-          --pending || done();
-        });
-      })(tokens[i]);
-    }
-
-    return;
-  }
-  try {
-    if (opt) opt = merge({}, marked.defaults, opt);
-    return Parser.parse(Lexer.lex(src, opt), opt);
-  } catch (e) {
-    e.message += '\nPlease report this to https://github.com/chjj/marked.';
-    if ((opt || marked.defaults).silent) {
-      return '<p>An error occured:</p><pre>'
-        + escape(e.message + '', true)
-        + '</pre>';
-    }
-    throw e;
-  }
-}
-
-/**
- * Options
- */
-
-marked.options =
-marked.setOptions = function(opt) {
-  merge(marked.defaults, opt);
-  return marked;
-};
-
-marked.defaults = {
-  gfm: true,
-  tables: true,
-  breaks: false,
-  pedantic: false,
-  sanitize: false,
-  sanitizer: null,
-  mangle: true,
-  smartLists: false,
-  silent: false,
-  highlight: null,
-  langPrefix: 'lang-',
-  smartypants: false,
-  headerPrefix: '',
-  renderer: new Renderer,
-  xhtml: false
-};
-
-/**
- * Expose
- */
-
-marked.Parser = Parser;
-marked.parser = Parser.parse;
-
-marked.Renderer = Renderer;
-
-marked.Lexer = Lexer;
-marked.lexer = Lexer.lex;
-
-marked.InlineLexer = InlineLexer;
-marked.inlineLexer = InlineLexer.output;
-
-marked.parse = marked;
-
-if (typeof module !== 'undefined' && typeof exports === 'object') {
-  module.exports = marked;
-} else if (typeof define === 'function' && define.amd) {
-  define(function() { return marked; });
-} else {
-  this.marked = marked;
-}
-
-}).call(function() {
-  return this || (typeof window !== 'undefined' ? window : global);
-}());
-
-;(function(root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define([], factory);
-  } else if (typeof exports === 'object') {
-    module.exports = factory();
-  } else {
-    root.pliny = factory();
-  }
-}(this, function() {
-"use strict";
-
-/*
- * Copyright (C) 2016 Sean T. McBeth
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-////////////////////////////////////////////////////////////////////////////
-// Pliny's author is not smart enough to figure out how to make it        //
-// possible to use it to document itself, so here's a bunch of comments.  //
-////////////////////////////////////////////////////////////////////////////
-
-
-// Pliny is a documentation construction system. You create live documentation
-// objects on code assets with pliny, then you read back those documentation objects
-// with pliny.
-//
-// Pliny is also capable of generating HTML output for your documentation.
-//
-// Pliny is named after Gaius Plinius Secundus (https://en.wikipedia.org/wiki/Pliny_the_Elder),
-// a scholar and hero, who died trying to save people from the eruption of Mount
-// Vesuvius during the destruction of Pompeii. Also, his nephew Gaius Plinius Caecilius Secundus
-// (https://en.wikipedia.org/wiki/Pliny_the_Younger), through whom we know his uncle.
-
-// Walks through dot-accessors to retrieve an object out of a root object.
-//
-// @param {Object} bag - the root object.
-// @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
-// @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
-function openBag(bag, name) {
-  // Break up the object path
-  return name.split(".")
-  // Recurse through objects until we either run out of objects or find the
-  // one we're looking for.
-  .reduce(function (obj, p) {
-    return obj[p];
-  }, bag);
-}
-
-var pliny = function (require) {
-  "use strict";
-
-  var markdown = require("marked");
-
-  // The default storage location.
-  var database = {
-    fieldType: "database",
-    fullName: "[Global]",
-    id: "Global",
-    description: "These are the elements in the global namespace."
-  };
-
-  function hash(buf) {
-    var s1 = 1,
-        s2 = 0,
-        buffer = buf.split("").map(function (c) {
-      return c.charCodeAt(0);
-    });
-
-    for (var n = 0; n < buffer.length; ++n) {
-      s1 = (s1 + buffer[n]) % 32771;
-      s2 = (s2 + s1) % 32771;
-    }
-    return s2 << 8 | s1;
-  }
-
-  // Figures out if the maybeName parameter is a bag or a string path to a bag,
-  // then either gives you back the bag, or finds the bag that the path refers to
-  // and gives you that.
-  //
-  // @param {Object} bag - the root object.
-  // @param {String} maybeName - a period-delimited list of object accessors, naming the object we want to access.
-  // @returns {Object} - the object we asked for, or undefined, if it doesn't exist.
-  function resolveBag(bag, maybeName) {
-    if (typeof maybeName === "string" || maybeName instanceof String) {
-      return openBag(bag, maybeName);
-    } else {
-      return maybeName;
-    }
-  }
-
-  /////
-  // Fills in intermediate levels of an object tree to make the full object tree
-  // accessible, in the documentation database.
-  //
-  // @param {String} name - a period-delimited list of object accessors, naming the object we want to fill in.
-  // @param {Object} rootObject - the object on which to fill in values.
-  // @returns {Object} - the leaf-level filled-in object.
-  ///
-  function fillBag(name) {
-    // Start at the top level.
-    var bag = database;
-    if (typeof name !== "undefined" && name.length > 0) {
-      // Break up the object path.
-      var parts = name.split("."),
-
-
-      // We'll be rebuilding the path as we go, so we can name intermediate objects.
-      path = "",
-
-
-      // The first time we extend the path, it doesn't get a period seperator.
-      sep = "";
-      // Walk through the object tree.
-      for (var i = 0; i < parts.length; ++i) {
-        // Fill in any missing objects.
-        if (typeof bag[parts[i]] === "undefined") {
-          bag[parts[i]] = {};
-        }
-
-        path += sep + parts[i];
-        sep = ".";
-
-        // Drill down into the tree.
-        bag = bag[parts[i]];
-
-        // If we have a name, and the object hasn't already been named, then we
-        // give it a name.
-        if (path.length > 0 && !bag.name) {
-          bag.name = path;
-        }
-      }
-    }
-    return bag;
-  }
-
-  /////
-  // Reads the documentation metadata and builds up the documentation database.
-  //
-  // @param {String} fieldType - the name of the type of object for which we're reading metadata: function, class, namespace, etc.
-  // @param {String} info - the metadata object the user provided us.
-  ///
-  function analyzeObject(fieldType, info) {
-    // If the user didn't supply a type for the metadata object, we infer it
-    // from context.
-    if (typeof info.fieldType === 'undefined') {
-      info.fieldType = fieldType;
-    }
-
-    // Find out where we're going to store the object in the metadata database and where in the parent object we're going to store the documentation object.
-    var parentBag = fillBag(info.parent || ""),
-        pluralName = fieldType + "s";
-    pluralName = pluralName.replace(/ys$/, "ies").replace(/ss$/, "ses");
-    if (!parentBag[pluralName]) {
-      parentBag[pluralName] = [];
-    }
-    var arr = parentBag[pluralName];
-
-    // Make sure we haven't already stored an object by this name.
-    var found = false;
-    for (var i = 0; i < arr.length; ++i) {
-      if (arr[i].name === info.name) {
-        found = true;
-      }
-    }
-
-    if (!found) {
-      var subArrays = {};
-
-      ["examples", "issues", "comments"].forEach(function (k) {
-        if (typeof info[k] !== "undefined") {
-          subArrays[k] = info[k];
-          delete info[k];
-        }
-      });
-
-      // After we copy the metadata, we get back the documentation database object
-      // that will store the fuller data we get from other objects.
-      info = copyObjectMetadata(info);
-
-      arr.push(info);
-
-      // Handle other parent-child relationships.
-      if (info.fieldType === "class" && info.baseClass) {
-        if (info.parent === undefined) {
-          info.parent = info.baseClass;
-        }
-        pliny.subClass(info);
-      }
-
-      for (var k in subArrays) {
-        var subArr = subArrays[k],
-            type = k.substring(0, k.length - 1);
-        for (var i = 0; i < subArr.length; ++i) {
-          if (subArr[i].parent === undefined) {
-            subArr[i].parent = info.fullName.replace(/::/g, ".");
-          }
-          pliny[type](subArr[i]);
-        }
-      }
-    }
-  }
-
-  /////
-  // Copies all of the data the user entered for metadata to the documetation
-  // object in the documentation database.
-  //
-  // @param {String} name - a period-delimited list of object accessors, naming the documentation object we want to create.
-  // @param {Object} info - the metadata object from the user.
-  // @returns the documentation object that we created.
-  ///
-  function copyObjectMetadata(info) {
-    var fullName = (info.parent && info.parent + "." || "") + info.name,
-        bag = fillBag(fullName);
-
-    // Make sure we aren't setting the data for a second time.
-    if (!bag.fieldType) {
-
-      // Copy all the fields! ALL THE FIELDS!
-      // TODO: don't copy metadata directly to bag object. The bag objects are used
-      // as the search path for finding code objects, and some of the metadata field
-      // names might clash with code object field names. Maybe have a new metadata
-      // table.
-      for (var k in info) {
-        bag[k] = info[k];
-      }
-
-      // The fullName is used in titles on documentation articles.
-      if (!bag.fullName) {
-        if (bag.fieldType === "issue") {
-          Object.defineProperty(bag, "issueID", {
-            get: function get() {
-              return hash(this.parent + "." + this.name);
-            }
-          });
-        }
-        Object.defineProperty(bag, "fullName", {
-          get: function get() {
-            var output = "";
-            if (this.parent) {
-              output += this.parent;
-
-              // Print the seperator between the parent identifier and the name of
-              // the object.
-              if (this.fieldType === "method" || this.fieldType === "property" || this.fieldType === "event") {
-                // Methods, properties, and events aren't invokable from their class
-                // objects, so print them in a different way that doesn't suggest you
-                // can dot-access them. I'm using the typical C++ notation for member
-                // fields here.
-                output += "::";
-              } else if (this.fieldType === "example" || this.fieldType === "issue") {
-                output += ": ";
-              } else {
-                output += ".";
-              }
-            }
-            output += this.name;
-            return output;
-          }
-        });
-      }
-
-      // The ID is used to make DOM elements.
-      if (!bag.id) {
-        Object.defineProperty(bag, "id", {
-          get: function get() {
-            return this.fullName.replace(/(\.|:)/g, "_").replace(/ /g, "");
-          }
-        });
-      }
-
-      // We try to see if the real object exists yet (whether the documentation
-      // before or after the object it is documenting). If it doesn't, then we
-      // wait a small amount of time for the rest of the script to execute and
-      // then pick up where we left off.
-      if (!setContextualHelp(fullName)) {
-        // The setTimeout is to allow the script to continue to load after this
-        // particular function has called, so that more of the script can be
-        // inspected.
-        setTimeout(setContextualHelp, 1, fullName);
-      }
-    }
-    return bag;
-  }
-
-  function setEnumerationValues(name) {
-    var enumeration = null;
-    try {
-      enumeration = require(name);
-    } catch (exp) {
-      enumeration = null;
-    }
-    if (!enumeration) {
-      setTimeout(setEnumerationValues, 1, name);
-    } else {
-      for (var key in enumeration) {
-        var val = enumeration[key];
-        if (enumeration.hasOwnProperty(key) && typeof val === "number") {
-          pliny.value({
-            parent: name,
-            name: key,
-            type: "Number",
-            description: val.toString(),
-            value: val
-          });
-        }
-      }
-    }
-  };
-
-  var scriptPattern = /\bpliny\s*\.\s*(\w+)/gm;
-  /////
-  // Finds the actual object in the scope hierarchy, and looks for contextual scripts that might be defined in this object
-  //
-  // @param {String} name - a period-delimited list of object accessors, naming the real object we want to access.
-  // @returns {Object} - the actual object the name refers to, or undefined if such an object exists.
-  ///
-  function setContextualHelp(name) {
-    // Find the real object
-    var obj = openBag(database, name);
-    if (obj) {
-      if (obj.fieldType === "enumeration") {
-        setEnumerationValues(obj.parent + "." + obj.name);
-      }
-      // Look for contextual scripts
-      if (typeof obj === "function") {
-        var script = obj.toString(),
-            match = null;
-        while (!!(match = scriptPattern.exec(script))) {
-          var fieldType = match[1],
-              start = match.index + match[0].length,
-              fieldInfo = getFieldInfo(script.substring(start));
-          // Shove in the context.
-          if (fieldInfo.parent === undefined) {
-            fieldInfo.parent = name;
-          }
-
-          // And follow the normal documentation path.
-          pliny[fieldType].call(null, fieldInfo);
-        }
-      }
-    }
-    return obj;
-  }
-
-  /////
-  // When a documentation script is included inside of a function, we need to
-  // read the script and parse out the JSON objects so we can later execute
-  // the documentation function safely, i.e. not use eval().
-  //
-  // @param {String} script - the source code of the containing function.
-  // @return {Array} - a list of JSON-parsed objects that are the parameters specified at the documentation function call-site (i.e. sans context)
-  ///
-  function getFieldInfo(script) {
-    var parameters = [],
-        start = 0,
-        scopeLevel = 0,
-        inString = false,
-        stringToken = null;
-
-    // Walk over the script...
-    for (var i = 0; i < script.length; ++i) {
-      // ... a character at a time
-      var c = script.charAt(i);
-
-      // Keep track of whether or not we're in a string. We're looking for any
-      // quotation marks that are either at the beginning of the string or have
-      // not previously been escaped by a backslash...
-      if ((inString && c === stringToken || !inString && (c === '"' || c === "'")) && (i === 0 || script.charAt(i - 1) !== '\\')) {
-        inString = !inString;
-        if (inString) {
-          stringToken = c;
-        }
-      }
-
-      // ... because only then...
-      if (!inString) {
-        // ... can we change scope level. We're only supporting JSON objects,
-        // so no need to go any further than this.
-        if (c === '(' || c === '{' || c === '[') {
-          ++scopeLevel;
-        } else if (c === ')' || c === '}' || c === ']') {
-          --scopeLevel;
-        }
-      }
-
-      // If we've exited the parameter list, or we're inside the parameter list
-      // and see a comma that is not inside of a string literal...
-      if (scopeLevel === 0 || scopeLevel === 1 && c === ',' && !inString) {
-        // ... save the parameter, skipping the first character because it's always
-        // either the open paren for the parameter list or one of the commas
-        // between parameters.
-        parameters.push(parseParameter(script.substring(start + 1, i).trim()));
-
-        // Advance forward the start of the next token.
-        start = i;
-
-        // If we left the parameter list, we've found all of the parameters and
-        // can quit out of the loop before we get to the end of the script.
-        if (scopeLevel === 0) {
-          break;
-        }
-      }
-    }
-    if (parameters.length !== 1) {
-      throw new Error("There should have only been one parameter to the function");
-    }
-    return parameters[0];
-  }
-
-  ////
-  // useful in cases where a functional system really just needs to check the
-  // value of a collection.
-  ///
-  function identity(v) {
-    return v;
-  }
-
-  /////
-  // When we've found an individual parameter to a documentation function in a
-  // contextual scope, we need to make sure it's valid JSON before we try to
-  // convert it to a real JavaScript object.
-  //
-  // @param {String} script - the subscript portion that refers to a single parameter.
-  // @return {Object} - the value that the string represents, parsed with JSON.parse().
-  ///
-  function parseParameter(script) {
-    // Make sure all hash key labels are surrounded in quotation marks.
-    var stringLiterals = [];
-    var litReplace = function litReplace(str) {
-      var name = "&STRING_LIT" + stringLiterals.length + ";";
-      if (str[0] === "'") {
-        str = str.replace(/\\"/g, "&_DBLQUOTE_;").replace(/\\'/g, "&_SGLQUOTE_;").replace(/"/g, "\\\"").replace(/'/g, "\"").replace(/&_DBLQUOTE_;/g, "\\\"").replace(/&_SGLQUOTE_;/g, "\\'");
-      }
-      stringLiterals.push(str);
-      return name;
-    };
-    var litReturn = function litReturn(a, b) {
-      return stringLiterals[b];
-    };
-    var param = script.replace(/'(\\'|[^'])+'/g, litReplace).replace(/"(\\"|[^"])+"/g, litReplace).replace(/\b(\w+)\b\s*:/g, "\"$1\":").replace(/&STRING_LIT(\d+);/g, litReturn).replace(/&STRING_LIT(\d+);/g, litReturn).replace(/\\\r?\n/g, "");
-    return JSON.parse(param);
-  }
-
-  // A collection of different ways to output documentation data.
-  var formatters = {
-    /////
-    // Find a particular object and print out the documentation for it.
-    //
-    // @param {String} name - a period-delimited list of object accessors, naming the object we want to access.
-    ///
-    format: function format(name) {
-      var obj = null;
-      if (typeof name === "string" || name instanceof String) {
-        obj = openBag(database, name);
-      } else {
-        obj = name;
-      }
-      if (obj) {
-        var output = this.shortDescription(true, obj);
-
-        // The array defines the order in which they will appear.
-        output += "\n\n" + ["parent", "description", "parameters", "returns", "errors", "namespaces", "classes", "functions", "values", "events", "properties", "methods", "enumerations", "records", "examples", "issues", "comments"].map(formatters.checkAndFormatField.bind(this, obj))
-        // filter out any lines that returned undefined because they didn't exist
-        .filter(identity)
-        // concate them all together
-        .join("\n");
-        return output;
-      }
-    },
-    checkAndFormatField: function checkAndFormatField(obj, prop) {
-      var obj2 = obj[prop];
-      if (obj2) {
-        return this.formatField(obj, prop, obj2);
-      }
-    }
-  };
-  // Make HTML that can be written out to a page
-  formatters.html = {
-    format: function format(name) {
-      var obj = resolveBag(database, name);
-      return "<section id=\"" + obj.id + "\" class=\"" + obj.fieldType + "\"><article>" + formatters.format.call(formatters.html, obj) + "</article></section>";
-    },
-    /////
-    // Puts together a string that describes a top-level field out of a documentation
-    // object.
-    //
-    // @param {Object} obj - the documentation object out of which we're retrieving the field.
-    // @param {String} p - the name of the field we're retrieving out of the documentation object.
-    // @return {String} - a description of the field.
-    ///
-    formatField: function formatField(obj, propertyName, value) {
-      var output = "";
-      if (obj.fieldType === "enumeration" && propertyName === "values") {
-        output += this.formatEnumeration(obj, propertyName, value);
-      } else if (value instanceof Array) {
-        output += this.formatArray(obj, propertyName, value);
-      } else if (propertyName === "parent") {
-        output += "<p>Contained in <a href=\"index.html#" + pliny.get(value).id + "\"><code>" + value + "</code></a></p>";
-      } else if (propertyName === "description") {
-        output += markdown(value);
-      } else if (propertyName === "returns") {
-        output += "<h3>Return value</h3>" + markdown(value);
-      } else {
-        output += "<dl><dt>" + propertyName + "</dt><dd>" + value + "</dd></dl>";
-      }
-      return output;
-    },
-    ////
-    // Specific fomratting function for Enumerations
-    //
-    // @param {Object} obj - the documentation object from which to read an array.
-    // @param {String} arrName - the name of the array to read from the documentation object.
-    // @param {Array} arr - the array from which we're reading values.
-    // @return {String} - the formatted description of the array.
-    formatEnumeration: function formatEnumeration(obj, arrName, arr) {
-      var output = "<table><thead><tr><th>Name</th><th>Value</th><tr><thead><tbody>";
-      for (var i = 0; i < arr.length; ++i) {
-        var e = arr[i];
-        output += "<tr><td>" + e.name + "</td><td>" + e.description + "</td></tr>";
-      }
-      output += "</tbody></table>";
-      return output;
-    },
-    ////
-    // Specific formatting function for Code Example.
-    //
-    // @param {Array} arr - an array of objects defining programming examples.
-    // @return {String} - a summary/details view of the programming examples.
-    examplesFormat: function examplesFormat(obj, arr) {
-      var output = "";
-      for (var i = 0; i < arr.length; ++i) {
-        var ex = arr[i];
-        output += "<div><h3><a href=\"index.html#" + ex.id + "\">" + ex.name + "</a></h3>" + markdown(ex.description) + "</div>";
-      }
-      return output;
-    },
-    ////
-    // Specific formatting function for Issues.
-    //
-    // @param {Array} arr - an array of objects defining issues.
-    // @return {String} - a summary/details view of the issues.
-    issuesFormat: function issuesFormat(obj, arr) {
-      var parts = {
-        open: "",
-        closed: ""
-      };
-      for (var i = 0; i < arr.length; ++i) {
-        var issue = arr[i],
-            str = "<div><h3><a href=\"index.html#" + issue.id + "\">" + issue.issueID + ": " + issue.name + " [" + issue.type + "]</a></h3>" + markdown(issue.description) + "</div>";
-        parts[issue.type] += str;
-      }
-      return parts.open + "<h2>Closed Issues</h2>" + parts.closed;
-    },
-    ////
-    // Specific formatting function for Comments section of Issues.
-    //
-    // @param {Array} arr - an array of objects defining comments.
-    // @return {String} - a summary/details view of the comment.
-    commentsFormat: function commentsFormat(obj, arr) {
-      var output = "";
-      for (var i = 0; i < arr.length; ++i) {
-        var comment = arr[i];
-        output += "<aside><h3>" + comment.name + "</h3>" + markdown(comment.description);
-        if (typeof comment.comments !== "undefined" && comment.comments instanceof Array) {
-          output += this.formatArray(comment, "comments", comment.comments);
-        }
-        output += "</aside>";
-      }
-      return output;
-    },
-    /////
-    // Puts together lists of parameters for function signatures, as well as
-    // lists of properties and methods for classes and the like.
-    //
-    // @param {Object} obj - the documentation object from which to read an array.
-    // @param {String} arrName - the name of the array to read from the documentation object.
-    // @param {Array} arr - the array from which we're reading values.
-    // @return {String} - the formatted description of the array.
-    ///
-    formatArray: function formatArray(obj, arrName, arr) {
-      var output = "<h2>";
-      if (obj.fieldType === "class") {
-        if (arrName === "parameters") {
-          output += "constructor ";
-        } else if (arrName === "functions") {
-          output += "static ";
-        }
-      }
-
-      if (arrName !== "description") {
-        output += arrName;
-      }
-
-      output += "</h2>";
-
-      var formatterName = arrName + "Format";
-      if (this[formatterName]) {
-        output += this[formatterName](obj, arr);
-      } else {
-        output += "<ul class=\"" + arrName + "\">" + arr.map(this.formatArrayElement.bind(this, arrName)).join("") + "</ul>";
-      }
-      return output;
-    },
-    /////
-    // For individual elements of an array, formats the element so it fits well
-    // on the screen. Elements that are supposed to be inline, but have the ability
-    // to be drilled-down into, are truncated if they get to be more than 200
-    // characters wide.
-    //
-    // @param {String} arrName - the name of the array from which we retrieved elements.
-    // @param {String} n - one of the array elements.
-    // @return {String} - the formatted element, including a newline at the end.
-    ///
-    formatArrayElement: function formatArrayElement(arrName, n) {
-      var s = "<li>";
-      if (n.description) {
-        var desc = n.description.match(/^(([^\n](\n[^\n])?)+)\n\n/);
-        if (desc) {
-          desc = desc[1] + "...";
-        } else {
-          desc = n.description;
-        }
-
-        if (n.optional) {
-          desc = "(Optional) " + desc;
-        }
-
-        if (n.default !== undefined) {
-          desc += " Defaults to <code>" + n.default + "</code>.";
-        }
-
-        s += "<dl><dt>" + this.shortDescription(false, n) + "</dt><dd>" + markdown(desc) + "</dd></dl>";
-      } else {
-        s += this.shortDescription(false, n);
-      }
-      s += "</li>";
-      return s;
-    },
-    /////
-    // Describe an object by type, name, and parameters (if it's a function-type object).
-    // @param {Object} p - the documentation object to describe.
-    // @return {String} - the description of the documentation object.
-    ///
-    shortDescription: function shortDescription(topLevel, p) {
-      var output = "",
-          tag = topLevel ? "h1" : "span",
-          isFunction = p.fieldType === "function" || p.fieldType === "method" || p.fieldType === "event",
-          isContainer = isFunction || p.fieldType === "class" || p.fieldType === "namespace" || p.fieldType === "enumeration" || p.fieldType === "subClass" || p.fieldType === "record";
-
-      output += "<" + tag + ">";
-      if (isContainer && !topLevel) {
-        output += "<a href=\"index.html#" + p.id + "\">";
-      }
-
-      output += "<code>" + (topLevel && p.fieldType !== "example" && p.fullName || p.name);
-
-      if (p.type) {
-        output += " <span class=\"type\">" + p.type + "</span>";
-      }
-
-      // But functions and classes take parameters, so they get slightly more.
-      if (isFunction) {
-        output += "<ol class=\"signatureParameters\">";
-        if (p.parameters) {
-          output += "<li>" + p.parameters.map(function (p) {
-            return p.name;
-          }).join("</li><li>") + "</li>";
-        }
-        output += "</ol>";
-      }
-
-      if (isContainer && !topLevel) {
-        output += "</a>";
-      }
-
-      return output + "</code></" + tag + ">";
-    }
-  };
-
-  // Output to the Developer console in the browser directly.
-  formatters.console = {
-    format: function format(name) {
-      return formatters.format.call(formatters.console, name);
-    },
-    /////
-    // Puts together a string that describes a top-level field out of a documentation
-    // object.
-    //
-    // @params {Object} obj - the documentation object out of which we're retrieving the field.
-    // @params {String} p - the name of the field we're retrieving out of the documentation object.
-    // @return {String} - a description of the field.
-    ///
-    formatField: function formatField(obj, propertyName, value) {
-      if (value instanceof Array) {
-        return this.formatArray(obj, propertyName, value);
-      } else if (propertyName === "description") {
-        return "\t" + value + "\n";
-      } else {
-        return "\t" + propertyName + ": " + value + "\n";
-      }
-    },
-    /////
-    // Puts together lists of parameters for function signatures, as well as
-    // lists of properties and methods for classes and the like.
-    //
-    // @param {Object} obj - the documentation object from which to read an array.
-    // @param {String} arrName - the name of the array to read from the documentation object.
-    // @return {String} - the formatted description of the array.
-    ///
-    formatArray: function formatArray(obj, arrName, arr) {
-      var output = "\t";
-      if (obj.fieldType === "class") {
-        if (arrName === "parameters") {
-          output += "constructor ";
-        } else if (arrName === "functions") {
-          output += "static ";
-        }
-      }
-
-      if (arrName !== "description") {
-        output += arrName + ":\n";
-      }
-
-      if (arr instanceof Array) {
-        output += arr.map(this.formatArrayElement.bind(this, arrName)).join("");
-      } else {
-        output += arr;
-      }
-      return output;
-    },
-    /////
-    // For individual elements of an array, formats the element so it fits well
-    // on the screen. Elements that are supposed to be inline, but have the ability
-    // to be drilled-down into, are truncated if they get to be more than 200
-    // characters wide.
-    //
-    // @param {String} arrName - the name of the array from which we retrieved elements.
-    // @param {String} n - one of the array elements.
-    // @param {Number} i - the index of the element in the array.
-    // @return {String} - the formatted element, including a newline at the end.
-    ///
-    formatArrayElement: function formatArrayElement(arrName, n, i) {
-      var s = "\t\t" + i + ": " + this.shortDescription(false, n);
-      if (n.description) {
-        s += " - " + n.description;
-
-        if (arrName !== "parameters" && arrName !== "properties" && arrName !== "methods" && s.length > 200) {
-          s = s.substring(0, 200) + "...";
-        }
-      }
-      s += "\n";
-      return s;
-    },
-    /////
-    // Describe an object by type, name, and parameters (if it's a function-type object).
-    // @param {Object} p - the documentation object to describe.
-    // @return {String} - the description of the documentation object.
-    ///
-    shortDescription: function shortDescription(topLevel, p) {
-      // This is the basic description that all objects get.
-      var output = "";
-      if (topLevel || p.type) {
-        output += "[" + (p.type || p.fieldType) + "] ";
-      }
-
-      output += topLevel ? p.fullName : p.name;
-
-      // But functions and classes take parameters, so they get slightly more.
-      if (p.fieldType === "function" || p.fieldType === "method") {
-        output += "(";
-        if (p.parameters) {
-          output += p.parameters.map(this.shortDescription.bind(this, false)).join(", ");
-        }
-        output += ")";
-      }
-
-      return output;
-    }
-  };
-
-  // The namespacing object we're going to return to the importing script.
-  var pliny = formatters.console.format;
-  // Give the user access to the database.
-  pliny.database = database;
-  // Give the user access to all of the formatters.
-  pliny.formats = formatters;
-  // Just get the raw data
-  pliny.get = openBag.bind(null, pliny.database);
-  // Forward on the markdown functionality
-  pliny.markdown = markdown;
-  // Strip pliny calls out of a source file and deposit them into a separate file.
-  pliny.carve = function (source, destination, callback) {
-    var fs = require("fs");
-    fs.readFile(source, "utf-8", function (err, txt) {
-      var matches,
-          left = 0,
-          outputLeft = "",
-          outputRight = "",
-          test = /pliny\.\w+/g;
-      while (matches = test.exec(txt)) {
-        var sub = txt.substring(left, matches.index);
-        outputLeft += sub;
-        var depth = 0,
-            inString = false,
-            found = false;
-        for (left = matches.index + matches.length; left < txt.length; ++left) {
-          if (txt[left] === "\"" && (left === 0 || txt[left - 1] !== "\\")) inString = !inString;
-          if (!inString) {
-            if (txt[left] === "(") {
-              found = true;
-              ++depth;
-            } else if (txt[left] === ")") --depth;
-          }
-          if (depth === 0 && found) break;
-        }
-        while (left < txt.length && /[;\) \r\n]/.test(txt[left])) {
-          left++;
-        }
-
-        outputRight += txt.substring(matches.index, left);
-      }
-      outputLeft += txt.substring(left);
-      fs.writeFile(source, outputLeft, function () {
-        fs.writeFile(destination, outputRight, callback);
-      });
-    });
-  };
-
-  // Create documentation functions for each of the supported types of code objects.
-  ["namespace", "event", "function", "value", "class", "property", "method", "enumeration", "record", "subClass", "example", "error", "issue", "comment"].forEach(function (k) {
-    pliny[k] = pliny[k] || analyzeObject.bind(null, k);
-  });
-
-  return pliny;
-}(typeof require !== 'undefined' && require || openBag.bind(null, window));
-return pliny;
-}));
-
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1hcmtlZC5qcyIsInNyYy9wbGlueS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUN0d0NBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBIiwiZmlsZSI6InBsaW55LmpzIn0=
-
 (function (root) {
 
   // Store setTimeout reference so promise-polyfill will be unaffected by
@@ -9963,1772 +7719,9937 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/**
- * jshashes - https://github.com/h2non/jshashes
- * Released under the "New BSD" license
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+'use strict';
+/* eslint-disable no-unused-vars */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (e) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (Object.getOwnPropertySymbols) {
+			symbols = Object.getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+},{}],2:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Algorithms specification:
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * MD5 - http://www.ietf.org/rfc/rfc1321.txt
- * RIPEMD-160 - http://homes.esat.kuleuven.be/~bosselae/ripemd160.html
- * SHA1   - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
- * SHA256 - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
- * SHA512 - http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
- * HMAC - http://www.ietf.org/rfc/rfc2104.txt
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-(function() {
-  var Hashes;
 
-  function utf8Encode(str) {
-    var x, y, output = '',
-      i = -1,
-      l;
+var Util = _dereq_('./util.js');
+var WakeLock = _dereq_('./wakelock.js');
 
-    if (str && str.length) {
-      l = str.length;
-      while ((i += 1) < l) {
-        /* Decode utf-16 surrogate pairs */
-        x = str.charCodeAt(i);
-        y = i + 1 < l ? str.charCodeAt(i + 1) : 0;
-        if (0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF) {
-          x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
-          i += 1;
-        }
-        /* Encode output as utf-8 */
-        if (x <= 0x7F) {
-          output += String.fromCharCode(x);
-        } else if (x <= 0x7FF) {
-          output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F),
-            0x80 | (x & 0x3F));
-        } else if (x <= 0xFFFF) {
-          output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F),
-            0x80 | ((x >>> 6) & 0x3F),
-            0x80 | (x & 0x3F));
-        } else if (x <= 0x1FFFFF) {
-          output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07),
-            0x80 | ((x >>> 12) & 0x3F),
-            0x80 | ((x >>> 6) & 0x3F),
-            0x80 | (x & 0x3F));
-        }
-      }
-    }
-    return output;
+// Start at a higher number to reduce chance of conflict.
+var nextDisplayId = 1000;
+var hasShowDeprecationWarning = false;
+
+var defaultLeftBounds = [0, 0, 0.5, 1];
+var defaultRightBounds = [0.5, 0, 0.5, 1];
+
+/**
+ * The base class for all VR displays.
+ */
+function VRDisplay() {
+  this.isPolyfilled = true;
+  this.displayId = nextDisplayId++;
+  this.displayName = 'webvr-polyfill displayName';
+
+  this.isConnected = true;
+  this.isPresenting = false;
+  this.capabilities = {
+    hasPosition: false,
+    hasOrientation: false,
+    hasExternalDisplay: false,
+    canPresent: false,
+    maxLayers: 1
+  };
+  this.stageParameters = null;
+
+  // "Private" members.
+  this.waitingForPresent_ = false;
+  this.layer_ = null;
+
+  this.fullscreenElement_ = null;
+  this.fullscreenWrapper_ = null;
+  this.fullscreenElementCachedStyle_ = null;
+
+  this.fullscreenEventTarget_ = null;
+  this.fullscreenChangeHandler_ = null;
+  this.fullscreenErrorHandler_ = null;
+
+  this.wakelock_ = new WakeLock();
+}
+
+VRDisplay.prototype.getPose = function() {
+  // TODO: Technically this should retain it's value for the duration of a frame
+  // but I doubt that's practical to do in javascript.
+  return this.getImmediatePose();
+};
+
+VRDisplay.prototype.requestAnimationFrame = function(callback) {
+  return window.requestAnimationFrame(callback);
+};
+
+VRDisplay.prototype.cancelAnimationFrame = function(id) {
+  return window.cancelAnimationFrame(id);
+};
+
+VRDisplay.prototype.wrapForFullscreen = function(element) {
+  // Don't wrap in iOS.
+  if (Util.isIOS()) {
+    return element;
+  }
+  if (!this.fullscreenWrapper_) {
+    this.fullscreenWrapper_ = document.createElement('div');
+    var cssProperties = [
+      'height: ' + Math.min(screen.height, screen.width) + 'px !important',
+      'top: 0 !important',
+      'left: 0 !important',
+      'right: 0 !important',
+      'border: 0',
+      'margin: 0',
+      'padding: 0',
+      'z-index: 999999 !important',
+      'position: fixed',
+    ];
+    this.fullscreenWrapper_.setAttribute('style', cssProperties.join('; ') + ';');
+    this.fullscreenWrapper_.classList.add('webvr-polyfill-fullscreen-wrapper');
   }
 
-  function utf8Decode(str) {
-    var i, ac, c1, c2, c3, arr = [],
-      l;
-    i = ac = c1 = c2 = c3 = 0;
-
-    if (str && str.length) {
-      l = str.length;
-      str += '';
-
-      while (i < l) {
-        c1 = str.charCodeAt(i);
-        ac += 1;
-        if (c1 < 128) {
-          arr[ac] = String.fromCharCode(c1);
-          i += 1;
-        } else if (c1 > 191 && c1 < 224) {
-          c2 = str.charCodeAt(i + 1);
-          arr[ac] = String.fromCharCode(((c1 & 31) << 6) | (c2 & 63));
-          i += 2;
-        } else {
-          c2 = str.charCodeAt(i + 1);
-          c3 = str.charCodeAt(i + 2);
-          arr[ac] = String.fromCharCode(((c1 & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-          i += 3;
-        }
-      }
-    }
-    return arr.join('');
+  if (this.fullscreenElement_ == element) {
+    return this.fullscreenWrapper_;
   }
 
-  /**
-   * Add integers, wrapping at 2^32. This uses 16-bit operations internally
-   * to work around bugs in some JS interpreters.
-   */
+  // Remove any previously applied wrappers
+  this.removeFullscreenWrapper();
 
-  function safe_add(x, y) {
-    var lsw = (x & 0xFFFF) + (y & 0xFFFF),
-      msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-    return (msw << 16) | (lsw & 0xFFFF);
+  this.fullscreenElement_ = element;
+  var parent = this.fullscreenElement_.parentElement;
+  parent.insertBefore(this.fullscreenWrapper_, this.fullscreenElement_);
+  parent.removeChild(this.fullscreenElement_);
+  this.fullscreenWrapper_.insertBefore(this.fullscreenElement_, this.fullscreenWrapper_.firstChild);
+  this.fullscreenElementCachedStyle_ = this.fullscreenElement_.getAttribute('style');
+
+  var self = this;
+  function applyFullscreenElementStyle() {
+    if (!self.fullscreenElement_) {
+      return;
+    }
+
+    var cssProperties = [
+      'position: absolute',
+      'top: 0',
+      'left: 0',
+      'width: ' + Math.max(screen.width, screen.height) + 'px',
+      'height: ' + Math.min(screen.height, screen.width) + 'px',
+      'border: 0',
+      'margin: 0',
+      'padding: 0',
+    ];
+    self.fullscreenElement_.setAttribute('style', cssProperties.join('; ') + ';');
   }
 
-  /**
-   * Bitwise rotate a 32-bit number to the left.
-   */
+  applyFullscreenElementStyle();
 
-  function bit_rol(num, cnt) {
-    return (num << cnt) | (num >>> (32 - cnt));
+  return this.fullscreenWrapper_;
+};
+
+VRDisplay.prototype.removeFullscreenWrapper = function() {
+  if (!this.fullscreenElement_) {
+    return;
   }
 
-  /**
-   * Convert a raw string to a hex string
-   */
+  var element = this.fullscreenElement_;
+  if (this.fullscreenElementCachedStyle_) {
+    element.setAttribute('style', this.fullscreenElementCachedStyle_);
+  } else {
+    element.removeAttribute('style');
+  }
+  this.fullscreenElement_ = null;
+  this.fullscreenElementCachedStyle_ = null;
 
-  function rstr2hex(input, hexcase) {
-    var hex_tab = hexcase ? '0123456789ABCDEF' : '0123456789abcdef',
-      output = '',
-      x, i = 0,
-      l = input.length;
-    for (; i < l; i += 1) {
-      x = input.charCodeAt(i);
-      output += hex_tab.charAt((x >>> 4) & 0x0F) + hex_tab.charAt(x & 0x0F);
+  var parent = this.fullscreenWrapper_.parentElement;
+  this.fullscreenWrapper_.removeChild(element);
+  parent.insertBefore(element, this.fullscreenWrapper_);
+  parent.removeChild(this.fullscreenWrapper_);
+
+  return element;
+};
+
+VRDisplay.prototype.requestPresent = function(layers) {
+  var wasPresenting = this.isPresenting;
+  var self = this;
+
+  if (!(layers instanceof Array)) {
+    if (!hasShowDeprecationWarning) {
+      console.warn("Using a deprecated form of requestPresent. Should pass in an array of VRLayers.");
+      hasShowDeprecationWarning = true;
     }
-    return output;
+    layers = [layers];
   }
 
-  /**
-   * Encode a string as utf-16
-   */
-
-  function str2rstr_utf16le(input) {
-    var i, l = input.length,
-      output = '';
-    for (i = 0; i < l; i += 1) {
-      output += String.fromCharCode(input.charCodeAt(i) & 0xFF, (input.charCodeAt(i) >>> 8) & 0xFF);
-    }
-    return output;
-  }
-
-  function str2rstr_utf16be(input) {
-    var i, l = input.length,
-      output = '';
-    for (i = 0; i < l; i += 1) {
-      output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF, input.charCodeAt(i) & 0xFF);
-    }
-    return output;
-  }
-
-  /**
-   * Convert an array of big-endian words to a string
-   */
-
-  function binb2rstr(input) {
-    var i, l = input.length * 32,
-      output = '';
-    for (i = 0; i < l; i += 8) {
-      output += String.fromCharCode((input[i >> 5] >>> (24 - i % 32)) & 0xFF);
-    }
-    return output;
-  }
-
-  /**
-   * Convert an array of little-endian words to a string
-   */
-
-  function binl2rstr(input) {
-    var i, l = input.length * 32,
-      output = '';
-    for (i = 0; i < l; i += 8) {
-      output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
-    }
-    return output;
-  }
-
-  /**
-   * Convert a raw string to an array of little-endian words
-   * Characters >255 have their high-byte silently ignored.
-   */
-
-  function rstr2binl(input) {
-    var i, l = input.length * 8,
-      output = Array(input.length >> 2),
-      lo = output.length;
-    for (i = 0; i < lo; i += 1) {
-      output[i] = 0;
-    }
-    for (i = 0; i < l; i += 8) {
-      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (i % 32);
-    }
-    return output;
-  }
-
-  /**
-   * Convert a raw string to an array of big-endian words
-   * Characters >255 have their high-byte silently ignored.
-   */
-
-  function rstr2binb(input) {
-    var i, l = input.length * 8,
-      output = Array(input.length >> 2),
-      lo = output.length;
-    for (i = 0; i < lo; i += 1) {
-      output[i] = 0;
-    }
-    for (i = 0; i < l; i += 8) {
-      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (24 - i % 32);
-    }
-    return output;
-  }
-
-  /**
-   * Convert a raw string to an arbitrary string encoding
-   */
-
-  function rstr2any(input, encoding) {
-    var divisor = encoding.length,
-      remainders = Array(),
-      i, q, x, ld, quotient, dividend, output, full_length;
-
-    /* Convert to an array of 16-bit big-endian values, forming the dividend */
-    dividend = Array(Math.ceil(input.length / 2));
-    ld = dividend.length;
-    for (i = 0; i < ld; i += 1) {
-      dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
+  return new Promise(function(resolve, reject) {
+    if (!self.capabilities.canPresent) {
+      reject(new Error('VRDisplay is not capable of presenting.'));
+      return;
     }
 
-    /**
-     * Repeatedly perform a long division. The binary array forms the dividend,
-     * the length of the encoding is the divisor. Once computed, the quotient
-     * forms the dividend for the next step. We stop when the dividend is zerHashes.
-     * All remainders are stored for later use.
-     */
-    while (dividend.length > 0) {
-      quotient = Array();
-      x = 0;
-      for (i = 0; i < dividend.length; i += 1) {
-        x = (x << 16) + dividend[i];
-        q = Math.floor(x / divisor);
-        x -= q * divisor;
-        if (quotient.length > 0 || q > 0) {
-          quotient[quotient.length] = q;
-        }
-      }
-      remainders[remainders.length] = x;
-      dividend = quotient;
+    if (layers.length == 0 || layers.length > self.capabilities.maxLayers) {
+      reject(new Error('Invalid number of layers.'));
+      return;
     }
 
-    /* Convert the remainders to the output string */
-    output = '';
-    for (i = remainders.length - 1; i >= 0; i--) {
-      output += encoding.charAt(remainders[i]);
-    }
-
-    /* Append leading zero equivalents */
-    full_length = Math.ceil(input.length * 8 / (Math.log(encoding.length) / Math.log(2)));
-    for (i = output.length; i < full_length; i += 1) {
-      output = encoding[0] + output;
-    }
-    return output;
-  }
-
-  /**
-   * Convert a raw string to a base-64 string
-   */
-
-  function rstr2b64(input, b64pad) {
-    var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-      output = '',
-      len = input.length,
-      i, j, triplet;
-    b64pad = b64pad || '=';
-    for (i = 0; i < len; i += 3) {
-      triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
-      for (j = 0; j < 4; j += 1) {
-        if (i * 8 + j * 6 > input.length * 8) {
-          output += b64pad;
-        } else {
-          output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
-        }
-      }
-    }
-    return output;
-  }
-
-  Hashes = {
-    /**
-     * @property {String} version
-     * @readonly
-     */
-    VERSION: '1.0.5',
-    /**
-     * @member Hashes
-     * @class Base64
-     * @constructor
-     */
-    Base64: function() {
-      // private properties
-      var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-        pad = '=', // default pad according with the RFC standard
-        url = false, // URL encoding support @todo
-        utf8 = true; // by default enable UTF-8 support encoding
-
-      // public method for encoding
-      this.encode = function(input) {
-        var i, j, triplet,
-          output = '',
-          len = input.length;
-
-        pad = pad || '=';
-        input = (utf8) ? utf8Encode(input) : input;
-
-        for (i = 0; i < len; i += 3) {
-          triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
-          for (j = 0; j < 4; j += 1) {
-            if (i * 8 + j * 6 > len * 8) {
-              output += pad;
-            } else {
-              output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
-            }
-          }
-        }
-        return output;
-      };
-
-      // public method for decoding
-      this.decode = function(input) {
-        // var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-        var i, o1, o2, o3, h1, h2, h3, h4, bits, ac,
-          dec = '',
-          arr = [];
-        if (!input) {
-          return input;
-        }
-
-        i = ac = 0;
-        input = input.replace(new RegExp('\\' + pad, 'gi'), ''); // use '='
-        //input += '';
-
-        do { // unpack four hexets into three octets using index points in b64
-          h1 = tab.indexOf(input.charAt(i += 1));
-          h2 = tab.indexOf(input.charAt(i += 1));
-          h3 = tab.indexOf(input.charAt(i += 1));
-          h4 = tab.indexOf(input.charAt(i += 1));
-
-          bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-
-          o1 = bits >> 16 & 0xff;
-          o2 = bits >> 8 & 0xff;
-          o3 = bits & 0xff;
-          ac += 1;
-
-          if (h3 === 64) {
-            arr[ac] = String.fromCharCode(o1);
-          } else if (h4 === 64) {
-            arr[ac] = String.fromCharCode(o1, o2);
-          } else {
-            arr[ac] = String.fromCharCode(o1, o2, o3);
-          }
-        } while (i < input.length);
-
-        dec = arr.join('');
-        dec = (utf8) ? utf8Decode(dec) : dec;
-
-        return dec;
-      };
-
-      // set custom pad string
-      this.setPad = function(str) {
-        pad = str || pad;
-        return this;
-      };
-      // set custom tab string characters
-      this.setTab = function(str) {
-        tab = str || tab;
-        return this;
-      };
-      this.setUTF8 = function(bool) {
-        if (typeof bool === 'boolean') {
-          utf8 = bool;
-        }
-        return this;
-      };
-    },
-
-    /**
-     * CRC-32 calculation
-     * @member Hashes
-     * @method CRC32
-     * @static
-     * @param {String} str Input String
-     * @return {String}
-     */
-    CRC32: function(str) {
-      var crc = 0,
-        x = 0,
-        y = 0,
-        table, i, iTop;
-      str = utf8Encode(str);
-
-      table = [
-        '00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 ',
-        '79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 ',
-        '84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F ',
-        '63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD ',
-        'A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC ',
-        '51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 ',
-        'B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 ',
-        '06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 ',
-        'E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 ',
-        '12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 ',
-        'D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 ',
-        '33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 ',
-        'CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 ',
-        '9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E ',
-        '7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D ',
-        '806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 ',
-        '60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA ',
-        'AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 ',
-        '5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 ',
-        'B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 ',
-        '05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 ',
-        'F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA ',
-        '11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 ',
-        'D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F ',
-        '30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E ',
-        'C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D'
-      ].join('');
-
-      crc = crc ^ (-1);
-      for (i = 0, iTop = str.length; i < iTop; i += 1) {
-        y = (crc ^ str.charCodeAt(i)) & 0xFF;
-        x = '0x' + table.substr(y * 9, 8);
-        crc = (crc >>> 8) ^ x;
-      }
-      // always return a positive number (that's what >>> 0 does)
-      return (crc ^ (-1)) >>> 0;
-    },
-    /**
-     * @member Hashes
-     * @class MD5
-     * @constructor
-     * @param {Object} [config]
-     *
-     * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
-     * Digest Algorithm, as defined in RFC 1321.
-     * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
-     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
-     * See <http://pajhome.org.uk/crypt/md5> for more infHashes.
-     */
-    MD5: function(options) {
-      /**
-       * Private config properties. You may need to tweak these to be compatible with
-       * the server-side, but the defaults work in most cases.
-       * See {@link Hashes.MD5#method-setUpperCase} and {@link Hashes.SHA1#method-setUpperCase}
-       */
-      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase
-        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=', // base-64 pad character. Defaults to '=' for strict RFC compliance
-        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true; // enable/disable utf8 encoding
-
-      // privileged (public) methods
-      this.hex = function(s) {
-        return rstr2hex(rstr(s, utf8), hexcase);
-      };
-      this.b64 = function(s) {
-        return rstr2b64(rstr(s), b64pad);
-      };
-      this.any = function(s, e) {
-        return rstr2any(rstr(s, utf8), e);
-      };
-      this.raw = function(s) {
-        return rstr(s, utf8);
-      };
-      this.hex_hmac = function(k, d) {
-        return rstr2hex(rstr_hmac(k, d), hexcase);
-      };
-      this.b64_hmac = function(k, d) {
-        return rstr2b64(rstr_hmac(k, d), b64pad);
-      };
-      this.any_hmac = function(k, d, e) {
-        return rstr2any(rstr_hmac(k, d), e);
-      };
-      /**
-       * Perform a simple self-test to see if the VM is working
-       * @return {String} Hexadecimal hash sample
-       */
-      this.vm_test = function() {
-        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
-      };
-      /**
-       * Enable/disable uppercase hexadecimal returned string
-       * @param {Boolean}
-       * @return {Object} this
-       */
-      this.setUpperCase = function(a) {
-        if (typeof a === 'boolean') {
-          hexcase = a;
-        }
-        return this;
-      };
-      /**
-       * Defines a base64 pad string
-       * @param {String} Pad
-       * @return {Object} this
-       */
-      this.setPad = function(a) {
-        b64pad = a || b64pad;
-        return this;
-      };
-      /**
-       * Defines a base64 pad string
-       * @param {Boolean}
-       * @return {Object} [this]
-       */
-      this.setUTF8 = function(a) {
-        if (typeof a === 'boolean') {
-          utf8 = a;
-        }
-        return this;
-      };
-
-      // private methods
-
-      /**
-       * Calculate the MD5 of a raw string
-       */
-
-      function rstr(s) {
-        s = (utf8) ? utf8Encode(s) : s;
-        return binl2rstr(binl(rstr2binl(s), s.length * 8));
-      }
-
-      /**
-       * Calculate the HMAC-MD5, of a key and some data (raw strings)
-       */
-
-      function rstr_hmac(key, data) {
-        var bkey, ipad, opad, hash, i;
-
-        key = (utf8) ? utf8Encode(key) : key;
-        data = (utf8) ? utf8Encode(data) : data;
-        bkey = rstr2binl(key);
-        if (bkey.length > 16) {
-          bkey = binl(bkey, key.length * 8);
-        }
-
-        ipad = Array(16), opad = Array(16);
-        for (i = 0; i < 16; i += 1) {
-          ipad[i] = bkey[i] ^ 0x36363636;
-          opad[i] = bkey[i] ^ 0x5C5C5C5C;
-        }
-        hash = binl(ipad.concat(rstr2binl(data)), 512 + data.length * 8);
-        return binl2rstr(binl(opad.concat(hash), 512 + 128));
-      }
-
-      /**
-       * Calculate the MD5 of an array of little-endian words, and a bit length.
-       */
-
-      function binl(x, len) {
-        var i, olda, oldb, oldc, oldd,
-          a = 1732584193,
-          b = -271733879,
-          c = -1732584194,
-          d = 271733878;
-
-        /* append padding */
-        x[len >> 5] |= 0x80 << ((len) % 32);
-        x[(((len + 64) >>> 9) << 4) + 14] = len;
-
-        for (i = 0; i < x.length; i += 16) {
-          olda = a;
-          oldb = b;
-          oldc = c;
-          oldd = d;
-
-          a = md5_ff(a, b, c, d, x[i + 0], 7, -680876936);
-          d = md5_ff(d, a, b, c, x[i + 1], 12, -389564586);
-          c = md5_ff(c, d, a, b, x[i + 2], 17, 606105819);
-          b = md5_ff(b, c, d, a, x[i + 3], 22, -1044525330);
-          a = md5_ff(a, b, c, d, x[i + 4], 7, -176418897);
-          d = md5_ff(d, a, b, c, x[i + 5], 12, 1200080426);
-          c = md5_ff(c, d, a, b, x[i + 6], 17, -1473231341);
-          b = md5_ff(b, c, d, a, x[i + 7], 22, -45705983);
-          a = md5_ff(a, b, c, d, x[i + 8], 7, 1770035416);
-          d = md5_ff(d, a, b, c, x[i + 9], 12, -1958414417);
-          c = md5_ff(c, d, a, b, x[i + 10], 17, -42063);
-          b = md5_ff(b, c, d, a, x[i + 11], 22, -1990404162);
-          a = md5_ff(a, b, c, d, x[i + 12], 7, 1804603682);
-          d = md5_ff(d, a, b, c, x[i + 13], 12, -40341101);
-          c = md5_ff(c, d, a, b, x[i + 14], 17, -1502002290);
-          b = md5_ff(b, c, d, a, x[i + 15], 22, 1236535329);
-
-          a = md5_gg(a, b, c, d, x[i + 1], 5, -165796510);
-          d = md5_gg(d, a, b, c, x[i + 6], 9, -1069501632);
-          c = md5_gg(c, d, a, b, x[i + 11], 14, 643717713);
-          b = md5_gg(b, c, d, a, x[i + 0], 20, -373897302);
-          a = md5_gg(a, b, c, d, x[i + 5], 5, -701558691);
-          d = md5_gg(d, a, b, c, x[i + 10], 9, 38016083);
-          c = md5_gg(c, d, a, b, x[i + 15], 14, -660478335);
-          b = md5_gg(b, c, d, a, x[i + 4], 20, -405537848);
-          a = md5_gg(a, b, c, d, x[i + 9], 5, 568446438);
-          d = md5_gg(d, a, b, c, x[i + 14], 9, -1019803690);
-          c = md5_gg(c, d, a, b, x[i + 3], 14, -187363961);
-          b = md5_gg(b, c, d, a, x[i + 8], 20, 1163531501);
-          a = md5_gg(a, b, c, d, x[i + 13], 5, -1444681467);
-          d = md5_gg(d, a, b, c, x[i + 2], 9, -51403784);
-          c = md5_gg(c, d, a, b, x[i + 7], 14, 1735328473);
-          b = md5_gg(b, c, d, a, x[i + 12], 20, -1926607734);
-
-          a = md5_hh(a, b, c, d, x[i + 5], 4, -378558);
-          d = md5_hh(d, a, b, c, x[i + 8], 11, -2022574463);
-          c = md5_hh(c, d, a, b, x[i + 11], 16, 1839030562);
-          b = md5_hh(b, c, d, a, x[i + 14], 23, -35309556);
-          a = md5_hh(a, b, c, d, x[i + 1], 4, -1530992060);
-          d = md5_hh(d, a, b, c, x[i + 4], 11, 1272893353);
-          c = md5_hh(c, d, a, b, x[i + 7], 16, -155497632);
-          b = md5_hh(b, c, d, a, x[i + 10], 23, -1094730640);
-          a = md5_hh(a, b, c, d, x[i + 13], 4, 681279174);
-          d = md5_hh(d, a, b, c, x[i + 0], 11, -358537222);
-          c = md5_hh(c, d, a, b, x[i + 3], 16, -722521979);
-          b = md5_hh(b, c, d, a, x[i + 6], 23, 76029189);
-          a = md5_hh(a, b, c, d, x[i + 9], 4, -640364487);
-          d = md5_hh(d, a, b, c, x[i + 12], 11, -421815835);
-          c = md5_hh(c, d, a, b, x[i + 15], 16, 530742520);
-          b = md5_hh(b, c, d, a, x[i + 2], 23, -995338651);
-
-          a = md5_ii(a, b, c, d, x[i + 0], 6, -198630844);
-          d = md5_ii(d, a, b, c, x[i + 7], 10, 1126891415);
-          c = md5_ii(c, d, a, b, x[i + 14], 15, -1416354905);
-          b = md5_ii(b, c, d, a, x[i + 5], 21, -57434055);
-          a = md5_ii(a, b, c, d, x[i + 12], 6, 1700485571);
-          d = md5_ii(d, a, b, c, x[i + 3], 10, -1894986606);
-          c = md5_ii(c, d, a, b, x[i + 10], 15, -1051523);
-          b = md5_ii(b, c, d, a, x[i + 1], 21, -2054922799);
-          a = md5_ii(a, b, c, d, x[i + 8], 6, 1873313359);
-          d = md5_ii(d, a, b, c, x[i + 15], 10, -30611744);
-          c = md5_ii(c, d, a, b, x[i + 6], 15, -1560198380);
-          b = md5_ii(b, c, d, a, x[i + 13], 21, 1309151649);
-          a = md5_ii(a, b, c, d, x[i + 4], 6, -145523070);
-          d = md5_ii(d, a, b, c, x[i + 11], 10, -1120210379);
-          c = md5_ii(c, d, a, b, x[i + 2], 15, 718787259);
-          b = md5_ii(b, c, d, a, x[i + 9], 21, -343485551);
-
-          a = safe_add(a, olda);
-          b = safe_add(b, oldb);
-          c = safe_add(c, oldc);
-          d = safe_add(d, oldd);
-        }
-        return Array(a, b, c, d);
-      }
-
-      /**
-       * These functions implement the four basic operations the algorithm uses.
-       */
-
-      function md5_cmn(q, a, b, x, s, t) {
-        return safe_add(bit_rol(safe_add(safe_add(a, q), safe_add(x, t)), s), b);
-      }
-
-      function md5_ff(a, b, c, d, x, s, t) {
-        return md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
-      }
-
-      function md5_gg(a, b, c, d, x, s, t) {
-        return md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
-      }
-
-      function md5_hh(a, b, c, d, x, s, t) {
-        return md5_cmn(b ^ c ^ d, a, b, x, s, t);
-      }
-
-      function md5_ii(a, b, c, d, x, s, t) {
-        return md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
-      }
-    },
-    /**
-     * @member Hashes
-     * @class Hashes.SHA1
-     * @param {Object} [config]
-     * @constructor
-     *
-     * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined in FIPS 180-1
-     * Version 2.2 Copyright Paul Johnston 2000 - 2009.
-     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
-     * See http://pajhome.org.uk/crypt/md5 for details.
-     */
-    SHA1: function(options) {
-      /**
-       * Private config properties. You may need to tweak these to be compatible with
-       * the server-side, but the defaults work in most cases.
-       * See {@link Hashes.MD5#method-setUpperCase} and {@link Hashes.SHA1#method-setUpperCase}
-       */
-      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase
-        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=', // base-64 pad character. Defaults to '=' for strict RFC compliance
-        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true; // enable/disable utf8 encoding
-
-      // public methods
-      this.hex = function(s) {
-        return rstr2hex(rstr(s, utf8), hexcase);
-      };
-      this.b64 = function(s) {
-        return rstr2b64(rstr(s, utf8), b64pad);
-      };
-      this.any = function(s, e) {
-        return rstr2any(rstr(s, utf8), e);
-      };
-      this.raw = function(s) {
-        return rstr(s, utf8);
-      };
-      this.hex_hmac = function(k, d) {
-        return rstr2hex(rstr_hmac(k, d));
-      };
-      this.b64_hmac = function(k, d) {
-        return rstr2b64(rstr_hmac(k, d), b64pad);
-      };
-      this.any_hmac = function(k, d, e) {
-        return rstr2any(rstr_hmac(k, d), e);
-      };
-      /**
-       * Perform a simple self-test to see if the VM is working
-       * @return {String} Hexadecimal hash sample
-       * @public
-       */
-      this.vm_test = function() {
-        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
-      };
-      /**
-       * @description Enable/disable uppercase hexadecimal returned string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUpperCase = function(a) {
-        if (typeof a === 'boolean') {
-          hexcase = a;
-        }
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {string} Pad
-       * @return {Object} this
-       * @public
-       */
-      this.setPad = function(a) {
-        b64pad = a || b64pad;
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUTF8 = function(a) {
-        if (typeof a === 'boolean') {
-          utf8 = a;
-        }
-        return this;
-      };
-
-      // private methods
-
-      /**
-       * Calculate the SHA-512 of a raw string
-       */
-
-      function rstr(s) {
-        s = (utf8) ? utf8Encode(s) : s;
-        return binb2rstr(binb(rstr2binb(s), s.length * 8));
-      }
-
-      /**
-       * Calculate the HMAC-SHA1 of a key and some data (raw strings)
-       */
-
-      function rstr_hmac(key, data) {
-        var bkey, ipad, opad, i, hash;
-        key = (utf8) ? utf8Encode(key) : key;
-        data = (utf8) ? utf8Encode(data) : data;
-        bkey = rstr2binb(key);
-
-        if (bkey.length > 16) {
-          bkey = binb(bkey, key.length * 8);
-        }
-        ipad = Array(16), opad = Array(16);
-        for (i = 0; i < 16; i += 1) {
-          ipad[i] = bkey[i] ^ 0x36363636;
-          opad[i] = bkey[i] ^ 0x5C5C5C5C;
-        }
-        hash = binb(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
-        return binb2rstr(binb(opad.concat(hash), 512 + 160));
-      }
-
-      /**
-       * Calculate the SHA-1 of an array of big-endian words, and a bit length
-       */
-
-      function binb(x, len) {
-        var i, j, t, olda, oldb, oldc, oldd, olde,
-          w = Array(80),
-          a = 1732584193,
-          b = -271733879,
-          c = -1732584194,
-          d = 271733878,
-          e = -1009589776;
-
-        /* append padding */
-        x[len >> 5] |= 0x80 << (24 - len % 32);
-        x[((len + 64 >> 9) << 4) + 15] = len;
-
-        for (i = 0; i < x.length; i += 16) {
-          olda = a,
-          oldb = b;
-          oldc = c;
-          oldd = d;
-          olde = e;
-
-          for (j = 0; j < 80; j += 1) {
-            if (j < 16) {
-              w[j] = x[i + j];
-            } else {
-              w[j] = bit_rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-            }
-            t = safe_add(safe_add(bit_rol(a, 5), sha1_ft(j, b, c, d)),
-              safe_add(safe_add(e, w[j]), sha1_kt(j)));
-            e = d;
-            d = c;
-            c = bit_rol(b, 30);
-            b = a;
-            a = t;
-          }
-
-          a = safe_add(a, olda);
-          b = safe_add(b, oldb);
-          c = safe_add(c, oldc);
-          d = safe_add(d, oldd);
-          e = safe_add(e, olde);
-        }
-        return Array(a, b, c, d, e);
-      }
-
-      /**
-       * Perform the appropriate triplet combination function for the current
-       * iteration
-       */
-
-      function sha1_ft(t, b, c, d) {
-        if (t < 20) {
-          return (b & c) | ((~b) & d);
-        }
-        if (t < 40) {
-          return b ^ c ^ d;
-        }
-        if (t < 60) {
-          return (b & c) | (b & d) | (c & d);
-        }
-        return b ^ c ^ d;
-      }
-
-      /**
-       * Determine the appropriate additive constant for the current iteration
-       */
-
-      function sha1_kt(t) {
-        return (t < 20) ? 1518500249 : (t < 40) ? 1859775393 :
-          (t < 60) ? -1894007588 : -899497514;
-      }
-    },
-    /**
-     * @class Hashes.SHA256
-     * @param {config}
-     *
-     * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined in FIPS 180-2
-     * Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
-     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
-     * See http://pajhome.org.uk/crypt/md5 for details.
-     * Also http://anmar.eu.org/projects/jssha2/
-     */
-    SHA256: function(options) {
-      /**
-       * Private properties configuration variables. You may need to tweak these to be compatible with
-       * the server-side, but the defaults work in most cases.
-       * @see this.setUpperCase() method
-       * @see this.setPad() method
-       */
-      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false, // hexadecimal output case format. false - lowercase; true - uppercase  */
-        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
-        /* base-64 pad character. Default '=' for strict RFC compliance   */
-        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
-        /* enable/disable utf8 encoding */
-        sha256_K;
-
-      /* privileged (public) methods */
-      this.hex = function(s) {
-        return rstr2hex(rstr(s, utf8));
-      };
-      this.b64 = function(s) {
-        return rstr2b64(rstr(s, utf8), b64pad);
-      };
-      this.any = function(s, e) {
-        return rstr2any(rstr(s, utf8), e);
-      };
-      this.raw = function(s) {
-        return rstr(s, utf8);
-      };
-      this.hex_hmac = function(k, d) {
-        return rstr2hex(rstr_hmac(k, d));
-      };
-      this.b64_hmac = function(k, d) {
-        return rstr2b64(rstr_hmac(k, d), b64pad);
-      };
-      this.any_hmac = function(k, d, e) {
-        return rstr2any(rstr_hmac(k, d), e);
-      };
-      /**
-       * Perform a simple self-test to see if the VM is working
-       * @return {String} Hexadecimal hash sample
-       * @public
-       */
-      this.vm_test = function() {
-        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
-      };
-      /**
-       * Enable/disable uppercase hexadecimal returned string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUpperCase = function(a) {
-        if (typeof a === 'boolean') {
-          hexcase = a;
-        }
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {string} Pad
-       * @return {Object} this
-       * @public
-       */
-      this.setPad = function(a) {
-        b64pad = a || b64pad;
-        return this;
-      };
-      /**
-       * Defines a base64 pad string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUTF8 = function(a) {
-        if (typeof a === 'boolean') {
-          utf8 = a;
-        }
-        return this;
-      };
-
-      // private methods
-
-      /**
-       * Calculate the SHA-512 of a raw string
-       */
-
-      function rstr(s, utf8) {
-        s = (utf8) ? utf8Encode(s) : s;
-        return binb2rstr(binb(rstr2binb(s), s.length * 8));
-      }
-
-      /**
-       * Calculate the HMAC-sha256 of a key and some data (raw strings)
-       */
-
-      function rstr_hmac(key, data) {
-        key = (utf8) ? utf8Encode(key) : key;
-        data = (utf8) ? utf8Encode(data) : data;
-        var hash, i = 0,
-          bkey = rstr2binb(key),
-          ipad = Array(16),
-          opad = Array(16);
-
-        if (bkey.length > 16) {
-          bkey = binb(bkey, key.length * 8);
-        }
-
-        for (; i < 16; i += 1) {
-          ipad[i] = bkey[i] ^ 0x36363636;
-          opad[i] = bkey[i] ^ 0x5C5C5C5C;
-        }
-
-        hash = binb(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
-        return binb2rstr(binb(opad.concat(hash), 512 + 256));
-      }
-
+    var incomingLayer = layers[0];
+    if (!incomingLayer.source) {
       /*
-       * Main sha256 function, with its support functions
-       */
+      todo: figure out the correct behavior if the source is not provided.
+      see https://github.com/w3c/webvr/issues/58
+      */
+      resolve();
+      return;
+    }
 
-      function sha256_S(X, n) {
-        return (X >>> n) | (X << (32 - n));
+    var leftBounds = incomingLayer.leftBounds || defaultLeftBounds;
+    var rightBounds = incomingLayer.rightBounds || defaultRightBounds;
+    if (wasPresenting) {
+      // Already presenting, just changing configuration
+      var changed = false;
+      var layer = self.layer_;
+      if (layer.source !== incomingLayer.source) {
+        layer.source = incomingLayer.source;
+        changed = true;
       }
 
-      function sha256_R(X, n) {
-        return (X >>> n);
+      for (var i = 0; i < 4; i++) {
+        if (layer.leftBounds[i] !== leftBounds[i]) {
+          layer.leftBounds[i] = leftBounds[i];
+          changed = true;
+        }
+        if (layer.rightBounds[i] !== rightBounds[i]) {
+          layer.rightBounds[i] = rightBounds[i];
+          changed = true;
+        }
       }
 
-      function sha256_Ch(x, y, z) {
-        return ((x & y) ^ ((~x) & z));
+      if (changed) {
+        self.fireVRDisplayPresentChange_();
       }
+      resolve();
+      return;
+    }
 
-      function sha256_Maj(x, y, z) {
-        return ((x & y) ^ (x & z) ^ (y & z));
-      }
+    // Was not already presenting
+    self.layer_ = {
+      source: incomingLayer.source,
+      leftBounds: leftBounds.slice(0),
+      rightBounds: rightBounds.slice(0)
+    };
 
-      function sha256_Sigma0256(x) {
-        return (sha256_S(x, 2) ^ sha256_S(x, 13) ^ sha256_S(x, 22));
-      }
+    self.waitingForPresent_ = false;
+    if (self.layer_ && self.layer_.source) {
+      var fullscreenElement = self.wrapForFullscreen(self.layer_.source);
 
-      function sha256_Sigma1256(x) {
-        return (sha256_S(x, 6) ^ sha256_S(x, 11) ^ sha256_S(x, 25));
-      }
+      function onFullscreenChange() {
+        var actualFullscreenElement = Util.getFullscreenElement();
 
-      function sha256_Gamma0256(x) {
-        return (sha256_S(x, 7) ^ sha256_S(x, 18) ^ sha256_R(x, 3));
-      }
-
-      function sha256_Gamma1256(x) {
-        return (sha256_S(x, 17) ^ sha256_S(x, 19) ^ sha256_R(x, 10));
-      }
-
-      function sha256_Sigma0512(x) {
-        return (sha256_S(x, 28) ^ sha256_S(x, 34) ^ sha256_S(x, 39));
-      }
-
-      function sha256_Sigma1512(x) {
-        return (sha256_S(x, 14) ^ sha256_S(x, 18) ^ sha256_S(x, 41));
-      }
-
-      function sha256_Gamma0512(x) {
-        return (sha256_S(x, 1) ^ sha256_S(x, 8) ^ sha256_R(x, 7));
-      }
-
-      function sha256_Gamma1512(x) {
-        return (sha256_S(x, 19) ^ sha256_S(x, 61) ^ sha256_R(x, 6));
-      }
-
-      sha256_K = [
-        1116352408, 1899447441, -1245643825, -373957723, 961987163, 1508970993, -1841331548, -1424204075, -670586216, 310598401, 607225278, 1426881987,
-        1925078388, -2132889090, -1680079193, -1046744716, -459576895, -272742522,
-        264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, -1740746414, -1473132947, -1341970488, -1084653625, -958395405, -710438585,
-        113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291,
-        1695183700, 1986661051, -2117940946, -1838011259, -1564481375, -1474664885, -1035236496, -949202525, -778901479, -694614492, -200395387, 275423344,
-        430227734, 506948616, 659060556, 883997877, 958139571, 1322822218,
-        1537002063, 1747873779, 1955562222, 2024104815, -2067236844, -1933114872, -1866530822, -1538233109, -1090935817, -965641998
-      ];
-
-      function binb(m, l) {
-        var HASH = [1779033703, -1150833019, 1013904242, -1521486534,
-          1359893119, -1694144372, 528734635, 1541459225
-        ];
-        var W = new Array(64);
-        var a, b, c, d, e, f, g, h;
-        var i, j, T1, T2;
-
-        /* append padding */
-        m[l >> 5] |= 0x80 << (24 - l % 32);
-        m[((l + 64 >> 9) << 4) + 15] = l;
-
-        for (i = 0; i < m.length; i += 16) {
-          a = HASH[0];
-          b = HASH[1];
-          c = HASH[2];
-          d = HASH[3];
-          e = HASH[4];
-          f = HASH[5];
-          g = HASH[6];
-          h = HASH[7];
-
-          for (j = 0; j < 64; j += 1) {
-            if (j < 16) {
-              W[j] = m[j + i];
-            } else {
-              W[j] = safe_add(safe_add(safe_add(sha256_Gamma1256(W[j - 2]), W[j - 7]),
-                sha256_Gamma0256(W[j - 15])), W[j - 16]);
-            }
-
-            T1 = safe_add(safe_add(safe_add(safe_add(h, sha256_Sigma1256(e)), sha256_Ch(e, f, g)),
-              sha256_K[j]), W[j]);
-            T2 = safe_add(sha256_Sigma0256(a), sha256_Maj(a, b, c));
-            h = g;
-            g = f;
-            f = e;
-            e = safe_add(d, T1);
-            d = c;
-            c = b;
-            b = a;
-            a = safe_add(T1, T2);
+        self.isPresenting = (fullscreenElement === actualFullscreenElement);
+        if (self.isPresenting) {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape-primary').catch(function(error){
+                    console.error('screen.orientation.lock() failed due to', error.message)
+            });
           }
-
-          HASH[0] = safe_add(a, HASH[0]);
-          HASH[1] = safe_add(b, HASH[1]);
-          HASH[2] = safe_add(c, HASH[2]);
-          HASH[3] = safe_add(d, HASH[3]);
-          HASH[4] = safe_add(e, HASH[4]);
-          HASH[5] = safe_add(f, HASH[5]);
-          HASH[6] = safe_add(g, HASH[6]);
-          HASH[7] = safe_add(h, HASH[7]);
-        }
-        return HASH;
-      }
-
-    },
-
-    /**
-     * @class Hashes.SHA512
-     * @param {config}
-     *
-     * A JavaScript implementation of the Secure Hash Algorithm, SHA-512, as defined in FIPS 180-2
-     * Version 2.2 Copyright Anonymous Contributor, Paul Johnston 2000 - 2009.
-     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
-     * See http://pajhome.org.uk/crypt/md5 for details.
-     */
-    SHA512: function(options) {
-      /**
-       * Private properties configuration variables. You may need to tweak these to be compatible with
-       * the server-side, but the defaults work in most cases.
-       * @see this.setUpperCase() method
-       * @see this.setPad() method
-       */
-      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false,
-        /* hexadecimal output case format. false - lowercase; true - uppercase  */
-        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
-        /* base-64 pad character. Default '=' for strict RFC compliance   */
-        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
-        /* enable/disable utf8 encoding */
-        sha512_k;
-
-      /* privileged (public) methods */
-      this.hex = function(s) {
-        return rstr2hex(rstr(s));
-      };
-      this.b64 = function(s) {
-        return rstr2b64(rstr(s), b64pad);
-      };
-      this.any = function(s, e) {
-        return rstr2any(rstr(s), e);
-      };
-      this.raw = function(s) {
-        return rstr(s, utf8);
-      };
-      this.hex_hmac = function(k, d) {
-        return rstr2hex(rstr_hmac(k, d));
-      };
-      this.b64_hmac = function(k, d) {
-        return rstr2b64(rstr_hmac(k, d), b64pad);
-      };
-      this.any_hmac = function(k, d, e) {
-        return rstr2any(rstr_hmac(k, d), e);
-      };
-      /**
-       * Perform a simple self-test to see if the VM is working
-       * @return {String} Hexadecimal hash sample
-       * @public
-       */
-      this.vm_test = function() {
-        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
-      };
-      /**
-       * @description Enable/disable uppercase hexadecimal returned string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUpperCase = function(a) {
-        if (typeof a === 'boolean') {
-          hexcase = a;
-        }
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {string} Pad
-       * @return {Object} this
-       * @public
-       */
-      this.setPad = function(a) {
-        b64pad = a || b64pad;
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUTF8 = function(a) {
-        if (typeof a === 'boolean') {
-          utf8 = a;
-        }
-        return this;
-      };
-
-      /* private methods */
-
-      /**
-       * Calculate the SHA-512 of a raw string
-       */
-
-      function rstr(s) {
-        s = (utf8) ? utf8Encode(s) : s;
-        return binb2rstr(binb(rstr2binb(s), s.length * 8));
-      }
-      /*
-       * Calculate the HMAC-SHA-512 of a key and some data (raw strings)
-       */
-
-      function rstr_hmac(key, data) {
-        key = (utf8) ? utf8Encode(key) : key;
-        data = (utf8) ? utf8Encode(data) : data;
-
-        var hash, i = 0,
-          bkey = rstr2binb(key),
-          ipad = Array(32),
-          opad = Array(32);
-
-        if (bkey.length > 32) {
-          bkey = binb(bkey, key.length * 8);
-        }
-
-        for (; i < 32; i += 1) {
-          ipad[i] = bkey[i] ^ 0x36363636;
-          opad[i] = bkey[i] ^ 0x5C5C5C5C;
-        }
-
-        hash = binb(ipad.concat(rstr2binb(data)), 1024 + data.length * 8);
-        return binb2rstr(binb(opad.concat(hash), 1024 + 512));
-      }
-
-      /**
-       * Calculate the SHA-512 of an array of big-endian dwords, and a bit length
-       */
-
-      function binb(x, len) {
-        var j, i, l,
-          W = new Array(80),
-          hash = new Array(16),
-          //Initial hash values
-          H = [
-            new int64(0x6a09e667, -205731576),
-            new int64(-1150833019, -2067093701),
-            new int64(0x3c6ef372, -23791573),
-            new int64(-1521486534, 0x5f1d36f1),
-            new int64(0x510e527f, -1377402159),
-            new int64(-1694144372, 0x2b3e6c1f),
-            new int64(0x1f83d9ab, -79577749),
-            new int64(0x5be0cd19, 0x137e2179)
-          ],
-          T1 = new int64(0, 0),
-          T2 = new int64(0, 0),
-          a = new int64(0, 0),
-          b = new int64(0, 0),
-          c = new int64(0, 0),
-          d = new int64(0, 0),
-          e = new int64(0, 0),
-          f = new int64(0, 0),
-          g = new int64(0, 0),
-          h = new int64(0, 0),
-          //Temporary variables not specified by the document
-          s0 = new int64(0, 0),
-          s1 = new int64(0, 0),
-          Ch = new int64(0, 0),
-          Maj = new int64(0, 0),
-          r1 = new int64(0, 0),
-          r2 = new int64(0, 0),
-          r3 = new int64(0, 0);
-
-        if (sha512_k === undefined) {
-          //SHA512 constants
-          sha512_k = [
-            new int64(0x428a2f98, -685199838), new int64(0x71374491, 0x23ef65cd),
-            new int64(-1245643825, -330482897), new int64(-373957723, -2121671748),
-            new int64(0x3956c25b, -213338824), new int64(0x59f111f1, -1241133031),
-            new int64(-1841331548, -1357295717), new int64(-1424204075, -630357736),
-            new int64(-670586216, -1560083902), new int64(0x12835b01, 0x45706fbe),
-            new int64(0x243185be, 0x4ee4b28c), new int64(0x550c7dc3, -704662302),
-            new int64(0x72be5d74, -226784913), new int64(-2132889090, 0x3b1696b1),
-            new int64(-1680079193, 0x25c71235), new int64(-1046744716, -815192428),
-            new int64(-459576895, -1628353838), new int64(-272742522, 0x384f25e3),
-            new int64(0xfc19dc6, -1953704523), new int64(0x240ca1cc, 0x77ac9c65),
-            new int64(0x2de92c6f, 0x592b0275), new int64(0x4a7484aa, 0x6ea6e483),
-            new int64(0x5cb0a9dc, -1119749164), new int64(0x76f988da, -2096016459),
-            new int64(-1740746414, -295247957), new int64(-1473132947, 0x2db43210),
-            new int64(-1341970488, -1728372417), new int64(-1084653625, -1091629340),
-            new int64(-958395405, 0x3da88fc2), new int64(-710438585, -1828018395),
-            new int64(0x6ca6351, -536640913), new int64(0x14292967, 0xa0e6e70),
-            new int64(0x27b70a85, 0x46d22ffc), new int64(0x2e1b2138, 0x5c26c926),
-            new int64(0x4d2c6dfc, 0x5ac42aed), new int64(0x53380d13, -1651133473),
-            new int64(0x650a7354, -1951439906), new int64(0x766a0abb, 0x3c77b2a8),
-            new int64(-2117940946, 0x47edaee6), new int64(-1838011259, 0x1482353b),
-            new int64(-1564481375, 0x4cf10364), new int64(-1474664885, -1136513023),
-            new int64(-1035236496, -789014639), new int64(-949202525, 0x654be30),
-            new int64(-778901479, -688958952), new int64(-694614492, 0x5565a910),
-            new int64(-200395387, 0x5771202a), new int64(0x106aa070, 0x32bbd1b8),
-            new int64(0x19a4c116, -1194143544), new int64(0x1e376c08, 0x5141ab53),
-            new int64(0x2748774c, -544281703), new int64(0x34b0bcb5, -509917016),
-            new int64(0x391c0cb3, -976659869), new int64(0x4ed8aa4a, -482243893),
-            new int64(0x5b9cca4f, 0x7763e373), new int64(0x682e6ff3, -692930397),
-            new int64(0x748f82ee, 0x5defb2fc), new int64(0x78a5636f, 0x43172f60),
-            new int64(-2067236844, -1578062990), new int64(-1933114872, 0x1a6439ec),
-            new int64(-1866530822, 0x23631e28), new int64(-1538233109, -561857047),
-            new int64(-1090935817, -1295615723), new int64(-965641998, -479046869),
-            new int64(-903397682, -366583396), new int64(-779700025, 0x21c0c207),
-            new int64(-354779690, -840897762), new int64(-176337025, -294727304),
-            new int64(0x6f067aa, 0x72176fba), new int64(0xa637dc5, -1563912026),
-            new int64(0x113f9804, -1090974290), new int64(0x1b710b35, 0x131c471b),
-            new int64(0x28db77f5, 0x23047d84), new int64(0x32caab7b, 0x40c72493),
-            new int64(0x3c9ebe0a, 0x15c9bebc), new int64(0x431d67c4, -1676669620),
-            new int64(0x4cc5d4be, -885112138), new int64(0x597f299c, -60457430),
-            new int64(0x5fcb6fab, 0x3ad6faec), new int64(0x6c44198c, 0x4a475817)
-          ];
-        }
-
-        for (i = 0; i < 80; i += 1) {
-          W[i] = new int64(0, 0);
-        }
-
-        // append padding to the source string. The format is described in the FIPS.
-        x[len >> 5] |= 0x80 << (24 - (len & 0x1f));
-        x[((len + 128 >> 10) << 5) + 31] = len;
-        l = x.length;
-        for (i = 0; i < l; i += 32) { //32 dwords is the block size
-          int64copy(a, H[0]);
-          int64copy(b, H[1]);
-          int64copy(c, H[2]);
-          int64copy(d, H[3]);
-          int64copy(e, H[4]);
-          int64copy(f, H[5]);
-          int64copy(g, H[6]);
-          int64copy(h, H[7]);
-
-          for (j = 0; j < 16; j += 1) {
-            W[j].h = x[i + 2 * j];
-            W[j].l = x[i + 2 * j + 1];
+          self.waitingForPresent_ = false;
+          self.beginPresent_();
+          resolve();
+        } else {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
           }
-
-          for (j = 16; j < 80; j += 1) {
-            //sigma1
-            int64rrot(r1, W[j - 2], 19);
-            int64revrrot(r2, W[j - 2], 29);
-            int64shr(r3, W[j - 2], 6);
-            s1.l = r1.l ^ r2.l ^ r3.l;
-            s1.h = r1.h ^ r2.h ^ r3.h;
-            //sigma0
-            int64rrot(r1, W[j - 15], 1);
-            int64rrot(r2, W[j - 15], 8);
-            int64shr(r3, W[j - 15], 7);
-            s0.l = r1.l ^ r2.l ^ r3.l;
-            s0.h = r1.h ^ r2.h ^ r3.h;
-
-            int64add4(W[j], s1, W[j - 7], s0, W[j - 16]);
-          }
-
-          for (j = 0; j < 80; j += 1) {
-            //Ch
-            Ch.l = (e.l & f.l) ^ (~e.l & g.l);
-            Ch.h = (e.h & f.h) ^ (~e.h & g.h);
-
-            //Sigma1
-            int64rrot(r1, e, 14);
-            int64rrot(r2, e, 18);
-            int64revrrot(r3, e, 9);
-            s1.l = r1.l ^ r2.l ^ r3.l;
-            s1.h = r1.h ^ r2.h ^ r3.h;
-
-            //Sigma0
-            int64rrot(r1, a, 28);
-            int64revrrot(r2, a, 2);
-            int64revrrot(r3, a, 7);
-            s0.l = r1.l ^ r2.l ^ r3.l;
-            s0.h = r1.h ^ r2.h ^ r3.h;
-
-            //Maj
-            Maj.l = (a.l & b.l) ^ (a.l & c.l) ^ (b.l & c.l);
-            Maj.h = (a.h & b.h) ^ (a.h & c.h) ^ (b.h & c.h);
-
-            int64add5(T1, h, s1, Ch, sha512_k[j], W[j]);
-            int64add(T2, s0, Maj);
-
-            int64copy(h, g);
-            int64copy(g, f);
-            int64copy(f, e);
-            int64add(e, d, T1);
-            int64copy(d, c);
-            int64copy(c, b);
-            int64copy(b, a);
-            int64add(a, T1, T2);
-          }
-          int64add(H[0], H[0], a);
-          int64add(H[1], H[1], b);
-          int64add(H[2], H[2], c);
-          int64add(H[3], H[3], d);
-          int64add(H[4], H[4], e);
-          int64add(H[5], H[5], f);
-          int64add(H[6], H[6], g);
-          int64add(H[7], H[7], h);
+          self.removeFullscreenWrapper();
+          self.wakelock_.release();
+          self.endPresent_();
+          self.removeFullscreenListeners_();
+        }
+        self.fireVRDisplayPresentChange_();
+      }
+      function onFullscreenError() {
+        if (!self.waitingForPresent_) {
+          return;
         }
 
-        //represent the hash as an array of 32-bit dwords
-        for (i = 0; i < 8; i += 1) {
-          hash[2 * i] = H[i].h;
-          hash[2 * i + 1] = H[i].l;
+        self.removeFullscreenWrapper();
+        self.removeFullscreenListeners_();
+
+        self.wakelock_.release();
+        self.waitingForPresent_ = false;
+        self.isPresenting = false;
+
+        reject(new Error('Unable to present.'));
+      }
+
+      self.addFullscreenListeners_(fullscreenElement,
+          onFullscreenChange, onFullscreenError);
+
+      if (Util.requestFullscreen(fullscreenElement)) {
+        self.wakelock_.request();
+        self.waitingForPresent_ = true;
+      } else if (Util.isIOS()) {
+        // *sigh* Just fake it.
+        self.wakelock_.request();
+        self.isPresenting = true;
+        self.beginPresent_();
+        self.fireVRDisplayPresentChange_();
+        resolve();
+      }
+    }
+
+    if (!self.waitingForPresent_ && !Util.isIOS()) {
+      Util.exitFullscreen();
+      reject(new Error('Unable to present.'));
+    }
+  });
+};
+
+VRDisplay.prototype.exitPresent = function() {
+  var wasPresenting = this.isPresenting;
+  var self = this;
+  this.isPresenting = false;
+  this.layer_ = null;
+  this.wakelock_.release();
+
+  return new Promise(function(resolve, reject) {
+    if (wasPresenting) {
+      if (!Util.exitFullscreen() && Util.isIOS()) {
+        self.endPresent_();
+        self.fireVRDisplayPresentChange_();
+      }
+
+      resolve();
+    } else {
+      reject(new Error('Was not presenting to VRDisplay.'));
+    }
+  });
+};
+
+VRDisplay.prototype.getLayers = function() {
+  if (this.layer_) {
+    return [this.layer_];
+  }
+  return [];
+};
+
+VRDisplay.prototype.fireVRDisplayPresentChange_ = function() {
+  var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
+  window.dispatchEvent(event);
+};
+
+VRDisplay.prototype.addFullscreenListeners_ = function(element, changeHandler, errorHandler) {
+  this.removeFullscreenListeners_();
+
+  this.fullscreenEventTarget_ = element;
+  this.fullscreenChangeHandler_ = changeHandler;
+  this.fullscreenErrorHandler_ = errorHandler;
+
+  if (changeHandler) {
+    element.addEventListener('fullscreenchange', changeHandler, false);
+    element.addEventListener('webkitfullscreenchange', changeHandler, false);
+    document.addEventListener('mozfullscreenchange', changeHandler, false);
+    element.addEventListener('msfullscreenchange', changeHandler, false);
+  }
+
+  if (errorHandler) {
+    element.addEventListener('fullscreenerror', errorHandler, false);
+    element.addEventListener('webkitfullscreenerror', errorHandler, false);
+    document.addEventListener('mozfullscreenerror', errorHandler, false);
+    element.addEventListener('msfullscreenerror', errorHandler, false);
+  }
+};
+
+VRDisplay.prototype.removeFullscreenListeners_ = function() {
+  if (!this.fullscreenEventTarget_)
+    return;
+
+  var element = this.fullscreenEventTarget_;
+
+  if (this.fullscreenChangeHandler_) {
+    var changeHandler = this.fullscreenChangeHandler_;
+    element.removeEventListener('fullscreenchange', changeHandler, false);
+    element.removeEventListener('webkitfullscreenchange', changeHandler, false);
+    document.removeEventListener('mozfullscreenchange', changeHandler, false);
+    element.removeEventListener('msfullscreenchange', changeHandler, false);
+  }
+
+  if (this.fullscreenErrorHandler_) {
+    var errorHandler = this.fullscreenErrorHandler_;
+    element.removeEventListener('fullscreenerror', errorHandler, false);
+    element.removeEventListener('webkitfullscreenerror', errorHandler, false);
+    document.removeEventListener('mozfullscreenerror', errorHandler, false);
+    element.removeEventListener('msfullscreenerror', errorHandler, false);
+  }
+
+  this.fullscreenEventTarget_ = null;
+  this.fullscreenChangeHandler_ = null;
+  this.fullscreenErrorHandler_ = null;
+};
+
+VRDisplay.prototype.beginPresent_ = function() {
+  // Override to add custom behavior when presentation begins.
+};
+
+VRDisplay.prototype.endPresent_ = function() {
+  // Override to add custom behavior when presentation ends.
+};
+
+VRDisplay.prototype.submitFrame = function(pose) {
+  // Override to add custom behavior for frame submission.
+};
+
+VRDisplay.prototype.getEyeParameters = function(whichEye) {
+  // Override to return accurate eye parameters if canPresent is true.
+  return null;
+};
+
+/*
+ * Deprecated classes
+ */
+
+/**
+ * The base class for all VR devices. (Deprecated)
+ */
+function VRDevice() {
+  this.isPolyfilled = true;
+  this.hardwareUnitId = 'webvr-polyfill hardwareUnitId';
+  this.deviceId = 'webvr-polyfill deviceId';
+  this.deviceName = 'webvr-polyfill deviceName';
+}
+
+/**
+ * The base class for all VR HMD devices. (Deprecated)
+ */
+function HMDVRDevice() {
+}
+HMDVRDevice.prototype = new VRDevice();
+
+/**
+ * The base class for all VR position sensor devices. (Deprecated)
+ */
+function PositionSensorVRDevice() {
+}
+PositionSensorVRDevice.prototype = new VRDevice();
+
+module.exports.VRDisplay = VRDisplay;
+module.exports.VRDevice = VRDevice;
+module.exports.HMDVRDevice = HMDVRDevice;
+module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
+
+},{"./util.js":22,"./wakelock.js":24}],3:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var CardboardUI = _dereq_('./cardboard-ui.js');
+var Util = _dereq_('./util.js');
+var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
+
+var distortionVS = [
+  'attribute vec2 position;',
+  'attribute vec3 texCoord;',
+
+  'varying vec2 vTexCoord;',
+
+  'uniform vec4 viewportOffsetScale[2];',
+
+  'void main() {',
+  '  vec4 viewport = viewportOffsetScale[int(texCoord.z)];',
+  '  vTexCoord = (texCoord.xy * viewport.zw) + viewport.xy;',
+  '  gl_Position = vec4( position, 1.0, 1.0 );',
+  '}',
+].join('\n');
+
+var distortionFS = [
+  'precision mediump float;',
+  'uniform sampler2D diffuse;',
+
+  'varying vec2 vTexCoord;',
+
+  'void main() {',
+  '  gl_FragColor = texture2D(diffuse, vTexCoord);',
+  '}',
+].join('\n');
+
+/**
+ * A mesh-based distorter.
+ */
+function CardboardDistorter(gl) {
+  this.gl = gl;
+  this.ctxAttribs = gl.getContextAttributes();
+
+  this.meshWidth = 20;
+  this.meshHeight = 20;
+
+  this.bufferScale = WebVRConfig.BUFFER_SCALE;
+
+  this.bufferWidth = gl.drawingBufferWidth;
+  this.bufferHeight = gl.drawingBufferHeight;
+
+  // Patching support
+  this.realBindFramebuffer = gl.bindFramebuffer;
+  this.realEnable = gl.enable;
+  this.realDisable = gl.disable;
+  this.realColorMask = gl.colorMask;
+  this.realClearColor = gl.clearColor;
+  this.realViewport = gl.viewport;
+
+  if (!Util.isIOS()) {
+    this.realCanvasWidth = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'width');
+    this.realCanvasHeight = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'height');
+  }
+
+  this.isPatched = false;
+
+  // State tracking
+  this.lastBoundFramebuffer = null;
+  this.cullFace = false;
+  this.depthTest = false;
+  this.blend = false;
+  this.scissorTest = false;
+  this.stencilTest = false;
+  this.viewport = [0, 0, 0, 0];
+  this.colorMask = [true, true, true, true];
+  this.clearColor = [0, 0, 0, 0];
+
+  this.attribs = {
+    position: 0,
+    texCoord: 1
+  };
+  this.program = Util.linkProgram(gl, distortionVS, distortionFS, this.attribs);
+  this.uniforms = Util.getProgramUniforms(gl, this.program);
+
+  this.viewportOffsetScale = new Float32Array(8);
+  this.setTextureBounds();
+
+  this.vertexBuffer = gl.createBuffer();
+  this.indexBuffer = gl.createBuffer();
+  this.indexCount = 0;
+
+  this.renderTarget = gl.createTexture();
+  this.framebuffer = gl.createFramebuffer();
+
+  this.depthStencilBuffer = null;
+  this.depthBuffer = null;
+  this.stencilBuffer = null;
+
+  if (this.ctxAttribs.depth && this.ctxAttribs.stencil) {
+    this.depthStencilBuffer = gl.createRenderbuffer();
+  } else if (this.ctxAttribs.depth) {
+    this.depthBuffer = gl.createRenderbuffer();
+  } else if (this.ctxAttribs.stencil) {
+    this.stencilBuffer = gl.createRenderbuffer();
+  }
+
+  this.patch();
+
+  this.onResize();
+
+  if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
+    this.cardboardUI = new CardboardUI(gl);
+  }
+};
+
+/**
+ * Tears down all the resources created by the distorter and removes any
+ * patches.
+ */
+CardboardDistorter.prototype.destroy = function() {
+  var gl = this.gl;
+
+  this.unpatch();
+
+  gl.deleteProgram(this.program);
+  gl.deleteBuffer(this.vertexBuffer);
+  gl.deleteBuffer(this.indexBuffer);
+  gl.deleteTexture(this.renderTarget);
+  gl.deleteFramebuffer(this.framebuffer);
+  if (this.depthStencilBuffer) {
+    gl.deleteRenderbuffer(this.depthStencilBuffer);
+  }
+  if (this.depthBuffer) {
+    gl.deleteRenderbuffer(this.depthBuffer);
+  }
+  if (this.stencilBuffer) {
+    gl.deleteRenderbuffer(this.stencilBuffer);
+  }
+
+  if (this.cardboardUI) {
+    this.cardboardUI.destroy();
+  }
+};
+
+
+/**
+ * Resizes the backbuffer to match the canvas width and height.
+ */
+CardboardDistorter.prototype.onResize = function() {
+  var gl = this.gl;
+  var self = this;
+
+  var glState = [
+    gl.RENDERBUFFER_BINDING,
+    gl.TEXTURE_BINDING_2D, gl.TEXTURE0
+  ];
+
+  WGLUPreserveGLState(gl, glState, function(gl) {
+    // Bind real backbuffer and clear it once. We don't need to clear it again
+    // after that because we're overwriting the same area every frame.
+    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
+
+    // Put things in a good state
+    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
+    self.realColorMask.call(gl, true, true, true, true);
+    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    self.realClearColor.call(gl, 0, 0, 0, 1);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Now bind and resize the fake backbuffer
+    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.framebuffer);
+
+    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
+    gl.texImage2D(gl.TEXTURE_2D, 0, self.ctxAttribs.alpha ? gl.RGBA : gl.RGB,
+        self.bufferWidth, self.bufferHeight, 0,
+        self.ctxAttribs.alpha ? gl.RGBA : gl.RGB, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, self.renderTarget, 0);
+
+    if (self.ctxAttribs.depth && self.ctxAttribs.stencil) {
+      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthStencilBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL,
+          self.bufferWidth, self.bufferHeight);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT,
+          gl.RENDERBUFFER, self.depthStencilBuffer);
+    } else if (self.ctxAttribs.depth) {
+      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
+          self.bufferWidth, self.bufferHeight);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+          gl.RENDERBUFFER, self.depthBuffer);
+    } else if (self.ctxAttribs.stencil) {
+      gl.bindRenderbuffer(gl.RENDERBUFFER, self.stencilBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.STENCIL_INDEX8,
+          self.bufferWidth, self.bufferHeight);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT,
+          gl.RENDERBUFFER, self.stencilBuffer);
+    }
+
+    if (!gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+      console.error('Framebuffer incomplete!');
+    }
+
+    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
+
+    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
+
+    self.realColorMask.apply(gl, self.colorMask);
+    self.realViewport.apply(gl, self.viewport);
+    self.realClearColor.apply(gl, self.clearColor);
+  });
+
+  if (this.cardboardUI) {
+    this.cardboardUI.onResize();
+  }
+};
+
+CardboardDistorter.prototype.patch = function() {
+  if (this.isPatched) {
+    return;
+  }
+
+  var self = this;
+  var canvas = this.gl.canvas;
+  var gl = this.gl;
+
+  if (!Util.isIOS()) {
+    canvas.width = Util.getScreenWidth() * this.bufferScale;
+    canvas.height = Util.getScreenHeight() * this.bufferScale;
+
+    Object.defineProperty(canvas, 'width', {
+      configurable: true,
+      enumerable: true,
+      get: function() {
+        return self.bufferWidth;
+      },
+      set: function(value) {
+        self.bufferWidth = value;
+        self.onResize();
+      }
+    });
+
+    Object.defineProperty(canvas, 'height', {
+      configurable: true,
+      enumerable: true,
+      get: function() {
+        return self.bufferHeight;
+      },
+      set: function(value) {
+        self.bufferHeight = value;
+        self.onResize();
+      }
+    });
+  }
+
+  this.lastBoundFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+
+  if (this.lastBoundFramebuffer == null) {
+    this.lastBoundFramebuffer = this.framebuffer;
+    this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+  }
+
+  this.gl.bindFramebuffer = function(target, framebuffer) {
+    self.lastBoundFramebuffer = framebuffer ? framebuffer : self.framebuffer;
+    // Silently make calls to bind the default framebuffer bind ours instead.
+    self.realBindFramebuffer.call(gl, target, self.lastBoundFramebuffer);
+  };
+
+  this.cullFace = gl.getParameter(gl.CULL_FACE);
+  this.depthTest = gl.getParameter(gl.DEPTH_TEST);
+  this.blend = gl.getParameter(gl.BLEND);
+  this.scissorTest = gl.getParameter(gl.SCISSOR_TEST);
+  this.stencilTest = gl.getParameter(gl.STENCIL_TEST);
+
+  gl.enable = function(pname) {
+    switch (pname) {
+      case gl.CULL_FACE: self.cullFace = true; break;
+      case gl.DEPTH_TEST: self.depthTest = true; break;
+      case gl.BLEND: self.blend = true; break;
+      case gl.SCISSOR_TEST: self.scissorTest = true; break;
+      case gl.STENCIL_TEST: self.stencilTest = true; break;
+    }
+    self.realEnable.call(gl, pname);
+  };
+
+  gl.disable = function(pname) {
+    switch (pname) {
+      case gl.CULL_FACE: self.cullFace = false; break;
+      case gl.DEPTH_TEST: self.depthTest = false; break;
+      case gl.BLEND: self.blend = false; break;
+      case gl.SCISSOR_TEST: self.scissorTest = false; break;
+      case gl.STENCIL_TEST: self.stencilTest = false; break;
+    }
+    self.realDisable.call(gl, pname);
+  };
+
+  this.colorMask = gl.getParameter(gl.COLOR_WRITEMASK);
+  gl.colorMask = function(r, g, b, a) {
+    self.colorMask[0] = r;
+    self.colorMask[1] = g;
+    self.colorMask[2] = b;
+    self.colorMask[3] = a;
+    self.realColorMask.call(gl, r, g, b, a);
+  };
+
+  this.clearColor = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+  gl.clearColor = function(r, g, b, a) {
+    self.clearColor[0] = r;
+    self.clearColor[1] = g;
+    self.clearColor[2] = b;
+    self.clearColor[3] = a;
+    self.realClearColor.call(gl, r, g, b, a);
+  };
+
+  this.viewport = gl.getParameter(gl.VIEWPORT);
+  gl.viewport = function(x, y, w, h) {
+    self.viewport[0] = x;
+    self.viewport[1] = y;
+    self.viewport[2] = w;
+    self.viewport[3] = h;
+    self.realViewport.call(gl, x, y, w, h);
+  };
+
+  this.isPatched = true;
+  Util.safariCssSizeWorkaround(canvas);
+};
+
+CardboardDistorter.prototype.unpatch = function() {
+  if (!this.isPatched) {
+    return;
+  }
+
+  var gl = this.gl;
+  var canvas = this.gl.canvas;
+
+  if (!Util.isIOS()) {
+    Object.defineProperty(canvas, 'width', this.realCanvasWidth);
+    Object.defineProperty(canvas, 'height', this.realCanvasHeight);
+  }
+  canvas.width = this.bufferWidth;
+  canvas.height = this.bufferHeight;
+
+  gl.bindFramebuffer = this.realBindFramebuffer;
+  gl.enable = this.realEnable;
+  gl.disable = this.realDisable;
+  gl.colorMask = this.realColorMask;
+  gl.clearColor = this.realClearColor;
+  gl.viewport = this.realViewport;
+
+  // Check to see if our fake backbuffer is bound and bind the real backbuffer
+  // if that's the case.
+  if (this.lastBoundFramebuffer == this.framebuffer) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+  this.isPatched = false;
+
+  setTimeout(function() {
+    Util.safariCssSizeWorkaround(canvas);
+  }, 1);
+};
+
+CardboardDistorter.prototype.setTextureBounds = function(leftBounds, rightBounds) {
+  if (!leftBounds) {
+    leftBounds = [0, 0, 0.5, 1];
+  }
+
+  if (!rightBounds) {
+    rightBounds = [0.5, 0, 0.5, 1];
+  }
+
+  // Left eye
+  this.viewportOffsetScale[0] = leftBounds[0]; // X
+  this.viewportOffsetScale[1] = leftBounds[1]; // Y
+  this.viewportOffsetScale[2] = leftBounds[2]; // Width
+  this.viewportOffsetScale[3] = leftBounds[3]; // Height
+
+  // Right eye
+  this.viewportOffsetScale[4] = rightBounds[0]; // X
+  this.viewportOffsetScale[5] = rightBounds[1]; // Y
+  this.viewportOffsetScale[6] = rightBounds[2]; // Width
+  this.viewportOffsetScale[7] = rightBounds[3]; // Height
+};
+
+/**
+ * Performs distortion pass on the injected backbuffer, rendering it to the real
+ * backbuffer.
+ */
+CardboardDistorter.prototype.submitFrame = function() {
+  var gl = this.gl;
+  var self = this;
+
+  var glState = [];
+
+  if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
+    glState.push(
+      gl.CURRENT_PROGRAM,
+      gl.ARRAY_BUFFER_BINDING,
+      gl.ELEMENT_ARRAY_BUFFER_BINDING,
+      gl.TEXTURE_BINDING_2D, gl.TEXTURE0
+    );
+  }
+
+  WGLUPreserveGLState(gl, glState, function(gl) {
+    // Bind the real default framebuffer
+    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
+
+    // Make sure the GL state is in a good place
+    if (self.cullFace) { self.realDisable.call(gl, gl.CULL_FACE); }
+    if (self.depthTest) { self.realDisable.call(gl, gl.DEPTH_TEST); }
+    if (self.blend) { self.realDisable.call(gl, gl.BLEND); }
+    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
+    if (self.stencilTest) { self.realDisable.call(gl, gl.STENCIL_TEST); }
+    self.realColorMask.call(gl, true, true, true, true);
+    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+    // If the backbuffer has an alpha channel clear every frame so the page
+    // doesn't show through.
+    if (self.ctxAttribs.alpha || Util.isIOS()) {
+      self.realClearColor.call(gl, 0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+
+    // Bind distortion program and mesh
+    gl.useProgram(self.program);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
+    gl.enableVertexAttribArray(self.attribs.position);
+    gl.enableVertexAttribArray(self.attribs.texCoord);
+    gl.vertexAttribPointer(self.attribs.position, 2, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(self.attribs.texCoord, 3, gl.FLOAT, false, 20, 8);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniform1i(self.uniforms.diffuse, 0);
+    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
+
+    gl.uniform4fv(self.uniforms.viewportOffsetScale, self.viewportOffsetScale);
+
+    // Draws both eyes
+    gl.drawElements(gl.TRIANGLES, self.indexCount, gl.UNSIGNED_SHORT, 0);
+
+    if (self.cardboardUI) {
+      self.cardboardUI.renderNoState();
+    }
+
+    // Bind the fake default framebuffer again
+    self.realBindFramebuffer.call(self.gl, gl.FRAMEBUFFER, self.framebuffer);
+
+    // If preserveDrawingBuffer == false clear the framebuffer
+    if (!self.ctxAttribs.preserveDrawingBuffer) {
+      self.realClearColor.call(gl, 0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+
+    if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
+      self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
+    }
+
+    // Restore state
+    if (self.cullFace) { self.realEnable.call(gl, gl.CULL_FACE); }
+    if (self.depthTest) { self.realEnable.call(gl, gl.DEPTH_TEST); }
+    if (self.blend) { self.realEnable.call(gl, gl.BLEND); }
+    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
+    if (self.stencilTest) { self.realEnable.call(gl, gl.STENCIL_TEST); }
+
+    self.realColorMask.apply(gl, self.colorMask);
+    self.realViewport.apply(gl, self.viewport);
+    if (self.ctxAttribs.alpha || !self.ctxAttribs.preserveDrawingBuffer) {
+      self.realClearColor.apply(gl, self.clearColor);
+    }
+  });
+
+  // Workaround for the fact that Safari doesn't allow us to patch the canvas
+  // width and height correctly. After each submit frame check to see what the
+  // real backbuffer size has been set to and resize the fake backbuffer size
+  // to match.
+  if (Util.isIOS()) {
+    var canvas = gl.canvas;
+    if (canvas.width != self.bufferWidth || canvas.height != self.bufferHeight) {
+      self.bufferWidth = canvas.width;
+      self.bufferHeight = canvas.height;
+      self.onResize();
+    }
+  }
+};
+
+/**
+ * Call when the deviceInfo has changed. At this point we need
+ * to re-calculate the distortion mesh.
+ */
+CardboardDistorter.prototype.updateDeviceInfo = function(deviceInfo) {
+  var gl = this.gl;
+  var self = this;
+
+  var glState = [gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING];
+  WGLUPreserveGLState(gl, glState, function(gl) {
+    var vertices = self.computeMeshVertices_(self.meshWidth, self.meshHeight, deviceInfo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    // Indices don't change based on device parameters, so only compute once.
+    if (!self.indexCount) {
+      var indices = self.computeMeshIndices_(self.meshWidth, self.meshHeight);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+      self.indexCount = indices.length;
+    }
+  });
+};
+
+/**
+ * Build the distortion mesh vertices.
+ * Based on code from the Unity cardboard plugin.
+ */
+CardboardDistorter.prototype.computeMeshVertices_ = function(width, height, deviceInfo) {
+  var vertices = new Float32Array(2 * width * height * 5);
+
+  var lensFrustum = deviceInfo.getLeftEyeVisibleTanAngles();
+  var noLensFrustum = deviceInfo.getLeftEyeNoLensTanAngles();
+  var viewport = deviceInfo.getLeftEyeVisibleScreenRect(noLensFrustum);
+  var vidx = 0;
+  var iidx = 0;
+  for (var e = 0; e < 2; e++) {
+    for (var j = 0; j < height; j++) {
+      for (var i = 0; i < width; i++, vidx++) {
+        var u = i / (width - 1);
+        var v = j / (height - 1);
+
+        // Grid points regularly spaced in StreoScreen, and barrel distorted in
+        // the mesh.
+        var s = u;
+        var t = v;
+        var x = Util.lerp(lensFrustum[0], lensFrustum[2], u);
+        var y = Util.lerp(lensFrustum[3], lensFrustum[1], v);
+        var d = Math.sqrt(x * x + y * y);
+        var r = deviceInfo.distortion.distortInverse(d);
+        var p = x * r / d;
+        var q = y * r / d;
+        u = (p - noLensFrustum[0]) / (noLensFrustum[2] - noLensFrustum[0]);
+        v = (q - noLensFrustum[3]) / (noLensFrustum[1] - noLensFrustum[3]);
+
+        // Convert u,v to mesh screen coordinates.
+        var aspect = deviceInfo.device.widthMeters / deviceInfo.device.heightMeters;
+
+        // FIXME: The original Unity plugin multiplied U by the aspect ratio
+        // and didn't multiply either value by 2, but that seems to get it
+        // really close to correct looking for me. I hate this kind of "Don't
+        // know why it works" code though, and wold love a more logical
+        // explanation of what needs to happen here.
+        u = (viewport.x + u * viewport.width - 0.5) * 2.0; //* aspect;
+        v = (viewport.y + v * viewport.height - 0.5) * 2.0;
+
+        vertices[(vidx * 5) + 0] = u; // position.x
+        vertices[(vidx * 5) + 1] = v; // position.y
+        vertices[(vidx * 5) + 2] = s; // texCoord.x
+        vertices[(vidx * 5) + 3] = t; // texCoord.y
+        vertices[(vidx * 5) + 4] = e; // texCoord.z (viewport index)
+      }
+    }
+    var w = lensFrustum[2] - lensFrustum[0];
+    lensFrustum[0] = -(w + lensFrustum[0]);
+    lensFrustum[2] = w - lensFrustum[2];
+    w = noLensFrustum[2] - noLensFrustum[0];
+    noLensFrustum[0] = -(w + noLensFrustum[0]);
+    noLensFrustum[2] = w - noLensFrustum[2];
+    viewport.x = 1 - (viewport.x + viewport.width);
+  }
+  return vertices;
+}
+
+/**
+ * Build the distortion mesh indices.
+ * Based on code from the Unity cardboard plugin.
+ */
+CardboardDistorter.prototype.computeMeshIndices_ = function(width, height) {
+  var indices = new Uint16Array(2 * (width - 1) * (height - 1) * 6);
+  var halfwidth = width / 2;
+  var halfheight = height / 2;
+  var vidx = 0;
+  var iidx = 0;
+  for (var e = 0; e < 2; e++) {
+    for (var j = 0; j < height; j++) {
+      for (var i = 0; i < width; i++, vidx++) {
+        if (i == 0 || j == 0)
+          continue;
+        // Build a quad.  Lower right and upper left quadrants have quads with
+        // the triangle diagonal flipped to get the vignette to interpolate
+        // correctly.
+        if ((i <= halfwidth) == (j <= halfheight)) {
+          // Quad diagonal lower left to upper right.
+          indices[iidx++] = vidx;
+          indices[iidx++] = vidx - width - 1;
+          indices[iidx++] = vidx - width;
+          indices[iidx++] = vidx - width - 1;
+          indices[iidx++] = vidx;
+          indices[iidx++] = vidx - 1;
+        } else {
+          // Quad diagonal upper left to lower right.
+          indices[iidx++] = vidx - 1;
+          indices[iidx++] = vidx - width;
+          indices[iidx++] = vidx;
+          indices[iidx++] = vidx - width;
+          indices[iidx++] = vidx - 1;
+          indices[iidx++] = vidx - width - 1;
         }
-        return hash;
       }
+    }
+  }
+  return indices;
+};
 
-      //A constructor for 64-bit numbers
+CardboardDistorter.prototype.getOwnPropertyDescriptor_ = function(proto, attrName) {
+  var descriptor = Object.getOwnPropertyDescriptor(proto, attrName);
+  // In some cases (ahem... Safari), the descriptor returns undefined get and
+  // set fields. In this case, we need to create a synthetic property
+  // descriptor. This works around some of the issues in
+  // https://github.com/borismus/webvr-polyfill/issues/46
+  if (descriptor.get === undefined || descriptor.set === undefined) {
+    descriptor.configurable = true;
+    descriptor.enumerable = true;
+    descriptor.get = function() {
+      return this.getAttribute(attrName);
+    };
+    descriptor.set = function(val) {
+      this.setAttribute(attrName, val);
+    };
+  }
+  return descriptor;
+};
 
-      function int64(h, l) {
-        this.h = h;
-        this.l = l;
-        //this.toString = int64toString;
-      }
+module.exports = CardboardDistorter;
 
-      //Copies src into dst, assuming both are 64-bit numbers
+},{"./cardboard-ui.js":4,"./deps/wglu-preserve-state.js":6,"./util.js":22}],4:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-      function int64copy(dst, src) {
-        dst.h = src.h;
-        dst.l = src.l;
-      }
+var Util = _dereq_('./util.js');
+var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
 
-      //Right-rotates a 64-bit number by shift
-      //Won't handle cases of shift>=32
-      //The function revrrot() is for that
+var uiVS = [
+  'attribute vec2 position;',
 
-      function int64rrot(dst, x, shift) {
-        dst.l = (x.l >>> shift) | (x.h << (32 - shift));
-        dst.h = (x.h >>> shift) | (x.l << (32 - shift));
-      }
+  'uniform mat4 projectionMat;',
 
-      //Reverses the dwords of the source and then rotates right by shift.
-      //This is equivalent to rotation by 32+shift
+  'void main() {',
+  '  gl_Position = projectionMat * vec4( position, -1.0, 1.0 );',
+  '}',
+].join('\n');
 
-      function int64revrrot(dst, x, shift) {
-        dst.l = (x.h >>> shift) | (x.l << (32 - shift));
-        dst.h = (x.l >>> shift) | (x.h << (32 - shift));
-      }
+var uiFS = [
+  'precision mediump float;',
 
-      //Bitwise-shifts right a 64-bit number by shift
-      //Won't handle shift>=32, but it's never needed in SHA512
+  'uniform vec4 color;',
 
-      function int64shr(dst, x, shift) {
-        dst.l = (x.l >>> shift) | (x.h << (32 - shift));
-        dst.h = (x.h >>> shift);
-      }
+  'void main() {',
+  '  gl_FragColor = color;',
+  '}',
+].join('\n');
 
-      //Adds two 64-bit numbers
-      //Like the original implementation, does not rely on 32-bit operations
+var DEG2RAD = Math.PI/180.0;
 
-      function int64add(dst, x, y) {
-        var w0 = (x.l & 0xffff) + (y.l & 0xffff);
-        var w1 = (x.l >>> 16) + (y.l >>> 16) + (w0 >>> 16);
-        var w2 = (x.h & 0xffff) + (y.h & 0xffff) + (w1 >>> 16);
-        var w3 = (x.h >>> 16) + (y.h >>> 16) + (w2 >>> 16);
-        dst.l = (w0 & 0xffff) | (w1 << 16);
-        dst.h = (w2 & 0xffff) | (w3 << 16);
-      }
+// The gear has 6 identical sections, each spanning 60 degrees.
+var kAnglePerGearSection = 60;
 
-      //Same, except with 4 addends. Works faster than adding them one by one.
+// Half-angle of the span of the outer rim.
+var kOuterRimEndAngle = 12;
 
-      function int64add4(dst, a, b, c, d) {
-        var w0 = (a.l & 0xffff) + (b.l & 0xffff) + (c.l & 0xffff) + (d.l & 0xffff);
-        var w1 = (a.l >>> 16) + (b.l >>> 16) + (c.l >>> 16) + (d.l >>> 16) + (w0 >>> 16);
-        var w2 = (a.h & 0xffff) + (b.h & 0xffff) + (c.h & 0xffff) + (d.h & 0xffff) + (w1 >>> 16);
-        var w3 = (a.h >>> 16) + (b.h >>> 16) + (c.h >>> 16) + (d.h >>> 16) + (w2 >>> 16);
-        dst.l = (w0 & 0xffff) | (w1 << 16);
-        dst.h = (w2 & 0xffff) | (w3 << 16);
-      }
+// Angle between the middle of the outer rim and the start of the inner rim.
+var kInnerRimBeginAngle = 20;
 
-      //Same, except with 5 addends
+// Distance from center to outer rim, normalized so that the entire model
+// fits in a [-1, 1] x [-1, 1] square.
+var kOuterRadius = 1;
 
-      function int64add5(dst, a, b, c, d, e) {
-        var w0 = (a.l & 0xffff) + (b.l & 0xffff) + (c.l & 0xffff) + (d.l & 0xffff) + (e.l & 0xffff),
-          w1 = (a.l >>> 16) + (b.l >>> 16) + (c.l >>> 16) + (d.l >>> 16) + (e.l >>> 16) + (w0 >>> 16),
-          w2 = (a.h & 0xffff) + (b.h & 0xffff) + (c.h & 0xffff) + (d.h & 0xffff) + (e.h & 0xffff) + (w1 >>> 16),
-          w3 = (a.h >>> 16) + (b.h >>> 16) + (c.h >>> 16) + (d.h >>> 16) + (e.h >>> 16) + (w2 >>> 16);
-        dst.l = (w0 & 0xffff) | (w1 << 16);
-        dst.h = (w2 & 0xffff) | (w3 << 16);
-      }
-    },
-    /**
-     * @class Hashes.RMD160
-     * @constructor
-     * @param {Object} [config]
-     *
-     * A JavaScript implementation of the RIPEMD-160 Algorithm
-     * Version 2.2 Copyright Jeremy Lin, Paul Johnston 2000 - 2009.
-     * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
-     * See http://pajhome.org.uk/crypt/md5 for details.
-     * Also http://www.ocf.berkeley.edu/~jjlin/jsotp/
-     */
-    RMD160: function(options) {
-      /**
-       * Private properties configuration variables. You may need to tweak these to be compatible with
-       * the server-side, but the defaults work in most cases.
-       * @see this.setUpperCase() method
-       * @see this.setPad() method
-       */
-      var hexcase = (options && typeof options.uppercase === 'boolean') ? options.uppercase : false,
-        /* hexadecimal output case format. false - lowercase; true - uppercase  */
-        b64pad = (options && typeof options.pad === 'string') ? options.pda : '=',
-        /* base-64 pad character. Default '=' for strict RFC compliance   */
-        utf8 = (options && typeof options.utf8 === 'boolean') ? options.utf8 : true,
-        /* enable/disable utf8 encoding */
-        rmd160_r1 = [
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-          7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
-          3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
-          1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
-          4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13
-        ],
-        rmd160_r2 = [
-          5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
-          6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
-          15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
-          8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
-          12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
-        ],
-        rmd160_s1 = [
-          11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
-          7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
-          11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
-          11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
-          9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6
-        ],
-        rmd160_s2 = [
-          8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
-          9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
-          9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
-          15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
-          8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
-        ];
+// Distance from center to depressed rim, in model units.
+var kMiddleRadius = 0.75;
 
-      /* privileged (public) methods */
-      this.hex = function(s) {
-        return rstr2hex(rstr(s, utf8));
-      };
-      this.b64 = function(s) {
-        return rstr2b64(rstr(s, utf8), b64pad);
-      };
-      this.any = function(s, e) {
-        return rstr2any(rstr(s, utf8), e);
-      };
-      this.raw = function(s) {
-        return rstr(s, utf8);
-      };
-      this.hex_hmac = function(k, d) {
-        return rstr2hex(rstr_hmac(k, d));
-      };
-      this.b64_hmac = function(k, d) {
-        return rstr2b64(rstr_hmac(k, d), b64pad);
-      };
-      this.any_hmac = function(k, d, e) {
-        return rstr2any(rstr_hmac(k, d), e);
-      };
-      /**
-       * Perform a simple self-test to see if the VM is working
-       * @return {String} Hexadecimal hash sample
-       * @public
-       */
-      this.vm_test = function() {
-        return hex('abc').toLowerCase() === '900150983cd24fb0d6963f7d28e17f72';
-      };
-      /**
-       * @description Enable/disable uppercase hexadecimal returned string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUpperCase = function(a) {
-        if (typeof a === 'boolean') {
-          hexcase = a;
+// Radius of the inner hollow circle, in model units.
+var kInnerRadius = 0.3125;
+
+// Center line thickness in DP.
+var kCenterLineThicknessDp = 4;
+
+// Button width in DP.
+var kButtonWidthDp = 28;
+
+// Factor to scale the touch area that responds to the touch.
+var kTouchSlopFactor = 1.5;
+
+var Angles = [
+  0, kOuterRimEndAngle, kInnerRimBeginAngle,
+  kAnglePerGearSection - kInnerRimBeginAngle,
+  kAnglePerGearSection - kOuterRimEndAngle
+];
+
+/**
+ * Renders the alignment line and "options" gear. It is assumed that the canvas
+ * this is rendered into covers the entire screen (or close to it.)
+ */
+function CardboardUI(gl) {
+  this.gl = gl;
+
+  this.attribs = {
+    position: 0
+  };
+  this.program = Util.linkProgram(gl, uiVS, uiFS, this.attribs);
+  this.uniforms = Util.getProgramUniforms(gl, this.program);
+
+  this.vertexBuffer = gl.createBuffer();
+  this.gearOffset = 0;
+  this.gearVertexCount = 0;
+  this.arrowOffset = 0;
+  this.arrowVertexCount = 0;
+
+  this.projMat = new Float32Array(16);
+
+  this.listener = null;
+
+  this.onResize();
+};
+
+/**
+ * Tears down all the resources created by the UI renderer.
+ */
+CardboardUI.prototype.destroy = function() {
+  var gl = this.gl;
+
+  if (this.listener) {
+    gl.canvas.removeEventListener('click', this.listener, false);
+  }
+
+  gl.deleteProgram(this.program);
+  gl.deleteBuffer(this.vertexBuffer);
+};
+
+/**
+ * Adds a listener to clicks on the gear and back icons
+ */
+CardboardUI.prototype.listen = function(optionsCallback, backCallback) {
+  var canvas = this.gl.canvas;
+  this.listener = function(event) {
+    var midline = canvas.clientWidth / 2;
+    var buttonSize = kButtonWidthDp * kTouchSlopFactor;
+    // Check to see if the user clicked on (or around) the gear icon
+    if (event.clientX > midline - buttonSize &&
+        event.clientX < midline + buttonSize &&
+        event.clientY > canvas.clientHeight - buttonSize) {
+      optionsCallback(event);
+    }
+    // Check to see if the user clicked on (or around) the back icon
+    else if (event.clientX < buttonSize && event.clientY < buttonSize) {
+      backCallback(event);
+    }
+  };
+  canvas.addEventListener('click', this.listener, false);
+};
+
+/**
+ * Builds the UI mesh.
+ */
+CardboardUI.prototype.onResize = function() {
+  var gl = this.gl;
+  var self = this;
+
+  var glState = [
+    gl.ARRAY_BUFFER_BINDING
+  ];
+
+  WGLUPreserveGLState(gl, glState, function(gl) {
+    var vertices = [];
+
+    var midline = gl.drawingBufferWidth / 2;
+
+    // Assumes your canvas width and height is scaled proportionately.
+    // TODO(smus): The following causes buttons to become huge on iOS, but seems
+    // like the right thing to do. For now, added a hack. But really, investigate why.
+    var dps = (gl.drawingBufferWidth / (screen.width * window.devicePixelRatio));
+    if (!Util.isIOS()) {
+      dps *= window.devicePixelRatio;
+    }
+
+    var lineWidth = kCenterLineThicknessDp * dps / 2;
+    var buttonSize = kButtonWidthDp * kTouchSlopFactor * dps;
+    var buttonScale = kButtonWidthDp * dps / 2;
+    var buttonBorder = ((kButtonWidthDp * kTouchSlopFactor) - kButtonWidthDp) * dps;
+
+    // Build centerline
+    vertices.push(midline - lineWidth, buttonSize);
+    vertices.push(midline - lineWidth, gl.drawingBufferHeight);
+    vertices.push(midline + lineWidth, buttonSize);
+    vertices.push(midline + lineWidth, gl.drawingBufferHeight);
+
+    // Build gear
+    self.gearOffset = (vertices.length / 2);
+
+    function addGearSegment(theta, r) {
+      var angle = (90 - theta) * DEG2RAD;
+      var x = Math.cos(angle);
+      var y = Math.sin(angle);
+      vertices.push(kInnerRadius * x * buttonScale + midline, kInnerRadius * y * buttonScale + buttonScale);
+      vertices.push(r * x * buttonScale + midline, r * y * buttonScale + buttonScale);
+    }
+
+    for (var i = 0; i <= 6; i++) {
+      var segmentTheta = i * kAnglePerGearSection;
+
+      addGearSegment(segmentTheta, kOuterRadius);
+      addGearSegment(segmentTheta + kOuterRimEndAngle, kOuterRadius);
+      addGearSegment(segmentTheta + kInnerRimBeginAngle, kMiddleRadius);
+      addGearSegment(segmentTheta + (kAnglePerGearSection - kInnerRimBeginAngle), kMiddleRadius);
+      addGearSegment(segmentTheta + (kAnglePerGearSection - kOuterRimEndAngle), kOuterRadius);
+    }
+
+    self.gearVertexCount = (vertices.length / 2) - self.gearOffset;
+
+    // Build back arrow
+    self.arrowOffset = (vertices.length / 2);
+
+    function addArrowVertex(x, y) {
+      vertices.push(buttonBorder + x, gl.drawingBufferHeight - buttonBorder - y);
+    }
+
+    var angledLineWidth = lineWidth / Math.sin(45 * DEG2RAD);
+
+    addArrowVertex(0, buttonScale);
+    addArrowVertex(buttonScale, 0);
+    addArrowVertex(buttonScale + angledLineWidth, angledLineWidth);
+    addArrowVertex(angledLineWidth, buttonScale + angledLineWidth);
+
+    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
+    addArrowVertex(0, buttonScale);
+    addArrowVertex(buttonScale, buttonScale * 2);
+    addArrowVertex(buttonScale + angledLineWidth, (buttonScale * 2) - angledLineWidth);
+
+    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
+    addArrowVertex(0, buttonScale);
+
+    addArrowVertex(angledLineWidth, buttonScale - lineWidth);
+    addArrowVertex(kButtonWidthDp * dps, buttonScale - lineWidth);
+    addArrowVertex(angledLineWidth, buttonScale + lineWidth);
+    addArrowVertex(kButtonWidthDp * dps, buttonScale + lineWidth);
+
+    self.arrowVertexCount = (vertices.length / 2) - self.arrowOffset;
+
+    // Buffer data
+    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  });
+};
+
+/**
+ * Performs distortion pass on the injected backbuffer, rendering it to the real
+ * backbuffer.
+ */
+CardboardUI.prototype.render = function() {
+  var gl = this.gl;
+  var self = this;
+
+  var glState = [
+    gl.CULL_FACE,
+    gl.DEPTH_TEST,
+    gl.BLEND,
+    gl.SCISSOR_TEST,
+    gl.STENCIL_TEST,
+    gl.COLOR_WRITEMASK,
+    gl.VIEWPORT,
+
+    gl.CURRENT_PROGRAM,
+    gl.ARRAY_BUFFER_BINDING
+  ];
+
+  WGLUPreserveGLState(gl, glState, function(gl) {
+    // Make sure the GL state is in a good place
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.disable(gl.SCISSOR_TEST);
+    gl.disable(gl.STENCIL_TEST);
+    gl.colorMask(true, true, true, true);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+    self.renderNoState();
+  });
+};
+
+CardboardUI.prototype.renderNoState = function() {
+  var gl = this.gl;
+
+  // Bind distortion program and mesh
+  gl.useProgram(this.program);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+  gl.enableVertexAttribArray(this.attribs.position);
+  gl.vertexAttribPointer(this.attribs.position, 2, gl.FLOAT, false, 8, 0);
+
+  gl.uniform4f(this.uniforms.color, 1.0, 1.0, 1.0, 1.0);
+
+  Util.orthoMatrix(this.projMat, 0, gl.drawingBufferWidth, 0, gl.drawingBufferHeight, 0.1, 1024.0);
+  gl.uniformMatrix4fv(this.uniforms.projectionMat, false, this.projMat);
+
+  // Draws UI element
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(gl.TRIANGLE_STRIP, this.gearOffset, this.gearVertexCount);
+  gl.drawArrays(gl.TRIANGLE_STRIP, this.arrowOffset, this.arrowVertexCount);
+};
+
+module.exports = CardboardUI;
+
+},{"./deps/wglu-preserve-state.js":6,"./util.js":22}],5:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var CardboardDistorter = _dereq_('./cardboard-distorter.js');
+var CardboardUI = _dereq_('./cardboard-ui.js');
+var DeviceInfo = _dereq_('./device-info.js');
+var Dpdb = _dereq_('./dpdb/dpdb.js');
+var FusionPoseSensor = _dereq_('./sensor-fusion/fusion-pose-sensor.js');
+var RotateInstructions = _dereq_('./rotate-instructions.js');
+var ViewerSelector = _dereq_('./viewer-selector.js');
+var VRDisplay = _dereq_('./base.js').VRDisplay;
+var Util = _dereq_('./util.js');
+
+var Eye = {
+  LEFT: 'left',
+  RIGHT: 'right'
+};
+
+/**
+ * VRDisplay based on mobile device parameters and DeviceMotion APIs.
+ */
+function CardboardVRDisplay() {
+  this.displayName = 'Cardboard VRDisplay (webvr-polyfill)';
+
+  this.capabilities.hasOrientation = true;
+  this.capabilities.canPresent = true;
+
+  // "Private" members.
+  this.bufferScale_ = WebVRConfig.BUFFER_SCALE;
+  this.poseSensor_ = new FusionPoseSensor();
+  this.distorter_ = null;
+  this.cardboardUI_ = null;
+
+  this.dpdb_ = new Dpdb(true, this.onDeviceParamsUpdated_.bind(this));
+  this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams());
+
+  this.viewerSelector_ = new ViewerSelector();
+  this.viewerSelector_.on('change', this.onViewerChanged_.bind(this));
+
+  // Set the correct initial viewer.
+  this.deviceInfo_.setViewer(this.viewerSelector_.getCurrentViewer());
+
+  if (!WebVRConfig.ROTATE_INSTRUCTIONS_DISABLED) {
+    this.rotateInstructions_ = new RotateInstructions();
+  }
+
+  if (Util.isIOS()) {
+    // Listen for resize events to workaround this awful Safari bug.
+    window.addEventListener('resize', this.onResize_.bind(this));
+  }
+}
+CardboardVRDisplay.prototype = new VRDisplay();
+
+CardboardVRDisplay.prototype.getImmediatePose = function() {
+  return {
+    position: this.poseSensor_.getPosition(),
+    orientation: this.poseSensor_.getOrientation(),
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+};
+
+CardboardVRDisplay.prototype.resetPose = function() {
+  this.poseSensor_.resetPose();
+};
+
+CardboardVRDisplay.prototype.getEyeParameters = function(whichEye) {
+  var offset = [this.deviceInfo_.viewer.interLensDistance * 0.5, 0.0, 0.0];
+  var fieldOfView;
+
+  // TODO: FoV can be a little expensive to compute. Cache when device params change.
+  if (whichEye == Eye.LEFT) {
+    offset[0] *= -1.0;
+    fieldOfView = this.deviceInfo_.getFieldOfViewLeftEye();
+  } else if (whichEye == Eye.RIGHT) {
+    fieldOfView = this.deviceInfo_.getFieldOfViewRightEye();
+  } else {
+    console.error('Invalid eye provided: %s', whichEye);
+    return null;
+  }
+
+  return {
+    fieldOfView: fieldOfView,
+    offset: offset,
+    // TODO: Should be able to provide better values than these.
+    renderWidth: this.deviceInfo_.device.width * 0.5 * this.bufferScale_,
+    renderHeight: this.deviceInfo_.device.height * this.bufferScale_,
+  };
+};
+
+CardboardVRDisplay.prototype.onDeviceParamsUpdated_ = function(newParams) {
+  console.log('DPDB reported that device params were updated.');
+  this.deviceInfo_.updateDeviceParams(newParams);
+
+  if (this.distorter_) {
+    this.distorter.updateDeviceInfo(this.deviceInfo_);
+  }
+};
+
+CardboardVRDisplay.prototype.updateBounds_ = function () {
+  if (this.layer_ && this.distorter_ && (this.layer_.leftBounds || this.layer_.rightBounds)) {
+    this.distorter_.setTextureBounds(this.layer_.leftBounds, this.layer_.rightBounds);
+  }
+};
+
+CardboardVRDisplay.prototype.beginPresent_ = function() {
+  var gl = this.layer_.source.getContext('webgl');
+  if (!gl)
+    gl = this.layer_.source.getContext('experimental-webgl');
+  if (!gl)
+    gl = this.layer_.source.getContext('webgl2');
+
+  if (!gl)
+    return; // Can't do distortion without a WebGL context.
+
+  // Provides a way to opt out of distortion
+  if (this.layer_.predistorted) {
+    if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
+      gl.canvas.width = Util.getScreenWidth() * this.bufferScale_;
+      gl.canvas.height = Util.getScreenHeight() * this.bufferScale_;
+      this.cardboardUI_ = new CardboardUI(gl);
+    }
+  } else {
+    // Create a new distorter for the target context
+    this.distorter_ = new CardboardDistorter(gl);
+    this.distorter_.updateDeviceInfo(this.deviceInfo_);
+    this.cardboardUI_ = this.distorter_.cardboardUI;
+  }
+
+  if (this.cardboardUI_) {
+    this.cardboardUI_.listen(function(e) {
+      // Options clicked.
+      this.viewerSelector_.show(this.layer_.source.parentElement);
+      e.stopPropagation();
+      e.preventDefault();
+    }.bind(this), function(e) {
+      // Back clicked.
+      this.exitPresent();
+      e.stopPropagation();
+      e.preventDefault();
+    }.bind(this));
+  }
+
+  if (this.rotateInstructions_) {
+    if (Util.isLandscapeMode() && Util.isMobile()) {
+      // In landscape mode, temporarily show the "put into Cardboard"
+      // interstitial. Otherwise, do the default thing.
+      this.rotateInstructions_.showTemporarily(3000, this.layer_.source.parentElement);
+    } else {
+      this.rotateInstructions_.update();
+    }
+  }
+
+  // Listen for orientation change events in order to show interstitial.
+  this.orientationHandler = this.onOrientationChange_.bind(this);
+  window.addEventListener('orientationchange', this.orientationHandler);
+
+  // Listen for present display change events in order to update distorter dimensions
+  this.vrdisplaypresentchangeHandler = this.updateBounds_.bind(this);
+  window.addEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
+
+  // Fire this event initially, to give geometry-distortion clients the chance
+  // to do something custom.
+  this.fireVRDisplayDeviceParamsChange_();
+};
+
+CardboardVRDisplay.prototype.endPresent_ = function() {
+  if (this.distorter_) {
+    this.distorter_.destroy();
+    this.distorter_ = null;
+  }
+  if (this.cardboardUI_) {
+    this.cardboardUI_.destroy();
+    this.cardboardUI_ = null;
+  }
+
+  if (this.rotateInstructions_) {
+    this.rotateInstructions_.hide();
+  }
+  this.viewerSelector_.hide();
+
+  window.removeEventListener('orientationchange', this.orientationHandler);
+  window.removeEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
+};
+
+CardboardVRDisplay.prototype.submitFrame = function(pose) {
+  if (this.distorter_) {
+    this.distorter_.submitFrame();
+  } else if (this.cardboardUI_ && this.layer_) {
+    // Hack for predistorted: true.
+    var canvas = this.layer_.source.getContext('webgl').canvas;
+    if (canvas.width != this.lastWidth || canvas.height != this.lastHeight) {
+      this.cardboardUI_.onResize();
+    }
+    this.lastWidth = canvas.width;
+    this.lastHeight = canvas.height;
+
+    // Render the Cardboard UI.
+    this.cardboardUI_.render();
+  }
+};
+
+CardboardVRDisplay.prototype.onOrientationChange_ = function(e) {
+  console.log('onOrientationChange_');
+
+  // Hide the viewer selector.
+  this.viewerSelector_.hide();
+
+  // Update the rotate instructions.
+  if (this.rotateInstructions_) {
+    this.rotateInstructions_.update();
+  }
+
+  this.onResize_();
+};
+
+CardboardVRDisplay.prototype.onResize_ = function(e) {
+  if (this.layer_) {
+    var gl = this.layer_.source.getContext('webgl');
+    // Size the CSS canvas.
+    // Added padding on right and bottom because iPhone 5 will not
+    // hide the URL bar unless content is bigger than the screen.
+    // This will not be visible as long as the container element (e.g. body)
+    // is set to 'overflow: hidden'.
+    var cssProperties = [
+      'position: absolute',
+      'top: 0',
+      'left: 0',
+      'width: ' + Math.max(screen.width, screen.height) + 'px',
+      'height: ' + Math.min(screen.height, screen.width) + 'px',
+      'border: 0',
+      'margin: 0',
+      'padding: 0 10px 10px 0',
+    ];
+    gl.canvas.setAttribute('style', cssProperties.join('; ') + ';');
+
+    Util.safariCssSizeWorkaround(gl.canvas);
+  }
+};
+
+CardboardVRDisplay.prototype.onViewerChanged_ = function(viewer) {
+  this.deviceInfo_.setViewer(viewer);
+
+  if (this.distorter_) {
+    // Update the distortion appropriately.
+    this.distorter_.updateDeviceInfo(this.deviceInfo_);
+  }
+
+  // Fire a new event containing viewer and device parameters for clients that
+  // want to implement their own geometry-based distortion.
+  this.fireVRDisplayDeviceParamsChange_();
+};
+
+CardboardVRDisplay.prototype.fireVRDisplayDeviceParamsChange_ = function() {
+  var event = new CustomEvent('vrdisplaydeviceparamschange', {
+    detail: {
+      vrdisplay: this,
+      deviceInfo: this.deviceInfo_,
+    }
+  });
+  window.dispatchEvent(event);
+};
+
+module.exports = CardboardVRDisplay;
+
+},{"./base.js":2,"./cardboard-distorter.js":3,"./cardboard-ui.js":4,"./device-info.js":7,"./dpdb/dpdb.js":11,"./rotate-instructions.js":16,"./sensor-fusion/fusion-pose-sensor.js":18,"./util.js":22,"./viewer-selector.js":23}],6:[function(_dereq_,module,exports){
+/*
+Copyright (c) 2016, Brandon Jones.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+/*
+Caches specified GL state, runs a callback, and restores the cached state when
+done.
+
+Example usage:
+
+var savedState = [
+  gl.ARRAY_BUFFER_BINDING,
+
+  // TEXTURE_BINDING_2D or _CUBE_MAP must always be followed by the texure unit.
+  gl.TEXTURE_BINDING_2D, gl.TEXTURE0,
+
+  gl.CLEAR_COLOR,
+];
+// After this call the array buffer, texture unit 0, active texture, and clear
+// color will be restored. The viewport will remain changed, however, because
+// gl.VIEWPORT was not included in the savedState list.
+WGLUPreserveGLState(gl, savedState, function(gl) {
+  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, ....);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, ...);
+
+  gl.clearColor(1, 0, 0, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+});
+
+Note that this is not intended to be fast. Managing state in your own code to
+avoid redundant state setting and querying will always be faster. This function
+is most useful for cases where you may not have full control over the WebGL
+calls being made, such as tooling or effect injectors.
+*/
+
+function WGLUPreserveGLState(gl, bindings, callback) {
+  if (!bindings) {
+    callback(gl);
+    return;
+  }
+
+  var boundValues = [];
+
+  var activeTexture = null;
+  for (var i = 0; i < bindings.length; ++i) {
+    var binding = bindings[i];
+    switch (binding) {
+      case gl.TEXTURE_BINDING_2D:
+      case gl.TEXTURE_BINDING_CUBE_MAP:
+        var textureUnit = bindings[++i];
+        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31) {
+          console.error("TEXTURE_BINDING_2D or TEXTURE_BINDING_CUBE_MAP must be followed by a valid texture unit");
+          boundValues.push(null, null);
+          break;
         }
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {string} Pad
-       * @return {Object} this
-       * @public
-       */
-      this.setPad = function(a) {
-        if (typeof a !== 'undefined') {
-          b64pad = a;
+        if (!activeTexture) {
+          activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
         }
-        return this;
-      };
-      /**
-       * @description Defines a base64 pad string
-       * @param {boolean}
-       * @return {Object} this
-       * @public
-       */
-      this.setUTF8 = function(a) {
-        if (typeof a === 'boolean') {
-          utf8 = a;
+        gl.activeTexture(textureUnit);
+        boundValues.push(gl.getParameter(binding), null);
+        break;
+      case gl.ACTIVE_TEXTURE:
+        activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        boundValues.push(null);
+        break;
+      default:
+        boundValues.push(gl.getParameter(binding));
+        break;
+    }
+  }
+
+  callback(gl);
+
+  for (var i = 0; i < bindings.length; ++i) {
+    var binding = bindings[i];
+    var boundValue = boundValues[i];
+    switch (binding) {
+      case gl.ACTIVE_TEXTURE:
+        break; // Ignore this binding, since we special-case it to happen last.
+      case gl.ARRAY_BUFFER_BINDING:
+        gl.bindBuffer(gl.ARRAY_BUFFER, boundValue);
+        break;
+      case gl.COLOR_CLEAR_VALUE:
+        gl.clearColor(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
+        break;
+      case gl.COLOR_WRITEMASK:
+        gl.colorMask(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
+        break;
+      case gl.CURRENT_PROGRAM:
+        gl.useProgram(boundValue);
+        break;
+      case gl.ELEMENT_ARRAY_BUFFER_BINDING:
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boundValue);
+        break;
+      case gl.FRAMEBUFFER_BINDING:
+        gl.bindFramebuffer(gl.FRAMEBUFFER, boundValue);
+        break;
+      case gl.RENDERBUFFER_BINDING:
+        gl.bindRenderbuffer(gl.RENDERBUFFER, boundValue);
+        break;
+      case gl.TEXTURE_BINDING_2D:
+        var textureUnit = bindings[++i];
+        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
+          break;
+        gl.activeTexture(textureUnit);
+        gl.bindTexture(gl.TEXTURE_2D, boundValue);
+        break;
+      case gl.TEXTURE_BINDING_CUBE_MAP:
+        var textureUnit = bindings[++i];
+        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
+          break;
+        gl.activeTexture(textureUnit);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, boundValue);
+        break;
+      case gl.VIEWPORT:
+        gl.viewport(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
+        break;
+      case gl.BLEND:
+      case gl.CULL_FACE:
+      case gl.DEPTH_TEST:
+      case gl.SCISSOR_TEST:
+      case gl.STENCIL_TEST:
+        if (boundValue) {
+          gl.enable(binding);
+        } else {
+          gl.disable(binding);
         }
-        return this;
-      };
+        break;
+      default:
+        console.log("No GL restore behavior for 0x" + binding.toString(16));
+        break;
+    }
 
-      /* private methods */
+    if (activeTexture) {
+      gl.activeTexture(activeTexture);
+    }
+  }
+}
 
-      /**
-       * Calculate the rmd160 of a raw string
-       */
+module.exports = WGLUPreserveGLState;
+},{}],7:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-      function rstr(s) {
-        s = (utf8) ? utf8Encode(s) : s;
-        return binl2rstr(binl(rstr2binl(s), s.length * 8));
+var Distortion = _dereq_('./distortion/distortion.js');
+var MathUtil = _dereq_('./math-util.js');
+var Util = _dereq_('./util.js');
+
+function Device(params) {
+  this.width = params.width || Util.getScreenWidth();
+  this.height = params.height || Util.getScreenHeight();
+  this.widthMeters = params.widthMeters;
+  this.heightMeters = params.heightMeters;
+  this.bevelMeters = params.bevelMeters;
+}
+
+
+// Fallback Android device (based on Nexus 5 measurements) for use when
+// we can't recognize an Android device.
+var DEFAULT_ANDROID = new Device({
+  widthMeters: 0.110,
+  heightMeters: 0.062,
+  bevelMeters: 0.004
+});
+
+// Fallback iOS device (based on iPhone6) for use when
+// we can't recognize an Android device.
+var DEFAULT_IOS = new Device({
+  widthMeters: 0.1038,
+  heightMeters: 0.0584,
+  bevelMeters: 0.004
+});
+
+
+var Viewers = {
+  CardboardV1: new CardboardViewer({
+    id: 'CardboardV1',
+    label: 'Cardboard I/O 2014',
+    fov: 40,
+    interLensDistance: 0.060,
+    baselineLensDistance: 0.035,
+    screenLensDistance: 0.042,
+    distortionCoefficients: [0.441, 0.156],
+    inverseCoefficients: [-0.4410035, 0.42756155, -0.4804439, 0.5460139,
+      -0.58821183, 0.5733938, -0.48303202, 0.33299083, -0.17573841,
+      0.0651772, -0.01488963, 0.001559834]
+  }),
+  CardboardV2: new CardboardViewer({
+    id: 'CardboardV2',
+    label: 'Cardboard I/O 2015',
+    fov: 60,
+    interLensDistance: 0.064,
+    baselineLensDistance: 0.035,
+    screenLensDistance: 0.039,
+    distortionCoefficients: [0.34, 0.55],
+    inverseCoefficients: [-0.33836704, -0.18162185, 0.862655, -1.2462051,
+      1.0560602, -0.58208317, 0.21609078, -0.05444823, 0.009177956,
+      -9.904169E-4, 6.183535E-5, -1.6981803E-6]
+  })
+};
+
+
+var DEFAULT_LEFT_CENTER = {x: 0.5, y: 0.5};
+var DEFAULT_RIGHT_CENTER = {x: 0.5, y: 0.5};
+
+/**
+ * Manages information about the device and the viewer.
+ *
+ * deviceParams indicates the parameters of the device to use (generally
+ * obtained from dpdb.getDeviceParams()). Can be null to mean no device
+ * params were found.
+ */
+function DeviceInfo(deviceParams) {
+  this.viewer = Viewers.CardboardV2;
+  this.updateDeviceParams(deviceParams);
+  this.distortion = new Distortion(this.viewer.distortionCoefficients);
+}
+
+DeviceInfo.prototype.updateDeviceParams = function(deviceParams) {
+  this.device = this.determineDevice_(deviceParams) || this.device;
+};
+
+DeviceInfo.prototype.getDevice = function() {
+  return this.device;
+};
+
+DeviceInfo.prototype.setViewer = function(viewer) {
+  this.viewer = viewer;
+  this.distortion = new Distortion(this.viewer.distortionCoefficients);
+};
+
+DeviceInfo.prototype.determineDevice_ = function(deviceParams) {
+  if (!deviceParams) {
+    // No parameters, so use a default.
+    if (Util.isIOS()) {
+      console.warn('Using fallback iOS device measurements.');
+      return DEFAULT_IOS;
+    } else {
+      console.warn('Using fallback Android device measurements.');
+      return DEFAULT_ANDROID;
+    }
+  }
+
+  // Compute device screen dimensions based on deviceParams.
+  var METERS_PER_INCH = 0.0254;
+  var metersPerPixelX = METERS_PER_INCH / deviceParams.xdpi;
+  var metersPerPixelY = METERS_PER_INCH / deviceParams.ydpi;
+  var width = Util.getScreenWidth();
+  var height = Util.getScreenHeight();
+  return new Device({
+    widthMeters: metersPerPixelX * width,
+    heightMeters: metersPerPixelY * height,
+    bevelMeters: deviceParams.bevelMm * 0.001,
+  });
+};
+
+/**
+ * Calculates field of view for the left eye.
+ */
+DeviceInfo.prototype.getDistortedFieldOfViewLeftEye = function() {
+  var viewer = this.viewer;
+  var device = this.device;
+  var distortion = this.distortion;
+
+  // Device.height and device.width for device in portrait mode, so transpose.
+  var eyeToScreenDistance = viewer.screenLensDistance;
+
+  var outerDist = (device.widthMeters - viewer.interLensDistance) / 2;
+  var innerDist = viewer.interLensDistance / 2;
+  var bottomDist = viewer.baselineLensDistance - device.bevelMeters;
+  var topDist = device.heightMeters - bottomDist;
+
+  var outerAngle = MathUtil.radToDeg * Math.atan(
+      distortion.distort(outerDist / eyeToScreenDistance));
+  var innerAngle = MathUtil.radToDeg * Math.atan(
+      distortion.distort(innerDist / eyeToScreenDistance));
+  var bottomAngle = MathUtil.radToDeg * Math.atan(
+      distortion.distort(bottomDist / eyeToScreenDistance));
+  var topAngle = MathUtil.radToDeg * Math.atan(
+      distortion.distort(topDist / eyeToScreenDistance));
+
+  return {
+    leftDegrees: Math.min(outerAngle, viewer.fov),
+    rightDegrees: Math.min(innerAngle, viewer.fov),
+    downDegrees: Math.min(bottomAngle, viewer.fov),
+    upDegrees: Math.min(topAngle, viewer.fov)
+  };
+};
+
+/**
+ * Calculates the tan-angles from the maximum FOV for the left eye for the
+ * current device and screen parameters.
+ */
+DeviceInfo.prototype.getLeftEyeVisibleTanAngles = function() {
+  var viewer = this.viewer;
+  var device = this.device;
+  var distortion = this.distortion;
+
+  // Tan-angles from the max FOV.
+  var fovLeft = Math.tan(-MathUtil.degToRad * viewer.fov);
+  var fovTop = Math.tan(MathUtil.degToRad * viewer.fov);
+  var fovRight = Math.tan(MathUtil.degToRad * viewer.fov);
+  var fovBottom = Math.tan(-MathUtil.degToRad * viewer.fov);
+  // Viewport size.
+  var halfWidth = device.widthMeters / 4;
+  var halfHeight = device.heightMeters / 2;
+  // Viewport center, measured from left lens position.
+  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
+  var centerX = viewer.interLensDistance / 2 - halfWidth;
+  var centerY = -verticalLensOffset;
+  var centerZ = viewer.screenLensDistance;
+  // Tan-angles of the viewport edges, as seen through the lens.
+  var screenLeft = distortion.distort((centerX - halfWidth) / centerZ);
+  var screenTop = distortion.distort((centerY + halfHeight) / centerZ);
+  var screenRight = distortion.distort((centerX + halfWidth) / centerZ);
+  var screenBottom = distortion.distort((centerY - halfHeight) / centerZ);
+  // Compare the two sets of tan-angles and take the value closer to zero on each side.
+  var result = new Float32Array(4);
+  result[0] = Math.max(fovLeft, screenLeft);
+  result[1] = Math.min(fovTop, screenTop);
+  result[2] = Math.min(fovRight, screenRight);
+  result[3] = Math.max(fovBottom, screenBottom);
+  return result;
+};
+
+/**
+ * Calculates the tan-angles from the maximum FOV for the left eye for the
+ * current device and screen parameters, assuming no lenses.
+ */
+DeviceInfo.prototype.getLeftEyeNoLensTanAngles = function() {
+  var viewer = this.viewer;
+  var device = this.device;
+  var distortion = this.distortion;
+
+  var result = new Float32Array(4);
+  // Tan-angles from the max FOV.
+  var fovLeft = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
+  var fovTop = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
+  var fovRight = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
+  var fovBottom = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
+  // Viewport size.
+  var halfWidth = device.widthMeters / 4;
+  var halfHeight = device.heightMeters / 2;
+  // Viewport center, measured from left lens position.
+  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
+  var centerX = viewer.interLensDistance / 2 - halfWidth;
+  var centerY = -verticalLensOffset;
+  var centerZ = viewer.screenLensDistance;
+  // Tan-angles of the viewport edges, as seen through the lens.
+  var screenLeft = (centerX - halfWidth) / centerZ;
+  var screenTop = (centerY + halfHeight) / centerZ;
+  var screenRight = (centerX + halfWidth) / centerZ;
+  var screenBottom = (centerY - halfHeight) / centerZ;
+  // Compare the two sets of tan-angles and take the value closer to zero on each side.
+  result[0] = Math.max(fovLeft, screenLeft);
+  result[1] = Math.min(fovTop, screenTop);
+  result[2] = Math.min(fovRight, screenRight);
+  result[3] = Math.max(fovBottom, screenBottom);
+  return result;
+};
+
+/**
+ * Calculates the screen rectangle visible from the left eye for the
+ * current device and screen parameters.
+ */
+DeviceInfo.prototype.getLeftEyeVisibleScreenRect = function(undistortedFrustum) {
+  var viewer = this.viewer;
+  var device = this.device;
+
+  var dist = viewer.screenLensDistance;
+  var eyeX = (device.widthMeters - viewer.interLensDistance) / 2;
+  var eyeY = viewer.baselineLensDistance - device.bevelMeters;
+  var left = (undistortedFrustum[0] * dist + eyeX) / device.widthMeters;
+  var top = (undistortedFrustum[1] * dist + eyeY) / device.heightMeters;
+  var right = (undistortedFrustum[2] * dist + eyeX) / device.widthMeters;
+  var bottom = (undistortedFrustum[3] * dist + eyeY) / device.heightMeters;
+  return {
+    x: left,
+    y: bottom,
+    width: right - left,
+    height: top - bottom
+  };
+};
+
+DeviceInfo.prototype.getFieldOfViewLeftEye = function(opt_isUndistorted) {
+  return opt_isUndistorted ? this.getUndistortedFieldOfViewLeftEye() :
+      this.getDistortedFieldOfViewLeftEye();
+};
+
+DeviceInfo.prototype.getFieldOfViewRightEye = function(opt_isUndistorted) {
+  var fov = this.getFieldOfViewLeftEye(opt_isUndistorted);
+  return {
+    leftDegrees: fov.rightDegrees,
+    rightDegrees: fov.leftDegrees,
+    upDegrees: fov.upDegrees,
+    downDegrees: fov.downDegrees
+  };
+};
+
+/**
+ * Calculates undistorted field of view for the left eye.
+ */
+DeviceInfo.prototype.getUndistortedFieldOfViewLeftEye = function() {
+  var p = this.getUndistortedParams_();
+
+  return {
+    leftDegrees: MathUtil.radToDeg * Math.atan(p.outerDist),
+    rightDegrees: MathUtil.radToDeg * Math.atan(p.innerDist),
+    downDegrees: MathUtil.radToDeg * Math.atan(p.bottomDist),
+    upDegrees: MathUtil.radToDeg * Math.atan(p.topDist)
+  };
+};
+
+DeviceInfo.prototype.getUndistortedViewportLeftEye = function() {
+  var p = this.getUndistortedParams_();
+  var viewer = this.viewer;
+  var device = this.device;
+
+  // Distances stored in local variables are in tan-angle units unless otherwise
+  // noted.
+  var eyeToScreenDistance = viewer.screenLensDistance;
+  var screenWidth = device.widthMeters / eyeToScreenDistance;
+  var screenHeight = device.heightMeters / eyeToScreenDistance;
+  var xPxPerTanAngle = device.width / screenWidth;
+  var yPxPerTanAngle = device.height / screenHeight;
+
+  var x = Math.round((p.eyePosX - p.outerDist) * xPxPerTanAngle);
+  var y = Math.round((p.eyePosY - p.bottomDist) * yPxPerTanAngle);
+  return {
+    x: x,
+    y: y,
+    width: Math.round((p.eyePosX + p.innerDist) * xPxPerTanAngle) - x,
+    height: Math.round((p.eyePosY + p.topDist) * yPxPerTanAngle) - y
+  };
+};
+
+DeviceInfo.prototype.getUndistortedParams_ = function() {
+  var viewer = this.viewer;
+  var device = this.device;
+  var distortion = this.distortion;
+
+  // Most of these variables in tan-angle units.
+  var eyeToScreenDistance = viewer.screenLensDistance;
+  var halfLensDistance = viewer.interLensDistance / 2 / eyeToScreenDistance;
+  var screenWidth = device.widthMeters / eyeToScreenDistance;
+  var screenHeight = device.heightMeters / eyeToScreenDistance;
+
+  var eyePosX = screenWidth / 2 - halfLensDistance;
+  var eyePosY = (viewer.baselineLensDistance - device.bevelMeters) / eyeToScreenDistance;
+
+  var maxFov = viewer.fov;
+  var viewerMax = distortion.distortInverse(Math.tan(MathUtil.degToRad * maxFov));
+  var outerDist = Math.min(eyePosX, viewerMax);
+  var innerDist = Math.min(halfLensDistance, viewerMax);
+  var bottomDist = Math.min(eyePosY, viewerMax);
+  var topDist = Math.min(screenHeight - eyePosY, viewerMax);
+
+  return {
+    outerDist: outerDist,
+    innerDist: innerDist,
+    topDist: topDist,
+    bottomDist: bottomDist,
+    eyePosX: eyePosX,
+    eyePosY: eyePosY
+  };
+};
+
+
+function CardboardViewer(params) {
+  // A machine readable ID.
+  this.id = params.id;
+  // A human readable label.
+  this.label = params.label;
+
+  // Field of view in degrees (per side).
+  this.fov = params.fov;
+
+  // Distance between lens centers in meters.
+  this.interLensDistance = params.interLensDistance;
+  // Distance between viewer baseline and lens center in meters.
+  this.baselineLensDistance = params.baselineLensDistance;
+  // Screen-to-lens distance in meters.
+  this.screenLensDistance = params.screenLensDistance;
+
+  // Distortion coefficients.
+  this.distortionCoefficients = params.distortionCoefficients;
+  // Inverse distortion coefficients.
+  // TODO: Calculate these from distortionCoefficients in the future.
+  this.inverseCoefficients = params.inverseCoefficients;
+}
+
+// Export viewer information.
+DeviceInfo.Viewers = Viewers;
+module.exports = DeviceInfo;
+
+},{"./distortion/distortion.js":9,"./math-util.js":14,"./util.js":22}],8:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var VRDisplay = _dereq_('./base.js').VRDisplay;
+var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
+var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
+
+/**
+ * Wraps a VRDisplay and exposes it as a HMDVRDevice
+ */
+function VRDisplayHMDDevice(display) {
+  this.display = display;
+
+  this.hardwareUnitId = display.displayId;
+  this.deviceId = 'webvr-polyfill:HMD:' + display.displayId;
+  this.deviceName = display.displayName + ' (HMD)';
+}
+VRDisplayHMDDevice.prototype = new HMDVRDevice();
+
+VRDisplayHMDDevice.prototype.getEyeParameters = function(whichEye) {
+  var eyeParameters = this.display.getEyeParameters(whichEye);
+
+  return {
+    currentFieldOfView: eyeParameters.fieldOfView,
+    maximumFieldOfView: eyeParameters.fieldOfView,
+    minimumFieldOfView: eyeParameters.fieldOfView,
+    recommendedFieldOfView: eyeParameters.fieldOfView,
+    eyeTranslation: { x: eyeParameters.offset[0], y: eyeParameters.offset[1], z: eyeParameters.offset[2] },
+    renderRect: {
+      x: (whichEye == 'right') ? eyeParameters.renderWidth : 0,
+      y: 0,
+      width: eyeParameters.renderWidth,
+      height: eyeParameters.renderHeight
+    }
+  };
+};
+
+VRDisplayHMDDevice.prototype.setFieldOfView =
+    function(opt_fovLeft, opt_fovRight, opt_zNear, opt_zFar) {
+  // Not supported. getEyeParameters reports that the min, max, and recommended
+  // FoV is all the same, so no adjustment can be made.
+};
+
+// TODO: Need to hook requestFullscreen to see if a wrapped VRDisplay was passed
+// in as an option. If so we should prevent the default fullscreen behavior and
+// call VRDisplay.requestPresent instead.
+
+/**
+ * Wraps a VRDisplay and exposes it as a PositionSensorVRDevice
+ */
+function VRDisplayPositionSensorDevice(display) {
+  this.display = display;
+
+  this.hardwareUnitId = display.displayId;
+  this.deviceId = 'webvr-polyfill:PositionSensor: ' + display.displayId;
+  this.deviceName = display.displayName + ' (PositionSensor)';
+}
+VRDisplayPositionSensorDevice.prototype = new PositionSensorVRDevice();
+
+VRDisplayPositionSensorDevice.prototype.getState = function() {
+  var pose = this.display.getPose();
+  return {
+    position: pose.position ? { x: pose.position[0], y: pose.position[1], z: pose.position[2] } : null,
+    orientation: pose.orientation ? { x: pose.orientation[0], y: pose.orientation[1], z: pose.orientation[2], w: pose.orientation[3] } : null,
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+};
+
+VRDisplayPositionSensorDevice.prototype.resetState = function() {
+  return this.positionDevice.resetPose();
+};
+
+
+module.exports.VRDisplayHMDDevice = VRDisplayHMDDevice;
+module.exports.VRDisplayPositionSensorDevice = VRDisplayPositionSensorDevice;
+
+
+},{"./base.js":2}],9:[function(_dereq_,module,exports){
+/**
+ * TODO(smus): Implement coefficient inversion.
+ */
+function Distortion(coefficients) {
+  this.coefficients = coefficients;
+}
+
+/**
+ * Calculates the inverse distortion for a radius.
+ * </p><p>
+ * Allows to compute the original undistorted radius from a distorted one.
+ * See also getApproximateInverseDistortion() for a faster but potentially
+ * less accurate method.
+ *
+ * @param {Number} radius Distorted radius from the lens center in tan-angle units.
+ * @return {Number} The undistorted radius in tan-angle units.
+ */
+Distortion.prototype.distortInverse = function(radius) {
+  // Secant method.
+  var r0 = 0;
+  var r1 = 1;
+  var dr0 = radius - this.distort(r0);
+  while (Math.abs(r1 - r0) > 0.0001 /** 0.1mm */) {
+    var dr1 = radius - this.distort(r1);
+    var r2 = r1 - dr1 * ((r1 - r0) / (dr1 - dr0));
+    r0 = r1;
+    r1 = r2;
+    dr0 = dr1;
+  }
+  return r1;
+};
+
+/**
+ * Distorts a radius by its distortion factor from the center of the lenses.
+ *
+ * @param {Number} radius Radius from the lens center in tan-angle units.
+ * @return {Number} The distorted radius in tan-angle units.
+ */
+Distortion.prototype.distort = function(radius) {
+  var r2 = radius * radius;
+  var ret = 0;
+  for (var i = 0; i < this.coefficients.length; i++) {
+    ret = r2 * (ret + this.coefficients[i]);
+  }
+  return (ret + 1) * radius;
+};
+
+// Functions below roughly ported from
+// https://github.com/googlesamples/cardboard-unity/blob/master/Cardboard/Scripts/CardboardProfile.cs#L412
+
+// Solves a small linear equation via destructive gaussian
+// elimination and back substitution.  This isn't generic numeric
+// code, it's just a quick hack to work with the generally
+// well-behaved symmetric matrices for least-squares fitting.
+// Not intended for reuse.
+//
+// @param a Input positive definite symmetrical matrix. Destroyed
+//     during calculation.
+// @param y Input right-hand-side values. Destroyed during calculation.
+// @return Resulting x value vector.
+//
+Distortion.prototype.solveLinear_ = function(a, y) {
+  var n = a.length;
+
+  // Gaussian elimination (no row exchange) to triangular matrix.
+  // The input matrix is a A^T A product which should be a positive
+  // definite symmetrical matrix, and if I remember my linear
+  // algebra right this implies that the pivots will be nonzero and
+  // calculations sufficiently accurate without needing row
+  // exchange.
+  for (var j = 0; j < n - 1; ++j) {
+    for (var k = j + 1; k < n; ++k) {
+      var p = a[j][k] / a[j][j];
+      for (var i = j + 1; i < n; ++i) {
+        a[i][k] -= p * a[i][j];
       }
+      y[k] -= p * y[j];
+    }
+  }
+  // From this point on, only the matrix elements a[j][i] with i>=j are
+  // valid. The elimination doesn't fill in eliminated 0 values.
 
-      /**
-       * Calculate the HMAC-rmd160 of a key and some data (raw strings)
-       */
+  var x = new Array(n);
 
-      function rstr_hmac(key, data) {
-        key = (utf8) ? utf8Encode(key) : key;
-        data = (utf8) ? utf8Encode(data) : data;
-        var i, hash,
-          bkey = rstr2binl(key),
-          ipad = Array(16),
-          opad = Array(16);
+  // Back substitution.
+  for (var j = n - 1; j >= 0; --j) {
+    var v = y[j];
+    for (var i = j + 1; i < n; ++i) {
+      v -= a[i][j] * x[i];
+    }
+    x[j] = v / a[j][j];
+  }
 
-        if (bkey.length > 16) {
-          bkey = binl(bkey, key.length * 8);
+  return x;
+};
+
+// Solves a least-squares matrix equation.  Given the equation A * x = y, calculate the
+// least-square fit x = inverse(A * transpose(A)) * transpose(A) * y.  The way this works
+// is that, while A is typically not a square matrix (and hence not invertible), A * transpose(A)
+// is always square.  That is:
+//   A * x = y
+//   transpose(A) * (A * x) = transpose(A) * y   <- multiply both sides by transpose(A)
+//   (transpose(A) * A) * x = transpose(A) * y   <- associativity
+//   x = inverse(transpose(A) * A) * transpose(A) * y  <- solve for x
+// Matrix A's row count (first index) must match y's value count.  A's column count (second index)
+// determines the length of the result vector x.
+Distortion.prototype.solveLeastSquares_ = function(matA, vecY) {
+  var i, j, k, sum;
+  var numSamples = matA.length;
+  var numCoefficients = matA[0].length;
+  if (numSamples != vecY.Length) {
+    throw new Error("Matrix / vector dimension mismatch");
+  }
+
+  // Calculate transpose(A) * A
+  var matATA = new Array(numCoefficients);
+  for (k = 0; k < numCoefficients; ++k) {
+    matATA[k] = new Array(numCoefficients);
+    for (j = 0; j < numCoefficients; ++j) {
+      sum = 0;
+      for (i = 0; i < numSamples; ++i) {
+        sum += matA[j][i] * matA[k][i];
+      }
+      matATA[k][j] = sum;
+    }
+  }
+
+  // Calculate transpose(A) * y
+  var vecATY = new Array(numCoefficients);
+  for (j = 0; j < numCoefficients; ++j) {
+    sum = 0;
+    for (i = 0; i < numSamples; ++i) {
+      sum += matA[j][i] * vecY[i];
+    }
+    vecATY[j] = sum;
+  }
+
+  // Now solve (A * transpose(A)) * x = transpose(A) * y.
+  return this.solveLinear_(matATA, vecATY);
+};
+
+/// Calculates an approximate inverse to the given radial distortion parameters.
+Distortion.prototype.approximateInverse = function(maxRadius, numSamples) {
+  maxRadius = maxRadius || 1;
+  numSamples = numSamples || 100;
+  var numCoefficients = 6;
+  var i, j;
+
+  // R + K1*R^3 + K2*R^5 = r, with R = rp = distort(r)
+  // Repeating for numSamples:
+  //   [ R0^3, R0^5 ] * [ K1 ] = [ r0 - R0 ]
+  //   [ R1^3, R1^5 ]   [ K2 ]   [ r1 - R1 ]
+  //   [ R2^3, R2^5 ]            [ r2 - R2 ]
+  //   [ etc... ]                [ etc... ]
+  // That is:
+  //   matA * [K1, K2] = y
+  // Solve:
+  //   [K1, K2] = inverse(transpose(matA) * matA) * transpose(matA) * y
+  var matA = new Array(numCoefficients);
+  for (j = 0; j < numCoefficients; ++j) {
+    matA[j] = new Array(numSamples);
+  }
+  var vecY = new Array(numSamples);
+
+  for (i = 0; i < numSamples; ++i) {
+    var r = maxRadius * (i + 1) / numSamples;
+    var rp = this.distort(r);
+    var v = rp;
+    for (j = 0; j < numCoefficients; ++j) {
+      v *= rp * rp;
+      matA[j][i] = v;
+    }
+    vecY[i] = r - rp;
+  }
+
+  var inverseCoefficients = this.solveLeastSquares_(matA, vecY);
+
+  return new Distortion(inverseCoefficients);
+};
+
+module.exports = Distortion;
+
+},{}],10:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * DPDB cache.
+ */
+var DPDB_CACHE = {
+  "format": 1,
+  "last_updated": "2016-01-20T00:18:35Z",
+  "devices": [
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "asus/*/Nexus 7/*" },
+      { "ua": "Nexus 7" }
+    ],
+    "dpi": [ 320.8, 323.0 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "asus/*/ASUS_Z00AD/*" },
+      { "ua": "ASUS_Z00AD" }
+    ],
+    "dpi": [ 403.0, 404.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "HTC/*/HTC6435LVW/*" },
+      { "ua": "HTC6435LVW" }
+    ],
+    "dpi": [ 449.7, 443.3 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "HTC/*/HTC One XL/*" },
+      { "ua": "HTC One XL" }
+    ],
+    "dpi": [ 315.3, 314.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "htc/*/Nexus 9/*" },
+      { "ua": "Nexus 9" }
+    ],
+    "dpi": 289.0,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "HTC/*/HTC One M9/*" },
+      { "ua": "HTC One M9" }
+    ],
+    "dpi": [ 442.5, 443.3 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "HTC/*/HTC One_M8/*" },
+      { "ua": "HTC One_M8" }
+    ],
+    "dpi": [ 449.7, 447.4 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "HTC/*/HTC One/*" },
+      { "ua": "HTC One" }
+    ],
+    "dpi": 472.8,
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Huawei/*/Nexus 6P/*" },
+      { "ua": "Nexus 6P" }
+    ],
+    "dpi": [ 515.1, 518.0 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/Nexus 5X/*" },
+      { "ua": "Nexus 5X" }
+    ],
+    "dpi": [ 422.0, 419.9 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LGMS345/*" },
+      { "ua": "LGMS345" }
+    ],
+    "dpi": [ 221.7, 219.1 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LG-D800/*" },
+      { "ua": "LG-D800" }
+    ],
+    "dpi": [ 422.0, 424.1 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LG-D850/*" },
+      { "ua": "LG-D850" }
+    ],
+    "dpi": [ 537.9, 541.9 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/VS985 4G/*" },
+      { "ua": "VS985 4G" }
+    ],
+    "dpi": [ 537.9, 535.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/Nexus 5/*" },
+      { "ua": "Nexus 5 " }
+    ],
+    "dpi": [ 442.4, 444.8 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/Nexus 4/*" },
+      { "ua": "Nexus 4" }
+    ],
+    "dpi": [ 319.8, 318.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LG-P769/*" },
+      { "ua": "LG-P769" }
+    ],
+    "dpi": [ 240.6, 247.5 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LGMS323/*" },
+      { "ua": "LGMS323" }
+    ],
+    "dpi": [ 206.6, 204.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "LGE/*/LGLS996/*" },
+      { "ua": "LGLS996" }
+    ],
+    "dpi": [ 403.4, 401.5 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Micromax/*/4560MMX/*" },
+      { "ua": "4560MMX" }
+    ],
+    "dpi": [ 240.0, 219.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Micromax/*/A250/*" },
+      { "ua": "Micromax A250" }
+    ],
+    "dpi": [ 480.0, 446.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Micromax/*/Micromax AQ4501/*" },
+      { "ua": "Micromax AQ4501" }
+    ],
+    "dpi": 240.0,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/DROID RAZR/*" },
+      { "ua": "DROID RAZR" }
+    ],
+    "dpi": [ 368.1, 256.7 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT830C/*" },
+      { "ua": "XT830C" }
+    ],
+    "dpi": [ 254.0, 255.9 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1021/*" },
+      { "ua": "XT1021" }
+    ],
+    "dpi": [ 254.0, 256.7 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1023/*" },
+      { "ua": "XT1023" }
+    ],
+    "dpi": [ 254.0, 256.7 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1028/*" },
+      { "ua": "XT1028" }
+    ],
+    "dpi": [ 326.6, 327.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1034/*" },
+      { "ua": "XT1034" }
+    ],
+    "dpi": [ 326.6, 328.4 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1053/*" },
+      { "ua": "XT1053" }
+    ],
+    "dpi": [ 315.3, 316.1 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1562/*" },
+      { "ua": "XT1562" }
+    ],
+    "dpi": [ 403.4, 402.7 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/Nexus 6/*" },
+      { "ua": "Nexus 6 " }
+    ],
+    "dpi": [ 494.3, 489.7 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1063/*" },
+      { "ua": "XT1063" }
+    ],
+    "dpi": [ 295.0, 296.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1064/*" },
+      { "ua": "XT1064" }
+    ],
+    "dpi": [ 295.0, 295.6 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1092/*" },
+      { "ua": "XT1092" }
+    ],
+    "dpi": [ 422.0, 424.1 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "motorola/*/XT1095/*" },
+      { "ua": "XT1095" }
+    ],
+    "dpi": [ 422.0, 423.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "OnePlus/*/A0001/*" },
+      { "ua": "A0001" }
+    ],
+    "dpi": [ 403.4, 401.0 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "OnePlus/*/ONE E1005/*" },
+      { "ua": "ONE E1005" }
+    ],
+    "dpi": [ 442.4, 441.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "OnePlus/*/ONE A2005/*" },
+      { "ua": "ONE A2005" }
+    ],
+    "dpi": [ 391.9, 405.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "OPPO/*/X909/*" },
+      { "ua": "X909" }
+    ],
+    "dpi": [ 442.4, 444.1 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9082/*" },
+      { "ua": "GT-I9082" }
+    ],
+    "dpi": [ 184.7, 185.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G360P/*" },
+      { "ua": "SM-G360P" }
+    ],
+    "dpi": [ 196.7, 205.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/Nexus S/*" },
+      { "ua": "Nexus S" }
+    ],
+    "dpi": [ 234.5, 229.8 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9300/*" },
+      { "ua": "GT-I9300" }
+    ],
+    "dpi": [ 304.8, 303.9 ],
+    "bw": 5,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-T230NU/*" },
+      { "ua": "SM-T230NU" }
+    ],
+    "dpi": 216.0,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SGH-T399/*" },
+      { "ua": "SGH-T399" }
+    ],
+    "dpi": [ 217.7, 231.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-N9005/*" },
+      { "ua": "SM-N9005" }
+    ],
+    "dpi": [ 386.4, 387.0 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SAMSUNG-SM-N900A/*" },
+      { "ua": "SAMSUNG-SM-N900A" }
+    ],
+    "dpi": [ 386.4, 387.7 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9500/*" },
+      { "ua": "GT-I9500" }
+    ],
+    "dpi": [ 442.5, 443.3 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9505/*" },
+      { "ua": "GT-I9505" }
+    ],
+    "dpi": 439.4,
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G900F/*" },
+      { "ua": "SM-G900F" }
+    ],
+    "dpi": [ 415.6, 431.6 ],
+    "bw": 5,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G900M/*" },
+      { "ua": "SM-G900M" }
+    ],
+    "dpi": [ 415.6, 431.6 ],
+    "bw": 5,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G800F/*" },
+      { "ua": "SM-G800F" }
+    ],
+    "dpi": 326.8,
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G906S/*" },
+      { "ua": "SM-G906S" }
+    ],
+    "dpi": [ 562.7, 572.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9300/*" },
+      { "ua": "GT-I9300" }
+    ],
+    "dpi": [ 306.7, 304.8 ],
+    "bw": 5,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-T535/*" },
+      { "ua": "SM-T535" }
+    ],
+    "dpi": [ 142.6, 136.4 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-N920C/*" },
+      { "ua": "SM-N920C" }
+    ],
+    "dpi": [ 515.1, 518.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9300I/*" },
+      { "ua": "GT-I9300I" }
+    ],
+    "dpi": [ 304.8, 305.8 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-I9195/*" },
+      { "ua": "GT-I9195" }
+    ],
+    "dpi": [ 249.4, 256.7 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SPH-L520/*" },
+      { "ua": "SPH-L520" }
+    ],
+    "dpi": [ 249.4, 255.9 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SAMSUNG-SGH-I717/*" },
+      { "ua": "SAMSUNG-SGH-I717" }
+    ],
+    "dpi": 285.8,
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SPH-D710/*" },
+      { "ua": "SPH-D710" }
+    ],
+    "dpi": [ 217.7, 204.2 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/GT-N7100/*" },
+      { "ua": "GT-N7100" }
+    ],
+    "dpi": 265.1,
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SCH-I605/*" },
+      { "ua": "SCH-I605" }
+    ],
+    "dpi": 265.1,
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/Galaxy Nexus/*" },
+      { "ua": "Galaxy Nexus" }
+    ],
+    "dpi": [ 315.3, 314.2 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-N910H/*" },
+      { "ua": "SM-N910H" }
+    ],
+    "dpi": [ 515.1, 518.0 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-N910C/*" },
+      { "ua": "SM-N910C" }
+    ],
+    "dpi": [ 515.2, 520.2 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G130M/*" },
+      { "ua": "SM-G130M" }
+    ],
+    "dpi": [ 165.9, 164.8 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G928I/*" },
+      { "ua": "SM-G928I" }
+    ],
+    "dpi": [ 515.1, 518.4 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G920F/*" },
+      { "ua": "SM-G920F" }
+    ],
+    "dpi": 580.6,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G920P/*" },
+      { "ua": "SM-G920P" }
+    ],
+    "dpi": [ 522.5, 577.0 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G925F/*" },
+      { "ua": "SM-G925F" }
+    ],
+    "dpi": 580.6,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "samsung/*/SM-G925V/*" },
+      { "ua": "SM-G925V" }
+    ],
+    "dpi": [ 522.5, 576.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Sony/*/C6903/*" },
+      { "ua": "C6903" }
+    ],
+    "dpi": [ 442.5, 443.3 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Sony/*/D6653/*" },
+      { "ua": "D6653" }
+    ],
+    "dpi": [ 428.6, 427.6 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Sony/*/E6653/*" },
+      { "ua": "E6653" }
+    ],
+    "dpi": [ 428.6, 425.7 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Sony/*/E6853/*" },
+      { "ua": "E6853" }
+    ],
+    "dpi": [ 403.4, 401.9 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "Sony/*/SGP321/*" },
+      { "ua": "SGP321" }
+    ],
+    "dpi": [ 224.7, 224.1 ],
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "TCT/*/ALCATEL ONE TOUCH Fierce/*" },
+      { "ua": "ALCATEL ONE TOUCH Fierce" }
+    ],
+    "dpi": [ 240.0, 247.5 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "THL/*/thl 5000/*" },
+      { "ua": "thl 5000" }
+    ],
+    "dpi": [ 480.0, 443.3 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "android",
+    "rules": [
+      { "mdmh": "ZTE/*/ZTE Blade L2/*" },
+      { "ua": "ZTE Blade L2" }
+    ],
+    "dpi": 240.0,
+    "bw": 3,
+    "ac": 500
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 640, 960 ] } ],
+    "dpi": [ 325.1, 328.4 ],
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 640, 960 ] } ],
+    "dpi": [ 325.1, 328.4 ],
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 640, 1136 ] } ],
+    "dpi": [ 317.1, 320.2 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 640, 1136 ] } ],
+    "dpi": [ 317.1, 320.2 ],
+    "bw": 3,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 750, 1334 ] } ],
+    "dpi": 326.4,
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 750, 1334 ] } ],
+    "dpi": 326.4,
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 1242, 2208 ] } ],
+    "dpi": [ 453.6, 458.4 ],
+    "bw": 4,
+    "ac": 1000
+  },
+
+  {
+    "type": "ios",
+    "rules": [ { "res": [ 1242, 2208 ] } ],
+    "dpi": [ 453.6, 458.4 ],
+    "bw": 4,
+    "ac": 1000
+  }
+]};
+
+module.exports = DPDB_CACHE;
+
+},{}],11:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Offline cache of the DPDB, to be used until we load the online one (and
+// as a fallback in case we can't load the online one).
+var DPDB_CACHE = _dereq_('./dpdb-cache.js');
+var Util = _dereq_('../util.js');
+
+// Online DPDB URL.
+var ONLINE_DPDB_URL = 'https://storage.googleapis.com/cardboard-dpdb/dpdb.json';
+
+/**
+ * Calculates device parameters based on the DPDB (Device Parameter Database).
+ * Initially, uses the cached DPDB values.
+ *
+ * If fetchOnline == true, then this object tries to fetch the online version
+ * of the DPDB and updates the device info if a better match is found.
+ * Calls the onDeviceParamsUpdated callback when there is an update to the
+ * device information.
+ */
+function Dpdb(fetchOnline, onDeviceParamsUpdated) {
+  // Start with the offline DPDB cache while we are loading the real one.
+  this.dpdb = DPDB_CACHE;
+
+  // Calculate device params based on the offline version of the DPDB.
+  this.recalculateDeviceParams_();
+
+  // XHR to fetch online DPDB file, if requested.
+  if (fetchOnline) {
+    // Set the callback.
+    this.onDeviceParamsUpdated = onDeviceParamsUpdated;
+
+    console.log('Fetching DPDB...');
+    var xhr = new XMLHttpRequest();
+    var obj = this;
+    xhr.open('GET', ONLINE_DPDB_URL, true);
+    xhr.addEventListener('load', function() {
+      obj.loading = false;
+      if (xhr.status >= 200 && xhr.status <= 299) {
+        // Success.
+        console.log('Successfully loaded online DPDB.');
+        obj.dpdb = JSON.parse(xhr.response);
+        obj.recalculateDeviceParams_();
+      } else {
+        // Error loading the DPDB.
+        console.error('Error loading online DPDB!');
+      }
+    });
+    xhr.send();
+  }
+}
+
+// Returns the current device parameters.
+Dpdb.prototype.getDeviceParams = function() {
+  return this.deviceParams;
+};
+
+// Recalculates this device's parameters based on the DPDB.
+Dpdb.prototype.recalculateDeviceParams_ = function() {
+  console.log('Recalculating device params.');
+  var newDeviceParams = this.calcDeviceParams_();
+  console.log('New device parameters:');
+  console.log(newDeviceParams);
+  if (newDeviceParams) {
+    this.deviceParams = newDeviceParams;
+    // Invoke callback, if it is set.
+    if (this.onDeviceParamsUpdated) {
+      this.onDeviceParamsUpdated(this.deviceParams);
+    }
+  } else {
+    console.error('Failed to recalculate device parameters.');
+  }
+};
+
+// Returns a DeviceParams object that represents the best guess as to this
+// device's parameters. Can return null if the device does not match any
+// known devices.
+Dpdb.prototype.calcDeviceParams_ = function() {
+  var db = this.dpdb; // shorthand
+  if (!db) {
+    console.error('DPDB not available.');
+    return null;
+  }
+  if (db.format != 1) {
+    console.error('DPDB has unexpected format version.');
+    return null;
+  }
+  if (!db.devices || !db.devices.length) {
+    console.error('DPDB does not have a devices section.');
+    return null;
+  }
+
+  // Get the actual user agent and screen dimensions in pixels.
+  var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  var width = Util.getScreenWidth();
+  var height = Util.getScreenHeight();
+  console.log('User agent: ' + userAgent);
+  console.log('Pixel width: ' + width);
+  console.log('Pixel height: ' + height);
+
+  if (!db.devices) {
+    console.error('DPDB has no devices section.');
+    return null;
+  }
+
+  for (var i = 0; i < db.devices.length; i++) {
+    var device = db.devices[i];
+    if (!device.rules) {
+      console.warn('Device[' + i + '] has no rules section.');
+      continue;
+    }
+
+    if (device.type != 'ios' && device.type != 'android') {
+      console.warn('Device[' + i + '] has invalid type.');
+      continue;
+    }
+
+    // See if this device is of the appropriate type.
+    if (Util.isIOS() != (device.type == 'ios')) continue;
+
+    // See if this device matches any of the rules:
+    var matched = false;
+    for (var j = 0; j < device.rules.length; j++) {
+      var rule = device.rules[j];
+      if (this.matchRule_(rule, userAgent, width, height)) {
+        console.log('Rule matched:');
+        console.log(rule);
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) continue;
+
+    // device.dpi might be an array of [ xdpi, ydpi] or just a scalar.
+    var xdpi = device.dpi[0] || device.dpi;
+    var ydpi = device.dpi[1] || device.dpi;
+
+    return new DeviceParams({ xdpi: xdpi, ydpi: ydpi, bevelMm: device.bw });
+  }
+
+  console.warn('No DPDB device match.');
+  return null;
+};
+
+Dpdb.prototype.matchRule_ = function(rule, ua, screenWidth, screenHeight) {
+  // We can only match 'ua' and 'res' rules, not other types like 'mdmh'
+  // (which are meant for native platforms).
+  if (!rule.ua && !rule.res) return false;
+
+  // If our user agent string doesn't contain the indicated user agent string,
+  // the match fails.
+  if (rule.ua && ua.indexOf(rule.ua) < 0) return false;
+
+  // If the rule specifies screen dimensions that don't correspond to ours,
+  // the match fails.
+  if (rule.res) {
+    if (!rule.res[0] || !rule.res[1]) return false;
+    var resX = rule.res[0];
+    var resY = rule.res[1];
+    // Compare min and max so as to make the order not matter, i.e., it should
+    // be true that 640x480 == 480x640.
+    if (Math.min(screenWidth, screenHeight) != Math.min(resX, resY) ||
+        (Math.max(screenWidth, screenHeight) != Math.max(resX, resY))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function DeviceParams(params) {
+  this.xdpi = params.xdpi;
+  this.ydpi = params.ydpi;
+  this.bevelMm = params.bevelMm;
+}
+
+module.exports = Dpdb;
+},{"../util.js":22,"./dpdb-cache.js":10}],12:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function Emitter() {
+  this.callbacks = {};
+}
+
+Emitter.prototype.emit = function(eventName) {
+  var callbacks = this.callbacks[eventName];
+  if (!callbacks) {
+    //console.log('No valid callback specified.');
+    return;
+  }
+  var args = [].slice.call(arguments);
+  // Eliminate the first param (the callback).
+  args.shift();
+  for (var i = 0; i < callbacks.length; i++) {
+    callbacks[i].apply(this, args);
+  }
+};
+
+Emitter.prototype.on = function(eventName, callback) {
+  if (eventName in this.callbacks) {
+    this.callbacks[eventName].push(callback);
+  } else {
+    this.callbacks[eventName] = [callback];
+  }
+};
+
+module.exports = Emitter;
+
+},{}],13:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var Util = _dereq_('./util.js');
+var WebVRPolyfill = _dereq_('./webvr-polyfill.js');
+
+// Initialize a WebVRConfig just in case.
+window.WebVRConfig = Util.extend({
+  // Forces availability of VR mode, even for non-mobile devices.
+  FORCE_ENABLE_VR: false,
+
+  // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
+  K_FILTER: 0.98,
+
+  // How far into the future to predict during fast motion (in seconds).
+  PREDICTION_TIME_S: 0.040,
+
+  // Flag to disable touch panner. In case you have your own touch controls.
+  TOUCH_PANNER_DISABLED: false,
+
+  // Flag to disabled the UI in VR Mode.
+  CARDBOARD_UI_DISABLED: false, // Default: false
+
+  // Flag to disable the instructions to rotate your device.
+  ROTATE_INSTRUCTIONS_DISABLED: false, // Default: false.
+
+  // Enable yaw panning only, disabling roll and pitch. This can be useful
+  // for panoramas with nothing interesting above or below.
+  YAW_ONLY: false,
+
+  // To disable keyboard and mouse controls, if you want to use your own
+  // implementation.
+  MOUSE_KEYBOARD_CONTROLS_DISABLED: false,
+
+  // Prevent the polyfill from initializing immediately. Requires the app
+  // to call InitializeWebVRPolyfill() before it can be used.
+  DEFER_INITIALIZATION: false,
+
+  // Enable the deprecated version of the API (navigator.getVRDevices).
+  ENABLE_DEPRECATED_API: false,
+
+  // Scales the recommended buffer size reported by WebVR, which can improve
+  // performance.
+  // UPDATE(2016-05-03): Setting this to 0.5 by default since 1.0 does not
+  // perform well on many mobile devices.
+  BUFFER_SCALE: 0.5,
+
+  // Allow VRDisplay.submitFrame to change gl bindings, which is more
+  // efficient if the application code will re-bind its resources on the
+  // next frame anyway. This has been seen to cause rendering glitches with
+  // THREE.js.
+  // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
+  // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
+  // and gl.TEXTURE_BINDING_2D for texture unit 0.
+  DIRTY_SUBMIT_FRAME_BINDINGS: false
+}, window.WebVRConfig);
+
+if (!window.WebVRConfig.DEFER_INITIALIZATION) {
+  new WebVRPolyfill();
+} else {
+  window.InitializeWebVRPolyfill = function() {
+    new WebVRPolyfill();
+  }
+}
+
+},{"./util.js":22,"./webvr-polyfill.js":25}],14:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var MathUtil = window.MathUtil || {};
+
+MathUtil.degToRad = Math.PI / 180;
+MathUtil.radToDeg = 180 / Math.PI;
+
+// Some minimal math functionality borrowed from THREE.Math and stripped down
+// for the purposes of this library.
+
+
+MathUtil.Vector2 = function ( x, y ) {
+  this.x = x || 0;
+  this.y = y || 0;
+};
+
+MathUtil.Vector2.prototype = {
+  constructor: MathUtil.Vector2,
+
+  set: function ( x, y ) {
+    this.x = x;
+    this.y = y;
+
+    return this;
+  },
+
+  copy: function ( v ) {
+    this.x = v.x;
+    this.y = v.y;
+
+    return this;
+  },
+
+  subVectors: function ( a, b ) {
+    this.x = a.x - b.x;
+    this.y = a.y - b.y;
+
+    return this;
+  },
+};
+
+MathUtil.Vector3 = function ( x, y, z ) {
+  this.x = x || 0;
+  this.y = y || 0;
+  this.z = z || 0;
+};
+
+MathUtil.Vector3.prototype = {
+  constructor: MathUtil.Vector3,
+
+  set: function ( x, y, z ) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+
+    return this;
+  },
+
+  copy: function ( v ) {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+
+    return this;
+  },
+
+  length: function () {
+    return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
+  },
+
+  normalize: function () {
+    var scalar = this.length();
+
+    if ( scalar !== 0 ) {
+      var invScalar = 1 / scalar;
+
+      this.multiplyScalar(invScalar);
+    } else {
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+    }
+
+    return this;
+  },
+
+  multiplyScalar: function ( scalar ) {
+    this.x *= scalar;
+    this.y *= scalar;
+    this.z *= scalar;
+  },
+
+  applyQuaternion: function ( q ) {
+    var x = this.x;
+    var y = this.y;
+    var z = this.z;
+
+    var qx = q.x;
+    var qy = q.y;
+    var qz = q.z;
+    var qw = q.w;
+
+    // calculate quat * vector
+    var ix =  qw * x + qy * z - qz * y;
+    var iy =  qw * y + qz * x - qx * z;
+    var iz =  qw * z + qx * y - qy * x;
+    var iw = - qx * x - qy * y - qz * z;
+
+    // calculate result * inverse quat
+    this.x = ix * qw + iw * - qx + iy * - qz - iz * - qy;
+    this.y = iy * qw + iw * - qy + iz * - qx - ix * - qz;
+    this.z = iz * qw + iw * - qz + ix * - qy - iy * - qx;
+
+    return this;
+  },
+
+  dot: function ( v ) {
+    return this.x * v.x + this.y * v.y + this.z * v.z;
+  },
+
+  crossVectors: function ( a, b ) {
+    var ax = a.x, ay = a.y, az = a.z;
+    var bx = b.x, by = b.y, bz = b.z;
+
+    this.x = ay * bz - az * by;
+    this.y = az * bx - ax * bz;
+    this.z = ax * by - ay * bx;
+
+    return this;
+  },
+};
+
+MathUtil.Quaternion = function ( x, y, z, w ) {
+  this.x = x || 0;
+  this.y = y || 0;
+  this.z = z || 0;
+  this.w = ( w !== undefined ) ? w : 1;
+};
+
+MathUtil.Quaternion.prototype = {
+  constructor: MathUtil.Quaternion,
+
+  set: function ( x, y, z, w ) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+
+    return this;
+  },
+
+  copy: function ( quaternion ) {
+    this.x = quaternion.x;
+    this.y = quaternion.y;
+    this.z = quaternion.z;
+    this.w = quaternion.w;
+
+    return this;
+  },
+
+  setFromEulerXYZ: function( x, y, z ) {
+    var c1 = Math.cos( x / 2 );
+    var c2 = Math.cos( y / 2 );
+    var c3 = Math.cos( z / 2 );
+    var s1 = Math.sin( x / 2 );
+    var s2 = Math.sin( y / 2 );
+    var s3 = Math.sin( z / 2 );
+
+    this.x = s1 * c2 * c3 + c1 * s2 * s3;
+    this.y = c1 * s2 * c3 - s1 * c2 * s3;
+    this.z = c1 * c2 * s3 + s1 * s2 * c3;
+    this.w = c1 * c2 * c3 - s1 * s2 * s3;
+
+    return this;
+  },
+
+  setFromEulerYXZ: function( x, y, z ) {
+    var c1 = Math.cos( x / 2 );
+    var c2 = Math.cos( y / 2 );
+    var c3 = Math.cos( z / 2 );
+    var s1 = Math.sin( x / 2 );
+    var s2 = Math.sin( y / 2 );
+    var s3 = Math.sin( z / 2 );
+
+    this.x = s1 * c2 * c3 + c1 * s2 * s3;
+    this.y = c1 * s2 * c3 - s1 * c2 * s3;
+    this.z = c1 * c2 * s3 - s1 * s2 * c3;
+    this.w = c1 * c2 * c3 + s1 * s2 * s3;
+
+    return this;
+  },
+
+  setFromAxisAngle: function ( axis, angle ) {
+    // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+    // assumes axis is normalized
+
+    var halfAngle = angle / 2, s = Math.sin( halfAngle );
+
+    this.x = axis.x * s;
+    this.y = axis.y * s;
+    this.z = axis.z * s;
+    this.w = Math.cos( halfAngle );
+
+    return this;
+  },
+
+  multiply: function ( q ) {
+    return this.multiplyQuaternions( this, q );
+  },
+
+  multiplyQuaternions: function ( a, b ) {
+    // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+
+    var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
+    var qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
+
+    this.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+    this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+    this.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+    this.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
+
+    return this;
+  },
+
+  inverse: function () {
+    this.x *= -1;
+    this.y *= -1;
+    this.z *= -1;
+
+    this.normalize();
+
+    return this;
+  },
+
+  normalize: function () {
+    var l = Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
+
+    if ( l === 0 ) {
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+      this.w = 1;
+    } else {
+      l = 1 / l;
+
+      this.x = this.x * l;
+      this.y = this.y * l;
+      this.z = this.z * l;
+      this.w = this.w * l;
+    }
+
+    return this;
+  },
+
+  slerp: function ( qb, t ) {
+    if ( t === 0 ) return this;
+    if ( t === 1 ) return this.copy( qb );
+
+    var x = this.x, y = this.y, z = this.z, w = this.w;
+
+    // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+
+    var cosHalfTheta = w * qb.w + x * qb.x + y * qb.y + z * qb.z;
+
+    if ( cosHalfTheta < 0 ) {
+      this.w = - qb.w;
+      this.x = - qb.x;
+      this.y = - qb.y;
+      this.z = - qb.z;
+
+      cosHalfTheta = - cosHalfTheta;
+    } else {
+      this.copy( qb );
+    }
+
+    if ( cosHalfTheta >= 1.0 ) {
+      this.w = w;
+      this.x = x;
+      this.y = y;
+      this.z = z;
+
+      return this;
+    }
+
+    var halfTheta = Math.acos( cosHalfTheta );
+    var sinHalfTheta = Math.sqrt( 1.0 - cosHalfTheta * cosHalfTheta );
+
+    if ( Math.abs( sinHalfTheta ) < 0.001 ) {
+      this.w = 0.5 * ( w + this.w );
+      this.x = 0.5 * ( x + this.x );
+      this.y = 0.5 * ( y + this.y );
+      this.z = 0.5 * ( z + this.z );
+
+      return this;
+    }
+
+    var ratioA = Math.sin( ( 1 - t ) * halfTheta ) / sinHalfTheta,
+    ratioB = Math.sin( t * halfTheta ) / sinHalfTheta;
+
+    this.w = ( w * ratioA + this.w * ratioB );
+    this.x = ( x * ratioA + this.x * ratioB );
+    this.y = ( y * ratioA + this.y * ratioB );
+    this.z = ( z * ratioA + this.z * ratioB );
+
+    return this;
+  },
+
+  setFromUnitVectors: function () {
+    // http://lolengine.net/blog/2014/02/24/quaternion-from-two-vectors-final
+    // assumes direction vectors vFrom and vTo are normalized
+
+    var v1, r;
+    var EPS = 0.000001;
+
+    return function ( vFrom, vTo ) {
+      if ( v1 === undefined ) v1 = new MathUtil.Vector3();
+
+      r = vFrom.dot( vTo ) + 1;
+
+      if ( r < EPS ) {
+        r = 0;
+
+        if ( Math.abs( vFrom.x ) > Math.abs( vFrom.z ) ) {
+          v1.set( - vFrom.y, vFrom.x, 0 );
+        } else {
+          v1.set( 0, - vFrom.z, vFrom.y );
         }
-
-        for (i = 0; i < 16; i += 1) {
-          ipad[i] = bkey[i] ^ 0x36363636;
-          opad[i] = bkey[i] ^ 0x5C5C5C5C;
-        }
-        hash = binl(ipad.concat(rstr2binl(data)), 512 + data.length * 8);
-        return binl2rstr(binl(opad.concat(hash), 512 + 160));
+      } else {
+        v1.crossVectors( vFrom, vTo );
       }
 
-      /**
-       * Convert an array of little-endian words to a string
-       */
+      this.x = v1.x;
+      this.y = v1.y;
+      this.z = v1.z;
+      this.w = r;
 
-      function binl2rstr(input) {
-        var i, output = '',
-          l = input.length * 32;
-        for (i = 0; i < l; i += 8) {
-          output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
-        }
-        return output;
-      }
+      this.normalize();
 
-      /**
-       * Calculate the RIPE-MD160 of an array of little-endian words, and a bit length.
-       */
+      return this;
+    }
+  }(),
+};
 
-      function binl(x, len) {
-        var T, j, i, l,
-          h0 = 0x67452301,
-          h1 = 0xefcdab89,
-          h2 = 0x98badcfe,
-          h3 = 0x10325476,
-          h4 = 0xc3d2e1f0,
-          A1, B1, C1, D1, E1,
-          A2, B2, C2, D2, E2;
+module.exports = MathUtil;
 
-        /* append padding */
-        x[len >> 5] |= 0x80 << (len % 32);
-        x[(((len + 64) >>> 9) << 4) + 14] = len;
-        l = x.length;
+},{}],15:[function(_dereq_,module,exports){
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-        for (i = 0; i < l; i += 16) {
-          A1 = A2 = h0;
-          B1 = B2 = h1;
-          C1 = C2 = h2;
-          D1 = D2 = h3;
-          E1 = E2 = h4;
-          for (j = 0; j <= 79; j += 1) {
-            T = safe_add(A1, rmd160_f(j, B1, C1, D1));
-            T = safe_add(T, x[i + rmd160_r1[j]]);
-            T = safe_add(T, rmd160_K1(j));
-            T = safe_add(bit_rol(T, rmd160_s1[j]), E1);
-            A1 = E1;
-            E1 = D1;
-            D1 = bit_rol(C1, 10);
-            C1 = B1;
-            B1 = T;
-            T = safe_add(A2, rmd160_f(79 - j, B2, C2, D2));
-            T = safe_add(T, x[i + rmd160_r2[j]]);
-            T = safe_add(T, rmd160_K2(j));
-            T = safe_add(bit_rol(T, rmd160_s2[j]), E2);
-            A2 = E2;
-            E2 = D2;
-            D2 = bit_rol(C2, 10);
-            C2 = B2;
-            B2 = T;
-          }
+var VRDisplay = _dereq_('./base.js').VRDisplay;
+var MathUtil = _dereq_('./math-util.js');
+var Util = _dereq_('./util.js');
 
-          T = safe_add(h1, safe_add(C1, D2));
-          h1 = safe_add(h2, safe_add(D1, E2));
-          h2 = safe_add(h3, safe_add(E1, A2));
-          h3 = safe_add(h4, safe_add(A1, B2));
-          h4 = safe_add(h0, safe_add(B1, C2));
-          h0 = T;
-        }
-        return [h0, h1, h2, h3, h4];
-      }
+// How much to rotate per key stroke.
+var KEY_SPEED = 0.15;
+var KEY_ANIMATION_DURATION = 80;
 
-      // specific algorithm methods
+// How much to rotate for mouse events.
+var MOUSE_SPEED_X = 0.5;
+var MOUSE_SPEED_Y = 0.3;
 
-      function rmd160_f(j, x, y, z) {
-        return (0 <= j && j <= 15) ? (x ^ y ^ z) :
-          (16 <= j && j <= 31) ? (x & y) | (~x & z) :
-          (32 <= j && j <= 47) ? (x | ~y) ^ z :
-          (48 <= j && j <= 63) ? (x & z) | (y & ~z) :
-          (64 <= j && j <= 79) ? x ^ (y | ~z) :
-          'rmd160_f: j out of range';
-      }
+/**
+ * VRDisplay based on mouse and keyboard input. Designed for desktops/laptops
+ * where orientation events aren't supported. Cannot present.
+ */
+function MouseKeyboardVRDisplay() {
+  this.displayName = 'Mouse and Keyboard VRDisplay (webvr-polyfill)';
 
-      function rmd160_K1(j) {
-        return (0 <= j && j <= 15) ? 0x00000000 :
-          (16 <= j && j <= 31) ? 0x5a827999 :
-          (32 <= j && j <= 47) ? 0x6ed9eba1 :
-          (48 <= j && j <= 63) ? 0x8f1bbcdc :
-          (64 <= j && j <= 79) ? 0xa953fd4e :
-          'rmd160_K1: j out of range';
-      }
+  this.capabilities.hasOrientation = true;
 
-      function rmd160_K2(j) {
-        return (0 <= j && j <= 15) ? 0x50a28be6 :
-          (16 <= j && j <= 31) ? 0x5c4dd124 :
-          (32 <= j && j <= 47) ? 0x6d703ef3 :
-          (48 <= j && j <= 63) ? 0x7a6d76e9 :
-          (64 <= j && j <= 79) ? 0x00000000 :
-          'rmd160_K2: j out of range';
-      }
+  // Attach to mouse and keyboard events.
+  window.addEventListener('keydown', this.onKeyDown_.bind(this));
+  window.addEventListener('mousemove', this.onMouseMove_.bind(this));
+  window.addEventListener('mousedown', this.onMouseDown_.bind(this));
+  window.addEventListener('mouseup', this.onMouseUp_.bind(this));
+
+  // "Private" members.
+  this.phi_ = 0;
+  this.theta_ = 0;
+
+  // Variables for keyboard-based rotation animation.
+  this.targetAngle_ = null;
+  this.angleAnimation_ = null;
+
+  // State variables for calculations.
+  this.orientation_ = new MathUtil.Quaternion();
+
+  // Variables for mouse-based rotation.
+  this.rotateStart_ = new MathUtil.Vector2();
+  this.rotateEnd_ = new MathUtil.Vector2();
+  this.rotateDelta_ = new MathUtil.Vector2();
+  this.isDragging_ = false;
+
+  this.orientationOut_ = new Float32Array(4);
+}
+MouseKeyboardVRDisplay.prototype = new VRDisplay();
+
+MouseKeyboardVRDisplay.prototype.getImmediatePose = function() {
+  this.orientation_.setFromEulerYXZ(this.phi_, this.theta_, 0);
+
+  this.orientationOut_[0] = this.orientation_.x;
+  this.orientationOut_[1] = this.orientation_.y;
+  this.orientationOut_[2] = this.orientation_.z;
+  this.orientationOut_[3] = this.orientation_.w;
+
+  return {
+    position: null,
+    orientation: this.orientationOut_,
+    linearVelocity: null,
+    linearAcceleration: null,
+    angularVelocity: null,
+    angularAcceleration: null
+  };
+};
+
+MouseKeyboardVRDisplay.prototype.onKeyDown_ = function(e) {
+  // Track WASD and arrow keys.
+  if (e.keyCode == 38) { // Up key.
+    this.animatePhi_(this.phi_ + KEY_SPEED);
+  } else if (e.keyCode == 39) { // Right key.
+    this.animateTheta_(this.theta_ - KEY_SPEED);
+  } else if (e.keyCode == 40) { // Down key.
+    this.animatePhi_(this.phi_ - KEY_SPEED);
+  } else if (e.keyCode == 37) { // Left key.
+    this.animateTheta_(this.theta_ + KEY_SPEED);
+  }
+};
+
+MouseKeyboardVRDisplay.prototype.animateTheta_ = function(targetAngle) {
+  this.animateKeyTransitions_('theta_', targetAngle);
+};
+
+MouseKeyboardVRDisplay.prototype.animatePhi_ = function(targetAngle) {
+  // Prevent looking too far up or down.
+  targetAngle = Util.clamp(targetAngle, -Math.PI/2, Math.PI/2);
+  this.animateKeyTransitions_('phi_', targetAngle);
+};
+
+/**
+ * Start an animation to transition an angle from one value to another.
+ */
+MouseKeyboardVRDisplay.prototype.animateKeyTransitions_ = function(angleName, targetAngle) {
+  // If an animation is currently running, cancel it.
+  if (this.angleAnimation_) {
+    cancelAnimationFrame(this.angleAnimation_);
+  }
+  var startAngle = this[angleName];
+  var startTime = new Date();
+  // Set up an interval timer to perform the animation.
+  this.angleAnimation_ = requestAnimationFrame(function animate() {
+    // Once we're finished the animation, we're done.
+    var elapsed = new Date() - startTime;
+    if (elapsed >= KEY_ANIMATION_DURATION) {
+      this[angleName] = targetAngle;
+      cancelAnimationFrame(this.angleAnimation_);
+      return;
+    }
+    // loop with requestAnimationFrame
+    this.angleAnimation_ = requestAnimationFrame(animate.bind(this))
+    // Linearly interpolate the angle some amount.
+    var percent = elapsed / KEY_ANIMATION_DURATION;
+    this[angleName] = startAngle + (targetAngle - startAngle) * percent;
+  }.bind(this));
+};
+
+MouseKeyboardVRDisplay.prototype.onMouseDown_ = function(e) {
+  this.rotateStart_.set(e.clientX, e.clientY);
+  this.isDragging_ = true;
+};
+
+// Very similar to https://gist.github.com/mrflix/8351020
+MouseKeyboardVRDisplay.prototype.onMouseMove_ = function(e) {
+  if (!this.isDragging_ && !this.isPointerLocked_()) {
+    return;
+  }
+  // Support pointer lock API.
+  if (this.isPointerLocked_()) {
+    var movementX = e.movementX || e.mozMovementX || 0;
+    var movementY = e.movementY || e.mozMovementY || 0;
+    this.rotateEnd_.set(this.rotateStart_.x - movementX, this.rotateStart_.y - movementY);
+  } else {
+    this.rotateEnd_.set(e.clientX, e.clientY);
+  }
+  // Calculate how much we moved in mouse space.
+  this.rotateDelta_.subVectors(this.rotateEnd_, this.rotateStart_);
+  this.rotateStart_.copy(this.rotateEnd_);
+
+  // Keep track of the cumulative euler angles.
+  this.phi_ += 2 * Math.PI * this.rotateDelta_.y / screen.height * MOUSE_SPEED_Y;
+  this.theta_ += 2 * Math.PI * this.rotateDelta_.x / screen.width * MOUSE_SPEED_X;
+
+  // Prevent looking too far up or down.
+  this.phi_ = Util.clamp(this.phi_, -Math.PI/2, Math.PI/2);
+};
+
+MouseKeyboardVRDisplay.prototype.onMouseUp_ = function(e) {
+  this.isDragging_ = false;
+};
+
+MouseKeyboardVRDisplay.prototype.isPointerLocked_ = function() {
+  var el = document.pointerLockElement || document.mozPointerLockElement ||
+      document.webkitPointerLockElement;
+  return el !== undefined;
+};
+
+MouseKeyboardVRDisplay.prototype.resetPose = function() {
+  this.phi_ = 0;
+  this.theta_ = 0;
+};
+
+module.exports = MouseKeyboardVRDisplay;
+
+},{"./base.js":2,"./math-util.js":14,"./util.js":22}],16:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var Util = _dereq_('./util.js');
+
+function RotateInstructions() {
+  this.loadIcon_();
+
+  var overlay = document.createElement('div');
+  var s = overlay.style;
+  s.position = 'fixed';
+  s.top = 0;
+  s.right = 0;
+  s.bottom = 0;
+  s.left = 0;
+  s.backgroundColor = 'gray';
+  s.fontFamily = 'sans-serif';
+  // Force this to be above the fullscreen canvas, which is at zIndex: 999999.
+  s.zIndex = 1000000;
+
+  var img = document.createElement('img');
+  img.src = this.icon;
+  var s = img.style;
+  s.marginLeft = '25%';
+  s.marginTop = '25%';
+  s.width = '50%';
+  overlay.appendChild(img);
+
+  var text = document.createElement('div');
+  var s = text.style;
+  s.textAlign = 'center';
+  s.fontSize = '16px';
+  s.lineHeight = '24px';
+  s.margin = '24px 25%';
+  s.width = '50%';
+  text.innerHTML = 'Place your phone into your Cardboard viewer.';
+  overlay.appendChild(text);
+
+  var snackbar = document.createElement('div');
+  var s = snackbar.style;
+  s.backgroundColor = '#CFD8DC';
+  s.position = 'fixed';
+  s.bottom = 0;
+  s.width = '100%';
+  s.height = '48px';
+  s.padding = '14px 24px';
+  s.boxSizing = 'border-box';
+  s.color = '#656A6B';
+  overlay.appendChild(snackbar);
+
+  var snackbarText = document.createElement('div');
+  snackbarText.style.float = 'left';
+  snackbarText.innerHTML = 'No Cardboard viewer?';
+
+  var snackbarButton = document.createElement('a');
+  snackbarButton.href = 'https://www.google.com/get/cardboard/get-cardboard/';
+  snackbarButton.innerHTML = 'get one';
+  snackbarButton.target = '_blank';
+  var s = snackbarButton.style;
+  s.float = 'right';
+  s.fontWeight = 600;
+  s.textTransform = 'uppercase';
+  s.borderLeft = '1px solid gray';
+  s.paddingLeft = '24px';
+  s.textDecoration = 'none';
+  s.color = '#656A6B';
+
+  snackbar.appendChild(snackbarText);
+  snackbar.appendChild(snackbarButton);
+
+  this.overlay = overlay;
+  this.text = text;
+
+  this.hide();
+}
+
+RotateInstructions.prototype.show = function(parent) {
+  if (!parent && !this.overlay.parentElement) {
+    document.body.appendChild(this.overlay);
+  } else if (parent) {
+    if (this.overlay.parentElement && this.overlay.parentElement != parent)
+      this.overlay.parentElement.removeChild(this.overlay);
+
+    parent.appendChild(this.overlay);
+  }
+
+  this.overlay.style.display = 'block';
+
+  var img = this.overlay.querySelector('img');
+  var s = img.style;
+
+  if (Util.isLandscapeMode()) {
+    s.width = '20%';
+    s.marginLeft = '40%';
+    s.marginTop = '3%';
+  } else {
+    s.width = '50%';
+    s.marginLeft = '25%';
+    s.marginTop = '25%';
+  }
+};
+
+RotateInstructions.prototype.hide = function() {
+  this.overlay.style.display = 'none';
+};
+
+RotateInstructions.prototype.showTemporarily = function(ms, parent) {
+  this.show(parent);
+  this.timer = setTimeout(this.hide.bind(this), ms);
+};
+
+RotateInstructions.prototype.disableShowTemporarily = function() {
+  clearTimeout(this.timer);
+};
+
+RotateInstructions.prototype.update = function() {
+  this.disableShowTemporarily();
+  // In portrait VR mode, tell the user to rotate to landscape. Otherwise, hide
+  // the instructions.
+  if (!Util.isLandscapeMode() && Util.isMobile()) {
+    this.show();
+  } else {
+    this.hide();
+  }
+};
+
+RotateInstructions.prototype.loadIcon_ = function() {
+  // Encoded asset_src/rotate-instructions.svg
+  this.icon = Util.base64('image/svg+xml', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjE5OHB4IiBoZWlnaHQ9IjI0MHB4IiB2aWV3Qm94PSIwIDAgMTk4IDI0MCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpza2V0Y2g9Imh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaC9ucyI+CiAgICA8IS0tIEdlbmVyYXRvcjogU2tldGNoIDMuMy4zICgxMjA4MSkgLSBodHRwOi8vd3d3LmJvaGVtaWFuY29kaW5nLmNvbS9za2V0Y2ggLS0+CiAgICA8dGl0bGU+dHJhbnNpdGlvbjwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggU2tldGNoLjwvZGVzYz4KICAgIDxkZWZzPjwvZGVmcz4KICAgIDxnIGlkPSJQYWdlLTEiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHNrZXRjaDp0eXBlPSJNU1BhZ2UiPgogICAgICAgIDxnIGlkPSJ0cmFuc2l0aW9uIiBza2V0Y2g6dHlwZT0iTVNBcnRib2FyZEdyb3VwIj4KICAgICAgICAgICAgPGcgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTQtKy1JbXBvcnRlZC1MYXllcnMtQ29weS0rLUltcG9ydGVkLUxheWVycy1Db3B5LTItQ29weSIgc2tldGNoOnR5cGU9Ik1TTGF5ZXJHcm91cCI+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHktNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsIDEwNy4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjYyNSwyLjUyNyBDMTQ5LjYyNSwyLjUyNyAxNTUuODA1LDYuMDk2IDE1Ni4zNjIsNi40MTggTDE1Ni4zNjIsNy4zMDQgQzE1Ni4zNjIsNy40ODEgMTU2LjM3NSw3LjY2NCAxNTYuNCw3Ljg1MyBDMTU2LjQxLDcuOTM0IDE1Ni40Miw4LjAxNSAxNTYuNDI3LDguMDk1IEMxNTYuNTY3LDkuNTEgMTU3LjQwMSwxMS4wOTMgMTU4LjUzMiwxMi4wOTQgTDE2NC4yNTIsMTcuMTU2IEwxNjQuMzMzLDE3LjA2NiBDMTY0LjMzMywxNy4wNjYgMTY4LjcxNSwxNC41MzYgMTY5LjU2OCwxNC4wNDIgQzE3MS4wMjUsMTQuODgzIDE5NS41MzgsMjkuMDM1IDE5NS41MzgsMjkuMDM1IEwxOTUuNTM4LDgzLjAzNiBDMTk1LjUzOCw4My44MDcgMTk1LjE1Miw4NC4yNTMgMTk0LjU5LDg0LjI1MyBDMTk0LjM1Nyw4NC4yNTMgMTk0LjA5NSw4NC4xNzcgMTkzLjgxOCw4NC4wMTcgTDE2OS44NTEsNzAuMTc5IEwxNjkuODM3LDcwLjIwMyBMMTQyLjUxNSw4NS45NzggTDE0MS42NjUsODQuNjU1IEMxMzYuOTM0LDgzLjEyNiAxMzEuOTE3LDgxLjkxNSAxMjYuNzE0LDgxLjA0NSBDMTI2LjcwOSw4MS4wNiAxMjYuNzA3LDgxLjA2OSAxMjYuNzA3LDgxLjA2OSBMMTIxLjY0LDk4LjAzIEwxMTMuNzQ5LDEwMi41ODYgTDExMy43MTIsMTAyLjUyMyBMMTEzLjcxMiwxMzAuMTEzIEMxMTMuNzEyLDEzMC44ODUgMTEzLjMyNiwxMzEuMzMgMTEyLjc2NCwxMzEuMzMgQzExMi41MzIsMTMxLjMzIDExMi4yNjksMTMxLjI1NCAxMTEuOTkyLDEzMS4wOTQgTDY5LjUxOSwxMDYuNTcyIEM2OC41NjksMTA2LjAyMyA2Ny43OTksMTA0LjY5NSA2Ny43OTksMTAzLjYwNSBMNjcuNzk5LDEwMi41NyBMNjcuNzc4LDEwMi42MTcgQzY3LjI3LDEwMi4zOTMgNjYuNjQ4LDEwMi4yNDkgNjUuOTYyLDEwMi4yMTggQzY1Ljg3NSwxMDIuMjE0IDY1Ljc4OCwxMDIuMjEyIDY1LjcwMSwxMDIuMjEyIEM2NS42MDYsMTAyLjIxMiA2NS41MTEsMTAyLjIxNSA2NS40MTYsMTAyLjIxOSBDNjUuMTk1LDEwMi4yMjkgNjQuOTc0LDEwMi4yMzUgNjQuNzU0LDEwMi4yMzUgQzY0LjMzMSwxMDIuMjM1IDYzLjkxMSwxMDIuMjE2IDYzLjQ5OCwxMDIuMTc4IEM2MS44NDMsMTAyLjAyNSA2MC4yOTgsMTAxLjU3OCA1OS4wOTQsMTAwLjg4MiBMMTIuNTE4LDczLjk5MiBMMTIuNTIzLDc0LjAwNCBMMi4yNDUsNTUuMjU0IEMxLjI0NCw1My40MjcgMi4wMDQsNTEuMDM4IDMuOTQzLDQ5LjkxOCBMNTkuOTU0LDE3LjU3MyBDNjAuNjI2LDE3LjE4NSA2MS4zNSwxNy4wMDEgNjIuMDUzLDE3LjAwMSBDNjMuMzc5LDE3LjAwMSA2NC42MjUsMTcuNjYgNjUuMjgsMTguODU0IEw2NS4yODUsMTguODUxIEw2NS41MTIsMTkuMjY0IEw2NS41MDYsMTkuMjY4IEM2NS45MDksMjAuMDAzIDY2LjQwNSwyMC42OCA2Ni45ODMsMjEuMjg2IEw2Ny4yNiwyMS41NTYgQzY5LjE3NCwyMy40MDYgNzEuNzI4LDI0LjM1NyA3NC4zNzMsMjQuMzU3IEM3Ni4zMjIsMjQuMzU3IDc4LjMyMSwyMy44NCA4MC4xNDgsMjIuNzg1IEM4MC4xNjEsMjIuNzg1IDg3LjQ2NywxOC41NjYgODcuNDY3LDE4LjU2NiBDODguMTM5LDE4LjE3OCA4OC44NjMsMTcuOTk0IDg5LjU2NiwxNy45OTQgQzkwLjg5MiwxNy45OTQgOTIuMTM4LDE4LjY1MiA5Mi43OTIsMTkuODQ3IEw5Ni4wNDIsMjUuNzc1IEw5Ni4wNjQsMjUuNzU3IEwxMDIuODQ5LDI5LjY3NCBMMTAyLjc0NCwyOS40OTIgTDE0OS42MjUsMi41MjcgTTE0OS42MjUsMC44OTIgQzE0OS4zNDMsMC44OTIgMTQ5LjA2MiwwLjk2NSAxNDguODEsMS4xMSBMMTAyLjY0MSwyNy42NjYgTDk3LjIzMSwyNC41NDIgTDk0LjIyNiwxOS4wNjEgQzkzLjMxMywxNy4zOTQgOTEuNTI3LDE2LjM1OSA4OS41NjYsMTYuMzU4IEM4OC41NTUsMTYuMzU4IDg3LjU0NiwxNi42MzIgODYuNjQ5LDE3LjE1IEM4My44NzgsMTguNzUgNzkuNjg3LDIxLjE2OSA3OS4zNzQsMjEuMzQ1IEM3OS4zNTksMjEuMzUzIDc5LjM0NSwyMS4zNjEgNzkuMzMsMjEuMzY5IEM3Ny43OTgsMjIuMjU0IDc2LjA4NCwyMi43MjIgNzQuMzczLDIyLjcyMiBDNzIuMDgxLDIyLjcyMiA2OS45NTksMjEuODkgNjguMzk3LDIwLjM4IEw2OC4xNDUsMjAuMTM1IEM2Ny43MDYsMTkuNjcyIDY3LjMyMywxOS4xNTYgNjcuMDA2LDE4LjYwMSBDNjYuOTg4LDE4LjU1OSA2Ni45NjgsMTguNTE5IDY2Ljk0NiwxOC40NzkgTDY2LjcxOSwxOC4wNjUgQzY2LjY5LDE4LjAxMiA2Ni42NTgsMTcuOTYgNjYuNjI0LDE3LjkxMSBDNjUuNjg2LDE2LjMzNyA2My45NTEsMTUuMzY2IDYyLjA1MywxNS4zNjYgQzYxLjA0MiwxNS4zNjYgNjAuMDMzLDE1LjY0IDU5LjEzNiwxNi4xNTggTDMuMTI1LDQ4LjUwMiBDMC40MjYsNTAuMDYxIC0wLjYxMyw1My40NDIgMC44MTEsNTYuMDQgTDExLjA4OSw3NC43OSBDMTEuMjY2LDc1LjExMyAxMS41MzcsNzUuMzUzIDExLjg1LDc1LjQ5NCBMNTguMjc2LDEwMi4yOTggQzU5LjY3OSwxMDMuMTA4IDYxLjQzMywxMDMuNjMgNjMuMzQ4LDEwMy44MDYgQzYzLjgxMiwxMDMuODQ4IDY0LjI4NSwxMDMuODcgNjQuNzU0LDEwMy44NyBDNjUsMTAzLjg3IDY1LjI0OSwxMDMuODY0IDY1LjQ5NCwxMDMuODUyIEM2NS41NjMsMTAzLjg0OSA2NS42MzIsMTAzLjg0NyA2NS43MDEsMTAzLjg0NyBDNjUuNzY0LDEwMy44NDcgNjUuODI4LDEwMy44NDkgNjUuODksMTAzLjg1MiBDNjUuOTg2LDEwMy44NTYgNjYuMDgsMTAzLjg2MyA2Ni4xNzMsMTAzLjg3NCBDNjYuMjgyLDEwNS40NjcgNjcuMzMyLDEwNy4xOTcgNjguNzAyLDEwNy45ODggTDExMS4xNzQsMTMyLjUxIEMxMTEuNjk4LDEzMi44MTIgMTEyLjIzMiwxMzIuOTY1IDExMi43NjQsMTMyLjk2NSBDMTE0LjI2MSwxMzIuOTY1IDExNS4zNDcsMTMxLjc2NSAxMTUuMzQ3LDEzMC4xMTMgTDExNS4zNDcsMTAzLjU1MSBMMTIyLjQ1OCw5OS40NDYgQzEyMi44MTksOTkuMjM3IDEyMy4wODcsOTguODk4IDEyMy4yMDcsOTguNDk4IEwxMjcuODY1LDgyLjkwNSBDMTMyLjI3OSw4My43MDIgMTM2LjU1Nyw4NC43NTMgMTQwLjYwNyw4Ni4wMzMgTDE0MS4xNCw4Ni44NjIgQzE0MS40NTEsODcuMzQ2IDE0MS45NzcsODcuNjEzIDE0Mi41MTYsODcuNjEzIEMxNDIuNzk0LDg3LjYxMyAxNDMuMDc2LDg3LjU0MiAxNDMuMzMzLDg3LjM5MyBMMTY5Ljg2NSw3Mi4wNzYgTDE5Myw4NS40MzMgQzE5My41MjMsODUuNzM1IDE5NC4wNTgsODUuODg4IDE5NC41OSw4NS44ODggQzE5Ni4wODcsODUuODg4IDE5Ny4xNzMsODQuNjg5IDE5Ny4xNzMsODMuMDM2IEwxOTcuMTczLDI5LjAzNSBDMTk3LjE3MywyOC40NTEgMTk2Ljg2MSwyNy45MTEgMTk2LjM1NSwyNy42MTkgQzE5Ni4zNTUsMjcuNjE5IDE3MS44NDMsMTMuNDY3IDE3MC4zODUsMTIuNjI2IEMxNzAuMTMyLDEyLjQ4IDE2OS44NSwxMi40MDcgMTY5LjU2OCwxMi40MDcgQzE2OS4yODUsMTIuNDA3IDE2OS4wMDIsMTIuNDgxIDE2OC43NDksMTIuNjI3IEMxNjguMTQzLDEyLjk3OCAxNjUuNzU2LDE0LjM1NyAxNjQuNDI0LDE1LjEyNSBMMTU5LjYxNSwxMC44NyBDMTU4Ljc5NiwxMC4xNDUgMTU4LjE1NCw4LjkzNyAxNTguMDU0LDcuOTM0IEMxNTguMDQ1LDcuODM3IDE1OC4wMzQsNy43MzkgMTU4LjAyMSw3LjY0IEMxNTguMDA1LDcuNTIzIDE1Ny45OTgsNy40MSAxNTcuOTk4LDcuMzA0IEwxNTcuOTk4LDYuNDE4IEMxNTcuOTk4LDUuODM0IDE1Ny42ODYsNS4yOTUgMTU3LjE4MSw1LjAwMiBDMTU2LjYyNCw0LjY4IDE1MC40NDIsMS4xMTEgMTUwLjQ0MiwxLjExMSBDMTUwLjE4OSwwLjk2NSAxNDkuOTA3LDAuODkyIDE0OS42MjUsMC44OTIiIGlkPSJGaWxsLTEiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTYuMDI3LDI1LjYzNiBMMTQyLjYwMyw1Mi41MjcgQzE0My44MDcsNTMuMjIyIDE0NC41ODIsNTQuMTE0IDE0NC44NDUsNTUuMDY4IEwxNDQuODM1LDU1LjA3NSBMNjMuNDYxLDEwMi4wNTcgTDYzLjQ2LDEwMi4wNTcgQzYxLjgwNiwxMDEuOTA1IDYwLjI2MSwxMDEuNDU3IDU5LjA1NywxMDAuNzYyIEwxMi40ODEsNzMuODcxIEw5Ni4wMjcsMjUuNjM2IiBpZD0iRmlsbC0yIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYzLjQ2MSwxMDIuMTc0IEM2My40NTMsMTAyLjE3NCA2My40NDYsMTAyLjE3NCA2My40MzksMTAyLjE3MiBDNjEuNzQ2LDEwMi4wMTYgNjAuMjExLDEwMS41NjMgNTguOTk4LDEwMC44NjMgTDEyLjQyMiw3My45NzMgQzEyLjM4Niw3My45NTIgMTIuMzY0LDczLjkxNCAxMi4zNjQsNzMuODcxIEMxMi4zNjQsNzMuODMgMTIuMzg2LDczLjc5MSAxMi40MjIsNzMuNzcgTDk1Ljk2OCwyNS41MzUgQzk2LjAwNCwyNS41MTQgOTYuMDQ5LDI1LjUxNCA5Ni4wODUsMjUuNTM1IEwxNDIuNjYxLDUyLjQyNiBDMTQzLjg4OCw1My4xMzQgMTQ0LjY4Miw1NC4wMzggMTQ0Ljk1Nyw1NS4wMzcgQzE0NC45Nyw1NS4wODMgMTQ0Ljk1Myw1NS4xMzMgMTQ0LjkxNSw1NS4xNjEgQzE0NC45MTEsNTUuMTY1IDE0NC44OTgsNTUuMTc0IDE0NC44OTQsNTUuMTc3IEw2My41MTksMTAyLjE1OCBDNjMuNTAxLDEwMi4xNjkgNjMuNDgxLDEwMi4xNzQgNjMuNDYxLDEwMi4xNzQgTDYzLjQ2MSwxMDIuMTc0IFogTTEyLjcxNCw3My44NzEgTDU5LjExNSwxMDAuNjYxIEM2MC4yOTMsMTAxLjM0MSA2MS43ODYsMTAxLjc4MiA2My40MzUsMTAxLjkzNyBMMTQ0LjcwNyw1NS4wMTUgQzE0NC40MjgsNTQuMTA4IDE0My42ODIsNTMuMjg1IDE0Mi41NDQsNTIuNjI4IEw5Ni4wMjcsMjUuNzcxIEwxMi43MTQsNzMuODcxIEwxMi43MTQsNzMuODcxIFoiIGlkPSJGaWxsLTMiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ4LjMyNyw1OC40NzEgQzE0OC4xNDUsNTguNDggMTQ3Ljk2Miw1OC40OCAxNDcuNzgxLDU4LjQ3MiBDMTQ1Ljg4Nyw1OC4zODkgMTQ0LjQ3OSw1Ny40MzQgMTQ0LjYzNiw1Ni4zNCBDMTQ0LjY4OSw1NS45NjcgMTQ0LjY2NCw1NS41OTcgMTQ0LjU2NCw1NS4yMzUgTDYzLjQ2MSwxMDIuMDU3IEM2NC4wODksMTAyLjExNSA2NC43MzMsMTAyLjEzIDY1LjM3OSwxMDIuMDk5IEM2NS41NjEsMTAyLjA5IDY1Ljc0MywxMDIuMDkgNjUuOTI1LDEwMi4wOTggQzY3LjgxOSwxMDIuMTgxIDY5LjIyNywxMDMuMTM2IDY5LjA3LDEwNC4yMyBMMTQ4LjMyNyw1OC40NzEiIGlkPSJGaWxsLTQiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNjkuMDcsMTA0LjM0NyBDNjkuMDQ4LDEwNC4zNDcgNjkuMDI1LDEwNC4zNCA2OS4wMDUsMTA0LjMyNyBDNjguOTY4LDEwNC4zMDEgNjguOTQ4LDEwNC4yNTcgNjguOTU1LDEwNC4yMTMgQzY5LDEwMy44OTYgNjguODk4LDEwMy41NzYgNjguNjU4LDEwMy4yODggQzY4LjE1MywxMDIuNjc4IDY3LjEwMywxMDIuMjY2IDY1LjkyLDEwMi4yMTQgQzY1Ljc0MiwxMDIuMjA2IDY1LjU2MywxMDIuMjA3IDY1LjM4NSwxMDIuMjE1IEM2NC43NDIsMTAyLjI0NiA2NC4wODcsMTAyLjIzMiA2My40NSwxMDIuMTc0IEM2My4zOTksMTAyLjE2OSA2My4zNTgsMTAyLjEzMiA2My4zNDcsMTAyLjA4MiBDNjMuMzM2LDEwMi4wMzMgNjMuMzU4LDEwMS45ODEgNjMuNDAyLDEwMS45NTYgTDE0NC41MDYsNTUuMTM0IEMxNDQuNTM3LDU1LjExNiAxNDQuNTc1LDU1LjExMyAxNDQuNjA5LDU1LjEyNyBDMTQ0LjY0Miw1NS4xNDEgMTQ0LjY2OCw1NS4xNyAxNDQuNjc3LDU1LjIwNCBDMTQ0Ljc4MSw1NS41ODUgMTQ0LjgwNiw1NS45NzIgMTQ0Ljc1MSw1Ni4zNTcgQzE0NC43MDYsNTYuNjczIDE0NC44MDgsNTYuOTk0IDE0NS4wNDcsNTcuMjgyIEMxNDUuNTUzLDU3Ljg5MiAxNDYuNjAyLDU4LjMwMyAxNDcuNzg2LDU4LjM1NSBDMTQ3Ljk2NCw1OC4zNjMgMTQ4LjE0Myw1OC4zNjMgMTQ4LjMyMSw1OC4zNTQgQzE0OC4zNzcsNTguMzUyIDE0OC40MjQsNTguMzg3IDE0OC40MzksNTguNDM4IEMxNDguNDU0LDU4LjQ5IDE0OC40MzIsNTguNTQ1IDE0OC4zODUsNTguNTcyIEw2OS4xMjksMTA0LjMzMSBDNjkuMTExLDEwNC4zNDIgNjkuMDksMTA0LjM0NyA2OS4wNywxMDQuMzQ3IEw2OS4wNywxMDQuMzQ3IFogTTY1LjY2NSwxMDEuOTc1IEM2NS43NTQsMTAxLjk3NSA2NS44NDIsMTAxLjk3NyA2NS45MywxMDEuOTgxIEM2Ny4xOTYsMTAyLjAzNyA2OC4yODMsMTAyLjQ2OSA2OC44MzgsMTAzLjEzOSBDNjkuMDY1LDEwMy40MTMgNjkuMTg4LDEwMy43MTQgNjkuMTk4LDEwNC4wMjEgTDE0Ny44ODMsNTguNTkyIEMxNDcuODQ3LDU4LjU5MiAxNDcuODExLDU4LjU5MSAxNDcuNzc2LDU4LjU4OSBDMTQ2LjUwOSw1OC41MzMgMTQ1LjQyMiw1OC4xIDE0NC44NjcsNTcuNDMxIEMxNDQuNTg1LDU3LjA5MSAxNDQuNDY1LDU2LjcwNyAxNDQuNTIsNTYuMzI0IEMxNDQuNTYzLDU2LjAyMSAxNDQuNTUyLDU1LjcxNiAxNDQuNDg4LDU1LjQxNCBMNjMuODQ2LDEwMS45NyBDNjQuMzUzLDEwMi4wMDIgNjQuODY3LDEwMi4wMDYgNjUuMzc0LDEwMS45ODIgQzY1LjQ3MSwxMDEuOTc3IDY1LjU2OCwxMDEuOTc1IDY1LjY2NSwxMDEuOTc1IEw2NS42NjUsMTAxLjk3NSBaIiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTIuMjA4LDU1LjEzNCBDMS4yMDcsNTMuMzA3IDEuOTY3LDUwLjkxNyAzLjkwNiw0OS43OTcgTDU5LjkxNywxNy40NTMgQzYxLjg1NiwxNi4zMzMgNjQuMjQxLDE2LjkwNyA2NS4yNDMsMTguNzM0IEw2NS40NzUsMTkuMTQ0IEM2NS44NzIsMTkuODgyIDY2LjM2OCwyMC41NiA2Ni45NDUsMjEuMTY1IEw2Ny4yMjMsMjEuNDM1IEM3MC41NDgsMjQuNjQ5IDc1LjgwNiwyNS4xNTEgODAuMTExLDIyLjY2NSBMODcuNDMsMTguNDQ1IEM4OS4zNywxNy4zMjYgOTEuNzU0LDE3Ljg5OSA5Mi43NTUsMTkuNzI3IEw5Ni4wMDUsMjUuNjU1IEwxMi40ODYsNzMuODg0IEwyLjIwOCw1NS4xMzQgWiIgaWQ9IkZpbGwtNiIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMi40ODYsNzQuMDAxIEMxMi40NzYsNzQuMDAxIDEyLjQ2NSw3My45OTkgMTIuNDU1LDczLjk5NiBDMTIuNDI0LDczLjk4OCAxMi4zOTksNzMuOTY3IDEyLjM4NCw3My45NCBMMi4xMDYsNTUuMTkgQzEuMDc1LDUzLjMxIDEuODU3LDUwLjg0NSAzLjg0OCw0OS42OTYgTDU5Ljg1OCwxNy4zNTIgQzYwLjUyNSwxNi45NjcgNjEuMjcxLDE2Ljc2NCA2Mi4wMTYsMTYuNzY0IEM2My40MzEsMTYuNzY0IDY0LjY2NiwxNy40NjYgNjUuMzI3LDE4LjY0NiBDNjUuMzM3LDE4LjY1NCA2NS4zNDUsMTguNjYzIDY1LjM1MSwxOC42NzQgTDY1LjU3OCwxOS4wODggQzY1LjU4NCwxOS4xIDY1LjU4OSwxOS4xMTIgNjUuNTkxLDE5LjEyNiBDNjUuOTg1LDE5LjgzOCA2Ni40NjksMjAuNDk3IDY3LjAzLDIxLjA4NSBMNjcuMzA1LDIxLjM1MSBDNjkuMTUxLDIzLjEzNyA3MS42NDksMjQuMTIgNzQuMzM2LDI0LjEyIEM3Ni4zMTMsMjQuMTIgNzguMjksMjMuNTgyIDgwLjA1MywyMi41NjMgQzgwLjA2NCwyMi41NTcgODAuMDc2LDIyLjU1MyA4MC4wODgsMjIuNTUgTDg3LjM3MiwxOC4zNDQgQzg4LjAzOCwxNy45NTkgODguNzg0LDE3Ljc1NiA4OS41MjksMTcuNzU2IEM5MC45NTYsMTcuNzU2IDkyLjIwMSwxOC40NzIgOTIuODU4LDE5LjY3IEw5Ni4xMDcsMjUuNTk5IEM5Ni4xMzgsMjUuNjU0IDk2LjExOCwyNS43MjQgOTYuMDYzLDI1Ljc1NiBMMTIuNTQ1LDczLjk4NSBDMTIuNTI2LDczLjk5NiAxMi41MDYsNzQuMDAxIDEyLjQ4Niw3NC4wMDEgTDEyLjQ4Niw3NC4wMDEgWiBNNjIuMDE2LDE2Ljk5NyBDNjEuMzEyLDE2Ljk5NyA2MC42MDYsMTcuMTkgNTkuOTc1LDE3LjU1NCBMMy45NjUsNDkuODk5IEMyLjA4Myw1MC45ODUgMS4zNDEsNTMuMzA4IDIuMzEsNTUuMDc4IEwxMi41MzEsNzMuNzIzIEw5NS44NDgsMjUuNjExIEw5Mi42NTMsMTkuNzgyIEM5Mi4wMzgsMTguNjYgOTAuODcsMTcuOTkgODkuNTI5LDE3Ljk5IEM4OC44MjUsMTcuOTkgODguMTE5LDE4LjE4MiA4Ny40ODksMTguNTQ3IEw4MC4xNzIsMjIuNzcyIEM4MC4xNjEsMjIuNzc4IDgwLjE0OSwyMi43ODIgODAuMTM3LDIyLjc4NSBDNzguMzQ2LDIzLjgxMSA3Ni4zNDEsMjQuMzU0IDc0LjMzNiwyNC4zNTQgQzcxLjU4OCwyNC4zNTQgNjkuMDMzLDIzLjM0NyA2Ny4xNDIsMjEuNTE5IEw2Ni44NjQsMjEuMjQ5IEM2Ni4yNzcsMjAuNjM0IDY1Ljc3NCwxOS45NDcgNjUuMzY3LDE5LjIwMyBDNjUuMzYsMTkuMTkyIDY1LjM1NiwxOS4xNzkgNjUuMzU0LDE5LjE2NiBMNjUuMTYzLDE4LjgxOSBDNjUuMTU0LDE4LjgxMSA2NS4xNDYsMTguODAxIDY1LjE0LDE4Ljc5IEM2NC41MjUsMTcuNjY3IDYzLjM1NywxNi45OTcgNjIuMDE2LDE2Ljk5NyBMNjIuMDE2LDE2Ljk5NyBaIiBpZD0iRmlsbC03IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTQyLjQzNCw0OC44MDggTDQyLjQzNCw0OC44MDggQzM5LjkyNCw0OC44MDcgMzcuNzM3LDQ3LjU1IDM2LjU4Miw0NS40NDMgQzM0Ljc3MSw0Mi4xMzkgMzYuMTQ0LDM3LjgwOSAzOS42NDEsMzUuNzg5IEw1MS45MzIsMjguNjkxIEM1My4xMDMsMjguMDE1IDU0LjQxMywyNy42NTggNTUuNzIxLDI3LjY1OCBDNTguMjMxLDI3LjY1OCA2MC40MTgsMjguOTE2IDYxLjU3MywzMS4wMjMgQzYzLjM4NCwzNC4zMjcgNjIuMDEyLDM4LjY1NyA1OC41MTQsNDAuNjc3IEw0Ni4yMjMsNDcuNzc1IEM0NS4wNTMsNDguNDUgNDMuNzQyLDQ4LjgwOCA0Mi40MzQsNDguODA4IEw0Mi40MzQsNDguODA4IFogTTU1LjcyMSwyOC4xMjUgQzU0LjQ5NSwyOC4xMjUgNTMuMjY1LDI4LjQ2MSA1Mi4xNjYsMjkuMDk2IEwzOS44NzUsMzYuMTk0IEMzNi41OTYsMzguMDg3IDM1LjMwMiw0Mi4xMzYgMzYuOTkyLDQ1LjIxOCBDMzguMDYzLDQ3LjE3MyA0MC4wOTgsNDguMzQgNDIuNDM0LDQ4LjM0IEM0My42NjEsNDguMzQgNDQuODksNDguMDA1IDQ1Ljk5LDQ3LjM3IEw1OC4yODEsNDAuMjcyIEM2MS41NiwzOC4zNzkgNjIuODUzLDM0LjMzIDYxLjE2NCwzMS4yNDggQzYwLjA5MiwyOS4yOTMgNTguMDU4LDI4LjEyNSA1NS43MjEsMjguMTI1IEw1NS43MjEsMjguMTI1IFoiIGlkPSJGaWxsLTgiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjU4OCwyLjQwNyBDMTQ5LjU4OCwyLjQwNyAxNTUuNzY4LDUuOTc1IDE1Ni4zMjUsNi4yOTcgTDE1Ni4zMjUsNy4xODQgQzE1Ni4zMjUsNy4zNiAxNTYuMzM4LDcuNTQ0IDE1Ni4zNjIsNy43MzMgQzE1Ni4zNzMsNy44MTQgMTU2LjM4Miw3Ljg5NCAxNTYuMzksNy45NzUgQzE1Ni41Myw5LjM5IDE1Ny4zNjMsMTAuOTczIDE1OC40OTUsMTEuOTc0IEwxNjUuODkxLDE4LjUxOSBDMTY2LjA2OCwxOC42NzUgMTY2LjI0OSwxOC44MTQgMTY2LjQzMiwxOC45MzQgQzE2OC4wMTEsMTkuOTc0IDE2OS4zODIsMTkuNCAxNjkuNDk0LDE3LjY1MiBDMTY5LjU0MywxNi44NjggMTY5LjU1MSwxNi4wNTcgMTY5LjUxNywxNS4yMjMgTDE2OS41MTQsMTUuMDYzIEwxNjkuNTE0LDEzLjkxMiBDMTcwLjc4LDE0LjY0MiAxOTUuNTAxLDI4LjkxNSAxOTUuNTAxLDI4LjkxNSBMMTk1LjUwMSw4Mi45MTUgQzE5NS41MDEsODQuMDA1IDE5NC43MzEsODQuNDQ1IDE5My43ODEsODMuODk3IEwxNTEuMzA4LDU5LjM3NCBDMTUwLjM1OCw1OC44MjYgMTQ5LjU4OCw1Ny40OTcgMTQ5LjU4OCw1Ni40MDggTDE0OS41ODgsMjIuMzc1IiBpZD0iRmlsbC05IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE5NC41NTMsODQuMjUgQzE5NC4yOTYsODQuMjUgMTk0LjAxMyw4NC4xNjUgMTkzLjcyMiw4My45OTcgTDE1MS4yNSw1OS40NzYgQzE1MC4yNjksNTguOTA5IDE0OS40NzEsNTcuNTMzIDE0OS40NzEsNTYuNDA4IEwxNDkuNDcxLDIyLjM3NSBMMTQ5LjcwNSwyMi4zNzUgTDE0OS43MDUsNTYuNDA4IEMxNDkuNzA1LDU3LjQ1OSAxNTAuNDUsNTguNzQ0IDE1MS4zNjYsNTkuMjc0IEwxOTMuODM5LDgzLjc5NSBDMTk0LjI2Myw4NC4wNCAxOTQuNjU1LDg0LjA4MyAxOTQuOTQyLDgzLjkxNyBDMTk1LjIyNyw4My43NTMgMTk1LjM4NCw4My4zOTcgMTk1LjM4NCw4Mi45MTUgTDE5NS4zODQsMjguOTgyIEMxOTQuMTAyLDI4LjI0MiAxNzIuMTA0LDE1LjU0MiAxNjkuNjMxLDE0LjExNCBMMTY5LjYzNCwxNS4yMiBDMTY5LjY2OCwxNi4wNTIgMTY5LjY2LDE2Ljg3NCAxNjkuNjEsMTcuNjU5IEMxNjkuNTU2LDE4LjUwMyAxNjkuMjE0LDE5LjEyMyAxNjguNjQ3LDE5LjQwNSBDMTY4LjAyOCwxOS43MTQgMTY3LjE5NywxOS41NzggMTY2LjM2NywxOS4wMzIgQzE2Ni4xODEsMTguOTA5IDE2NS45OTUsMTguNzY2IDE2NS44MTQsMTguNjA2IEwxNTguNDE3LDEyLjA2MiBDMTU3LjI1OSwxMS4wMzYgMTU2LjQxOCw5LjQzNyAxNTYuMjc0LDcuOTg2IEMxNTYuMjY2LDcuOTA3IDE1Ni4yNTcsNy44MjcgMTU2LjI0Nyw3Ljc0OCBDMTU2LjIyMSw3LjU1NSAxNTYuMjA5LDcuMzY1IDE1Ni4yMDksNy4xODQgTDE1Ni4yMDksNi4zNjQgQzE1NS4zNzUsNS44ODMgMTQ5LjUyOSwyLjUwOCAxNDkuNTI5LDIuNTA4IEwxNDkuNjQ2LDIuMzA2IEMxNDkuNjQ2LDIuMzA2IDE1NS44MjcsNS44NzQgMTU2LjM4NCw2LjE5NiBMMTU2LjQ0Miw2LjIzIEwxNTYuNDQyLDcuMTg0IEMxNTYuNDQyLDcuMzU1IDE1Ni40NTQsNy41MzUgMTU2LjQ3OCw3LjcxNyBDMTU2LjQ4OSw3LjggMTU2LjQ5OSw3Ljg4MiAxNTYuNTA3LDcuOTYzIEMxNTYuNjQ1LDkuMzU4IDE1Ny40NTUsMTAuODk4IDE1OC41NzIsMTEuODg2IEwxNjUuOTY5LDE4LjQzMSBDMTY2LjE0MiwxOC41ODQgMTY2LjMxOSwxOC43MiAxNjYuNDk2LDE4LjgzNyBDMTY3LjI1NCwxOS4zMzYgMTY4LDE5LjQ2NyAxNjguNTQzLDE5LjE5NiBDMTY5LjAzMywxOC45NTMgMTY5LjMyOSwxOC40MDEgMTY5LjM3NywxNy42NDUgQzE2OS40MjcsMTYuODY3IDE2OS40MzQsMTYuMDU0IDE2OS40MDEsMTUuMjI4IEwxNjkuMzk3LDE1LjA2NSBMMTY5LjM5NywxMy43MSBMMTY5LjU3MiwxMy44MSBDMTcwLjgzOSwxNC41NDEgMTk1LjU1OSwyOC44MTQgMTk1LjU1OSwyOC44MTQgTDE5NS42MTgsMjguODQ3IEwxOTUuNjE4LDgyLjkxNSBDMTk1LjYxOCw4My40ODQgMTk1LjQyLDgzLjkxMSAxOTUuMDU5LDg0LjExOSBDMTk0LjkwOCw4NC4yMDYgMTk0LjczNyw4NC4yNSAxOTQuNTUzLDg0LjI1IiBpZD0iRmlsbC0xMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDUuNjg1LDU2LjE2MSBMMTY5LjgsNzAuMDgzIEwxNDMuODIyLDg1LjA4MSBMMTQyLjM2LDg0Ljc3NCBDMTM1LjgyNiw4Mi42MDQgMTI4LjczMiw4MS4wNDYgMTIxLjM0MSw4MC4xNTggQzExNi45NzYsNzkuNjM0IDExMi42NzgsODEuMjU0IDExMS43NDMsODMuNzc4IEMxMTEuNTA2LDg0LjQxNCAxMTEuNTAzLDg1LjA3MSAxMTEuNzMyLDg1LjcwNiBDMTEzLjI3LDg5Ljk3MyAxMTUuOTY4LDk0LjA2OSAxMTkuNzI3LDk3Ljg0MSBMMTIwLjI1OSw5OC42ODYgQzEyMC4yNiw5OC42ODUgOTQuMjgyLDExMy42ODMgOTQuMjgyLDExMy42ODMgTDcwLjE2Nyw5OS43NjEgTDE0NS42ODUsNTYuMTYxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik05NC4yODIsMTEzLjgxOCBMOTQuMjIzLDExMy43ODUgTDY5LjkzMyw5OS43NjEgTDcwLjEwOCw5OS42NiBMMTQ1LjY4NSw1Ni4wMjYgTDE0NS43NDMsNTYuMDU5IEwxNzAuMDMzLDcwLjA4MyBMMTQzLjg0Miw4NS4yMDUgTDE0My43OTcsODUuMTk1IEMxNDMuNzcyLDg1LjE5IDE0Mi4zMzYsODQuODg4IDE0Mi4zMzYsODQuODg4IEMxMzUuNzg3LDgyLjcxNCAxMjguNzIzLDgxLjE2MyAxMjEuMzI3LDgwLjI3NCBDMTIwLjc4OCw4MC4yMDkgMTIwLjIzNiw4MC4xNzcgMTE5LjY4OSw4MC4xNzcgQzExNS45MzEsODAuMTc3IDExMi42MzUsODEuNzA4IDExMS44NTIsODMuODE5IEMxMTEuNjI0LDg0LjQzMiAxMTEuNjIxLDg1LjA1MyAxMTEuODQyLDg1LjY2NyBDMTEzLjM3Nyw4OS45MjUgMTE2LjA1OCw5My45OTMgMTE5LjgxLDk3Ljc1OCBMMTE5LjgyNiw5Ny43NzkgTDEyMC4zNTIsOTguNjE0IEMxMjAuMzU0LDk4LjYxNyAxMjAuMzU2LDk4LjYyIDEyMC4zNTgsOTguNjI0IEwxMjAuNDIyLDk4LjcyNiBMMTIwLjMxNyw5OC43ODcgQzEyMC4yNjQsOTguODE4IDk0LjU5OSwxMTMuNjM1IDk0LjM0LDExMy43ODUgTDk0LjI4MiwxMTMuODE4IEw5NC4yODIsMTEzLjgxOCBaIE03MC40MDEsOTkuNzYxIEw5NC4yODIsMTEzLjU0OSBMMTE5LjA4NCw5OS4yMjkgQzExOS42Myw5OC45MTQgMTE5LjkzLDk4Ljc0IDEyMC4xMDEsOTguNjU0IEwxMTkuNjM1LDk3LjkxNCBDMTE1Ljg2NCw5NC4xMjcgMTEzLjE2OCw5MC4wMzMgMTExLjYyMiw4NS43NDYgQzExMS4zODIsODUuMDc5IDExMS4zODYsODQuNDA0IDExMS42MzMsODMuNzM4IEMxMTIuNDQ4LDgxLjUzOSAxMTUuODM2LDc5Ljk0MyAxMTkuNjg5LDc5Ljk0MyBDMTIwLjI0Niw3OS45NDMgMTIwLjgwNiw3OS45NzYgMTIxLjM1NSw4MC4wNDIgQzEyOC43NjcsODAuOTMzIDEzNS44NDYsODIuNDg3IDE0Mi4zOTYsODQuNjYzIEMxNDMuMjMyLDg0LjgzOCAxNDMuNjExLDg0LjkxNyAxNDMuNzg2LDg0Ljk2NyBMMTY5LjU2Niw3MC4wODMgTDE0NS42ODUsNTYuMjk1IEw3MC40MDEsOTkuNzYxIEw3MC40MDEsOTkuNzYxIFoiIGlkPSJGaWxsLTEyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2Ny4yMywxOC45NzkgTDE2Ny4yMyw2OS44NSBMMTM5LjkwOSw4NS42MjMgTDEzMy40NDgsNzEuNDU2IEMxMzIuNTM4LDY5LjQ2IDEzMC4wMiw2OS43MTggMTI3LjgyNCw3Mi4wMyBDMTI2Ljc2OSw3My4xNCAxMjUuOTMxLDc0LjU4NSAxMjUuNDk0LDc2LjA0OCBMMTE5LjAzNCw5Ny42NzYgTDkxLjcxMiwxMTMuNDUgTDkxLjcxMiw2Mi41NzkgTDE2Ny4yMywxOC45NzkiIGlkPSJGaWxsLTEzIiBmaWxsPSIjRkZGRkZGIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTkxLjcxMiwxMTMuNTY3IEM5MS42OTIsMTEzLjU2NyA5MS42NzIsMTEzLjU2MSA5MS42NTMsMTEzLjU1MSBDOTEuNjE4LDExMy41MyA5MS41OTUsMTEzLjQ5MiA5MS41OTUsMTEzLjQ1IEw5MS41OTUsNjIuNTc5IEM5MS41OTUsNjIuNTM3IDkxLjYxOCw2Mi40OTkgOTEuNjUzLDYyLjQ3OCBMMTY3LjE3MiwxOC44NzggQzE2Ny4yMDgsMTguODU3IDE2Ny4yNTIsMTguODU3IDE2Ny4yODgsMTguODc4IEMxNjcuMzI0LDE4Ljg5OSAxNjcuMzQ3LDE4LjkzNyAxNjcuMzQ3LDE4Ljk3OSBMMTY3LjM0Nyw2OS44NSBDMTY3LjM0Nyw2OS44OTEgMTY3LjMyNCw2OS45MyAxNjcuMjg4LDY5Ljk1IEwxMzkuOTY3LDg1LjcyNSBDMTM5LjkzOSw4NS43NDEgMTM5LjkwNSw4NS43NDUgMTM5Ljg3Myw4NS43MzUgQzEzOS44NDIsODUuNzI1IDEzOS44MTYsODUuNzAyIDEzOS44MDIsODUuNjcyIEwxMzMuMzQyLDcxLjUwNCBDMTMyLjk2Nyw3MC42ODIgMTMyLjI4LDcwLjIyOSAxMzEuNDA4LDcwLjIyOSBDMTMwLjMxOSw3MC4yMjkgMTI5LjA0NCw3MC45MTUgMTI3LjkwOCw3Mi4xMSBDMTI2Ljg3NCw3My4yIDEyNi4wMzQsNzQuNjQ3IDEyNS42MDYsNzYuMDgyIEwxMTkuMTQ2LDk3LjcwOSBDMTE5LjEzNyw5Ny43MzggMTE5LjExOCw5Ny43NjIgMTE5LjA5Miw5Ny43NzcgTDkxLjc3LDExMy41NTEgQzkxLjc1MiwxMTMuNTYxIDkxLjczMiwxMTMuNTY3IDkxLjcxMiwxMTMuNTY3IEw5MS43MTIsMTEzLjU2NyBaIE05MS44MjksNjIuNjQ3IEw5MS44MjksMTEzLjI0OCBMMTE4LjkzNSw5Ny41OTggTDEyNS4zODIsNzYuMDE1IEMxMjUuODI3LDc0LjUyNSAxMjYuNjY0LDczLjA4MSAxMjcuNzM5LDcxLjk1IEMxMjguOTE5LDcwLjcwOCAxMzAuMjU2LDY5Ljk5NiAxMzEuNDA4LDY5Ljk5NiBDMTMyLjM3Nyw2OS45OTYgMTMzLjEzOSw3MC40OTcgMTMzLjU1NCw3MS40MDcgTDEzOS45NjEsODUuNDU4IEwxNjcuMTEzLDY5Ljc4MiBMMTY3LjExMywxOS4xODEgTDkxLjgyOSw2Mi42NDcgTDkxLjgyOSw2Mi42NDcgWiIgaWQ9IkZpbGwtMTQiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTY4LjU0MywxOS4yMTMgTDE2OC41NDMsNzAuMDgzIEwxNDEuMjIxLDg1Ljg1NyBMMTM0Ljc2MSw3MS42ODkgQzEzMy44NTEsNjkuNjk0IDEzMS4zMzMsNjkuOTUxIDEyOS4xMzcsNzIuMjYzIEMxMjguMDgyLDczLjM3NCAxMjcuMjQ0LDc0LjgxOSAxMjYuODA3LDc2LjI4MiBMMTIwLjM0Niw5Ny45MDkgTDkzLjAyNSwxMTMuNjgzIEw5My4wMjUsNjIuODEzIEwxNjguNTQzLDE5LjIxMyIgaWQ9IkZpbGwtMTUiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTMuMDI1LDExMy44IEM5My4wMDUsMTEzLjggOTIuOTg0LDExMy43OTUgOTIuOTY2LDExMy43ODUgQzkyLjkzMSwxMTMuNzY0IDkyLjkwOCwxMTMuNzI1IDkyLjkwOCwxMTMuNjg0IEw5Mi45MDgsNjIuODEzIEM5Mi45MDgsNjIuNzcxIDkyLjkzMSw2Mi43MzMgOTIuOTY2LDYyLjcxMiBMMTY4LjQ4NCwxOS4xMTIgQzE2OC41MiwxOS4wOSAxNjguNTY1LDE5LjA5IDE2OC42MDEsMTkuMTEyIEMxNjguNjM3LDE5LjEzMiAxNjguNjYsMTkuMTcxIDE2OC42NiwxOS4yMTIgTDE2OC42Niw3MC4wODMgQzE2OC42Niw3MC4xMjUgMTY4LjYzNyw3MC4xNjQgMTY4LjYwMSw3MC4xODQgTDE0MS4yOCw4NS45NTggQzE0MS4yNTEsODUuOTc1IDE0MS4yMTcsODUuOTc5IDE0MS4xODYsODUuOTY4IEMxNDEuMTU0LDg1Ljk1OCAxNDEuMTI5LDg1LjkzNiAxNDEuMTE1LDg1LjkwNiBMMTM0LjY1NSw3MS43MzggQzEzNC4yOCw3MC45MTUgMTMzLjU5Myw3MC40NjMgMTMyLjcyLDcwLjQ2MyBDMTMxLjYzMiw3MC40NjMgMTMwLjM1Nyw3MS4xNDggMTI5LjIyMSw3Mi4zNDQgQzEyOC4xODYsNzMuNDMzIDEyNy4zNDcsNzQuODgxIDEyNi45MTksNzYuMzE1IEwxMjAuNDU4LDk3Ljk0MyBDMTIwLjQ1LDk3Ljk3MiAxMjAuNDMxLDk3Ljk5NiAxMjAuNDA1LDk4LjAxIEw5My4wODMsMTEzLjc4NSBDOTMuMDY1LDExMy43OTUgOTMuMDQ1LDExMy44IDkzLjAyNSwxMTMuOCBMOTMuMDI1LDExMy44IFogTTkzLjE0Miw2Mi44ODEgTDkzLjE0MiwxMTMuNDgxIEwxMjAuMjQ4LDk3LjgzMiBMMTI2LjY5NSw3Ni4yNDggQzEyNy4xNCw3NC43NTggMTI3Ljk3Nyw3My4zMTUgMTI5LjA1Miw3Mi4xODMgQzEzMC4yMzEsNzAuOTQyIDEzMS41NjgsNzAuMjI5IDEzMi43Miw3MC4yMjkgQzEzMy42ODksNzAuMjI5IDEzNC40NTIsNzAuNzMxIDEzNC44NjcsNzEuNjQxIEwxNDEuMjc0LDg1LjY5MiBMMTY4LjQyNiw3MC4wMTYgTDE2OC40MjYsMTkuNDE1IEw5My4xNDIsNjIuODgxIEw5My4xNDIsNjIuODgxIFoiIGlkPSJGaWxsLTE2IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS44LDcwLjA4MyBMMTQyLjQ3OCw4NS44NTcgTDEzNi4wMTgsNzEuNjg5IEMxMzUuMTA4LDY5LjY5NCAxMzIuNTksNjkuOTUxIDEzMC4zOTMsNzIuMjYzIEMxMjkuMzM5LDczLjM3NCAxMjguNSw3NC44MTkgMTI4LjA2NCw3Ni4yODIgTDEyMS42MDMsOTcuOTA5IEw5NC4yODIsMTEzLjY4MyBMOTQuMjgyLDYyLjgxMyBMMTY5LjgsMTkuMjEzIEwxNjkuOCw3MC4wODMgWiIgaWQ9IkZpbGwtMTciIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTQuMjgyLDExMy45MTcgQzk0LjI0MSwxMTMuOTE3IDk0LjIwMSwxMTMuOTA3IDk0LjE2NSwxMTMuODg2IEM5NC4wOTMsMTEzLjg0NSA5NC4wNDgsMTEzLjc2NyA5NC4wNDgsMTEzLjY4NCBMOTQuMDQ4LDYyLjgxMyBDOTQuMDQ4LDYyLjczIDk0LjA5Myw2Mi42NTIgOTQuMTY1LDYyLjYxMSBMMTY5LjY4MywxOS4wMSBDMTY5Ljc1NSwxOC45NjkgMTY5Ljg0NCwxOC45NjkgMTY5LjkxNywxOS4wMSBDMTY5Ljk4OSwxOS4wNTIgMTcwLjAzMywxOS4xMjkgMTcwLjAzMywxOS4yMTIgTDE3MC4wMzMsNzAuMDgzIEMxNzAuMDMzLDcwLjE2NiAxNjkuOTg5LDcwLjI0NCAxNjkuOTE3LDcwLjI4NSBMMTQyLjU5NSw4Ni4wNiBDMTQyLjUzOCw4Ni4wOTIgMTQyLjQ2OSw4Ni4xIDE0Mi40MDcsODYuMDggQzE0Mi4zNDQsODYuMDYgMTQyLjI5Myw4Ni4wMTQgMTQyLjI2Niw4NS45NTQgTDEzNS44MDUsNzEuNzg2IEMxMzUuNDQ1LDcwLjk5NyAxMzQuODEzLDcwLjU4IDEzMy45NzcsNzAuNTggQzEzMi45MjEsNzAuNTggMTMxLjY3Niw3MS4yNTIgMTMwLjU2Miw3Mi40MjQgQzEyOS41NCw3My41MDEgMTI4LjcxMSw3NC45MzEgMTI4LjI4Nyw3Ni4zNDggTDEyMS44MjcsOTcuOTc2IEMxMjEuODEsOTguMDM0IDEyMS43NzEsOTguMDgyIDEyMS43Miw5OC4xMTIgTDk0LjM5OCwxMTMuODg2IEM5NC4zNjIsMTEzLjkwNyA5NC4zMjIsMTEzLjkxNyA5NC4yODIsMTEzLjkxNyBMOTQuMjgyLDExMy45MTcgWiBNOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDExMy4yNzkgTDEyMS40MDYsOTcuNzU0IEwxMjcuODQsNzYuMjE1IEMxMjguMjksNzQuNzA4IDEyOS4xMzcsNzMuMjQ3IDEzMC4yMjQsNzIuMTAzIEMxMzEuNDI1LDcwLjgzOCAxMzIuNzkzLDcwLjExMiAxMzMuOTc3LDcwLjExMiBDMTM0Ljk5NSw3MC4xMTIgMTM1Ljc5NSw3MC42MzggMTM2LjIzLDcxLjU5MiBMMTQyLjU4NCw4NS41MjYgTDE2OS41NjYsNjkuOTQ4IEwxNjkuNTY2LDE5LjYxNyBMOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDYyLjk0OCBaIiBpZD0iRmlsbC0xOCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMDkuODk0LDkyLjk0MyBMMTA5Ljg5NCw5Mi45NDMgQzEwOC4xMiw5Mi45NDMgMTA2LjY1Myw5Mi4yMTggMTA1LjY1LDkwLjgyMyBDMTA1LjU4Myw5MC43MzEgMTA1LjU5Myw5MC42MSAxMDUuNjczLDkwLjUyOSBDMTA1Ljc1Myw5MC40NDggMTA1Ljg4LDkwLjQ0IDEwNS45NzQsOTAuNTA2IEMxMDYuNzU0LDkxLjA1MyAxMDcuNjc5LDkxLjMzMyAxMDguNzI0LDkxLjMzMyBDMTEwLjA0Nyw5MS4zMzMgMTExLjQ3OCw5MC44OTQgMTEyLjk4LDkwLjAyNyBDMTE4LjI5MSw4Ni45NiAxMjIuNjExLDc5LjUwOSAxMjIuNjExLDczLjQxNiBDMTIyLjYxMSw3MS40ODkgMTIyLjE2OSw2OS44NTYgMTIxLjMzMyw2OC42OTIgQzEyMS4yNjYsNjguNiAxMjEuMjc2LDY4LjQ3MyAxMjEuMzU2LDY4LjM5MiBDMTIxLjQzNiw2OC4zMTEgMTIxLjU2Myw2OC4yOTkgMTIxLjY1Niw2OC4zNjUgQzEyMy4zMjcsNjkuNTM3IDEyNC4yNDcsNzEuNzQ2IDEyNC4yNDcsNzQuNTg0IEMxMjQuMjQ3LDgwLjgyNiAxMTkuODIxLDg4LjQ0NyAxMTQuMzgyLDkxLjU4NyBDMTEyLjgwOCw5Mi40OTUgMTExLjI5OCw5Mi45NDMgMTA5Ljg5NCw5Mi45NDMgTDEwOS44OTQsOTIuOTQzIFogTTEwNi45MjUsOTEuNDAxIEMxMDcuNzM4LDkyLjA1MiAxMDguNzQ1LDkyLjI3OCAxMDkuODkzLDkyLjI3OCBMMTA5Ljg5NCw5Mi4yNzggQzExMS4yMTUsOTIuMjc4IDExMi42NDcsOTEuOTUxIDExNC4xNDgsOTEuMDg0IEMxMTkuNDU5LDg4LjAxNyAxMjMuNzgsODAuNjIxIDEyMy43OCw3NC41MjggQzEyMy43OCw3Mi41NDkgMTIzLjMxNyw3MC45MjkgMTIyLjQ1NCw2OS43NjcgQzEyMi44NjUsNzAuODAyIDEyMy4wNzksNzIuMDQyIDEyMy4wNzksNzMuNDAyIEMxMjMuMDc5LDc5LjY0NSAxMTguNjUzLDg3LjI4NSAxMTMuMjE0LDkwLjQyNSBDMTExLjY0LDkxLjMzNCAxMTAuMTMsOTEuNzQyIDEwOC43MjQsOTEuNzQyIEMxMDguMDgzLDkxLjc0MiAxMDcuNDgxLDkxLjU5MyAxMDYuOTI1LDkxLjQwMSBMMTA2LjkyNSw5MS40MDEgWiIgaWQ9IkZpbGwtMTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjA5Nyw5MC4yMyBDMTE4LjQ4MSw4Ny4xMjIgMTIyLjg0NSw3OS41OTQgMTIyLjg0NSw3My40MTYgQzEyMi44NDUsNzEuMzY1IDEyMi4zNjIsNjkuNzI0IDEyMS41MjIsNjguNTU2IEMxMTkuNzM4LDY3LjMwNCAxMTcuMTQ4LDY3LjM2MiAxMTQuMjY1LDY5LjAyNiBDMTA4Ljg4MSw3Mi4xMzQgMTA0LjUxNyw3OS42NjIgMTA0LjUxNyw4NS44NCBDMTA0LjUxNyw4Ny44OTEgMTA1LDg5LjUzMiAxMDUuODQsOTAuNyBDMTA3LjYyNCw5MS45NTIgMTEwLjIxNCw5MS44OTQgMTEzLjA5Nyw5MC4yMyIgaWQ9IkZpbGwtMjAiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTA4LjcyNCw5MS42MTQgTDEwOC43MjQsOTEuNjE0IEMxMDcuNTgyLDkxLjYxNCAxMDYuNTY2LDkxLjQwMSAxMDUuNzA1LDkwLjc5NyBDMTA1LjY4NCw5MC43ODMgMTA1LjY2NSw5MC44MTEgMTA1LjY1LDkwLjc5IEMxMDQuNzU2LDg5LjU0NiAxMDQuMjgzLDg3Ljg0MiAxMDQuMjgzLDg1LjgxNyBDMTA0LjI4Myw3OS41NzUgMTA4LjcwOSw3MS45NTMgMTE0LjE0OCw2OC44MTIgQzExNS43MjIsNjcuOTA0IDExNy4yMzIsNjcuNDQ5IDExOC42MzgsNjcuNDQ5IEMxMTkuNzgsNjcuNDQ5IDEyMC43OTYsNjcuNzU4IDEyMS42NTYsNjguMzYyIEMxMjEuNjc4LDY4LjM3NyAxMjEuNjk3LDY4LjM5NyAxMjEuNzEyLDY4LjQxOCBDMTIyLjYwNiw2OS42NjIgMTIzLjA3OSw3MS4zOSAxMjMuMDc5LDczLjQxNSBDMTIzLjA3OSw3OS42NTggMTE4LjY1Myw4Ny4xOTggMTEzLjIxNCw5MC4zMzggQzExMS42NCw5MS4yNDcgMTEwLjEzLDkxLjYxNCAxMDguNzI0LDkxLjYxNCBMMTA4LjcyNCw5MS42MTQgWiBNMTA2LjAwNiw5MC41MDUgQzEwNi43OCw5MS4wMzcgMTA3LjY5NCw5MS4yODEgMTA4LjcyNCw5MS4yODEgQzExMC4wNDcsOTEuMjgxIDExMS40NzgsOTAuODY4IDExMi45OCw5MC4wMDEgQzExOC4yOTEsODYuOTM1IDEyMi42MTEsNzkuNDk2IDEyMi42MTEsNzMuNDAzIEMxMjIuNjExLDcxLjQ5NCAxMjIuMTc3LDY5Ljg4IDEyMS4zNTYsNjguNzE4IEMxMjAuNTgyLDY4LjE4NSAxMTkuNjY4LDY3LjkxOSAxMTguNjM4LDY3LjkxOSBDMTE3LjMxNSw2Ny45MTkgMTE1Ljg4Myw2OC4zNiAxMTQuMzgyLDY5LjIyNyBDMTA5LjA3MSw3Mi4yOTMgMTA0Ljc1MSw3OS43MzMgMTA0Ljc1MSw4NS44MjYgQzEwNC43NTEsODcuNzM1IDEwNS4xODUsODkuMzQzIDEwNi4wMDYsOTAuNTA1IEwxMDYuMDA2LDkwLjUwNSBaIiBpZD0iRmlsbC0yMSIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDkuMzE4LDcuMjYyIEwxMzkuMzM0LDE2LjE0IEwxNTUuMjI3LDI3LjE3MSBMMTYwLjgxNiwyMS4wNTkgTDE0OS4zMTgsNy4yNjIiIGlkPSJGaWxsLTIyIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS42NzYsMTMuODQgTDE1OS45MjgsMTkuNDY3IEMxNTYuMjg2LDIxLjU3IDE1MC40LDIxLjU4IDE0Ni43ODEsMTkuNDkxIEMxNDMuMTYxLDE3LjQwMiAxNDMuMTgsMTQuMDAzIDE0Ni44MjIsMTEuOSBMMTU2LjMxNyw2LjI5MiBMMTQ5LjU4OCwyLjQwNyBMNjcuNzUyLDQ5LjQ3OCBMMTEzLjY3NSw3NS45OTIgTDExNi43NTYsNzQuMjEzIEMxMTcuMzg3LDczLjg0OCAxMTcuNjI1LDczLjMxNSAxMTcuMzc0LDcyLjgyMyBDMTE1LjAxNyw2OC4xOTEgMTE0Ljc4MSw2My4yNzcgMTE2LjY5MSw1OC41NjEgQzEyMi4zMjksNDQuNjQxIDE0MS4yLDMzLjc0NiAxNjUuMzA5LDMwLjQ5MSBDMTczLjQ3OCwyOS4zODggMTgxLjk4OSwyOS41MjQgMTkwLjAxMywzMC44ODUgQzE5MC44NjUsMzEuMDMgMTkxLjc4OSwzMC44OTMgMTkyLjQyLDMwLjUyOCBMMTk1LjUwMSwyOC43NSBMMTY5LjY3NiwxMy44NCIgaWQ9IkZpbGwtMjMiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3Ni40NTkgQzExMy41OTQsNzYuNDU5IDExMy41MTQsNzYuNDM4IDExMy40NDIsNzYuMzk3IEw2Ny41MTgsNDkuODgyIEM2Ny4zNzQsNDkuNzk5IDY3LjI4NCw0OS42NDUgNjcuMjg1LDQ5LjQ3OCBDNjcuMjg1LDQ5LjMxMSA2Ny4zNzQsNDkuMTU3IDY3LjUxOSw0OS4wNzMgTDE0OS4zNTUsMi4wMDIgQzE0OS40OTksMS45MTkgMTQ5LjY3NywxLjkxOSAxNDkuODIxLDIuMDAyIEwxNTYuNTUsNS44ODcgQzE1Ni43NzQsNi4wMTcgMTU2Ljg1LDYuMzAyIDE1Ni43MjIsNi41MjYgQzE1Ni41OTIsNi43NDkgMTU2LjMwNyw2LjgyNiAxNTYuMDgzLDYuNjk2IEwxNDkuNTg3LDIuOTQ2IEw2OC42ODcsNDkuNDc5IEwxMTMuNjc1LDc1LjQ1MiBMMTE2LjUyMyw3My44MDggQzExNi43MTUsNzMuNjk3IDExNy4xNDMsNzMuMzk5IDExNi45NTgsNzMuMDM1IEMxMTQuNTQyLDY4LjI4NyAxMTQuMyw2My4yMjEgMTE2LjI1OCw1OC4zODUgQzExOS4wNjQsNTEuNDU4IDEyNS4xNDMsNDUuMTQzIDEzMy44NCw0MC4xMjIgQzE0Mi40OTcsMzUuMTI0IDE1My4zNTgsMzEuNjMzIDE2NS4yNDcsMzAuMDI4IEMxNzMuNDQ1LDI4LjkyMSAxODIuMDM3LDI5LjA1OCAxOTAuMDkxLDMwLjQyNSBDMTkwLjgzLDMwLjU1IDE5MS42NTIsMzAuNDMyIDE5Mi4xODYsMzAuMTI0IEwxOTQuNTY3LDI4Ljc1IEwxNjkuNDQyLDE0LjI0NCBDMTY5LjIxOSwxNC4xMTUgMTY5LjE0MiwxMy44MjkgMTY5LjI3MSwxMy42MDYgQzE2OS40LDEzLjM4MiAxNjkuNjg1LDEzLjMwNiAxNjkuOTA5LDEzLjQzNSBMMTk1LjczNCwyOC4zNDUgQzE5NS44NzksMjguNDI4IDE5NS45NjgsMjguNTgzIDE5NS45NjgsMjguNzUgQzE5NS45NjgsMjguOTE2IDE5NS44NzksMjkuMDcxIDE5NS43MzQsMjkuMTU0IEwxOTIuNjUzLDMwLjkzMyBDMTkxLjkzMiwzMS4zNSAxOTAuODksMzEuNTA4IDE4OS45MzUsMzEuMzQ2IEMxODEuOTcyLDI5Ljk5NSAxNzMuNDc4LDI5Ljg2IDE2NS4zNzIsMzAuOTU0IEMxNTMuNjAyLDMyLjU0MyAxNDIuODYsMzUuOTkzIDEzNC4zMDcsNDAuOTMxIEMxMjUuNzkzLDQ1Ljg0NyAxMTkuODUxLDUyLjAwNCAxMTcuMTI0LDU4LjczNiBDMTE1LjI3LDYzLjMxNCAxMTUuNTAxLDY4LjExMiAxMTcuNzksNzIuNjExIEMxMTguMTYsNzMuMzM2IDExNy44NDUsNzQuMTI0IDExNi45OSw3NC42MTcgTDExMy45MDksNzYuMzk3IEMxMTMuODM2LDc2LjQzOCAxMTMuNzU2LDc2LjQ1OSAxMTMuNjc1LDc2LjQ1OSIgaWQ9IkZpbGwtMjQiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUzLjMxNiwyMS4yNzkgQzE1MC45MDMsMjEuMjc5IDE0OC40OTUsMjAuNzUxIDE0Ni42NjQsMTkuNjkzIEMxNDQuODQ2LDE4LjY0NCAxNDMuODQ0LDE3LjIzMiAxNDMuODQ0LDE1LjcxOCBDMTQzLjg0NCwxNC4xOTEgMTQ0Ljg2LDEyLjc2MyAxNDYuNzA1LDExLjY5OCBMMTU2LjE5OCw2LjA5MSBDMTU2LjMwOSw2LjAyNSAxNTYuNDUyLDYuMDYyIDE1Ni41MTgsNi4xNzMgQzE1Ni41ODMsNi4yODQgMTU2LjU0Nyw2LjQyNyAxNTYuNDM2LDYuNDkzIEwxNDYuOTQsMTIuMTAyIEMxNDUuMjQ0LDEzLjA4MSAxNDQuMzEyLDE0LjM2NSAxNDQuMzEyLDE1LjcxOCBDMTQ0LjMxMiwxNy4wNTggMTQ1LjIzLDE4LjMyNiAxNDYuODk3LDE5LjI4OSBDMTUwLjQ0NiwyMS4zMzggMTU2LjI0LDIxLjMyNyAxNTkuODExLDE5LjI2NSBMMTY5LjU1OSwxMy42MzcgQzE2OS42NywxMy41NzMgMTY5LjgxMywxMy42MTEgMTY5Ljg3OCwxMy43MjMgQzE2OS45NDMsMTMuODM0IDE2OS45MDQsMTMuOTc3IDE2OS43OTMsMTQuMDQyIEwxNjAuMDQ1LDE5LjY3IEMxNTguMTg3LDIwLjc0MiAxNTUuNzQ5LDIxLjI3OSAxNTMuMzE2LDIxLjI3OSIgaWQ9IkZpbGwtMjUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3NS45OTIgTDY3Ljc2Miw0OS40ODQiIGlkPSJGaWxsLTI2IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMy42NzUsNzYuMzQyIEMxMTMuNjE1LDc2LjM0MiAxMTMuNTU1LDc2LjMyNyAxMTMuNSw3Ni4yOTUgTDY3LjU4Nyw0OS43ODcgQzY3LjQxOSw0OS42OSA2Ny4zNjIsNDkuNDc2IDY3LjQ1OSw0OS4zMDkgQzY3LjU1Niw0OS4xNDEgNjcuNzcsNDkuMDgzIDY3LjkzNyw0OS4xOCBMMTEzLjg1LDc1LjY4OCBDMTE0LjAxOCw3NS43ODUgMTE0LjA3NSw3NiAxMTMuOTc4LDc2LjE2NyBDMTEzLjkxNCw3Ni4yNzkgMTEzLjc5Niw3Ni4zNDIgMTEzLjY3NSw3Ni4zNDIiIGlkPSJGaWxsLTI3IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY3Ljc2Miw0OS40ODQgTDY3Ljc2MiwxMDMuNDg1IEM2Ny43NjIsMTA0LjU3NSA2OC41MzIsMTA1LjkwMyA2OS40ODIsMTA2LjQ1MiBMMTExLjk1NSwxMzAuOTczIEMxMTIuOTA1LDEzMS41MjIgMTEzLjY3NSwxMzEuMDgzIDExMy42NzUsMTI5Ljk5MyBMMTEzLjY3NSw3NS45OTIiIGlkPSJGaWxsLTI4IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMi43MjcsMTMxLjU2MSBDMTEyLjQzLDEzMS41NjEgMTEyLjEwNywxMzEuNDY2IDExMS43OCwxMzEuMjc2IEw2OS4zMDcsMTA2Ljc1NSBDNjguMjQ0LDEwNi4xNDIgNjcuNDEyLDEwNC43MDUgNjcuNDEyLDEwMy40ODUgTDY3LjQxMiw0OS40ODQgQzY3LjQxMiw0OS4yOSA2Ny41NjksNDkuMTM0IDY3Ljc2Miw0OS4xMzQgQzY3Ljk1Niw0OS4xMzQgNjguMTEzLDQ5LjI5IDY4LjExMyw0OS40ODQgTDY4LjExMywxMDMuNDg1IEM2OC4xMTMsMTA0LjQ0NSA2OC44MiwxMDUuNjY1IDY5LjY1NywxMDYuMTQ4IEwxMTIuMTMsMTMwLjY3IEMxMTIuNDc0LDEzMC44NjggMTEyLjc5MSwxMzAuOTEzIDExMywxMzAuNzkyIEMxMTMuMjA2LDEzMC42NzMgMTEzLjMyNSwxMzAuMzgxIDExMy4zMjUsMTI5Ljk5MyBMMTEzLjMyNSw3NS45OTIgQzExMy4zMjUsNzUuNzk4IDExMy40ODIsNzUuNjQxIDExMy42NzUsNzUuNjQxIEMxMTMuODY5LDc1LjY0MSAxMTQuMDI1LDc1Ljc5OCAxMTQuMDI1LDc1Ljk5MiBMMTE0LjAyNSwxMjkuOTkzIEMxMTQuMDI1LDEzMC42NDggMTEzLjc4NiwxMzEuMTQ3IDExMy4zNSwxMzEuMzk5IEMxMTMuMTYyLDEzMS41MDcgMTEyLjk1MiwxMzEuNTYxIDExMi43MjcsMTMxLjU2MSIgaWQ9IkZpbGwtMjkiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEyLjg2LDQwLjUxMiBDMTEyLjg2LDQwLjUxMiAxMTIuODYsNDAuNTEyIDExMi44NTksNDAuNTEyIEMxMTAuNTQxLDQwLjUxMiAxMDguMzYsMzkuOTkgMTA2LjcxNywzOS4wNDEgQzEwNS4wMTIsMzguMDU3IDEwNC4wNzQsMzYuNzI2IDEwNC4wNzQsMzUuMjkyIEMxMDQuMDc0LDMzLjg0NyAxMDUuMDI2LDMyLjUwMSAxMDYuNzU0LDMxLjUwNCBMMTE4Ljc5NSwyNC41NTEgQzEyMC40NjMsMjMuNTg5IDEyMi42NjksMjMuMDU4IDEyNS4wMDcsMjMuMDU4IEMxMjcuMzI1LDIzLjA1OCAxMjkuNTA2LDIzLjU4MSAxMzEuMTUsMjQuNTMgQzEzMi44NTQsMjUuNTE0IDEzMy43OTMsMjYuODQ1IDEzMy43OTMsMjguMjc4IEMxMzMuNzkzLDI5LjcyNCAxMzIuODQxLDMxLjA2OSAxMzEuMTEzLDMyLjA2NyBMMTE5LjA3MSwzOS4wMTkgQzExNy40MDMsMzkuOTgyIDExNS4xOTcsNDAuNTEyIDExMi44Niw0MC41MTIgTDExMi44Niw0MC41MTIgWiBNMTI1LjAwNywyMy43NTkgQzEyMi43OSwyMy43NTkgMTIwLjcwOSwyNC4yNTYgMTE5LjE0NiwyNS4xNTggTDEwNy4xMDQsMzIuMTEgQzEwNS42MDIsMzIuOTc4IDEwNC43NzQsMzQuMTA4IDEwNC43NzQsMzUuMjkyIEMxMDQuNzc0LDM2LjQ2NSAxMDUuNTg5LDM3LjU4MSAxMDcuMDY3LDM4LjQzNCBDMTA4LjYwNSwzOS4zMjMgMTEwLjY2MywzOS44MTIgMTEyLjg1OSwzOS44MTIgTDExMi44NiwzOS44MTIgQzExNS4wNzYsMzkuODEyIDExNy4xNTgsMzkuMzE1IDExOC43MjEsMzguNDEzIEwxMzAuNzYyLDMxLjQ2IEMxMzIuMjY0LDMwLjU5MyAxMzMuMDkyLDI5LjQ2MyAxMzMuMDkyLDI4LjI3OCBDMTMzLjA5MiwyNy4xMDYgMTMyLjI3OCwyNS45OSAxMzAuOCwyNS4xMzYgQzEyOS4yNjEsMjQuMjQ4IDEyNy4yMDQsMjMuNzU5IDEyNS4wMDcsMjMuNzU5IEwxMjUuMDA3LDIzLjc1OSBaIiBpZD0iRmlsbC0zMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNjUuNjMsMTYuMjE5IEwxNTkuODk2LDE5LjUzIEMxNTYuNzI5LDIxLjM1OCAxNTEuNjEsMjEuMzY3IDE0OC40NjMsMTkuNTUgQzE0NS4zMTYsMTcuNzMzIDE0NS4zMzIsMTQuNzc4IDE0OC40OTksMTIuOTQ5IEwxNTQuMjMzLDkuNjM5IEwxNjUuNjMsMTYuMjE5IiBpZD0iRmlsbC0zMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNTQuMjMzLDEwLjQ0OCBMMTY0LjIyOCwxNi4yMTkgTDE1OS41NDYsMTguOTIzIEMxNTguMTEyLDE5Ljc1IDE1Ni4xOTQsMjAuMjA2IDE1NC4xNDcsMjAuMjA2IEMxNTIuMTE4LDIwLjIwNiAxNTAuMjI0LDE5Ljc1NyAxNDguODE0LDE4Ljk0MyBDMTQ3LjUyNCwxOC4xOTkgMTQ2LjgxNCwxNy4yNDkgMTQ2LjgxNCwxNi4yNjkgQzE0Ni44MTQsMTUuMjc4IDE0Ny41MzcsMTQuMzE0IDE0OC44NSwxMy41NTYgTDE1NC4yMzMsMTAuNDQ4IE0xNTQuMjMzLDkuNjM5IEwxNDguNDk5LDEyLjk0OSBDMTQ1LjMzMiwxNC43NzggMTQ1LjMxNiwxNy43MzMgMTQ4LjQ2MywxOS41NSBDMTUwLjAzMSwyMC40NTUgMTUyLjA4NiwyMC45MDcgMTU0LjE0NywyMC45MDcgQzE1Ni4yMjQsMjAuOTA3IDE1OC4zMDYsMjAuNDQ3IDE1OS44OTYsMTkuNTMgTDE2NS42MywxNi4yMTkgTDE1NC4yMzMsOS42MzkiIGlkPSJGaWxsLTMyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NS40NDUsNzIuNjY3IEwxNDUuNDQ1LDcyLjY2NyBDMTQzLjY3Miw3Mi42NjcgMTQyLjIwNCw3MS44MTcgMTQxLjIwMiw3MC40MjIgQzE0MS4xMzUsNzAuMzMgMTQxLjE0NSw3MC4xNDcgMTQxLjIyNSw3MC4wNjYgQzE0MS4zMDUsNjkuOTg1IDE0MS40MzIsNjkuOTQ2IDE0MS41MjUsNzAuMDExIEMxNDIuMzA2LDcwLjU1OSAxNDMuMjMxLDcwLjgyMyAxNDQuMjc2LDcwLjgyMiBDMTQ1LjU5OCw3MC44MjIgMTQ3LjAzLDcwLjM3NiAxNDguNTMyLDY5LjUwOSBDMTUzLjg0Miw2Ni40NDMgMTU4LjE2Myw1OC45ODcgMTU4LjE2Myw1Mi44OTQgQzE1OC4xNjMsNTAuOTY3IDE1Ny43MjEsNDkuMzMyIDE1Ni44ODQsNDguMTY4IEMxNTYuODE4LDQ4LjA3NiAxNTYuODI4LDQ3Ljk0OCAxNTYuOTA4LDQ3Ljg2NyBDMTU2Ljk4OCw0Ny43ODYgMTU3LjExNCw0Ny43NzQgMTU3LjIwOCw0Ny44NCBDMTU4Ljg3OCw0OS4wMTIgMTU5Ljc5OCw1MS4yMiAxNTkuNzk4LDU0LjA1OSBDMTU5Ljc5OCw2MC4zMDEgMTU1LjM3Myw2OC4wNDYgMTQ5LjkzMyw3MS4xODYgQzE0OC4zNiw3Mi4wOTQgMTQ2Ljg1LDcyLjY2NyAxNDUuNDQ1LDcyLjY2NyBMMTQ1LjQ0NSw3Mi42NjcgWiBNMTQyLjQ3Niw3MSBDMTQzLjI5LDcxLjY1MSAxNDQuMjk2LDcyLjAwMiAxNDUuNDQ1LDcyLjAwMiBDMTQ2Ljc2Nyw3Mi4wMDIgMTQ4LjE5OCw3MS41NSAxNDkuNyw3MC42ODIgQzE1NS4wMSw2Ny42MTcgMTU5LjMzMSw2MC4xNTkgMTU5LjMzMSw1NC4wNjUgQzE1OS4zMzEsNTIuMDg1IDE1OC44NjgsNTAuNDM1IDE1OC4wMDYsNDkuMjcyIEMxNTguNDE3LDUwLjMwNyAxNTguNjMsNTEuNTMyIDE1OC42Myw1Mi44OTIgQzE1OC42Myw1OS4xMzQgMTU0LjIwNSw2Ni43NjcgMTQ4Ljc2NSw2OS45MDcgQzE0Ny4xOTIsNzAuODE2IDE0NS42ODEsNzEuMjgzIDE0NC4yNzYsNzEuMjgzIEMxNDMuNjM0LDcxLjI4MyAxNDMuMDMzLDcxLjE5MiAxNDIuNDc2LDcxIEwxNDIuNDc2LDcxIFoiIGlkPSJGaWxsLTMzIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0OC42NDgsNjkuNzA0IEMxNTQuMDMyLDY2LjU5NiAxNTguMzk2LDU5LjA2OCAxNTguMzk2LDUyLjg5MSBDMTU4LjM5Niw1MC44MzkgMTU3LjkxMyw0OS4xOTggMTU3LjA3NCw0OC4wMyBDMTU1LjI4OSw0Ni43NzggMTUyLjY5OSw0Ni44MzYgMTQ5LjgxNiw0OC41MDEgQzE0NC40MzMsNTEuNjA5IDE0MC4wNjgsNTkuMTM3IDE0MC4wNjgsNjUuMzE0IEMxNDAuMDY4LDY3LjM2NSAxNDAuNTUyLDY5LjAwNiAxNDEuMzkxLDcwLjE3NCBDMTQzLjE3Niw3MS40MjcgMTQ1Ljc2NSw3MS4zNjkgMTQ4LjY0OCw2OS43MDQiIGlkPSJGaWxsLTM0IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NC4yNzYsNzEuMjc2IEwxNDQuMjc2LDcxLjI3NiBDMTQzLjEzMyw3MS4yNzYgMTQyLjExOCw3MC45NjkgMTQxLjI1Nyw3MC4zNjUgQzE0MS4yMzYsNzAuMzUxIDE0MS4yMTcsNzAuMzMyIDE0MS4yMDIsNzAuMzExIEMxNDAuMzA3LDY5LjA2NyAxMzkuODM1LDY3LjMzOSAxMzkuODM1LDY1LjMxNCBDMTM5LjgzNSw1OS4wNzMgMTQ0LjI2LDUxLjQzOSAxNDkuNyw0OC4yOTggQzE1MS4yNzMsNDcuMzkgMTUyLjc4NCw0Ni45MjkgMTU0LjE4OSw0Ni45MjkgQzE1NS4zMzIsNDYuOTI5IDE1Ni4zNDcsNDcuMjM2IDE1Ny4yMDgsNDcuODM5IEMxNTcuMjI5LDQ3Ljg1NCAxNTcuMjQ4LDQ3Ljg3MyAxNTcuMjYzLDQ3Ljg5NCBDMTU4LjE1Nyw0OS4xMzggMTU4LjYzLDUwLjg2NSAxNTguNjMsNTIuODkxIEMxNTguNjMsNTkuMTMyIDE1NC4yMDUsNjYuNzY2IDE0OC43NjUsNjkuOTA3IEMxNDcuMTkyLDcwLjgxNSAxNDUuNjgxLDcxLjI3NiAxNDQuMjc2LDcxLjI3NiBMMTQ0LjI3Niw3MS4yNzYgWiBNMTQxLjU1OCw3MC4xMDQgQzE0Mi4zMzEsNzAuNjM3IDE0My4yNDUsNzEuMDA1IDE0NC4yNzYsNzEuMDA1IEMxNDUuNTk4LDcxLjAwNSAxNDcuMDMsNzAuNDY3IDE0OC41MzIsNjkuNiBDMTUzLjg0Miw2Ni41MzQgMTU4LjE2Myw1OS4wMzMgMTU4LjE2Myw1Mi45MzkgQzE1OC4xNjMsNTEuMDMxIDE1Ny43MjksNDkuMzg1IDE1Ni45MDcsNDguMjIzIEMxNTYuMTMzLDQ3LjY5MSAxNTUuMjE5LDQ3LjQwOSAxNTQuMTg5LDQ3LjQwOSBDMTUyLjg2Nyw0Ny40MDkgMTUxLjQzNSw0Ny44NDIgMTQ5LjkzMyw0OC43MDkgQzE0NC42MjMsNTEuNzc1IDE0MC4zMDIsNTkuMjczIDE0MC4zMDIsNjUuMzY2IEMxNDAuMzAyLDY3LjI3NiAxNDAuNzM2LDY4Ljk0MiAxNDEuNTU4LDcwLjEwNCBMMTQxLjU1OCw3MC4xMDQgWiIgaWQ9IkZpbGwtMzUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUwLjcyLDY1LjM2MSBMMTUwLjM1Nyw2NS4wNjYgQzE1MS4xNDcsNjQuMDkyIDE1MS44NjksNjMuMDQgMTUyLjUwNSw2MS45MzggQzE1My4zMTMsNjAuNTM5IDE1My45NzgsNTkuMDY3IDE1NC40ODIsNTcuNTYzIEwxNTQuOTI1LDU3LjcxMiBDMTU0LjQxMiw1OS4yNDUgMTUzLjczMyw2MC43NDUgMTUyLjkxLDYyLjE3MiBDMTUyLjI2Miw2My4yOTUgMTUxLjUyNSw2NC4zNjggMTUwLjcyLDY1LjM2MSIgaWQ9IkZpbGwtMzYiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE1LjkxNyw4NC41MTQgTDExNS41NTQsODQuMjIgQzExNi4zNDQsODMuMjQ1IDExNy4wNjYsODIuMTk0IDExNy43MDIsODEuMDkyIEMxMTguNTEsNzkuNjkyIDExOS4xNzUsNzguMjIgMTE5LjY3OCw3Ni43MTcgTDEyMC4xMjEsNzYuODY1IEMxMTkuNjA4LDc4LjM5OCAxMTguOTMsNzkuODk5IDExOC4xMDYsODEuMzI2IEMxMTcuNDU4LDgyLjQ0OCAxMTYuNzIyLDgzLjUyMSAxMTUuOTE3LDg0LjUxNCIgaWQ9IkZpbGwtMzciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE0LDEzMC40NzYgTDExNCwxMzAuMDA4IEwxMTQsNzYuMDUyIEwxMTQsNzUuNTg0IEwxMTQsNzYuMDUyIEwxMTQsMTMwLjAwOCBMMTE0LDEzMC40NzYiIGlkPSJGaWxsLTM4IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYyLjAwMDAwMCwgMC4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTkuODIyLDM3LjQ3NCBDMTkuODM5LDM3LjMzOSAxOS43NDcsMzcuMTk0IDE5LjU1NSwzNy4wODIgQzE5LjIyOCwzNi44OTQgMTguNzI5LDM2Ljg3MiAxOC40NDYsMzcuMDM3IEwxMi40MzQsNDAuNTA4IEMxMi4zMDMsNDAuNTg0IDEyLjI0LDQwLjY4NiAxMi4yNDMsNDAuNzkzIEMxMi4yNDUsNDAuOTI1IDEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQxLjM3MSBMMTIuMjQ1LDQxLjQxNCBMMTIuMjM4LDQxLjU0MiBDOC4xNDgsNDMuODg3IDUuNjQ3LDQ1LjMyMSA1LjY0Nyw0NS4zMjEgQzUuNjQ2LDQ1LjMyMSAzLjU3LDQ2LjM2NyAyLjg2LDUwLjUxMyBDMi44Niw1MC41MTMgMS45NDgsNTcuNDc0IDEuOTYyLDcwLjI1OCBDMS45NzcsODIuODI4IDIuNTY4LDg3LjMyOCAzLjEyOSw5MS42MDkgQzMuMzQ5LDkzLjI5MyA2LjEzLDkzLjczNCA2LjEzLDkzLjczNCBDNi40NjEsOTMuNzc0IDYuODI4LDkzLjcwNyA3LjIxLDkzLjQ4NiBMODIuNDgzLDQ5LjkzNSBDODQuMjkxLDQ4Ljg2NiA4NS4xNSw0Ni4yMTYgODUuNTM5LDQzLjY1MSBDODYuNzUyLDM1LjY2MSA4Ny4yMTQsMTAuNjczIDg1LjI2NCwzLjc3MyBDODUuMDY4LDMuMDggODQuNzU0LDIuNjkgODQuMzk2LDIuNDkxIEw4Mi4zMSwxLjcwMSBDODEuNTgzLDEuNzI5IDgwLjg5NCwyLjE2OCA4MC43NzYsMi4yMzYgQzgwLjYzNiwyLjMxNyA0MS44MDcsMjQuNTg1IDIwLjAzMiwzNy4wNzIgTDE5LjgyMiwzNy40NzQiIGlkPSJGaWxsLTEiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNODIuMzExLDEuNzAxIEw4NC4zOTYsMi40OTEgQzg0Ljc1NCwyLjY5IDg1LjA2OCwzLjA4IDg1LjI2NCwzLjc3MyBDODcuMjEzLDEwLjY3MyA4Ni43NTEsMzUuNjYgODUuNTM5LDQzLjY1MSBDODUuMTQ5LDQ2LjIxNiA4NC4yOSw0OC44NjYgODIuNDgzLDQ5LjkzNSBMNy4yMSw5My40ODYgQzYuODk3LDkzLjY2NyA2LjU5NSw5My43NDQgNi4zMTQsOTMuNzQ0IEw2LjEzMSw5My43MzMgQzYuMTMxLDkzLjczNCAzLjM0OSw5My4yOTMgMy4xMjgsOTEuNjA5IEMyLjU2OCw4Ny4zMjcgMS45NzcsODIuODI4IDEuOTYzLDcwLjI1OCBDMS45NDgsNTcuNDc0IDIuODYsNTAuNTEzIDIuODYsNTAuNTEzIEMzLjU3LDQ2LjM2NyA1LjY0Nyw0NS4zMjEgNS42NDcsNDUuMzIxIEM1LjY0Nyw0NS4zMjEgOC4xNDgsNDMuODg3IDEyLjIzOCw0MS41NDIgTDEyLjI0NSw0MS40MTQgTDEyLjI0NSw0MS4zNzEgQzEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQwLjkyNSAxMi4yNDMsNDAuNzkzIEMxMi4yNCw0MC42ODYgMTIuMzAyLDQwLjU4MyAxMi40MzQsNDAuNTA4IEwxOC40NDYsMzcuMDM2IEMxOC41NzQsMzYuOTYyIDE4Ljc0NiwzNi45MjYgMTguOTI3LDM2LjkyNiBDMTkuMTQ1LDM2LjkyNiAxOS4zNzYsMzYuOTc5IDE5LjU1NCwzNy4wODIgQzE5Ljc0NywzNy4xOTQgMTkuODM5LDM3LjM0IDE5LjgyMiwzNy40NzQgTDIwLjAzMywzNy4wNzIgQzQxLjgwNiwyNC41ODUgODAuNjM2LDIuMzE4IDgwLjc3NywyLjIzNiBDODAuODk0LDIuMTY4IDgxLjU4MywxLjcyOSA4Mi4zMTEsMS43MDEgTTgyLjMxMSwwLjcwNCBMODIuMjcyLDAuNzA1IEM4MS42NTQsMC43MjggODAuOTg5LDAuOTQ5IDgwLjI5OCwxLjM2MSBMODAuMjc3LDEuMzczIEM4MC4xMjksMS40NTggNTkuNzY4LDEzLjEzNSAxOS43NTgsMzYuMDc5IEMxOS41LDM1Ljk4MSAxOS4yMTQsMzUuOTI5IDE4LjkyNywzNS45MjkgQzE4LjU2MiwzNS45MjkgMTguMjIzLDM2LjAxMyAxNy45NDcsMzYuMTczIEwxMS45MzUsMzkuNjQ0IEMxMS40OTMsMzkuODk5IDExLjIzNiw0MC4zMzQgMTEuMjQ2LDQwLjgxIEwxMS4yNDcsNDAuOTYgTDUuMTY3LDQ0LjQ0NyBDNC43OTQsNDQuNjQ2IDIuNjI1LDQ1Ljk3OCAxLjg3Nyw1MC4zNDUgTDEuODcxLDUwLjM4NCBDMS44NjIsNTAuNDU0IDAuOTUxLDU3LjU1NyAwLjk2NSw3MC4yNTkgQzAuOTc5LDgyLjg3OSAxLjU2OCw4Ny4zNzUgMi4xMzcsOTEuNzI0IEwyLjEzOSw5MS43MzkgQzIuNDQ3LDk0LjA5NCA1LjYxNCw5NC42NjIgNS45NzUsOTQuNzE5IEw2LjAwOSw5NC43MjMgQzYuMTEsOTQuNzM2IDYuMjEzLDk0Ljc0MiA2LjMxNCw5NC43NDIgQzYuNzksOTQuNzQyIDcuMjYsOTQuNjEgNy43MSw5NC4zNSBMODIuOTgzLDUwLjc5OCBDODQuNzk0LDQ5LjcyNyA4NS45ODIsNDcuMzc1IDg2LjUyNSw0My44MDEgQzg3LjcxMSwzNS45ODcgODguMjU5LDEwLjcwNSA4Ni4yMjQsMy41MDIgQzg1Ljk3MSwyLjYwOSA4NS41MiwxLjk3NSA4NC44ODEsMS42MiBMODQuNzQ5LDEuNTU4IEw4Mi42NjQsMC43NjkgQzgyLjU1MSwwLjcyNSA4Mi40MzEsMC43MDQgODIuMzExLDAuNzA0IiBpZD0iRmlsbC0yIiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY2LjI2NywxMS41NjUgTDY3Ljc2MiwxMS45OTkgTDExLjQyMyw0NC4zMjUiIGlkPSJGaWxsLTMiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMjAyLDkwLjU0NSBDMTIuMDI5LDkwLjU0NSAxMS44NjIsOTAuNDU1IDExLjc2OSw5MC4yOTUgQzExLjYzMiw5MC4wNTcgMTEuNzEzLDg5Ljc1MiAxMS45NTIsODkuNjE0IEwzMC4zODksNzguOTY5IEMzMC42MjgsNzguODMxIDMwLjkzMyw3OC45MTMgMzEuMDcxLDc5LjE1MiBDMzEuMjA4LDc5LjM5IDMxLjEyNyw3OS42OTYgMzAuODg4LDc5LjgzMyBMMTIuNDUxLDkwLjQ3OCBMMTIuMjAyLDkwLjU0NSIgaWQ9IkZpbGwtNCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMy43NjQsNDIuNjU0IEwxMy42NTYsNDIuNTkyIEwxMy43MDIsNDIuNDIxIEwxOC44MzcsMzkuNDU3IEwxOS4wMDcsMzkuNTAyIEwxOC45NjIsMzkuNjczIEwxMy44MjcsNDIuNjM3IEwxMy43NjQsNDIuNjU0IiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTguNTIsOTAuMzc1IEw4LjUyLDQ2LjQyMSBMOC41ODMsNDYuMzg1IEw3NS44NCw3LjU1NCBMNzUuODQsNTEuNTA4IEw3NS43NzgsNTEuNTQ0IEw4LjUyLDkwLjM3NSBMOC41Miw5MC4zNzUgWiBNOC43Nyw0Ni41NjQgTDguNzcsODkuOTQ0IEw3NS41OTEsNTEuMzY1IEw3NS41OTEsNy45ODUgTDguNzcsNDYuNTY0IEw4Ljc3LDQ2LjU2NCBaIiBpZD0iRmlsbC02IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTI0Ljk4Niw4My4xODIgQzI0Ljc1Niw4My4zMzEgMjQuMzc0LDgzLjU2NiAyNC4xMzcsODMuNzA1IEwxMi42MzIsOTAuNDA2IEMxMi4zOTUsOTAuNTQ1IDEyLjQyNiw5MC42NTggMTIuNyw5MC42NTggTDEzLjI2NSw5MC42NTggQzEzLjU0LDkwLjY1OCAxMy45NTgsOTAuNTQ1IDE0LjE5NSw5MC40MDYgTDI1LjcsODMuNzA1IEMyNS45MzcsODMuNTY2IDI2LjEyOCw4My40NTIgMjYuMTI1LDgzLjQ0OSBDMjYuMTIyLDgzLjQ0NyAyNi4xMTksODMuMjIgMjYuMTE5LDgyLjk0NiBDMjYuMTE5LDgyLjY3MiAyNS45MzEsODIuNTY5IDI1LjcwMSw4Mi43MTkgTDI0Ljk4Niw4My4xODIiIGlkPSJGaWxsLTciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTMuMjY2LDkwLjc4MiBMMTIuNyw5MC43ODIgQzEyLjUsOTAuNzgyIDEyLjM4NCw5MC43MjYgMTIuMzU0LDkwLjYxNiBDMTIuMzI0LDkwLjUwNiAxMi4zOTcsOTAuMzk5IDEyLjU2OSw5MC4yOTkgTDI0LjA3NCw4My41OTcgQzI0LjMxLDgzLjQ1OSAyNC42ODksODMuMjI2IDI0LjkxOCw4My4wNzggTDI1LjYzMyw4Mi42MTQgQzI1LjcyMyw4Mi41NTUgMjUuODEzLDgyLjUyNSAyNS44OTksODIuNTI1IEMyNi4wNzEsODIuNTI1IDI2LjI0NCw4Mi42NTUgMjYuMjQ0LDgyLjk0NiBDMjYuMjQ0LDgzLjE2IDI2LjI0NSw4My4zMDkgMjYuMjQ3LDgzLjM4MyBMMjYuMjUzLDgzLjM4NyBMMjYuMjQ5LDgzLjQ1NiBDMjYuMjQ2LDgzLjUzMSAyNi4yNDYsODMuNTMxIDI1Ljc2Myw4My44MTIgTDE0LjI1OCw5MC41MTQgQzE0LDkwLjY2NSAxMy41NjQsOTAuNzgyIDEzLjI2Niw5MC43ODIgTDEzLjI2Niw5MC43ODIgWiBNMTIuNjY2LDkwLjUzMiBMMTIuNyw5MC41MzMgTDEzLjI2Niw5MC41MzMgQzEzLjUxOCw5MC41MzMgMTMuOTE1LDkwLjQyNSAxNC4xMzIsOTAuMjk5IEwyNS42MzcsODMuNTk3IEMyNS44MDUsODMuNDk5IDI1LjkzMSw4My40MjQgMjUuOTk4LDgzLjM4MyBDMjUuOTk0LDgzLjI5OSAyNS45OTQsODMuMTY1IDI1Ljk5NCw4Mi45NDYgTDI1Ljg5OSw4Mi43NzUgTDI1Ljc2OCw4Mi44MjQgTDI1LjA1NCw4My4yODcgQzI0LjgyMiw4My40MzcgMjQuNDM4LDgzLjY3MyAyNC4yLDgzLjgxMiBMMTIuNjk1LDkwLjUxNCBMMTIuNjY2LDkwLjUzMiBMMTIuNjY2LDkwLjUzMiBaIiBpZD0iRmlsbC04IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEzLjI2Niw4OS44NzEgTDEyLjcsODkuODcxIEMxMi41LDg5Ljg3MSAxMi4zODQsODkuODE1IDEyLjM1NCw4OS43MDUgQzEyLjMyNCw4OS41OTUgMTIuMzk3LDg5LjQ4OCAxMi41NjksODkuMzg4IEwyNC4wNzQsODIuNjg2IEMyNC4zMzIsODIuNTM1IDI0Ljc2OCw4Mi40MTggMjUuMDY3LDgyLjQxOCBMMjUuNjMyLDgyLjQxOCBDMjUuODMyLDgyLjQxOCAyNS45NDgsODIuNDc0IDI1Ljk3OCw4Mi41ODQgQzI2LjAwOCw4Mi42OTQgMjUuOTM1LDgyLjgwMSAyNS43NjMsODIuOTAxIEwxNC4yNTgsODkuNjAzIEMxNCw4OS43NTQgMTMuNTY0LDg5Ljg3MSAxMy4yNjYsODkuODcxIEwxMy4yNjYsODkuODcxIFogTTEyLjY2Niw4OS42MjEgTDEyLjcsODkuNjIyIEwxMy4yNjYsODkuNjIyIEMxMy41MTgsODkuNjIyIDEzLjkxNSw4OS41MTUgMTQuMTMyLDg5LjM4OCBMMjUuNjM3LDgyLjY4NiBMMjUuNjY3LDgyLjY2OCBMMjUuNjMyLDgyLjY2NyBMMjUuMDY3LDgyLjY2NyBDMjQuODE1LDgyLjY2NyAyNC40MTgsODIuNzc1IDI0LjIsODIuOTAxIEwxMi42OTUsODkuNjAzIEwxMi42NjYsODkuNjIxIEwxMi42NjYsODkuNjIxIFoiIGlkPSJGaWxsLTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMzcsOTAuODAxIEwxMi4zNyw4OS41NTQgTDEyLjM3LDkwLjgwMSIgaWQ9IkZpbGwtMTAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNi4xMyw5My45MDEgQzUuMzc5LDkzLjgwOCA0LjgxNiw5My4xNjQgNC42OTEsOTIuNTI1IEMzLjg2LDg4LjI4NyAzLjU0LDgzLjc0MyAzLjUyNiw3MS4xNzMgQzMuNTExLDU4LjM4OSA0LjQyMyw1MS40MjggNC40MjMsNTEuNDI4IEM1LjEzNCw0Ny4yODIgNy4yMSw0Ni4yMzYgNy4yMSw0Ni4yMzYgQzcuMjEsNDYuMjM2IDgxLjY2NywzLjI1IDgyLjA2OSwzLjAxNyBDODIuMjkyLDIuODg4IDg0LjU1NiwxLjQzMyA4NS4yNjQsMy45NCBDODcuMjE0LDEwLjg0IDg2Ljc1MiwzNS44MjcgODUuNTM5LDQzLjgxOCBDODUuMTUsNDYuMzgzIDg0LjI5MSw0OS4wMzMgODIuNDgzLDUwLjEwMSBMNy4yMSw5My42NTMgQzYuODI4LDkzLjg3NCA2LjQ2MSw5My45NDEgNi4xMyw5My45MDEgQzYuMTMsOTMuOTAxIDMuMzQ5LDkzLjQ2IDMuMTI5LDkxLjc3NiBDMi41NjgsODcuNDk1IDEuOTc3LDgyLjk5NSAxLjk2Miw3MC40MjUgQzEuOTQ4LDU3LjY0MSAyLjg2LDUwLjY4IDIuODYsNTAuNjggQzMuNTcsNDYuNTM0IDUuNjQ3LDQ1LjQ4OSA1LjY0Nyw0NS40ODkgQzUuNjQ2LDQ1LjQ4OSA4LjA2NSw0NC4wOTIgMTIuMjQ1LDQxLjY3OSBMMTMuMTE2LDQxLjU2IEwxOS43MTUsMzcuNzMgTDE5Ljc2MSwzNy4yNjkgTDYuMTMsOTMuOTAxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjMxNyw5NC4xNjEgTDYuMTAyLDk0LjE0OCBMNi4xMDEsOTQuMTQ4IEw1Ljg1Nyw5NC4xMDEgQzUuMTM4LDkzLjk0NSAzLjA4NSw5My4zNjUgMi44ODEsOTEuODA5IEMyLjMxMyw4Ny40NjkgMS43MjcsODIuOTk2IDEuNzEzLDcwLjQyNSBDMS42OTksNTcuNzcxIDIuNjA0LDUwLjcxOCAyLjYxMyw1MC42NDggQzMuMzM4LDQ2LjQxNyA1LjQ0NSw0NS4zMSA1LjUzNSw0NS4yNjYgTDEyLjE2Myw0MS40MzkgTDEzLjAzMyw0MS4zMiBMMTkuNDc5LDM3LjU3OCBMMTkuNTEzLDM3LjI0NCBDMTkuNTI2LDM3LjEwNyAxOS42NDcsMzcuMDA4IDE5Ljc4NiwzNy4wMjEgQzE5LjkyMiwzNy4wMzQgMjAuMDIzLDM3LjE1NiAyMC4wMDksMzcuMjkzIEwxOS45NSwzNy44ODIgTDEzLjE5OCw0MS44MDEgTDEyLjMyOCw0MS45MTkgTDUuNzcyLDQ1LjcwNCBDNS43NDEsNDUuNzIgMy43ODIsNDYuNzcyIDMuMTA2LDUwLjcyMiBDMy4wOTksNTAuNzgyIDIuMTk4LDU3LjgwOCAyLjIxMiw3MC40MjQgQzIuMjI2LDgyLjk2MyAyLjgwOSw4Ny40MiAzLjM3Myw5MS43MjkgQzMuNDY0LDkyLjQyIDQuMDYyLDkyLjg4MyA0LjY4Miw5My4xODEgQzQuNTY2LDkyLjk4NCA0LjQ4Niw5Mi43NzYgNC40NDYsOTIuNTcyIEMzLjY2NSw4OC41ODggMy4yOTEsODQuMzcgMy4yNzYsNzEuMTczIEMzLjI2Miw1OC41MiA0LjE2Nyw1MS40NjYgNC4xNzYsNTEuMzk2IEM0LjkwMSw0Ny4xNjUgNy4wMDgsNDYuMDU5IDcuMDk4LDQ2LjAxNCBDNy4wOTQsNDYuMDE1IDgxLjU0MiwzLjAzNCA4MS45NDQsMi44MDIgTDgxLjk3MiwyLjc4NSBDODIuODc2LDIuMjQ3IDgzLjY5MiwyLjA5NyA4NC4zMzIsMi4zNTIgQzg0Ljg4NywyLjU3MyA4NS4yODEsMy4wODUgODUuNTA0LDMuODcyIEM4Ny41MTgsMTEgODYuOTY0LDM2LjA5MSA4NS43ODUsNDMuODU1IEM4NS4yNzgsNDcuMTk2IDg0LjIxLDQ5LjM3IDgyLjYxLDUwLjMxNyBMNy4zMzUsOTMuODY5IEM2Ljk5OSw5NC4wNjMgNi42NTgsOTQuMTYxIDYuMzE3LDk0LjE2MSBMNi4zMTcsOTQuMTYxIFogTTYuMTcsOTMuNjU0IEM2LjQ2Myw5My42OSA2Ljc3NCw5My42MTcgNy4wODUsOTMuNDM3IEw4Mi4zNTgsNDkuODg2IEM4NC4xODEsNDguODA4IDg0Ljk2LDQ1Ljk3MSA4NS4yOTIsNDMuNzggQzg2LjQ2NiwzNi4wNDkgODcuMDIzLDExLjA4NSA4NS4wMjQsNC4wMDggQzg0Ljg0NiwzLjM3NyA4NC41NTEsMi45NzYgODQuMTQ4LDIuODE2IEM4My42NjQsMi42MjMgODIuOTgyLDIuNzY0IDgyLjIyNywzLjIxMyBMODIuMTkzLDMuMjM0IEM4MS43OTEsMy40NjYgNy4zMzUsNDYuNDUyIDcuMzM1LDQ2LjQ1MiBDNy4zMDQsNDYuNDY5IDUuMzQ2LDQ3LjUyMSA0LjY2OSw1MS40NzEgQzQuNjYyLDUxLjUzIDMuNzYxLDU4LjU1NiAzLjc3NSw3MS4xNzMgQzMuNzksODQuMzI4IDQuMTYxLDg4LjUyNCA0LjkzNiw5Mi40NzYgQzUuMDI2LDkyLjkzNyA1LjQxMiw5My40NTkgNS45NzMsOTMuNjE1IEM2LjA4Nyw5My42NCA2LjE1OCw5My42NTIgNi4xNjksOTMuNjU0IEw2LjE3LDkzLjY1NCBMNi4xNyw5My42NTQgWiIgaWQ9IkZpbGwtMTIiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4zMTcsNjguOTgyIEM3LjgwNiw2OC43MDEgOC4yMDIsNjguOTI2IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNi44MjksNzEuMjk0IDYuNDMzLDcxLjA2OSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIiBpZD0iRmlsbC0xMyIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjkyLDcxLjEzMyBDNi42MzEsNzEuMTMzIDYuNDMzLDcwLjkwNSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIEM3LjQ2LDY4LjkgNy41OTUsNjguODYxIDcuNzE0LDY4Ljg2MSBDOC4wMDMsNjguODYxIDguMjAyLDY5LjA5IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNy4xNzQsNzEuMDk0IDcuMDM5LDcxLjEzMyA2LjkyLDcxLjEzMyBNNy43MTQsNjguNjc0IEM3LjU1Nyw2OC42NzQgNy4zOTIsNjguNzIzIDcuMjI0LDY4LjgyMSBDNi42NzYsNjkuMTM4IDYuMjQ2LDY5Ljg3OSA2LjI0Niw3MC41MDggQzYuMjQ2LDcwLjk5NCA2LjUxNyw3MS4zMiA2LjkyLDcxLjMyIEM3LjA3OCw3MS4zMiA3LjI0Myw3MS4yNzEgNy40MTEsNzEuMTc0IEM3Ljk1OSw3MC44NTcgOC4zODksNzAuMTE3IDguMzg5LDY5LjQ4NyBDOC4zODksNjkuMDAxIDguMTE3LDY4LjY3NCA3LjcxNCw2OC42NzQiIGlkPSJGaWxsLTE0IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYuOTIsNzAuOTQ3IEM2LjY0OSw3MC45NDcgNi42MjEsNzAuNjQgNi42MjEsNzAuNTA4IEM2LjYyMSw3MC4wMTcgNi45ODIsNjkuMzkyIDcuNDExLDY5LjE0NSBDNy41MjEsNjkuMDgyIDcuNjI1LDY5LjA0OSA3LjcxNCw2OS4wNDkgQzcuOTg2LDY5LjA0OSA4LjAxNSw2OS4zNTUgOC4wMTUsNjkuNDg3IEM4LjAxNSw2OS45NzggNy42NTIsNzAuNjAzIDcuMjI0LDcwLjg1MSBDNy4xMTUsNzAuOTE0IDcuMDEsNzAuOTQ3IDYuOTIsNzAuOTQ3IE03LjcxNCw2OC44NjEgQzcuNTk1LDY4Ljg2MSA3LjQ2LDY4LjkgNy4zMTcsNjguOTgyIEM2LjgyOSw2OS4yNjUgNi40MzMsNjkuOTQ4IDYuNDMzLDcwLjUwOCBDNi40MzMsNzAuOTA1IDYuNjMxLDcxLjEzMyA2LjkyLDcxLjEzMyBDNy4wMzksNzEuMTMzIDcuMTc0LDcxLjA5NCA3LjMxNyw3MS4wMTIgQzcuODA2LDcwLjczIDguMjAyLDcwLjA0NyA4LjIwMiw2OS40ODcgQzguMjAyLDY5LjA5IDguMDAzLDY4Ljg2MSA3LjcxNCw2OC44NjEiIGlkPSJGaWxsLTE1IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTcuNDQ0LDg1LjM1IEM3LjcwOCw4NS4xOTggNy45MjEsODUuMzE5IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuOTI1IDcuNzA4LDg2LjI5MiA3LjQ0NCw4Ni40NDQgQzcuMTgxLDg2LjU5NyA2Ljk2Nyw4Ni40NzUgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IiBpZD0iRmlsbC0xNiIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik03LjIzLDg2LjUxIEM3LjA3NCw4Ni41MSA2Ljk2Nyw4Ni4zODcgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IEM3LjUyMSw4NS4zMDUgNy41OTQsODUuMjg0IDcuNjU4LDg1LjI4NCBDNy44MTQsODUuMjg0IDcuOTIxLDg1LjQwOCA3LjkyMSw4NS42MjIgQzcuOTIxLDg1LjkyNSA3LjcwOCw4Ni4yOTIgNy40NDQsODYuNDQ0IEM3LjM2Nyw4Ni40ODkgNy4yOTQsODYuNTEgNy4yMyw4Ni41MSBNNy42NTgsODUuMDk4IEM3LjU1OCw4NS4wOTggNy40NTUsODUuMTI3IDcuMzUxLDg1LjE4OCBDNy4wMzEsODUuMzczIDYuNzgxLDg1LjgwNiA2Ljc4MSw4Ni4xNzMgQzYuNzgxLDg2LjQ4MiA2Ljk2Niw4Ni42OTcgNy4yMyw4Ni42OTcgQzcuMzMsODYuNjk3IDcuNDMzLDg2LjY2NiA3LjUzOCw4Ni42MDcgQzcuODU4LDg2LjQyMiA4LjEwOCw4NS45ODkgOC4xMDgsODUuNjIyIEM4LjEwOCw4NS4zMTMgNy45MjMsODUuMDk4IDcuNjU4LDg1LjA5OCIgaWQ9IkZpbGwtMTciIGZpbGw9IiM4MDk3QTIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4yMyw4Ni4zMjIgTDcuMTU0LDg2LjE3MyBDNy4xNTQsODUuOTM4IDcuMzMzLDg1LjYyOSA3LjUzOCw4NS41MTIgTDcuNjU4LDg1LjQ3MSBMNy43MzQsODUuNjIyIEM3LjczNCw4NS44NTYgNy41NTUsODYuMTY0IDcuMzUxLDg2LjI4MiBMNy4yMyw4Ni4zMjIgTTcuNjU4LDg1LjI4NCBDNy41OTQsODUuMjg0IDcuNTIxLDg1LjMwNSA3LjQ0NCw4NS4zNSBDNy4xODEsODUuNTAyIDYuOTY3LDg1Ljg3MSA2Ljk2Nyw4Ni4xNzMgQzYuOTY3LDg2LjM4NyA3LjA3NCw4Ni41MSA3LjIzLDg2LjUxIEM3LjI5NCw4Ni41MSA3LjM2Nyw4Ni40ODkgNy40NDQsODYuNDQ0IEM3LjcwOCw4Ni4yOTIgNy45MjEsODUuOTI1IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuNDA4IDcuODE0LDg1LjI4NCA3LjY1OCw4NS4yODQiIGlkPSJGaWxsLTE4IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTc3LjI3OCw3Ljc2OSBMNzcuMjc4LDUxLjQzNiBMMTAuMjA4LDkwLjE2IEwxMC4yMDgsNDYuNDkzIEw3Ny4yNzgsNy43NjkiIGlkPSJGaWxsLTE5IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEwLjA4Myw5MC4zNzUgTDEwLjA4Myw0Ni40MjEgTDEwLjE0Niw0Ni4zODUgTDc3LjQwMyw3LjU1NCBMNzcuNDAzLDUxLjUwOCBMNzcuMzQxLDUxLjU0NCBMMTAuMDgzLDkwLjM3NSBMMTAuMDgzLDkwLjM3NSBaIE0xMC4zMzMsNDYuNTY0IEwxMC4zMzMsODkuOTQ0IEw3Ny4xNTQsNTEuMzY1IEw3Ny4xNTQsNy45ODUgTDEwLjMzMyw0Ni41NjQgTDEwLjMzMyw0Ni41NjQgWiIgaWQ9IkZpbGwtMjAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgIDwvZz4KICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMjUuNzM3LDg4LjY0NyBMMTE4LjA5OCw5MS45ODEgTDExOC4wOTgsODQgTDEwNi42MzksODguNzEzIEwxMDYuNjM5LDk2Ljk4MiBMOTksMTAwLjMxNSBMMTEyLjM2OSwxMDMuOTYxIEwxMjUuNzM3LDg4LjY0NyIgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTIiIGZpbGw9IiM0NTVBNjQiIHNrZXRjaDp0eXBlPSJNU1NoYXBlR3JvdXAiPjwvcGF0aD4KICAgICAgICAgICAgPC9nPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+');
+};
+
+module.exports = RotateInstructions;
+
+},{"./util.js":22}],17:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * TODO: Fix up all "new THREE" instantiations to improve performance.
+ */
+var SensorSample = _dereq_('./sensor-sample.js');
+var MathUtil = _dereq_('../math-util.js');
+var Util = _dereq_('../util.js');
+
+var DEBUG = false;
+
+/**
+ * An implementation of a simple complementary filter, which fuses gyroscope and
+ * accelerometer data from the 'devicemotion' event.
+ *
+ * Accelerometer data is very noisy, but stable over the long term.
+ * Gyroscope data is smooth, but tends to drift over the long term.
+ *
+ * This fusion is relatively simple:
+ * 1. Get orientation estimates from accelerometer by applying a low-pass filter
+ *    on that data.
+ * 2. Get orientation estimates from gyroscope by integrating over time.
+ * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the
+ *    short term.
+ */
+function ComplementaryFilter(kFilter) {
+  this.kFilter = kFilter;
+
+  // Raw sensor measurements.
+  this.currentAccelMeasurement = new SensorSample();
+  this.currentGyroMeasurement = new SensorSample();
+  this.previousGyroMeasurement = new SensorSample();
+
+  // Current filter orientation
+  this.filterQ = new MathUtil.Quaternion();
+  this.previousFilterQ = new MathUtil.Quaternion();
+
+  // Orientation based on the accelerometer.
+  this.accelQ = new MathUtil.Quaternion();
+  // Whether or not the orientation has been initialized.
+  this.isOrientationInitialized = false;
+  // Running estimate of gravity based on the current orientation.
+  this.estimatedGravity = new MathUtil.Vector3();
+  // Measured gravity based on accelerometer.
+  this.measuredGravity = new MathUtil.Vector3();
+
+  // Debug only quaternion of gyro-based orientation.
+  this.gyroIntegralQ = new MathUtil.Quaternion();
+}
+
+ComplementaryFilter.prototype.addAccelMeasurement = function(vector, timestampS) {
+  this.currentAccelMeasurement.set(vector, timestampS);
+};
+
+ComplementaryFilter.prototype.addGyroMeasurement = function(vector, timestampS) {
+  this.currentGyroMeasurement.set(vector, timestampS);
+
+  var deltaT = timestampS - this.previousGyroMeasurement.timestampS;
+  if (Util.isTimestampDeltaValid(deltaT)) {
+    this.run_();
+  }
+
+  this.previousGyroMeasurement.copy(this.currentGyroMeasurement);
+};
+
+ComplementaryFilter.prototype.run_ = function() {
+
+  if (!this.isOrientationInitialized) {
+    this.accelQ = this.accelToQuaternion_(this.currentAccelMeasurement.sample);
+    this.previousFilterQ.copy(this.accelQ);
+    this.isOrientationInitialized = true;
+    return;
+  }
+
+  var deltaT = this.currentGyroMeasurement.timestampS -
+      this.previousGyroMeasurement.timestampS;
+
+  // Convert gyro rotation vector to a quaternion delta.
+  var gyroDeltaQ = this.gyroToQuaternionDelta_(this.currentGyroMeasurement.sample, deltaT);
+  this.gyroIntegralQ.multiply(gyroDeltaQ);
+
+  // filter_1 = K * (filter_0 + gyro * dT) + (1 - K) * accel.
+  this.filterQ.copy(this.previousFilterQ);
+  this.filterQ.multiply(gyroDeltaQ);
+
+  // Calculate the delta between the current estimated gravity and the real
+  // gravity vector from accelerometer.
+  var invFilterQ = new MathUtil.Quaternion();
+  invFilterQ.copy(this.filterQ);
+  invFilterQ.inverse();
+
+  this.estimatedGravity.set(0, 0, -1);
+  this.estimatedGravity.applyQuaternion(invFilterQ);
+  this.estimatedGravity.normalize();
+
+  this.measuredGravity.copy(this.currentAccelMeasurement.sample);
+  this.measuredGravity.normalize();
+
+  // Compare estimated gravity with measured gravity, get the delta quaternion
+  // between the two.
+  var deltaQ = new MathUtil.Quaternion();
+  deltaQ.setFromUnitVectors(this.estimatedGravity, this.measuredGravity);
+  deltaQ.inverse();
+
+  if (DEBUG) {
+    console.log('Delta: %d deg, G_est: (%s, %s, %s), G_meas: (%s, %s, %s)',
+                MathUtil.radToDeg * Util.getQuaternionAngle(deltaQ),
+                (this.estimatedGravity.x).toFixed(1),
+                (this.estimatedGravity.y).toFixed(1),
+                (this.estimatedGravity.z).toFixed(1),
+                (this.measuredGravity.x).toFixed(1),
+                (this.measuredGravity.y).toFixed(1),
+                (this.measuredGravity.z).toFixed(1));
+  }
+
+  // Calculate the SLERP target: current orientation plus the measured-estimated
+  // quaternion delta.
+  var targetQ = new MathUtil.Quaternion();
+  targetQ.copy(this.filterQ);
+  targetQ.multiply(deltaQ);
+
+  // SLERP factor: 0 is pure gyro, 1 is pure accel.
+  this.filterQ.slerp(targetQ, 1 - this.kFilter);
+
+  this.previousFilterQ.copy(this.filterQ);
+};
+
+ComplementaryFilter.prototype.getOrientation = function() {
+  return this.filterQ;
+};
+
+ComplementaryFilter.prototype.accelToQuaternion_ = function(accel) {
+  var normAccel = new MathUtil.Vector3();
+  normAccel.copy(accel);
+  normAccel.normalize();
+  var quat = new MathUtil.Quaternion();
+  quat.setFromUnitVectors(new MathUtil.Vector3(0, 0, -1), normAccel);
+  quat.inverse();
+  return quat;
+};
+
+ComplementaryFilter.prototype.gyroToQuaternionDelta_ = function(gyro, dt) {
+  // Extract axis and angle from the gyroscope data.
+  var quat = new MathUtil.Quaternion();
+  var axis = new MathUtil.Vector3();
+  axis.copy(gyro);
+  axis.normalize();
+  quat.setFromAxisAngle(axis, gyro.length() * dt);
+  return quat;
+};
+
+
+module.exports = ComplementaryFilter;
+
+},{"../math-util.js":14,"../util.js":22,"./sensor-sample.js":20}],18:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var ComplementaryFilter = _dereq_('./complementary-filter.js');
+var PosePredictor = _dereq_('./pose-predictor.js');
+var TouchPanner = _dereq_('../touch-panner.js');
+var MathUtil = _dereq_('../math-util.js');
+var Util = _dereq_('../util.js');
+
+/**
+ * The pose sensor, implemented using DeviceMotion APIs.
+ */
+function FusionPoseSensor() {
+  this.deviceId = 'webvr-polyfill:fused';
+  this.deviceName = 'VR Position Device (webvr-polyfill:fused)';
+
+  this.accelerometer = new MathUtil.Vector3();
+  this.gyroscope = new MathUtil.Vector3();
+
+  window.addEventListener('devicemotion', this.onDeviceMotionChange_.bind(this));
+  window.addEventListener('orientationchange', this.onScreenOrientationChange_.bind(this));
+
+  this.filter = new ComplementaryFilter(WebVRConfig.K_FILTER);
+  this.posePredictor = new PosePredictor(WebVRConfig.PREDICTION_TIME_S);
+  this.touchPanner = new TouchPanner();
+
+  this.filterToWorldQ = new MathUtil.Quaternion();
+
+  // Set the filter to world transform, depending on OS.
+  if (Util.isIOS()) {
+    this.filterToWorldQ.setFromAxisAngle(new MathUtil.Vector3(1, 0, 0), Math.PI / 2);
+  } else {
+    this.filterToWorldQ.setFromAxisAngle(new MathUtil.Vector3(1, 0, 0), -Math.PI / 2);
+  }
+
+  this.inverseWorldToScreenQ = new MathUtil.Quaternion();
+  this.worldToScreenQ = new MathUtil.Quaternion();
+  this.originalPoseAdjustQ = new MathUtil.Quaternion();
+  this.originalPoseAdjustQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1),
+                                           -window.orientation * Math.PI / 180);
+
+  this.setScreenTransform_();
+  // Adjust this filter for being in landscape mode.
+  if (Util.isLandscapeMode()) {
+    this.filterToWorldQ.multiply(this.inverseWorldToScreenQ);
+  }
+
+  // Keep track of a reset transform for resetSensor.
+  this.resetQ = new MathUtil.Quaternion();
+
+  this.isFirefoxAndroid = Util.isFirefoxAndroid();
+  this.isIOS = Util.isIOS();
+
+  this.orientationOut_ = new Float32Array(4);
+}
+
+FusionPoseSensor.prototype.getPosition = function() {
+  // This PoseSensor doesn't support position
+  return null;
+};
+
+FusionPoseSensor.prototype.getOrientation = function() {
+  // Convert from filter space to the the same system used by the
+  // deviceorientation event.
+  var orientation = this.filter.getOrientation();
+
+  // Predict orientation.
+  this.predictedQ = this.posePredictor.getPrediction(orientation, this.gyroscope, this.previousTimestampS);
+
+  // Convert to THREE coordinate system: -Z forward, Y up, X right.
+  var out = new MathUtil.Quaternion();
+  out.copy(this.filterToWorldQ);
+  out.multiply(this.resetQ);
+  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
+    out.multiply(this.touchPanner.getOrientation());
+  }
+  out.multiply(this.predictedQ);
+  out.multiply(this.worldToScreenQ);
+
+  // Handle the yaw-only case.
+  if (WebVRConfig.YAW_ONLY) {
+    // Make a quaternion that only turns around the Y-axis.
+    out.x = 0;
+    out.z = 0;
+    out.normalize();
+  }
+
+  this.orientationOut_[0] = out.x;
+  this.orientationOut_[1] = out.y;
+  this.orientationOut_[2] = out.z;
+  this.orientationOut_[3] = out.w;
+  return this.orientationOut_;
+};
+
+FusionPoseSensor.prototype.resetPose = function() {
+  // Reduce to inverted yaw-only.
+  this.resetQ.copy(this.filter.getOrientation());
+  this.resetQ.x = 0;
+  this.resetQ.y = 0;
+  this.resetQ.z *= -1;
+  this.resetQ.normalize();
+
+  // Take into account extra transformations in landscape mode.
+  if (Util.isLandscapeMode()) {
+    this.resetQ.multiply(this.inverseWorldToScreenQ);
+  }
+
+  // Take into account original pose.
+  this.resetQ.multiply(this.originalPoseAdjustQ);
+
+  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
+    this.touchPanner.resetSensor();
+  }
+};
+
+FusionPoseSensor.prototype.onDeviceMotionChange_ = function(deviceMotion) {
+  var accGravity = deviceMotion.accelerationIncludingGravity;
+  var rotRate = deviceMotion.rotationRate;
+  var timestampS = deviceMotion.timeStamp / 1000;
+
+  // Firefox Android timeStamp returns one thousandth of a millisecond.
+  if (this.isFirefoxAndroid) {
+    timestampS /= 1000;
+  }
+
+  var deltaS = timestampS - this.previousTimestampS;
+  if (deltaS <= Util.MIN_TIMESTEP || deltaS > Util.MAX_TIMESTEP) {
+    console.warn('Invalid timestamps detected. Time step between successive ' +
+                 'gyroscope sensor samples is very small or not monotonic');
+    this.previousTimestampS = timestampS;
+    return;
+  }
+  this.accelerometer.set(-accGravity.x, -accGravity.y, -accGravity.z);
+  this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
+
+  // With iOS and Firefox Android, rotationRate is reported in degrees,
+  // so we first convert to radians.
+  if (this.isIOS || this.isFirefoxAndroid) {
+    this.gyroscope.multiplyScalar(Math.PI / 180);
+  }
+
+  this.filter.addAccelMeasurement(this.accelerometer, timestampS);
+  this.filter.addGyroMeasurement(this.gyroscope, timestampS);
+
+  this.previousTimestampS = timestampS;
+};
+
+FusionPoseSensor.prototype.onScreenOrientationChange_ =
+    function(screenOrientation) {
+  this.setScreenTransform_();
+};
+
+FusionPoseSensor.prototype.setScreenTransform_ = function() {
+  this.worldToScreenQ.set(0, 0, 0, 1);
+  switch (window.orientation) {
+    case 0:
+      break;
+    case 90:
+      this.worldToScreenQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1), -Math.PI / 2);
+      break;
+    case -90:
+      this.worldToScreenQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1), Math.PI / 2);
+      break;
+    case 180:
+      // TODO.
+      break;
+  }
+  this.inverseWorldToScreenQ.copy(this.worldToScreenQ);
+  this.inverseWorldToScreenQ.inverse();
+};
+
+module.exports = FusionPoseSensor;
+
+},{"../math-util.js":14,"../touch-panner.js":21,"../util.js":22,"./complementary-filter.js":17,"./pose-predictor.js":19}],19:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var MathUtil = _dereq_('../math-util.js');
+var DEBUG = false;
+
+/**
+ * Given an orientation and the gyroscope data, predicts the future orientation
+ * of the head. This makes rendering appear faster.
+ *
+ * Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf
+ *
+ * @param {Number} predictionTimeS time from head movement to the appearance of
+ * the corresponding image.
+ */
+function PosePredictor(predictionTimeS) {
+  this.predictionTimeS = predictionTimeS;
+
+  // The quaternion corresponding to the previous state.
+  this.previousQ = new MathUtil.Quaternion();
+  // Previous time a prediction occurred.
+  this.previousTimestampS = null;
+
+  // The delta quaternion that adjusts the current pose.
+  this.deltaQ = new MathUtil.Quaternion();
+  // The output quaternion.
+  this.outQ = new MathUtil.Quaternion();
+}
+
+PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
+  if (!this.previousTimestampS) {
+    this.previousQ.copy(currentQ);
+    this.previousTimestampS = timestampS;
+    return currentQ;
+  }
+
+  // Calculate axis and angle based on gyroscope rotation rate data.
+  var axis = new MathUtil.Vector3();
+  axis.copy(gyro);
+  axis.normalize();
+
+  var angularSpeed = gyro.length();
+
+  // If we're rotating slowly, don't do prediction.
+  if (angularSpeed < MathUtil.degToRad * 20) {
+    if (DEBUG) {
+      console.log('Moving slowly, at %s deg/s: no prediction',
+                  (MathUtil.radToDeg * angularSpeed).toFixed(1));
+    }
+    this.outQ.copy(currentQ);
+    this.previousQ.copy(currentQ);
+    return this.outQ;
+  }
+
+  // Get the predicted angle based on the time delta and latency.
+  var deltaT = timestampS - this.previousTimestampS;
+  var predictAngle = angularSpeed * this.predictionTimeS;
+
+  this.deltaQ.setFromAxisAngle(axis, predictAngle);
+  this.outQ.copy(this.previousQ);
+  this.outQ.multiply(this.deltaQ);
+
+  this.previousQ.copy(currentQ);
+
+  return this.outQ;
+};
+
+
+module.exports = PosePredictor;
+
+},{"../math-util.js":14}],20:[function(_dereq_,module,exports){
+function SensorSample(sample, timestampS) {
+  this.set(sample, timestampS);
+};
+
+SensorSample.prototype.set = function(sample, timestampS) {
+  this.sample = sample;
+  this.timestampS = timestampS;
+};
+
+SensorSample.prototype.copy = function(sensorSample) {
+  this.set(sensorSample.sample, sensorSample.timestampS);
+};
+
+module.exports = SensorSample;
+
+},{}],21:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var MathUtil = _dereq_('./math-util.js');
+var Util = _dereq_('./util.js');
+
+var ROTATE_SPEED = 0.5;
+/**
+ * Provides a quaternion responsible for pre-panning the scene before further
+ * transformations due to device sensors.
+ */
+function TouchPanner() {
+  window.addEventListener('touchstart', this.onTouchStart_.bind(this));
+  window.addEventListener('touchmove', this.onTouchMove_.bind(this));
+  window.addEventListener('touchend', this.onTouchEnd_.bind(this));
+
+  this.isTouching = false;
+  this.rotateStart = new MathUtil.Vector2();
+  this.rotateEnd = new MathUtil.Vector2();
+  this.rotateDelta = new MathUtil.Vector2();
+
+  this.theta = 0;
+  this.orientation = new MathUtil.Quaternion();
+}
+
+TouchPanner.prototype.getOrientation = function() {
+  this.orientation.setFromEulerXYZ(0, 0, this.theta);
+  return this.orientation;
+};
+
+TouchPanner.prototype.resetSensor = function() {
+  this.theta = 0;
+};
+
+TouchPanner.prototype.onTouchStart_ = function(e) {
+  // Only respond if there is exactly one touch.
+  if (e.touches.length != 1) {
+    return;
+  }
+  this.rotateStart.set(e.touches[0].pageX, e.touches[0].pageY);
+  this.isTouching = true;
+};
+
+TouchPanner.prototype.onTouchMove_ = function(e) {
+  if (!this.isTouching) {
+    return;
+  }
+  this.rotateEnd.set(e.touches[0].pageX, e.touches[0].pageY);
+  this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart);
+  this.rotateStart.copy(this.rotateEnd);
+
+  // On iOS, direction is inverted.
+  if (Util.isIOS()) {
+    this.rotateDelta.x *= -1;
+  }
+
+  var element = document.body;
+  this.theta += 2 * Math.PI * this.rotateDelta.x / element.clientWidth * ROTATE_SPEED;
+};
+
+TouchPanner.prototype.onTouchEnd_ = function(e) {
+  this.isTouching = false;
+};
+
+module.exports = TouchPanner;
+
+},{"./math-util.js":14,"./util.js":22}],22:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var objectAssign = _dereq_('object-assign');
+
+var Util = window.Util || {};
+
+Util.MIN_TIMESTEP = 0.001;
+Util.MAX_TIMESTEP = 1;
+
+Util.base64 = function(mimeType, base64) {
+  return 'data:' + mimeType + ';base64,' + base64;
+};
+
+Util.clamp = function(value, min, max) {
+  return Math.min(Math.max(min, value), max);
+};
+
+Util.lerp = function(a, b, t) {
+  return a + ((b - a) * t);
+};
+
+Util.isIOS = (function() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
+  return function() {
+    return isIOS;
+  };
+})();
+
+Util.isSafari = (function() {
+  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  return function() {
+    return isSafari;
+  };
+})();
+
+Util.isFirefoxAndroid = (function() {
+  var isFirefoxAndroid = navigator.userAgent.indexOf('Firefox') !== -1 &&
+      navigator.userAgent.indexOf('Android') !== -1;
+  return function() {
+    return isFirefoxAndroid;
+  };
+})();
+
+Util.isLandscapeMode = function() {
+  return (window.orientation == 90 || window.orientation == -90);
+};
+
+// Helper method to validate the time steps of sensor timestamps.
+Util.isTimestampDeltaValid = function(timestampDeltaS) {
+  if (isNaN(timestampDeltaS)) {
+    return false;
+  }
+  if (timestampDeltaS <= Util.MIN_TIMESTEP) {
+    return false;
+  }
+  if (timestampDeltaS > Util.MAX_TIMESTEP) {
+    return false;
+  }
+  return true;
+};
+
+Util.getScreenWidth = function() {
+  return Math.max(window.screen.width, window.screen.height) *
+      window.devicePixelRatio;
+};
+
+Util.getScreenHeight = function() {
+  return Math.min(window.screen.width, window.screen.height) *
+      window.devicePixelRatio;
+};
+
+Util.requestFullscreen = function(element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  } else {
+    return false;
+  }
+
+  return true;
+};
+
+Util.exitFullscreen = function() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  } else {
+    return false;
+  }
+
+  return true;
+};
+
+Util.getFullscreenElement = function() {
+  return document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement;
+};
+
+Util.linkProgram = function(gl, vertexSource, fragmentSource, attribLocationMap) {
+  // No error checking for brevity.
+  var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vertexShader, vertexSource);
+  gl.compileShader(vertexShader);
+
+  var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fragmentShader, fragmentSource);
+  gl.compileShader(fragmentShader);
+
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+
+  for (var attribName in attribLocationMap)
+    gl.bindAttribLocation(program, attribLocationMap[attribName], attribName);
+
+  gl.linkProgram(program);
+
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+
+  return program;
+};
+
+Util.getProgramUniforms = function(gl, program) {
+  var uniforms = {};
+  var uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+  var uniformName = '';
+  for (var i = 0; i < uniformCount; i++) {
+    var uniformInfo = gl.getActiveUniform(program, i);
+    uniformName = uniformInfo.name.replace('[0]', '');
+    uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+  }
+  return uniforms;
+};
+
+Util.orthoMatrix = function (out, left, right, bottom, top, near, far) {
+  var lr = 1 / (left - right),
+      bt = 1 / (bottom - top),
+      nf = 1 / (near - far);
+  out[0] = -2 * lr;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = -2 * bt;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 2 * nf;
+  out[11] = 0;
+  out[12] = (left + right) * lr;
+  out[13] = (top + bottom) * bt;
+  out[14] = (far + near) * nf;
+  out[15] = 1;
+  return out;
+};
+
+Util.isMobile = function() {
+  var check = false;
+  (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
+  return check;
+};
+
+Util.extend = objectAssign;
+
+Util.safariCssSizeWorkaround = function(canvas) {
+  // TODO(smus): Remove this workaround when Safari for iOS is fixed.
+  // iOS only workaround (for https://bugs.webkit.org/show_bug.cgi?id=152556).
+  //
+  // "To the last I grapple with thee;
+  //  from hell's heart I stab at thee;
+  //  for hate's sake I spit my last breath at thee."
+  // -- Moby Dick, by Herman Melville
+  if (Util.isIOS()) {
+    var width = canvas.style.width;
+    var height = canvas.style.height;
+    canvas.style.width = (parseInt(width) + 1) + 'px';
+    canvas.style.height = (parseInt(height)) + 'px';
+    console.log('Resetting width to...', width);
+    setTimeout(function() {
+      console.log('Done. Width is now', width);
+      canvas.style.width = width;
+      canvas.style.height = height;
+    }, 100);
+  }
+
+  // Debug only.
+  window.Util = Util;
+  window.canvas = canvas;
+};
+
+module.exports = Util;
+
+},{"object-assign":1}],23:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var Emitter = _dereq_('./emitter.js');
+var Util = _dereq_('./util.js');
+var DeviceInfo = _dereq_('./device-info.js');
+
+var DEFAULT_VIEWER = 'CardboardV1';
+var VIEWER_KEY = 'WEBVR_CARDBOARD_VIEWER';
+var CLASS_NAME = 'webvr-polyfill-viewer-selector';
+
+/**
+ * Creates a viewer selector with the options specified. Supports being shown
+ * and hidden. Generates events when viewer parameters change. Also supports
+ * saving the currently selected index in localStorage.
+ */
+function ViewerSelector() {
+  // Try to load the selected key from local storage. If none exists, use the
+  // default key.
+  try {
+    this.selectedKey = localStorage.getItem(VIEWER_KEY) || DEFAULT_VIEWER;
+  } catch (error) {
+    console.error('Failed to load viewer profile: %s', error);
+  }
+  this.dialog = this.createDialog_(DeviceInfo.Viewers);
+  this.root = null;
+}
+ViewerSelector.prototype = new Emitter();
+
+ViewerSelector.prototype.show = function(root) {
+  this.root = root;
+
+  root.appendChild(this.dialog);
+  //console.log('ViewerSelector.show');
+
+  // Ensure the currently selected item is checked.
+  var selected = this.dialog.querySelector('#' + this.selectedKey);
+  selected.checked = true;
+
+  // Show the UI.
+  this.dialog.style.display = 'block';
+};
+
+ViewerSelector.prototype.hide = function() {
+  if (this.root && this.root.contains(this.dialog)) {
+    this.root.removeChild(this.dialog);
+  }
+  //console.log('ViewerSelector.hide');
+  this.dialog.style.display = 'none';
+};
+
+ViewerSelector.prototype.getCurrentViewer = function() {
+  return DeviceInfo.Viewers[this.selectedKey];
+};
+
+ViewerSelector.prototype.getSelectedKey_ = function() {
+  var input = this.dialog.querySelector('input[name=field]:checked');
+  if (input) {
+    return input.id;
+  }
+  return null;
+};
+
+ViewerSelector.prototype.onSave_ = function() {
+  this.selectedKey = this.getSelectedKey_();
+  if (!this.selectedKey || !DeviceInfo.Viewers[this.selectedKey]) {
+    console.error('ViewerSelector.onSave_: this should never happen!');
+    return;
+  }
+
+  this.emit('change', DeviceInfo.Viewers[this.selectedKey]);
+
+  // Attempt to save the viewer profile, but fails in private mode.
+  try {
+    localStorage.setItem(VIEWER_KEY, this.selectedKey);
+  } catch(error) {
+    console.error('Failed to save viewer profile: %s', error);
+  }
+  this.hide();
+};
+
+/**
+ * Creates the dialog.
+ */
+ViewerSelector.prototype.createDialog_ = function(options) {
+  var container = document.createElement('div');
+  container.classList.add(CLASS_NAME);
+  container.style.display = 'none';
+  // Create an overlay that dims the background, and which goes away when you
+  // tap it.
+  var overlay = document.createElement('div');
+  var s = overlay.style;
+  s.position = 'fixed';
+  s.left = 0;
+  s.top = 0;
+  s.width = '100%';
+  s.height = '100%';
+  s.background = 'rgba(0, 0, 0, 0.3)';
+  overlay.addEventListener('click', this.hide.bind(this));
+
+  var width = 280;
+  var dialog = document.createElement('div');
+  var s = dialog.style;
+  s.boxSizing = 'border-box';
+  s.position = 'fixed';
+  s.top = '24px';
+  s.left = '50%';
+  s.marginLeft = (-width/2) + 'px';
+  s.width = width + 'px';
+  s.padding = '24px';
+  s.overflow = 'hidden';
+  s.background = '#fafafa';
+  s.fontFamily = "'Roboto', sans-serif";
+  s.boxShadow = '0px 5px 20px #666';
+
+  dialog.appendChild(this.createH1_('Select your viewer'));
+  for (var id in options) {
+    dialog.appendChild(this.createChoice_(id, options[id].label));
+  }
+  dialog.appendChild(this.createButton_('Save', this.onSave_.bind(this)));
+
+  container.appendChild(overlay);
+  container.appendChild(dialog);
+
+  return container;
+};
+
+ViewerSelector.prototype.createH1_ = function(name) {
+  var h1 = document.createElement('h1');
+  var s = h1.style;
+  s.color = 'black';
+  s.fontSize = '20px';
+  s.fontWeight = 'bold';
+  s.marginTop = 0;
+  s.marginBottom = '24px';
+  h1.innerHTML = name;
+  return h1;
+};
+
+ViewerSelector.prototype.createChoice_ = function(id, name) {
+  /*
+  <div class="choice">
+  <input id="v1" type="radio" name="field" value="v1">
+  <label for="v1">Cardboard V1</label>
+  </div>
+  */
+  var div = document.createElement('div');
+  div.style.marginTop = '8px';
+  div.style.color = 'black';
+
+  var input = document.createElement('input');
+  input.style.fontSize = '30px';
+  input.setAttribute('id', id);
+  input.setAttribute('type', 'radio');
+  input.setAttribute('value', id);
+  input.setAttribute('name', 'field');
+
+  var label = document.createElement('label');
+  label.style.marginLeft = '4px';
+  label.setAttribute('for', id);
+  label.innerHTML = name;
+
+  div.appendChild(input);
+  div.appendChild(label);
+
+  return div;
+};
+
+ViewerSelector.prototype.createButton_ = function(label, onclick) {
+  var button = document.createElement('button');
+  button.innerHTML = label;
+  var s = button.style;
+  s.float = 'right';
+  s.textTransform = 'uppercase';
+  s.color = '#1094f7';
+  s.fontSize = '14px';
+  s.letterSpacing = 0;
+  s.border = 0;
+  s.background = 'none';
+  s.marginTop = '16px';
+
+  button.addEventListener('click', onclick);
+
+  return button;
+};
+
+module.exports = ViewerSelector;
+
+},{"./device-info.js":7,"./emitter.js":12,"./util.js":22}],24:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var Util = _dereq_('./util.js');
+
+/**
+ * Android and iOS compatible wakelock implementation.
+ *
+ * Refactored thanks to dkovalev@.
+ */
+function AndroidWakeLock() {
+  var video = document.createElement('video');
+
+  video.addEventListener('ended', function() {
+    video.play();
+  });
+
+  this.request = function() {
+    if (video.paused) {
+      // Base64 version of videos_src/no-sleep-120s.mp4.
+      video.src = Util.base64('video/mp4', 'AAAAGGZ0eXBpc29tAAAAAG1wNDFhdmMxAAAIA21vb3YAAABsbXZoZAAAAADSa9v60mvb+gABX5AAlw/gAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAdkdHJhawAAAFx0a2hkAAAAAdJr2/rSa9v6AAAAAQAAAAAAlw/gAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAHAAAAAAAJGVkdHMAAAAcZWxzdAAAAAAAAAABAJcP4AAAAAAAAQAAAAAG3G1kaWEAAAAgbWRoZAAAAADSa9v60mvb+gAPQkAGjneAFccAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAABodtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAZHc3RibAAAAJdzdHNkAAAAAAAAAAEAAACHYXZjMQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAMABwASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAADFhdmNDAWQAC//hABlnZAALrNlfllw4QAAAAwBAAAADAKPFCmWAAQAFaOvssiwAAAAYc3R0cwAAAAAAAAABAAAAbgAPQkAAAAAUc3RzcwAAAAAAAAABAAAAAQAAA4BjdHRzAAAAAAAAAG4AAAABAD0JAAAAAAEAehIAAAAAAQA9CQAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEALcbAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAABuAAAAAQAAAcxzdHN6AAAAAAAAAAAAAABuAAADCQAAABgAAAAOAAAADgAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABMAAAAUc3RjbwAAAAAAAAABAAAIKwAAACt1ZHRhAAAAI6llbmMAFwAAdmxjIDIuMi4xIHN0cmVhbSBvdXRwdXQAAAAId2lkZQAACRRtZGF0AAACrgX//6vcRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTQyIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNCAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDEzIG1lPWhleCBzdWJtZT03IHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0xIDh4OGRjdD0xIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MTIgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1hYnIgbWJ0cmVlPTEgYml0cmF0ZT0xMDAgcmF0ZXRvbD0xLjAgcWNvbXA9MC42MCBxcG1pbj0xMCBxcG1heD01MSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAU2WIhAAQ/8ltlOe+cTZuGkKg+aRtuivcDZ0pBsfsEi9p/i1yU9DxS2lq4dXTinViF1URBKXgnzKBd/Uh1bkhHtMrwrRcOJslD01UB+fyaL6ef+DBAAAAFEGaJGxBD5B+v+a+4QqF3MgBXz9MAAAACkGeQniH/+94r6EAAAAKAZ5hdEN/8QytwAAAAAgBnmNqQ3/EgQAAAA5BmmhJqEFomUwIIf/+4QAAAApBnoZFESw//76BAAAACAGepXRDf8SBAAAACAGep2pDf8SAAAAADkGarEmoQWyZTAgh//7gAAAACkGeykUVLD//voEAAAAIAZ7pdEN/xIAAAAAIAZ7rakN/xIAAAAAOQZrwSahBbJlMCCH//uEAAAAKQZ8ORRUsP/++gQAAAAgBny10Q3/EgQAAAAgBny9qQ3/EgAAAAA5BmzRJqEFsmUwIIf/+4AAAAApBn1JFFSw//76BAAAACAGfcXRDf8SAAAAACAGfc2pDf8SAAAAADkGbeEmoQWyZTAgh//7hAAAACkGflkUVLD//voAAAAAIAZ+1dEN/xIEAAAAIAZ+3akN/xIEAAAAOQZu8SahBbJlMCCH//uAAAAAKQZ/aRRUsP/++gQAAAAgBn/l0Q3/EgAAAAAgBn/tqQ3/EgQAAAA5Bm+BJqEFsmUwIIf/+4QAAAApBnh5FFSw//76AAAAACAGePXRDf8SAAAAACAGeP2pDf8SBAAAADkGaJEmoQWyZTAgh//7gAAAACkGeQkUVLD//voEAAAAIAZ5hdEN/xIAAAAAIAZ5jakN/xIEAAAAOQZpoSahBbJlMCCH//uEAAAAKQZ6GRRUsP/++gQAAAAgBnqV0Q3/EgQAAAAgBnqdqQ3/EgAAAAA5BmqxJqEFsmUwIIf/+4AAAAApBnspFFSw//76BAAAACAGe6XRDf8SAAAAACAGe62pDf8SAAAAADkGa8EmoQWyZTAgh//7hAAAACkGfDkUVLD//voEAAAAIAZ8tdEN/xIEAAAAIAZ8vakN/xIAAAAAOQZs0SahBbJlMCCH//uAAAAAKQZ9SRRUsP/++gQAAAAgBn3F0Q3/EgAAAAAgBn3NqQ3/EgAAAAA5Bm3hJqEFsmUwIIf/+4QAAAApBn5ZFFSw//76AAAAACAGftXRDf8SBAAAACAGft2pDf8SBAAAADkGbvEmoQWyZTAgh//7gAAAACkGf2kUVLD//voEAAAAIAZ/5dEN/xIAAAAAIAZ/7akN/xIEAAAAOQZvgSahBbJlMCCH//uEAAAAKQZ4eRRUsP/++gAAAAAgBnj10Q3/EgAAAAAgBnj9qQ3/EgQAAAA5BmiRJqEFsmUwIIf/+4AAAAApBnkJFFSw//76BAAAACAGeYXRDf8SAAAAACAGeY2pDf8SBAAAADkGaaEmoQWyZTAgh//7hAAAACkGehkUVLD//voEAAAAIAZ6ldEN/xIEAAAAIAZ6nakN/xIAAAAAOQZqsSahBbJlMCCH//uAAAAAKQZ7KRRUsP/++gQAAAAgBnul0Q3/EgAAAAAgBnutqQ3/EgAAAAA5BmvBJqEFsmUwIIf/+4QAAAApBnw5FFSw//76BAAAACAGfLXRDf8SBAAAACAGfL2pDf8SAAAAADkGbNEmoQWyZTAgh//7gAAAACkGfUkUVLD//voEAAAAIAZ9xdEN/xIAAAAAIAZ9zakN/xIAAAAAOQZt4SahBbJlMCCH//uEAAAAKQZ+WRRUsP/++gAAAAAgBn7V0Q3/EgQAAAAgBn7dqQ3/EgQAAAA5Bm7xJqEFsmUwIIf/+4AAAAApBn9pFFSw//76BAAAACAGf+XRDf8SAAAAACAGf+2pDf8SBAAAADkGb4EmoQWyZTAgh//7hAAAACkGeHkUVLD//voAAAAAIAZ49dEN/xIAAAAAIAZ4/akN/xIEAAAAOQZokSahBbJlMCCH//uAAAAAKQZ5CRRUsP/++gQAAAAgBnmF0Q3/EgAAAAAgBnmNqQ3/EgQAAAA5BmmhJqEFsmUwIIf/+4QAAAApBnoZFFSw//76BAAAACAGepXRDf8SBAAAACAGep2pDf8SAAAAADkGarEmoQWyZTAgh//7gAAAACkGeykUVLD//voEAAAAIAZ7pdEN/xIAAAAAIAZ7rakN/xIAAAAAPQZruSahBbJlMFEw3//7B');
+      video.play();
     }
   };
 
-  // exposes Hashes
-  (function(window, undefined) {
-    var freeExports = false;
-    if (typeof exports === 'object') {
-      freeExports = exports;
-      if (exports && typeof global === 'object' && global && global === global.global) {
-        window = global;
-      }
-    }
+  this.release = function() {
+    video.pause();
+    video.src = '';
+  };
+}
 
-    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
-      // define as an anonymous module, so, through path mapping, it can be aliased
-      define(function() {
-        return Hashes;
+function iOSWakeLock() {
+  var timer = null;
+
+  this.request = function() {
+    if (!timer) {
+      timer = setInterval(function() {
+        window.location = window.location;
+        setTimeout(window.stop, 0);
+      }, 30000);
+    }
+  }
+
+  this.release = function() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+}
+
+
+function getWakeLock() {
+  var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  if (userAgent.match(/iPhone/i) || userAgent.match(/iPod/i)) {
+    return iOSWakeLock;
+  } else {
+    return AndroidWakeLock;
+  }
+}
+
+module.exports = getWakeLock();
+},{"./util.js":22}],25:[function(_dereq_,module,exports){
+/*
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var CardboardVRDisplay = _dereq_('./cardboard-vr-display.js');
+var MouseKeyboardVRDisplay = _dereq_('./mouse-keyboard-vr-display.js');
+// Uncomment to add positional tracking via webcam.
+//var WebcamPositionSensorVRDevice = require('./webcam-position-sensor-vr-device.js');
+var VRDisplay = _dereq_('./base.js').VRDisplay;
+var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
+var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
+var VRDisplayHMDDevice = _dereq_('./display-wrappers.js').VRDisplayHMDDevice;
+var VRDisplayPositionSensorDevice = _dereq_('./display-wrappers.js').VRDisplayPositionSensorDevice;
+
+function WebVRPolyfill() {
+  this.displays = [];
+  this.devices = []; // For deprecated objects
+  this.devicesPopulated = false;
+  this.nativeWebVRAvailable = this.isWebVRAvailable();
+  this.nativeLegacyWebVRAvailable = this.isDeprecatedWebVRAvailable();
+
+  if (!this.nativeLegacyWebVRAvailable) {
+    if (!this.nativeWebVRAvailable) {
+      this.enablePolyfill();
+    }
+    if (WebVRConfig.ENABLE_DEPRECATED_API) {
+      this.enableDeprecatedPolyfill();
+    }
+  }
+}
+
+WebVRPolyfill.prototype.isWebVRAvailable = function() {
+  return ('getVRDisplays' in navigator);
+};
+
+WebVRPolyfill.prototype.isDeprecatedWebVRAvailable = function() {
+  return ('getVRDevices' in navigator) || ('mozGetVRDevices' in navigator);
+};
+
+WebVRPolyfill.prototype.populateDevices = function() {
+  if (this.devicesPopulated) {
+    return;
+  }
+
+  // Initialize our virtual VR devices.
+  var vrDisplay = null;
+
+  // Add a Cardboard VRDisplay on compatible mobile devices
+  if (this.isCardboardCompatible()) {
+    vrDisplay = new CardboardVRDisplay();
+    this.displays.push(vrDisplay);
+
+    // For backwards compatibility
+    if (WebVRConfig.ENABLE_DEPRECATED_API) {
+      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
+      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
+    }
+  }
+
+  // Add a Mouse and Keyboard driven VRDisplay for desktops/laptops
+  if (!this.isMobile() && !WebVRConfig.MOUSE_KEYBOARD_CONTROLS_DISABLED) {
+    vrDisplay = new MouseKeyboardVRDisplay();
+    this.displays.push(vrDisplay);
+
+    // For backwards compatibility
+    if (WebVRConfig.ENABLE_DEPRECATED_API) {
+      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
+      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
+    }
+  }
+
+  // Uncomment to add positional tracking via webcam.
+  //if (!this.isMobile() && WebVRConfig.ENABLE_DEPRECATED_API) {
+  //  positionDevice = new WebcamPositionSensorVRDevice();
+  //  this.devices.push(positionDevice);
+  //}
+
+  this.devicesPopulated = true;
+};
+
+WebVRPolyfill.prototype.enablePolyfill = function() {
+  // Provide navigator.getVRDisplays.
+  navigator.getVRDisplays = this.getVRDisplays.bind(this);
+
+  // Provide the VRDisplay object.
+  window.VRDisplay = VRDisplay;
+};
+
+WebVRPolyfill.prototype.enableDeprecatedPolyfill = function() {
+  // Provide navigator.getVRDevices.
+  navigator.getVRDevices = this.getVRDevices.bind(this);
+
+  // Provide the CardboardHMDVRDevice and PositionSensorVRDevice objects.
+  window.HMDVRDevice = HMDVRDevice;
+  window.PositionSensorVRDevice = PositionSensorVRDevice;
+};
+
+WebVRPolyfill.prototype.getVRDisplays = function() {
+  this.populateDevices();
+  var displays = this.displays;
+  return new Promise(function(resolve, reject) {
+    try {
+      resolve(displays);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+WebVRPolyfill.prototype.getVRDevices = function() {
+  console.warn('getVRDevices is deprecated. Please update your code to use getVRDisplays instead.');
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    try {
+      if (!self.devicesPopulated) {
+        if (self.nativeWebVRAvailable) {
+          return navigator.getVRDisplays(function(displays) {
+            for (var i = 0; i < displays.length; ++i) {
+              self.devices.push(new VRDisplayHMDDevice(displays[i]));
+              self.devices.push(new VRDisplayPositionSensorDevice(displays[i]));
+            }
+            self.devicesPopulated = true;
+            resolve(self.devices);
+          }, reject);
+        }
+
+        if (self.nativeLegacyWebVRAvailable) {
+          return (navigator.getVRDDevices || navigator.mozGetVRDevices)(function(devices) {
+            for (var i = 0; i < devices.length; ++i) {
+              if (devices[i] instanceof HMDVRDevice) {
+                self.devices.push(devices[i]);
+              }
+              if (devices[i] instanceof PositionSensorVRDevice) {
+                self.devices.push(devices[i]);
+              }
+            }
+            self.devicesPopulated = true;
+            resolve(self.devices);
+          }, reject);
+        }
+      }
+
+      self.populateDevices();
+      resolve(self.devices);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+/**
+ * Determine if a device is mobile.
+ */
+WebVRPolyfill.prototype.isMobile = function() {
+  return /Android/i.test(navigator.userAgent) ||
+      /iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
+WebVRPolyfill.prototype.isCardboardCompatible = function() {
+  // For now, support all iOS and Android devices.
+  // Also enable the WebVRConfig.FORCE_VR flag for debugging.
+  return this.isMobile() || WebVRConfig.FORCE_ENABLE_VR;
+};
+
+module.exports = WebVRPolyfill;
+
+},{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.AsyncLockRequest = factory();
+  }
+}(this, function() {
+"use strict";
+
+function findProperty(elem, arr) {
+  for (var i = 0; i < arr.length; ++i) {
+    if (elem[arr[i]] !== undefined) {
+      return arr[i];
+    }
+  }
+}
+
+function AsyncLockRequest(name, elementOpts, changeEventOpts, errorEventOpts, requestMethodOpts, exitMethodOpts, testExtraParam) {
+  var elementName = findProperty(document, elementOpts),
+      changeEventName = findProperty(document, changeEventOpts),
+      errorEventName = findProperty(document, errorEventOpts),
+      requestMethodName = findProperty(document.documentElement, requestMethodOpts),
+      exitMethodName = findProperty(document, exitMethodOpts),
+      changeTimeout = null;
+
+  changeEventName = changeEventName && changeEventName.substring(2);
+  errorEventName = errorEventName && errorEventName.substring(2);
+
+  var ns = {
+    addChangeListener: function addChangeListener(thunk, bubbles) {
+      return document.addEventListener(changeEventName, thunk, bubbles);
+    },
+    removeChangeListener: function removeChangeListener(thunk) {
+      return document.removeEventListener(changeEventName, thunk);
+    },
+    addErrorListener: function addErrorListener(thunk, bubbles) {
+      return document.addEventListener(errorEventName, thunk, bubbles);
+    },
+    removeErrorListener: function removeErrorListener(thunk) {
+      return document.removeEventListener(errorEventName, thunk);
+    },
+    withChange: function withChange(act) {
+      return new Promise(function (resolve, reject) {
+        var onSuccess = function onSuccess() {
+          setTimeout(tearDown);
+          resolve(ns.element);
+        },
+            onError = function onError(evt) {
+          setTimeout(tearDown);
+          reject(evt);
+        },
+            stop = function stop() {
+          if (changeTimeout) {
+            clearTimeout(changeTimeout);
+            changeTimeout = null;
+          }
+        },
+            tearDown = function tearDown() {
+          stop();
+          ns.removeChangeListener(onSuccess);
+          ns.removeErrorListener(onError);
+        };
+
+        ns.addChangeListener(onSuccess, false);
+        ns.addErrorListener(onError, false);
+
+        if (act()) {
+          // we've already gotten lock, so don't wait for it.
+          tearDown();
+          resolve(ns.element);
+        } else {
+          // Timeout waiting on the lock to happen, for systems like iOS that
+          // don't properly support it, even though they say they do.
+          stop();
+          changeTimeout = setTimeout(function () {
+            tearDown();
+            reject(name + " state did not change in allotted time");
+          }, 1000);
+        }
       });
-    } else if (freeExports) {
-      // in Node.js or RingoJS v0.8.0+
-      if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = Hashes;
+    },
+    request: function request(elem, extraParam) {
+      if (testExtraParam) {
+        extraParam = testExtraParam(extraParam);
       }
-      // in Narwhal or RingoJS v0.7.0-
-      else {
-        freeExports.Hashes = Hashes;
-      }
-    } else {
-      // in a browser or Rhino
-      window.Hashes = Hashes;
+      return ns.withChange(function () {
+        if (!requestMethodName) {
+          throw new Error("No " + name + " API support.");
+        } else if (ns.isActive) {
+          return true;
+        } else if (extraParam) {
+          elem[requestMethodName](extraParam);
+        } else if (isChrome) {
+          elem[requestMethodName](window.Element.ALLOW_KEYBOARD_INPUT);
+        } else {
+          elem[requestMethodName]();
+        }
+      });
+    },
+    exit: function exit() {
+      return ns.withChange(function () {
+        if (!exitMethodName) {
+          throw new Error("No Fullscreen API support.");
+        } else if (!ns.isActive) {
+          return true;
+        } else {
+          document[exitMethodName]();
+        }
+      });
     }
-  }(this));
-}()); // IIFE
+  };
 
+  Object.defineProperties(ns, {
+    element: {
+      get: function get() {
+        return document[elementName];
+      }
+    },
+    isActive: {
+      get: function get() {
+        return !!document[elementName];
+      }
+    }
+  });
+
+  return ns;
+}
+return AsyncLockRequest;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.FullScreen = factory();
+  }
+}(this, function() {
+"use strict";
+
+var FullScreen = AsyncLockRequest("Fullscreen", ["fullscreenElement", "mozFullScreenElement", "webkitFullscreenElement", "msFullscreenElement"], ["onfullscreenchange", "onmozfullscreenchange", "onwebkitfullscreenchange", "onmsfullscreenchange"], ["onfullscreenerror", "onmozfullscreenerror", "onwebkitfullscreenerror", "onmsfullscreenerror"], ["requestFullscreen", "mozRequestFullScreen", "webkitRequestFullscreen", "webkitRequestFullScreen", "msRequestFullscreen"], ["exitFullscreen", "mozExitFullScreen", "webkitExitFullscreen", "webkitExitFullScreen", "msExitFullscreen"], function (arg) {
+  return arg || isChrome && window.Element.ALLOW_KEYBOARD_INPUT || undefined;
+});
+return FullScreen;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.Orientation = factory();
+  }
+}(this, function() {
+"use strict";
+
+function lockOrientation() {
+  var type = screen.orientation && screen.orientation.type || screen.mozOrientation || "";
+  if (type.indexOf("landscape") === -1) {
+    type = "landscape-primary";
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    return screen.orientation.lock(type);
+  } else if (screen.mozLockOrientation) {
+    var locked = screen.mozLockOrientation(type);
+    if (locked) {
+      return Promise.resolve();
+    }
+  } else {
+    return Promise.reject();
+  }
+}
+
+function unlockOrientation() {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  } else if (screen.mozUnlockOrientation) {
+    screen.mozUnlockOrientation();
+  }
+}
+
+var Orientation = {
+  lock: lockOrientation,
+  unlock: unlockOrientation
+};
+return Orientation;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.PointerLock = factory();
+  }
+}(this, function() {
+"use strict";
+
+var PointerLock = AsyncLockRequest("Pointer Lock", ["pointerLockElement", "mozPointerLockElement", "webkitPointerLockElement"], ["onpointerlockchange", "onmozpointerlockchange", "onwebkitpointerlockchange"], ["onpointerlockerror", "onmozpointerlockerror", "onwebkitpointerlockerror"], ["requestPointerLock", "mozRequestPointerLock", "webkitRequestPointerLock", "webkitRequestPointerLock"], ["exitPointerLock", "mozExitPointerLock", "webkitExitPointerLock", "webkitExitPointerLock"]);
+return PointerLock;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.StandardMonitor = factory();
+  }
+}(this, function() {
+"use strict";
+
+function noop() {}
+
+function immutable(value) {
+  return {
+    get: function get() {
+      return value;
+    }
+  };
+}
+
+function StandardMonitor(display) {
+
+  var depthNear = 0.01,
+      depthFar = 10000.0,
+      capabilities = {},
+      currentLayers = [],
+      fireDisplayPresentChange = function (evt) {
+    if (!this.isPresenting) {
+      FullScreen.removeChangeListener(fireDisplayPresentChange);
+    }
+    window.dispatchEvent(new Event("vrdisplaypresentchange"));
+  }.bind(this);
+
+  Object.defineProperties(capabilities, {
+    hasPosition: immutable(false),
+    hasOrientation: immutable(isMobile),
+    hasExternalDisplay: immutable(false),
+    canPresent: immutable(true),
+    maxLayers: immutable(1)
+  });
+
+  function defaultFOV(side) {
+    if (side === "left") {
+      var width = this.DOMElement && this.DOMElement.offsetWidth || screen.width,
+          height = this.DOMElement && this.DOMElement.offsetHeight || screen.height,
+          aspect = width / height,
+          vFOV = 25,
+          hFOV = vFOV * aspect;
+      return {
+        renderWidth: width * devicePixelRatio,
+        renderHeight: height * devicePixelRatio,
+        offset: new Float32Array([0, 0, 0]),
+        fieldOfView: {
+          upDegrees: vFOV,
+          downDegrees: vFOV,
+          leftDegrees: hFOV,
+          rightDegrees: hFOV
+        }
+      };
+    }
+  }
+
+  function defaultPose() {
+    return {
+      position: [0, 0, 0],
+      orientation: [0, 0, 0, 1],
+      linearVelocity: null,
+      linearAcceleration: null,
+      angularVelocity: null,
+      angularAcceleration: null
+    };
+  }
+
+  Object.defineProperties(this, {
+    displayId: immutable(display && display.displayId || "N/A"),
+    displayName: immutable(isMobile && "Magic Window" || "Standard Monitor"),
+    isConnected: immutable(!display || display.isConnected),
+    stageParameters: immutable(display && display.stageParameters || null),
+    resetPose: immutable(display && display.resetPose.bind(display) || noop),
+    isPolyfilled: immutable(display && display.isPolyfilled),
+
+    depthNear: {
+      get: function get() {
+        if (display) {
+          return display.depthNear;
+        } else {
+          return depthNear;
+        }
+      },
+      set: function set(v) {
+        if (display) {
+          display.depthNear = v;
+        } else {
+          depthNear = v;
+        }
+      }
+    },
+
+    depthFar: {
+      get: function get() {
+        if (display) {
+          return display.depthFar;
+        } else {
+          return depthFar;
+        }
+      },
+      set: function set(v) {
+        if (display) {
+          display.depthFar = v;
+        } else {
+          depthFar = v;
+        }
+      }
+    },
+
+    capabilities: immutable(capabilities),
+
+    requestAnimationFrame: immutable(window.requestAnimationFrame.bind(window)),
+    cancelAnimationFrame: immutable(window.cancelAnimationFrame.bind(window)),
+
+    submitFrame: immutable(noop),
+
+    requestPresent: immutable(function (layers) {
+      for (var i = 0; i < layers.length && i < 1; ++i) {
+        currentLayers[i] = layers[i];
+      }
+      FullScreen.addChangeListener(fireDisplayPresentChange);
+      var promise = FullScreen.request(layers[0].source);
+      if (isMobile) {
+        promise = promise.then(Orientation.lock);
+      }
+      return promise;
+    }),
+
+    isPresenting: {
+      get: function get() {
+        return display && display.isPresenting || !display && FullScreen.isActive;
+      }
+    },
+
+    getLayers: immutable(function () {
+      return currentLayers;
+    }),
+
+    exitPresent: immutable(function () {
+      currentLayers.splice(0);
+      var promise = FullScreen.exit();
+      if (isMobile) {
+        promise = promise.then(Orientation.unlock);
+      }
+      return promise;
+    }),
+
+    getEyeParameters: immutable(defaultFOV),
+    getPose: immutable(isMobile && display && display.getPose.bind(display) || defaultPose),
+    getImmediatePose: immutable(isMobile && display && display.getImmediatePose.bind(display) || defaultPose)
+  });
+}
+return StandardMonitor;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.ViewCameraTransform = factory();
+  }
+}(this, function() {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ViewCameraTransform = function () {
+  _createClass(ViewCameraTransform, null, [{
+    key: "makeTransform",
+    value: function makeTransform(eye, near, far) {
+      return {
+        translation: new THREE.Vector3().fromArray(eye.offset),
+        projection: ViewCameraTransform.fieldOfViewToProjectionMatrix(eye.fieldOfView, near, far),
+        viewport: {
+          left: 0,
+          top: 0,
+          width: eye.renderWidth,
+          height: eye.renderHeight
+        }
+      };
+    }
+  }, {
+    key: "fieldOfViewToProjectionMatrix",
+    value: function fieldOfViewToProjectionMatrix(fov, zNear, zFar) {
+      var upTan = Math.tan(fov.upDegrees * Math.PI / 180.0),
+          downTan = Math.tan(fov.downDegrees * Math.PI / 180.0),
+          leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0),
+          rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0),
+          xScale = 2.0 / (leftTan + rightTan),
+          yScale = 2.0 / (upTan + downTan),
+          matrix = new THREE.Matrix4();
+
+      matrix.elements[0] = xScale;
+      matrix.elements[1] = 0.0;
+      matrix.elements[2] = 0.0;
+      matrix.elements[3] = 0.0;
+      matrix.elements[4] = 0.0;
+      matrix.elements[5] = yScale;
+      matrix.elements[6] = 0.0;
+      matrix.elements[7] = 0.0;
+      matrix.elements[8] = -((leftTan - rightTan) * xScale * 0.5);
+      matrix.elements[9] = (upTan - downTan) * yScale * 0.5;
+      matrix.elements[10] = -(zNear + zFar) / (zFar - zNear);
+      matrix.elements[11] = -1.0;
+      matrix.elements[12] = 0.0;
+      matrix.elements[13] = 0.0;
+      matrix.elements[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+      matrix.elements[15] = 0.0;
+
+      return matrix;
+    }
+  }]);
+
+  function ViewCameraTransform(display) {
+    _classCallCheck(this, ViewCameraTransform);
+
+    this._display = display;
+  }
+
+  _createClass(ViewCameraTransform, [{
+    key: "getTransforms",
+    value: function getTransforms(near, far) {
+      var l = this._display.getEyeParameters("left"),
+          r = this._display.getEyeParameters("right"),
+          params = [ViewCameraTransform.makeTransform(l, near, far)];
+      if (r) {
+        params.push(ViewCameraTransform.makeTransform(r, near, far));
+      }
+      for (var i = 1; i < params.length; ++i) {
+        params[i].viewport.left = params[i - 1].viewport.left + params[i - 1].viewport.width;
+      }
+      return params;
+    }
+  }]);
+
+  return ViewCameraTransform;
+}();
+return ViewCameraTransform;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.WebVRBootstrapper = factory();
+  }
+}(this, function() {
+"use strict";
+
+function WebVRBootstrapper(manifest) {
+  wrapWebVR();
+  return documentReady().then(function () {
+    return manifest && function (progress) {
+      return loadFiles(manifest, progress);
+    };
+  });
+}
+return WebVRBootstrapper;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.documentReady = factory();
+  }
+}(this, function() {
+"use strict";
+
+function documentReady() {
+  return new Promise(function (resolve, reject) {
+    function setup() {
+      var ready = document.readyState === "complete";
+      if (ready) {
+        document.removeEventListener("readystatechange", setup);
+        resolve();
+      }
+      return ready;
+    }
+
+    if (!setup()) {
+      document.addEventListener("readystatechange", setup);
+    }
+  });
+}
+return documentReady;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.isChrome = factory();
+  }
+}(this, function() {
+"use strict";
+
+var isChrome = !window.opera && navigator.userAgent.indexOf(' OPR/') === -1;
+return isChrome;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.isMobile = factory();
+  }
+}(this, function() {
+"use strict";
+
+var isMobile = function (a) {
+  return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
+  );
+}(navigator.userAgent || navigator.vendor || window.opera);
+return isMobile;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.loadFiles = factory();
+  }
+}(this, function() {
+"use strict";
+
+function get(url, done, progress) {
+  var req = new XMLHttpRequest();
+  req.onload = function () {
+    if (req.status < 400) {
+      done(req.response);
+    } else {
+      done(new Error(req.status));
+    }
+  };
+
+  req.open("GET", url);
+  req.onprogress = progress;
+  req.send();
+}
+
+function __loadFiles(files, done, progress, index, total, loaded) {
+  if (index < files.length) {
+    var file = files[index][0],
+        size = files[index][1],
+        shortExt = file.match(/\.\w+$/)[0] || "none",
+        longExt = file.match(/(\.\w+)+$/)[0] || "none",
+        lastLoaded = loaded;
+    get(file, function (content) {
+      if (content instanceof Error) {
+        console.error("Failed to load " + file + ": " + content.message);
+      } else if (shortExt === ".js" && longExt !== ".typeface.js") {
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.src = file;
+        s.defer = false;
+        s.async = false;
+        document.head.appendChild(s);
+      }
+
+      __loadFiles(files, done, progress, index + 1, total, loaded);
+    }, function (evt) {
+      return progress(loaded = lastLoaded + evt.loaded, total);
+    });
+  } else {
+    done();
+  }
+}
+
+/* syntax:
+loadFiles([
+    // filename,  size
+    ["script1.js", 456],
+    ["script3.js", 8762],
+    ["script2.js", 12368]
+], function(objects){
+    // the thing to do when done.
+    console.assert(objects.name1 !== undefined);
+    console.assert(objects.name2 !== undefined);
+}, function(n, m, size, total){
+    // track progress
+    console.log("loaded file %d of %d, loaded %d bytes of %d bytes total.", n, m, size, total);
+});
+*/
+function _loadFiles(manifestSpec, progress, done) {
+  function readManifest(manifest) {
+    var total = 0;
+    for (var i = 0; i < manifest.length; ++i) {
+      total += manifest[i][1];
+    }
+    progress = progress || console.log.bind(console, "File load progress");
+    __loadFiles(manifest, done, progress, 0, total, 0);
+  }
+
+  if (manifestSpec instanceof String || typeof manifestSpec === "string") {
+    get(manifestSpec, function (manifestText) {
+      readManifest(JSON.parse(manifestText));
+    });
+  } else if (manifestSpec instanceof Array) {
+    readManifest(manifestSpec);
+  }
+}
+
+function loadFiles(manifestSpec, progress) {
+  return new Promise(function (resolve, reject) {
+    return _loadFiles(manifestSpec, progress, resolve);
+  });
+}
+return loadFiles;
+}));
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.wrapWebVR = factory();
+  }
+}(this, function() {
+"use strict";
+
+function wrapWebVR() {
+  var oldGetVRDisplays = navigator.getVRDisplays || Promise.resolve.bind(Promise, []);
+  navigator.getVRDisplays = function () {
+    return oldGetVRDisplays.call(navigator).then(function (displays) {
+      var hasStandardMonitor = displays.map(function (display) {
+        return display instanceof StandardMonitor;
+      }).reduce(function (a, b) {
+        return a || b;
+      }, false);
+
+      if (!hasStandardMonitor) {
+        var created = false;
+        for (var i = 0; i < displays.length; ++i) {
+          var display = displays[i],
+              overwritten = display instanceof StandardMonitor;
+          if (!overwritten && display.displayName === "Mouse and Keyboard VRDisplay (webvr-polyfill)") {
+            created = true;
+            displays[i] = new StandardMonitor(display);
+          }
+        }
+        if (!created) {
+          displays.unshift(new StandardMonitor(displays[0]));
+        }
+      }
+
+      return displays;
+    });
+  };
+}
+return wrapWebVR;
+}));
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9Bc3luY0xvY2tSZXF1ZXN0LmpzIiwic3JjL0Z1bGxTY3JlZW4uanMiLCJzcmMvT3JpZW50YXRpb24uanMiLCJzcmMvUG9pbnRlckxvY2suanMiLCJzcmMvU3RhbmRhcmRNb25pdG9yLmpzIiwic3JjL1ZpZXdDYW1lcmFUcmFuc2Zvcm0uanMiLCJzcmMvV2ViVlJCb290c3RyYXBwZXIuanMiLCJzcmMvZG9jdW1lbnRSZWFkeS5qcyIsInNyYy9pc0Nocm9tZS5qcyIsInNyYy9pc01vYmlsZS5qcyIsInNyYy9sb2FkRmlsZXMuanMiLCJzcmMvd3JhcFdlYlZSLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQ25JQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FDaEJBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FDMUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQ2RBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQ2pLQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FDeEZBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FDckJBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQzdCQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUNkQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUNqQkE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FDL0ZBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBIiwiZmlsZSI6IndlYnZyLWJvb3RzdHJhcHBlci5qcyJ9
+
+/*
+  html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>
+  Copyright (c) 2016 Niklas von Hertzen
+
+  Released under  License
+*/
+
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.html2canvas = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function (global){
+/*! https://mths.be/punycode v1.4.0 by @mathias */
+;(function(root) {
+
+	/** Detect free variables */
+	var freeExports = typeof exports == 'object' && exports &&
+		!exports.nodeType && exports;
+	var freeModule = typeof module == 'object' && module &&
+		!module.nodeType && module;
+	var freeGlobal = typeof global == 'object' && global;
+	if (
+		freeGlobal.global === freeGlobal ||
+		freeGlobal.window === freeGlobal ||
+		freeGlobal.self === freeGlobal
+	) {
+		root = freeGlobal;
+	}
+
+	/**
+	 * The `punycode` object.
+	 * @name punycode
+	 * @type Object
+	 */
+	var punycode,
+
+	/** Highest positive signed 32-bit float value */
+	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
+
+	/** Bootstring parameters */
+	base = 36,
+	tMin = 1,
+	tMax = 26,
+	skew = 38,
+	damp = 700,
+	initialBias = 72,
+	initialN = 128, // 0x80
+	delimiter = '-', // '\x2D'
+
+	/** Regular expressions */
+	regexPunycode = /^xn--/,
+	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
+	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
+
+	/** Error messages */
+	errors = {
+		'overflow': 'Overflow: input needs wider integers to process',
+		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
+		'invalid-input': 'Invalid input'
+	},
+
+	/** Convenience shortcuts */
+	baseMinusTMin = base - tMin,
+	floor = Math.floor,
+	stringFromCharCode = String.fromCharCode,
+
+	/** Temporary variable */
+	key;
+
+	/*--------------------------------------------------------------------------*/
+
+	/**
+	 * A generic error utility function.
+	 * @private
+	 * @param {String} type The error type.
+	 * @returns {Error} Throws a `RangeError` with the applicable error message.
+	 */
+	function error(type) {
+		throw new RangeError(errors[type]);
+	}
+
+	/**
+	 * A generic `Array#map` utility function.
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} callback The function that gets called for every array
+	 * item.
+	 * @returns {Array} A new array of values returned by the callback function.
+	 */
+	function map(array, fn) {
+		var length = array.length;
+		var result = [];
+		while (length--) {
+			result[length] = fn(array[length]);
+		}
+		return result;
+	}
+
+	/**
+	 * A simple `Array#map`-like wrapper to work with domain name strings or email
+	 * addresses.
+	 * @private
+	 * @param {String} domain The domain name or email address.
+	 * @param {Function} callback The function that gets called for every
+	 * character.
+	 * @returns {Array} A new string of characters returned by the callback
+	 * function.
+	 */
+	function mapDomain(string, fn) {
+		var parts = string.split('@');
+		var result = '';
+		if (parts.length > 1) {
+			// In email addresses, only the domain name should be punycoded. Leave
+			// the local part (i.e. everything up to `@`) intact.
+			result = parts[0] + '@';
+			string = parts[1];
+		}
+		// Avoid `split(regex)` for IE8 compatibility. See #17.
+		string = string.replace(regexSeparators, '\x2E');
+		var labels = string.split('.');
+		var encoded = map(labels, fn).join('.');
+		return result + encoded;
+	}
+
+	/**
+	 * Creates an array containing the numeric code points of each Unicode
+	 * character in the string. While JavaScript uses UCS-2 internally,
+	 * this function will convert a pair of surrogate halves (each of which
+	 * UCS-2 exposes as separate characters) into a single code point,
+	 * matching UTF-16.
+	 * @see `punycode.ucs2.encode`
+	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+	 * @memberOf punycode.ucs2
+	 * @name decode
+	 * @param {String} string The Unicode input string (UCS-2).
+	 * @returns {Array} The new array of code points.
+	 */
+	function ucs2decode(string) {
+		var output = [],
+		    counter = 0,
+		    length = string.length,
+		    value,
+		    extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Creates a string based on an array of numeric code points.
+	 * @see `punycode.ucs2.decode`
+	 * @memberOf punycode.ucs2
+	 * @name encode
+	 * @param {Array} codePoints The array of numeric code points.
+	 * @returns {String} The new Unicode string (UCS-2).
+	 */
+	function ucs2encode(array) {
+		return map(array, function(value) {
+			var output = '';
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+			return output;
+		}).join('');
+	}
+
+	/**
+	 * Converts a basic code point into a digit/integer.
+	 * @see `digitToBasic()`
+	 * @private
+	 * @param {Number} codePoint The basic numeric code point value.
+	 * @returns {Number} The numeric value of a basic code point (for use in
+	 * representing integers) in the range `0` to `base - 1`, or `base` if
+	 * the code point does not represent a value.
+	 */
+	function basicToDigit(codePoint) {
+		if (codePoint - 48 < 10) {
+			return codePoint - 22;
+		}
+		if (codePoint - 65 < 26) {
+			return codePoint - 65;
+		}
+		if (codePoint - 97 < 26) {
+			return codePoint - 97;
+		}
+		return base;
+	}
+
+	/**
+	 * Converts a digit/integer into a basic code point.
+	 * @see `basicToDigit()`
+	 * @private
+	 * @param {Number} digit The numeric value of a basic code point.
+	 * @returns {Number} The basic code point whose value (when used for
+	 * representing integers) is `digit`, which needs to be in the range
+	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
+	 * used; else, the lowercase form is used. The behavior is undefined
+	 * if `flag` is non-zero and `digit` has no uppercase form.
+	 */
+	function digitToBasic(digit, flag) {
+		//  0..25 map to ASCII a..z or A..Z
+		// 26..35 map to ASCII 0..9
+		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+	}
+
+	/**
+	 * Bias adaptation function as per section 3.4 of RFC 3492.
+	 * https://tools.ietf.org/html/rfc3492#section-3.4
+	 * @private
+	 */
+	function adapt(delta, numPoints, firstTime) {
+		var k = 0;
+		delta = firstTime ? floor(delta / damp) : delta >> 1;
+		delta += floor(delta / numPoints);
+		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
+			delta = floor(delta / baseMinusTMin);
+		}
+		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+	}
+
+	/**
+	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
+	 * symbols.
+	 * @memberOf punycode
+	 * @param {String} input The Punycode string of ASCII-only symbols.
+	 * @returns {String} The resulting string of Unicode symbols.
+	 */
+	function decode(input) {
+		// Don't use UCS-2
+		var output = [],
+		    inputLength = input.length,
+		    out,
+		    i = 0,
+		    n = initialN,
+		    bias = initialBias,
+		    basic,
+		    j,
+		    index,
+		    oldi,
+		    w,
+		    k,
+		    digit,
+		    t,
+		    /** Cached calculation results */
+		    baseMinusT;
+
+		// Handle the basic code points: let `basic` be the number of input code
+		// points before the last delimiter, or `0` if there is none, then copy
+		// the first basic code points to the output.
+
+		basic = input.lastIndexOf(delimiter);
+		if (basic < 0) {
+			basic = 0;
+		}
+
+		for (j = 0; j < basic; ++j) {
+			// if it's not a basic code point
+			if (input.charCodeAt(j) >= 0x80) {
+				error('not-basic');
+			}
+			output.push(input.charCodeAt(j));
+		}
+
+		// Main decoding loop: start just after the last delimiter if any basic code
+		// points were copied; start at the beginning otherwise.
+
+		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
+
+			// `index` is the index of the next character to be consumed.
+			// Decode a generalized variable-length integer into `delta`,
+			// which gets added to `i`. The overflow checking is easier
+			// if we increase `i` as we go, then subtract off its starting
+			// value at the end to obtain `delta`.
+			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
+
+				if (index >= inputLength) {
+					error('invalid-input');
+				}
+
+				digit = basicToDigit(input.charCodeAt(index++));
+
+				if (digit >= base || digit > floor((maxInt - i) / w)) {
+					error('overflow');
+				}
+
+				i += digit * w;
+				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+
+				if (digit < t) {
+					break;
+				}
+
+				baseMinusT = base - t;
+				if (w > floor(maxInt / baseMinusT)) {
+					error('overflow');
+				}
+
+				w *= baseMinusT;
+
+			}
+
+			out = output.length + 1;
+			bias = adapt(i - oldi, out, oldi == 0);
+
+			// `i` was supposed to wrap around from `out` to `0`,
+			// incrementing `n` each time, so we'll fix that now:
+			if (floor(i / out) > maxInt - n) {
+				error('overflow');
+			}
+
+			n += floor(i / out);
+			i %= out;
+
+			// Insert `n` at position `i` of the output
+			output.splice(i++, 0, n);
+
+		}
+
+		return ucs2encode(output);
+	}
+
+	/**
+	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
+	 * Punycode string of ASCII-only symbols.
+	 * @memberOf punycode
+	 * @param {String} input The string of Unicode symbols.
+	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
+	 */
+	function encode(input) {
+		var n,
+		    delta,
+		    handledCPCount,
+		    basicLength,
+		    bias,
+		    j,
+		    m,
+		    q,
+		    k,
+		    t,
+		    currentValue,
+		    output = [],
+		    /** `inputLength` will hold the number of code points in `input`. */
+		    inputLength,
+		    /** Cached calculation results */
+		    handledCPCountPlusOne,
+		    baseMinusT,
+		    qMinusT;
+
+		// Convert the input in UCS-2 to Unicode
+		input = ucs2decode(input);
+
+		// Cache the length
+		inputLength = input.length;
+
+		// Initialize the state
+		n = initialN;
+		delta = 0;
+		bias = initialBias;
+
+		// Handle the basic code points
+		for (j = 0; j < inputLength; ++j) {
+			currentValue = input[j];
+			if (currentValue < 0x80) {
+				output.push(stringFromCharCode(currentValue));
+			}
+		}
+
+		handledCPCount = basicLength = output.length;
+
+		// `handledCPCount` is the number of code points that have been handled;
+		// `basicLength` is the number of basic code points.
+
+		// Finish the basic string - if it is not empty - with a delimiter
+		if (basicLength) {
+			output.push(delimiter);
+		}
+
+		// Main encoding loop:
+		while (handledCPCount < inputLength) {
+
+			// All non-basic code points < n have been handled already. Find the next
+			// larger one:
+			for (m = maxInt, j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+				if (currentValue >= n && currentValue < m) {
+					m = currentValue;
+				}
+			}
+
+			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
+			// but guard against overflow
+			handledCPCountPlusOne = handledCPCount + 1;
+			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+				error('overflow');
+			}
+
+			delta += (m - n) * handledCPCountPlusOne;
+			n = m;
+
+			for (j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+
+				if (currentValue < n && ++delta > maxInt) {
+					error('overflow');
+				}
+
+				if (currentValue == n) {
+					// Represent delta as a generalized variable-length integer
+					for (q = delta, k = base; /* no condition */; k += base) {
+						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+						if (q < t) {
+							break;
+						}
+						qMinusT = q - t;
+						baseMinusT = base - t;
+						output.push(
+							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
+						);
+						q = floor(qMinusT / baseMinusT);
+					}
+
+					output.push(stringFromCharCode(digitToBasic(q, 0)));
+					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+					delta = 0;
+					++handledCPCount;
+				}
+			}
+
+			++delta;
+			++n;
+
+		}
+		return output.join('');
+	}
+
+	/**
+	 * Converts a Punycode string representing a domain name or an email address
+	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
+	 * it doesn't matter if you call it on a string that has already been
+	 * converted to Unicode.
+	 * @memberOf punycode
+	 * @param {String} input The Punycoded domain name or email address to
+	 * convert to Unicode.
+	 * @returns {String} The Unicode representation of the given Punycode
+	 * string.
+	 */
+	function toUnicode(input) {
+		return mapDomain(input, function(string) {
+			return regexPunycode.test(string)
+				? decode(string.slice(4).toLowerCase())
+				: string;
+		});
+	}
+
+	/**
+	 * Converts a Unicode string representing a domain name or an email address to
+	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
+	 * i.e. it doesn't matter if you call it with a domain that's already in
+	 * ASCII.
+	 * @memberOf punycode
+	 * @param {String} input The domain name or email address to convert, as a
+	 * Unicode string.
+	 * @returns {String} The Punycode representation of the given domain name or
+	 * email address.
+	 */
+	function toASCII(input) {
+		return mapDomain(input, function(string) {
+			return regexNonASCII.test(string)
+				? 'xn--' + encode(string)
+				: string;
+		});
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	/** Define the public API */
+	punycode = {
+		/**
+		 * A string representing the current Punycode.js version number.
+		 * @memberOf punycode
+		 * @type String
+		 */
+		'version': '1.3.2',
+		/**
+		 * An object of methods to convert from JavaScript's internal character
+		 * representation (UCS-2) to Unicode code points, and back.
+		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+		 * @memberOf punycode
+		 * @type Object
+		 */
+		'ucs2': {
+			'decode': ucs2decode,
+			'encode': ucs2encode
+		},
+		'decode': decode,
+		'encode': encode,
+		'toASCII': toASCII,
+		'toUnicode': toUnicode
+	};
+
+	/** Expose `punycode` */
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define('punycode', function() {
+			return punycode;
+		});
+	} else if (freeExports && freeModule) {
+		if (module.exports == freeExports) {
+			// in Node.js, io.js, or RingoJS v0.8.0+
+			freeModule.exports = punycode;
+		} else {
+			// in Narwhal or RingoJS v0.7.0-
+			for (key in punycode) {
+				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
+			}
+		}
+	} else {
+		// in Rhino or a web browser
+		root.punycode = punycode;
+	}
+
+}(this));
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],2:[function(_dereq_,module,exports){
+var log = _dereq_('./log');
+
+function restoreOwnerScroll(ownerDocument, x, y) {
+    if (ownerDocument.defaultView && (x !== ownerDocument.defaultView.pageXOffset || y !== ownerDocument.defaultView.pageYOffset)) {
+        ownerDocument.defaultView.scrollTo(x, y);
+    }
+}
+
+function cloneCanvasContents(canvas, clonedCanvas) {
+    try {
+        if (clonedCanvas) {
+            clonedCanvas.width = canvas.width;
+            clonedCanvas.height = canvas.height;
+            clonedCanvas.getContext("2d").putImageData(canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+        }
+    } catch(e) {
+        log("Unable to copy canvas content from", canvas, e);
+    }
+}
+
+function cloneNode(node, javascriptEnabled) {
+    var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
+
+    var child = node.firstChild;
+    while(child) {
+        if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
+            clone.appendChild(cloneNode(child, javascriptEnabled));
+        }
+        child = child.nextSibling;
+    }
+
+    if (node.nodeType === 1) {
+        clone._scrollTop = node.scrollTop;
+        clone._scrollLeft = node.scrollLeft;
+        if (node.nodeName === "CANVAS") {
+            cloneCanvasContents(node, clone);
+        } else if (node.nodeName === "TEXTAREA" || node.nodeName === "SELECT") {
+            clone.value = node.value;
+        }
+    }
+
+    return clone;
+}
+
+function initNode(node) {
+    if (node.nodeType === 1) {
+        node.scrollTop = node._scrollTop;
+        node.scrollLeft = node._scrollLeft;
+
+        var child = node.firstChild;
+        while(child) {
+            initNode(child);
+            child = child.nextSibling;
+        }
+    }
+}
+
+module.exports = function(ownerDocument, containerDocument, width, height, options, x ,y) {
+    var documentElement = cloneNode(ownerDocument.documentElement, options.javascriptEnabled);
+    var container = containerDocument.createElement("iframe");
+
+    container.className = "html2canvas-container";
+    container.style.visibility = "hidden";
+    container.style.position = "fixed";
+    container.style.left = "-10000px";
+    container.style.top = "0px";
+    container.style.border = "0";
+    container.width = width;
+    container.height = height;
+    container.scrolling = "no"; // ios won't scroll without it
+    containerDocument.body.appendChild(container);
+
+    return new Promise(function(resolve) {
+        var documentClone = container.contentWindow.document;
+
+        /* Chrome doesn't detect relative background-images assigned in inline <style> sheets when fetched through getComputedStyle
+         if window url is about:blank, we can assign the url to current by writing onto the document
+         */
+        container.contentWindow.onload = container.onload = function() {
+            var interval = setInterval(function() {
+                if (documentClone.body.childNodes.length > 0) {
+                    initNode(documentClone.documentElement);
+                    clearInterval(interval);
+                    if (options.type === "view") {
+                        container.contentWindow.scrollTo(x, y);
+                        if ((/(iPad|iPhone|iPod)/g).test(navigator.userAgent) && (container.contentWindow.scrollY !== y || container.contentWindow.scrollX !== x)) {
+                            documentClone.documentElement.style.top = (-y) + "px";
+                            documentClone.documentElement.style.left = (-x) + "px";
+                            documentClone.documentElement.style.position = 'absolute';
+                        }
+                    }
+                    resolve(container);
+                }
+            }, 50);
+        };
+
+        documentClone.open();
+        documentClone.write("<!DOCTYPE html><html></html>");
+        // Chrome scrolls the parent document for some reason after the write to the cloned window???
+        restoreOwnerScroll(ownerDocument, x, y);
+        documentClone.replaceChild(documentClone.adoptNode(documentElement), documentClone.documentElement);
+        documentClone.close();
+    });
+};
+
+},{"./log":13}],3:[function(_dereq_,module,exports){
+// http://dev.w3.org/csswg/css-color/
+
+function Color(value) {
+    this.r = 0;
+    this.g = 0;
+    this.b = 0;
+    this.a = null;
+    var result = this.fromArray(value) ||
+        this.namedColor(value) ||
+        this.rgb(value) ||
+        this.rgba(value) ||
+        this.hex6(value) ||
+        this.hex3(value);
+}
+
+Color.prototype.darken = function(amount) {
+    var a = 1 - amount;
+    return  new Color([
+        Math.round(this.r * a),
+        Math.round(this.g * a),
+        Math.round(this.b * a),
+        this.a
+    ]);
+};
+
+Color.prototype.isTransparent = function() {
+    return this.a === 0;
+};
+
+Color.prototype.isBlack = function() {
+    return this.r === 0 && this.g === 0 && this.b === 0;
+};
+
+Color.prototype.fromArray = function(array) {
+    if (Array.isArray(array)) {
+        this.r = Math.min(array[0], 255);
+        this.g = Math.min(array[1], 255);
+        this.b = Math.min(array[2], 255);
+        if (array.length > 3) {
+            this.a = array[3];
+        }
+    }
+
+    return (Array.isArray(array));
+};
+
+var _hex3 = /^#([a-f0-9]{3})$/i;
+
+Color.prototype.hex3 = function(value) {
+    var match = null;
+    if ((match = value.match(_hex3)) !== null) {
+        this.r = parseInt(match[1][0] + match[1][0], 16);
+        this.g = parseInt(match[1][1] + match[1][1], 16);
+        this.b = parseInt(match[1][2] + match[1][2], 16);
+    }
+    return match !== null;
+};
+
+var _hex6 = /^#([a-f0-9]{6})$/i;
+
+Color.prototype.hex6 = function(value) {
+    var match = null;
+    if ((match = value.match(_hex6)) !== null) {
+        this.r = parseInt(match[1].substring(0, 2), 16);
+        this.g = parseInt(match[1].substring(2, 4), 16);
+        this.b = parseInt(match[1].substring(4, 6), 16);
+    }
+    return match !== null;
+};
+
+
+var _rgb = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+
+Color.prototype.rgb = function(value) {
+    var match = null;
+    if ((match = value.match(_rgb)) !== null) {
+        this.r = Number(match[1]);
+        this.g = Number(match[2]);
+        this.b = Number(match[3]);
+    }
+    return match !== null;
+};
+
+var _rgba = /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d?\.?\d+)\s*\)$/;
+
+Color.prototype.rgba = function(value) {
+    var match = null;
+    if ((match = value.match(_rgba)) !== null) {
+        this.r = Number(match[1]);
+        this.g = Number(match[2]);
+        this.b = Number(match[3]);
+        this.a = Number(match[4]);
+    }
+    return match !== null;
+};
+
+Color.prototype.toString = function() {
+    return this.a !== null && this.a !== 1 ?
+    "rgba(" + [this.r, this.g, this.b, this.a].join(",") + ")" :
+    "rgb(" + [this.r, this.g, this.b].join(",") + ")";
+};
+
+Color.prototype.namedColor = function(value) {
+    value = value.toLowerCase();
+    var color = colors[value];
+    if (color) {
+        this.r = color[0];
+        this.g = color[1];
+        this.b = color[2];
+    } else if (value === "transparent") {
+        this.r = this.g = this.b = this.a = 0;
+        return true;
+    }
+
+    return !!color;
+};
+
+Color.prototype.isColor = true;
+
+// JSON.stringify([].slice.call($$('.named-color-table tr'), 1).map(function(row) { return [row.childNodes[3].textContent, row.childNodes[5].textContent.trim().split(",").map(Number)] }).reduce(function(data, row) {data[row[0]] = row[1]; return data}, {}))
+var colors = {
+    "aliceblue": [240, 248, 255],
+    "antiquewhite": [250, 235, 215],
+    "aqua": [0, 255, 255],
+    "aquamarine": [127, 255, 212],
+    "azure": [240, 255, 255],
+    "beige": [245, 245, 220],
+    "bisque": [255, 228, 196],
+    "black": [0, 0, 0],
+    "blanchedalmond": [255, 235, 205],
+    "blue": [0, 0, 255],
+    "blueviolet": [138, 43, 226],
+    "brown": [165, 42, 42],
+    "burlywood": [222, 184, 135],
+    "cadetblue": [95, 158, 160],
+    "chartreuse": [127, 255, 0],
+    "chocolate": [210, 105, 30],
+    "coral": [255, 127, 80],
+    "cornflowerblue": [100, 149, 237],
+    "cornsilk": [255, 248, 220],
+    "crimson": [220, 20, 60],
+    "cyan": [0, 255, 255],
+    "darkblue": [0, 0, 139],
+    "darkcyan": [0, 139, 139],
+    "darkgoldenrod": [184, 134, 11],
+    "darkgray": [169, 169, 169],
+    "darkgreen": [0, 100, 0],
+    "darkgrey": [169, 169, 169],
+    "darkkhaki": [189, 183, 107],
+    "darkmagenta": [139, 0, 139],
+    "darkolivegreen": [85, 107, 47],
+    "darkorange": [255, 140, 0],
+    "darkorchid": [153, 50, 204],
+    "darkred": [139, 0, 0],
+    "darksalmon": [233, 150, 122],
+    "darkseagreen": [143, 188, 143],
+    "darkslateblue": [72, 61, 139],
+    "darkslategray": [47, 79, 79],
+    "darkslategrey": [47, 79, 79],
+    "darkturquoise": [0, 206, 209],
+    "darkviolet": [148, 0, 211],
+    "deeppink": [255, 20, 147],
+    "deepskyblue": [0, 191, 255],
+    "dimgray": [105, 105, 105],
+    "dimgrey": [105, 105, 105],
+    "dodgerblue": [30, 144, 255],
+    "firebrick": [178, 34, 34],
+    "floralwhite": [255, 250, 240],
+    "forestgreen": [34, 139, 34],
+    "fuchsia": [255, 0, 255],
+    "gainsboro": [220, 220, 220],
+    "ghostwhite": [248, 248, 255],
+    "gold": [255, 215, 0],
+    "goldenrod": [218, 165, 32],
+    "gray": [128, 128, 128],
+    "green": [0, 128, 0],
+    "greenyellow": [173, 255, 47],
+    "grey": [128, 128, 128],
+    "honeydew": [240, 255, 240],
+    "hotpink": [255, 105, 180],
+    "indianred": [205, 92, 92],
+    "indigo": [75, 0, 130],
+    "ivory": [255, 255, 240],
+    "khaki": [240, 230, 140],
+    "lavender": [230, 230, 250],
+    "lavenderblush": [255, 240, 245],
+    "lawngreen": [124, 252, 0],
+    "lemonchiffon": [255, 250, 205],
+    "lightblue": [173, 216, 230],
+    "lightcoral": [240, 128, 128],
+    "lightcyan": [224, 255, 255],
+    "lightgoldenrodyellow": [250, 250, 210],
+    "lightgray": [211, 211, 211],
+    "lightgreen": [144, 238, 144],
+    "lightgrey": [211, 211, 211],
+    "lightpink": [255, 182, 193],
+    "lightsalmon": [255, 160, 122],
+    "lightseagreen": [32, 178, 170],
+    "lightskyblue": [135, 206, 250],
+    "lightslategray": [119, 136, 153],
+    "lightslategrey": [119, 136, 153],
+    "lightsteelblue": [176, 196, 222],
+    "lightyellow": [255, 255, 224],
+    "lime": [0, 255, 0],
+    "limegreen": [50, 205, 50],
+    "linen": [250, 240, 230],
+    "magenta": [255, 0, 255],
+    "maroon": [128, 0, 0],
+    "mediumaquamarine": [102, 205, 170],
+    "mediumblue": [0, 0, 205],
+    "mediumorchid": [186, 85, 211],
+    "mediumpurple": [147, 112, 219],
+    "mediumseagreen": [60, 179, 113],
+    "mediumslateblue": [123, 104, 238],
+    "mediumspringgreen": [0, 250, 154],
+    "mediumturquoise": [72, 209, 204],
+    "mediumvioletred": [199, 21, 133],
+    "midnightblue": [25, 25, 112],
+    "mintcream": [245, 255, 250],
+    "mistyrose": [255, 228, 225],
+    "moccasin": [255, 228, 181],
+    "navajowhite": [255, 222, 173],
+    "navy": [0, 0, 128],
+    "oldlace": [253, 245, 230],
+    "olive": [128, 128, 0],
+    "olivedrab": [107, 142, 35],
+    "orange": [255, 165, 0],
+    "orangered": [255, 69, 0],
+    "orchid": [218, 112, 214],
+    "palegoldenrod": [238, 232, 170],
+    "palegreen": [152, 251, 152],
+    "paleturquoise": [175, 238, 238],
+    "palevioletred": [219, 112, 147],
+    "papayawhip": [255, 239, 213],
+    "peachpuff": [255, 218, 185],
+    "peru": [205, 133, 63],
+    "pink": [255, 192, 203],
+    "plum": [221, 160, 221],
+    "powderblue": [176, 224, 230],
+    "purple": [128, 0, 128],
+    "rebeccapurple": [102, 51, 153],
+    "red": [255, 0, 0],
+    "rosybrown": [188, 143, 143],
+    "royalblue": [65, 105, 225],
+    "saddlebrown": [139, 69, 19],
+    "salmon": [250, 128, 114],
+    "sandybrown": [244, 164, 96],
+    "seagreen": [46, 139, 87],
+    "seashell": [255, 245, 238],
+    "sienna": [160, 82, 45],
+    "silver": [192, 192, 192],
+    "skyblue": [135, 206, 235],
+    "slateblue": [106, 90, 205],
+    "slategray": [112, 128, 144],
+    "slategrey": [112, 128, 144],
+    "snow": [255, 250, 250],
+    "springgreen": [0, 255, 127],
+    "steelblue": [70, 130, 180],
+    "tan": [210, 180, 140],
+    "teal": [0, 128, 128],
+    "thistle": [216, 191, 216],
+    "tomato": [255, 99, 71],
+    "turquoise": [64, 224, 208],
+    "violet": [238, 130, 238],
+    "wheat": [245, 222, 179],
+    "white": [255, 255, 255],
+    "whitesmoke": [245, 245, 245],
+    "yellow": [255, 255, 0],
+    "yellowgreen": [154, 205, 50]
+};
+
+module.exports = Color;
+
+},{}],4:[function(_dereq_,module,exports){
+var Support = _dereq_('./support');
+var CanvasRenderer = _dereq_('./renderers/canvas');
+var ImageLoader = _dereq_('./imageloader');
+var NodeParser = _dereq_('./nodeparser');
+var NodeContainer = _dereq_('./nodecontainer');
+var log = _dereq_('./log');
+var utils = _dereq_('./utils');
+var createWindowClone = _dereq_('./clone');
+var loadUrlDocument = _dereq_('./proxy').loadUrlDocument;
+var getBounds = utils.getBounds;
+
+var html2canvasNodeAttribute = "data-html2canvas-node";
+var html2canvasCloneIndex = 0;
+
+function html2canvas(nodeList, options) {
+    var index = html2canvasCloneIndex++;
+    options = options || {};
+    if (options.logging) {
+        log.options.logging = true;
+        log.options.start = Date.now();
+    }
+
+    options.async = typeof(options.async) === "undefined" ? true : options.async;
+    options.allowTaint = typeof(options.allowTaint) === "undefined" ? false : options.allowTaint;
+    options.removeContainer = typeof(options.removeContainer) === "undefined" ? true : options.removeContainer;
+    options.javascriptEnabled = typeof(options.javascriptEnabled) === "undefined" ? false : options.javascriptEnabled;
+    options.imageTimeout = typeof(options.imageTimeout) === "undefined" ? 10000 : options.imageTimeout;
+    options.renderer = typeof(options.renderer) === "function" ? options.renderer : CanvasRenderer;
+    options.strict = !!options.strict;
+
+    if (typeof(nodeList) === "string") {
+        if (typeof(options.proxy) !== "string") {
+            return Promise.reject("Proxy must be used when rendering url");
+        }
+        var width = options.width != null ? options.width : window.innerWidth;
+        var height = options.height != null ? options.height : window.innerHeight;
+        return loadUrlDocument(absoluteUrl(nodeList), options.proxy, document, width, height, options).then(function(container) {
+            return renderWindow(container.contentWindow.document.documentElement, container, options, width, height);
+        });
+    }
+
+    var node = ((nodeList === undefined) ? [document.documentElement] : ((nodeList.length) ? nodeList : [nodeList]))[0];
+    node.setAttribute(html2canvasNodeAttribute + index, index);
+    return renderDocument(node.ownerDocument, options, node.ownerDocument.defaultView.innerWidth, node.ownerDocument.defaultView.innerHeight, index).then(function(canvas) {
+        if (typeof(options.onrendered) === "function") {
+            log("options.onrendered is deprecated, html2canvas returns a Promise containing the canvas");
+            options.onrendered(canvas);
+        }
+        return canvas;
+    });
+}
+
+html2canvas.CanvasRenderer = CanvasRenderer;
+html2canvas.NodeContainer = NodeContainer;
+html2canvas.log = log;
+html2canvas.utils = utils;
+
+var html2canvasExport = (typeof(document) === "undefined" || typeof(Object.create) !== "function" || typeof(document.createElement("canvas").getContext) !== "function") ? function() {
+    return Promise.reject("No canvas support");
+} : html2canvas;
+
+module.exports = html2canvasExport;
+
+if (typeof(define) === 'function' && define.amd) {
+    define('html2canvas', [], function() {
+        return html2canvasExport;
+    });
+}
+
+function renderDocument(document, options, windowWidth, windowHeight, html2canvasIndex) {
+    return createWindowClone(document, document, windowWidth, windowHeight, options, document.defaultView.pageXOffset, document.defaultView.pageYOffset).then(function(container) {
+        log("Document cloned");
+        var attributeName = html2canvasNodeAttribute + html2canvasIndex;
+        var selector = "[" + attributeName + "='" + html2canvasIndex + "']";
+        document.querySelector(selector).removeAttribute(attributeName);
+        var clonedWindow = container.contentWindow;
+        var node = clonedWindow.document.querySelector(selector);
+        var oncloneHandler = (typeof(options.onclone) === "function") ? Promise.resolve(options.onclone(clonedWindow.document)) : Promise.resolve(true);
+        return oncloneHandler.then(function() {
+            return renderWindow(node, container, options, windowWidth, windowHeight);
+        });
+    });
+}
+
+function renderWindow(node, container, options, windowWidth, windowHeight) {
+    var clonedWindow = container.contentWindow;
+    var support = new Support(clonedWindow.document);
+    var imageLoader = new ImageLoader(options, support);
+    var bounds = getBounds(node);
+    var width = options.type === "view" ? windowWidth : documentWidth(clonedWindow.document);
+    var height = options.type === "view" ? windowHeight : documentHeight(clonedWindow.document);
+    var renderer = new options.renderer(width, height, imageLoader, options, document);
+    var parser = new NodeParser(node, renderer, support, imageLoader, options);
+    return parser.ready.then(function() {
+        log("Finished rendering");
+        var canvas;
+
+        if (options.type === "view") {
+            canvas = crop(renderer.canvas, {width: renderer.canvas.width, height: renderer.canvas.height, top: 0, left: 0, x: 0, y: 0});
+        } else if (node === clonedWindow.document.body || node === clonedWindow.document.documentElement || options.canvas != null) {
+            canvas = renderer.canvas;
+        } else {
+            canvas = crop(renderer.canvas, {width:  options.width != null ? options.width : bounds.width, height: options.height != null ? options.height : bounds.height, top: bounds.top, left: bounds.left, x: 0, y: 0});
+        }
+
+        cleanupContainer(container, options);
+        return canvas;
+    });
+}
+
+function cleanupContainer(container, options) {
+    if (options.removeContainer) {
+        container.parentNode.removeChild(container);
+        log("Cleaned up container");
+    }
+}
+
+function crop(canvas, bounds) {
+    var croppedCanvas = document.createElement("canvas");
+    var x1 = Math.min(canvas.width - 1, Math.max(0, bounds.left));
+    var x2 = Math.min(canvas.width, Math.max(1, bounds.left + bounds.width));
+    var y1 = Math.min(canvas.height - 1, Math.max(0, bounds.top));
+    var y2 = Math.min(canvas.height, Math.max(1, bounds.top + bounds.height));
+    croppedCanvas.width = bounds.width;
+    croppedCanvas.height =  bounds.height;
+    var width = x2-x1;
+    var height = y2-y1;
+    log("Cropping canvas at:", "left:", bounds.left, "top:", bounds.top, "width:", width, "height:", height);
+    log("Resulting crop with width", bounds.width, "and height", bounds.height, "with x", x1, "and y", y1);
+    croppedCanvas.getContext("2d").drawImage(canvas, x1, y1, width, height, bounds.x, bounds.y, width, height);
+    return croppedCanvas;
+}
+
+function documentWidth (doc) {
+    return Math.max(
+        Math.max(doc.body.scrollWidth, doc.documentElement.scrollWidth),
+        Math.max(doc.body.offsetWidth, doc.documentElement.offsetWidth),
+        Math.max(doc.body.clientWidth, doc.documentElement.clientWidth)
+    );
+}
+
+function documentHeight (doc) {
+    return Math.max(
+        Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight),
+        Math.max(doc.body.offsetHeight, doc.documentElement.offsetHeight),
+        Math.max(doc.body.clientHeight, doc.documentElement.clientHeight)
+    );
+}
+
+function absoluteUrl(url) {
+    var link = document.createElement("a");
+    link.href = url;
+    link.href = link.href;
+    return link;
+}
+
+},{"./clone":2,"./imageloader":11,"./log":13,"./nodecontainer":14,"./nodeparser":15,"./proxy":16,"./renderers/canvas":20,"./support":22,"./utils":26}],5:[function(_dereq_,module,exports){
+var log = _dereq_('./log');
+var smallImage = _dereq_('./utils').smallImage;
+
+function DummyImageContainer(src) {
+    this.src = src;
+    log("DummyImageContainer for", src);
+    if (!this.promise || !this.image) {
+        log("Initiating DummyImageContainer");
+        DummyImageContainer.prototype.image = new Image();
+        var image = this.image;
+        DummyImageContainer.prototype.promise = new Promise(function(resolve, reject) {
+            image.onload = resolve;
+            image.onerror = reject;
+            image.src = smallImage();
+            if (image.complete === true) {
+                resolve(image);
+            }
+        });
+    }
+}
+
+module.exports = DummyImageContainer;
+
+},{"./log":13,"./utils":26}],6:[function(_dereq_,module,exports){
+var smallImage = _dereq_('./utils').smallImage;
+
+function Font(family, size) {
+    var container = document.createElement('div'),
+        img = document.createElement('img'),
+        span = document.createElement('span'),
+        sampleText = 'Hidden Text',
+        baseline,
+        middle;
+
+    container.style.visibility = "hidden";
+    container.style.fontFamily = family;
+    container.style.fontSize = size;
+    container.style.margin = 0;
+    container.style.padding = 0;
+
+    document.body.appendChild(container);
+
+    img.src = smallImage();
+    img.width = 1;
+    img.height = 1;
+
+    img.style.margin = 0;
+    img.style.padding = 0;
+    img.style.verticalAlign = "baseline";
+
+    span.style.fontFamily = family;
+    span.style.fontSize = size;
+    span.style.margin = 0;
+    span.style.padding = 0;
+
+    span.appendChild(document.createTextNode(sampleText));
+    container.appendChild(span);
+    container.appendChild(img);
+    baseline = (img.offsetTop - span.offsetTop) + 1;
+
+    container.removeChild(span);
+    container.appendChild(document.createTextNode(sampleText));
+
+    container.style.lineHeight = "normal";
+    img.style.verticalAlign = "super";
+
+    middle = (img.offsetTop-container.offsetTop) + 1;
+
+    document.body.removeChild(container);
+
+    this.baseline = baseline;
+    this.lineWidth = 1;
+    this.middle = middle;
+}
+
+module.exports = Font;
+
+},{"./utils":26}],7:[function(_dereq_,module,exports){
+var Font = _dereq_('./font');
+
+function FontMetrics() {
+    this.data = {};
+}
+
+FontMetrics.prototype.getMetrics = function(family, size) {
+    if (this.data[family + "-" + size] === undefined) {
+        this.data[family + "-" + size] = new Font(family, size);
+    }
+    return this.data[family + "-" + size];
+};
+
+module.exports = FontMetrics;
+
+},{"./font":6}],8:[function(_dereq_,module,exports){
+var utils = _dereq_('./utils');
+var getBounds = utils.getBounds;
+var loadUrlDocument = _dereq_('./proxy').loadUrlDocument;
+
+function FrameContainer(container, sameOrigin, options) {
+    this.image = null;
+    this.src = container;
+    var self = this;
+    var bounds = getBounds(container);
+    this.promise = (!sameOrigin ? this.proxyLoad(options.proxy, bounds, options) : new Promise(function(resolve) {
+        if (container.contentWindow.document.URL === "about:blank" || container.contentWindow.document.documentElement == null) {
+            container.contentWindow.onload = container.onload = function() {
+                resolve(container);
+            };
+        } else {
+            resolve(container);
+        }
+    })).then(function(container) {
+        var html2canvas = _dereq_('./core');
+        return html2canvas(container.contentWindow.document.documentElement, {type: 'view', width: container.width, height: container.height, proxy: options.proxy, javascriptEnabled: options.javascriptEnabled, removeContainer: options.removeContainer, allowTaint: options.allowTaint, imageTimeout: options.imageTimeout / 2});
+    }).then(function(canvas) {
+        return self.image = canvas;
+    });
+}
+
+FrameContainer.prototype.proxyLoad = function(proxy, bounds, options) {
+    var container = this.src;
+    return loadUrlDocument(container.src, proxy, container.ownerDocument, bounds.width, bounds.height, options);
+};
+
+module.exports = FrameContainer;
+
+},{"./core":4,"./proxy":16,"./utils":26}],9:[function(_dereq_,module,exports){
+function GradientContainer(imageData) {
+    this.src = imageData.value;
+    this.colorStops = [];
+    this.type = null;
+    this.x0 = 0.5;
+    this.y0 = 0.5;
+    this.x1 = 0.5;
+    this.y1 = 0.5;
+    this.promise = Promise.resolve(true);
+}
+
+GradientContainer.TYPES = {
+    LINEAR: 1,
+    RADIAL: 2
+};
+
+// TODO: support hsl[a], negative %/length values
+// TODO: support <angle> (e.g. -?\d{1,3}(?:\.\d+)deg, etc. : https://developer.mozilla.org/docs/Web/CSS/angle )
+GradientContainer.REGEXP_COLORSTOP = /^\s*(rgba?\(\s*\d{1,3},\s*\d{1,3},\s*\d{1,3}(?:,\s*[0-9\.]+)?\s*\)|[a-z]{3,20}|#[a-f0-9]{3,6})(?:\s+(\d{1,3}(?:\.\d+)?)(%|px)?)?(?:\s|$)/i;
+
+module.exports = GradientContainer;
+
+},{}],10:[function(_dereq_,module,exports){
+function ImageContainer(src, cors) {
+    this.src = src;
+    this.image = new Image();
+    var self = this;
+    this.tainted = null;
+    this.promise = new Promise(function(resolve, reject) {
+        self.image.onload = resolve;
+        self.image.onerror = reject;
+        if (cors) {
+            self.image.crossOrigin = "anonymous";
+        }
+        self.image.src = src;
+        if (self.image.complete === true) {
+            resolve(self.image);
+        }
+    });
+}
+
+module.exports = ImageContainer;
+
+},{}],11:[function(_dereq_,module,exports){
+var log = _dereq_('./log');
+var ImageContainer = _dereq_('./imagecontainer');
+var DummyImageContainer = _dereq_('./dummyimagecontainer');
+var ProxyImageContainer = _dereq_('./proxyimagecontainer');
+var FrameContainer = _dereq_('./framecontainer');
+var SVGContainer = _dereq_('./svgcontainer');
+var SVGNodeContainer = _dereq_('./svgnodecontainer');
+var LinearGradientContainer = _dereq_('./lineargradientcontainer');
+var WebkitGradientContainer = _dereq_('./webkitgradientcontainer');
+var bind = _dereq_('./utils').bind;
+
+function ImageLoader(options, support) {
+    this.link = null;
+    this.options = options;
+    this.support = support;
+    this.origin = this.getOrigin(window.location.href);
+}
+
+ImageLoader.prototype.findImages = function(nodes) {
+    var images = [];
+    nodes.reduce(function(imageNodes, container) {
+        switch(container.node.nodeName) {
+        case "IMG":
+            return imageNodes.concat([{
+                args: [container.node.src],
+                method: "url"
+            }]);
+        case "svg":
+        case "IFRAME":
+            return imageNodes.concat([{
+                args: [container.node],
+                method: container.node.nodeName
+            }]);
+        }
+        return imageNodes;
+    }, []).forEach(this.addImage(images, this.loadImage), this);
+    return images;
+};
+
+ImageLoader.prototype.findBackgroundImage = function(images, container) {
+    container.parseBackgroundImages().filter(this.hasImageBackground).forEach(this.addImage(images, this.loadImage), this);
+    return images;
+};
+
+ImageLoader.prototype.addImage = function(images, callback) {
+    return function(newImage) {
+        newImage.args.forEach(function(image) {
+            if (!this.imageExists(images, image)) {
+                images.splice(0, 0, callback.call(this, newImage));
+                log('Added image #' + (images.length), typeof(image) === "string" ? image.substring(0, 100) : image);
+            }
+        }, this);
+    };
+};
+
+ImageLoader.prototype.hasImageBackground = function(imageData) {
+    return imageData.method !== "none";
+};
+
+ImageLoader.prototype.loadImage = function(imageData) {
+    if (imageData.method === "url") {
+        var src = imageData.args[0];
+        if (this.isSVG(src) && !this.support.svg && !this.options.allowTaint) {
+            return new SVGContainer(src);
+        } else if (src.match(/data:image\/.*;base64,/i)) {
+            return new ImageContainer(src.replace(/url\(['"]{0,}|['"]{0,}\)$/ig, ''), false);
+        } else if (this.isSameOrigin(src) || this.options.allowTaint === true || this.isSVG(src)) {
+            return new ImageContainer(src, false);
+        } else if (this.support.cors && !this.options.allowTaint && this.options.useCORS) {
+            return new ImageContainer(src, true);
+        } else if (this.options.proxy) {
+            return new ProxyImageContainer(src, this.options.proxy);
+        } else {
+            return new DummyImageContainer(src);
+        }
+    } else if (imageData.method === "linear-gradient") {
+        return new LinearGradientContainer(imageData);
+    } else if (imageData.method === "gradient") {
+        return new WebkitGradientContainer(imageData);
+    } else if (imageData.method === "svg") {
+        return new SVGNodeContainer(imageData.args[0], this.support.svg);
+    } else if (imageData.method === "IFRAME") {
+        return new FrameContainer(imageData.args[0], this.isSameOrigin(imageData.args[0].src), this.options);
+    } else {
+        return new DummyImageContainer(imageData);
+    }
+};
+
+ImageLoader.prototype.isSVG = function(src) {
+    return src.substring(src.length - 3).toLowerCase() === "svg" || SVGContainer.prototype.isInline(src);
+};
+
+ImageLoader.prototype.imageExists = function(images, src) {
+    return images.some(function(image) {
+        return image.src === src;
+    });
+};
+
+ImageLoader.prototype.isSameOrigin = function(url) {
+    return (this.getOrigin(url) === this.origin);
+};
+
+ImageLoader.prototype.getOrigin = function(url) {
+    var link = this.link || (this.link = document.createElement("a"));
+    link.href = url;
+    link.href = link.href; // IE9, LOL! - http://jsfiddle.net/niklasvh/2e48b/
+    return link.protocol + link.hostname + link.port;
+};
+
+ImageLoader.prototype.getPromise = function(container) {
+    return this.timeout(container, this.options.imageTimeout)['catch'](function() {
+        var dummy = new DummyImageContainer(container.src);
+        return dummy.promise.then(function(image) {
+            container.image = image;
+        });
+    });
+};
+
+ImageLoader.prototype.get = function(src) {
+    var found = null;
+    return this.images.some(function(img) {
+        return (found = img).src === src;
+    }) ? found : null;
+};
+
+ImageLoader.prototype.fetch = function(nodes) {
+    this.images = nodes.reduce(bind(this.findBackgroundImage, this), this.findImages(nodes));
+    this.images.forEach(function(image, index) {
+        image.promise.then(function() {
+            log("Succesfully loaded image #"+ (index+1), image);
+        }, function(e) {
+            log("Failed loading image #"+ (index+1), image, e);
+        });
+    });
+    this.ready = Promise.all(this.images.map(this.getPromise, this));
+    log("Finished searching images");
+    return this;
+};
+
+ImageLoader.prototype.timeout = function(container, timeout) {
+    var timer;
+    var promise = Promise.race([container.promise, new Promise(function(res, reject) {
+        timer = setTimeout(function() {
+            log("Timed out loading image", container);
+            reject(container);
+        }, timeout);
+    })]).then(function(container) {
+        clearTimeout(timer);
+        return container;
+    });
+    promise['catch'](function() {
+        clearTimeout(timer);
+    });
+    return promise;
+};
+
+module.exports = ImageLoader;
+
+},{"./dummyimagecontainer":5,"./framecontainer":8,"./imagecontainer":10,"./lineargradientcontainer":12,"./log":13,"./proxyimagecontainer":17,"./svgcontainer":23,"./svgnodecontainer":24,"./utils":26,"./webkitgradientcontainer":27}],12:[function(_dereq_,module,exports){
+var GradientContainer = _dereq_('./gradientcontainer');
+var Color = _dereq_('./color');
+
+function LinearGradientContainer(imageData) {
+    GradientContainer.apply(this, arguments);
+    this.type = GradientContainer.TYPES.LINEAR;
+
+    var hasDirection = LinearGradientContainer.REGEXP_DIRECTION.test( imageData.args[0] ) ||
+        !GradientContainer.REGEXP_COLORSTOP.test( imageData.args[0] );
+
+    if (hasDirection) {
+        imageData.args[0].split(/\s+/).reverse().forEach(function(position, index) {
+            switch(position) {
+            case "left":
+                this.x0 = 0;
+                this.x1 = 1;
+                break;
+            case "top":
+                this.y0 = 0;
+                this.y1 = 1;
+                break;
+            case "right":
+                this.x0 = 1;
+                this.x1 = 0;
+                break;
+            case "bottom":
+                this.y0 = 1;
+                this.y1 = 0;
+                break;
+            case "to":
+                var y0 = this.y0;
+                var x0 = this.x0;
+                this.y0 = this.y1;
+                this.x0 = this.x1;
+                this.x1 = x0;
+                this.y1 = y0;
+                break;
+            case "center":
+                break; // centered by default
+            // Firefox internally converts position keywords to percentages:
+            // http://www.w3.org/TR/2010/WD-CSS2-20101207/colors.html#propdef-background-position
+            default: // percentage or absolute length
+                // TODO: support absolute start point positions (e.g., use bounds to convert px to a ratio)
+                var ratio = parseFloat(position, 10) * 1e-2;
+                if (isNaN(ratio)) { // invalid or unhandled value
+                    break;
+                }
+                if (index === 0) {
+                    this.y0 = ratio;
+                    this.y1 = 1 - this.y0;
+                } else {
+                    this.x0 = ratio;
+                    this.x1 = 1 - this.x0;
+                }
+                break;
+            }
+        }, this);
+    } else {
+        this.y0 = 0;
+        this.y1 = 1;
+    }
+
+    this.colorStops = imageData.args.slice(hasDirection ? 1 : 0).map(function(colorStop) {
+        var colorStopMatch = colorStop.match(GradientContainer.REGEXP_COLORSTOP);
+        var value = +colorStopMatch[2];
+        var unit = value === 0 ? "%" : colorStopMatch[3]; // treat "0" as "0%"
+        return {
+            color: new Color(colorStopMatch[1]),
+            // TODO: support absolute stop positions (e.g., compute gradient line length & convert px to ratio)
+            stop: unit === "%" ? value / 100 : null
+        };
+    });
+
+    if (this.colorStops[0].stop === null) {
+        this.colorStops[0].stop = 0;
+    }
+
+    if (this.colorStops[this.colorStops.length - 1].stop === null) {
+        this.colorStops[this.colorStops.length - 1].stop = 1;
+    }
+
+    // calculates and fills-in explicit stop positions when omitted from rule
+    this.colorStops.forEach(function(colorStop, index) {
+        if (colorStop.stop === null) {
+            this.colorStops.slice(index).some(function(find, count) {
+                if (find.stop !== null) {
+                    colorStop.stop = ((find.stop - this.colorStops[index - 1].stop) / (count + 1)) + this.colorStops[index - 1].stop;
+                    return true;
+                } else {
+                    return false;
+                }
+            }, this);
+        }
+    }, this);
+}
+
+LinearGradientContainer.prototype = Object.create(GradientContainer.prototype);
+
+// TODO: support <angle> (e.g. -?\d{1,3}(?:\.\d+)deg, etc. : https://developer.mozilla.org/docs/Web/CSS/angle )
+LinearGradientContainer.REGEXP_DIRECTION = /^\s*(?:to|left|right|top|bottom|center|\d{1,3}(?:\.\d+)?%?)(?:\s|$)/i;
+
+module.exports = LinearGradientContainer;
+
+},{"./color":3,"./gradientcontainer":9}],13:[function(_dereq_,module,exports){
+var logger = function() {
+    if (logger.options.logging && window.console && window.console.log) {
+        Function.prototype.bind.call(window.console.log, (window.console)).apply(window.console, [(Date.now() - logger.options.start) + "ms", "html2canvas:"].concat([].slice.call(arguments, 0)));
+    }
+};
+
+logger.options = {logging: false};
+module.exports = logger;
+
+},{}],14:[function(_dereq_,module,exports){
+var Color = _dereq_('./color');
+var utils = _dereq_('./utils');
+var getBounds = utils.getBounds;
+var parseBackgrounds = utils.parseBackgrounds;
+var offsetBounds = utils.offsetBounds;
+
+function NodeContainer(node, parent) {
+    this.node = node;
+    this.parent = parent;
+    this.stack = null;
+    this.bounds = null;
+    this.borders = null;
+    this.clip = [];
+    this.backgroundClip = [];
+    this.offsetBounds = null;
+    this.visible = null;
+    this.computedStyles = null;
+    this.colors = {};
+    this.styles = {};
+    this.backgroundImages = null;
+    this.transformData = null;
+    this.transformMatrix = null;
+    this.isPseudoElement = false;
+    this.opacity = null;
+}
+
+NodeContainer.prototype.cloneTo = function(stack) {
+    stack.visible = this.visible;
+    stack.borders = this.borders;
+    stack.bounds = this.bounds;
+    stack.clip = this.clip;
+    stack.backgroundClip = this.backgroundClip;
+    stack.computedStyles = this.computedStyles;
+    stack.styles = this.styles;
+    stack.backgroundImages = this.backgroundImages;
+    stack.opacity = this.opacity;
+};
+
+NodeContainer.prototype.getOpacity = function() {
+    return this.opacity === null ? (this.opacity = this.cssFloat('opacity')) : this.opacity;
+};
+
+NodeContainer.prototype.assignStack = function(stack) {
+    this.stack = stack;
+    stack.children.push(this);
+};
+
+NodeContainer.prototype.isElementVisible = function() {
+    return this.node.nodeType === Node.TEXT_NODE ? this.parent.visible : (
+        this.css('display') !== "none" &&
+        this.css('visibility') !== "hidden" &&
+        !this.node.hasAttribute("data-html2canvas-ignore") &&
+        (this.node.nodeName !== "INPUT" || this.node.getAttribute("type") !== "hidden")
+    );
+};
+
+NodeContainer.prototype.css = function(attribute) {
+    if (!this.computedStyles) {
+        this.computedStyles = this.isPseudoElement ? this.parent.computedStyle(this.before ? ":before" : ":after") : this.computedStyle(null);
+    }
+
+    return this.styles[attribute] || (this.styles[attribute] = this.computedStyles[attribute]);
+};
+
+NodeContainer.prototype.prefixedCss = function(attribute) {
+    var prefixes = ["webkit", "moz", "ms", "o"];
+    var value = this.css(attribute);
+    if (value === undefined) {
+        prefixes.some(function(prefix) {
+            value = this.css(prefix + attribute.substr(0, 1).toUpperCase() + attribute.substr(1));
+            return value !== undefined;
+        }, this);
+    }
+    return value === undefined ? null : value;
+};
+
+NodeContainer.prototype.computedStyle = function(type) {
+    return this.node.ownerDocument.defaultView.getComputedStyle(this.node, type);
+};
+
+NodeContainer.prototype.cssInt = function(attribute) {
+    var value = parseInt(this.css(attribute), 10);
+    return (isNaN(value)) ? 0 : value; // borders in old IE are throwing 'medium' for demo.html
+};
+
+NodeContainer.prototype.color = function(attribute) {
+    return this.colors[attribute] || (this.colors[attribute] = new Color(this.css(attribute)));
+};
+
+NodeContainer.prototype.cssFloat = function(attribute) {
+    var value = parseFloat(this.css(attribute));
+    return (isNaN(value)) ? 0 : value;
+};
+
+NodeContainer.prototype.fontWeight = function() {
+    var weight = this.css("fontWeight");
+    switch(parseInt(weight, 10)){
+    case 401:
+        weight = "bold";
+        break;
+    case 400:
+        weight = "normal";
+        break;
+    }
+    return weight;
+};
+
+NodeContainer.prototype.parseClip = function() {
+    var matches = this.css('clip').match(this.CLIP);
+    if (matches) {
+        return {
+            top: parseInt(matches[1], 10),
+            right: parseInt(matches[2], 10),
+            bottom: parseInt(matches[3], 10),
+            left: parseInt(matches[4], 10)
+        };
+    }
+    return null;
+};
+
+NodeContainer.prototype.parseBackgroundImages = function() {
+    return this.backgroundImages || (this.backgroundImages = parseBackgrounds(this.css("backgroundImage")));
+};
+
+NodeContainer.prototype.cssList = function(property, index) {
+    var value = (this.css(property) || '').split(',');
+    value = value[index || 0] || value[0] || 'auto';
+    value = value.trim().split(' ');
+    if (value.length === 1) {
+        value = [value[0], isPercentage(value[0]) ? 'auto' : value[0]];
+    }
+    return value;
+};
+
+NodeContainer.prototype.parseBackgroundSize = function(bounds, image, index) {
+    var size = this.cssList("backgroundSize", index);
+    var width, height;
+
+    if (isPercentage(size[0])) {
+        width = bounds.width * parseFloat(size[0]) / 100;
+    } else if (/contain|cover/.test(size[0])) {
+        var targetRatio = bounds.width / bounds.height, currentRatio = image.width / image.height;
+        return (targetRatio < currentRatio ^ size[0] === 'contain') ?  {width: bounds.height * currentRatio, height: bounds.height} : {width: bounds.width, height: bounds.width / currentRatio};
+    } else {
+        width = parseInt(size[0], 10);
+    }
+
+    if (size[0] === 'auto' && size[1] === 'auto') {
+        height = image.height;
+    } else if (size[1] === 'auto') {
+        height = width / image.width * image.height;
+    } else if (isPercentage(size[1])) {
+        height =  bounds.height * parseFloat(size[1]) / 100;
+    } else {
+        height = parseInt(size[1], 10);
+    }
+
+    if (size[0] === 'auto') {
+        width = height / image.height * image.width;
+    }
+
+    return {width: width, height: height};
+};
+
+NodeContainer.prototype.parseBackgroundPosition = function(bounds, image, index, backgroundSize) {
+    var position = this.cssList('backgroundPosition', index);
+    var left, top;
+
+    if (isPercentage(position[0])){
+        left = (bounds.width - (backgroundSize || image).width) * (parseFloat(position[0]) / 100);
+    } else {
+        left = parseInt(position[0], 10);
+    }
+
+    if (position[1] === 'auto') {
+        top = left / image.width * image.height;
+    } else if (isPercentage(position[1])){
+        top =  (bounds.height - (backgroundSize || image).height) * parseFloat(position[1]) / 100;
+    } else {
+        top = parseInt(position[1], 10);
+    }
+
+    if (position[0] === 'auto') {
+        left = top / image.height * image.width;
+    }
+
+    return {left: left, top: top};
+};
+
+NodeContainer.prototype.parseBackgroundRepeat = function(index) {
+    return this.cssList("backgroundRepeat", index)[0];
+};
+
+NodeContainer.prototype.parseTextShadows = function() {
+    var textShadow = this.css("textShadow");
+    var results = [];
+
+    if (textShadow && textShadow !== 'none') {
+        var shadows = textShadow.match(this.TEXT_SHADOW_PROPERTY);
+        for (var i = 0; shadows && (i < shadows.length); i++) {
+            var s = shadows[i].match(this.TEXT_SHADOW_VALUES);
+            results.push({
+                color: new Color(s[0]),
+                offsetX: s[1] ? parseFloat(s[1].replace('px', '')) : 0,
+                offsetY: s[2] ? parseFloat(s[2].replace('px', '')) : 0,
+                blur: s[3] ? s[3].replace('px', '') : 0
+            });
+        }
+    }
+    return results;
+};
+
+NodeContainer.prototype.parseTransform = function() {
+    if (!this.transformData) {
+        if (this.hasTransform()) {
+            var offset = this.parseBounds();
+            var origin = this.prefixedCss("transformOrigin").split(" ").map(removePx).map(asFloat);
+            origin[0] += offset.left;
+            origin[1] += offset.top;
+            this.transformData = {
+                origin: origin,
+                matrix: this.parseTransformMatrix()
+            };
+        } else {
+            this.transformData = {
+                origin: [0, 0],
+                matrix: [1, 0, 0, 1, 0, 0]
+            };
+        }
+    }
+    return this.transformData;
+};
+
+NodeContainer.prototype.parseTransformMatrix = function() {
+    if (!this.transformMatrix) {
+        var transform = this.prefixedCss("transform");
+        var matrix = transform ? parseMatrix(transform.match(this.MATRIX_PROPERTY)) : null;
+        this.transformMatrix = matrix ? matrix : [1, 0, 0, 1, 0, 0];
+    }
+    return this.transformMatrix;
+};
+
+NodeContainer.prototype.parseBounds = function() {
+    return this.bounds || (this.bounds = this.hasTransform() ? offsetBounds(this.node) : getBounds(this.node));
+};
+
+NodeContainer.prototype.hasTransform = function() {
+    return this.parseTransformMatrix().join(",") !== "1,0,0,1,0,0" || (this.parent && this.parent.hasTransform());
+};
+
+NodeContainer.prototype.getValue = function() {
+    var value = this.node.value || "";
+    if (this.node.tagName === "SELECT") {
+        value = selectionValue(this.node);
+    } else if (this.node.type === "password") {
+        value = Array(value.length + 1).join('\u2022'); // jshint ignore:line
+    }
+    return value.length === 0 ? (this.node.placeholder || "") : value;
+};
+
+NodeContainer.prototype.MATRIX_PROPERTY = /(matrix|matrix3d)\((.+)\)/;
+NodeContainer.prototype.TEXT_SHADOW_PROPERTY = /((rgba|rgb)\([^\)]+\)(\s-?\d+px){0,})/g;
+NodeContainer.prototype.TEXT_SHADOW_VALUES = /(-?\d+px)|(#.+)|(rgb\(.+\))|(rgba\(.+\))/g;
+NodeContainer.prototype.CLIP = /^rect\((\d+)px,? (\d+)px,? (\d+)px,? (\d+)px\)$/;
+
+function selectionValue(node) {
+    var option = node.options[node.selectedIndex || 0];
+    return option ? (option.text || "") : "";
+}
+
+function parseMatrix(match) {
+    if (match && match[1] === "matrix") {
+        return match[2].split(",").map(function(s) {
+            return parseFloat(s.trim());
+        });
+    } else if (match && match[1] === "matrix3d") {
+        var matrix3d = match[2].split(",").map(function(s) {
+          return parseFloat(s.trim());
+        });
+        return [matrix3d[0], matrix3d[1], matrix3d[4], matrix3d[5], matrix3d[12], matrix3d[13]];
+    }
+}
+
+function isPercentage(value) {
+    return value.toString().indexOf("%") !== -1;
+}
+
+function removePx(str) {
+    return str.replace("px", "");
+}
+
+function asFloat(str) {
+    return parseFloat(str);
+}
+
+module.exports = NodeContainer;
+
+},{"./color":3,"./utils":26}],15:[function(_dereq_,module,exports){
+var log = _dereq_('./log');
+var punycode = _dereq_('punycode');
+var NodeContainer = _dereq_('./nodecontainer');
+var TextContainer = _dereq_('./textcontainer');
+var PseudoElementContainer = _dereq_('./pseudoelementcontainer');
+var FontMetrics = _dereq_('./fontmetrics');
+var Color = _dereq_('./color');
+var StackingContext = _dereq_('./stackingcontext');
+var utils = _dereq_('./utils');
+var bind = utils.bind;
+var getBounds = utils.getBounds;
+var parseBackgrounds = utils.parseBackgrounds;
+var offsetBounds = utils.offsetBounds;
+
+function NodeParser(element, renderer, support, imageLoader, options) {
+    log("Starting NodeParser");
+    this.renderer = renderer;
+    this.options = options;
+    this.range = null;
+    this.support = support;
+    this.renderQueue = [];
+    this.stack = new StackingContext(true, 1, element.ownerDocument, null);
+    var parent = new NodeContainer(element, null);
+    if (options.background) {
+        renderer.rectangle(0, 0, renderer.width, renderer.height, new Color(options.background));
+    }
+    if (element === element.ownerDocument.documentElement) {
+        // http://www.w3.org/TR/css3-background/#special-backgrounds
+        var canvasBackground = new NodeContainer(parent.color('backgroundColor').isTransparent() ? element.ownerDocument.body : element.ownerDocument.documentElement, null);
+        renderer.rectangle(0, 0, renderer.width, renderer.height, canvasBackground.color('backgroundColor'));
+    }
+    parent.visibile = parent.isElementVisible();
+    this.createPseudoHideStyles(element.ownerDocument);
+    this.disableAnimations(element.ownerDocument);
+    this.nodes = flatten([parent].concat(this.getChildren(parent)).filter(function(container) {
+        return container.visible = container.isElementVisible();
+    }).map(this.getPseudoElements, this));
+    this.fontMetrics = new FontMetrics();
+    log("Fetched nodes, total:", this.nodes.length);
+    log("Calculate overflow clips");
+    this.calculateOverflowClips();
+    log("Start fetching images");
+    this.images = imageLoader.fetch(this.nodes.filter(isElement));
+    this.ready = this.images.ready.then(bind(function() {
+        log("Images loaded, starting parsing");
+        log("Creating stacking contexts");
+        this.createStackingContexts();
+        log("Sorting stacking contexts");
+        this.sortStackingContexts(this.stack);
+        this.parse(this.stack);
+        log("Render queue created with " + this.renderQueue.length + " items");
+        return new Promise(bind(function(resolve) {
+            if (!options.async) {
+                this.renderQueue.forEach(this.paint, this);
+                resolve();
+            } else if (typeof(options.async) === "function") {
+                options.async.call(this, this.renderQueue, resolve);
+            } else if (this.renderQueue.length > 0){
+                this.renderIndex = 0;
+                this.asyncRenderer(this.renderQueue, resolve);
+            } else {
+                resolve();
+            }
+        }, this));
+    }, this));
+}
+
+NodeParser.prototype.calculateOverflowClips = function() {
+    this.nodes.forEach(function(container) {
+        if (isElement(container)) {
+            if (isPseudoElement(container)) {
+                container.appendToDOM();
+            }
+            container.borders = this.parseBorders(container);
+            var clip = (container.css('overflow') === "hidden") ? [container.borders.clip] : [];
+            var cssClip = container.parseClip();
+            if (cssClip && ["absolute", "fixed"].indexOf(container.css('position')) !== -1) {
+                clip.push([["rect",
+                        container.bounds.left + cssClip.left,
+                        container.bounds.top + cssClip.top,
+                        cssClip.right - cssClip.left,
+                        cssClip.bottom - cssClip.top
+                ]]);
+            }
+            container.clip = hasParentClip(container) ? container.parent.clip.concat(clip) : clip;
+            container.backgroundClip = (container.css('overflow') !== "hidden") ? container.clip.concat([container.borders.clip]) : container.clip;
+            if (isPseudoElement(container)) {
+                container.cleanDOM();
+            }
+        } else if (isTextNode(container)) {
+            container.clip = hasParentClip(container) ? container.parent.clip : [];
+        }
+        if (!isPseudoElement(container)) {
+            container.bounds = null;
+        }
+    }, this);
+};
+
+function hasParentClip(container) {
+    return container.parent && container.parent.clip.length;
+}
+
+NodeParser.prototype.asyncRenderer = function(queue, resolve, asyncTimer) {
+    asyncTimer = asyncTimer || Date.now();
+    this.paint(queue[this.renderIndex++]);
+    if (queue.length === this.renderIndex) {
+        resolve();
+    } else if (asyncTimer + 20 > Date.now()) {
+        this.asyncRenderer(queue, resolve, asyncTimer);
+    } else {
+        setTimeout(bind(function() {
+            this.asyncRenderer(queue, resolve);
+        }, this), 0);
+    }
+};
+
+NodeParser.prototype.createPseudoHideStyles = function(document) {
+    this.createStyles(document, '.' + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + ':before { content: "" !important; display: none !important; }' +
+        '.' + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER + ':after { content: "" !important; display: none !important; }');
+};
+
+NodeParser.prototype.disableAnimations = function(document) {
+    this.createStyles(document, '* { -webkit-animation: none !important; -moz-animation: none !important; -o-animation: none !important; animation: none !important; ' +
+        '-webkit-transition: none !important; -moz-transition: none !important; -o-transition: none !important; transition: none !important;}');
+};
+
+NodeParser.prototype.createStyles = function(document, styles) {
+    var hidePseudoElements = document.createElement('style');
+    hidePseudoElements.innerHTML = styles;
+    document.body.appendChild(hidePseudoElements);
+};
+
+NodeParser.prototype.getPseudoElements = function(container) {
+    var nodes = [[container]];
+    if (container.node.nodeType === Node.ELEMENT_NODE) {
+        var before = this.getPseudoElement(container, ":before");
+        var after = this.getPseudoElement(container, ":after");
+
+        if (before) {
+            nodes.push(before);
+        }
+
+        if (after) {
+            nodes.push(after);
+        }
+    }
+    return flatten(nodes);
+};
+
+function toCamelCase(str) {
+    return str.replace(/(\-[a-z])/g, function(match){
+        return match.toUpperCase().replace('-','');
+    });
+}
+
+NodeParser.prototype.getPseudoElement = function(container, type) {
+    var style = container.computedStyle(type);
+    if(!style || !style.content || style.content === "none" || style.content === "-moz-alt-content" || style.display === "none") {
+        return null;
+    }
+
+    var content = stripQuotes(style.content);
+    var isImage = content.substr(0, 3) === 'url';
+    var pseudoNode = document.createElement(isImage ? 'img' : 'html2canvaspseudoelement');
+    var pseudoContainer = new PseudoElementContainer(pseudoNode, container, type);
+
+    for (var i = style.length-1; i >= 0; i--) {
+        var property = toCamelCase(style.item(i));
+        pseudoNode.style[property] = style[property];
+    }
+
+    pseudoNode.className = PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + " " + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER;
+
+    if (isImage) {
+        pseudoNode.src = parseBackgrounds(content)[0].args[0];
+        return [pseudoContainer];
+    } else {
+        var text = document.createTextNode(content);
+        pseudoNode.appendChild(text);
+        return [pseudoContainer, new TextContainer(text, pseudoContainer)];
+    }
+};
+
+
+NodeParser.prototype.getChildren = function(parentContainer) {
+    return flatten([].filter.call(parentContainer.node.childNodes, renderableNode).map(function(node) {
+        var container = [node.nodeType === Node.TEXT_NODE ? new TextContainer(node, parentContainer) : new NodeContainer(node, parentContainer)].filter(nonIgnoredElement);
+        return node.nodeType === Node.ELEMENT_NODE && container.length && node.tagName !== "TEXTAREA" ? (container[0].isElementVisible() ? container.concat(this.getChildren(container[0])) : []) : container;
+    }, this));
+};
+
+NodeParser.prototype.newStackingContext = function(container, hasOwnStacking) {
+    var stack = new StackingContext(hasOwnStacking, container.getOpacity(), container.node, container.parent);
+    container.cloneTo(stack);
+    var parentStack = hasOwnStacking ? stack.getParentStack(this) : stack.parent.stack;
+    parentStack.contexts.push(stack);
+    container.stack = stack;
+};
+
+NodeParser.prototype.createStackingContexts = function() {
+    this.nodes.forEach(function(container) {
+        if (isElement(container) && (this.isRootElement(container) || hasOpacity(container) || isPositionedForStacking(container) || this.isBodyWithTransparentRoot(container) || container.hasTransform())) {
+            this.newStackingContext(container, true);
+        } else if (isElement(container) && ((isPositioned(container) && zIndex0(container)) || isInlineBlock(container) || isFloating(container))) {
+            this.newStackingContext(container, false);
+        } else {
+            container.assignStack(container.parent.stack);
+        }
+    }, this);
+};
+
+NodeParser.prototype.isBodyWithTransparentRoot = function(container) {
+    return container.node.nodeName === "BODY" && container.parent.color('backgroundColor').isTransparent();
+};
+
+NodeParser.prototype.isRootElement = function(container) {
+    return container.parent === null;
+};
+
+NodeParser.prototype.sortStackingContexts = function(stack) {
+    stack.contexts.sort(zIndexSort(stack.contexts.slice(0)));
+    stack.contexts.forEach(this.sortStackingContexts, this);
+};
+
+NodeParser.prototype.parseTextBounds = function(container) {
+    return function(text, index, textList) {
+        if (container.parent.css("textDecoration").substr(0, 4) !== "none" || text.trim().length !== 0) {
+            if (this.support.rangeBounds && !container.parent.hasTransform()) {
+                var offset = textList.slice(0, index).join("").length;
+                return this.getRangeBounds(container.node, offset, text.length);
+            } else if (container.node && typeof(container.node.data) === "string") {
+                var replacementNode = container.node.splitText(text.length);
+                var bounds = this.getWrapperBounds(container.node, container.parent.hasTransform());
+                container.node = replacementNode;
+                return bounds;
+            }
+        } else if(!this.support.rangeBounds || container.parent.hasTransform()){
+            container.node = container.node.splitText(text.length);
+        }
+        return {};
+    };
+};
+
+NodeParser.prototype.getWrapperBounds = function(node, transform) {
+    var wrapper = node.ownerDocument.createElement('html2canvaswrapper');
+    var parent = node.parentNode,
+        backupText = node.cloneNode(true);
+
+    wrapper.appendChild(node.cloneNode(true));
+    parent.replaceChild(wrapper, node);
+    var bounds = transform ? offsetBounds(wrapper) : getBounds(wrapper);
+    parent.replaceChild(backupText, wrapper);
+    return bounds;
+};
+
+NodeParser.prototype.getRangeBounds = function(node, offset, length) {
+    var range = this.range || (this.range = node.ownerDocument.createRange());
+    range.setStart(node, offset);
+    range.setEnd(node, offset + length);
+    return range.getBoundingClientRect();
+};
+
+function ClearTransform() {}
+
+NodeParser.prototype.parse = function(stack) {
+    // http://www.w3.org/TR/CSS21/visuren.html#z-index
+    var negativeZindex = stack.contexts.filter(negativeZIndex); // 2. the child stacking contexts with negative stack levels (most negative first).
+    var descendantElements = stack.children.filter(isElement);
+    var descendantNonFloats = descendantElements.filter(not(isFloating));
+    var nonInlineNonPositionedDescendants = descendantNonFloats.filter(not(isPositioned)).filter(not(inlineLevel)); // 3 the in-flow, non-inline-level, non-positioned descendants.
+    var nonPositionedFloats = descendantElements.filter(not(isPositioned)).filter(isFloating); // 4. the non-positioned floats.
+    var inFlow = descendantNonFloats.filter(not(isPositioned)).filter(inlineLevel); // 5. the in-flow, inline-level, non-positioned descendants, including inline tables and inline blocks.
+    var stackLevel0 = stack.contexts.concat(descendantNonFloats.filter(isPositioned)).filter(zIndex0); // 6. the child stacking contexts with stack level 0 and the positioned descendants with stack level 0.
+    var text = stack.children.filter(isTextNode).filter(hasText);
+    var positiveZindex = stack.contexts.filter(positiveZIndex); // 7. the child stacking contexts with positive stack levels (least positive first).
+    negativeZindex.concat(nonInlineNonPositionedDescendants).concat(nonPositionedFloats)
+        .concat(inFlow).concat(stackLevel0).concat(text).concat(positiveZindex).forEach(function(container) {
+            this.renderQueue.push(container);
+            if (isStackingContext(container)) {
+                this.parse(container);
+                this.renderQueue.push(new ClearTransform());
+            }
+        }, this);
+};
+
+NodeParser.prototype.paint = function(container) {
+    try {
+        if (container instanceof ClearTransform) {
+            this.renderer.ctx.restore();
+        } else if (isTextNode(container)) {
+            if (isPseudoElement(container.parent)) {
+                container.parent.appendToDOM();
+            }
+            this.paintText(container);
+            if (isPseudoElement(container.parent)) {
+                container.parent.cleanDOM();
+            }
+        } else {
+            this.paintNode(container);
+        }
+    } catch(e) {
+        log(e);
+        if (this.options.strict) {
+            throw e;
+        }
+    }
+};
+
+NodeParser.prototype.paintNode = function(container) {
+    if (isStackingContext(container)) {
+        this.renderer.setOpacity(container.opacity);
+        this.renderer.ctx.save();
+        if (container.hasTransform()) {
+            this.renderer.setTransform(container.parseTransform());
+        }
+    }
+
+    if (container.node.nodeName === "INPUT" && container.node.type === "checkbox") {
+        this.paintCheckbox(container);
+    } else if (container.node.nodeName === "INPUT" && container.node.type === "radio") {
+        this.paintRadio(container);
+    } else {
+        this.paintElement(container);
+    }
+};
+
+NodeParser.prototype.paintElement = function(container) {
+    var bounds = container.parseBounds();
+    this.renderer.clip(container.backgroundClip, function() {
+        this.renderer.renderBackground(container, bounds, container.borders.borders.map(getWidth));
+    }, this);
+
+    this.renderer.clip(container.clip, function() {
+        this.renderer.renderBorders(container.borders.borders);
+    }, this);
+
+    this.renderer.clip(container.backgroundClip, function() {
+        switch (container.node.nodeName) {
+        case "svg":
+        case "IFRAME":
+            var imgContainer = this.images.get(container.node);
+            if (imgContainer) {
+                this.renderer.renderImage(container, bounds, container.borders, imgContainer);
+            } else {
+                log("Error loading <" + container.node.nodeName + ">", container.node);
+            }
+            break;
+        case "IMG":
+            var imageContainer = this.images.get(container.node.src);
+            if (imageContainer) {
+                this.renderer.renderImage(container, bounds, container.borders, imageContainer);
+            } else {
+                log("Error loading <img>", container.node.src);
+            }
+            break;
+        case "CANVAS":
+            this.renderer.renderImage(container, bounds, container.borders, {image: container.node});
+            break;
+        case "SELECT":
+        case "INPUT":
+        case "TEXTAREA":
+            this.paintFormValue(container);
+            break;
+        }
+    }, this);
+};
+
+NodeParser.prototype.paintCheckbox = function(container) {
+    var b = container.parseBounds();
+
+    var size = Math.min(b.width, b.height);
+    var bounds = {width: size - 1, height: size - 1, top: b.top, left: b.left};
+    var r = [3, 3];
+    var radius = [r, r, r, r];
+    var borders = [1,1,1,1].map(function(w) {
+        return {color: new Color('#A5A5A5'), width: w};
+    });
+
+    var borderPoints = calculateCurvePoints(bounds, radius, borders);
+
+    this.renderer.clip(container.backgroundClip, function() {
+        this.renderer.rectangle(bounds.left + 1, bounds.top + 1, bounds.width - 2, bounds.height - 2, new Color("#DEDEDE"));
+        this.renderer.renderBorders(calculateBorders(borders, bounds, borderPoints, radius));
+        if (container.node.checked) {
+            this.renderer.font(new Color('#424242'), 'normal', 'normal', 'bold', (size - 3) + "px", 'arial');
+            this.renderer.text("\u2714", bounds.left + size / 6, bounds.top + size - 1);
+        }
+    }, this);
+};
+
+NodeParser.prototype.paintRadio = function(container) {
+    var bounds = container.parseBounds();
+
+    var size = Math.min(bounds.width, bounds.height) - 2;
+
+    this.renderer.clip(container.backgroundClip, function() {
+        this.renderer.circleStroke(bounds.left + 1, bounds.top + 1, size, new Color('#DEDEDE'), 1, new Color('#A5A5A5'));
+        if (container.node.checked) {
+            this.renderer.circle(Math.ceil(bounds.left + size / 4) + 1, Math.ceil(bounds.top + size / 4) + 1, Math.floor(size / 2), new Color('#424242'));
+        }
+    }, this);
+};
+
+NodeParser.prototype.paintFormValue = function(container) {
+    var value = container.getValue();
+    if (value.length > 0) {
+        var document = container.node.ownerDocument;
+        var wrapper = document.createElement('html2canvaswrapper');
+        var properties = ['lineHeight', 'textAlign', 'fontFamily', 'fontWeight', 'fontSize', 'color',
+            'paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom',
+            'width', 'height', 'borderLeftStyle', 'borderTopStyle', 'borderLeftWidth', 'borderTopWidth',
+            'boxSizing', 'whiteSpace', 'wordWrap'];
+
+        properties.forEach(function(property) {
+            try {
+                wrapper.style[property] = container.css(property);
+            } catch(e) {
+                // Older IE has issues with "border"
+                log("html2canvas: Parse: Exception caught in renderFormValue: " + e.message);
+            }
+        });
+        var bounds = container.parseBounds();
+        wrapper.style.position = "fixed";
+        wrapper.style.left = bounds.left + "px";
+        wrapper.style.top = bounds.top + "px";
+        wrapper.textContent = value;
+        document.body.appendChild(wrapper);
+        this.paintText(new TextContainer(wrapper.firstChild, container));
+        document.body.removeChild(wrapper);
+    }
+};
+
+NodeParser.prototype.paintText = function(container) {
+    container.applyTextTransform();
+    var characters = punycode.ucs2.decode(container.node.data);
+    var textList = (!this.options.letterRendering || noLetterSpacing(container)) && !hasUnicode(container.node.data) ? getWords(characters) : characters.map(function(character) {
+        return punycode.ucs2.encode([character]);
+    });
+
+    var weight = container.parent.fontWeight();
+    var size = container.parent.css('fontSize');
+    var family = container.parent.css('fontFamily');
+    var shadows = container.parent.parseTextShadows();
+
+    this.renderer.font(container.parent.color('color'), container.parent.css('fontStyle'), container.parent.css('fontVariant'), weight, size, family);
+    if (shadows.length) {
+        // TODO: support multiple text shadows
+        this.renderer.fontShadow(shadows[0].color, shadows[0].offsetX, shadows[0].offsetY, shadows[0].blur);
+    } else {
+        this.renderer.clearShadow();
+    }
+
+    this.renderer.clip(container.parent.clip, function() {
+        textList.map(this.parseTextBounds(container), this).forEach(function(bounds, index) {
+            if (bounds) {
+                this.renderer.text(textList[index], bounds.left, bounds.bottom);
+                this.renderTextDecoration(container.parent, bounds, this.fontMetrics.getMetrics(family, size));
+            }
+        }, this);
+    }, this);
+};
+
+NodeParser.prototype.renderTextDecoration = function(container, bounds, metrics) {
+    switch(container.css("textDecoration").split(" ")[0]) {
+    case "underline":
+        // Draws a line at the baseline of the font
+        // TODO As some browsers display the line as more than 1px if the font-size is big, need to take that into account both in position and size
+        this.renderer.rectangle(bounds.left, Math.round(bounds.top + metrics.baseline + metrics.lineWidth), bounds.width, 1, container.color("color"));
+        break;
+    case "overline":
+        this.renderer.rectangle(bounds.left, Math.round(bounds.top), bounds.width, 1, container.color("color"));
+        break;
+    case "line-through":
+        // TODO try and find exact position for line-through
+        this.renderer.rectangle(bounds.left, Math.ceil(bounds.top + metrics.middle + metrics.lineWidth), bounds.width, 1, container.color("color"));
+        break;
+    }
+};
+
+var borderColorTransforms = {
+    inset: [
+        ["darken", 0.60],
+        ["darken", 0.10],
+        ["darken", 0.10],
+        ["darken", 0.60]
+    ]
+};
+
+NodeParser.prototype.parseBorders = function(container) {
+    var nodeBounds = container.parseBounds();
+    var radius = getBorderRadiusData(container);
+    var borders = ["Top", "Right", "Bottom", "Left"].map(function(side, index) {
+        var style = container.css('border' + side + 'Style');
+        var color = container.color('border' + side + 'Color');
+        if (style === "inset" && color.isBlack()) {
+            color = new Color([255, 255, 255, color.a]); // this is wrong, but
+        }
+        var colorTransform = borderColorTransforms[style] ? borderColorTransforms[style][index] : null;
+        return {
+            width: container.cssInt('border' + side + 'Width'),
+            color: colorTransform ? color[colorTransform[0]](colorTransform[1]) : color,
+            args: null
+        };
+    });
+    var borderPoints = calculateCurvePoints(nodeBounds, radius, borders);
+
+    return {
+        clip: this.parseBackgroundClip(container, borderPoints, borders, radius, nodeBounds),
+        borders: calculateBorders(borders, nodeBounds, borderPoints, radius)
+    };
+};
+
+function calculateBorders(borders, nodeBounds, borderPoints, radius) {
+    return borders.map(function(border, borderSide) {
+        if (border.width > 0) {
+            var bx = nodeBounds.left;
+            var by = nodeBounds.top;
+            var bw = nodeBounds.width;
+            var bh = nodeBounds.height - (borders[2].width);
+
+            switch(borderSide) {
+            case 0:
+                // top border
+                bh = borders[0].width;
+                border.args = drawSide({
+                        c1: [bx, by],
+                        c2: [bx + bw, by],
+                        c3: [bx + bw - borders[1].width, by + bh],
+                        c4: [bx + borders[3].width, by + bh]
+                    }, radius[0], radius[1],
+                    borderPoints.topLeftOuter, borderPoints.topLeftInner, borderPoints.topRightOuter, borderPoints.topRightInner);
+                break;
+            case 1:
+                // right border
+                bx = nodeBounds.left + nodeBounds.width - (borders[1].width);
+                bw = borders[1].width;
+
+                border.args = drawSide({
+                        c1: [bx + bw, by],
+                        c2: [bx + bw, by + bh + borders[2].width],
+                        c3: [bx, by + bh],
+                        c4: [bx, by + borders[0].width]
+                    }, radius[1], radius[2],
+                    borderPoints.topRightOuter, borderPoints.topRightInner, borderPoints.bottomRightOuter, borderPoints.bottomRightInner);
+                break;
+            case 2:
+                // bottom border
+                by = (by + nodeBounds.height) - (borders[2].width);
+                bh = borders[2].width;
+                border.args = drawSide({
+                        c1: [bx + bw, by + bh],
+                        c2: [bx, by + bh],
+                        c3: [bx + borders[3].width, by],
+                        c4: [bx + bw - borders[3].width, by]
+                    }, radius[2], radius[3],
+                    borderPoints.bottomRightOuter, borderPoints.bottomRightInner, borderPoints.bottomLeftOuter, borderPoints.bottomLeftInner);
+                break;
+            case 3:
+                // left border
+                bw = borders[3].width;
+                border.args = drawSide({
+                        c1: [bx, by + bh + borders[2].width],
+                        c2: [bx, by],
+                        c3: [bx + bw, by + borders[0].width],
+                        c4: [bx + bw, by + bh]
+                    }, radius[3], radius[0],
+                    borderPoints.bottomLeftOuter, borderPoints.bottomLeftInner, borderPoints.topLeftOuter, borderPoints.topLeftInner);
+                break;
+            }
+        }
+        return border;
+    });
+}
+
+NodeParser.prototype.parseBackgroundClip = function(container, borderPoints, borders, radius, bounds) {
+    var backgroundClip = container.css('backgroundClip'),
+        borderArgs = [];
+
+    switch(backgroundClip) {
+    case "content-box":
+    case "padding-box":
+        parseCorner(borderArgs, radius[0], radius[1], borderPoints.topLeftInner, borderPoints.topRightInner, bounds.left + borders[3].width, bounds.top + borders[0].width);
+        parseCorner(borderArgs, radius[1], radius[2], borderPoints.topRightInner, borderPoints.bottomRightInner, bounds.left + bounds.width - borders[1].width, bounds.top + borders[0].width);
+        parseCorner(borderArgs, radius[2], radius[3], borderPoints.bottomRightInner, borderPoints.bottomLeftInner, bounds.left + bounds.width - borders[1].width, bounds.top + bounds.height - borders[2].width);
+        parseCorner(borderArgs, radius[3], radius[0], borderPoints.bottomLeftInner, borderPoints.topLeftInner, bounds.left + borders[3].width, bounds.top + bounds.height - borders[2].width);
+        break;
+
+    default:
+        parseCorner(borderArgs, radius[0], radius[1], borderPoints.topLeftOuter, borderPoints.topRightOuter, bounds.left, bounds.top);
+        parseCorner(borderArgs, radius[1], radius[2], borderPoints.topRightOuter, borderPoints.bottomRightOuter, bounds.left + bounds.width, bounds.top);
+        parseCorner(borderArgs, radius[2], radius[3], borderPoints.bottomRightOuter, borderPoints.bottomLeftOuter, bounds.left + bounds.width, bounds.top + bounds.height);
+        parseCorner(borderArgs, radius[3], radius[0], borderPoints.bottomLeftOuter, borderPoints.topLeftOuter, bounds.left, bounds.top + bounds.height);
+        break;
+    }
+
+    return borderArgs;
+};
+
+function getCurvePoints(x, y, r1, r2) {
+    var kappa = 4 * ((Math.sqrt(2) - 1) / 3);
+    var ox = (r1) * kappa, // control point offset horizontal
+        oy = (r2) * kappa, // control point offset vertical
+        xm = x + r1, // x-middle
+        ym = y + r2; // y-middle
+    return {
+        topLeft: bezierCurve({x: x, y: ym}, {x: x, y: ym - oy}, {x: xm - ox, y: y}, {x: xm, y: y}),
+        topRight: bezierCurve({x: x, y: y}, {x: x + ox,y: y}, {x: xm, y: ym - oy}, {x: xm, y: ym}),
+        bottomRight: bezierCurve({x: xm, y: y}, {x: xm, y: y + oy}, {x: x + ox, y: ym}, {x: x, y: ym}),
+        bottomLeft: bezierCurve({x: xm, y: ym}, {x: xm - ox, y: ym}, {x: x, y: y + oy}, {x: x, y:y})
+    };
+}
+
+function calculateCurvePoints(bounds, borderRadius, borders) {
+    var x = bounds.left,
+        y = bounds.top,
+        width = bounds.width,
+        height = bounds.height,
+
+        tlh = borderRadius[0][0] < width / 2 ? borderRadius[0][0] : width / 2,
+        tlv = borderRadius[0][1] < height / 2 ? borderRadius[0][1] : height / 2,
+        trh = borderRadius[1][0] < width / 2 ? borderRadius[1][0] : width / 2,
+        trv = borderRadius[1][1] < height / 2 ? borderRadius[1][1] : height / 2,
+        brh = borderRadius[2][0] < width / 2 ? borderRadius[2][0] : width / 2,
+        brv = borderRadius[2][1] < height / 2 ? borderRadius[2][1] : height / 2,
+        blh = borderRadius[3][0] < width / 2 ? borderRadius[3][0] : width / 2,
+        blv = borderRadius[3][1] < height / 2 ? borderRadius[3][1] : height / 2;
+
+    var topWidth = width - trh,
+        rightHeight = height - brv,
+        bottomWidth = width - brh,
+        leftHeight = height - blv;
+
+    return {
+        topLeftOuter: getCurvePoints(x, y, tlh, tlv).topLeft.subdivide(0.5),
+        topLeftInner: getCurvePoints(x + borders[3].width, y + borders[0].width, Math.max(0, tlh - borders[3].width), Math.max(0, tlv - borders[0].width)).topLeft.subdivide(0.5),
+        topRightOuter: getCurvePoints(x + topWidth, y, trh, trv).topRight.subdivide(0.5),
+        topRightInner: getCurvePoints(x + Math.min(topWidth, width + borders[3].width), y + borders[0].width, (topWidth > width + borders[3].width) ? 0 :trh - borders[3].width, trv - borders[0].width).topRight.subdivide(0.5),
+        bottomRightOuter: getCurvePoints(x + bottomWidth, y + rightHeight, brh, brv).bottomRight.subdivide(0.5),
+        bottomRightInner: getCurvePoints(x + Math.min(bottomWidth, width - borders[3].width), y + Math.min(rightHeight, height + borders[0].width), Math.max(0, brh - borders[1].width),  brv - borders[2].width).bottomRight.subdivide(0.5),
+        bottomLeftOuter: getCurvePoints(x, y + leftHeight, blh, blv).bottomLeft.subdivide(0.5),
+        bottomLeftInner: getCurvePoints(x + borders[3].width, y + leftHeight, Math.max(0, blh - borders[3].width), blv - borders[2].width).bottomLeft.subdivide(0.5)
+    };
+}
+
+function bezierCurve(start, startControl, endControl, end) {
+    var lerp = function (a, b, t) {
+        return {
+            x: a.x + (b.x - a.x) * t,
+            y: a.y + (b.y - a.y) * t
+        };
+    };
+
+    return {
+        start: start,
+        startControl: startControl,
+        endControl: endControl,
+        end: end,
+        subdivide: function(t) {
+            var ab = lerp(start, startControl, t),
+                bc = lerp(startControl, endControl, t),
+                cd = lerp(endControl, end, t),
+                abbc = lerp(ab, bc, t),
+                bccd = lerp(bc, cd, t),
+                dest = lerp(abbc, bccd, t);
+            return [bezierCurve(start, ab, abbc, dest), bezierCurve(dest, bccd, cd, end)];
+        },
+        curveTo: function(borderArgs) {
+            borderArgs.push(["bezierCurve", startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y]);
+        },
+        curveToReversed: function(borderArgs) {
+            borderArgs.push(["bezierCurve", endControl.x, endControl.y, startControl.x, startControl.y, start.x, start.y]);
+        }
+    };
+}
+
+function drawSide(borderData, radius1, radius2, outer1, inner1, outer2, inner2) {
+    var borderArgs = [];
+
+    if (radius1[0] > 0 || radius1[1] > 0) {
+        borderArgs.push(["line", outer1[1].start.x, outer1[1].start.y]);
+        outer1[1].curveTo(borderArgs);
+    } else {
+        borderArgs.push([ "line", borderData.c1[0], borderData.c1[1]]);
+    }
+
+    if (radius2[0] > 0 || radius2[1] > 0) {
+        borderArgs.push(["line", outer2[0].start.x, outer2[0].start.y]);
+        outer2[0].curveTo(borderArgs);
+        borderArgs.push(["line", inner2[0].end.x, inner2[0].end.y]);
+        inner2[0].curveToReversed(borderArgs);
+    } else {
+        borderArgs.push(["line", borderData.c2[0], borderData.c2[1]]);
+        borderArgs.push(["line", borderData.c3[0], borderData.c3[1]]);
+    }
+
+    if (radius1[0] > 0 || radius1[1] > 0) {
+        borderArgs.push(["line", inner1[1].end.x, inner1[1].end.y]);
+        inner1[1].curveToReversed(borderArgs);
+    } else {
+        borderArgs.push(["line", borderData.c4[0], borderData.c4[1]]);
+    }
+
+    return borderArgs;
+}
+
+function parseCorner(borderArgs, radius1, radius2, corner1, corner2, x, y) {
+    if (radius1[0] > 0 || radius1[1] > 0) {
+        borderArgs.push(["line", corner1[0].start.x, corner1[0].start.y]);
+        corner1[0].curveTo(borderArgs);
+        corner1[1].curveTo(borderArgs);
+    } else {
+        borderArgs.push(["line", x, y]);
+    }
+
+    if (radius2[0] > 0 || radius2[1] > 0) {
+        borderArgs.push(["line", corner2[0].start.x, corner2[0].start.y]);
+    }
+}
+
+function negativeZIndex(container) {
+    return container.cssInt("zIndex") < 0;
+}
+
+function positiveZIndex(container) {
+    return container.cssInt("zIndex") > 0;
+}
+
+function zIndex0(container) {
+    return container.cssInt("zIndex") === 0;
+}
+
+function inlineLevel(container) {
+    return ["inline", "inline-block", "inline-table"].indexOf(container.css("display")) !== -1;
+}
+
+function isStackingContext(container) {
+    return (container instanceof StackingContext);
+}
+
+function hasText(container) {
+    return container.node.data.trim().length > 0;
+}
+
+function noLetterSpacing(container) {
+    return (/^(normal|none|0px)$/.test(container.parent.css("letterSpacing")));
+}
+
+function getBorderRadiusData(container) {
+    return ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map(function(side) {
+        var value = container.css('border' + side + 'Radius');
+        var arr = value.split(" ");
+        if (arr.length <= 1) {
+            arr[1] = arr[0];
+        }
+        return arr.map(asInt);
+    });
+}
+
+function renderableNode(node) {
+    return (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE);
+}
+
+function isPositionedForStacking(container) {
+    var position = container.css("position");
+    var zIndex = (["absolute", "relative", "fixed"].indexOf(position) !== -1) ? container.css("zIndex") : "auto";
+    return zIndex !== "auto";
+}
+
+function isPositioned(container) {
+    return container.css("position") !== "static";
+}
+
+function isFloating(container) {
+    return container.css("float") !== "none";
+}
+
+function isInlineBlock(container) {
+    return ["inline-block", "inline-table"].indexOf(container.css("display")) !== -1;
+}
+
+function not(callback) {
+    var context = this;
+    return function() {
+        return !callback.apply(context, arguments);
+    };
+}
+
+function isElement(container) {
+    return container.node.nodeType === Node.ELEMENT_NODE;
+}
+
+function isPseudoElement(container) {
+    return container.isPseudoElement === true;
+}
+
+function isTextNode(container) {
+    return container.node.nodeType === Node.TEXT_NODE;
+}
+
+function zIndexSort(contexts) {
+    return function(a, b) {
+        return (a.cssInt("zIndex") + (contexts.indexOf(a) / contexts.length)) - (b.cssInt("zIndex") + (contexts.indexOf(b) / contexts.length));
+    };
+}
+
+function hasOpacity(container) {
+    return container.getOpacity() < 1;
+}
+
+function asInt(value) {
+    return parseInt(value, 10);
+}
+
+function getWidth(border) {
+    return border.width;
+}
+
+function nonIgnoredElement(nodeContainer) {
+    return (nodeContainer.node.nodeType !== Node.ELEMENT_NODE || ["SCRIPT", "HEAD", "TITLE", "OBJECT", "BR", "OPTION"].indexOf(nodeContainer.node.nodeName) === -1);
+}
+
+function flatten(arrays) {
+    return [].concat.apply([], arrays);
+}
+
+function stripQuotes(content) {
+    var first = content.substr(0, 1);
+    return (first === content.substr(content.length - 1) && first.match(/'|"/)) ? content.substr(1, content.length - 2) : content;
+}
+
+function getWords(characters) {
+    var words = [], i = 0, onWordBoundary = false, word;
+    while(characters.length) {
+        if (isWordBoundary(characters[i]) === onWordBoundary) {
+            word = characters.splice(0, i);
+            if (word.length) {
+                words.push(punycode.ucs2.encode(word));
+            }
+            onWordBoundary =! onWordBoundary;
+            i = 0;
+        } else {
+            i++;
+        }
+
+        if (i >= characters.length) {
+            word = characters.splice(0, i);
+            if (word.length) {
+                words.push(punycode.ucs2.encode(word));
+            }
+        }
+    }
+    return words;
+}
+
+function isWordBoundary(characterCode) {
+    return [
+        32, // <space>
+        13, // \r
+        10, // \n
+        9, // \t
+        45 // -
+    ].indexOf(characterCode) !== -1;
+}
+
+function hasUnicode(string) {
+    return (/[^\u0000-\u00ff]/).test(string);
+}
+
+module.exports = NodeParser;
+
+},{"./color":3,"./fontmetrics":7,"./log":13,"./nodecontainer":14,"./pseudoelementcontainer":18,"./stackingcontext":21,"./textcontainer":25,"./utils":26,"punycode":1}],16:[function(_dereq_,module,exports){
+var XHR = _dereq_('./xhr');
+var utils = _dereq_('./utils');
+var log = _dereq_('./log');
+var createWindowClone = _dereq_('./clone');
+var decode64 = utils.decode64;
+
+function Proxy(src, proxyUrl, document) {
+    var supportsCORS = ('withCredentials' in new XMLHttpRequest());
+    if (!proxyUrl) {
+        return Promise.reject("No proxy configured");
+    }
+    var callback = createCallback(supportsCORS);
+    var url = createProxyUrl(proxyUrl, src, callback);
+
+    return supportsCORS ? XHR(url) : (jsonp(document, url, callback).then(function(response) {
+        return decode64(response.content);
+    }));
+}
+var proxyCount = 0;
+
+function ProxyURL(src, proxyUrl, document) {
+    var supportsCORSImage = ('crossOrigin' in new Image());
+    var callback = createCallback(supportsCORSImage);
+    var url = createProxyUrl(proxyUrl, src, callback);
+    return (supportsCORSImage ? Promise.resolve(url) : jsonp(document, url, callback).then(function(response) {
+        return "data:" + response.type + ";base64," + response.content;
+    }));
+}
+
+function jsonp(document, url, callback) {
+    return new Promise(function(resolve, reject) {
+        var s = document.createElement("script");
+        var cleanup = function() {
+            delete window.html2canvas.proxy[callback];
+            document.body.removeChild(s);
+        };
+        window.html2canvas.proxy[callback] = function(response) {
+            cleanup();
+            resolve(response);
+        };
+        s.src = url;
+        s.onerror = function(e) {
+            cleanup();
+            reject(e);
+        };
+        document.body.appendChild(s);
+    });
+}
+
+function createCallback(useCORS) {
+    return !useCORS ? "html2canvas_" + Date.now() + "_" + (++proxyCount) + "_" + Math.round(Math.random() * 100000) : "";
+}
+
+function createProxyUrl(proxyUrl, src, callback) {
+    return proxyUrl + "?url=" + encodeURIComponent(src) + (callback.length ? "&callback=html2canvas.proxy." + callback : "");
+}
+
+function documentFromHTML(src) {
+    return function(html) {
+        var parser = new DOMParser(), doc;
+        try {
+            doc = parser.parseFromString(html, "text/html");
+        } catch(e) {
+            log("DOMParser not supported, falling back to createHTMLDocument");
+            doc = document.implementation.createHTMLDocument("");
+            try {
+                doc.open();
+                doc.write(html);
+                doc.close();
+            } catch(ee) {
+                log("createHTMLDocument write not supported, falling back to document.body.innerHTML");
+                doc.body.innerHTML = html; // ie9 doesnt support writing to documentElement
+            }
+        }
+
+        var b = doc.querySelector("base");
+        if (!b || !b.href.host) {
+            var base = doc.createElement("base");
+            base.href = src;
+            doc.head.insertBefore(base, doc.head.firstChild);
+        }
+
+        return doc;
+    };
+}
+
+function loadUrlDocument(src, proxy, document, width, height, options) {
+    return new Proxy(src, proxy, window.document).then(documentFromHTML(src)).then(function(doc) {
+        return createWindowClone(doc, document, width, height, options, 0, 0);
+    });
+}
+
+exports.Proxy = Proxy;
+exports.ProxyURL = ProxyURL;
+exports.loadUrlDocument = loadUrlDocument;
+
+},{"./clone":2,"./log":13,"./utils":26,"./xhr":28}],17:[function(_dereq_,module,exports){
+var ProxyURL = _dereq_('./proxy').ProxyURL;
+
+function ProxyImageContainer(src, proxy) {
+    var link = document.createElement("a");
+    link.href = src;
+    src = link.href;
+    this.src = src;
+    this.image = new Image();
+    var self = this;
+    this.promise = new Promise(function(resolve, reject) {
+        self.image.crossOrigin = "Anonymous";
+        self.image.onload = resolve;
+        self.image.onerror = reject;
+
+        new ProxyURL(src, proxy, document).then(function(url) {
+            self.image.src = url;
+        })['catch'](reject);
+    });
+}
+
+module.exports = ProxyImageContainer;
+
+},{"./proxy":16}],18:[function(_dereq_,module,exports){
+var NodeContainer = _dereq_('./nodecontainer');
+
+function PseudoElementContainer(node, parent, type) {
+    NodeContainer.call(this, node, parent);
+    this.isPseudoElement = true;
+    this.before = type === ":before";
+}
+
+PseudoElementContainer.prototype.cloneTo = function(stack) {
+    PseudoElementContainer.prototype.cloneTo.call(this, stack);
+    stack.isPseudoElement = true;
+    stack.before = this.before;
+};
+
+PseudoElementContainer.prototype = Object.create(NodeContainer.prototype);
+
+PseudoElementContainer.prototype.appendToDOM = function() {
+    if (this.before) {
+        this.parent.node.insertBefore(this.node, this.parent.node.firstChild);
+    } else {
+        this.parent.node.appendChild(this.node);
+    }
+    this.parent.node.className += " " + this.getHideClass();
+};
+
+PseudoElementContainer.prototype.cleanDOM = function() {
+    this.node.parentNode.removeChild(this.node);
+    this.parent.node.className = this.parent.node.className.replace(this.getHideClass(), "");
+};
+
+PseudoElementContainer.prototype.getHideClass = function() {
+    return this["PSEUDO_HIDE_ELEMENT_CLASS_" + (this.before ? "BEFORE" : "AFTER")];
+};
+
+PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE = "___html2canvas___pseudoelement_before";
+PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER = "___html2canvas___pseudoelement_after";
+
+module.exports = PseudoElementContainer;
+
+},{"./nodecontainer":14}],19:[function(_dereq_,module,exports){
+var log = _dereq_('./log');
+
+function Renderer(width, height, images, options, document) {
+    this.width = width;
+    this.height = height;
+    this.images = images;
+    this.options = options;
+    this.document = document;
+}
+
+Renderer.prototype.renderImage = function(container, bounds, borderData, imageContainer) {
+    var paddingLeft = container.cssInt('paddingLeft'),
+        paddingTop = container.cssInt('paddingTop'),
+        paddingRight = container.cssInt('paddingRight'),
+        paddingBottom = container.cssInt('paddingBottom'),
+        borders = borderData.borders;
+
+    var width = bounds.width - (borders[1].width + borders[3].width + paddingLeft + paddingRight);
+    var height = bounds.height - (borders[0].width + borders[2].width + paddingTop + paddingBottom);
+    this.drawImage(
+        imageContainer,
+        0,
+        0,
+        imageContainer.image.width || width,
+        imageContainer.image.height || height,
+        bounds.left + paddingLeft + borders[3].width,
+        bounds.top + paddingTop + borders[0].width,
+        width,
+        height
+    );
+};
+
+Renderer.prototype.renderBackground = function(container, bounds, borderData) {
+    if (bounds.height > 0 && bounds.width > 0) {
+        this.renderBackgroundColor(container, bounds);
+        this.renderBackgroundImage(container, bounds, borderData);
+    }
+};
+
+Renderer.prototype.renderBackgroundColor = function(container, bounds) {
+    var color = container.color("backgroundColor");
+    if (!color.isTransparent()) {
+        this.rectangle(bounds.left, bounds.top, bounds.width, bounds.height, color);
+    }
+};
+
+Renderer.prototype.renderBorders = function(borders) {
+    borders.forEach(this.renderBorder, this);
+};
+
+Renderer.prototype.renderBorder = function(data) {
+    if (!data.color.isTransparent() && data.args !== null) {
+        this.drawShape(data.args, data.color);
+    }
+};
+
+Renderer.prototype.renderBackgroundImage = function(container, bounds, borderData) {
+    var backgroundImages = container.parseBackgroundImages();
+    backgroundImages.reverse().forEach(function(backgroundImage, index, arr) {
+        switch(backgroundImage.method) {
+        case "url":
+            var image = this.images.get(backgroundImage.args[0]);
+            if (image) {
+                this.renderBackgroundRepeating(container, bounds, image, arr.length - (index+1), borderData);
+            } else {
+                log("Error loading background-image", backgroundImage.args[0]);
+            }
+            break;
+        case "linear-gradient":
+        case "gradient":
+            var gradientImage = this.images.get(backgroundImage.value);
+            if (gradientImage) {
+                this.renderBackgroundGradient(gradientImage, bounds, borderData);
+            } else {
+                log("Error loading background-image", backgroundImage.args[0]);
+            }
+            break;
+        case "none":
+            break;
+        default:
+            log("Unknown background-image type", backgroundImage.args[0]);
+        }
+    }, this);
+};
+
+Renderer.prototype.renderBackgroundRepeating = function(container, bounds, imageContainer, index, borderData) {
+    var size = container.parseBackgroundSize(bounds, imageContainer.image, index);
+    var position = container.parseBackgroundPosition(bounds, imageContainer.image, index, size);
+    var repeat = container.parseBackgroundRepeat(index);
+    switch (repeat) {
+    case "repeat-x":
+    case "repeat no-repeat":
+        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + borderData[3], bounds.top + position.top + borderData[0], 99999, size.height, borderData);
+        break;
+    case "repeat-y":
+    case "no-repeat repeat":
+        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + position.left + borderData[3], bounds.top + borderData[0], size.width, 99999, borderData);
+        break;
+    case "no-repeat":
+        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + position.left + borderData[3], bounds.top + position.top + borderData[0], size.width, size.height, borderData);
+        break;
+    default:
+        this.renderBackgroundRepeat(imageContainer, position, size, {top: bounds.top, left: bounds.left}, borderData[3], borderData[0]);
+        break;
+    }
+};
+
+module.exports = Renderer;
+
+},{"./log":13}],20:[function(_dereq_,module,exports){
+var Renderer = _dereq_('../renderer');
+var LinearGradientContainer = _dereq_('../lineargradientcontainer');
+var log = _dereq_('../log');
+
+function CanvasRenderer(width, height) {
+    Renderer.apply(this, arguments);
+    this.canvas = this.options.canvas || this.document.createElement("canvas");
+    if (!this.options.canvas) {
+        this.canvas.width = width;
+        this.canvas.height = height;
+    }
+    this.ctx = this.canvas.getContext("2d");
+    this.taintCtx = this.document.createElement("canvas").getContext("2d");
+    this.ctx.textBaseline = "bottom";
+    this.variables = {};
+    log("Initialized CanvasRenderer with size", width, "x", height);
+}
+
+CanvasRenderer.prototype = Object.create(Renderer.prototype);
+
+CanvasRenderer.prototype.setFillStyle = function(fillStyle) {
+    this.ctx.fillStyle = typeof(fillStyle) === "object" && !!fillStyle.isColor ? fillStyle.toString() : fillStyle;
+    return this.ctx;
+};
+
+CanvasRenderer.prototype.rectangle = function(left, top, width, height, color) {
+    this.setFillStyle(color).fillRect(left, top, width, height);
+};
+
+CanvasRenderer.prototype.circle = function(left, top, size, color) {
+    this.setFillStyle(color);
+    this.ctx.beginPath();
+    this.ctx.arc(left + size / 2, top + size / 2, size / 2, 0, Math.PI*2, true);
+    this.ctx.closePath();
+    this.ctx.fill();
+};
+
+CanvasRenderer.prototype.circleStroke = function(left, top, size, color, stroke, strokeColor) {
+    this.circle(left, top, size, color);
+    this.ctx.strokeStyle = strokeColor.toString();
+    this.ctx.stroke();
+};
+
+CanvasRenderer.prototype.drawShape = function(shape, color) {
+    this.shape(shape);
+    this.setFillStyle(color).fill();
+};
+
+CanvasRenderer.prototype.taints = function(imageContainer) {
+    if (imageContainer.tainted === null) {
+        this.taintCtx.drawImage(imageContainer.image, 0, 0);
+        try {
+            this.taintCtx.getImageData(0, 0, 1, 1);
+            imageContainer.tainted = false;
+        } catch(e) {
+            this.taintCtx = document.createElement("canvas").getContext("2d");
+            imageContainer.tainted = true;
+        }
+    }
+
+    return imageContainer.tainted;
+};
+
+CanvasRenderer.prototype.drawImage = function(imageContainer, sx, sy, sw, sh, dx, dy, dw, dh) {
+    if (!this.taints(imageContainer) || this.options.allowTaint) {
+        this.ctx.drawImage(imageContainer.image, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+};
+
+CanvasRenderer.prototype.clip = function(shapes, callback, context) {
+    this.ctx.save();
+    shapes.filter(hasEntries).forEach(function(shape) {
+        this.shape(shape).clip();
+    }, this);
+    callback.call(context);
+    this.ctx.restore();
+};
+
+CanvasRenderer.prototype.shape = function(shape) {
+    this.ctx.beginPath();
+    shape.forEach(function(point, index) {
+        if (point[0] === "rect") {
+            this.ctx.rect.apply(this.ctx, point.slice(1));
+        } else {
+            this.ctx[(index === 0) ? "moveTo" : point[0] + "To" ].apply(this.ctx, point.slice(1));
+        }
+    }, this);
+    this.ctx.closePath();
+    return this.ctx;
+};
+
+CanvasRenderer.prototype.font = function(color, style, variant, weight, size, family) {
+    this.setFillStyle(color).font = [style, variant, weight, size, family].join(" ").split(",")[0];
+};
+
+CanvasRenderer.prototype.fontShadow = function(color, offsetX, offsetY, blur) {
+    this.setVariable("shadowColor", color.toString())
+        .setVariable("shadowOffsetY", offsetX)
+        .setVariable("shadowOffsetX", offsetY)
+        .setVariable("shadowBlur", blur);
+};
+
+CanvasRenderer.prototype.clearShadow = function() {
+    this.setVariable("shadowColor", "rgba(0,0,0,0)");
+};
+
+CanvasRenderer.prototype.setOpacity = function(opacity) {
+    this.ctx.globalAlpha = opacity;
+};
+
+CanvasRenderer.prototype.setTransform = function(transform) {
+    this.ctx.translate(transform.origin[0], transform.origin[1]);
+    this.ctx.transform.apply(this.ctx, transform.matrix);
+    this.ctx.translate(-transform.origin[0], -transform.origin[1]);
+};
+
+CanvasRenderer.prototype.setVariable = function(property, value) {
+    if (this.variables[property] !== value) {
+        this.variables[property] = this.ctx[property] = value;
+    }
+
+    return this;
+};
+
+CanvasRenderer.prototype.text = function(text, left, bottom) {
+    this.ctx.fillText(text, left, bottom);
+};
+
+CanvasRenderer.prototype.backgroundRepeatShape = function(imageContainer, backgroundPosition, size, bounds, left, top, width, height, borderData) {
+    var shape = [
+        ["line", Math.round(left), Math.round(top)],
+        ["line", Math.round(left + width), Math.round(top)],
+        ["line", Math.round(left + width), Math.round(height + top)],
+        ["line", Math.round(left), Math.round(height + top)]
+    ];
+    this.clip([shape], function() {
+        this.renderBackgroundRepeat(imageContainer, backgroundPosition, size, bounds, borderData[3], borderData[0]);
+    }, this);
+};
+
+CanvasRenderer.prototype.renderBackgroundRepeat = function(imageContainer, backgroundPosition, size, bounds, borderLeft, borderTop) {
+    var offsetX = Math.round(bounds.left + backgroundPosition.left + borderLeft), offsetY = Math.round(bounds.top + backgroundPosition.top + borderTop);
+    this.setFillStyle(this.ctx.createPattern(this.resizeImage(imageContainer, size), "repeat"));
+    this.ctx.translate(offsetX, offsetY);
+    this.ctx.fill();
+    this.ctx.translate(-offsetX, -offsetY);
+};
+
+CanvasRenderer.prototype.renderBackgroundGradient = function(gradientImage, bounds) {
+    if (gradientImage instanceof LinearGradientContainer) {
+        var gradient = this.ctx.createLinearGradient(
+            bounds.left + bounds.width * gradientImage.x0,
+            bounds.top + bounds.height * gradientImage.y0,
+            bounds.left +  bounds.width * gradientImage.x1,
+            bounds.top +  bounds.height * gradientImage.y1);
+        gradientImage.colorStops.forEach(function(colorStop) {
+            gradient.addColorStop(colorStop.stop, colorStop.color.toString());
+        });
+        this.rectangle(bounds.left, bounds.top, bounds.width, bounds.height, gradient);
+    }
+};
+
+CanvasRenderer.prototype.resizeImage = function(imageContainer, size) {
+    var image = imageContainer.image;
+    if(image.width === size.width && image.height === size.height) {
+        return image;
+    }
+
+    var ctx, canvas = document.createElement('canvas');
+    canvas.width = size.width;
+    canvas.height = size.height;
+    ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, size.width, size.height );
+    return canvas;
+};
+
+function hasEntries(array) {
+    return array.length > 0;
+}
+
+module.exports = CanvasRenderer;
+
+},{"../lineargradientcontainer":12,"../log":13,"../renderer":19}],21:[function(_dereq_,module,exports){
+var NodeContainer = _dereq_('./nodecontainer');
+
+function StackingContext(hasOwnStacking, opacity, element, parent) {
+    NodeContainer.call(this, element, parent);
+    this.ownStacking = hasOwnStacking;
+    this.contexts = [];
+    this.children = [];
+    this.opacity = (this.parent ? this.parent.stack.opacity : 1) * opacity;
+}
+
+StackingContext.prototype = Object.create(NodeContainer.prototype);
+
+StackingContext.prototype.getParentStack = function(context) {
+    var parentStack = (this.parent) ? this.parent.stack : null;
+    return parentStack ? (parentStack.ownStacking ? parentStack : parentStack.getParentStack(context)) : context.stack;
+};
+
+module.exports = StackingContext;
+
+},{"./nodecontainer":14}],22:[function(_dereq_,module,exports){
+function Support(document) {
+    this.rangeBounds = this.testRangeBounds(document);
+    this.cors = this.testCORS();
+    this.svg = this.testSVG();
+}
+
+Support.prototype.testRangeBounds = function(document) {
+    var range, testElement, rangeBounds, rangeHeight, support = false;
+
+    if (document.createRange) {
+        range = document.createRange();
+        if (range.getBoundingClientRect) {
+            testElement = document.createElement('boundtest');
+            testElement.style.height = "123px";
+            testElement.style.display = "block";
+            document.body.appendChild(testElement);
+
+            range.selectNode(testElement);
+            rangeBounds = range.getBoundingClientRect();
+            rangeHeight = rangeBounds.height;
+
+            if (rangeHeight === 123) {
+                support = true;
+            }
+            document.body.removeChild(testElement);
+        }
+    }
+
+    return support;
+};
+
+Support.prototype.testCORS = function() {
+    return typeof((new Image()).crossOrigin) !== "undefined";
+};
+
+Support.prototype.testSVG = function() {
+    var img = new Image();
+    var canvas = document.createElement("canvas");
+    var ctx =  canvas.getContext("2d");
+    img.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'></svg>";
+
+    try {
+        ctx.drawImage(img, 0, 0);
+        canvas.toDataURL();
+    } catch(e) {
+        return false;
+    }
+    return true;
+};
+
+module.exports = Support;
+
+},{}],23:[function(_dereq_,module,exports){
+var XHR = _dereq_('./xhr');
+var decode64 = _dereq_('./utils').decode64;
+
+function SVGContainer(src) {
+    this.src = src;
+    this.image = null;
+    var self = this;
+
+    this.promise = this.hasFabric().then(function() {
+        return (self.isInline(src) ? Promise.resolve(self.inlineFormatting(src)) : XHR(src));
+    }).then(function(svg) {
+        return new Promise(function(resolve) {
+            window.html2canvas.svg.fabric.loadSVGFromString(svg, self.createCanvas.call(self, resolve));
+        });
+    });
+}
+
+SVGContainer.prototype.hasFabric = function() {
+    return !window.html2canvas.svg || !window.html2canvas.svg.fabric ? Promise.reject(new Error("html2canvas.svg.js is not loaded, cannot render svg")) : Promise.resolve();
+};
+
+SVGContainer.prototype.inlineFormatting = function(src) {
+    return (/^data:image\/svg\+xml;base64,/.test(src)) ? this.decode64(this.removeContentType(src)) : this.removeContentType(src);
+};
+
+SVGContainer.prototype.removeContentType = function(src) {
+    return src.replace(/^data:image\/svg\+xml(;base64)?,/,'');
+};
+
+SVGContainer.prototype.isInline = function(src) {
+    return (/^data:image\/svg\+xml/i.test(src));
+};
+
+SVGContainer.prototype.createCanvas = function(resolve) {
+    var self = this;
+    return function (objects, options) {
+        var canvas = new window.html2canvas.svg.fabric.StaticCanvas('c');
+        self.image = canvas.lowerCanvasEl;
+        canvas
+            .setWidth(options.width)
+            .setHeight(options.height)
+            .add(window.html2canvas.svg.fabric.util.groupSVGElements(objects, options))
+            .renderAll();
+        resolve(canvas.lowerCanvasEl);
+    };
+};
+
+SVGContainer.prototype.decode64 = function(str) {
+    return (typeof(window.atob) === "function") ? window.atob(str) : decode64(str);
+};
+
+module.exports = SVGContainer;
+
+},{"./utils":26,"./xhr":28}],24:[function(_dereq_,module,exports){
+var SVGContainer = _dereq_('./svgcontainer');
+
+function SVGNodeContainer(node, _native) {
+    this.src = node;
+    this.image = null;
+    var self = this;
+
+    this.promise = _native ? new Promise(function(resolve, reject) {
+        self.image = new Image();
+        self.image.onload = resolve;
+        self.image.onerror = reject;
+        self.image.src = "data:image/svg+xml," + (new XMLSerializer()).serializeToString(node);
+        if (self.image.complete === true) {
+            resolve(self.image);
+        }
+    }) : this.hasFabric().then(function() {
+        return new Promise(function(resolve) {
+            window.html2canvas.svg.fabric.parseSVGDocument(node, self.createCanvas.call(self, resolve));
+        });
+    });
+}
+
+SVGNodeContainer.prototype = Object.create(SVGContainer.prototype);
+
+module.exports = SVGNodeContainer;
+
+},{"./svgcontainer":23}],25:[function(_dereq_,module,exports){
+var NodeContainer = _dereq_('./nodecontainer');
+
+function TextContainer(node, parent) {
+    NodeContainer.call(this, node, parent);
+}
+
+TextContainer.prototype = Object.create(NodeContainer.prototype);
+
+TextContainer.prototype.applyTextTransform = function() {
+    this.node.data = this.transform(this.parent.css("textTransform"));
+};
+
+TextContainer.prototype.transform = function(transform) {
+    var text = this.node.data;
+    switch(transform){
+        case "lowercase":
+            return text.toLowerCase();
+        case "capitalize":
+            return text.replace(/(^|\s|:|-|\(|\))([a-z])/g, capitalize);
+        case "uppercase":
+            return text.toUpperCase();
+        default:
+            return text;
+    }
+};
+
+function capitalize(m, p1, p2) {
+    if (m.length > 0) {
+        return p1 + p2.toUpperCase();
+    }
+}
+
+module.exports = TextContainer;
+
+},{"./nodecontainer":14}],26:[function(_dereq_,module,exports){
+exports.smallImage = function smallImage() {
+    return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+};
+
+exports.bind = function(callback, context) {
+    return function() {
+        return callback.apply(context, arguments);
+    };
+};
+
+/*
+ * base64-arraybuffer
+ * https://github.com/niklasvh/base64-arraybuffer
+ *
+ * Copyright (c) 2012 Niklas von Hertzen
+ * Licensed under the MIT license.
+ */
+
+exports.decode64 = function(base64) {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var len = base64.length, i, encoded1, encoded2, encoded3, encoded4, byte1, byte2, byte3;
+
+    var output = "";
+
+    for (i = 0; i < len; i+=4) {
+        encoded1 = chars.indexOf(base64[i]);
+        encoded2 = chars.indexOf(base64[i+1]);
+        encoded3 = chars.indexOf(base64[i+2]);
+        encoded4 = chars.indexOf(base64[i+3]);
+
+        byte1 = (encoded1 << 2) | (encoded2 >> 4);
+        byte2 = ((encoded2 & 15) << 4) | (encoded3 >> 2);
+        byte3 = ((encoded3 & 3) << 6) | encoded4;
+        if (encoded3 === 64) {
+            output += String.fromCharCode(byte1);
+        } else if (encoded4 === 64 || encoded4 === -1) {
+            output += String.fromCharCode(byte1, byte2);
+        } else{
+            output += String.fromCharCode(byte1, byte2, byte3);
+        }
+    }
+
+    return output;
+};
+
+exports.getBounds = function(node) {
+    if (node.getBoundingClientRect) {
+        var clientRect = node.getBoundingClientRect();
+        var width = node.offsetWidth == null ? clientRect.width : node.offsetWidth;
+        return {
+            top: clientRect.top,
+            bottom: clientRect.bottom || (clientRect.top + clientRect.height),
+            right: clientRect.left + width,
+            left: clientRect.left,
+            width:  width,
+            height: node.offsetHeight == null ? clientRect.height : node.offsetHeight
+        };
+    }
+    return {};
+};
+
+exports.offsetBounds = function(node) {
+    var parent = node.offsetParent ? exports.offsetBounds(node.offsetParent) : {top: 0, left: 0};
+
+    return {
+        top: node.offsetTop + parent.top,
+        bottom: node.offsetTop + node.offsetHeight + parent.top,
+        right: node.offsetLeft + parent.left + node.offsetWidth,
+        left: node.offsetLeft + parent.left,
+        width: node.offsetWidth,
+        height: node.offsetHeight
+    };
+};
+
+exports.parseBackgrounds = function(backgroundImage) {
+    var whitespace = ' \r\n\t',
+        method, definition, prefix, prefix_i, block, results = [],
+        mode = 0, numParen = 0, quote, args;
+    var appendResult = function() {
+        if(method) {
+            if (definition.substr(0, 1) === '"') {
+                definition = definition.substr(1, definition.length - 2);
+            }
+            if (definition) {
+                args.push(definition);
+            }
+            if (method.substr(0, 1) === '-' && (prefix_i = method.indexOf('-', 1 ) + 1) > 0) {
+                prefix = method.substr(0, prefix_i);
+                method = method.substr(prefix_i);
+            }
+            results.push({
+                prefix: prefix,
+                method: method.toLowerCase(),
+                value: block,
+                args: args,
+                image: null
+            });
+        }
+        args = [];
+        method = prefix = definition = block = '';
+    };
+    args = [];
+    method = prefix = definition = block = '';
+    backgroundImage.split("").forEach(function(c) {
+        if (mode === 0 && whitespace.indexOf(c) > -1) {
+            return;
+        }
+        switch(c) {
+        case '"':
+            if(!quote) {
+                quote = c;
+            } else if(quote === c) {
+                quote = null;
+            }
+            break;
+        case '(':
+            if(quote) {
+                break;
+            } else if(mode === 0) {
+                mode = 1;
+                block += c;
+                return;
+            } else {
+                numParen++;
+            }
+            break;
+        case ')':
+            if (quote) {
+                break;
+            } else if(mode === 1) {
+                if(numParen === 0) {
+                    mode = 0;
+                    block += c;
+                    appendResult();
+                    return;
+                } else {
+                    numParen--;
+                }
+            }
+            break;
+
+        case ',':
+            if (quote) {
+                break;
+            } else if(mode === 0) {
+                appendResult();
+                return;
+            } else if (mode === 1) {
+                if (numParen === 0 && !method.match(/^url$/i)) {
+                    args.push(definition);
+                    definition = '';
+                    block += c;
+                    return;
+                }
+            }
+            break;
+        }
+
+        block += c;
+        if (mode === 0) {
+            method += c;
+        } else {
+            definition += c;
+        }
+    });
+
+    appendResult();
+    return results;
+};
+
+},{}],27:[function(_dereq_,module,exports){
+var GradientContainer = _dereq_('./gradientcontainer');
+
+function WebkitGradientContainer(imageData) {
+    GradientContainer.apply(this, arguments);
+    this.type = imageData.args[0] === "linear" ? GradientContainer.TYPES.LINEAR : GradientContainer.TYPES.RADIAL;
+}
+
+WebkitGradientContainer.prototype = Object.create(GradientContainer.prototype);
+
+module.exports = WebkitGradientContainer;
+
+},{"./gradientcontainer":9}],28:[function(_dereq_,module,exports){
+function XHR(url) {
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                resolve(xhr.responseText);
+            } else {
+                reject(new Error(xhr.statusText));
+            }
+        };
+
+        xhr.onerror = function() {
+            reject(new Error("Network Error"));
+        };
+
+        xhr.send();
+    });
+}
+
+module.exports = XHR;
+
+},{}]},{},[4])(4)
+});
 var self = self || {};// File:src/Three.js
 
 /**
@@ -56998,9253 +62919,6 @@ THREE.EventDispatcher.prototype.apply( THREE.MTLLoader.prototype );
 
 } )();
 
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-'use strict';
-/* eslint-disable no-unused-vars */
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (e) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (Object.getOwnPropertySymbols) {
-			symbols = Object.getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-},{}],2:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-var WakeLock = _dereq_('./wakelock.js');
-
-// Start at a higher number to reduce chance of conflict.
-var nextDisplayId = 1000;
-var hasShowDeprecationWarning = false;
-
-var defaultLeftBounds = [0, 0, 0.5, 1];
-var defaultRightBounds = [0.5, 0, 0.5, 1];
-
-/**
- * The base class for all VR displays.
- */
-function VRDisplay() {
-  this.isPolyfilled = true;
-  this.displayId = nextDisplayId++;
-  this.displayName = 'webvr-polyfill displayName';
-
-  this.isConnected = true;
-  this.isPresenting = false;
-  this.capabilities = {
-    hasPosition: false,
-    hasOrientation: false,
-    hasExternalDisplay: false,
-    canPresent: false,
-    maxLayers: 1
-  };
-  this.stageParameters = null;
-
-  // "Private" members.
-  this.waitingForPresent_ = false;
-  this.layer_ = null;
-
-  this.fullscreenElement_ = null;
-  this.fullscreenWrapper_ = null;
-  this.fullscreenElementCachedStyle_ = null;
-
-  this.fullscreenEventTarget_ = null;
-  this.fullscreenChangeHandler_ = null;
-  this.fullscreenErrorHandler_ = null;
-
-  this.wakelock_ = new WakeLock();
-}
-
-VRDisplay.prototype.getPose = function() {
-  // TODO: Technically this should retain it's value for the duration of a frame
-  // but I doubt that's practical to do in javascript.
-  return this.getImmediatePose();
-};
-
-VRDisplay.prototype.requestAnimationFrame = function(callback) {
-  return window.requestAnimationFrame(callback);
-};
-
-VRDisplay.prototype.cancelAnimationFrame = function(id) {
-  return window.cancelAnimationFrame(id);
-};
-
-VRDisplay.prototype.wrapForFullscreen = function(element) {
-  // Don't wrap in iOS.
-  if (Util.isIOS()) {
-    return element;
-  }
-  if (!this.fullscreenWrapper_) {
-    this.fullscreenWrapper_ = document.createElement('div');
-    var cssProperties = [
-      'height: ' + Math.min(screen.height, screen.width) + 'px !important',
-      'top: 0 !important',
-      'left: 0 !important',
-      'right: 0 !important',
-      'border: 0',
-      'margin: 0',
-      'padding: 0',
-      'z-index: 999999 !important',
-      'position: fixed',
-    ];
-    this.fullscreenWrapper_.setAttribute('style', cssProperties.join('; ') + ';');
-    this.fullscreenWrapper_.classList.add('webvr-polyfill-fullscreen-wrapper');
-  }
-
-  if (this.fullscreenElement_ == element) {
-    return this.fullscreenWrapper_;
-  }
-
-  // Remove any previously applied wrappers
-  this.removeFullscreenWrapper();
-
-  this.fullscreenElement_ = element;
-  var parent = this.fullscreenElement_.parentElement;
-  parent.insertBefore(this.fullscreenWrapper_, this.fullscreenElement_);
-  parent.removeChild(this.fullscreenElement_);
-  this.fullscreenWrapper_.insertBefore(this.fullscreenElement_, this.fullscreenWrapper_.firstChild);
-  this.fullscreenElementCachedStyle_ = this.fullscreenElement_.getAttribute('style');
-
-  var self = this;
-  function applyFullscreenElementStyle() {
-    if (!self.fullscreenElement_) {
-      return;
-    }
-
-    var cssProperties = [
-      'position: absolute',
-      'top: 0',
-      'left: 0',
-      'width: ' + Math.max(screen.width, screen.height) + 'px',
-      'height: ' + Math.min(screen.height, screen.width) + 'px',
-      'border: 0',
-      'margin: 0',
-      'padding: 0',
-    ];
-    self.fullscreenElement_.setAttribute('style', cssProperties.join('; ') + ';');
-  }
-
-  applyFullscreenElementStyle();
-
-  return this.fullscreenWrapper_;
-};
-
-VRDisplay.prototype.removeFullscreenWrapper = function() {
-  if (!this.fullscreenElement_) {
-    return;
-  }
-
-  var element = this.fullscreenElement_;
-  if (this.fullscreenElementCachedStyle_) {
-    element.setAttribute('style', this.fullscreenElementCachedStyle_);
-  } else {
-    element.removeAttribute('style');
-  }
-  this.fullscreenElement_ = null;
-  this.fullscreenElementCachedStyle_ = null;
-
-  var parent = this.fullscreenWrapper_.parentElement;
-  this.fullscreenWrapper_.removeChild(element);
-  parent.insertBefore(element, this.fullscreenWrapper_);
-  parent.removeChild(this.fullscreenWrapper_);
-
-  return element;
-};
-
-VRDisplay.prototype.requestPresent = function(layers) {
-  var wasPresenting = this.isPresenting;
-  var self = this;
-
-  if (!(layers instanceof Array)) {
-    if (!hasShowDeprecationWarning) {
-      console.warn("Using a deprecated form of requestPresent. Should pass in an array of VRLayers.");
-      hasShowDeprecationWarning = true;
-    }
-    layers = [layers];
-  }
-
-  return new Promise(function(resolve, reject) {
-    if (!self.capabilities.canPresent) {
-      reject(new Error('VRDisplay is not capable of presenting.'));
-      return;
-    }
-
-    if (layers.length == 0 || layers.length > self.capabilities.maxLayers) {
-      reject(new Error('Invalid number of layers.'));
-      return;
-    }
-
-    var incomingLayer = layers[0];
-    if (!incomingLayer.source) {
-      /*
-      todo: figure out the correct behavior if the source is not provided.
-      see https://github.com/w3c/webvr/issues/58
-      */
-      resolve();
-      return;
-    }
-
-    var leftBounds = incomingLayer.leftBounds || defaultLeftBounds;
-    var rightBounds = incomingLayer.rightBounds || defaultRightBounds;
-    if (wasPresenting) {
-      // Already presenting, just changing configuration
-      var changed = false;
-      var layer = self.layer_;
-      if (layer.source !== incomingLayer.source) {
-        layer.source = incomingLayer.source;
-        changed = true;
-      }
-
-      for (var i = 0; i < 4; i++) {
-        if (layer.leftBounds[i] !== leftBounds[i]) {
-          layer.leftBounds[i] = leftBounds[i];
-          changed = true;
-        }
-        if (layer.rightBounds[i] !== rightBounds[i]) {
-          layer.rightBounds[i] = rightBounds[i];
-          changed = true;
-        }
-      }
-
-      if (changed) {
-        self.fireVRDisplayPresentChange_();
-      }
-      resolve();
-      return;
-    }
-
-    // Was not already presenting
-    self.layer_ = {
-      source: incomingLayer.source,
-      leftBounds: leftBounds.slice(0),
-      rightBounds: rightBounds.slice(0)
-    };
-
-    self.waitingForPresent_ = false;
-    if (self.layer_ && self.layer_.source) {
-      var fullscreenElement = self.wrapForFullscreen(self.layer_.source);
-
-      function onFullscreenChange() {
-        var actualFullscreenElement = Util.getFullscreenElement();
-
-        self.isPresenting = (fullscreenElement === actualFullscreenElement);
-        if (self.isPresenting) {
-          if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape-primary').catch(function(error){
-                    console.error('screen.orientation.lock() failed due to', error.message)
-            });
-          }
-          self.waitingForPresent_ = false;
-          self.beginPresent_();
-          resolve();
-        } else {
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-          }
-          self.removeFullscreenWrapper();
-          self.wakelock_.release();
-          self.endPresent_();
-          self.removeFullscreenListeners_();
-        }
-        self.fireVRDisplayPresentChange_();
-      }
-      function onFullscreenError() {
-        if (!self.waitingForPresent_) {
-          return;
-        }
-
-        self.removeFullscreenWrapper();
-        self.removeFullscreenListeners_();
-
-        self.wakelock_.release();
-        self.waitingForPresent_ = false;
-        self.isPresenting = false;
-
-        reject(new Error('Unable to present.'));
-      }
-
-      self.addFullscreenListeners_(fullscreenElement,
-          onFullscreenChange, onFullscreenError);
-
-      if (Util.requestFullscreen(fullscreenElement)) {
-        self.wakelock_.request();
-        self.waitingForPresent_ = true;
-      } else if (Util.isIOS()) {
-        // *sigh* Just fake it.
-        self.wakelock_.request();
-        self.isPresenting = true;
-        self.beginPresent_();
-        self.fireVRDisplayPresentChange_();
-        resolve();
-      }
-    }
-
-    if (!self.waitingForPresent_ && !Util.isIOS()) {
-      Util.exitFullscreen();
-      reject(new Error('Unable to present.'));
-    }
-  });
-};
-
-VRDisplay.prototype.exitPresent = function() {
-  var wasPresenting = this.isPresenting;
-  var self = this;
-  this.isPresenting = false;
-  this.layer_ = null;
-  this.wakelock_.release();
-
-  return new Promise(function(resolve, reject) {
-    if (wasPresenting) {
-      if (!Util.exitFullscreen() && Util.isIOS()) {
-        self.endPresent_();
-        self.fireVRDisplayPresentChange_();
-      }
-
-      resolve();
-    } else {
-      reject(new Error('Was not presenting to VRDisplay.'));
-    }
-  });
-};
-
-VRDisplay.prototype.getLayers = function() {
-  if (this.layer_) {
-    return [this.layer_];
-  }
-  return [];
-};
-
-VRDisplay.prototype.fireVRDisplayPresentChange_ = function() {
-  var event = new CustomEvent('vrdisplaypresentchange', {detail: {vrdisplay: this}});
-  window.dispatchEvent(event);
-};
-
-VRDisplay.prototype.addFullscreenListeners_ = function(element, changeHandler, errorHandler) {
-  this.removeFullscreenListeners_();
-
-  this.fullscreenEventTarget_ = element;
-  this.fullscreenChangeHandler_ = changeHandler;
-  this.fullscreenErrorHandler_ = errorHandler;
-
-  if (changeHandler) {
-    element.addEventListener('fullscreenchange', changeHandler, false);
-    element.addEventListener('webkitfullscreenchange', changeHandler, false);
-    document.addEventListener('mozfullscreenchange', changeHandler, false);
-    element.addEventListener('msfullscreenchange', changeHandler, false);
-  }
-
-  if (errorHandler) {
-    element.addEventListener('fullscreenerror', errorHandler, false);
-    element.addEventListener('webkitfullscreenerror', errorHandler, false);
-    document.addEventListener('mozfullscreenerror', errorHandler, false);
-    element.addEventListener('msfullscreenerror', errorHandler, false);
-  }
-};
-
-VRDisplay.prototype.removeFullscreenListeners_ = function() {
-  if (!this.fullscreenEventTarget_)
-    return;
-
-  var element = this.fullscreenEventTarget_;
-
-  if (this.fullscreenChangeHandler_) {
-    var changeHandler = this.fullscreenChangeHandler_;
-    element.removeEventListener('fullscreenchange', changeHandler, false);
-    element.removeEventListener('webkitfullscreenchange', changeHandler, false);
-    document.removeEventListener('mozfullscreenchange', changeHandler, false);
-    element.removeEventListener('msfullscreenchange', changeHandler, false);
-  }
-
-  if (this.fullscreenErrorHandler_) {
-    var errorHandler = this.fullscreenErrorHandler_;
-    element.removeEventListener('fullscreenerror', errorHandler, false);
-    element.removeEventListener('webkitfullscreenerror', errorHandler, false);
-    document.removeEventListener('mozfullscreenerror', errorHandler, false);
-    element.removeEventListener('msfullscreenerror', errorHandler, false);
-  }
-
-  this.fullscreenEventTarget_ = null;
-  this.fullscreenChangeHandler_ = null;
-  this.fullscreenErrorHandler_ = null;
-};
-
-VRDisplay.prototype.beginPresent_ = function() {
-  // Override to add custom behavior when presentation begins.
-};
-
-VRDisplay.prototype.endPresent_ = function() {
-  // Override to add custom behavior when presentation ends.
-};
-
-VRDisplay.prototype.submitFrame = function(pose) {
-  // Override to add custom behavior for frame submission.
-};
-
-VRDisplay.prototype.getEyeParameters = function(whichEye) {
-  // Override to return accurate eye parameters if canPresent is true.
-  return null;
-};
-
-/*
- * Deprecated classes
- */
-
-/**
- * The base class for all VR devices. (Deprecated)
- */
-function VRDevice() {
-  this.isPolyfilled = true;
-  this.hardwareUnitId = 'webvr-polyfill hardwareUnitId';
-  this.deviceId = 'webvr-polyfill deviceId';
-  this.deviceName = 'webvr-polyfill deviceName';
-}
-
-/**
- * The base class for all VR HMD devices. (Deprecated)
- */
-function HMDVRDevice() {
-}
-HMDVRDevice.prototype = new VRDevice();
-
-/**
- * The base class for all VR position sensor devices. (Deprecated)
- */
-function PositionSensorVRDevice() {
-}
-PositionSensorVRDevice.prototype = new VRDevice();
-
-module.exports.VRDisplay = VRDisplay;
-module.exports.VRDevice = VRDevice;
-module.exports.HMDVRDevice = HMDVRDevice;
-module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
-
-},{"./util.js":22,"./wakelock.js":24}],3:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var CardboardUI = _dereq_('./cardboard-ui.js');
-var Util = _dereq_('./util.js');
-var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
-
-var distortionVS = [
-  'attribute vec2 position;',
-  'attribute vec3 texCoord;',
-
-  'varying vec2 vTexCoord;',
-
-  'uniform vec4 viewportOffsetScale[2];',
-
-  'void main() {',
-  '  vec4 viewport = viewportOffsetScale[int(texCoord.z)];',
-  '  vTexCoord = (texCoord.xy * viewport.zw) + viewport.xy;',
-  '  gl_Position = vec4( position, 1.0, 1.0 );',
-  '}',
-].join('\n');
-
-var distortionFS = [
-  'precision mediump float;',
-  'uniform sampler2D diffuse;',
-
-  'varying vec2 vTexCoord;',
-
-  'void main() {',
-  '  gl_FragColor = texture2D(diffuse, vTexCoord);',
-  '}',
-].join('\n');
-
-/**
- * A mesh-based distorter.
- */
-function CardboardDistorter(gl) {
-  this.gl = gl;
-  this.ctxAttribs = gl.getContextAttributes();
-
-  this.meshWidth = 20;
-  this.meshHeight = 20;
-
-  this.bufferScale = WebVRConfig.BUFFER_SCALE;
-
-  this.bufferWidth = gl.drawingBufferWidth;
-  this.bufferHeight = gl.drawingBufferHeight;
-
-  // Patching support
-  this.realBindFramebuffer = gl.bindFramebuffer;
-  this.realEnable = gl.enable;
-  this.realDisable = gl.disable;
-  this.realColorMask = gl.colorMask;
-  this.realClearColor = gl.clearColor;
-  this.realViewport = gl.viewport;
-
-  if (!Util.isIOS()) {
-    this.realCanvasWidth = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'width');
-    this.realCanvasHeight = Object.getOwnPropertyDescriptor(gl.canvas.__proto__, 'height');
-  }
-
-  this.isPatched = false;
-
-  // State tracking
-  this.lastBoundFramebuffer = null;
-  this.cullFace = false;
-  this.depthTest = false;
-  this.blend = false;
-  this.scissorTest = false;
-  this.stencilTest = false;
-  this.viewport = [0, 0, 0, 0];
-  this.colorMask = [true, true, true, true];
-  this.clearColor = [0, 0, 0, 0];
-
-  this.attribs = {
-    position: 0,
-    texCoord: 1
-  };
-  this.program = Util.linkProgram(gl, distortionVS, distortionFS, this.attribs);
-  this.uniforms = Util.getProgramUniforms(gl, this.program);
-
-  this.viewportOffsetScale = new Float32Array(8);
-  this.setTextureBounds();
-
-  this.vertexBuffer = gl.createBuffer();
-  this.indexBuffer = gl.createBuffer();
-  this.indexCount = 0;
-
-  this.renderTarget = gl.createTexture();
-  this.framebuffer = gl.createFramebuffer();
-
-  this.depthStencilBuffer = null;
-  this.depthBuffer = null;
-  this.stencilBuffer = null;
-
-  if (this.ctxAttribs.depth && this.ctxAttribs.stencil) {
-    this.depthStencilBuffer = gl.createRenderbuffer();
-  } else if (this.ctxAttribs.depth) {
-    this.depthBuffer = gl.createRenderbuffer();
-  } else if (this.ctxAttribs.stencil) {
-    this.stencilBuffer = gl.createRenderbuffer();
-  }
-
-  this.patch();
-
-  this.onResize();
-
-  if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
-    this.cardboardUI = new CardboardUI(gl);
-  }
-};
-
-/**
- * Tears down all the resources created by the distorter and removes any
- * patches.
- */
-CardboardDistorter.prototype.destroy = function() {
-  var gl = this.gl;
-
-  this.unpatch();
-
-  gl.deleteProgram(this.program);
-  gl.deleteBuffer(this.vertexBuffer);
-  gl.deleteBuffer(this.indexBuffer);
-  gl.deleteTexture(this.renderTarget);
-  gl.deleteFramebuffer(this.framebuffer);
-  if (this.depthStencilBuffer) {
-    gl.deleteRenderbuffer(this.depthStencilBuffer);
-  }
-  if (this.depthBuffer) {
-    gl.deleteRenderbuffer(this.depthBuffer);
-  }
-  if (this.stencilBuffer) {
-    gl.deleteRenderbuffer(this.stencilBuffer);
-  }
-
-  if (this.cardboardUI) {
-    this.cardboardUI.destroy();
-  }
-};
-
-
-/**
- * Resizes the backbuffer to match the canvas width and height.
- */
-CardboardDistorter.prototype.onResize = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.RENDERBUFFER_BINDING,
-    gl.TEXTURE_BINDING_2D, gl.TEXTURE0
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Bind real backbuffer and clear it once. We don't need to clear it again
-    // after that because we're overwriting the same area every frame.
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
-
-    // Put things in a good state
-    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
-    self.realColorMask.call(gl, true, true, true, true);
-    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    self.realClearColor.call(gl, 0, 0, 0, 1);
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    // Now bind and resize the fake backbuffer
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.framebuffer);
-
-    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
-    gl.texImage2D(gl.TEXTURE_2D, 0, self.ctxAttribs.alpha ? gl.RGBA : gl.RGB,
-        self.bufferWidth, self.bufferHeight, 0,
-        self.ctxAttribs.alpha ? gl.RGBA : gl.RGB, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, self.renderTarget, 0);
-
-    if (self.ctxAttribs.depth && self.ctxAttribs.stencil) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthStencilBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT,
-          gl.RENDERBUFFER, self.depthStencilBuffer);
-    } else if (self.ctxAttribs.depth) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.depthBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-          gl.RENDERBUFFER, self.depthBuffer);
-    } else if (self.ctxAttribs.stencil) {
-      gl.bindRenderbuffer(gl.RENDERBUFFER, self.stencilBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.STENCIL_INDEX8,
-          self.bufferWidth, self.bufferHeight);
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT,
-          gl.RENDERBUFFER, self.stencilBuffer);
-    }
-
-    if (!gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
-      console.error('Framebuffer incomplete!');
-    }
-
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
-
-    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
-
-    self.realColorMask.apply(gl, self.colorMask);
-    self.realViewport.apply(gl, self.viewport);
-    self.realClearColor.apply(gl, self.clearColor);
-  });
-
-  if (this.cardboardUI) {
-    this.cardboardUI.onResize();
-  }
-};
-
-CardboardDistorter.prototype.patch = function() {
-  if (this.isPatched) {
-    return;
-  }
-
-  var self = this;
-  var canvas = this.gl.canvas;
-  var gl = this.gl;
-
-  if (!Util.isIOS()) {
-    canvas.width = Util.getScreenWidth() * this.bufferScale;
-    canvas.height = Util.getScreenHeight() * this.bufferScale;
-
-    Object.defineProperty(canvas, 'width', {
-      configurable: true,
-      enumerable: true,
-      get: function() {
-        return self.bufferWidth;
-      },
-      set: function(value) {
-        self.bufferWidth = value;
-        self.onResize();
-      }
-    });
-
-    Object.defineProperty(canvas, 'height', {
-      configurable: true,
-      enumerable: true,
-      get: function() {
-        return self.bufferHeight;
-      },
-      set: function(value) {
-        self.bufferHeight = value;
-        self.onResize();
-      }
-    });
-  }
-
-  this.lastBoundFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-
-  if (this.lastBoundFramebuffer == null) {
-    this.lastBoundFramebuffer = this.framebuffer;
-    this.gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-  }
-
-  this.gl.bindFramebuffer = function(target, framebuffer) {
-    self.lastBoundFramebuffer = framebuffer ? framebuffer : self.framebuffer;
-    // Silently make calls to bind the default framebuffer bind ours instead.
-    self.realBindFramebuffer.call(gl, target, self.lastBoundFramebuffer);
-  };
-
-  this.cullFace = gl.getParameter(gl.CULL_FACE);
-  this.depthTest = gl.getParameter(gl.DEPTH_TEST);
-  this.blend = gl.getParameter(gl.BLEND);
-  this.scissorTest = gl.getParameter(gl.SCISSOR_TEST);
-  this.stencilTest = gl.getParameter(gl.STENCIL_TEST);
-
-  gl.enable = function(pname) {
-    switch (pname) {
-      case gl.CULL_FACE: self.cullFace = true; break;
-      case gl.DEPTH_TEST: self.depthTest = true; break;
-      case gl.BLEND: self.blend = true; break;
-      case gl.SCISSOR_TEST: self.scissorTest = true; break;
-      case gl.STENCIL_TEST: self.stencilTest = true; break;
-    }
-    self.realEnable.call(gl, pname);
-  };
-
-  gl.disable = function(pname) {
-    switch (pname) {
-      case gl.CULL_FACE: self.cullFace = false; break;
-      case gl.DEPTH_TEST: self.depthTest = false; break;
-      case gl.BLEND: self.blend = false; break;
-      case gl.SCISSOR_TEST: self.scissorTest = false; break;
-      case gl.STENCIL_TEST: self.stencilTest = false; break;
-    }
-    self.realDisable.call(gl, pname);
-  };
-
-  this.colorMask = gl.getParameter(gl.COLOR_WRITEMASK);
-  gl.colorMask = function(r, g, b, a) {
-    self.colorMask[0] = r;
-    self.colorMask[1] = g;
-    self.colorMask[2] = b;
-    self.colorMask[3] = a;
-    self.realColorMask.call(gl, r, g, b, a);
-  };
-
-  this.clearColor = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-  gl.clearColor = function(r, g, b, a) {
-    self.clearColor[0] = r;
-    self.clearColor[1] = g;
-    self.clearColor[2] = b;
-    self.clearColor[3] = a;
-    self.realClearColor.call(gl, r, g, b, a);
-  };
-
-  this.viewport = gl.getParameter(gl.VIEWPORT);
-  gl.viewport = function(x, y, w, h) {
-    self.viewport[0] = x;
-    self.viewport[1] = y;
-    self.viewport[2] = w;
-    self.viewport[3] = h;
-    self.realViewport.call(gl, x, y, w, h);
-  };
-
-  this.isPatched = true;
-  Util.safariCssSizeWorkaround(canvas);
-};
-
-CardboardDistorter.prototype.unpatch = function() {
-  if (!this.isPatched) {
-    return;
-  }
-
-  var gl = this.gl;
-  var canvas = this.gl.canvas;
-
-  if (!Util.isIOS()) {
-    Object.defineProperty(canvas, 'width', this.realCanvasWidth);
-    Object.defineProperty(canvas, 'height', this.realCanvasHeight);
-  }
-  canvas.width = this.bufferWidth;
-  canvas.height = this.bufferHeight;
-
-  gl.bindFramebuffer = this.realBindFramebuffer;
-  gl.enable = this.realEnable;
-  gl.disable = this.realDisable;
-  gl.colorMask = this.realColorMask;
-  gl.clearColor = this.realClearColor;
-  gl.viewport = this.realViewport;
-
-  // Check to see if our fake backbuffer is bound and bind the real backbuffer
-  // if that's the case.
-  if (this.lastBoundFramebuffer == this.framebuffer) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  }
-
-  this.isPatched = false;
-
-  setTimeout(function() {
-    Util.safariCssSizeWorkaround(canvas);
-  }, 1);
-};
-
-CardboardDistorter.prototype.setTextureBounds = function(leftBounds, rightBounds) {
-  if (!leftBounds) {
-    leftBounds = [0, 0, 0.5, 1];
-  }
-
-  if (!rightBounds) {
-    rightBounds = [0.5, 0, 0.5, 1];
-  }
-
-  // Left eye
-  this.viewportOffsetScale[0] = leftBounds[0]; // X
-  this.viewportOffsetScale[1] = leftBounds[1]; // Y
-  this.viewportOffsetScale[2] = leftBounds[2]; // Width
-  this.viewportOffsetScale[3] = leftBounds[3]; // Height
-
-  // Right eye
-  this.viewportOffsetScale[4] = rightBounds[0]; // X
-  this.viewportOffsetScale[5] = rightBounds[1]; // Y
-  this.viewportOffsetScale[6] = rightBounds[2]; // Width
-  this.viewportOffsetScale[7] = rightBounds[3]; // Height
-};
-
-/**
- * Performs distortion pass on the injected backbuffer, rendering it to the real
- * backbuffer.
- */
-CardboardDistorter.prototype.submitFrame = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [];
-
-  if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
-    glState.push(
-      gl.CURRENT_PROGRAM,
-      gl.ARRAY_BUFFER_BINDING,
-      gl.ELEMENT_ARRAY_BUFFER_BINDING,
-      gl.TEXTURE_BINDING_2D, gl.TEXTURE0
-    );
-  }
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Bind the real default framebuffer
-    self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, null);
-
-    // Make sure the GL state is in a good place
-    if (self.cullFace) { self.realDisable.call(gl, gl.CULL_FACE); }
-    if (self.depthTest) { self.realDisable.call(gl, gl.DEPTH_TEST); }
-    if (self.blend) { self.realDisable.call(gl, gl.BLEND); }
-    if (self.scissorTest) { self.realDisable.call(gl, gl.SCISSOR_TEST); }
-    if (self.stencilTest) { self.realDisable.call(gl, gl.STENCIL_TEST); }
-    self.realColorMask.call(gl, true, true, true, true);
-    self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-    // If the backbuffer has an alpha channel clear every frame so the page
-    // doesn't show through.
-    if (self.ctxAttribs.alpha || Util.isIOS()) {
-      self.realClearColor.call(gl, 0, 0, 0, 1);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    }
-
-    // Bind distortion program and mesh
-    gl.useProgram(self.program);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.enableVertexAttribArray(self.attribs.position);
-    gl.enableVertexAttribArray(self.attribs.texCoord);
-    gl.vertexAttribPointer(self.attribs.position, 2, gl.FLOAT, false, 20, 0);
-    gl.vertexAttribPointer(self.attribs.texCoord, 3, gl.FLOAT, false, 20, 8);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.uniform1i(self.uniforms.diffuse, 0);
-    gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
-
-    gl.uniform4fv(self.uniforms.viewportOffsetScale, self.viewportOffsetScale);
-
-    // Draws both eyes
-    gl.drawElements(gl.TRIANGLES, self.indexCount, gl.UNSIGNED_SHORT, 0);
-
-    if (self.cardboardUI) {
-      self.cardboardUI.renderNoState();
-    }
-
-    // Bind the fake default framebuffer again
-    self.realBindFramebuffer.call(self.gl, gl.FRAMEBUFFER, self.framebuffer);
-
-    // If preserveDrawingBuffer == false clear the framebuffer
-    if (!self.ctxAttribs.preserveDrawingBuffer) {
-      self.realClearColor.call(gl, 0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-    }
-
-    if (!WebVRConfig.DIRTY_SUBMIT_FRAME_BINDINGS) {
-      self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.lastBoundFramebuffer);
-    }
-
-    // Restore state
-    if (self.cullFace) { self.realEnable.call(gl, gl.CULL_FACE); }
-    if (self.depthTest) { self.realEnable.call(gl, gl.DEPTH_TEST); }
-    if (self.blend) { self.realEnable.call(gl, gl.BLEND); }
-    if (self.scissorTest) { self.realEnable.call(gl, gl.SCISSOR_TEST); }
-    if (self.stencilTest) { self.realEnable.call(gl, gl.STENCIL_TEST); }
-
-    self.realColorMask.apply(gl, self.colorMask);
-    self.realViewport.apply(gl, self.viewport);
-    if (self.ctxAttribs.alpha || !self.ctxAttribs.preserveDrawingBuffer) {
-      self.realClearColor.apply(gl, self.clearColor);
-    }
-  });
-
-  // Workaround for the fact that Safari doesn't allow us to patch the canvas
-  // width and height correctly. After each submit frame check to see what the
-  // real backbuffer size has been set to and resize the fake backbuffer size
-  // to match.
-  if (Util.isIOS()) {
-    var canvas = gl.canvas;
-    if (canvas.width != self.bufferWidth || canvas.height != self.bufferHeight) {
-      self.bufferWidth = canvas.width;
-      self.bufferHeight = canvas.height;
-      self.onResize();
-    }
-  }
-};
-
-/**
- * Call when the deviceInfo has changed. At this point we need
- * to re-calculate the distortion mesh.
- */
-CardboardDistorter.prototype.updateDeviceInfo = function(deviceInfo) {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING];
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    var vertices = self.computeMeshVertices_(self.meshWidth, self.meshHeight, deviceInfo);
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    // Indices don't change based on device parameters, so only compute once.
-    if (!self.indexCount) {
-      var indices = self.computeMeshIndices_(self.meshWidth, self.meshHeight);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-      self.indexCount = indices.length;
-    }
-  });
-};
-
-/**
- * Build the distortion mesh vertices.
- * Based on code from the Unity cardboard plugin.
- */
-CardboardDistorter.prototype.computeMeshVertices_ = function(width, height, deviceInfo) {
-  var vertices = new Float32Array(2 * width * height * 5);
-
-  var lensFrustum = deviceInfo.getLeftEyeVisibleTanAngles();
-  var noLensFrustum = deviceInfo.getLeftEyeNoLensTanAngles();
-  var viewport = deviceInfo.getLeftEyeVisibleScreenRect(noLensFrustum);
-  var vidx = 0;
-  var iidx = 0;
-  for (var e = 0; e < 2; e++) {
-    for (var j = 0; j < height; j++) {
-      for (var i = 0; i < width; i++, vidx++) {
-        var u = i / (width - 1);
-        var v = j / (height - 1);
-
-        // Grid points regularly spaced in StreoScreen, and barrel distorted in
-        // the mesh.
-        var s = u;
-        var t = v;
-        var x = Util.lerp(lensFrustum[0], lensFrustum[2], u);
-        var y = Util.lerp(lensFrustum[3], lensFrustum[1], v);
-        var d = Math.sqrt(x * x + y * y);
-        var r = deviceInfo.distortion.distortInverse(d);
-        var p = x * r / d;
-        var q = y * r / d;
-        u = (p - noLensFrustum[0]) / (noLensFrustum[2] - noLensFrustum[0]);
-        v = (q - noLensFrustum[3]) / (noLensFrustum[1] - noLensFrustum[3]);
-
-        // Convert u,v to mesh screen coordinates.
-        var aspect = deviceInfo.device.widthMeters / deviceInfo.device.heightMeters;
-
-        // FIXME: The original Unity plugin multiplied U by the aspect ratio
-        // and didn't multiply either value by 2, but that seems to get it
-        // really close to correct looking for me. I hate this kind of "Don't
-        // know why it works" code though, and wold love a more logical
-        // explanation of what needs to happen here.
-        u = (viewport.x + u * viewport.width - 0.5) * 2.0; //* aspect;
-        v = (viewport.y + v * viewport.height - 0.5) * 2.0;
-
-        vertices[(vidx * 5) + 0] = u; // position.x
-        vertices[(vidx * 5) + 1] = v; // position.y
-        vertices[(vidx * 5) + 2] = s; // texCoord.x
-        vertices[(vidx * 5) + 3] = t; // texCoord.y
-        vertices[(vidx * 5) + 4] = e; // texCoord.z (viewport index)
-      }
-    }
-    var w = lensFrustum[2] - lensFrustum[0];
-    lensFrustum[0] = -(w + lensFrustum[0]);
-    lensFrustum[2] = w - lensFrustum[2];
-    w = noLensFrustum[2] - noLensFrustum[0];
-    noLensFrustum[0] = -(w + noLensFrustum[0]);
-    noLensFrustum[2] = w - noLensFrustum[2];
-    viewport.x = 1 - (viewport.x + viewport.width);
-  }
-  return vertices;
-}
-
-/**
- * Build the distortion mesh indices.
- * Based on code from the Unity cardboard plugin.
- */
-CardboardDistorter.prototype.computeMeshIndices_ = function(width, height) {
-  var indices = new Uint16Array(2 * (width - 1) * (height - 1) * 6);
-  var halfwidth = width / 2;
-  var halfheight = height / 2;
-  var vidx = 0;
-  var iidx = 0;
-  for (var e = 0; e < 2; e++) {
-    for (var j = 0; j < height; j++) {
-      for (var i = 0; i < width; i++, vidx++) {
-        if (i == 0 || j == 0)
-          continue;
-        // Build a quad.  Lower right and upper left quadrants have quads with
-        // the triangle diagonal flipped to get the vignette to interpolate
-        // correctly.
-        if ((i <= halfwidth) == (j <= halfheight)) {
-          // Quad diagonal lower left to upper right.
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - width - 1;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx - width - 1;
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - 1;
-        } else {
-          // Quad diagonal upper left to lower right.
-          indices[iidx++] = vidx - 1;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx;
-          indices[iidx++] = vidx - width;
-          indices[iidx++] = vidx - 1;
-          indices[iidx++] = vidx - width - 1;
-        }
-      }
-    }
-  }
-  return indices;
-};
-
-CardboardDistorter.prototype.getOwnPropertyDescriptor_ = function(proto, attrName) {
-  var descriptor = Object.getOwnPropertyDescriptor(proto, attrName);
-  // In some cases (ahem... Safari), the descriptor returns undefined get and
-  // set fields. In this case, we need to create a synthetic property
-  // descriptor. This works around some of the issues in
-  // https://github.com/borismus/webvr-polyfill/issues/46
-  if (descriptor.get === undefined || descriptor.set === undefined) {
-    descriptor.configurable = true;
-    descriptor.enumerable = true;
-    descriptor.get = function() {
-      return this.getAttribute(attrName);
-    };
-    descriptor.set = function(val) {
-      this.setAttribute(attrName, val);
-    };
-  }
-  return descriptor;
-};
-
-module.exports = CardboardDistorter;
-
-},{"./cardboard-ui.js":4,"./deps/wglu-preserve-state.js":6,"./util.js":22}],4:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-var WGLUPreserveGLState = _dereq_('./deps/wglu-preserve-state.js');
-
-var uiVS = [
-  'attribute vec2 position;',
-
-  'uniform mat4 projectionMat;',
-
-  'void main() {',
-  '  gl_Position = projectionMat * vec4( position, -1.0, 1.0 );',
-  '}',
-].join('\n');
-
-var uiFS = [
-  'precision mediump float;',
-
-  'uniform vec4 color;',
-
-  'void main() {',
-  '  gl_FragColor = color;',
-  '}',
-].join('\n');
-
-var DEG2RAD = Math.PI/180.0;
-
-// The gear has 6 identical sections, each spanning 60 degrees.
-var kAnglePerGearSection = 60;
-
-// Half-angle of the span of the outer rim.
-var kOuterRimEndAngle = 12;
-
-// Angle between the middle of the outer rim and the start of the inner rim.
-var kInnerRimBeginAngle = 20;
-
-// Distance from center to outer rim, normalized so that the entire model
-// fits in a [-1, 1] x [-1, 1] square.
-var kOuterRadius = 1;
-
-// Distance from center to depressed rim, in model units.
-var kMiddleRadius = 0.75;
-
-// Radius of the inner hollow circle, in model units.
-var kInnerRadius = 0.3125;
-
-// Center line thickness in DP.
-var kCenterLineThicknessDp = 4;
-
-// Button width in DP.
-var kButtonWidthDp = 28;
-
-// Factor to scale the touch area that responds to the touch.
-var kTouchSlopFactor = 1.5;
-
-var Angles = [
-  0, kOuterRimEndAngle, kInnerRimBeginAngle,
-  kAnglePerGearSection - kInnerRimBeginAngle,
-  kAnglePerGearSection - kOuterRimEndAngle
-];
-
-/**
- * Renders the alignment line and "options" gear. It is assumed that the canvas
- * this is rendered into covers the entire screen (or close to it.)
- */
-function CardboardUI(gl) {
-  this.gl = gl;
-
-  this.attribs = {
-    position: 0
-  };
-  this.program = Util.linkProgram(gl, uiVS, uiFS, this.attribs);
-  this.uniforms = Util.getProgramUniforms(gl, this.program);
-
-  this.vertexBuffer = gl.createBuffer();
-  this.gearOffset = 0;
-  this.gearVertexCount = 0;
-  this.arrowOffset = 0;
-  this.arrowVertexCount = 0;
-
-  this.projMat = new Float32Array(16);
-
-  this.listener = null;
-
-  this.onResize();
-};
-
-/**
- * Tears down all the resources created by the UI renderer.
- */
-CardboardUI.prototype.destroy = function() {
-  var gl = this.gl;
-
-  if (this.listener) {
-    gl.canvas.removeEventListener('click', this.listener, false);
-  }
-
-  gl.deleteProgram(this.program);
-  gl.deleteBuffer(this.vertexBuffer);
-};
-
-/**
- * Adds a listener to clicks on the gear and back icons
- */
-CardboardUI.prototype.listen = function(optionsCallback, backCallback) {
-  var canvas = this.gl.canvas;
-  this.listener = function(event) {
-    var midline = canvas.clientWidth / 2;
-    var buttonSize = kButtonWidthDp * kTouchSlopFactor;
-    // Check to see if the user clicked on (or around) the gear icon
-    if (event.clientX > midline - buttonSize &&
-        event.clientX < midline + buttonSize &&
-        event.clientY > canvas.clientHeight - buttonSize) {
-      optionsCallback(event);
-    }
-    // Check to see if the user clicked on (or around) the back icon
-    else if (event.clientX < buttonSize && event.clientY < buttonSize) {
-      backCallback(event);
-    }
-  };
-  canvas.addEventListener('click', this.listener, false);
-};
-
-/**
- * Builds the UI mesh.
- */
-CardboardUI.prototype.onResize = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.ARRAY_BUFFER_BINDING
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    var vertices = [];
-
-    var midline = gl.drawingBufferWidth / 2;
-
-    // Assumes your canvas width and height is scaled proportionately.
-    // TODO(smus): The following causes buttons to become huge on iOS, but seems
-    // like the right thing to do. For now, added a hack. But really, investigate why.
-    var dps = (gl.drawingBufferWidth / (screen.width * window.devicePixelRatio));
-    if (!Util.isIOS()) {
-      dps *= window.devicePixelRatio;
-    }
-
-    var lineWidth = kCenterLineThicknessDp * dps / 2;
-    var buttonSize = kButtonWidthDp * kTouchSlopFactor * dps;
-    var buttonScale = kButtonWidthDp * dps / 2;
-    var buttonBorder = ((kButtonWidthDp * kTouchSlopFactor) - kButtonWidthDp) * dps;
-
-    // Build centerline
-    vertices.push(midline - lineWidth, buttonSize);
-    vertices.push(midline - lineWidth, gl.drawingBufferHeight);
-    vertices.push(midline + lineWidth, buttonSize);
-    vertices.push(midline + lineWidth, gl.drawingBufferHeight);
-
-    // Build gear
-    self.gearOffset = (vertices.length / 2);
-
-    function addGearSegment(theta, r) {
-      var angle = (90 - theta) * DEG2RAD;
-      var x = Math.cos(angle);
-      var y = Math.sin(angle);
-      vertices.push(kInnerRadius * x * buttonScale + midline, kInnerRadius * y * buttonScale + buttonScale);
-      vertices.push(r * x * buttonScale + midline, r * y * buttonScale + buttonScale);
-    }
-
-    for (var i = 0; i <= 6; i++) {
-      var segmentTheta = i * kAnglePerGearSection;
-
-      addGearSegment(segmentTheta, kOuterRadius);
-      addGearSegment(segmentTheta + kOuterRimEndAngle, kOuterRadius);
-      addGearSegment(segmentTheta + kInnerRimBeginAngle, kMiddleRadius);
-      addGearSegment(segmentTheta + (kAnglePerGearSection - kInnerRimBeginAngle), kMiddleRadius);
-      addGearSegment(segmentTheta + (kAnglePerGearSection - kOuterRimEndAngle), kOuterRadius);
-    }
-
-    self.gearVertexCount = (vertices.length / 2) - self.gearOffset;
-
-    // Build back arrow
-    self.arrowOffset = (vertices.length / 2);
-
-    function addArrowVertex(x, y) {
-      vertices.push(buttonBorder + x, gl.drawingBufferHeight - buttonBorder - y);
-    }
-
-    var angledLineWidth = lineWidth / Math.sin(45 * DEG2RAD);
-
-    addArrowVertex(0, buttonScale);
-    addArrowVertex(buttonScale, 0);
-    addArrowVertex(buttonScale + angledLineWidth, angledLineWidth);
-    addArrowVertex(angledLineWidth, buttonScale + angledLineWidth);
-
-    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
-    addArrowVertex(0, buttonScale);
-    addArrowVertex(buttonScale, buttonScale * 2);
-    addArrowVertex(buttonScale + angledLineWidth, (buttonScale * 2) - angledLineWidth);
-
-    addArrowVertex(angledLineWidth, buttonScale - angledLineWidth);
-    addArrowVertex(0, buttonScale);
-
-    addArrowVertex(angledLineWidth, buttonScale - lineWidth);
-    addArrowVertex(kButtonWidthDp * dps, buttonScale - lineWidth);
-    addArrowVertex(angledLineWidth, buttonScale + lineWidth);
-    addArrowVertex(kButtonWidthDp * dps, buttonScale + lineWidth);
-
-    self.arrowVertexCount = (vertices.length / 2) - self.arrowOffset;
-
-    // Buffer data
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  });
-};
-
-/**
- * Performs distortion pass on the injected backbuffer, rendering it to the real
- * backbuffer.
- */
-CardboardUI.prototype.render = function() {
-  var gl = this.gl;
-  var self = this;
-
-  var glState = [
-    gl.CULL_FACE,
-    gl.DEPTH_TEST,
-    gl.BLEND,
-    gl.SCISSOR_TEST,
-    gl.STENCIL_TEST,
-    gl.COLOR_WRITEMASK,
-    gl.VIEWPORT,
-
-    gl.CURRENT_PROGRAM,
-    gl.ARRAY_BUFFER_BINDING
-  ];
-
-  WGLUPreserveGLState(gl, glState, function(gl) {
-    // Make sure the GL state is in a good place
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.DEPTH_TEST);
-    gl.disable(gl.BLEND);
-    gl.disable(gl.SCISSOR_TEST);
-    gl.disable(gl.STENCIL_TEST);
-    gl.colorMask(true, true, true, true);
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-    self.renderNoState();
-  });
-};
-
-CardboardUI.prototype.renderNoState = function() {
-  var gl = this.gl;
-
-  // Bind distortion program and mesh
-  gl.useProgram(this.program);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-  gl.enableVertexAttribArray(this.attribs.position);
-  gl.vertexAttribPointer(this.attribs.position, 2, gl.FLOAT, false, 8, 0);
-
-  gl.uniform4f(this.uniforms.color, 1.0, 1.0, 1.0, 1.0);
-
-  Util.orthoMatrix(this.projMat, 0, gl.drawingBufferWidth, 0, gl.drawingBufferHeight, 0.1, 1024.0);
-  gl.uniformMatrix4fv(this.uniforms.projectionMat, false, this.projMat);
-
-  // Draws UI element
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  gl.drawArrays(gl.TRIANGLE_STRIP, this.gearOffset, this.gearVertexCount);
-  gl.drawArrays(gl.TRIANGLE_STRIP, this.arrowOffset, this.arrowVertexCount);
-};
-
-module.exports = CardboardUI;
-
-},{"./deps/wglu-preserve-state.js":6,"./util.js":22}],5:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var CardboardDistorter = _dereq_('./cardboard-distorter.js');
-var CardboardUI = _dereq_('./cardboard-ui.js');
-var DeviceInfo = _dereq_('./device-info.js');
-var Dpdb = _dereq_('./dpdb/dpdb.js');
-var FusionPoseSensor = _dereq_('./sensor-fusion/fusion-pose-sensor.js');
-var RotateInstructions = _dereq_('./rotate-instructions.js');
-var ViewerSelector = _dereq_('./viewer-selector.js');
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var Util = _dereq_('./util.js');
-
-var Eye = {
-  LEFT: 'left',
-  RIGHT: 'right'
-};
-
-/**
- * VRDisplay based on mobile device parameters and DeviceMotion APIs.
- */
-function CardboardVRDisplay() {
-  this.displayName = 'Cardboard VRDisplay (webvr-polyfill)';
-
-  this.capabilities.hasOrientation = true;
-  this.capabilities.canPresent = true;
-
-  // "Private" members.
-  this.bufferScale_ = WebVRConfig.BUFFER_SCALE;
-  this.poseSensor_ = new FusionPoseSensor();
-  this.distorter_ = null;
-  this.cardboardUI_ = null;
-
-  this.dpdb_ = new Dpdb(true, this.onDeviceParamsUpdated_.bind(this));
-  this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams());
-
-  this.viewerSelector_ = new ViewerSelector();
-  this.viewerSelector_.on('change', this.onViewerChanged_.bind(this));
-
-  // Set the correct initial viewer.
-  this.deviceInfo_.setViewer(this.viewerSelector_.getCurrentViewer());
-
-  if (!WebVRConfig.ROTATE_INSTRUCTIONS_DISABLED) {
-    this.rotateInstructions_ = new RotateInstructions();
-  }
-
-  if (Util.isIOS()) {
-    // Listen for resize events to workaround this awful Safari bug.
-    window.addEventListener('resize', this.onResize_.bind(this));
-  }
-}
-CardboardVRDisplay.prototype = new VRDisplay();
-
-CardboardVRDisplay.prototype.getImmediatePose = function() {
-  return {
-    position: this.poseSensor_.getPosition(),
-    orientation: this.poseSensor_.getOrientation(),
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-};
-
-CardboardVRDisplay.prototype.resetPose = function() {
-  this.poseSensor_.resetPose();
-};
-
-CardboardVRDisplay.prototype.getEyeParameters = function(whichEye) {
-  var offset = [this.deviceInfo_.viewer.interLensDistance * 0.5, 0.0, 0.0];
-  var fieldOfView;
-
-  // TODO: FoV can be a little expensive to compute. Cache when device params change.
-  if (whichEye == Eye.LEFT) {
-    offset[0] *= -1.0;
-    fieldOfView = this.deviceInfo_.getFieldOfViewLeftEye();
-  } else if (whichEye == Eye.RIGHT) {
-    fieldOfView = this.deviceInfo_.getFieldOfViewRightEye();
-  } else {
-    console.error('Invalid eye provided: %s', whichEye);
-    return null;
-  }
-
-  return {
-    fieldOfView: fieldOfView,
-    offset: offset,
-    // TODO: Should be able to provide better values than these.
-    renderWidth: this.deviceInfo_.device.width * 0.5 * this.bufferScale_,
-    renderHeight: this.deviceInfo_.device.height * this.bufferScale_,
-  };
-};
-
-CardboardVRDisplay.prototype.onDeviceParamsUpdated_ = function(newParams) {
-  console.log('DPDB reported that device params were updated.');
-  this.deviceInfo_.updateDeviceParams(newParams);
-
-  if (this.distorter_) {
-    this.distorter.updateDeviceInfo(this.deviceInfo_);
-  }
-};
-
-CardboardVRDisplay.prototype.updateBounds_ = function () {
-  if (this.layer_ && this.distorter_ && (this.layer_.leftBounds || this.layer_.rightBounds)) {
-    this.distorter_.setTextureBounds(this.layer_.leftBounds, this.layer_.rightBounds);
-  }
-};
-
-CardboardVRDisplay.prototype.beginPresent_ = function() {
-  var gl = this.layer_.source.getContext('webgl');
-  if (!gl)
-    gl = this.layer_.source.getContext('experimental-webgl');
-  if (!gl)
-    gl = this.layer_.source.getContext('webgl2');
-
-  if (!gl)
-    return; // Can't do distortion without a WebGL context.
-
-  // Provides a way to opt out of distortion
-  if (this.layer_.predistorted) {
-    if (!WebVRConfig.CARDBOARD_UI_DISABLED) {
-      gl.canvas.width = Util.getScreenWidth() * this.bufferScale_;
-      gl.canvas.height = Util.getScreenHeight() * this.bufferScale_;
-      this.cardboardUI_ = new CardboardUI(gl);
-    }
-  } else {
-    // Create a new distorter for the target context
-    this.distorter_ = new CardboardDistorter(gl);
-    this.distorter_.updateDeviceInfo(this.deviceInfo_);
-    this.cardboardUI_ = this.distorter_.cardboardUI;
-  }
-
-  if (this.cardboardUI_) {
-    this.cardboardUI_.listen(function(e) {
-      // Options clicked.
-      this.viewerSelector_.show(this.layer_.source.parentElement);
-      e.stopPropagation();
-      e.preventDefault();
-    }.bind(this), function(e) {
-      // Back clicked.
-      this.exitPresent();
-      e.stopPropagation();
-      e.preventDefault();
-    }.bind(this));
-  }
-
-  if (this.rotateInstructions_) {
-    if (Util.isLandscapeMode() && Util.isMobile()) {
-      // In landscape mode, temporarily show the "put into Cardboard"
-      // interstitial. Otherwise, do the default thing.
-      this.rotateInstructions_.showTemporarily(3000, this.layer_.source.parentElement);
-    } else {
-      this.rotateInstructions_.update();
-    }
-  }
-
-  // Listen for orientation change events in order to show interstitial.
-  this.orientationHandler = this.onOrientationChange_.bind(this);
-  window.addEventListener('orientationchange', this.orientationHandler);
-
-  // Listen for present display change events in order to update distorter dimensions
-  this.vrdisplaypresentchangeHandler = this.updateBounds_.bind(this);
-  window.addEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
-
-  // Fire this event initially, to give geometry-distortion clients the chance
-  // to do something custom.
-  this.fireVRDisplayDeviceParamsChange_();
-};
-
-CardboardVRDisplay.prototype.endPresent_ = function() {
-  if (this.distorter_) {
-    this.distorter_.destroy();
-    this.distorter_ = null;
-  }
-  if (this.cardboardUI_) {
-    this.cardboardUI_.destroy();
-    this.cardboardUI_ = null;
-  }
-
-  if (this.rotateInstructions_) {
-    this.rotateInstructions_.hide();
-  }
-  this.viewerSelector_.hide();
-
-  window.removeEventListener('orientationchange', this.orientationHandler);
-  window.removeEventListener('vrdisplaypresentchange', this.vrdisplaypresentchangeHandler);
-};
-
-CardboardVRDisplay.prototype.submitFrame = function(pose) {
-  if (this.distorter_) {
-    this.distorter_.submitFrame();
-  } else if (this.cardboardUI_ && this.layer_) {
-    // Hack for predistorted: true.
-    var canvas = this.layer_.source.getContext('webgl').canvas;
-    if (canvas.width != this.lastWidth || canvas.height != this.lastHeight) {
-      this.cardboardUI_.onResize();
-    }
-    this.lastWidth = canvas.width;
-    this.lastHeight = canvas.height;
-
-    // Render the Cardboard UI.
-    this.cardboardUI_.render();
-  }
-};
-
-CardboardVRDisplay.prototype.onOrientationChange_ = function(e) {
-  console.log('onOrientationChange_');
-
-  // Hide the viewer selector.
-  this.viewerSelector_.hide();
-
-  // Update the rotate instructions.
-  if (this.rotateInstructions_) {
-    this.rotateInstructions_.update();
-  }
-
-  this.onResize_();
-};
-
-CardboardVRDisplay.prototype.onResize_ = function(e) {
-  if (this.layer_) {
-    var gl = this.layer_.source.getContext('webgl');
-    // Size the CSS canvas.
-    // Added padding on right and bottom because iPhone 5 will not
-    // hide the URL bar unless content is bigger than the screen.
-    // This will not be visible as long as the container element (e.g. body)
-    // is set to 'overflow: hidden'.
-    var cssProperties = [
-      'position: absolute',
-      'top: 0',
-      'left: 0',
-      'width: ' + Math.max(screen.width, screen.height) + 'px',
-      'height: ' + Math.min(screen.height, screen.width) + 'px',
-      'border: 0',
-      'margin: 0',
-      'padding: 0 10px 10px 0',
-    ];
-    gl.canvas.setAttribute('style', cssProperties.join('; ') + ';');
-
-    Util.safariCssSizeWorkaround(gl.canvas);
-  }
-};
-
-CardboardVRDisplay.prototype.onViewerChanged_ = function(viewer) {
-  this.deviceInfo_.setViewer(viewer);
-
-  if (this.distorter_) {
-    // Update the distortion appropriately.
-    this.distorter_.updateDeviceInfo(this.deviceInfo_);
-  }
-
-  // Fire a new event containing viewer and device parameters for clients that
-  // want to implement their own geometry-based distortion.
-  this.fireVRDisplayDeviceParamsChange_();
-};
-
-CardboardVRDisplay.prototype.fireVRDisplayDeviceParamsChange_ = function() {
-  var event = new CustomEvent('vrdisplaydeviceparamschange', {
-    detail: {
-      vrdisplay: this,
-      deviceInfo: this.deviceInfo_,
-    }
-  });
-  window.dispatchEvent(event);
-};
-
-module.exports = CardboardVRDisplay;
-
-},{"./base.js":2,"./cardboard-distorter.js":3,"./cardboard-ui.js":4,"./device-info.js":7,"./dpdb/dpdb.js":11,"./rotate-instructions.js":16,"./sensor-fusion/fusion-pose-sensor.js":18,"./util.js":22,"./viewer-selector.js":23}],6:[function(_dereq_,module,exports){
-/*
-Copyright (c) 2016, Brandon Jones.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-/*
-Caches specified GL state, runs a callback, and restores the cached state when
-done.
-
-Example usage:
-
-var savedState = [
-  gl.ARRAY_BUFFER_BINDING,
-
-  // TEXTURE_BINDING_2D or _CUBE_MAP must always be followed by the texure unit.
-  gl.TEXTURE_BINDING_2D, gl.TEXTURE0,
-
-  gl.CLEAR_COLOR,
-];
-// After this call the array buffer, texture unit 0, active texture, and clear
-// color will be restored. The viewport will remain changed, however, because
-// gl.VIEWPORT was not included in the savedState list.
-WGLUPreserveGLState(gl, savedState, function(gl) {
-  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, ....);
-
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(gl.TEXTURE_2D, ...);
-
-  gl.clearColor(1, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-});
-
-Note that this is not intended to be fast. Managing state in your own code to
-avoid redundant state setting and querying will always be faster. This function
-is most useful for cases where you may not have full control over the WebGL
-calls being made, such as tooling or effect injectors.
-*/
-
-function WGLUPreserveGLState(gl, bindings, callback) {
-  if (!bindings) {
-    callback(gl);
-    return;
-  }
-
-  var boundValues = [];
-
-  var activeTexture = null;
-  for (var i = 0; i < bindings.length; ++i) {
-    var binding = bindings[i];
-    switch (binding) {
-      case gl.TEXTURE_BINDING_2D:
-      case gl.TEXTURE_BINDING_CUBE_MAP:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31) {
-          console.error("TEXTURE_BINDING_2D or TEXTURE_BINDING_CUBE_MAP must be followed by a valid texture unit");
-          boundValues.push(null, null);
-          break;
-        }
-        if (!activeTexture) {
-          activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        }
-        gl.activeTexture(textureUnit);
-        boundValues.push(gl.getParameter(binding), null);
-        break;
-      case gl.ACTIVE_TEXTURE:
-        activeTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        boundValues.push(null);
-        break;
-      default:
-        boundValues.push(gl.getParameter(binding));
-        break;
-    }
-  }
-
-  callback(gl);
-
-  for (var i = 0; i < bindings.length; ++i) {
-    var binding = bindings[i];
-    var boundValue = boundValues[i];
-    switch (binding) {
-      case gl.ACTIVE_TEXTURE:
-        break; // Ignore this binding, since we special-case it to happen last.
-      case gl.ARRAY_BUFFER_BINDING:
-        gl.bindBuffer(gl.ARRAY_BUFFER, boundValue);
-        break;
-      case gl.COLOR_CLEAR_VALUE:
-        gl.clearColor(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.COLOR_WRITEMASK:
-        gl.colorMask(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.CURRENT_PROGRAM:
-        gl.useProgram(boundValue);
-        break;
-      case gl.ELEMENT_ARRAY_BUFFER_BINDING:
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boundValue);
-        break;
-      case gl.FRAMEBUFFER_BINDING:
-        gl.bindFramebuffer(gl.FRAMEBUFFER, boundValue);
-        break;
-      case gl.RENDERBUFFER_BINDING:
-        gl.bindRenderbuffer(gl.RENDERBUFFER, boundValue);
-        break;
-      case gl.TEXTURE_BINDING_2D:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
-          break;
-        gl.activeTexture(textureUnit);
-        gl.bindTexture(gl.TEXTURE_2D, boundValue);
-        break;
-      case gl.TEXTURE_BINDING_CUBE_MAP:
-        var textureUnit = bindings[++i];
-        if (textureUnit < gl.TEXTURE0 || textureUnit > gl.TEXTURE31)
-          break;
-        gl.activeTexture(textureUnit);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, boundValue);
-        break;
-      case gl.VIEWPORT:
-        gl.viewport(boundValue[0], boundValue[1], boundValue[2], boundValue[3]);
-        break;
-      case gl.BLEND:
-      case gl.CULL_FACE:
-      case gl.DEPTH_TEST:
-      case gl.SCISSOR_TEST:
-      case gl.STENCIL_TEST:
-        if (boundValue) {
-          gl.enable(binding);
-        } else {
-          gl.disable(binding);
-        }
-        break;
-      default:
-        console.log("No GL restore behavior for 0x" + binding.toString(16));
-        break;
-    }
-
-    if (activeTexture) {
-      gl.activeTexture(activeTexture);
-    }
-  }
-}
-
-module.exports = WGLUPreserveGLState;
-},{}],7:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Distortion = _dereq_('./distortion/distortion.js');
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-function Device(params) {
-  this.width = params.width || Util.getScreenWidth();
-  this.height = params.height || Util.getScreenHeight();
-  this.widthMeters = params.widthMeters;
-  this.heightMeters = params.heightMeters;
-  this.bevelMeters = params.bevelMeters;
-}
-
-
-// Fallback Android device (based on Nexus 5 measurements) for use when
-// we can't recognize an Android device.
-var DEFAULT_ANDROID = new Device({
-  widthMeters: 0.110,
-  heightMeters: 0.062,
-  bevelMeters: 0.004
-});
-
-// Fallback iOS device (based on iPhone6) for use when
-// we can't recognize an Android device.
-var DEFAULT_IOS = new Device({
-  widthMeters: 0.1038,
-  heightMeters: 0.0584,
-  bevelMeters: 0.004
-});
-
-
-var Viewers = {
-  CardboardV1: new CardboardViewer({
-    id: 'CardboardV1',
-    label: 'Cardboard I/O 2014',
-    fov: 40,
-    interLensDistance: 0.060,
-    baselineLensDistance: 0.035,
-    screenLensDistance: 0.042,
-    distortionCoefficients: [0.441, 0.156],
-    inverseCoefficients: [-0.4410035, 0.42756155, -0.4804439, 0.5460139,
-      -0.58821183, 0.5733938, -0.48303202, 0.33299083, -0.17573841,
-      0.0651772, -0.01488963, 0.001559834]
-  }),
-  CardboardV2: new CardboardViewer({
-    id: 'CardboardV2',
-    label: 'Cardboard I/O 2015',
-    fov: 60,
-    interLensDistance: 0.064,
-    baselineLensDistance: 0.035,
-    screenLensDistance: 0.039,
-    distortionCoefficients: [0.34, 0.55],
-    inverseCoefficients: [-0.33836704, -0.18162185, 0.862655, -1.2462051,
-      1.0560602, -0.58208317, 0.21609078, -0.05444823, 0.009177956,
-      -9.904169E-4, 6.183535E-5, -1.6981803E-6]
-  })
-};
-
-
-var DEFAULT_LEFT_CENTER = {x: 0.5, y: 0.5};
-var DEFAULT_RIGHT_CENTER = {x: 0.5, y: 0.5};
-
-/**
- * Manages information about the device and the viewer.
- *
- * deviceParams indicates the parameters of the device to use (generally
- * obtained from dpdb.getDeviceParams()). Can be null to mean no device
- * params were found.
- */
-function DeviceInfo(deviceParams) {
-  this.viewer = Viewers.CardboardV2;
-  this.updateDeviceParams(deviceParams);
-  this.distortion = new Distortion(this.viewer.distortionCoefficients);
-}
-
-DeviceInfo.prototype.updateDeviceParams = function(deviceParams) {
-  this.device = this.determineDevice_(deviceParams) || this.device;
-};
-
-DeviceInfo.prototype.getDevice = function() {
-  return this.device;
-};
-
-DeviceInfo.prototype.setViewer = function(viewer) {
-  this.viewer = viewer;
-  this.distortion = new Distortion(this.viewer.distortionCoefficients);
-};
-
-DeviceInfo.prototype.determineDevice_ = function(deviceParams) {
-  if (!deviceParams) {
-    // No parameters, so use a default.
-    if (Util.isIOS()) {
-      console.warn('Using fallback iOS device measurements.');
-      return DEFAULT_IOS;
-    } else {
-      console.warn('Using fallback Android device measurements.');
-      return DEFAULT_ANDROID;
-    }
-  }
-
-  // Compute device screen dimensions based on deviceParams.
-  var METERS_PER_INCH = 0.0254;
-  var metersPerPixelX = METERS_PER_INCH / deviceParams.xdpi;
-  var metersPerPixelY = METERS_PER_INCH / deviceParams.ydpi;
-  var width = Util.getScreenWidth();
-  var height = Util.getScreenHeight();
-  return new Device({
-    widthMeters: metersPerPixelX * width,
-    heightMeters: metersPerPixelY * height,
-    bevelMeters: deviceParams.bevelMm * 0.001,
-  });
-};
-
-/**
- * Calculates field of view for the left eye.
- */
-DeviceInfo.prototype.getDistortedFieldOfViewLeftEye = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Device.height and device.width for device in portrait mode, so transpose.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-
-  var outerDist = (device.widthMeters - viewer.interLensDistance) / 2;
-  var innerDist = viewer.interLensDistance / 2;
-  var bottomDist = viewer.baselineLensDistance - device.bevelMeters;
-  var topDist = device.heightMeters - bottomDist;
-
-  var outerAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(outerDist / eyeToScreenDistance));
-  var innerAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(innerDist / eyeToScreenDistance));
-  var bottomAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(bottomDist / eyeToScreenDistance));
-  var topAngle = MathUtil.radToDeg * Math.atan(
-      distortion.distort(topDist / eyeToScreenDistance));
-
-  return {
-    leftDegrees: Math.min(outerAngle, viewer.fov),
-    rightDegrees: Math.min(innerAngle, viewer.fov),
-    downDegrees: Math.min(bottomAngle, viewer.fov),
-    upDegrees: Math.min(topAngle, viewer.fov)
-  };
-};
-
-/**
- * Calculates the tan-angles from the maximum FOV for the left eye for the
- * current device and screen parameters.
- */
-DeviceInfo.prototype.getLeftEyeVisibleTanAngles = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Tan-angles from the max FOV.
-  var fovLeft = Math.tan(-MathUtil.degToRad * viewer.fov);
-  var fovTop = Math.tan(MathUtil.degToRad * viewer.fov);
-  var fovRight = Math.tan(MathUtil.degToRad * viewer.fov);
-  var fovBottom = Math.tan(-MathUtil.degToRad * viewer.fov);
-  // Viewport size.
-  var halfWidth = device.widthMeters / 4;
-  var halfHeight = device.heightMeters / 2;
-  // Viewport center, measured from left lens position.
-  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
-  var centerY = -verticalLensOffset;
-  var centerZ = viewer.screenLensDistance;
-  // Tan-angles of the viewport edges, as seen through the lens.
-  var screenLeft = distortion.distort((centerX - halfWidth) / centerZ);
-  var screenTop = distortion.distort((centerY + halfHeight) / centerZ);
-  var screenRight = distortion.distort((centerX + halfWidth) / centerZ);
-  var screenBottom = distortion.distort((centerY - halfHeight) / centerZ);
-  // Compare the two sets of tan-angles and take the value closer to zero on each side.
-  var result = new Float32Array(4);
-  result[0] = Math.max(fovLeft, screenLeft);
-  result[1] = Math.min(fovTop, screenTop);
-  result[2] = Math.min(fovRight, screenRight);
-  result[3] = Math.max(fovBottom, screenBottom);
-  return result;
-};
-
-/**
- * Calculates the tan-angles from the maximum FOV for the left eye for the
- * current device and screen parameters, assuming no lenses.
- */
-DeviceInfo.prototype.getLeftEyeNoLensTanAngles = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  var result = new Float32Array(4);
-  // Tan-angles from the max FOV.
-  var fovLeft = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
-  var fovTop = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
-  var fovRight = distortion.distortInverse(Math.tan(MathUtil.degToRad * viewer.fov));
-  var fovBottom = distortion.distortInverse(Math.tan(-MathUtil.degToRad * viewer.fov));
-  // Viewport size.
-  var halfWidth = device.widthMeters / 4;
-  var halfHeight = device.heightMeters / 2;
-  // Viewport center, measured from left lens position.
-  var verticalLensOffset = (viewer.baselineLensDistance - device.bevelMeters - halfHeight);
-  var centerX = viewer.interLensDistance / 2 - halfWidth;
-  var centerY = -verticalLensOffset;
-  var centerZ = viewer.screenLensDistance;
-  // Tan-angles of the viewport edges, as seen through the lens.
-  var screenLeft = (centerX - halfWidth) / centerZ;
-  var screenTop = (centerY + halfHeight) / centerZ;
-  var screenRight = (centerX + halfWidth) / centerZ;
-  var screenBottom = (centerY - halfHeight) / centerZ;
-  // Compare the two sets of tan-angles and take the value closer to zero on each side.
-  result[0] = Math.max(fovLeft, screenLeft);
-  result[1] = Math.min(fovTop, screenTop);
-  result[2] = Math.min(fovRight, screenRight);
-  result[3] = Math.max(fovBottom, screenBottom);
-  return result;
-};
-
-/**
- * Calculates the screen rectangle visible from the left eye for the
- * current device and screen parameters.
- */
-DeviceInfo.prototype.getLeftEyeVisibleScreenRect = function(undistortedFrustum) {
-  var viewer = this.viewer;
-  var device = this.device;
-
-  var dist = viewer.screenLensDistance;
-  var eyeX = (device.widthMeters - viewer.interLensDistance) / 2;
-  var eyeY = viewer.baselineLensDistance - device.bevelMeters;
-  var left = (undistortedFrustum[0] * dist + eyeX) / device.widthMeters;
-  var top = (undistortedFrustum[1] * dist + eyeY) / device.heightMeters;
-  var right = (undistortedFrustum[2] * dist + eyeX) / device.widthMeters;
-  var bottom = (undistortedFrustum[3] * dist + eyeY) / device.heightMeters;
-  return {
-    x: left,
-    y: bottom,
-    width: right - left,
-    height: top - bottom
-  };
-};
-
-DeviceInfo.prototype.getFieldOfViewLeftEye = function(opt_isUndistorted) {
-  return opt_isUndistorted ? this.getUndistortedFieldOfViewLeftEye() :
-      this.getDistortedFieldOfViewLeftEye();
-};
-
-DeviceInfo.prototype.getFieldOfViewRightEye = function(opt_isUndistorted) {
-  var fov = this.getFieldOfViewLeftEye(opt_isUndistorted);
-  return {
-    leftDegrees: fov.rightDegrees,
-    rightDegrees: fov.leftDegrees,
-    upDegrees: fov.upDegrees,
-    downDegrees: fov.downDegrees
-  };
-};
-
-/**
- * Calculates undistorted field of view for the left eye.
- */
-DeviceInfo.prototype.getUndistortedFieldOfViewLeftEye = function() {
-  var p = this.getUndistortedParams_();
-
-  return {
-    leftDegrees: MathUtil.radToDeg * Math.atan(p.outerDist),
-    rightDegrees: MathUtil.radToDeg * Math.atan(p.innerDist),
-    downDegrees: MathUtil.radToDeg * Math.atan(p.bottomDist),
-    upDegrees: MathUtil.radToDeg * Math.atan(p.topDist)
-  };
-};
-
-DeviceInfo.prototype.getUndistortedViewportLeftEye = function() {
-  var p = this.getUndistortedParams_();
-  var viewer = this.viewer;
-  var device = this.device;
-
-  // Distances stored in local variables are in tan-angle units unless otherwise
-  // noted.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-  var screenWidth = device.widthMeters / eyeToScreenDistance;
-  var screenHeight = device.heightMeters / eyeToScreenDistance;
-  var xPxPerTanAngle = device.width / screenWidth;
-  var yPxPerTanAngle = device.height / screenHeight;
-
-  var x = Math.round((p.eyePosX - p.outerDist) * xPxPerTanAngle);
-  var y = Math.round((p.eyePosY - p.bottomDist) * yPxPerTanAngle);
-  return {
-    x: x,
-    y: y,
-    width: Math.round((p.eyePosX + p.innerDist) * xPxPerTanAngle) - x,
-    height: Math.round((p.eyePosY + p.topDist) * yPxPerTanAngle) - y
-  };
-};
-
-DeviceInfo.prototype.getUndistortedParams_ = function() {
-  var viewer = this.viewer;
-  var device = this.device;
-  var distortion = this.distortion;
-
-  // Most of these variables in tan-angle units.
-  var eyeToScreenDistance = viewer.screenLensDistance;
-  var halfLensDistance = viewer.interLensDistance / 2 / eyeToScreenDistance;
-  var screenWidth = device.widthMeters / eyeToScreenDistance;
-  var screenHeight = device.heightMeters / eyeToScreenDistance;
-
-  var eyePosX = screenWidth / 2 - halfLensDistance;
-  var eyePosY = (viewer.baselineLensDistance - device.bevelMeters) / eyeToScreenDistance;
-
-  var maxFov = viewer.fov;
-  var viewerMax = distortion.distortInverse(Math.tan(MathUtil.degToRad * maxFov));
-  var outerDist = Math.min(eyePosX, viewerMax);
-  var innerDist = Math.min(halfLensDistance, viewerMax);
-  var bottomDist = Math.min(eyePosY, viewerMax);
-  var topDist = Math.min(screenHeight - eyePosY, viewerMax);
-
-  return {
-    outerDist: outerDist,
-    innerDist: innerDist,
-    topDist: topDist,
-    bottomDist: bottomDist,
-    eyePosX: eyePosX,
-    eyePosY: eyePosY
-  };
-};
-
-
-function CardboardViewer(params) {
-  // A machine readable ID.
-  this.id = params.id;
-  // A human readable label.
-  this.label = params.label;
-
-  // Field of view in degrees (per side).
-  this.fov = params.fov;
-
-  // Distance between lens centers in meters.
-  this.interLensDistance = params.interLensDistance;
-  // Distance between viewer baseline and lens center in meters.
-  this.baselineLensDistance = params.baselineLensDistance;
-  // Screen-to-lens distance in meters.
-  this.screenLensDistance = params.screenLensDistance;
-
-  // Distortion coefficients.
-  this.distortionCoefficients = params.distortionCoefficients;
-  // Inverse distortion coefficients.
-  // TODO: Calculate these from distortionCoefficients in the future.
-  this.inverseCoefficients = params.inverseCoefficients;
-}
-
-// Export viewer information.
-DeviceInfo.Viewers = Viewers;
-module.exports = DeviceInfo;
-
-},{"./distortion/distortion.js":9,"./math-util.js":14,"./util.js":22}],8:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
-
-/**
- * Wraps a VRDisplay and exposes it as a HMDVRDevice
- */
-function VRDisplayHMDDevice(display) {
-  this.display = display;
-
-  this.hardwareUnitId = display.displayId;
-  this.deviceId = 'webvr-polyfill:HMD:' + display.displayId;
-  this.deviceName = display.displayName + ' (HMD)';
-}
-VRDisplayHMDDevice.prototype = new HMDVRDevice();
-
-VRDisplayHMDDevice.prototype.getEyeParameters = function(whichEye) {
-  var eyeParameters = this.display.getEyeParameters(whichEye);
-
-  return {
-    currentFieldOfView: eyeParameters.fieldOfView,
-    maximumFieldOfView: eyeParameters.fieldOfView,
-    minimumFieldOfView: eyeParameters.fieldOfView,
-    recommendedFieldOfView: eyeParameters.fieldOfView,
-    eyeTranslation: { x: eyeParameters.offset[0], y: eyeParameters.offset[1], z: eyeParameters.offset[2] },
-    renderRect: {
-      x: (whichEye == 'right') ? eyeParameters.renderWidth : 0,
-      y: 0,
-      width: eyeParameters.renderWidth,
-      height: eyeParameters.renderHeight
-    }
-  };
-};
-
-VRDisplayHMDDevice.prototype.setFieldOfView =
-    function(opt_fovLeft, opt_fovRight, opt_zNear, opt_zFar) {
-  // Not supported. getEyeParameters reports that the min, max, and recommended
-  // FoV is all the same, so no adjustment can be made.
-};
-
-// TODO: Need to hook requestFullscreen to see if a wrapped VRDisplay was passed
-// in as an option. If so we should prevent the default fullscreen behavior and
-// call VRDisplay.requestPresent instead.
-
-/**
- * Wraps a VRDisplay and exposes it as a PositionSensorVRDevice
- */
-function VRDisplayPositionSensorDevice(display) {
-  this.display = display;
-
-  this.hardwareUnitId = display.displayId;
-  this.deviceId = 'webvr-polyfill:PositionSensor: ' + display.displayId;
-  this.deviceName = display.displayName + ' (PositionSensor)';
-}
-VRDisplayPositionSensorDevice.prototype = new PositionSensorVRDevice();
-
-VRDisplayPositionSensorDevice.prototype.getState = function() {
-  var pose = this.display.getPose();
-  return {
-    position: pose.position ? { x: pose.position[0], y: pose.position[1], z: pose.position[2] } : null,
-    orientation: pose.orientation ? { x: pose.orientation[0], y: pose.orientation[1], z: pose.orientation[2], w: pose.orientation[3] } : null,
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-};
-
-VRDisplayPositionSensorDevice.prototype.resetState = function() {
-  return this.positionDevice.resetPose();
-};
-
-
-module.exports.VRDisplayHMDDevice = VRDisplayHMDDevice;
-module.exports.VRDisplayPositionSensorDevice = VRDisplayPositionSensorDevice;
-
-
-},{"./base.js":2}],9:[function(_dereq_,module,exports){
-/**
- * TODO(smus): Implement coefficient inversion.
- */
-function Distortion(coefficients) {
-  this.coefficients = coefficients;
-}
-
-/**
- * Calculates the inverse distortion for a radius.
- * </p><p>
- * Allows to compute the original undistorted radius from a distorted one.
- * See also getApproximateInverseDistortion() for a faster but potentially
- * less accurate method.
- *
- * @param {Number} radius Distorted radius from the lens center in tan-angle units.
- * @return {Number} The undistorted radius in tan-angle units.
- */
-Distortion.prototype.distortInverse = function(radius) {
-  // Secant method.
-  var r0 = 0;
-  var r1 = 1;
-  var dr0 = radius - this.distort(r0);
-  while (Math.abs(r1 - r0) > 0.0001 /** 0.1mm */) {
-    var dr1 = radius - this.distort(r1);
-    var r2 = r1 - dr1 * ((r1 - r0) / (dr1 - dr0));
-    r0 = r1;
-    r1 = r2;
-    dr0 = dr1;
-  }
-  return r1;
-};
-
-/**
- * Distorts a radius by its distortion factor from the center of the lenses.
- *
- * @param {Number} radius Radius from the lens center in tan-angle units.
- * @return {Number} The distorted radius in tan-angle units.
- */
-Distortion.prototype.distort = function(radius) {
-  var r2 = radius * radius;
-  var ret = 0;
-  for (var i = 0; i < this.coefficients.length; i++) {
-    ret = r2 * (ret + this.coefficients[i]);
-  }
-  return (ret + 1) * radius;
-};
-
-// Functions below roughly ported from
-// https://github.com/googlesamples/cardboard-unity/blob/master/Cardboard/Scripts/CardboardProfile.cs#L412
-
-// Solves a small linear equation via destructive gaussian
-// elimination and back substitution.  This isn't generic numeric
-// code, it's just a quick hack to work with the generally
-// well-behaved symmetric matrices for least-squares fitting.
-// Not intended for reuse.
-//
-// @param a Input positive definite symmetrical matrix. Destroyed
-//     during calculation.
-// @param y Input right-hand-side values. Destroyed during calculation.
-// @return Resulting x value vector.
-//
-Distortion.prototype.solveLinear_ = function(a, y) {
-  var n = a.length;
-
-  // Gaussian elimination (no row exchange) to triangular matrix.
-  // The input matrix is a A^T A product which should be a positive
-  // definite symmetrical matrix, and if I remember my linear
-  // algebra right this implies that the pivots will be nonzero and
-  // calculations sufficiently accurate without needing row
-  // exchange.
-  for (var j = 0; j < n - 1; ++j) {
-    for (var k = j + 1; k < n; ++k) {
-      var p = a[j][k] / a[j][j];
-      for (var i = j + 1; i < n; ++i) {
-        a[i][k] -= p * a[i][j];
-      }
-      y[k] -= p * y[j];
-    }
-  }
-  // From this point on, only the matrix elements a[j][i] with i>=j are
-  // valid. The elimination doesn't fill in eliminated 0 values.
-
-  var x = new Array(n);
-
-  // Back substitution.
-  for (var j = n - 1; j >= 0; --j) {
-    var v = y[j];
-    for (var i = j + 1; i < n; ++i) {
-      v -= a[i][j] * x[i];
-    }
-    x[j] = v / a[j][j];
-  }
-
-  return x;
-};
-
-// Solves a least-squares matrix equation.  Given the equation A * x = y, calculate the
-// least-square fit x = inverse(A * transpose(A)) * transpose(A) * y.  The way this works
-// is that, while A is typically not a square matrix (and hence not invertible), A * transpose(A)
-// is always square.  That is:
-//   A * x = y
-//   transpose(A) * (A * x) = transpose(A) * y   <- multiply both sides by transpose(A)
-//   (transpose(A) * A) * x = transpose(A) * y   <- associativity
-//   x = inverse(transpose(A) * A) * transpose(A) * y  <- solve for x
-// Matrix A's row count (first index) must match y's value count.  A's column count (second index)
-// determines the length of the result vector x.
-Distortion.prototype.solveLeastSquares_ = function(matA, vecY) {
-  var i, j, k, sum;
-  var numSamples = matA.length;
-  var numCoefficients = matA[0].length;
-  if (numSamples != vecY.Length) {
-    throw new Error("Matrix / vector dimension mismatch");
-  }
-
-  // Calculate transpose(A) * A
-  var matATA = new Array(numCoefficients);
-  for (k = 0; k < numCoefficients; ++k) {
-    matATA[k] = new Array(numCoefficients);
-    for (j = 0; j < numCoefficients; ++j) {
-      sum = 0;
-      for (i = 0; i < numSamples; ++i) {
-        sum += matA[j][i] * matA[k][i];
-      }
-      matATA[k][j] = sum;
-    }
-  }
-
-  // Calculate transpose(A) * y
-  var vecATY = new Array(numCoefficients);
-  for (j = 0; j < numCoefficients; ++j) {
-    sum = 0;
-    for (i = 0; i < numSamples; ++i) {
-      sum += matA[j][i] * vecY[i];
-    }
-    vecATY[j] = sum;
-  }
-
-  // Now solve (A * transpose(A)) * x = transpose(A) * y.
-  return this.solveLinear_(matATA, vecATY);
-};
-
-/// Calculates an approximate inverse to the given radial distortion parameters.
-Distortion.prototype.approximateInverse = function(maxRadius, numSamples) {
-  maxRadius = maxRadius || 1;
-  numSamples = numSamples || 100;
-  var numCoefficients = 6;
-  var i, j;
-
-  // R + K1*R^3 + K2*R^5 = r, with R = rp = distort(r)
-  // Repeating for numSamples:
-  //   [ R0^3, R0^5 ] * [ K1 ] = [ r0 - R0 ]
-  //   [ R1^3, R1^5 ]   [ K2 ]   [ r1 - R1 ]
-  //   [ R2^3, R2^5 ]            [ r2 - R2 ]
-  //   [ etc... ]                [ etc... ]
-  // That is:
-  //   matA * [K1, K2] = y
-  // Solve:
-  //   [K1, K2] = inverse(transpose(matA) * matA) * transpose(matA) * y
-  var matA = new Array(numCoefficients);
-  for (j = 0; j < numCoefficients; ++j) {
-    matA[j] = new Array(numSamples);
-  }
-  var vecY = new Array(numSamples);
-
-  for (i = 0; i < numSamples; ++i) {
-    var r = maxRadius * (i + 1) / numSamples;
-    var rp = this.distort(r);
-    var v = rp;
-    for (j = 0; j < numCoefficients; ++j) {
-      v *= rp * rp;
-      matA[j][i] = v;
-    }
-    vecY[i] = r - rp;
-  }
-
-  var inverseCoefficients = this.solveLeastSquares_(matA, vecY);
-
-  return new Distortion(inverseCoefficients);
-};
-
-module.exports = Distortion;
-
-},{}],10:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * DPDB cache.
- */
-var DPDB_CACHE = {
-  "format": 1,
-  "last_updated": "2016-01-20T00:18:35Z",
-  "devices": [
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "asus/*/Nexus 7/*" },
-      { "ua": "Nexus 7" }
-    ],
-    "dpi": [ 320.8, 323.0 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "asus/*/ASUS_Z00AD/*" },
-      { "ua": "ASUS_Z00AD" }
-    ],
-    "dpi": [ 403.0, 404.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC6435LVW/*" },
-      { "ua": "HTC6435LVW" }
-    ],
-    "dpi": [ 449.7, 443.3 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One XL/*" },
-      { "ua": "HTC One XL" }
-    ],
-    "dpi": [ 315.3, 314.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "htc/*/Nexus 9/*" },
-      { "ua": "Nexus 9" }
-    ],
-    "dpi": 289.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One M9/*" },
-      { "ua": "HTC One M9" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One_M8/*" },
-      { "ua": "HTC One_M8" }
-    ],
-    "dpi": [ 449.7, 447.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "HTC/*/HTC One/*" },
-      { "ua": "HTC One" }
-    ],
-    "dpi": 472.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Huawei/*/Nexus 6P/*" },
-      { "ua": "Nexus 6P" }
-    ],
-    "dpi": [ 515.1, 518.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 5X/*" },
-      { "ua": "Nexus 5X" }
-    ],
-    "dpi": [ 422.0, 419.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGMS345/*" },
-      { "ua": "LGMS345" }
-    ],
-    "dpi": [ 221.7, 219.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-D800/*" },
-      { "ua": "LG-D800" }
-    ],
-    "dpi": [ 422.0, 424.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-D850/*" },
-      { "ua": "LG-D850" }
-    ],
-    "dpi": [ 537.9, 541.9 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/VS985 4G/*" },
-      { "ua": "VS985 4G" }
-    ],
-    "dpi": [ 537.9, 535.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 5/*" },
-      { "ua": "Nexus 5 " }
-    ],
-    "dpi": [ 442.4, 444.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/Nexus 4/*" },
-      { "ua": "Nexus 4" }
-    ],
-    "dpi": [ 319.8, 318.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LG-P769/*" },
-      { "ua": "LG-P769" }
-    ],
-    "dpi": [ 240.6, 247.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGMS323/*" },
-      { "ua": "LGMS323" }
-    ],
-    "dpi": [ 206.6, 204.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "LGE/*/LGLS996/*" },
-      { "ua": "LGLS996" }
-    ],
-    "dpi": [ 403.4, 401.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/4560MMX/*" },
-      { "ua": "4560MMX" }
-    ],
-    "dpi": [ 240.0, 219.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/A250/*" },
-      { "ua": "Micromax A250" }
-    ],
-    "dpi": [ 480.0, 446.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Micromax/*/Micromax AQ4501/*" },
-      { "ua": "Micromax AQ4501" }
-    ],
-    "dpi": 240.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/DROID RAZR/*" },
-      { "ua": "DROID RAZR" }
-    ],
-    "dpi": [ 368.1, 256.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT830C/*" },
-      { "ua": "XT830C" }
-    ],
-    "dpi": [ 254.0, 255.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1021/*" },
-      { "ua": "XT1021" }
-    ],
-    "dpi": [ 254.0, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1023/*" },
-      { "ua": "XT1023" }
-    ],
-    "dpi": [ 254.0, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1028/*" },
-      { "ua": "XT1028" }
-    ],
-    "dpi": [ 326.6, 327.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1034/*" },
-      { "ua": "XT1034" }
-    ],
-    "dpi": [ 326.6, 328.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1053/*" },
-      { "ua": "XT1053" }
-    ],
-    "dpi": [ 315.3, 316.1 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1562/*" },
-      { "ua": "XT1562" }
-    ],
-    "dpi": [ 403.4, 402.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/Nexus 6/*" },
-      { "ua": "Nexus 6 " }
-    ],
-    "dpi": [ 494.3, 489.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1063/*" },
-      { "ua": "XT1063" }
-    ],
-    "dpi": [ 295.0, 296.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1064/*" },
-      { "ua": "XT1064" }
-    ],
-    "dpi": [ 295.0, 295.6 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1092/*" },
-      { "ua": "XT1092" }
-    ],
-    "dpi": [ 422.0, 424.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "motorola/*/XT1095/*" },
-      { "ua": "XT1095" }
-    ],
-    "dpi": [ 422.0, 423.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/A0001/*" },
-      { "ua": "A0001" }
-    ],
-    "dpi": [ 403.4, 401.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/ONE E1005/*" },
-      { "ua": "ONE E1005" }
-    ],
-    "dpi": [ 442.4, 441.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OnePlus/*/ONE A2005/*" },
-      { "ua": "ONE A2005" }
-    ],
-    "dpi": [ 391.9, 405.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "OPPO/*/X909/*" },
-      { "ua": "X909" }
-    ],
-    "dpi": [ 442.4, 444.1 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9082/*" },
-      { "ua": "GT-I9082" }
-    ],
-    "dpi": [ 184.7, 185.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G360P/*" },
-      { "ua": "SM-G360P" }
-    ],
-    "dpi": [ 196.7, 205.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/Nexus S/*" },
-      { "ua": "Nexus S" }
-    ],
-    "dpi": [ 234.5, 229.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300/*" },
-      { "ua": "GT-I9300" }
-    ],
-    "dpi": [ 304.8, 303.9 ],
-    "bw": 5,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-T230NU/*" },
-      { "ua": "SM-T230NU" }
-    ],
-    "dpi": 216.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SGH-T399/*" },
-      { "ua": "SGH-T399" }
-    ],
-    "dpi": [ 217.7, 231.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N9005/*" },
-      { "ua": "SM-N9005" }
-    ],
-    "dpi": [ 386.4, 387.0 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SAMSUNG-SM-N900A/*" },
-      { "ua": "SAMSUNG-SM-N900A" }
-    ],
-    "dpi": [ 386.4, 387.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9500/*" },
-      { "ua": "GT-I9500" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9505/*" },
-      { "ua": "GT-I9505" }
-    ],
-    "dpi": 439.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G900F/*" },
-      { "ua": "SM-G900F" }
-    ],
-    "dpi": [ 415.6, 431.6 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G900M/*" },
-      { "ua": "SM-G900M" }
-    ],
-    "dpi": [ 415.6, 431.6 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G800F/*" },
-      { "ua": "SM-G800F" }
-    ],
-    "dpi": 326.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G906S/*" },
-      { "ua": "SM-G906S" }
-    ],
-    "dpi": [ 562.7, 572.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300/*" },
-      { "ua": "GT-I9300" }
-    ],
-    "dpi": [ 306.7, 304.8 ],
-    "bw": 5,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-T535/*" },
-      { "ua": "SM-T535" }
-    ],
-    "dpi": [ 142.6, 136.4 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N920C/*" },
-      { "ua": "SM-N920C" }
-    ],
-    "dpi": [ 515.1, 518.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9300I/*" },
-      { "ua": "GT-I9300I" }
-    ],
-    "dpi": [ 304.8, 305.8 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-I9195/*" },
-      { "ua": "GT-I9195" }
-    ],
-    "dpi": [ 249.4, 256.7 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SPH-L520/*" },
-      { "ua": "SPH-L520" }
-    ],
-    "dpi": [ 249.4, 255.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SAMSUNG-SGH-I717/*" },
-      { "ua": "SAMSUNG-SGH-I717" }
-    ],
-    "dpi": 285.8,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SPH-D710/*" },
-      { "ua": "SPH-D710" }
-    ],
-    "dpi": [ 217.7, 204.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/GT-N7100/*" },
-      { "ua": "GT-N7100" }
-    ],
-    "dpi": 265.1,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SCH-I605/*" },
-      { "ua": "SCH-I605" }
-    ],
-    "dpi": 265.1,
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/Galaxy Nexus/*" },
-      { "ua": "Galaxy Nexus" }
-    ],
-    "dpi": [ 315.3, 314.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N910H/*" },
-      { "ua": "SM-N910H" }
-    ],
-    "dpi": [ 515.1, 518.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-N910C/*" },
-      { "ua": "SM-N910C" }
-    ],
-    "dpi": [ 515.2, 520.2 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G130M/*" },
-      { "ua": "SM-G130M" }
-    ],
-    "dpi": [ 165.9, 164.8 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G928I/*" },
-      { "ua": "SM-G928I" }
-    ],
-    "dpi": [ 515.1, 518.4 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G920F/*" },
-      { "ua": "SM-G920F" }
-    ],
-    "dpi": 580.6,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G920P/*" },
-      { "ua": "SM-G920P" }
-    ],
-    "dpi": [ 522.5, 577.0 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G925F/*" },
-      { "ua": "SM-G925F" }
-    ],
-    "dpi": 580.6,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "samsung/*/SM-G925V/*" },
-      { "ua": "SM-G925V" }
-    ],
-    "dpi": [ 522.5, 576.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/C6903/*" },
-      { "ua": "C6903" }
-    ],
-    "dpi": [ 442.5, 443.3 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/D6653/*" },
-      { "ua": "D6653" }
-    ],
-    "dpi": [ 428.6, 427.6 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/E6653/*" },
-      { "ua": "E6653" }
-    ],
-    "dpi": [ 428.6, 425.7 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/E6853/*" },
-      { "ua": "E6853" }
-    ],
-    "dpi": [ 403.4, 401.9 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "Sony/*/SGP321/*" },
-      { "ua": "SGP321" }
-    ],
-    "dpi": [ 224.7, 224.1 ],
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "TCT/*/ALCATEL ONE TOUCH Fierce/*" },
-      { "ua": "ALCATEL ONE TOUCH Fierce" }
-    ],
-    "dpi": [ 240.0, 247.5 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "THL/*/thl 5000/*" },
-      { "ua": "thl 5000" }
-    ],
-    "dpi": [ 480.0, 443.3 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "android",
-    "rules": [
-      { "mdmh": "ZTE/*/ZTE Blade L2/*" },
-      { "ua": "ZTE Blade L2" }
-    ],
-    "dpi": 240.0,
-    "bw": 3,
-    "ac": 500
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 960 ] } ],
-    "dpi": [ 325.1, 328.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 960 ] } ],
-    "dpi": [ 325.1, 328.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 1136 ] } ],
-    "dpi": [ 317.1, 320.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 640, 1136 ] } ],
-    "dpi": [ 317.1, 320.2 ],
-    "bw": 3,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 750, 1334 ] } ],
-    "dpi": 326.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 750, 1334 ] } ],
-    "dpi": 326.4,
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 1242, 2208 ] } ],
-    "dpi": [ 453.6, 458.4 ],
-    "bw": 4,
-    "ac": 1000
-  },
-
-  {
-    "type": "ios",
-    "rules": [ { "res": [ 1242, 2208 ] } ],
-    "dpi": [ 453.6, 458.4 ],
-    "bw": 4,
-    "ac": 1000
-  }
-]};
-
-module.exports = DPDB_CACHE;
-
-},{}],11:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-// Offline cache of the DPDB, to be used until we load the online one (and
-// as a fallback in case we can't load the online one).
-var DPDB_CACHE = _dereq_('./dpdb-cache.js');
-var Util = _dereq_('../util.js');
-
-// Online DPDB URL.
-var ONLINE_DPDB_URL = 'https://storage.googleapis.com/cardboard-dpdb/dpdb.json';
-
-/**
- * Calculates device parameters based on the DPDB (Device Parameter Database).
- * Initially, uses the cached DPDB values.
- *
- * If fetchOnline == true, then this object tries to fetch the online version
- * of the DPDB and updates the device info if a better match is found.
- * Calls the onDeviceParamsUpdated callback when there is an update to the
- * device information.
- */
-function Dpdb(fetchOnline, onDeviceParamsUpdated) {
-  // Start with the offline DPDB cache while we are loading the real one.
-  this.dpdb = DPDB_CACHE;
-
-  // Calculate device params based on the offline version of the DPDB.
-  this.recalculateDeviceParams_();
-
-  // XHR to fetch online DPDB file, if requested.
-  if (fetchOnline) {
-    // Set the callback.
-    this.onDeviceParamsUpdated = onDeviceParamsUpdated;
-
-    console.log('Fetching DPDB...');
-    var xhr = new XMLHttpRequest();
-    var obj = this;
-    xhr.open('GET', ONLINE_DPDB_URL, true);
-    xhr.addEventListener('load', function() {
-      obj.loading = false;
-      if (xhr.status >= 200 && xhr.status <= 299) {
-        // Success.
-        console.log('Successfully loaded online DPDB.');
-        obj.dpdb = JSON.parse(xhr.response);
-        obj.recalculateDeviceParams_();
-      } else {
-        // Error loading the DPDB.
-        console.error('Error loading online DPDB!');
-      }
-    });
-    xhr.send();
-  }
-}
-
-// Returns the current device parameters.
-Dpdb.prototype.getDeviceParams = function() {
-  return this.deviceParams;
-};
-
-// Recalculates this device's parameters based on the DPDB.
-Dpdb.prototype.recalculateDeviceParams_ = function() {
-  console.log('Recalculating device params.');
-  var newDeviceParams = this.calcDeviceParams_();
-  console.log('New device parameters:');
-  console.log(newDeviceParams);
-  if (newDeviceParams) {
-    this.deviceParams = newDeviceParams;
-    // Invoke callback, if it is set.
-    if (this.onDeviceParamsUpdated) {
-      this.onDeviceParamsUpdated(this.deviceParams);
-    }
-  } else {
-    console.error('Failed to recalculate device parameters.');
-  }
-};
-
-// Returns a DeviceParams object that represents the best guess as to this
-// device's parameters. Can return null if the device does not match any
-// known devices.
-Dpdb.prototype.calcDeviceParams_ = function() {
-  var db = this.dpdb; // shorthand
-  if (!db) {
-    console.error('DPDB not available.');
-    return null;
-  }
-  if (db.format != 1) {
-    console.error('DPDB has unexpected format version.');
-    return null;
-  }
-  if (!db.devices || !db.devices.length) {
-    console.error('DPDB does not have a devices section.');
-    return null;
-  }
-
-  // Get the actual user agent and screen dimensions in pixels.
-  var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  var width = Util.getScreenWidth();
-  var height = Util.getScreenHeight();
-  console.log('User agent: ' + userAgent);
-  console.log('Pixel width: ' + width);
-  console.log('Pixel height: ' + height);
-
-  if (!db.devices) {
-    console.error('DPDB has no devices section.');
-    return null;
-  }
-
-  for (var i = 0; i < db.devices.length; i++) {
-    var device = db.devices[i];
-    if (!device.rules) {
-      console.warn('Device[' + i + '] has no rules section.');
-      continue;
-    }
-
-    if (device.type != 'ios' && device.type != 'android') {
-      console.warn('Device[' + i + '] has invalid type.');
-      continue;
-    }
-
-    // See if this device is of the appropriate type.
-    if (Util.isIOS() != (device.type == 'ios')) continue;
-
-    // See if this device matches any of the rules:
-    var matched = false;
-    for (var j = 0; j < device.rules.length; j++) {
-      var rule = device.rules[j];
-      if (this.matchRule_(rule, userAgent, width, height)) {
-        console.log('Rule matched:');
-        console.log(rule);
-        matched = true;
-        break;
-      }
-    }
-    if (!matched) continue;
-
-    // device.dpi might be an array of [ xdpi, ydpi] or just a scalar.
-    var xdpi = device.dpi[0] || device.dpi;
-    var ydpi = device.dpi[1] || device.dpi;
-
-    return new DeviceParams({ xdpi: xdpi, ydpi: ydpi, bevelMm: device.bw });
-  }
-
-  console.warn('No DPDB device match.');
-  return null;
-};
-
-Dpdb.prototype.matchRule_ = function(rule, ua, screenWidth, screenHeight) {
-  // We can only match 'ua' and 'res' rules, not other types like 'mdmh'
-  // (which are meant for native platforms).
-  if (!rule.ua && !rule.res) return false;
-
-  // If our user agent string doesn't contain the indicated user agent string,
-  // the match fails.
-  if (rule.ua && ua.indexOf(rule.ua) < 0) return false;
-
-  // If the rule specifies screen dimensions that don't correspond to ours,
-  // the match fails.
-  if (rule.res) {
-    if (!rule.res[0] || !rule.res[1]) return false;
-    var resX = rule.res[0];
-    var resY = rule.res[1];
-    // Compare min and max so as to make the order not matter, i.e., it should
-    // be true that 640x480 == 480x640.
-    if (Math.min(screenWidth, screenHeight) != Math.min(resX, resY) ||
-        (Math.max(screenWidth, screenHeight) != Math.max(resX, resY))) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function DeviceParams(params) {
-  this.xdpi = params.xdpi;
-  this.ydpi = params.ydpi;
-  this.bevelMm = params.bevelMm;
-}
-
-module.exports = Dpdb;
-},{"../util.js":22,"./dpdb-cache.js":10}],12:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-function Emitter() {
-  this.callbacks = {};
-}
-
-Emitter.prototype.emit = function(eventName) {
-  var callbacks = this.callbacks[eventName];
-  if (!callbacks) {
-    //console.log('No valid callback specified.');
-    return;
-  }
-  var args = [].slice.call(arguments);
-  // Eliminate the first param (the callback).
-  args.shift();
-  for (var i = 0; i < callbacks.length; i++) {
-    callbacks[i].apply(this, args);
-  }
-};
-
-Emitter.prototype.on = function(eventName, callback) {
-  if (eventName in this.callbacks) {
-    this.callbacks[eventName].push(callback);
-  } else {
-    this.callbacks[eventName] = [callback];
-  }
-};
-
-module.exports = Emitter;
-
-},{}],13:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var Util = _dereq_('./util.js');
-var WebVRPolyfill = _dereq_('./webvr-polyfill.js');
-
-// Initialize a WebVRConfig just in case.
-window.WebVRConfig = Util.extend({
-  // Forces availability of VR mode, even for non-mobile devices.
-  FORCE_ENABLE_VR: false,
-
-  // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
-  K_FILTER: 0.98,
-
-  // How far into the future to predict during fast motion (in seconds).
-  PREDICTION_TIME_S: 0.040,
-
-  // Flag to disable touch panner. In case you have your own touch controls.
-  TOUCH_PANNER_DISABLED: false,
-
-  // Flag to disabled the UI in VR Mode.
-  CARDBOARD_UI_DISABLED: false, // Default: false
-
-  // Flag to disable the instructions to rotate your device.
-  ROTATE_INSTRUCTIONS_DISABLED: false, // Default: false.
-
-  // Enable yaw panning only, disabling roll and pitch. This can be useful
-  // for panoramas with nothing interesting above or below.
-  YAW_ONLY: false,
-
-  // To disable keyboard and mouse controls, if you want to use your own
-  // implementation.
-  MOUSE_KEYBOARD_CONTROLS_DISABLED: false,
-
-  // Prevent the polyfill from initializing immediately. Requires the app
-  // to call InitializeWebVRPolyfill() before it can be used.
-  DEFER_INITIALIZATION: false,
-
-  // Enable the deprecated version of the API (navigator.getVRDevices).
-  ENABLE_DEPRECATED_API: false,
-
-  // Scales the recommended buffer size reported by WebVR, which can improve
-  // performance.
-  // UPDATE(2016-05-03): Setting this to 0.5 by default since 1.0 does not
-  // perform well on many mobile devices.
-  BUFFER_SCALE: 0.5,
-
-  // Allow VRDisplay.submitFrame to change gl bindings, which is more
-  // efficient if the application code will re-bind its resources on the
-  // next frame anyway. This has been seen to cause rendering glitches with
-  // THREE.js.
-  // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
-  // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
-  // and gl.TEXTURE_BINDING_2D for texture unit 0.
-  DIRTY_SUBMIT_FRAME_BINDINGS: false
-}, window.WebVRConfig);
-
-if (!window.WebVRConfig.DEFER_INITIALIZATION) {
-  new WebVRPolyfill();
-} else {
-  window.InitializeWebVRPolyfill = function() {
-    new WebVRPolyfill();
-  }
-}
-
-},{"./util.js":22,"./webvr-polyfill.js":25}],14:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var MathUtil = window.MathUtil || {};
-
-MathUtil.degToRad = Math.PI / 180;
-MathUtil.radToDeg = 180 / Math.PI;
-
-// Some minimal math functionality borrowed from THREE.Math and stripped down
-// for the purposes of this library.
-
-
-MathUtil.Vector2 = function ( x, y ) {
-  this.x = x || 0;
-  this.y = y || 0;
-};
-
-MathUtil.Vector2.prototype = {
-  constructor: MathUtil.Vector2,
-
-  set: function ( x, y ) {
-    this.x = x;
-    this.y = y;
-
-    return this;
-  },
-
-  copy: function ( v ) {
-    this.x = v.x;
-    this.y = v.y;
-
-    return this;
-  },
-
-  subVectors: function ( a, b ) {
-    this.x = a.x - b.x;
-    this.y = a.y - b.y;
-
-    return this;
-  },
-};
-
-MathUtil.Vector3 = function ( x, y, z ) {
-  this.x = x || 0;
-  this.y = y || 0;
-  this.z = z || 0;
-};
-
-MathUtil.Vector3.prototype = {
-  constructor: MathUtil.Vector3,
-
-  set: function ( x, y, z ) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-
-    return this;
-  },
-
-  copy: function ( v ) {
-    this.x = v.x;
-    this.y = v.y;
-    this.z = v.z;
-
-    return this;
-  },
-
-  length: function () {
-    return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
-  },
-
-  normalize: function () {
-    var scalar = this.length();
-
-    if ( scalar !== 0 ) {
-      var invScalar = 1 / scalar;
-
-      this.multiplyScalar(invScalar);
-    } else {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
-    }
-
-    return this;
-  },
-
-  multiplyScalar: function ( scalar ) {
-    this.x *= scalar;
-    this.y *= scalar;
-    this.z *= scalar;
-  },
-
-  applyQuaternion: function ( q ) {
-    var x = this.x;
-    var y = this.y;
-    var z = this.z;
-
-    var qx = q.x;
-    var qy = q.y;
-    var qz = q.z;
-    var qw = q.w;
-
-    // calculate quat * vector
-    var ix =  qw * x + qy * z - qz * y;
-    var iy =  qw * y + qz * x - qx * z;
-    var iz =  qw * z + qx * y - qy * x;
-    var iw = - qx * x - qy * y - qz * z;
-
-    // calculate result * inverse quat
-    this.x = ix * qw + iw * - qx + iy * - qz - iz * - qy;
-    this.y = iy * qw + iw * - qy + iz * - qx - ix * - qz;
-    this.z = iz * qw + iw * - qz + ix * - qy - iy * - qx;
-
-    return this;
-  },
-
-  dot: function ( v ) {
-    return this.x * v.x + this.y * v.y + this.z * v.z;
-  },
-
-  crossVectors: function ( a, b ) {
-    var ax = a.x, ay = a.y, az = a.z;
-    var bx = b.x, by = b.y, bz = b.z;
-
-    this.x = ay * bz - az * by;
-    this.y = az * bx - ax * bz;
-    this.z = ax * by - ay * bx;
-
-    return this;
-  },
-};
-
-MathUtil.Quaternion = function ( x, y, z, w ) {
-  this.x = x || 0;
-  this.y = y || 0;
-  this.z = z || 0;
-  this.w = ( w !== undefined ) ? w : 1;
-};
-
-MathUtil.Quaternion.prototype = {
-  constructor: MathUtil.Quaternion,
-
-  set: function ( x, y, z, w ) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.w = w;
-
-    return this;
-  },
-
-  copy: function ( quaternion ) {
-    this.x = quaternion.x;
-    this.y = quaternion.y;
-    this.z = quaternion.z;
-    this.w = quaternion.w;
-
-    return this;
-  },
-
-  setFromEulerXYZ: function( x, y, z ) {
-    var c1 = Math.cos( x / 2 );
-    var c2 = Math.cos( y / 2 );
-    var c3 = Math.cos( z / 2 );
-    var s1 = Math.sin( x / 2 );
-    var s2 = Math.sin( y / 2 );
-    var s3 = Math.sin( z / 2 );
-
-    this.x = s1 * c2 * c3 + c1 * s2 * s3;
-    this.y = c1 * s2 * c3 - s1 * c2 * s3;
-    this.z = c1 * c2 * s3 + s1 * s2 * c3;
-    this.w = c1 * c2 * c3 - s1 * s2 * s3;
-
-    return this;
-  },
-
-  setFromEulerYXZ: function( x, y, z ) {
-    var c1 = Math.cos( x / 2 );
-    var c2 = Math.cos( y / 2 );
-    var c3 = Math.cos( z / 2 );
-    var s1 = Math.sin( x / 2 );
-    var s2 = Math.sin( y / 2 );
-    var s3 = Math.sin( z / 2 );
-
-    this.x = s1 * c2 * c3 + c1 * s2 * s3;
-    this.y = c1 * s2 * c3 - s1 * c2 * s3;
-    this.z = c1 * c2 * s3 - s1 * s2 * c3;
-    this.w = c1 * c2 * c3 + s1 * s2 * s3;
-
-    return this;
-  },
-
-  setFromAxisAngle: function ( axis, angle ) {
-    // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
-    // assumes axis is normalized
-
-    var halfAngle = angle / 2, s = Math.sin( halfAngle );
-
-    this.x = axis.x * s;
-    this.y = axis.y * s;
-    this.z = axis.z * s;
-    this.w = Math.cos( halfAngle );
-
-    return this;
-  },
-
-  multiply: function ( q ) {
-    return this.multiplyQuaternions( this, q );
-  },
-
-  multiplyQuaternions: function ( a, b ) {
-    // from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
-
-    var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
-    var qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
-
-    this.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
-    this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
-    this.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
-    this.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
-
-    return this;
-  },
-
-  inverse: function () {
-    this.x *= -1;
-    this.y *= -1;
-    this.z *= -1;
-
-    this.normalize();
-
-    return this;
-  },
-
-  normalize: function () {
-    var l = Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
-
-    if ( l === 0 ) {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
-      this.w = 1;
-    } else {
-      l = 1 / l;
-
-      this.x = this.x * l;
-      this.y = this.y * l;
-      this.z = this.z * l;
-      this.w = this.w * l;
-    }
-
-    return this;
-  },
-
-  slerp: function ( qb, t ) {
-    if ( t === 0 ) return this;
-    if ( t === 1 ) return this.copy( qb );
-
-    var x = this.x, y = this.y, z = this.z, w = this.w;
-
-    // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
-
-    var cosHalfTheta = w * qb.w + x * qb.x + y * qb.y + z * qb.z;
-
-    if ( cosHalfTheta < 0 ) {
-      this.w = - qb.w;
-      this.x = - qb.x;
-      this.y = - qb.y;
-      this.z = - qb.z;
-
-      cosHalfTheta = - cosHalfTheta;
-    } else {
-      this.copy( qb );
-    }
-
-    if ( cosHalfTheta >= 1.0 ) {
-      this.w = w;
-      this.x = x;
-      this.y = y;
-      this.z = z;
-
-      return this;
-    }
-
-    var halfTheta = Math.acos( cosHalfTheta );
-    var sinHalfTheta = Math.sqrt( 1.0 - cosHalfTheta * cosHalfTheta );
-
-    if ( Math.abs( sinHalfTheta ) < 0.001 ) {
-      this.w = 0.5 * ( w + this.w );
-      this.x = 0.5 * ( x + this.x );
-      this.y = 0.5 * ( y + this.y );
-      this.z = 0.5 * ( z + this.z );
-
-      return this;
-    }
-
-    var ratioA = Math.sin( ( 1 - t ) * halfTheta ) / sinHalfTheta,
-    ratioB = Math.sin( t * halfTheta ) / sinHalfTheta;
-
-    this.w = ( w * ratioA + this.w * ratioB );
-    this.x = ( x * ratioA + this.x * ratioB );
-    this.y = ( y * ratioA + this.y * ratioB );
-    this.z = ( z * ratioA + this.z * ratioB );
-
-    return this;
-  },
-
-  setFromUnitVectors: function () {
-    // http://lolengine.net/blog/2014/02/24/quaternion-from-two-vectors-final
-    // assumes direction vectors vFrom and vTo are normalized
-
-    var v1, r;
-    var EPS = 0.000001;
-
-    return function ( vFrom, vTo ) {
-      if ( v1 === undefined ) v1 = new MathUtil.Vector3();
-
-      r = vFrom.dot( vTo ) + 1;
-
-      if ( r < EPS ) {
-        r = 0;
-
-        if ( Math.abs( vFrom.x ) > Math.abs( vFrom.z ) ) {
-          v1.set( - vFrom.y, vFrom.x, 0 );
-        } else {
-          v1.set( 0, - vFrom.z, vFrom.y );
-        }
-      } else {
-        v1.crossVectors( vFrom, vTo );
-      }
-
-      this.x = v1.x;
-      this.y = v1.y;
-      this.z = v1.z;
-      this.w = r;
-
-      this.normalize();
-
-      return this;
-    }
-  }(),
-};
-
-module.exports = MathUtil;
-
-},{}],15:[function(_dereq_,module,exports){
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-// How much to rotate per key stroke.
-var KEY_SPEED = 0.15;
-var KEY_ANIMATION_DURATION = 80;
-
-// How much to rotate for mouse events.
-var MOUSE_SPEED_X = 0.5;
-var MOUSE_SPEED_Y = 0.3;
-
-/**
- * VRDisplay based on mouse and keyboard input. Designed for desktops/laptops
- * where orientation events aren't supported. Cannot present.
- */
-function MouseKeyboardVRDisplay() {
-  this.displayName = 'Mouse and Keyboard VRDisplay (webvr-polyfill)';
-
-  this.capabilities.hasOrientation = true;
-
-  // Attach to mouse and keyboard events.
-  window.addEventListener('keydown', this.onKeyDown_.bind(this));
-  window.addEventListener('mousemove', this.onMouseMove_.bind(this));
-  window.addEventListener('mousedown', this.onMouseDown_.bind(this));
-  window.addEventListener('mouseup', this.onMouseUp_.bind(this));
-
-  // "Private" members.
-  this.phi_ = 0;
-  this.theta_ = 0;
-
-  // Variables for keyboard-based rotation animation.
-  this.targetAngle_ = null;
-  this.angleAnimation_ = null;
-
-  // State variables for calculations.
-  this.orientation_ = new MathUtil.Quaternion();
-
-  // Variables for mouse-based rotation.
-  this.rotateStart_ = new MathUtil.Vector2();
-  this.rotateEnd_ = new MathUtil.Vector2();
-  this.rotateDelta_ = new MathUtil.Vector2();
-  this.isDragging_ = false;
-
-  this.orientationOut_ = new Float32Array(4);
-}
-MouseKeyboardVRDisplay.prototype = new VRDisplay();
-
-MouseKeyboardVRDisplay.prototype.getImmediatePose = function() {
-  this.orientation_.setFromEulerYXZ(this.phi_, this.theta_, 0);
-
-  this.orientationOut_[0] = this.orientation_.x;
-  this.orientationOut_[1] = this.orientation_.y;
-  this.orientationOut_[2] = this.orientation_.z;
-  this.orientationOut_[3] = this.orientation_.w;
-
-  return {
-    position: null,
-    orientation: this.orientationOut_,
-    linearVelocity: null,
-    linearAcceleration: null,
-    angularVelocity: null,
-    angularAcceleration: null
-  };
-};
-
-MouseKeyboardVRDisplay.prototype.onKeyDown_ = function(e) {
-  // Track WASD and arrow keys.
-  if (e.keyCode == 38) { // Up key.
-    this.animatePhi_(this.phi_ + KEY_SPEED);
-  } else if (e.keyCode == 39) { // Right key.
-    this.animateTheta_(this.theta_ - KEY_SPEED);
-  } else if (e.keyCode == 40) { // Down key.
-    this.animatePhi_(this.phi_ - KEY_SPEED);
-  } else if (e.keyCode == 37) { // Left key.
-    this.animateTheta_(this.theta_ + KEY_SPEED);
-  }
-};
-
-MouseKeyboardVRDisplay.prototype.animateTheta_ = function(targetAngle) {
-  this.animateKeyTransitions_('theta_', targetAngle);
-};
-
-MouseKeyboardVRDisplay.prototype.animatePhi_ = function(targetAngle) {
-  // Prevent looking too far up or down.
-  targetAngle = Util.clamp(targetAngle, -Math.PI/2, Math.PI/2);
-  this.animateKeyTransitions_('phi_', targetAngle);
-};
-
-/**
- * Start an animation to transition an angle from one value to another.
- */
-MouseKeyboardVRDisplay.prototype.animateKeyTransitions_ = function(angleName, targetAngle) {
-  // If an animation is currently running, cancel it.
-  if (this.angleAnimation_) {
-    cancelAnimationFrame(this.angleAnimation_);
-  }
-  var startAngle = this[angleName];
-  var startTime = new Date();
-  // Set up an interval timer to perform the animation.
-  this.angleAnimation_ = requestAnimationFrame(function animate() {
-    // Once we're finished the animation, we're done.
-    var elapsed = new Date() - startTime;
-    if (elapsed >= KEY_ANIMATION_DURATION) {
-      this[angleName] = targetAngle;
-      cancelAnimationFrame(this.angleAnimation_);
-      return;
-    }
-    // loop with requestAnimationFrame
-    this.angleAnimation_ = requestAnimationFrame(animate.bind(this))
-    // Linearly interpolate the angle some amount.
-    var percent = elapsed / KEY_ANIMATION_DURATION;
-    this[angleName] = startAngle + (targetAngle - startAngle) * percent;
-  }.bind(this));
-};
-
-MouseKeyboardVRDisplay.prototype.onMouseDown_ = function(e) {
-  this.rotateStart_.set(e.clientX, e.clientY);
-  this.isDragging_ = true;
-};
-
-// Very similar to https://gist.github.com/mrflix/8351020
-MouseKeyboardVRDisplay.prototype.onMouseMove_ = function(e) {
-  if (!this.isDragging_ && !this.isPointerLocked_()) {
-    return;
-  }
-  // Support pointer lock API.
-  if (this.isPointerLocked_()) {
-    var movementX = e.movementX || e.mozMovementX || 0;
-    var movementY = e.movementY || e.mozMovementY || 0;
-    this.rotateEnd_.set(this.rotateStart_.x - movementX, this.rotateStart_.y - movementY);
-  } else {
-    this.rotateEnd_.set(e.clientX, e.clientY);
-  }
-  // Calculate how much we moved in mouse space.
-  this.rotateDelta_.subVectors(this.rotateEnd_, this.rotateStart_);
-  this.rotateStart_.copy(this.rotateEnd_);
-
-  // Keep track of the cumulative euler angles.
-  this.phi_ += 2 * Math.PI * this.rotateDelta_.y / screen.height * MOUSE_SPEED_Y;
-  this.theta_ += 2 * Math.PI * this.rotateDelta_.x / screen.width * MOUSE_SPEED_X;
-
-  // Prevent looking too far up or down.
-  this.phi_ = Util.clamp(this.phi_, -Math.PI/2, Math.PI/2);
-};
-
-MouseKeyboardVRDisplay.prototype.onMouseUp_ = function(e) {
-  this.isDragging_ = false;
-};
-
-MouseKeyboardVRDisplay.prototype.isPointerLocked_ = function() {
-  var el = document.pointerLockElement || document.mozPointerLockElement ||
-      document.webkitPointerLockElement;
-  return el !== undefined;
-};
-
-MouseKeyboardVRDisplay.prototype.resetPose = function() {
-  this.phi_ = 0;
-  this.theta_ = 0;
-};
-
-module.exports = MouseKeyboardVRDisplay;
-
-},{"./base.js":2,"./math-util.js":14,"./util.js":22}],16:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-
-function RotateInstructions() {
-  this.loadIcon_();
-
-  var overlay = document.createElement('div');
-  var s = overlay.style;
-  s.position = 'fixed';
-  s.top = 0;
-  s.right = 0;
-  s.bottom = 0;
-  s.left = 0;
-  s.backgroundColor = 'gray';
-  s.fontFamily = 'sans-serif';
-  // Force this to be above the fullscreen canvas, which is at zIndex: 999999.
-  s.zIndex = 1000000;
-
-  var img = document.createElement('img');
-  img.src = this.icon;
-  var s = img.style;
-  s.marginLeft = '25%';
-  s.marginTop = '25%';
-  s.width = '50%';
-  overlay.appendChild(img);
-
-  var text = document.createElement('div');
-  var s = text.style;
-  s.textAlign = 'center';
-  s.fontSize = '16px';
-  s.lineHeight = '24px';
-  s.margin = '24px 25%';
-  s.width = '50%';
-  text.innerHTML = 'Place your phone into your Cardboard viewer.';
-  overlay.appendChild(text);
-
-  var snackbar = document.createElement('div');
-  var s = snackbar.style;
-  s.backgroundColor = '#CFD8DC';
-  s.position = 'fixed';
-  s.bottom = 0;
-  s.width = '100%';
-  s.height = '48px';
-  s.padding = '14px 24px';
-  s.boxSizing = 'border-box';
-  s.color = '#656A6B';
-  overlay.appendChild(snackbar);
-
-  var snackbarText = document.createElement('div');
-  snackbarText.style.float = 'left';
-  snackbarText.innerHTML = 'No Cardboard viewer?';
-
-  var snackbarButton = document.createElement('a');
-  snackbarButton.href = 'https://www.google.com/get/cardboard/get-cardboard/';
-  snackbarButton.innerHTML = 'get one';
-  snackbarButton.target = '_blank';
-  var s = snackbarButton.style;
-  s.float = 'right';
-  s.fontWeight = 600;
-  s.textTransform = 'uppercase';
-  s.borderLeft = '1px solid gray';
-  s.paddingLeft = '24px';
-  s.textDecoration = 'none';
-  s.color = '#656A6B';
-
-  snackbar.appendChild(snackbarText);
-  snackbar.appendChild(snackbarButton);
-
-  this.overlay = overlay;
-  this.text = text;
-
-  this.hide();
-}
-
-RotateInstructions.prototype.show = function(parent) {
-  if (!parent && !this.overlay.parentElement) {
-    document.body.appendChild(this.overlay);
-  } else if (parent) {
-    if (this.overlay.parentElement && this.overlay.parentElement != parent)
-      this.overlay.parentElement.removeChild(this.overlay);
-
-    parent.appendChild(this.overlay);
-  }
-
-  this.overlay.style.display = 'block';
-
-  var img = this.overlay.querySelector('img');
-  var s = img.style;
-
-  if (Util.isLandscapeMode()) {
-    s.width = '20%';
-    s.marginLeft = '40%';
-    s.marginTop = '3%';
-  } else {
-    s.width = '50%';
-    s.marginLeft = '25%';
-    s.marginTop = '25%';
-  }
-};
-
-RotateInstructions.prototype.hide = function() {
-  this.overlay.style.display = 'none';
-};
-
-RotateInstructions.prototype.showTemporarily = function(ms, parent) {
-  this.show(parent);
-  this.timer = setTimeout(this.hide.bind(this), ms);
-};
-
-RotateInstructions.prototype.disableShowTemporarily = function() {
-  clearTimeout(this.timer);
-};
-
-RotateInstructions.prototype.update = function() {
-  this.disableShowTemporarily();
-  // In portrait VR mode, tell the user to rotate to landscape. Otherwise, hide
-  // the instructions.
-  if (!Util.isLandscapeMode() && Util.isMobile()) {
-    this.show();
-  } else {
-    this.hide();
-  }
-};
-
-RotateInstructions.prototype.loadIcon_ = function() {
-  // Encoded asset_src/rotate-instructions.svg
-  this.icon = Util.base64('image/svg+xml', 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjE5OHB4IiBoZWlnaHQ9IjI0MHB4IiB2aWV3Qm94PSIwIDAgMTk4IDI0MCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWxuczpza2V0Y2g9Imh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaC9ucyI+CiAgICA8IS0tIEdlbmVyYXRvcjogU2tldGNoIDMuMy4zICgxMjA4MSkgLSBodHRwOi8vd3d3LmJvaGVtaWFuY29kaW5nLmNvbS9za2V0Y2ggLS0+CiAgICA8dGl0bGU+dHJhbnNpdGlvbjwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggU2tldGNoLjwvZGVzYz4KICAgIDxkZWZzPjwvZGVmcz4KICAgIDxnIGlkPSJQYWdlLTEiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHNrZXRjaDp0eXBlPSJNU1BhZ2UiPgogICAgICAgIDxnIGlkPSJ0cmFuc2l0aW9uIiBza2V0Y2g6dHlwZT0iTVNBcnRib2FyZEdyb3VwIj4KICAgICAgICAgICAgPGcgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTQtKy1JbXBvcnRlZC1MYXllcnMtQ29weS0rLUltcG9ydGVkLUxheWVycy1Db3B5LTItQ29weSIgc2tldGNoOnR5cGU9Ik1TTGF5ZXJHcm91cCI+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHktNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsIDEwNy4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjYyNSwyLjUyNyBDMTQ5LjYyNSwyLjUyNyAxNTUuODA1LDYuMDk2IDE1Ni4zNjIsNi40MTggTDE1Ni4zNjIsNy4zMDQgQzE1Ni4zNjIsNy40ODEgMTU2LjM3NSw3LjY2NCAxNTYuNCw3Ljg1MyBDMTU2LjQxLDcuOTM0IDE1Ni40Miw4LjAxNSAxNTYuNDI3LDguMDk1IEMxNTYuNTY3LDkuNTEgMTU3LjQwMSwxMS4wOTMgMTU4LjUzMiwxMi4wOTQgTDE2NC4yNTIsMTcuMTU2IEwxNjQuMzMzLDE3LjA2NiBDMTY0LjMzMywxNy4wNjYgMTY4LjcxNSwxNC41MzYgMTY5LjU2OCwxNC4wNDIgQzE3MS4wMjUsMTQuODgzIDE5NS41MzgsMjkuMDM1IDE5NS41MzgsMjkuMDM1IEwxOTUuNTM4LDgzLjAzNiBDMTk1LjUzOCw4My44MDcgMTk1LjE1Miw4NC4yNTMgMTk0LjU5LDg0LjI1MyBDMTk0LjM1Nyw4NC4yNTMgMTk0LjA5NSw4NC4xNzcgMTkzLjgxOCw4NC4wMTcgTDE2OS44NTEsNzAuMTc5IEwxNjkuODM3LDcwLjIwMyBMMTQyLjUxNSw4NS45NzggTDE0MS42NjUsODQuNjU1IEMxMzYuOTM0LDgzLjEyNiAxMzEuOTE3LDgxLjkxNSAxMjYuNzE0LDgxLjA0NSBDMTI2LjcwOSw4MS4wNiAxMjYuNzA3LDgxLjA2OSAxMjYuNzA3LDgxLjA2OSBMMTIxLjY0LDk4LjAzIEwxMTMuNzQ5LDEwMi41ODYgTDExMy43MTIsMTAyLjUyMyBMMTEzLjcxMiwxMzAuMTEzIEMxMTMuNzEyLDEzMC44ODUgMTEzLjMyNiwxMzEuMzMgMTEyLjc2NCwxMzEuMzMgQzExMi41MzIsMTMxLjMzIDExMi4yNjksMTMxLjI1NCAxMTEuOTkyLDEzMS4wOTQgTDY5LjUxOSwxMDYuNTcyIEM2OC41NjksMTA2LjAyMyA2Ny43OTksMTA0LjY5NSA2Ny43OTksMTAzLjYwNSBMNjcuNzk5LDEwMi41NyBMNjcuNzc4LDEwMi42MTcgQzY3LjI3LDEwMi4zOTMgNjYuNjQ4LDEwMi4yNDkgNjUuOTYyLDEwMi4yMTggQzY1Ljg3NSwxMDIuMjE0IDY1Ljc4OCwxMDIuMjEyIDY1LjcwMSwxMDIuMjEyIEM2NS42MDYsMTAyLjIxMiA2NS41MTEsMTAyLjIxNSA2NS40MTYsMTAyLjIxOSBDNjUuMTk1LDEwMi4yMjkgNjQuOTc0LDEwMi4yMzUgNjQuNzU0LDEwMi4yMzUgQzY0LjMzMSwxMDIuMjM1IDYzLjkxMSwxMDIuMjE2IDYzLjQ5OCwxMDIuMTc4IEM2MS44NDMsMTAyLjAyNSA2MC4yOTgsMTAxLjU3OCA1OS4wOTQsMTAwLjg4MiBMMTIuNTE4LDczLjk5MiBMMTIuNTIzLDc0LjAwNCBMMi4yNDUsNTUuMjU0IEMxLjI0NCw1My40MjcgMi4wMDQsNTEuMDM4IDMuOTQzLDQ5LjkxOCBMNTkuOTU0LDE3LjU3MyBDNjAuNjI2LDE3LjE4NSA2MS4zNSwxNy4wMDEgNjIuMDUzLDE3LjAwMSBDNjMuMzc5LDE3LjAwMSA2NC42MjUsMTcuNjYgNjUuMjgsMTguODU0IEw2NS4yODUsMTguODUxIEw2NS41MTIsMTkuMjY0IEw2NS41MDYsMTkuMjY4IEM2NS45MDksMjAuMDAzIDY2LjQwNSwyMC42OCA2Ni45ODMsMjEuMjg2IEw2Ny4yNiwyMS41NTYgQzY5LjE3NCwyMy40MDYgNzEuNzI4LDI0LjM1NyA3NC4zNzMsMjQuMzU3IEM3Ni4zMjIsMjQuMzU3IDc4LjMyMSwyMy44NCA4MC4xNDgsMjIuNzg1IEM4MC4xNjEsMjIuNzg1IDg3LjQ2NywxOC41NjYgODcuNDY3LDE4LjU2NiBDODguMTM5LDE4LjE3OCA4OC44NjMsMTcuOTk0IDg5LjU2NiwxNy45OTQgQzkwLjg5MiwxNy45OTQgOTIuMTM4LDE4LjY1MiA5Mi43OTIsMTkuODQ3IEw5Ni4wNDIsMjUuNzc1IEw5Ni4wNjQsMjUuNzU3IEwxMDIuODQ5LDI5LjY3NCBMMTAyLjc0NCwyOS40OTIgTDE0OS42MjUsMi41MjcgTTE0OS42MjUsMC44OTIgQzE0OS4zNDMsMC44OTIgMTQ5LjA2MiwwLjk2NSAxNDguODEsMS4xMSBMMTAyLjY0MSwyNy42NjYgTDk3LjIzMSwyNC41NDIgTDk0LjIyNiwxOS4wNjEgQzkzLjMxMywxNy4zOTQgOTEuNTI3LDE2LjM1OSA4OS41NjYsMTYuMzU4IEM4OC41NTUsMTYuMzU4IDg3LjU0NiwxNi42MzIgODYuNjQ5LDE3LjE1IEM4My44NzgsMTguNzUgNzkuNjg3LDIxLjE2OSA3OS4zNzQsMjEuMzQ1IEM3OS4zNTksMjEuMzUzIDc5LjM0NSwyMS4zNjEgNzkuMzMsMjEuMzY5IEM3Ny43OTgsMjIuMjU0IDc2LjA4NCwyMi43MjIgNzQuMzczLDIyLjcyMiBDNzIuMDgxLDIyLjcyMiA2OS45NTksMjEuODkgNjguMzk3LDIwLjM4IEw2OC4xNDUsMjAuMTM1IEM2Ny43MDYsMTkuNjcyIDY3LjMyMywxOS4xNTYgNjcuMDA2LDE4LjYwMSBDNjYuOTg4LDE4LjU1OSA2Ni45NjgsMTguNTE5IDY2Ljk0NiwxOC40NzkgTDY2LjcxOSwxOC4wNjUgQzY2LjY5LDE4LjAxMiA2Ni42NTgsMTcuOTYgNjYuNjI0LDE3LjkxMSBDNjUuNjg2LDE2LjMzNyA2My45NTEsMTUuMzY2IDYyLjA1MywxNS4zNjYgQzYxLjA0MiwxNS4zNjYgNjAuMDMzLDE1LjY0IDU5LjEzNiwxNi4xNTggTDMuMTI1LDQ4LjUwMiBDMC40MjYsNTAuMDYxIC0wLjYxMyw1My40NDIgMC44MTEsNTYuMDQgTDExLjA4OSw3NC43OSBDMTEuMjY2LDc1LjExMyAxMS41MzcsNzUuMzUzIDExLjg1LDc1LjQ5NCBMNTguMjc2LDEwMi4yOTggQzU5LjY3OSwxMDMuMTA4IDYxLjQzMywxMDMuNjMgNjMuMzQ4LDEwMy44MDYgQzYzLjgxMiwxMDMuODQ4IDY0LjI4NSwxMDMuODcgNjQuNzU0LDEwMy44NyBDNjUsMTAzLjg3IDY1LjI0OSwxMDMuODY0IDY1LjQ5NCwxMDMuODUyIEM2NS41NjMsMTAzLjg0OSA2NS42MzIsMTAzLjg0NyA2NS43MDEsMTAzLjg0NyBDNjUuNzY0LDEwMy44NDcgNjUuODI4LDEwMy44NDkgNjUuODksMTAzLjg1MiBDNjUuOTg2LDEwMy44NTYgNjYuMDgsMTAzLjg2MyA2Ni4xNzMsMTAzLjg3NCBDNjYuMjgyLDEwNS40NjcgNjcuMzMyLDEwNy4xOTcgNjguNzAyLDEwNy45ODggTDExMS4xNzQsMTMyLjUxIEMxMTEuNjk4LDEzMi44MTIgMTEyLjIzMiwxMzIuOTY1IDExMi43NjQsMTMyLjk2NSBDMTE0LjI2MSwxMzIuOTY1IDExNS4zNDcsMTMxLjc2NSAxMTUuMzQ3LDEzMC4xMTMgTDExNS4zNDcsMTAzLjU1MSBMMTIyLjQ1OCw5OS40NDYgQzEyMi44MTksOTkuMjM3IDEyMy4wODcsOTguODk4IDEyMy4yMDcsOTguNDk4IEwxMjcuODY1LDgyLjkwNSBDMTMyLjI3OSw4My43MDIgMTM2LjU1Nyw4NC43NTMgMTQwLjYwNyw4Ni4wMzMgTDE0MS4xNCw4Ni44NjIgQzE0MS40NTEsODcuMzQ2IDE0MS45NzcsODcuNjEzIDE0Mi41MTYsODcuNjEzIEMxNDIuNzk0LDg3LjYxMyAxNDMuMDc2LDg3LjU0MiAxNDMuMzMzLDg3LjM5MyBMMTY5Ljg2NSw3Mi4wNzYgTDE5Myw4NS40MzMgQzE5My41MjMsODUuNzM1IDE5NC4wNTgsODUuODg4IDE5NC41OSw4NS44ODggQzE5Ni4wODcsODUuODg4IDE5Ny4xNzMsODQuNjg5IDE5Ny4xNzMsODMuMDM2IEwxOTcuMTczLDI5LjAzNSBDMTk3LjE3MywyOC40NTEgMTk2Ljg2MSwyNy45MTEgMTk2LjM1NSwyNy42MTkgQzE5Ni4zNTUsMjcuNjE5IDE3MS44NDMsMTMuNDY3IDE3MC4zODUsMTIuNjI2IEMxNzAuMTMyLDEyLjQ4IDE2OS44NSwxMi40MDcgMTY5LjU2OCwxMi40MDcgQzE2OS4yODUsMTIuNDA3IDE2OS4wMDIsMTIuNDgxIDE2OC43NDksMTIuNjI3IEMxNjguMTQzLDEyLjk3OCAxNjUuNzU2LDE0LjM1NyAxNjQuNDI0LDE1LjEyNSBMMTU5LjYxNSwxMC44NyBDMTU4Ljc5NiwxMC4xNDUgMTU4LjE1NCw4LjkzNyAxNTguMDU0LDcuOTM0IEMxNTguMDQ1LDcuODM3IDE1OC4wMzQsNy43MzkgMTU4LjAyMSw3LjY0IEMxNTguMDA1LDcuNTIzIDE1Ny45OTgsNy40MSAxNTcuOTk4LDcuMzA0IEwxNTcuOTk4LDYuNDE4IEMxNTcuOTk4LDUuODM0IDE1Ny42ODYsNS4yOTUgMTU3LjE4MSw1LjAwMiBDMTU2LjYyNCw0LjY4IDE1MC40NDIsMS4xMTEgMTUwLjQ0MiwxLjExMSBDMTUwLjE4OSwwLjk2NSAxNDkuOTA3LDAuODkyIDE0OS42MjUsMC44OTIiIGlkPSJGaWxsLTEiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTYuMDI3LDI1LjYzNiBMMTQyLjYwMyw1Mi41MjcgQzE0My44MDcsNTMuMjIyIDE0NC41ODIsNTQuMTE0IDE0NC44NDUsNTUuMDY4IEwxNDQuODM1LDU1LjA3NSBMNjMuNDYxLDEwMi4wNTcgTDYzLjQ2LDEwMi4wNTcgQzYxLjgwNiwxMDEuOTA1IDYwLjI2MSwxMDEuNDU3IDU5LjA1NywxMDAuNzYyIEwxMi40ODEsNzMuODcxIEw5Ni4wMjcsMjUuNjM2IiBpZD0iRmlsbC0yIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYzLjQ2MSwxMDIuMTc0IEM2My40NTMsMTAyLjE3NCA2My40NDYsMTAyLjE3NCA2My40MzksMTAyLjE3MiBDNjEuNzQ2LDEwMi4wMTYgNjAuMjExLDEwMS41NjMgNTguOTk4LDEwMC44NjMgTDEyLjQyMiw3My45NzMgQzEyLjM4Niw3My45NTIgMTIuMzY0LDczLjkxNCAxMi4zNjQsNzMuODcxIEMxMi4zNjQsNzMuODMgMTIuMzg2LDczLjc5MSAxMi40MjIsNzMuNzcgTDk1Ljk2OCwyNS41MzUgQzk2LjAwNCwyNS41MTQgOTYuMDQ5LDI1LjUxNCA5Ni4wODUsMjUuNTM1IEwxNDIuNjYxLDUyLjQyNiBDMTQzLjg4OCw1My4xMzQgMTQ0LjY4Miw1NC4wMzggMTQ0Ljk1Nyw1NS4wMzcgQzE0NC45Nyw1NS4wODMgMTQ0Ljk1Myw1NS4xMzMgMTQ0LjkxNSw1NS4xNjEgQzE0NC45MTEsNTUuMTY1IDE0NC44OTgsNTUuMTc0IDE0NC44OTQsNTUuMTc3IEw2My41MTksMTAyLjE1OCBDNjMuNTAxLDEwMi4xNjkgNjMuNDgxLDEwMi4xNzQgNjMuNDYxLDEwMi4xNzQgTDYzLjQ2MSwxMDIuMTc0IFogTTEyLjcxNCw3My44NzEgTDU5LjExNSwxMDAuNjYxIEM2MC4yOTMsMTAxLjM0MSA2MS43ODYsMTAxLjc4MiA2My40MzUsMTAxLjkzNyBMMTQ0LjcwNyw1NS4wMTUgQzE0NC40MjgsNTQuMTA4IDE0My42ODIsNTMuMjg1IDE0Mi41NDQsNTIuNjI4IEw5Ni4wMjcsMjUuNzcxIEwxMi43MTQsNzMuODcxIEwxMi43MTQsNzMuODcxIFoiIGlkPSJGaWxsLTMiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ4LjMyNyw1OC40NzEgQzE0OC4xNDUsNTguNDggMTQ3Ljk2Miw1OC40OCAxNDcuNzgxLDU4LjQ3MiBDMTQ1Ljg4Nyw1OC4zODkgMTQ0LjQ3OSw1Ny40MzQgMTQ0LjYzNiw1Ni4zNCBDMTQ0LjY4OSw1NS45NjcgMTQ0LjY2NCw1NS41OTcgMTQ0LjU2NCw1NS4yMzUgTDYzLjQ2MSwxMDIuMDU3IEM2NC4wODksMTAyLjExNSA2NC43MzMsMTAyLjEzIDY1LjM3OSwxMDIuMDk5IEM2NS41NjEsMTAyLjA5IDY1Ljc0MywxMDIuMDkgNjUuOTI1LDEwMi4wOTggQzY3LjgxOSwxMDIuMTgxIDY5LjIyNywxMDMuMTM2IDY5LjA3LDEwNC4yMyBMMTQ4LjMyNyw1OC40NzEiIGlkPSJGaWxsLTQiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNjkuMDcsMTA0LjM0NyBDNjkuMDQ4LDEwNC4zNDcgNjkuMDI1LDEwNC4zNCA2OS4wMDUsMTA0LjMyNyBDNjguOTY4LDEwNC4zMDEgNjguOTQ4LDEwNC4yNTcgNjguOTU1LDEwNC4yMTMgQzY5LDEwMy44OTYgNjguODk4LDEwMy41NzYgNjguNjU4LDEwMy4yODggQzY4LjE1MywxMDIuNjc4IDY3LjEwMywxMDIuMjY2IDY1LjkyLDEwMi4yMTQgQzY1Ljc0MiwxMDIuMjA2IDY1LjU2MywxMDIuMjA3IDY1LjM4NSwxMDIuMjE1IEM2NC43NDIsMTAyLjI0NiA2NC4wODcsMTAyLjIzMiA2My40NSwxMDIuMTc0IEM2My4zOTksMTAyLjE2OSA2My4zNTgsMTAyLjEzMiA2My4zNDcsMTAyLjA4MiBDNjMuMzM2LDEwMi4wMzMgNjMuMzU4LDEwMS45ODEgNjMuNDAyLDEwMS45NTYgTDE0NC41MDYsNTUuMTM0IEMxNDQuNTM3LDU1LjExNiAxNDQuNTc1LDU1LjExMyAxNDQuNjA5LDU1LjEyNyBDMTQ0LjY0Miw1NS4xNDEgMTQ0LjY2OCw1NS4xNyAxNDQuNjc3LDU1LjIwNCBDMTQ0Ljc4MSw1NS41ODUgMTQ0LjgwNiw1NS45NzIgMTQ0Ljc1MSw1Ni4zNTcgQzE0NC43MDYsNTYuNjczIDE0NC44MDgsNTYuOTk0IDE0NS4wNDcsNTcuMjgyIEMxNDUuNTUzLDU3Ljg5MiAxNDYuNjAyLDU4LjMwMyAxNDcuNzg2LDU4LjM1NSBDMTQ3Ljk2NCw1OC4zNjMgMTQ4LjE0Myw1OC4zNjMgMTQ4LjMyMSw1OC4zNTQgQzE0OC4zNzcsNTguMzUyIDE0OC40MjQsNTguMzg3IDE0OC40MzksNTguNDM4IEMxNDguNDU0LDU4LjQ5IDE0OC40MzIsNTguNTQ1IDE0OC4zODUsNTguNTcyIEw2OS4xMjksMTA0LjMzMSBDNjkuMTExLDEwNC4zNDIgNjkuMDksMTA0LjM0NyA2OS4wNywxMDQuMzQ3IEw2OS4wNywxMDQuMzQ3IFogTTY1LjY2NSwxMDEuOTc1IEM2NS43NTQsMTAxLjk3NSA2NS44NDIsMTAxLjk3NyA2NS45MywxMDEuOTgxIEM2Ny4xOTYsMTAyLjAzNyA2OC4yODMsMTAyLjQ2OSA2OC44MzgsMTAzLjEzOSBDNjkuMDY1LDEwMy40MTMgNjkuMTg4LDEwMy43MTQgNjkuMTk4LDEwNC4wMjEgTDE0Ny44ODMsNTguNTkyIEMxNDcuODQ3LDU4LjU5MiAxNDcuODExLDU4LjU5MSAxNDcuNzc2LDU4LjU4OSBDMTQ2LjUwOSw1OC41MzMgMTQ1LjQyMiw1OC4xIDE0NC44NjcsNTcuNDMxIEMxNDQuNTg1LDU3LjA5MSAxNDQuNDY1LDU2LjcwNyAxNDQuNTIsNTYuMzI0IEMxNDQuNTYzLDU2LjAyMSAxNDQuNTUyLDU1LjcxNiAxNDQuNDg4LDU1LjQxNCBMNjMuODQ2LDEwMS45NyBDNjQuMzUzLDEwMi4wMDIgNjQuODY3LDEwMi4wMDYgNjUuMzc0LDEwMS45ODIgQzY1LjQ3MSwxMDEuOTc3IDY1LjU2OCwxMDEuOTc1IDY1LjY2NSwxMDEuOTc1IEw2NS42NjUsMTAxLjk3NSBaIiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTIuMjA4LDU1LjEzNCBDMS4yMDcsNTMuMzA3IDEuOTY3LDUwLjkxNyAzLjkwNiw0OS43OTcgTDU5LjkxNywxNy40NTMgQzYxLjg1NiwxNi4zMzMgNjQuMjQxLDE2LjkwNyA2NS4yNDMsMTguNzM0IEw2NS40NzUsMTkuMTQ0IEM2NS44NzIsMTkuODgyIDY2LjM2OCwyMC41NiA2Ni45NDUsMjEuMTY1IEw2Ny4yMjMsMjEuNDM1IEM3MC41NDgsMjQuNjQ5IDc1LjgwNiwyNS4xNTEgODAuMTExLDIyLjY2NSBMODcuNDMsMTguNDQ1IEM4OS4zNywxNy4zMjYgOTEuNzU0LDE3Ljg5OSA5Mi43NTUsMTkuNzI3IEw5Ni4wMDUsMjUuNjU1IEwxMi40ODYsNzMuODg0IEwyLjIwOCw1NS4xMzQgWiIgaWQ9IkZpbGwtNiIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMi40ODYsNzQuMDAxIEMxMi40NzYsNzQuMDAxIDEyLjQ2NSw3My45OTkgMTIuNDU1LDczLjk5NiBDMTIuNDI0LDczLjk4OCAxMi4zOTksNzMuOTY3IDEyLjM4NCw3My45NCBMMi4xMDYsNTUuMTkgQzEuMDc1LDUzLjMxIDEuODU3LDUwLjg0NSAzLjg0OCw0OS42OTYgTDU5Ljg1OCwxNy4zNTIgQzYwLjUyNSwxNi45NjcgNjEuMjcxLDE2Ljc2NCA2Mi4wMTYsMTYuNzY0IEM2My40MzEsMTYuNzY0IDY0LjY2NiwxNy40NjYgNjUuMzI3LDE4LjY0NiBDNjUuMzM3LDE4LjY1NCA2NS4zNDUsMTguNjYzIDY1LjM1MSwxOC42NzQgTDY1LjU3OCwxOS4wODggQzY1LjU4NCwxOS4xIDY1LjU4OSwxOS4xMTIgNjUuNTkxLDE5LjEyNiBDNjUuOTg1LDE5LjgzOCA2Ni40NjksMjAuNDk3IDY3LjAzLDIxLjA4NSBMNjcuMzA1LDIxLjM1MSBDNjkuMTUxLDIzLjEzNyA3MS42NDksMjQuMTIgNzQuMzM2LDI0LjEyIEM3Ni4zMTMsMjQuMTIgNzguMjksMjMuNTgyIDgwLjA1MywyMi41NjMgQzgwLjA2NCwyMi41NTcgODAuMDc2LDIyLjU1MyA4MC4wODgsMjIuNTUgTDg3LjM3MiwxOC4zNDQgQzg4LjAzOCwxNy45NTkgODguNzg0LDE3Ljc1NiA4OS41MjksMTcuNzU2IEM5MC45NTYsMTcuNzU2IDkyLjIwMSwxOC40NzIgOTIuODU4LDE5LjY3IEw5Ni4xMDcsMjUuNTk5IEM5Ni4xMzgsMjUuNjU0IDk2LjExOCwyNS43MjQgOTYuMDYzLDI1Ljc1NiBMMTIuNTQ1LDczLjk4NSBDMTIuNTI2LDczLjk5NiAxMi41MDYsNzQuMDAxIDEyLjQ4Niw3NC4wMDEgTDEyLjQ4Niw3NC4wMDEgWiBNNjIuMDE2LDE2Ljk5NyBDNjEuMzEyLDE2Ljk5NyA2MC42MDYsMTcuMTkgNTkuOTc1LDE3LjU1NCBMMy45NjUsNDkuODk5IEMyLjA4Myw1MC45ODUgMS4zNDEsNTMuMzA4IDIuMzEsNTUuMDc4IEwxMi41MzEsNzMuNzIzIEw5NS44NDgsMjUuNjExIEw5Mi42NTMsMTkuNzgyIEM5Mi4wMzgsMTguNjYgOTAuODcsMTcuOTkgODkuNTI5LDE3Ljk5IEM4OC44MjUsMTcuOTkgODguMTE5LDE4LjE4MiA4Ny40ODksMTguNTQ3IEw4MC4xNzIsMjIuNzcyIEM4MC4xNjEsMjIuNzc4IDgwLjE0OSwyMi43ODIgODAuMTM3LDIyLjc4NSBDNzguMzQ2LDIzLjgxMSA3Ni4zNDEsMjQuMzU0IDc0LjMzNiwyNC4zNTQgQzcxLjU4OCwyNC4zNTQgNjkuMDMzLDIzLjM0NyA2Ny4xNDIsMjEuNTE5IEw2Ni44NjQsMjEuMjQ5IEM2Ni4yNzcsMjAuNjM0IDY1Ljc3NCwxOS45NDcgNjUuMzY3LDE5LjIwMyBDNjUuMzYsMTkuMTkyIDY1LjM1NiwxOS4xNzkgNjUuMzU0LDE5LjE2NiBMNjUuMTYzLDE4LjgxOSBDNjUuMTU0LDE4LjgxMSA2NS4xNDYsMTguODAxIDY1LjE0LDE4Ljc5IEM2NC41MjUsMTcuNjY3IDYzLjM1NywxNi45OTcgNjIuMDE2LDE2Ljk5NyBMNjIuMDE2LDE2Ljk5NyBaIiBpZD0iRmlsbC03IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTQyLjQzNCw0OC44MDggTDQyLjQzNCw0OC44MDggQzM5LjkyNCw0OC44MDcgMzcuNzM3LDQ3LjU1IDM2LjU4Miw0NS40NDMgQzM0Ljc3MSw0Mi4xMzkgMzYuMTQ0LDM3LjgwOSAzOS42NDEsMzUuNzg5IEw1MS45MzIsMjguNjkxIEM1My4xMDMsMjguMDE1IDU0LjQxMywyNy42NTggNTUuNzIxLDI3LjY1OCBDNTguMjMxLDI3LjY1OCA2MC40MTgsMjguOTE2IDYxLjU3MywzMS4wMjMgQzYzLjM4NCwzNC4zMjcgNjIuMDEyLDM4LjY1NyA1OC41MTQsNDAuNjc3IEw0Ni4yMjMsNDcuNzc1IEM0NS4wNTMsNDguNDUgNDMuNzQyLDQ4LjgwOCA0Mi40MzQsNDguODA4IEw0Mi40MzQsNDguODA4IFogTTU1LjcyMSwyOC4xMjUgQzU0LjQ5NSwyOC4xMjUgNTMuMjY1LDI4LjQ2MSA1Mi4xNjYsMjkuMDk2IEwzOS44NzUsMzYuMTk0IEMzNi41OTYsMzguMDg3IDM1LjMwMiw0Mi4xMzYgMzYuOTkyLDQ1LjIxOCBDMzguMDYzLDQ3LjE3MyA0MC4wOTgsNDguMzQgNDIuNDM0LDQ4LjM0IEM0My42NjEsNDguMzQgNDQuODksNDguMDA1IDQ1Ljk5LDQ3LjM3IEw1OC4yODEsNDAuMjcyIEM2MS41NiwzOC4zNzkgNjIuODUzLDM0LjMzIDYxLjE2NCwzMS4yNDggQzYwLjA5MiwyOS4yOTMgNTguMDU4LDI4LjEyNSA1NS43MjEsMjguMTI1IEw1NS43MjEsMjguMTI1IFoiIGlkPSJGaWxsLTgiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTQ5LjU4OCwyLjQwNyBDMTQ5LjU4OCwyLjQwNyAxNTUuNzY4LDUuOTc1IDE1Ni4zMjUsNi4yOTcgTDE1Ni4zMjUsNy4xODQgQzE1Ni4zMjUsNy4zNiAxNTYuMzM4LDcuNTQ0IDE1Ni4zNjIsNy43MzMgQzE1Ni4zNzMsNy44MTQgMTU2LjM4Miw3Ljg5NCAxNTYuMzksNy45NzUgQzE1Ni41Myw5LjM5IDE1Ny4zNjMsMTAuOTczIDE1OC40OTUsMTEuOTc0IEwxNjUuODkxLDE4LjUxOSBDMTY2LjA2OCwxOC42NzUgMTY2LjI0OSwxOC44MTQgMTY2LjQzMiwxOC45MzQgQzE2OC4wMTEsMTkuOTc0IDE2OS4zODIsMTkuNCAxNjkuNDk0LDE3LjY1MiBDMTY5LjU0MywxNi44NjggMTY5LjU1MSwxNi4wNTcgMTY5LjUxNywxNS4yMjMgTDE2OS41MTQsMTUuMDYzIEwxNjkuNTE0LDEzLjkxMiBDMTcwLjc4LDE0LjY0MiAxOTUuNTAxLDI4LjkxNSAxOTUuNTAxLDI4LjkxNSBMMTk1LjUwMSw4Mi45MTUgQzE5NS41MDEsODQuMDA1IDE5NC43MzEsODQuNDQ1IDE5My43ODEsODMuODk3IEwxNTEuMzA4LDU5LjM3NCBDMTUwLjM1OCw1OC44MjYgMTQ5LjU4OCw1Ny40OTcgMTQ5LjU4OCw1Ni40MDggTDE0OS41ODgsMjIuMzc1IiBpZD0iRmlsbC05IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE5NC41NTMsODQuMjUgQzE5NC4yOTYsODQuMjUgMTk0LjAxMyw4NC4xNjUgMTkzLjcyMiw4My45OTcgTDE1MS4yNSw1OS40NzYgQzE1MC4yNjksNTguOTA5IDE0OS40NzEsNTcuNTMzIDE0OS40NzEsNTYuNDA4IEwxNDkuNDcxLDIyLjM3NSBMMTQ5LjcwNSwyMi4zNzUgTDE0OS43MDUsNTYuNDA4IEMxNDkuNzA1LDU3LjQ1OSAxNTAuNDUsNTguNzQ0IDE1MS4zNjYsNTkuMjc0IEwxOTMuODM5LDgzLjc5NSBDMTk0LjI2Myw4NC4wNCAxOTQuNjU1LDg0LjA4MyAxOTQuOTQyLDgzLjkxNyBDMTk1LjIyNyw4My43NTMgMTk1LjM4NCw4My4zOTcgMTk1LjM4NCw4Mi45MTUgTDE5NS4zODQsMjguOTgyIEMxOTQuMTAyLDI4LjI0MiAxNzIuMTA0LDE1LjU0MiAxNjkuNjMxLDE0LjExNCBMMTY5LjYzNCwxNS4yMiBDMTY5LjY2OCwxNi4wNTIgMTY5LjY2LDE2Ljg3NCAxNjkuNjEsMTcuNjU5IEMxNjkuNTU2LDE4LjUwMyAxNjkuMjE0LDE5LjEyMyAxNjguNjQ3LDE5LjQwNSBDMTY4LjAyOCwxOS43MTQgMTY3LjE5NywxOS41NzggMTY2LjM2NywxOS4wMzIgQzE2Ni4xODEsMTguOTA5IDE2NS45OTUsMTguNzY2IDE2NS44MTQsMTguNjA2IEwxNTguNDE3LDEyLjA2MiBDMTU3LjI1OSwxMS4wMzYgMTU2LjQxOCw5LjQzNyAxNTYuMjc0LDcuOTg2IEMxNTYuMjY2LDcuOTA3IDE1Ni4yNTcsNy44MjcgMTU2LjI0Nyw3Ljc0OCBDMTU2LjIyMSw3LjU1NSAxNTYuMjA5LDcuMzY1IDE1Ni4yMDksNy4xODQgTDE1Ni4yMDksNi4zNjQgQzE1NS4zNzUsNS44ODMgMTQ5LjUyOSwyLjUwOCAxNDkuNTI5LDIuNTA4IEwxNDkuNjQ2LDIuMzA2IEMxNDkuNjQ2LDIuMzA2IDE1NS44MjcsNS44NzQgMTU2LjM4NCw2LjE5NiBMMTU2LjQ0Miw2LjIzIEwxNTYuNDQyLDcuMTg0IEMxNTYuNDQyLDcuMzU1IDE1Ni40NTQsNy41MzUgMTU2LjQ3OCw3LjcxNyBDMTU2LjQ4OSw3LjggMTU2LjQ5OSw3Ljg4MiAxNTYuNTA3LDcuOTYzIEMxNTYuNjQ1LDkuMzU4IDE1Ny40NTUsMTAuODk4IDE1OC41NzIsMTEuODg2IEwxNjUuOTY5LDE4LjQzMSBDMTY2LjE0MiwxOC41ODQgMTY2LjMxOSwxOC43MiAxNjYuNDk2LDE4LjgzNyBDMTY3LjI1NCwxOS4zMzYgMTY4LDE5LjQ2NyAxNjguNTQzLDE5LjE5NiBDMTY5LjAzMywxOC45NTMgMTY5LjMyOSwxOC40MDEgMTY5LjM3NywxNy42NDUgQzE2OS40MjcsMTYuODY3IDE2OS40MzQsMTYuMDU0IDE2OS40MDEsMTUuMjI4IEwxNjkuMzk3LDE1LjA2NSBMMTY5LjM5NywxMy43MSBMMTY5LjU3MiwxMy44MSBDMTcwLjgzOSwxNC41NDEgMTk1LjU1OSwyOC44MTQgMTk1LjU1OSwyOC44MTQgTDE5NS42MTgsMjguODQ3IEwxOTUuNjE4LDgyLjkxNSBDMTk1LjYxOCw4My40ODQgMTk1LjQyLDgzLjkxMSAxOTUuMDU5LDg0LjExOSBDMTk0LjkwOCw4NC4yMDYgMTk0LjczNyw4NC4yNSAxOTQuNTUzLDg0LjI1IiBpZD0iRmlsbC0xMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDUuNjg1LDU2LjE2MSBMMTY5LjgsNzAuMDgzIEwxNDMuODIyLDg1LjA4MSBMMTQyLjM2LDg0Ljc3NCBDMTM1LjgyNiw4Mi42MDQgMTI4LjczMiw4MS4wNDYgMTIxLjM0MSw4MC4xNTggQzExNi45NzYsNzkuNjM0IDExMi42NzgsODEuMjU0IDExMS43NDMsODMuNzc4IEMxMTEuNTA2LDg0LjQxNCAxMTEuNTAzLDg1LjA3MSAxMTEuNzMyLDg1LjcwNiBDMTEzLjI3LDg5Ljk3MyAxMTUuOTY4LDk0LjA2OSAxMTkuNzI3LDk3Ljg0MSBMMTIwLjI1OSw5OC42ODYgQzEyMC4yNiw5OC42ODUgOTQuMjgyLDExMy42ODMgOTQuMjgyLDExMy42ODMgTDcwLjE2Nyw5OS43NjEgTDE0NS42ODUsNTYuMTYxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik05NC4yODIsMTEzLjgxOCBMOTQuMjIzLDExMy43ODUgTDY5LjkzMyw5OS43NjEgTDcwLjEwOCw5OS42NiBMMTQ1LjY4NSw1Ni4wMjYgTDE0NS43NDMsNTYuMDU5IEwxNzAuMDMzLDcwLjA4MyBMMTQzLjg0Miw4NS4yMDUgTDE0My43OTcsODUuMTk1IEMxNDMuNzcyLDg1LjE5IDE0Mi4zMzYsODQuODg4IDE0Mi4zMzYsODQuODg4IEMxMzUuNzg3LDgyLjcxNCAxMjguNzIzLDgxLjE2MyAxMjEuMzI3LDgwLjI3NCBDMTIwLjc4OCw4MC4yMDkgMTIwLjIzNiw4MC4xNzcgMTE5LjY4OSw4MC4xNzcgQzExNS45MzEsODAuMTc3IDExMi42MzUsODEuNzA4IDExMS44NTIsODMuODE5IEMxMTEuNjI0LDg0LjQzMiAxMTEuNjIxLDg1LjA1MyAxMTEuODQyLDg1LjY2NyBDMTEzLjM3Nyw4OS45MjUgMTE2LjA1OCw5My45OTMgMTE5LjgxLDk3Ljc1OCBMMTE5LjgyNiw5Ny43NzkgTDEyMC4zNTIsOTguNjE0IEMxMjAuMzU0LDk4LjYxNyAxMjAuMzU2LDk4LjYyIDEyMC4zNTgsOTguNjI0IEwxMjAuNDIyLDk4LjcyNiBMMTIwLjMxNyw5OC43ODcgQzEyMC4yNjQsOTguODE4IDk0LjU5OSwxMTMuNjM1IDk0LjM0LDExMy43ODUgTDk0LjI4MiwxMTMuODE4IEw5NC4yODIsMTEzLjgxOCBaIE03MC40MDEsOTkuNzYxIEw5NC4yODIsMTEzLjU0OSBMMTE5LjA4NCw5OS4yMjkgQzExOS42Myw5OC45MTQgMTE5LjkzLDk4Ljc0IDEyMC4xMDEsOTguNjU0IEwxMTkuNjM1LDk3LjkxNCBDMTE1Ljg2NCw5NC4xMjcgMTEzLjE2OCw5MC4wMzMgMTExLjYyMiw4NS43NDYgQzExMS4zODIsODUuMDc5IDExMS4zODYsODQuNDA0IDExMS42MzMsODMuNzM4IEMxMTIuNDQ4LDgxLjUzOSAxMTUuODM2LDc5Ljk0MyAxMTkuNjg5LDc5Ljk0MyBDMTIwLjI0Niw3OS45NDMgMTIwLjgwNiw3OS45NzYgMTIxLjM1NSw4MC4wNDIgQzEyOC43NjcsODAuOTMzIDEzNS44NDYsODIuNDg3IDE0Mi4zOTYsODQuNjYzIEMxNDMuMjMyLDg0LjgzOCAxNDMuNjExLDg0LjkxNyAxNDMuNzg2LDg0Ljk2NyBMMTY5LjU2Niw3MC4wODMgTDE0NS42ODUsNTYuMjk1IEw3MC40MDEsOTkuNzYxIEw3MC40MDEsOTkuNzYxIFoiIGlkPSJGaWxsLTEyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2Ny4yMywxOC45NzkgTDE2Ny4yMyw2OS44NSBMMTM5LjkwOSw4NS42MjMgTDEzMy40NDgsNzEuNDU2IEMxMzIuNTM4LDY5LjQ2IDEzMC4wMiw2OS43MTggMTI3LjgyNCw3Mi4wMyBDMTI2Ljc2OSw3My4xNCAxMjUuOTMxLDc0LjU4NSAxMjUuNDk0LDc2LjA0OCBMMTE5LjAzNCw5Ny42NzYgTDkxLjcxMiwxMTMuNDUgTDkxLjcxMiw2Mi41NzkgTDE2Ny4yMywxOC45NzkiIGlkPSJGaWxsLTEzIiBmaWxsPSIjRkZGRkZGIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTkxLjcxMiwxMTMuNTY3IEM5MS42OTIsMTEzLjU2NyA5MS42NzIsMTEzLjU2MSA5MS42NTMsMTEzLjU1MSBDOTEuNjE4LDExMy41MyA5MS41OTUsMTEzLjQ5MiA5MS41OTUsMTEzLjQ1IEw5MS41OTUsNjIuNTc5IEM5MS41OTUsNjIuNTM3IDkxLjYxOCw2Mi40OTkgOTEuNjUzLDYyLjQ3OCBMMTY3LjE3MiwxOC44NzggQzE2Ny4yMDgsMTguODU3IDE2Ny4yNTIsMTguODU3IDE2Ny4yODgsMTguODc4IEMxNjcuMzI0LDE4Ljg5OSAxNjcuMzQ3LDE4LjkzNyAxNjcuMzQ3LDE4Ljk3OSBMMTY3LjM0Nyw2OS44NSBDMTY3LjM0Nyw2OS44OTEgMTY3LjMyNCw2OS45MyAxNjcuMjg4LDY5Ljk1IEwxMzkuOTY3LDg1LjcyNSBDMTM5LjkzOSw4NS43NDEgMTM5LjkwNSw4NS43NDUgMTM5Ljg3Myw4NS43MzUgQzEzOS44NDIsODUuNzI1IDEzOS44MTYsODUuNzAyIDEzOS44MDIsODUuNjcyIEwxMzMuMzQyLDcxLjUwNCBDMTMyLjk2Nyw3MC42ODIgMTMyLjI4LDcwLjIyOSAxMzEuNDA4LDcwLjIyOSBDMTMwLjMxOSw3MC4yMjkgMTI5LjA0NCw3MC45MTUgMTI3LjkwOCw3Mi4xMSBDMTI2Ljg3NCw3My4yIDEyNi4wMzQsNzQuNjQ3IDEyNS42MDYsNzYuMDgyIEwxMTkuMTQ2LDk3LjcwOSBDMTE5LjEzNyw5Ny43MzggMTE5LjExOCw5Ny43NjIgMTE5LjA5Miw5Ny43NzcgTDkxLjc3LDExMy41NTEgQzkxLjc1MiwxMTMuNTYxIDkxLjczMiwxMTMuNTY3IDkxLjcxMiwxMTMuNTY3IEw5MS43MTIsMTEzLjU2NyBaIE05MS44MjksNjIuNjQ3IEw5MS44MjksMTEzLjI0OCBMMTE4LjkzNSw5Ny41OTggTDEyNS4zODIsNzYuMDE1IEMxMjUuODI3LDc0LjUyNSAxMjYuNjY0LDczLjA4MSAxMjcuNzM5LDcxLjk1IEMxMjguOTE5LDcwLjcwOCAxMzAuMjU2LDY5Ljk5NiAxMzEuNDA4LDY5Ljk5NiBDMTMyLjM3Nyw2OS45OTYgMTMzLjEzOSw3MC40OTcgMTMzLjU1NCw3MS40MDcgTDEzOS45NjEsODUuNDU4IEwxNjcuMTEzLDY5Ljc4MiBMMTY3LjExMywxOS4xODEgTDkxLjgyOSw2Mi42NDcgTDkxLjgyOSw2Mi42NDcgWiIgaWQ9IkZpbGwtMTQiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTY4LjU0MywxOS4yMTMgTDE2OC41NDMsNzAuMDgzIEwxNDEuMjIxLDg1Ljg1NyBMMTM0Ljc2MSw3MS42ODkgQzEzMy44NTEsNjkuNjk0IDEzMS4zMzMsNjkuOTUxIDEyOS4xMzcsNzIuMjYzIEMxMjguMDgyLDczLjM3NCAxMjcuMjQ0LDc0LjgxOSAxMjYuODA3LDc2LjI4MiBMMTIwLjM0Niw5Ny45MDkgTDkzLjAyNSwxMTMuNjgzIEw5My4wMjUsNjIuODEzIEwxNjguNTQzLDE5LjIxMyIgaWQ9IkZpbGwtMTUiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTMuMDI1LDExMy44IEM5My4wMDUsMTEzLjggOTIuOTg0LDExMy43OTUgOTIuOTY2LDExMy43ODUgQzkyLjkzMSwxMTMuNzY0IDkyLjkwOCwxMTMuNzI1IDkyLjkwOCwxMTMuNjg0IEw5Mi45MDgsNjIuODEzIEM5Mi45MDgsNjIuNzcxIDkyLjkzMSw2Mi43MzMgOTIuOTY2LDYyLjcxMiBMMTY4LjQ4NCwxOS4xMTIgQzE2OC41MiwxOS4wOSAxNjguNTY1LDE5LjA5IDE2OC42MDEsMTkuMTEyIEMxNjguNjM3LDE5LjEzMiAxNjguNjYsMTkuMTcxIDE2OC42NiwxOS4yMTIgTDE2OC42Niw3MC4wODMgQzE2OC42Niw3MC4xMjUgMTY4LjYzNyw3MC4xNjQgMTY4LjYwMSw3MC4xODQgTDE0MS4yOCw4NS45NTggQzE0MS4yNTEsODUuOTc1IDE0MS4yMTcsODUuOTc5IDE0MS4xODYsODUuOTY4IEMxNDEuMTU0LDg1Ljk1OCAxNDEuMTI5LDg1LjkzNiAxNDEuMTE1LDg1LjkwNiBMMTM0LjY1NSw3MS43MzggQzEzNC4yOCw3MC45MTUgMTMzLjU5Myw3MC40NjMgMTMyLjcyLDcwLjQ2MyBDMTMxLjYzMiw3MC40NjMgMTMwLjM1Nyw3MS4xNDggMTI5LjIyMSw3Mi4zNDQgQzEyOC4xODYsNzMuNDMzIDEyNy4zNDcsNzQuODgxIDEyNi45MTksNzYuMzE1IEwxMjAuNDU4LDk3Ljk0MyBDMTIwLjQ1LDk3Ljk3MiAxMjAuNDMxLDk3Ljk5NiAxMjAuNDA1LDk4LjAxIEw5My4wODMsMTEzLjc4NSBDOTMuMDY1LDExMy43OTUgOTMuMDQ1LDExMy44IDkzLjAyNSwxMTMuOCBMOTMuMDI1LDExMy44IFogTTkzLjE0Miw2Mi44ODEgTDkzLjE0MiwxMTMuNDgxIEwxMjAuMjQ4LDk3LjgzMiBMMTI2LjY5NSw3Ni4yNDggQzEyNy4xNCw3NC43NTggMTI3Ljk3Nyw3My4zMTUgMTI5LjA1Miw3Mi4xODMgQzEzMC4yMzEsNzAuOTQyIDEzMS41NjgsNzAuMjI5IDEzMi43Miw3MC4yMjkgQzEzMy42ODksNzAuMjI5IDEzNC40NTIsNzAuNzMxIDEzNC44NjcsNzEuNjQxIEwxNDEuMjc0LDg1LjY5MiBMMTY4LjQyNiw3MC4wMTYgTDE2OC40MjYsMTkuNDE1IEw5My4xNDIsNjIuODgxIEw5My4xNDIsNjIuODgxIFoiIGlkPSJGaWxsLTE2IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS44LDcwLjA4MyBMMTQyLjQ3OCw4NS44NTcgTDEzNi4wMTgsNzEuNjg5IEMxMzUuMTA4LDY5LjY5NCAxMzIuNTksNjkuOTUxIDEzMC4zOTMsNzIuMjYzIEMxMjkuMzM5LDczLjM3NCAxMjguNSw3NC44MTkgMTI4LjA2NCw3Ni4yODIgTDEyMS42MDMsOTcuOTA5IEw5NC4yODIsMTEzLjY4MyBMOTQuMjgyLDYyLjgxMyBMMTY5LjgsMTkuMjEzIEwxNjkuOCw3MC4wODMgWiIgaWQ9IkZpbGwtMTciIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNOTQuMjgyLDExMy45MTcgQzk0LjI0MSwxMTMuOTE3IDk0LjIwMSwxMTMuOTA3IDk0LjE2NSwxMTMuODg2IEM5NC4wOTMsMTEzLjg0NSA5NC4wNDgsMTEzLjc2NyA5NC4wNDgsMTEzLjY4NCBMOTQuMDQ4LDYyLjgxMyBDOTQuMDQ4LDYyLjczIDk0LjA5Myw2Mi42NTIgOTQuMTY1LDYyLjYxMSBMMTY5LjY4MywxOS4wMSBDMTY5Ljc1NSwxOC45NjkgMTY5Ljg0NCwxOC45NjkgMTY5LjkxNywxOS4wMSBDMTY5Ljk4OSwxOS4wNTIgMTcwLjAzMywxOS4xMjkgMTcwLjAzMywxOS4yMTIgTDE3MC4wMzMsNzAuMDgzIEMxNzAuMDMzLDcwLjE2NiAxNjkuOTg5LDcwLjI0NCAxNjkuOTE3LDcwLjI4NSBMMTQyLjU5NSw4Ni4wNiBDMTQyLjUzOCw4Ni4wOTIgMTQyLjQ2OSw4Ni4xIDE0Mi40MDcsODYuMDggQzE0Mi4zNDQsODYuMDYgMTQyLjI5Myw4Ni4wMTQgMTQyLjI2Niw4NS45NTQgTDEzNS44MDUsNzEuNzg2IEMxMzUuNDQ1LDcwLjk5NyAxMzQuODEzLDcwLjU4IDEzMy45NzcsNzAuNTggQzEzMi45MjEsNzAuNTggMTMxLjY3Niw3MS4yNTIgMTMwLjU2Miw3Mi40MjQgQzEyOS41NCw3My41MDEgMTI4LjcxMSw3NC45MzEgMTI4LjI4Nyw3Ni4zNDggTDEyMS44MjcsOTcuOTc2IEMxMjEuODEsOTguMDM0IDEyMS43NzEsOTguMDgyIDEyMS43Miw5OC4xMTIgTDk0LjM5OCwxMTMuODg2IEM5NC4zNjIsMTEzLjkwNyA5NC4zMjIsMTEzLjkxNyA5NC4yODIsMTEzLjkxNyBMOTQuMjgyLDExMy45MTcgWiBNOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDExMy4yNzkgTDEyMS40MDYsOTcuNzU0IEwxMjcuODQsNzYuMjE1IEMxMjguMjksNzQuNzA4IDEyOS4xMzcsNzMuMjQ3IDEzMC4yMjQsNzIuMTAzIEMxMzEuNDI1LDcwLjgzOCAxMzIuNzkzLDcwLjExMiAxMzMuOTc3LDcwLjExMiBDMTM0Ljk5NSw3MC4xMTIgMTM1Ljc5NSw3MC42MzggMTM2LjIzLDcxLjU5MiBMMTQyLjU4NCw4NS41MjYgTDE2OS41NjYsNjkuOTQ4IEwxNjkuNTY2LDE5LjYxNyBMOTQuNTE1LDYyLjk0OCBMOTQuNTE1LDYyLjk0OCBaIiBpZD0iRmlsbC0xOCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMDkuODk0LDkyLjk0MyBMMTA5Ljg5NCw5Mi45NDMgQzEwOC4xMiw5Mi45NDMgMTA2LjY1Myw5Mi4yMTggMTA1LjY1LDkwLjgyMyBDMTA1LjU4Myw5MC43MzEgMTA1LjU5Myw5MC42MSAxMDUuNjczLDkwLjUyOSBDMTA1Ljc1Myw5MC40NDggMTA1Ljg4LDkwLjQ0IDEwNS45NzQsOTAuNTA2IEMxMDYuNzU0LDkxLjA1MyAxMDcuNjc5LDkxLjMzMyAxMDguNzI0LDkxLjMzMyBDMTEwLjA0Nyw5MS4zMzMgMTExLjQ3OCw5MC44OTQgMTEyLjk4LDkwLjAyNyBDMTE4LjI5MSw4Ni45NiAxMjIuNjExLDc5LjUwOSAxMjIuNjExLDczLjQxNiBDMTIyLjYxMSw3MS40ODkgMTIyLjE2OSw2OS44NTYgMTIxLjMzMyw2OC42OTIgQzEyMS4yNjYsNjguNiAxMjEuMjc2LDY4LjQ3MyAxMjEuMzU2LDY4LjM5MiBDMTIxLjQzNiw2OC4zMTEgMTIxLjU2Myw2OC4yOTkgMTIxLjY1Niw2OC4zNjUgQzEyMy4zMjcsNjkuNTM3IDEyNC4yNDcsNzEuNzQ2IDEyNC4yNDcsNzQuNTg0IEMxMjQuMjQ3LDgwLjgyNiAxMTkuODIxLDg4LjQ0NyAxMTQuMzgyLDkxLjU4NyBDMTEyLjgwOCw5Mi40OTUgMTExLjI5OCw5Mi45NDMgMTA5Ljg5NCw5Mi45NDMgTDEwOS44OTQsOTIuOTQzIFogTTEwNi45MjUsOTEuNDAxIEMxMDcuNzM4LDkyLjA1MiAxMDguNzQ1LDkyLjI3OCAxMDkuODkzLDkyLjI3OCBMMTA5Ljg5NCw5Mi4yNzggQzExMS4yMTUsOTIuMjc4IDExMi42NDcsOTEuOTUxIDExNC4xNDgsOTEuMDg0IEMxMTkuNDU5LDg4LjAxNyAxMjMuNzgsODAuNjIxIDEyMy43OCw3NC41MjggQzEyMy43OCw3Mi41NDkgMTIzLjMxNyw3MC45MjkgMTIyLjQ1NCw2OS43NjcgQzEyMi44NjUsNzAuODAyIDEyMy4wNzksNzIuMDQyIDEyMy4wNzksNzMuNDAyIEMxMjMuMDc5LDc5LjY0NSAxMTguNjUzLDg3LjI4NSAxMTMuMjE0LDkwLjQyNSBDMTExLjY0LDkxLjMzNCAxMTAuMTMsOTEuNzQyIDEwOC43MjQsOTEuNzQyIEMxMDguMDgzLDkxLjc0MiAxMDcuNDgxLDkxLjU5MyAxMDYuOTI1LDkxLjQwMSBMMTA2LjkyNSw5MS40MDEgWiIgaWQ9IkZpbGwtMTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjA5Nyw5MC4yMyBDMTE4LjQ4MSw4Ny4xMjIgMTIyLjg0NSw3OS41OTQgMTIyLjg0NSw3My40MTYgQzEyMi44NDUsNzEuMzY1IDEyMi4zNjIsNjkuNzI0IDEyMS41MjIsNjguNTU2IEMxMTkuNzM4LDY3LjMwNCAxMTcuMTQ4LDY3LjM2MiAxMTQuMjY1LDY5LjAyNiBDMTA4Ljg4MSw3Mi4xMzQgMTA0LjUxNyw3OS42NjIgMTA0LjUxNyw4NS44NCBDMTA0LjUxNyw4Ny44OTEgMTA1LDg5LjUzMiAxMDUuODQsOTAuNyBDMTA3LjYyNCw5MS45NTIgMTEwLjIxNCw5MS44OTQgMTEzLjA5Nyw5MC4yMyIgaWQ9IkZpbGwtMjAiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTA4LjcyNCw5MS42MTQgTDEwOC43MjQsOTEuNjE0IEMxMDcuNTgyLDkxLjYxNCAxMDYuNTY2LDkxLjQwMSAxMDUuNzA1LDkwLjc5NyBDMTA1LjY4NCw5MC43ODMgMTA1LjY2NSw5MC44MTEgMTA1LjY1LDkwLjc5IEMxMDQuNzU2LDg5LjU0NiAxMDQuMjgzLDg3Ljg0MiAxMDQuMjgzLDg1LjgxNyBDMTA0LjI4Myw3OS41NzUgMTA4LjcwOSw3MS45NTMgMTE0LjE0OCw2OC44MTIgQzExNS43MjIsNjcuOTA0IDExNy4yMzIsNjcuNDQ5IDExOC42MzgsNjcuNDQ5IEMxMTkuNzgsNjcuNDQ5IDEyMC43OTYsNjcuNzU4IDEyMS42NTYsNjguMzYyIEMxMjEuNjc4LDY4LjM3NyAxMjEuNjk3LDY4LjM5NyAxMjEuNzEyLDY4LjQxOCBDMTIyLjYwNiw2OS42NjIgMTIzLjA3OSw3MS4zOSAxMjMuMDc5LDczLjQxNSBDMTIzLjA3OSw3OS42NTggMTE4LjY1Myw4Ny4xOTggMTEzLjIxNCw5MC4zMzggQzExMS42NCw5MS4yNDcgMTEwLjEzLDkxLjYxNCAxMDguNzI0LDkxLjYxNCBMMTA4LjcyNCw5MS42MTQgWiBNMTA2LjAwNiw5MC41MDUgQzEwNi43OCw5MS4wMzcgMTA3LjY5NCw5MS4yODEgMTA4LjcyNCw5MS4yODEgQzExMC4wNDcsOTEuMjgxIDExMS40NzgsOTAuODY4IDExMi45OCw5MC4wMDEgQzExOC4yOTEsODYuOTM1IDEyMi42MTEsNzkuNDk2IDEyMi42MTEsNzMuNDAzIEMxMjIuNjExLDcxLjQ5NCAxMjIuMTc3LDY5Ljg4IDEyMS4zNTYsNjguNzE4IEMxMjAuNTgyLDY4LjE4NSAxMTkuNjY4LDY3LjkxOSAxMTguNjM4LDY3LjkxOSBDMTE3LjMxNSw2Ny45MTkgMTE1Ljg4Myw2OC4zNiAxMTQuMzgyLDY5LjIyNyBDMTA5LjA3MSw3Mi4yOTMgMTA0Ljc1MSw3OS43MzMgMTA0Ljc1MSw4NS44MjYgQzEwNC43NTEsODcuNzM1IDEwNS4xODUsODkuMzQzIDEwNi4wMDYsOTAuNTA1IEwxMDYuMDA2LDkwLjUwNSBaIiBpZD0iRmlsbC0yMSIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNDkuMzE4LDcuMjYyIEwxMzkuMzM0LDE2LjE0IEwxNTUuMjI3LDI3LjE3MSBMMTYwLjgxNiwyMS4wNTkgTDE0OS4zMTgsNy4yNjIiIGlkPSJGaWxsLTIyIiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE2OS42NzYsMTMuODQgTDE1OS45MjgsMTkuNDY3IEMxNTYuMjg2LDIxLjU3IDE1MC40LDIxLjU4IDE0Ni43ODEsMTkuNDkxIEMxNDMuMTYxLDE3LjQwMiAxNDMuMTgsMTQuMDAzIDE0Ni44MjIsMTEuOSBMMTU2LjMxNyw2LjI5MiBMMTQ5LjU4OCwyLjQwNyBMNjcuNzUyLDQ5LjQ3OCBMMTEzLjY3NSw3NS45OTIgTDExNi43NTYsNzQuMjEzIEMxMTcuMzg3LDczLjg0OCAxMTcuNjI1LDczLjMxNSAxMTcuMzc0LDcyLjgyMyBDMTE1LjAxNyw2OC4xOTEgMTE0Ljc4MSw2My4yNzcgMTE2LjY5MSw1OC41NjEgQzEyMi4zMjksNDQuNjQxIDE0MS4yLDMzLjc0NiAxNjUuMzA5LDMwLjQ5MSBDMTczLjQ3OCwyOS4zODggMTgxLjk4OSwyOS41MjQgMTkwLjAxMywzMC44ODUgQzE5MC44NjUsMzEuMDMgMTkxLjc4OSwzMC44OTMgMTkyLjQyLDMwLjUyOCBMMTk1LjUwMSwyOC43NSBMMTY5LjY3NiwxMy44NCIgaWQ9IkZpbGwtMjMiIGZpbGw9IiNGQUZBRkEiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3Ni40NTkgQzExMy41OTQsNzYuNDU5IDExMy41MTQsNzYuNDM4IDExMy40NDIsNzYuMzk3IEw2Ny41MTgsNDkuODgyIEM2Ny4zNzQsNDkuNzk5IDY3LjI4NCw0OS42NDUgNjcuMjg1LDQ5LjQ3OCBDNjcuMjg1LDQ5LjMxMSA2Ny4zNzQsNDkuMTU3IDY3LjUxOSw0OS4wNzMgTDE0OS4zNTUsMi4wMDIgQzE0OS40OTksMS45MTkgMTQ5LjY3NywxLjkxOSAxNDkuODIxLDIuMDAyIEwxNTYuNTUsNS44ODcgQzE1Ni43NzQsNi4wMTcgMTU2Ljg1LDYuMzAyIDE1Ni43MjIsNi41MjYgQzE1Ni41OTIsNi43NDkgMTU2LjMwNyw2LjgyNiAxNTYuMDgzLDYuNjk2IEwxNDkuNTg3LDIuOTQ2IEw2OC42ODcsNDkuNDc5IEwxMTMuNjc1LDc1LjQ1MiBMMTE2LjUyMyw3My44MDggQzExNi43MTUsNzMuNjk3IDExNy4xNDMsNzMuMzk5IDExNi45NTgsNzMuMDM1IEMxMTQuNTQyLDY4LjI4NyAxMTQuMyw2My4yMjEgMTE2LjI1OCw1OC4zODUgQzExOS4wNjQsNTEuNDU4IDEyNS4xNDMsNDUuMTQzIDEzMy44NCw0MC4xMjIgQzE0Mi40OTcsMzUuMTI0IDE1My4zNTgsMzEuNjMzIDE2NS4yNDcsMzAuMDI4IEMxNzMuNDQ1LDI4LjkyMSAxODIuMDM3LDI5LjA1OCAxOTAuMDkxLDMwLjQyNSBDMTkwLjgzLDMwLjU1IDE5MS42NTIsMzAuNDMyIDE5Mi4xODYsMzAuMTI0IEwxOTQuNTY3LDI4Ljc1IEwxNjkuNDQyLDE0LjI0NCBDMTY5LjIxOSwxNC4xMTUgMTY5LjE0MiwxMy44MjkgMTY5LjI3MSwxMy42MDYgQzE2OS40LDEzLjM4MiAxNjkuNjg1LDEzLjMwNiAxNjkuOTA5LDEzLjQzNSBMMTk1LjczNCwyOC4zNDUgQzE5NS44NzksMjguNDI4IDE5NS45NjgsMjguNTgzIDE5NS45NjgsMjguNzUgQzE5NS45NjgsMjguOTE2IDE5NS44NzksMjkuMDcxIDE5NS43MzQsMjkuMTU0IEwxOTIuNjUzLDMwLjkzMyBDMTkxLjkzMiwzMS4zNSAxOTAuODksMzEuNTA4IDE4OS45MzUsMzEuMzQ2IEMxODEuOTcyLDI5Ljk5NSAxNzMuNDc4LDI5Ljg2IDE2NS4zNzIsMzAuOTU0IEMxNTMuNjAyLDMyLjU0MyAxNDIuODYsMzUuOTkzIDEzNC4zMDcsNDAuOTMxIEMxMjUuNzkzLDQ1Ljg0NyAxMTkuODUxLDUyLjAwNCAxMTcuMTI0LDU4LjczNiBDMTE1LjI3LDYzLjMxNCAxMTUuNTAxLDY4LjExMiAxMTcuNzksNzIuNjExIEMxMTguMTYsNzMuMzM2IDExNy44NDUsNzQuMTI0IDExNi45OSw3NC42MTcgTDExMy45MDksNzYuMzk3IEMxMTMuODM2LDc2LjQzOCAxMTMuNzU2LDc2LjQ1OSAxMTMuNjc1LDc2LjQ1OSIgaWQ9IkZpbGwtMjQiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUzLjMxNiwyMS4yNzkgQzE1MC45MDMsMjEuMjc5IDE0OC40OTUsMjAuNzUxIDE0Ni42NjQsMTkuNjkzIEMxNDQuODQ2LDE4LjY0NCAxNDMuODQ0LDE3LjIzMiAxNDMuODQ0LDE1LjcxOCBDMTQzLjg0NCwxNC4xOTEgMTQ0Ljg2LDEyLjc2MyAxNDYuNzA1LDExLjY5OCBMMTU2LjE5OCw2LjA5MSBDMTU2LjMwOSw2LjAyNSAxNTYuNDUyLDYuMDYyIDE1Ni41MTgsNi4xNzMgQzE1Ni41ODMsNi4yODQgMTU2LjU0Nyw2LjQyNyAxNTYuNDM2LDYuNDkzIEwxNDYuOTQsMTIuMTAyIEMxNDUuMjQ0LDEzLjA4MSAxNDQuMzEyLDE0LjM2NSAxNDQuMzEyLDE1LjcxOCBDMTQ0LjMxMiwxNy4wNTggMTQ1LjIzLDE4LjMyNiAxNDYuODk3LDE5LjI4OSBDMTUwLjQ0NiwyMS4zMzggMTU2LjI0LDIxLjMyNyAxNTkuODExLDE5LjI2NSBMMTY5LjU1OSwxMy42MzcgQzE2OS42NywxMy41NzMgMTY5LjgxMywxMy42MTEgMTY5Ljg3OCwxMy43MjMgQzE2OS45NDMsMTMuODM0IDE2OS45MDQsMTMuOTc3IDE2OS43OTMsMTQuMDQyIEwxNjAuMDQ1LDE5LjY3IEMxNTguMTg3LDIwLjc0MiAxNTUuNzQ5LDIxLjI3OSAxNTMuMzE2LDIxLjI3OSIgaWQ9IkZpbGwtMjUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEzLjY3NSw3NS45OTIgTDY3Ljc2Miw0OS40ODQiIGlkPSJGaWxsLTI2IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMy42NzUsNzYuMzQyIEMxMTMuNjE1LDc2LjM0MiAxMTMuNTU1LDc2LjMyNyAxMTMuNSw3Ni4yOTUgTDY3LjU4Nyw0OS43ODcgQzY3LjQxOSw0OS42OSA2Ny4zNjIsNDkuNDc2IDY3LjQ1OSw0OS4zMDkgQzY3LjU1Niw0OS4xNDEgNjcuNzcsNDkuMDgzIDY3LjkzNyw0OS4xOCBMMTEzLjg1LDc1LjY4OCBDMTE0LjAxOCw3NS43ODUgMTE0LjA3NSw3NiAxMTMuOTc4LDc2LjE2NyBDMTEzLjkxNCw3Ni4yNzkgMTEzLjc5Niw3Ni4zNDIgMTEzLjY3NSw3Ni4zNDIiIGlkPSJGaWxsLTI3IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY3Ljc2Miw0OS40ODQgTDY3Ljc2MiwxMDMuNDg1IEM2Ny43NjIsMTA0LjU3NSA2OC41MzIsMTA1LjkwMyA2OS40ODIsMTA2LjQ1MiBMMTExLjk1NSwxMzAuOTczIEMxMTIuOTA1LDEzMS41MjIgMTEzLjY3NSwxMzEuMDgzIDExMy42NzUsMTI5Ljk5MyBMMTEzLjY3NSw3NS45OTIiIGlkPSJGaWxsLTI4IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExMi43MjcsMTMxLjU2MSBDMTEyLjQzLDEzMS41NjEgMTEyLjEwNywxMzEuNDY2IDExMS43OCwxMzEuMjc2IEw2OS4zMDcsMTA2Ljc1NSBDNjguMjQ0LDEwNi4xNDIgNjcuNDEyLDEwNC43MDUgNjcuNDEyLDEwMy40ODUgTDY3LjQxMiw0OS40ODQgQzY3LjQxMiw0OS4yOSA2Ny41NjksNDkuMTM0IDY3Ljc2Miw0OS4xMzQgQzY3Ljk1Niw0OS4xMzQgNjguMTEzLDQ5LjI5IDY4LjExMyw0OS40ODQgTDY4LjExMywxMDMuNDg1IEM2OC4xMTMsMTA0LjQ0NSA2OC44MiwxMDUuNjY1IDY5LjY1NywxMDYuMTQ4IEwxMTIuMTMsMTMwLjY3IEMxMTIuNDc0LDEzMC44NjggMTEyLjc5MSwxMzAuOTEzIDExMywxMzAuNzkyIEMxMTMuMjA2LDEzMC42NzMgMTEzLjMyNSwxMzAuMzgxIDExMy4zMjUsMTI5Ljk5MyBMMTEzLjMyNSw3NS45OTIgQzExMy4zMjUsNzUuNzk4IDExMy40ODIsNzUuNjQxIDExMy42NzUsNzUuNjQxIEMxMTMuODY5LDc1LjY0MSAxMTQuMDI1LDc1Ljc5OCAxMTQuMDI1LDc1Ljk5MiBMMTE0LjAyNSwxMjkuOTkzIEMxMTQuMDI1LDEzMC42NDggMTEzLjc4NiwxMzEuMTQ3IDExMy4zNSwxMzEuMzk5IEMxMTMuMTYyLDEzMS41MDcgMTEyLjk1MiwxMzEuNTYxIDExMi43MjcsMTMxLjU2MSIgaWQ9IkZpbGwtMjkiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTEyLjg2LDQwLjUxMiBDMTEyLjg2LDQwLjUxMiAxMTIuODYsNDAuNTEyIDExMi44NTksNDAuNTEyIEMxMTAuNTQxLDQwLjUxMiAxMDguMzYsMzkuOTkgMTA2LjcxNywzOS4wNDEgQzEwNS4wMTIsMzguMDU3IDEwNC4wNzQsMzYuNzI2IDEwNC4wNzQsMzUuMjkyIEMxMDQuMDc0LDMzLjg0NyAxMDUuMDI2LDMyLjUwMSAxMDYuNzU0LDMxLjUwNCBMMTE4Ljc5NSwyNC41NTEgQzEyMC40NjMsMjMuNTg5IDEyMi42NjksMjMuMDU4IDEyNS4wMDcsMjMuMDU4IEMxMjcuMzI1LDIzLjA1OCAxMjkuNTA2LDIzLjU4MSAxMzEuMTUsMjQuNTMgQzEzMi44NTQsMjUuNTE0IDEzMy43OTMsMjYuODQ1IDEzMy43OTMsMjguMjc4IEMxMzMuNzkzLDI5LjcyNCAxMzIuODQxLDMxLjA2OSAxMzEuMTEzLDMyLjA2NyBMMTE5LjA3MSwzOS4wMTkgQzExNy40MDMsMzkuOTgyIDExNS4xOTcsNDAuNTEyIDExMi44Niw0MC41MTIgTDExMi44Niw0MC41MTIgWiBNMTI1LjAwNywyMy43NTkgQzEyMi43OSwyMy43NTkgMTIwLjcwOSwyNC4yNTYgMTE5LjE0NiwyNS4xNTggTDEwNy4xMDQsMzIuMTEgQzEwNS42MDIsMzIuOTc4IDEwNC43NzQsMzQuMTA4IDEwNC43NzQsMzUuMjkyIEMxMDQuNzc0LDM2LjQ2NSAxMDUuNTg5LDM3LjU4MSAxMDcuMDY3LDM4LjQzNCBDMTA4LjYwNSwzOS4zMjMgMTEwLjY2MywzOS44MTIgMTEyLjg1OSwzOS44MTIgTDExMi44NiwzOS44MTIgQzExNS4wNzYsMzkuODEyIDExNy4xNTgsMzkuMzE1IDExOC43MjEsMzguNDEzIEwxMzAuNzYyLDMxLjQ2IEMxMzIuMjY0LDMwLjU5MyAxMzMuMDkyLDI5LjQ2MyAxMzMuMDkyLDI4LjI3OCBDMTMzLjA5MiwyNy4xMDYgMTMyLjI3OCwyNS45OSAxMzAuOCwyNS4xMzYgQzEyOS4yNjEsMjQuMjQ4IDEyNy4yMDQsMjMuNzU5IDEyNS4wMDcsMjMuNzU5IEwxMjUuMDA3LDIzLjc1OSBaIiBpZD0iRmlsbC0zMCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNjUuNjMsMTYuMjE5IEwxNTkuODk2LDE5LjUzIEMxNTYuNzI5LDIxLjM1OCAxNTEuNjEsMjEuMzY3IDE0OC40NjMsMTkuNTUgQzE0NS4zMTYsMTcuNzMzIDE0NS4zMzIsMTQuNzc4IDE0OC40OTksMTIuOTQ5IEwxNTQuMjMzLDkuNjM5IEwxNjUuNjMsMTYuMjE5IiBpZD0iRmlsbC0zMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNTQuMjMzLDEwLjQ0OCBMMTY0LjIyOCwxNi4yMTkgTDE1OS41NDYsMTguOTIzIEMxNTguMTEyLDE5Ljc1IDE1Ni4xOTQsMjAuMjA2IDE1NC4xNDcsMjAuMjA2IEMxNTIuMTE4LDIwLjIwNiAxNTAuMjI0LDE5Ljc1NyAxNDguODE0LDE4Ljk0MyBDMTQ3LjUyNCwxOC4xOTkgMTQ2LjgxNCwxNy4yNDkgMTQ2LjgxNCwxNi4yNjkgQzE0Ni44MTQsMTUuMjc4IDE0Ny41MzcsMTQuMzE0IDE0OC44NSwxMy41NTYgTDE1NC4yMzMsMTAuNDQ4IE0xNTQuMjMzLDkuNjM5IEwxNDguNDk5LDEyLjk0OSBDMTQ1LjMzMiwxNC43NzggMTQ1LjMxNiwxNy43MzMgMTQ4LjQ2MywxOS41NSBDMTUwLjAzMSwyMC40NTUgMTUyLjA4NiwyMC45MDcgMTU0LjE0NywyMC45MDcgQzE1Ni4yMjQsMjAuOTA3IDE1OC4zMDYsMjAuNDQ3IDE1OS44OTYsMTkuNTMgTDE2NS42MywxNi4yMTkgTDE1NC4yMzMsOS42MzkiIGlkPSJGaWxsLTMyIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NS40NDUsNzIuNjY3IEwxNDUuNDQ1LDcyLjY2NyBDMTQzLjY3Miw3Mi42NjcgMTQyLjIwNCw3MS44MTcgMTQxLjIwMiw3MC40MjIgQzE0MS4xMzUsNzAuMzMgMTQxLjE0NSw3MC4xNDcgMTQxLjIyNSw3MC4wNjYgQzE0MS4zMDUsNjkuOTg1IDE0MS40MzIsNjkuOTQ2IDE0MS41MjUsNzAuMDExIEMxNDIuMzA2LDcwLjU1OSAxNDMuMjMxLDcwLjgyMyAxNDQuMjc2LDcwLjgyMiBDMTQ1LjU5OCw3MC44MjIgMTQ3LjAzLDcwLjM3NiAxNDguNTMyLDY5LjUwOSBDMTUzLjg0Miw2Ni40NDMgMTU4LjE2Myw1OC45ODcgMTU4LjE2Myw1Mi44OTQgQzE1OC4xNjMsNTAuOTY3IDE1Ny43MjEsNDkuMzMyIDE1Ni44ODQsNDguMTY4IEMxNTYuODE4LDQ4LjA3NiAxNTYuODI4LDQ3Ljk0OCAxNTYuOTA4LDQ3Ljg2NyBDMTU2Ljk4OCw0Ny43ODYgMTU3LjExNCw0Ny43NzQgMTU3LjIwOCw0Ny44NCBDMTU4Ljg3OCw0OS4wMTIgMTU5Ljc5OCw1MS4yMiAxNTkuNzk4LDU0LjA1OSBDMTU5Ljc5OCw2MC4zMDEgMTU1LjM3Myw2OC4wNDYgMTQ5LjkzMyw3MS4xODYgQzE0OC4zNiw3Mi4wOTQgMTQ2Ljg1LDcyLjY2NyAxNDUuNDQ1LDcyLjY2NyBMMTQ1LjQ0NSw3Mi42NjcgWiBNMTQyLjQ3Niw3MSBDMTQzLjI5LDcxLjY1MSAxNDQuMjk2LDcyLjAwMiAxNDUuNDQ1LDcyLjAwMiBDMTQ2Ljc2Nyw3Mi4wMDIgMTQ4LjE5OCw3MS41NSAxNDkuNyw3MC42ODIgQzE1NS4wMSw2Ny42MTcgMTU5LjMzMSw2MC4xNTkgMTU5LjMzMSw1NC4wNjUgQzE1OS4zMzEsNTIuMDg1IDE1OC44NjgsNTAuNDM1IDE1OC4wMDYsNDkuMjcyIEMxNTguNDE3LDUwLjMwNyAxNTguNjMsNTEuNTMyIDE1OC42Myw1Mi44OTIgQzE1OC42Myw1OS4xMzQgMTU0LjIwNSw2Ni43NjcgMTQ4Ljc2NSw2OS45MDcgQzE0Ny4xOTIsNzAuODE2IDE0NS42ODEsNzEuMjgzIDE0NC4yNzYsNzEuMjgzIEMxNDMuNjM0LDcxLjI4MyAxNDMuMDMzLDcxLjE5MiAxNDIuNDc2LDcxIEwxNDIuNDc2LDcxIFoiIGlkPSJGaWxsLTMzIiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0OC42NDgsNjkuNzA0IEMxNTQuMDMyLDY2LjU5NiAxNTguMzk2LDU5LjA2OCAxNTguMzk2LDUyLjg5MSBDMTU4LjM5Niw1MC44MzkgMTU3LjkxMyw0OS4xOTggMTU3LjA3NCw0OC4wMyBDMTU1LjI4OSw0Ni43NzggMTUyLjY5OSw0Ni44MzYgMTQ5LjgxNiw0OC41MDEgQzE0NC40MzMsNTEuNjA5IDE0MC4wNjgsNTkuMTM3IDE0MC4wNjgsNjUuMzE0IEMxNDAuMDY4LDY3LjM2NSAxNDAuNTUyLDY5LjAwNiAxNDEuMzkxLDcwLjE3NCBDMTQzLjE3Niw3MS40MjcgMTQ1Ljc2NSw3MS4zNjkgMTQ4LjY0OCw2OS43MDQiIGlkPSJGaWxsLTM0IiBmaWxsPSIjRkFGQUZBIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTE0NC4yNzYsNzEuMjc2IEwxNDQuMjc2LDcxLjI3NiBDMTQzLjEzMyw3MS4yNzYgMTQyLjExOCw3MC45NjkgMTQxLjI1Nyw3MC4zNjUgQzE0MS4yMzYsNzAuMzUxIDE0MS4yMTcsNzAuMzMyIDE0MS4yMDIsNzAuMzExIEMxNDAuMzA3LDY5LjA2NyAxMzkuODM1LDY3LjMzOSAxMzkuODM1LDY1LjMxNCBDMTM5LjgzNSw1OS4wNzMgMTQ0LjI2LDUxLjQzOSAxNDkuNyw0OC4yOTggQzE1MS4yNzMsNDcuMzkgMTUyLjc4NCw0Ni45MjkgMTU0LjE4OSw0Ni45MjkgQzE1NS4zMzIsNDYuOTI5IDE1Ni4zNDcsNDcuMjM2IDE1Ny4yMDgsNDcuODM5IEMxNTcuMjI5LDQ3Ljg1NCAxNTcuMjQ4LDQ3Ljg3MyAxNTcuMjYzLDQ3Ljg5NCBDMTU4LjE1Nyw0OS4xMzggMTU4LjYzLDUwLjg2NSAxNTguNjMsNTIuODkxIEMxNTguNjMsNTkuMTMyIDE1NC4yMDUsNjYuNzY2IDE0OC43NjUsNjkuOTA3IEMxNDcuMTkyLDcwLjgxNSAxNDUuNjgxLDcxLjI3NiAxNDQuMjc2LDcxLjI3NiBMMTQ0LjI3Niw3MS4yNzYgWiBNMTQxLjU1OCw3MC4xMDQgQzE0Mi4zMzEsNzAuNjM3IDE0My4yNDUsNzEuMDA1IDE0NC4yNzYsNzEuMDA1IEMxNDUuNTk4LDcxLjAwNSAxNDcuMDMsNzAuNDY3IDE0OC41MzIsNjkuNiBDMTUzLjg0Miw2Ni41MzQgMTU4LjE2Myw1OS4wMzMgMTU4LjE2Myw1Mi45MzkgQzE1OC4xNjMsNTEuMDMxIDE1Ny43MjksNDkuMzg1IDE1Ni45MDcsNDguMjIzIEMxNTYuMTMzLDQ3LjY5MSAxNTUuMjE5LDQ3LjQwOSAxNTQuMTg5LDQ3LjQwOSBDMTUyLjg2Nyw0Ny40MDkgMTUxLjQzNSw0Ny44NDIgMTQ5LjkzMyw0OC43MDkgQzE0NC42MjMsNTEuNzc1IDE0MC4zMDIsNTkuMjczIDE0MC4zMDIsNjUuMzY2IEMxNDAuMzAyLDY3LjI3NiAxNDAuNzM2LDY4Ljk0MiAxNDEuNTU4LDcwLjEwNCBMMTQxLjU1OCw3MC4xMDQgWiIgaWQ9IkZpbGwtMzUiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTUwLjcyLDY1LjM2MSBMMTUwLjM1Nyw2NS4wNjYgQzE1MS4xNDcsNjQuMDkyIDE1MS44NjksNjMuMDQgMTUyLjUwNSw2MS45MzggQzE1My4zMTMsNjAuNTM5IDE1My45NzgsNTkuMDY3IDE1NC40ODIsNTcuNTYzIEwxNTQuOTI1LDU3LjcxMiBDMTU0LjQxMiw1OS4yNDUgMTUzLjczMyw2MC43NDUgMTUyLjkxLDYyLjE3MiBDMTUyLjI2Miw2My4yOTUgMTUxLjUyNSw2NC4zNjggMTUwLjcyLDY1LjM2MSIgaWQ9IkZpbGwtMzYiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE1LjkxNyw4NC41MTQgTDExNS41NTQsODQuMjIgQzExNi4zNDQsODMuMjQ1IDExNy4wNjYsODIuMTk0IDExNy43MDIsODEuMDkyIEMxMTguNTEsNzkuNjkyIDExOS4xNzUsNzguMjIgMTE5LjY3OCw3Ni43MTcgTDEyMC4xMjEsNzYuODY1IEMxMTkuNjA4LDc4LjM5OCAxMTguOTMsNzkuODk5IDExOC4xMDYsODEuMzI2IEMxMTcuNDU4LDgyLjQ0OCAxMTYuNzIyLDgzLjUyMSAxMTUuOTE3LDg0LjUxNCIgaWQ9IkZpbGwtMzciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTE0LDEzMC40NzYgTDExNCwxMzAuMDA4IEwxMTQsNzYuMDUyIEwxMTQsNzUuNTg0IEwxMTQsNzYuMDUyIEwxMTQsMTMwLjAwOCBMMTE0LDEzMC40NzYiIGlkPSJGaWxsLTM4IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgICAgICA8ZyBpZD0iSW1wb3J0ZWQtTGF5ZXJzLUNvcHkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYyLjAwMDAwMCwgMC4wMDAwMDApIiBza2V0Y2g6dHlwZT0iTVNTaGFwZUdyb3VwIj4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTkuODIyLDM3LjQ3NCBDMTkuODM5LDM3LjMzOSAxOS43NDcsMzcuMTk0IDE5LjU1NSwzNy4wODIgQzE5LjIyOCwzNi44OTQgMTguNzI5LDM2Ljg3MiAxOC40NDYsMzcuMDM3IEwxMi40MzQsNDAuNTA4IEMxMi4zMDMsNDAuNTg0IDEyLjI0LDQwLjY4NiAxMi4yNDMsNDAuNzkzIEMxMi4yNDUsNDAuOTI1IDEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQxLjM3MSBMMTIuMjQ1LDQxLjQxNCBMMTIuMjM4LDQxLjU0MiBDOC4xNDgsNDMuODg3IDUuNjQ3LDQ1LjMyMSA1LjY0Nyw0NS4zMjEgQzUuNjQ2LDQ1LjMyMSAzLjU3LDQ2LjM2NyAyLjg2LDUwLjUxMyBDMi44Niw1MC41MTMgMS45NDgsNTcuNDc0IDEuOTYyLDcwLjI1OCBDMS45NzcsODIuODI4IDIuNTY4LDg3LjMyOCAzLjEyOSw5MS42MDkgQzMuMzQ5LDkzLjI5MyA2LjEzLDkzLjczNCA2LjEzLDkzLjczNCBDNi40NjEsOTMuNzc0IDYuODI4LDkzLjcwNyA3LjIxLDkzLjQ4NiBMODIuNDgzLDQ5LjkzNSBDODQuMjkxLDQ4Ljg2NiA4NS4xNSw0Ni4yMTYgODUuNTM5LDQzLjY1MSBDODYuNzUyLDM1LjY2MSA4Ny4yMTQsMTAuNjczIDg1LjI2NCwzLjc3MyBDODUuMDY4LDMuMDggODQuNzU0LDIuNjkgODQuMzk2LDIuNDkxIEw4Mi4zMSwxLjcwMSBDODEuNTgzLDEuNzI5IDgwLjg5NCwyLjE2OCA4MC43NzYsMi4yMzYgQzgwLjYzNiwyLjMxNyA0MS44MDcsMjQuNTg1IDIwLjAzMiwzNy4wNzIgTDE5LjgyMiwzNy40NzQiIGlkPSJGaWxsLTEiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNODIuMzExLDEuNzAxIEw4NC4zOTYsMi40OTEgQzg0Ljc1NCwyLjY5IDg1LjA2OCwzLjA4IDg1LjI2NCwzLjc3MyBDODcuMjEzLDEwLjY3MyA4Ni43NTEsMzUuNjYgODUuNTM5LDQzLjY1MSBDODUuMTQ5LDQ2LjIxNiA4NC4yOSw0OC44NjYgODIuNDgzLDQ5LjkzNSBMNy4yMSw5My40ODYgQzYuODk3LDkzLjY2NyA2LjU5NSw5My43NDQgNi4zMTQsOTMuNzQ0IEw2LjEzMSw5My43MzMgQzYuMTMxLDkzLjczNCAzLjM0OSw5My4yOTMgMy4xMjgsOTEuNjA5IEMyLjU2OCw4Ny4zMjcgMS45NzcsODIuODI4IDEuOTYzLDcwLjI1OCBDMS45NDgsNTcuNDc0IDIuODYsNTAuNTEzIDIuODYsNTAuNTEzIEMzLjU3LDQ2LjM2NyA1LjY0Nyw0NS4zMjEgNS42NDcsNDUuMzIxIEM1LjY0Nyw0NS4zMjEgOC4xNDgsNDMuODg3IDEyLjIzOCw0MS41NDIgTDEyLjI0NSw0MS40MTQgTDEyLjI0NSw0MS4zNzEgQzEyLjI0NSw0MS4yNTQgMTIuMjQ1LDQwLjkyNSAxMi4yNDMsNDAuNzkzIEMxMi4yNCw0MC42ODYgMTIuMzAyLDQwLjU4MyAxMi40MzQsNDAuNTA4IEwxOC40NDYsMzcuMDM2IEMxOC41NzQsMzYuOTYyIDE4Ljc0NiwzNi45MjYgMTguOTI3LDM2LjkyNiBDMTkuMTQ1LDM2LjkyNiAxOS4zNzYsMzYuOTc5IDE5LjU1NCwzNy4wODIgQzE5Ljc0NywzNy4xOTQgMTkuODM5LDM3LjM0IDE5LjgyMiwzNy40NzQgTDIwLjAzMywzNy4wNzIgQzQxLjgwNiwyNC41ODUgODAuNjM2LDIuMzE4IDgwLjc3NywyLjIzNiBDODAuODk0LDIuMTY4IDgxLjU4MywxLjcyOSA4Mi4zMTEsMS43MDEgTTgyLjMxMSwwLjcwNCBMODIuMjcyLDAuNzA1IEM4MS42NTQsMC43MjggODAuOTg5LDAuOTQ5IDgwLjI5OCwxLjM2MSBMODAuMjc3LDEuMzczIEM4MC4xMjksMS40NTggNTkuNzY4LDEzLjEzNSAxOS43NTgsMzYuMDc5IEMxOS41LDM1Ljk4MSAxOS4yMTQsMzUuOTI5IDE4LjkyNywzNS45MjkgQzE4LjU2MiwzNS45MjkgMTguMjIzLDM2LjAxMyAxNy45NDcsMzYuMTczIEwxMS45MzUsMzkuNjQ0IEMxMS40OTMsMzkuODk5IDExLjIzNiw0MC4zMzQgMTEuMjQ2LDQwLjgxIEwxMS4yNDcsNDAuOTYgTDUuMTY3LDQ0LjQ0NyBDNC43OTQsNDQuNjQ2IDIuNjI1LDQ1Ljk3OCAxLjg3Nyw1MC4zNDUgTDEuODcxLDUwLjM4NCBDMS44NjIsNTAuNDU0IDAuOTUxLDU3LjU1NyAwLjk2NSw3MC4yNTkgQzAuOTc5LDgyLjg3OSAxLjU2OCw4Ny4zNzUgMi4xMzcsOTEuNzI0IEwyLjEzOSw5MS43MzkgQzIuNDQ3LDk0LjA5NCA1LjYxNCw5NC42NjIgNS45NzUsOTQuNzE5IEw2LjAwOSw5NC43MjMgQzYuMTEsOTQuNzM2IDYuMjEzLDk0Ljc0MiA2LjMxNCw5NC43NDIgQzYuNzksOTQuNzQyIDcuMjYsOTQuNjEgNy43MSw5NC4zNSBMODIuOTgzLDUwLjc5OCBDODQuNzk0LDQ5LjcyNyA4NS45ODIsNDcuMzc1IDg2LjUyNSw0My44MDEgQzg3LjcxMSwzNS45ODcgODguMjU5LDEwLjcwNSA4Ni4yMjQsMy41MDIgQzg1Ljk3MSwyLjYwOSA4NS41MiwxLjk3NSA4NC44ODEsMS42MiBMODQuNzQ5LDEuNTU4IEw4Mi42NjQsMC43NjkgQzgyLjU1MSwwLjcyNSA4Mi40MzEsMC43MDQgODIuMzExLDAuNzA0IiBpZD0iRmlsbC0yIiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTY2LjI2NywxMS41NjUgTDY3Ljc2MiwxMS45OTkgTDExLjQyMyw0NC4zMjUiIGlkPSJGaWxsLTMiIGZpbGw9IiNGRkZGRkYiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMjAyLDkwLjU0NSBDMTIuMDI5LDkwLjU0NSAxMS44NjIsOTAuNDU1IDExLjc2OSw5MC4yOTUgQzExLjYzMiw5MC4wNTcgMTEuNzEzLDg5Ljc1MiAxMS45NTIsODkuNjE0IEwzMC4zODksNzguOTY5IEMzMC42MjgsNzguODMxIDMwLjkzMyw3OC45MTMgMzEuMDcxLDc5LjE1MiBDMzEuMjA4LDc5LjM5IDMxLjEyNyw3OS42OTYgMzAuODg4LDc5LjgzMyBMMTIuNDUxLDkwLjQ3OCBMMTIuMjAyLDkwLjU0NSIgaWQ9IkZpbGwtNCIgZmlsbD0iIzYwN0Q4QiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMy43NjQsNDIuNjU0IEwxMy42NTYsNDIuNTkyIEwxMy43MDIsNDIuNDIxIEwxOC44MzcsMzkuNDU3IEwxOS4wMDcsMzkuNTAyIEwxOC45NjIsMzkuNjczIEwxMy44MjcsNDIuNjM3IEwxMy43NjQsNDIuNjU0IiBpZD0iRmlsbC01IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTguNTIsOTAuMzc1IEw4LjUyLDQ2LjQyMSBMOC41ODMsNDYuMzg1IEw3NS44NCw3LjU1NCBMNzUuODQsNTEuNTA4IEw3NS43NzgsNTEuNTQ0IEw4LjUyLDkwLjM3NSBMOC41Miw5MC4zNzUgWiBNOC43Nyw0Ni41NjQgTDguNzcsODkuOTQ0IEw3NS41OTEsNTEuMzY1IEw3NS41OTEsNy45ODUgTDguNzcsNDYuNTY0IEw4Ljc3LDQ2LjU2NCBaIiBpZD0iRmlsbC02IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTI0Ljk4Niw4My4xODIgQzI0Ljc1Niw4My4zMzEgMjQuMzc0LDgzLjU2NiAyNC4xMzcsODMuNzA1IEwxMi42MzIsOTAuNDA2IEMxMi4zOTUsOTAuNTQ1IDEyLjQyNiw5MC42NTggMTIuNyw5MC42NTggTDEzLjI2NSw5MC42NTggQzEzLjU0LDkwLjY1OCAxMy45NTgsOTAuNTQ1IDE0LjE5NSw5MC40MDYgTDI1LjcsODMuNzA1IEMyNS45MzcsODMuNTY2IDI2LjEyOCw4My40NTIgMjYuMTI1LDgzLjQ0OSBDMjYuMTIyLDgzLjQ0NyAyNi4xMTksODMuMjIgMjYuMTE5LDgyLjk0NiBDMjYuMTE5LDgyLjY3MiAyNS45MzEsODIuNTY5IDI1LjcwMSw4Mi43MTkgTDI0Ljk4Niw4My4xODIiIGlkPSJGaWxsLTciIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTMuMjY2LDkwLjc4MiBMMTIuNyw5MC43ODIgQzEyLjUsOTAuNzgyIDEyLjM4NCw5MC43MjYgMTIuMzU0LDkwLjYxNiBDMTIuMzI0LDkwLjUwNiAxMi4zOTcsOTAuMzk5IDEyLjU2OSw5MC4yOTkgTDI0LjA3NCw4My41OTcgQzI0LjMxLDgzLjQ1OSAyNC42ODksODMuMjI2IDI0LjkxOCw4My4wNzggTDI1LjYzMyw4Mi42MTQgQzI1LjcyMyw4Mi41NTUgMjUuODEzLDgyLjUyNSAyNS44OTksODIuNTI1IEMyNi4wNzEsODIuNTI1IDI2LjI0NCw4Mi42NTUgMjYuMjQ0LDgyLjk0NiBDMjYuMjQ0LDgzLjE2IDI2LjI0NSw4My4zMDkgMjYuMjQ3LDgzLjM4MyBMMjYuMjUzLDgzLjM4NyBMMjYuMjQ5LDgzLjQ1NiBDMjYuMjQ2LDgzLjUzMSAyNi4yNDYsODMuNTMxIDI1Ljc2Myw4My44MTIgTDE0LjI1OCw5MC41MTQgQzE0LDkwLjY2NSAxMy41NjQsOTAuNzgyIDEzLjI2Niw5MC43ODIgTDEzLjI2Niw5MC43ODIgWiBNMTIuNjY2LDkwLjUzMiBMMTIuNyw5MC41MzMgTDEzLjI2Niw5MC41MzMgQzEzLjUxOCw5MC41MzMgMTMuOTE1LDkwLjQyNSAxNC4xMzIsOTAuMjk5IEwyNS42MzcsODMuNTk3IEMyNS44MDUsODMuNDk5IDI1LjkzMSw4My40MjQgMjUuOTk4LDgzLjM4MyBDMjUuOTk0LDgzLjI5OSAyNS45OTQsODMuMTY1IDI1Ljk5NCw4Mi45NDYgTDI1Ljg5OSw4Mi43NzUgTDI1Ljc2OCw4Mi44MjQgTDI1LjA1NCw4My4yODcgQzI0LjgyMiw4My40MzcgMjQuNDM4LDgzLjY3MyAyNC4yLDgzLjgxMiBMMTIuNjk1LDkwLjUxNCBMMTIuNjY2LDkwLjUzMiBMMTIuNjY2LDkwLjUzMiBaIiBpZD0iRmlsbC04IiBmaWxsPSIjNjA3RDhCIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEzLjI2Niw4OS44NzEgTDEyLjcsODkuODcxIEMxMi41LDg5Ljg3MSAxMi4zODQsODkuODE1IDEyLjM1NCw4OS43MDUgQzEyLjMyNCw4OS41OTUgMTIuMzk3LDg5LjQ4OCAxMi41NjksODkuMzg4IEwyNC4wNzQsODIuNjg2IEMyNC4zMzIsODIuNTM1IDI0Ljc2OCw4Mi40MTggMjUuMDY3LDgyLjQxOCBMMjUuNjMyLDgyLjQxOCBDMjUuODMyLDgyLjQxOCAyNS45NDgsODIuNDc0IDI1Ljk3OCw4Mi41ODQgQzI2LjAwOCw4Mi42OTQgMjUuOTM1LDgyLjgwMSAyNS43NjMsODIuOTAxIEwxNC4yNTgsODkuNjAzIEMxNCw4OS43NTQgMTMuNTY0LDg5Ljg3MSAxMy4yNjYsODkuODcxIEwxMy4yNjYsODkuODcxIFogTTEyLjY2Niw4OS42MjEgTDEyLjcsODkuNjIyIEwxMy4yNjYsODkuNjIyIEMxMy41MTgsODkuNjIyIDEzLjkxNSw4OS41MTUgMTQuMTMyLDg5LjM4OCBMMjUuNjM3LDgyLjY4NiBMMjUuNjY3LDgyLjY2OCBMMjUuNjMyLDgyLjY2NyBMMjUuMDY3LDgyLjY2NyBDMjQuODE1LDgyLjY2NyAyNC40MTgsODIuNzc1IDI0LjIsODIuOTAxIEwxMi42OTUsODkuNjAzIEwxMi42NjYsODkuNjIxIEwxMi42NjYsODkuNjIxIFoiIGlkPSJGaWxsLTkiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIuMzcsOTAuODAxIEwxMi4zNyw4OS41NTQgTDEyLjM3LDkwLjgwMSIgaWQ9IkZpbGwtMTAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNi4xMyw5My45MDEgQzUuMzc5LDkzLjgwOCA0LjgxNiw5My4xNjQgNC42OTEsOTIuNTI1IEMzLjg2LDg4LjI4NyAzLjU0LDgzLjc0MyAzLjUyNiw3MS4xNzMgQzMuNTExLDU4LjM4OSA0LjQyMyw1MS40MjggNC40MjMsNTEuNDI4IEM1LjEzNCw0Ny4yODIgNy4yMSw0Ni4yMzYgNy4yMSw0Ni4yMzYgQzcuMjEsNDYuMjM2IDgxLjY2NywzLjI1IDgyLjA2OSwzLjAxNyBDODIuMjkyLDIuODg4IDg0LjU1NiwxLjQzMyA4NS4yNjQsMy45NCBDODcuMjE0LDEwLjg0IDg2Ljc1MiwzNS44MjcgODUuNTM5LDQzLjgxOCBDODUuMTUsNDYuMzgzIDg0LjI5MSw0OS4wMzMgODIuNDgzLDUwLjEwMSBMNy4yMSw5My42NTMgQzYuODI4LDkzLjg3NCA2LjQ2MSw5My45NDEgNi4xMyw5My45MDEgQzYuMTMsOTMuOTAxIDMuMzQ5LDkzLjQ2IDMuMTI5LDkxLjc3NiBDMi41NjgsODcuNDk1IDEuOTc3LDgyLjk5NSAxLjk2Miw3MC40MjUgQzEuOTQ4LDU3LjY0MSAyLjg2LDUwLjY4IDIuODYsNTAuNjggQzMuNTcsNDYuNTM0IDUuNjQ3LDQ1LjQ4OSA1LjY0Nyw0NS40ODkgQzUuNjQ2LDQ1LjQ4OSA4LjA2NSw0NC4wOTIgMTIuMjQ1LDQxLjY3OSBMMTMuMTE2LDQxLjU2IEwxOS43MTUsMzcuNzMgTDE5Ljc2MSwzNy4yNjkgTDYuMTMsOTMuOTAxIiBpZD0iRmlsbC0xMSIgZmlsbD0iI0ZBRkFGQSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjMxNyw5NC4xNjEgTDYuMTAyLDk0LjE0OCBMNi4xMDEsOTQuMTQ4IEw1Ljg1Nyw5NC4xMDEgQzUuMTM4LDkzLjk0NSAzLjA4NSw5My4zNjUgMi44ODEsOTEuODA5IEMyLjMxMyw4Ny40NjkgMS43MjcsODIuOTk2IDEuNzEzLDcwLjQyNSBDMS42OTksNTcuNzcxIDIuNjA0LDUwLjcxOCAyLjYxMyw1MC42NDggQzMuMzM4LDQ2LjQxNyA1LjQ0NSw0NS4zMSA1LjUzNSw0NS4yNjYgTDEyLjE2Myw0MS40MzkgTDEzLjAzMyw0MS4zMiBMMTkuNDc5LDM3LjU3OCBMMTkuNTEzLDM3LjI0NCBDMTkuNTI2LDM3LjEwNyAxOS42NDcsMzcuMDA4IDE5Ljc4NiwzNy4wMjEgQzE5LjkyMiwzNy4wMzQgMjAuMDIzLDM3LjE1NiAyMC4wMDksMzcuMjkzIEwxOS45NSwzNy44ODIgTDEzLjE5OCw0MS44MDEgTDEyLjMyOCw0MS45MTkgTDUuNzcyLDQ1LjcwNCBDNS43NDEsNDUuNzIgMy43ODIsNDYuNzcyIDMuMTA2LDUwLjcyMiBDMy4wOTksNTAuNzgyIDIuMTk4LDU3LjgwOCAyLjIxMiw3MC40MjQgQzIuMjI2LDgyLjk2MyAyLjgwOSw4Ny40MiAzLjM3Myw5MS43MjkgQzMuNDY0LDkyLjQyIDQuMDYyLDkyLjg4MyA0LjY4Miw5My4xODEgQzQuNTY2LDkyLjk4NCA0LjQ4Niw5Mi43NzYgNC40NDYsOTIuNTcyIEMzLjY2NSw4OC41ODggMy4yOTEsODQuMzcgMy4yNzYsNzEuMTczIEMzLjI2Miw1OC41MiA0LjE2Nyw1MS40NjYgNC4xNzYsNTEuMzk2IEM0LjkwMSw0Ny4xNjUgNy4wMDgsNDYuMDU5IDcuMDk4LDQ2LjAxNCBDNy4wOTQsNDYuMDE1IDgxLjU0MiwzLjAzNCA4MS45NDQsMi44MDIgTDgxLjk3MiwyLjc4NSBDODIuODc2LDIuMjQ3IDgzLjY5MiwyLjA5NyA4NC4zMzIsMi4zNTIgQzg0Ljg4NywyLjU3MyA4NS4yODEsMy4wODUgODUuNTA0LDMuODcyIEM4Ny41MTgsMTEgODYuOTY0LDM2LjA5MSA4NS43ODUsNDMuODU1IEM4NS4yNzgsNDcuMTk2IDg0LjIxLDQ5LjM3IDgyLjYxLDUwLjMxNyBMNy4zMzUsOTMuODY5IEM2Ljk5OSw5NC4wNjMgNi42NTgsOTQuMTYxIDYuMzE3LDk0LjE2MSBMNi4zMTcsOTQuMTYxIFogTTYuMTcsOTMuNjU0IEM2LjQ2Myw5My42OSA2Ljc3NCw5My42MTcgNy4wODUsOTMuNDM3IEw4Mi4zNTgsNDkuODg2IEM4NC4xODEsNDguODA4IDg0Ljk2LDQ1Ljk3MSA4NS4yOTIsNDMuNzggQzg2LjQ2NiwzNi4wNDkgODcuMDIzLDExLjA4NSA4NS4wMjQsNC4wMDggQzg0Ljg0NiwzLjM3NyA4NC41NTEsMi45NzYgODQuMTQ4LDIuODE2IEM4My42NjQsMi42MjMgODIuOTgyLDIuNzY0IDgyLjIyNywzLjIxMyBMODIuMTkzLDMuMjM0IEM4MS43OTEsMy40NjYgNy4zMzUsNDYuNDUyIDcuMzM1LDQ2LjQ1MiBDNy4zMDQsNDYuNDY5IDUuMzQ2LDQ3LjUyMSA0LjY2OSw1MS40NzEgQzQuNjYyLDUxLjUzIDMuNzYxLDU4LjU1NiAzLjc3NSw3MS4xNzMgQzMuNzksODQuMzI4IDQuMTYxLDg4LjUyNCA0LjkzNiw5Mi40NzYgQzUuMDI2LDkyLjkzNyA1LjQxMiw5My40NTkgNS45NzMsOTMuNjE1IEM2LjA4Nyw5My42NCA2LjE1OCw5My42NTIgNi4xNjksOTMuNjU0IEw2LjE3LDkzLjY1NCBMNi4xNyw5My42NTQgWiIgaWQ9IkZpbGwtMTIiIGZpbGw9IiM0NTVBNjQiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4zMTcsNjguOTgyIEM3LjgwNiw2OC43MDEgOC4yMDIsNjguOTI2IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNi44MjksNzEuMjk0IDYuNDMzLDcxLjA2OSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIiBpZD0iRmlsbC0xMyIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik02LjkyLDcxLjEzMyBDNi42MzEsNzEuMTMzIDYuNDMzLDcwLjkwNSA2LjQzMyw3MC41MDggQzYuNDMzLDY5Ljk0OCA2LjgyOSw2OS4yNjUgNy4zMTcsNjguOTgyIEM3LjQ2LDY4LjkgNy41OTUsNjguODYxIDcuNzE0LDY4Ljg2MSBDOC4wMDMsNjguODYxIDguMjAyLDY5LjA5IDguMjAyLDY5LjQ4NyBDOC4yMDIsNzAuMDQ3IDcuODA2LDcwLjczIDcuMzE3LDcxLjAxMiBDNy4xNzQsNzEuMDk0IDcuMDM5LDcxLjEzMyA2LjkyLDcxLjEzMyBNNy43MTQsNjguNjc0IEM3LjU1Nyw2OC42NzQgNy4zOTIsNjguNzIzIDcuMjI0LDY4LjgyMSBDNi42NzYsNjkuMTM4IDYuMjQ2LDY5Ljg3OSA2LjI0Niw3MC41MDggQzYuMjQ2LDcwLjk5NCA2LjUxNyw3MS4zMiA2LjkyLDcxLjMyIEM3LjA3OCw3MS4zMiA3LjI0Myw3MS4yNzEgNy40MTEsNzEuMTc0IEM3Ljk1OSw3MC44NTcgOC4zODksNzAuMTE3IDguMzg5LDY5LjQ4NyBDOC4zODksNjkuMDAxIDguMTE3LDY4LjY3NCA3LjcxNCw2OC42NzQiIGlkPSJGaWxsLTE0IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTYuOTIsNzAuOTQ3IEM2LjY0OSw3MC45NDcgNi42MjEsNzAuNjQgNi42MjEsNzAuNTA4IEM2LjYyMSw3MC4wMTcgNi45ODIsNjkuMzkyIDcuNDExLDY5LjE0NSBDNy41MjEsNjkuMDgyIDcuNjI1LDY5LjA0OSA3LjcxNCw2OS4wNDkgQzcuOTg2LDY5LjA0OSA4LjAxNSw2OS4zNTUgOC4wMTUsNjkuNDg3IEM4LjAxNSw2OS45NzggNy42NTIsNzAuNjAzIDcuMjI0LDcwLjg1MSBDNy4xMTUsNzAuOTE0IDcuMDEsNzAuOTQ3IDYuOTIsNzAuOTQ3IE03LjcxNCw2OC44NjEgQzcuNTk1LDY4Ljg2MSA3LjQ2LDY4LjkgNy4zMTcsNjguOTgyIEM2LjgyOSw2OS4yNjUgNi40MzMsNjkuOTQ4IDYuNDMzLDcwLjUwOCBDNi40MzMsNzAuOTA1IDYuNjMxLDcxLjEzMyA2LjkyLDcxLjEzMyBDNy4wMzksNzEuMTMzIDcuMTc0LDcxLjA5NCA3LjMxNyw3MS4wMTIgQzcuODA2LDcwLjczIDguMjAyLDcwLjA0NyA4LjIwMiw2OS40ODcgQzguMjAyLDY5LjA5IDguMDAzLDY4Ljg2MSA3LjcxNCw2OC44NjEiIGlkPSJGaWxsLTE1IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTcuNDQ0LDg1LjM1IEM3LjcwOCw4NS4xOTggNy45MjEsODUuMzE5IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuOTI1IDcuNzA4LDg2LjI5MiA3LjQ0NCw4Ni40NDQgQzcuMTgxLDg2LjU5NyA2Ljk2Nyw4Ni40NzUgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IiBpZD0iRmlsbC0xNiIgZmlsbD0iI0ZGRkZGRiI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik03LjIzLDg2LjUxIEM3LjA3NCw4Ni41MSA2Ljk2Nyw4Ni4zODcgNi45NjcsODYuMTczIEM2Ljk2Nyw4NS44NzEgNy4xODEsODUuNTAyIDcuNDQ0LDg1LjM1IEM3LjUyMSw4NS4zMDUgNy41OTQsODUuMjg0IDcuNjU4LDg1LjI4NCBDNy44MTQsODUuMjg0IDcuOTIxLDg1LjQwOCA3LjkyMSw4NS42MjIgQzcuOTIxLDg1LjkyNSA3LjcwOCw4Ni4yOTIgNy40NDQsODYuNDQ0IEM3LjM2Nyw4Ni40ODkgNy4yOTQsODYuNTEgNy4yMyw4Ni41MSBNNy42NTgsODUuMDk4IEM3LjU1OCw4NS4wOTggNy40NTUsODUuMTI3IDcuMzUxLDg1LjE4OCBDNy4wMzEsODUuMzczIDYuNzgxLDg1LjgwNiA2Ljc4MSw4Ni4xNzMgQzYuNzgxLDg2LjQ4MiA2Ljk2Niw4Ni42OTcgNy4yMyw4Ni42OTcgQzcuMzMsODYuNjk3IDcuNDMzLDg2LjY2NiA3LjUzOCw4Ni42MDcgQzcuODU4LDg2LjQyMiA4LjEwOCw4NS45ODkgOC4xMDgsODUuNjIyIEM4LjEwOCw4NS4zMTMgNy45MjMsODUuMDk4IDcuNjU4LDg1LjA5OCIgaWQ9IkZpbGwtMTciIGZpbGw9IiM4MDk3QTIiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNy4yMyw4Ni4zMjIgTDcuMTU0LDg2LjE3MyBDNy4xNTQsODUuOTM4IDcuMzMzLDg1LjYyOSA3LjUzOCw4NS41MTIgTDcuNjU4LDg1LjQ3MSBMNy43MzQsODUuNjIyIEM3LjczNCw4NS44NTYgNy41NTUsODYuMTY0IDcuMzUxLDg2LjI4MiBMNy4yMyw4Ni4zMjIgTTcuNjU4LDg1LjI4NCBDNy41OTQsODUuMjg0IDcuNTIxLDg1LjMwNSA3LjQ0NCw4NS4zNSBDNy4xODEsODUuNTAyIDYuOTY3LDg1Ljg3MSA2Ljk2Nyw4Ni4xNzMgQzYuOTY3LDg2LjM4NyA3LjA3NCw4Ni41MSA3LjIzLDg2LjUxIEM3LjI5NCw4Ni41MSA3LjM2Nyw4Ni40ODkgNy40NDQsODYuNDQ0IEM3LjcwOCw4Ni4yOTIgNy45MjEsODUuOTI1IDcuOTIxLDg1LjYyMiBDNy45MjEsODUuNDA4IDcuODE0LDg1LjI4NCA3LjY1OCw4NS4yODQiIGlkPSJGaWxsLTE4IiBmaWxsPSIjODA5N0EyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTc3LjI3OCw3Ljc2OSBMNzcuMjc4LDUxLjQzNiBMMTAuMjA4LDkwLjE2IEwxMC4yMDgsNDYuNDkzIEw3Ny4yNzgsNy43NjkiIGlkPSJGaWxsLTE5IiBmaWxsPSIjNDU1QTY0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTEwLjA4Myw5MC4zNzUgTDEwLjA4Myw0Ni40MjEgTDEwLjE0Niw0Ni4zODUgTDc3LjQwMyw3LjU1NCBMNzcuNDAzLDUxLjUwOCBMNzcuMzQxLDUxLjU0NCBMMTAuMDgzLDkwLjM3NSBMMTAuMDgzLDkwLjM3NSBaIE0xMC4zMzMsNDYuNTY0IEwxMC4zMzMsODkuOTQ0IEw3Ny4xNTQsNTEuMzY1IEw3Ny4xNTQsNy45ODUgTDEwLjMzMyw0Ni41NjQgTDEwLjMzMyw0Ni41NjQgWiIgaWQ9IkZpbGwtMjAiIGZpbGw9IiM2MDdEOEIiPjwvcGF0aD4KICAgICAgICAgICAgICAgIDwvZz4KICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMjUuNzM3LDg4LjY0NyBMMTE4LjA5OCw5MS45ODEgTDExOC4wOTgsODQgTDEwNi42MzksODguNzEzIEwxMDYuNjM5LDk2Ljk4MiBMOTksMTAwLjMxNSBMMTEyLjM2OSwxMDMuOTYxIEwxMjUuNzM3LDg4LjY0NyIgaWQ9IkltcG9ydGVkLUxheWVycy1Db3B5LTIiIGZpbGw9IiM0NTVBNjQiIHNrZXRjaDp0eXBlPSJNU1NoYXBlR3JvdXAiPjwvcGF0aD4KICAgICAgICAgICAgPC9nPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+');
-};
-
-module.exports = RotateInstructions;
-
-},{"./util.js":22}],17:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * TODO: Fix up all "new THREE" instantiations to improve performance.
- */
-var SensorSample = _dereq_('./sensor-sample.js');
-var MathUtil = _dereq_('../math-util.js');
-var Util = _dereq_('../util.js');
-
-var DEBUG = false;
-
-/**
- * An implementation of a simple complementary filter, which fuses gyroscope and
- * accelerometer data from the 'devicemotion' event.
- *
- * Accelerometer data is very noisy, but stable over the long term.
- * Gyroscope data is smooth, but tends to drift over the long term.
- *
- * This fusion is relatively simple:
- * 1. Get orientation estimates from accelerometer by applying a low-pass filter
- *    on that data.
- * 2. Get orientation estimates from gyroscope by integrating over time.
- * 3. Combine the two estimates, weighing (1) in the long term, but (2) for the
- *    short term.
- */
-function ComplementaryFilter(kFilter) {
-  this.kFilter = kFilter;
-
-  // Raw sensor measurements.
-  this.currentAccelMeasurement = new SensorSample();
-  this.currentGyroMeasurement = new SensorSample();
-  this.previousGyroMeasurement = new SensorSample();
-
-  // Current filter orientation
-  this.filterQ = new MathUtil.Quaternion();
-  this.previousFilterQ = new MathUtil.Quaternion();
-
-  // Orientation based on the accelerometer.
-  this.accelQ = new MathUtil.Quaternion();
-  // Whether or not the orientation has been initialized.
-  this.isOrientationInitialized = false;
-  // Running estimate of gravity based on the current orientation.
-  this.estimatedGravity = new MathUtil.Vector3();
-  // Measured gravity based on accelerometer.
-  this.measuredGravity = new MathUtil.Vector3();
-
-  // Debug only quaternion of gyro-based orientation.
-  this.gyroIntegralQ = new MathUtil.Quaternion();
-}
-
-ComplementaryFilter.prototype.addAccelMeasurement = function(vector, timestampS) {
-  this.currentAccelMeasurement.set(vector, timestampS);
-};
-
-ComplementaryFilter.prototype.addGyroMeasurement = function(vector, timestampS) {
-  this.currentGyroMeasurement.set(vector, timestampS);
-
-  var deltaT = timestampS - this.previousGyroMeasurement.timestampS;
-  if (Util.isTimestampDeltaValid(deltaT)) {
-    this.run_();
-  }
-
-  this.previousGyroMeasurement.copy(this.currentGyroMeasurement);
-};
-
-ComplementaryFilter.prototype.run_ = function() {
-
-  if (!this.isOrientationInitialized) {
-    this.accelQ = this.accelToQuaternion_(this.currentAccelMeasurement.sample);
-    this.previousFilterQ.copy(this.accelQ);
-    this.isOrientationInitialized = true;
-    return;
-  }
-
-  var deltaT = this.currentGyroMeasurement.timestampS -
-      this.previousGyroMeasurement.timestampS;
-
-  // Convert gyro rotation vector to a quaternion delta.
-  var gyroDeltaQ = this.gyroToQuaternionDelta_(this.currentGyroMeasurement.sample, deltaT);
-  this.gyroIntegralQ.multiply(gyroDeltaQ);
-
-  // filter_1 = K * (filter_0 + gyro * dT) + (1 - K) * accel.
-  this.filterQ.copy(this.previousFilterQ);
-  this.filterQ.multiply(gyroDeltaQ);
-
-  // Calculate the delta between the current estimated gravity and the real
-  // gravity vector from accelerometer.
-  var invFilterQ = new MathUtil.Quaternion();
-  invFilterQ.copy(this.filterQ);
-  invFilterQ.inverse();
-
-  this.estimatedGravity.set(0, 0, -1);
-  this.estimatedGravity.applyQuaternion(invFilterQ);
-  this.estimatedGravity.normalize();
-
-  this.measuredGravity.copy(this.currentAccelMeasurement.sample);
-  this.measuredGravity.normalize();
-
-  // Compare estimated gravity with measured gravity, get the delta quaternion
-  // between the two.
-  var deltaQ = new MathUtil.Quaternion();
-  deltaQ.setFromUnitVectors(this.estimatedGravity, this.measuredGravity);
-  deltaQ.inverse();
-
-  if (DEBUG) {
-    console.log('Delta: %d deg, G_est: (%s, %s, %s), G_meas: (%s, %s, %s)',
-                MathUtil.radToDeg * Util.getQuaternionAngle(deltaQ),
-                (this.estimatedGravity.x).toFixed(1),
-                (this.estimatedGravity.y).toFixed(1),
-                (this.estimatedGravity.z).toFixed(1),
-                (this.measuredGravity.x).toFixed(1),
-                (this.measuredGravity.y).toFixed(1),
-                (this.measuredGravity.z).toFixed(1));
-  }
-
-  // Calculate the SLERP target: current orientation plus the measured-estimated
-  // quaternion delta.
-  var targetQ = new MathUtil.Quaternion();
-  targetQ.copy(this.filterQ);
-  targetQ.multiply(deltaQ);
-
-  // SLERP factor: 0 is pure gyro, 1 is pure accel.
-  this.filterQ.slerp(targetQ, 1 - this.kFilter);
-
-  this.previousFilterQ.copy(this.filterQ);
-};
-
-ComplementaryFilter.prototype.getOrientation = function() {
-  return this.filterQ;
-};
-
-ComplementaryFilter.prototype.accelToQuaternion_ = function(accel) {
-  var normAccel = new MathUtil.Vector3();
-  normAccel.copy(accel);
-  normAccel.normalize();
-  var quat = new MathUtil.Quaternion();
-  quat.setFromUnitVectors(new MathUtil.Vector3(0, 0, -1), normAccel);
-  quat.inverse();
-  return quat;
-};
-
-ComplementaryFilter.prototype.gyroToQuaternionDelta_ = function(gyro, dt) {
-  // Extract axis and angle from the gyroscope data.
-  var quat = new MathUtil.Quaternion();
-  var axis = new MathUtil.Vector3();
-  axis.copy(gyro);
-  axis.normalize();
-  quat.setFromAxisAngle(axis, gyro.length() * dt);
-  return quat;
-};
-
-
-module.exports = ComplementaryFilter;
-
-},{"../math-util.js":14,"../util.js":22,"./sensor-sample.js":20}],18:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var ComplementaryFilter = _dereq_('./complementary-filter.js');
-var PosePredictor = _dereq_('./pose-predictor.js');
-var TouchPanner = _dereq_('../touch-panner.js');
-var MathUtil = _dereq_('../math-util.js');
-var Util = _dereq_('../util.js');
-
-/**
- * The pose sensor, implemented using DeviceMotion APIs.
- */
-function FusionPoseSensor() {
-  this.deviceId = 'webvr-polyfill:fused';
-  this.deviceName = 'VR Position Device (webvr-polyfill:fused)';
-
-  this.accelerometer = new MathUtil.Vector3();
-  this.gyroscope = new MathUtil.Vector3();
-
-  window.addEventListener('devicemotion', this.onDeviceMotionChange_.bind(this));
-  window.addEventListener('orientationchange', this.onScreenOrientationChange_.bind(this));
-
-  this.filter = new ComplementaryFilter(WebVRConfig.K_FILTER);
-  this.posePredictor = new PosePredictor(WebVRConfig.PREDICTION_TIME_S);
-  this.touchPanner = new TouchPanner();
-
-  this.filterToWorldQ = new MathUtil.Quaternion();
-
-  // Set the filter to world transform, depending on OS.
-  if (Util.isIOS()) {
-    this.filterToWorldQ.setFromAxisAngle(new MathUtil.Vector3(1, 0, 0), Math.PI / 2);
-  } else {
-    this.filterToWorldQ.setFromAxisAngle(new MathUtil.Vector3(1, 0, 0), -Math.PI / 2);
-  }
-
-  this.inverseWorldToScreenQ = new MathUtil.Quaternion();
-  this.worldToScreenQ = new MathUtil.Quaternion();
-  this.originalPoseAdjustQ = new MathUtil.Quaternion();
-  this.originalPoseAdjustQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1),
-                                           -window.orientation * Math.PI / 180);
-
-  this.setScreenTransform_();
-  // Adjust this filter for being in landscape mode.
-  if (Util.isLandscapeMode()) {
-    this.filterToWorldQ.multiply(this.inverseWorldToScreenQ);
-  }
-
-  // Keep track of a reset transform for resetSensor.
-  this.resetQ = new MathUtil.Quaternion();
-
-  this.isFirefoxAndroid = Util.isFirefoxAndroid();
-  this.isIOS = Util.isIOS();
-
-  this.orientationOut_ = new Float32Array(4);
-}
-
-FusionPoseSensor.prototype.getPosition = function() {
-  // This PoseSensor doesn't support position
-  return null;
-};
-
-FusionPoseSensor.prototype.getOrientation = function() {
-  // Convert from filter space to the the same system used by the
-  // deviceorientation event.
-  var orientation = this.filter.getOrientation();
-
-  // Predict orientation.
-  this.predictedQ = this.posePredictor.getPrediction(orientation, this.gyroscope, this.previousTimestampS);
-
-  // Convert to THREE coordinate system: -Z forward, Y up, X right.
-  var out = new MathUtil.Quaternion();
-  out.copy(this.filterToWorldQ);
-  out.multiply(this.resetQ);
-  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
-    out.multiply(this.touchPanner.getOrientation());
-  }
-  out.multiply(this.predictedQ);
-  out.multiply(this.worldToScreenQ);
-
-  // Handle the yaw-only case.
-  if (WebVRConfig.YAW_ONLY) {
-    // Make a quaternion that only turns around the Y-axis.
-    out.x = 0;
-    out.z = 0;
-    out.normalize();
-  }
-
-  this.orientationOut_[0] = out.x;
-  this.orientationOut_[1] = out.y;
-  this.orientationOut_[2] = out.z;
-  this.orientationOut_[3] = out.w;
-  return this.orientationOut_;
-};
-
-FusionPoseSensor.prototype.resetPose = function() {
-  // Reduce to inverted yaw-only.
-  this.resetQ.copy(this.filter.getOrientation());
-  this.resetQ.x = 0;
-  this.resetQ.y = 0;
-  this.resetQ.z *= -1;
-  this.resetQ.normalize();
-
-  // Take into account extra transformations in landscape mode.
-  if (Util.isLandscapeMode()) {
-    this.resetQ.multiply(this.inverseWorldToScreenQ);
-  }
-
-  // Take into account original pose.
-  this.resetQ.multiply(this.originalPoseAdjustQ);
-
-  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
-    this.touchPanner.resetSensor();
-  }
-};
-
-FusionPoseSensor.prototype.onDeviceMotionChange_ = function(deviceMotion) {
-  var accGravity = deviceMotion.accelerationIncludingGravity;
-  var rotRate = deviceMotion.rotationRate;
-  var timestampS = deviceMotion.timeStamp / 1000;
-
-  // Firefox Android timeStamp returns one thousandth of a millisecond.
-  if (this.isFirefoxAndroid) {
-    timestampS /= 1000;
-  }
-
-  var deltaS = timestampS - this.previousTimestampS;
-  if (deltaS <= Util.MIN_TIMESTEP || deltaS > Util.MAX_TIMESTEP) {
-    console.warn('Invalid timestamps detected. Time step between successive ' +
-                 'gyroscope sensor samples is very small or not monotonic');
-    this.previousTimestampS = timestampS;
-    return;
-  }
-  this.accelerometer.set(-accGravity.x, -accGravity.y, -accGravity.z);
-  this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
-
-  // With iOS and Firefox Android, rotationRate is reported in degrees,
-  // so we first convert to radians.
-  if (this.isIOS || this.isFirefoxAndroid) {
-    this.gyroscope.multiplyScalar(Math.PI / 180);
-  }
-
-  this.filter.addAccelMeasurement(this.accelerometer, timestampS);
-  this.filter.addGyroMeasurement(this.gyroscope, timestampS);
-
-  this.previousTimestampS = timestampS;
-};
-
-FusionPoseSensor.prototype.onScreenOrientationChange_ =
-    function(screenOrientation) {
-  this.setScreenTransform_();
-};
-
-FusionPoseSensor.prototype.setScreenTransform_ = function() {
-  this.worldToScreenQ.set(0, 0, 0, 1);
-  switch (window.orientation) {
-    case 0:
-      break;
-    case 90:
-      this.worldToScreenQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1), -Math.PI / 2);
-      break;
-    case -90:
-      this.worldToScreenQ.setFromAxisAngle(new MathUtil.Vector3(0, 0, 1), Math.PI / 2);
-      break;
-    case 180:
-      // TODO.
-      break;
-  }
-  this.inverseWorldToScreenQ.copy(this.worldToScreenQ);
-  this.inverseWorldToScreenQ.inverse();
-};
-
-module.exports = FusionPoseSensor;
-
-},{"../math-util.js":14,"../touch-panner.js":21,"../util.js":22,"./complementary-filter.js":17,"./pose-predictor.js":19}],19:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var MathUtil = _dereq_('../math-util.js');
-var DEBUG = false;
-
-/**
- * Given an orientation and the gyroscope data, predicts the future orientation
- * of the head. This makes rendering appear faster.
- *
- * Also see: http://msl.cs.uiuc.edu/~lavalle/papers/LavYerKatAnt14.pdf
- *
- * @param {Number} predictionTimeS time from head movement to the appearance of
- * the corresponding image.
- */
-function PosePredictor(predictionTimeS) {
-  this.predictionTimeS = predictionTimeS;
-
-  // The quaternion corresponding to the previous state.
-  this.previousQ = new MathUtil.Quaternion();
-  // Previous time a prediction occurred.
-  this.previousTimestampS = null;
-
-  // The delta quaternion that adjusts the current pose.
-  this.deltaQ = new MathUtil.Quaternion();
-  // The output quaternion.
-  this.outQ = new MathUtil.Quaternion();
-}
-
-PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
-  if (!this.previousTimestampS) {
-    this.previousQ.copy(currentQ);
-    this.previousTimestampS = timestampS;
-    return currentQ;
-  }
-
-  // Calculate axis and angle based on gyroscope rotation rate data.
-  var axis = new MathUtil.Vector3();
-  axis.copy(gyro);
-  axis.normalize();
-
-  var angularSpeed = gyro.length();
-
-  // If we're rotating slowly, don't do prediction.
-  if (angularSpeed < MathUtil.degToRad * 20) {
-    if (DEBUG) {
-      console.log('Moving slowly, at %s deg/s: no prediction',
-                  (MathUtil.radToDeg * angularSpeed).toFixed(1));
-    }
-    this.outQ.copy(currentQ);
-    this.previousQ.copy(currentQ);
-    return this.outQ;
-  }
-
-  // Get the predicted angle based on the time delta and latency.
-  var deltaT = timestampS - this.previousTimestampS;
-  var predictAngle = angularSpeed * this.predictionTimeS;
-
-  this.deltaQ.setFromAxisAngle(axis, predictAngle);
-  this.outQ.copy(this.previousQ);
-  this.outQ.multiply(this.deltaQ);
-
-  this.previousQ.copy(currentQ);
-
-  return this.outQ;
-};
-
-
-module.exports = PosePredictor;
-
-},{"../math-util.js":14}],20:[function(_dereq_,module,exports){
-function SensorSample(sample, timestampS) {
-  this.set(sample, timestampS);
-};
-
-SensorSample.prototype.set = function(sample, timestampS) {
-  this.sample = sample;
-  this.timestampS = timestampS;
-};
-
-SensorSample.prototype.copy = function(sensorSample) {
-  this.set(sensorSample.sample, sensorSample.timestampS);
-};
-
-module.exports = SensorSample;
-
-},{}],21:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var MathUtil = _dereq_('./math-util.js');
-var Util = _dereq_('./util.js');
-
-var ROTATE_SPEED = 0.5;
-/**
- * Provides a quaternion responsible for pre-panning the scene before further
- * transformations due to device sensors.
- */
-function TouchPanner() {
-  window.addEventListener('touchstart', this.onTouchStart_.bind(this));
-  window.addEventListener('touchmove', this.onTouchMove_.bind(this));
-  window.addEventListener('touchend', this.onTouchEnd_.bind(this));
-
-  this.isTouching = false;
-  this.rotateStart = new MathUtil.Vector2();
-  this.rotateEnd = new MathUtil.Vector2();
-  this.rotateDelta = new MathUtil.Vector2();
-
-  this.theta = 0;
-  this.orientation = new MathUtil.Quaternion();
-}
-
-TouchPanner.prototype.getOrientation = function() {
-  this.orientation.setFromEulerXYZ(0, 0, this.theta);
-  return this.orientation;
-};
-
-TouchPanner.prototype.resetSensor = function() {
-  this.theta = 0;
-};
-
-TouchPanner.prototype.onTouchStart_ = function(e) {
-  // Only respond if there is exactly one touch.
-  if (e.touches.length != 1) {
-    return;
-  }
-  this.rotateStart.set(e.touches[0].pageX, e.touches[0].pageY);
-  this.isTouching = true;
-};
-
-TouchPanner.prototype.onTouchMove_ = function(e) {
-  if (!this.isTouching) {
-    return;
-  }
-  this.rotateEnd.set(e.touches[0].pageX, e.touches[0].pageY);
-  this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart);
-  this.rotateStart.copy(this.rotateEnd);
-
-  // On iOS, direction is inverted.
-  if (Util.isIOS()) {
-    this.rotateDelta.x *= -1;
-  }
-
-  var element = document.body;
-  this.theta += 2 * Math.PI * this.rotateDelta.x / element.clientWidth * ROTATE_SPEED;
-};
-
-TouchPanner.prototype.onTouchEnd_ = function(e) {
-  this.isTouching = false;
-};
-
-module.exports = TouchPanner;
-
-},{"./math-util.js":14,"./util.js":22}],22:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var objectAssign = _dereq_('object-assign');
-
-var Util = window.Util || {};
-
-Util.MIN_TIMESTEP = 0.001;
-Util.MAX_TIMESTEP = 1;
-
-Util.base64 = function(mimeType, base64) {
-  return 'data:' + mimeType + ';base64,' + base64;
-};
-
-Util.clamp = function(value, min, max) {
-  return Math.min(Math.max(min, value), max);
-};
-
-Util.lerp = function(a, b, t) {
-  return a + ((b - a) * t);
-};
-
-Util.isIOS = (function() {
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.platform);
-  return function() {
-    return isIOS;
-  };
-})();
-
-Util.isSafari = (function() {
-  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  return function() {
-    return isSafari;
-  };
-})();
-
-Util.isFirefoxAndroid = (function() {
-  var isFirefoxAndroid = navigator.userAgent.indexOf('Firefox') !== -1 &&
-      navigator.userAgent.indexOf('Android') !== -1;
-  return function() {
-    return isFirefoxAndroid;
-  };
-})();
-
-Util.isLandscapeMode = function() {
-  return (window.orientation == 90 || window.orientation == -90);
-};
-
-// Helper method to validate the time steps of sensor timestamps.
-Util.isTimestampDeltaValid = function(timestampDeltaS) {
-  if (isNaN(timestampDeltaS)) {
-    return false;
-  }
-  if (timestampDeltaS <= Util.MIN_TIMESTEP) {
-    return false;
-  }
-  if (timestampDeltaS > Util.MAX_TIMESTEP) {
-    return false;
-  }
-  return true;
-};
-
-Util.getScreenWidth = function() {
-  return Math.max(window.screen.width, window.screen.height) *
-      window.devicePixelRatio;
-};
-
-Util.getScreenHeight = function() {
-  return Math.min(window.screen.width, window.screen.height) *
-      window.devicePixelRatio;
-};
-
-Util.requestFullscreen = function(element) {
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen();
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
-  } else {
-    return false;
-  }
-
-  return true;
-};
-
-Util.exitFullscreen = function() {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
-  } else {
-    return false;
-  }
-
-  return true;
-};
-
-Util.getFullscreenElement = function() {
-  return document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.mozFullScreenElement ||
-      document.msFullscreenElement;
-};
-
-Util.linkProgram = function(gl, vertexSource, fragmentSource, attribLocationMap) {
-  // No error checking for brevity.
-  var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vertexSource);
-  gl.compileShader(vertexShader);
-
-  var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragmentShader, fragmentSource);
-  gl.compileShader(fragmentShader);
-
-  var program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-
-  for (var attribName in attribLocationMap)
-    gl.bindAttribLocation(program, attribLocationMap[attribName], attribName);
-
-  gl.linkProgram(program);
-
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-
-  return program;
-};
-
-Util.getProgramUniforms = function(gl, program) {
-  var uniforms = {};
-  var uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-  var uniformName = '';
-  for (var i = 0; i < uniformCount; i++) {
-    var uniformInfo = gl.getActiveUniform(program, i);
-    uniformName = uniformInfo.name.replace('[0]', '');
-    uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
-  }
-  return uniforms;
-};
-
-Util.orthoMatrix = function (out, left, right, bottom, top, near, far) {
-  var lr = 1 / (left - right),
-      bt = 1 / (bottom - top),
-      nf = 1 / (near - far);
-  out[0] = -2 * lr;
-  out[1] = 0;
-  out[2] = 0;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = -2 * bt;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = 0;
-  out[9] = 0;
-  out[10] = 2 * nf;
-  out[11] = 0;
-  out[12] = (left + right) * lr;
-  out[13] = (top + bottom) * bt;
-  out[14] = (far + near) * nf;
-  out[15] = 1;
-  return out;
-};
-
-Util.isMobile = function() {
-  var check = false;
-  (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
-  return check;
-};
-
-Util.extend = objectAssign;
-
-Util.safariCssSizeWorkaround = function(canvas) {
-  // TODO(smus): Remove this workaround when Safari for iOS is fixed.
-  // iOS only workaround (for https://bugs.webkit.org/show_bug.cgi?id=152556).
-  //
-  // "To the last I grapple with thee;
-  //  from hell's heart I stab at thee;
-  //  for hate's sake I spit my last breath at thee."
-  // -- Moby Dick, by Herman Melville
-  if (Util.isIOS()) {
-    var width = canvas.style.width;
-    var height = canvas.style.height;
-    canvas.style.width = (parseInt(width) + 1) + 'px';
-    canvas.style.height = (parseInt(height)) + 'px';
-    console.log('Resetting width to...', width);
-    setTimeout(function() {
-      console.log('Done. Width is now', width);
-      canvas.style.width = width;
-      canvas.style.height = height;
-    }, 100);
-  }
-
-  // Debug only.
-  window.Util = Util;
-  window.canvas = canvas;
-};
-
-module.exports = Util;
-
-},{"object-assign":1}],23:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Emitter = _dereq_('./emitter.js');
-var Util = _dereq_('./util.js');
-var DeviceInfo = _dereq_('./device-info.js');
-
-var DEFAULT_VIEWER = 'CardboardV1';
-var VIEWER_KEY = 'WEBVR_CARDBOARD_VIEWER';
-var CLASS_NAME = 'webvr-polyfill-viewer-selector';
-
-/**
- * Creates a viewer selector with the options specified. Supports being shown
- * and hidden. Generates events when viewer parameters change. Also supports
- * saving the currently selected index in localStorage.
- */
-function ViewerSelector() {
-  // Try to load the selected key from local storage. If none exists, use the
-  // default key.
-  try {
-    this.selectedKey = localStorage.getItem(VIEWER_KEY) || DEFAULT_VIEWER;
-  } catch (error) {
-    console.error('Failed to load viewer profile: %s', error);
-  }
-  this.dialog = this.createDialog_(DeviceInfo.Viewers);
-  this.root = null;
-}
-ViewerSelector.prototype = new Emitter();
-
-ViewerSelector.prototype.show = function(root) {
-  this.root = root;
-
-  root.appendChild(this.dialog);
-  //console.log('ViewerSelector.show');
-
-  // Ensure the currently selected item is checked.
-  var selected = this.dialog.querySelector('#' + this.selectedKey);
-  selected.checked = true;
-
-  // Show the UI.
-  this.dialog.style.display = 'block';
-};
-
-ViewerSelector.prototype.hide = function() {
-  if (this.root && this.root.contains(this.dialog)) {
-    this.root.removeChild(this.dialog);
-  }
-  //console.log('ViewerSelector.hide');
-  this.dialog.style.display = 'none';
-};
-
-ViewerSelector.prototype.getCurrentViewer = function() {
-  return DeviceInfo.Viewers[this.selectedKey];
-};
-
-ViewerSelector.prototype.getSelectedKey_ = function() {
-  var input = this.dialog.querySelector('input[name=field]:checked');
-  if (input) {
-    return input.id;
-  }
-  return null;
-};
-
-ViewerSelector.prototype.onSave_ = function() {
-  this.selectedKey = this.getSelectedKey_();
-  if (!this.selectedKey || !DeviceInfo.Viewers[this.selectedKey]) {
-    console.error('ViewerSelector.onSave_: this should never happen!');
-    return;
-  }
-
-  this.emit('change', DeviceInfo.Viewers[this.selectedKey]);
-
-  // Attempt to save the viewer profile, but fails in private mode.
-  try {
-    localStorage.setItem(VIEWER_KEY, this.selectedKey);
-  } catch(error) {
-    console.error('Failed to save viewer profile: %s', error);
-  }
-  this.hide();
-};
-
-/**
- * Creates the dialog.
- */
-ViewerSelector.prototype.createDialog_ = function(options) {
-  var container = document.createElement('div');
-  container.classList.add(CLASS_NAME);
-  container.style.display = 'none';
-  // Create an overlay that dims the background, and which goes away when you
-  // tap it.
-  var overlay = document.createElement('div');
-  var s = overlay.style;
-  s.position = 'fixed';
-  s.left = 0;
-  s.top = 0;
-  s.width = '100%';
-  s.height = '100%';
-  s.background = 'rgba(0, 0, 0, 0.3)';
-  overlay.addEventListener('click', this.hide.bind(this));
-
-  var width = 280;
-  var dialog = document.createElement('div');
-  var s = dialog.style;
-  s.boxSizing = 'border-box';
-  s.position = 'fixed';
-  s.top = '24px';
-  s.left = '50%';
-  s.marginLeft = (-width/2) + 'px';
-  s.width = width + 'px';
-  s.padding = '24px';
-  s.overflow = 'hidden';
-  s.background = '#fafafa';
-  s.fontFamily = "'Roboto', sans-serif";
-  s.boxShadow = '0px 5px 20px #666';
-
-  dialog.appendChild(this.createH1_('Select your viewer'));
-  for (var id in options) {
-    dialog.appendChild(this.createChoice_(id, options[id].label));
-  }
-  dialog.appendChild(this.createButton_('Save', this.onSave_.bind(this)));
-
-  container.appendChild(overlay);
-  container.appendChild(dialog);
-
-  return container;
-};
-
-ViewerSelector.prototype.createH1_ = function(name) {
-  var h1 = document.createElement('h1');
-  var s = h1.style;
-  s.color = 'black';
-  s.fontSize = '20px';
-  s.fontWeight = 'bold';
-  s.marginTop = 0;
-  s.marginBottom = '24px';
-  h1.innerHTML = name;
-  return h1;
-};
-
-ViewerSelector.prototype.createChoice_ = function(id, name) {
-  /*
-  <div class="choice">
-  <input id="v1" type="radio" name="field" value="v1">
-  <label for="v1">Cardboard V1</label>
-  </div>
-  */
-  var div = document.createElement('div');
-  div.style.marginTop = '8px';
-  div.style.color = 'black';
-
-  var input = document.createElement('input');
-  input.style.fontSize = '30px';
-  input.setAttribute('id', id);
-  input.setAttribute('type', 'radio');
-  input.setAttribute('value', id);
-  input.setAttribute('name', 'field');
-
-  var label = document.createElement('label');
-  label.style.marginLeft = '4px';
-  label.setAttribute('for', id);
-  label.innerHTML = name;
-
-  div.appendChild(input);
-  div.appendChild(label);
-
-  return div;
-};
-
-ViewerSelector.prototype.createButton_ = function(label, onclick) {
-  var button = document.createElement('button');
-  button.innerHTML = label;
-  var s = button.style;
-  s.float = 'right';
-  s.textTransform = 'uppercase';
-  s.color = '#1094f7';
-  s.fontSize = '14px';
-  s.letterSpacing = 0;
-  s.border = 0;
-  s.background = 'none';
-  s.marginTop = '16px';
-
-  button.addEventListener('click', onclick);
-
-  return button;
-};
-
-module.exports = ViewerSelector;
-
-},{"./device-info.js":7,"./emitter.js":12,"./util.js":22}],24:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var Util = _dereq_('./util.js');
-
-/**
- * Android and iOS compatible wakelock implementation.
- *
- * Refactored thanks to dkovalev@.
- */
-function AndroidWakeLock() {
-  var video = document.createElement('video');
-
-  video.addEventListener('ended', function() {
-    video.play();
-  });
-
-  this.request = function() {
-    if (video.paused) {
-      // Base64 version of videos_src/no-sleep-120s.mp4.
-      video.src = Util.base64('video/mp4', 'AAAAGGZ0eXBpc29tAAAAAG1wNDFhdmMxAAAIA21vb3YAAABsbXZoZAAAAADSa9v60mvb+gABX5AAlw/gAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAdkdHJhawAAAFx0a2hkAAAAAdJr2/rSa9v6AAAAAQAAAAAAlw/gAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAHAAAAAAAJGVkdHMAAAAcZWxzdAAAAAAAAAABAJcP4AAAAAAAAQAAAAAG3G1kaWEAAAAgbWRoZAAAAADSa9v60mvb+gAPQkAGjneAFccAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAABodtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAZHc3RibAAAAJdzdHNkAAAAAAAAAAEAAACHYXZjMQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAMABwASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAADFhdmNDAWQAC//hABlnZAALrNlfllw4QAAAAwBAAAADAKPFCmWAAQAFaOvssiwAAAAYc3R0cwAAAAAAAAABAAAAbgAPQkAAAAAUc3RzcwAAAAAAAAABAAAAAQAAA4BjdHRzAAAAAAAAAG4AAAABAD0JAAAAAAEAehIAAAAAAQA9CQAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEATEtAAAAAAQAehIAAAAABAAAAAAAAAAEAD0JAAAAAAQBMS0AAAAABAB6EgAAAAAEAAAAAAAAAAQAPQkAAAAABAExLQAAAAAEAHoSAAAAAAQAAAAAAAAABAA9CQAAAAAEALcbAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAABuAAAAAQAAAcxzdHN6AAAAAAAAAAAAAABuAAADCQAAABgAAAAOAAAADgAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABMAAAAUc3RjbwAAAAAAAAABAAAIKwAAACt1ZHRhAAAAI6llbmMAFwAAdmxjIDIuMi4xIHN0cmVhbSBvdXRwdXQAAAAId2lkZQAACRRtZGF0AAACrgX//6vcRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTQyIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNCAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDEzIG1lPWhleCBzdWJtZT03IHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0xIDh4OGRjdD0xIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MTIgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1hYnIgbWJ0cmVlPTEgYml0cmF0ZT0xMDAgcmF0ZXRvbD0xLjAgcWNvbXA9MC42MCBxcG1pbj0xMCBxcG1heD01MSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAU2WIhAAQ/8ltlOe+cTZuGkKg+aRtuivcDZ0pBsfsEi9p/i1yU9DxS2lq4dXTinViF1URBKXgnzKBd/Uh1bkhHtMrwrRcOJslD01UB+fyaL6ef+DBAAAAFEGaJGxBD5B+v+a+4QqF3MgBXz9MAAAACkGeQniH/+94r6EAAAAKAZ5hdEN/8QytwAAAAAgBnmNqQ3/EgQAAAA5BmmhJqEFomUwIIf/+4QAAAApBnoZFESw//76BAAAACAGepXRDf8SBAAAACAGep2pDf8SAAAAADkGarEmoQWyZTAgh//7gAAAACkGeykUVLD//voEAAAAIAZ7pdEN/xIAAAAAIAZ7rakN/xIAAAAAOQZrwSahBbJlMCCH//uEAAAAKQZ8ORRUsP/++gQAAAAgBny10Q3/EgQAAAAgBny9qQ3/EgAAAAA5BmzRJqEFsmUwIIf/+4AAAAApBn1JFFSw//76BAAAACAGfcXRDf8SAAAAACAGfc2pDf8SAAAAADkGbeEmoQWyZTAgh//7hAAAACkGflkUVLD//voAAAAAIAZ+1dEN/xIEAAAAIAZ+3akN/xIEAAAAOQZu8SahBbJlMCCH//uAAAAAKQZ/aRRUsP/++gQAAAAgBn/l0Q3/EgAAAAAgBn/tqQ3/EgQAAAA5Bm+BJqEFsmUwIIf/+4QAAAApBnh5FFSw//76AAAAACAGePXRDf8SAAAAACAGeP2pDf8SBAAAADkGaJEmoQWyZTAgh//7gAAAACkGeQkUVLD//voEAAAAIAZ5hdEN/xIAAAAAIAZ5jakN/xIEAAAAOQZpoSahBbJlMCCH//uEAAAAKQZ6GRRUsP/++gQAAAAgBnqV0Q3/EgQAAAAgBnqdqQ3/EgAAAAA5BmqxJqEFsmUwIIf/+4AAAAApBnspFFSw//76BAAAACAGe6XRDf8SAAAAACAGe62pDf8SAAAAADkGa8EmoQWyZTAgh//7hAAAACkGfDkUVLD//voEAAAAIAZ8tdEN/xIEAAAAIAZ8vakN/xIAAAAAOQZs0SahBbJlMCCH//uAAAAAKQZ9SRRUsP/++gQAAAAgBn3F0Q3/EgAAAAAgBn3NqQ3/EgAAAAA5Bm3hJqEFsmUwIIf/+4QAAAApBn5ZFFSw//76AAAAACAGftXRDf8SBAAAACAGft2pDf8SBAAAADkGbvEmoQWyZTAgh//7gAAAACkGf2kUVLD//voEAAAAIAZ/5dEN/xIAAAAAIAZ/7akN/xIEAAAAOQZvgSahBbJlMCCH//uEAAAAKQZ4eRRUsP/++gAAAAAgBnj10Q3/EgAAAAAgBnj9qQ3/EgQAAAA5BmiRJqEFsmUwIIf/+4AAAAApBnkJFFSw//76BAAAACAGeYXRDf8SAAAAACAGeY2pDf8SBAAAADkGaaEmoQWyZTAgh//7hAAAACkGehkUVLD//voEAAAAIAZ6ldEN/xIEAAAAIAZ6nakN/xIAAAAAOQZqsSahBbJlMCCH//uAAAAAKQZ7KRRUsP/++gQAAAAgBnul0Q3/EgAAAAAgBnutqQ3/EgAAAAA5BmvBJqEFsmUwIIf/+4QAAAApBnw5FFSw//76BAAAACAGfLXRDf8SBAAAACAGfL2pDf8SAAAAADkGbNEmoQWyZTAgh//7gAAAACkGfUkUVLD//voEAAAAIAZ9xdEN/xIAAAAAIAZ9zakN/xIAAAAAOQZt4SahBbJlMCCH//uEAAAAKQZ+WRRUsP/++gAAAAAgBn7V0Q3/EgQAAAAgBn7dqQ3/EgQAAAA5Bm7xJqEFsmUwIIf/+4AAAAApBn9pFFSw//76BAAAACAGf+XRDf8SAAAAACAGf+2pDf8SBAAAADkGb4EmoQWyZTAgh//7hAAAACkGeHkUVLD//voAAAAAIAZ49dEN/xIAAAAAIAZ4/akN/xIEAAAAOQZokSahBbJlMCCH//uAAAAAKQZ5CRRUsP/++gQAAAAgBnmF0Q3/EgAAAAAgBnmNqQ3/EgQAAAA5BmmhJqEFsmUwIIf/+4QAAAApBnoZFFSw//76BAAAACAGepXRDf8SBAAAACAGep2pDf8SAAAAADkGarEmoQWyZTAgh//7gAAAACkGeykUVLD//voEAAAAIAZ7pdEN/xIAAAAAIAZ7rakN/xIAAAAAPQZruSahBbJlMFEw3//7B');
-      video.play();
-    }
-  };
-
-  this.release = function() {
-    video.pause();
-    video.src = '';
-  };
-}
-
-function iOSWakeLock() {
-  var timer = null;
-
-  this.request = function() {
-    if (!timer) {
-      timer = setInterval(function() {
-        window.location = window.location;
-        setTimeout(window.stop, 0);
-      }, 30000);
-    }
-  }
-
-  this.release = function() {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-  }
-}
-
-
-function getWakeLock() {
-  var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  if (userAgent.match(/iPhone/i) || userAgent.match(/iPod/i)) {
-    return iOSWakeLock;
-  } else {
-    return AndroidWakeLock;
-  }
-}
-
-module.exports = getWakeLock();
-},{"./util.js":22}],25:[function(_dereq_,module,exports){
-/*
- * Copyright 2015 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var CardboardVRDisplay = _dereq_('./cardboard-vr-display.js');
-var MouseKeyboardVRDisplay = _dereq_('./mouse-keyboard-vr-display.js');
-// Uncomment to add positional tracking via webcam.
-//var WebcamPositionSensorVRDevice = require('./webcam-position-sensor-vr-device.js');
-var VRDisplay = _dereq_('./base.js').VRDisplay;
-var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
-var VRDisplayHMDDevice = _dereq_('./display-wrappers.js').VRDisplayHMDDevice;
-var VRDisplayPositionSensorDevice = _dereq_('./display-wrappers.js').VRDisplayPositionSensorDevice;
-
-function WebVRPolyfill() {
-  this.displays = [];
-  this.devices = []; // For deprecated objects
-  this.devicesPopulated = false;
-  this.nativeWebVRAvailable = this.isWebVRAvailable();
-  this.nativeLegacyWebVRAvailable = this.isDeprecatedWebVRAvailable();
-
-  if (!this.nativeLegacyWebVRAvailable) {
-    if (!this.nativeWebVRAvailable) {
-      this.enablePolyfill();
-    }
-    if (WebVRConfig.ENABLE_DEPRECATED_API) {
-      this.enableDeprecatedPolyfill();
-    }
-  }
-}
-
-WebVRPolyfill.prototype.isWebVRAvailable = function() {
-  return ('getVRDisplays' in navigator);
-};
-
-WebVRPolyfill.prototype.isDeprecatedWebVRAvailable = function() {
-  return ('getVRDevices' in navigator) || ('mozGetVRDevices' in navigator);
-};
-
-WebVRPolyfill.prototype.populateDevices = function() {
-  if (this.devicesPopulated) {
-    return;
-  }
-
-  // Initialize our virtual VR devices.
-  var vrDisplay = null;
-
-  // Add a Cardboard VRDisplay on compatible mobile devices
-  if (this.isCardboardCompatible()) {
-    vrDisplay = new CardboardVRDisplay();
-    this.displays.push(vrDisplay);
-
-    // For backwards compatibility
-    if (WebVRConfig.ENABLE_DEPRECATED_API) {
-      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
-      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
-    }
-  }
-
-  // Add a Mouse and Keyboard driven VRDisplay for desktops/laptops
-  if (!this.isMobile() && !WebVRConfig.MOUSE_KEYBOARD_CONTROLS_DISABLED) {
-    vrDisplay = new MouseKeyboardVRDisplay();
-    this.displays.push(vrDisplay);
-
-    // For backwards compatibility
-    if (WebVRConfig.ENABLE_DEPRECATED_API) {
-      this.devices.push(new VRDisplayHMDDevice(vrDisplay));
-      this.devices.push(new VRDisplayPositionSensorDevice(vrDisplay));
-    }
-  }
-
-  // Uncomment to add positional tracking via webcam.
-  //if (!this.isMobile() && WebVRConfig.ENABLE_DEPRECATED_API) {
-  //  positionDevice = new WebcamPositionSensorVRDevice();
-  //  this.devices.push(positionDevice);
-  //}
-
-  this.devicesPopulated = true;
-};
-
-WebVRPolyfill.prototype.enablePolyfill = function() {
-  // Provide navigator.getVRDisplays.
-  navigator.getVRDisplays = this.getVRDisplays.bind(this);
-
-  // Provide the VRDisplay object.
-  window.VRDisplay = VRDisplay;
-};
-
-WebVRPolyfill.prototype.enableDeprecatedPolyfill = function() {
-  // Provide navigator.getVRDevices.
-  navigator.getVRDevices = this.getVRDevices.bind(this);
-
-  // Provide the CardboardHMDVRDevice and PositionSensorVRDevice objects.
-  window.HMDVRDevice = HMDVRDevice;
-  window.PositionSensorVRDevice = PositionSensorVRDevice;
-};
-
-WebVRPolyfill.prototype.getVRDisplays = function() {
-  this.populateDevices();
-  var displays = this.displays;
-  return new Promise(function(resolve, reject) {
-    try {
-      resolve(displays);
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
-
-WebVRPolyfill.prototype.getVRDevices = function() {
-  console.warn('getVRDevices is deprecated. Please update your code to use getVRDisplays instead.');
-  var self = this;
-  return new Promise(function(resolve, reject) {
-    try {
-      if (!self.devicesPopulated) {
-        if (self.nativeWebVRAvailable) {
-          return navigator.getVRDisplays(function(displays) {
-            for (var i = 0; i < displays.length; ++i) {
-              self.devices.push(new VRDisplayHMDDevice(displays[i]));
-              self.devices.push(new VRDisplayPositionSensorDevice(displays[i]));
-            }
-            self.devicesPopulated = true;
-            resolve(self.devices);
-          }, reject);
-        }
-
-        if (self.nativeLegacyWebVRAvailable) {
-          return (navigator.getVRDDevices || navigator.mozGetVRDevices)(function(devices) {
-            for (var i = 0; i < devices.length; ++i) {
-              if (devices[i] instanceof HMDVRDevice) {
-                self.devices.push(devices[i]);
-              }
-              if (devices[i] instanceof PositionSensorVRDevice) {
-                self.devices.push(devices[i]);
-              }
-            }
-            self.devicesPopulated = true;
-            resolve(self.devices);
-          }, reject);
-        }
-      }
-
-      self.populateDevices();
-      resolve(self.devices);
-    } catch (e) {
-      reject(e);
-    }
-  });
-};
-
-/**
- * Determine if a device is mobile.
- */
-WebVRPolyfill.prototype.isMobile = function() {
-  return /Android/i.test(navigator.userAgent) ||
-      /iPhone|iPad|iPod/i.test(navigator.userAgent);
-};
-
-WebVRPolyfill.prototype.isCardboardCompatible = function() {
-  // For now, support all iOS and Android devices.
-  // Also enable the WebVRConfig.FORCE_VR flag for debugging.
-  return this.isMobile() || WebVRConfig.FORCE_ENABLE_VR;
-};
-
-module.exports = WebVRPolyfill;
-
-},{"./base.js":2,"./cardboard-vr-display.js":5,"./display-wrappers.js":8,"./mouse-keyboard-vr-display.js":15}]},{},[13]);
-
-/*
-  html2canvas 0.5.0-beta4 <http://html2canvas.hertzen.com>
-  Copyright (c) 2016 Niklas von Hertzen
-
-  Released under  License
-*/
-
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.html2canvas = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-(function (global){
-/*! https://mths.be/punycode v1.4.0 by @mathias */
-;(function(root) {
-
-	/** Detect free variables */
-	var freeExports = typeof exports == 'object' && exports &&
-		!exports.nodeType && exports;
-	var freeModule = typeof module == 'object' && module &&
-		!module.nodeType && module;
-	var freeGlobal = typeof global == 'object' && global;
-	if (
-		freeGlobal.global === freeGlobal ||
-		freeGlobal.window === freeGlobal ||
-		freeGlobal.self === freeGlobal
-	) {
-		root = freeGlobal;
-	}
-
-	/**
-	 * The `punycode` object.
-	 * @name punycode
-	 * @type Object
-	 */
-	var punycode,
-
-	/** Highest positive signed 32-bit float value */
-	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
-
-	/** Bootstring parameters */
-	base = 36,
-	tMin = 1,
-	tMax = 26,
-	skew = 38,
-	damp = 700,
-	initialBias = 72,
-	initialN = 128, // 0x80
-	delimiter = '-', // '\x2D'
-
-	/** Regular expressions */
-	regexPunycode = /^xn--/,
-	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
-	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
-
-	/** Error messages */
-	errors = {
-		'overflow': 'Overflow: input needs wider integers to process',
-		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
-		'invalid-input': 'Invalid input'
-	},
-
-	/** Convenience shortcuts */
-	baseMinusTMin = base - tMin,
-	floor = Math.floor,
-	stringFromCharCode = String.fromCharCode,
-
-	/** Temporary variable */
-	key;
-
-	/*--------------------------------------------------------------------------*/
-
-	/**
-	 * A generic error utility function.
-	 * @private
-	 * @param {String} type The error type.
-	 * @returns {Error} Throws a `RangeError` with the applicable error message.
-	 */
-	function error(type) {
-		throw new RangeError(errors[type]);
-	}
-
-	/**
-	 * A generic `Array#map` utility function.
-	 * @private
-	 * @param {Array} array The array to iterate over.
-	 * @param {Function} callback The function that gets called for every array
-	 * item.
-	 * @returns {Array} A new array of values returned by the callback function.
-	 */
-	function map(array, fn) {
-		var length = array.length;
-		var result = [];
-		while (length--) {
-			result[length] = fn(array[length]);
-		}
-		return result;
-	}
-
-	/**
-	 * A simple `Array#map`-like wrapper to work with domain name strings or email
-	 * addresses.
-	 * @private
-	 * @param {String} domain The domain name or email address.
-	 * @param {Function} callback The function that gets called for every
-	 * character.
-	 * @returns {Array} A new string of characters returned by the callback
-	 * function.
-	 */
-	function mapDomain(string, fn) {
-		var parts = string.split('@');
-		var result = '';
-		if (parts.length > 1) {
-			// In email addresses, only the domain name should be punycoded. Leave
-			// the local part (i.e. everything up to `@`) intact.
-			result = parts[0] + '@';
-			string = parts[1];
-		}
-		// Avoid `split(regex)` for IE8 compatibility. See #17.
-		string = string.replace(regexSeparators, '\x2E');
-		var labels = string.split('.');
-		var encoded = map(labels, fn).join('.');
-		return result + encoded;
-	}
-
-	/**
-	 * Creates an array containing the numeric code points of each Unicode
-	 * character in the string. While JavaScript uses UCS-2 internally,
-	 * this function will convert a pair of surrogate halves (each of which
-	 * UCS-2 exposes as separate characters) into a single code point,
-	 * matching UTF-16.
-	 * @see `punycode.ucs2.encode`
-	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-	 * @memberOf punycode.ucs2
-	 * @name decode
-	 * @param {String} string The Unicode input string (UCS-2).
-	 * @returns {Array} The new array of code points.
-	 */
-	function ucs2decode(string) {
-		var output = [],
-		    counter = 0,
-		    length = string.length,
-		    value,
-		    extra;
-		while (counter < length) {
-			value = string.charCodeAt(counter++);
-			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
-				// high surrogate, and there is a next character
-				extra = string.charCodeAt(counter++);
-				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
-					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
-				} else {
-					// unmatched surrogate; only append this code unit, in case the next
-					// code unit is the high surrogate of a surrogate pair
-					output.push(value);
-					counter--;
-				}
-			} else {
-				output.push(value);
-			}
-		}
-		return output;
-	}
-
-	/**
-	 * Creates a string based on an array of numeric code points.
-	 * @see `punycode.ucs2.decode`
-	 * @memberOf punycode.ucs2
-	 * @name encode
-	 * @param {Array} codePoints The array of numeric code points.
-	 * @returns {String} The new Unicode string (UCS-2).
-	 */
-	function ucs2encode(array) {
-		return map(array, function(value) {
-			var output = '';
-			if (value > 0xFFFF) {
-				value -= 0x10000;
-				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
-				value = 0xDC00 | value & 0x3FF;
-			}
-			output += stringFromCharCode(value);
-			return output;
-		}).join('');
-	}
-
-	/**
-	 * Converts a basic code point into a digit/integer.
-	 * @see `digitToBasic()`
-	 * @private
-	 * @param {Number} codePoint The basic numeric code point value.
-	 * @returns {Number} The numeric value of a basic code point (for use in
-	 * representing integers) in the range `0` to `base - 1`, or `base` if
-	 * the code point does not represent a value.
-	 */
-	function basicToDigit(codePoint) {
-		if (codePoint - 48 < 10) {
-			return codePoint - 22;
-		}
-		if (codePoint - 65 < 26) {
-			return codePoint - 65;
-		}
-		if (codePoint - 97 < 26) {
-			return codePoint - 97;
-		}
-		return base;
-	}
-
-	/**
-	 * Converts a digit/integer into a basic code point.
-	 * @see `basicToDigit()`
-	 * @private
-	 * @param {Number} digit The numeric value of a basic code point.
-	 * @returns {Number} The basic code point whose value (when used for
-	 * representing integers) is `digit`, which needs to be in the range
-	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
-	 * used; else, the lowercase form is used. The behavior is undefined
-	 * if `flag` is non-zero and `digit` has no uppercase form.
-	 */
-	function digitToBasic(digit, flag) {
-		//  0..25 map to ASCII a..z or A..Z
-		// 26..35 map to ASCII 0..9
-		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
-	}
-
-	/**
-	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * https://tools.ietf.org/html/rfc3492#section-3.4
-	 * @private
-	 */
-	function adapt(delta, numPoints, firstTime) {
-		var k = 0;
-		delta = firstTime ? floor(delta / damp) : delta >> 1;
-		delta += floor(delta / numPoints);
-		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
-			delta = floor(delta / baseMinusTMin);
-		}
-		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
-	}
-
-	/**
-	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
-	 * symbols.
-	 * @memberOf punycode
-	 * @param {String} input The Punycode string of ASCII-only symbols.
-	 * @returns {String} The resulting string of Unicode symbols.
-	 */
-	function decode(input) {
-		// Don't use UCS-2
-		var output = [],
-		    inputLength = input.length,
-		    out,
-		    i = 0,
-		    n = initialN,
-		    bias = initialBias,
-		    basic,
-		    j,
-		    index,
-		    oldi,
-		    w,
-		    k,
-		    digit,
-		    t,
-		    /** Cached calculation results */
-		    baseMinusT;
-
-		// Handle the basic code points: let `basic` be the number of input code
-		// points before the last delimiter, or `0` if there is none, then copy
-		// the first basic code points to the output.
-
-		basic = input.lastIndexOf(delimiter);
-		if (basic < 0) {
-			basic = 0;
-		}
-
-		for (j = 0; j < basic; ++j) {
-			// if it's not a basic code point
-			if (input.charCodeAt(j) >= 0x80) {
-				error('not-basic');
-			}
-			output.push(input.charCodeAt(j));
-		}
-
-		// Main decoding loop: start just after the last delimiter if any basic code
-		// points were copied; start at the beginning otherwise.
-
-		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
-
-			// `index` is the index of the next character to be consumed.
-			// Decode a generalized variable-length integer into `delta`,
-			// which gets added to `i`. The overflow checking is easier
-			// if we increase `i` as we go, then subtract off its starting
-			// value at the end to obtain `delta`.
-			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
-
-				if (index >= inputLength) {
-					error('invalid-input');
-				}
-
-				digit = basicToDigit(input.charCodeAt(index++));
-
-				if (digit >= base || digit > floor((maxInt - i) / w)) {
-					error('overflow');
-				}
-
-				i += digit * w;
-				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
-
-				if (digit < t) {
-					break;
-				}
-
-				baseMinusT = base - t;
-				if (w > floor(maxInt / baseMinusT)) {
-					error('overflow');
-				}
-
-				w *= baseMinusT;
-
-			}
-
-			out = output.length + 1;
-			bias = adapt(i - oldi, out, oldi == 0);
-
-			// `i` was supposed to wrap around from `out` to `0`,
-			// incrementing `n` each time, so we'll fix that now:
-			if (floor(i / out) > maxInt - n) {
-				error('overflow');
-			}
-
-			n += floor(i / out);
-			i %= out;
-
-			// Insert `n` at position `i` of the output
-			output.splice(i++, 0, n);
-
-		}
-
-		return ucs2encode(output);
-	}
-
-	/**
-	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
-	 * Punycode string of ASCII-only symbols.
-	 * @memberOf punycode
-	 * @param {String} input The string of Unicode symbols.
-	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
-	 */
-	function encode(input) {
-		var n,
-		    delta,
-		    handledCPCount,
-		    basicLength,
-		    bias,
-		    j,
-		    m,
-		    q,
-		    k,
-		    t,
-		    currentValue,
-		    output = [],
-		    /** `inputLength` will hold the number of code points in `input`. */
-		    inputLength,
-		    /** Cached calculation results */
-		    handledCPCountPlusOne,
-		    baseMinusT,
-		    qMinusT;
-
-		// Convert the input in UCS-2 to Unicode
-		input = ucs2decode(input);
-
-		// Cache the length
-		inputLength = input.length;
-
-		// Initialize the state
-		n = initialN;
-		delta = 0;
-		bias = initialBias;
-
-		// Handle the basic code points
-		for (j = 0; j < inputLength; ++j) {
-			currentValue = input[j];
-			if (currentValue < 0x80) {
-				output.push(stringFromCharCode(currentValue));
-			}
-		}
-
-		handledCPCount = basicLength = output.length;
-
-		// `handledCPCount` is the number of code points that have been handled;
-		// `basicLength` is the number of basic code points.
-
-		// Finish the basic string - if it is not empty - with a delimiter
-		if (basicLength) {
-			output.push(delimiter);
-		}
-
-		// Main encoding loop:
-		while (handledCPCount < inputLength) {
-
-			// All non-basic code points < n have been handled already. Find the next
-			// larger one:
-			for (m = maxInt, j = 0; j < inputLength; ++j) {
-				currentValue = input[j];
-				if (currentValue >= n && currentValue < m) {
-					m = currentValue;
-				}
-			}
-
-			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
-			// but guard against overflow
-			handledCPCountPlusOne = handledCPCount + 1;
-			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-				error('overflow');
-			}
-
-			delta += (m - n) * handledCPCountPlusOne;
-			n = m;
-
-			for (j = 0; j < inputLength; ++j) {
-				currentValue = input[j];
-
-				if (currentValue < n && ++delta > maxInt) {
-					error('overflow');
-				}
-
-				if (currentValue == n) {
-					// Represent delta as a generalized variable-length integer
-					for (q = delta, k = base; /* no condition */; k += base) {
-						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
-						if (q < t) {
-							break;
-						}
-						qMinusT = q - t;
-						baseMinusT = base - t;
-						output.push(
-							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
-						);
-						q = floor(qMinusT / baseMinusT);
-					}
-
-					output.push(stringFromCharCode(digitToBasic(q, 0)));
-					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
-					delta = 0;
-					++handledCPCount;
-				}
-			}
-
-			++delta;
-			++n;
-
-		}
-		return output.join('');
-	}
-
-	/**
-	 * Converts a Punycode string representing a domain name or an email address
-	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
-	 * it doesn't matter if you call it on a string that has already been
-	 * converted to Unicode.
-	 * @memberOf punycode
-	 * @param {String} input The Punycoded domain name or email address to
-	 * convert to Unicode.
-	 * @returns {String} The Unicode representation of the given Punycode
-	 * string.
-	 */
-	function toUnicode(input) {
-		return mapDomain(input, function(string) {
-			return regexPunycode.test(string)
-				? decode(string.slice(4).toLowerCase())
-				: string;
-		});
-	}
-
-	/**
-	 * Converts a Unicode string representing a domain name or an email address to
-	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
-	 * i.e. it doesn't matter if you call it with a domain that's already in
-	 * ASCII.
-	 * @memberOf punycode
-	 * @param {String} input The domain name or email address to convert, as a
-	 * Unicode string.
-	 * @returns {String} The Punycode representation of the given domain name or
-	 * email address.
-	 */
-	function toASCII(input) {
-		return mapDomain(input, function(string) {
-			return regexNonASCII.test(string)
-				? 'xn--' + encode(string)
-				: string;
-		});
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	/** Define the public API */
-	punycode = {
-		/**
-		 * A string representing the current Punycode.js version number.
-		 * @memberOf punycode
-		 * @type String
-		 */
-		'version': '1.3.2',
-		/**
-		 * An object of methods to convert from JavaScript's internal character
-		 * representation (UCS-2) to Unicode code points, and back.
-		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-		 * @memberOf punycode
-		 * @type Object
-		 */
-		'ucs2': {
-			'decode': ucs2decode,
-			'encode': ucs2encode
-		},
-		'decode': decode,
-		'encode': encode,
-		'toASCII': toASCII,
-		'toUnicode': toUnicode
-	};
-
-	/** Expose `punycode` */
-	// Some AMD build optimizers, like r.js, check for specific condition patterns
-	// like the following:
-	if (
-		typeof define == 'function' &&
-		typeof define.amd == 'object' &&
-		define.amd
-	) {
-		define('punycode', function() {
-			return punycode;
-		});
-	} else if (freeExports && freeModule) {
-		if (module.exports == freeExports) {
-			// in Node.js, io.js, or RingoJS v0.8.0+
-			freeModule.exports = punycode;
-		} else {
-			// in Narwhal or RingoJS v0.7.0-
-			for (key in punycode) {
-				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
-			}
-		}
-	} else {
-		// in Rhino or a web browser
-		root.punycode = punycode;
-	}
-
-}(this));
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],2:[function(_dereq_,module,exports){
-var log = _dereq_('./log');
-
-function restoreOwnerScroll(ownerDocument, x, y) {
-    if (ownerDocument.defaultView && (x !== ownerDocument.defaultView.pageXOffset || y !== ownerDocument.defaultView.pageYOffset)) {
-        ownerDocument.defaultView.scrollTo(x, y);
-    }
-}
-
-function cloneCanvasContents(canvas, clonedCanvas) {
-    try {
-        if (clonedCanvas) {
-            clonedCanvas.width = canvas.width;
-            clonedCanvas.height = canvas.height;
-            clonedCanvas.getContext("2d").putImageData(canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height), 0, 0);
-        }
-    } catch(e) {
-        log("Unable to copy canvas content from", canvas, e);
-    }
-}
-
-function cloneNode(node, javascriptEnabled) {
-    var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
-
-    var child = node.firstChild;
-    while(child) {
-        if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
-            clone.appendChild(cloneNode(child, javascriptEnabled));
-        }
-        child = child.nextSibling;
-    }
-
-    if (node.nodeType === 1) {
-        clone._scrollTop = node.scrollTop;
-        clone._scrollLeft = node.scrollLeft;
-        if (node.nodeName === "CANVAS") {
-            cloneCanvasContents(node, clone);
-        } else if (node.nodeName === "TEXTAREA" || node.nodeName === "SELECT") {
-            clone.value = node.value;
-        }
-    }
-
-    return clone;
-}
-
-function initNode(node) {
-    if (node.nodeType === 1) {
-        node.scrollTop = node._scrollTop;
-        node.scrollLeft = node._scrollLeft;
-
-        var child = node.firstChild;
-        while(child) {
-            initNode(child);
-            child = child.nextSibling;
-        }
-    }
-}
-
-module.exports = function(ownerDocument, containerDocument, width, height, options, x ,y) {
-    var documentElement = cloneNode(ownerDocument.documentElement, options.javascriptEnabled);
-    var container = containerDocument.createElement("iframe");
-
-    container.className = "html2canvas-container";
-    container.style.visibility = "hidden";
-    container.style.position = "fixed";
-    container.style.left = "-10000px";
-    container.style.top = "0px";
-    container.style.border = "0";
-    container.width = width;
-    container.height = height;
-    container.scrolling = "no"; // ios won't scroll without it
-    containerDocument.body.appendChild(container);
-
-    return new Promise(function(resolve) {
-        var documentClone = container.contentWindow.document;
-
-        /* Chrome doesn't detect relative background-images assigned in inline <style> sheets when fetched through getComputedStyle
-         if window url is about:blank, we can assign the url to current by writing onto the document
-         */
-        container.contentWindow.onload = container.onload = function() {
-            var interval = setInterval(function() {
-                if (documentClone.body.childNodes.length > 0) {
-                    initNode(documentClone.documentElement);
-                    clearInterval(interval);
-                    if (options.type === "view") {
-                        container.contentWindow.scrollTo(x, y);
-                        if ((/(iPad|iPhone|iPod)/g).test(navigator.userAgent) && (container.contentWindow.scrollY !== y || container.contentWindow.scrollX !== x)) {
-                            documentClone.documentElement.style.top = (-y) + "px";
-                            documentClone.documentElement.style.left = (-x) + "px";
-                            documentClone.documentElement.style.position = 'absolute';
-                        }
-                    }
-                    resolve(container);
-                }
-            }, 50);
-        };
-
-        documentClone.open();
-        documentClone.write("<!DOCTYPE html><html></html>");
-        // Chrome scrolls the parent document for some reason after the write to the cloned window???
-        restoreOwnerScroll(ownerDocument, x, y);
-        documentClone.replaceChild(documentClone.adoptNode(documentElement), documentClone.documentElement);
-        documentClone.close();
-    });
-};
-
-},{"./log":13}],3:[function(_dereq_,module,exports){
-// http://dev.w3.org/csswg/css-color/
-
-function Color(value) {
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
-    this.a = null;
-    var result = this.fromArray(value) ||
-        this.namedColor(value) ||
-        this.rgb(value) ||
-        this.rgba(value) ||
-        this.hex6(value) ||
-        this.hex3(value);
-}
-
-Color.prototype.darken = function(amount) {
-    var a = 1 - amount;
-    return  new Color([
-        Math.round(this.r * a),
-        Math.round(this.g * a),
-        Math.round(this.b * a),
-        this.a
-    ]);
-};
-
-Color.prototype.isTransparent = function() {
-    return this.a === 0;
-};
-
-Color.prototype.isBlack = function() {
-    return this.r === 0 && this.g === 0 && this.b === 0;
-};
-
-Color.prototype.fromArray = function(array) {
-    if (Array.isArray(array)) {
-        this.r = Math.min(array[0], 255);
-        this.g = Math.min(array[1], 255);
-        this.b = Math.min(array[2], 255);
-        if (array.length > 3) {
-            this.a = array[3];
-        }
-    }
-
-    return (Array.isArray(array));
-};
-
-var _hex3 = /^#([a-f0-9]{3})$/i;
-
-Color.prototype.hex3 = function(value) {
-    var match = null;
-    if ((match = value.match(_hex3)) !== null) {
-        this.r = parseInt(match[1][0] + match[1][0], 16);
-        this.g = parseInt(match[1][1] + match[1][1], 16);
-        this.b = parseInt(match[1][2] + match[1][2], 16);
-    }
-    return match !== null;
-};
-
-var _hex6 = /^#([a-f0-9]{6})$/i;
-
-Color.prototype.hex6 = function(value) {
-    var match = null;
-    if ((match = value.match(_hex6)) !== null) {
-        this.r = parseInt(match[1].substring(0, 2), 16);
-        this.g = parseInt(match[1].substring(2, 4), 16);
-        this.b = parseInt(match[1].substring(4, 6), 16);
-    }
-    return match !== null;
-};
-
-
-var _rgb = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
-
-Color.prototype.rgb = function(value) {
-    var match = null;
-    if ((match = value.match(_rgb)) !== null) {
-        this.r = Number(match[1]);
-        this.g = Number(match[2]);
-        this.b = Number(match[3]);
-    }
-    return match !== null;
-};
-
-var _rgba = /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d?\.?\d+)\s*\)$/;
-
-Color.prototype.rgba = function(value) {
-    var match = null;
-    if ((match = value.match(_rgba)) !== null) {
-        this.r = Number(match[1]);
-        this.g = Number(match[2]);
-        this.b = Number(match[3]);
-        this.a = Number(match[4]);
-    }
-    return match !== null;
-};
-
-Color.prototype.toString = function() {
-    return this.a !== null && this.a !== 1 ?
-    "rgba(" + [this.r, this.g, this.b, this.a].join(",") + ")" :
-    "rgb(" + [this.r, this.g, this.b].join(",") + ")";
-};
-
-Color.prototype.namedColor = function(value) {
-    value = value.toLowerCase();
-    var color = colors[value];
-    if (color) {
-        this.r = color[0];
-        this.g = color[1];
-        this.b = color[2];
-    } else if (value === "transparent") {
-        this.r = this.g = this.b = this.a = 0;
-        return true;
-    }
-
-    return !!color;
-};
-
-Color.prototype.isColor = true;
-
-// JSON.stringify([].slice.call($$('.named-color-table tr'), 1).map(function(row) { return [row.childNodes[3].textContent, row.childNodes[5].textContent.trim().split(",").map(Number)] }).reduce(function(data, row) {data[row[0]] = row[1]; return data}, {}))
-var colors = {
-    "aliceblue": [240, 248, 255],
-    "antiquewhite": [250, 235, 215],
-    "aqua": [0, 255, 255],
-    "aquamarine": [127, 255, 212],
-    "azure": [240, 255, 255],
-    "beige": [245, 245, 220],
-    "bisque": [255, 228, 196],
-    "black": [0, 0, 0],
-    "blanchedalmond": [255, 235, 205],
-    "blue": [0, 0, 255],
-    "blueviolet": [138, 43, 226],
-    "brown": [165, 42, 42],
-    "burlywood": [222, 184, 135],
-    "cadetblue": [95, 158, 160],
-    "chartreuse": [127, 255, 0],
-    "chocolate": [210, 105, 30],
-    "coral": [255, 127, 80],
-    "cornflowerblue": [100, 149, 237],
-    "cornsilk": [255, 248, 220],
-    "crimson": [220, 20, 60],
-    "cyan": [0, 255, 255],
-    "darkblue": [0, 0, 139],
-    "darkcyan": [0, 139, 139],
-    "darkgoldenrod": [184, 134, 11],
-    "darkgray": [169, 169, 169],
-    "darkgreen": [0, 100, 0],
-    "darkgrey": [169, 169, 169],
-    "darkkhaki": [189, 183, 107],
-    "darkmagenta": [139, 0, 139],
-    "darkolivegreen": [85, 107, 47],
-    "darkorange": [255, 140, 0],
-    "darkorchid": [153, 50, 204],
-    "darkred": [139, 0, 0],
-    "darksalmon": [233, 150, 122],
-    "darkseagreen": [143, 188, 143],
-    "darkslateblue": [72, 61, 139],
-    "darkslategray": [47, 79, 79],
-    "darkslategrey": [47, 79, 79],
-    "darkturquoise": [0, 206, 209],
-    "darkviolet": [148, 0, 211],
-    "deeppink": [255, 20, 147],
-    "deepskyblue": [0, 191, 255],
-    "dimgray": [105, 105, 105],
-    "dimgrey": [105, 105, 105],
-    "dodgerblue": [30, 144, 255],
-    "firebrick": [178, 34, 34],
-    "floralwhite": [255, 250, 240],
-    "forestgreen": [34, 139, 34],
-    "fuchsia": [255, 0, 255],
-    "gainsboro": [220, 220, 220],
-    "ghostwhite": [248, 248, 255],
-    "gold": [255, 215, 0],
-    "goldenrod": [218, 165, 32],
-    "gray": [128, 128, 128],
-    "green": [0, 128, 0],
-    "greenyellow": [173, 255, 47],
-    "grey": [128, 128, 128],
-    "honeydew": [240, 255, 240],
-    "hotpink": [255, 105, 180],
-    "indianred": [205, 92, 92],
-    "indigo": [75, 0, 130],
-    "ivory": [255, 255, 240],
-    "khaki": [240, 230, 140],
-    "lavender": [230, 230, 250],
-    "lavenderblush": [255, 240, 245],
-    "lawngreen": [124, 252, 0],
-    "lemonchiffon": [255, 250, 205],
-    "lightblue": [173, 216, 230],
-    "lightcoral": [240, 128, 128],
-    "lightcyan": [224, 255, 255],
-    "lightgoldenrodyellow": [250, 250, 210],
-    "lightgray": [211, 211, 211],
-    "lightgreen": [144, 238, 144],
-    "lightgrey": [211, 211, 211],
-    "lightpink": [255, 182, 193],
-    "lightsalmon": [255, 160, 122],
-    "lightseagreen": [32, 178, 170],
-    "lightskyblue": [135, 206, 250],
-    "lightslategray": [119, 136, 153],
-    "lightslategrey": [119, 136, 153],
-    "lightsteelblue": [176, 196, 222],
-    "lightyellow": [255, 255, 224],
-    "lime": [0, 255, 0],
-    "limegreen": [50, 205, 50],
-    "linen": [250, 240, 230],
-    "magenta": [255, 0, 255],
-    "maroon": [128, 0, 0],
-    "mediumaquamarine": [102, 205, 170],
-    "mediumblue": [0, 0, 205],
-    "mediumorchid": [186, 85, 211],
-    "mediumpurple": [147, 112, 219],
-    "mediumseagreen": [60, 179, 113],
-    "mediumslateblue": [123, 104, 238],
-    "mediumspringgreen": [0, 250, 154],
-    "mediumturquoise": [72, 209, 204],
-    "mediumvioletred": [199, 21, 133],
-    "midnightblue": [25, 25, 112],
-    "mintcream": [245, 255, 250],
-    "mistyrose": [255, 228, 225],
-    "moccasin": [255, 228, 181],
-    "navajowhite": [255, 222, 173],
-    "navy": [0, 0, 128],
-    "oldlace": [253, 245, 230],
-    "olive": [128, 128, 0],
-    "olivedrab": [107, 142, 35],
-    "orange": [255, 165, 0],
-    "orangered": [255, 69, 0],
-    "orchid": [218, 112, 214],
-    "palegoldenrod": [238, 232, 170],
-    "palegreen": [152, 251, 152],
-    "paleturquoise": [175, 238, 238],
-    "palevioletred": [219, 112, 147],
-    "papayawhip": [255, 239, 213],
-    "peachpuff": [255, 218, 185],
-    "peru": [205, 133, 63],
-    "pink": [255, 192, 203],
-    "plum": [221, 160, 221],
-    "powderblue": [176, 224, 230],
-    "purple": [128, 0, 128],
-    "rebeccapurple": [102, 51, 153],
-    "red": [255, 0, 0],
-    "rosybrown": [188, 143, 143],
-    "royalblue": [65, 105, 225],
-    "saddlebrown": [139, 69, 19],
-    "salmon": [250, 128, 114],
-    "sandybrown": [244, 164, 96],
-    "seagreen": [46, 139, 87],
-    "seashell": [255, 245, 238],
-    "sienna": [160, 82, 45],
-    "silver": [192, 192, 192],
-    "skyblue": [135, 206, 235],
-    "slateblue": [106, 90, 205],
-    "slategray": [112, 128, 144],
-    "slategrey": [112, 128, 144],
-    "snow": [255, 250, 250],
-    "springgreen": [0, 255, 127],
-    "steelblue": [70, 130, 180],
-    "tan": [210, 180, 140],
-    "teal": [0, 128, 128],
-    "thistle": [216, 191, 216],
-    "tomato": [255, 99, 71],
-    "turquoise": [64, 224, 208],
-    "violet": [238, 130, 238],
-    "wheat": [245, 222, 179],
-    "white": [255, 255, 255],
-    "whitesmoke": [245, 245, 245],
-    "yellow": [255, 255, 0],
-    "yellowgreen": [154, 205, 50]
-};
-
-module.exports = Color;
-
-},{}],4:[function(_dereq_,module,exports){
-var Support = _dereq_('./support');
-var CanvasRenderer = _dereq_('./renderers/canvas');
-var ImageLoader = _dereq_('./imageloader');
-var NodeParser = _dereq_('./nodeparser');
-var NodeContainer = _dereq_('./nodecontainer');
-var log = _dereq_('./log');
-var utils = _dereq_('./utils');
-var createWindowClone = _dereq_('./clone');
-var loadUrlDocument = _dereq_('./proxy').loadUrlDocument;
-var getBounds = utils.getBounds;
-
-var html2canvasNodeAttribute = "data-html2canvas-node";
-var html2canvasCloneIndex = 0;
-
-function html2canvas(nodeList, options) {
-    var index = html2canvasCloneIndex++;
-    options = options || {};
-    if (options.logging) {
-        log.options.logging = true;
-        log.options.start = Date.now();
-    }
-
-    options.async = typeof(options.async) === "undefined" ? true : options.async;
-    options.allowTaint = typeof(options.allowTaint) === "undefined" ? false : options.allowTaint;
-    options.removeContainer = typeof(options.removeContainer) === "undefined" ? true : options.removeContainer;
-    options.javascriptEnabled = typeof(options.javascriptEnabled) === "undefined" ? false : options.javascriptEnabled;
-    options.imageTimeout = typeof(options.imageTimeout) === "undefined" ? 10000 : options.imageTimeout;
-    options.renderer = typeof(options.renderer) === "function" ? options.renderer : CanvasRenderer;
-    options.strict = !!options.strict;
-
-    if (typeof(nodeList) === "string") {
-        if (typeof(options.proxy) !== "string") {
-            return Promise.reject("Proxy must be used when rendering url");
-        }
-        var width = options.width != null ? options.width : window.innerWidth;
-        var height = options.height != null ? options.height : window.innerHeight;
-        return loadUrlDocument(absoluteUrl(nodeList), options.proxy, document, width, height, options).then(function(container) {
-            return renderWindow(container.contentWindow.document.documentElement, container, options, width, height);
-        });
-    }
-
-    var node = ((nodeList === undefined) ? [document.documentElement] : ((nodeList.length) ? nodeList : [nodeList]))[0];
-    node.setAttribute(html2canvasNodeAttribute + index, index);
-    return renderDocument(node.ownerDocument, options, node.ownerDocument.defaultView.innerWidth, node.ownerDocument.defaultView.innerHeight, index).then(function(canvas) {
-        if (typeof(options.onrendered) === "function") {
-            log("options.onrendered is deprecated, html2canvas returns a Promise containing the canvas");
-            options.onrendered(canvas);
-        }
-        return canvas;
-    });
-}
-
-html2canvas.CanvasRenderer = CanvasRenderer;
-html2canvas.NodeContainer = NodeContainer;
-html2canvas.log = log;
-html2canvas.utils = utils;
-
-var html2canvasExport = (typeof(document) === "undefined" || typeof(Object.create) !== "function" || typeof(document.createElement("canvas").getContext) !== "function") ? function() {
-    return Promise.reject("No canvas support");
-} : html2canvas;
-
-module.exports = html2canvasExport;
-
-if (typeof(define) === 'function' && define.amd) {
-    define('html2canvas', [], function() {
-        return html2canvasExport;
-    });
-}
-
-function renderDocument(document, options, windowWidth, windowHeight, html2canvasIndex) {
-    return createWindowClone(document, document, windowWidth, windowHeight, options, document.defaultView.pageXOffset, document.defaultView.pageYOffset).then(function(container) {
-        log("Document cloned");
-        var attributeName = html2canvasNodeAttribute + html2canvasIndex;
-        var selector = "[" + attributeName + "='" + html2canvasIndex + "']";
-        document.querySelector(selector).removeAttribute(attributeName);
-        var clonedWindow = container.contentWindow;
-        var node = clonedWindow.document.querySelector(selector);
-        var oncloneHandler = (typeof(options.onclone) === "function") ? Promise.resolve(options.onclone(clonedWindow.document)) : Promise.resolve(true);
-        return oncloneHandler.then(function() {
-            return renderWindow(node, container, options, windowWidth, windowHeight);
-        });
-    });
-}
-
-function renderWindow(node, container, options, windowWidth, windowHeight) {
-    var clonedWindow = container.contentWindow;
-    var support = new Support(clonedWindow.document);
-    var imageLoader = new ImageLoader(options, support);
-    var bounds = getBounds(node);
-    var width = options.type === "view" ? windowWidth : documentWidth(clonedWindow.document);
-    var height = options.type === "view" ? windowHeight : documentHeight(clonedWindow.document);
-    var renderer = new options.renderer(width, height, imageLoader, options, document);
-    var parser = new NodeParser(node, renderer, support, imageLoader, options);
-    return parser.ready.then(function() {
-        log("Finished rendering");
-        var canvas;
-
-        if (options.type === "view") {
-            canvas = crop(renderer.canvas, {width: renderer.canvas.width, height: renderer.canvas.height, top: 0, left: 0, x: 0, y: 0});
-        } else if (node === clonedWindow.document.body || node === clonedWindow.document.documentElement || options.canvas != null) {
-            canvas = renderer.canvas;
-        } else {
-            canvas = crop(renderer.canvas, {width:  options.width != null ? options.width : bounds.width, height: options.height != null ? options.height : bounds.height, top: bounds.top, left: bounds.left, x: 0, y: 0});
-        }
-
-        cleanupContainer(container, options);
-        return canvas;
-    });
-}
-
-function cleanupContainer(container, options) {
-    if (options.removeContainer) {
-        container.parentNode.removeChild(container);
-        log("Cleaned up container");
-    }
-}
-
-function crop(canvas, bounds) {
-    var croppedCanvas = document.createElement("canvas");
-    var x1 = Math.min(canvas.width - 1, Math.max(0, bounds.left));
-    var x2 = Math.min(canvas.width, Math.max(1, bounds.left + bounds.width));
-    var y1 = Math.min(canvas.height - 1, Math.max(0, bounds.top));
-    var y2 = Math.min(canvas.height, Math.max(1, bounds.top + bounds.height));
-    croppedCanvas.width = bounds.width;
-    croppedCanvas.height =  bounds.height;
-    var width = x2-x1;
-    var height = y2-y1;
-    log("Cropping canvas at:", "left:", bounds.left, "top:", bounds.top, "width:", width, "height:", height);
-    log("Resulting crop with width", bounds.width, "and height", bounds.height, "with x", x1, "and y", y1);
-    croppedCanvas.getContext("2d").drawImage(canvas, x1, y1, width, height, bounds.x, bounds.y, width, height);
-    return croppedCanvas;
-}
-
-function documentWidth (doc) {
-    return Math.max(
-        Math.max(doc.body.scrollWidth, doc.documentElement.scrollWidth),
-        Math.max(doc.body.offsetWidth, doc.documentElement.offsetWidth),
-        Math.max(doc.body.clientWidth, doc.documentElement.clientWidth)
-    );
-}
-
-function documentHeight (doc) {
-    return Math.max(
-        Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight),
-        Math.max(doc.body.offsetHeight, doc.documentElement.offsetHeight),
-        Math.max(doc.body.clientHeight, doc.documentElement.clientHeight)
-    );
-}
-
-function absoluteUrl(url) {
-    var link = document.createElement("a");
-    link.href = url;
-    link.href = link.href;
-    return link;
-}
-
-},{"./clone":2,"./imageloader":11,"./log":13,"./nodecontainer":14,"./nodeparser":15,"./proxy":16,"./renderers/canvas":20,"./support":22,"./utils":26}],5:[function(_dereq_,module,exports){
-var log = _dereq_('./log');
-var smallImage = _dereq_('./utils').smallImage;
-
-function DummyImageContainer(src) {
-    this.src = src;
-    log("DummyImageContainer for", src);
-    if (!this.promise || !this.image) {
-        log("Initiating DummyImageContainer");
-        DummyImageContainer.prototype.image = new Image();
-        var image = this.image;
-        DummyImageContainer.prototype.promise = new Promise(function(resolve, reject) {
-            image.onload = resolve;
-            image.onerror = reject;
-            image.src = smallImage();
-            if (image.complete === true) {
-                resolve(image);
-            }
-        });
-    }
-}
-
-module.exports = DummyImageContainer;
-
-},{"./log":13,"./utils":26}],6:[function(_dereq_,module,exports){
-var smallImage = _dereq_('./utils').smallImage;
-
-function Font(family, size) {
-    var container = document.createElement('div'),
-        img = document.createElement('img'),
-        span = document.createElement('span'),
-        sampleText = 'Hidden Text',
-        baseline,
-        middle;
-
-    container.style.visibility = "hidden";
-    container.style.fontFamily = family;
-    container.style.fontSize = size;
-    container.style.margin = 0;
-    container.style.padding = 0;
-
-    document.body.appendChild(container);
-
-    img.src = smallImage();
-    img.width = 1;
-    img.height = 1;
-
-    img.style.margin = 0;
-    img.style.padding = 0;
-    img.style.verticalAlign = "baseline";
-
-    span.style.fontFamily = family;
-    span.style.fontSize = size;
-    span.style.margin = 0;
-    span.style.padding = 0;
-
-    span.appendChild(document.createTextNode(sampleText));
-    container.appendChild(span);
-    container.appendChild(img);
-    baseline = (img.offsetTop - span.offsetTop) + 1;
-
-    container.removeChild(span);
-    container.appendChild(document.createTextNode(sampleText));
-
-    container.style.lineHeight = "normal";
-    img.style.verticalAlign = "super";
-
-    middle = (img.offsetTop-container.offsetTop) + 1;
-
-    document.body.removeChild(container);
-
-    this.baseline = baseline;
-    this.lineWidth = 1;
-    this.middle = middle;
-}
-
-module.exports = Font;
-
-},{"./utils":26}],7:[function(_dereq_,module,exports){
-var Font = _dereq_('./font');
-
-function FontMetrics() {
-    this.data = {};
-}
-
-FontMetrics.prototype.getMetrics = function(family, size) {
-    if (this.data[family + "-" + size] === undefined) {
-        this.data[family + "-" + size] = new Font(family, size);
-    }
-    return this.data[family + "-" + size];
-};
-
-module.exports = FontMetrics;
-
-},{"./font":6}],8:[function(_dereq_,module,exports){
-var utils = _dereq_('./utils');
-var getBounds = utils.getBounds;
-var loadUrlDocument = _dereq_('./proxy').loadUrlDocument;
-
-function FrameContainer(container, sameOrigin, options) {
-    this.image = null;
-    this.src = container;
-    var self = this;
-    var bounds = getBounds(container);
-    this.promise = (!sameOrigin ? this.proxyLoad(options.proxy, bounds, options) : new Promise(function(resolve) {
-        if (container.contentWindow.document.URL === "about:blank" || container.contentWindow.document.documentElement == null) {
-            container.contentWindow.onload = container.onload = function() {
-                resolve(container);
-            };
-        } else {
-            resolve(container);
-        }
-    })).then(function(container) {
-        var html2canvas = _dereq_('./core');
-        return html2canvas(container.contentWindow.document.documentElement, {type: 'view', width: container.width, height: container.height, proxy: options.proxy, javascriptEnabled: options.javascriptEnabled, removeContainer: options.removeContainer, allowTaint: options.allowTaint, imageTimeout: options.imageTimeout / 2});
-    }).then(function(canvas) {
-        return self.image = canvas;
-    });
-}
-
-FrameContainer.prototype.proxyLoad = function(proxy, bounds, options) {
-    var container = this.src;
-    return loadUrlDocument(container.src, proxy, container.ownerDocument, bounds.width, bounds.height, options);
-};
-
-module.exports = FrameContainer;
-
-},{"./core":4,"./proxy":16,"./utils":26}],9:[function(_dereq_,module,exports){
-function GradientContainer(imageData) {
-    this.src = imageData.value;
-    this.colorStops = [];
-    this.type = null;
-    this.x0 = 0.5;
-    this.y0 = 0.5;
-    this.x1 = 0.5;
-    this.y1 = 0.5;
-    this.promise = Promise.resolve(true);
-}
-
-GradientContainer.TYPES = {
-    LINEAR: 1,
-    RADIAL: 2
-};
-
-// TODO: support hsl[a], negative %/length values
-// TODO: support <angle> (e.g. -?\d{1,3}(?:\.\d+)deg, etc. : https://developer.mozilla.org/docs/Web/CSS/angle )
-GradientContainer.REGEXP_COLORSTOP = /^\s*(rgba?\(\s*\d{1,3},\s*\d{1,3},\s*\d{1,3}(?:,\s*[0-9\.]+)?\s*\)|[a-z]{3,20}|#[a-f0-9]{3,6})(?:\s+(\d{1,3}(?:\.\d+)?)(%|px)?)?(?:\s|$)/i;
-
-module.exports = GradientContainer;
-
-},{}],10:[function(_dereq_,module,exports){
-function ImageContainer(src, cors) {
-    this.src = src;
-    this.image = new Image();
-    var self = this;
-    this.tainted = null;
-    this.promise = new Promise(function(resolve, reject) {
-        self.image.onload = resolve;
-        self.image.onerror = reject;
-        if (cors) {
-            self.image.crossOrigin = "anonymous";
-        }
-        self.image.src = src;
-        if (self.image.complete === true) {
-            resolve(self.image);
-        }
-    });
-}
-
-module.exports = ImageContainer;
-
-},{}],11:[function(_dereq_,module,exports){
-var log = _dereq_('./log');
-var ImageContainer = _dereq_('./imagecontainer');
-var DummyImageContainer = _dereq_('./dummyimagecontainer');
-var ProxyImageContainer = _dereq_('./proxyimagecontainer');
-var FrameContainer = _dereq_('./framecontainer');
-var SVGContainer = _dereq_('./svgcontainer');
-var SVGNodeContainer = _dereq_('./svgnodecontainer');
-var LinearGradientContainer = _dereq_('./lineargradientcontainer');
-var WebkitGradientContainer = _dereq_('./webkitgradientcontainer');
-var bind = _dereq_('./utils').bind;
-
-function ImageLoader(options, support) {
-    this.link = null;
-    this.options = options;
-    this.support = support;
-    this.origin = this.getOrigin(window.location.href);
-}
-
-ImageLoader.prototype.findImages = function(nodes) {
-    var images = [];
-    nodes.reduce(function(imageNodes, container) {
-        switch(container.node.nodeName) {
-        case "IMG":
-            return imageNodes.concat([{
-                args: [container.node.src],
-                method: "url"
-            }]);
-        case "svg":
-        case "IFRAME":
-            return imageNodes.concat([{
-                args: [container.node],
-                method: container.node.nodeName
-            }]);
-        }
-        return imageNodes;
-    }, []).forEach(this.addImage(images, this.loadImage), this);
-    return images;
-};
-
-ImageLoader.prototype.findBackgroundImage = function(images, container) {
-    container.parseBackgroundImages().filter(this.hasImageBackground).forEach(this.addImage(images, this.loadImage), this);
-    return images;
-};
-
-ImageLoader.prototype.addImage = function(images, callback) {
-    return function(newImage) {
-        newImage.args.forEach(function(image) {
-            if (!this.imageExists(images, image)) {
-                images.splice(0, 0, callback.call(this, newImage));
-                log('Added image #' + (images.length), typeof(image) === "string" ? image.substring(0, 100) : image);
-            }
-        }, this);
-    };
-};
-
-ImageLoader.prototype.hasImageBackground = function(imageData) {
-    return imageData.method !== "none";
-};
-
-ImageLoader.prototype.loadImage = function(imageData) {
-    if (imageData.method === "url") {
-        var src = imageData.args[0];
-        if (this.isSVG(src) && !this.support.svg && !this.options.allowTaint) {
-            return new SVGContainer(src);
-        } else if (src.match(/data:image\/.*;base64,/i)) {
-            return new ImageContainer(src.replace(/url\(['"]{0,}|['"]{0,}\)$/ig, ''), false);
-        } else if (this.isSameOrigin(src) || this.options.allowTaint === true || this.isSVG(src)) {
-            return new ImageContainer(src, false);
-        } else if (this.support.cors && !this.options.allowTaint && this.options.useCORS) {
-            return new ImageContainer(src, true);
-        } else if (this.options.proxy) {
-            return new ProxyImageContainer(src, this.options.proxy);
-        } else {
-            return new DummyImageContainer(src);
-        }
-    } else if (imageData.method === "linear-gradient") {
-        return new LinearGradientContainer(imageData);
-    } else if (imageData.method === "gradient") {
-        return new WebkitGradientContainer(imageData);
-    } else if (imageData.method === "svg") {
-        return new SVGNodeContainer(imageData.args[0], this.support.svg);
-    } else if (imageData.method === "IFRAME") {
-        return new FrameContainer(imageData.args[0], this.isSameOrigin(imageData.args[0].src), this.options);
-    } else {
-        return new DummyImageContainer(imageData);
-    }
-};
-
-ImageLoader.prototype.isSVG = function(src) {
-    return src.substring(src.length - 3).toLowerCase() === "svg" || SVGContainer.prototype.isInline(src);
-};
-
-ImageLoader.prototype.imageExists = function(images, src) {
-    return images.some(function(image) {
-        return image.src === src;
-    });
-};
-
-ImageLoader.prototype.isSameOrigin = function(url) {
-    return (this.getOrigin(url) === this.origin);
-};
-
-ImageLoader.prototype.getOrigin = function(url) {
-    var link = this.link || (this.link = document.createElement("a"));
-    link.href = url;
-    link.href = link.href; // IE9, LOL! - http://jsfiddle.net/niklasvh/2e48b/
-    return link.protocol + link.hostname + link.port;
-};
-
-ImageLoader.prototype.getPromise = function(container) {
-    return this.timeout(container, this.options.imageTimeout)['catch'](function() {
-        var dummy = new DummyImageContainer(container.src);
-        return dummy.promise.then(function(image) {
-            container.image = image;
-        });
-    });
-};
-
-ImageLoader.prototype.get = function(src) {
-    var found = null;
-    return this.images.some(function(img) {
-        return (found = img).src === src;
-    }) ? found : null;
-};
-
-ImageLoader.prototype.fetch = function(nodes) {
-    this.images = nodes.reduce(bind(this.findBackgroundImage, this), this.findImages(nodes));
-    this.images.forEach(function(image, index) {
-        image.promise.then(function() {
-            log("Succesfully loaded image #"+ (index+1), image);
-        }, function(e) {
-            log("Failed loading image #"+ (index+1), image, e);
-        });
-    });
-    this.ready = Promise.all(this.images.map(this.getPromise, this));
-    log("Finished searching images");
-    return this;
-};
-
-ImageLoader.prototype.timeout = function(container, timeout) {
-    var timer;
-    var promise = Promise.race([container.promise, new Promise(function(res, reject) {
-        timer = setTimeout(function() {
-            log("Timed out loading image", container);
-            reject(container);
-        }, timeout);
-    })]).then(function(container) {
-        clearTimeout(timer);
-        return container;
-    });
-    promise['catch'](function() {
-        clearTimeout(timer);
-    });
-    return promise;
-};
-
-module.exports = ImageLoader;
-
-},{"./dummyimagecontainer":5,"./framecontainer":8,"./imagecontainer":10,"./lineargradientcontainer":12,"./log":13,"./proxyimagecontainer":17,"./svgcontainer":23,"./svgnodecontainer":24,"./utils":26,"./webkitgradientcontainer":27}],12:[function(_dereq_,module,exports){
-var GradientContainer = _dereq_('./gradientcontainer');
-var Color = _dereq_('./color');
-
-function LinearGradientContainer(imageData) {
-    GradientContainer.apply(this, arguments);
-    this.type = GradientContainer.TYPES.LINEAR;
-
-    var hasDirection = LinearGradientContainer.REGEXP_DIRECTION.test( imageData.args[0] ) ||
-        !GradientContainer.REGEXP_COLORSTOP.test( imageData.args[0] );
-
-    if (hasDirection) {
-        imageData.args[0].split(/\s+/).reverse().forEach(function(position, index) {
-            switch(position) {
-            case "left":
-                this.x0 = 0;
-                this.x1 = 1;
-                break;
-            case "top":
-                this.y0 = 0;
-                this.y1 = 1;
-                break;
-            case "right":
-                this.x0 = 1;
-                this.x1 = 0;
-                break;
-            case "bottom":
-                this.y0 = 1;
-                this.y1 = 0;
-                break;
-            case "to":
-                var y0 = this.y0;
-                var x0 = this.x0;
-                this.y0 = this.y1;
-                this.x0 = this.x1;
-                this.x1 = x0;
-                this.y1 = y0;
-                break;
-            case "center":
-                break; // centered by default
-            // Firefox internally converts position keywords to percentages:
-            // http://www.w3.org/TR/2010/WD-CSS2-20101207/colors.html#propdef-background-position
-            default: // percentage or absolute length
-                // TODO: support absolute start point positions (e.g., use bounds to convert px to a ratio)
-                var ratio = parseFloat(position, 10) * 1e-2;
-                if (isNaN(ratio)) { // invalid or unhandled value
-                    break;
-                }
-                if (index === 0) {
-                    this.y0 = ratio;
-                    this.y1 = 1 - this.y0;
-                } else {
-                    this.x0 = ratio;
-                    this.x1 = 1 - this.x0;
-                }
-                break;
-            }
-        }, this);
-    } else {
-        this.y0 = 0;
-        this.y1 = 1;
-    }
-
-    this.colorStops = imageData.args.slice(hasDirection ? 1 : 0).map(function(colorStop) {
-        var colorStopMatch = colorStop.match(GradientContainer.REGEXP_COLORSTOP);
-        var value = +colorStopMatch[2];
-        var unit = value === 0 ? "%" : colorStopMatch[3]; // treat "0" as "0%"
-        return {
-            color: new Color(colorStopMatch[1]),
-            // TODO: support absolute stop positions (e.g., compute gradient line length & convert px to ratio)
-            stop: unit === "%" ? value / 100 : null
-        };
-    });
-
-    if (this.colorStops[0].stop === null) {
-        this.colorStops[0].stop = 0;
-    }
-
-    if (this.colorStops[this.colorStops.length - 1].stop === null) {
-        this.colorStops[this.colorStops.length - 1].stop = 1;
-    }
-
-    // calculates and fills-in explicit stop positions when omitted from rule
-    this.colorStops.forEach(function(colorStop, index) {
-        if (colorStop.stop === null) {
-            this.colorStops.slice(index).some(function(find, count) {
-                if (find.stop !== null) {
-                    colorStop.stop = ((find.stop - this.colorStops[index - 1].stop) / (count + 1)) + this.colorStops[index - 1].stop;
-                    return true;
-                } else {
-                    return false;
-                }
-            }, this);
-        }
-    }, this);
-}
-
-LinearGradientContainer.prototype = Object.create(GradientContainer.prototype);
-
-// TODO: support <angle> (e.g. -?\d{1,3}(?:\.\d+)deg, etc. : https://developer.mozilla.org/docs/Web/CSS/angle )
-LinearGradientContainer.REGEXP_DIRECTION = /^\s*(?:to|left|right|top|bottom|center|\d{1,3}(?:\.\d+)?%?)(?:\s|$)/i;
-
-module.exports = LinearGradientContainer;
-
-},{"./color":3,"./gradientcontainer":9}],13:[function(_dereq_,module,exports){
-var logger = function() {
-    if (logger.options.logging && window.console && window.console.log) {
-        Function.prototype.bind.call(window.console.log, (window.console)).apply(window.console, [(Date.now() - logger.options.start) + "ms", "html2canvas:"].concat([].slice.call(arguments, 0)));
-    }
-};
-
-logger.options = {logging: false};
-module.exports = logger;
-
-},{}],14:[function(_dereq_,module,exports){
-var Color = _dereq_('./color');
-var utils = _dereq_('./utils');
-var getBounds = utils.getBounds;
-var parseBackgrounds = utils.parseBackgrounds;
-var offsetBounds = utils.offsetBounds;
-
-function NodeContainer(node, parent) {
-    this.node = node;
-    this.parent = parent;
-    this.stack = null;
-    this.bounds = null;
-    this.borders = null;
-    this.clip = [];
-    this.backgroundClip = [];
-    this.offsetBounds = null;
-    this.visible = null;
-    this.computedStyles = null;
-    this.colors = {};
-    this.styles = {};
-    this.backgroundImages = null;
-    this.transformData = null;
-    this.transformMatrix = null;
-    this.isPseudoElement = false;
-    this.opacity = null;
-}
-
-NodeContainer.prototype.cloneTo = function(stack) {
-    stack.visible = this.visible;
-    stack.borders = this.borders;
-    stack.bounds = this.bounds;
-    stack.clip = this.clip;
-    stack.backgroundClip = this.backgroundClip;
-    stack.computedStyles = this.computedStyles;
-    stack.styles = this.styles;
-    stack.backgroundImages = this.backgroundImages;
-    stack.opacity = this.opacity;
-};
-
-NodeContainer.prototype.getOpacity = function() {
-    return this.opacity === null ? (this.opacity = this.cssFloat('opacity')) : this.opacity;
-};
-
-NodeContainer.prototype.assignStack = function(stack) {
-    this.stack = stack;
-    stack.children.push(this);
-};
-
-NodeContainer.prototype.isElementVisible = function() {
-    return this.node.nodeType === Node.TEXT_NODE ? this.parent.visible : (
-        this.css('display') !== "none" &&
-        this.css('visibility') !== "hidden" &&
-        !this.node.hasAttribute("data-html2canvas-ignore") &&
-        (this.node.nodeName !== "INPUT" || this.node.getAttribute("type") !== "hidden")
-    );
-};
-
-NodeContainer.prototype.css = function(attribute) {
-    if (!this.computedStyles) {
-        this.computedStyles = this.isPseudoElement ? this.parent.computedStyle(this.before ? ":before" : ":after") : this.computedStyle(null);
-    }
-
-    return this.styles[attribute] || (this.styles[attribute] = this.computedStyles[attribute]);
-};
-
-NodeContainer.prototype.prefixedCss = function(attribute) {
-    var prefixes = ["webkit", "moz", "ms", "o"];
-    var value = this.css(attribute);
-    if (value === undefined) {
-        prefixes.some(function(prefix) {
-            value = this.css(prefix + attribute.substr(0, 1).toUpperCase() + attribute.substr(1));
-            return value !== undefined;
-        }, this);
-    }
-    return value === undefined ? null : value;
-};
-
-NodeContainer.prototype.computedStyle = function(type) {
-    return this.node.ownerDocument.defaultView.getComputedStyle(this.node, type);
-};
-
-NodeContainer.prototype.cssInt = function(attribute) {
-    var value = parseInt(this.css(attribute), 10);
-    return (isNaN(value)) ? 0 : value; // borders in old IE are throwing 'medium' for demo.html
-};
-
-NodeContainer.prototype.color = function(attribute) {
-    return this.colors[attribute] || (this.colors[attribute] = new Color(this.css(attribute)));
-};
-
-NodeContainer.prototype.cssFloat = function(attribute) {
-    var value = parseFloat(this.css(attribute));
-    return (isNaN(value)) ? 0 : value;
-};
-
-NodeContainer.prototype.fontWeight = function() {
-    var weight = this.css("fontWeight");
-    switch(parseInt(weight, 10)){
-    case 401:
-        weight = "bold";
-        break;
-    case 400:
-        weight = "normal";
-        break;
-    }
-    return weight;
-};
-
-NodeContainer.prototype.parseClip = function() {
-    var matches = this.css('clip').match(this.CLIP);
-    if (matches) {
-        return {
-            top: parseInt(matches[1], 10),
-            right: parseInt(matches[2], 10),
-            bottom: parseInt(matches[3], 10),
-            left: parseInt(matches[4], 10)
-        };
-    }
-    return null;
-};
-
-NodeContainer.prototype.parseBackgroundImages = function() {
-    return this.backgroundImages || (this.backgroundImages = parseBackgrounds(this.css("backgroundImage")));
-};
-
-NodeContainer.prototype.cssList = function(property, index) {
-    var value = (this.css(property) || '').split(',');
-    value = value[index || 0] || value[0] || 'auto';
-    value = value.trim().split(' ');
-    if (value.length === 1) {
-        value = [value[0], isPercentage(value[0]) ? 'auto' : value[0]];
-    }
-    return value;
-};
-
-NodeContainer.prototype.parseBackgroundSize = function(bounds, image, index) {
-    var size = this.cssList("backgroundSize", index);
-    var width, height;
-
-    if (isPercentage(size[0])) {
-        width = bounds.width * parseFloat(size[0]) / 100;
-    } else if (/contain|cover/.test(size[0])) {
-        var targetRatio = bounds.width / bounds.height, currentRatio = image.width / image.height;
-        return (targetRatio < currentRatio ^ size[0] === 'contain') ?  {width: bounds.height * currentRatio, height: bounds.height} : {width: bounds.width, height: bounds.width / currentRatio};
-    } else {
-        width = parseInt(size[0], 10);
-    }
-
-    if (size[0] === 'auto' && size[1] === 'auto') {
-        height = image.height;
-    } else if (size[1] === 'auto') {
-        height = width / image.width * image.height;
-    } else if (isPercentage(size[1])) {
-        height =  bounds.height * parseFloat(size[1]) / 100;
-    } else {
-        height = parseInt(size[1], 10);
-    }
-
-    if (size[0] === 'auto') {
-        width = height / image.height * image.width;
-    }
-
-    return {width: width, height: height};
-};
-
-NodeContainer.prototype.parseBackgroundPosition = function(bounds, image, index, backgroundSize) {
-    var position = this.cssList('backgroundPosition', index);
-    var left, top;
-
-    if (isPercentage(position[0])){
-        left = (bounds.width - (backgroundSize || image).width) * (parseFloat(position[0]) / 100);
-    } else {
-        left = parseInt(position[0], 10);
-    }
-
-    if (position[1] === 'auto') {
-        top = left / image.width * image.height;
-    } else if (isPercentage(position[1])){
-        top =  (bounds.height - (backgroundSize || image).height) * parseFloat(position[1]) / 100;
-    } else {
-        top = parseInt(position[1], 10);
-    }
-
-    if (position[0] === 'auto') {
-        left = top / image.height * image.width;
-    }
-
-    return {left: left, top: top};
-};
-
-NodeContainer.prototype.parseBackgroundRepeat = function(index) {
-    return this.cssList("backgroundRepeat", index)[0];
-};
-
-NodeContainer.prototype.parseTextShadows = function() {
-    var textShadow = this.css("textShadow");
-    var results = [];
-
-    if (textShadow && textShadow !== 'none') {
-        var shadows = textShadow.match(this.TEXT_SHADOW_PROPERTY);
-        for (var i = 0; shadows && (i < shadows.length); i++) {
-            var s = shadows[i].match(this.TEXT_SHADOW_VALUES);
-            results.push({
-                color: new Color(s[0]),
-                offsetX: s[1] ? parseFloat(s[1].replace('px', '')) : 0,
-                offsetY: s[2] ? parseFloat(s[2].replace('px', '')) : 0,
-                blur: s[3] ? s[3].replace('px', '') : 0
-            });
-        }
-    }
-    return results;
-};
-
-NodeContainer.prototype.parseTransform = function() {
-    if (!this.transformData) {
-        if (this.hasTransform()) {
-            var offset = this.parseBounds();
-            var origin = this.prefixedCss("transformOrigin").split(" ").map(removePx).map(asFloat);
-            origin[0] += offset.left;
-            origin[1] += offset.top;
-            this.transformData = {
-                origin: origin,
-                matrix: this.parseTransformMatrix()
-            };
-        } else {
-            this.transformData = {
-                origin: [0, 0],
-                matrix: [1, 0, 0, 1, 0, 0]
-            };
-        }
-    }
-    return this.transformData;
-};
-
-NodeContainer.prototype.parseTransformMatrix = function() {
-    if (!this.transformMatrix) {
-        var transform = this.prefixedCss("transform");
-        var matrix = transform ? parseMatrix(transform.match(this.MATRIX_PROPERTY)) : null;
-        this.transformMatrix = matrix ? matrix : [1, 0, 0, 1, 0, 0];
-    }
-    return this.transformMatrix;
-};
-
-NodeContainer.prototype.parseBounds = function() {
-    return this.bounds || (this.bounds = this.hasTransform() ? offsetBounds(this.node) : getBounds(this.node));
-};
-
-NodeContainer.prototype.hasTransform = function() {
-    return this.parseTransformMatrix().join(",") !== "1,0,0,1,0,0" || (this.parent && this.parent.hasTransform());
-};
-
-NodeContainer.prototype.getValue = function() {
-    var value = this.node.value || "";
-    if (this.node.tagName === "SELECT") {
-        value = selectionValue(this.node);
-    } else if (this.node.type === "password") {
-        value = Array(value.length + 1).join('\u2022'); // jshint ignore:line
-    }
-    return value.length === 0 ? (this.node.placeholder || "") : value;
-};
-
-NodeContainer.prototype.MATRIX_PROPERTY = /(matrix|matrix3d)\((.+)\)/;
-NodeContainer.prototype.TEXT_SHADOW_PROPERTY = /((rgba|rgb)\([^\)]+\)(\s-?\d+px){0,})/g;
-NodeContainer.prototype.TEXT_SHADOW_VALUES = /(-?\d+px)|(#.+)|(rgb\(.+\))|(rgba\(.+\))/g;
-NodeContainer.prototype.CLIP = /^rect\((\d+)px,? (\d+)px,? (\d+)px,? (\d+)px\)$/;
-
-function selectionValue(node) {
-    var option = node.options[node.selectedIndex || 0];
-    return option ? (option.text || "") : "";
-}
-
-function parseMatrix(match) {
-    if (match && match[1] === "matrix") {
-        return match[2].split(",").map(function(s) {
-            return parseFloat(s.trim());
-        });
-    } else if (match && match[1] === "matrix3d") {
-        var matrix3d = match[2].split(",").map(function(s) {
-          return parseFloat(s.trim());
-        });
-        return [matrix3d[0], matrix3d[1], matrix3d[4], matrix3d[5], matrix3d[12], matrix3d[13]];
-    }
-}
-
-function isPercentage(value) {
-    return value.toString().indexOf("%") !== -1;
-}
-
-function removePx(str) {
-    return str.replace("px", "");
-}
-
-function asFloat(str) {
-    return parseFloat(str);
-}
-
-module.exports = NodeContainer;
-
-},{"./color":3,"./utils":26}],15:[function(_dereq_,module,exports){
-var log = _dereq_('./log');
-var punycode = _dereq_('punycode');
-var NodeContainer = _dereq_('./nodecontainer');
-var TextContainer = _dereq_('./textcontainer');
-var PseudoElementContainer = _dereq_('./pseudoelementcontainer');
-var FontMetrics = _dereq_('./fontmetrics');
-var Color = _dereq_('./color');
-var StackingContext = _dereq_('./stackingcontext');
-var utils = _dereq_('./utils');
-var bind = utils.bind;
-var getBounds = utils.getBounds;
-var parseBackgrounds = utils.parseBackgrounds;
-var offsetBounds = utils.offsetBounds;
-
-function NodeParser(element, renderer, support, imageLoader, options) {
-    log("Starting NodeParser");
-    this.renderer = renderer;
-    this.options = options;
-    this.range = null;
-    this.support = support;
-    this.renderQueue = [];
-    this.stack = new StackingContext(true, 1, element.ownerDocument, null);
-    var parent = new NodeContainer(element, null);
-    if (options.background) {
-        renderer.rectangle(0, 0, renderer.width, renderer.height, new Color(options.background));
-    }
-    if (element === element.ownerDocument.documentElement) {
-        // http://www.w3.org/TR/css3-background/#special-backgrounds
-        var canvasBackground = new NodeContainer(parent.color('backgroundColor').isTransparent() ? element.ownerDocument.body : element.ownerDocument.documentElement, null);
-        renderer.rectangle(0, 0, renderer.width, renderer.height, canvasBackground.color('backgroundColor'));
-    }
-    parent.visibile = parent.isElementVisible();
-    this.createPseudoHideStyles(element.ownerDocument);
-    this.disableAnimations(element.ownerDocument);
-    this.nodes = flatten([parent].concat(this.getChildren(parent)).filter(function(container) {
-        return container.visible = container.isElementVisible();
-    }).map(this.getPseudoElements, this));
-    this.fontMetrics = new FontMetrics();
-    log("Fetched nodes, total:", this.nodes.length);
-    log("Calculate overflow clips");
-    this.calculateOverflowClips();
-    log("Start fetching images");
-    this.images = imageLoader.fetch(this.nodes.filter(isElement));
-    this.ready = this.images.ready.then(bind(function() {
-        log("Images loaded, starting parsing");
-        log("Creating stacking contexts");
-        this.createStackingContexts();
-        log("Sorting stacking contexts");
-        this.sortStackingContexts(this.stack);
-        this.parse(this.stack);
-        log("Render queue created with " + this.renderQueue.length + " items");
-        return new Promise(bind(function(resolve) {
-            if (!options.async) {
-                this.renderQueue.forEach(this.paint, this);
-                resolve();
-            } else if (typeof(options.async) === "function") {
-                options.async.call(this, this.renderQueue, resolve);
-            } else if (this.renderQueue.length > 0){
-                this.renderIndex = 0;
-                this.asyncRenderer(this.renderQueue, resolve);
-            } else {
-                resolve();
-            }
-        }, this));
-    }, this));
-}
-
-NodeParser.prototype.calculateOverflowClips = function() {
-    this.nodes.forEach(function(container) {
-        if (isElement(container)) {
-            if (isPseudoElement(container)) {
-                container.appendToDOM();
-            }
-            container.borders = this.parseBorders(container);
-            var clip = (container.css('overflow') === "hidden") ? [container.borders.clip] : [];
-            var cssClip = container.parseClip();
-            if (cssClip && ["absolute", "fixed"].indexOf(container.css('position')) !== -1) {
-                clip.push([["rect",
-                        container.bounds.left + cssClip.left,
-                        container.bounds.top + cssClip.top,
-                        cssClip.right - cssClip.left,
-                        cssClip.bottom - cssClip.top
-                ]]);
-            }
-            container.clip = hasParentClip(container) ? container.parent.clip.concat(clip) : clip;
-            container.backgroundClip = (container.css('overflow') !== "hidden") ? container.clip.concat([container.borders.clip]) : container.clip;
-            if (isPseudoElement(container)) {
-                container.cleanDOM();
-            }
-        } else if (isTextNode(container)) {
-            container.clip = hasParentClip(container) ? container.parent.clip : [];
-        }
-        if (!isPseudoElement(container)) {
-            container.bounds = null;
-        }
-    }, this);
-};
-
-function hasParentClip(container) {
-    return container.parent && container.parent.clip.length;
-}
-
-NodeParser.prototype.asyncRenderer = function(queue, resolve, asyncTimer) {
-    asyncTimer = asyncTimer || Date.now();
-    this.paint(queue[this.renderIndex++]);
-    if (queue.length === this.renderIndex) {
-        resolve();
-    } else if (asyncTimer + 20 > Date.now()) {
-        this.asyncRenderer(queue, resolve, asyncTimer);
-    } else {
-        setTimeout(bind(function() {
-            this.asyncRenderer(queue, resolve);
-        }, this), 0);
-    }
-};
-
-NodeParser.prototype.createPseudoHideStyles = function(document) {
-    this.createStyles(document, '.' + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + ':before { content: "" !important; display: none !important; }' +
-        '.' + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER + ':after { content: "" !important; display: none !important; }');
-};
-
-NodeParser.prototype.disableAnimations = function(document) {
-    this.createStyles(document, '* { -webkit-animation: none !important; -moz-animation: none !important; -o-animation: none !important; animation: none !important; ' +
-        '-webkit-transition: none !important; -moz-transition: none !important; -o-transition: none !important; transition: none !important;}');
-};
-
-NodeParser.prototype.createStyles = function(document, styles) {
-    var hidePseudoElements = document.createElement('style');
-    hidePseudoElements.innerHTML = styles;
-    document.body.appendChild(hidePseudoElements);
-};
-
-NodeParser.prototype.getPseudoElements = function(container) {
-    var nodes = [[container]];
-    if (container.node.nodeType === Node.ELEMENT_NODE) {
-        var before = this.getPseudoElement(container, ":before");
-        var after = this.getPseudoElement(container, ":after");
-
-        if (before) {
-            nodes.push(before);
-        }
-
-        if (after) {
-            nodes.push(after);
-        }
-    }
-    return flatten(nodes);
-};
-
-function toCamelCase(str) {
-    return str.replace(/(\-[a-z])/g, function(match){
-        return match.toUpperCase().replace('-','');
-    });
-}
-
-NodeParser.prototype.getPseudoElement = function(container, type) {
-    var style = container.computedStyle(type);
-    if(!style || !style.content || style.content === "none" || style.content === "-moz-alt-content" || style.display === "none") {
-        return null;
-    }
-
-    var content = stripQuotes(style.content);
-    var isImage = content.substr(0, 3) === 'url';
-    var pseudoNode = document.createElement(isImage ? 'img' : 'html2canvaspseudoelement');
-    var pseudoContainer = new PseudoElementContainer(pseudoNode, container, type);
-
-    for (var i = style.length-1; i >= 0; i--) {
-        var property = toCamelCase(style.item(i));
-        pseudoNode.style[property] = style[property];
-    }
-
-    pseudoNode.className = PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE + " " + PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER;
-
-    if (isImage) {
-        pseudoNode.src = parseBackgrounds(content)[0].args[0];
-        return [pseudoContainer];
-    } else {
-        var text = document.createTextNode(content);
-        pseudoNode.appendChild(text);
-        return [pseudoContainer, new TextContainer(text, pseudoContainer)];
-    }
-};
-
-
-NodeParser.prototype.getChildren = function(parentContainer) {
-    return flatten([].filter.call(parentContainer.node.childNodes, renderableNode).map(function(node) {
-        var container = [node.nodeType === Node.TEXT_NODE ? new TextContainer(node, parentContainer) : new NodeContainer(node, parentContainer)].filter(nonIgnoredElement);
-        return node.nodeType === Node.ELEMENT_NODE && container.length && node.tagName !== "TEXTAREA" ? (container[0].isElementVisible() ? container.concat(this.getChildren(container[0])) : []) : container;
-    }, this));
-};
-
-NodeParser.prototype.newStackingContext = function(container, hasOwnStacking) {
-    var stack = new StackingContext(hasOwnStacking, container.getOpacity(), container.node, container.parent);
-    container.cloneTo(stack);
-    var parentStack = hasOwnStacking ? stack.getParentStack(this) : stack.parent.stack;
-    parentStack.contexts.push(stack);
-    container.stack = stack;
-};
-
-NodeParser.prototype.createStackingContexts = function() {
-    this.nodes.forEach(function(container) {
-        if (isElement(container) && (this.isRootElement(container) || hasOpacity(container) || isPositionedForStacking(container) || this.isBodyWithTransparentRoot(container) || container.hasTransform())) {
-            this.newStackingContext(container, true);
-        } else if (isElement(container) && ((isPositioned(container) && zIndex0(container)) || isInlineBlock(container) || isFloating(container))) {
-            this.newStackingContext(container, false);
-        } else {
-            container.assignStack(container.parent.stack);
-        }
-    }, this);
-};
-
-NodeParser.prototype.isBodyWithTransparentRoot = function(container) {
-    return container.node.nodeName === "BODY" && container.parent.color('backgroundColor').isTransparent();
-};
-
-NodeParser.prototype.isRootElement = function(container) {
-    return container.parent === null;
-};
-
-NodeParser.prototype.sortStackingContexts = function(stack) {
-    stack.contexts.sort(zIndexSort(stack.contexts.slice(0)));
-    stack.contexts.forEach(this.sortStackingContexts, this);
-};
-
-NodeParser.prototype.parseTextBounds = function(container) {
-    return function(text, index, textList) {
-        if (container.parent.css("textDecoration").substr(0, 4) !== "none" || text.trim().length !== 0) {
-            if (this.support.rangeBounds && !container.parent.hasTransform()) {
-                var offset = textList.slice(0, index).join("").length;
-                return this.getRangeBounds(container.node, offset, text.length);
-            } else if (container.node && typeof(container.node.data) === "string") {
-                var replacementNode = container.node.splitText(text.length);
-                var bounds = this.getWrapperBounds(container.node, container.parent.hasTransform());
-                container.node = replacementNode;
-                return bounds;
-            }
-        } else if(!this.support.rangeBounds || container.parent.hasTransform()){
-            container.node = container.node.splitText(text.length);
-        }
-        return {};
-    };
-};
-
-NodeParser.prototype.getWrapperBounds = function(node, transform) {
-    var wrapper = node.ownerDocument.createElement('html2canvaswrapper');
-    var parent = node.parentNode,
-        backupText = node.cloneNode(true);
-
-    wrapper.appendChild(node.cloneNode(true));
-    parent.replaceChild(wrapper, node);
-    var bounds = transform ? offsetBounds(wrapper) : getBounds(wrapper);
-    parent.replaceChild(backupText, wrapper);
-    return bounds;
-};
-
-NodeParser.prototype.getRangeBounds = function(node, offset, length) {
-    var range = this.range || (this.range = node.ownerDocument.createRange());
-    range.setStart(node, offset);
-    range.setEnd(node, offset + length);
-    return range.getBoundingClientRect();
-};
-
-function ClearTransform() {}
-
-NodeParser.prototype.parse = function(stack) {
-    // http://www.w3.org/TR/CSS21/visuren.html#z-index
-    var negativeZindex = stack.contexts.filter(negativeZIndex); // 2. the child stacking contexts with negative stack levels (most negative first).
-    var descendantElements = stack.children.filter(isElement);
-    var descendantNonFloats = descendantElements.filter(not(isFloating));
-    var nonInlineNonPositionedDescendants = descendantNonFloats.filter(not(isPositioned)).filter(not(inlineLevel)); // 3 the in-flow, non-inline-level, non-positioned descendants.
-    var nonPositionedFloats = descendantElements.filter(not(isPositioned)).filter(isFloating); // 4. the non-positioned floats.
-    var inFlow = descendantNonFloats.filter(not(isPositioned)).filter(inlineLevel); // 5. the in-flow, inline-level, non-positioned descendants, including inline tables and inline blocks.
-    var stackLevel0 = stack.contexts.concat(descendantNonFloats.filter(isPositioned)).filter(zIndex0); // 6. the child stacking contexts with stack level 0 and the positioned descendants with stack level 0.
-    var text = stack.children.filter(isTextNode).filter(hasText);
-    var positiveZindex = stack.contexts.filter(positiveZIndex); // 7. the child stacking contexts with positive stack levels (least positive first).
-    negativeZindex.concat(nonInlineNonPositionedDescendants).concat(nonPositionedFloats)
-        .concat(inFlow).concat(stackLevel0).concat(text).concat(positiveZindex).forEach(function(container) {
-            this.renderQueue.push(container);
-            if (isStackingContext(container)) {
-                this.parse(container);
-                this.renderQueue.push(new ClearTransform());
-            }
-        }, this);
-};
-
-NodeParser.prototype.paint = function(container) {
-    try {
-        if (container instanceof ClearTransform) {
-            this.renderer.ctx.restore();
-        } else if (isTextNode(container)) {
-            if (isPseudoElement(container.parent)) {
-                container.parent.appendToDOM();
-            }
-            this.paintText(container);
-            if (isPseudoElement(container.parent)) {
-                container.parent.cleanDOM();
-            }
-        } else {
-            this.paintNode(container);
-        }
-    } catch(e) {
-        log(e);
-        if (this.options.strict) {
-            throw e;
-        }
-    }
-};
-
-NodeParser.prototype.paintNode = function(container) {
-    if (isStackingContext(container)) {
-        this.renderer.setOpacity(container.opacity);
-        this.renderer.ctx.save();
-        if (container.hasTransform()) {
-            this.renderer.setTransform(container.parseTransform());
-        }
-    }
-
-    if (container.node.nodeName === "INPUT" && container.node.type === "checkbox") {
-        this.paintCheckbox(container);
-    } else if (container.node.nodeName === "INPUT" && container.node.type === "radio") {
-        this.paintRadio(container);
-    } else {
-        this.paintElement(container);
-    }
-};
-
-NodeParser.prototype.paintElement = function(container) {
-    var bounds = container.parseBounds();
-    this.renderer.clip(container.backgroundClip, function() {
-        this.renderer.renderBackground(container, bounds, container.borders.borders.map(getWidth));
-    }, this);
-
-    this.renderer.clip(container.clip, function() {
-        this.renderer.renderBorders(container.borders.borders);
-    }, this);
-
-    this.renderer.clip(container.backgroundClip, function() {
-        switch (container.node.nodeName) {
-        case "svg":
-        case "IFRAME":
-            var imgContainer = this.images.get(container.node);
-            if (imgContainer) {
-                this.renderer.renderImage(container, bounds, container.borders, imgContainer);
-            } else {
-                log("Error loading <" + container.node.nodeName + ">", container.node);
-            }
-            break;
-        case "IMG":
-            var imageContainer = this.images.get(container.node.src);
-            if (imageContainer) {
-                this.renderer.renderImage(container, bounds, container.borders, imageContainer);
-            } else {
-                log("Error loading <img>", container.node.src);
-            }
-            break;
-        case "CANVAS":
-            this.renderer.renderImage(container, bounds, container.borders, {image: container.node});
-            break;
-        case "SELECT":
-        case "INPUT":
-        case "TEXTAREA":
-            this.paintFormValue(container);
-            break;
-        }
-    }, this);
-};
-
-NodeParser.prototype.paintCheckbox = function(container) {
-    var b = container.parseBounds();
-
-    var size = Math.min(b.width, b.height);
-    var bounds = {width: size - 1, height: size - 1, top: b.top, left: b.left};
-    var r = [3, 3];
-    var radius = [r, r, r, r];
-    var borders = [1,1,1,1].map(function(w) {
-        return {color: new Color('#A5A5A5'), width: w};
-    });
-
-    var borderPoints = calculateCurvePoints(bounds, radius, borders);
-
-    this.renderer.clip(container.backgroundClip, function() {
-        this.renderer.rectangle(bounds.left + 1, bounds.top + 1, bounds.width - 2, bounds.height - 2, new Color("#DEDEDE"));
-        this.renderer.renderBorders(calculateBorders(borders, bounds, borderPoints, radius));
-        if (container.node.checked) {
-            this.renderer.font(new Color('#424242'), 'normal', 'normal', 'bold', (size - 3) + "px", 'arial');
-            this.renderer.text("\u2714", bounds.left + size / 6, bounds.top + size - 1);
-        }
-    }, this);
-};
-
-NodeParser.prototype.paintRadio = function(container) {
-    var bounds = container.parseBounds();
-
-    var size = Math.min(bounds.width, bounds.height) - 2;
-
-    this.renderer.clip(container.backgroundClip, function() {
-        this.renderer.circleStroke(bounds.left + 1, bounds.top + 1, size, new Color('#DEDEDE'), 1, new Color('#A5A5A5'));
-        if (container.node.checked) {
-            this.renderer.circle(Math.ceil(bounds.left + size / 4) + 1, Math.ceil(bounds.top + size / 4) + 1, Math.floor(size / 2), new Color('#424242'));
-        }
-    }, this);
-};
-
-NodeParser.prototype.paintFormValue = function(container) {
-    var value = container.getValue();
-    if (value.length > 0) {
-        var document = container.node.ownerDocument;
-        var wrapper = document.createElement('html2canvaswrapper');
-        var properties = ['lineHeight', 'textAlign', 'fontFamily', 'fontWeight', 'fontSize', 'color',
-            'paddingLeft', 'paddingTop', 'paddingRight', 'paddingBottom',
-            'width', 'height', 'borderLeftStyle', 'borderTopStyle', 'borderLeftWidth', 'borderTopWidth',
-            'boxSizing', 'whiteSpace', 'wordWrap'];
-
-        properties.forEach(function(property) {
-            try {
-                wrapper.style[property] = container.css(property);
-            } catch(e) {
-                // Older IE has issues with "border"
-                log("html2canvas: Parse: Exception caught in renderFormValue: " + e.message);
-            }
-        });
-        var bounds = container.parseBounds();
-        wrapper.style.position = "fixed";
-        wrapper.style.left = bounds.left + "px";
-        wrapper.style.top = bounds.top + "px";
-        wrapper.textContent = value;
-        document.body.appendChild(wrapper);
-        this.paintText(new TextContainer(wrapper.firstChild, container));
-        document.body.removeChild(wrapper);
-    }
-};
-
-NodeParser.prototype.paintText = function(container) {
-    container.applyTextTransform();
-    var characters = punycode.ucs2.decode(container.node.data);
-    var textList = (!this.options.letterRendering || noLetterSpacing(container)) && !hasUnicode(container.node.data) ? getWords(characters) : characters.map(function(character) {
-        return punycode.ucs2.encode([character]);
-    });
-
-    var weight = container.parent.fontWeight();
-    var size = container.parent.css('fontSize');
-    var family = container.parent.css('fontFamily');
-    var shadows = container.parent.parseTextShadows();
-
-    this.renderer.font(container.parent.color('color'), container.parent.css('fontStyle'), container.parent.css('fontVariant'), weight, size, family);
-    if (shadows.length) {
-        // TODO: support multiple text shadows
-        this.renderer.fontShadow(shadows[0].color, shadows[0].offsetX, shadows[0].offsetY, shadows[0].blur);
-    } else {
-        this.renderer.clearShadow();
-    }
-
-    this.renderer.clip(container.parent.clip, function() {
-        textList.map(this.parseTextBounds(container), this).forEach(function(bounds, index) {
-            if (bounds) {
-                this.renderer.text(textList[index], bounds.left, bounds.bottom);
-                this.renderTextDecoration(container.parent, bounds, this.fontMetrics.getMetrics(family, size));
-            }
-        }, this);
-    }, this);
-};
-
-NodeParser.prototype.renderTextDecoration = function(container, bounds, metrics) {
-    switch(container.css("textDecoration").split(" ")[0]) {
-    case "underline":
-        // Draws a line at the baseline of the font
-        // TODO As some browsers display the line as more than 1px if the font-size is big, need to take that into account both in position and size
-        this.renderer.rectangle(bounds.left, Math.round(bounds.top + metrics.baseline + metrics.lineWidth), bounds.width, 1, container.color("color"));
-        break;
-    case "overline":
-        this.renderer.rectangle(bounds.left, Math.round(bounds.top), bounds.width, 1, container.color("color"));
-        break;
-    case "line-through":
-        // TODO try and find exact position for line-through
-        this.renderer.rectangle(bounds.left, Math.ceil(bounds.top + metrics.middle + metrics.lineWidth), bounds.width, 1, container.color("color"));
-        break;
-    }
-};
-
-var borderColorTransforms = {
-    inset: [
-        ["darken", 0.60],
-        ["darken", 0.10],
-        ["darken", 0.10],
-        ["darken", 0.60]
-    ]
-};
-
-NodeParser.prototype.parseBorders = function(container) {
-    var nodeBounds = container.parseBounds();
-    var radius = getBorderRadiusData(container);
-    var borders = ["Top", "Right", "Bottom", "Left"].map(function(side, index) {
-        var style = container.css('border' + side + 'Style');
-        var color = container.color('border' + side + 'Color');
-        if (style === "inset" && color.isBlack()) {
-            color = new Color([255, 255, 255, color.a]); // this is wrong, but
-        }
-        var colorTransform = borderColorTransforms[style] ? borderColorTransforms[style][index] : null;
-        return {
-            width: container.cssInt('border' + side + 'Width'),
-            color: colorTransform ? color[colorTransform[0]](colorTransform[1]) : color,
-            args: null
-        };
-    });
-    var borderPoints = calculateCurvePoints(nodeBounds, radius, borders);
-
-    return {
-        clip: this.parseBackgroundClip(container, borderPoints, borders, radius, nodeBounds),
-        borders: calculateBorders(borders, nodeBounds, borderPoints, radius)
-    };
-};
-
-function calculateBorders(borders, nodeBounds, borderPoints, radius) {
-    return borders.map(function(border, borderSide) {
-        if (border.width > 0) {
-            var bx = nodeBounds.left;
-            var by = nodeBounds.top;
-            var bw = nodeBounds.width;
-            var bh = nodeBounds.height - (borders[2].width);
-
-            switch(borderSide) {
-            case 0:
-                // top border
-                bh = borders[0].width;
-                border.args = drawSide({
-                        c1: [bx, by],
-                        c2: [bx + bw, by],
-                        c3: [bx + bw - borders[1].width, by + bh],
-                        c4: [bx + borders[3].width, by + bh]
-                    }, radius[0], radius[1],
-                    borderPoints.topLeftOuter, borderPoints.topLeftInner, borderPoints.topRightOuter, borderPoints.topRightInner);
-                break;
-            case 1:
-                // right border
-                bx = nodeBounds.left + nodeBounds.width - (borders[1].width);
-                bw = borders[1].width;
-
-                border.args = drawSide({
-                        c1: [bx + bw, by],
-                        c2: [bx + bw, by + bh + borders[2].width],
-                        c3: [bx, by + bh],
-                        c4: [bx, by + borders[0].width]
-                    }, radius[1], radius[2],
-                    borderPoints.topRightOuter, borderPoints.topRightInner, borderPoints.bottomRightOuter, borderPoints.bottomRightInner);
-                break;
-            case 2:
-                // bottom border
-                by = (by + nodeBounds.height) - (borders[2].width);
-                bh = borders[2].width;
-                border.args = drawSide({
-                        c1: [bx + bw, by + bh],
-                        c2: [bx, by + bh],
-                        c3: [bx + borders[3].width, by],
-                        c4: [bx + bw - borders[3].width, by]
-                    }, radius[2], radius[3],
-                    borderPoints.bottomRightOuter, borderPoints.bottomRightInner, borderPoints.bottomLeftOuter, borderPoints.bottomLeftInner);
-                break;
-            case 3:
-                // left border
-                bw = borders[3].width;
-                border.args = drawSide({
-                        c1: [bx, by + bh + borders[2].width],
-                        c2: [bx, by],
-                        c3: [bx + bw, by + borders[0].width],
-                        c4: [bx + bw, by + bh]
-                    }, radius[3], radius[0],
-                    borderPoints.bottomLeftOuter, borderPoints.bottomLeftInner, borderPoints.topLeftOuter, borderPoints.topLeftInner);
-                break;
-            }
-        }
-        return border;
-    });
-}
-
-NodeParser.prototype.parseBackgroundClip = function(container, borderPoints, borders, radius, bounds) {
-    var backgroundClip = container.css('backgroundClip'),
-        borderArgs = [];
-
-    switch(backgroundClip) {
-    case "content-box":
-    case "padding-box":
-        parseCorner(borderArgs, radius[0], radius[1], borderPoints.topLeftInner, borderPoints.topRightInner, bounds.left + borders[3].width, bounds.top + borders[0].width);
-        parseCorner(borderArgs, radius[1], radius[2], borderPoints.topRightInner, borderPoints.bottomRightInner, bounds.left + bounds.width - borders[1].width, bounds.top + borders[0].width);
-        parseCorner(borderArgs, radius[2], radius[3], borderPoints.bottomRightInner, borderPoints.bottomLeftInner, bounds.left + bounds.width - borders[1].width, bounds.top + bounds.height - borders[2].width);
-        parseCorner(borderArgs, radius[3], radius[0], borderPoints.bottomLeftInner, borderPoints.topLeftInner, bounds.left + borders[3].width, bounds.top + bounds.height - borders[2].width);
-        break;
-
-    default:
-        parseCorner(borderArgs, radius[0], radius[1], borderPoints.topLeftOuter, borderPoints.topRightOuter, bounds.left, bounds.top);
-        parseCorner(borderArgs, radius[1], radius[2], borderPoints.topRightOuter, borderPoints.bottomRightOuter, bounds.left + bounds.width, bounds.top);
-        parseCorner(borderArgs, radius[2], radius[3], borderPoints.bottomRightOuter, borderPoints.bottomLeftOuter, bounds.left + bounds.width, bounds.top + bounds.height);
-        parseCorner(borderArgs, radius[3], radius[0], borderPoints.bottomLeftOuter, borderPoints.topLeftOuter, bounds.left, bounds.top + bounds.height);
-        break;
-    }
-
-    return borderArgs;
-};
-
-function getCurvePoints(x, y, r1, r2) {
-    var kappa = 4 * ((Math.sqrt(2) - 1) / 3);
-    var ox = (r1) * kappa, // control point offset horizontal
-        oy = (r2) * kappa, // control point offset vertical
-        xm = x + r1, // x-middle
-        ym = y + r2; // y-middle
-    return {
-        topLeft: bezierCurve({x: x, y: ym}, {x: x, y: ym - oy}, {x: xm - ox, y: y}, {x: xm, y: y}),
-        topRight: bezierCurve({x: x, y: y}, {x: x + ox,y: y}, {x: xm, y: ym - oy}, {x: xm, y: ym}),
-        bottomRight: bezierCurve({x: xm, y: y}, {x: xm, y: y + oy}, {x: x + ox, y: ym}, {x: x, y: ym}),
-        bottomLeft: bezierCurve({x: xm, y: ym}, {x: xm - ox, y: ym}, {x: x, y: y + oy}, {x: x, y:y})
-    };
-}
-
-function calculateCurvePoints(bounds, borderRadius, borders) {
-    var x = bounds.left,
-        y = bounds.top,
-        width = bounds.width,
-        height = bounds.height,
-
-        tlh = borderRadius[0][0] < width / 2 ? borderRadius[0][0] : width / 2,
-        tlv = borderRadius[0][1] < height / 2 ? borderRadius[0][1] : height / 2,
-        trh = borderRadius[1][0] < width / 2 ? borderRadius[1][0] : width / 2,
-        trv = borderRadius[1][1] < height / 2 ? borderRadius[1][1] : height / 2,
-        brh = borderRadius[2][0] < width / 2 ? borderRadius[2][0] : width / 2,
-        brv = borderRadius[2][1] < height / 2 ? borderRadius[2][1] : height / 2,
-        blh = borderRadius[3][0] < width / 2 ? borderRadius[3][0] : width / 2,
-        blv = borderRadius[3][1] < height / 2 ? borderRadius[3][1] : height / 2;
-
-    var topWidth = width - trh,
-        rightHeight = height - brv,
-        bottomWidth = width - brh,
-        leftHeight = height - blv;
-
-    return {
-        topLeftOuter: getCurvePoints(x, y, tlh, tlv).topLeft.subdivide(0.5),
-        topLeftInner: getCurvePoints(x + borders[3].width, y + borders[0].width, Math.max(0, tlh - borders[3].width), Math.max(0, tlv - borders[0].width)).topLeft.subdivide(0.5),
-        topRightOuter: getCurvePoints(x + topWidth, y, trh, trv).topRight.subdivide(0.5),
-        topRightInner: getCurvePoints(x + Math.min(topWidth, width + borders[3].width), y + borders[0].width, (topWidth > width + borders[3].width) ? 0 :trh - borders[3].width, trv - borders[0].width).topRight.subdivide(0.5),
-        bottomRightOuter: getCurvePoints(x + bottomWidth, y + rightHeight, brh, brv).bottomRight.subdivide(0.5),
-        bottomRightInner: getCurvePoints(x + Math.min(bottomWidth, width - borders[3].width), y + Math.min(rightHeight, height + borders[0].width), Math.max(0, brh - borders[1].width),  brv - borders[2].width).bottomRight.subdivide(0.5),
-        bottomLeftOuter: getCurvePoints(x, y + leftHeight, blh, blv).bottomLeft.subdivide(0.5),
-        bottomLeftInner: getCurvePoints(x + borders[3].width, y + leftHeight, Math.max(0, blh - borders[3].width), blv - borders[2].width).bottomLeft.subdivide(0.5)
-    };
-}
-
-function bezierCurve(start, startControl, endControl, end) {
-    var lerp = function (a, b, t) {
-        return {
-            x: a.x + (b.x - a.x) * t,
-            y: a.y + (b.y - a.y) * t
-        };
-    };
-
-    return {
-        start: start,
-        startControl: startControl,
-        endControl: endControl,
-        end: end,
-        subdivide: function(t) {
-            var ab = lerp(start, startControl, t),
-                bc = lerp(startControl, endControl, t),
-                cd = lerp(endControl, end, t),
-                abbc = lerp(ab, bc, t),
-                bccd = lerp(bc, cd, t),
-                dest = lerp(abbc, bccd, t);
-            return [bezierCurve(start, ab, abbc, dest), bezierCurve(dest, bccd, cd, end)];
-        },
-        curveTo: function(borderArgs) {
-            borderArgs.push(["bezierCurve", startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y]);
-        },
-        curveToReversed: function(borderArgs) {
-            borderArgs.push(["bezierCurve", endControl.x, endControl.y, startControl.x, startControl.y, start.x, start.y]);
-        }
-    };
-}
-
-function drawSide(borderData, radius1, radius2, outer1, inner1, outer2, inner2) {
-    var borderArgs = [];
-
-    if (radius1[0] > 0 || radius1[1] > 0) {
-        borderArgs.push(["line", outer1[1].start.x, outer1[1].start.y]);
-        outer1[1].curveTo(borderArgs);
-    } else {
-        borderArgs.push([ "line", borderData.c1[0], borderData.c1[1]]);
-    }
-
-    if (radius2[0] > 0 || radius2[1] > 0) {
-        borderArgs.push(["line", outer2[0].start.x, outer2[0].start.y]);
-        outer2[0].curveTo(borderArgs);
-        borderArgs.push(["line", inner2[0].end.x, inner2[0].end.y]);
-        inner2[0].curveToReversed(borderArgs);
-    } else {
-        borderArgs.push(["line", borderData.c2[0], borderData.c2[1]]);
-        borderArgs.push(["line", borderData.c3[0], borderData.c3[1]]);
-    }
-
-    if (radius1[0] > 0 || radius1[1] > 0) {
-        borderArgs.push(["line", inner1[1].end.x, inner1[1].end.y]);
-        inner1[1].curveToReversed(borderArgs);
-    } else {
-        borderArgs.push(["line", borderData.c4[0], borderData.c4[1]]);
-    }
-
-    return borderArgs;
-}
-
-function parseCorner(borderArgs, radius1, radius2, corner1, corner2, x, y) {
-    if (radius1[0] > 0 || radius1[1] > 0) {
-        borderArgs.push(["line", corner1[0].start.x, corner1[0].start.y]);
-        corner1[0].curveTo(borderArgs);
-        corner1[1].curveTo(borderArgs);
-    } else {
-        borderArgs.push(["line", x, y]);
-    }
-
-    if (radius2[0] > 0 || radius2[1] > 0) {
-        borderArgs.push(["line", corner2[0].start.x, corner2[0].start.y]);
-    }
-}
-
-function negativeZIndex(container) {
-    return container.cssInt("zIndex") < 0;
-}
-
-function positiveZIndex(container) {
-    return container.cssInt("zIndex") > 0;
-}
-
-function zIndex0(container) {
-    return container.cssInt("zIndex") === 0;
-}
-
-function inlineLevel(container) {
-    return ["inline", "inline-block", "inline-table"].indexOf(container.css("display")) !== -1;
-}
-
-function isStackingContext(container) {
-    return (container instanceof StackingContext);
-}
-
-function hasText(container) {
-    return container.node.data.trim().length > 0;
-}
-
-function noLetterSpacing(container) {
-    return (/^(normal|none|0px)$/.test(container.parent.css("letterSpacing")));
-}
-
-function getBorderRadiusData(container) {
-    return ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map(function(side) {
-        var value = container.css('border' + side + 'Radius');
-        var arr = value.split(" ");
-        if (arr.length <= 1) {
-            arr[1] = arr[0];
-        }
-        return arr.map(asInt);
-    });
-}
-
-function renderableNode(node) {
-    return (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.ELEMENT_NODE);
-}
-
-function isPositionedForStacking(container) {
-    var position = container.css("position");
-    var zIndex = (["absolute", "relative", "fixed"].indexOf(position) !== -1) ? container.css("zIndex") : "auto";
-    return zIndex !== "auto";
-}
-
-function isPositioned(container) {
-    return container.css("position") !== "static";
-}
-
-function isFloating(container) {
-    return container.css("float") !== "none";
-}
-
-function isInlineBlock(container) {
-    return ["inline-block", "inline-table"].indexOf(container.css("display")) !== -1;
-}
-
-function not(callback) {
-    var context = this;
-    return function() {
-        return !callback.apply(context, arguments);
-    };
-}
-
-function isElement(container) {
-    return container.node.nodeType === Node.ELEMENT_NODE;
-}
-
-function isPseudoElement(container) {
-    return container.isPseudoElement === true;
-}
-
-function isTextNode(container) {
-    return container.node.nodeType === Node.TEXT_NODE;
-}
-
-function zIndexSort(contexts) {
-    return function(a, b) {
-        return (a.cssInt("zIndex") + (contexts.indexOf(a) / contexts.length)) - (b.cssInt("zIndex") + (contexts.indexOf(b) / contexts.length));
-    };
-}
-
-function hasOpacity(container) {
-    return container.getOpacity() < 1;
-}
-
-function asInt(value) {
-    return parseInt(value, 10);
-}
-
-function getWidth(border) {
-    return border.width;
-}
-
-function nonIgnoredElement(nodeContainer) {
-    return (nodeContainer.node.nodeType !== Node.ELEMENT_NODE || ["SCRIPT", "HEAD", "TITLE", "OBJECT", "BR", "OPTION"].indexOf(nodeContainer.node.nodeName) === -1);
-}
-
-function flatten(arrays) {
-    return [].concat.apply([], arrays);
-}
-
-function stripQuotes(content) {
-    var first = content.substr(0, 1);
-    return (first === content.substr(content.length - 1) && first.match(/'|"/)) ? content.substr(1, content.length - 2) : content;
-}
-
-function getWords(characters) {
-    var words = [], i = 0, onWordBoundary = false, word;
-    while(characters.length) {
-        if (isWordBoundary(characters[i]) === onWordBoundary) {
-            word = characters.splice(0, i);
-            if (word.length) {
-                words.push(punycode.ucs2.encode(word));
-            }
-            onWordBoundary =! onWordBoundary;
-            i = 0;
-        } else {
-            i++;
-        }
-
-        if (i >= characters.length) {
-            word = characters.splice(0, i);
-            if (word.length) {
-                words.push(punycode.ucs2.encode(word));
-            }
-        }
-    }
-    return words;
-}
-
-function isWordBoundary(characterCode) {
-    return [
-        32, // <space>
-        13, // \r
-        10, // \n
-        9, // \t
-        45 // -
-    ].indexOf(characterCode) !== -1;
-}
-
-function hasUnicode(string) {
-    return (/[^\u0000-\u00ff]/).test(string);
-}
-
-module.exports = NodeParser;
-
-},{"./color":3,"./fontmetrics":7,"./log":13,"./nodecontainer":14,"./pseudoelementcontainer":18,"./stackingcontext":21,"./textcontainer":25,"./utils":26,"punycode":1}],16:[function(_dereq_,module,exports){
-var XHR = _dereq_('./xhr');
-var utils = _dereq_('./utils');
-var log = _dereq_('./log');
-var createWindowClone = _dereq_('./clone');
-var decode64 = utils.decode64;
-
-function Proxy(src, proxyUrl, document) {
-    var supportsCORS = ('withCredentials' in new XMLHttpRequest());
-    if (!proxyUrl) {
-        return Promise.reject("No proxy configured");
-    }
-    var callback = createCallback(supportsCORS);
-    var url = createProxyUrl(proxyUrl, src, callback);
-
-    return supportsCORS ? XHR(url) : (jsonp(document, url, callback).then(function(response) {
-        return decode64(response.content);
-    }));
-}
-var proxyCount = 0;
-
-function ProxyURL(src, proxyUrl, document) {
-    var supportsCORSImage = ('crossOrigin' in new Image());
-    var callback = createCallback(supportsCORSImage);
-    var url = createProxyUrl(proxyUrl, src, callback);
-    return (supportsCORSImage ? Promise.resolve(url) : jsonp(document, url, callback).then(function(response) {
-        return "data:" + response.type + ";base64," + response.content;
-    }));
-}
-
-function jsonp(document, url, callback) {
-    return new Promise(function(resolve, reject) {
-        var s = document.createElement("script");
-        var cleanup = function() {
-            delete window.html2canvas.proxy[callback];
-            document.body.removeChild(s);
-        };
-        window.html2canvas.proxy[callback] = function(response) {
-            cleanup();
-            resolve(response);
-        };
-        s.src = url;
-        s.onerror = function(e) {
-            cleanup();
-            reject(e);
-        };
-        document.body.appendChild(s);
-    });
-}
-
-function createCallback(useCORS) {
-    return !useCORS ? "html2canvas_" + Date.now() + "_" + (++proxyCount) + "_" + Math.round(Math.random() * 100000) : "";
-}
-
-function createProxyUrl(proxyUrl, src, callback) {
-    return proxyUrl + "?url=" + encodeURIComponent(src) + (callback.length ? "&callback=html2canvas.proxy." + callback : "");
-}
-
-function documentFromHTML(src) {
-    return function(html) {
-        var parser = new DOMParser(), doc;
-        try {
-            doc = parser.parseFromString(html, "text/html");
-        } catch(e) {
-            log("DOMParser not supported, falling back to createHTMLDocument");
-            doc = document.implementation.createHTMLDocument("");
-            try {
-                doc.open();
-                doc.write(html);
-                doc.close();
-            } catch(ee) {
-                log("createHTMLDocument write not supported, falling back to document.body.innerHTML");
-                doc.body.innerHTML = html; // ie9 doesnt support writing to documentElement
-            }
-        }
-
-        var b = doc.querySelector("base");
-        if (!b || !b.href.host) {
-            var base = doc.createElement("base");
-            base.href = src;
-            doc.head.insertBefore(base, doc.head.firstChild);
-        }
-
-        return doc;
-    };
-}
-
-function loadUrlDocument(src, proxy, document, width, height, options) {
-    return new Proxy(src, proxy, window.document).then(documentFromHTML(src)).then(function(doc) {
-        return createWindowClone(doc, document, width, height, options, 0, 0);
-    });
-}
-
-exports.Proxy = Proxy;
-exports.ProxyURL = ProxyURL;
-exports.loadUrlDocument = loadUrlDocument;
-
-},{"./clone":2,"./log":13,"./utils":26,"./xhr":28}],17:[function(_dereq_,module,exports){
-var ProxyURL = _dereq_('./proxy').ProxyURL;
-
-function ProxyImageContainer(src, proxy) {
-    var link = document.createElement("a");
-    link.href = src;
-    src = link.href;
-    this.src = src;
-    this.image = new Image();
-    var self = this;
-    this.promise = new Promise(function(resolve, reject) {
-        self.image.crossOrigin = "Anonymous";
-        self.image.onload = resolve;
-        self.image.onerror = reject;
-
-        new ProxyURL(src, proxy, document).then(function(url) {
-            self.image.src = url;
-        })['catch'](reject);
-    });
-}
-
-module.exports = ProxyImageContainer;
-
-},{"./proxy":16}],18:[function(_dereq_,module,exports){
-var NodeContainer = _dereq_('./nodecontainer');
-
-function PseudoElementContainer(node, parent, type) {
-    NodeContainer.call(this, node, parent);
-    this.isPseudoElement = true;
-    this.before = type === ":before";
-}
-
-PseudoElementContainer.prototype.cloneTo = function(stack) {
-    PseudoElementContainer.prototype.cloneTo.call(this, stack);
-    stack.isPseudoElement = true;
-    stack.before = this.before;
-};
-
-PseudoElementContainer.prototype = Object.create(NodeContainer.prototype);
-
-PseudoElementContainer.prototype.appendToDOM = function() {
-    if (this.before) {
-        this.parent.node.insertBefore(this.node, this.parent.node.firstChild);
-    } else {
-        this.parent.node.appendChild(this.node);
-    }
-    this.parent.node.className += " " + this.getHideClass();
-};
-
-PseudoElementContainer.prototype.cleanDOM = function() {
-    this.node.parentNode.removeChild(this.node);
-    this.parent.node.className = this.parent.node.className.replace(this.getHideClass(), "");
-};
-
-PseudoElementContainer.prototype.getHideClass = function() {
-    return this["PSEUDO_HIDE_ELEMENT_CLASS_" + (this.before ? "BEFORE" : "AFTER")];
-};
-
-PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_BEFORE = "___html2canvas___pseudoelement_before";
-PseudoElementContainer.prototype.PSEUDO_HIDE_ELEMENT_CLASS_AFTER = "___html2canvas___pseudoelement_after";
-
-module.exports = PseudoElementContainer;
-
-},{"./nodecontainer":14}],19:[function(_dereq_,module,exports){
-var log = _dereq_('./log');
-
-function Renderer(width, height, images, options, document) {
-    this.width = width;
-    this.height = height;
-    this.images = images;
-    this.options = options;
-    this.document = document;
-}
-
-Renderer.prototype.renderImage = function(container, bounds, borderData, imageContainer) {
-    var paddingLeft = container.cssInt('paddingLeft'),
-        paddingTop = container.cssInt('paddingTop'),
-        paddingRight = container.cssInt('paddingRight'),
-        paddingBottom = container.cssInt('paddingBottom'),
-        borders = borderData.borders;
-
-    var width = bounds.width - (borders[1].width + borders[3].width + paddingLeft + paddingRight);
-    var height = bounds.height - (borders[0].width + borders[2].width + paddingTop + paddingBottom);
-    this.drawImage(
-        imageContainer,
-        0,
-        0,
-        imageContainer.image.width || width,
-        imageContainer.image.height || height,
-        bounds.left + paddingLeft + borders[3].width,
-        bounds.top + paddingTop + borders[0].width,
-        width,
-        height
-    );
-};
-
-Renderer.prototype.renderBackground = function(container, bounds, borderData) {
-    if (bounds.height > 0 && bounds.width > 0) {
-        this.renderBackgroundColor(container, bounds);
-        this.renderBackgroundImage(container, bounds, borderData);
-    }
-};
-
-Renderer.prototype.renderBackgroundColor = function(container, bounds) {
-    var color = container.color("backgroundColor");
-    if (!color.isTransparent()) {
-        this.rectangle(bounds.left, bounds.top, bounds.width, bounds.height, color);
-    }
-};
-
-Renderer.prototype.renderBorders = function(borders) {
-    borders.forEach(this.renderBorder, this);
-};
-
-Renderer.prototype.renderBorder = function(data) {
-    if (!data.color.isTransparent() && data.args !== null) {
-        this.drawShape(data.args, data.color);
-    }
-};
-
-Renderer.prototype.renderBackgroundImage = function(container, bounds, borderData) {
-    var backgroundImages = container.parseBackgroundImages();
-    backgroundImages.reverse().forEach(function(backgroundImage, index, arr) {
-        switch(backgroundImage.method) {
-        case "url":
-            var image = this.images.get(backgroundImage.args[0]);
-            if (image) {
-                this.renderBackgroundRepeating(container, bounds, image, arr.length - (index+1), borderData);
-            } else {
-                log("Error loading background-image", backgroundImage.args[0]);
-            }
-            break;
-        case "linear-gradient":
-        case "gradient":
-            var gradientImage = this.images.get(backgroundImage.value);
-            if (gradientImage) {
-                this.renderBackgroundGradient(gradientImage, bounds, borderData);
-            } else {
-                log("Error loading background-image", backgroundImage.args[0]);
-            }
-            break;
-        case "none":
-            break;
-        default:
-            log("Unknown background-image type", backgroundImage.args[0]);
-        }
-    }, this);
-};
-
-Renderer.prototype.renderBackgroundRepeating = function(container, bounds, imageContainer, index, borderData) {
-    var size = container.parseBackgroundSize(bounds, imageContainer.image, index);
-    var position = container.parseBackgroundPosition(bounds, imageContainer.image, index, size);
-    var repeat = container.parseBackgroundRepeat(index);
-    switch (repeat) {
-    case "repeat-x":
-    case "repeat no-repeat":
-        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + borderData[3], bounds.top + position.top + borderData[0], 99999, size.height, borderData);
-        break;
-    case "repeat-y":
-    case "no-repeat repeat":
-        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + position.left + borderData[3], bounds.top + borderData[0], size.width, 99999, borderData);
-        break;
-    case "no-repeat":
-        this.backgroundRepeatShape(imageContainer, position, size, bounds, bounds.left + position.left + borderData[3], bounds.top + position.top + borderData[0], size.width, size.height, borderData);
-        break;
-    default:
-        this.renderBackgroundRepeat(imageContainer, position, size, {top: bounds.top, left: bounds.left}, borderData[3], borderData[0]);
-        break;
-    }
-};
-
-module.exports = Renderer;
-
-},{"./log":13}],20:[function(_dereq_,module,exports){
-var Renderer = _dereq_('../renderer');
-var LinearGradientContainer = _dereq_('../lineargradientcontainer');
-var log = _dereq_('../log');
-
-function CanvasRenderer(width, height) {
-    Renderer.apply(this, arguments);
-    this.canvas = this.options.canvas || this.document.createElement("canvas");
-    if (!this.options.canvas) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-    }
-    this.ctx = this.canvas.getContext("2d");
-    this.taintCtx = this.document.createElement("canvas").getContext("2d");
-    this.ctx.textBaseline = "bottom";
-    this.variables = {};
-    log("Initialized CanvasRenderer with size", width, "x", height);
-}
-
-CanvasRenderer.prototype = Object.create(Renderer.prototype);
-
-CanvasRenderer.prototype.setFillStyle = function(fillStyle) {
-    this.ctx.fillStyle = typeof(fillStyle) === "object" && !!fillStyle.isColor ? fillStyle.toString() : fillStyle;
-    return this.ctx;
-};
-
-CanvasRenderer.prototype.rectangle = function(left, top, width, height, color) {
-    this.setFillStyle(color).fillRect(left, top, width, height);
-};
-
-CanvasRenderer.prototype.circle = function(left, top, size, color) {
-    this.setFillStyle(color);
-    this.ctx.beginPath();
-    this.ctx.arc(left + size / 2, top + size / 2, size / 2, 0, Math.PI*2, true);
-    this.ctx.closePath();
-    this.ctx.fill();
-};
-
-CanvasRenderer.prototype.circleStroke = function(left, top, size, color, stroke, strokeColor) {
-    this.circle(left, top, size, color);
-    this.ctx.strokeStyle = strokeColor.toString();
-    this.ctx.stroke();
-};
-
-CanvasRenderer.prototype.drawShape = function(shape, color) {
-    this.shape(shape);
-    this.setFillStyle(color).fill();
-};
-
-CanvasRenderer.prototype.taints = function(imageContainer) {
-    if (imageContainer.tainted === null) {
-        this.taintCtx.drawImage(imageContainer.image, 0, 0);
-        try {
-            this.taintCtx.getImageData(0, 0, 1, 1);
-            imageContainer.tainted = false;
-        } catch(e) {
-            this.taintCtx = document.createElement("canvas").getContext("2d");
-            imageContainer.tainted = true;
-        }
-    }
-
-    return imageContainer.tainted;
-};
-
-CanvasRenderer.prototype.drawImage = function(imageContainer, sx, sy, sw, sh, dx, dy, dw, dh) {
-    if (!this.taints(imageContainer) || this.options.allowTaint) {
-        this.ctx.drawImage(imageContainer.image, sx, sy, sw, sh, dx, dy, dw, dh);
-    }
-};
-
-CanvasRenderer.prototype.clip = function(shapes, callback, context) {
-    this.ctx.save();
-    shapes.filter(hasEntries).forEach(function(shape) {
-        this.shape(shape).clip();
-    }, this);
-    callback.call(context);
-    this.ctx.restore();
-};
-
-CanvasRenderer.prototype.shape = function(shape) {
-    this.ctx.beginPath();
-    shape.forEach(function(point, index) {
-        if (point[0] === "rect") {
-            this.ctx.rect.apply(this.ctx, point.slice(1));
-        } else {
-            this.ctx[(index === 0) ? "moveTo" : point[0] + "To" ].apply(this.ctx, point.slice(1));
-        }
-    }, this);
-    this.ctx.closePath();
-    return this.ctx;
-};
-
-CanvasRenderer.prototype.font = function(color, style, variant, weight, size, family) {
-    this.setFillStyle(color).font = [style, variant, weight, size, family].join(" ").split(",")[0];
-};
-
-CanvasRenderer.prototype.fontShadow = function(color, offsetX, offsetY, blur) {
-    this.setVariable("shadowColor", color.toString())
-        .setVariable("shadowOffsetY", offsetX)
-        .setVariable("shadowOffsetX", offsetY)
-        .setVariable("shadowBlur", blur);
-};
-
-CanvasRenderer.prototype.clearShadow = function() {
-    this.setVariable("shadowColor", "rgba(0,0,0,0)");
-};
-
-CanvasRenderer.prototype.setOpacity = function(opacity) {
-    this.ctx.globalAlpha = opacity;
-};
-
-CanvasRenderer.prototype.setTransform = function(transform) {
-    this.ctx.translate(transform.origin[0], transform.origin[1]);
-    this.ctx.transform.apply(this.ctx, transform.matrix);
-    this.ctx.translate(-transform.origin[0], -transform.origin[1]);
-};
-
-CanvasRenderer.prototype.setVariable = function(property, value) {
-    if (this.variables[property] !== value) {
-        this.variables[property] = this.ctx[property] = value;
-    }
-
-    return this;
-};
-
-CanvasRenderer.prototype.text = function(text, left, bottom) {
-    this.ctx.fillText(text, left, bottom);
-};
-
-CanvasRenderer.prototype.backgroundRepeatShape = function(imageContainer, backgroundPosition, size, bounds, left, top, width, height, borderData) {
-    var shape = [
-        ["line", Math.round(left), Math.round(top)],
-        ["line", Math.round(left + width), Math.round(top)],
-        ["line", Math.round(left + width), Math.round(height + top)],
-        ["line", Math.round(left), Math.round(height + top)]
-    ];
-    this.clip([shape], function() {
-        this.renderBackgroundRepeat(imageContainer, backgroundPosition, size, bounds, borderData[3], borderData[0]);
-    }, this);
-};
-
-CanvasRenderer.prototype.renderBackgroundRepeat = function(imageContainer, backgroundPosition, size, bounds, borderLeft, borderTop) {
-    var offsetX = Math.round(bounds.left + backgroundPosition.left + borderLeft), offsetY = Math.round(bounds.top + backgroundPosition.top + borderTop);
-    this.setFillStyle(this.ctx.createPattern(this.resizeImage(imageContainer, size), "repeat"));
-    this.ctx.translate(offsetX, offsetY);
-    this.ctx.fill();
-    this.ctx.translate(-offsetX, -offsetY);
-};
-
-CanvasRenderer.prototype.renderBackgroundGradient = function(gradientImage, bounds) {
-    if (gradientImage instanceof LinearGradientContainer) {
-        var gradient = this.ctx.createLinearGradient(
-            bounds.left + bounds.width * gradientImage.x0,
-            bounds.top + bounds.height * gradientImage.y0,
-            bounds.left +  bounds.width * gradientImage.x1,
-            bounds.top +  bounds.height * gradientImage.y1);
-        gradientImage.colorStops.forEach(function(colorStop) {
-            gradient.addColorStop(colorStop.stop, colorStop.color.toString());
-        });
-        this.rectangle(bounds.left, bounds.top, bounds.width, bounds.height, gradient);
-    }
-};
-
-CanvasRenderer.prototype.resizeImage = function(imageContainer, size) {
-    var image = imageContainer.image;
-    if(image.width === size.width && image.height === size.height) {
-        return image;
-    }
-
-    var ctx, canvas = document.createElement('canvas');
-    canvas.width = size.width;
-    canvas.height = size.height;
-    ctx = canvas.getContext("2d");
-    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, size.width, size.height );
-    return canvas;
-};
-
-function hasEntries(array) {
-    return array.length > 0;
-}
-
-module.exports = CanvasRenderer;
-
-},{"../lineargradientcontainer":12,"../log":13,"../renderer":19}],21:[function(_dereq_,module,exports){
-var NodeContainer = _dereq_('./nodecontainer');
-
-function StackingContext(hasOwnStacking, opacity, element, parent) {
-    NodeContainer.call(this, element, parent);
-    this.ownStacking = hasOwnStacking;
-    this.contexts = [];
-    this.children = [];
-    this.opacity = (this.parent ? this.parent.stack.opacity : 1) * opacity;
-}
-
-StackingContext.prototype = Object.create(NodeContainer.prototype);
-
-StackingContext.prototype.getParentStack = function(context) {
-    var parentStack = (this.parent) ? this.parent.stack : null;
-    return parentStack ? (parentStack.ownStacking ? parentStack : parentStack.getParentStack(context)) : context.stack;
-};
-
-module.exports = StackingContext;
-
-},{"./nodecontainer":14}],22:[function(_dereq_,module,exports){
-function Support(document) {
-    this.rangeBounds = this.testRangeBounds(document);
-    this.cors = this.testCORS();
-    this.svg = this.testSVG();
-}
-
-Support.prototype.testRangeBounds = function(document) {
-    var range, testElement, rangeBounds, rangeHeight, support = false;
-
-    if (document.createRange) {
-        range = document.createRange();
-        if (range.getBoundingClientRect) {
-            testElement = document.createElement('boundtest');
-            testElement.style.height = "123px";
-            testElement.style.display = "block";
-            document.body.appendChild(testElement);
-
-            range.selectNode(testElement);
-            rangeBounds = range.getBoundingClientRect();
-            rangeHeight = rangeBounds.height;
-
-            if (rangeHeight === 123) {
-                support = true;
-            }
-            document.body.removeChild(testElement);
-        }
-    }
-
-    return support;
-};
-
-Support.prototype.testCORS = function() {
-    return typeof((new Image()).crossOrigin) !== "undefined";
-};
-
-Support.prototype.testSVG = function() {
-    var img = new Image();
-    var canvas = document.createElement("canvas");
-    var ctx =  canvas.getContext("2d");
-    img.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'></svg>";
-
-    try {
-        ctx.drawImage(img, 0, 0);
-        canvas.toDataURL();
-    } catch(e) {
-        return false;
-    }
-    return true;
-};
-
-module.exports = Support;
-
-},{}],23:[function(_dereq_,module,exports){
-var XHR = _dereq_('./xhr');
-var decode64 = _dereq_('./utils').decode64;
-
-function SVGContainer(src) {
-    this.src = src;
-    this.image = null;
-    var self = this;
-
-    this.promise = this.hasFabric().then(function() {
-        return (self.isInline(src) ? Promise.resolve(self.inlineFormatting(src)) : XHR(src));
-    }).then(function(svg) {
-        return new Promise(function(resolve) {
-            window.html2canvas.svg.fabric.loadSVGFromString(svg, self.createCanvas.call(self, resolve));
-        });
-    });
-}
-
-SVGContainer.prototype.hasFabric = function() {
-    return !window.html2canvas.svg || !window.html2canvas.svg.fabric ? Promise.reject(new Error("html2canvas.svg.js is not loaded, cannot render svg")) : Promise.resolve();
-};
-
-SVGContainer.prototype.inlineFormatting = function(src) {
-    return (/^data:image\/svg\+xml;base64,/.test(src)) ? this.decode64(this.removeContentType(src)) : this.removeContentType(src);
-};
-
-SVGContainer.prototype.removeContentType = function(src) {
-    return src.replace(/^data:image\/svg\+xml(;base64)?,/,'');
-};
-
-SVGContainer.prototype.isInline = function(src) {
-    return (/^data:image\/svg\+xml/i.test(src));
-};
-
-SVGContainer.prototype.createCanvas = function(resolve) {
-    var self = this;
-    return function (objects, options) {
-        var canvas = new window.html2canvas.svg.fabric.StaticCanvas('c');
-        self.image = canvas.lowerCanvasEl;
-        canvas
-            .setWidth(options.width)
-            .setHeight(options.height)
-            .add(window.html2canvas.svg.fabric.util.groupSVGElements(objects, options))
-            .renderAll();
-        resolve(canvas.lowerCanvasEl);
-    };
-};
-
-SVGContainer.prototype.decode64 = function(str) {
-    return (typeof(window.atob) === "function") ? window.atob(str) : decode64(str);
-};
-
-module.exports = SVGContainer;
-
-},{"./utils":26,"./xhr":28}],24:[function(_dereq_,module,exports){
-var SVGContainer = _dereq_('./svgcontainer');
-
-function SVGNodeContainer(node, _native) {
-    this.src = node;
-    this.image = null;
-    var self = this;
-
-    this.promise = _native ? new Promise(function(resolve, reject) {
-        self.image = new Image();
-        self.image.onload = resolve;
-        self.image.onerror = reject;
-        self.image.src = "data:image/svg+xml," + (new XMLSerializer()).serializeToString(node);
-        if (self.image.complete === true) {
-            resolve(self.image);
-        }
-    }) : this.hasFabric().then(function() {
-        return new Promise(function(resolve) {
-            window.html2canvas.svg.fabric.parseSVGDocument(node, self.createCanvas.call(self, resolve));
-        });
-    });
-}
-
-SVGNodeContainer.prototype = Object.create(SVGContainer.prototype);
-
-module.exports = SVGNodeContainer;
-
-},{"./svgcontainer":23}],25:[function(_dereq_,module,exports){
-var NodeContainer = _dereq_('./nodecontainer');
-
-function TextContainer(node, parent) {
-    NodeContainer.call(this, node, parent);
-}
-
-TextContainer.prototype = Object.create(NodeContainer.prototype);
-
-TextContainer.prototype.applyTextTransform = function() {
-    this.node.data = this.transform(this.parent.css("textTransform"));
-};
-
-TextContainer.prototype.transform = function(transform) {
-    var text = this.node.data;
-    switch(transform){
-        case "lowercase":
-            return text.toLowerCase();
-        case "capitalize":
-            return text.replace(/(^|\s|:|-|\(|\))([a-z])/g, capitalize);
-        case "uppercase":
-            return text.toUpperCase();
-        default:
-            return text;
-    }
-};
-
-function capitalize(m, p1, p2) {
-    if (m.length > 0) {
-        return p1 + p2.toUpperCase();
-    }
-}
-
-module.exports = TextContainer;
-
-},{"./nodecontainer":14}],26:[function(_dereq_,module,exports){
-exports.smallImage = function smallImage() {
-    return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-};
-
-exports.bind = function(callback, context) {
-    return function() {
-        return callback.apply(context, arguments);
-    };
-};
-
-/*
- * base64-arraybuffer
- * https://github.com/niklasvh/base64-arraybuffer
- *
- * Copyright (c) 2012 Niklas von Hertzen
- * Licensed under the MIT license.
- */
-
-exports.decode64 = function(base64) {
-    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    var len = base64.length, i, encoded1, encoded2, encoded3, encoded4, byte1, byte2, byte3;
-
-    var output = "";
-
-    for (i = 0; i < len; i+=4) {
-        encoded1 = chars.indexOf(base64[i]);
-        encoded2 = chars.indexOf(base64[i+1]);
-        encoded3 = chars.indexOf(base64[i+2]);
-        encoded4 = chars.indexOf(base64[i+3]);
-
-        byte1 = (encoded1 << 2) | (encoded2 >> 4);
-        byte2 = ((encoded2 & 15) << 4) | (encoded3 >> 2);
-        byte3 = ((encoded3 & 3) << 6) | encoded4;
-        if (encoded3 === 64) {
-            output += String.fromCharCode(byte1);
-        } else if (encoded4 === 64 || encoded4 === -1) {
-            output += String.fromCharCode(byte1, byte2);
-        } else{
-            output += String.fromCharCode(byte1, byte2, byte3);
-        }
-    }
-
-    return output;
-};
-
-exports.getBounds = function(node) {
-    if (node.getBoundingClientRect) {
-        var clientRect = node.getBoundingClientRect();
-        var width = node.offsetWidth == null ? clientRect.width : node.offsetWidth;
-        return {
-            top: clientRect.top,
-            bottom: clientRect.bottom || (clientRect.top + clientRect.height),
-            right: clientRect.left + width,
-            left: clientRect.left,
-            width:  width,
-            height: node.offsetHeight == null ? clientRect.height : node.offsetHeight
-        };
-    }
-    return {};
-};
-
-exports.offsetBounds = function(node) {
-    var parent = node.offsetParent ? exports.offsetBounds(node.offsetParent) : {top: 0, left: 0};
-
-    return {
-        top: node.offsetTop + parent.top,
-        bottom: node.offsetTop + node.offsetHeight + parent.top,
-        right: node.offsetLeft + parent.left + node.offsetWidth,
-        left: node.offsetLeft + parent.left,
-        width: node.offsetWidth,
-        height: node.offsetHeight
-    };
-};
-
-exports.parseBackgrounds = function(backgroundImage) {
-    var whitespace = ' \r\n\t',
-        method, definition, prefix, prefix_i, block, results = [],
-        mode = 0, numParen = 0, quote, args;
-    var appendResult = function() {
-        if(method) {
-            if (definition.substr(0, 1) === '"') {
-                definition = definition.substr(1, definition.length - 2);
-            }
-            if (definition) {
-                args.push(definition);
-            }
-            if (method.substr(0, 1) === '-' && (prefix_i = method.indexOf('-', 1 ) + 1) > 0) {
-                prefix = method.substr(0, prefix_i);
-                method = method.substr(prefix_i);
-            }
-            results.push({
-                prefix: prefix,
-                method: method.toLowerCase(),
-                value: block,
-                args: args,
-                image: null
-            });
-        }
-        args = [];
-        method = prefix = definition = block = '';
-    };
-    args = [];
-    method = prefix = definition = block = '';
-    backgroundImage.split("").forEach(function(c) {
-        if (mode === 0 && whitespace.indexOf(c) > -1) {
-            return;
-        }
-        switch(c) {
-        case '"':
-            if(!quote) {
-                quote = c;
-            } else if(quote === c) {
-                quote = null;
-            }
-            break;
-        case '(':
-            if(quote) {
-                break;
-            } else if(mode === 0) {
-                mode = 1;
-                block += c;
-                return;
-            } else {
-                numParen++;
-            }
-            break;
-        case ')':
-            if (quote) {
-                break;
-            } else if(mode === 1) {
-                if(numParen === 0) {
-                    mode = 0;
-                    block += c;
-                    appendResult();
-                    return;
-                } else {
-                    numParen--;
-                }
-            }
-            break;
-
-        case ',':
-            if (quote) {
-                break;
-            } else if(mode === 0) {
-                appendResult();
-                return;
-            } else if (mode === 1) {
-                if (numParen === 0 && !method.match(/^url$/i)) {
-                    args.push(definition);
-                    definition = '';
-                    block += c;
-                    return;
-                }
-            }
-            break;
-        }
-
-        block += c;
-        if (mode === 0) {
-            method += c;
-        } else {
-            definition += c;
-        }
-    });
-
-    appendResult();
-    return results;
-};
-
-},{}],27:[function(_dereq_,module,exports){
-var GradientContainer = _dereq_('./gradientcontainer');
-
-function WebkitGradientContainer(imageData) {
-    GradientContainer.apply(this, arguments);
-    this.type = imageData.args[0] === "linear" ? GradientContainer.TYPES.LINEAR : GradientContainer.TYPES.RADIAL;
-}
-
-WebkitGradientContainer.prototype = Object.create(GradientContainer.prototype);
-
-module.exports = WebkitGradientContainer;
-
-},{"./gradientcontainer":9}],28:[function(_dereq_,module,exports){
-function XHR(url) {
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                resolve(xhr.responseText);
-            } else {
-                reject(new Error(xhr.statusText));
-            }
-        };
-
-        xhr.onerror = function() {
-            reject(new Error("Network Error"));
-        };
-
-        xhr.send();
-    });
-}
-
-module.exports = XHR;
-
-},{}]},{},[4])(4)
-});
 /**
  * @file A fantasy name generator library.
  * @version 1.0.0

@@ -12,10 +12,8 @@ block document
     li Before you deploy your application to your website, switch to using the minified version. Minification can save significant amounts of bandwidth usage for your users. WebGL applications tend to be large, so any amount of savings will get your users into your application faster and use less of their energy and data resources.
 
   ul
-    li: a(href= fileRoot + "Primrose.min.js", target="_blank") Download the latest version of the Primrose WebVR framework
-    li: a(href= fileRoot + "PrimroseDependencies.min.js", target="_blank") Download Primrose's dependencies as a single package
-    li: a(href= fileRoot + "doc/setup.html") Read detailed installation and setup instructions
-    li: a(href= fileRoot + "doc/drum.html") Learn how to make a simple drum-machine application
+    li: a(href= fileRoot + "Primrose.min.js", target="_blank") Download the latest version of the Primrose WebVR framework, with dependencies included.
+    li: a(href= fileRoot + "doc/index.html") Read the Quick Start instructions.
 
   p Additionally, you may wish to:
   ul
@@ -33,7 +31,7 @@ block document
     git clone https://github.com/NotionTheory/Primrose.git
     cd Primrose
     npm install
-    gulp
+    gulp release
 
   p From there, you may copy the #[code Primrose.min.js] file into your private project directory, or run the command #[kbd npm start] to run a copy of this website and try Primrose out right away.
 
@@ -83,31 +81,40 @@ block document
     a(href="http://www.primrosevr.com/archive/") http://www.primrosevr.com/archive/
     | - for both expanded and minified versions.
 
-  p For example, to link to the minified version of v0.20.2 of the Primrose package, you would use the link:
-  ul: li: a(href="http://www.primrosevr.com/archive/Primrose-0.20.2.min.js") http://www.primrosevr.com/archive/Primrose-0.20.2.min.js
+  p For example, to link to the minified version of v0.26.0 of the Primrose package, you would use the link:
+  ul: li: a(href="http://www.primrosevr.com/archive/Primrose-0.26.0.min.js") http://www.primrosevr.com/archive/Primrose-0.26.0.min.js
 
   p If you have locally saved a copy of #[code Primrose.js] or #[code Primrose.min.js] without a version number in its name, you can find the version number in the JavaScript Developer Console of your favorite browser with the library loaded. It will appear as:
 
-  tt Using Primrose v0.20.2. Find out more at http://www.primrosevr.com
+  tt Using Primrose v0.26.0. Find out more at http://www.primrosevr.com
 
   p You can then copy that version number into a filename of the Archive directory to retrieve any historical version you may need.
 
   blockquote NOTE: because of bandwidth limitations with the Primrose website hosting provider, it is advised that you copy the necessary files to your own project directory and host them with your own provider.
 
   h2 Dependencies
-  p There are also a number of libraries on which Primrose depends.
+  p There are also a number of libraries on which Primrose depends. The file #[code PrimroseDependencies.js] contains both the required and optional dependencies. The file #[code Primrose.js] contains the dependencies, plus the Primrose library. The file #[code PrimroseLib.js] contains only the Primrose library, without the dependencies.
 
-  p If you are only using Primrose as a client-side library, then there is only one external dependency that Primrose does not include automatically. #[a(href="http://www.threejs.org") Three.js] is an abstraction layer and scene graph implementation for WebGL. #[code three.js] is usually located at:
+  p If you are only using Primrose as a client-side library, then there are only two external dependencies.
   ul
     li
-      a(href="http://www.threejs.org/build/three.js") http://www.threejs.org/build/three.js
-      | - expanded version.
+      a(href="http://www.threejs.org") Three.js
+      | - an abstraction layer and scene graph implementation for WebGL.
     li
-      a(href="http://www.threejs.org/build/three.min.js") http://www.threejs.org/build/three.min.js
-      | - minified version.
+      a(href="https://html2canvas.hertzen.com/") Html2Canvas
+      | - a tool for taking screenshots of HTML sub-documents, which is necessary for the #[code Primrose.Contrls.HtmlDoc] component.
 
   p There are a few optional dependencies:
   ul
+    li
+      a(href="https://github.com/taylorhakes/promise-polyfill") Promise Polyfill
+      | - an ES6 Promise polyfill library for browsers that do not yet have native Promises (i.e. Microsoft Edge).
+    li
+      a(href="https://https://github.com/borismus/webvr-polyfill") WebVR Polyfill
+      | - a polyfill library for making WebVR apps work on smartphones that have Device Orientation API but don't yet have WebVR API (i.e. iOS devices).
+    li
+      a(href="https://github.com/capnmidnight/WebVR-Bootstrapper") WebVR Booststrapper
+      | - a minimal set of code to get an image into a VR HMD as soon as possible. Also abstracts a regular full screen view as a mock #[code VRDisplay] to be able to include it as a display option along side VR devices easily.
     li
       a(href="https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/master/src/debug/webgl-debug.js") WebGL-Debug.js
       | - a wrapper for WebGL contexts that can help debug WebGL-specific issues.

@@ -15,7 +15,7 @@ The Primrose Framework helps web developers create virtual reality experiences w
           sceneModel: "commodore_pet.json",
           skyTexture: "images/bg2.jpg",
           groundTexture: "images/deck.png"
-        } );
+        });
 
     function isExecuteCommand ( evt ) {
       return evt[modA] && evt[modB] && evt.keyCode === Primrose.Keys[execKey];

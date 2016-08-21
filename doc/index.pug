@@ -7,17 +7,17 @@ block document
   ul
     li #[code app.js] - this is where you will write your JavaScript code to define your scene.
     li #[code bg.jpg] - a skymap texture.
-    li #[code cardboard.mtl] - materials for cardboard.obj,
-    li #[code cardboard.obj] - an icon for activating VR mode.
     li #[code deck.png] - a ground texture.
     li #[code helvetiker_regular.typeface.js] - a font for 3D text elements.
     li #[code index.html] - an HTML file to pull it all together.
-    li #[code monitor.mtl] - materials for monitor.obj,
-    li #[code monitor.obj] - an icon for activating regular full-screen mode.
-    li #[code Primrose.min.js] - the Primrose framework.
-    li #[code PrimroseDependencies.min.js] - 3rd party JS libraries like Three.js on which Primrose depends, prepackaged for you.
-    li #[code PrimroseDocumentation.min.js] - the live documentation database for Primrose.
-    li #[code StartHere.exe] - run this executable on Windows to setup a local web server and automatically start your browser.
+    li #[code Primrose.min.js] - the Primrose framework, with dependencies included.
+    li
+      span run one of the following scripts to setup a local web server and automatically start your browser
+      ul
+        li #[code StartHere-LINUX.sh] - for Linux
+        li #[code StartHere-MACOS.exe] - for macOS
+        li #[code StartHere-WINDOWS.exe] - for Windows
+    li #[code webvr-bootstrapper.min.js] - a minimal file for getting the page loaded quickly, display a loading progress bar, and abstract regular full-screen view as a display option alongside WebVR.
     li #[code wind.ogg] - some ambient noise for aiding in orienting one's self in the space.
 
   p In the #[code app.js] file, you'll find the relevant scripts to edit to make your own VR applications. The template project starts out fairly empty.

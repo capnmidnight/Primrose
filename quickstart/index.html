@@ -4,45 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Primrose VR Application</title>
-    <script type="text/javascript" src="WebVRBootstrapper.min.js"></script>
+    <script type="text/javascript" src="webvr-bootstrapper.min.js"></script>
     <script>
-      WebVRBootstrapper( "manifest.json", function ( startDownload ) {
-        function addButton( text, thunk ) {
-          var btn = document.createElement( "button" );
-          btn.type = "button";
-          btn.appendChild( document.createTextNode( text ) );
-          btn.addEventListener( "click", thunk );
-          document.getElementById( "fsb" ).appendChild( btn );
-        }
-        var b = document.querySelector( "progress" );
-        startDownload( function ( n, m ) {
-          b.max = m;
-          b.value = n;
-        }, function () {
-          b.style.display = "none";
-          function vrButton( display, i ) {
-            addButton( display.displayName, env.goFullScreen.bind( env, i ) );
-          }
-          env.addEventListener( "ready", function () {
-            env.displays.forEach( vrButton );
-          }, false );
-        } );
-      } );
+      WebVRBootstrapper( "manifest.json" ).then(function ( startDownload ) {
+        var progressBar = document.querySelector( "progress" );
+        return startDownload( function ( n, m ) {
+          progressBar.max = m;
+          progressBar.value = n;
+        });
+      }).then(function () {
+        var progressBar = document.querySelector( "progress" );
+        progressBar.style.display = "none";
+        navigator.getVRDisplays().then(function( displays ) {
+          displays.forEach(function( display, i ) {
+            var btn = document.createElement( "button" );
+            btn.type = "button";
+            btn.appendChild( document.createTextNode( display.displayName ) );
+            btn.addEventListener( "click", function() {
+              console.log("OK");
+              env.goFullScreen(i);
+            });
+            document.getElementById( "fsb" ).appendChild( btn );
+          });
+        });
+      });
     </script>
     <style type="text/css">
       html, body, canvas, progress, #fsb {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
         margin: 0;
         border: 0;
         padding: 0;
       }
 
-      #fsb {
-        pointer-events: none;
+      html, body, canvas, progress {
+        width: 100%;
+        height: 100%;
       }
 
       button {

@@ -37,22 +37,8 @@ html
     block head
       link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
       style #frontBuffer { background-image:url(screenshot.jpg); }
-
-      script(src="node_modules/bare-bones-logger/bare-bones-logger.js")
-      script(src="node_modules/marked/marked.min.js")
-      script(src="node_modules/pliny/pliny.js")
-      script(src="node_modules/promise-polyfill/promise.js")
-      script(src="node_modules/lavu-details-polyfill/lib/index.min.js")
-      script(src="node_modules/socket.io-client/socket.io.js")
-      script(src="node_modules/jshashes/hashes.js")
-      script(src="node_modules/three/three.js")
-      script(src="node_modules/three/examples/js/loaders/OBJLoader.js")
-      script(src="node_modules/three/examples/js/loaders/MTLLoader.js")
-      script(src="node_modules/three/examples/js/loaders/FBXLoader.js")
-      script(src="node_modules/webvr-polyfill/build/webvr-polyfill.js")
-      script(src="node_modules/html2canvas/dist/html2canvas.js")
-      script(src="namegen.js")
-
+      script(src=fileRoot + "node_modules/bare-bones-logger/bare-bones-logger" + jsExt)
+      script(src=fileRoot + "Primrose" + jsExt)
       script(type="text/javascript").
         WebVRBootstrapper([["app.js", 0]])
           .then(function (startDownload) {

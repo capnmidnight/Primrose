@@ -15,144 +15,14 @@
     <meta property="og:site_name" content="Primrose VR">
     <meta property="og:description" content="Primrose: Framework for WebVR Applications">
     <meta name="twitter:description" content="Primrose: Framework for WebVR Applications">
-    <meta property="og:url" content="http://www.primrosevr.com/doc/community.html"><!-- start main.jade meta block -->
+    <meta property="og:url" content="http://www.primrosevr.com/undefined"><!-- start main.pug meta block -->
     <meta name="twitter:image" content="http://www.primrosevr.com/images/screenshot.jpg">
-    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.jade meta block -->
-<!-- start main.jade title block --><!-- start detailPage.jade title block -->
+    <meta property="og:image" content="http://www.primrosevr.com/images/screenshot.jpg"><!-- end main.pug meta block -->
+<!-- start main.pug title block --><!-- start detailPage.pug title block -->
     <meta property="og:title" content="Primrose VR: WebVR Application Framework Documentation">
     <meta name="twitter:title" content="Primrose VR: WebVR Application Framework Documentation">
-    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end detailPage.jade title block --><!-- end main.jade title block -->
-    <link type="text/css" rel="stylesheet" href="../doc/style.css"><!-- start withFramework.jade head append -->
-    <script type="text/javascript" src="../node_modules/bare-bones-logger/bare-bones-logger.js"></script>
-    <script type="text/javascript" src="../node_modules/marked/marked.min.js"></script>
-    <script type="text/javascript" src="../node_modules/pliny/pliny.js"></script>
-    <script type="text/javascript" src="../node_modules/promise-polyfill/promise.js"></script>
-    <script type="text/javascript" src="../node_modules/lavu-details-polyfill/lib/index.min.js"></script>
-    <script type="text/javascript" src="../node_modules/socket.io-client/socket.io.js"></script>
-    <script type="text/javascript" src="../node_modules/jshashes/hashes.js"></script>
-    <script type="text/javascript" src="../node_modules/three/three.js"></script>
-    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/MTLLoader.js"></script>
-    <script type="text/javascript" src="../node_modules/three/examples/js/loaders/FBXLoader.js"></script>
-    <script type="text/javascript" src="../node_modules/webvr-polyfill/build/webvr-polyfill.js"></script>
-    <script type="text/javascript" src="../node_modules/html2canvas/dist/html2canvas.js"></script>
-    <script type="text/javascript" src="../namegen.js"></script>
-    <script type="text/javascript" src="../src/app.js"></script>
-    <script type="text/javascript" src="../src/base/InsideSphereGeometry.js"></script>
-    <script type="text/javascript" src="../src/base/axis.js"></script>
-    <script type="text/javascript" src="../src/base/box.js"></script>
-    <script type="text/javascript" src="../src/base/brick.js"></script>
-    <script type="text/javascript" src="../src/base/cache.js"></script>
-    <script type="text/javascript" src="../src/base/clone.js"></script>
-    <script type="text/javascript" src="../src/base/cloud.js"></script>
-    <script type="text/javascript" src="../src/base/copyObject.js"></script>
-    <script type="text/javascript" src="../src/base/cylinder.js"></script>
-    <script type="text/javascript" src="../src/base/emit.js"></script>
-    <script type="text/javascript" src="../src/base/findProperty.js"></script>
-    <script type="text/javascript" src="../src/base/forms.js"></script>
-    <script type="text/javascript" src="../src/base/hub.js"></script>
-    <script type="text/javascript" src="../src/base/light.js"></script>
-    <script type="text/javascript" src="../src/base/patch.js"></script>
-    <script type="text/javascript" src="../src/base/put.js"></script>
-    <script type="text/javascript" src="../src/base/quad.js"></script>
-    <script type="text/javascript" src="../src/base/range.js"></script>
-    <script type="text/javascript" src="../src/base/shell.js"></script>
-    <script type="text/javascript" src="../src/base/sphere.js"></script>
-    <script type="text/javascript" src="../src/base/textured.js"></script>
-    <script type="text/javascript" src="../src/base/v3.js"></script>
-    <script type="text/javascript" src="../src/fx/AbstractEventEmitter.js"></script>
-    <script type="text/javascript" src="../src/fx/Angle.js"></script>
-    <script type="text/javascript" src="../src/fx/BaseControl.js"></script>
-    <script type="text/javascript" src="../src/fx/BrowserEnvironment.js"></script>
-    <script type="text/javascript" src="../src/fx/ButtonFactory.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/cascadeElement.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/findEverything.js"></script>
-    <script type="text/javascript" src="../src/fx/DOM/makeHidingContainer.js"></script>
-    <script type="text/javascript" src="../src/fx/Entity.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/XHR.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/del.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/delObject.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/get.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getBuffer.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getObject.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/getText.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/post.js"></script>
-    <script type="text/javascript" src="../src/fx/HTTP/postObject.js"></script>
-    <script type="text/javascript" src="../src/fx/InputProcessor.js"></script>
-    <script type="text/javascript" src="../src/fx/Keys.js"></script>
-    <script type="text/javascript" src="../src/fx/ModelLoader.js"></script>
-    <script type="text/javascript" src="../src/fx/Pointer.js"></script>
-    <script type="text/javascript" src="../src/fx/PoseInputProcessor.js"></script>
-    <script type="text/javascript" src="../src/fx/Projector.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/ID.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/color.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/int.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/item.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/number.js"></script>
-    <script type="text/javascript" src="../src/fx/Random/steps.js"></script>
-    <script type="text/javascript" src="../src/fx/Surface.js"></script>
-    <script type="text/javascript" src="../src/fx/WebRTCSocket.js"></script>
-    <script type="text/javascript" src="../src/fx/Workerize.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/ALabel.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button2D.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Button3D.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Form.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/HtmlDoc.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/Image.js"></script>
-    <script type="text/javascript" src="../src/fx/controls/VUMeter.js"></script>
-    <script type="text/javascript" src="../src/fx/input/FPSInput.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Gamepad.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Keyboard.js"></script>
-    <script type="text/javascript" src="../src/fx/input/LeapMotion.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Location.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Motion.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Mouse.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Speech.js"></script>
-    <script type="text/javascript" src="../src/fx/input/Touch.js"></script>
-    <script type="text/javascript" src="../src/fx/input/VR.js"></script>
-    <script type="text/javascript" src="../src/fx/network/AudioChannel.js"></script>
-    <script type="text/javascript" src="../src/fx/network/DataChannel.js"></script>
-    <script type="text/javascript" src="../src/fx/network/Manager.js"></script>
-    <script type="text/javascript" src="../src/fx/network/RemoteUser.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Audio3D.js"></script>
-    <script type="text/javascript" src="../src/fx/output/HapticGlove.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Music.js"></script>
-    <script type="text/javascript" src="../src/fx/output/Speech.js"></script>
-    <script type="text/javascript" src="../src/fx/text/CodePage.js"></script>
-    <script type="text/javascript" src="../src/fx/text/CommandPack.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Cursor.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Grammar.js"></script>
-    <script type="text/javascript" src="../src/fx/text/OperatingSystem.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Point.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Rectangle.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Rule.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Size.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Terminal.js"></script>
-    <script type="text/javascript" src="../src/fx/text/Token.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/DE_QWERTZ.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/EN_UKX.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/EN_US.js"></script>
-    <script type="text/javascript" src="../src/fx/text/code_pages/FR_AZERTY.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/BasicTextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/TextEditor.js"></script>
-    <script type="text/javascript" src="../src/fx/text/command_packs/TextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/PlainText.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/TextBox.js"></script>
-    <script type="text/javascript" src="../src/fx/text/controls/TextInput.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/Basic.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/JavaScript.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/PlainText.js"></script>
-    <script type="text/javascript" src="../src/fx/text/grammars/TestResults.js"></script>
-    <script type="text/javascript" src="../src/fx/text/operating_systems/OSX.js"></script>
-    <script type="text/javascript" src="../src/fx/text/operating_systems/Windows.js"></script>
-    <script type="text/javascript" src="../src/fx/text/themes/Dark.js"></script>
-    <script type="text/javascript" src="../src/fx/text/themes/Default.js"></script>
-    <script type="text/javascript" src="../src/three-ext/Matrix4.prototype.toString.js"></script>
-    <script type="text/javascript" src="../src/three-ext/Object3D.prototype.addToBrowserEnvironment.js"></script>
-    <script type="text/javascript" src="../src/three-ext/Quaternion.prototype.toString.js"></script>
-    <script type="text/javascript" src="../src/three-ext/Vector3.prototype.toString.js"></script>
-    <script type="text/javascript" src="../src/x/LoginForm.js"></script>
-    <script type="text/javascript" src="../src/x/SignupForm.js"></script><!-- end withFramework.jade head append -->
+    <title>Primrose VR: WebVR Application Framework Documentation</title><!-- end detailPage.pug title block --><!-- end main.pug title block -->
+    <link type="text/css" rel="stylesheet" href="../doc/style.css">
     <script type="text/javascript" src="../ga.js"></script>
   </head>
   <body>
@@ -166,8 +36,8 @@
         </ul>
       </nav>
       <h1>Community</h1>
-    </header><!-- start main.jade banner block --><!-- end main.jade banner block -->
-<!-- start main.jade main block -->
+    </header><!-- start main.pug banner block --><!-- end main.pug banner block -->
+<!-- start main.pug main block -->
     <main>
       <h1>PrimroseVR</h1>
       <ul>
@@ -183,10 +53,10 @@
         <li><a href="https://webvr-slack.herokuapp.com/" target="_blank">WebVR Community Slack Channel</a>&nbsp;- this is where all the up-to-the-minute news on WebVR is discussed.</li>
         <li><a href="https://www.reddit.com/r/webvr" target="_blank">WebVR Subreddit</a>&nbsp;- this serves as the unofficial community forum for discussing all things WebVR.</li>
       </ul>
-    </main><!-- end main.jade main block -->
-<!-- start main.jade footer block -->
+    </main><!-- end main.pug main block -->
+<!-- start main.pug footer block -->
     <footer>
       <div id="footerWrapper"><a href="../doc/readme.html">About</a><a href="../doc/license.html">License</a><a href="../doc/changelog.html">Changelog</a><a href="https://notiontheory.typeform.com/to/QzZmAD" target="_blank">Slack</a><a class="small icon github" href="https://www.github.com/NotionTheory/Primrose" target="_blank">&nbsp;</a><a class="small icon twitter" href="https://www.twitter.com/Primrose_VR" target="_blank">&nbsp;</a><a href="http://www.notiontheory.com/team" target="_blank" style="color:#ec2471">Made (with love) by NotionTheory</a></div>
-    </footer><!-- end main.jade footer block -->
+    </footer><!-- end main.pug footer block -->
   </body>
 </html>

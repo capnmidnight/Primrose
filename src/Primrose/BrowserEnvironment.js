@@ -1,9 +1,5 @@
 "use strict";
 
-if (typeof THREE === "undefined") {
-  return function () {};
-}
-
 var MILLISECONDS_TO_SECONDS = 0.001;
 
 pliny.class({
