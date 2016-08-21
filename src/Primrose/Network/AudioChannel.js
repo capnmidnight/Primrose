@@ -1,6 +1,6 @@
 "use strict";
 
-const ENABLE_OPUS_HACK = true;
+const ENABLE_OPUS_HACK = false;
 
 if (!navigator.mediaDevices) {
   navigator.mediaDevices = {};
@@ -87,8 +87,6 @@ var preferOpus = (function () {
   return preferOpus;
 })();
 
-let INSTANCE_COUNT = 0;
-
 pliny.class({
   parent: "Primrose.Network",
     name: "AudioChannel",
@@ -118,8 +116,8 @@ pliny.class({
 });
 class AudioChannel extends Primrose.WebRTCSocket {
   constructor(extraIceServers, proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+    console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
     super(extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond);
-
     pliny.property({
       parent: "Primrose.Network.AudioChannel",
       name: "outAudio",
@@ -137,6 +135,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
       description: "An audio channel from the remote user to the local user."
     });
     this.inAudio = null;
+    this.startTimeout();
   }
 
   issueRequest() {

@@ -150,4 +150,5 @@ function authSucceeded() {
   document.cookie = "user=" + getUserName() +
   "\nroom=" + getRoomName();
   env.connect(socket, ctrls.userName.value);
+  document.title = getUserName() + " in " + getRoomName();
 }
