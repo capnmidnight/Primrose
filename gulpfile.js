@@ -18,6 +18,7 @@ var gulp = require("gulp"),
     "node_modules/three/examples/js/loaders/OBJLoader.js",
     "node_modules/three/examples/js/loaders/MTLLoader.js",
     "node_modules/three/examples/js/loaders/FBXLoader.js",
+    "node_modules/bare-bones-logger/bare-bones-logger.js",
     "namegen.js"
   ],
   totFiles = depFiles.concat(jsFiles),
