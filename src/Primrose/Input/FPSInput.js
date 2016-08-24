@@ -155,7 +155,8 @@ class FPSInput {
       var padID = Primrose.Input.Gamepad.ID(pad),
         isMotion = padID.indexOf("Vive") === 0,
         padCommands = null,
-        controllerNumber = 0;
+        controllerNumber = 0,
+        mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
         if (isMotion) {
@@ -174,7 +175,7 @@ class FPSInput {
           };
 
           for (var i = 0; i < this.managers.length; ++i) {
-            var mgr = this.managers[i];
+            mgr = this.managers[i];
             if (mgr.currentPad && mgr.currentPad.id === pad.id) {
               ++controllerNumber;
             }
@@ -218,7 +219,7 @@ class FPSInput {
           };
         }
 
-        var mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
+        mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
         this.add(mgr);
 
         if (isMotion) {
@@ -304,6 +305,7 @@ class FPSInput {
   }
 
   update(dt) {
+    var i;
     this.Keyboard.enabled = this.Touch.enabled = this.Mouse.enabled = !this.hasMotionControllers;
     if (this.Gamepad_0) {
       this.Gamepad_0.enabled = !this.hasMotionControllers;
@@ -311,7 +313,7 @@ class FPSInput {
 
     var hadGamepad = this.hasGamepad;
     Primrose.Input.Gamepad.poll();
-    for (var i = 0; i < this.managers.length; ++i) {
+    for (i = 0; i < this.managers.length; ++i) {
       this.managers[i].update(dt);
     }
     if (!hadGamepad && this.hasGamepad) {
@@ -323,11 +325,11 @@ class FPSInput {
     // update the motionDevices
     this.stage.updateMatrix();
     this.matrix.multiplyMatrices(this.stage.matrix, this.VR.stage.matrix);
-    for (var i = 0; i < this.motionDevices.length; ++i) {
+    for (i = 0; i < this.motionDevices.length; ++i) {
       this.motionDevices[i].updateStage(this.matrix);
     }
 
-    for (var i = 0; i < this.pointers.length; ++i) {
+    for (i = 0; i < this.pointers.length; ++i) {
       this.pointers[i].update();
     }
 
