@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   name: "PIXEL_SCALES",
   description: "Scaling factors for changing the resolution of the display when the render quality level changes."

@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   parent: "Primrose.HTTP",
   name: "del",

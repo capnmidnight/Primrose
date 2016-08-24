@@ -1,5 +1,3 @@
-"use strict";
-
 var SCROLL_SCALE = isFirefox ? 3 : 100,
   COUNTER = 0,
   OFFSET = 5;

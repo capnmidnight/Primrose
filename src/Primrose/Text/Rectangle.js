@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose.Text",
     name: "Rectangle",

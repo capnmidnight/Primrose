@@ -1,4 +1,3 @@
-"use strict";
 pliny.function({
   parent: "Primrose.Random",
   name: "item",

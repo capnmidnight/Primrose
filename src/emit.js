@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "emit",
   description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",

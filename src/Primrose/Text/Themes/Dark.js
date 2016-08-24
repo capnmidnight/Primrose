@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.record({
   parent: "Primrose.Text.Themes",
   name: "Dark",

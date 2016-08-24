@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   name: "InsideSphereGeometry",
     parameters: [{
@@ -42,8 +40,6 @@ InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
 });
 
 function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-  "use strict";
-
   THREE.Geometry.call(this);
 
   this.type = 'InsideSphereGeometry';

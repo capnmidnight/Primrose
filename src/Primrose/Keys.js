@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.enumeration({
   parent: "Primrose",
   name: "Keys",

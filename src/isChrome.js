@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   name: "isChrome",
   type: "Boolean",

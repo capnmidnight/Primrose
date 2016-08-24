@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "shell",
   parameters: [{

@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.namespace({
   name: "Controls",
   parent: "Primrose",

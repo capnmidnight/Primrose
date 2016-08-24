@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "cache",
   description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",

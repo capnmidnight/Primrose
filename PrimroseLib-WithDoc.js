@@ -3,6 +3,47 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+  pliny.class({
+    name: "InsideSphereGeometry",
+    parameters: [{
+      name: "radius",
+      type: "Number",
+      description: "How far the sphere should extend away from a center point."
+    }, {
+      name: "widthSegments",
+      type: "Number",
+      description: "The number of faces wide in which to slice the geometry."
+    }, {
+      name: "heightSegments",
+      type: "Number",
+      description: "The number of faces tall in which to slice the geometry."
+    }, {
+      name: "phiStart",
+      type: "Number",
+      description: "The angle in radians around the Y-axis at which the sphere starts."
+    }, {
+      name: "phiLength",
+      type: "Number",
+      description: "The change of angle in radians around the Y-axis to which the sphere ends."
+    }, {
+      name: "thetaStart",
+      type: "Number",
+      description: "The angle in radians around the Z-axis at which the sphere starts."
+    }, {
+      name: "thetaLength",
+      type: "Number",
+      description: "The change of angle in radians around the Z-axis to which the sphere ends."
+    }],
+    description: "The InsideSphereGeometry is basically an inside-out Sphere. Or\n\
+more accurately, it's a Sphere where the face winding order is reversed, so that\n\
+textures appear on the inside of the sphere, rather than the outside. I know, that's\n\
+note exactly helpful.\n\
+\n\
+Say you want a to model the sky as a sphere, or the inside of a helmet. You don't\n\
+care anything about the outside of this sphere, only the inside. You would use\n\
+InsideSphereGeometry in this case. Or its alias, [`shell()`](#shell)."
+  });
+
   function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
     THREE.Geometry.call(this);
 
@@ -126,6 +167,10 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+  pliny.value({
+    name: "PIXEL_SCALES",
+    description: "Scaling factors for changing the resolution of the display when the render quality level changes."
+  });
   var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
   // end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +197,10 @@
    * You should have received a copy of the GNU General Public License
    * along with this program.  If not, see <http://www.gnu.org/licenses/>.
    */
+  pliny.namespace({
+    name: "Primrose",
+    description: "Primrose helps you make VR applications for web browsers as easy as making other types of interactive web pages.\n\nThis top-level namespace contains classes for manipulating and viewing 3D environments."
+  });
   var Primrose = {};
   // end D:\Documents\VR\Primrose\src\Primrose.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +211,10 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Quality.js
+  pliny.enumeration({
+    name: "Quality",
+    description: "Graphics quality settings."
+  });
   var Quality = {
     NONE: 0,
     VERYLOW: 1,
@@ -179,6 +232,36 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\axis.js
+  pliny.function({
+    name: "axis",
+    description: "Creates a set of reference axes, with X as red, Y as green, and Z as blue.",
+    parameters: [{
+      name: "length",
+      type: "Number",
+      description: "The length each axis should be in its own axis."
+    }, {
+      name: "width",
+      type: "Number",
+      description: "The size each axis should be in the other axes."
+    }],
+    returns: "THREE.Object3D",
+    examples: [{
+      name: "Basic usage",
+      description: "To create a fixed point of reference in the scene, use the `axis()` function.:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var scene = new THREE.Scene()\n\
+    // This set of axis bars will each be 1 meter long and 5cm wide.\n\
+    // They'll be centered on each other, so the individual halves\n\
+    // of the bars will only extend half a meter.\n\
+    scene.add(axis(1, 0.05));\n\
+\n\
+The result should appear as:\n\
+\n\
+![screenshot](images/axis.png)"
+    }]
+  });
+
   function axis(length, width) {
     var center = hub();
     put(brick(0xff0000, length, width, width)).on(center);
@@ -195,6 +278,41 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\box.js
+  pliny.function({
+    name: "box",
+    description: "A shortcut function for the THREE.BoxGeometry class. Creates a \"rectilinear prism\", i.e. the general class of rectangular objects that includes cubes.",
+    parameters: [{
+      name: "width",
+      type: "Number",
+      description: "The size of the box in the X dimension."
+    }, {
+      name: "height",
+      type: "Number",
+      optional: true,
+      description: "The size of the box in the Y dimension. If height is not provided, it will be set to the width parameter."
+    }, {
+      name: "length",
+      type: "Number",
+      optional: true,
+      description: "The size of the box in the Z dimension. If length is not provided, it will be set to the width parameter."
+    }],
+    returns: "THREE.BoxGeometry",
+    examples: [{
+      name: "Basic usage",
+      description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple box geometry object that you can then add a material to create a mesh:\n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var geom = box(1, 2, 3),\n\
+      mesh = textured(geom, 0xff0000);\n\
+    put(mesh)\n\
+      .on(scene)\n\
+      .at(-2, 1, -5);\n\
+\n\
+It should look something like this:\n\
+<img src=\"images/box.jpg\">"
+    }]
+  });
+
   function box(width, height, length) {
     if (height === undefined) {
       height = width;
@@ -215,6 +333,49 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\brick.js
+  pliny.function({
+    name: "brick",
+    description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",
+    parameters: [{
+      name: "txt",
+      type: "Texture description",
+      description: "The texture to apply to the box."
+    }, {
+      name: "width",
+      type: "Number",
+      optional: true,
+      description: "The size of the box in the X dimension.",
+      default: 1
+    }, {
+      name: "height",
+      type: "Number",
+      optional: true,
+      description: "The size of the box in the Y dimension.",
+      default: 1
+    }, {
+      name: "length",
+      type: "Number",
+      optional: true,
+      description: "The size of the box in the Z dimension.",
+      default: 1
+    }],
+    returns: "THREE.Mesh",
+    examples: [{
+      name: "Basic usage",
+      description: "To create a textured brick with the `brick()` function.:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var mesh = brick(DECK, 1, 2, 3);\n\
+    put(mesh)\n\
+      .on(scene)\n\
+      .at(-2, 1, -5);\n\
+\n\
+The result should appear as:\n\
+\n\
+![screenshot](images/brick.jpg)"
+    }]
+  });
+
   function brick(txt, w, h, l) {
     return textured(box(w || 1, h || 1, l || 1), txt, {
       txtRepeatS: w,
@@ -230,6 +391,38 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\cache.js
+  pliny.function({
+    name: "cache",
+    description: "Looks for the hashed name of the object in the object cache, and if it exists, returns it. If it doesn't exist, calls the makeObject function, using the return results to set the object in the cache, and returning it. In other words, a simple sort of memoization.",
+    parameters: [{
+      name: "hash",
+      type: "String",
+      description: "The hash key for the object to cache or retrieve."
+    }, {
+      name: "makeObject",
+      type: "Function",
+      description: "A function that creates the object we want, if it doesn't already exist in the cache."
+    }],
+    returns: "Object",
+    examples: [{
+      name: "Basic usage",
+      description: "Using the `cache()` function lets you create an object once and retrieve it back again with the same function call.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    function makeCube(i){\n\
+      return cache(\"cubeGeom\" + i, function(){\n\
+        return new THREE.BoxGeometry(i, i, i);\n\
+      });\n\
+    }\n\
+    \n\
+    var a = makeCube(1),\n\
+        b = makeCube(2),\n\
+        c = makeCube(1);\n\
+    \n\
+    console.assert(a !== b);\n\
+    console.assert(a === c);"
+    }]
+  });
   var cache = function () {
     var _cache = {};
     return function (hash, makeObject) {
@@ -248,6 +441,29 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\clone.js
+  pliny.function({
+    name: "clone",
+    parameters: [{
+      name: "obj",
+      type: "Object",
+      description: "The object-literal to clone"
+    }],
+    description: "Creates a copy of a JavaScript object literal.",
+    examples: [{
+      name: "Create a copy of an object.",
+      description: "To create a copy of an object that can be modified without modifying the original object, use the `clone()` function:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var objA = { x: 1, y: 2 },\n\
+        objB = clone(objA);\n\
+    console.assert(objA !== objB);\n\
+    console.assert(objA.x === objB.x);\n\
+    console.assert(objA.y === objB.y);\n\
+    objB.x = 3;\n\
+    console.assert(objA.x !== objB.x);"
+    }]
+  });
+
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
@@ -260,6 +476,49 @@
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\cloud.js
+  pliny.function({
+    name: "cloud",
+    description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",
+    parameters: [{
+      name: "verts",
+      type: "Array",
+      description: "An array of `THREE.Vector3`s to turn into a `THREE.Points` object."
+    }, {
+      name: "c",
+      type: "Number",
+      description: "A hexadecimal color value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
+    }, {
+      name: "s",
+      type: "Number",
+      description: "A numeric size value to use when creating the `THREE.PointsMaterial` to go with the point cloud."
+    }],
+    returns: "THREE.Points",
+    examples: [{
+      name: "Create randomized \"dust\".",
+      description: "Creating a cloud is pretty simple.\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var verts = [],\n\
+        R = Primrose.Random.number,\n\
+        WIDTH = 10,\n\
+        HEIGHT = 10,\n\
+        DEPTH = 10;\n\
+    \n\
+    for (var i = 0; i< 5000; ++i) {\n\
+      verts.push(v3(R(-0.5 * WIDTH, 0.5 * WIDTH),\n\
+                    R(-0.5 * HEIGHT, 0.5 * HEIGHT),\n\
+                    R(-0.5 * DEPTH, 0.5 * DEPTH)));\n\
+    }\n\
+    put(cloud(verts, 0x7f7f7f 0.05))\n\
+      .on(scene)\n\
+      .at(WIDTH / 2 , HEIGHT / 2, DEPTH / 2);\n\
+\n\
+The results should look like this:\n\
+\n\
+<img src=\"images/cloud.jpg\">"
+    }]
+  });
+
   function cloud(verts, c, s) {
     var geom = new THREE.Geometry();
     for (var i = 0; i < verts.length; ++i) {
@@ -284,6 +543,54 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\copyObject.js
+  pliny.function({
+    name: "copyObject",
+    description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",
+    parameters: [{
+      name: "dest",
+      type: "Object",
+      description: "The object to which to copy fields."
+    }, {
+      name: "source",
+      type: "Object",
+      description: "The object from which to copy fields."
+    }, {
+      name: "shallow",
+      type: "Boolean",
+      optional: true,
+      default: "false",
+      description: "Pass true to avoid recursing through object and only perform a shallow clone."
+    }],
+    returns: "Object",
+    examples: [{
+      name: "Copy an object.",
+      description: "Blah blah blah\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var dest = {\n\
+        a: 1,\n\
+        b: 2,\n\
+        c: {\n\
+          d: 3\n\
+        }\n\
+      },\n\
+      src = {\n\
+        b: 5,\n\
+        c: {\n\
+          e: 6\n\
+        },\n\
+        f: 7\n\
+      };\n\
+    \n\
+    copyObject(dest, src);\n\
+    console.assert(dest.a === 1);\n\
+    console.assert(dest.b === 5);\n\
+    console.assert(dest.c.d === 3);\n\
+    console.assert(dest.c.e === 6);\n\
+    console.assert(dest.f === 7);"
+    }]
+  });
+
   function copyObject(dest, source, shallow) {
     var stack = [{
       dest: dest,
@@ -318,6 +625,75 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\cylinder.js
+  pliny.function({
+    name: "cylinder",
+    description: "Shorthand functino for creating a new THREE.CylinderGeometry object.",
+    parameters: [{
+      name: "rT",
+      type: "Number",
+      optional: true,
+      description: "The radius at the top of the cylinder.",
+      default: 0.5
+    }, {
+      name: "rB",
+      type: "Number",
+      optional: true,
+      description: "The radius at the bottom of the cylinder.",
+      default: 0.5
+    }, {
+      name: "height",
+      type: "Number",
+      optional: true,
+      description: "The height of the cylinder.",
+      default: 1
+    }, {
+      name: "rS",
+      type: "Number",
+      optional: true,
+      description: "The number of sides on the cylinder.",
+      default: 8
+    }, {
+      name: "hS",
+      type: "Number",
+      optional: true,
+      description: "The number of slices along the height of the cylinder.",
+      default: 1
+    }, {
+      name: "openEnded",
+      type: "Boolean",
+      optional: true,
+      description: "Whether or not to leave the end of the cylinder open, thereby making a pipe.",
+      default: false
+    }, {
+      name: "thetaStart",
+      type: "Number",
+      optional: true,
+      description: "The angle at which to start sweeping the cylinder.",
+      default: 0
+    }, {
+      name: "thetaEnd",
+      type: "Number",
+      optional: true,
+      description: "The angle at which to end sweeping the cylinder.",
+      default: 2 * Math.PI
+    }],
+    returns: "THREE.CylinderGeometry",
+    examples: [{
+      name: "Basic usage",
+      description: "Three.js separates geometry from materials, so you can create shared materials and geometry that recombine in different ways. To create a simple cylinder geometry object that you can then add a material to create a mesh: \n\
+  \n\
+    grammar(\"JavaScript\");\n\
+    var geom = cylinder(),\n\
+      mesh = textured(geom, 0xff0000);\n\
+    put(mesh)\n\
+      .on(scene)\n\
+      .at(-2, 1, -5);\n\
+\n\
+It should look something like this:\n\
+<img src=\"images/cylinder.jpg\">"
+    }]
+  });
+
   function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
     if (rT === undefined) {
       rT = 0.5;
@@ -341,6 +717,27 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\deleteSetting.js
+  pliny.function({
+    name: "deleteSetting",
+    parameters: [{
+      name: " name",
+      type: "string",
+      description: "The name of the setting to delete."
+    }],
+    description: "Removes an object from localStorage",
+    examples: [{
+      name: "Basic usage",
+      description: "\
+\n\
+    grammar(\"JavaScript\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");\n\
+    setSetting(\"A\", \"modified-A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"modified-A\");\n\
+    deleteSetting(\"A\");\n\
+    console.assert(getSetting(\"A\", \"default-A\") === \"default-A\");"
+    }]
+  });
+
   function deleteSetting(name) {
     if (window.localStorage) {
       window.localStorage.removeItem(name);
@@ -355,6 +752,45 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\emit.js
+  pliny.function({
+    name: "emit",
+    description: "A shorthand function for triggering events. Can be `.call()`ed on objects that have a `listeners` property.",
+    parameters: [{
+      name: "evt",
+      type: "String",
+      description: "The name of the event to trigger."
+    }, {
+      name: "args",
+      type: "Array",
+      optional: true,
+      description: "Arguments to pass to the event."
+    }],
+    examples: [{
+      name: "Basic usage",
+      description: "    grammar(\"JavaScript\");\n\
+    function MyClass(){\n\
+      this.listeners = {\n\
+        myevent: []\n\
+      };\n\
+    }\n\
+    \n\
+    MyClass.prototype.addEventListener = function(evt, thunk){\n\
+      this.listeners[evt].push(thunk);\n\
+    };\n\
+    \n\
+    MyClass.prototype.execute = function(){\n\
+      emit.call(this, \"myevent\", { a: 1, b: 2});\n\
+    };\n\
+    \n\
+    var obj = new MyClass();\n\
+    obj.addEventListener(\"myevent\", function(evt){\n\
+      console.assert(evt.a === 1);\n\
+      console.assert(evt.b === 2);\n\
+    });\n\
+    obj.execute();"
+    }]
+  });
+
   function emit(evt, args) {
     var handlers = this.listeners && this.listeners[evt] || this._listeners && this._listeners[evt];
     for (var i = 0; handlers && i < handlers.length; ++i) {
@@ -370,6 +806,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\findProperty.js
+  pliny.function({
+    name: "findProperty",
+    description: "Searches an object for a property that might go by different names in different browsers.",
+    parameters: [{
+      name: "elem",
+      type: "Object",
+      description: "The object to search."
+    }, {
+      name: "arr",
+      type: "Array",
+      description: "An array of strings that lists the possible values for the property name."
+    }],
+    returns: "String",
+    examples: [{
+      name: "Find the right name of the fullScree element.",
+      description: "    grammar(\"JavaScript\");\n\
+    var elementName = findProperty(document, [\"fullscreenElement\", \"mozFullScreenElement\", \"webkitFullscreenElement\", \"msFullscreenElement\"]);\n\
+    console.assert(!isFirefox || elementName === \"mozFullScreenElement\");\n\
+    console.assert(!isChrome || elementName === \"webkitFullscreenElement\");\n\
+    console.assert(!isIE || elementName === \"msFullscreenElement\");"
+    }]
+  });
+
   function findProperty(elem, arr) {
     for (var i = 0; i < arr.length; ++i) {
       if (elem[arr[i]] !== undefined) {
@@ -388,6 +847,39 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\getSetting.js
+  pliny.function({
+    name: "getSetting",
+    parameters: [{
+      name: " name",
+      type: "string",
+      description: "The name of the setting to read."
+    }, {
+      name: "defValue",
+      type: "Object",
+      description: "The default value to return, if the setting is not present in `localStorage`."
+    }],
+    returns: "The Object stored in `localStorage` for the given name, or the default value provided if the setting doesn't exist in `localStorage`.",
+    description: "Retrieves named values out of `localStorage`. The values should\n\
+be valid for passing to `JSON.parse()`. A default value can be specified in the\n\
+function call that should be returned if the value does not exist, or causes an\n\
+error in parsing. Typically, you'd call this function at page-load time after having\n\
+called the [`setSetting()`](#setSetting) function during a previous page session.",
+    examples: [{
+      name: "Basic usage",
+      description: "Assuming a text input element with the id `text1`, the following\n\
+code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"
+    }]
+  });
+
   function getSetting(name, defValue) {
     if (window.localStorage) {
       var val = window.localStorage.getItem(name);
@@ -412,6 +904,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\hub.js
+  pliny.function({
+    name: "hub",
+    description: "Calling `hub()` is a short-hand for creating a new `THREE.Object3D`. This is useful in live-coding examples to keep code terse and easy to write. It also polyfills in a method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the hub using `appendChild()` such that they may be pickable in the scene.",
+    examples: [{
+      name: "Basic usage",
+      description: "\n\
+    //these two lines of code perform the same task.\n\
+    var base1 = new THREE.Object3D();\n\
+    var base2 = hub();"
+    }]
+  });
+
   function hub() {
     return new THREE.Object3D();
   }
@@ -436,6 +940,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isChrome.js
+  pliny.value({
+    name: "isChrome",
+    type: "Boolean",
+    description: "Flag indicating the browser is currently calling itself Chrome\n\
+or Chromium. Chromium was one of the first browsers to implement virtual reality\n\
+features directly in the browser, thanks to the work of Brandon \"Toji\" Jones."
+  });
   var isChrome = !!window.chrome && !window.isOpera;
   // end D:\Documents\VR\Primrose\src\isChrome.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -446,6 +957,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isFirefox.js
+  pliny.value({
+    name: "isFirefox",
+    type: "Boolean",
+    description: "Flag indicating the browser is currently calling itself Firefox.\n\
+Firefox was one of the first browsers to implement virtual reality features directly\n\
+in the browser, thanks to the work of the MozVR team."
+  });
   var isFirefox = typeof window.InstallTrigger !== 'undefined';
   // end D:\Documents\VR\Primrose\src\isFirefox.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -456,6 +974,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isGearVR.js
+  pliny.value({
+    name: "isGearVR",
+    type: "Boolean",
+    description: "Flag indicating the application is running on the Samsung Gear VR in the Samsung Internet app."
+  });
   var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
   // end D:\Documents\VR\Primrose\src\isGearVR.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -466,6 +989,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isIE.js
+  pliny.value({
+    name: "isIE",
+    type: "Boolean",
+    description: "Flag indicating the browser is currently calling itself Internet\n\
+Explorer. Once the bane of every web developer's existence, it has since passed\n\
+the torch on to Safari in all of its many useless incarnations."
+  });
   var isIE = /*@cc_on!@*/false || !!document.documentMode;
   // end D:\Documents\VR\Primrose\src\isIE.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -476,6 +1006,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isInIFrame.js
+  pliny.value({
+    name: "isHomeScreen",
+    type: "Boolean",
+    description: "Flag indicating the script is currently running in an IFRAME or not."
+  });
   var isInIFrame = window.self !== window.top;
   // end D:\Documents\VR\Primrose\src\isInIFrame.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -486,6 +1021,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isMobile.js
+  pliny.value({
+    name: "isMobile",
+    type: "Boolean",
+    description: "Flag indicating the current system is a recognized \"mobile\"\n\
+device, usually possessing a motion sensor."
+  });
   var isMobile = function (a) {
     return (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substring(0, 4))
     );
@@ -499,6 +1040,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isOSX.js
+  pliny.value({
+    name: "isOSX",
+    type: "Boolean",
+    description: "Flag indicating the current system is a computer running the Apple\n\
+OSX operating system. Useful for changing keyboard shortcuts to support Apple's\n\
+idiosynchratic, concensus-defying keyboard shortcuts."
+  });
   var isOSX = /Macintosh/.test(navigator.userAgent || "");
   // end D:\Documents\VR\Primrose\src\isOSX.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -509,6 +1057,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isOpera.js
+  pliny.value({
+    name: "isOpera",
+    type: "Boolean",
+    description: "Flag indicating the browser is currently calling itself Opera.\n\
+Opera is a substandard browser that lags adoption of cutting edge web technologies,\n\
+so you are not likely to need this flag if you are using Primrose, other than to\n\
+cajole users into downloading a more advanced browser such as Mozilla Firefox or\n\
+Google Chrome."
+  });
   var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
   // end D:\Documents\VR\Primrose\src\isOpera.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -519,6 +1076,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isSafari.js
+  pliny.value({
+    name: "isSafari",
+    type: "Boolean",
+    description: "Flag indicating the browser is currently calling itself Safari.\n\
+Safari is an overly opinionated browser that thinks users should be protected from\n\
+themselves in such a way as to prevent users from gaining access to the latest in\n\
+cutting-edge web technologies. Essentially, it was replaced Microsoft Internet\n\
+Explorer as the Internet Explorer of the web."
+  });
   var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
   // end D:\Documents\VR\Primrose\src\isSafari.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -529,6 +1095,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isWebKit.js
+  pliny.value({
+    name: "isWebKit",
+    type: "Boolean",
+    description: "Flag indicating the browser is one of Chrome, Safari, or Opera.\n\
+WebKit browsers have certain issues in common that can be treated together, like\n\
+a common basis for orientation events."
+  });
   var isWebKit = !/iP(hone|od|ad)/.test(navigator.userAgent || "") || isOpera || isChrome;
   // end D:\Documents\VR\Primrose\src\isWebKit.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -539,6 +1112,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isWindows.js
+  pliny.value({
+    name: "isWindows",
+    type: "Boolean",
+    description: "Flag indicating the current system is a computer running one of\n\
+the Microsoft Windows operating systems. We have not yet found a use for this flag."
+  });
   var isWindows = /Windows/.test(navigator.userAgent || "");
   // end D:\Documents\VR\Primrose\src\isWindows.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -549,6 +1128,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\isiOS.js
+  pliny.value({
+    name: "isiOS",
+    type: "Boolean",
+    description: "Flag indicating the current system is a device running the Apple\n\
+iOS operating system: iPad, iPod Touch, iPhone. Useful for invoking optional code\n\
+paths necessary to deal with deficiencies in Apple's implementation of web standards."
+  });
   var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
   // end D:\Documents\VR\Primrose\src\isiOS.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -559,6 +1145,42 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\light.js
+  pliny.function({
+    name: "light",
+    description: "Shortcut function for creating a new THREE.PointLight object.",
+    parameters: [{
+      name: "color",
+      type: "Number",
+      optional: true,
+      description: "The RGB color value for the light.",
+      default: "0xffffff"
+    }, {
+      name: "intensity",
+      type: "Number",
+      optional: true,
+      description: "The strength of the light.",
+      default: 1
+    }, {
+      name: "distance",
+      type: "Number",
+      optional: true,
+      description: "The distance the light will shine.",
+      default: 0
+    }, {
+      name: "decay",
+      type: "Number",
+      optional: true,
+      description: "How much the light dims over distance.",
+      default: 1
+    }],
+    returns: "THREE.PointLight",
+    examples: [{
+      name: "Basic usage",
+      description: "    grammar(\"JavaScript\");\n\
+    put(light(0xffff00)).on(scene).at(0, 100, 0);"
+    }]
+  });
+
   function light(color, intensity, distance, decay) {
     return new THREE.PointLight(color, intensity, distance, decay);
   }
@@ -571,6 +1193,42 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\patch.js
+  pliny.function({
+    name: "patch",
+    parameters: [{
+      name: "obj1",
+      type: "Object",
+      description: "The object to which to copy values that don't yet exist in the object."
+    }, {
+      name: "obj2",
+      type: "Object",
+      description: "The object from which to copy values to obj1, if obj1 does not already have a value in place."
+    }],
+    returns: "Object - the obj1 parameter, with the values copied from obj2",
+    description: "Copies values into Object A from Object B, skipping any value names that already exist in Object A.",
+    examples: [{
+      name: "Set default values.",
+      description: "The `patch` function is intended to copy default values onto a user-supplied 'options' object, without clobbering the values they have provided.\n\
+    var obj1 = {\n\
+      a: 1,\n\
+      b: 2,\n\
+      c: 3\n\
+    },\n\
+      obj2 = {\n\
+      c: 4,\n\
+      d: 5,\n\
+      e: 6\n\
+    },\n\
+      obj3 = patch(obj1, obj2);\n\
+    console.assert(obj1 === obj3); // the returned object is exactly the same object as the first parameter.\n\
+    console.assert(obj3.a === 1); // the `a` property did not exist in obj2\n\
+    console.assert(obj3.b === 2); // the `b` property did not exist in obj2\n\
+    console.assert(obj3.c === 3); // the `c` property existed in obj2, but it already existed in obj1, so it doesn't get overwritten\n\
+    console.assert(obj3.d === 5); // the `d` property did not exist in obj1\n\
+    console.assert(obj3.e === 6); // the `e` property did not exist in obj1"
+    }]
+  });
+
   function patch(obj1, obj2) {
     obj1 = obj1 || {};
     for (var k in obj2) {
@@ -589,6 +1247,31 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\put.js
+  pliny.function({
+    name: "put",
+    description: "A literate interface for putting objects onto scenes with basic, common transformations. You call `put()` with an object, then have access to a series of methods that you can chain together, before receiving the object back again. This makes it possible to create objects in the parameter position of `put()` at the same time as declaring the variable that will hold it.\n\
+\n\
+* .on(scene) - the Primrose.Entity or THREE.Object3D on which to append the element.\n\
+* .at(x, y, z) - set the translation for the object.\n\
+* .rot(x, y, z) - set the rotation for the object.\n\
+* .scale(x, y, z) - set the scale for the object.\n\
+* .obj() - return the naked object, if not all of the transformations are desired.",
+    parameters: [{
+      name: "object",
+      type: "Object",
+      description: "The object to manipulate."
+    }],
+    returns: "Object",
+    examples: [{
+      name: "Put an object on a scene at a specific location.",
+      description: "    grammar(\"JavaScript\");\n\
+    var myCylinder = put(textured(cylinder(), 0x00ff00))\n\
+      .on(scene)\n\
+      .at(1, 2, 3)\n\
+      .obj();"
+    }]
+  });
+
   function put(object) {
     var box = {
       on: null,
@@ -656,6 +1339,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\quad.js
+  pliny.function({
+    name: "quad",
+    description: "| [under construction]"
+  });
+
   function quad(w, h, s, t) {
     if (h === undefined) {
       h = w;
@@ -673,6 +1361,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\range.js
+  pliny.function({
+    name: "range",
+    description: "| [under construction]"
+  });
+
   function range(n, m, s, t) {
     var n2 = s && n || 0,
         m2 = s && m || n,
@@ -691,6 +1384,42 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\readForm.js
+  pliny.function({
+    name: "readForm",
+    parameters: [{
+      name: "ctrls",
+      type: "Hash of Elements",
+      description: "An array of HTML form elements, aka INPUT, TEXTAREA, SELECT, etc."
+    }],
+    returns: "Object",
+    description: "Scans through an array of input elements and builds a state object that contains the values the input elements represent. Elements that do not have an ID attribute set, or have an attribute `data-skipcache` set, will not be included.",
+    examples: [{
+      name: "Basic usage",
+      description: "Assuming the following HTML form:\n\
+\n\
+    grammar(\"HTML\");\n\
+    <form>\n\
+      <input type=\"text\" id=\"txt\" value=\"hello\">\n\
+      <input type=\"number\" id=\"num\" value=\"5\">\n\
+    </form>\n\
+\n\
+##Code:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var ctrls = findEverything();\n\
+    ctrls.txt.value = \"world\";\n\
+    ctrls.num.value = \"6\"6;\n\
+    var state = readForm(ctrls);\n\
+    console.assert(state.txt === \"world\");\n\
+    console.assert(state.num === \"6\");\n\
+    state.txt = \"mars\";\n\
+    state.num = 55;\n\
+    writeForm(ctrls, state);\n\
+    console.assert(ctrls.txt.value === \"mars\");\n\
+    console.assert(ctrls.num.value === \"55\");"
+    }]
+  });
+
   function readForm(ctrls) {
     var state = {};
     if (ctrls) {
@@ -730,6 +1459,36 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\setSetting.js
+  pliny.function({
+    name: "setSetting",
+    parameters: [{
+      name: " name",
+      type: "string",
+      description: "The name of the setting to set."
+    }, {
+      name: "val",
+      type: "Object",
+      description: "The value to write. It should be useable as a parameter to `JSON.stringify()`."
+    }],
+    description: "Writes named values to `localStorage`. The values should be valid\n\
+for passing to `JSON.stringify()`. Typically, you'd call this function at page-unload\n\
+time, then call the [`getSetting()`](#getSetting) function during a subsequent page load.",
+    examples: [{
+      name: "Basic usage",
+      description: "Assuming a text input element with the id `text1`, the following\n\
+code should persist between reloads whatever the user writes in the text area:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var text1 = document.getElementById(\"text1\");\n\
+    document.addEventListener(\"unload\", function(){\n\
+      setSetting(\"text1-value\", text1.value);\n\
+    }, false);\n\
+    document.addEventListener(\"load\", function(){\n\
+      text1.value = getSetting(\"text1-value\", \"My default value!\");\n\
+    }, false);"
+    }]
+  });
+
   function setSetting(name, val) {
     if (window.localStorage && val) {
       try {
@@ -748,6 +1507,71 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\shell.js
+  pliny.function({
+    name: "shell",
+    parameters: [{
+      name: "radius",
+      type: "Number",
+      description: "How far the sphere should extend away from a center point."
+    }, {
+      name: "widthSegments",
+      type: "Number",
+      description: "The number of faces wide in which to slice the geometry."
+    }, {
+      name: "heightSegments",
+      type: "Number",
+      description: "The number of faces tall in which to slice the geometry."
+    }, {
+      name: "phi",
+      type: "Number",
+      optional: true,
+      description: "The angle in radians around the Y-axis of the sphere.",
+      default: "80 degrees."
+    }, {
+      name: "thetaStart",
+      type: "Number",
+      optional: true,
+      description: "The angle in radians around the Z-axis of the sphere.",
+      default: "48 degrees."
+    }],
+    description: "The shell is basically an inside-out sphere. Say you want a to model\n\
+the sky as a sphere, or the inside of a helmet. You don't care anything about the\n\
+outside of this sphere, only the inside. You would use InsideSphereGeometry in this\n\
+case. It is mostly an alias for [`InsideSphereGeometry`](#InsideSphereGeometry).",
+    examples: [{
+      name: "Create a sky sphere",
+      description: "To create a sphere that hovers around the user at a\n\
+far distance, showing a sky of some kind, you can use the `shell()` function in\n\
+combination with the [`textured()`](#textured) function. Assuming you have an image\n\
+file to use as the texture, execute code as such:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var sky = textured(\n\
+      shell(\n\
+          // The radius value should be less than your draw distance.\n\
+          1000,\n\
+          // The number of slices defines how smooth the sphere will be in the\n\
+          // horizontal direction. Think of it like lines of longitude.\n\
+          18,\n\
+          // The number of rings defines how smooth the sphere will be in the\n\
+          // vertical direction. Think of it like lines of latitude.\n\
+          9,\n\
+          // The phi angle is the number or radians around the 'belt' of the sphere\n\
+          // to sweep out the geometry. To make a full circle, you'll need 2 * PI\n\
+          // radians.\n\
+          Math.PI * 2,\n\
+          // The theta angle is the number of radians above and below the 'belt'\n\
+          // of the sphere to sweep out the geometry. Since the belt sweeps a full\n\
+          // 360 degrees, theta only needs to sweep a half circle, or PI radians.\n\
+          Math.PI ),\n\
+      // Specify the texture image next.\n\
+      \"skyTexture.jpg\",\n\
+      // Specify that the material should be shadeless, i.e. no shadows. This\n\
+      // works best for skymaps.\n\
+      {unshaded: true} );"
+    }]
+  });
+
   function shell(r, slices, rings, phi, theta) {
     var SLICE = 0.45;
     if (phi === undefined) {
@@ -771,6 +1595,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\sphere.js
+  pliny.function({
+    name: "sphere",
+    description: "| [under construction]"
+  });
+
   function sphere(r, slices, rings) {
     return cache("SphereGeometry(" + r + ", " + slices + ", " + rings + ")", function () {
       return new THREE.SphereGeometry(r, slices, rings);
@@ -799,6 +1628,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     });
   };
+
+  pliny.function({
+    name: "textured",
+    description: "| [under construction]"
+  });
 
   function textured(geometry, txt, options) {
     options = options || {};
@@ -959,6 +1793,34 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\v3.js
+  pliny.function({
+    name: "v3",
+    description: "A shortcut function for creating a new THREE.Vector3 object.",
+    parameters: [{
+      name: "x",
+      type: "Number",
+      description: "The X component of the vector"
+    }, {
+      name: "y",
+      type: "Number",
+      description: "The Y component of the vector"
+    }, {
+      name: "z",
+      type: "Number",
+      description: "The Z component of the vector"
+    }],
+    returns: "THREE.Vector3",
+    examples: [{
+      name: "Create a vector",
+      description: "    grammar(\"JavaScript\");\n\
+    var a = v3(1, 2, 3);\n\
+    console.assert(a.x === 1);\n\
+    console.assert(a.y === 2);\n\
+    console.assert(a.z === 3);\n\
+    console.assert(a.toArray().join(\", \") === \"1, 2, 3\");"
+    }]
+  });
+
   function v3(x, y, z) {
     return new THREE.Vector3(x, y, z);
   }
@@ -971,6 +1833,45 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\writeForm.js
+  pliny.function({
+    name: "writeForm",
+    parameters: [{
+      name: "ctrls",
+      type: "Hash of Elements",
+      description: "A hash-collection of HTML input elements that will have their values set."
+    }, {
+      name: "state",
+      type: "Hash object",
+      description: "The values that will be set on the form. Hash keys should match IDs of the elements in the `ctrls` parameter."
+    }],
+    description: "Writes out a full set of state values to an HTML input form, wherever keys in the `ctrls` parameter match keys in the `state` parameter.",
+    examples: [{
+      name: "Basic usage",
+      description: "Assuming the following HTML form:\n\
+\n\
+    grammar(\"HTML\");\n\
+    <form>\n\
+      <input type=\"text\" id=\"txt\" value=\"hello\">\n\
+      <input type=\"number\" id=\"num\" value=\"5\">\n\
+    </form>\n\
+\n\
+## Code:\n\
+\n\
+    grammar(\"JavaScript\");\n\
+    var ctrls = findEverything();\n\
+    ctrls.txt.value = \"world\";\n\
+    ctrls.num.value = \"6\"6;\n\
+    var state = readForm(ctrls);\n\
+    console.assert(state.txt === \"world\");\n\
+    console.assert(state.num === \"6\");\n\
+    state.txt = \"mars\";\n\
+    state.num = 55;\n\
+    writeForm(ctrls, state);\n\
+    console.assert(ctrls.txt.value === \"mars\");\n\
+    console.assert(ctrls.num.value === \"55\");"
+    }]
+  });
+
   function writeForm(ctrls, state) {
     if (state) {
       for (var name in ctrls) {
@@ -1049,6 +1950,78 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   // start D:\Documents\VR\Primrose\src\Primrose\Angle.js
   var DEG2RAD = Math.PI / 180,
       RAD2DEG = 180 / Math.PI;
+  pliny.class({
+    parent: "Primrose",
+    name: "Angle",
+    description: "The Angle class smooths out the jump from 360 to 0 degrees. It\n\
+keeps track of the previous state of angle values and keeps the change between\n\
+angle values to a maximum magnitude of 180 degrees, plus or minus. This allows for\n\
+smoother opperation as rotating past 360 degrees will not reset to 0, but continue\n\
+to 361 degrees and beyond, while rotating behind 0 degrees will not reset to 360\n\
+but continue to -1 and below.\n\
+\n\
+When instantiating, choose a value that is as close as you can guess will be your\n\
+initial sensor readings.\n\
+\n\
+This is particularly important for the 180 degrees, +- 10 degrees or so. If you\n\
+expect values to run back and forth over 180 degrees, then initialAngleInDegrees\n\
+should be set to 180. Otherwise, if your initial value is anything slightly larger\n\
+than 180, the correction will rotate the angle into negative degrees, e.g.:\n\
+* initialAngleInDegrees = 0\n\
+* first reading = 185\n\
+* updated degrees value = -175\n\
+\n\
+It also automatically performs degree-to-radian and radian-to-degree conversions.\n\
+For more information, see [Radian - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Radian).\n\
+\n\
+![Radians](https://upload.wikimedia.org/wikipedia/commons/4/4e/Circle_radians.gif)",
+    parameters: [{
+      name: "initialAngleInDegrees",
+      type: "Number",
+      description: "(Required) Specifies the initial context of the angle. Zero is not always the correct value."
+    }],
+    examples: [{
+      name: "Basic usage",
+      description: "To use the Angle class, create an instance of it with `new`, and modify the `degrees` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Angle(356);\n\
+  a.degrees += 5;\n\
+  console.log(a.degrees);\n\
+\n\
+## Results:\n\
+> 361"
+    }, {
+      name: "Convert degrees to radians",
+      description: "Create an instance of Primrose.Angle, modify the `degrees` property, and read the `radians` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Angle(10);\n\
+  a.degrees += 355;\n\
+  console.log(a.radians);\n\
+\n\
+## Results:\n\
+> 0.08726646259971647"
+    }, {
+      name: "Convert radians to degress",
+      description: "Create an instance of Primrose.Angle, modify the `radians` property, and read the `degrees` property.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Angle(0);\n\
+  a.radians += Math.PI / 2;\n\
+  console.log(a.degrees);\n\
+\n\
+## Results:\n\
+> 90"
+    }]
+  });
+
   function Angle(v) {
     if (typeof v !== "number") {
       throw new Error("Angle must be initialized with a number. Initial value was: " + v);
@@ -1059,6 +2032,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         d1,
         d2,
         d3;
+    pliny.property({
+      parent: "Primrose.Angle",
+      name: "degrees",
+      type: "Number",
+      description: "Get/set the current value of the angle in degrees."
+    });
     Object.defineProperty(this, "degrees", {
       set: function set(newValue) {
         do {
@@ -1083,6 +2062,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     });
   }
 
+  pliny.property({
+    parent: "Primrose.Angle",
+    name: "radians",
+    type: "Number",
+    description: "Get/set the current value of the angle in radians."
+  });
   Object.defineProperty(Angle.prototype, "radians", {
     get: function get() {
       return this.degrees * DEG2RAD;
@@ -1115,6 +2100,98 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       TRANSLATE_PATTERN = new RegExp("translate3d\\s*\\(\\s*" + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + DELIM + NUMBER_PATTERN + UNITS + "\\s*\\)", "i"),
       ROTATE_PATTERN = new RegExp("rotate3d\\s*\\(\\s*" + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + DELIM + NUMBER_PATTERN + "rad\\s*\\)", "i");
 
+  pliny.class({
+    parent: "Primrose",
+    name: "BaseControl",
+    description: "The BaseControl class is the parent class for all 3D controls.\n\
+It manages a unique ID for every new control, the focus state of the control, and\n\
+performs basic conversions from DOM elements to the internal Control format."
+  });
+
+  pliny.method({
+    parent: "Primrose.BaseControl",
+    name: "focus",
+    description: "Sets the focus property of the control, does not change the focus property of any other control.",
+    examples: [{
+      name: "Focus on one control, blur all the rest",
+      description: "When we have a list of controls and we are trying to track\n\
+focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+    new Primrose.Text.Controls.TextBox(),\n\
+    new Primrose.Text.Controls.TextBox(),\n\
+    new Primrose.Text.Button()\n\
+  ];\n\
+\n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+    }]
+  });
+
+  pliny.method({
+    parent: "Primrose.BaseControl",
+    name: "blur",
+    description: "Unsets the focus property of the control, does not change the focus property of any other control.",
+    examples: [{
+      name: "Focus on one control, blur all the rest",
+      description: "When we have a list of controls and we are trying to track\n\
+focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+    new Primrose.Text.Controls.TextBox(),\n\
+    new Primrose.Text.Controls.TextBox(),\n\
+    new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+    }]
+  });
+
+  pliny.method({
+    parent: "Primrose.BaseControl",
+    name: "copyElement",
+    description: "Copies properties from a DOM element that the control is supposed to match.",
+    parameters: [{
+      name: "elem",
+      type: "Element",
+      description: "The element--e.g. a button or textarea--to copy."
+    }],
+    examples: [{
+      name: "Rough concept",
+      description: "The class is not used directly. Its methods would be used in a base\n\
+class that implements its functionality.\n\
+\n\
+The `copyElement()` method gets used when a DOM element is getting \"converted\"\n\
+to a 3D element on-the-fly.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var myDOMButton = document.querySelector(\"button[type='button']\"),\n\
+    my3DButton = new Primrose.Controls.Button3D();\n\
+  my3DButton.copyElement(myDOMButton);"
+    }]
+  });
+
   var BaseControl = function (_Primrose$AbstractEve) {
     _inherits(BaseControl, _Primrose$AbstractEve);
 
@@ -1123,8 +2200,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BaseControl).call(this));
 
+      pliny.property({
+        name: "controlID",
+        type: "Number",
+        description: "Automatically incrementing counter for controls, to make sure there is a distinct differentiator between them all."
+      });
       _this.controlID = ID++;
 
+      pliny.property({
+        name: "focused",
+        type: "Boolean",
+        description: "Flag indicating this control has received focus. You should theoretically only read it."
+      });
       _this.focused = false;
       return _this;
     }
@@ -1184,6 +2271,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
   var MILLISECONDS_TO_SECONDS = 0.001;
+
+  pliny.class({
+    parent: "Primrose",
+    name: "BrowserEnvironment",
+    description: "Make a Virtual Reality app in your web browser!"
+  });
 
   var BrowserEnvironment = function (_Primrose$AbstractEve) {
     _inherits(BrowserEnvironment, _Primrose$AbstractEve);
@@ -2019,11 +3112,51 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
   var buttonCount = 0;
 
+  pliny.class({
+    parent: "Primrose",
+    name: "ButtonFactory",
+    description: "Loads a model file and holds the data, creating clones of the data whenever a new button is desired.",
+    parameters: [{
+      name: "template",
+      type: "THREE.Object3D",
+      description: "A THREE.Object3D that specifies a 3D model for a button, to be used as a template."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "The options to apply to all buttons that get created by the factory."
+    }, {
+      name: "complete",
+      type: "Function",
+      description: "A callback function to indicate when the loading process has completed, if `templateFile` was a String path."
+    }]
+  });
+
   function ButtonFactory(templateFile, options) {
+    pliny.property({
+      name: "options",
+      type: "Object",
+      description: "The options that the user provided, so that we might change them after the factory has been created, if we so choose."
+    });
     this.options = options;
+    pliny.property({
+      name: "template",
+      type: "THREE.Object3D",
+      description: "The 3D model for the button, that will be cloned every time a new button is created."
+    });
     this.template = templateFile;
   }
 
+  pliny.method({
+    parent: "Primrose.ButtonFactory",
+    name: "create",
+    description: "Clones all of the geometry, materials, etc. in a 3D model to create a new copy of it. This really should be done with instanced objects, but I just don't have the time to deal with it right now.",
+    parameters: [{
+      name: "toggle",
+      type: "Boolean",
+      description: "True if the new button should be a toggle button (requiring additional clicks to deactivate) or a regular button (deactivating when the button is released, aka \"momentary\"."
+    }],
+    return: "The cloned button that which we so desired."
+  });
   ButtonFactory.prototype.create = function (toggle) {
     var name = "button" + ++buttonCount;
     var obj = this.template.clone();
@@ -2039,6 +3172,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Controls.js
+  pliny.namespace({
+    name: "Controls",
+    parent: "Primrose",
+    description: "Various 3D control objects."
+  });
   var Controls = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Controls.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -2049,6 +3187,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\DOM.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "DOM",
+    description: "A few functions for manipulating DOM."
+  });
   var DOM = {};
   // end D:\Documents\VR\Primrose\src\Primrose\DOM.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -2066,10 +3209,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var entityKeys = [],
       entities = new WeakMap();
 
+  pliny.class({
+    parent: "Primrose",
+    name: "Entity",
+    description: "The Entity class is the parent class for all 3D controls. It manages a unique ID for every new control, the focus state of the control, and performs basic conversions from DOM elements to the internal Control format."
+  });
+
   var Entity = function () {
     _createClass(Entity, null, [{
       key: "registerEntity",
       value: function registerEntity(e) {
+        pliny.function({
+          parent: "Primrose.Entity",
+          name: "registerEntity",
+          description: "Register an entity to be able to receive eyeBlank events.",
+          parameters: [{
+            name: "e",
+            type: "Primrose.Entity",
+            description: "The entity to register."
+          }]
+        });
         entities.set(e.id, e);
         entityKeys.push(e.id);
         e.addEventListener("_idchanged", function (evt) {
@@ -2082,6 +3241,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "eyeBlankAll",
       value: function eyeBlankAll(eye) {
+        pliny.function({
+          parent: "Primrose.Entity",
+          name: "eyeBlankAll",
+          description: "Trigger the eyeBlank event for all registered entities.",
+          parameters: [{
+            name: "eye",
+            type: "Number",
+            description: "The eye to switch to: -1 for left, +1 for right."
+          }]
+        });
         entityKeys.forEach(function (id) {
           entities.get(id).eyeBlank(eye);
         });
@@ -2093,14 +3262,44 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this.id = id;
 
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "parent ",
+        type: "Primrose.Entity",
+        description: "The parent element of this eleemnt, if this element has been added as a child to another element."
+      });
       this.parent = null;
 
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "children",
+        type: "Array",
+        description: "The child elements of this element."
+      });
       this.children = [];
 
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "focused",
+        type: "Boolean",
+        description: "A flag indicating if the element, or a child element within it, has received focus from the user."
+      });
       this.focused = false;
 
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "focusable",
+        type: "Boolean",
+        description: "A flag indicating if the element, or any child elements within it, is capable of receiving focus."
+      });
       this.focusable = true;
 
+      pliny.property({
+        parent: "Primrose.Entity",
+        name: "listeners",
+        type: "Object",
+        description: "The event listener container, holding the callbacks to trigger for each type of event."
+      });
       this.listeners = {
         focus: [],
         blur: [],
@@ -2114,11 +3313,87 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _idchanged: []
       };
 
-      }
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "focus",
+        description: "If the element is focusable, occurs when the user clicks on an element for the first time, or when a program calls the `focus()` method."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "blur",
+        description: "If the element is focused (which implies it is also focusable), occurs when the user clicks off of an element, or when a program calls the `blur()` method."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "click",
+        description: "Occurs whenever the user clicks on an element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "keydown",
+        description: "Occurs when the user pushes a key down while focused on the element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "keyup",
+        description: "Occurs when the user releases a key while focused on the element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "paste",
+        description: "Occurs when the user activates the clipboard's `paste` command while focused on the element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "cut",
+        description: "Occurs when the user activates the clipboard's `cut` command while focused on the element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "copy",
+        description: "Occurs when the user activates the clipboard's `copy` command while focused on the element."
+      });
+
+      pliny.event({
+        parent: "Primrose.Entity",
+        name: "wheel",
+        description: "Occurs when the user scrolls the mouse wheel while focused on the element."
+      });
+    }
 
     _createClass(Entity, [{
       key: "addEventListener",
       value: function addEventListener(event, func) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "addEventListener",
+          description: "Adding an event listener registers a function as being ready to receive events.",
+          parameters: [{
+            name: "evt",
+            type: "String",
+            description: "The name of the event for which we are listening."
+          }, {
+            name: "thunk",
+            type: "Function",
+            description: "The callback to fire when the event occurs."
+          }],
+          examples: [{
+            name: "Add an event listener.",
+            description: "The `addEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox();\n\
+  txt.addEventListener(\"mousemove\", console.log.bind(console, \"mouse move\"));\n\
+  txt.addEventListener(\"keydown\", console.log.bind(console, \"key down\"));"
+          }]
+        });
         if (this.listeners[event]) {
           this.listeners[event].push(func);
         }
@@ -2126,6 +3401,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "removeEventListener",
       value: function removeEventListener(event, func) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "removeEventListener",
+          description: "Removing an event listener so that it no longer receives events from this object. Note that it must be the same function instance that was used when the event listener was added.",
+          parameters: [{
+            name: "evt",
+            type: "String",
+            description: "The name of the event from which we are removing."
+          }, {
+            name: "thunk",
+            type: "Function",
+            description: "The callback to remove."
+          }],
+          examples: [{
+            name: "Remove an event listener.",
+            description: "The `removeEventListener()` method operates nearly identically to the method of the same name on DOM elements.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var txt = new Primrose.Text.Controls.TextBox(),\n\
+  func = console.log.bind(console, \"mouse move\");\n\
+  txt.addEventListener(\"mousemove\", func);\n\
+  txt.removeEventListener(\"mousemove\", func);"
+          }]
+        });
         var evts = this.listeners[event];
         if (evt) {
           var i = evts.indexOf(func);
@@ -2137,6 +3436,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "focus",
       value: function focus() {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "focus",
+          description: "If the control is focusable, sets the focus property of the control, does not change the focus property of any other control.",
+          examples: [{
+            name: "Focus on one control, blur all the rest",
+            description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+          }]
+        });
         if (this.focusable) {
           this.focused = true;
           emit.call(this, "focus", {
@@ -2147,6 +3474,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "blur",
       value: function blur() {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "blur",
+          description: "If the element is focused, unsets the focus property of the control and all child controls. Does not change the focus property of any parent or sibling controls.",
+          examples: [{
+            name: "Focus on one control, blur all the rest",
+            description: "When we have a list of controls and we are trying to track focus between them all, we must coordinate calls between `focus()` and `blur()`.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var ctrls = [\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Controls.TextBox(),\n\
+  new Primrose.Text.Button()\n\
+  ];\n\
+  \n\
+  function focusOn(id){\n\
+    for(var i = 0; i < ctrls.length; ++i){\n\
+      var c = ctrls[i];\n\
+      if(c.controlID === id){\n\
+        c.focus();\n\
+      }\n\
+      else{\n\
+        c.blur();\n\
+      }\n\
+    }\n\
+  }"
+          }]
+        });
         if (this.focused) {
           this.focused = false;
           for (var i = 0; i < this.children.length; ++i) {
@@ -2162,6 +3517,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "appendChild",
       value: function appendChild(child) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "appendChild",
+          description: "Adds an Entity as a child entity of this entity.",
+          parameters: [{
+            name: "child",
+            type: "Primrose.Entity",
+            description: "The object to add. Will only succeed if `child.parent` is not set to a value."
+          }],
+          examples: [{
+            name: "Add an entity to another entity",
+            description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);"
+          }]
+        });
         if (child && !child.parent) {
           child.parent = this;
           this.children.push(child);
@@ -2170,6 +3547,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "removeChild",
       value: function removeChild(child) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "removeChild",
+          description: "Removes an Entity from another Entity of this entity.",
+          parameters: [{
+            name: "child",
+            type: "Primrose.Entity",
+            description: "The object to remove. Will only succeed if `child.parent` is this object."
+          }],
+          examples: [{
+            name: "Remove an entity from another entity",
+            description: "Entities can be arranged in parent-child relationships.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var a = new Primrose.Entity(),\n\
+  b = new Primrose.Entity();\n\
+  a.appendChild(b);\n\
+  console.assert(a.children.length === 1);\n\
+  console.assert(a.children[0] === b);\n\
+  console.assert(b.parent === a);\n\
+  a.removeChild(b);\n\
+  console.assert(a.children.length === 0)\n\
+  console.assert(b.parent === null);"
+          }]
+        });
         var i = this.children.indexOf(child);
         if (0 <= i && i < this.children.length) {
           this.children.splice(i, 1);
@@ -2179,6 +3581,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "eyeBlank",
       value: function eyeBlank(eye) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "eyeBlank",
+          parameters: [{
+            name: "eye",
+            type: "Number",
+            description: "The eye to switch to: -1 for left, +1 for right."
+          }],
+          description: "Instructs any stereoscopically rendered surfaces to change their rendering offset."
+        });
         for (var i = 0; i < this.children.length; ++i) {
           this.children[i].eyeBlank(eye);
         }
@@ -2194,6 +3606,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "startDOMPointer",
       value: function startDOMPointer(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "startDOMPointer",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The pointer event to read"
+          }],
+          description: "Hooks up to the window's `mouseDown` and `touchStart` events and propagates it to any of its focused children."
+        });
         for (var i = 0; i < this.children.length; ++i) {
           this.children[i].startDOMPointer(evt);
         }
@@ -2201,56 +3623,157 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "moveDOMPointer",
       value: function moveDOMPointer(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "moveDOMPointer",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The pointer event to read"
+          }],
+          description: "Hooks up to the window's `mouseMove` and `touchMove` events and propagates it to any of its focused children."
+        });
         this._forFocusedChild("moveDOMPointer", evt);
       }
     }, {
       key: "startUV",
       value: function startUV(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "startUV",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The pointer event to read"
+          }],
+          description: "Hooks up to the window's `mouseDown` and `touchStart` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+        });
         this._forFocusedChild("startUV", evt);
       }
     }, {
       key: "moveUV",
       value: function moveUV(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "moveUV",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The pointer event to read"
+          }],
+          description: "Hooks up to the window's `mouseMove` and `touchMove` events, with coordinates translated to tangent-space UV coordinates, and propagates it to any of its focused children."
+        });
         this._forFocusedChild("moveUV", evt);
       }
     }, {
       key: "endPointer",
       value: function endPointer() {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "endPointer",
+          description: "Hooks up to the window's `mouseUp` and `toucheEnd` events and propagates it to any of its focused children."
+        });
         this._forFocusedChild("endPointer");
       }
     }, {
       key: "keyDown",
       value: function keyDown(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "keyDown",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The key event to read"
+          }],
+          description: "Hooks up to the window's `keyDown` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("keyDown", evt);
       }
     }, {
       key: "keyUp",
       value: function keyUp(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "keyUp",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The key event to read"
+          }],
+          description: "Hooks up to the window's `keyUp` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("keyUp", evt);
       }
     }, {
       key: "readClipboard",
       value: function readClipboard(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "readClipboard",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The clipboard event to read"
+          }],
+          description: "Hooks up to the clipboard's `paste` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("readClipboard", evt);
       }
     }, {
       key: "copySelectedText",
       value: function copySelectedText(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "copySelectedText",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The clipboard event to read"
+          }],
+          description: "Hooks up to the clipboard's `copy` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("copySelectedText", evt);
       }
     }, {
       key: "cutSelectedText",
       value: function cutSelectedText(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "cutSelectedText",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The clipboard event to read"
+          }],
+          description: "Hooks up to the clipboard's `cut` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("cutSelectedText", evt);
       }
     }, {
       key: "readWheel",
       value: function readWheel(evt) {
+        pliny.method({
+          parent: "Primrose.Entity",
+          name: "readWheel",
+          parameters: [{
+            name: "evt",
+            type: "Event",
+            description: "The wheel event to read"
+          }],
+          description: "Hooks up to the window's `wheel` event and propagates it to any of its focused children."
+        });
         this._forFocusedChild("readWheel", evt);
       }
     }, {
       key: "id",
       get: function get() {
+        pliny.property({
+          parent: "Primrose.Entity",
+          name: "id ",
+          type: "String",
+          description: "Get or set the id for the control."
+        });
         return this._id;
       },
       set: function set(v) {
@@ -2264,6 +3787,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "theme",
       get: function get() {
+        pliny.property({
+          parent: "Primrose.Entity",
+          name: "theme",
+          type: "Primrose.Text.Themes.*",
+          description: "Get or set the theme used for rendering text on any controls in the control tree."
+        });
         return null;
       },
       set: function set(v) {
@@ -2274,6 +3803,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "lockMovement",
       get: function get() {
+        pliny.property({
+          parent: "Primrose.Entity",
+          name: "lockMovement",
+          type: "Boolean",
+          description: "Recursively searches the deepest leaf-node of the control graph for a control that has its `lockMovement` property set to `true`, indicating that key events should not be used to navigate the user, because they are being interpreted as typing commands."
+        });
         var lock = false;
         for (var i = 0; i < this.children.length && !lock; ++i) {
           lock |= this.children[i].lockMovement;
@@ -2283,6 +3818,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "focusedElement",
       get: function get() {
+        pliny.property({
+          parent: "Primrose.Entity",
+          name: "focusedElement",
+          type: "Primrose.Entity",
+          description: "Searches the deepest leaf-node of the control graph for a control that has its `focused` property set to `true`."
+        });
         var result = null,
             head = this;
         while (head && head.focused) {
@@ -2313,6 +3854,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "HTTP",
+    description: "A collection of basic XMLHttpRequest wrappers."
+  });
   var HTTP = {};
   // end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -2323,6 +3869,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "Input",
+    description: "The Input namespace contains classes that handle user input, for use in navigating the 3D environment."
+  });
   var Input = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Input.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -2347,6 +3898,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       LASER_WIDTH = 0.01,
       LASER_LENGTH = 3 * LASER_WIDTH,
       moveTo = new THREE.Vector3(0, 0, 0);
+
+  pliny.class({
+    parent: "Primrose",
+    name: "InputProcessor",
+    description: "| [under construction]"
+  });
 
   var InputProcessor = function () {
     _createClass(InputProcessor, null, [{
@@ -2926,6 +4483,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Keys.js
+  pliny.enumeration({
+    parent: "Primrose",
+    name: "Keys",
+    description: "Keycode values for system keys that are the same across all international standards"
+  });
   var Keys = {
     ANY: Number.MAX_VALUE,
     ///////////////////////////////////////////////////////////////////////////
@@ -3120,7 +4682,52 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return object;
   }
 
+  pliny.class({
+    parent: "Primrose",
+    name: "ModelLoader",
+    description: "Creates an interface for cloning 3D models loaded from files, to instance those objects.\n\
+\n\
+> NOTE: You don't instantiate this class directly. Call `ModelLoader.loadModel`.",
+    parameters: [{
+      name: "template",
+      type: "THREE.Object3D",
+      description: "The 3D model to make clonable."
+    }],
+    examples: [{
+      name: "Load a basic model.",
+      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  // Create the scene where objects will go\n\
+  var scene = new THREE.Scene(),\n\
+   \n\
+  // Load up the file, optionally \"check it out\"\n\
+    modelFactory = new Primrose.loadModel(\"path/to/model.json\", console.log.bind(console, \"Progress:\"))\n\
+    .then(function(model){\n\
+      model.template.traverse(function(child){\n\
+        // Do whatever you want to the individual child objects of the scene.\n\
+      });\n\
+   \n\
+    // Add copies of the model to the scene every time the user hits the ENTER key.\n\
+    window.addEventListener(\"keyup\", function(evt){\n\
+      // If the template object exists, then the model loaded successfully.\n\
+      if(evt.keyCode === 10){\n\
+        scene.add(model.clone());\n\
+      }\n\
+    });\n\
+  })\n\
+  .catch(console.error.bind(console));"
+    }]
+  });
+
   function ModelLoader(template) {
+    pliny.property({
+      name: "template",
+      type: "THREE.Object3D",
+      description: "When a model is loaded, stores a reference to the model so it can be cloned in the future."
+    });
     this.template = template;
   }
   ModelLoader.loadModel = function (src, type, progress) {
@@ -3129,6 +4736,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     });
   };
 
+  pliny.method({
+    parent: "Primrose.ModelLoader",
+    name: "clone",
+    description: "Creates a copy of the stored template model.",
+    returns: "A THREE.Object3D that is a copy of the stored template.",
+    examples: [{
+      name: "Load a basic model.",
+      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  // Create the scene where objects will go\n\
+  var scene = new THREE.Scene(),\n\
+  \n\
+  // Load up the file, optionally \"check it out\"\n\
+    modelFactory = new Primrose.ModelLoader(\"path/to/model.json\", function(model){\n\
+      model.traverse(function(child){\n\
+        // Do whatever you want to the individual child objects of the scene.\n\
+      });\n\
+  }, console.error.bind(console), console.log.bind(console, \"Progress:\"));\n\
+  \n\
+  // Add copies of the model to the scene every time the user hits the ENTER key.\n\
+  window.addEventListener(\"keyup\", function(evt){\n\
+    // If the template object exists, then the model loaded successfully.\n\
+    if(modelFactory.template && evt.keyCode === 10){\n\
+      scene.add(modelFactory.clone());\n\
+    }\n\
+  });"
+    }]
+  });
   ModelLoader.prototype.clone = function () {
     var _this = this;
 
@@ -3150,6 +4788,60 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return obj;
   };
 
+  pliny.function({
+    parent: "Primrose.ModelLoader",
+    name: "loadObject",
+    description: "Asynchronously loads a JSON, OBJ, or MTL file as a Three.js object. It processes the scene for attributes, creates new properties on the scene to give us\n\
+faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
+Useful for one-time use models.\n\
+\n\
+> NOTE: ModelLoader uses the same Cross-Origin Request policy as THREE.ImageUtils,\n\
+> meaning you may use THREE.ImageUtils.crossOrigin to configure the cross-origin\n\
+> policy that Primrose uses for requests.",
+    returns: "Promise",
+    parameters: [{
+      name: "src",
+      type: "String",
+      description: "The file from which to load."
+    }, {
+      name: "type",
+      type: "String",
+      optional: true,
+      description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension."
+    }, {
+      name: "progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Load a basic model.",
+      description: "When Blender exports the Three.js JSON format, models are treated as full scenes, essentially making them scene-graph sub-trees. Instantiating a Primrose.ModelLoader object referencing one of these model files creates a factory for that model that we can use to generate an arbitrary number of copies of the model in our greater scene.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  // Create the scene where objects will go\n\
+  var renderer = new THREE.WebGLRenderer(),\n\
+      currentScene = new THREE.Scene(),\n\
+      camera = new THREE.PerspectiveCamera();\n\
+   \n\
+  // Load up the file\n\
+  Primrose.ModelLoader.loadObject(\n\
+    \"path/to/model.json\",\n\
+    null,\n\
+    console.log.bind(console, \"Progress:\"))\n\
+    .then(scene.add.bind(scene))\n\
+    .catch(console.error.bind(console));\n\
+   \n\
+  function paint(t){\n\
+    requestAnimationFrame(paint);\n\
+    renderer.render(scene, camera);\n\
+  }\n\
+   \n\
+  requestAnimationFrame(paint);"
+    }]
+  });
   ModelLoader.loadObject = function (src, type, progress) {
     var extMatch = src.match(EXTENSION_PATTERN),
         extension = type && "." + type || extMatch[0];
@@ -3212,6 +4904,72 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   };
 
+  pliny.function({
+    parent: "Primrose.ModelLoader",
+    name: "loadObjects",
+    description: "Asynchronously loads an array of JSON, OBJ, or MTL file as a Three.js object. It processes the objects for attributes, creating new properties on each object to give us\n\
+faster access to some of the elements within it. It uses callbacks to tell you when loading progresses. It uses a Promise to tell you when it's complete, or when an error occurred.\n\
+Useful for static models.\n\
+\n\
+See [`Primrose.ModelLoader.loadObject()`](#Primrose_ModelLoader_loadObject) for more details on how individual models are loaded.",
+    returns: "Promise",
+    parameters: [{
+      name: "arr",
+      type: "Array",
+      description: "The files from which to load."
+    }, {
+      name: "type",
+      type: "String",
+      optional: true,
+      description: "The type of the file--JSON, FBX, OJB, or STL--if it can't be determined from the file extension."
+    }, {
+      name: "progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Load some models.",
+      description: "When Blender exports models, they are frequently treated as full scenes, essentially making them scene-graph sub-trees.\n\
+We can load a bunch of models in one go using the following code.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  // Create the scene where objects will go\n\
+  var renderer = new THREE.WebGLRenderer(),\n\
+      currentScene = new THREE.Scene(),\n\
+      camera = new THREE.PerspectiveCamera(),\n\
+      allModels = null;\n\
+   \n\
+  // Load up the file\n\
+  Primrose.ModelLoader.loadObjects(\n\
+    [\"path/to/model1.json\",\n\
+      \"path/to/model2.obj\",\n\
+      \"path/to/model3.obj\",\n\
+      \"path/to/model4.fbx\"],\n\
+    console.log.bind(console, \"Progress:\"))\n\
+    .then(function(models){\n\
+      allModels = models;\n\
+      models.forEach(function(model){\n\
+        scene.add(model);\n\
+      });\n\
+    })\n\
+    .catch(console.error.bind(console));\n\
+   \n\
+  function paint(t){\n\
+    requestAnimationFrame(paint);\n\
+    \n\
+    if(allModels){\n\
+      // do whatever updating you want on the models\n\
+    }\n\
+    \n\
+    renderer.render(scene, camera);\n\
+  }\n\
+  \n\
+  requestAnimationFrame(paint);"
+    }]
+  });
   ModelLoader.loadObjects = function (map) {
     var output = {},
         promise = Promise.resolve(output);
@@ -3240,6 +4998,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Network.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "Network",
+    description: "The Network namespace contains classes for communicating events between entities in a graph relationship across different types of communication boundaries: in-thread, cross-thread, cross-WAN, and cross-LAN."
+  });
   var Network = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Network.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -3250,6 +5013,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Output.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "Output",
+    description: "The Output namespace contains classes that handle output to devices other than the screen (e.g. Audio, Music, etc.)."
+  });
   var Output = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Output.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -3278,6 +5046,40 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       LASER_LENGTH = 3 * LASER_WIDTH,
       EULER_TEMP = new THREE.Euler(),
       moveBy = new THREE.Vector3(0, 0, 0);
+
+  pliny.class({
+    parent: "Primrose",
+    name: "Pointer",
+    baseClass: "Primrose.AbstractEventEmitter",
+    description: "A device that points into the scene somewhere, casting a ray at objects for picking operations.",
+    parameters: [{
+      name: "name ",
+      type: "String",
+      description: "A friendly name for this pointer object, to make debugging easier."
+    }, {
+      name: "color",
+      type: "Number",
+      description: "The color to use to render the teleport pad and 3D pointer cursor."
+    }, {
+      name: "emission",
+      type: "Number",
+      description: "The color to use to highlight the teleport pad and 3D pointer cursor so that it's not 100% black outside of lighted areas."
+    }, {
+      name: "isHand",
+      type: "Boolean",
+      description: "Pass true to add a hand model at the origin of the pointer ray."
+    }, {
+      name: "orientationDevice",
+      type: "Primrose.InputProcessor",
+      description: "The input object that defines the orientation for this pointer."
+    }, {
+      name: "positionDevice",
+      type: "Primrose.PoseInputProcessor",
+      description: "The input object that defines the position for this pointer.",
+      optional: true,
+      defaultValue: null
+    }]
+  });
 
   var Pointer = function (_Primrose$AbstractEve) {
     _inherits(Pointer, _Primrose$AbstractEve);
@@ -3331,6 +5133,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     }, {
       key: "addToBrowserEnvironment",
       value: function addToBrowserEnvironment(env, scene) {
+        pliny.method({
+          parent: "Primrose.Pointer",
+          name: "addToBrowserEnvironment",
+          description: "Add this meshes that give the visual representation of the pointer, to the scene.",
+          parameters: [{
+            name: "env",
+            type: "Primrose.BrowserEnvironment",
+            description: "Not used, just here to fulfill a common interface in the framework."
+          }, {
+            name: "scene",
+            type: "THREE.Scene",
+            description: "The scene to which to add the 3D cursor."
+          }]
+        });
         scene.add(this.mesh);
         scene.add(this.disk);
       }
@@ -3544,6 +5360,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   },
       EMPTY_SCALE = new THREE.Vector3();
 
+  pliny.class({
+    parent: "Primrose",
+    name: "PoseInputProcessor",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var PoseInputProcessor = function (_Primrose$InputProces) {
     _inherits(PoseInputProcessor, _Primrose$InputProces);
 
@@ -3609,6 +5432,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Projector.js
+  pliny.class({
+    parent: "Primrose",
+    name: "Projector",
+    description: "| [under construction]"
+  });
+
   function Projector(isWorker) {
     (function () {
       if (typeof THREE === "undefined") {
@@ -5889,6 +7718,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "Random",
+    description: "Functions for handling random numbers of different criteria, or selecting random elements of arrays."
+  });
   var Random = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Random.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -5899,6 +7733,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+  pliny.value({
+    name: "SKINS",
+    type: "Array of String",
+    description: "A selection of color values that closely match skin colors of people."
+  });
   var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
   // end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -5909,6 +7748,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+  pliny.value({
+    name: "SKIN_VALUES",
+    type: "Array of Number",
+    description: "A selection of color values that closely match skin colors of people."
+  });
   var SKINS_VALUES = Primrose.SKINS.map(function (s) {
     return parseInt(s.substring(1), 16);
   });
@@ -5921,6 +7765,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+  pliny.value({
+    parent: "Primrose",
+    name: "SYS_FONTS",
+    type: "String",
+    description: "A selection of fonts that will match whatever the user's operating system normally uses."
+  });
   var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
   // end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -5944,6 +7794,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Surface.js
   var COUNTER = 0;
+
+  pliny.class({
+    parent: "Primrose",
+    name: "Surface",
+    description: "Cascades through a number of options to eventually return a CanvasRenderingContext2D object on which one will perform drawing operations.",
+    baseClass: "Primrose.Entity",
+    parameters: [{
+      name: "options.id",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options.bounds",
+      type: "Primrose.Text.Rectangle",
+      description: "The size and location of the surface to create."
+    }]
+  });
 
   var Surface = function (_Primrose$Entity) {
     _inherits(Surface, _Primrose$Entity);
@@ -6059,6 +7925,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       }
 
       if (_this.canvas === null) {
+        pliny.error({
+          name: "Invalid element",
+          type: "Error",
+          description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+        });
         console.error(_typeof(_this.options.id));
         console.error(_this.options.id);
         throw new Error(_this.options.id + " does not refer to a valid canvas element.");
@@ -6338,6 +8209,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "Text",
+    description: "The Text namespace contains classes everything regarding the Primrose source code editor."
+  });
   var Text = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -6389,6 +8265,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     });
   }
 
+  pliny.class({
+    parent: "Primrose",
+    name: "WebRTCSocket",
+    description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+    parameters: [{
+      name: "extraIceServers",
+      type: "Array",
+      description: "A collection of ICE servers to use on top of the default Google STUN servers."
+    }, {
+      name: "proxyServer",
+      type: "WebSocket",
+      description: "A connection over which to negotiate the peering."
+    }, {
+      name: "fromUserName",
+      type: "String",
+      description: "The name of the local user, from which the peering is being initiated."
+    }, {
+      name: "fromUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+    }, {
+      name: "toUserName",
+      type: "String",
+      description: "The name of the remote user, to which the peering is being requested."
+    }, {
+      name: "toUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+    }]
+  });
+
   var WebRTCSocket = function () {
     // Be forewarned, the WebRTC lifecycle is very complex and editing this class is likely to break it.
     function WebRTCSocket(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
@@ -6418,30 +8325,60 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       this._log = print.bind(null, "log");
       this._error = print.bind(null, "error", 0);
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "proxyServer",
+        type: "WebSocket",
+        description: "The connection over which to negotiate the peering."
+      });
       Object.defineProperty(this, "proxyServer", {
         get: function get() {
           return proxyServer;
         }
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "fromUserName",
+        type: "String",
+        description: "The name of the local user."
+      });
       Object.defineProperty(this, "fromUserName", {
         get: function get() {
           return fromUserName;
         }
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "fromUserIndex",
+        type: "Number",
+        description: "The index of the local user's current device."
+      });
       Object.defineProperty(this, "fromUserIndex", {
         get: function get() {
           return fromUserIndex;
         }
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "toUserName",
+        type: "String",
+        description: "The name of the remote user."
+      });
       Object.defineProperty(this, "toUserName", {
         get: function get() {
           return toUserName;
         }
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "toUserIndex",
+        type: "Number",
+        description: "The index of the remote user's current device."
+      });
       Object.defineProperty(this, "toUserIndex", {
         get: function get() {
           return toUserIndex;
@@ -6459,11 +8396,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this._log(1, iceServers);
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "rtc",
+        type: "RTCPeerConnection",
+        description: "The raw RTCPeerConnection that got negotiated."
+      });
       this.rtc = new RTCPeerConnection({
         // Indicate to the API what servers should be used to figure out NAT traversal.
         iceServers: iceServers
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "progress",
+        type: "WebSocket",
+        description: "The connection over which to negotiate the peering."
+      });
       var progress = {
         offer: {
           created: false,
@@ -6480,6 +8429,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
       });
 
+      pliny.property({
+        parent: "Primrose.WebRTCSocket",
+        name: "goFirst",
+        type: "Boolean",
+        description: "We don't want the ICE candidates, offers, and answers clashing in the middle, so we need to be careful about order of operations. Users already in the room will initiate peer connections with users that are just joining."
+      });
       Object.defineProperty(this, "goFirst", {
         get: function get() {
           return !goSecond;
@@ -6701,11 +8656,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "recordProgress",
       value: function recordProgress(description, method) {
+        pliny.method({
+          parent: "Primrose.WebRTCSocket",
+          name: "recordProgress",
+          description: "mark that we made progress towards our goals.",
+          parameters: [{
+            name: "description",
+            type: "RTCSessionDescription",
+            description: "An answer or offer object."
+          }, {
+            name: "method",
+            type: "String",
+            description: "Whether or not the description had been 'created' or 'received' here."
+          }]
+        });
         this.progress[description.type][method] = true;
       }
     }, {
       key: "wrap",
       value: function wrap(item) {
+        pliny.method({
+          parent: "Primrose.WebRTCSocket",
+          name: "wrap",
+          returns: "Object",
+          description: "Provides the context into a message so that the remote user can tell if the message `this.isExpected()`",
+          parameters: [{
+            name: "item",
+            type: "Object",
+            description: "The object to wrap."
+          }]
+        });
         return {
           fromUserName: this.fromUserName,
           fromUserIndex: this.fromUserIndex,
@@ -6717,6 +8697,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "isExpected",
       value: function isExpected(tag, obj) {
+        pliny.method({
+          parent: "Primrose.WebRTCSocket",
+          name: "isExpected",
+          returns: "Boolean",
+          description: "A test to see if we were expecting a particular message. Sometimes the messages get criss-crossed on the negotiation server, and this just makes sure we don't cause an error.",
+          parameters: [{
+            name: "tag",
+            type: "String",
+            description: "A name for the operation being tested."
+          }, {
+            name: "obj",
+            type: "Object",
+            description: "The object within the operating being tested."
+          }]
+        });
+
         var incomplete = !this.complete,
             fromUser = obj.fromUserName === this.toUserName,
             fromIndex = obj.fromUserIndex === this.toUserIndex,
@@ -6731,6 +8727,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "close",
       value: function close() {
+        pliny.method({
+          parent: "Primrose.WebRTCSocket",
+          name: "close",
+          description: "shut down the peer connection, if it was succesful in being created."
+        });
         if (this.rtc && this.rtc.signalingState !== "closed") {
           this.rtc.close();
           this.rtc = null;
@@ -6739,16 +8740,35 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "teardown",
       value: function teardown() {
+        pliny.method({
+          parent: "Primrose.WebRTCSocket",
+          name: "teardown",
+          description: "Whether ending succesfully or failing, the processing is mostly the same: teardown all the event handlers."
+        });
+
         throw new Error("Not implemented.");
       }
     }, {
       key: "issueRequest",
       value: function issueRequest() {
+        pliny.property({
+          parent: "Primrose.WebRTCSocket",
+          name: "issueRequest",
+          description: "Override this method in subClasses to trigger the peering process."
+        });
+
         throw new Error("Not implemented");
       }
     }, {
       key: "complete",
       get: function get() {
+        pliny.property({
+          parent: "Primrose.WebRTCSocket",
+          name: "complete",
+          returns: "Boolean",
+          description: "Override this method in subClasses to indicate when the peering process is complete. The peering process is complete when all offers are answered."
+        });
+
         return !this.rtc || this.rtc.signalingState === "closed";
       }
     }]);
@@ -6766,6 +8786,123 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+  pliny.class({
+    parent: "Primrose",
+    name: "Workerize",
+    description: "Builds a WebWorker thread out of a JavaScript class's source code, and attempts to create a message interface that matches the message-passing interface that the class already uses.\n\
+\n\
+Automatically workerized classes should have methods that take a single array for any parameters and return no values. All return results should come through an Event that the class emits.",
+    parameters: [{
+      name: "func",
+      type: "Function",
+      description: "The class function to workerize"
+    }],
+    examples: [{
+      name: "Create a basic workerized class.",
+      description: "Classes in JavaScript are created by adding new functions to the `prototype` of another function, then instantiating objects from that class with `new`. When creating such a class for automatic workerization, a few restrictions are required:\n\
+* All methods in the class must be on the prototype. Any methods created and assigned in the constructor will not be available to the message passing interface.\n\
+* All interaction with objects of the class must be through these publicly accessible methods. This includes initialization.\n\
+* All methods should take at most a single argument. If you need multiple arguments, pack them into an array.\n\
+* The methods cannot return any values. If a value must be returned to the calling context, it must be done through an event callback.\n\
+* The class must assign handlers to events through an addEventListener method that mirrors the standard interface used in DOM. Workerize will not respect the 3rd `bubbles` parameter that is so often omitted when programming against DOM.\n\
+\n\
+Assuming the following class:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  function MyClass(){\n\
+    this.listeners = {\n\
+      complete: []\n\
+    };\n\
+    this.objects = [];\n\
+  }\n\
+\n\
+  MyClass.prototype.addEventListener = function(evt, handler){\n\
+    if(this.listeners[evt]){\n\
+      this.listeners[evt].push(handler);\n\
+    }\n\
+  };\n\
+\n\
+  MyClass.prototype.addObject = function(obj){\n\
+    this.objects.push(obj);\n\
+  };\n\
+\n\
+  MyClass.prototype.update = function(dt){\n\
+    // we can make essentially arbitrarily small timeslice updates\n\
+    var SLICE = 0.1;\n\
+    for(var ddt = 0; ddt < dt; ddt += SLICE){\n\
+      for(var i = 0; i < this.objects.length; ++i){\n\
+        var o = this.objects[i];\n\
+        o.x += o.vx * SLICE;\n\
+        o.y += o.vy * SLICE;\n\
+        o.z += o.vz * SLICE;\n\
+      }\n\
+    }\n\
+    // prepare our return state for the UI thread.\n\
+    var returnValue = [];\n\
+    for(var i = 0; i < this.objects.length; ++i){\n\
+      returnValue.push([o.x, o.y, o.z]);\n\
+    }\n\
+    // and emit the event to all of the listeners.\n\
+    for(var i = 0; i < this.listeners.complete.length; ++i){\n\
+      this.listeners.complete[i](returnValue);\n\
+    }\n\
+  };\n\
+\n\
+Then we can create and use an automatically workerized version of it as follows.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var phys = new Primrose.Workerize(MyClass);\n\
+  // we keep a local copy of the state so we can perform other operations on it.\n\
+  var objects = [];\n\
+  for(var i = 0; i < 10; ++i){\n\
+    var obj = {\n\
+      // random values between -1 and 1\n\
+      x: 2 * Math.random() - 1,\n\
+      y: 2 * Math.random() - 1,\n\
+      z: 2 * Math.random() - 1,\n\
+      vx: 2 * Math.random() - 1,\n\
+      vy: 2 * Math.random() - 1,\n\
+      vz: 2 * Math.random() - 1\n\
+    };\n\
+    objects.push(obj);\n\
+    phys.addObject(obj);\n\
+  }\n\
+  \n\
+  // this flag lets us keep track of whether or not we know that the worker is in the middle of an expensive operation.\n\
+  phys.ready = true;\n\
+  phys.addEventListener(\"complete\", function(newPositions){\n\
+    // We update the state in the UI thread with the expensively-computed values.\n\
+    for(var i = 0; i < newPositions.length; ++i){\n\
+      objects[i].x = newPositions[i][0];\n\
+      objects[i].y = newPositions[i][1];\n\
+      objects[i].z = newPositions[i][2];\n\
+    }\n\
+    phys.ready = true;\n\
+  });\n\
+  \n\
+  var lt = null;\n\
+  function paint(t){\n\
+    requestAnimationFrame(paint);\n\
+    if(lt === undefined || lt === null){\n\
+      lt = t;\n\
+    } else {\n\
+      var dt = t - lt;\n\
+      if(phys.ready){\n\
+        phys.ready = false;\n\
+        phys.update(dt);\n\
+        lt = t;\n\
+      }\n\
+      for(var i = 0; i < objects.length; ++i){\n\
+        var o = objects[i];\n\
+        // We can even perform a much cheaper position update to smooth over the blips in the expensive update on the worker thread.\n\
+        drawObjectAt(o.x + o.vx * dt, o.y + o.vy * dt, o.z + o.vz * dt);\n\
+      }\n\
+    }\n\
+  }\n\
+  requestAnimationFrame(paint);"
+    }]
+  });
+
   function Workerize(func) {
     var _this = this;
 
@@ -6806,13 +8943,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     // The binary-large-object can be used to convert the script from text to a
     // data URI, because workers can only be created from same-origin URIs.
+    pliny.property({
+      name: "worker",
+      type: "WebWorker",
+      description: "The worker thread containing our class."
+    });
     this.worker = Workerize.createWorker(script, false);
 
+    pliny.property({
+      name: "args",
+      type: "Array",
+      description: "Static allocation of an array to save on memory usage when piping commands to a worker."
+    });
     this.args = [null, null];
 
     // create a mapper from the UI-thread side onmessage event, to receive
     // messages from the worker thread that events occured and pass them on to
     // the UI thread.
+    pliny.property({
+      name: "listeners",
+      type: "Object",
+      description: "A bag of arrays of callbacks for each of the class' events."
+    });
     this.listeners = {};
 
     this.worker.onmessage = function (e) {
@@ -6822,6 +8974,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     // create mappers from the UI-thread side method calls to the UI-thread side
     // postMessage method, to inform the worker thread that methods were called,
     // with parameters.
+    pliny.property({
+      name: "&lt;mappings for each method in the original class&gt;",
+      type: "Function",
+      description: "Each mapped function causes a message to be posted to the worker thread with its arguments packed into an array."
+    });
     for (k in func.prototype) {
       // we skip the addEventListener method because we override it in a
       // different way, to be able to pass messages across the thread boundary.
@@ -6834,12 +8991,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     this.ready = true;
   }
 
+  pliny.method({
+    parent: "Primrose.Workerize",
+    name: "methodShim",
+    description: "Posts messages to the worker thread by packing arguments into an array. The worker will receive the array and interpret the first value as the name of the method to invoke and the second value as another array of parameters.",
+    parameters: [{
+      name: "methodName",
+      type: "String",
+      description: "The method inside the worker context that we want to invoke."
+    }, {
+      name: "args",
+      type: "Array",
+      description: "The arguments that we want to pass to the method that we are calling in the worker context."
+    }]
+  });
   Workerize.prototype.methodShim = function (eventName, args) {
     this.args[0] = eventName;
     this.args[1] = args;
     this.worker.postMessage(this.args);
   };
 
+  pliny.method({
+    parent: "Primrose.Workerize",
+    name: "addEventListener",
+    description: "Adding an event listener just registers a function as being ready to receive events, it doesn't do anything with the worker thread yet.",
+    parameters: [{
+      name: "evt",
+      type: "String",
+      description: "The name of the event for which we are listening."
+    }, {
+      name: "thunk",
+      type: "Function",
+      description: "The callback to fire when the event occurs."
+    }]
+  });
   Workerize.prototype.addEventListener = function (evt, thunk) {
     if (!this.listeners[evt]) {
       this.listeners[evt] = [];
@@ -6847,6 +9032,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     this.listeners[evt].push(thunk);
   };
 
+  pliny.function({
+    parent: "Primrose.Workerize",
+    name: "createWorker",
+    description: "A static function that loads Plain Ol' JavaScript Functions into a WebWorker.",
+    parameters: [{
+      name: "script",
+      type: "(String|Function)",
+      description: "A String defining a script, or a Function that can be toString()'d to get it's script."
+    }, {
+      name: "stripFunc",
+      type: "Boolean",
+      description: "Set to true if you want the function to strip the surround function block scope from the script."
+    }],
+    returns: "The WebWorker object."
+  });
   Workerize.createWorker = function (script, stripFunc) {
     if (typeof script === "function") {
       script = script.toString();
@@ -6874,6 +9074,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\X.js
+  pliny.namespace({
+    parent: "Primrose",
+    name: "X",
+    description: "Extensions and components that combine other Primrose elements."
+  });
   var X = {};
   // end D:\Documents\VR\Primrose\src\Primrose\X.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -6893,6 +9098,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
   var COUNTER = 0;
+
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "AbstractLabel",
+    description: "A simple label of text to put on a Surface.",
+    baseClass: "Primrose.Surface",
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
+  });
 
   var AbstractLabel = function (_Primrose$Surface) {
     _inherits(AbstractLabel, _Primrose$Surface);
@@ -7068,6 +9289,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
   var COUNTER = 0;
 
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "Button2D",
+    description: "A simple button to put on a Surface.",
+    baseClass: "Primrose.Controls.AbstractLabel",
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
+  });
+
   var Button2D = function (_Primrose$Controls$Ab) {
     _inherits(Button2D, _Primrose$Controls$Ab);
 
@@ -7152,6 +9389,26 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+  pliny.class({
+    parent: "Primrose",
+    name: "Button3D",
+    baseClass: "Primrose.BaseControl",
+    parameters: [{
+      name: "model",
+      type: "THREE.Object3D",
+      description: "A 3D model to use as the graphics for this button."
+    }, {
+      name: "name",
+      type: "String",
+      description: "A name for the button, to make it distinct from other buttons."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "A hash of options:\n\t\t\tmaxThrow - The limit for how far the button can be depressed.\n\t\t\tminDeflection - The minimum distance the button must be depressed before it is activated.\n\t\t\tcolorPressed - The color to change the button cap to when the button is activated.\n\t\t\tcolorUnpressed - The color to change the button cap to when the button is deactivated.\n\t\t\ttoggle - True if deactivating the button should require a second click. False if the button should deactivate when it is released."
+    }],
+    description: "A 3D button control, with a separate cap from a stand that it sits on. You click and depress the cap on top of the stand to actuate."
+  });
+
   var Button3D = function (_Primrose$BaseControl) {
     _inherits(Button3D, _Primrose$BaseControl);
 
@@ -7165,22 +9422,50 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       options.colorUnpressed = new THREE.Color(options.colorUnpressed);
       options.colorPressed = new THREE.Color(options.colorPressed);
 
+      pliny.event({
+        name: "click",
+        description: "Occurs when the button is activated."
+      });
       _this.listeners.click = [];
 
+      pliny.event({
+        name: "release",
+        description: "Occurs when the button is deactivated."
+      });
       _this.listeners.release = [];
 
+      pliny.property({
+        name: "base",
+        type: "THREE.Object3D",
+        description: "The stand the button cap sits on."
+      });
       _this.base = model.children[1];
 
+      pliny.property({
+        name: "base",
+        type: "THREE.Object3D",
+        description: "The moveable part of the button, that triggers the click event."
+      });
       _this.cap = model.children[0];
       _this.cap.name = name;
       _this.cap.material = _this.cap.material.clone();
       _this.cap.button = _this;
       _this.cap.base = _this.base;
 
+      pliny.property({
+        name: "container",
+        type: "THREE.Object3D",
+        description: "A grouping collection for the base and cap."
+      });
       _this.container = new THREE.Object3D();
       _this.container.add(_this.base);
       _this.container.add(_this.cap);
 
+      pliny.property({
+        name: "color",
+        type: "Number",
+        description: "The current color of the button cap."
+      });
       _this.color = _this.cap.material.color;
       _this.name = name;
       _this.element = null;
@@ -7219,6 +9504,48 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     return Button3D;
   }(Primrose.BaseControl);
 
+  pliny.record({
+    parent: "Primrose.Controls.Button3D",
+    name: "DEFAULTS",
+    description: "Default option values that override undefined options passed to the Button3D class."
+  });
+
+  pliny.property({
+    parent: "Primrose.Controls.Button3D",
+    name: "position",
+    type: "THREE.Vector3",
+    description: "The location of the button."
+  });
+  pliny.value({
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
+    name: "maxThrow",
+    type: "Number",
+    description: "The limit for how far the button can be depressed."
+  });
+  pliny.value({
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
+    name: "minDeflection",
+    type: "Number",
+    description: "The minimum distance the button must be depressed before it is activated."
+  });
+  pliny.value({
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
+    name: "colorUnpressed",
+    type: "Number",
+    description: "The color to change the button cap to when the button is deactivated."
+  });
+  pliny.value({
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
+    name: "colorPressed",
+    type: "Number",
+    description: "The color to change the button cap to when the button is activated."
+  });
+  pliny.value({
+    parent: "Primrose.Controls.Button3D.DEFAULTS",
+    name: "toggle",
+    type: "Boolean",
+    description: "True if deactivating the button should require a second click. False if the button should deactivate when it is released."
+  });
   Button3D.DEFAULTS = {
     maxThrow: 0.1,
     minDeflection: 10,
@@ -7244,6 +9571,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
   var COUNTER = 0;
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "Form",
+    baseClass: "Primrose.Entity",
+    description: "A basic 2D form control, with its own mesh to use as a frame."
+  });
+
   var Form = function (_Primrose$Surface) {
     _inherits(Form, _Primrose$Surface);
 
@@ -7360,6 +9694,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
   var COUNTER = 0;
+
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "HtmlDoc",
+    baseClass: "Primrose.Surface",
+    description: "A rendering of an HTML document.",
+    parameters: [{
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Document."
+    }]
+  });
 
   var HtmlDoc = function (_Primrose$Surface) {
     _inherits(HtmlDoc, _Primrose$Surface);
@@ -7484,6 +9830,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   var COUNTER = 0,
       HTMLImage = window.Image,
       imageCache = {};
+
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "Image",
+    baseClass: "Primrose.Surface",
+    description: "A simple 2D image to put on a Surface.",
+    parameters: [{
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Image."
+    }]
+  });
 
   var Image = function (_Primrose$Surface) {
     _inherits(Image, _Primrose$Surface);
@@ -7698,6 +10056,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
   var COUNTER = 0;
 
+  pliny.class({
+    parent: "Primrose.Controls",
+    name: "VUMeter",
+    baseClass: "Primrose.Surface",
+    description: "A visualization of audio data.",
+    parameters: [{
+      name: "analyzer",
+      type: "MediaStream",
+      description: "The audio stream to analyze."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the Button."
+    }]
+  });
+
   var VUMeter = function (_Primrose$Surface) {
     _inherits(VUMeter, _Primrose$Surface);
 
@@ -7777,6 +10151,90 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+  pliny.function({
+    parent: "Primrose.DOM",
+    name: "cascadeElement",
+    returns: "Element",
+    parameters: [{
+      name: "id",
+      type: "(String|Element)",
+      description: "A vague reference to the element. Either a String id where the element can be had, a String id to give a newly created element if it does not exist, or an Element to manipulate and validate"
+    }, {
+      name: "tag",
+      type: "String",
+      description: "The HTML tag name of the element we are finding/creating/validating."
+    }, {
+      name: "DOMClass",
+      type: "Class",
+      description: "The class Function that is the type of element that we are frobnicating."
+    }],
+    description: "* If `id` is a string, tries to find the DOM element that has said ID\n\
+  * If it exists, and it matches the expected tag type, returns the element, or throws an error if validation fails.\n\
+  * If it doesn't exist, creates it and sets its ID to the provided id, then returns the new DOM element, not yet placed in the document anywhere.\n\
+* If `id` is a DOM element, validates that it is of the expected type,\n\
+  * returning the DOM element back if it's good,\n\
+  * or throwing an error if it is not\n\
+* If `id` is null, creates the DOM element to match the expected type.",
+    examples: [{
+      name: "Get an element by ID that already exists.",
+      description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elem = Primrose.DOM.cascadeElement(\"second-elem\", \"section\", HTMLElement);\n\
+  console.assert(elem.textContent === \"Second element\");"
+    }, {
+      name: "Validate the tag type.",
+      description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  //The following line of code should cause a runtime error.\n\
+  Primrose.DOM.cascadeElement(\"img1\", \"section\", HTMLElement);"
+    }, {
+      name: "Create an element.",
+      description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elem = Primrose.DOM.cascadeElement(\"img2\", \"img\", HTMLImageElement);\n\
+  console.assert(elem.id === \"img2\");\n\
+  console.assert(elem.parentElement === null);\n\
+  document.body.appendChild(elem);\n\
+  console.assert(elem.parentElement === document.body);"
+    }]
+  });
+
   function cascadeElement(id, tag, DOMClass, add) {
     var elem = null;
     if (id === null) {
@@ -7798,6 +10256,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     }
 
     if (elem === null) {
+      pliny.error({
+        name: "Invalid element",
+        type: "Error",
+        description: "If the element could not be found, could not be created, or one of the appropriate ID was found but did not match the expected type, an error is thrown to halt operation."
+      });
       throw new Error(id + " does not refer to a valid " + tag + " element.");
     }
     return elem;
@@ -7811,6 +10274,57 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+  pliny.function({
+    parent: "Primrose.DOM",
+    name: "findEverything",
+    description: "Searches an element for all sub elements that have a named ID,\n\
+using that ID as the name of a field in a hashmap to store a reference to the element.\n\
+Basically, a quick way to get at all the named elements in a page. Returns an object full\n\
+of element references, with fields named by the ID of the elements that were found.\n\
+\n\
+> NOTE: You may name your IDs pretty much anything you want, but for ease of use,\n\
+> you should name them in a camalCase fashion. See [CamelCase - Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/CamelCase).",
+    parameters: [{
+      name: "elem",
+      type: "Element",
+      optional: true,
+      description: "the root element from which to search.",
+      default: "`document`."
+    }, {
+      name: "obj",
+      type: "Object",
+      optional: true,
+      description: "the object in which to store the element references. If no object is provided, one will be created."
+    }],
+    returns: "Object",
+    examples: [{
+      name: "Get all child elements.",
+      description: "Assuming the following HTML snippet:\n\
+\n\
+  grammar(\"HTML\");\n\
+  <div>\n\
+    <div id=\"First\">first element</div>\n\
+    <section id=\"second-elem\">\n\
+      Second element\n\
+      <img id=\"img1\" src=\"img.png\">\n\
+    </section>\n\
+  </div>\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var elems = Primrose.DOM.findEverything();\n\
+  console.log(elems.First.innerHTML);\n\
+  console.log(elems[\"second-elem\"].textContent);\n\
+  console.log(elems.img1.src);\n\
+\n\
+## Results:\n\
+> first element  \n\
+> Second element  \n\
+> img.png"
+    }]
+  });
+
   function findEverything(elem, obj) {
     elem = elem || document;
     obj = obj || {};
@@ -7835,6 +10349,27 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+  pliny.function({
+    parent: "Primrose.DOM",
+    name: "makeHidingContainer",
+    description: "Takes an element and shoves it into a containing element that\n\
+is 0x0 pixels in size, with the overflow hidden. Sometimes, we need an element\n\
+like a TextArea in the DOM to be able to receive key events, but we don't want the\n\
+user to see it, so the makeHidingContainer function makes it easy to make it disappear.",
+    parameters: [{
+      name: "id",
+      type: "(String|Element)",
+      description: "A vague reference to\n\
+the element. Either a String id where the element can be had, a String id to give\n\
+a newly created element if it does not exist, or an Element to manipulate and validate."
+    }, {
+      name: "obj",
+      type: "Element",
+      description: "The child element to stow in the hiding container."
+    }],
+    returns: "The hiding container element, not yet inserted into the DOM."
+  });
+
   function makeHidingContainer(id, obj) {
     var elem = Primrose.DOM.cascadeElement(id, "div", window.HTMLDivElement);
     elem.style.position = "absolute";
@@ -7855,6 +10390,51 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "XHR",
+    description: "Wraps up the XMLHttpRequest object into a workflow that is easier for me to handle: a single function call. Can handle both GETs and POSTs, with or  without a payload.",
+    returns: "Promise",
+    parameters: [{
+      name: "method",
+      type: "String",
+      description: "The HTTP Verb being used for the request."
+    }, {
+      name: "type",
+      type: "String",
+      description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+      default: "\"text\""
+    }, {
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.data",
+      type: "Object",
+      description: "The data object to use as the request body payload, if this is a PUT request."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Make a GET request.",
+      description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.XHR(\"GET\", \"json\", \"localFile.json\", {\n\
+    progress: console.log.bind(console, \"progress\"))\n\
+    .then(console.log.bind(console, \"done\")))\n\
+    .catch(console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+    }]
+  });
+
   function XHR(method, type, url, options) {
     return new Promise(function (resolve, reject) {
       options = options || {};
@@ -7915,6 +10495,32 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "del",
+    description: "Process an HTTP DELETE request.",
+    returns: "Promise",
+    parameters: [{
+      name: "type",
+      type: "String",
+      description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+      default: "\"text\""
+    }, {
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.data",
+      type: "Object",
+      description: "The data object to use as the request body payload."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }]
+  });
+
   function del(type, url, options) {
     return Primrose.HTTP.XHR("DELETE", type, url, options);
   }
@@ -7927,6 +10533,27 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "delObject",
+    description: "Delete something on the server, and receive JSON in response.",
+    returns: "Promise",
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.data",
+      type: "Object",
+      description: "The data object to use as the request body payload, if this is a PUT request."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }]
+  });
+
   function delObject(url, options) {
     return Primrose.HTTP.del("json", url, options);
   }
@@ -7939,6 +10566,43 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "get",
+    description: "Process an HTTP GET request.",
+    returns: "Promise",
+    parameters: [{
+      name: "type",
+      type: "String",
+      description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+      default: "\"text\""
+    }, {
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Make a GET request.",
+      description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.get(\"json\", \"localFile.json\",\n\
+    console.log.bind(console, \"progress\"),\n\
+    console.log.bind(console, \"done\"),\n\
+    console.error.bind(console));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+    }]
+  });
+
   function get(type, url, options) {
     return Primrose.HTTP.XHR("GET", type || "text", url, options);
   }
@@ -7951,6 +10615,41 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "getBuffer",
+    description: "Get an ArrayBuffer from a server.",
+    returns: "Promise",
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Make a GET request for an ArrayBuffer.",
+      description: "Use this to load audio files and do whatever you want with them.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var context = new AudioContext();\n\
+  Primrose.HTTP.getBuffer(\"audio.mp3\",\n\
+    console.log.bind(console, \"progress\"));,\n\
+    function(buffer){\n\
+      context.decodeAudioData(\n\
+        buffer,\n\
+        console.log.bind(console, \"success\"),\n\
+        console.error.bind(console, \"error decoding\"));\n\
+    },\n\
+    console.error.bind(console, \"error loading\")\n"
+    }]
+  });
+
   function getBuffer(url, options) {
     return Primrose.HTTP.get("arraybuffer", url, options);
   }
@@ -7963,6 +10662,39 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "getObject",
+    description: "Get a JSON object from a server.",
+    returns: "Promise",
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Make a GET request for a JSON object.",
+      description: "Typically, you would use one of the other functions in the Primrose.HTTP namespace, but the XHR function is provided as a fallback in case those others do not meet your needs.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.getObject(\"localFile.json\", {\n\
+      progress: console.log.bind(console, \"progress\")\n\
+    })\n\
+    .then(console.log.bind(console, \"done\"))\n\
+    .catch(console.error.bind(console)));\n\
+\n\
+## Results:\n\
+> Object {field1: 1, field2: \"Field2\"}"
+    }]
+  });
+
   function getObject(url, options) {
     return Primrose.HTTP.get("json", url, options);
   }
@@ -7975,6 +10707,38 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "getText",
+    description: "Get plain text from a server. Returns a promise that will be resolve with the text retrieved from the server.",
+    returns: "Promise",
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }],
+    examples: [{
+      name: "Make a GET request for plain text.",
+      description: "Use this to load arbitrary files and do whatever you want with them.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  Primrose.HTTP.getText(\"localFile.json\",\n\
+    console.log.bind(console, \"progress\"),\n\
+    console.log.bind(console, \"done\"),\n\
+    console.error.bind(console));\n\
+\n\
+## Results:\n\
+> \"Object {field1: 1, field2: \\\"Field2\\\"}\""
+    }]
+  });
+
   function getText(url, options) {
     return Primrose.HTTP.get("text", url, options);
   }
@@ -7987,6 +10751,32 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "post",
+    description: "Process an HTTP POST request.",
+    returns: "Promise",
+    parameters: [{
+      name: "type",
+      type: "String",
+      description: "How the response should be interpreted. One of [\"text\", \"json\", \"arraybuffer\"]. See the [MDN - XMLHttpRequest - responseType](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest#xmlhttprequest-responsetype).",
+      default: "\"text\""
+    }, {
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.data",
+      type: "Object",
+      description: "The data object to use as the request body payload, if this is a POST request."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }]
+  });
+
   function post(type, url, options) {
     return Primrose.HTTP.XHR("POST", type, url, options);
   }
@@ -7999,6 +10789,27 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+  pliny.function({
+    parent: "Primrose.HTTP",
+    name: "postObject",
+    description: "Send a JSON object to a server.",
+    returns: "Promise",
+    parameters: [{
+      name: "url",
+      type: "String",
+      description: "The resource to which the request is being sent."
+    }, {
+      name: "options.data",
+      type: "Object",
+      description: "The data object to use as the request body payload, if this is a PUT request."
+    }, {
+      name: "options.progress",
+      type: "Function",
+      optional: true,
+      description: "A callback function to be called as the download from the server progresses."
+    }]
+  });
+
   function postObject(url, options) {
     return Primrose.HTTP.post("json", url, options);
   }
@@ -8018,6 +10829,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var DISPLACEMENT = new THREE.Vector3(),
       EULER_TEMP = new THREE.Euler(),
       WEDGE = Math.PI / 3;
+
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "FPSInput",
+    description: "| [under construction]"
+  });
 
   var FPSInput = function () {
     function FPSInput(DOMElement, options) {
@@ -8505,6 +11322,28 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
       currentDevices = [],
       currentManagers = {};
 
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Gamepad",
+    baseClass: "Primrose.PoseInputProcessor",
+    parameters: [{
+      name: "name",
+      type: "string",
+      description: "An unique name for this input manager. Note that systems with motion controllers will often have two controllers with the same ID, but different indexes. The name should take that into account."
+    }, {
+      name: "commands",
+      type: "Array",
+      optional: true,
+      description: "An array of input command descriptions."
+    }, {
+      name: "socket",
+      type: "WebSocket",
+      optional: true,
+      description: "A socket over which to transmit device state for device fusion."
+    }],
+    description: "An input processor for Gamepads, including those with positional data."
+  });
+
   var Gamepad = function (_Primrose$PoseInputPr) {
     _inherits(Gamepad, _Primrose$PoseInputPr);
 
@@ -8638,6 +11477,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
   Primrose.InputProcessor.defineAxisProperties(Gamepad, ["LSX", "LSY", "RSX", "RSY", "IDK1", "IDK2", "Z", "BUTTONS"]);
 
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_360_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
   Gamepad.XBOX_360_BUTTONS = {
     A: 1,
     B: 2,
@@ -8657,6 +11501,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     RIGHT_DPAD: 16
   };
 
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "XBOX_ONE_BUTTONS",
+    description: "Labeled names for each of the different control features of the Xbox 360 controller."
+  });
   Gamepad.XBOX_ONE_BUTTONS = {
     A: 1,
     B: 2,
@@ -8676,6 +11525,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     RIGHT_DPAD: 16
   };
 
+  pliny.enumeration({
+    parent: "Primrose.Input.Gamepad",
+    name: "VIVE_BUTTONS",
+    description: "Labeled names for each of the different control buttons of the HTC Vive Motion Controllers."
+  });
   Gamepad.VIVE_BUTTONS = {
     TOUCHPAD_PRESSED: 0,
     TRIGGER_PRESSED: 1,
@@ -8704,6 +11558,30 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Keyboard",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]",
+    parameters: [{
+      name: "",
+      type: "",
+      description: ""
+    }, {
+      name: "",
+      type: "",
+      description: ""
+    }, {
+      name: "",
+      type: "",
+      description: ""
+    }, {
+      name: "",
+      type: "",
+      description: ""
+    }]
+  });
+
   var Keyboard = function (_Primrose$InputProces) {
     _inherits(Keyboard, _Primrose$InputProces);
 
@@ -8869,6 +11747,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     });
   }
 
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "LeapMotionInput",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var LeapMotion = function (_Primrose$InputProces) {
     _inherits(LeapMotion, _Primrose$InputProces);
 
@@ -8995,6 +11880,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Location",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var Location = function (_Primrose$InputProces) {
     _inherits(Location, _Primrose$InputProces);
 
@@ -9054,6 +11946,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input\Motion.js
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Motion",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var Motion = function (_Primrose$InputProces) {
     _inherits(Motion, _Primrose$InputProces);
 
@@ -9141,6 +12040,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Mouse",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var Mouse = function (_Primrose$InputProces) {
     _inherits(Mouse, _Primrose$InputProces);
 
@@ -9277,6 +12183,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   //  `getErrorMessage()`: returns the Error object that occured when setup failed, or
   //  null if setup was successful.
   ///
+
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Speech",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
 
   var Speech = function (_Primrose$InputProces) {
     _inherits(Speech, _Primrose$InputProces);
@@ -9462,6 +12375,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "Touch",
+    baseClass: "Primrose.InputProcessor",
+    description: "| [under construction]"
+  });
+
   var Touch = function (_Primrose$InputProces) {
     _inherits(Touch, _Primrose$InputProces);
 
@@ -9543,6 +12463,24 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     orientation: [0, 0, 0, 1]
   },
       GAZE_LENGTH = 3000;
+  pliny.class({
+    parent: "Primrose.Input",
+    name: "VR",
+    baseClass: "Primrose.PoseInputProcessor",
+    parameters: [{
+      name: "commands",
+      type: "Array",
+      optional: true,
+      description: "An array of input command descriptions."
+    }, {
+      name: "socket",
+      type: "WebSocket",
+      optional: true,
+      description: "A socket over which to transmit device state for device fusion."
+    }],
+    description: "An input manager for gamepad devices."
+  });
+
   var VR = function (_Primrose$PoseInputPr) {
     _inherits(VR, _Primrose$PoseInputPr);
 
@@ -9889,6 +12827,34 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     return preferOpus;
   }();
 
+  pliny.class({
+    parent: "Primrose.Network",
+    name: "AudioChannel",
+    baseClass: "Primrose.WebRTCSocket",
+    description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+    parameters: [{
+      name: "extraIceServers",
+      type: "Array",
+      description: "A collection of ICE servers to use on top of the default Google STUN servers."
+    }, {
+      name: "proxyServer",
+      type: "WebSocket",
+      description: "A connection over which to negotiate the peering."
+    }, {
+      name: "fromUserName",
+      type: "String",
+      description: "The name of the local user, from which the peering is being initiated."
+    }, {
+      name: "toUserName",
+      type: "String",
+      description: "The name of the remote user, to which the peering is being requested."
+    }, {
+      name: "outAudio",
+      type: "MediaStream",
+      description: "An audio stream from the local user to send to the remote user."
+    }]
+  });
+
   var AudioChannel = function (_Primrose$WebRTCSocke) {
     _inherits(AudioChannel, _Primrose$WebRTCSocke);
 
@@ -9899,12 +12865,24 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AudioChannel).call(this, extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond));
 
+      pliny.property({
+        parent: "Primrose.Network.AudioChannel",
+        name: "outAudio",
+        type: "MediaStream",
+        description: "An audio channel from the local user to the remote user."
+      });
       Object.defineProperty(_this, "outAudio", {
         get: function get() {
           return outAudio;
         }
       });
 
+      pliny.property({
+        parent: "Primrose.Network.AudioChannel",
+        name: "inAudio",
+        type: "MediaStream",
+        description: "An audio channel from the remote user to the local user."
+      });
       _this.inAudio = null;
       _this.startTimeout();
       return _this;
@@ -10016,6 +12994,38 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
   var INSTANCE_COUNT = 0;
 
+  pliny.class({
+    parent: "Primrose.Network",
+    name: "DataChannel",
+    baseClass: "Primrose.WebRTCSocket",
+    description: "Manages the negotiation between peer users to set up bidirectional audio between the two.",
+    parameters: [{
+      name: "extraIceServers",
+      type: "Array",
+      description: "A collection of ICE servers to use on top of the default Google STUN servers."
+    }, {
+      name: "proxyServer",
+      type: "WebSocket",
+      description: "A connection over which to negotiate the peering."
+    }, {
+      name: "fromUserName",
+      type: "String",
+      description: "The name of the local user, from which the peering is being initiated."
+    }, {
+      name: "fromUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is performing the peering operation."
+    }, {
+      name: "toUserName",
+      type: "String",
+      description: "The name of the remote user, to which the peering is being requested."
+    }, {
+      name: "toUserIndex",
+      type: "Number",
+      description: "For users with multiple devices logged in at one time, this is the index of the device that is receiving the peering operation."
+    }]
+  });
+
   var DataChannel = function (_Primrose$WebRTCSocke) {
     _inherits(DataChannel, _Primrose$WebRTCSocke);
 
@@ -10024,6 +13034,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
       var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DataChannel).call(this, extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
 
+      pliny.property({
+        parent: "Primrose.Network.DataChannel",
+        name: "dataChannel",
+        type: "RTCDataChannel",
+        description: "A bidirectional data channel from the remote user to the local user."
+      });
       _this.dataChannel = null;
       return _this;
     }
@@ -10081,6 +13097,24 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+  pliny.class({
+    parent: "Primrose.Network",
+    name: "Manager",
+    parameters: [{
+      name: "localUser",
+      type: "Primrose.Input.FPSInput",
+      description: "The object that represents the player's location in the scene."
+    }, {
+      name: "audio",
+      type: "Primrose.Output.Audio3D",
+      description: "The audio manager being used in the current Environment."
+    }, {
+      name: "factories",
+      type: "Primrose.ModelLoader",
+      description: "Model factory for creating avatars for new remote users."
+    }]
+  });
+
   var Manager = function (_Primrose$AbstractEve) {
     _inherits(Manager, _Primrose$AbstractEve);
 
@@ -10260,6 +13294,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+  pliny.class({
+    parent: "Primrose.Network",
+    name: "RemoteUser",
+    description: "A networked user.",
+    parameters: [{
+      name: "userName",
+      type: "String",
+      description: "The name of the user."
+    }, {
+      name: "modelFactory",
+      type: "Primrose.ModelLoader",
+      description: "The factory for creating avatars for the user."
+    }, {
+      name: "nameMaterial",
+      type: "Number",
+      description: "The color to use with `textured()` to set as the material for the NAME object that will float above the user's avatar."
+    }]
+  });
+
   var RemoteUser = function () {
     function RemoteUser(userName, modelFactory, nameMaterial) {
       var _this = this;
@@ -10328,6 +13381,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function peer(extraIceServers, peeringSocket, microphone, localUserName, audio, goSecond) {
         var _this2 = this;
 
+        pliny.method({
+          parent: "Pliny.RemoteUser",
+          name: "peer",
+          returns: "Promise",
+          description: "Makes a WebRTCPeerConnection between the local user and this remote user and wires up the audio channel.",
+          parameters: [{
+            name: "extraIceServers",
+            type: "Array",
+            description: "A collection of ICE servers to use on top of the default Google STUN servers."
+          }, {
+            name: "peeringSocket",
+            type: "WebSocket",
+            description: "A WebSocket over which the peer connection will be negotiated."
+          }, {
+            name: "microphone",
+            type: "Promise",
+            description: "A promise that resolves with an audio stream that can be sent to the remote user, representing the local user's voice chat."
+          }, {
+            name: "localUserName",
+            type: "String",
+            description: "The name of the user initiating the peer connection."
+          }, {
+            name: "audio",
+            type: "Primrose.Output.Audio3D",
+            description: "The audio context form which audio spatialization objects will be created, and to which the remote user's voice chat will be piped."
+          }]
+        });
+
         return microphone.then(function (outAudio) {
           _this2.audioChannel = new Primrose.Network.AudioChannel(extraIceServers, peeringSocket, localUserName, _this2.userName, outAudio, goSecond);
           return _this2.audioChannel.ready.then(function () {
@@ -10359,6 +13440,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "unpeer",
       value: function unpeer() {
+        pliny.method({
+          parent: "Pliny.RemoteUser",
+          name: "unpeer",
+          description: "Cleans up after a user has left the room, removing the audio channels that were created for the user."
+        });
+
         if (this.audioChannel) {
           this.audioChannel.close();
           if (this.audioElement) {
@@ -10400,6 +13487,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "update",
       value: function update(dt) {
+        pliny.method({
+          parent: "Pliny.RemoteUser",
+          name: "update",
+          description: "Moves the avatar by its velocity for a set amount of time. Updates the audio panner information.",
+          parameters: [{
+            name: "dt",
+            type: "Number",
+            description: "The amount of time since the last update to the user."
+          }]
+        });
+
         this.time += dt;
         var fade = this.time >= RemoteUser.NETWORK_DT;
         this._updateV(this.headPosition, dt, fade);
@@ -10415,6 +13513,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }, {
       key: "setState",
       value: function setState(v) {
+        pliny.property({
+          parent: "Pliny.RemoteUser",
+          name: "state",
+          description: "After receiving a network update, sets the current state of the remote user so that, by the time the next network update comes around, the user will be where it is predicted to be.",
+          parameters: [{
+            name: "v",
+            type: "Array",
+            description: "The raw state array from the network (includes the un-read first username field)."
+          }]
+        });
+
         this.time = 0;
         this._predict(this.headPosition, v, 1);
         this._predict(this.stageQuaternion, v, 4);
@@ -10448,6 +13557,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   // start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
   // polyfill
   Window.prototype.AudioContext = Window.prototype.AudioContext || Window.prototype.webkitAudioContext || function () {};
+
+  pliny.class({
+    parent: "Primrose.Output",
+    name: "Audio3D",
+    description: "| [under construction]"
+  });
 
   var Audio3D = function () {
     function Audio3D() {
@@ -10624,6 +13739,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       value: function loadSource(sources, loop) {
         var _this4 = this;
 
+        pliny.method({
+          parent: "Primrose.Output.Audio3D",
+          name: "loadSound",
+          returns: "Promise<MediaElementAudioSourceNode>",
+          parameters: [{
+            name: "sources",
+            type: "String|Array<String>",
+            description: "A string URI to an audio source, or an array of string URIs to audio sources. Will be used as a collection of HTML5 &lt;source> tags as children of an HTML5 &lt;audio> tag."
+          }, {
+            name: "loop",
+            type: "Boolean",
+            optional: true,
+            description: "indicate that the sound should be played on loop."
+          }],
+          description: "Loads the first element of the `sources` array for which the browser supports the file format as an HTML5 &lt;audio> tag to use as an `AudioSourceNode` attached to the current `AudioContext`. This does not load all of the audio files. It only loads the first one of a list of options that could work, because all browsers do not support the same audio formats.",
+          examples: [{
+            name: "Load a single audio file.",
+            description: "There is no one, good, compressed audio format supported in all browsers, but they do all support uncompressed WAV. You shouldn't use this on the Internet, but it might be okay for a local solution.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource(\"mySong.wav\").then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+          }, {
+            name: "Load a single audio file from a list of options.",
+            description: "There is no one, good, compressed audio format supported in all browsers. As a hack around the problem, HTML5 media tags may include one or more &lt;source> tags as children to specify a cascading list of media sources. The browser will select the first one that it can successfully decode.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ]).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+          }, {
+            name: "Load an ambient audio file that should be looped.",
+            description: "The only audio option that is available is whether or not the audio file should be looped. You specify this with the second parameter to the `loadSource()` method, a `Boolean` value to indicate that looping is desired.\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var audio = new Primrose.Output.Audio3D();\n\
+  audio.loadSource([\n\
+    \"mySong.mp3\",\n\
+    \"mySong.aac\",\n\
+    \"mySong.ogg\"\n\
+  ], true).then(function(node){\n\
+    node.connect(audio.context.destination);\n\
+  });"
+          }]
+        });
+
         return new Promise(function (resolve, reject) {
           if (!(sources instanceof Array)) {
             sources = [sources];
@@ -10705,6 +13873,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+  pliny.class({
+    parent: "Primrose.Output",
+    name: "HapticGlove",
+    description: "| [under construction]"
+  });
+
   function HapticGlove(options) {
 
     options.port = options.port || HapticGlove.DEFAULT_PORT;
@@ -10827,6 +14001,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     return 440 * Math.pow(PIANO_BASE, n - 49);
   }
 
+  pliny.class({
+    parent: "Primrose.Output",
+    name: "Music",
+    description: "| [under construction]"
+  });
+
   function Music(context, type, numNotes) {
     this.audio = context || new AudioContext();
     if (this.audio && this.audio.createGain) {
@@ -10921,6 +14101,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var Speech = null;
 
   try {
+    pliny.class({
+      parent: "Primrose.Output",
+      name: "Speech",
+      description: "| [under construction]"
+    });
     Speech = function Speech(options) {
       options = options || {};
       var voices = speechSynthesis.getVoices().filter(function (v) {
@@ -10944,6 +14129,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     console.error(exp);
 
     // in case of error, return a shim that lets us continue unabated
+    pliny.class({
+      parent: "Primrose.Output",
+      name: "Speech",
+      description: "| [under construction]"
+    });
     Speech = function Speech() {
       this.speak = function () {};
     };
@@ -10957,6 +14147,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "ID",
+    description: "Returns a randomized string to be used as a general purpose identifier. Collisions are possible, but should be rare.",
+    returns: "String",
+    examples: [{
+      name: "Generate 10 random identifiers.",
+      description: "To generate a randomized identifier, call the `Primrose.Random.ID()` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.ID());\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> 25xzdqnhg1ma2qsb3k1n61or\n\
+> 1hyajmimpyjb4chvge5ng66r\n\
+> cq3dy9qnkwhneza3vr3haor\n\
+> g3l5k2kfwmxjrxjwg0uj714i\n\
+> 7qsta7cutxke8t88pahy3nmi\n\
+> h75g0nj0d4gh7zsyowxko6r\n\
+> 7pbej49fhhd5icimp3krzfr\n\
+> 3vnlovkkvyvmetsjcyirizfr\n\
+> icrehedvz97dpgkusfumzpvi\n\
+> 9p06sytn6dfearuibsnn4s4i"
+    }]
+  });
+
   function ID() {
     return (Math.random() * Math.log(Number.MAX_VALUE)).toString(36).replace(".", "");
   }
@@ -10969,6 +14189,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "color",
+    description: "Returns a random hex RGB number to be used as a color.",
+    returns: "Number",
+    examples: [{
+      name: "Generate a random color.",
+      description: "To generate colors at random, call the `Primrose.Random.color()` function:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.color().toString(16));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> 351233\n\
+> 3e8e9\n\
+> 8a85a6\n\
+> 5fad58\n\
+> 17fe2b\n\
+> d4b42b\n\
+> e986bf\n\
+> 38541a\n\
+> 5a19db\n\
+> 5f5c50"
+    }]
+  });
+
   function color() {
     var r = Primrose.Random.int(0, 256),
         g = Primrose.Random.int(0, 256),
@@ -10984,6 +14234,73 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "int",
+    description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive. Includes a means to skew the results in one direction or another. The number is as good as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
+    parameters: [{
+      name: "min",
+      type: "Number",
+      description: "The included minimum side of the range of numbers."
+    }, {
+      name: "max",
+      type: "Number",
+      description: "The excluded maximum side of the range of numbers."
+    }, {
+      name: "power",
+      type: "Number",
+      optional: true,
+      description: "The power to which to raise the random number before scaling and translating into the desired range. Values greater than 1 skew output values to the minimum of the range. Values less than 1 skew output values to the maximum of the range.",
+      default: 1
+    }],
+    returns: "Number",
+    examples: [{
+      name: "Generate a random integer numbers on the range [-10, 10).",
+      description: "To generate a random integer on a closed range, call the `Primrose.Random.integer` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.int(-10, 10));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> -3  \n\
+> 1  \n\
+> -2  \n\
+> 8  \n\
+> 7  \n\
+> 4  \n\
+> 5  \n\
+> -9  \n\
+> 4  \n\
+> 0"
+    }, {
+      name: "Generate skewed random integer numbers on the range [-100, 100).",
+      description: "To generate a random integer skewed to one end of the range on a closed range, call the `Primrose.Random.integer` function with the `power` parameter as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.int(-100, 100, 5));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> -100  \n\
+> -100  \n\
+> -78  \n\
+> -81  \n\
+> -99  \n\
+> 18  \n\
+> -100  \n\
+> -100  \n\
+> -100  \n\
+> 52"
+    }]
+  });
+
   function int(min, max, power) {
     power = power || 1;
     if (max === undefined) {
@@ -11003,6 +14320,48 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "item",
+    description: "Returns a random element from an array.",
+    parameters: [{
+      name: "arr",
+      type: "Array",
+      description: "The array form which to pick items."
+    }],
+    returns: "Any",
+    examples: [{
+      name: "Select a random element from an array.",
+      description: "To pick an item from an array at random, call the `Primrose.Random.item` function with the `power` parameter as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var numbers = [\n\
+    \"one\",\n\
+    \"two\",\n\
+    \"three\",\n\
+    \"four\",\n\
+    \"five\"\n\
+  ];\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.item(numbers));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> three  \n\
+> four  \n\
+> four  \n\
+> two  \n\
+> three  \n\
+> two  \n\
+> five  \n\
+> four  \n\
+> three  \n\
+> two"
+    }]
+  });
+
   function item(arr) {
     return arr[Primrose.Random.int(arr.length)];
   }
@@ -11015,6 +14374,45 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "number",
+    description: "Returns a random floating-point number on a given range [min, max), i.e. min is inclusive, max is exclusive. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
+    parameters: [{
+      name: "min",
+      type: "Number",
+      description: "The included minimum side of the range of numbers."
+    }, {
+      name: "max",
+      type: "Number",
+      description: "The excluded maximum side of the range of numbers."
+    }],
+    returns: "Number",
+    examples: [{
+      name: "Generate a random number on the range [-1, 1).",
+      description: "To generate a random number on a closed range, call the `Primrose.Random.number` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.number(-1, 1));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> -0.4869012129493058  \n\
+> 0.5300767715089023  \n\
+> 0.11962601682171226  \n\
+> -0.22012147679924965  \n\
+> 0.48508461797609925  \n\
+> -0.8488651723600924  \n\
+> 0.15711558377370238  \n\
+> -0.3644236018881202  \n\
+> 0.4486056035384536  \n\
+> -0.9659552359953523"
+    }]
+  });
+
   function number(min, max) {
     return Math.random() * (max - min) + min;
   }
@@ -11027,6 +14425,49 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+  pliny.function({
+    parent: "Primrose.Random",
+    name: "steps",
+    description: "Returns a random integer number on a given range [min, max), i.e. min is inclusive, max is exclusive, sticking to a number of steps in between. Useful for randomly generating music note values on pentatonic scales. As random as your JavaScript engine supports with Math.random(), which is not good enough for crypto, but is certainly good enough for games.",
+    parameters: [{
+      name: "min",
+      type: "Number",
+      description: "The included minimum side of the range of numbers."
+    }, {
+      name: "max",
+      type: "Number",
+      description: "The excluded maximum side of the range of numbers."
+    }, {
+      name: "steps",
+      type: "Number",
+      description: "The number of steps between individual integers, e.g. if min is even and step is even, then no odd numbers will be generated."
+    }],
+    returns: "Number",
+    examples: [{
+      name: "Generate random, even numbers.",
+      description: "To generate numbers on a closed range with a constant step size between them, call the `Primrose.Random.step` function as shown:\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  for(var i = 0; i < 10; ++i){\n\
+    console.log(Primrose.Random.steps(0, 100, 2));\n\
+  }\n\
+\n\
+## Result (note that this is just one possible outcome):\n\
+> 86  \n\
+> 32  \n\
+> 86  \n\
+> 56  \n\
+> 4  \n\
+> 96  \n\
+> 68  \n\
+> 92  \n\
+> 4  \n\
+> 36"
+    }]
+  });
+
   function steps(min, max, steps) {
     return min + Primrose.Random.int(0, (1 + max - min) / steps) * steps;
   }
@@ -11041,6 +14482,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "CodePage",
+    description: "| [under construction]"
+  });
+
   function CodePage(name, lang, options) {
     this.name = name;
     this.language = lang;
@@ -11171,6 +14618,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "CodePages",
+    description: "The CodePages namespace contains international keyboard parameters."
+  });
   var CodePages = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -11181,6 +14633,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "CommandPack",
+    description: "| [under construction]"
+  });
+
   function CommandPack(name, commands) {
     this.name = name;
     copyObject(this, commands);
@@ -11194,6 +14652,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "CommandPacks",
+    description: "The CommandPacks namespace contains sets of keyboard shortcuts for different types of text-oriented controls."
+  });
   var CommandPacks = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -11204,6 +14667,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "Controls",
+    description: "The Controls namespace contains different types of text-oriented controls."
+  });
   var Controls = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -11231,6 +14699,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
     return reverse;
   }();
+
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Cursor",
+    description: "| [under construction]"
+  });
 
   function Cursor(i, x, y) {
     this.i = i || 0;
@@ -11461,9 +14935,88 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Grammar",
+    parameters: [{
+      name: "name",
+      type: "String",
+      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+    }, {
+      name: "rules",
+      type: "Array",
+      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+    }],
+    description: "A Grammar is a collection of rules for processing text into tokens. Tokens are special characters that tell us about the structure of the text, things like keywords, curly braces, numbers, etc. After the text is tokenized, the tokens get a rough processing pass that groups them into larger elements that can be rendered in color on the screen.\n\
+\n\
+As tokens are discovered, they are removed from the text being processed, so order is important. Grammar rules are applied in the order they are specified, and more than one rule can produce the same token type.\n\
+\n\
+See [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names.",
+    examples: [{
+      name: "A plain-text \"grammar\".",
+      description: "Plain text does not actually have a grammar that needs to be processed. However, to get the text to work with the rendering system, a basic grammar is necessary to be able to break the text up into lines and prepare it for rendering.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var plainTextGrammar = new Primrose.Text.Grammar(\n\
+    // The name is for displaying in options views.\n\
+    \"Plain-text\", [\n\
+    // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+    [\"newlines\", /(?:\\r\\n|\\r|\\n)/] \n\
+  ] );"
+    }, {
+      name: "A grammar for BASIC",
+      description: "The BASIC programming language is now defunct, but a grammar for it to display in Primrose is quite easy to build.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var basicGrammar = new Primrose.Text.Grammar( \"BASIC\",\n\
+    // Grammar rules are applied in the order they are specified.\n\
+    [\n\
+      // Text needs at least the newlines token, or else every line will attempt to render as a single line and the line count won't work.\n\
+      [ \"newlines\", /(?:\\r\\n|\\r|\\n)/ ],\n\
+      // BASIC programs used to require the programmer type in her own line numbers. The start at the beginning of the line.\n\
+      [ \"lineNumbers\", /^\\d+\\s+/ ],\n\
+      // Comments were lines that started with the keyword \"REM\" (for REMARK) and ran to the end of the line. They did not have to be numbered, because they were not executable and were stripped out by the interpreter.\n\
+      [ \"startLineComments\", /^REM\\s/ ],\n\
+      // Both double-quoted and single-quoted strings were not always supported, but in this case, I'm just demonstrating how it would be done for both.\n\
+      [ \"strings\", /\"(?:\\\\\"|[^\"])*\"/ ],\n\
+      [ \"strings\", /'(?:\\\\'|[^'])*'/ ],\n\
+      // Numbers are an optional dash, followed by a optional digits, followed by optional period, followed by 1 or more required digits. This allows us to match both integers and decimal numbers, both positive and negative, with or without leading zeroes for decimal numbers between (-1, 1).\n\
+      [ \"numbers\", /-?(?:(?:\\b\\d*)?\\.)?\\b\\d+\\b/ ],\n\
+      // Keywords are really just a list of different words we want to match, surrounded by the \"word boundary\" selector \"\\b\".\n\
+      [ \"keywords\",\n\
+        /\\b(?:RESTORE|REPEAT|RETURN|LOAD|LABEL|DATA|READ|THEN|ELSE|FOR|DIM|LET|IF|TO|STEP|NEXT|WHILE|WEND|UNTIL|GOTO|GOSUB|ON|TAB|AT|END|STOP|PRINT|INPUT|RND|INT|CLS|CLK|LEN)\\b/\n\
+      ],\n\
+      // Sometimes things we want to treat as keywords have different meanings in different locations. We can specify rules for tokens more than once.\n\
+      [ \"keywords\", /^DEF FN/ ],\n\
+      // These are all treated as mathematical operations.\n\
+      [ \"operators\",\n\
+        /(?:\\+|;|,|-|\\*\\*|\\*|\\/|>=|<=|=|<>|<|>|OR|AND|NOT|MOD|\\(|\\)|\\[|\\])/\n\
+      ],\n\
+      // Once everything else has been matched, the left over blocks of words are treated as variable and function names.\n\
+      [ \"identifiers\", /\\w+\\$?/ ]\n\
+    ] );"
+    }]
+  });
+
   function Grammar(name, rules) {
+    pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: " name",
+      type: "String",
+      description: "A user-friendly name for the grammar, to be able to include it in an options listing."
+    });
     this.name = name;
 
+    pliny.property({
+      parent: "Primrose.Text.Grammar",
+      name: "grammar",
+      type: "Array",
+      description: "A collection of rules to apply to tokenize text. The rules should be an array of two-element arrays. The first element should be a token name (see [`Primrose.Text.Rule`](#Primrose_Text_Rule) for a list of valid token names), followed by a regular expression that selects the token out of the source code."
+    });
     // clone the preprocessing grammar to start a new grammar
     this.grammar = rules.map(function (rule) {
       return new Primrose.Text.Rule(rule[0], rule[1]);
@@ -11540,6 +15093,49 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return temp.innerHTML;
     };
 
+    pliny.method({
+      parent: "Primrose.Text.Grammar",
+      name: "tokenize",
+      parameters: [{
+        name: "text",
+        type: "String",
+        description: "The text to tokenize."
+      }],
+      returns: "An array of tokens, ammounting to drawing instructions to the renderer. However, they still need to be layed out to fit the bounds of the text area.",
+      description: "Breaks plain text up into a list of tokens that can later be rendered with color.",
+      examples: [{
+        name: 'Tokenize some JavaScript',
+        description: 'Primrose comes with a grammar for JavaScript built in.\n\
+\n\
+## Code:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  var tokens = new Primrose.Text.Grammars.JavaScript\n\
+    .tokenize("var x = 3;\\n\\\n\
+  var y = 2;\\n\\\n\
+  console.log(x + y);");\n\
+  console.log(JSON.stringify(tokens));\n\
+\n\
+## Result:\n\
+\n\
+  grammar(\"JavaScript\");\n\
+  [ \n\
+    { "value": "var", "type": "keywords", "index": 0, "line": 0 },\n\
+    { "value": " x = ", "type": "regular", "index": 3, "line": 0 },\n\
+    { "value": "3", "type": "numbers", "index": 8, "line": 0 },\n\
+    { "value": ";", "type": "regular", "index": 9, "line": 0 },\n\
+    { "value": "\\n", "type": "newlines", "index": 10, "line": 0 },\n\
+    { "value": " y = ", "type": "regular", "index": 11, "line": 1 },\n\
+    { "value": "2", "type": "numbers", "index": 16, "line": 1 },\n\
+    { "value": ";", "type": "regular", "index": 17, "line": 1 },\n\
+    { "value": "\\n", "type": "newlines", "index": 18, "line": 1 },\n\
+    { "value": "console", "type": "members", "index": 19, "line": 2 },\n\
+    { "value": ".", "type": "regular", "index": 26, "line": 2 },\n\
+    { "value": "log", "type": "functions", "index": 27, "line": 2 },\n\
+    { "value": "(x + y);", "type": "regular", "index": 30, "line": 2 }\n\
+  ]'
+      }]
+    });
     this.tokenize = function (text) {
       // all text starts off as regular text, then gets cut up into tokens of
       // more specific type
@@ -11564,6 +15160,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "Grammars",
+    description: "The Grammars namespace contains grammar parsers for different types of programming languages, to enable syntax highlighting."
+  });
   var Grammars = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -11589,6 +15190,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     setCursorCommand(obj, baseMod || "NORMAL", key, func, "front");
     setCursorCommand(obj, baseMod + "SHIFT", key, func, "back");
   }
+
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "OperatingSystem",
+    description: "| [under construction]"
+  });
 
   var OperatingSystem = function () {
     function OperatingSystem(name, pre1, pre2, redo, pre3, home, end, pre5, fullHome, fullEnd) {
@@ -11666,6 +15273,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "OperatingSystems",
+    description: "The OperatingSystems namespace contains sets of keyboard shortcuts for different operating systems."
+  });
   var OperatingSystems = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -11676,6 +15288,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Point",
+    description: "| [under construction]"
+  });
+
   function Point(x, y) {
     this.set(x || 0, y || 0);
   }
@@ -11712,6 +15330,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Rectangle",
+    description: "| [under construction]"
+  });
+
   var Rectangle = function () {
     function Rectangle(x, y, width, height) {
       _classCallCheck(this, Rectangle);
@@ -11839,6 +15463,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Rule",
+    description: "| [under construction]"
+  });
+
   function Rule(name, test) {
     this.name = name;
     this.test = test;
@@ -11887,6 +15517,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Size",
+    description: "| [under construction]"
+  });
+
   function Size(width, height) {
     this.set(width || 0, height || 0);
   }
@@ -11921,6 +15557,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Terminal",
+    description: "| [under construction]"
+  });
+
   var Terminal = function Terminal(inputEditor, outputEditor) {
     _classCallCheck(this, Terminal);
 
@@ -12046,6 +15688,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+  pliny.namespace({
+    parent: "Primrose.Text",
+    name: "Themes",
+    description: "The Themes namespace contains color themes for text-oriented controls, for use when coupled with a parsing grammar."
+  });
   var Themes = {};
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -12056,6 +15703,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+  pliny.class({
+    parent: "Primrose.Text",
+    name: "Token",
+    description: "| [under construction]"
+  });
+
   function Token(value, type, index, line) {
     this.value = value;
     this.type = type;
@@ -12097,6 +15750,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
   var WIDTH = 512,
       HEIGHT = 150;
+
+  pliny.class({
+    parent: "Primrose.X",
+    name: "LoginForm",
+    baseClass: "Primrose.Controls.Form",
+    description: "A basic authentication form."
+  });
 
   var LoginForm = function (_Primrose$Controls$Fo) {
     _inherits(LoginForm, _Primrose$Controls$Fo);
@@ -12206,6 +15866,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
   var COUNTER = 0;
 
+  pliny.class({
+    parent: "Primrose.X",
+    name: "SignupForm",
+    baseClass: "Primrose.Controls.Form",
+    description: "A basic registration form."
+  });
+
   var SignupForm = function (_Primrose$Controls$Fo) {
     _inherits(SignupForm, _Primrose$Controls$Fo);
 
@@ -12314,6 +15981,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
   var CodePage = Primrose.Text.CodePage;
 
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
+    name: "DE_QWERTZ",
+    description: "| [under construction]"
+  });
   var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
     deadKeys: [220, 221, 160, 192],
     NORMAL: {
@@ -12442,6 +16114,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
   var CodePage = Primrose.Text.CodePage;
 
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
+    name: "EN_UKX",
+    description: "| [under construction]"
+  });
   var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
     CTRLALT: {
       "52": "€",
@@ -12533,6 +16210,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
   var CodePage = Primrose.Text.CodePage;
 
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
+    name: "EN_US",
+    description: "| [under construction]"
+  });
   var EN_US = new CodePage("English: USA", "en-US", {
     NORMAL: {
       "32": " ",
@@ -12598,6 +16280,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
   var CodePage = Primrose.Text.CodePage;
 
+  pliny.record({
+    parent: "Primrose.Text.CodePages",
+    name: "FR_AZERTY",
+    description: "| [under construction]"
+  });
   var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
     deadKeys: [221, 50, 55],
     NORMAL: {
@@ -12701,6 +16388,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+  pliny.record({
+    parent: "Primrose.Text.CommandPacks",
+    name: "TextInput",
+    baseClass: "Primrose.Text.CommandPack",
+    description: "| [under construction]"
+  });
+
   var BasicTextInput = function (_Primrose$Text$Comman) {
     _inherits(BasicTextInput, _Primrose$Text$Comman);
 
@@ -12826,6 +16520,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+  pliny.record({
+    parent: "Primrose.Text.CommandPacks",
+    name: "TextEditor",
+    description: "| [under construction]"
+  });
   var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input commands", {
     NORMAL_UPARROW: function NORMAL_UPARROW(prim, tokenRows) {
       prim.cursorUp(tokenRows, prim.frontCursor);
@@ -12887,6 +16586,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // If SHIFT is not held, then "front.
   // If SHIFT is held, then "back"
   //
+  pliny.record({
+    parent: "Primrose.Text.CommandPacks",
+    name: "TextInput",
+    description: "| [under construction]"
+  });
   var TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
   // end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -12897,6 +16601,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+  pliny.class({
+    parent: "Primrose.Text.Controls",
+    name: "PlainText",
+    description: "| [under construction]"
+  });
+
   function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
     text = text.replace(/\r\n/g, "\n");
     var lines = text.split("\n");
@@ -12968,6 +16678,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   var SCROLL_SCALE = isFirefox ? 3 : 100,
       COUNTER = 0,
       OFFSET = 5;
+
+  pliny.class({
+    parent: "Primrose.Text.Controls",
+    name: "TextBox",
+    description: "Syntax highlighting textbox control.",
+    baseClass: "Primrose.Surface",
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the TextBox."
+    }]
+  });
 
   var TextBox = function (_Primrose$Surface) {
     _inherits(TextBox, _Primrose$Surface);
@@ -13964,6 +17690,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
   var COUNTER = 0;
 
+  pliny.class({
+    parent: "Primrose.Text.Controls",
+    name: "TextInput",
+    description: "plain text input box.",
+    baseClass: "Primrose.Text.Controls.TextBox",
+    parameters: [{
+      name: "idOrCanvasOrContext",
+      type: "String or HTMLCanvasElement or CanvasRenderingContext2D",
+      description: "Either an ID of an element that exists, an element, or the ID to set on an element that is to be created."
+    }, {
+      name: "options",
+      type: "Object",
+      description: "Named parameters for creating the TextInput."
+    }]
+  });
+
   var TextInput = function (_Primrose$Text$Contro) {
     _inherits(TextInput, _Primrose$Text$Contro);
 
@@ -14036,6 +17778,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
   // we don't use strict here because this grammar includes an interpreter that uses `eval()`
 
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
+    name: "Basic",
+    description: "| [under construction]"
+  });
   var Basic = new Primrose.Text.Grammar("BASIC",
   // Grammar rules are applied in the order they are specified.
   [
@@ -14642,6 +18389,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
+    name: "JavaScript",
+    description: "| [under construction]"
+  });
   var JavaScript = new Primrose.Text.Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -14652,6 +18404,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
+    name: "PlainText",
+    description: "| [under construction]"
+  });
   var PlainText = new Primrose.Text.Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -14662,6 +18419,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+  pliny.value({
+    parent: "Primrose.Text.Grammars",
+    name: "TestResults",
+    description: "| [under construction]"
+  });
   var TestResults = new Primrose.Text.Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
   // end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -14672,6 +18434,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+  pliny.value({
+    parent: "Primrose.Text.OperatingSystems",
+    name: "OSX",
+    description: "| [under construction]"
+  });
   var OSX = new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
   // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -14686,6 +18453,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   // cut, copy, and paste commands are events that the browser manages,
   // so we don't have to include handlers for them here.
   ///
+  pliny.value({
+    parent: "Primrose.Text.OperatingSystems",
+    name: "OSX",
+    description: "| [under construction]"
+  });
   var Windows = new Primrose.Text.OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
   // end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
   ////////////////////////////////////////////////////////////////////////////////
@@ -14696,6 +18468,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+  pliny.record({
+    parent: "Primrose.Text.Themes",
+    name: "Dark",
+    description: "| [under construction]"
+  });
   var Dark = {
     name: "Dark",
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -14750,6 +18527,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+  pliny.record({
+    parent: "Primrose.Text.Themes",
+    name: "Default",
+    description: "| [under construction]"
+  });
   var Default = {
     name: "Light",
     fontFamily: "'Droid Sans Mono', 'Consolas', 'Lucida Console', 'Courier New', 'Courier', monospace",
@@ -14820,6 +18602,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+  pliny.method({
+    parent: "THREE.Matrix4",
+    name: "toString ",
+    description: "A polyfill method for printing objects.",
+    parameters: [{
+      name: "digits",
+      type: "Number",
+      description: "the number of significant figures to print."
+    }]
+  });
   function toString(digits) {
     this.transpose();
     var parts = this.toArray();
@@ -14868,6 +18660,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+  pliny.method({
+    parent: "THREE.Quaternion",
+    name: "toString ",
+    description: "A polyfill method for printing objects.",
+    parameters: [{
+      name: "digits",
+      type: "Number",
+      description: "the number of significant figures to print."
+    }]
+  });
   function toString(digits) {
     var parts = this.toArray();
     if (digits !== undefined) {
@@ -14890,6 +18692,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+  pliny.method({
+    parent: "THREE.Object3D",
+    name: "addToBrowserEnvironment",
+    description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene. This half of the polyfill implements the visitor pattern, so that individual objects can define their own processing for this action.",
+    parameters: [{
+      name: "env",
+      type: "Primrose.BrowserEnvironment",
+      description: "The environment (with collision detection and ray-picking capability) to which to register objects"
+    }, {
+      name: "scene",
+      type: "THREE.Object3D",
+      description: "The true parent element for `this` object"
+    }]
+  });
   function addToBrowserEnvironment(env, scene) {
     var _this = this;
 
@@ -14897,6 +18713,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     // this has to be done as a lambda expression because it needs to capture the
     // env variable provided in the addToBrowserEnvironment call;
 
+    pliny.method({
+      parent: "THREE.Object3D",
+      name: "appendChild",
+      description: "A polyfill method for being able to add the object to a `Primrose.BrowserEnvironment` using `appendChild()` and to add other elements to the Object3D using `appendChild()` such that they may be pickable in the scene.",
+      parameters: [{
+        name: "child",
+        type: "Object",
+        description: "Any Primrose.Entity or THREE.Object3D to add to this object."
+      }]
+    });
     this.appendChild = function (child) {
       if (child.addToBrowserEnvironment) {
         return child.addToBrowserEnvironment(env, _this);
@@ -14932,6 +18758,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 (function () {
   ////////////////////////////////////////////////////////////////////////////////
   // start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+  pliny.method({
+    parent: "THREE.Vector3",
+    name: "toString ",
+    description: "A polyfill method for printing objects.",
+    parameters: [{
+      name: "digits",
+      type: "Number",
+      description: "the number of significant figures to print."
+    }]
+  });
   function toString(digits) {
     var parts = this.toArray();
     if (digits !== undefined) {

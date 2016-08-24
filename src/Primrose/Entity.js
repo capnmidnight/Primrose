@@ -1,5 +1,3 @@
-"use strict";
-
 var entityKeys = [],
   entities = new WeakMap();
 

@@ -1,6 +1,3 @@
-"use strict";
-
-
 pliny.function({
   name: "readForm",
   parameters: [{

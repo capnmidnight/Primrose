@@ -1,5 +1,3 @@
-"use strict";
-
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {

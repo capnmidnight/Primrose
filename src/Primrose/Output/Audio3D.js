@@ -1,5 +1,3 @@
-"use strict";
-
 // polyfill
 Window.prototype.AudioContext =
   Window.prototype.AudioContext ||
@@ -256,9 +254,10 @@ class Audio3D {
         })
         .forEach(audio.appendChild.bind(audio));
       audio.oncanplay = () => {
+        var snd = null;
         if (this.context) {
           audio.oncanplay = null;
-          var snd = {
+          snd = {
             volume: this.context.createGain(),
             source: this.context.createMediaElementSource(audio)
           };

@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose.Input",
     name: "Location",

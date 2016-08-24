@@ -1,5 +1,3 @@
-"use strict";
-
 const SETTINGS_TO_ZERO = ["heading", "pitch", "roll", "pointerPitch", "headX", "headY", "headZ"],
   TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),

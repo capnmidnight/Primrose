@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "sphere",
   description: "| [under construction]"

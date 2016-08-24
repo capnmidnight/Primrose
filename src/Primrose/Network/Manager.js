@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose.Network",
     name: "Manager",
@@ -68,7 +66,7 @@ class Manager extends Primrose.AbstractEventEmitter {
     if (key !== this.userName) {
       var user = this.users[key];
       if (user) {
-        user.state = state;
+        user.setState(state);
       }
       else {
         console.error("Unknown user", key);
@@ -90,7 +88,7 @@ class Manager extends Primrose.AbstractEventEmitter {
           video: false
         })
         .then(Primrose.Output.Audio3D.setAudioStream)
-        .catch(console.warn.bind(console, "Can't get audio"))
+        .catch(console.warn.bind(console, "Can't get audio"));
     }
     if (!this._socket) {
       this._socket = socket;

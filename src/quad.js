@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "quad",
   description: "| [under construction]"

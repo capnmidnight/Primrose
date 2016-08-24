@@ -1,5 +1,3 @@
-"use strict";
-
 const DISPLACEMENT = new THREE.Vector3(),
   EULER_TEMP = new THREE.Euler(),
   WEDGE = Math.PI / 3;

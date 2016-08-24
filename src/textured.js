@@ -1,5 +1,3 @@
-"use strict";
-
 var textureLoader = null,
   textureCache = {};
 

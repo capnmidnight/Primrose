@@ -1,5 +1,3 @@
-"use strict";
-
 const PEERING_TIMEOUT_LENGTH = 10000;
 
 /* polyfills */
@@ -332,14 +330,14 @@ class WebRTCSocket {
 
           // This is just for debugging purposes.
           this.rtc.onsignalingstatechange = (evt) => this._log(1, "[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
-          this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection/Gathering State: %s/%s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
+          this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
 
           // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
           // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
           // you that negotiation is necessary, and only then create the offer. There is a race-condition between
           // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
           // don't wait for the appropriate time.
-          this.rtc.onnegotiationneeded = (evt) => this.createOffer()
+          this.rtc.onnegotiationneeded = (evt) => this.createOffer(this.offerOptions)
             // record the local description.
             .then(descriptionCreated);
 

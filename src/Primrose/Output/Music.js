@@ -1,5 +1,3 @@
-"use strict";
-
 /* polyfill */
 Window.prototype.AudioContext =
   Window.prototype.AudioContext ||

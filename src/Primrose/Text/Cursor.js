@@ -1,5 +1,3 @@
-"use strict";
-
 // unicode-aware string reverse
 var reverse = (function () {
   var combiningMarks =

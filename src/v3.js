@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "v3",
   description: "A shortcut function for creating a new THREE.Vector3 object.",

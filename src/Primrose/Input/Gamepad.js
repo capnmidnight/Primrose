@@ -1,5 +1,3 @@
-"use strict";
-
 navigator.getGamepads = navigator.getGamepads ||
   navigator.webkitGetGamepads;
 

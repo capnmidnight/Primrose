@@ -1,4 +1,3 @@
-"use strict";
 var CodePage = Primrose.Text.CodePage;
 
 pliny.record({
