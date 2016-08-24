@@ -55,7 +55,7 @@ class InputProcessor {
     this.lastState = "";
     this.listeners = {
       teleport: []
-    }
+    };
 
     var readMetaKeys = (event) => {
       for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
