@@ -231,7 +231,7 @@ ModelLoader.loadObject = function (src, type, progress) {
           .then(() => ModelLoader.loadObject(newPath, "mtl", progress))
           .then((materials) => {
             materials.preload();
-            Loader.setMaterials(materials)
+            Loader.setMaterials(materials);
           });
       }
       else if (extension === ".mtl") {
@@ -265,7 +265,7 @@ ModelLoader.loadObject = function (src, type, progress) {
       if (extension !== ".mtl" && extension !== ".typeface.js") {
         promise = promise.then(setProperties);
       }
-      promise = promise.catch(console.error.bind(console, "MODEL_ERR", src))
+      promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
       return promise;
     }
   }

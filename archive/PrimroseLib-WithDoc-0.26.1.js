@@ -12260,7 +12260,7 @@ var Touch = function (_Primrose$InputProces) {
 
     DOMElement = DOMElement || window;
 
-    function setState(stateChange, setAxis, event) {
+    var setState = function setState(stateChange, setAxis, event) {
       var touches = event.changedTouches,
           i = 0,
           t = null;
@@ -12268,14 +12268,14 @@ var Touch = function (_Primrose$InputProces) {
         t = touches[i];
 
         if (setAxis) {
-          this.setAxis("X" + t.identifier, t.pageX);
-          this.setAxis("Y" + t.identifier, t.pageY);
+          _this.setAxis("X" + t.identifier, t.pageX);
+          _this.setAxis("Y" + t.identifier, t.pageY);
         } else {
-          this.setAxis("LX" + t.identifier, t.pageX);
-          this.setAxis("LY" + t.identifier, t.pageY);
+          _this.setAxis("LX" + t.identifier, t.pageX);
+          _this.setAxis("LY" + t.identifier, t.pageY);
         }
 
-        this.setButton("FINGER" + t.identifier, stateChange);
+        _this.setButton("FINGER" + t.identifier, stateChange);
       }
       touches = event.touches;
 
@@ -12283,9 +12283,9 @@ var Touch = function (_Primrose$InputProces) {
       for (i = 0; i < touches.length; ++i) {
         fingerState |= 1 << t.identifier;
       }
-      this.FINGERS = fingerState;
+      _this.FINGERS = fingerState;
       event.preventDefault();
-    }
+    };
 
     DOMElement.addEventListener("touchstart", setState.bind(_this, true, false), false);
     DOMElement.addEventListener("touchend", setState.bind(_this, false, true), false);

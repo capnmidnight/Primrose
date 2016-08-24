@@ -46,7 +46,7 @@ class Gamepad extends Primrose.PoseInputProcessor {
       id = "Unknown";
     }
     id = (id + "_" + (pad.index || 0))
-      .replace(/\s+/g, "_")
+      .replace(/\s+/g, "_");
     return id;
   }
 
@@ -56,14 +56,14 @@ class Gamepad extends Primrose.PoseInputProcessor {
       padIDs = [],
       newPads = [],
       oldPads = [],
-      i;
+      i, padID;
 
     if (maybePads) {
       for (i = 0; i < maybePads.length; ++i) {
         var maybePad = maybePads[i];
         if (maybePad) {
-          var padID = Gamepad.ID(maybePad),
-            padIdx = currentDeviceIDs.indexOf(padID);
+          padID = Gamepad.ID(maybePad);
+          var padIdx = currentDeviceIDs.indexOf(padID);
           pads.push(maybePad);
           padIDs.push(padID);
           if (padIdx === -1) {
@@ -80,8 +80,8 @@ class Gamepad extends Primrose.PoseInputProcessor {
     }
 
     for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
-      var padID = currentDeviceIDs[i],
-        mgr = currentManagers[padID],
+      padID = currentDeviceIDs[i];
+      var mgr = currentManagers[padID],
         pad = currentDevices[i];
       if (padIDs.indexOf(padID) === -1) {
         oldPads.push(padID);
