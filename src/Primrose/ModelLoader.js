@@ -238,7 +238,7 @@ ModelLoader.loadObject = function (src, type, progress) {
         var match = src.match(PATH_PATTERN),
           dir = match[1];
         src = match[2] + match[3];
-        Loader.setBaseUrl(dir);
+        Loader.setTexturePath(dir);
         Loader.setPath(dir);
       }
 
