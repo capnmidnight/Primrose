@@ -167,7 +167,7 @@ class Entity {
 
   set id(v) {
     var oldID = this._id;
-    this._id = new String(v);
+    this._id = new Object(v);
     emit.call(this, "_idchanged", {
       oldID: oldID,
       entity: this

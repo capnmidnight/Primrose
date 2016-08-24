@@ -37,16 +37,16 @@ function textured(geometry, txt, options) {
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
 
-  var material = null;
+  var material = null, textureDescription;
   if (txt instanceof THREE.Material) {
     material = txt;
     txt = null;
   }
   else {
     var txtID = (txt.id || txt)
-      .toString(),
-      textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`,
-      materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.wireframe}, ${options.emissive})`;
+      .toString();
+      textureDescription = `Primrose.textured(${txtID}, ${options.txtRepeatS}, ${options.txtRepeatT})`;
+    var materialDescription = `Primrose.material(${textureDescription}, ${options.unshaded}, ${options.opacity}, ${options.roughness}, ${options.metalness}, ${options.wireframe}, ${options.emissive})`;
     material = cache(materialDescription, () => {
       var materialOptions = {
           transparent: options.opacity < 1,

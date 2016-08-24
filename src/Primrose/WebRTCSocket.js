@@ -228,7 +228,7 @@ class WebRTCSocket {
         if (isError) {
           this.close();
         }
-      }
+      };
 
       // A pass-through function to include in the promise stream to see if the channels have all been
       // set up correctly and ready to go.

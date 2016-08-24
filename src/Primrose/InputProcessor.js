@@ -89,13 +89,14 @@ class InputProcessor {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    var i;
+    for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
 
     this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
 
-    for (var i = 0; i < this.axisNames.length; ++i) {
+    for (i = 0; i < this.axisNames.length; ++i) {
       this.inputState.axes[i] = 0;
     }
   }
@@ -177,10 +178,11 @@ class InputProcessor {
           cmd.state.wasPressed = cmd.state.pressed;
           cmd.state.pressed = false;
           if (!cmd.disabled) {
-            var metaKeysSet = true;
+            var metaKeysSet = true,
+              n;
 
             if (cmd.metaKeys) {
-              for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+              for (n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
                 var m = cmd.metaKeys[n];
                 metaKeysSet = metaKeysSet &&
                   (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] &&
@@ -192,8 +194,7 @@ class InputProcessor {
 
             if (metaKeysSet) {
               var pressed = true,
-                value = 0,
-                n, temp,
+                value = 0, temp,
                 anyButtons = false;
 
               for (n in this.inputState.buttons) {

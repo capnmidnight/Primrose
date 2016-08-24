@@ -64820,14 +64820,15 @@ function textured(geometry, txt, options) {
   options.unshaded = !!options.unshaded;
   options.wireframe = !!options.wireframe;
 
-  var material = null;
+  var material = null,
+      textureDescription;
   if (txt instanceof THREE.Material) {
     material = txt;
     txt = null;
   } else {
-    var txtID = (txt.id || txt).toString(),
-        textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")",
-        materialDescription = "Primrose.material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.wireframe + ", " + options.emissive + ")";
+    var txtID = (txt.id || txt).toString();
+    textureDescription = "Primrose.textured(" + txtID + ", " + options.txtRepeatS + ", " + options.txtRepeatT + ")";
+    var materialDescription = "Primrose.material(" + textureDescription + ", " + options.unshaded + ", " + options.opacity + ", " + options.roughness + ", " + options.metalness + ", " + options.wireframe + ", " + options.emissive + ")";
     material = cache(materialDescription, function () {
       var materialOptions = {
         transparent: options.opacity < 1,
@@ -66240,7 +66241,7 @@ var Entity = function () {
     },
     set: function set(v) {
       var oldID = this._id;
-      this._id = new String(v);
+      this._id = new Object(v);
       emit.call(this, "_idchanged", {
         oldID: oldID,
         entity: this
@@ -66409,13 +66410,14 @@ var InputProcessor = function () {
       this.addCommand(cmdName, commands[cmdName]);
     }
 
-    for (var i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
+    var i;
+    for (i = 0; i < Primrose.Keys.MODIFIER_KEYS.length; ++i) {
       this.inputState[Primrose.Keys.MODIFIER_KEYS[i]] = false;
     }
 
     this.axisNames = axisNames || Primrose.Input[name] && Primrose.Input[name].AXES || [];
 
-    for (var i = 0; i < this.axisNames.length; ++i) {
+    for (i = 0; i < this.axisNames.length; ++i) {
       this.inputState.axes[i] = 0;
     }
   }
@@ -66503,10 +66505,11 @@ var InputProcessor = function () {
             cmd.state.wasPressed = cmd.state.pressed;
             cmd.state.pressed = false;
             if (!cmd.disabled) {
-              var metaKeysSet = true;
+              var metaKeysSet = true,
+                  n;
 
               if (cmd.metaKeys) {
-                for (var n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
+                for (n = 0; n < cmd.metaKeys.length && metaKeysSet; ++n) {
                   var m = cmd.metaKeys[n];
                   metaKeysSet = metaKeysSet && (this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && !m.toggle || !this.inputState[Primrose.Keys.MODIFIER_KEYS[m.index]] && m.toggle);
                 }
@@ -66515,7 +66518,6 @@ var InputProcessor = function () {
               if (metaKeysSet) {
                 var pressed = true,
                     value = 0,
-                    n,
                     temp,
                     anyButtons = false;
 
