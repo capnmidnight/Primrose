@@ -6,7 +6,7 @@ var loaders = {
     ".mtl": THREE.MTLLoader,
     ".obj": THREE.OBJLoader,
     ".stl": THREE.STLLoader,
-    ".typeface.js": THREE.FontLoader
+    ".typeface.json": THREE.FontLoader
   },
   mime = {
     "text/prs.wavefront-obj": "obj",
@@ -262,7 +262,7 @@ ModelLoader.loadObject = function (src, type, progress) {
         promise = promise.then(fixJSONScene);
       }
 
-      if (extension !== ".mtl" && extension !== ".typeface.js") {
+      if (extension !== ".mtl" && extension !== ".typeface.json") {
         promise = promise.then(setProperties);
       }
       promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));

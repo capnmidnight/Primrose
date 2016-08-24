@@ -10,7 +10,7 @@ var WIDTH = 100,
   env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/grass.png",
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   });
 
 // and clicking on the objects in the scene

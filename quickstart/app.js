@@ -5,7 +5,7 @@ var env = new Primrose.BrowserEnvironment({
   groundTexture: "deck.png",
   fullScreenIcon: "monitor.obj",
   VRIcon: "cardboard.obj",
-  font: "helvetiker_regular.typeface.js"
+  font: "helvetiker_regular.typeface.json"
 });
 
 env.addEventListener("ready", function () {

@@ -4573,7 +4573,7 @@ var loaders = {
   ".mtl": THREE.MTLLoader,
   ".obj": THREE.OBJLoader,
   ".stl": THREE.STLLoader,
-  ".typeface.js": THREE.FontLoader
+  ".typeface.json": THREE.FontLoader
 },
     mime = {
   "text/prs.wavefront-obj": "obj",
@@ -4805,7 +4805,7 @@ ModelLoader.loadObject = function (src, type, progress) {
         var match = src.match(PATH_PATTERN),
             dir = match[1];
         src = match[2] + match[3];
-        Loader.setBaseUrl(dir);
+        Loader.setTexturePath(dir);
         Loader.setPath(dir);
       }
 
@@ -4831,7 +4831,7 @@ ModelLoader.loadObject = function (src, type, progress) {
         promise = promise.then(fixJSONScene);
       }
 
-      if (extension !== ".mtl" && extension !== ".typeface.js") {
+      if (extension !== ".mtl" && extension !== ".typeface.json") {
         promise = promise.then(setProperties);
       }
       promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
@@ -11250,14 +11250,15 @@ var Gamepad = function (_Primrose$PoseInputPr) {
           padIDs = [],
           newPads = [],
           oldPads = [],
-          i;
+          i,
+          padID;
 
       if (maybePads) {
         for (i = 0; i < maybePads.length; ++i) {
           var maybePad = maybePads[i];
           if (maybePad) {
-            var padID = Gamepad.ID(maybePad),
-                padIdx = currentDeviceIDs.indexOf(padID);
+            padID = Gamepad.ID(maybePad);
+            var padIdx = currentDeviceIDs.indexOf(padID);
             pads.push(maybePad);
             padIDs.push(padID);
             if (padIdx === -1) {
@@ -11273,8 +11274,8 @@ var Gamepad = function (_Primrose$PoseInputPr) {
       }
 
       for (i = currentDeviceIDs.length - 1; i >= 0; --i) {
-        var padID = currentDeviceIDs[i],
-            mgr = currentManagers[padID],
+        padID = currentDeviceIDs[i];
+        var mgr = currentManagers[padID],
             pad = currentDevices[i];
         if (padIDs.indexOf(padID) === -1) {
           oldPads.push(padID);

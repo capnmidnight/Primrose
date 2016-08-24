@@ -17,7 +17,7 @@ var GRASS = "../images/grass.png",
   env = new Primrose.BrowserEnvironment({
     skyTexture: "../images/bg2.jpg",
     groundTexture: ROCK,
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   });
 
 function column(a, b, h) {

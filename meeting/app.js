@@ -27,7 +27,7 @@ env = new Primrose.BrowserEnvironment({
   fullScreenIcon: "../doc/models/monitor.obj",
   VRIcon: "../doc/models/cardboard.obj",
   audioIcon: "../doc/models/microphone.obj",
-  font: "../doc/fonts/helvetiker_regular.typeface.js",
+  font: "../doc/fonts/helvetiker_regular.typeface.json",
   webRTC: Primrose.HTTP.getObject("/turn")
 });
 
