@@ -1,5 +1,3 @@
-"use strict";
-
 class AbstractEventEmitter {
   constructor() {
     this._handlers = {};

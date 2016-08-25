@@ -12,7 +12,7 @@ var modA = isOSX ? "metaKey" : "ctrlKey",
     sceneModel: "../models/commodore_pet.json",
     skyTexture: "../images/bg2.jpg",
     groundTexture: "../images/deck.png",
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   });
 
 function isExecuteCommand(evt) {

@@ -3,8 +3,6 @@
 // If SHIFT is not held, then "front.
 // If SHIFT is held, then "back"
 //
-"use strict";
-
 pliny.record({
   parent: "Primrose.Text.CommandPacks",
   name: "TextInput",

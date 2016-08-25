@@ -1,5 +1,3 @@
-"use strict";
-
 const TELEPORT_PAD_RADIUS = 0.4,
   FORWARD = new THREE.Vector3(0, 0, -1),
   MAX_SELECT_DISTANCE = 2,

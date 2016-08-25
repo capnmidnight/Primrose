@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "cloud",
   description: "Creates a point cloud with points of a fixed color and size out of an array of vertices.",

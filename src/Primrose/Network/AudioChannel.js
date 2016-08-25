@@ -1,6 +1,4 @@
-"use strict";
-
-const ENABLE_OPUS_HACK = true;
+const ENABLE_OPUS_HACK = false;
 
 if (!navigator.mediaDevices) {
   navigator.mediaDevices = {};
@@ -87,8 +85,6 @@ var preferOpus = (function () {
   return preferOpus;
 })();
 
-let INSTANCE_COUNT = 0;
-
 pliny.class({
   parent: "Primrose.Network",
     name: "AudioChannel",
@@ -118,8 +114,8 @@ pliny.class({
 });
 class AudioChannel extends Primrose.WebRTCSocket {
   constructor(extraIceServers, proxyServer, fromUserName, toUserName, outAudio, goSecond) {
+    console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
     super(extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond);
-
     pliny.property({
       parent: "Primrose.Network.AudioChannel",
       name: "outAudio",
@@ -137,6 +133,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
       description: "An audio channel from the remote user to the local user."
     });
     this.inAudio = null;
+    this.startTimeout();
   }
 
   issueRequest() {
@@ -147,7 +144,7 @@ class AudioChannel extends Primrose.WebRTCSocket {
 
       // Make sure we actually have audio to send to the remote.
       if (this.outAudio) {
-        if (isFirefox) {
+        if (this.rtc.addTrack) {
           this.outAudio.getAudioTracks()
             .forEach((track) => this.rtc.addTrack(track, this.outAudio));
         }
@@ -162,12 +159,15 @@ class AudioChannel extends Primrose.WebRTCSocket {
       this.inAudio = stream;
       if (!this.goFirst) {
         this._log(0, "Creating the second stream from %s to %s", this.fromUserName, this.toUserName);
+        this.clearTimeout();
+        this._log(1, "Restarting timeout.");
+        this.startTimeout();
         addStream();
       }
     };
 
     // Wait to receive an audio track.
-    if (isFirefox) {
+    if (this.rtc.ontrack) {
       this.rtc.ontrack = (evt) => onStream(evt.streams[0]);
     }
     else {

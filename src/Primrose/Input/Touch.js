@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose.Input",
     name: "Touch",
@@ -11,7 +9,7 @@ class Touch extends Primrose.InputProcessor {
     super("Touch", parent, commands, socket);
     DOMElement = DOMElement || window;
 
-    function setState(stateChange, setAxis, event) {
+    var setState = (stateChange, setAxis, event) => {
       var touches = event.changedTouches,
         i = 0,
         t = null;
@@ -37,7 +35,7 @@ class Touch extends Primrose.InputProcessor {
       }
       this.FINGERS = fingerState;
       event.preventDefault();
-    }
+    };
 
     DOMElement.addEventListener("touchstart", setState.bind(this, true, false), false);
     DOMElement.addEventListener("touchend", setState.bind(this, false, true), false);

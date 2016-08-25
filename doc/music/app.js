@@ -4,7 +4,7 @@ var env = new Primrose.BrowserEnvironment({
   // which the user will walk around, on which we can
   // create additional objects.
   sceneModel: "../models/holodeck.json",
-  font: "../fonts/helvetiker_regular.typeface.js",
+  font: "../fonts/helvetiker_regular.typeface.json",
   // One of our GUI controls is configured here.
   button: {
     // This file references another Three.js JSON-formatted

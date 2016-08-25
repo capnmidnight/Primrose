@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "cylinder",
   description: "Shorthand functino for creating a new THREE.CylinderGeometry object.",

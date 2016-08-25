@@ -1,5 +1,3 @@
-"use strict";
-
 const WIDTH = 512,
   HEIGHT = 200;
 

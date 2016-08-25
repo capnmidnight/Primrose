@@ -13,7 +13,7 @@ var GRASS = "../images/grass.png",
     skyTexture: DECK,
     ambientSound: "../audio/menu.ogg",
     groundTexture: DECK,
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   }),
 
   editor = null,

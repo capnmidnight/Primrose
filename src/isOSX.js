@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   name: "isOSX",
   type: "Boolean",

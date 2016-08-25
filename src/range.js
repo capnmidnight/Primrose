@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "range",
   description: "| [under construction]"

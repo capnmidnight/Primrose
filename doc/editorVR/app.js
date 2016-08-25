@@ -8,7 +8,7 @@ var GRASS = "../images/grass.png",
     skyTexture: "../images/bg2.jpg",
     ambientSound: "../audio/wind.ogg",
     groundTexture: GRASS,
-    font: "../fonts/helvetiker_regular.typeface.js"
+    font: "../fonts/helvetiker_regular.typeface.json"
   }),
 
   subScene = new THREE.Object3D(),

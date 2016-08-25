@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "brick",
   description: "Creates a textured box. See [`box()`](#box) and [`textured()`](#textured). The texture will be repeated across the box.",

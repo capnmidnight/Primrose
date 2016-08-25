@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "light",
   description: "Shortcut function for creating a new THREE.PointLight object.",

@@ -1,5 +1,3 @@
-"use strict";
-
 var ID = 1,
   NUMBER_PATTERN = "([+-]?(?:(?:\\d+(?:\\.\\d*)?)|(?:\\.\\d+)))",
   DELIM = "\\s*,\\s*",

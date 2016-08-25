@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   name: "SKIN_VALUES",
   type: "Array of Number",

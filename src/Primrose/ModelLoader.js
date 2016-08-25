@@ -1,5 +1,3 @@
-"use strict";
-
 // The JSON format object loader is not always included in the Three.js distribution,
 // so we have to first check for it.
 var loaders = {
@@ -8,7 +6,7 @@ var loaders = {
     ".mtl": THREE.MTLLoader,
     ".obj": THREE.OBJLoader,
     ".stl": THREE.STLLoader,
-    ".typeface.js": THREE.FontLoader
+    ".typeface.json": THREE.FontLoader
   },
   mime = {
     "text/prs.wavefront-obj": "obj",
@@ -233,14 +231,14 @@ ModelLoader.loadObject = function (src, type, progress) {
           .then(() => ModelLoader.loadObject(newPath, "mtl", progress))
           .then((materials) => {
             materials.preload();
-            Loader.setMaterials(materials)
+            Loader.setMaterials(materials);
           });
       }
       else if (extension === ".mtl") {
         var match = src.match(PATH_PATTERN),
           dir = match[1];
         src = match[2] + match[3];
-        Loader.setBaseUrl(dir);
+        Loader.setTexturePath(dir);
         Loader.setPath(dir);
       }
 
@@ -264,10 +262,10 @@ ModelLoader.loadObject = function (src, type, progress) {
         promise = promise.then(fixJSONScene);
       }
 
-      if (extension !== ".mtl" && extension !== ".typeface.js") {
+      if (extension !== ".mtl" && extension !== ".typeface.json") {
         promise = promise.then(setProperties);
       }
-      promise = promise.catch(console.error.bind(console, "MODEL_ERR", src))
+      promise = promise.catch(console.error.bind(console, "MODEL_ERR", src));
       return promise;
     }
   }

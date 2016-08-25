@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   parent: "Primrose.DOM",
   name: "makeHidingContainer",

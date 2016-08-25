@@ -1,5 +1,3 @@
-"use strict";
-
 var MILLISECONDS_TO_SECONDS = 0.001;
 
 pliny.class({
@@ -602,7 +600,7 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
       if (this.input.VR.isPresenting && !PointerLock.isActive) {
         PointerLock.request(this.input.VR.currentCanvas);
       }
-    }
+    };
 
     window.addEventListener("keydown", (evt) => {
       if (this.input.VR.isPresenting) {

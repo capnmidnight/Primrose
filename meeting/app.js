@@ -27,7 +27,7 @@ env = new Primrose.BrowserEnvironment({
   fullScreenIcon: "../doc/models/monitor.obj",
   VRIcon: "../doc/models/cardboard.obj",
   audioIcon: "../doc/models/microphone.obj",
-  font: "../doc/fonts/helvetiker_regular.typeface.js",
+  font: "../doc/fonts/helvetiker_regular.typeface.json",
   webRTC: Primrose.HTTP.getObject("/turn")
 });
 
@@ -150,4 +150,5 @@ function authSucceeded() {
   document.cookie = "user=" + getUserName() +
   "\nroom=" + getRoomName();
   env.connect(socket, ctrls.userName.value);
+  document.title = getUserName() + " in " + getRoomName();
 }

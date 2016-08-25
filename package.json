@@ -1,7 +1,7 @@
 {
   "name": "primrose",
   "description": "Primrose is a for Virtual Reality applications in Web browsers. It includes a basic syntax highlighting text editor.",
-  "version": "0.26.0",
+  "version": "0.26.1",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -60,16 +60,14 @@
     "promise-polyfill": "^5.2.1",
     "replay-telemetry-webvr": "^1.0.6",
     "socket.io-client": "^1.4.8",
-    "three": "^0.76.1",
+    "three": "^0.80.0",
     "webvr-bootstrapper": "^3.1.13",
     "webvr-polyfill": "^0.9.16"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-data": "^1.2.1",
-    "gulp-pug": "^3.0.4",
     "gulp-rename": "^1.2.2",
     "jstransformer-marked": "^1.0.1",
-    "notiontheory-basic-build": "^2.1.11"
+    "notiontheory-basic-build": "^2.2.0"
   }
 }

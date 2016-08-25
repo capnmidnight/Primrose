@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   parent: "Primrose",
   name: "SYS_FONTS",

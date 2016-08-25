@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.method({
   parent: "THREE.Object3D",
   name: "addToBrowserEnvironment",
@@ -14,7 +12,6 @@ pliny.method({
     description: "The true parent element for `this` object"
   }]
 });
-
 function addToBrowserEnvironment(env, scene) {
   scene.add(this);
   // this has to be done as a lambda expression because it needs to capture the

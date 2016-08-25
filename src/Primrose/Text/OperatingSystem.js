@@ -1,5 +1,3 @@
-"use strict";
-
 function setCursorCommand(obj, mod, key, func, cur) {
   var name = mod + "_" + key;
   obj[name] = function (prim, tokenRows) {

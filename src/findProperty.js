@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "findProperty",
   description: "Searches an object for a property that might go by different names in different browsers.",

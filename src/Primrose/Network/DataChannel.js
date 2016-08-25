@@ -1,5 +1,3 @@
-"use strict";
-
 let INSTANCE_COUNT = 0;
 
 pliny.class({

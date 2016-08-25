@@ -1,4 +1,4 @@
-"use strict";
+const PEERING_TIMEOUT_LENGTH = 10000;
 
 /* polyfills */
 window.RTCPeerConnection =
@@ -79,7 +79,7 @@ class WebRTCSocket {
     // These logging constructs are basically off by default, but you will need them if you ever
     // need to debug the WebRTC workflow.
     let attemptCount = 0;
-    const MAX_LOG_LEVEL = 0,
+    const MAX_LOG_LEVEL = 5,
       instanceNumber = ++INSTANCE_COUNT,
       print = function (name, level, format) {
         if (level < MAX_LOG_LEVEL) {
@@ -98,6 +98,8 @@ class WebRTCSocket {
         return arguments[3];
       };
 
+    this._timeout = null;
+    this._onError = null;
     this._log = print.bind(null, "log");
     this._error = print.bind(null, "error", 0);
 
@@ -166,12 +168,9 @@ class WebRTCSocket {
       type: "RTCPeerConnection",
       description: "The raw RTCPeerConnection that got negotiated."
     });
-    const rtc = new RTCPeerConnection({
+    this.rtc = new RTCPeerConnection({
       // Indicate to the API what servers should be used to figure out NAT traversal.
       iceServers
-    });
-    Object.defineProperty(this, "rtc", {
-      get: () => rtc
     });
 
     pliny.property({
@@ -211,8 +210,11 @@ class WebRTCSocket {
     // This is where things get gnarly
     this.ready = new Promise((resolve, reject) => {
 
-      const done = () => {
+      const done = (isError) => {
+        console.log(this.rtc);
         this._log(2, "Tearing down event handlers");
+        this.clearTimeout();
+        this.proxyServer.off("cancel", this._onError);
         this.proxyServer.off("peer", onUser);
         this.proxyServer.off("offer", onOffer);
         this.proxyServer.off("ice", onIce);
@@ -223,12 +225,16 @@ class WebRTCSocket {
         this.rtc.onicecandidate = null;
 
         this.teardown();
-      }
+        if (isError) {
+          this.close();
+        }
+      };
 
       // A pass-through function to include in the promise stream to see if the channels have all been
       // set up correctly and ready to go.
       const check = (obj) => {
         if (this.complete) {
+          this._log(1, "Timeout avoided.");
           done();
           resolve();
         }
@@ -252,7 +258,7 @@ class WebRTCSocket {
           .then(check)
 
           // and if there are any errors, bomb out and shut everything down.
-          .catch(onError);
+          .catch(this._onError);
         }
       };
 
@@ -273,13 +279,15 @@ class WebRTCSocket {
         .then(check)
 
         // and if there are any errors, bomb out and shut everything down.
-        .catch(onError);
+        .catch(this._onError);
       };
 
       // A catch-all error handler to shut down the world if an error we couldn't handle happens.
-      const onError = (exp) => {
+      this._onError = (exp) => {
         this._error(exp);
-        done();
+        this.proxyServer.emit("cancel", exp);
+        this._log(1, "Timeout avoided, but only because of an error.");
+        done(true);
         reject(exp);
       };
 
@@ -315,20 +323,21 @@ class WebRTCSocket {
 
           // When an answer is recieved, it's much simpler than receiving an offer. We just mark the progress and
           // check to see if we're done.
+          this.proxyServer.on("cancel", this._onError);
           this.proxyServer.on("answer", descriptionReceived);
           this.proxyServer.on("offer", onOffer);
           this.proxyServer.on("ice", onIce);
 
           // This is just for debugging purposes.
           this.rtc.onsignalingstatechange = (evt) => this._log(1, "[%s] Signal State: %s", instanceNumber, this.rtc.signalingState);
-          this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection/Gathering State: %s/%s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
+          this.rtc.oniceconnectionstatechange = (evt) => this._log(1, "[%s] ICE Connection %s, Gathering %s", instanceNumber, this.rtc.iceConnectionState, this.rtc.iceGatheringState);
 
           // All of the literature you'll read on WebRTC show creating an offer right after creating a data channel
           // or adding a stream to the peer connection. This is wrong. The correct way is to wait for the API to tell
           // you that negotiation is necessary, and only then create the offer. There is a race-condition between
           // the signaling state of the WebRTCPeerConnection and creating an offer after creating a channel if we
           // don't wait for the appropriate time.
-          this.rtc.onnegotiationneeded = (evt) => this.createOffer()
+          this.rtc.onnegotiationneeded = (evt) => this.createOffer(this.offerOptions)
             // record the local description.
             .then(descriptionCreated);
 
@@ -357,6 +366,25 @@ class WebRTCSocket {
 
       // Okay, now go back to onUser
     });
+  }
+
+  startTimeout() {
+    if (this._timeout === null) {
+      this._log(1, "Timing out in 10 seconds.");
+      this._timeout = setTimeout(this.cancel.bind(this), PEERING_TIMEOUT_LENGTH);
+    }
+  }
+
+  clearTimeout() {
+    if (this._timeout !== null) {
+      clearTimeout(this._timeout);
+      this._timeout = null;
+    }
+  }
+
+  cancel() {
+    this._log(1, "Timed out!");
+    this._onError("Gave up waiting on the peering connection.");
   }
 
   createOffer() {
@@ -443,8 +471,9 @@ class WebRTCSocket {
       name: "close",
       description: "shut down the peer connection, if it was succesful in being created."
     });
-    if (this.rtc.signalingState !== "closed") {
+    if (this.rtc && this.rtc.signalingState !== "closed") {
       this.rtc.close();
+      this.rtc = null;
     }
   }
 

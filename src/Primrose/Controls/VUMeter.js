@@ -1,5 +1,3 @@
-"use strict";
-
 var COUNTER = 0;
 
 pliny.class({

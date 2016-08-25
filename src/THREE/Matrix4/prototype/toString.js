@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.method({
   parent: "THREE.Matrix4",
   name: "toString ",
@@ -10,7 +8,6 @@ pliny.method({
     description: "the number of significant figures to print."
   }]
 });
-
 function toString(digits) {
   this.transpose();
   var parts = this.toArray();

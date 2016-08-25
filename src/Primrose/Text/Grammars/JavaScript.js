@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   parent: "Primrose.Text.Grammars",
   name: "JavaScript",

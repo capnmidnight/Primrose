@@ -1,5 +1,3 @@
-"use strict";
-
 var buttonCount = 0;
 
 pliny.class({

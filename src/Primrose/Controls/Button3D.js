@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose",
     name: "Button3D",

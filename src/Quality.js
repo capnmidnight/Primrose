@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.enumeration({
   name: "Quality",
   description: "Graphics quality settings."

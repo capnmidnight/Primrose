@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.class({
   parent: "Primrose.Network",
     name: "RemoteUser",
@@ -208,7 +206,7 @@ class RemoteUser {
     }
   }
 
-  set state(v) {
+  setState(v) {
     pliny.property({
       parent: "Pliny.RemoteUser",
       name: "state",

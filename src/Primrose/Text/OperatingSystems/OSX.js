@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   parent: "Primrose.Text.OperatingSystems",
   name: "OSX",

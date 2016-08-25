@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.function({
   name: "copyObject",
   description: "Copies properties from one object to another, essentially cloning the source object into the destination object. Uses a local stack to perform recursive copying. Overwrites any fields that already exist in the destination. For convenience, also returns the destination object.",

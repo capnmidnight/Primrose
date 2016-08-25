@@ -1,5 +1,3 @@
-"use strict";
-
 pliny.value({
   name: "isOpera",
   type: "Boolean",
