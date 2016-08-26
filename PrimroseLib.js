@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
 (function(){"use strict";
 
 function InsideSphereGeometry(radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
@@ -118,19 +118,19 @@ if (typeof window.THREE !== "undefined") {
 }
 if(typeof window !== "undefined") window.InsideSphereGeometry = InsideSphereGeometry;
 })();
-// end D:\Documents\VR\Primrose\src\InsideSphereGeometry.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\InsideSphereGeometry.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
 (function(){"use strict";
 
 var PIXEL_SCALES = [0.5, 0.25, 0.333333, 0.5, 1];
 if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 })();
-// end D:\Documents\VR\Primrose\src\PIXEL_SCALES.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\PIXEL_SCALES.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
 (function(){"use strict";
 
 /*
@@ -152,10 +152,10 @@ if(typeof window !== "undefined") window.PIXEL_SCALES = PIXEL_SCALES;
 var Primrose = {};
 if(typeof window !== "undefined") window.Primrose = Primrose;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Quality.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
 (function(){"use strict";
 
 var Quality = {
@@ -168,10 +168,10 @@ var Quality = {
 };
 if(typeof window !== "undefined") window.Quality = Quality;
 })();
-// end D:\Documents\VR\Primrose\src\Quality.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Quality.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\axis.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
 (function(){"use strict";
 
 function axis(length, width) {
@@ -183,10 +183,10 @@ function axis(length, width) {
 }
 if(typeof window !== "undefined") window.axis = axis;
 })();
-// end D:\Documents\VR\Primrose\src\axis.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\axis.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\box.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
 (function(){"use strict";
 
 function box(width, height, length) {
@@ -202,10 +202,10 @@ function box(width, height, length) {
 }
 if(typeof window !== "undefined") window.box = box;
 })();
-// end D:\Documents\VR\Primrose\src\box.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\box.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\brick.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
 (function(){"use strict";
 
 function brick(txt, w, h, l) {
@@ -216,10 +216,10 @@ function brick(txt, w, h, l) {
 }
 if(typeof window !== "undefined") window.brick = brick;
 })();
-// end D:\Documents\VR\Primrose\src\brick.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\brick.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\cache.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
 (function(){"use strict";
 
 var cache = function () {
@@ -233,10 +233,10 @@ var cache = function () {
 }();
 if(typeof window !== "undefined") window.cache = cache;
 })();
-// end D:\Documents\VR\Primrose\src\cache.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\cache.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\clone.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
 (function(){"use strict";
 
 function clone(obj) {
@@ -244,10 +244,10 @@ function clone(obj) {
 }
 if(typeof window !== "undefined") window.clone = clone;
 })();
-// end D:\Documents\VR\Primrose\src\clone.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\clone.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\cloud.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
 (function(){"use strict";
 
 function cloud(verts, c, s) {
@@ -265,10 +265,10 @@ function cloud(verts, c, s) {
 }
 if(typeof window !== "undefined") window.cloud = cloud;
 })();
-// end D:\Documents\VR\Primrose\src\cloud.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\cloud.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\copyObject.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -300,10 +300,10 @@ function copyObject(dest, source, shallow) {
 }
 if(typeof window !== "undefined") window.copyObject = copyObject;
 })();
-// end D:\Documents\VR\Primrose\src\copyObject.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\copyObject.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\cylinder.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
 (function(){"use strict";
 
 function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
@@ -322,10 +322,10 @@ function cylinder(rT, rB, height, rS, hS, openEnded, thetaStart, thetaEnd) {
 }
 if(typeof window !== "undefined") window.cylinder = cylinder;
 })();
-// end D:\Documents\VR\Primrose\src\cylinder.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\cylinder.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\deleteSetting.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
 (function(){"use strict";
 
 function deleteSetting(name) {
@@ -335,10 +335,10 @@ function deleteSetting(name) {
 }
 if(typeof window !== "undefined") window.deleteSetting = deleteSetting;
 })();
-// end D:\Documents\VR\Primrose\src\deleteSetting.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\deleteSetting.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\emit.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
 (function(){"use strict";
 
 function emit(evt, args) {
@@ -349,10 +349,10 @@ function emit(evt, args) {
 }
 if(typeof window !== "undefined") window.emit = emit;
 })();
-// end D:\Documents\VR\Primrose\src\emit.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\emit.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\findProperty.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
 (function(){"use strict";
 
 function findProperty(elem, arr) {
@@ -364,10 +364,10 @@ function findProperty(elem, arr) {
 }
 if(typeof window !== "undefined") window.findProperty = findProperty;
 })();
-// end D:\Documents\VR\Primrose\src\findProperty.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\findProperty.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\getSetting.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -389,10 +389,10 @@ function getSetting(name, defValue) {
 }
 if(typeof window !== "undefined") window.getSetting = getSetting;
 })();
-// end D:\Documents\VR\Primrose\src\getSetting.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\getSetting.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\hub.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
 (function(){"use strict";
 
 function hub() {
@@ -400,10 +400,10 @@ function hub() {
 }
 if(typeof window !== "undefined") window.hub = hub;
 })();
-// end D:\Documents\VR\Primrose\src\hub.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\hub.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\identity.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
 (function(){"use strict";
 
 function identity(obj) {
@@ -411,55 +411,55 @@ function identity(obj) {
 }
 if(typeof window !== "undefined") window.identity = identity;
 })();
-// end D:\Documents\VR\Primrose\src\identity.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\identity.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isChrome.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
 (function(){"use strict";
 
 var isChrome = !!window.chrome && !window.isOpera;
 if(typeof window !== "undefined") window.isChrome = isChrome;
 })();
-// end D:\Documents\VR\Primrose\src\isChrome.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isChrome.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isFirefox.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
 (function(){"use strict";
 
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
 if(typeof window !== "undefined") window.isFirefox = isFirefox;
 })();
-// end D:\Documents\VR\Primrose\src\isFirefox.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isFirefox.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isGearVR.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
 (function(){"use strict";
 
 var isGearVR = navigator.userAgent.indexOf("Mobile VR") > -1;
 if(typeof window !== "undefined") window.isGearVR = isGearVR;
 })();
-// end D:\Documents\VR\Primrose\src\isGearVR.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isGearVR.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isIE.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
 (function(){"use strict";
 
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
 if(typeof window !== "undefined") window.isIE = isIE;
 })();
-// end D:\Documents\VR\Primrose\src\isIE.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isIE.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isInIFrame.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
 (function(){"use strict";
 
 var isInIFrame = window.self !== window.top;
 if(typeof window !== "undefined") window.isInIFrame = isInIFrame;
 })();
-// end D:\Documents\VR\Primrose\src\isInIFrame.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isInIFrame.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isMobile.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
 (function(){"use strict";
 
 var isMobile = function (a) {
@@ -468,64 +468,64 @@ var isMobile = function (a) {
 }(navigator.userAgent || navigator.vendor || window.opera);
 if(typeof window !== "undefined") window.isMobile = isMobile;
 })();
-// end D:\Documents\VR\Primrose\src\isMobile.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isMobile.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isOSX.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
 (function(){"use strict";
 
 var isOSX = /Macintosh/.test(navigator.userAgent || "");
 if(typeof window !== "undefined") window.isOSX = isOSX;
 })();
-// end D:\Documents\VR\Primrose\src\isOSX.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOSX.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isOpera.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
 (function(){"use strict";
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 if(typeof window !== "undefined") window.isOpera = isOpera;
 })();
-// end D:\Documents\VR\Primrose\src\isOpera.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isOpera.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isSafari.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
 (function(){"use strict";
 
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 if(typeof window !== "undefined") window.isSafari = isSafari;
 })();
-// end D:\Documents\VR\Primrose\src\isSafari.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isSafari.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isWebKit.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
 (function(){"use strict";
 
 var isWebKit = !/iP(hone|od|ad)/.test(navigator.userAgent || "") || isOpera || isChrome;
 if(typeof window !== "undefined") window.isWebKit = isWebKit;
 })();
-// end D:\Documents\VR\Primrose\src\isWebKit.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWebKit.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isWindows.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
 (function(){"use strict";
 
 var isWindows = /Windows/.test(navigator.userAgent || "");
 if(typeof window !== "undefined") window.isWindows = isWindows;
 })();
-// end D:\Documents\VR\Primrose\src\isWindows.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isWindows.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\isiOS.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
 (function(){"use strict";
 
 var isiOS = /iP(hone|od|ad)/.test(navigator.userAgent || "");
 if(typeof window !== "undefined") window.isiOS = isiOS;
 })();
-// end D:\Documents\VR\Primrose\src\isiOS.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\isiOS.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\light.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
 (function(){"use strict";
 
 function light(color, intensity, distance, decay) {
@@ -533,10 +533,10 @@ function light(color, intensity, distance, decay) {
 }
 if(typeof window !== "undefined") window.light = light;
 })();
-// end D:\Documents\VR\Primrose\src\light.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\light.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\patch.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
 (function(){"use strict";
 
 function patch(obj1, obj2) {
@@ -550,10 +550,10 @@ function patch(obj1, obj2) {
 }
 if(typeof window !== "undefined") window.patch = patch;
 })();
-// end D:\Documents\VR\Primrose\src\patch.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\patch.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\put.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
 (function(){"use strict";
 
 function put(object) {
@@ -616,10 +616,10 @@ function put(object) {
 }
 if(typeof window !== "undefined") window.put = put;
 })();
-// end D:\Documents\VR\Primrose\src\put.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\put.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\quad.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
 (function(){"use strict";
 
 function quad(w, h, s, t) {
@@ -632,10 +632,10 @@ function quad(w, h, s, t) {
 }
 if(typeof window !== "undefined") window.quad = quad;
 })();
-// end D:\Documents\VR\Primrose\src\quad.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\quad.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\range.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
 (function(){"use strict";
 
 function range(n, m, s, t) {
@@ -649,10 +649,10 @@ function range(n, m, s, t) {
 }
 if(typeof window !== "undefined") window.range = range;
 })();
-// end D:\Documents\VR\Primrose\src\range.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\range.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\readForm.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
 (function(){"use strict";
 
 function readForm(ctrls) {
@@ -673,10 +673,10 @@ function readForm(ctrls) {
 }
 if(typeof window !== "undefined") window.readForm = readForm;
 })();
-// end D:\Documents\VR\Primrose\src\readForm.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\readForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\setFalse.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
 (function(){"use strict";
 
 function setFalse(evt) {
@@ -684,10 +684,10 @@ function setFalse(evt) {
 }
 if(typeof window !== "undefined") window.setFalse = setFalse;
 })();
-// end D:\Documents\VR\Primrose\src\setFalse.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\setFalse.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\setSetting.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -703,10 +703,10 @@ function setSetting(name, val) {
 }
 if(typeof window !== "undefined") window.setSetting = setSetting;
 })();
-// end D:\Documents\VR\Primrose\src\setSetting.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\setSetting.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\shell.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
 (function(){"use strict";
 
 function shell(r, slices, rings, phi, theta) {
@@ -725,10 +725,10 @@ function shell(r, slices, rings, phi, theta) {
 }
 if(typeof window !== "undefined") window.shell = shell;
 })();
-// end D:\Documents\VR\Primrose\src\shell.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\shell.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\sphere.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
 (function(){"use strict";
 
 function sphere(r, slices, rings) {
@@ -738,10 +738,10 @@ function sphere(r, slices, rings) {
 }
 if(typeof window !== "undefined") window.sphere = sphere;
 })();
-// end D:\Documents\VR\Primrose\src\sphere.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\sphere.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\textured.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
 (function(){"use strict";
 
 var textureLoader = null,
@@ -912,10 +912,10 @@ function textured(geometry, txt, options) {
 }
 if(typeof window !== "undefined") window.textured = textured;
 })();
-// end D:\Documents\VR\Primrose\src\textured.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\textured.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\v3.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
 (function(){"use strict";
 
 function v3(x, y, z) {
@@ -923,10 +923,10 @@ function v3(x, y, z) {
 }
 if(typeof window !== "undefined") window.v3 = v3;
 })();
-// end D:\Documents\VR\Primrose\src\v3.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\v3.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\writeForm.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
 (function(){"use strict";
 
 function writeForm(ctrls, state) {
@@ -945,10 +945,10 @@ function writeForm(ctrls, state) {
 }
 if(typeof window !== "undefined") window.writeForm = writeForm;
 })();
-// end D:\Documents\VR\Primrose\src\writeForm.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\writeForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -995,10 +995,10 @@ var AbstractEventEmitter = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.AbstractEventEmitter = AbstractEventEmitter;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\AbstractEventEmitter.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Angle.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
 (function(){"use strict";
 
 var DEG2RAD = Math.PI / 180,
@@ -1047,10 +1047,10 @@ Object.defineProperty(Angle.prototype, "radians", {
 });
 if(typeof window !== "undefined") window.Primrose.Angle = Angle;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Angle.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Angle.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1074,7 +1074,7 @@ var BaseControl = function (_Primrose$AbstractEve) {
   function BaseControl() {
     _classCallCheck(this, BaseControl);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BaseControl).call(this));
+    var _this = _possibleConstructorReturn(this, (BaseControl.__proto__ || Object.getPrototypeOf(BaseControl)).call(this));
 
     _this.controlID = ID++;
 
@@ -1119,10 +1119,10 @@ var BaseControl = function (_Primrose$AbstractEve) {
 }(Primrose.AbstractEventEmitter);
 if(typeof window !== "undefined") window.Primrose.BaseControl = BaseControl;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\BaseControl.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BaseControl.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1143,7 +1143,7 @@ var BrowserEnvironment = function (_Primrose$AbstractEve) {
 
     _classCallCheck(this, BrowserEnvironment);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BrowserEnvironment).call(this));
+    var _this = _possibleConstructorReturn(this, (BrowserEnvironment.__proto__ || Object.getPrototypeOf(BrowserEnvironment)).call(this));
 
     _this.options = patch(options, BrowserEnvironment.DEFAULTS);
     _this.options.foregroundColor = _this.options.foregroundColor || complementColor(new THREE.Color(_this.options.backgroundColor)).getHex();
@@ -1960,10 +1960,10 @@ BrowserEnvironment.DEFAULTS = {
 };
 if(typeof window !== "undefined") window.Primrose.BrowserEnvironment = BrowserEnvironment;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\BrowserEnvironment.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
 (function(){"use strict";
 
 var buttonCount = 0;
@@ -1981,28 +1981,28 @@ ButtonFactory.prototype.create = function (toggle) {
 };
 if(typeof window !== "undefined") window.Primrose.ButtonFactory = ButtonFactory;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ButtonFactory.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
 (function(){"use strict";
 
 var Controls = {};
 if(typeof window !== "undefined") window.Primrose.Controls = Controls;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\DOM.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
 (function(){"use strict";
 
 var DOM = {};
 if(typeof window !== "undefined") window.Primrose.DOM = DOM;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\DOM.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Entity.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2250,28 +2250,28 @@ var Entity = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.Entity = Entity;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Entity.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Entity.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
 (function(){"use strict";
 
 var HTTP = {};
 if(typeof window !== "undefined") window.Primrose.HTTP = HTTP;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
 (function(){"use strict";
 
 var Input = {};
 if(typeof window !== "undefined") window.Primrose.Input = Input;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2859,10 +2859,10 @@ var InputProcessor = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.InputProcessor = InputProcessor;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\InputProcessor.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\InputProcessor.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Keys.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
 (function(){"use strict";
 
 var Keys = {
@@ -2999,10 +2999,10 @@ for (var key in Keys) {
 }
 if(typeof window !== "undefined") window.Primrose.Keys = Keys;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Keys.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Keys.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
 (function(){"use strict";
 
 // The JSON format object loader is not always included in the Three.js distribution,
@@ -3171,28 +3171,28 @@ function loader(map, key) {
 }
 if(typeof window !== "undefined") window.Primrose.ModelLoader = ModelLoader;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\ModelLoader.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\ModelLoader.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Network.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
 (function(){"use strict";
 
 var Network = {};
 if(typeof window !== "undefined") window.Primrose.Network = Network;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Network.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Output.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
 (function(){"use strict";
 
 var Output = {};
 if(typeof window !== "undefined") window.Primrose.Output = Output;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Output.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3219,14 +3219,16 @@ var Pointer = function (_Primrose$AbstractEve) {
 
   function Pointer(name, color, emission, isHand, orientationDevice) {
     var positionDevice = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
+    var triggerDevice = arguments.length <= 6 || arguments[6] === undefined ? null : arguments[6];
 
     _classCallCheck(this, Pointer);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Pointer).call(this));
+    var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
     _this.name = name;
     _this.orientationDevice = orientationDevice;
     _this.positionDevice = positionDevice || orientationDevice;
+    _this.triggerDevice = triggerDevice || orientationDevice;
     _this._currentControl = null;
     _this.showPointer = true;
     _this.color = color;
@@ -3287,7 +3289,7 @@ var Pointer = function (_Primrose$AbstractEve) {
         this.quaternion.copy(this.orientationDevice.quaternion);
       } else {
 
-        var head = this.orientationDevice,
+        var head = this.triggerDevice,
             pitch = 0,
             heading = 0;
         while (head) {
@@ -3454,10 +3456,10 @@ var Pointer = function (_Primrose$AbstractEve) {
 }(Primrose.AbstractEventEmitter);
 if(typeof window !== "undefined") window.Primrose.Pointer = Pointer;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Pointer.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Pointer.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3482,7 +3484,7 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
   function PoseInputProcessor(name, parent, commands, socket, axisNames) {
     _classCallCheck(this, PoseInputProcessor);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PoseInputProcessor).call(this, name, parent, commands, socket, axisNames));
+    var _this = _possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, parent, commands, socket, axisNames));
 
     _this.currentDevice = null;
     _this.lastPose = null;
@@ -3498,7 +3500,7 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
   _createClass(PoseInputProcessor, [{
     key: "update",
     value: function update(dt) {
-      _get(Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
+      _get(PoseInputProcessor.prototype.__proto__ || Object.getPrototypeOf(PoseInputProcessor.prototype), "update", this).call(this, dt);
 
       if (this.currentDevice) {
         var pose = this.currentPose || this.lastPose || DEFAULT_POSE;
@@ -3532,10 +3534,10 @@ var PoseInputProcessor = function (_Primrose$InputProces) {
 }(Primrose.InputProcessor);
 if(typeof window !== "undefined") window.Primrose.PoseInputProcessor = PoseInputProcessor;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\PoseInputProcessor.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Projector.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Projector.js
 (function(){"use strict";
 
 function Projector(isWorker) {
@@ -5811,28 +5813,28 @@ Projector.prototype.projectPointers = function (args) {
 };
 if(typeof window !== "undefined") window.Primrose.Projector = Projector;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Projector.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Projector.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
 (function(){"use strict";
 
 var Random = {};
 if(typeof window !== "undefined") window.Primrose.Random = Random;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
 (function(){"use strict";
 
 var SKINS = ["#FFDFC4", "#F0D5BE", "#EECEB3", "#E1B899", "#E5C298", "#FFDCB2", "#E5B887", "#E5A073", "#E79E6D", "#DB9065", "#CE967C", "#C67856", "#BA6C49", "#A57257", "#F0C8C9", "#DDA8A0", "#B97C6D", "#A8756C", "#AD6452", "#5C3836", "#CB8442", "#BD723C", "#704139", "#A3866A", "#870400", "#710101", "#430000", "#5B0001", "#302E2E"];
 if(typeof window !== "undefined") window.Primrose.SKINS = SKINS;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\SKINS.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 (function(){"use strict";
 
 var SKINS_VALUES = Primrose.SKINS.map(function (s) {
@@ -5840,19 +5842,19 @@ var SKINS_VALUES = Primrose.SKINS.map(function (s) {
 });
 if(typeof window !== "undefined") window.Primrose.SKINS_VALUES = SKINS_VALUES;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SKINS_VALUES.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 (function(){"use strict";
 
 var SYS_FONTS = "-apple-system, '.SFNSText-Regular', 'San Francisco', 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif";
 if(typeof window !== "undefined") window.Primrose.SYS_FONTS = SYS_FONTS;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\SYS_FONTS.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Surface.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -5882,7 +5884,7 @@ var Surface = function (_Primrose$Entity) {
   function Surface(options) {
     _classCallCheck(this, Surface);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Surface).call(this));
+    var _this = _possibleConstructorReturn(this, (Surface.__proto__ || Object.getPrototypeOf(Surface)).call(this));
 
     _this.options = patch(options, {
       id: "Primrose.Surface[" + COUNTER++ + "]",
@@ -6081,7 +6083,7 @@ var Surface = function (_Primrose$Entity) {
       if (!(child instanceof Surface)) {
         throw new Error("Can only append other Surfaces to a Surface. You gave: " + child);
       }
-      _get(Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
+      _get(Surface.prototype.__proto__ || Object.getPrototypeOf(Surface.prototype), "appendChild", this).call(this, child);
       this.invalidate();
     }
   }, {
@@ -6253,19 +6255,19 @@ var Surface = function (_Primrose$Entity) {
 }(Primrose.Entity);
 if(typeof window !== "undefined") window.Primrose.Surface = Surface;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Surface.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Surface.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
 (function(){"use strict";
 
 var Text = {};
 if(typeof window !== "undefined") window.Primrose.Text = Text;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6677,10 +6679,10 @@ var WebRTCSocket = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.WebRTCSocket = WebRTCSocket;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\WebRTCSocket.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
 (function(){"use strict";
 
 function Workerize(func) {
@@ -6784,19 +6786,19 @@ Workerize.createWorker = function (script, stripFunc) {
 };
 if(typeof window !== "undefined") window.Primrose.Workerize = Workerize;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Workerize.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Workerize.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\X.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
 (function(){"use strict";
 
 var X = {};
 if(typeof window !== "undefined") window.Primrose.X = X;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\X.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6819,7 +6821,7 @@ var AbstractLabel = function (_Primrose$Surface) {
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AbstractLabel).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (AbstractLabel.__proto__ || Object.getPrototypeOf(AbstractLabel)).call(this, patch(options, {
       id: "Primrose.Controls.AbstractLabel[" + COUNTER++ + "]"
     })));
     ////////////////////////////////////////////////////////////////////////
@@ -6962,10 +6964,10 @@ var AbstractLabel = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Controls.AbstractLabel = AbstractLabel;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\AbstractLabel.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
 (function(){"use strict";
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -6993,7 +6995,7 @@ var Button2D = function (_Primrose$Controls$Ab) {
   function Button2D(options) {
     _classCallCheck(this, Button2D);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Button2D).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (Button2D.__proto__ || Object.getPrototypeOf(Button2D)).call(this, patch(options, {
       id: "Primrose.Controls.Button2D[" + COUNTER++ + "]",
       textAlign: "center"
     })));
@@ -7031,7 +7033,7 @@ var Button2D = function (_Primrose$Controls$Ab) {
     key: "_isChanged",
     value: function _isChanged() {
       var activatedChanged = this._activated !== this._lastActivated,
-          changed = _get(Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
+          changed = _get(Button2D.prototype.__proto__ || Object.getPrototypeOf(Button2D.prototype), "_isChanged", this) || activatedChanged;
       return changed;
     }
   }, {
@@ -7047,10 +7049,10 @@ var Button2D = function (_Primrose$Controls$Ab) {
 }(Primrose.Controls.AbstractLabel);
 if(typeof window !== "undefined") window.Primrose.Controls.Button2D = Button2D;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button2D.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -7067,7 +7069,7 @@ var Button3D = function (_Primrose$BaseControl) {
   function Button3D(model, name, options) {
     _classCallCheck(this, Button3D);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Button3D).call(this));
+    var _this = _possibleConstructorReturn(this, (Button3D.__proto__ || Object.getPrototypeOf(Button3D)).call(this));
 
     options = patch(options, Button3D);
     options.minDeflection = Math.cos(options.minDeflection);
@@ -7137,10 +7139,10 @@ Button3D.DEFAULTS = {
 };
 if(typeof window !== "undefined") window.Primrose.Controls.Button3D = Button3D;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Button3D.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -7165,7 +7167,7 @@ var Form = function (_Primrose$Surface) {
   function Form(options) {
     _classCallCheck(this, Form);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Form).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, patch(options, {
       id: "Primrose.Controls.Form[" + COUNTER++ + "]"
     })));
 
@@ -7250,10 +7252,10 @@ var Form = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Controls.Form = Form;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\Form.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Form.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -7283,7 +7285,7 @@ var HtmlDoc = function (_Primrose$Surface) {
     // normalize input parameters
     ////////////////////////////////////////////////////////////////////////
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(HtmlDoc).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (HtmlDoc.__proto__ || Object.getPrototypeOf(HtmlDoc)).call(this, patch(options, {
       id: "Primrose.Controls.HtmlDoc[" + COUNTER++ + "]"
     })));
 
@@ -7369,10 +7371,10 @@ var HtmlDoc = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Controls.HtmlDoc = HtmlDoc;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\HtmlDoc.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -7411,7 +7413,7 @@ var Image = function (_Primrose$Surface) {
       };
     }
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Image).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (Image.__proto__ || Object.getPrototypeOf(Image)).call(this, patch(options, {
       id: "Primrose.Controls.Image[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, 1, 1)
     })));
@@ -7581,10 +7583,10 @@ var Image = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Controls.Image = Image;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\Image.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\Image.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -7618,7 +7620,7 @@ var VUMeter = function (_Primrose$Surface) {
     // initialization
     ///////////////////////////////////////////////////////////////////////
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VUMeter).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (VUMeter.__proto__ || Object.getPrototypeOf(VUMeter)).call(this, patch(options, {
       id: "Primrose.Controls.VUMeter[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, 512, 256),
       backgroundColor: 0x000000,
@@ -7667,10 +7669,10 @@ var VUMeter = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Controls.VUMeter = VUMeter;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Controls\VUMeter.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
 (function(){"use strict";
 
 function cascadeElement(id, tag, DOMClass, add) {
@@ -7700,10 +7702,10 @@ function cascadeElement(id, tag, DOMClass, add) {
 }
 if(typeof window !== "undefined") window.Primrose.DOM.cascadeElement = cascadeElement;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\cascadeElement.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
 (function(){"use strict";
 
 function findEverything(elem, obj) {
@@ -7723,10 +7725,10 @@ function findEverything(elem, obj) {
 }
 if(typeof window !== "undefined") window.Primrose.DOM.findEverything = findEverything;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\findEverything.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 (function(){"use strict";
 
 function makeHidingContainer(id, obj) {
@@ -7742,10 +7744,10 @@ function makeHidingContainer(id, obj) {
 }
 if(typeof window !== "undefined") window.Primrose.DOM.makeHidingContainer = makeHidingContainer;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\DOM\makeHidingContainer.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 (function(){"use strict";
 
 function XHR(method, type, url, options) {
@@ -7801,10 +7803,10 @@ function XHR(method, type, url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.XHR = XHR;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\XHR.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 (function(){"use strict";
 
 function del(type, url, options) {
@@ -7812,10 +7814,10 @@ function del(type, url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.del = del;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\del.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\del.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
 (function(){"use strict";
 
 function delObject(url, options) {
@@ -7823,10 +7825,10 @@ function delObject(url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.delObject = delObject;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\delObject.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
 (function(){"use strict";
 
 function get(type, url, options) {
@@ -7834,10 +7836,10 @@ function get(type, url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.get = get;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\get.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\get.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
 (function(){"use strict";
 
 function getBuffer(url, options) {
@@ -7845,10 +7847,10 @@ function getBuffer(url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.getBuffer = getBuffer;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getBuffer.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
 (function(){"use strict";
 
 function getObject(url, options) {
@@ -7856,10 +7858,10 @@ function getObject(url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.getObject = getObject;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getObject.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
 (function(){"use strict";
 
 function getText(url, options) {
@@ -7867,10 +7869,10 @@ function getText(url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.getText = getText;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\getText.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
 (function(){"use strict";
 
 function post(type, url, options) {
@@ -7878,10 +7880,10 @@ function post(type, url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.post = post;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\post.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\post.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
 (function(){"use strict";
 
 function postObject(url, options) {
@@ -7889,10 +7891,10 @@ function postObject(url, options) {
 }
 if(typeof window !== "undefined") window.Primrose.HTTP.postObject = postObject;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\HTTP\postObject.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8364,10 +8366,10 @@ var FPSInput = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.Input.FPSInput = FPSInput;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\FPSInput.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8478,7 +8480,7 @@ var Gamepad = function (_Primrose$PoseInputPr) {
 
     var padID = Gamepad.ID(pad);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Gamepad).call(this, padID, parent, commands, socket, Gamepad.AXES));
+    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, parent, commands, socket, Gamepad.AXES));
 
     currentManagers[padID] = _this;
 
@@ -8573,10 +8575,10 @@ Gamepad.VIVE_BUTTONS = {
 };
 if(typeof window !== "undefined") window.Primrose.Input.Gamepad = Gamepad;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Gamepad.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8593,7 +8595,7 @@ var Keyboard = function (_Primrose$InputProces) {
   function Keyboard(input, parent, commands, socket) {
     _classCallCheck(this, Keyboard);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Keyboard).call(this, "Keyboard", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", parent, commands, socket));
 
     _this.listeners.clipboard = [];
     _this.listeners.keydown = [];
@@ -8729,10 +8731,10 @@ var Keyboard = function (_Primrose$InputProces) {
 }(Primrose.InputProcessor);
 if(typeof window !== "undefined") window.Primrose.Input.Keyboard = Keyboard;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Keyboard.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8755,7 +8757,7 @@ var LeapMotion = function (_Primrose$InputProces) {
   function LeapMotion(commands, socket) {
     _classCallCheck(this, LeapMotion);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LeapMotion).call(this, "LeapMotion", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", null, commands, socket));
 
     _this.isStreaming = false;
     _this.controller = new Leap.Controller({
@@ -8860,10 +8862,10 @@ Primrose.InputProcessor.defineAxisProperties(LeapMotion, ["X0", "Y0", "Z0", "X1"
 LeapMotion.CONNECTION_TIMEOUT = 5000;
 if(typeof window !== "undefined") window.Primrose.Input.LeapMotion = LeapMotion;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\LeapMotion.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8880,7 +8882,7 @@ var Location = function (_Primrose$InputProces) {
   function Location(commands, socket, options) {
     _classCallCheck(this, Location);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Location).call(this, "Location", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", null, commands, socket));
 
     _this.options = patch(options, Location.DEFAULTS);
 
@@ -8918,10 +8920,10 @@ Location.DEFAULTS = {
 };
 if(typeof window !== "undefined") window.Primrose.Input.Location = Location;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Location.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Location.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Motion.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Motion.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -8938,7 +8940,7 @@ var Motion = function (_Primrose$InputProces) {
   function Motion(commands, socket) {
     _classCallCheck(this, Motion);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Motion).call(this, "Motion", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Motion.__proto__ || Object.getPrototypeOf(Motion)).call(this, "Motion", null, commands, socket));
 
     var corrector = new MotionCorrector(),
         a = new THREE.Quaternion(),
@@ -9004,10 +9006,10 @@ makeTransform(Motion.DEFAULT_TRANSFORMS[0], -1);
 makeTransform(Motion.DEFAULT_TRANSFORMS[1], 1);
 if(typeof window !== "undefined") window.Primrose.Input.Motion = Motion;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Motion.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Motion.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9024,7 +9026,7 @@ var Mouse = function (_Primrose$InputProces) {
   function Mouse(DOMElement, parent, commands, socket) {
     _classCallCheck(this, Mouse);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Mouse).call(this, "Mouse", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", parent, commands, socket));
 
     _this.timer = null;
 
@@ -9090,10 +9092,10 @@ var Mouse = function (_Primrose$InputProces) {
 Primrose.InputProcessor.defineAxisProperties(Mouse, ["X", "Y", "Z", "W", "BUTTONS"]);
 if(typeof window !== "undefined") window.Primrose.Input.Mouse = Mouse;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Mouse.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9160,7 +9162,7 @@ var Speech = function (_Primrose$InputProces) {
   function Speech(commands, socket) {
     _classCallCheck(this, Speech);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Speech).call(this, "Speech", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Speech.__proto__ || Object.getPrototypeOf(Speech)).call(this, "Speech", null, commands, socket));
 
     var running = false,
         recognition = null,
@@ -9303,13 +9305,13 @@ var Speech = function (_Primrose$InputProces) {
   }, {
     key: "enable",
     value: function enable(k, v) {
-      _get(Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
+      _get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "enable", this).call(this, k, v);
       this.check();
     }
   }, {
     key: "transmit",
     value: function transmit(v) {
-      _get(Object.getPrototypeOf(Speech.prototype), "transmit", this).call(this, v);
+      _get(Speech.prototype.__proto__ || Object.getPrototypeOf(Speech.prototype), "transmit", this).call(this, v);
       this.check();
     }
   }], [{
@@ -9323,10 +9325,10 @@ var Speech = function (_Primrose$InputProces) {
 }(Primrose.InputProcessor);
 if(typeof window !== "undefined") window.Primrose.Input.Speech = Speech;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Speech.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Speech.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -9341,7 +9343,7 @@ var Touch = function (_Primrose$InputProces) {
   function Touch(DOMElement, parent, commands, socket) {
     _classCallCheck(this, Touch);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Touch).call(this, "Touch", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", parent, commands, socket));
 
     DOMElement = DOMElement || window;
 
@@ -9392,10 +9394,10 @@ if (navigator.maxTouchPoints) {
 }
 if(typeof window !== "undefined") window.Primrose.Input.Touch = Touch;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\Touch.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\Touch.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -9421,7 +9423,7 @@ var VR = function (_Primrose$PoseInputPr) {
   function VR(avatarHeight, parent, socket) {
     _classCallCheck(this, VR);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(VR).call(this, "VR", parent, null, socket));
+    var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR", parent, null, socket));
 
     _this.displays = [];
     _this._transformers = [];
@@ -9529,7 +9531,7 @@ var VR = function (_Primrose$PoseInputPr) {
   }, {
     key: "zero",
     value: function zero() {
-      _get(Object.getPrototypeOf(VR.prototype), "zero", this).call(this);
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "zero", this).call(this);
       if (this.currentDevice) {
         this.currentDevice.resetPose();
       }
@@ -9537,7 +9539,7 @@ var VR = function (_Primrose$PoseInputPr) {
   }, {
     key: "update",
     value: function update(dt) {
-      _get(Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
 
       var x = 0,
           z = 0,
@@ -9576,7 +9578,7 @@ var VR = function (_Primrose$PoseInputPr) {
   }, {
     key: "resolvePicking",
     value: function resolvePicking(currentHits, lastHits, objects) {
-      _get(Object.getPrototypeOf(VR.prototype), "resolvePicking", this).call(this, currentHits, lastHits, objects);
+      _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "resolvePicking", this).call(this, currentHits, lastHits, objects);
 
       var currentHit = currentHits.VR,
           lastHit = lastHits && lastHits.VR,
@@ -9656,10 +9658,10 @@ var VR = function (_Primrose$PoseInputPr) {
 }(Primrose.PoseInputProcessor);
 if(typeof window !== "undefined") window.Primrose.Input.VR = VR;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Input\VR.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Input\VR.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
 (function(){'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9766,7 +9768,7 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
 
     console.log("attempting to peer audio from %s to %s. %s goes first.", fromUserName, toUserName, goSecond ? toUserName : fromUserName);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AudioChannel).call(this, extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond));
+    var _this = _possibleConstructorReturn(this, (AudioChannel.__proto__ || Object.getPrototypeOf(AudioChannel)).call(this, extraIceServers, proxyServer, fromUserName, 0, toUserName, 0, goSecond));
 
     Object.defineProperty(_this, "outAudio", {
       get: function get() {
@@ -9845,7 +9847,7 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
   }, {
     key: 'createOffer',
     value: function createOffer() {
-      return _get(Object.getPrototypeOf(AudioChannel.prototype), 'createOffer', this).call(this).then(preferOpus);
+      return _get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), 'createOffer', this).call(this).then(preferOpus);
     }
   }, {
     key: 'complete',
@@ -9856,7 +9858,7 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
         this._log(1, "[Second]: OR %s -> AC %s -> OC %s -> AR %s.", this.progress.offer.received, this.progress.answer.created, this.progress.offer.created, this.progress.answer.received);
       }
 
-      return _get(Object.getPrototypeOf(AudioChannel.prototype), 'complete', this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
+      return _get(AudioChannel.prototype.__proto__ || Object.getPrototypeOf(AudioChannel.prototype), 'complete', this) || this.progress.offer.received && this.progress.offer.created && this.progress.answer.received && this.progress.answer.created;
     }
   }]);
 
@@ -9864,10 +9866,10 @@ var AudioChannel = function (_Primrose$WebRTCSocke) {
 }(Primrose.WebRTCSocket);
 if(typeof window !== "undefined") window.Primrose.Network.AudioChannel = AudioChannel;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\AudioChannel.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9888,7 +9890,7 @@ var DataChannel = function (_Primrose$WebRTCSocke) {
   function DataChannel(extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond) {
     _classCallCheck(this, DataChannel);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DataChannel).call(this, extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
+    var _this = _possibleConstructorReturn(this, (DataChannel.__proto__ || Object.getPrototypeOf(DataChannel)).call(this, extraIceServers, proxyServer, fromUserName, fromUserIndex, toUserName, toUserIndex, goSecond));
 
     _this.dataChannel = null;
     return _this;
@@ -9922,7 +9924,7 @@ var DataChannel = function (_Primrose$WebRTCSocke) {
       } else {
         this._log(1, "[Second]: OC %s -> AR %s.", this.progress.offer.created, this.progress.answer.received);
       }
-      return _get(Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.recieved && this.progress.answer.created;
+      return _get(DataChannel.prototype.__proto__ || Object.getPrototypeOf(DataChannel.prototype), "complete", this) || this.goFirst && this.progress.offer.created && this.progress.answer.received || !this.goFirst && this.progress.offer.recieved && this.progress.answer.created;
     }
   }]);
 
@@ -9930,10 +9932,10 @@ var DataChannel = function (_Primrose$WebRTCSocke) {
 }(Primrose.WebRTCSocket);
 if(typeof window !== "undefined") window.Primrose.Network.DataChannel = DataChannel;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\DataChannel.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9950,7 +9952,7 @@ var Manager = function (_Primrose$AbstractEve) {
   function Manager(localUser, audio, factories, options) {
     _classCallCheck(this, Manager);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Manager).call(this));
+    var _this = _possibleConstructorReturn(this, (Manager.__proto__ || Object.getPrototypeOf(Manager)).call(this));
 
     _this.localUser = localUser;
     _this.audio = audio;
@@ -10110,10 +10112,10 @@ var Manager = function (_Primrose$AbstractEve) {
 }(Primrose.AbstractEventEmitter);
 if(typeof window !== "undefined") window.Primrose.Network.Manager = Manager;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Network\Manager.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\Manager.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -10295,10 +10297,10 @@ RemoteUser.NETWORK_DT = 0.10;
 RemoteUser.NETWORK_DT_INV = 1 / RemoteUser.NETWORK_DT;
 if(typeof window !== "undefined") window.Primrose.Network.RemoteUser = RemoteUser;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Network\RemoteUser.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -10555,10 +10557,10 @@ var Audio3D = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.Output.Audio3D = Audio3D;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Audio3D.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
 (function(){"use strict";
 
 function HapticGlove(options) {
@@ -10666,10 +10668,10 @@ HapticGlove.DEFAULT_PORT = 8383;
 HapticGlove.DEFAULT_HOST = document.location.hostname;
 if(typeof window !== "undefined") window.Primrose.Output.HapticGlove = HapticGlove;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\HapticGlove.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
 (function(){"use strict";
 
 /* polyfill */
@@ -10757,10 +10759,10 @@ Music.prototype.play = function (i, volume, duration, n) {
 };
 if(typeof window !== "undefined") window.Primrose.Output.Music = Music;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Output\Music.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Music.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 (function(){"use strict";
 
 function pickRandomOption(options, key, min, max) {
@@ -10804,10 +10806,10 @@ try {
 }
 if(typeof window !== "undefined") window.Primrose.Output.Speech = Speech;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Output\Speech.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Output\Speech.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
 (function(){"use strict";
 
 function ID() {
@@ -10815,10 +10817,10 @@ function ID() {
 }
 if(typeof window !== "undefined") window.Primrose.Random.ID = ID;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\ID.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\ID.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
 (function(){"use strict";
 
 function color() {
@@ -10829,10 +10831,10 @@ function color() {
 }
 if(typeof window !== "undefined") window.Primrose.Random.color = color;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\color.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\color.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
 (function(){"use strict";
 
 function int(min, max, power) {
@@ -10847,10 +10849,10 @@ function int(min, max, power) {
 }
 if(typeof window !== "undefined") window.Primrose.Random.int = int;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\int.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\int.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
 (function(){"use strict";
 
 function item(arr) {
@@ -10858,10 +10860,10 @@ function item(arr) {
 }
 if(typeof window !== "undefined") window.Primrose.Random.item = item;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\item.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\item.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
 (function(){"use strict";
 
 function number(min, max) {
@@ -10869,10 +10871,10 @@ function number(min, max) {
 }
 if(typeof window !== "undefined") window.Primrose.Random.number = number;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\number.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\number.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
 (function(){"use strict";
 
 function steps(min, max, steps) {
@@ -10880,10 +10882,10 @@ function steps(min, max, steps) {
 }
 if(typeof window !== "undefined") window.Primrose.Random.steps = steps;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Random\steps.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Random\steps.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
 (function(){"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -11011,19 +11013,19 @@ CodePage.DEAD = function (key) {
 };
 if(typeof window !== "undefined") window.Primrose.Text.CodePage = CodePage;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePage.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
 (function(){"use strict";
 
 var CodePages = {};
 if(typeof window !== "undefined") window.Primrose.Text.CodePages = CodePages;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
 (function(){"use strict";
 
 function CommandPack(name, commands) {
@@ -11032,28 +11034,28 @@ function CommandPack(name, commands) {
 }
 if(typeof window !== "undefined") window.Primrose.Text.CommandPack = CommandPack;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPack.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
 (function(){"use strict";
 
 var CommandPacks = {};
 if(typeof window !== "undefined") window.Primrose.Text.CommandPacks = CommandPacks;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
 (function(){"use strict";
 
 var Controls = {};
 if(typeof window !== "undefined") window.Primrose.Text.Controls = Controls;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Controls.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
 (function(){"use strict";
 
 // unicode-aware string reverse
@@ -11296,10 +11298,10 @@ Cursor.prototype.reverseFromNewline = function (lines) {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Cursor = Cursor;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Cursor.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
 (function(){"use strict";
 
 function Grammar(name, rules) {
@@ -11398,19 +11400,19 @@ function Grammar(name, rules) {
 }
 if(typeof window !== "undefined") window.Primrose.Text.Grammar = Grammar;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammar.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
 (function(){"use strict";
 
 var Grammars = {};
 if(typeof window !== "undefined") window.Primrose.Text.Grammars = Grammars;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -11496,19 +11498,19 @@ var OperatingSystem = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.Text.OperatingSystem = OperatingSystem;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystem.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
 (function(){"use strict";
 
 var OperatingSystems = {};
 if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems = OperatingSystems;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
 (function(){"use strict";
 
 function Point(x, y) {
@@ -11536,10 +11538,10 @@ Point.prototype.toString = function () {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Point = Point;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Point.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Point.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -11664,10 +11666,10 @@ var Rectangle = function () {
 }();
 if(typeof window !== "undefined") window.Primrose.Text.Rectangle = Rectangle;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rectangle.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
 (function(){"use strict";
 
 function Rule(name, test) {
@@ -11711,10 +11713,10 @@ Rule.prototype.carveOutMatchedToken = function (tokens, j) {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Rule = Rule;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Rule.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Rule.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
 (function(){"use strict";
 
 function Size(width, height) {
@@ -11742,10 +11744,10 @@ Size.prototype.toString = function () {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Size = Size;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Size.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Size.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -11866,19 +11868,19 @@ var Terminal = function Terminal(inputEditor, outputEditor) {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Terminal = Terminal;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Terminal.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
 (function(){"use strict";
 
 var Themes = {};
 if(typeof window !== "undefined") window.Primrose.Text.Themes = Themes;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Themes.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
 (function(){"use strict";
 
 function Token(value, type, index, line) {
@@ -11903,10 +11905,10 @@ Token.prototype.toString = function () {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Token = Token;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Token.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Token.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -11935,7 +11937,7 @@ var LoginForm = function (_Primrose$Controls$Fo) {
   function LoginForm() {
     _classCallCheck(this, LoginForm);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LoginForm).call(this, {
+    var _this = _possibleConstructorReturn(this, (LoginForm.__proto__ || Object.getPrototypeOf(LoginForm)).call(this, {
       id: "Primrose.X.LoginForm[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
     }));
@@ -12010,10 +12012,10 @@ var LoginForm = function (_Primrose$Controls$Fo) {
 }(Primrose.Controls.Form);
 if(typeof window !== "undefined") window.Primrose.X.LoginForm = LoginForm;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\LoginForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -12033,7 +12035,7 @@ var SignupForm = function (_Primrose$Controls$Fo) {
   function SignupForm() {
     _classCallCheck(this, SignupForm);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(SignupForm).call(this, {
+    var _this = _possibleConstructorReturn(this, (SignupForm.__proto__ || Object.getPrototypeOf(SignupForm)).call(this, {
       id: "Primrose.X.SignupForm[" + COUNTER++ + "]",
       bounds: new Primrose.Text.Rectangle(0, 0, WIDTH, HEIGHT)
     }));
@@ -12124,10 +12126,10 @@ var SignupForm = function (_Primrose$Controls$Fo) {
 }(Primrose.Controls.Form);
 if(typeof window !== "undefined") window.Primrose.X.SignupForm = SignupForm;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\X\SignupForm.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -12251,10 +12253,10 @@ var DE_QWERTZ = new CodePage("Deutsch: QWERTZ", "de", {
 });
 if(typeof window !== "undefined") window.Primrose.Text.CodePages.DE_QWERTZ = DE_QWERTZ;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\DE_QWERTZ.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -12341,10 +12343,10 @@ var EN_UKX = new CodePage("English: UK Extended", "en-GB", {
 });
 if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_UKX = EN_UKX;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_UKX.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -12405,10 +12407,10 @@ var EN_US = new CodePage("English: USA", "en-US", {
 });
 if(typeof window !== "undefined") window.Primrose.Text.CodePages.EN_US = EN_US;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\EN_US.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
 (function(){"use strict";
 
 var CodePage = Primrose.Text.CodePage;
@@ -12503,10 +12505,10 @@ var FR_AZERTY = new CodePage("Français: AZERTY", "fr", {
 });
 if(typeof window !== "undefined") window.Primrose.Text.CodePages.FR_AZERTY = FR_AZERTY;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CodePages\FR_AZERTY.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
 (function(){"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -12624,17 +12626,17 @@ var BasicTextInput = function (_Primrose$Text$Comman) {
       }
     }
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(BasicTextInput).call(this, additionalName || "Text editor commands", commands));
+    return _possibleConstructorReturn(this, (BasicTextInput.__proto__ || Object.getPrototypeOf(BasicTextInput)).call(this, additionalName || "Text editor commands", commands));
   }
 
   return BasicTextInput;
 }(Primrose.Text.CommandPack);
 if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.BasicTextInput = BasicTextInput;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\BasicTextInput.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
 (function(){"use strict";
 
 var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input commands", {
@@ -12686,10 +12688,10 @@ var TextEditor = new Primrose.Text.CommandPacks.BasicTextInput("Text Area input 
 });
 if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor = TextEditor;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextEditor.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
 (function(){"use strict";
 
 ////
@@ -12700,10 +12702,10 @@ if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextEditor =
 var TextInput = new Primrose.Text.CommandPacks.BasicTextInput("Text Line input commands");
 if(typeof window !== "undefined") window.Primrose.Text.CommandPacks.TextInput = TextInput;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\CommandPacks\TextInput.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
 (function(){"use strict";
 
 function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
@@ -12757,10 +12759,10 @@ function PlainText(text, size, fgcolor, bgcolor, x, y, z, hAlign) {
 }
 if(typeof window !== "undefined") window.Primrose.Text.Controls.PlainText = PlainText;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\PlainText.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
 (function(){"use strict";
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -12790,7 +12792,7 @@ var TextBox = function (_Primrose$Surface) {
   function TextBox(options) {
     _classCallCheck(this, TextBox);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TextBox).call(this, patch(options, {
+    var _this = _possibleConstructorReturn(this, (TextBox.__proto__ || Object.getPrototypeOf(TextBox)).call(this, patch(options, {
       id: "Primrose.Text.Controls.TextBox[" + COUNTER++ + "]"
     })));
 
@@ -12979,7 +12981,7 @@ var TextBox = function (_Primrose$Surface) {
   }, {
     key: "startPointer",
     value: function startPointer(x, y) {
-      if (!_get(Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
+      if (!_get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "startPointer", this).call(this, x, y)) {
         this._dragging = true;
         this.setCursorXY(this.frontCursor, x, y);
       }
@@ -12994,7 +12996,7 @@ var TextBox = function (_Primrose$Surface) {
   }, {
     key: "endPointer",
     value: function endPointer() {
-      _get(Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
+      _get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "endPointer", this).call(this);
       this._dragging = false;
       this._scrolling = false;
     }
@@ -13064,7 +13066,7 @@ var TextBox = function (_Primrose$Surface) {
   }, {
     key: "resize",
     value: function resize() {
-      _get(Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
+      _get(TextBox.prototype.__proto__ || Object.getPrototypeOf(TextBox.prototype), "resize", this).call(this);
       this._bg.setSize(this.surfaceWidth, this.surfaceHeight);
       this._fg.setSize(this.surfaceWidth, this.surfaceHeight);
       this._trim.setSize(this.surfaceWidth, this.surfaceHeight);
@@ -13749,10 +13751,10 @@ var TextBox = function (_Primrose$Surface) {
 }(Primrose.Surface);
 if(typeof window !== "undefined") window.Primrose.Text.Controls.TextBox = TextBox;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextBox.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
 (function(){"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -13775,7 +13777,7 @@ var TextInput = function (_Primrose$Text$Contro) {
   function TextInput(options) {
     _classCallCheck(this, TextInput);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TextInput).call(this, copyObject(patch(options, {
+    var _this = _possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, copyObject(patch(options, {
       id: "Primrose.Text.Controls.TextInput[" + COUNTER++ + "]",
       padding: 5
     }), {
@@ -13802,27 +13804,27 @@ var TextInput = function (_Primrose$Text$Contro) {
         }
         txt = val;
       }
-      _get(Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
+      _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "drawText", this).call(this, ctx, txt, x, y);
     }
   }, {
     key: "value",
     get: function get() {
-      return _get(Object.getPrototypeOf(TextInput.prototype), "value", this);
+      return _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", this);
     },
     set: function set(v) {
       v = v || "";
       v = v.replace(/\r?\n/g, "");
-      _set(Object.getPrototypeOf(TextInput.prototype), "value", v, this);
+      _set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "value", v, this);
     }
   }, {
     key: "selectedText",
     get: function get() {
-      return _get(Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
+      return _get(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", this);
     },
     set: function set(v) {
       v = v || "";
       v = v.replace(/\r?\n/g, "");
-      _set(Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
+      _set(TextInput.prototype.__proto__ || Object.getPrototypeOf(TextInput.prototype), "selectedText", v, this);
     }
   }]);
 
@@ -13830,10 +13832,10 @@ var TextInput = function (_Primrose$Text$Contro) {
 }(Primrose.Text.Controls.TextBox);
 if(typeof window !== "undefined") window.Primrose.Text.Controls.TextInput = TextInput;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Controls\TextInput.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
 (function(){"use strict";
 
 // we don't use strict here because this grammar includes an interpreter that uses `eval()`
@@ -14437,46 +14439,46 @@ Basic.interpret = function (sourceCode, input, output, errorOut, next, clearScre
 };
 if(typeof window !== "undefined") window.Primrose.Text.Grammars.Basic = Basic;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\Basic.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
 (function(){"use strict";
 
 var JavaScript = new Primrose.Text.Grammar("JavaScript", [["newlines", /(?:\r\n|\r|\n)/], ["startBlockComments", /\/\*/], ["endBlockComments", /\*\//], ["regexes", /(?:^|,|;|\(|\[|\{)(?:\s*)(\/(?:\\\/|[^\n\/])+\/)/], ["stringDelim", /("|')/], ["startLineComments", /\/\/.*$/m], ["numbers", /-?(?:(?:\b\d*)?\.)?\b\d+\b/], ["keywords", /\b(?:break|case|catch|const|continue|debugger|default|delete|do|else|export|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with)\b/], ["functions", /(\w+)(?:\s*\()/], ["members", /(\w+)\./], ["members", /((\w+\.)+)(\w+)/]]);
 if(typeof window !== "undefined") window.Primrose.Text.Grammars.JavaScript = JavaScript;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\JavaScript.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
 (function(){"use strict";
 
 var PlainText = new Primrose.Text.Grammar("PlainText", [["newlines", /(?:\r\n|\r|\n)/]]);
 if(typeof window !== "undefined") window.Primrose.Text.Grammars.PlainText = PlainText;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\PlainText.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
 (function(){"use strict";
 
 var TestResults = new Primrose.Text.Grammar("TestResults", [["newlines", /(?:\r\n|\r|\n)/, true], ["numbers", /(\[)(o+)/, true], ["numbers", /(\d+ succeeded), 0 failed/, true], ["numbers", /^    Successes:/, true], ["functions", /(x+)\]/, true], ["functions", /[1-9]\d* failed/, true], ["functions", /^    Failures:/, true], ["comments", /(\d+ms:)(.*)/, true], ["keywords", /(Test results for )(\w+):/, true], ["strings", /        \w+/, true]]);
 if(typeof window !== "undefined") window.Primrose.Text.Grammars.TestResults = TestResults;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Grammars\TestResults.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
 (function(){"use strict";
 
 var OSX = new Primrose.Text.OperatingSystem("OS X", "META", "ALT", "METASHIFT_z", "META", "LEFTARROW", "RIGHTARROW", "META", "UPARROW", "DOWNARROW");
 if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OSX;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\OSX.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
 (function(){"use strict";
 
 ////
@@ -14486,10 +14488,10 @@ if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.OSX = OS
 var Windows = new Primrose.Text.OperatingSystem("Windows", "CTRL", "CTRL", "CTRL_y", "", "HOME", "END", "CTRL", "HOME", "END");
 if(typeof window !== "undefined") window.Primrose.Text.OperatingSystems.Windows = Windows;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\OperatingSystems\Windows.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
 (function(){"use strict";
 
 var Dark = {
@@ -14539,10 +14541,10 @@ var Dark = {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Themes.Dark = Dark;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Dark.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
 (function(){"use strict";
 
 var Default = {
@@ -14592,10 +14594,10 @@ var Default = {
 };
 if(typeof window !== "undefined") window.Primrose.Text.Themes.Default = Default;
 })();
-// end D:\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\Primrose\Text\Themes\Default.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
 (function(){"use strict";
 
 function debug(label, digits) {
@@ -14607,10 +14609,10 @@ function debug(label, digits) {
 }
 if(typeof window !== "undefined") window.THREE.Matrix4.prototype.debug = debug;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\debug.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -14638,10 +14640,10 @@ function toString(digits) {
 }
 if(typeof window !== "undefined") window.THREE.Matrix4.prototype.toString = toString;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Matrix4\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
 (function(){"use strict";
 
 function addToBrowserEnvironment(env, scene) {
@@ -14663,10 +14665,10 @@ function addToBrowserEnvironment(env, scene) {
 }
 if(typeof window !== "undefined") window.THREE.Object3D.prototype.addToBrowserEnvironment = addToBrowserEnvironment;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Object3D\prototype\addToBrowserEnvironment.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
 (function(){"use strict";
 
 function debug(label, digits) {
@@ -14678,10 +14680,10 @@ function debug(label, digits) {
 }
 if(typeof window !== "undefined") window.THREE.Quaternion.prototype.debug = debug;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\debug.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -14699,10 +14701,10 @@ function toString(digits) {
 }
 if(typeof window !== "undefined") window.THREE.Quaternion.prototype.toString = toString;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Quaternion\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 (function(){"use strict";
 
 function debug(label, digits) {
@@ -14714,10 +14716,10 @@ function debug(label, digits) {
 }
 if(typeof window !== "undefined") window.THREE.Vector3.prototype.debug = debug;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\debug.js
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-// start D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+// start C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 (function(){"use strict";
 
 function toString(digits) {
@@ -14731,5 +14733,5 @@ function toString(digits) {
 }
 if(typeof window !== "undefined") window.THREE.Vector3.prototype.toString = toString;
 })();
-// end D:\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
+// end C:\Users\ThinkPad\Documents\VR\Primrose\src\THREE\Vector3\prototype\toString.js
 ////////////////////////////////////////////////////////////////////////////////

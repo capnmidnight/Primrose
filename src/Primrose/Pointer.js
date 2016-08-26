@@ -40,14 +40,21 @@ pliny.class({
       description: "The input object that defines the position for this pointer.",
       optional: true,
       defaultValue: null
+    }, {
+      name: "triggerDevice",
+      type: "Primrose.PoseInputProcessor",
+      description: "The input object that defines the button trigger for this pointer.",
+      optional: true,
+      defaultValue: null
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, emission, isHand, orientationDevice, positionDevice = null) {
+  constructor(name, color, emission, isHand, orientationDevice, positionDevice = null, triggerDevice = null) {
     super();
     this.name = name;
     this.orientationDevice = orientationDevice;
     this.positionDevice = positionDevice || orientationDevice;
+    this.triggerDevice = triggerDevice || orientationDevice;
     this._currentControl = null;
     this.showPointer = true;
     this.color = color;
@@ -147,7 +154,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     }
     else {
 
-      var head = this.orientationDevice,
+      var head = this.triggerDevice,
         pitch = 0,
         heading = 0;
       while (head) {

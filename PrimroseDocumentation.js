@@ -1797,6 +1797,12 @@ pliny.class({
     description: "The input object that defines the position for this pointer.",
     optional: true,
     defaultValue: null
+  }, {
+    name: "triggerDevice",
+    type: "Primrose.PoseInputProcessor",
+    description: "The input object that defines the button trigger for this pointer.",
+    optional: true,
+    defaultValue: null
   }]
 });
 
