@@ -5,8 +5,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class Location extends Primrose.InputProcessor {
-  constructor(commands, socket, options) {
-    super("Location", null, commands, socket);
+  constructor(commands, options) {
+    super("Location", commands);
 
     this.options = patch(options, Location.DEFAULTS);
 

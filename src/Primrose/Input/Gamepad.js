@@ -22,11 +22,6 @@ pliny.class({
       type: "Array",
       optional: true,
       description: "An array of input command descriptions."
-    }, {
-      name: "socket",
-      type: "WebSocket",
-      optional: true,
-      description: "A socket over which to transmit device state for device fusion."
     }],
     description: "An input processor for Gamepads, including those with positional data."
 });
@@ -111,9 +106,9 @@ class Gamepad extends Primrose.PoseInputProcessor {
     }
   }
 
-  constructor(pad, axisOffset, commands, socket, parent) {
+  constructor(pad, axisOffset, commands) {
     var padID = Gamepad.ID(pad);
-    super(padID, parent, commands, socket, Gamepad.AXES);
+    super(padID, commands, Gamepad.AXES);
     currentManagers[padID] = this;
 
     this.currentDevice = pad;

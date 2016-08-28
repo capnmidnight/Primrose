@@ -53,10 +53,14 @@ gulp.task("default", [
 ]);
 
 gulp.task("debug", [
-  min.build,
+  tot.build,
   html.debug,
   css.build
 ]);
+
+gulp.task("js", [js.default]);
+gulp.task("html", [html.debug]);
+gulp.task("css", [css.build]);
 
 gulp.task("release",  [
   "archive",

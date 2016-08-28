@@ -5,8 +5,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class Motion extends Primrose.InputProcessor {
-  constructor(commands, socket) {
-    super("Motion", null, commands, socket);
+  constructor(commands) {
+    super("Motion", commands);
     var corrector = new MotionCorrector(),
       a = new THREE.Quaternion(),
       b = new THREE.Quaternion(),

@@ -8,21 +8,15 @@ pliny.class({
     name: "VR",
     baseClass: "Primrose.PoseInputProcessor",
     parameters: [{
-      name: "commands",
-      type: "Array",
-      optional: true,
-      description: "An array of input command descriptions."
-    }, {
-      name: "socket",
-      type: "WebSocket",
-      optional: true,
-      description: "A socket over which to transmit device state for device fusion."
+      name: "avatarHeight",
+      type: "Number",
+      description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
     }],
     description: "An input manager for gamepad devices."
 });
 class VR extends Primrose.PoseInputProcessor {
-  constructor(avatarHeight, parent, socket) {
-    super("VR", parent, null, socket);
+  constructor(avatarHeight) {
+    super("VR");
 
     this.displays = [];
     this._transformers = [];
@@ -121,13 +115,14 @@ class VR extends Primrose.PoseInputProcessor {
   update(dt) {
     super.update(dt);
 
-    let x = 0,
-      z = 0,
-      stage = null;
+    var x, z, stage;
 
     if (this.currentDevice) {
       this.currentPose = this.currentDevice.getPose();
       stage = this.currentDevice.stageParameters;
+    }
+    else{
+      stage = null;
     }
 
     if (stage) {
@@ -137,6 +132,8 @@ class VR extends Primrose.PoseInputProcessor {
     }
     else {
       this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+      x = 0;
+      z = 0;
     }
 
     var s = {

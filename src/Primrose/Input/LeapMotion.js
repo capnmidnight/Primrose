@@ -12,8 +12,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class LeapMotion extends Primrose.InputProcessor {
-  constructor(commands, socket) {
-    super("LeapMotion", null, commands, socket);
+  constructor(commands) {
+    super("LeapMotion", commands);
 
     this.isStreaming = false;
     this.controller = new Leap.Controller({

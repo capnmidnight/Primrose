@@ -53,8 +53,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class Speech extends Primrose.InputProcessor {
-  constructor(commands, socket) {
-    super("Speech", null, commands, socket);
+  constructor(commands) {
+    super("Speech", commands);
     var running = false,
       recognition = null,
       errorMessage = null;

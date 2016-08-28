@@ -2308,22 +2308,17 @@ var InputProcessor = function () {
     }
   }]);
 
-  function InputProcessor(name, parent, commands, socket, axisNames) {
+  function InputProcessor(name, commands, axisNames) {
     var _this = this;
 
     _classCallCheck(this, InputProcessor);
 
     this.name = name;
-    this.parent = parent;
     this.commands = {};
     this.commandNames = [];
-    this.socket = socket;
     this.enabled = true;
     this.paused = false;
     this.ready = true;
-    this.transmitting = true;
-    this.receiving = true;
-    this.socketReady = false;
     this.inPhysicalUse = false;
     this.inputState = {
       buttons: [],
@@ -2347,24 +2342,6 @@ var InputProcessor = function () {
 
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
-
-    if (socket) {
-      socket.on("open", function () {
-        _this.socketReady = true;
-        _this.inPhysicalUse = !_this.receiving;
-      });
-      socket.on(name, function (cmdState) {
-        if (_this.receiving) {
-          _this.inPhysicalUse = false;
-          _this.decodeStateSnapshot(cmdState);
-          _this.fireCommands();
-        }
-      });
-      socket.on("close", function () {
-        _this.inPhysicalUse = true;
-        _this.socketReady = false;
-      });
-    }
 
     for (var cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
@@ -2566,14 +2543,6 @@ var InputProcessor = function () {
               } else if (!cmd.state.pressed) {
                 cmd.state.repeatCount = 0;
               }
-            }
-          }
-
-          if (this.socketReady && this.transmitting) {
-            var finalState = this.makeStateSnapshot();
-            if (finalState !== this.lastState) {
-              this.socket.emit(this.name, finalState);
-              this.lastState = finalState;
             }
           }
 
@@ -2784,26 +2753,6 @@ var InputProcessor = function () {
       return name && this.commands[name] && !this.commands[name].disabled;
     }
   }, {
-    key: "transmit",
-    value: function transmit(v) {
-      this.transmitting = v;
-    }
-  }, {
-    key: "isTransmitting",
-    value: function isTransmitting() {
-      return this.transmitting;
-    }
-  }, {
-    key: "receive",
-    value: function receive(v) {
-      this.receiving = v;
-    }
-  }, {
-    key: "isReceiving",
-    value: function isReceiving() {
-      return this.receiving;
-    }
-  }, {
     key: "getAxis",
     value: function getAxis(name) {
       var i = this.axisNames.indexOf(name);
@@ -2829,9 +2778,19 @@ var InputProcessor = function () {
       this.inputState.buttons[index] = pressed;
     }
   }, {
+    key: "isDown",
+    value: function isDown(name) {
+      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
+    }
+  }, {
+    key: "isUp",
+    value: function isUp(name) {
+      return this.enabled && this.isEnabled(name) && this.commands[name].state.pressed;
+    }
+  }, {
     key: "getValue",
     value: function getValue(name) {
-      return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.value || this.getAxis(name) || 0;
+      return this.enabled && this.isEnabled(name) && (this.commands[name].state.value || this.getAxis(name)) || 0;
     }
   }, {
     key: "setValue",
@@ -2842,16 +2801,6 @@ var InputProcessor = function () {
       } else if (this.commands[name] && !this.commands[name].disabled) {
         this.commands[name].state.value = value;
       }
-    }
-  }, {
-    key: "isDown",
-    value: function isDown(name) {
-      return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
-    }
-  }, {
-    key: "isUp",
-    value: function isUp(name) {
-      return (this.enabled || this.receiving && this.socketReady) && this.isEnabled(name) && this.commands[name].state.pressed;
     }
   }]);
 
@@ -3217,18 +3166,19 @@ var TELEPORT_PAD_RADIUS = 0.4,
 var Pointer = function (_Primrose$AbstractEve) {
   _inherits(Pointer, _Primrose$AbstractEve);
 
-  function Pointer(name, color, emission, isHand, orientationDevice) {
-    var positionDevice = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
-    var triggerDevice = arguments.length <= 6 || arguments[6] === undefined ? null : arguments[6];
+  function Pointer(name, color, emission, orientationDevices) {
+    var positionDevices = arguments.length <= 4 || arguments[4] === undefined ? null : arguments[4];
+    var triggerDevices = arguments.length <= 5 || arguments[5] === undefined ? null : arguments[5];
 
     _classCallCheck(this, Pointer);
 
     var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
     _this.name = name;
-    _this.orientationDevice = orientationDevice;
-    _this.positionDevice = positionDevice || orientationDevice;
-    _this.triggerDevice = triggerDevice || orientationDevice;
+    _this.orientationDevices = orientationDevices;
+    _this.positionDevices = positionDevices || orientationDevices.slice();
+    _this.triggerDevices = triggerDevices || orientationDevices.slice();
+
     _this._currentControl = null;
     _this.showPointer = true;
     _this.color = color;
@@ -3246,17 +3196,11 @@ var Pointer = function (_Primrose$AbstractEve) {
     });
     _this.disk.geometry.computeBoundingBox();
     _this.disk.geometry.vertices.forEach(function (v) {
-      return v.y -= _this.disk.geometry.boundingBox.min.y;
+      v.y -= _this.disk.geometry.boundingBox.min.y;
     });
     _this.disk.geometry.computeBoundingBox();
 
     _this.disk.scale.set(1, 0.1, 1);
-
-    if (isHand) {
-      _this.mesh.add(textured(box(0.1, 0.025, 0.2), _this.color, {
-        emissive: _this.emission
-      }));
-    }
     return _this;
   }
 
@@ -3264,6 +3208,21 @@ var Pointer = function (_Primrose$AbstractEve) {
     key: "add",
     value: function add(obj) {
       this.mesh.add(obj);
+    }
+  }, {
+    key: "addDevice",
+    value: function addDevice(orientation, position, trigger) {
+      if (orientation) {
+        this.orientationDevices.push(orientation);
+      }
+
+      if (position) {
+        this.positionDevices.push(position);
+      }
+
+      if (trigger) {
+        this.triggerDevices.push(trigger);
+      }
     }
   }, {
     key: "addToBrowserEnvironment",
@@ -3284,23 +3243,44 @@ var Pointer = function (_Primrose$AbstractEve) {
   }, {
     key: "update",
     value: function update() {
-      if (this.orientationDevice instanceof Primrose.PoseInputProcessor) {
-        this.position.copy(this.orientationDevice.position);
-        this.quaternion.copy(this.orientationDevice.quaternion);
+      if (this.orientationDevices[0] instanceof Primrose.PoseInputProcessor) {
+        this.position.copy(this.orientationDevices[0].position);
+        this.quaternion.copy(this.orientationDevices[0].quaternion);
       } else {
+        var pitch = 0,
+            heading = 0,
+            x = 0,
+            y = 0,
+            z = 0,
+            i,
+            obj;
 
-        var head = this.triggerDevice,
-            pitch = 0,
-            heading = 0;
-        while (head) {
-          pitch += head.getValue("pitch");
-          heading += head.getValue("heading");
-          head = head.parent;
+        for (i = 0; i < this.orientationDevices.length; ++i) {
+          obj = this.orientationDevices[i];
+          if (obj.enabled) {
+            pitch += obj.getValue("pitch");
+            heading += obj.getValue("heading");
+          }
+        }
+
+        for (i = 0; i < this.positionDevices.length; ++i) {
+          obj = this.positionDevices[i];
+          if (obj.enabled) {
+            if (obj.position) {
+              x += obj.position.x;
+              y += obj.position.y;
+              z += obj.position.z;
+            } else {
+              x += obj.getValue("X");
+              y += obj.getValue("Y");
+              z += obj.getValue("Z");
+            }
+          }
         }
 
         EULER_TEMP.set(pitch, heading, 0, "YXZ");
         this.quaternion.setFromEuler(EULER_TEMP);
-        this.position.copy(this.positionDevice.position);
+        this.position.set(x, y, z);
       }
     }
   }, {
@@ -3309,7 +3289,7 @@ var Pointer = function (_Primrose$AbstractEve) {
       this.disk.visible = false;
       this.mesh.visible = false;
 
-      if (this.orientationDevice.enabled && this.showPointer) {
+      if (this.showPointer) {
         // reset the mesh color to the base value
         textured(this.mesh, this.color, {
           emissive: this.minorColor
@@ -3319,16 +3299,17 @@ var Pointer = function (_Primrose$AbstractEve) {
             dButtons = 0,
             currentHit = currentHits[this.name],
             lastHit = lastHits && lastHits[this.name],
-            head = this.orientationDevice,
             isGround = false,
             object,
             control,
             point;
 
-        while (head) {
-          buttons += head.getValue("buttons");
-          dButtons += head.getValue("dButtons");
-          head = head.parent;
+        for (var i = 0; i < this.triggerDevices.length; ++i) {
+          var obj = this.triggerDevices[i];
+          if (obj.enabled) {
+            buttons += obj.getValue("buttons");
+            dButtons += obj.getValue("dButtons");
+          }
         }
 
         var changed = dButtons !== 0;
@@ -3367,7 +3348,7 @@ var Pointer = function (_Primrose$AbstractEve) {
         }
 
         if (changed) {
-          if (buttons) {
+          if (!buttons) {
             var blurCurrentControl = !!this.currentControl,
                 currentControl = this.currentControl;
             this.currentControl = null;
@@ -3431,14 +3412,6 @@ var Pointer = function (_Primrose$AbstractEve) {
       }
     }
   }, {
-    key: "segment",
-    get: function get() {
-      if (this.showPointer) {
-        FORWARD.set(0, 0, -1).applyQuaternion(this.mesh.quaternion).add(this.mesh.position);
-        return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
-      }
-    }
-  }, {
     key: "lockMovement",
     get: function get() {
       var head = this;
@@ -3449,6 +3422,14 @@ var Pointer = function (_Primrose$AbstractEve) {
         head = head.parent;
       }
       return false;
+    }
+  }, {
+    key: "segment",
+    get: function get() {
+      if (this.showPointer) {
+        FORWARD.set(0, 0, -1).applyQuaternion(this.mesh.quaternion).add(this.mesh.position);
+        return [this.name, this.mesh.position.toArray(), FORWARD.toArray()];
+      }
     }
   }]);
 
@@ -3481,10 +3462,10 @@ var DEFAULT_POSE = {
 var PoseInputProcessor = function (_Primrose$InputProces) {
   _inherits(PoseInputProcessor, _Primrose$InputProces);
 
-  function PoseInputProcessor(name, parent, commands, socket, axisNames) {
+  function PoseInputProcessor(name, commands, axisNames) {
     _classCallCheck(this, PoseInputProcessor);
 
-    var _this = _possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, parent, commands, socket, axisNames));
+    var _this = _possibleConstructorReturn(this, (PoseInputProcessor.__proto__ || Object.getPrototypeOf(PoseInputProcessor)).call(this, name, commands, axisNames));
 
     _this.currentDevice = null;
     _this.lastPose = null;
@@ -7933,7 +7914,7 @@ var FPSInput = function () {
       return _this.Keyboard.doTyping(_this.currentControl && _this.currentControl.focusedElement, evt);
     };
 
-    this.add(new Primrose.Input.Keyboard(this, null, {
+    this.add(new Primrose.Input.Keyboard(this, {
       strafeLeft: {
         buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
       },
@@ -7973,7 +7954,7 @@ var FPSInput = function () {
     this.Keyboard.addEventListener("keydown", keyDown);
     this.Keyboard.addEventListener("keyup", keyUp);
 
-    this.add(new Primrose.Input.Touch(DOMElement, this.Keyboard, {
+    this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
         axes: [Primrose.Input.Touch.FINGERS]
       },
@@ -8007,7 +7988,7 @@ var FPSInput = function () {
       }
     }));
 
-    this.add(new Primrose.Input.Mouse(DOMElement, this.Keyboard, {
+    this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
         axes: [Primrose.Input.Mouse.BUTTONS]
       },
@@ -8047,20 +8028,26 @@ var FPSInput = function () {
       }
     }));
 
-    this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
+    this.add(new Primrose.Input.VR(this.options.avatarHeight));
 
     this.motionDevices.push(this.VR);
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", function (pad) {
       var padID = Primrose.Input.Gamepad.ID(pad),
           isMotion = padID.indexOf("Vive") === 0,
-          padCommands = null,
-          controllerNumber = 0,
           mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
         if (isMotion) {
-          padCommands = {
+          var controllerNumber = 0;
+          for (var i = 0; i < _this.managers.length; ++i) {
+            mgr = _this.managers[i];
+            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+              ++controllerNumber;
+            }
+          }
+
+          mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
             buttons: {
               axes: [Primrose.Input.Gamepad.BUTTONS]
             },
@@ -8072,16 +8059,27 @@ var FPSInput = function () {
               buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
               commandUp: emit.bind(_this, "zero")
             }
-          };
+          });
 
-          for (var i = 0; i < _this.managers.length; ++i) {
-            mgr = _this.managers[i];
-            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-              ++controllerNumber;
-            }
-          }
+          _this.add(mgr);
+          _this.motionDevices.push(mgr);
+
+          var shift = (_this.motionDevices.length - 2) * 8,
+              color = 0x0000ff << shift,
+              emission = 0x00007f << shift,
+              ptr = new Primrose.Pointer(padID + "Pointer", color, emission, [mgr]);
+
+          ptr.add(textured(box(0.1, 0.025, 0.2), color, {
+            emissive: emission
+          }));
+
+          _this.pointers.push(ptr);
+          ptr.addToBrowserEnvironment(null, _this.options.scene);
+          ptr.addEventListener("teleport", function (evt) {
+            return _this.moveStage(evt.position);
+          });
         } else {
-          padCommands = {
+          mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
               axes: [Primrose.Input.Gamepad.BUTTONS]
             },
@@ -8115,25 +8113,10 @@ var FPSInput = function () {
               buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
               commandUp: emit.bind(_this, "zero")
             }
-          };
-        }
-
-        mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
-        _this.add(mgr);
-
-        if (isMotion) {
-          mgr.parent = _this.VR;
-          _this.motionDevices.push(mgr);
-
-          var shift = (_this.motionDevices.length - 2) * 8,
-              ptr = new Primrose.Pointer(padID + "Pointer", 0x0000ff << shift, 0x00007f << shift, true, mgr);
-          _this.pointers.push(ptr);
-          ptr.addToBrowserEnvironment(null, _this.options.scene);
-          ptr.addEventListener("teleport", function (evt) {
-            return _this.moveStage(evt.position);
           });
-        } else {
-          _this.Keyboard.parent = mgr;
+          _this.add(mgr);
+          _this.mousePointer.addDevice(mgr, mgr, mgr);
+          _this.head.addDevice(mgr, mgr, mgr);
         }
       }
     });
@@ -8142,11 +8125,11 @@ var FPSInput = function () {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, false, this.Mouse, this.VR);
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.Mouse, this.Touch], [this.VR, this.Touch, this.Keyboard]);
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, false, this.VR);
+    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, [this.VR, this.Mouse, this.Touch, this.Keyboard]);
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
 
@@ -8475,12 +8458,12 @@ var Gamepad = function (_Primrose$PoseInputPr) {
     }
   }]);
 
-  function Gamepad(pad, axisOffset, commands, socket, parent) {
+  function Gamepad(pad, axisOffset, commands) {
     _classCallCheck(this, Gamepad);
 
     var padID = Gamepad.ID(pad);
 
-    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, parent, commands, socket, Gamepad.AXES));
+    var _this = _possibleConstructorReturn(this, (Gamepad.__proto__ || Object.getPrototypeOf(Gamepad)).call(this, padID, commands, Gamepad.AXES));
 
     currentManagers[padID] = _this;
 
@@ -8592,10 +8575,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Keyboard = function (_Primrose$InputProces) {
   _inherits(Keyboard, _Primrose$InputProces);
 
-  function Keyboard(input, parent, commands, socket) {
+  function Keyboard(input, commands) {
     _classCallCheck(this, Keyboard);
 
-    var _this = _possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Keyboard.__proto__ || Object.getPrototypeOf(Keyboard)).call(this, "Keyboard", commands));
 
     _this.listeners.clipboard = [];
     _this.listeners.keydown = [];
@@ -8754,10 +8737,10 @@ function processFingerParts(i) {
 var LeapMotion = function (_Primrose$InputProces) {
   _inherits(LeapMotion, _Primrose$InputProces);
 
-  function LeapMotion(commands, socket) {
+  function LeapMotion(commands) {
     _classCallCheck(this, LeapMotion);
 
-    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (LeapMotion.__proto__ || Object.getPrototypeOf(LeapMotion)).call(this, "LeapMotion", commands));
 
     _this.isStreaming = false;
     _this.controller = new Leap.Controller({
@@ -8879,10 +8862,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Location = function (_Primrose$InputProces) {
   _inherits(Location, _Primrose$InputProces);
 
-  function Location(commands, socket, options) {
+  function Location(commands, options) {
     _classCallCheck(this, Location);
 
-    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Location.__proto__ || Object.getPrototypeOf(Location)).call(this, "Location", commands));
 
     _this.options = patch(options, Location.DEFAULTS);
 
@@ -8937,10 +8920,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Motion = function (_Primrose$InputProces) {
   _inherits(Motion, _Primrose$InputProces);
 
-  function Motion(commands, socket) {
+  function Motion(commands) {
     _classCallCheck(this, Motion);
 
-    var _this = _possibleConstructorReturn(this, (Motion.__proto__ || Object.getPrototypeOf(Motion)).call(this, "Motion", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Motion.__proto__ || Object.getPrototypeOf(Motion)).call(this, "Motion", commands));
 
     var corrector = new MotionCorrector(),
         a = new THREE.Quaternion(),
@@ -9023,10 +9006,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Mouse = function (_Primrose$InputProces) {
   _inherits(Mouse, _Primrose$InputProces);
 
-  function Mouse(DOMElement, parent, commands, socket) {
+  function Mouse(DOMElement, commands) {
     _classCallCheck(this, Mouse);
 
-    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Mouse.__proto__ || Object.getPrototypeOf(Mouse)).call(this, "Mouse", commands));
 
     _this.timer = null;
 
@@ -9159,10 +9142,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Speech = function (_Primrose$InputProces) {
   _inherits(Speech, _Primrose$InputProces);
 
-  function Speech(commands, socket) {
+  function Speech(commands) {
     _classCallCheck(this, Speech);
 
-    var _this = _possibleConstructorReturn(this, (Speech.__proto__ || Object.getPrototypeOf(Speech)).call(this, "Speech", null, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Speech.__proto__ || Object.getPrototypeOf(Speech)).call(this, "Speech", commands));
 
     var running = false,
         recognition = null,
@@ -9340,10 +9323,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Touch = function (_Primrose$InputProces) {
   _inherits(Touch, _Primrose$InputProces);
 
-  function Touch(DOMElement, parent, commands, socket) {
+  function Touch(DOMElement, commands) {
     _classCallCheck(this, Touch);
 
-    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", parent, commands, socket));
+    var _this = _possibleConstructorReturn(this, (Touch.__proto__ || Object.getPrototypeOf(Touch)).call(this, "Touch", commands));
 
     DOMElement = DOMElement || window;
 
@@ -9420,10 +9403,10 @@ var DEFAULT_POSE = {
 var VR = function (_Primrose$PoseInputPr) {
   _inherits(VR, _Primrose$PoseInputPr);
 
-  function VR(avatarHeight, parent, socket) {
+  function VR(avatarHeight) {
     _classCallCheck(this, VR);
 
-    var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR", parent, null, socket));
+    var _this = _possibleConstructorReturn(this, (VR.__proto__ || Object.getPrototypeOf(VR)).call(this, "VR"));
 
     _this.displays = [];
     _this._transformers = [];
@@ -9541,13 +9524,13 @@ var VR = function (_Primrose$PoseInputPr) {
     value: function update(dt) {
       _get(VR.prototype.__proto__ || Object.getPrototypeOf(VR.prototype), "update", this).call(this, dt);
 
-      var x = 0,
-          z = 0,
-          stage = null;
+      var x, z, stage;
 
       if (this.currentDevice) {
         this.currentPose = this.currentDevice.getPose();
         stage = this.currentDevice.stageParameters;
+      } else {
+        stage = null;
       }
 
       if (stage) {
@@ -9556,6 +9539,8 @@ var VR = function (_Primrose$PoseInputPr) {
         z = stage.sizeZ;
       } else {
         this.movePlayer.makeTranslation(0, this.defaultAvatarHeight, 0);
+        x = 0;
+        z = 0;
       }
 
       var s = {

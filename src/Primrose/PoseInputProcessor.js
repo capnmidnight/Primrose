@@ -11,8 +11,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class PoseInputProcessor extends Primrose.InputProcessor {
-  constructor(name, parent, commands, socket, axisNames) {
-    super(name, parent, commands, socket, axisNames);
+  constructor(name, commands, axisNames) {
+    super(name, commands, axisNames);
 
     this.currentDevice = null;
     this.lastPose = null;

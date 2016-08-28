@@ -5,8 +5,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class Touch extends Primrose.InputProcessor {
-  constructor(DOMElement, parent, commands, socket) {
-    super("Touch", parent, commands, socket);
+  constructor(DOMElement, commands) {
+    super("Touch", commands);
     DOMElement = DOMElement || window;
 
     var setState = (stateChange, setAxis, event) => {

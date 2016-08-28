@@ -27,7 +27,7 @@ class FPSInput {
     const keyUp = (evt) => this.currentControl && this.currentControl.keyUp && this.currentControl.keyUp(evt);
     const keyDown = (evt) => this.Keyboard.doTyping(this.currentControl && this.currentControl.focusedElement, evt);
 
-    this.add(new Primrose.Input.Keyboard(this, null, {
+    this.add(new Primrose.Input.Keyboard(this, {
       strafeLeft: {
         buttons: [-Primrose.Keys.A, -Primrose.Keys.LEFTARROW]
       },
@@ -73,7 +73,7 @@ class FPSInput {
     this.Keyboard.addEventListener("keydown", keyDown);
     this.Keyboard.addEventListener("keyup", keyUp);
 
-    this.add(new Primrose.Input.Touch(DOMElement, this.Keyboard, {
+    this.add(new Primrose.Input.Touch(DOMElement, {
       buttons: {
         axes: [Primrose.Input.Touch.FINGERS]
       },
@@ -107,7 +107,7 @@ class FPSInput {
       }
     }));
 
-    this.add(new Primrose.Input.Mouse(DOMElement, this.Keyboard, {
+    this.add(new Primrose.Input.Mouse(DOMElement, {
       buttons: {
         axes: [Primrose.Input.Mouse.BUTTONS]
       },
@@ -147,20 +147,26 @@ class FPSInput {
       }
     }));
 
-    this.add(new Primrose.Input.VR(this.options.avatarHeight, isMobile ? this.Touch : this.Mouse));
+    this.add(new Primrose.Input.VR(this.options.avatarHeight));
 
     this.motionDevices.push(this.VR);
 
     Primrose.Input.Gamepad.addEventListener("gamepadconnected", (pad) => {
       var padID = Primrose.Input.Gamepad.ID(pad),
         isMotion = padID.indexOf("Vive") === 0,
-        padCommands = null,
-        controllerNumber = 0,
         mgr;
 
       if (padID !== "Unknown" && padID !== "Rift") {
         if (isMotion) {
-          padCommands = {
+          var controllerNumber = 0;
+          for (var i = 0; i < this.managers.length; ++i) {
+            mgr = this.managers[i];
+            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
+              ++controllerNumber;
+            }
+          }
+
+          mgr = new Primrose.Input.Gamepad(pad, controllerNumber, {
             buttons: {
               axes: [Primrose.Input.Gamepad.BUTTONS]
             },
@@ -172,17 +178,26 @@ class FPSInput {
               buttons: [Primrose.Input.Gamepad.VIVE_BUTTONS.GRIP_PRESSED],
               commandUp: emit.bind(this, "zero")
             }
-          };
+          });
 
-          for (var i = 0; i < this.managers.length; ++i) {
-            mgr = this.managers[i];
-            if (mgr.currentPad && mgr.currentPad.id === pad.id) {
-              ++controllerNumber;
-            }
-          }
+          this.add(mgr);
+          this.motionDevices.push(mgr);
+
+          var shift = (this.motionDevices.length - 2) * 8,
+            color = 0x0000ff << shift,
+            emission = 0x00007f << shift,
+            ptr = new Primrose.Pointer(padID + "Pointer", color, emission, [mgr]);
+
+          ptr.add(textured(box(0.1, 0.025, 0.2), color, {
+            emissive: emission
+          }));
+
+          this.pointers.push(ptr);
+          ptr.addToBrowserEnvironment(null, this.options.scene);
+          ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
         }
         else {
-          padCommands = {
+          mgr = new Primrose.Input.Gamepad(pad, 0, {
             buttons: {
               axes: [Primrose.Input.Gamepad.BUTTONS]
             },
@@ -216,24 +231,10 @@ class FPSInput {
               buttons: [Primrose.Input.Gamepad.XBOX_ONE_BUTTONS.BACK],
               commandUp: emit.bind(this, "zero")
             }
-          };
-        }
-
-        mgr = new Primrose.Input.Gamepad(pad, controllerNumber, padCommands);
-        this.add(mgr);
-
-        if (isMotion) {
-          mgr.parent = this.VR;
-          this.motionDevices.push(mgr);
-
-          var shift = (this.motionDevices.length - 2) * 8,
-            ptr = new Primrose.Pointer(padID + "Pointer", 0x0000ff << shift, 0x00007f << shift, true, mgr);
-          this.pointers.push(ptr);
-          ptr.addToBrowserEnvironment(null, this.options.scene);
-          ptr.addEventListener("teleport", (evt) => this.moveStage(evt.position));
-        }
-        else {
-          this.Keyboard.parent = mgr;
+          });
+          this.add(mgr);
+          this.mousePointer.addDevice(mgr, mgr, mgr);
+          this.head.addDevice(mgr, mgr, mgr);
         }
       }
     });
@@ -242,11 +243,23 @@ class FPSInput {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, false, this.Mouse, this.VR);
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [
+      this.Mouse,
+      this.Touch
+    ], [
+      this.VR,
+      this.Touch,
+      this.Keyboard
+    ]);
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 
-    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, false, this.VR);
+    this.head = new Primrose.Pointer("GazePointer", 0xffff00, 0x7f7f00, [
+      this.VR,
+      this.Mouse,
+      this.Touch,
+      this.Keyboard
+    ]);
     this.pointers.push(this.head);
     this.head.addToBrowserEnvironment(null, this.options.scene);
 

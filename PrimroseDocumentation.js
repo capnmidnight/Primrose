@@ -1770,7 +1770,7 @@ pliny.class({
   parent: "Primrose",
   name: "Pointer",
   baseClass: "Primrose.AbstractEventEmitter",
-  description: "A device that points into the scene somewhere, casting a ray at objects for picking operations.",
+  description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
   parameters: [{
     name: "name ",
     type: "String",
@@ -1788,19 +1788,19 @@ pliny.class({
     type: "Boolean",
     description: "Pass true to add a hand model at the origin of the pointer ray."
   }, {
-    name: "orientationDevice",
-    type: "Primrose.InputProcessor",
-    description: "The input object that defines the orientation for this pointer."
+    name: "orientationDevices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
   }, {
-    name: "positionDevice",
-    type: "Primrose.PoseInputProcessor",
-    description: "The input object that defines the position for this pointer.",
+    name: "positionDevices",
+    type: "Array",
+    description: "An Array of `Primrose.PoseInputProcessor` objects that define the position for this pointer.",
     optional: true,
     defaultValue: null
   }, {
-    name: "triggerDevice",
-    type: "Primrose.PoseInputProcessor",
-    description: "The input object that defines the button trigger for this pointer.",
+    name: "triggerDevices",
+    type: "Array",
+    description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
     optional: true,
     defaultValue: null
   }]
@@ -2834,11 +2834,6 @@ pliny.class({
     type: "Array",
     optional: true,
     description: "An array of input command descriptions."
-  }, {
-    name: "socket",
-    type: "WebSocket",
-    optional: true,
-    description: "A socket over which to transmit device state for device fusion."
   }],
   description: "An input processor for Gamepads, including those with positional data."
 });
@@ -2929,15 +2924,9 @@ pliny.class({
   name: "VR",
   baseClass: "Primrose.PoseInputProcessor",
   parameters: [{
-    name: "commands",
-    type: "Array",
-    optional: true,
-    description: "An array of input command descriptions."
-  }, {
-    name: "socket",
-    type: "WebSocket",
-    optional: true,
-    description: "A socket over which to transmit device state for device fusion."
+    name: "avatarHeight",
+    type: "Number",
+    description: "The default height to use for the user, if the HMD doesn't provide a stage transform."
   }],
   description: "An input manager for gamepad devices."
 });

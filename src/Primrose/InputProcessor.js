@@ -31,18 +31,13 @@ class InputProcessor {
     });
   }
 
-  constructor(name, parent, commands, socket, axisNames) {
+  constructor(name, commands, axisNames) {
     this.name = name;
-    this.parent = parent;
     this.commands = {};
     this.commandNames = [];
-    this.socket = socket;
     this.enabled = true;
     this.paused = false;
     this.ready = true;
-    this.transmitting = true;
-    this.receiving = true;
-    this.socketReady = false;
     this.inPhysicalUse = false;
     this.inputState = {
       buttons: [],
@@ -66,24 +61,6 @@ class InputProcessor {
 
     window.addEventListener("keydown", readMetaKeys, false);
     window.addEventListener("keyup", readMetaKeys, false);
-
-    if (socket) {
-      socket.on("open", () => {
-        this.socketReady = true;
-        this.inPhysicalUse = !this.receiving;
-      });
-      socket.on(name, (cmdState) => {
-        if (this.receiving) {
-          this.inPhysicalUse = false;
-          this.decodeStateSnapshot(cmdState);
-          this.fireCommands();
-        }
-      });
-      socket.on("close", () => {
-        this.inPhysicalUse = true;
-        this.socketReady = false;
-      });
-    }
 
     for (var cmdName in commands) {
       this.addCommand(cmdName, commands[cmdName]);
@@ -289,14 +266,6 @@ class InputProcessor {
           }
         }
 
-        if (this.socketReady && this.transmitting) {
-          var finalState = this.makeStateSnapshot();
-          if (finalState !== this.lastState) {
-            this.socket.emit(this.name, finalState);
-            this.lastState = finalState;
-          }
-        }
-
         this.fireCommands();
       }
     }
@@ -484,22 +453,6 @@ class InputProcessor {
     return name && this.commands[name] && !this.commands[name].disabled;
   }
 
-  transmit(v) {
-    this.transmitting = v;
-  }
-
-  isTransmitting() {
-    return this.transmitting;
-  }
-
-  receive(v) {
-    this.receiving = v;
-  }
-
-  isReceiving() {
-    return this.receiving;
-  }
-
   getAxis(name) {
     var i = this.axisNames.indexOf(name);
     if (i > -1) {
@@ -522,11 +475,23 @@ class InputProcessor {
     this.inputState.buttons[index] = pressed;
   }
 
+  isDown(name) {
+    return this.enabled &&
+      this.isEnabled(name) &&
+      this.commands[name].state.pressed;
+  }
+
+  isUp(name) {
+    return this.enabled &&
+      this.isEnabled(name) &&
+      this.commands[name].state.pressed;
+  }
+
   getValue(name) {
-    return ((this.enabled || (this.receiving && this.socketReady)) &&
+    return this.enabled &&
         this.isEnabled(name) &&
-        this.commands[name].state.value) ||
-      this.getAxis(name) || 0;
+        (this.commands[name].state.value || this.getAxis(name)) ||
+        0;
   }
 
   setValue(name, value) {
@@ -537,17 +502,5 @@ class InputProcessor {
     else if (this.commands[name] && !this.commands[name].disabled) {
       this.commands[name].state.value = value;
     }
-  }
-
-  isDown(name) {
-    return (this.enabled || (this.receiving && this.socketReady)) &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
-  }
-
-  isUp(name) {
-    return (this.enabled || (this.receiving && this.socketReady)) &&
-      this.isEnabled(name) &&
-      this.commands[name].state.pressed;
   }
 }

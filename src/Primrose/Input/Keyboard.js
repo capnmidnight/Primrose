@@ -22,8 +22,8 @@ pliny.class({
     }]
 });
 class Keyboard extends Primrose.InputProcessor {
-  constructor(input, parent, commands, socket) {
-    super("Keyboard", parent, commands, socket);
+  constructor(input, commands) {
+    super("Keyboard", commands);
     this.listeners.clipboard = [];
     this.listeners.keydown = [];
     this.listeners.keyup = [];

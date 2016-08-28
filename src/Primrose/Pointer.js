@@ -13,7 +13,7 @@ pliny.class({
   parent: "Primrose",
     name: "Pointer",
     baseClass: "Primrose.AbstractEventEmitter",
-    description: "A device that points into the scene somewhere, casting a ray at objects for picking operations.",
+    description: "An object that points into the scene somewhere, casting a ray at objects for picking operations.",
     parameters: [{
       name: "name ",
       type: "String",
@@ -31,30 +31,31 @@ pliny.class({
       type: "Boolean",
       description: "Pass true to add a hand model at the origin of the pointer ray."
     }, {
-      name: "orientationDevice",
-      type: "Primrose.InputProcessor",
-      description: "The input object that defines the orientation for this pointer."
+      name: "orientationDevices",
+      type: "Array",
+      description: "An Array of `Primrose.InputProcessor` objects that define the orientation for this pointer."
     }, {
-      name: "positionDevice",
-      type: "Primrose.PoseInputProcessor",
-      description: "The input object that defines the position for this pointer.",
+      name: "positionDevices",
+      type: "Array",
+      description: "An Array of `Primrose.PoseInputProcessor` objects that define the position for this pointer.",
       optional: true,
       defaultValue: null
     }, {
-      name: "triggerDevice",
-      type: "Primrose.PoseInputProcessor",
-      description: "The input object that defines the button trigger for this pointer.",
+      name: "triggerDevices",
+      type: "Array",
+      description: "An Array of `Primrose.InputProcessor` objects that define the button trigger for this pointer.",
       optional: true,
       defaultValue: null
     }]
 });
 class Pointer extends Primrose.AbstractEventEmitter {
-  constructor(name, color, emission, isHand, orientationDevice, positionDevice = null, triggerDevice = null) {
+  constructor(name, color, emission, orientationDevices, positionDevices = null, triggerDevices = null) {
     super();
     this.name = name;
-    this.orientationDevice = orientationDevice;
-    this.positionDevice = positionDevice || orientationDevice;
-    this.triggerDevice = triggerDevice || orientationDevice;
+    this.orientationDevices = orientationDevices;
+    this.positionDevices = positionDevices || orientationDevices.slice();
+    this.triggerDevices = triggerDevices || orientationDevices.slice();
+
     this._currentControl = null;
     this.showPointer = true;
     this.color = color;
@@ -71,20 +72,30 @@ class Pointer extends Primrose.AbstractEventEmitter {
       emissive: this.emission
     });
     this.disk.geometry.computeBoundingBox();
-    this.disk.geometry.vertices.forEach((v) => v.y -= this.disk.geometry.boundingBox.min.y);
+    this.disk.geometry.vertices.forEach((v) => {
+      v.y -= this.disk.geometry.boundingBox.min.y;
+    });
     this.disk.geometry.computeBoundingBox();
 
     this.disk.scale.set(1, 0.1, 1);
-
-    if (isHand) {
-      this.mesh.add(textured(box(0.1, 0.025, 0.2), this.color, {
-        emissive: this.emission
-      }));
-    }
   }
 
   add(obj) {
     this.mesh.add(obj);
+  }
+
+  addDevice(orientation, position, trigger){
+    if(orientation){
+      this.orientationDevices.push(orientation);
+    }
+
+    if(position){
+      this.positionDevices.push(position);
+    }
+
+    if(trigger){
+      this.triggerDevices.push(trigger);
+    }
   }
 
   addToBrowserEnvironment(env, scene) {
@@ -138,6 +149,17 @@ class Pointer extends Primrose.AbstractEventEmitter {
     }
   }
 
+  get lockMovement() {
+    var head = this;
+    while (head) {
+      if (this.currentControl && this.currentControl.lockMovement) {
+        return true;
+      }
+      head = head.parent;
+    }
+    return false;
+  }
+
   get segment() {
     if (this.showPointer) {
       FORWARD.set(0, 0, -1)
@@ -148,24 +170,46 @@ class Pointer extends Primrose.AbstractEventEmitter {
   }
 
   update() {
-    if (this.orientationDevice instanceof Primrose.PoseInputProcessor) {
-      this.position.copy(this.orientationDevice.position);
-      this.quaternion.copy(this.orientationDevice.quaternion);
+    if (this.orientationDevices[0] instanceof Primrose.PoseInputProcessor) {
+      this.position.copy(this.orientationDevices[0].position);
+      this.quaternion.copy(this.orientationDevices[0].quaternion);
     }
     else {
+      var pitch = 0,
+        heading = 0,
+        x = 0,
+        y = 0,
+        z = 0,
+        i,
+        obj;
 
-      var head = this.triggerDevice,
-        pitch = 0,
-        heading = 0;
-      while (head) {
-        pitch += head.getValue("pitch");
-        heading += head.getValue("heading");
-        head = head.parent;
+      for(i = 0; i < this.orientationDevices.length; ++i) {
+        obj = this.orientationDevices[i];
+        if(obj.enabled) {
+          pitch += obj.getValue("pitch");
+          heading += obj.getValue("heading");
+        }
+      }
+
+      for(i = 0; i < this.positionDevices.length; ++i) {
+        obj = this.positionDevices[i];
+        if(obj.enabled) {
+          if(obj.position){
+            x += obj.position.x;
+            y += obj.position.y;
+            z += obj.position.z;
+          }
+          else{
+            x += obj.getValue("X");
+            y += obj.getValue("Y");
+            z += obj.getValue("Z");
+          }
+        }
       }
 
       EULER_TEMP.set(pitch, heading, 0, "YXZ");
       this.quaternion.setFromEuler(EULER_TEMP);
-      this.position.copy(this.positionDevice.position);
+      this.position.set(x, y, z);
     }
   }
 
@@ -173,7 +217,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
     this.disk.visible = false;
     this.mesh.visible = false;
 
-    if (this.orientationDevice.enabled && this.showPointer) {
+    if (this.showPointer) {
       // reset the mesh color to the base value
       textured(this.mesh, this.color, {
         emissive: this.minorColor
@@ -183,16 +227,17 @@ class Pointer extends Primrose.AbstractEventEmitter {
         dButtons = 0,
         currentHit = currentHits[this.name],
         lastHit = lastHits && lastHits[this.name],
-        head = this.orientationDevice,
         isGround = false,
         object,
         control,
         point;
 
-      while (head) {
-        buttons += head.getValue("buttons");
-        dButtons += head.getValue("dButtons");
-        head = head.parent;
+      for(var i = 0; i < this.triggerDevices.length; ++i) {
+        var obj = this.triggerDevices[i];
+        if(obj.enabled){
+          buttons += obj.getValue("buttons");
+          dButtons += obj.getValue("dButtons");
+        }
       }
 
       var changed = dButtons !== 0;
@@ -235,7 +280,7 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }
 
       if (changed) {
-        if (buttons) {
+        if (!buttons) {
           var blurCurrentControl = !!this.currentControl,
             currentControl = this.currentControl;
           this.currentControl = null;
@@ -274,16 +319,4 @@ class Pointer extends Primrose.AbstractEventEmitter {
       }
     }
   }
-
-  get lockMovement() {
-    var head = this;
-    while (head) {
-      if (this.currentControl && this.currentControl.lockMovement) {
-        return true;
-      }
-      head = head.parent;
-    }
-    return false;
-  }
-
 }

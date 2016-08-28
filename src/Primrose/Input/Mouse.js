@@ -5,8 +5,8 @@ pliny.class({
     description: "| [under construction]"
 });
 class Mouse extends Primrose.InputProcessor {
-  constructor(DOMElement, parent, commands, socket) {
-    super("Mouse", parent, commands, socket);
+  constructor(DOMElement, commands) {
+    super("Mouse", commands);
     this.timer = null;
 
     DOMElement = DOMElement || window;
