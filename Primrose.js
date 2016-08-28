@@ -67216,15 +67216,10 @@ var Pointer = function (_Primrose$AbstractEve) {
     var _this = _possibleConstructorReturn(this, (Pointer.__proto__ || Object.getPrototypeOf(Pointer)).call(this));
 
     _this.name = name;
-    if (!(orientationDevices instanceof Array)) {
-      throw new Error("orientationDevices parameter must be an array");
-    }
-    console.log(orientationDevices, positionDevices, triggerDevices);
     _this.orientationDevices = orientationDevices;
-    _this.positionDevices = positionDevices || orientationDevices;
-    _this.triggerDevices = triggerDevices || orientationDevices;
+    _this.positionDevices = positionDevices || orientationDevices.slice();
+    _this.triggerDevices = triggerDevices || orientationDevices.slice();
 
-    console.log(_this.orientationDevices, _this.positionDevices, _this.triggerDevices);
     _this._currentControl = null;
     _this.showPointer = true;
     _this.color = color;
@@ -67262,11 +67257,11 @@ var Pointer = function (_Primrose$AbstractEve) {
         this.orientationDevices.push(orientation);
       }
 
-      if (position && this.positionDevices !== this.orientationDevices) {
+      if (position) {
         this.positionDevices.push(position);
       }
 
-      if (trigger && this.triggerDevices !== this.orientationDevices) {
+      if (trigger) {
         this.triggerDevices.push(trigger);
       }
     }
@@ -67289,7 +67284,7 @@ var Pointer = function (_Primrose$AbstractEve) {
   }, {
     key: "update",
     value: function update() {
-      if (this.orientationDevices[0] instanceof Primrose.Input.PoseInputProcessor) {
+      if (this.orientationDevices[0] instanceof Primrose.PoseInputProcessor) {
         this.position.copy(this.orientationDevices[0].position);
         this.quaternion.copy(this.orientationDevices[0].quaternion);
       } else {
@@ -67301,7 +67296,7 @@ var Pointer = function (_Primrose$AbstractEve) {
             i,
             obj;
 
-        for (i = 0; i < this.orientationDevices; ++i) {
+        for (i = 0; i < this.orientationDevices.length; ++i) {
           obj = this.orientationDevices[i];
           if (obj.enabled) {
             pitch += obj.getValue("pitch");
@@ -67309,7 +67304,7 @@ var Pointer = function (_Primrose$AbstractEve) {
           }
         }
 
-        for (i = 0; i < this.positionDevices; ++i) {
+        for (i = 0; i < this.positionDevices.length; ++i) {
           obj = this.positionDevices[i];
           if (obj.enabled) {
             if (obj.position) {
@@ -67394,7 +67389,7 @@ var Pointer = function (_Primrose$AbstractEve) {
         }
 
         if (changed) {
-          if (buttons) {
+          if (!buttons) {
             var blurCurrentControl = !!this.currentControl,
                 currentControl = this.currentControl;
             this.currentControl = null;
@@ -72171,7 +72166,7 @@ var FPSInput = function () {
 
     this.stage = new THREE.Object3D();
 
-    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.VR, this.Mouse, this.Touch, this.Keyboard]);
+    this.mousePointer = new Primrose.Pointer("MousePointer", 0xff0000, 0x7f0000, [this.Mouse, this.Touch], [this.VR, this.Touch, this.Keyboard]);
     this.pointers.push(this.mousePointer);
     this.mousePointer.addToBrowserEnvironment(null, this.options.scene);
 

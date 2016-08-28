@@ -44,10 +44,12 @@ gulp.task("MeetingManifest", [tot.build], (cb) => exec("cd meeting && node ../no
   cb(err);
 }));
 
+gulp.task("js", [js.default]);
+gulp.task("html", [html.debug]);
+gulp.task("css", [css.build]);
+
 gulp.task("default", [
   js.default,
-  min.default,
-  tot.default,
   html.default,
   css.default
 ]);

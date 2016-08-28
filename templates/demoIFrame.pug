@@ -37,8 +37,12 @@ html
     block head
       link(type="text/css", rel="stylesheet", href=fileRoot + "doc/demoUI" + cssExt)
       style #frontBuffer { background-image:url(screenshot.jpg); }
-      script(src=fileRoot + "PrimroseDependencies" + jsExt)
-      script(src=fileRoot + "PrimroseLib" + jsExt)
+      if debug
+        script(src=fileRoot + "node_modules/pliny/pliny" + jsExt)
+        script(src=fileRoot + "PrimroseDependencies" + jsExt)
+        script(src=fileRoot + "PrimroseLib-WithDoc" + jsExt)
+      else
+        script(src=fileRoot + "Primrose" + jsExt)
       script(type="text/javascript").
         WebVRBootstrapper([["app.js", 0]])
           .then(function (startDownload) {
