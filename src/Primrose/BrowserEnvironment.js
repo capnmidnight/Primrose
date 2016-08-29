@@ -597,8 +597,11 @@ class BrowserEnvironment extends Primrose.AbstractEventEmitter {
     };
 
     var fixPointerLock = () => {
-      if (this.input.VR.isPresenting && !PointerLock.isActive) {
-        PointerLock.request(this.input.VR.currentCanvas);
+      if (this.input.VR.isPresenting && !PointerLock.isActive && !isMobile) {
+        var canv = this.input.VR.currentCanvas;
+        if(canv){
+          PointerLock.request(canv);
+        }
       }
     };
 

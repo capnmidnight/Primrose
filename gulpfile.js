@@ -49,6 +49,7 @@ gulp.task("html", [html.debug]);
 gulp.task("css", [css.build]);
 
 gulp.task("default", [
+  deps.default,
   js.default,
   html.default,
   css.default

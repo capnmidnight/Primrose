@@ -58,7 +58,10 @@ class VR extends Primrose.PoseInputProcessor {
       return Promise.reject("No display");
     }
     else {
-      let layers = opts;
+      let layers = opts,
+        elem = opts[0].source,
+        promise;
+
       if (!(layers instanceof Array)) {
         layers = [layers];
       }
@@ -67,17 +70,27 @@ class VR extends Primrose.PoseInputProcessor {
         layers = layers[0];
       }
 
-      var elem = opts[0].source,
+      if(this.currentDevice.isPolyfilled && isMobile){
+        promise = this.currentDevice.requestPresent(layers);
+      }
+      else{
+        // PCs with HMD should also make the browser window on the main
+        // display full-screen.
         promise = FullScreen.request(elem)
-        .catch((exp) => console.warn("FullScreen", exp))
-        .then(() => PointerLock.request(elem))
-        .catch((exp) => console.warn("PointerLock", exp))
-        .then(() => this.currentDevice.requestPresent(layers))
-        .catch((exp) => console.warn("requstPresent", exp));
+          .catch((exp) => console.warn("FullScreen", exp));
 
-      if (this.isNativeMobileWebVR) {
-        promise = promise.then(Orientation.lock)
-          .catch((exp) => console.warn("OrientationLock", exp));
+        // so we can then also lock pointer.
+        if(isMobile) {
+          promise = promise.then(Orientation.lock)
+            .catch((exp) => console.warn("OrientationLock", exp));
+        }
+        else {
+          promise = promise.then(() => PointerLock.request(elem))
+            .catch((exp) => console.warn("PointerLock", exp));
+        }
+
+        promise = promise.then(() => this.currentDevice.requestPresent(layers))
+          .catch((exp) => console.warn("requstPresent", exp));
       }
 
       return promise;
@@ -214,6 +227,12 @@ class VR extends Primrose.PoseInputProcessor {
   }
 
   get currentCanvas() {
-    return this.isPresenting && this.currentDevice.getLayers()[0].source;
+    if(this.isPresenting) {
+      var layers = this.currentDevice.getLayers();
+      if(layers.length > 0){
+        return layers[0].source;
+      }
+    }
+    return null;
   }
 }
